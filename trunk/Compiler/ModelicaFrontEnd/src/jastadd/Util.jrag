@@ -1043,6 +1043,15 @@ aspect FlatNames {
     eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
     /**
+     * Gets the last name part. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.firstActualPartName() = partName(0);
+    eq FQNameString.firstActualPartName() {
+        int pos = getName().indexOf('.');
+        return pos == -1 ? getName() : getName().substring(0, pos);
+    }
+
+    /**
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */
     syn String FQName.prefixActualPartName();

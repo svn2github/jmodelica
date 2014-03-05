@@ -421,7 +421,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + cos(x2) = 0;
- _der_x1 + (- sin(x2) * der(x2)) = 0.0;
+ _der_x1 + (- sin(x2) * der(x2)) = 0;
 end IndexReduction.IndexReduction6_Cos;
 ")})));
   end IndexReduction6_Cos;
@@ -446,7 +446,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + sin(x2) = 0;
- _der_x1 + cos(x2) * der(x2) = 0.0;
+ _der_x1 + cos(x2) * der(x2) = 0;
 end IndexReduction.IndexReduction7_Sin;
 ")})));
   end IndexReduction7_Sin;
@@ -471,7 +471,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  - x1 + 2 * x2 = 0;
- - _der_x1 + 2 * der(x2) = 0.0;
+ - _der_x1 + 2 * der(x2) = 0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -502,7 +502,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + exp(x2 * p * time) = 0;
- _der_x1 + exp(x2 * p * time) * (x2 * p + der(x2) * p * time) = 0.0;
+ _der_x1 + exp(x2 * p * time) * (x2 * p + der(x2) * p * time) = 0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -533,7 +533,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + tan(x2) = 0;
- _der_x1 + der(x2) / cos(x2) ^ 2 = 0.0;
+ _der_x1 + der(x2) / cos(x2) ^ 2 = 0;
 end IndexReduction.IndexReduction10_Tan;
 ")})));
   end IndexReduction10_Tan;
@@ -560,7 +560,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + asin(x2) = 0;
- _der_x1 + der(x2) / sqrt(1 - x2 ^ 2) = 0.0;
+ _der_x1 + der(x2) / sqrt(1 - x2 ^ 2) = 0;
 end IndexReduction.IndexReduction11_Asin;
 ")})));
   end IndexReduction11_Asin;
@@ -587,7 +587,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + acos(x2) = 0;
- _der_x1 + (- der(x2)) / sqrt(1 - x2 ^ 2) = 0.0;
+ _der_x1 + (- der(x2)) / sqrt(1 - x2 ^ 2) = 0;
 end IndexReduction.IndexReduction12_Acos;
 ")})));
   end IndexReduction12_Acos;
@@ -614,7 +614,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + atan(x2) = 0;
- _der_x1 + der(x2) / (1 + x2 ^ 2) = 0.0;
+ _der_x1 + der(x2) / (1 + x2 ^ 2) = 0;
 end IndexReduction.IndexReduction13_Atan;
 ")})));
   end IndexReduction13_Atan;
@@ -645,7 +645,7 @@ equation
  _der_x1 + der(x2) = 1;
  der(x3) = time;
  x1 + atan2(x2, x3) = 0;
- _der_x1 + (der(x2) * x3 - x2 * der(x3)) / (x2 * x2 + x3 * x3) = 0.0;
+ _der_x1 + (der(x2) * x3 - x2 * der(x3)) / (x2 * x2 + x3 * x3) = 0;
 end IndexReduction.IndexReduction14_Atan2;
 ")})));
 end IndexReduction14_Atan2;
@@ -672,7 +672,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + sinh(x2) = 0;
- _der_x1 + cosh(x2) * der(x2) = 0.0;
+ _der_x1 + cosh(x2) * der(x2) = 0;
 end IndexReduction.IndexReduction15_Sinh;
 ")})));
   end IndexReduction15_Sinh;
@@ -699,7 +699,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + cosh(x2) = 0;
- _der_x1 + sinh(x2) * der(x2) = 0.0;
+ _der_x1 + sinh(x2) * der(x2) = 0;
 end IndexReduction.IndexReduction16_Cosh;
 ")})));
   end IndexReduction16_Cosh;
@@ -726,7 +726,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + tanh(x2) = 0;
- _der_x1 + der(x2) / cosh(x2) ^ 2 = 0.0;
+ _der_x1 + der(x2) / cosh(x2) ^ 2 = 0;
 end IndexReduction.IndexReduction17_Tanh;
 ")})));
   end IndexReduction17_Tanh;
@@ -753,7 +753,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + log(x2) = 0;
- _der_x1 + der(x2) / x2 = 0.0;
+ _der_x1 + der(x2) / x2 = 0;
 end IndexReduction.IndexReduction18_Log;
 ")})));
   end IndexReduction18_Log;
@@ -780,7 +780,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + log10(x2) = 0;
- _der_x1 + der(x2) / (x2 * log(10)) = 0.0;
+ _der_x1 + der(x2) / (x2 * log(10)) = 0;
 end IndexReduction.IndexReduction19_Log10;
 ")})));
   end IndexReduction19_Log10;
@@ -807,7 +807,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + sqrt(x2) = 0;
- _der_x1 + der(x2) / (2 * sqrt(x2)) = 0.0;
+ _der_x1 + der(x2) / (2 * sqrt(x2)) = 0;
 end IndexReduction.IndexReduction20_Sqrt;
 ")})));
   end IndexReduction20_Sqrt;
@@ -834,7 +834,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + (if p > 3 then 3 * x2 elseif p <= 3 then sin(x2) else 2 * x2) = 0;
- _der_x1 + (if p > 3 then 3 * der(x2) elseif p <= 3 then cos(x2) * der(x2) else 2 * der(x2)) = 0.0;
+ _der_x1 + (if p > 3 then 3 * der(x2) elseif p <= 3 then cos(x2) * der(x2) else 2 * der(x2)) = 0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -865,7 +865,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + x2 ^ p + x2 ^ 1.4 = 0;
- _der_x1 + p * x2 ^ (p - 1) * der(x2) + 1.4 * x2 ^ 0.3999999999999999 * der(x2) = 0.0;
+ _der_x1 + p * x2 ^ (p - 1) * der(x2) + 1.4 * x2 ^ 0.3999999999999999 * der(x2) = 0;
 end IndexReduction.IndexReduction22_Pow;
 ")})));
   end IndexReduction22_Pow;
@@ -970,7 +970,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.IndexReduction24_DerFunc.f(x2) = 0;
- _der_x1 + IndexReduction.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0.0;
+ _der_x1 + IndexReduction.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0;
 
 public
  function IndexReduction.IndexReduction24_DerFunc.f_der
@@ -1043,7 +1043,7 @@ equation
  der(x1[1]) + der(x2[1]) = 1;
  _der_x2[2] = 2;
  x1[1] + IndexReduction.IndexReduction25_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}) = 0;
- der(x1[1]) + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), _der_x2[2]}, {{0.0, 0.0}, {0.0, 0.0}}) = 0.0;
+ der(x1[1]) + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), _der_x2[2]}, {{0.0, 0.0}, {0.0, 0.0}}) = 0;
 
 public
  function IndexReduction.IndexReduction25_DerFunc.f_der
@@ -1112,7 +1112,7 @@ equation
  der(x1[1]) + der(x2[1]) = 1;
  _der_x2[2] = 2;
  x1[1] + IndexReduction.IndexReduction26_DerFunc.f({x2[1], x2[2]}) = 0;
- der(x1[1]) + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), _der_x2[2]}) = 0.0;
+ der(x1[1]) + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), _der_x2[2]}) = 0;
 
 public
  function IndexReduction.IndexReduction26_DerFunc.f_der
@@ -1375,7 +1375,7 @@ initial equation
 equation
  _der_x + der(y) = 0;
  x + IndexReduction.IndexReduction29_FunctionNoDerivative.F(y, x, 0, x) = 0;
- _der_x + IndexReduction.IndexReduction29_FunctionNoDerivative.der_F(y, x, 0, x, der(y), _der_x) = 0.0;
+ _der_x + IndexReduction.IndexReduction29_FunctionNoDerivative.der_F(y, x, 0, x, der(y), _der_x) = 0;
 
 public
  function IndexReduction.IndexReduction29_FunctionNoDerivative.der_F
@@ -1695,7 +1695,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  (x1 + x2) / (x1 + p) = 0;
- ((_der_x1 + der(x2)) * (x1 + p) - (x1 + x2) * _der_x1) / (x1 + p) ^ 2 = 0.0;
+ ((_der_x1 + der(x2)) * (x1 + p) - (x1 + x2) * _der_x1) / (x1 + p) ^ 2 = 0;
 end IndexReduction.IndexReduction33_Div;
 ")})));
   end IndexReduction33_Div;
@@ -1724,7 +1724,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  (x1 + x2) / (p1 * p2) = 0;
- (_der_x1 + der(x2)) / (p1 * p2) = 0.0;
+ (_der_x1 + der(x2)) / (p1 * p2) = 0;
 end IndexReduction.IndexReduction34_Div;
 ")})));
   end IndexReduction34_Div;
@@ -1778,7 +1778,7 @@ initial equation
 equation
  x = 1;
  _der_x + der(y) = 0;
- _der_x = 0.0;
+ _der_x = 0;
 end IndexReduction.IndexReduction36_Integer;
 ")})));
 end IndexReduction36_Integer;
@@ -1805,7 +1805,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  noEvent(x1 + sin(x2)) = 0;
- noEvent(_der_x1 + cos(x2) * der(x2)) = 0.0;
+ noEvent(_der_x1 + cos(x2) * der(x2)) = 0;
 end IndexReduction.IndexReduction37_noEvent;
 ")})));
   end IndexReduction37_noEvent;
@@ -1890,8 +1890,8 @@ equation
  der(x1) + _der_x2 + _der_x3 = 1;
  min(x1, x2) = 0;
  min(x1, x3) = 0;
- noEvent(if x1 < x2 then der(x1) else _der_x2) = 0.0;
- noEvent(if x1 < x3 then der(x1) else _der_x3) = 0.0;
+ noEvent(if x1 < x2 then der(x1) else _der_x2) = 0;
+ noEvent(if x1 < x3 then der(x1) else _der_x3) = 0;
 end IndexReduction.IndexReduction39_MinExp;
 ")})));
 end IndexReduction39_MinExp;
@@ -1920,8 +1920,8 @@ equation
  der(x1) + _der_x2 + _der_x3 = 1;
  max(x1, x2) = 0;
  max(x1, x3) = 0;
- noEvent(if x1 > x2 then der(x1) else _der_x2) = 0.0;
- noEvent(if x1 > x3 then der(x1) else _der_x3) = 0.0;
+ noEvent(if x1 > x2 then der(x1) else _der_x2) = 0;
+ noEvent(if x1 > x3 then der(x1) else _der_x3) = 0;
 end IndexReduction.IndexReduction40_MaxExp;
 ")})));
 end IndexReduction40_MaxExp;
@@ -2035,10 +2035,10 @@ equation
  der(y) = dy;
  _der_dx + der(dy) = 0;
  x + IndexReduction.IndexReduction43_Order.f(y) = 0;
- _der_x + IndexReduction.IndexReduction43_Order.df(y, der(y)) = 0.0;
+ _der_x + IndexReduction.IndexReduction43_Order.df(y, der(y)) = 0;
  _der_der_x = _der_dx;
  _der_der_y = der(dy);
- _der_der_x + IndexReduction.IndexReduction43_Order.ddf(y, der(y), _der_der_y) = 0.0;
+ _der_der_x + IndexReduction.IndexReduction43_Order.ddf(y, der(y), _der_der_y) = 0;
 
 public
  function IndexReduction.IndexReduction43_Order.ddf
@@ -2144,10 +2144,10 @@ equation
  der(y) = dy;
  _der_dx + der(dy) = 0;
  x + IndexReduction.IndexReduction44_Order2Arg.f(y, time) = 0;
- _der_x + IndexReduction.IndexReduction44_Order2Arg.df(y, time, der(y), 1.0) = 0.0;
+ _der_x + IndexReduction.IndexReduction44_Order2Arg.df(y, time, der(y), 1.0) = 0;
  _der_der_x = _der_dx;
  _der_der_y = der(dy);
- _der_der_x + IndexReduction.IndexReduction44_Order2Arg.ddf(y, time, der(y), 1.0, _der_der_y, 0.0) = 0.0;
+ _der_der_x + IndexReduction.IndexReduction44_Order2Arg.ddf(y, time, der(y), 1.0, _der_der_y, 0.0) = 0;
 
 public
  function IndexReduction.IndexReduction44_Order2Arg.ddf
@@ -2264,8 +2264,8 @@ equation
  der(x1[2]) .+ _der_x2[2] = 1;
  x1[1] .* x2[1] = 0;
  x1[2] .* x2[2] = 0;
- x1[1] .* _der_x2[1] .+ der(x1[1]) .* x2[1] = 0.0;
- x1[2] .* _der_x2[2] .+ der(x1[2]) .* x2[2] = 0.0;
+ x1[1] .* _der_x2[1] .+ der(x1[1]) .* x2[1] = 0;
+ x1[2] .* _der_x2[2] .+ der(x1[2]) .* x2[2] = 0;
 end IndexReduction.IndexReduction47_DotMul;
 ")})));
 end IndexReduction47_DotMul;
@@ -2296,8 +2296,8 @@ equation
  _der_x1[2] .+ der(x2[2]) = 1;
  x1[1] ./ x2[1] = 0;
  x1[2] ./ x2[2] = 0;
- (_der_x1[1] .* x2[1] .- x1[1] .* der(x2[1])) ./ x2[1] .^ 2 = 0.0;
- (_der_x1[2] .* x2[2] .- x1[2] .* der(x2[2])) ./ x2[2] .^ 2 = 0.0;
+ (_der_x1[1] .* x2[1] .- x1[1] .* der(x2[1])) ./ x2[1] .^ 2 = 0;
+ (_der_x1[2] .* x2[2] .- x1[2] .* der(x2[2])) ./ x2[2] .^ 2 = 0;
 end IndexReduction.IndexReduction48_DotDiv;
 ")})));
 end IndexReduction48_DotDiv;
@@ -2328,8 +2328,8 @@ equation
  _der_x1[2] .+ der(x2[2]) = 1;
  x1[1] .^ x2[1] = 0;
  x1[2] .^ x2[2] = 0;
- x2[1] .* x1[1] .^ (x2[1] .- 1) .* _der_x1[1] = 0.0;
- x2[2] .* x1[2] .^ (x2[2] .- 1) .* _der_x1[2] = 0.0;
+ x2[1] .* x1[1] .^ (x2[1] .- 1) .* _der_x1[1] = 0;
+ x2[2] .* x1[2] .^ (x2[2] .- 1) .* _der_x1[2] = 0;
 end IndexReduction.IndexReduction49_DotPow;
 ")})));
 end IndexReduction49_DotPow;
@@ -2358,7 +2358,7 @@ equation
  _der_x1 + der(x2) = 1;
  x1 + temp_1 = 1;
  temp_1 = if div(x2, 3.14) < pre(temp_1) or div(x2, 3.14) >= pre(temp_1) + 1 or initial() then div(x2, 3.14) else pre(temp_1);
- _der_x1 = 0.0;
+ _der_x1 = 0;
 end IndexReduction.DivFunc;
 ")})));
 end DivFunc;
@@ -2533,14 +2533,14 @@ equation
  b = temp_1 * temp_4 + y;
  temp_1 = x + 3.14;
  temp_4 = time;
- a * _der_b + _der_a * b = 0.0;
+ a * _der_b + _der_a * b = 0;
  _der_a = temp_1 * _der_temp_4 + _der_temp_1 * temp_4;
  _der_b = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + der(y);
  _der_temp_1 = _der_x;
  _der_temp_4 = 1.0;
  cos(_der_x) * _der_der_x = _der_dx;
  - sin(der(y)) * der(_der_y) = _der_dy;
- a * _der_der_b + _der_a * _der_b + (_der_a * _der_b + _der_der_a * b) = 0.0;
+ a * _der_der_b + _der_a * _der_b + (_der_a * _der_b + _der_der_a * b) = 0;
  _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4);
  _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4) + der(_der_y);
  _der_der_temp_1 = _der_der_x;
@@ -2702,11 +2702,11 @@ equation
  21 = v1 * b_v;
  _der_b_v = _der_a_s;
  _der_v1 = 42 * _der_b_v;
- 0.0 = v1 * _der_b_v + _der_v1 * b_v;
+ 0 = v1 * _der_b_v + _der_v1 * b_v;
  _der_a_v = _der_der_a_s;
  _der_der_b_v = _der_der_a_s;
  _der_der_v1 = 42 * _der_der_b_v;
- 0.0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
+ 0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2756,11 +2756,11 @@ equation
  21 = v1 * b_v;
  _der_b_v = _der_a_s;
  _der_v1 = 42 * _der_b_v;
- 0.0 = v1 * _der_b_v + _der_v1 * b_v;
+ 0 = v1 * _der_b_v + _der_v1 * b_v;
  _der_a_v = _der_der_a_s;
  _der_der_b_v = _der_der_a_s;
  _der_der_v1 = 42 * _der_der_b_v;
- 0.0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
+ 0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2836,7 +2836,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.Simple.F(x2) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.Simple._der_F(x2, der(x2)) = 0.0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.Simple._der_F(x2, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.Simple.F
@@ -2861,6 +2861,134 @@ public
 end IndexReduction.AlgorithmDifferentiation.Simple;
 ")})));
 end Simple;
+
+model RecordInput
+  function F
+    input R x;
+    output Real y;
+  algorithm
+    y := sin(x.x[1]);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  record R
+    Real x[1];
+  end R;
+  Real x1;
+  R x2;
+equation
+  der(x1) + der(x2.x[1]) = 1;
+  x1 + F(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_RecordInput",
+            description="Test differentiation of function with record input",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.RecordInput
+ Real x1;
+ Real x2.x[1];
+ Real _der_x1;
+initial equation 
+ x2.x[1] = 0.0;
+equation
+ _der_x1 + x2.der(x[1]) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.RecordInput.F(IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.x[1]})) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.RecordInput._der_F(IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.x[1]}), IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.der(x[1])})) = 0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.RecordInput.F
+  input IndexReduction.AlgorithmDifferentiation.RecordInput.R x;
+  output Real y;
+ algorithm
+  y := sin(x.x[1]);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.RecordInput.F;
+
+ function IndexReduction.AlgorithmDifferentiation.RecordInput._der_F
+  input IndexReduction.AlgorithmDifferentiation.RecordInput.R x;
+  input IndexReduction.AlgorithmDifferentiation.RecordInput.R _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := cos(x.x[1]) * _der_x.x[1];
+  y := sin(x.x[1]);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.RecordInput._der_F;
+
+ record IndexReduction.AlgorithmDifferentiation.RecordInput.R
+  Real x[1];
+ end IndexReduction.AlgorithmDifferentiation.RecordInput.R;
+
+end IndexReduction.AlgorithmDifferentiation.RecordInput;
+")})));
+end RecordInput;
+
+model RecordOutput
+  function F
+    input Real x;
+    output R y;
+  algorithm
+    y.x[1] := sin(x);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  record R
+    Real x[1];
+  end R;
+  Real x1;
+  Real x2;
+  R r;
+equation
+  der(x1) + der(x2) = 1;
+  r = F(x2);
+  x1 + r.x[1] = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_RecordOutput",
+            description="Test differentiation of function with record output",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.RecordOutput
+ Real x1;
+ Real x2;
+ Real r.x[1];
+ Real _der_x1;
+ Real _der_x2;
+initial equation 
+ r.x[1] = 0.0;
+equation
+ _der_x1 + _der_x2 = 1;
+ (IndexReduction.AlgorithmDifferentiation.RecordOutput.R({r.x[1]})) = IndexReduction.AlgorithmDifferentiation.RecordOutput.F(x2);
+ x1 + r.x[1] = 1;
+ (IndexReduction.AlgorithmDifferentiation.RecordOutput.R({r.der(x[1])})) = IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F(x2, _der_x2);
+ _der_x1 + r.der(x[1]) = 0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.RecordOutput.F
+  input Real x;
+  output IndexReduction.AlgorithmDifferentiation.RecordOutput.R y;
+ algorithm
+  y.x[1] := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.RecordOutput.F;
+
+ function IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F
+  input Real x;
+  input Real _der_x;
+  output IndexReduction.AlgorithmDifferentiation.RecordOutput.R _der_y;
+  IndexReduction.AlgorithmDifferentiation.RecordOutput.R y;
+ algorithm
+  _der_y.x[1] := cos(x) * _der_x;
+  y.x[1] := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F;
+
+ record IndexReduction.AlgorithmDifferentiation.RecordOutput.R
+  Real x[1];
+ end IndexReduction.AlgorithmDifferentiation.RecordOutput.R;
+
+end IndexReduction.AlgorithmDifferentiation.RecordOutput;
+")})));
+end RecordOutput;
 
 model For
   function F
@@ -2897,7 +3025,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.For.F(x2) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.For._der_F(x2, der(x2)) = 0.0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.For._der_F(x2, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.For.F
@@ -2924,7 +3052,7 @@ public
   Real y;
   Real c;
  algorithm
-  _der_c := 0.0;
+  _der_c := 0;
   c := 0;
   for i in 1:10 loop
    if i > x then
@@ -2981,7 +3109,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  IndexReduction.AlgorithmDifferentiation.FunctionCall.F1(x1, x2) = 1;
- IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1(x1, x2, _der_x1, der(x2)) = 0.0;
+ IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1(x1, x2, _der_x1, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.FunctionCall.F1
@@ -3081,7 +3209,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.If.F(x2) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.If._der_F(x2, der(x2)) = 0.0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.If._der_F(x2, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.If.F
@@ -3107,10 +3235,10 @@ public
   Real b;
  algorithm
   if 10 > x then
-   _der_b := 0.0;
+   _der_b := 0;
    b := 1;
   else
-   _der_b := 0.0;
+   _der_b := 0;
    b := 2;
   end if;
   _der_y := cos(x) * _der_x;
@@ -3151,7 +3279,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.InitArray.F({x2}) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.InitArray._der_F({x2}, {der(x2)}) = 0.0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.InitArray._der_F({x2}, {der(x2)}) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.InitArray.F
@@ -3222,7 +3350,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.While.F(x2) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.While._der_F(x2, der(x2)) = 0.0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.While._der_F(x2, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.While.F
@@ -3246,7 +3374,7 @@ public
   Real y;
   Real c;
  algorithm
-  _der_c := 0.0;
+  _der_c := 0;
   c := 0;
   while c < x loop
    _der_c := _der_c;
@@ -3307,7 +3435,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  IndexReduction.AlgorithmDifferentiation.Recursive.F1(x1, x2) = 1;
- IndexReduction.AlgorithmDifferentiation.Recursive._der_F1(x1, x2, _der_x1, der(x2)) = 0.0;
+ IndexReduction.AlgorithmDifferentiation.Recursive._der_F1(x1, x2, _der_x1, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.Recursive.F1
@@ -3415,7 +3543,7 @@ initial equation
 equation
  _der_x1 + der(x2) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F(x2) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F(x2, der(x2)) = 0.0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F(x2, der(x2)) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F
@@ -3672,7 +3800,7 @@ public
   Real y;
   Real z;
  algorithm
-  _der_y := 0.0;
+  _der_y := 0;
   y := 42;
   _der_z := x * _der_x + _der_x * x;
   z := x * x;

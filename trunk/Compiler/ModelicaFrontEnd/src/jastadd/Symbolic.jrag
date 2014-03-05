@@ -765,34 +765,32 @@ aspect Derivatives {
         return new FRealLitExp(0);
     }
     
-	public FExp FExp.diffUseOrDerExp(String name, String myName) {
-		int val;
-		if (name.equals(TIME) && !variability().parameterOrLess()) {
-			return createDerExp(1);
-		} else if (name.equals(myName)) {
-			val = 1;
-		} else {
-			val = 0;
-		}
-		return new FRealLitExp(val);
-	}
-	
-	syn int FDerExp.order()                  = 1;
-	eq FHDerExp.order()                      = getOrder();
-	syn int InstDerExp.order()               = 1;
-	eq InstHDerExp.order()                   = getOrder();
-	syn int FDummyDerExp.order()             = 1;
-	eq FHDummyDerExp.order()                 = getOrder();
-	syn int FDerivativeVariable.order()      = 1;
-	eq FHDerivativeVariable.order()          = getOrder();
-	syn int FDummyDerivativeVariable.order() = 1;
-	eq FHDummyDerivativeVariable.order()     = getOrder();
-	
-	syn FExp FExp.createDerExp(int order) = diff(TIME, order);
-	eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order);
-	eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
-	eq FDerExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
-	eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
+    public FExp FExp.diffUseOrDerExp(String name, String myName) {
+        if (name.equals(TIME) && !variability().parameterOrLess())
+            return createDerExp(1);
+        else if (name.equals(myName))
+            return new FRealLitExp(1);
+        else
+            // This is needed when diffing record constructors
+            return type().zeroLiteral();
+    }
+    
+    syn int FIdUseExp.order()                = 0;
+    eq FDerExp.order()                       = 1;
+    eq FHDerExp.order()                      = getOrder();
+    eq FDummyDerExp.order()                  = 1;
+    eq FHDummyDerExp.order()                 = getOrder();
+    syn int InstDerExp.order()               = 1;
+    eq InstHDerExp.order()                   = getOrder();
+    syn int FDerivativeVariable.order()      = 1;
+    eq FHDerivativeVariable.order()          = getOrder();
+    syn int FDummyDerivativeVariable.order() = 1;
+    eq FHDummyDerivativeVariable.order()     = getOrder();
+    
+    syn FExp FExp.createDerExp(int order) = diff(TIME, order);
+    eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
+    eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
+    eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 	
 	syn FExp FIdUse.createDerExp(int order) = (order == 1) ? new FDerExp(fullCopy()) : new FHDerExp(fullCopy(), order);
 	
@@ -810,9 +808,9 @@ aspect Derivatives {
 		return res;
 	}
 	
-	public FExp FLitExp.diff(String name) {
-		return dynamicFExp(new FRealLitExp(0));
-	}
+    public FExp FLitExp.diff(String name) {
+        return type().zeroLiteral();
+    }
 	
 	public FExp FTimeExp.diff(String name) {
 		int val = 0;
@@ -1026,8 +1024,8 @@ aspect AlgorithmDifferentiation{
     }
     
     rewrite FDerExp {
-        when (myFV().isFFunctionVariable()) to FIdUseExp 
-        new FIdUseExp(getFIdUse().getFQName().createDerPrefixedName(order()));
+        when (inFunction()) to FIdUseExp 
+        new FIdUseExp(getFIdUse().getFQName().createDerPrefixedFunctionName(order()));
     }
     
     
