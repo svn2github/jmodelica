@@ -27,9 +27,9 @@
     <para>The Windows installer contains a binary distribution of
     JModelica.org, bundled with all required third-party software components.
     A list of the third-party dependencies can be found in <xref
-    linkend="inst_sec_win_deps"/>. The installer sets up a pre-configured
+    linkend="inst_sec_win_deps" />. The installer sets up a pre-configured
     complete environment with convenient start menu shortcuts. Installation
-    instructions are found in <xref linkend="inst_sec_win_inst"/>.</para>
+    instructions are found in <xref linkend="inst_sec_win_inst" />.</para>
 
     <section xml:id="inst_sec_win_deps">
       <title>Dependencies</title>
@@ -215,7 +215,7 @@
                     <imageobject>
                       <imagedata align="center"
                                  fileref="images/Setup_components.png"
-                                 scalefit="1" width="50%"/>
+                                 scalefit="1" width="50%"></imagedata>
                     </imageobject>
                   </mediaobject>
                 </figure></para>
@@ -300,11 +300,11 @@ sudo apt-get -y install python-jpype
           <title>Package versions for Ubuntu</title>
 
           <tgroup cols="3">
-            <colspec align="left" colname="col–package" colwidth="3*"/>
+            <colspec align="left" colname="col–package" colwidth="3*" />
 
-            <colspec align="left" colname="col–version" colwidth="1*"/>
+            <colspec align="left" colname="col–version" colwidth="1*" />
 
-            <colspec align="left" colname="col–note" colwidth="2*"/>
+            <colspec align="left" colname="col–note" colwidth="2*" />
 
             <thead>
               <row>
@@ -506,7 +506,7 @@ cd build
 ../configure --prefix=/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt; \
              --with-ipopt=/home/&lt;user_name&gt;/&lt;ipopt_install_location&gt; 
 make install
-make install_casadi
+make casadi_interface
 </programlisting>
 
       <para>where <literal>&lt;user_name&gt;</literal> and
