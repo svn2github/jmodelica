@@ -766,13 +766,19 @@ aspect Derivatives {
     }
     
     public FExp FExp.diffUseOrDerExp(String name, String myName) {
-        if (name.equals(TIME) && !variability().parameterOrLess())
-            return createDerExp(1);
-        else if (name.equals(myName))
-            return new FRealLitExp(1);
-        else
-            // This is needed when diffing record constructors
-            return type().zeroLiteral();
+        if (type().containsReal()) {
+            if (name.equals(TIME) && !variability().parameterOrLess())
+                return createDerExp(1);
+            else if (name.equals(myName))
+                return new FRealLitExp(1);
+            else
+                return type().zeroLiteral();
+        } else {
+            FExp exp = type().zeroLiteral();
+            if (!exp.isValidExp())
+                exp = fullCopy();
+            return exp;
+        }
     }
     
     syn int FIdUseExp.order()                = 0;

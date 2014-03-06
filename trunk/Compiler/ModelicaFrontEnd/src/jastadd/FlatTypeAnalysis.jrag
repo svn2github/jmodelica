@@ -1168,21 +1168,21 @@ aspect BuiltInFlatTypes {
 	eq FBooleanType.arrayType(Size size)  		= fBooleanArrayType(size);
 	eq FExternalObjectType.arrayType(Size size)	= fExternalObjectArrayType(size);
 	
- 	/**
- 	 * \brief Create a literal with the zero value for this type, if applicable.
- 	 */
- 	public FExp FType.zeroLiteral()        { throw new UnsupportedOperationException("Unable to create zero literal from type " + this); }
- 	public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
- 	public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
- 	public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }
- 	public FExp FBooleanType.zeroLiteral() { return new FBooleanLitExpFalse(); }
- 	public FExp FEnumType.zeroLiteral()    { return new FEnumLitExp(this, 1); }
- 	public FExp FRecordType.zeroLiteral()  {
- 		List<FExp> args = new List<FExp>();
- 		for (FRecordComponentType t : getComponents())
- 			args.add(t.getFType().zeroLiteral());
- 		return new FRecordConstructor(new FIdUse(getName()), args); 
- 	}
+    /**
+     * \brief Create a literal with the zero value for this type, if applicable.
+     */
+    public FExp FType.zeroLiteral()        { return new FNoExp(); }
+    public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
+    public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
+    public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }
+    public FExp FBooleanType.zeroLiteral() { return new FBooleanLitExpFalse(); }
+    public FExp FEnumType.zeroLiteral()    { return new FEnumLitExp(this, 1); }
+    public FExp FRecordType.zeroLiteral()  {
+        List<FExp> args = new List<FExp>();
+        for (FRecordComponentType t : getComponents())
+            args.add(t.getFType().zeroLiteral());
+        return new FRecordConstructor(new FIdUse(getName()), args); 
+    }
  	
  	/**
  	 * \brief Create a literal of the given integer value for this type, if applicable.
