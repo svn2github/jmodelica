@@ -1,0 +1,44 @@
+aspect LocalIteration{
+    syn boolean FAbstractEquation.canUseLocalIteration() {
+        String option = root().options.getStringOption("local_iteration_in_tearing");
+        if (option == OptionRegistry.LocalIteration.OFF)
+            return false;
+        else if (option == OptionRegistry.LocalIteration.ANNOTATION)
+            return hasLocalIteration();
+        else
+            return true;
+    }
+    
+    private void Equation.contributeLocalIteration(FEquation equation) {
+        AnnotationNode localIterationNode = annotation().vendorNode().forPath("LocalIteration");
+        if (!localIterationNode.exists())
+            return;
+        FAttribute localIterationAttr = new FInternalAttribute("LocalIteration");
+        equation.addFAttribute(localIterationAttr);
+        
+        AnnotationNode enabledAnnotation = localIterationNode.forPath("enabled");
+        Exp enabledExp = enabledAnnotation.exp();
+        if (enabledExp != null)
+            localIterationAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
+    }
+    
+    protected void FAbstractEquation.typeCheckLocalIteration(ErrorCheckType checkType) {
+        FAttribute localIterationAttr = findAttribute("LocalIteration");
+        if (localIterationAttr == null)
+            return;
+        FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
+        if (enabledAttr != null) {
+            FExp enabledExp = enabledAttr.getValue();
+            typeCheckHGTEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
+        }
+    }
+    
+    syn boolean FAbstractEquation.hasLocalIteration() {
+        FAttribute localIterationAttr = findAttribute("LocalIteration");
+        if (localIterationAttr == null)
+            return false;
+        FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
+        return enabledAttr == null || !enabledAttr.hasValue() || enabledAttr.getValue().ceval().booleanValue();
+    }
+    
+}
