@@ -41,6 +41,8 @@ class UserType : public VariableType {
         UserType(std::string name, Ref<ModelicaCasADi::PrimitiveType> baseType); 
         /** @return A string */
         const std::string getName() const;
+		/** @return A string */
+		Ref<ModelicaCasADi::PrimitiveType> getBaseType() const;
         /**
          * @param An AttributeKey
          * @param An AttributeValue
@@ -65,6 +67,7 @@ class UserType : public VariableType {
         Ref<ModelicaCasADi::PrimitiveType> baseType;
 };
 inline const std::string UserType::getName() const { return name; }
+inline Ref<ModelicaCasADi::PrimitiveType> UserType::getBaseType() const { return baseType; }
 inline void UserType::setAttribute(AttributeKey key, AttributeValue val) { attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal(key), val)); }
 }; // End namespace
 #endif

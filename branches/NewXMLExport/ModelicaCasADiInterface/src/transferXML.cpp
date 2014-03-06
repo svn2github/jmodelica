@@ -41,7 +41,7 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 	XMLElement* root = doc.FirstChildElement();
 	if (root != NULL) {
 		for (XMLElement* elem = root->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement()) {
-			if (!strcmp(elem->Value(), "component") || !strcmp(elem->Value(), "classdef") 
+			if (!strcmp(elem->Value(), "component") || !strcmp(elem->Value(), "classDefinition") 
 				|| !strcmp(elem->Value(), "extends")) {
 				// handle variables
 				transferVariables(m, elem);
@@ -87,12 +87,35 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 				// string variable which is not supported in the casadi interface
 			}
 		} else if (!strcmp(child->Value(), "local")) {
-			// a component that is of another type than the primitive, 
-			// need to know what special type this is since we don't export that information
-			// currently this should be unimplemented until it is a part of the export
+			Ref<ModelicaCasADi::UserType> userType = (ModelicaCasADi::UserType*) m->getVariableType(child->Attribute("name")).getNode();
+			Ref<ModelicaCasADi::PrimitiveType> prim = userType->getBaseType();
+			if (prim->getName() == "Real") {
+				addRealVariable(m, elem);
+			} else if (prim->getName() == "Integer") {
+				addIntegerVariable(m, elem);
+			} else if (prim->getName() == "Boolean") {
+				addBooleanVariable(m, elem);
+			}
+		}
+	} else if(!strcmp(elem->Value(), "classDefinition")) {
+		// maybe put in separate method for clearer code
+		XMLElement* child = elem->FirstChildElement();
+		if (strcmp(child->Value(), "enumeration")) {
+			std::string typeName = elem->Attribute("name");
+			std::string baseTypeName = child->Attribute("name");
+			Ref<ModelicaCasADi::UserType> userType = new ModelicaCasADi::UserType(typeName, getBaseType(m, baseTypeName));
+			for (child = child->NextSiblingElement(); child != NULL; child = child->NextSiblingElement()) {
+				if (!strcmp(child->Value(), "modifier")) {
+					for (XMLElement* item = child->FirstChildElement(); item != NULL; item = item->NextSiblingElement()) {
+						XMLElement* itemExpression = item->FirstChildElement();
+						userType->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression));
+					}
+				}
+			}
+			m->addNewVariableType(userType);
 		}
 	} else {
-		// classdef or extends clause which probably should not be imported
+		// extends clause, not supported in casadiinterface
 	}
 }
 
@@ -148,7 +171,8 @@ void addRealVariable(Ref<Model> m, XMLElement* variable) {
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
 	const char* comment = variable->Attribute("comment");
-	Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), var, getCausality(causality), getVariability(variability), NULL);
+	Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), var, getCausality(causality), 
+		getVariability(variability), getUserType(m, variable->FirstChildElement()));
 	if (comment != NULL) {
 		realVar->setAttribute("comment", CasADi::MX(comment));
 	}
@@ -174,7 +198,8 @@ void addIntegerVariable(Ref<Model> m, XMLElement* variable) {
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
 	const char* comment = variable->Attribute("comment");
-	Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), var, getCausality(causality), getVariability(variability), NULL);
+	Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), var, getCausality(causality), 
+		getVariability(variability), getUserType(m, variable->FirstChildElement()));
 	if (comment != NULL) {
 		intVar->setAttribute("comment", CasADi::MX(comment));
 	}
@@ -200,7 +225,8 @@ void addBooleanVariable(Ref<Model> m, XMLElement* variable) {
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
 	const char* comment = variable->Attribute("comment");
-	Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), var, getCausality(causality), getVariability(variability), NULL);
+	Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), var, getCausality(causality), 
+		getVariability(variability), getUserType(m, variable->FirstChildElement()));
 	if (comment != NULL) {
 		boolVar->setAttribute("comment", CasADi::MX(comment));
 	}
@@ -272,7 +298,6 @@ CasADi::MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 				derCall.append(")");
 				Ref<ModelicaCasADi::Variable> var = m->getVariable(name);
 				Ref<ModelicaCasADi::RealVariable> realVar = (ModelicaCasADi::RealVariable*)var.getNode();
-
 				if (!hasDerivativeVar(m, realVar)) {
 					addDerivativeVar(m, realVar, name);
 				}
@@ -442,4 +467,28 @@ bool hasDerivativeVar(Ref<Model> m, Ref<ModelicaCasADi::RealVariable> realVar) {
 		return true;
 	}
 	return false;
+}
+
+Ref<ModelicaCasADi::PrimitiveType> getBaseType(Ref<Model> m, std::string baseTypeName) {
+	if (m->getVariableType(baseTypeName).getNode() == NULL) {
+		if (baseTypeName == "Real") {
+			m->addNewVariableType(new ModelicaCasADi::RealType);
+		} else if (baseTypeName == "Integer") {
+			m->addNewVariableType(new ModelicaCasADi::IntegerType);
+		} else if (baseTypeName == "Boolean") {
+			m->addNewVariableType(new ModelicaCasADi::BooleanType);
+		}
+	}
+	return (ModelicaCasADi::PrimitiveType*) m->getVariableType(baseTypeName).getNode();
+}
+
+Ref<ModelicaCasADi::UserType> getUserType(Ref<Model> m, XMLElement* elem) {
+	if (!strcmp(elem->Value(), "local")) {
+		Ref<ModelicaCasADi::UserType> userType = (ModelicaCasADi::UserType*) m->getVariableType(elem->Attribute("name")).getNode();
+		if (userType.getNode() == NULL) {
+			throw std::runtime_error("Variables derived type is not present in Model");
+		}
+		return userType;
+	}
+	return NULL;
 }

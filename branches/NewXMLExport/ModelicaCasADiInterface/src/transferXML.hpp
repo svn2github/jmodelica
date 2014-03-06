@@ -35,6 +35,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "DerivativeVariable.hpp"
 #include "Ref.hpp"
 
+//types
+#include "types/VariableType.hpp"
+#include "types/UserType.hpp"
+#include "types/PrimitiveType.hpp"
+#include "types/RealType.hpp"
+#include "types/IntegerType.hpp"
+#include "types/BooleanType.hpp"
+
 // XML parser include
 #include "tinyxml2.h"
 
@@ -61,5 +69,7 @@ CasADi::MX builtinBinaryToMx(CasADi::MX lhs, CasADi::MX rhs, const char* builtin
 //ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
 bool hasDerivativeVar(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar);
+ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseType(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, std::string baseTypeName);
+ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
 #endif
