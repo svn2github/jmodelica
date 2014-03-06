@@ -1,0 +1,499 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/**
+ * InitialTransformation contains rewrites that transforms the original
+ * source AST into a canonical form. For example, multiple component
+ * declarations are split into individual ones and visibility is set
+ * for each individual declaration.
+ */
+ 
+ aspect InitialTransformations {
+    /** 
+     * This attribute is used to set the visibility of each element
+     * as protected or public. All classes that can have a parent with
+     * associated visibility must inherit this attribute. (At least if
+     * makes sense for that particular class).
+     */
+    inh VisibilityType ClassDecl.visibility(); 
+    inh VisibilityType PN_ComponentClause.visibility();
+    inh VisibilityType PN_ExtendsClause.visibility();
+    
+    // Added for proxy solution in JModelica IDE
+    public VisibilityType SourceRoot.computeVisibility() {
+        return new PublicVisibilityType();
+    }
+    
+    /**
+     *  Equations defining public or protected visibility of elements 
+     */
+    eq PublicElementList.getElement().visibility() = new PublicVisibilityType();
+    eq ProtectedElementList.getElement().visibility() = new ProtectedVisibilityType();
+    eq SourceRoot.getProgram().visibility() = computeVisibility(); 
+    eq Root.getChild().visibility() = new PublicVisibilityType(); 
+    
+    eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
+    eq ComponentRedeclare.getComponentDecl().visibility() = new PublicVisibilityType();
+    
+    /**
+     * Rewrite the PN_FullClassDecl to a FullClassDecl including visibility info.
+     */
+    rewrite PN_FullClassDecl {
+        to FullClassDecl { 
+            FullClassDecl fc = new FullClassDecl(visibility(),
+                                          getEncapsulatedOpt(),
+                                          getPartialOpt(),
+                                          getRestriction(),
+                                          getName(),
+                                          getRedeclareOpt(),
+                                          getFinalOpt(),
+                                          getInnerOpt(),
+                                          getOuterOpt(),
+                                          getReplaceableOpt(),
+                                          getConstrainingClauseOpt(),
+                                          getConstrainingClauseCommentOpt(),
+                                          getStringCommentOpt(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new Opt(),
+                                          new Opt(),
+                                          getEndDecl());
+            
+            if (hasAnnotation())
+            	fc.setAnnotation(getAnnotation());
+            getComposition().extractElementsTo(fc);
+            
+            if (hasRedeclare())
+            	fc.setLocationNoTree(getRedeclare(), this);
+            else if (hasFinal())
+            	fc.setLocationNoTree(getFinal(), this);
+            else if (hasInner())
+            	fc.setLocationNoTree(getInner(), this);
+            else if (hasOuter())
+            	fc.setLocationNoTree(getOuter(), this);
+            else if (hasReplaceable())
+            	fc.setLocationNoTree(getReplaceable(), this);
+            else if (hasEncapsulated())
+            	fc.setLocationNoTree(getEncapsulated(), this);
+            else if (hasPartial())
+            	fc.setLocationNoTree(getPartial(), this);
+            else
+            	fc.setLocationNoTree(getRestriction(), this);
+            return fc;
+        }
+    }
+    
+    /**
+     * Rewrite the PN_ExtendClassDecl to a ExtendClassDecl including visibility info.
+     */
+    rewrite PN_ExtendClassDecl {
+        to ExtendClassDecl { 
+            ExtendClassDecl ec = new ExtendClassDecl(visibility(),
+                                          getEncapsulatedOpt(),
+                                          getPartialOpt(),
+                                          getRestriction(),
+                                          getName(),
+                                          getRedeclareOpt(),
+                                          getFinalOpt(),
+                                          getInnerOpt(),
+                                          getOuterOpt(),
+                                          getReplaceableOpt(),
+                                          getConstrainingClauseOpt(),
+                                          getConstrainingClauseCommentOpt(),
+                                          getStringCommentOpt(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new Opt(),
+                                          new Opt(),
+                                          getEndDecl());
+            
+            ClassAccess ca = new ClassAccess(getName().getID());
+            InlineExtendsClause iec = new InlineExtendsClause(
+            		new PublicVisibilityType(), ca, getClassModificationOpt(), new Opt());
+            ec.addSuper(iec);
+            if (hasAnnotation())
+            	ec.setAnnotation(getAnnotation());
+            getComposition().extractElementsTo(ec);
+            if (!hasRedeclare())
+            	ec.setRedeclare(copyLocationTo(new Redeclare()));
+
+            ca.setLocationNoTree(getName());
+            // TODO: iec should probably include "extends" token as well, but that needs parser change
+            iec.setLocationNoTree(getName());
+            ec.setLocationNoTree(this);
+            return ec;
+        }
+    }
+    
+    /**
+     * Rewrite the PN_EnumDecl to a EnumClassDecl including visibility info.
+     */
+    rewrite PN_EnumDecl {
+        to EnumClassDecl {
+        	EnumClassDecl ecd = (EnumClassDecl)((SourceRoot)root()).getProgram().getEnumBaseDecl().fullCopy();
+        	
+        	// Copy fields
+        	ecd.setVisibilityType(visibility());
+        	ecd.setEncapsulatedOpt(getEncapsulatedOpt());
+        	ecd.setPartialOpt(getPartialOpt());
+        	ecd.setRestriction(getRestriction());
+        	ecd.setName(getName());
+        	ecd.setRedeclareOpt(getRedeclareOpt());
+        	ecd.setFinalOpt(getFinalOpt());
+        	ecd.setInnerOpt(getInnerOpt());
+        	ecd.setOuterOpt(getOuterOpt());
+        	ecd.setReplaceableOpt(getReplaceableOpt());
+        	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
+        	if (getComment().hasAnnotation())
+        		ecd.setAnnotation(getComment().getAnnotation());
+        	ecd.setEndDecl(new EndDecl(getName().getID()));
+        	ecd.setSymbol(getSymbol());
+        	
+        	// TODO: Copy min, max and start
+        	
+        	// TODO: Add components for the enumeration literals - todo? isn't this done?
+        	for (ComponentDecl d : getEnumSpecification().enumComponents()) {
+        		ecd.addComponentDecl(d);
+        	}
+        	
+            ecd.setLocationNoTree(this);
+            return ecd;
+        }
+    }
+    
+    public ArrayList<ComponentDecl> EnumSpecification.enumComponents() {
+    	return new ArrayList<ComponentDecl>();
+    }
+
+    public ArrayList<ComponentDecl> EnumLiteralList.enumComponents() {
+    	ArrayList<ComponentDecl> l = new ArrayList<ComponentDecl>();
+    	for (EnumLiteral el : getEnumLiterals()) {
+    		l.add(el.copyLocationTo(new EnumLiteralDecl(el.getIdDecl(),el.getComment())));
+    	}
+    	return l;
+    }
+    
+    // For preserved formatting.
+    Composition FullClassDecl.originalComposition;
+    
+    /**
+     * \brief Extract elements from Composition and add to a FullClassDecl.
+     */
+    public void Composition.extractElementsTo(FullClassDecl fcd) {
+    	fcd.originalComposition = this;
+
+        for (Clause cl : getClauses()) 
+			cl.addToFullClassDecl(fcd);
+        
+        if (hasExternalClause()) 
+        	fcd.setExternalClause(getExternalClause());
+    }
+    
+    public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
+    
+    public void ComponentDecl.addToFullClassDecl(FullClassDecl fcd) {
+        if (hasRedeclare()) {
+            ComponentAccess ca = new ComponentAccess(getName().getID(), getVarArraySubscriptsOpt().fullCopy());
+            fcd.addElementModification(new ComponentRedeclare(new Opt(), new Opt(), ca, this));
+        } else {
+            fcd.addComponentDecl(this);
+        }
+    }
+    
+    public void Algorithm.addToFullClassDecl(FullClassDecl fcd) {
+    	Algorithm algo = new Algorithm(getInitialOpt(), new List());
+    	for (Statement stmt : getStatements())
+    		stmt.addToFullClassDecl(fcd, algo);
+    	fcd.addAlgorithm(algo);
+    }
+    
+    public void Statement.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
+    	algo.addStatement(this);
+    }
+    
+    public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
+    	getAnnotation().setLocationNoTree(getAnnotation(), this);
+    	fcd.setAnnotation(getAnnotation());
+    }
+    
+    public void ExtendsClause.addToFullClassDecl(FullClassDecl fcd) {
+    	fcd.addSuper(this);
+    }
+    
+    public void ClassDecl.addToFullClassDecl(FullClassDecl fcd) {
+        // TODO: add redeclared to ElementModifications instead of class list
+    	fcd.addClassDecl(this);
+    }
+    
+    public void ImportClause.addToFullClassDecl(FullClassDecl fcd) {
+        fcd.addImport(this);
+    }
+    
+    public void EquationClause.addToFullClassDecl(FullClassDecl fcd) {
+        for (AbstractEquation equ : getAbstractEquations()) 
+        	equ.addToFullClassDecl(fcd);
+    }
+    
+    public void AbstractEquation.addToFullClassDecl(FullClassDecl fcd) {
+        fcd.addEquation(this);
+    }
+    
+    /**
+     * Rewrite the PN_ExtendsClause to a ExtendsClause including visibility info 
+     */
+    rewrite PN_ExtendsClause {
+        to ExtendsClause {     
+            ExtendsClause e =  new ExtendsClause(visibility(),
+                                     getSuper(),
+                                     getClassModificationOpt(),
+                                     getAnnotationOpt());
+        
+            e.setLocationNoTree(this);
+            return e;
+        }
+    }
+ 
+    /**
+     * Rewrite the PN_ComponentClause to a ComponentClause including
+     * visibility information. 
+     */
+    rewrite PN_ComponentClause {
+        to ComponentClause {
+            List l = new List();
+         
+            for(int i=0;i<getNumName();i++) {
+                if (getName(i)!=null) l.add(getName(i));
+            }
+         
+            ComponentClause c = new ComponentClause(getRedeclareOpt(),
+                                                    getFinalOpt(),
+                                                    getInnerOpt(),
+                                                    getOuterOpt(),
+                                                    getReplaceableOpt(),
+                                                    getTypePrefixFlowOpt(),
+                                                    getTypePrefixVariabilityOpt(),
+                                                    getTypePrefixInputOutputOpt(),
+                                                    getClassName(),
+                                                    getTypeArraySubscriptsOpt(),
+                                                    visibility(),
+                                                    l,
+                                                    getConstrainingClauseOpt(),
+                                                    getComment());
+            c.setLocationNoTree(this);
+            //log.debug("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
+            return c;
+        }
+    }
+    
+     rewrite PN_ComponentRedeclare {
+        to ComponentRedeclare {
+           ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), (ComponentDecl)getBaseComponentDecl());
+           c.setLocationNoTree(this);
+           return c;
+        }
+    }   
+    
+   
+    /**
+     * Eliminate the PublicElementList nodes. Creation of a new list
+     * is essential to trigger re-writes in the children. 
+     */
+    rewrite PublicElementList in Composition.getClause() {
+        to List {
+            List l = new List();
+            List el = getElementList();
+            for(int i=0;i<el.getNumChild();i++) 
+                if (el.getChild(i)!=null) l.add(el.getChild(i));
+            return l.add(new PN_DummyClause());
+        }
+    }
+  
+    /**
+     * Eliminate the ProtectedElementList nodes Creation of a new list
+     * is essential to trigger re-writes in the children. 
+     */
+    rewrite ProtectedElementList in Composition.getClause() {
+        to List {
+            List l = new List();
+            List el = getElementList();
+                for(int i=0;i<el.getNumChild();i++) 
+                    if (el.getChild(i)!=null) l.add(el.getChild(i));
+            return l.add(new PN_DummyClause());
+        }
+    }
+  
+	/**
+	 * Transform ComponentClauses to ComponentDecls 
+	 */
+	rewrite ComponentClause in Composition.getClause() {
+		to List {
+			List l = new List();
+			java.util.List<SiblingComponentDecl> siblings = null;
+			if (getNumName() > 1)
+				siblings = new ArrayList();
+			for (PN_ComponentDecl name : getNames()) {
+				ComponentDecl c = asComponentDecl(name, siblings);
+				if (l.getNumChild() == 0)
+					c.setLocationNoTree(this);
+				else
+					c.setLocationNoTree(name);
+				l.add(c);
+			}
+			return l;
+		}
+	}
+	
+	rewrite ComponentClause {
+		when (getNumName()==1) 
+		to ComponentDecl {
+			ComponentDecl cd = asComponentDecl(getName(0), null);
+			cd.setLocationNoTree(this);
+			return cd;
+		}
+	}
+	
+	private ComponentDecl ComponentClause.asComponentDecl(PN_ComponentDecl name, java.util.List<SiblingComponentDecl> siblings) {
+		// Move all ArraySubscripts to the declaration
+		List as;
+		if (name.hasVarArraySubscripts())
+			as = name.getVarArraySubscripts().getSubscriptList();
+		else
+			as = new List();
+
+		if (hasTypeArraySubscripts())
+			for (int i=0;i<getTypeArraySubscripts().getNumSubscript();i++)
+				as.add(getTypeArraySubscripts().getSubscript(i));
+		ComponentDecl c;
+		if (siblings == null) {
+			c = new ComponentDecl();
+		} else {
+			SiblingComponentDecl sc = new SiblingComponentDecl();
+			sc.setSiblings(siblings);
+			siblings.add(sc);
+			c = sc;
+		}
+		c.setRedeclareOpt(getRedeclareOpt().fullCopy());
+		c.setFinalOpt(getFinalOpt().fullCopy());
+		c.setInnerOpt(getInnerOpt().fullCopy());
+		c.setOuterOpt(getOuterOpt().fullCopy());
+		c.setReplaceableOpt(getReplaceableOpt().fullCopy());
+		c.setTypePrefixFlowOpt(getTypePrefixFlowOpt().fullCopy());
+		c.setTypePrefixVariabilityOpt(getTypePrefixVariabilityOpt().fullCopy());
+		c.setTypePrefixInputOutputOpt(getTypePrefixInputOutputOpt().fullCopy());
+		c.setClassName(getClassName().fullCopy());
+		c.setVisibilityType(getVisibilityType().fullCopy());
+		c.setName(name.getName());
+		if (as.getNumChild() > 0)
+		    c.setVarArraySubscripts(new ArraySubscripts(as));
+		c.setModificationOpt(name.getModificationOpt());
+		c.setConditionalAttributeOpt(name.getConditionalAttributeOpt());
+		c.setComment(name.getComment());
+		c.setConstrainingClauseOpt( getConstrainingClauseOpt().fullCopy());
+		c.setCCComment(getComment());
+		c.setLocationNoTree(this, this, name);
+		return c;
+	}
+
+
+    rewrite ComponentModification {
+        when (getName().isQualified())
+        to ComponentModification{
+            log.debug("ComponentModification -> ComponentModification: " + getName().qualifiedName());
+            ComponentModification e = new ComponentModification(new Opt(),
+                                           new Opt(),
+                                           getName().getFirstAccess(),
+                                           //getModificationOpt(),
+                                           new Opt(new CompleteModification(
+                                                    new ClassModification(
+                                                     new List().add(
+                                                      new ComponentModification(
+                                                       getEachOpt(),
+                                                       getFinalOpt(),
+                                                       getName().stripFirstAccess(),
+                                                       getModificationOpt(),
+                                                    getStringCommentOpt()))),
+                                                   new Opt())),
+                                           new Opt());
+            e.getModification().setLocationNoTree(this);
+            ((CompleteModification)e.getModification()).getClassModification().setLocationNoTree(this);
+            ClassModification cm = ((CompleteModification)e.getModification()).getClassModification();
+            ((ComponentModification)cm.getArgument(0)).getName().setLocationNoTree(this);
+            e.setLocationNoTree(this);
+            return e;
+        }
+    
+    }
+
+    rewrite PN_ShortClassDecl {
+        to ShortClassDecl {
+            ExtendsClauseShortClass ecsc = 
+               new ExtendsClauseShortClass(visibility(),
+                                      getClassName(),
+                                      getClassModificationOpt(),
+                                      new Opt<Annotation>(),
+                                      getTypePrefixFlowOpt(),
+                                      getTypePrefixVariabilityOpt(),
+                                      getTypePrefixInputOutputOpt(),
+                                      getArraySubscriptsOpt(),
+                                      getComment());
+            ecsc.setLocationNoTree(this);
+            ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
+                                      getEncapsulatedOpt(), 
+                                      getPartialOpt(), 
+                                      getRestriction(), 
+                                      getName(),  
+                                      getRedeclareOpt(),
+                                      getFinalOpt(),
+                                      getInnerOpt(),
+                                      getOuterOpt(),
+                                      getReplaceableOpt(),
+                                      getConstrainingClauseOpt(),
+                                      getConstrainingClauseCommentOpt(),
+                                      ecsc); 
+                                      
+           scd.setLocationNoTree(this);
+           return scd;
+        }
+    }
+    
+    rewrite PN_Dot {
+    	to Dot copyLocationTo(buildDot(new Dot()));
+    }
+
+    public Dot Access.buildDot(Dot dot) {
+    	dot.addAccessNoTransform(this);
+    	return dot;
+    }
+    
+
+    public Dot PN_Dot.buildDot(Dot dot) {
+    	getLeftNoTransform().buildDot(dot);
+    	getRightNoTransform().buildDot(dot);
+    	return dot;
+    }
+
+}
