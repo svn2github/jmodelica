@@ -902,6 +902,147 @@ P.show()
     </section>
 
     <section>
+      <title>Simulation of an Engine model with inputs</title>
+
+      <para>In this example the model is rather larger then the previous. It
+      is a slightly modified version of the model EngineV6_analytic from the
+      Multibody library in the Modelica Standard Library. The modification
+      consists of a replaced load with a user defined load. This has been done
+      in order to be able to demonstrate how inputs are set from a Python
+      script. In Figure <xref linkend="sim_fig_engine"/> the model is shown.
+      </para>
+
+      <figure xml:id="sim_fig_engine">
+        <title>Overview of the Engine model</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/enginev6_mod.png" scale="100"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>The Modelica code for the model is shown below, copy and save the
+      code in a file named <literal>EngineV6.mo</literal>.</para>
+
+      <programlisting>model EngineV6_analytic_with_input
+  output Real engineSpeed_rpm= Modelica.SIunits.Conversions.to_rpm(load.w);
+  output Real engineTorque = filter.u;
+  output Real filteredEngineTorque = filter.y;
+  
+  input Real u;
+  
+  import Modelica.Mechanics.*;
+
+  inner MultiBody.World world;
+  MultiBody.Examples.Loops.Utilities.EngineV6_analytic engine(redeclare 
+      model Cylinder = MultiBody.Examples.Loops.Utilities.Cylinder_analytic_CAD);
+      
+  Rotational.Components.Inertia load(
+    phi(start=0,fixed=true), w(start=10,fixed=true),
+    stateSelect=StateSelect.always,J=1);
+  Rotational.Sensors.TorqueSensor torqueSensor;
+  Rotational.Sources.Torque torque;
+  
+  Modelica.Blocks.Continuous.CriticalDamping filter(
+    n=2,initType=Modelica.Blocks.Types.Init.SteadyState,f=5);
+
+equation 
+  torque.tau = u;
+  
+  connect(world.frame_b, engine.frame_a);
+  connect(torque.flange, load.flange_b);
+  connect(torqueSensor.flange_a, engine.flange_b);
+  connect(torqueSensor.flange_b, load.flange_a);
+  connect(torqueSensor.tau, filter.u);
+  annotation (experiment(StopTime=1.01));
+
+end EngineV6_analytic_with_input;</programlisting>
+
+      <para>Now that the model has been defined, we create our Python script
+      which will compile, simulate and visualize the result for us. Create a
+      new text-file and start by copying the below commands into the file. The
+      code will import the necessary methods and packages into Python.</para>
+
+      <programlisting language="Python">from pymodelica import compile_fmu
+from pyfmi import load_fmu
+import pylab as P</programlisting>
+
+      <para>Compiling the model is performed by invoking the
+      <literal>compile_fmu</literal> method where the first argument is the
+      name of the model and the second argument is where the model is located
+      (which file). The method will create an FMU in the current directory and
+      in order to simulate the FMU, we need to additionally load the created
+      FMU into Python. This is done with the <literal>load_fmu</literal>
+      method which takes the name of the FMU as input. </para>
+
+      <programlisting>name = compile_fmu("EngineV6_analytic_with_input", "EngineV6.mo")
+
+model = load_fmu(name)</programlisting>
+
+      <para>So, now that we have compiled the model and loaded it into Python
+      we are almost ready to simulate the model. First however, we retrieve
+      the simulation options and specify how many result points we want to
+      receive after a simulation.</para>
+
+      <programlisting>opts = model.simulate_options()
+opts["ncp"] = 1000 #Specify that 1000 output points should be returned</programlisting>
+
+      <para>A simulation is finally performed using the
+      <literal>simulate</literal> method on the model and as we have changed
+      the options, we need to additionally provide these options to the
+      simulate method.</para>
+
+      <programlisting>res = model.simulate(options=opts)</programlisting>
+
+      <para>The simulation result is returned and stored into the
+      <literal>res</literal> object. Result for a trajectory is easily
+      retrieved using a Python dictionary syntax. Below is the visualization
+      code for viewing the engine torque and the engine speed. One could
+      instead use the Plot GUI for the visualization as the result are stored
+      in a file in the current directory.</para>
+
+      <programlisting>P.subplot(211)
+P.plot(res["time"],res["filteredEngineTorque"])
+P.grid()
+P.ylabel("Torque [N.m]")
+P.subplot(212)
+P.plot(res["time"],res["engineSpeed_rpm"])
+P.grid()
+P.xlabel("Time [s]")
+P.ylabel("Speed [1/min]")
+P.show()</programlisting>
+
+      <para>Above we have simulated the engine model and looked at the result,
+      we have not however specified any load as input. Remember that the model
+      we are looking at has a user specified load. Now we will create a Python
+      function that will act as our input. We create a function that depends
+      on the time and returns the value for use as input. </para>
+
+      <programlisting>def input_func(t):
+    return -100.0*t</programlisting>
+
+      <para>In order to use this input in the simulation, simply provide the
+      name of the input variable and the function as the input argument to the
+      simulate method, see below.</para>
+
+      <programlisting language="Python">res = model.simulate(options=opts, input=("u",input_func))
+</programlisting>
+
+      <para>Large models contain an enormous amount of variables and by
+      default, all of these variables are stored in the result. Storing the
+      result takes time and for large models the saving of the result may be
+      responsible for the majority of the overall simulation time. Not all
+      variables may be of interest, for example in our case, we are only
+      interested in two variables so storing the other variables are not
+      necessary. In the options dictionary there is a filter option which
+      allows to specify which variables should be stored, so in our case, try
+      the below filter and look at the impact on the simulation time.</para>
+
+      <programlisting>opts["filter"] = ["filteredEngineTorque", "engineSpeed_rpm"]</programlisting>
+    </section>
+
+    <section>
       <title>Simulation using the native FMI interface</title>
 
       <para>This example shows how to use the native JModelica.org FMI
