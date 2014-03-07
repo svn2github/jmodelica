@@ -909,15 +909,15 @@ P.show()
       Multibody library in the Modelica Standard Library. The modification
       consists of a replaced load with a user defined load. This has been done
       in order to be able to demonstrate how inputs are set from a Python
-      script. In Figure <xref linkend="sim_fig_engine"/> the model is shown.
-      </para>
+      script. In <xref linkend="sim_fig_engine"/> the model is shown.</para>
 
       <figure xml:id="sim_fig_engine">
         <title>Overview of the Engine model</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/enginev6_mod.png" scale="100"/>
+            <imagedata fileref="images/enginev6_mod.png" scale="60"
+                       scalefit="1"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -974,7 +974,7 @@ import pylab as P</programlisting>
       (which file). The method will create an FMU in the current directory and
       in order to simulate the FMU, we need to additionally load the created
       FMU into Python. This is done with the <literal>load_fmu</literal>
-      method which takes the name of the FMU as input. </para>
+      method which takes the name of the FMU as input.</para>
 
       <programlisting>name = compile_fmu("EngineV6_analytic_with_input", "EngineV6.mo")
 
@@ -1017,7 +1017,7 @@ P.show()</programlisting>
       we have not however specified any load as input. Remember that the model
       we are looking at has a user specified load. Now we will create a Python
       function that will act as our input. We create a function that depends
-      on the time and returns the value for use as input. </para>
+      on the time and returns the value for use as input.</para>
 
       <programlisting>def input_func(t):
     return -100.0*t</programlisting>
