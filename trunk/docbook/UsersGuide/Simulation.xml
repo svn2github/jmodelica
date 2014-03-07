@@ -1003,15 +1003,32 @@ opts["ncp"] = 1000 #Specify that 1000 output points should be returned</programl
       in a file in the current directory.</para>
 
       <programlisting>P.subplot(211)
-P.plot(res["time"],res["filteredEngineTorque"])
+P.suptitle("EngineV6")
+P.plot(res["time"],res["filteredEngineTorque"], label="Filtered Engine Torque")
 P.grid()
+P.legend()
 P.ylabel("Torque [N.m]")
 P.subplot(212)
-P.plot(res["time"],res["engineSpeed_rpm"])
+P.plot(res["time"],res["engineSpeed_rpm"], label="Engine Speed")
 P.grid()
+P.legend()
 P.xlabel("Time [s]")
 P.ylabel("Speed [1/min]")
 P.show()</programlisting>
+
+      <para>In <xref linkend="sim_fig_result_engine"/> the trajectories are
+      shown.</para>
+
+      <figure xml:id="sim_fig_result_engine">
+        <title>Resulting trajectories for the engine model.</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/engine_result.svg" scale="60"
+                       scalefit="1"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
 
       <para>Above we have simulated the engine model and looked at the result,
       we have not however specified any load as input. Remember that the model
@@ -1028,6 +1045,9 @@ P.show()</programlisting>
 
       <programlisting language="Python">res = model.simulate(options=opts, input=("u",input_func))
 </programlisting>
+
+      <para>Simulate the model again and look at the result and the impact of
+      the input. </para>
 
       <para>Large models contain an enormous amount of variables and by
       default, all of these variables are stored in the result. Storing the
