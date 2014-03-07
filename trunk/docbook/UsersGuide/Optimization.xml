@@ -1822,25 +1822,12 @@ plt.show()
 
             <m:mspace linebreak="newline"/>
           </m:math>
+        </informalequation>
 
-          <m:mo>-</m:mo>
-
-          <m:mn>1</m:mn>
-
-          <m:mo>≤</m:mo>
-
-          <m:mi>u</m:mi>
-
-          <m:mo>⁡</m:mo>
-
-          <m:mfenced><m:mi>t</m:mi></m:mfenced>
-
-          <m:mo>≤</m:mo>
-
-          <m:mn>1</m:mn>
-
-          <m:mtr><m:mtd columnalign="left"><m:mspace
-          width="1em"/></m:mtd></m:mtr>
+        <informalequation>
+          <m:math display="block">
+            <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
+          </m:math>
         </informalequation>
 
         <para>This problem is encoded in the following Optimica
@@ -4681,26 +4668,13 @@ plt.show()
 
                 <m:mspace linebreak="newline"/>
               </m:math>
-
-              <m:mo>-</m:mo>
-
-              <m:mn>1</m:mn>
-
-              <m:mo>≤</m:mo>
-
-              <m:mi>u</m:mi>
-
-              <m:mo>⁡</m:mo>
-
-              <m:mfenced><m:mi>t</m:mi></m:mfenced>
-
-              <m:mo>≤</m:mo>
-
-              <m:mn>1</m:mn>
-
-              <m:mtr><m:mtd columnalign="left"><m:mspace
-              width="1em"/></m:mtd></m:mtr>
             </informalequation>
+
+            <para><informalequation>
+                <m:math display="block">
+                  <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
+                </m:math>
+              </informalequation></para>
 
             <para>This problem is encoded in the following Optimica
             specification:</para>
@@ -4772,12 +4746,12 @@ plt.show()
 </programlisting>
 
             <para>The resulting control and state profiles are shown in <xref
-            linkend="opt-fig-vdp-min-time"/>. Notice the difference as
+            linkend="opt-fig-vdp-min-time-casadi"/>. Notice the difference as
             compared to Figure <xref linkend="fig-vdp-opt"/>, where the Van
             der Pol oscillator system is optimized using a quadratic objective
             function.</para>
 
-            <figure xml:id="opt-fig-vdp-min-time">
+            <figure xml:id="opt-fig-vdp-min-time-casadi">
               <title>Minimum time profiles for the Van der Pol
               Oscillator.</title>
 
