@@ -8,7 +8,6 @@ import org.jmodelica.util.NotNullCodeStream;
 /**
  * Aspect that adds XML codegeneration for flat models to the compiler
  * 
- * TODO Implement support for algorithm sections
  * TODO Fix generation for FFunctionCallEquation, since it generates unvalid XML in some cases
  * 
  */
@@ -156,9 +155,17 @@ aspect XMLCodeGenerator {
 			str.print("\n");
 			
 			for (FAbstractEquation alg : algorithms) {
-				// generate xml for algorithm section, add this later
 				p.print(alg, str, indentOneStep);
 			}
+		}
+		
+		// generate functions
+		for (FFunctionDecl function : getFFunctionDecls()) {
+			generateOpenTag(str, "classDefinition", indent, "name", function.name());
+			generateOpenTag(str, "class", indentOneStep, "kind", "function");
+			p.print(function, str, indentTwoSteps);
+			generateCloseTag(str, "class", indentOneStep);
+			generateCloseTag(str, "class", indent);
 		}
 		generateCloseTag(str, "class", indent);
 	}
@@ -264,6 +271,33 @@ aspect XMLCodeGenerator {
 			}
 			generateCloseTag(str, "classDefinition", indent);
 		}
+	}
+	
+	// generate function variables
+	public void FFunctionVariable.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		Map<String, String> attributes = new LinkedHashMap<String, String>();
+		attributes.put("name", name());
+		if (hasFTypePrefixInputOutput()) {
+			attributes.put("casuality", getFTypePrefixInputOutput().toString());
+		}
+		generateOpenTag(str, "component", indent, attributes);
+		
+		String variableType = getType().toString();
+		if (variableType.equals("Real") || variableType.equals("Integer") || 
+				variableType.equals("Boolean") || variableType.equals("String")) {
+			generateClosedTag(str, "builtin", indentOneStep, "name", variableType);
+		} else {
+			generateClosedTag(str, "local",  indentOneStep, "name", variableType);
+		}
+		
+		if (hasBindingExp()) {
+			generateOpenTag(str, "bindingExp", indentOneStep);
+			p.print(getBindingExp(), str, indentTwoSteps);
+			generateCloseTag(str, "bindingExp", indentOneStep);
+		}
+		generateClosedTag(str, "component", indent);
 	}
 	
 	//=========================================================================
@@ -396,8 +430,17 @@ aspect XMLCodeGenerator {
 	}
 	
 	//=========================================================================
-	// Code generation for general function calls and builtin functions
+	// Code generation for function declarations, general function calls and 
+	// builtin functions
 	//=========================================================================
+	
+	public void FFunctionDecl.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		for (FFunctionVariable var : getFFunctionVariables()) {
+			p.print(var, str, indent);
+		}
+		p.print(getFAlgorithm(), str, indent);
+	}
+	
 	public void FFunctionCall.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		generateOpenTag(str, "call", indent);
 		generateOpenTag(str, "function", indent);
@@ -677,12 +720,14 @@ aspect XMLCodeGenerator {
 		String indentTwoSteps = p.indent(indentOneStep);
 		generateOpenTag(str, "if", indent);
 		for (FIfWhenClause clause : getFIfWhenClauses()) {
-			p.print(clause, str, indentTwoSteps);
+			p.print(clause, str, indentOneStep);
 		}
 		if (getNumElseStmt() > 0) {
+			generateOpenTag(str, "else", indentOneStep);
 			for (FStatement stmt : getElseStmts()) {
 				p.print(stmt, str, indentTwoSteps);
 			}
+			generateCloseTag(str, "else", indentOneStep);
 		}
 		generateCloseTag(str, "if", indent);
 	}
@@ -727,7 +772,21 @@ aspect XMLCodeGenerator {
 		generateCloseTag(str, "while", indent);
 	}
 	
-	public void FFunctionCallStmt.prettyprintXML(Printer p, CodeStream str, String indent) {
-		// TODO implement this when generation of functions is implemented
+	public void FFunctionCallStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		String indentThreeSteps = p.indent(indentTwoSteps);
+		generateOpenTag(str, "assign", indent);
+		generateOpenTag(str, "to", indentOneStep);
+		generateOpenTag(str, "tuple", indentTwoSteps);
+		for (FFunctionCallLeft left : getLefts()) {
+			p.print(left, str, indentThreeSteps);
+		}
+		generateCloseTag(str, "tuple", indentTwoSteps);
+		generateCloseTag(str, "to", indentOneStep);
+		generateOpenTag(str, "from", indentOneStep);
+		p.print(getCall(), str, indentTwoSteps);
+		generateCloseTag(str, "from", indentOneStep);
+		generateCloseTag(str, "assign", indent);
 	}
 }
