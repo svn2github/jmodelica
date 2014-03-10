@@ -18,12 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jmi.h"
-
-/* Modelica utility functions */
-char* ModelicaAllocateString(size_t size)
-{
-	return calloc((size+1),sizeof(char));
-}
+#include "ModelicaUtilities.h"
 
 $ECE_external_includes$
  
@@ -70,7 +65,7 @@ char* parseString() {
     return str;
 }
 
-void printString(char* str) {
+void printString(const char* str) {
     printf("%d\n%s\n", strlen(str), str);
     fflush(stdout);
 }
@@ -87,6 +82,27 @@ void printString(char* str) {
 /* Parse/print arrays */
 #define parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { parse(TYPE, jmi_array_ref_1(ARR,vi)); }
 #define printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { print(TYPE, jmi_array_val_1(ARR,vi)); }
+
+/* Used by ModelicaUtilities */
+void jmi_global_log(int warning, const char* name, const char* fmt, const char* value)
+{
+    printf("LOG\n");
+    printInteger((double)warning);
+    printString(name);
+    printString(fmt);
+    printString(value);
+}
+
+void* jmi_global_calloc(size_t n, size_t s)
+{
+    return calloc(n, s);
+}
+
+void jmi_throw()
+{
+    exit(1);
+}
+
 
 /* Main */
 int main(int argc, const char* argv[])

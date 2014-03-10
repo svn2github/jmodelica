@@ -423,6 +423,20 @@ package CEval
       constant E[2] xArrayUnknown  = fenumarrayunknown({E.E1,E.E2});
     end EnumTest;
   end Fortran;
+  
+  package Utility
+    model LogTest
+      function func_with_ModelicaError
+        input  Real x_in;
+        output Real x_out;
+      external "C" annotation(Library="useModelicaError",
+                         Include="#include \"useModelicaError.h\"");
+      end func_with_ModelicaError;
+
+      Real xLog   = func_with_ModelicaError(1.1);
+      Real xError = func_with_ModelicaError(2.1);
+    end LogTest;
+  end Utility;
 end CEval;
 
 end ExtFunctionTests;

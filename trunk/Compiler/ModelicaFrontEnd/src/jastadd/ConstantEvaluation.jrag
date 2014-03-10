@@ -3394,6 +3394,7 @@ aspect ExternalCEval {
             for (CommonVariableDecl cvd : myInputs())
                 com.put(values.get(cvd));
             com.accept("CALC");
+            com.log();
             com.accept("DONE");
             for (CommonVariableDecl cvd : myOutputs())
                 values.put(cvd, com.get(cvd.type()));
@@ -3424,6 +3425,7 @@ aspect ExternalCEval {
         private BufferedWriter out;
         private Process process;
         private Timer timer;
+        String buffLine = null;
         
         public ProcessCommunicator(Process proc, int timeout) {
             process = proc;
@@ -3441,6 +3443,20 @@ aspect ExternalCEval {
             }
         }
         
+        private String getLine() throws IOException {
+            String line = buffLine;
+            if (line == null)
+                line = in.readLine();
+            if (line == null)
+                throw new IOException();
+            buffLine = null;
+            return line;
+        }
+        
+        private void buffLine(String line) {
+            buffLine = line;
+        }
+        
         /**
          * Print <code>val</code>, serialized, to the process 
          */
@@ -3454,7 +3470,7 @@ aspect ExternalCEval {
          * Read <code>type</code>, serialized, from the process 
          */
         public CValue get(FType type) throws IOException {
-            CValue val = type.deserialize(in);
+            CValue val = type.deserialize(this);
 //            ModelicaCompiler.log.debug("ProcessCommunicator READ: " + val.toString());
             return val;
         }
@@ -3463,11 +3479,27 @@ aspect ExternalCEval {
          * Read a line. Check equals to <code>s</code>.
          */
         public void accept(String s) throws IOException {
-            String line = in.readLine();
+            String line = getLine();
             if (line == null || !line.equals(s)) {
                 ModelicaCompiler.log.debug(String.format("ProcessCommunicator did not receive expected line\n\t'%s' != '%s'", s, (line == null ? "null" : line)));
                 throw new IOException();
             }
+        }
+        
+        public void log() throws IOException {
+            String line = getLine();
+            while (line.equals("LOG")) {
+                double warning = deserializeReal();
+                String name    = deserializeString();
+                String format  = deserializeString();
+                String value   = deserializeString();
+                if (warning != 0)
+                    ModelicaCompiler.log.warning("%s: " + format, name, value);
+                else
+                    ModelicaCompiler.log.info("%s: " + format, name, value);
+                line = getLine();
+            }
+            buffLine(line);
         }
         
         /**
@@ -3504,6 +3536,32 @@ aspect ExternalCEval {
             timer.cancel();
             timer.purge();
             timer = null;
+        }
+        
+        public double deserializeReal() throws IOException {
+            String s = in.readLine();
+            if (s == null)
+                throw new IOException();
+            try {
+                return Double.parseDouble(s);
+            } catch (NumberFormatException e) {
+                throw new IOException();
+            }
+        }
+        
+        public String deserializeString() throws IOException {
+            String s = in.readLine();
+            if (s == null)
+                throw new IOException();
+            try {
+                int len = Integer.parseInt(s);
+                char[] c = new char[len];
+                in.read(c,0,len);
+                s = in.readLine();
+                return new String(c);
+            } catch (NumberFormatException e) {
+                throw new IOException();
+            }
         }
     }
     
@@ -3553,55 +3611,33 @@ aspect ExternalCEval {
     /**
      * Read a constant value of <code>this</code> type from <code>buff</code>
      */
-    public CValue FType.deserialize(BufferedReader buff) throws IOException {
+    public CValue FType.deserialize(ProcessCommunicator com) throws IOException {
         if (isArray()) {
             CValueArray a = new CValueArray(size().ceval());
             for (Index i : a.indices()) {
-                a.setCell(i, deserializeScalar(buff));
+                a.setCell(i, deserializeScalar(com));
             }
             return a;
         } else {
-            return deserializeScalar(buff);
+            return deserializeScalar(com);
         }
     }
-    public CValue FType.deserializeScalar(BufferedReader buff) throws IOException {
+    public CValue FType.deserializeScalar(ProcessCommunicator com) throws IOException {
         throw new IOException();
     }
-    public CValue FRealType.deserializeScalar(BufferedReader buff) throws IOException {
-        return deserializeReal(buff);
+    public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueReal(com.deserializeReal());
     }
-    public CValue FIntegerType.deserializeScalar(BufferedReader buff) throws IOException {
-        return deserializeReal(buff).convertInteger();
+    public CValue FIntegerType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueInteger((int) com.deserializeReal());
     }
-    public CValue FBooleanType.deserializeScalar(BufferedReader buff) throws IOException {
-        return new CValueBoolean(deserializeReal(buff).realValue() != 0);
+    public CValue FBooleanType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueBoolean(com.deserializeReal() != 0);
     }
-    public CValue FStringType.deserializeScalar(BufferedReader buff) throws IOException {
-        String s = buff.readLine();
-        if (s == null)
-            throw new IOException();
-        try {
-            int len = Integer.parseInt(s);
-            char[] c = new char[len];
-            buff.read(c,0,len);
-            s = buff.readLine();
-            return new CValueString(new String(c));
-        } catch (NumberFormatException e) {
-            throw new IOException();
-        }
+    public CValue FStringType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueString(com.deserializeString());
     }
-    public CValue FEnumType.deserializeScalar(BufferedReader buff) throws IOException {
-        return new CValueEnum(this, deserializeReal(buff).intValue());
-    }
-    
-    protected CValueReal FType.deserializeReal(BufferedReader buff) throws IOException {
-        String s = buff.readLine();
-        if (s == null)
-            throw new IOException();
-        try {
-            return new CValueReal(Double.parseDouble(s));
-        } catch (NumberFormatException e) {
-            throw new IOException();
-        }
+    public CValue FEnumType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueEnum(this, (int) com.deserializeReal());
     }
 }

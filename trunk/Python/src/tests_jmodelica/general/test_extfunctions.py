@@ -551,7 +551,34 @@ class TestFortranBasic:
         nose.tools.assert_equals(model.get('xScalar'), 2)
         nose.tools.assert_equals(model.get('xArray[2]'), 2)
         nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 1)
-
+        
+        
+class TestUtilities:
+    '''
+    Test utility functions in external C functions.
+    '''
+    @classmethod
+    def setUpClass(self):
+        self.dir = build_ext('use_modelica_error', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dir, True)
+    
+    @testattr(stddist = True)
+    def testCEvalLog(self):
+        '''
+        Constant evaluation of external C logging function.
+        '''
+        cpath = "ExtFunctionTests.CEval.Utility.LogTest"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_log_level="w:tmp.log")
+        logfile = open('tmp.log')
+        nose.tools.assert_equals(logfile.readline(), "ModelicaMessage: <msg:X is a bit high: 1.100000.>\n")
+        nose.tools.assert_equals(logfile.readline(), "ModelicaError: <msg:X is too high: 2.100000.>\n")
+        logfile.close()
+        os.remove(logfile.name);
+        
 def build_ext(target, mofile):
     """
     Build a library for an external function.
