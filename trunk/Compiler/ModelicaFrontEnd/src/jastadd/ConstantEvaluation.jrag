@@ -3336,6 +3336,8 @@ aspect ExternalCEval {
      * Check external arguments
      */
     syn boolean FExternalStmt.canEvaluate() {
+        if (root().options.getIntegerOption("external_constant_evaluation") == 0)
+            return false;
         for (CommonVariableDecl cvd : myCommonVarDecls()) {
             if (cvd.type().isExternalObject() || cvd.type().isRecord()) {
                 return false;
@@ -3385,7 +3387,8 @@ aspect ExternalCEval {
         } 
         
         int res = 0;
-        ProcessCommunicator com = new ProcessCommunicator(proc);
+        int timeout = root().options.getIntegerOption("external_constant_evaluation");
+        ProcessCommunicator com = new ProcessCommunicator(proc, timeout);
         try {
             com.accept("START");
             for (CommonVariableDecl cvd : myInputs())
@@ -3422,18 +3425,20 @@ aspect ExternalCEval {
         private Process process;
         private Timer timer;
         
-        public ProcessCommunicator(Process proc) {
+        public ProcessCommunicator(Process proc, int timeout) {
             process = proc;
             in  = new BufferedReader(new InputStreamReader(process.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
             timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    process.destroy();
-                    cancel();
-                }
-            }, 5000);
+            if (timeout >= 0) {
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        process.destroy();
+                        cancel();
+                    }
+                }, timeout);
+            }
         }
         
         /**

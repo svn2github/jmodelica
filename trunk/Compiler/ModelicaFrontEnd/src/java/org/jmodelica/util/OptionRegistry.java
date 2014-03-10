@@ -238,6 +238,12 @@ abstract public class OptionRegistry {
  			 true,
  			 "If this option is set to true (default), then variabilities are " +
               "propagated through the model."),
+        EXT_CEVAL
+            ("external_constant_evaluation", 
+             compiler, 
+             5000,
+             "Time limit (ms) when evaluating constant calls to external functions during compilation. "
+             + "0 indicates no evaluation. -1 indicates no time limit. Default is 5000."),
 		HALT_WARN
 			("halt_on_warning", 
 			 compiler, 
