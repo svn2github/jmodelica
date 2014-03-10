@@ -192,8 +192,8 @@ class TestExternalBool:
             assert(model.get('res[' + str(i) + ']'))
             assert(model2.get('res[' + str(i) + ']'))
         for i in falseInd:
-		    assert(not model.get('res[' + str(i) + ']'))
-		    assert(not model2.get('res[' + str(i) + ']'))
+            assert(not model.get('res[' + str(i) + ']'))
+            assert(not model2.get('res[' + str(i) + ']'))
 
 class TestExternalShared2:
     
@@ -410,6 +410,147 @@ class TestModelicaError:
         except CVodeError, e:
             assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
         
+        
+class TestCBasic:
+    '''
+    Test basic external C functions.
+    '''
+    @classmethod
+    def setUpClass(self):
+        self.dir = build_ext('basic_static_c', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dir, True)
+    
+    @testattr(stddist = True)
+    def testCEvalReal(self):
+        '''
+        Constant evaluation of basic external C function with Reals.
+        '''
+        cpath = "ExtFunctionTests.CEval.C.RealTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('xScalar'), 3*3.14)
+        nose.tools.assert_equals(res.final('xArray[2]'), 4)
+        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
+        
+    @testattr(stddist = True)
+    def testCEvalInteger(self):
+        '''
+        Constant evaluation of basic external C function with Integers.
+        '''
+        cpath = "ExtFunctionTests.CEval.C.IntegerTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('xScalar'), 9)
+        nose.tools.assert_equals(res.final('xArray[2]'), 4)
+        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
+    
+    @testattr(stddist = True)
+    def testCEvalBoolean(self):
+        '''
+        Constant evaluation of basic external C function with Booleans.
+        '''
+        cpath = "ExtFunctionTests.CEval.C.BooleanTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('xScalar'), False)
+        nose.tools.assert_equals(res.final('xArray[2]'), True)
+        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
+    
+    @testattr(stddist = True)
+    def test_ExtFuncString(self):
+        cpath = "ExtFunctionTests.CEval.C.StringTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        #TODO: enable when model.get_string implemented
+        #nose.tools.assert_equals(model.get('xScalar'), 'dcb')
+        #nose.tools.assert_equals(model.get('xArray[2]'), 'dbf')
+        #nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 'dbf')
+    
+    @testattr(stddist = True)
+    def testCEvalEnum(self):
+        '''
+        Constant evaluation of basic external C function with Enums.
+        '''
+        cpath = "ExtFunctionTests.CEval.C.EnumTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(model.get('xScalar'), 2)
+        nose.tools.assert_equals(model.get('xArray[2]'), 2)
+        nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 1)
+        
+class TestFortranBasic:
+    '''
+    Test basic external fortran functions.
+    '''
+    @classmethod
+    def setUpClass(self):
+        self.dir = build_ext('basic_static_f', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dir, True)
+    
+    @testattr(stddist = True)
+    def testCEvalReal(self):
+        '''
+        Constant evaluation of basic external fortran function with Reals.
+        '''
+        cpath = "ExtFunctionTests.CEval.Fortran.RealTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('xScalar'), 3*3.14)
+        nose.tools.assert_equals(res.final('xArray[2]'), 4)
+        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
+        
+    @testattr(stddist = True)
+    def testCEvalInteger(self):
+        '''
+        Constant evaluation of basic external fortran function with Integers.
+        '''
+        cpath = "ExtFunctionTests.CEval.Fortran.IntegerTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('xScalar'), 9)
+        nose.tools.assert_equals(res.final('xArray[2]'), 4)
+        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
+    
+    @testattr(stddist = True)
+    def testCEvalBoolean(self):
+        '''
+        Constant evaluation of basic external fortran function with Booleans.
+        '''
+        cpath = "ExtFunctionTests.CEval.Fortran.BooleanTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('xScalar'), False)
+        nose.tools.assert_equals(res.final('xArray[2]'), True)
+        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
+    
+    @testattr(stddist = True)
+    def testCEvalEnum(self):
+        '''
+        Constant evaluation of basic external fortran function with Enums.
+        '''
+        cpath = "ExtFunctionTests.CEval.Fortran.EnumTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(model.get('xScalar'), 2)
+        nose.tools.assert_equals(model.get('xArray[2]'), 2)
+        nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 1)
 
 def build_ext(target, mofile):
     """

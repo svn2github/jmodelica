@@ -159,4 +159,270 @@ equation
 	x = whileTrue(1);
 end ExternalInfinityTest;
 
+package CEval
+  package C
+    model RealTest
+      function fRealScalar
+        input  Real x_in;
+        output Real x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fRealScalar;
+      
+      function fRealArray
+        input  Real[2] x_in;
+        output Real[size(x_in,1)] x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fRealArray;
+      
+      function fRealArrayUnknown
+        input  Real[:] x_in;
+        output Real[size(x_in,1)] x_out;
+      external "C" fRealArray(x_in, x_out) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fRealArrayUnknown;
+
+      constant Real    xScalar        = fRealScalar(3);
+      constant Real[2] xArray         = fRealArray({4,5});
+      constant Real[2] xArrayUnknown  = fRealArrayUnknown({6,7});
+    end RealTest;
+    
+    model IntegerTest
+      function fIntegerScalar
+        input  Integer x_in;
+        output Integer x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fIntegerScalar;
+      
+      function fIntegerArray
+        input  Integer[2] x_in;
+        output Integer[size(x_in,1)] x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fIntegerArray;
+      
+      function fIntegerArrayUnknown
+        input  Integer[:] x_in;
+        output Integer[size(x_in,1)] x_out;
+      external "C" fIntegerArray(x_in, x_out) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fIntegerArrayUnknown;
+
+      constant Integer    xScalar        = fIntegerScalar(3);
+      constant Integer[2] xArray         = fIntegerArray({4,5});
+      constant Integer[2] xArrayUnknown  = fIntegerArrayUnknown({6,7});
+    end IntegerTest;
+    
+    model BooleanTest
+      function fBooleanScalar
+        input  Boolean x_in;
+        output Boolean x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fBooleanScalar;
+      
+      function fBooleanArray
+        input  Boolean[2] x_in;
+        output Boolean[size(x_in,1)] x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fBooleanArray;
+      
+      function fBooleanArrayUnknown
+        input  Boolean[:] x_in;
+        output Boolean[size(x_in,1)] x_out;
+      external "C" fBooleanArray(x_in, x_out) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fBooleanArrayUnknown;
+
+      constant Boolean    xScalar        = fBooleanScalar(true);
+      constant Boolean[2] xArray         = fBooleanArray({false,false});
+      constant Boolean[2] xArrayUnknown  = fBooleanArrayUnknown({false,true});
+    end BooleanTest;
+    
+    model StringTest
+      function fStringScalar
+        input  String x_in;
+        output String x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fStringScalar;
+      
+      function fStringArray
+        input  String[2] x_in;
+        output String[size(x_in,1)] x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fStringArray;
+      
+      function fStringArrayUnknown
+        input  String[:] x_in;
+        output String[size(x_in,1)] x_out;
+      external "C" fStringArray(x_in, x_out) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fStringArrayUnknown;
+
+      constant String    xScalar        = fStringScalar("abcde");
+      constant String[2] xArray         = fStringArray({"abc","def"});
+      constant String[2] xArrayUnknown  = fStringArrayUnknown({"abc","def"});
+    end StringTest;
+    
+    model EnumTest
+      type E = enumeration(E1,E2);
+      function fEnumScalar
+        input  E x_in;
+        output E x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fEnumScalar;
+      
+      function fEnumArray
+        input  E[2] x_in;
+        output E[size(x_in,1)] x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fEnumArray;
+    
+      function fEnumArrayUnknown
+        input  E[:] x_in;
+        output E[size(x_in,1)] x_out;
+      external "C" fEnumArray(x_in, x_out) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fEnumArrayUnknown;
+      
+      constant E    xScalar        = fEnumScalar(E.E1);
+      constant E[2] xArray         = fEnumArray({E.E2,E.E1});
+      constant E[2] xArrayUnknown  = fEnumArrayUnknown({E.E1,E.E2});
+    end EnumTest;
+  end C;
+  
+  package Fortran
+    model RealTest
+      function frealscalar
+        input  Real x_in;
+        output Real x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end frealscalar;
+      
+      function frealarray
+        input  Real[2] x_in;
+        output Real[size(x_in,1)] x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end frealarray;
+    
+      function frealarrayunknown
+        input  Real[:] x_in;
+        output Real[size(x_in,1)] x_out;
+      external "FORTRAN 77" frealarray(x_in, x_out) annotation(
+        Library="externalFunctionsFortran");
+      end frealarrayunknown;
+      
+      constant Real    xScalar        = frealscalar(3);
+      constant Real[2] xArray         = frealarray({4,5});
+      constant Real[2] xArrayUnknown  = frealarrayunknown({6,7});
+    end RealTest;
+    
+    model IntegerTest
+      function fintegerscalar
+        input  Integer x_in;
+        output Integer x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end fintegerscalar;
+      
+      function fintegerarray
+        input  Integer[2] x_in;
+        output Integer[size(x_in,1)] x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end fintegerarray;
+    
+      function fintegerarrayunknown
+        input  Integer[:] x_in;
+        output Integer[size(x_in,1)] x_out;
+      external "FORTRAN 77" fintegerarray(x_in, x_out) annotation(
+        Library="externalFunctionsFortran");
+      end fintegerarrayunknown;
+      
+      constant Integer    xScalar        = fintegerscalar(3);
+      constant Integer[2] xArray         = fintegerarray({4,5});
+      constant Integer[2] xArrayUnknown  = fintegerarrayunknown({6,7});
+    end IntegerTest;
+    
+    model BooleanTest
+      function fbooleanscalar
+        input  Boolean x_in;
+        output Boolean x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end fbooleanscalar;
+      
+      function fbooleanarray
+        input  Boolean[2] x_in;
+        output Boolean[size(x_in,1)] x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end fbooleanarray;
+    
+      function fbooleanarrayunknown
+        input  Boolean[:] x_in;
+        output Boolean[size(x_in,1)] x_out;
+      external "FORTRAN 77" fbooleanarray(x_in, x_out) annotation(
+        Library="externalFunctionsFortran");
+      end fbooleanarrayunknown;
+      
+      constant Boolean    xScalar        = fbooleanscalar(true);
+      constant Boolean[2] xArray         = fbooleanarray({false,false});
+      constant Boolean[2] xArrayUnknown  = fbooleanarrayunknown({false,true});
+    end BooleanTest;
+
+    model EnumTest
+      type E = enumeration(E1,E2);
+      function fenumscalar
+        input  E x_in;
+        output E x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end fenumscalar;
+      
+      function fenumarray
+        input  E[2] x_in;
+        output E[size(x_in,1)] x_out;
+      external "FORTRAN 77" annotation(
+        Library="externalFunctionsFortran");
+      end fenumarray;
+    
+      function fenumarrayunknown
+        input  E[:] x_in;
+        output E[size(x_in,1)] x_out;
+      external "FORTRAN 77" fenumarray(x_in, x_out) annotation(
+        Library="externalFunctionsFortran");
+      end fenumarrayunknown;
+      
+      constant E    xScalar        = fenumscalar(E.E1);
+      constant E[2] xArray         = fenumarray({E.E2,E.E1});
+      constant E[2] xArrayUnknown  = fenumarrayunknown({E.E1,E.E2});
+    end EnumTest;
+  end Fortran;
+end CEval;
+
 end ExtFunctionTests;
