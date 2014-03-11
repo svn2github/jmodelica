@@ -574,10 +574,13 @@ class TestUtilities:
         cpath = "ExtFunctionTests.CEval.Utility.LogTest"
         fmu_name = compile_fmu(cpath, self.fpath, compiler_log_level="w:tmp.log")
         logfile = open('tmp.log')
-        nose.tools.assert_equals(logfile.readline(), "ModelicaMessage: <msg:X is a bit high: 1.100000.>\n")
-        nose.tools.assert_equals(logfile.readline(), "ModelicaError: <msg:X is too high: 2.100000.>\n")
+        count = 0
+        for line in logfile:
+            if line == "ModelicaMessage: <msg:X is a bit high: 1.100000.>\n" or line == "ModelicaError: <msg:X is too high: 2.100000.>\n":
+                count = count + 1
         logfile.close()
         os.remove(logfile.name);
+        nose.tools.assert_equals(count, 2)
         
 def build_ext(target, mofile):
     """
