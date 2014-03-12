@@ -94,6 +94,7 @@ aspect XMLCodeGenerator {
 	public void FClass.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
 		String indentTwoSteps = p.indent(indentOneStep);
+		String indentThreeSteps = p.indent(indentTwoSteps);
 		// assume everything is a model for now
 		generateOpenTag(str, "class", indent, "kind", "model");
 		
@@ -161,11 +162,11 @@ aspect XMLCodeGenerator {
 		
 		// generate functions
 		for (FFunctionDecl function : getFFunctionDecls()) {
-			generateOpenTag(str, "classDefinition", indent, "name", function.name());
-			generateOpenTag(str, "class", indentOneStep, "kind", "function");
-			p.print(function, str, indentTwoSteps);
-			generateCloseTag(str, "class", indentOneStep);
-			generateCloseTag(str, "class", indent);
+			generateOpenTag(str, "classDefinition", indentOneStep, "name", function.name());
+			generateOpenTag(str, "class", indentTwoSteps, "kind", "function");
+			p.print(function, str, indentThreeSteps);
+			generateCloseTag(str, "class", indentTwoSteps);
+			generateCloseTag(str, "classDefinition", indentOneStep);
 		}
 		generateCloseTag(str, "class", indent);
 	}
@@ -280,7 +281,7 @@ aspect XMLCodeGenerator {
 		Map<String, String> attributes = new LinkedHashMap<String, String>();
 		attributes.put("name", name());
 		if (hasFTypePrefixInputOutput()) {
-			attributes.put("casuality", getFTypePrefixInputOutput().toString());
+			attributes.put("causality", getFTypePrefixInputOutput().toString());
 		}
 		generateOpenTag(str, "component", indent, attributes);
 		
@@ -297,7 +298,7 @@ aspect XMLCodeGenerator {
 			p.print(getBindingExp(), str, indentTwoSteps);
 			generateCloseTag(str, "bindingExp", indentOneStep);
 		}
-		generateClosedTag(str, "component", indent);
+		generateCloseTag(str, "component", indent);
 	}
 	
 	//=========================================================================
@@ -442,14 +443,16 @@ aspect XMLCodeGenerator {
 	}
 	
 	public void FFunctionCall.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
 		generateOpenTag(str, "call", indent);
-		generateOpenTag(str, "function", indent);
+		generateOpenTag(str, "function", indentOneStep);
 		if (getName().getFQName().isScalarized()) {
-			generateClosedTag(str, "local", p.indent(indent), "name", name());
+			generateClosedTag(str, "local", indentTwoSteps, "name", name());
 		} else {
-			p.print(getName().getFQName(), str, p.indent(indent));
+			p.print(getName().getFQName(), str, indentTwoSteps);
 		}
-		generateCloseTag(str, "function", indent);
+		generateCloseTag(str, "function", indentOneStep);
 		for (FExp arg : getArgs()) {
 			p.print(arg, str, p.indent(indent));
 		}
@@ -481,9 +484,9 @@ aspect XMLCodeGenerator {
 		generateCloseTag(str, "operator", indent);
 	}
 	
-	// builtin function time
+	// builtin variable time
 	public void FTimeExp.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		generateClosedTag(str, "operator", indent, "name", "time");
+		generateClosedTag(str, "builtin", indent, "name", "time");
 	}
 	
 	// builtin function reinit
@@ -579,20 +582,24 @@ aspect XMLCodeGenerator {
 	}
 	
 	public void FFunctionCallEquation.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		// function calls of the following type: (x, y, z) = func(a, b); is
-		// currently generated as an equal clause, not sure if that is correct
-		int numLeft = getNumLeft();
-		if (numLeft > 0) {
-			// generate left side of function call
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		if (getNumLeft() > 0) {
 			generateOpenTag(str, "equal", indent);
-			// should this be considered a function call?
-			for (FFunctionCallLeft left : getLefts()) {
-				p.print(left, str, p.indent(indent));
+			if (getNumLeft() > 1) {
+				generateOpenTag(str, "tuple", indentOneStep);
+				for (FFunctionCallLeft left : getLefts()) {
+					p.print(left, str, indentTwoSteps);
+				}
+				generateCloseTag(str, "tuple", indentOneStep);
+			} else {
+				for (FFunctionCallLeft left : getLefts()) {
+					p.print(left, str, indentOneStep);
+				}
 			}
 		}
-		// generate right side of function call
 		p.print(getCall(), str, p.indent(indent));
-		if (numLeft > 0) {
+		if (getNumLeft() > 0) {
 			generateCloseTag(str, "equal", indent);
 		}
 	}
@@ -698,11 +705,11 @@ aspect XMLCodeGenerator {
 	}
 	
 	public void FBreakStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		generateClosedTag(str, "break", p.indent(indent));
+		generateClosedTag(str, "break", indent);
 	}
 	
 	public void FReturnStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		generateClosedTag(str, "return", p.indent(indent));
+		generateClosedTag(str, "return", indent);
 	}
 	
 	public void FWhenStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
@@ -778,11 +785,17 @@ aspect XMLCodeGenerator {
 		String indentThreeSteps = p.indent(indentTwoSteps);
 		generateOpenTag(str, "assign", indent);
 		generateOpenTag(str, "to", indentOneStep);
-		generateOpenTag(str, "tuple", indentTwoSteps);
-		for (FFunctionCallLeft left : getLefts()) {
-			p.print(left, str, indentThreeSteps);
+		if (getNumLeft() > 1) {
+			generateOpenTag(str, "tuple", indentTwoSteps);
+			for (FFunctionCallLeft left : getLefts()) {
+				p.print(left, str, indentThreeSteps);
+			}
+			generateCloseTag(str, "tuple", indentTwoSteps);
+		} else {
+			for (FFunctionCallLeft left : getLefts()) {
+				p.print(left, str, indentTwoSteps);
+			}
 		}
-		generateCloseTag(str, "tuple", indentTwoSteps);
 		generateCloseTag(str, "to", indentOneStep);
 		generateOpenTag(str, "from", indentOneStep);
 		p.print(getCall(), str, indentTwoSteps);

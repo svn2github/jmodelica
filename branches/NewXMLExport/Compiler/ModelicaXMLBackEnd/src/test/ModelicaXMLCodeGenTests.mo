@@ -823,28 +823,39 @@ equation
             template="",
             generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-        <component name=\"theta\">
-            <builtin name=\"Real\"/>
-        </component>
-        <component name=\"omega\">
-            <builtin name=\"Real\"/>
-        </component>
-        <component name=\"L\" variability=\"parameter\">
-            <builtin name=\"Real\"/>
-            <bindingExpression>
-                <integer value=\"2\"/>
-            </bindingExpression>
-        </component>
-        <component name=\"g\" variability=\"constant\">
-            <builtin name=\"Real\"/>
-            <bindingExpression>
-                <real value=\"9.81\"/>
-            </bindingExpression>
-        </component>
-        <component name=\"u1\" causality=\"input\">
-            <local name=\"Modelica.SIunits.ElectricPotential\"/>
-        </component>
-    
+    <classDefinition name=\"Modelica.SIunits.ElectricPotential\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"quantity\">
+                <string value=\"ElectricPotential\"/>
+            </item>
+            <item name=\"unit\">
+                <string value=\"V\"/>
+            </item>
+        </modifier>
+    </classDefinition>
+    <component name=\"theta\">
+        <builtin name=\"Real\"/>
+    </component>
+    <component name=\"omega\">
+        <builtin name=\"Real\"/>
+    </component>
+    <component name=\"L\" variability=\"parameter\">
+        <builtin name=\"Real\"/>
+        <bindingExpression>
+            <integer value=\"2\"/>
+        </bindingExpression>
+    </component>
+    <component name=\"g\" variability=\"constant\">
+        <builtin name=\"Real\"/>
+        <bindingExpression>
+            <real value=\"9.81\"/>
+        </bindingExpression>
+    </component>
+    <component name=\"u1\" causality=\"input\">
+        <local name=\"Modelica.SIunits.ElectricPotential\"/>
+    </component>
+
     <equation kind=\"initial\">
         <equal>
             <local name=\"theta\"/>
@@ -855,7 +866,7 @@ equation
             <real value=\"0.0\"/>
         </equal>
     </equation>
-    
+
     <equation>
         <equal>
             <operator name=\"der\">
@@ -880,8 +891,355 @@ equation
             </call>
         </equal>
     </equation>
+
 </class>"
  )})));
 end TestDeclarations;
+
+model TestAlgorithms
+    Real x1;
+    Real x2;
+    Integer index;
+    algorithm
+        x1 := 2;
+        x2 := x1;
+        index := 0;
+        while index < 3 loop
+            if index < 0 then
+             break;
+            else
+             index := index-1;
+            end if;
+        end while;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ModelicaXMLCodeGenTestCase(
+            name="TestAlgorithms",
+            description="Test algorithm constructs",
+            template="",
+            generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<class kind=\"model\">
+    <component name=\"x1\">
+        <builtin name=\"Real\"/>
+    </component>
+    <component name=\"x2\">
+        <builtin name=\"Real\"/>
+    </component>
+    <component name=\"index\" variability=\"discrete\">
+        <builtin name=\"Integer\"/>
+    </component>
+    <component name=\"pre(index)\" variability=\"discrete\">
+        <builtin name=\"Integer\"/>
+    </component>
+    
+    <equation kind=\"initial\">
+        <equal>
+            <operator name=\"pre\">
+                <local name=\"index\"/>
+            </operator>
+            <integer value=\"0\"/>
+        </equal>
+    </equation>
+    
+    <equation>
+    </equation>
+
+    <algorithm>
+        <assign>
+            <to>
+                <local name=\"x1\"/>
+            </to>
+            <from>
+                <integer value=\"2\"/>
+            </from>
+        </assign>
+        <assign>
+            <to>
+                <local name=\"x2\"/>
+            </to>
+            <from>
+                <local name=\"x1\"/>
+            </from>
+        </assign>
+        <assign>
+            <to>
+                <local name=\"index\"/>
+            </to>
+            <from>
+                <integer value=\"0\"/>
+            </from>
+        </assign>       
+        <while>
+            <cond>
+                <call builtin=\"&lt;\">
+                    <local name=\"index\"/>
+                    <integer value=\"3\"/>
+                </call>
+            </cond>
+            <then>
+                <if>
+                    <cond>
+                        <call builtin=\"&lt;\">
+                            <local name=\"index\"/>
+                            <integer value=\"0\"/>
+                        </call>
+                    </cond>
+                    <then>
+                        <break/>
+                    </then>
+                    <else>
+                        <assign>
+                            <to>
+                                <local name=\"index\"/>
+                            </to>
+                            <from>
+                                <call builtin=\"-\">
+                                    <local name=\"index\"/>
+                                    <integer value=\"1\"/>
+                                </call>
+                            </from>
+                        </assign>
+                    </else>
+                </if>
+            </then>
+        </while>
+    </algorithm>
+</class>
+"
+ )})));
+end TestAlgorithms;
+
+model TestFunctions
+    Real a1(start=0.1, fixed=true);
+    Real a2(start=0.4, fixed=true);
+    Real b1(start=-1.0);
+    Real b2(start=1.0);
+    function f
+        input Real in1;
+        input Real in2;
+        output Real out1;
+        output Real out2;
+        Real internal;
+    algorithm
+        internal := out1;
+        out2 := out2-internal;
+        out1 := out1*2.0;
+    end f;
+    equation
+        der(a1) = -3.14*a1-0.1-b2;
+        der(a2) = -2.7*a2-0.3;
+        (b1, b2) = f(a1, a2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ModelicaXMLCodeGenTestCase(
+            name="TestFunctions",
+            description="Test code generation for functions",
+            template="",
+            generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<class kind=\"model\">
+    <component name=\"a1\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"start\">
+                <real value=\"0.1\"/>
+            </item>
+            <item name=\"fixed\">
+                <true/>
+            </item>
+        </modifier>
+    </component>
+    <component name=\"a2\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"start\">
+                <real value=\"0.4\"/>
+            </item>
+            <item name=\"fixed\">
+                <true/>
+            </item>
+        </modifier>
+    </component>
+    <component name=\"b1\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"start\">
+                <call builtin=\"-\">
+                    <real value=\"1.0\"/>
+                </call>
+            </item>
+        </modifier>
+    </component>
+    <component name=\"b2\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"start\">
+                <real value=\"1.0\"/>
+            </item>
+        </modifier>
+    </component>
+
+    <equation kind=\"initial\">
+        <equal>
+            <local name=\"a1\"/>
+            <real value=\"0.1\"/>
+        </equal>
+        <equal>
+            <local name=\"a2\"/>
+            <real value=\"0.4\"/>
+        </equal>
+    </equation>
+
+    <equation>
+        <equal>
+            <operator name=\"der\">
+                <local name=\"a1\"/>
+            </operator>
+            <call builtin=\"-\">
+                <call builtin=\"-\">
+                    <call builtin=\"*\">
+                        <real value=\"-3.14\"/>
+                        <local name=\"a1\"/>
+                    </call>
+                    <real value=\"0.1\"/>
+                </call>
+                <local name=\"b2\"/>
+            </call>
+        </equal>
+        <equal>
+            <operator name=\"der\">
+                <local name=\"a2\"/>
+            </operator>
+            <call builtin=\"-\">
+                <call builtin=\"*\">
+                    <real value=\"-2.7\"/>
+                    <local name=\"a2\"/>
+                </call>
+                <real value=\"0.3\"/>
+            </call>
+        </equal>
+        <equal>
+            <tuple>
+            <local name=\"b1\"/>
+            <local name=\"b2\"/>
+            </tuple>
+            <call>
+                <function>
+                    <local name=\"ModelicaXMLCodeGenTests.TestFunctions.f\"/>
+                </function>
+                    <local name=\"a1\"/>
+                    <local name=\"a2\"/>
+            </call>
+        </equal>
+    </equation>
+
+    <classDefinition name=\"ModelicaXMLCodeGenTests.TestFunctions.f\">
+        <class kind=\"function\">
+            <component name=\"in1\" causality=\"input\">
+                <builtin name=\"Real\"/>
+            </component>
+            <component name=\"in2\" causality=\"input\">
+                <builtin name=\"Real\"/>
+            </component>
+            <component name=\"out1\" causality=\"output\">
+                <builtin name=\"Real\"/>
+            </component>
+            <component name=\"out2\" causality=\"output\">
+                <builtin name=\"Real\"/>
+            </component>
+            <component name=\"internal\">
+                <builtin name=\"Real\"/>
+            </component>
+            <algorithm>
+                <assign>
+                    <to>
+                        <local name=\"internal\"/>
+                    </to>
+                    <from>
+                        <local name=\"out1\"/>
+                    </from>
+                </assign>
+                <assign>
+                    <to>
+                        <local name=\"out2\"/>
+                    </to>
+                    <from>
+                        <call builtin=\"-\">
+                            <local name=\"out2\"/>
+                            <local name=\"internal\"/>
+                        </call>
+                    </from>
+                </assign>
+                <assign>
+                    <to>
+                        <local name=\"out1\"/>
+                    </to>
+                    <from>
+                        <call builtin=\"*\">
+                            <local name=\"out1\"/>
+                            <real value=\"2.0\"/>
+                        </call>
+                    </from>
+                </assign>
+                <return/>
+            </algorithm>
+        </class>
+    </classDefinition>
+</class>"
+ )})));
+end TestFunctions;
+
+model TestTypeImport
+    Voltage v;
+    Area a;
+    
+equation
+    v = 2;
+    a = 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ModelicaXMLCodeGenTestCase(
+            name="TestTypeImport",
+            description="Test export of extended types such as Voltage",
+            template="",
+            generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<class kind=\"model\">
+    <classDefinition name=\"Modelica.SIunits.ElectricPotential\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"quantity\">
+                <string value=\"ElectricPotential\"/>
+            </item>
+            <item name=\"unit\">
+                <string value=\"V\"/>
+            </item>
+        </modifier>
+    </classDefinition>
+    <classDefinition name=\"Modelica.SIunits.Area\">
+        <builtin name=\"Real\"/>
+        <modifier>
+            <item name=\"quantity\">
+                <string value=\"Area\"/>
+            </item>
+            <item name=\"unit\">
+                <string value=\"m2\"/>
+            </item>
+        </modifier>
+    </classDefinition>
+    <component name=\"v\" variability=\"constant\">
+        <local name=\"Modelica.SIunits.ElectricPotential\"/>
+        <bindingExpression>
+            <integer value=\"2\"/>
+        </bindingExpression>
+    </component>
+    <component name=\"a\" variability=\"constant\">
+        <local name=\"Modelica.SIunits.Area\"/>
+        <bindingExpression>
+            <integer value=\"2\"/>
+        </bindingExpression>
+    </component>
+
+</class>"
+ )})));
+end TestTypeImport;
 
 end ModelicaXMLCodeGenTests;
