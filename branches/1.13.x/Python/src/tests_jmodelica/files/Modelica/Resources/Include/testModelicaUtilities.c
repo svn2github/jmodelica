@@ -64,12 +64,11 @@ void testModelicaAllocateStringWithErrorReturn()
     char* word = ModelicaAllocateStringWithErrorReturn(sizeof("Hello"));
 }
 
-double testModelicaMessages(double a)
+void testModelicaMessages()
 {
     testModelicaMessage();
     testModelicaFormatMessage();
     testModelicaVFormatMessage();
-    return a + 1;
 }
 
 void testModelicaErrorMessages()

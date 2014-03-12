@@ -2286,8 +2286,6 @@ aspect FlatFunctionUtils {
       * Only valid in flat tree.
       */
      inh FFunctionDecl FExp.containingFFunctionDecl();
-     inh FFunctionDecl FVariable.containingFFunctionDecl();
-     inh FFunctionDecl FExternalStmt.containingFFunctionDecl();
      eq FFunctionDecl.getChild().containingFFunctionDecl()  = this;
      eq InstNode.getChild().containingFFunctionDecl()       = null;
      eq Root.getChild().containingFFunctionDecl()           = null;

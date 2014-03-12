@@ -123,7 +123,6 @@ public class ModelicaCompiler {
 	public static final Level DEFAULT_LEVEL = Level.ERROR;
 	protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
 	
-    private CCompilerDelegator delegator = null;
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
 	
@@ -217,11 +216,9 @@ public class ModelicaCompiler {
 		dir.delete();
 	}
 	
-    public CCompilerDelegator getCCompiler() {
-        if (delegator == null)
-            delegator = CCompilerDelegator.delegatorFor(options);
-        return delegator;
-    }
+	public CCompilerDelegator getCCompiler() {
+	    return CCompilerDelegator.delegatorFor(options);
+	}
 	
 	public static String getJModelicaHome() {
 		return jmodelicaHome;
@@ -697,13 +694,6 @@ public class ModelicaCompiler {
 			if (outDir == null)
 				setRandomOutDir();
 			
-			
-            if (target.getMakeFileFlag() != null) {
-                // Might be used by constant evaluation
-                CCompilerDelegator ccompiler = getCCompiler();
-                ccompiler.setTargetPlatforms(targetPlatforms);
-            }
-			
 			// compile mo-file + generate code for all templates that are not null
 			FClass fc = compileModel(fileName, className, target);
 			
@@ -719,6 +709,7 @@ public class ModelicaCompiler {
 				ASTNode.beginStep("compileCCode()");
 				String cFileName = FClass.convertClassNameToUnderscore(className);
 				CCompilerDelegator ccompiler = getCCompiler();
+				ccompiler.setTargetPlatforms(targetPlatforms);
 				ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
 				ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
 				ASTNode.endStep("compileCCode()");
@@ -922,8 +913,6 @@ public class ModelicaCompiler {
 				dumpMemoryUseFile(fc, "generated", false);
 			}
 			
-            removeCompiledExternals();
-            
 		} finally {
 //          logCompilationInfo();
 			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
@@ -1175,7 +1164,7 @@ public class ModelicaCompiler {
 		
 		String instName = icl.qualifiedName();
 		File flatFile = new File(sourceDir, instName + ".mof");
-		final FClass fc = FClass.create(icl, flatFile.getPath(), this);
+		final FClass fc = FClass.create(icl, flatFile.getPath());
 		
 		ASTNode.beginStep("flatten()");
 		log.info("Flattening model...");
@@ -1277,10 +1266,6 @@ public class ModelicaCompiler {
 	protected CGenerator createCGenerator(FClass fc) {
 		return new CADGenerator(new PrettyPrinter(), '$', fc);
 	}
-	
-    protected ExternCEvalGenerator createCGenerator(FClass fc, FExternalStmt ext) {
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', fc, ext);
-    }
 	
 	/**
 	 * Generate an output file.
@@ -1661,122 +1646,6 @@ public class ModelicaCompiler {
 		
 		return platform;
 	}
-	
-    /**
-     * Sets <code>platform</code> arch to 32 bit if not in <code>targetPlatforms</code>
-     */
-    public static String reduceBits(String platform, String[] targetPlatforms) {
-        if (!Arrays.asList(targetPlatforms).contains(platform)) {
-            platform = platform.substring(0, platform.length() - 2) + "32";
-        }
-        return platform;
-    }
-    
-    
-    /**
-     * Maps external functions names to compiled executables.
-     * A null/nonexistent entry means it has not been compiled yet.
-     * An empty string means compilation was not succesful.
-     */
-    private Map<String, String> compiledExternals = new HashMap<String, String>();
-    
-    /**
-     * If there is no executable corresponding to <code>ext</code>, create one.
-     */
-    private String getCompiledExternal(FClass fc, FExternalStmt ext) {
-        String executable = compiledExternals.get(ext.getName());
-        if (executable == null) {
-            String source = ext.getName().replace(".", "_");
-            TargetObject target = createTargetObject("ceval", "0.1");
-            Set<String> libs = new HashSet<String>();
-            Set<String> libDirs = new HashSet<String>();
-            Set<String> incDirs = new HashSet<String>();
-            if (ext.library() != null)
-                libs.addAll(ext.library());
-            if (ext.libraryDirectory() != null)
-                libDirs.add(ext.libraryDirectory());
-            if (ext.includeDirectory() != null)
-                incDirs.add(ext.includeDirectory());
-            try {
-                generateFile(fc, target.getCTemplates(fc), createCGenerator(fc, ext), sourceDir, source + ".c");
-                executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs);
-                new File(sourceDir, source + ".c").delete();
-                log.debug("Compiled external function to executable for constant evaluation: " + ext.getName() + " '" + executable + "'");
-            } catch (FileNotFoundException e) {
-                executable = "";
-                log.debug("Could not generate code for constant evaluation of external function. Function: " + ext.getName());
-            } catch (CcodeCompilationException e) {
-                executable = "";
-                log.debug("Could not compile external function for constant evaluation. Function: " + ext.getName());
-            }
-            compiledExternals.put(ext.getName(), executable);
-        }
-        return executable;
-    }
-    
-    /**
-     * Remove executables compiled by the constant evaluation framework.
-     */
-    private void removeCompiledExternals() {
-        for (String key : compiledExternals.keySet()) {
-            String executable = compiledExternals.get(key);
-            if (executable.length() > 0) {
-                new File(executable).delete();
-            }
-        }
-        compiledExternals = new HashMap<String,String>();
-    }
-    
-    /**
-     * Make sure <code>ext</code> executable is not used.
-     */
-    public void invalidateExternal(FExternalStmt ext) {
-        String key = ext.getName();
-        String executable = compiledExternals.get(key);
-        if (executable != null && executable.length() > 0) {
-            new File(executable).delete();
-        }
-        compiledExternals.put(key, "");
-    }
-    
-    /**
-     * Start a process for constant evaluation of <code>ext</code>.
-     */
-    public Process createExternCEvalProc(FClass fc, FExternalStmt ext) {
-        Process proc = null;
-        String executable = getCompiledExternal(fc, ext);
-        if (executable.length() > 0) {
-            try {
-                ProcessBuilder pb = new ProcessBuilder(executable);
-                pb.redirectErrorStream(true);
-                if (ext.libraryDirectory() != null) {
-                    // Update environment in case of shared library
-                    String platform = reduceBits(getPlatform(), getCCompiler().getTargetPlatforms());
-                    File f = new File(ext.libraryDirectory(), platform);
-                    String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
-                    appendPath(pb, libLoc, platform);
-                }
-                proc = pb.start();
-            } catch (IOException e) {
-                log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
-            }
-        }
-        return proc;
-    }
-    
-    /**
-     * Append a library location <code>libLoc</code> to the path variable in environment of <code>pb</code>.
-     */
-    private void appendPath(ProcessBuilder pb, String libLoc, String platform) {
-        String sep = platform.startsWith("win") ? ";" : ":";
-        String var = platform.startsWith("win") ? "PATH" : "LD_LIBRARY_PATH";
-        String res = pb.environment().get(var);
-        if (res == null)
-            res = libLoc;
-        else
-            res = res + sep + libLoc;
-        pb.environment().put(var, res);
-    }
     
     /**
     * Target object, contains all information related to which target is compiled.
@@ -1795,8 +1664,7 @@ public class ModelicaCompiler {
         FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
         FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
         CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.FMI1, ErrorCheckType.CHECK),
-        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false),
-        CEVAL     (Templates.CEVAL,     "ceval",     null  , null);
+        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false);
 
         private final Templates templates;
         private final String makeFileFlag;
@@ -1863,8 +1731,6 @@ public class ModelicaCompiler {
                 return JMU;
             } else if (targetType.equals("fmux")) {
                 return FMUX;
-            } else if (targetType.equals("ceval")){
-                return CEVAL;
             } else {
                 throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU, jmu to compile an JMU or fmux to compile an FMUX."); 
             }
@@ -2064,7 +1930,6 @@ public class Templates {
     public static final Templates FMUCS10   = new Templates(null,                              "fmi1_cs_modelica_template.c");
     public static final Templates FMUCS20   = new Templates(null,                              "fmi2_master_modelica_template.c");
     public static final Templates FMUMECS20 = new Templates(null,                              "fmi2_master_modelica_template.c");
-    public static final Templates CEVAL     = new Templates(null,                              "ceval_external_template.c");
     public static final Templates JMU       = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
     public static final Templates FMUX      = new Templates("jmodelica_model_description.tpl");
     
@@ -2302,24 +2167,11 @@ public abstract class CCompilerDelegator {
     }
     
     /**
-     * Compile an executable for build platform.
-     */
-    public String compileCCodeLocal(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
-            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
-        String[] platform = {ModelicaCompiler.reduceBits(ModelicaCompiler.getPlatform(), getTargetPlatforms())};
-        compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, platform);
-        File dir = new File(workDir, "binaries");
-        File executable = new File(dir, fileName + (platform[0].startsWith("win") ? ".exe" : ""));
-        return executable.getAbsolutePath();
-    }
-	
-    /**
      * Compile DLL(s) from generated C code for a set of target platforms.
      */
     protected abstract void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
             Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, String[] platforms);
 
-	
 	
 	abstract protected String[] getDefaultTargetPlatforms();
 	
