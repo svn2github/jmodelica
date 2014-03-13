@@ -521,6 +521,13 @@ aspect FlatTypeCheck {
   eq InstNode.getChild().isInstComponentSize()                          = false;
   eq FlatRoot.getChild().isInstComponentSize()                          = false;
 	
+  syn boolean FArraySubscripts.isFullSize() {
+      for (FSubscript fs : getFSubscripts())
+          if (!fs.isColon())
+              return false;
+      return true;
+  }
+  
   
   public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
