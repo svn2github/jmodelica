@@ -75,19 +75,6 @@ class TestExternalStatic:
         nose.tools.assert_equals(res.final('myResult[2]'), 4)
         nose.tools.assert_equals(res.final('myResult[3]'), 6)
         
-    @testattr(stddist = True)
-    def test_IntegerArraysCeval(self):
-        """
-        Test a model with external functions containing integer array and literal inputs. Constant evaluation during compilation.
-        """
-        cpath = "ExtFunctionTests.ExtFunctionTest4"
-        fmu_name = compile_fmu(cpath, TestExternalStatic.fpath, compiler_options={'variability_propagation':True})
-        model = load_fmu(fmu_name)
-        
-        nose.tools.assert_equals(model.get('myResult[1]'), 2) 
-        nose.tools.assert_equals(model.get('myResult[2]'), 4)
-        nose.tools.assert_equals(model.get('myResult[3]'), 6)
-        
 class TestUtilities:
     @classmethod
     def setUpClass(cls):
@@ -109,7 +96,7 @@ class TestUtilities:
         """
         fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
         cpath = "ExtFunctionTests.ExtFunctionTest3"
-        jmu_name = compile_fmu(cpath, fpath)
+        jmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(jmu_name)
         #model.simulate()
 
@@ -183,17 +170,12 @@ class TestExternalBool:
         fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(fmu_name)
         model.simulate()
-        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
-        model2 = load_fmu(fmu_name)
-        model2.simulate()
         trueInd  = {1,2,3,5,8}
         falseInd = {4,6,7}
         for i in trueInd:
             assert(model.get('res[' + str(i) + ']'))
-            assert(model2.get('res[' + str(i) + ']'))
         for i in falseInd:
             assert(not model.get('res[' + str(i) + ']'))
-            assert(not model2.get('res[' + str(i) + ']'))
 
 class TestExternalShared2:
     
@@ -217,6 +199,7 @@ class TestExternalShared2:
     def test_ExtFuncShared(self):
         """ 
         Test compiling a model with external functions in a shared library. Real, Integer, and Boolean arrays.
+        Compare results between constant evaluation and simulation.
         """
         fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
         model = load_fmu(fmu_name)

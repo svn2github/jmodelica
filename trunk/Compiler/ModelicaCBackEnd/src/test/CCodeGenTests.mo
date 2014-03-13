@@ -11409,14 +11409,13 @@ void func_CCodeGenTests_ExternalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_
     }
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
     jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
     f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
     jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
     JMI_DYNAMIC_FREE()
     return;
 }
-
 ")})));
 end ExternalArrayFortran6;
 
@@ -12351,10 +12350,10 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(b_a, 0));
     tmp_1 = 1;
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
     tmp_3 = (int)lda_v;
-    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(ipiv_a, 0), jmi_array_size(ipiv_a, 0))
     jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_4->var);
     tmp_5 = (int)ldb_v;
     tmp_6 = (int)info_v;
@@ -12451,12 +12450,12 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
     }
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(B_a, 0));
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_1->var);
     tmp_2 = (int)lda_v;
-    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
+    JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(ipiv_a, 0), jmi_array_size(ipiv_a, 0))
     jmi_matrix_to_fortran_int(ipiv_a, ipiv_a->var, tmp_3->var);
-    JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, jmi_array_size(A_a, 0) * jmi_array_size(B_a, 1), jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
+    JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
     jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_4->var);
     tmp_5 = (int)ldb_v;
     tmp_6 = (int)info_v;
@@ -14077,27 +14076,21 @@ $ECE_main$
 			generatedCode="
 #include \"example.h\"
 
-/* Input declarations */
+/* Declarations */
+jmi_ad_var_t b_v;
 jmi_ad_var_t a_v;
 
-/* Output declarations */
-jmi_ad_var_t b_v;
-
-/* Temp declarations */
-
 printf(\"START\\n\"); fflush(stdout);
-/* Parse inputs */
+/* Parse */
+parse(Real, b_v);
 parse(Real, a_v);
-
-
-/* Initialize outputs */
 
 /* Call the function */
 printf(\"CALC\\n\"); fflush(stdout);
 b_v = f(a_v);
 printf(\"DONE\\n\"); fflush(stdout);
 
-/* Print outputs */
+/* Print */
 print(Real, b_v);
 
 
@@ -14128,40 +14121,34 @@ $ECE_record_definitions$
 $ECE_main$
 ",
 			generatedCode="
-/* Input declarations */
+/* Declarations */
 JMI_ARRAY_DYNAMIC(a_a, 2)
-
-/* Output declarations */
 JMI_ARRAY_DYNAMIC(b_a, 2)
-
-/* Temp declarations */
 JMI_ARRAY_DYNAMIC(tmp_1, 2)
 JMI_ARRAY_DYNAMIC(tmp_2, 2)
 extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
 
 printf(\"START\\n\"); fflush(stdout);
-/* Parse inputs */
+/* Parse */
 parseArrayDims(2);
 JMI_ARRAY_DYNAMIC_INIT_2(a_a, d[0]*d[1], d[0], d[1]);
 parseArray(Real, a_a);
-
-
-/* Initialize outputs */
-JMI_ARRAY_DYNAMIC_INIT_2(b_a, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+parseArrayDims(2);
+JMI_ARRAY_DYNAMIC_INIT_2(b_a, d[0]*d[1], d[0], d[1]);
+parseArray(Real, b_a);
 
 /* Call the function */
 printf(\"CALC\\n\"); fflush(stdout);
 JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
 jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
-JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
 jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
 f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
 jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
 printf(\"DONE\\n\"); fflush(stdout);
 
-/* Print outputs */
+/* Print */
 printArray(Real, b_a);
-
 
 /* Free strings */
 
@@ -14313,25 +14300,21 @@ typedef struct _R_0_r {
 } R_0_r;
 JMI_RECORD_ARRAY_TYPE(R_0_r, R_0_ra)
 
-/* Input declarations */
+
+/* Declarations */
+jmi_ad_var_t i_v;
 char* s_v;
 jmi_ad_var_t b_v;
-
-/* Output declarations */
 JMI_RECORD_STATIC(R_0_r, r_v)
-jmi_ad_var_t i_v;
-
-/* Temp declarations */
 jmi_int_t tmp_1;
 
 printf(\"START\\n\"); fflush(stdout);
-/* Parse inputs */
+/* Parse */
+parse(Integer, i_v);
 parse(String, s_v);
-
 parse(Boolean, b_v);
-
-
-/* Initialize outputs */
+parse(String, r_v.s);
+parse(Boolean, r_v.b);
 
 /* Call the function */
 printf(\"CALC\\n\"); fflush(stdout);
@@ -14339,11 +14322,10 @@ tmp_1 = (int)b_v;
 i_v = realFunc(s_v, tmp_1, &r_v);
 printf(\"DONE\\n\"); fflush(stdout);
 
-/* Print outputs */
+/* Print */
+print(Integer, i_v);
 print(String, r_v.s);
 print(Boolean, r_v.b);
-
-print(Integer, i_v);
 
 /* Free strings */
 free(s_v);
@@ -14352,5 +14334,147 @@ free(r_v.s);
 printf(\"END\\n\"); fflush(stdout);
 ")})));
 end ExternalCeval4;
+
+model ExternalCeval5
+	
+    function dgelsx
+      "Computes the minimum-norm solution to a real linear least squares problem with rank deficient A"
+
+      extends Modelica.Icons.Function;
+      input Real A[:, :];
+      input Real B[size(A, 1), :];
+      input Real rcond=0.0 "Reciprocal condition number to estimate rank";
+      output Real X[max(size(A, 1), size(A, 2)), size(B, 2)]=cat(
+                1,
+                B,
+                zeros(max(nrow, ncol) - nrow, nrhs))
+        "Solution is in first size(A,2) rows";
+      output Integer info;
+      output Integer rank "Effective rank of A";
+    protected
+      Integer nrow=size(A, 1);
+      Integer ncol=size(A, 2);
+      Integer nx=max(nrow, ncol);
+      Integer nrhs=size(B, 2);
+      Integer lwork=max(min(nrow, ncol) + 3*ncol, 2*min(nrow, ncol) + nrhs);
+      Real work[max(min(size(A, 1), size(A, 2)) + 3*size(A, 2), 2*min(size(A, 1),
+        size(A, 2)) + size(B, 2))];
+      Real Awork[size(A, 1), size(A, 2)]=A;
+      Integer jpvt[size(A, 2)]=zeros(ncol);
+    external"FORTRAN 77" dgelsx(
+              nrow,
+              ncol,
+              nrhs,
+              Awork,
+              nrow,
+              X,
+              nx,
+              jpvt,
+              rcond,
+              rank,
+              work,
+              lwork,
+              info);
+    end dgelsx;
+    
+    Real[2,1] out;
+    Real a;
+    Real b;
+  equation
+    (out,a,b) = dgelsx({{1},{2}},{{1},{2}},1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ExternalCeval5",
+			description="Test code gen ceval of external functions.",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+			generatedCode="
+/* Declarations */
+jmi_ad_var_t nrow_v;
+jmi_ad_var_t ncol_v;
+jmi_ad_var_t nrhs_v;
+JMI_ARRAY_DYNAMIC(Awork_a, 2)
+JMI_ARRAY_DYNAMIC(X_a, 2)
+jmi_ad_var_t nx_v;
+JMI_ARRAY_DYNAMIC(jpvt_a, 1)
+jmi_ad_var_t rcond_v;
+jmi_ad_var_t rank_v;
+JMI_ARRAY_DYNAMIC(work_a, 1)
+jmi_ad_var_t lwork_v;
+jmi_ad_var_t info_v;
+jmi_int_t tmp_1;
+jmi_int_t tmp_2;
+jmi_int_t tmp_3;
+JMI_ARRAY_DYNAMIC(tmp_4, 2)
+jmi_int_t tmp_5;
+JMI_ARRAY_DYNAMIC(tmp_6, 2)
+jmi_int_t tmp_7;
+JMI_INT_ARRAY_DYNAMIC(tmp_8, 1)
+jmi_int_t tmp_9;
+jmi_int_t tmp_10;
+jmi_int_t tmp_11;
+extern void dgelsx_(jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+
+printf(\"START\\n\"); fflush(stdout);
+/* Parse */
+parse(Integer, nrow_v);
+parse(Integer, ncol_v);
+parse(Integer, nrhs_v);
+parseArrayDims(2);
+JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, d[0]*d[1], d[0], d[1]);
+parseArray(Real, Awork_a);
+parseArrayDims(2);
+JMI_ARRAY_DYNAMIC_INIT_2(X_a, d[0]*d[1], d[0], d[1]);
+parseArray(Real, X_a);
+parse(Integer, nx_v);
+parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(jpvt_a, d[0], d[0]);
+parseArray(Integer, jpvt_a);
+parse(Real, rcond_v);
+parse(Integer, rank_v);
+parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(work_a, d[0], d[0]);
+parseArray(Real, work_a);
+parse(Integer, lwork_v);
+parse(Integer, info_v);
+
+/* Call the function */
+printf(\"CALC\\n\"); fflush(stdout);
+tmp_1 = (int)nrow_v;
+tmp_2 = (int)ncol_v;
+tmp_3 = (int)nrhs_v;
+JMI_ARRAY_DYNAMIC_INIT_2(tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
+tmp_5 = (int)nrow_v;
+JMI_ARRAY_DYNAMIC_INIT_2(tmp_6, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
+jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_6->var);
+tmp_7 = (int)nx_v;
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_8, jmi_array_size(jpvt_a, 0), jmi_array_size(jpvt_a, 0))
+jmi_matrix_to_fortran_int(jpvt_a, jpvt_a->var, tmp_8->var);
+tmp_9 = (int)rank_v;
+tmp_10 = (int)lwork_v;
+tmp_11 = (int)info_v;
+dgelsx_(&tmp_1, &tmp_2, &tmp_3, tmp_4->var, &tmp_5, tmp_6->var, &tmp_7, tmp_8->var, &rcond_v, &tmp_9, work_a->var, &tmp_10, &tmp_11);
+jmi_matrix_from_fortran_real(X_a, tmp_6->var, X_a->var);
+rank_v = tmp_9;
+info_v = tmp_11;
+printf(\"DONE\\n\"); fflush(stdout);
+
+/* Print */
+printArray(Real, X_a);
+print(Integer, rank_v);
+print(Integer, info_v);
+
+/* Free strings */
+
+printf(\"END\\n\"); fflush(stdout);
+")})));
+end ExternalCeval5;
 
 end CCodeGenTests;

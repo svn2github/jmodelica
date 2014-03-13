@@ -2061,6 +2061,7 @@ aspect ConstantEvaluation {
         // Added for codegeneration when evaluating external functions
         public FType   type();
         public String  name_C();
+        public boolean isInput();
         public boolean isOutput();
   }
   
@@ -3338,7 +3339,7 @@ aspect ExternalCEval {
     syn boolean FExternalStmt.canEvaluate() {
         if (root().options.getIntegerOption("external_constant_evaluation") == 0)
             return false;
-        for (CommonVariableDecl cvd : myCommonVarDecls()) {
+        for (CommonVariableDecl cvd : varsToSerialize()) {
             if (cvd.type().isExternalObject() || cvd.type().isRecord()) {
                 return false;
             }
@@ -3391,16 +3392,17 @@ aspect ExternalCEval {
         ProcessCommunicator com = new ProcessCommunicator(proc, timeout);
         try {
             com.accept("START");
-            for (CommonVariableDecl cvd : myInputs())
-                com.put(values.get(cvd));
+            for (CommonVariableDecl cvd : varsToSerialize())
+                com.put(values.get(cvd), cvd.type(), !cvd.isInput());
             com.accept("CALC");
             com.log();
             com.accept("DONE");
-            for (CommonVariableDecl cvd : myOutputs())
+            for (CommonVariableDecl cvd : varsToDeserialize())
                 values.put(cvd, com.get(cvd.type()));
             com.accept("END");
             res = com.end();
         } catch (IOException e) {
+//            ModelicaCompiler.log.debug(e);
             res = -2;
         }
         com.destroy();
@@ -3460,9 +3462,9 @@ aspect ExternalCEval {
         /**
          * Print <code>val</code>, serialized, to the process 
          */
-        public void put(CValue val) throws IOException {
-//            ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString());
-            val.serialize(out);
+        public void put(CValue val, FType type, boolean allowUninitialized) throws IOException {
+//            ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString() + " of type: "+type.toString());
+            val.serialize(out, type, allowUninitialized);
             out.flush();
         }
         
@@ -3568,15 +3570,21 @@ aspect ExternalCEval {
     /**
      * Print this constant value to <code>buff</code>
      */
-    public void CValue.serialize(BufferedWriter buff) throws IOException {
+    public void CValue.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         throw new IOException();
     }
-    public void CValueArray.serialize(BufferedWriter buff) throws IOException {
+    public void CValueUnknown.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        if (allowUninitialized)
+            type.uninitialized().serialize(buff, type, false);
+        else
+            super.serialize(buff, type, allowUninitialized);
+    }
+    public void CValueArray.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         for (int s : size().size) {
             buff.write("" + s + "\n");
         }
         for (Index i : indices()) {
-            getCell(i).serialize(buff);
+            getCell(i).serialize(buff, type.scalarType(), allowUninitialized);
         }
     }
 //    public void CValueRecord.serialize(BufferedWriter buff) throws IOException {
@@ -3584,28 +3592,30 @@ aspect ExternalCEval {
 //            v.serialize(buff);
 //        }
 //    }
-    public void CValueReal.serialize(BufferedWriter buff) throws IOException {
+    public void CValueReal.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         buff.write(Double.toString(realValue()));
         buff.write("\n");
     }
-    public void CValueInteger.serialize(BufferedWriter buff) throws IOException {
+    public void CValueInteger.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         buff.write(Integer.toString(intValue()));
         buff.write("\n");
     }
-    public void CValueBoolean.serialize(BufferedWriter buff) throws IOException {
+    public void CValueBoolean.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         buff.write(booleanValue() ? "1\n" : "0\n");
     }
-    public void CValueString.serialize(BufferedWriter buff) throws IOException {
+    public void CValueString.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         String s = stringValue();
         buff.write("" + s.length() + " ");
         buff.write(s);
         buff.write("\n");
     }
-    public void CValueEnum.serialize(BufferedWriter buff) throws IOException {
+    public void CValueEnum.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         buff.write(Integer.toString(intValue()));
         buff.write("\n");
     }
     
+    public CValue FType.uninitialized() { return zeroCValue(); }
+    public CValue FEnumType.uninitialized() { return (new FIntegerType(size())).zeroCValue(); }
     
     
     /**

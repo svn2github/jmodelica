@@ -693,13 +693,30 @@ aspect CCodeGen {
 		printInit_C(p, str, indent, name, src, arrayMacroType_C());
 	}
 	
-	public void FType.printExternInit_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
-	    if (isArray() && size().isUnknown())
-	        printInit_C(p, str, indent, name, src, arrayExternMacroType_C());
-	    else
+	public void FType.printExternInit_C(CodePrinter p, CodeStream str, String indent, String name, FIdUseExp src) {
+        if (isArray() && size().isUnknown()) {
+            boolean unknown = size().isUnknown();
+            String srcName = src.prettyPrint_C("");
+            str.format("%s%s_%s_INIT_%d(%s%s, ", indent, arrayExternMacroType_C(), 
+                    (unknown ? "DYNAMIC" : "STATIC"), ndims(), arrayInitExtraArgs_C(), name);
+            if (unknown) {
+                printSizeFunc_C(str, srcName, " * ");
+                str.print(", ");
+            }
+            printSizeFunc_C(str, srcName, ", ");
+            str.print(")\n");
+	    } else {
 	        printInit_C(p, str, indent, name, src);
+	    }
 	    
 	}
+	
+    public void FType.printSizeFunc_C(CodeStream str, String name, String sep) {
+        str.format("jmi_array_size(%s, 0)", name);
+        for (int i = 1; i < ndims(); i++)
+            str.format("%sjmi_array_size(%s, %d)", sep, name, i);
+    }
+
 	
 	public void FType.printInit_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, String macroType_C) {
 		if (isArray()) {
@@ -3250,45 +3267,26 @@ aspect CCodeGen {
 
 aspect Serialize {
     public void FExternalStmt.genSerializeMain_C(CodeStream str, String indent) {
-        ArrayList<CommonVariableDecl> inputs  = myInputs();
-        ArrayList<CommonVariableDecl> outputs = myOutputs();
+        ArrayList<CommonVariableDecl> vars  = varsToSerialize();
         
-        
-        for (CommonVariableDecl cvd : inputs)
-            cvd.type().setParent(this);
-        for (CommonVariableDecl cvd : outputs)
+        for (CommonVariableDecl cvd : vars)
             cvd.type().setParent(this);
             
             
-        str.println();
         
-        str.println("/* Input declarations */");
-        for (CommonVariableDecl cvd : inputs)
+        str.println("/* Declarations */");
+        for (CommonVariableDecl cvd : vars)
             cvd.type().printDecl_C(ASTNode.printer_C, str, indent, cvd.name_C(), null, false);
-        str.println();
-        
-        str.println("/* Output declarations */");
-        for (CommonVariableDecl cvd : outputs)
-            cvd.type().printDecl_C(ASTNode.printer_C, str, indent, cvd.name_C(), null, false);
-        str.println();
-        
-        str.println("/* Temp declarations */");
         genVarDecls_C(ASTNode.printer_C, str, indent);
         str.println();
         
         str.println("printf(\"START\\n\"); fflush(stdout);");
         
-        str.println("/* Parse inputs */");
-        for (CommonVariableDecl cvd : inputs) {
+        str.println("/* Parse */");
+        for (CommonVariableDecl cvd : vars) {
             cvd.type().genSerializeInitIn_C(str, indent, cvd.name_C());
             cvd.type().genSerialize_C(str, indent, cvd.name_C(), true);
-            str.println();
         }
-        str.println();
-        
-        str.println("/* Initialize outputs */");
-        for (CommonVariableDecl cvd : outputs)
-            cvd.type().genSerializeInitOut_C(str, indent, cvd.name_C());
         str.println();
         
         str.println("/* Call the function */");
@@ -3297,17 +3295,13 @@ aspect Serialize {
         str.println("printf(\"DONE\\n\"); fflush(stdout);");
         str.println();
         
-        str.println("/* Print outputs */");
-        for (CommonVariableDecl cvd : outputs) {
+        str.println("/* Print */");
+        for (CommonVariableDecl cvd : varsToDeserialize())
             cvd.type().genSerialize_C(str, indent, cvd.name_C(), false);
-            str.println();
-        }
         str.println();
         
         str.println("/* Free strings */");
-        for (CommonVariableDecl cvd : inputs)
-            cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
-        for (CommonVariableDecl cvd : outputs)
+        for (CommonVariableDecl cvd : vars)
             cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
         str.println();
         
@@ -3331,24 +3325,6 @@ aspect Serialize {
             }
             for (int i = 0; i < ndims(); i++)
                 str.print(", d["+i+"]");
-            str.println(");");
-        }
-    }
-    
-    /**
-     * Generate code that initializes the variable <code>name</code> of type 
-     * <code>this</code>.
-     */
-    public void FType.genSerializeInitOut_C(CodeStream str, String indent, String name) {
-        if (isArray()) {
-            boolean unknown = size().isUnknown();
-            str.format("%s%s_%s_INIT_%d(%s%s, ", indent, arrayMacroType_C(), 
-                    (unknown ? "DYNAMIC" : "STATIC"), ndims(), arrayInitExtraArgs_C(), name);
-            if (unknown) {
-                size().printNumElements_C(ASTNode.printer_C, str, indent, this);
-                str.print(", ");
-            }
-            size().printDimensions_C(ASTNode.printer_C, str, indent, this);
             str.println(");");
         }
     }
@@ -3409,6 +3385,41 @@ aspect Serialize {
         }
     }
     
+    
+    syn ArrayList<CommonVariableDecl> FExternalStmt.varsToSerialize() {
+        if (!hasArg() && !hasReturnVar())
+            return myCommonVarDecls();
+        
+        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>();
+        if (hasReturnVar())
+            res.add(getReturnVar().myCommonVarDecl());
+        for (FExp e : getArgs()) {
+            e.varsToSerialize(res);
+        }
+        return res;
+    }
+    
+    syn ArrayList<CommonVariableDecl> FExternalStmt.varsToDeserialize() {
+        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>();
+        for (CommonVariableDecl cvd : varsToSerialize())
+            if (cvd.isOutput())
+                res.add(cvd);
+        return res;
+    }
+    
+    public void FExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
+        
+    }
+    
+    public void FIdUseExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
+        CommonVariableDecl cvd = myCommonVarDecl();
+        if (!decls.contains(cvd))
+            decls.add(cvd);
+    }
+    
+    public void FSizeExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
+        getFExp().varsToSerialize(decls);
+    }
     
     /**
      * CommonVariableDecls from enclosing function
@@ -3473,5 +3484,13 @@ aspect Serialize {
         buf.append('_');
         buf.append(type().isArray() ? C_SUFFIX_ARRAY : C_SUFFIX_VARIABLE);
         return buf.toString();
+    }
+    
+    public void FInstAccessExp.prettyPrintSize_C(CodePrinter p, CodeStream str, String indent, int dim) {
+        str.print("jmi_array_size(");
+        p.print(getInstAccess(), str, indent);
+        str.print(", ");
+        str.print(dim);
+        str.print(")");
     }
 }
