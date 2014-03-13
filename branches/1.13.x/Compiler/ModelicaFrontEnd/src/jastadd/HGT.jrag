@@ -275,14 +275,15 @@ aspect HGT {
                 for (SimpleEquationBlock seb : solvedBlocks)
                     eb.addSolvedBlock(seb);
                 return;
-            } else if (!useTearing) {
-                throw new BLTException("Hand guided tearing selections in block " + blockNumber + " does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
             }
             block = new ArrayList<Eq>();
             block.addAll(newGraph.getEquations());
             ASTNode.log.info("Additional tearing is needed, continuing with automatic tearing.");
         }
-        tear(block, eb);
+        if (!useTearing)
+            throw new BLTException("Hand guided tearing selections in block " + blockNumber + " does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
+        else
+            tear(block, eb);
     }
     
 }

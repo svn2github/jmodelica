@@ -1175,6 +1175,7 @@ aspect Flattening {
 		if (!root().options.getBooleanOption("hand_guided_tearing"))
 			return;
 		getInstComponentDecls().createAndFlattenResidualPairs(fc);
+		getInstExtendsList().createAndFlattenResidualPairs(fc);
 		FQName prefix = getFQName();
 		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
 			if (!pair.name().equals("Pair"))

@@ -3402,6 +3402,67 @@ Jacobian:
 ")})));
         end Extends1;
         
+        model Extends2
+            model A
+                Real x;
+                Real y;
+            equation
+                x = y + 1 annotation(__Modelon(name=eq));
+            end A;
+            
+            model B
+                Real x;
+                Real y;
+            equation
+                x = y + 2;
+            end B;
+            
+            model C
+            
+                A a;
+                B b;
+            equation
+                a.x = b.y + 2;
+                a.y = b.x - 3;
+            annotation(__Modelon(tearingPairs={
+                Pair(residualEquation=a.eq, iterationVariable=b.x)
+            }));
+            end C;
+            extends C;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="SystemPairs_Extends2",
+                description="Test of hand guided tearing with pairs defined on system level in an extended class.",
+                automatic_tearing=false,
+                hand_guided_tearing=true,
+                methodName="printDAEBLT",
+                methodResult="
+-------------------------------
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  b.y
+  a.y
+  a.x
+Iteration variables:
+  b.x
+Solved equations:
+  b.x = b.y + 2
+  a.y = b.x - 3
+  a.x = b.y + 2
+Residual equations:
+ Iteration variables: b.x
+  a.x = a.y + 1
+Jacobian:
+  |- 1.0, 0.0, 0.0, 1.0|
+  |0.0, 1.0, 0.0, - 1.0|
+  |- 1.0, 0.0, 1.0, 0.0|
+  |0.0, - 1.0, 1.0, 0.0|
+-------------------------------
+")})));
+        end Extends2;
+        
         model Error1
             Real x;
             Real y;
