@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="AtomicModelFunctionCallEquation.f">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<integer value="1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+	</component>
+	<component name="x3">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<local name="x1"/>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x2"/>
+				<local name="x3"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelFunctionCallEquation.f"/>
+				</function>
+				<local name="x1"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

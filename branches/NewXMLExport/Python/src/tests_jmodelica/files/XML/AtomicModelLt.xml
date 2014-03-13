@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1" variability="discrete">
+		<builtin name="Boolean"/>
+		<modifier>
+			<item name="start">
+				<true/>
+			</item>
+		</modifier>
+	</component>
+	<component name="u" causality="input">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="10"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="pre(x1)" variability="discrete">
+		<builtin name="Boolean"/>
+		<modifier>
+			<item name="start">
+				<true/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<operator name="pre">
+				<local name="x1"/>
+			</operator>
+			<true/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call builtin="&lt;">
+				<local name="u"/>
+				<integer value="2"/>
+			</call>
+		</equal>
+	</equation>
+</class>

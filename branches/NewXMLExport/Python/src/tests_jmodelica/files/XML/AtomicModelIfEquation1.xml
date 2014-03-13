@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="u">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x"/>
+			<integer value="1"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<local name="u"/>
+			<if>
+				<cond>
+					<call builtin="&lt;=">
+						<operator name="time"/>
+						<real value="1.5707963267948966"/>
+					</call>
+				</cond>
+				<then>
+					<call builtin="sin">
+						<operator name="time"/>
+					</call>
+				</then>
+				<else>
+					<if>
+						<cond>
+							<call builtin="&lt;=">
+								<operator name="time"/>
+								<real value="3.141592653589793"/>
+							</call>
+						</cond>
+						<then>
+							<integer value="1"/>
+						</then>
+						<else>
+							<call builtin="sin">
+								<call builtin="-">
+									<operator name="time"/>
+									<real value="1.5707963267948966"/>
+								</call>
+							</call>
+						</else>
+					</if>
+				</else>
+			</if>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x"/>
+			</operator>
+			<local name="u"/>
+		</equal>
+	</equation>
+</class>

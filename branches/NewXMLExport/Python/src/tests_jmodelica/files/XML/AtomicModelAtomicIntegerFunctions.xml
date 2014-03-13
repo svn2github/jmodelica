@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.monoInMonoOut">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.polyInMonoOut">
+		<class kind="function">
+			<component name="x1" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="x2" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="x1"/>
+							<local name="x2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.monoInPolyOut">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<if>
+							<cond>
+								<call builtin="&gt;">
+									<local name="x"/>
+									<integer value="2"/>
+								</call>
+							</cond>
+							<then>
+								<integer value="1"/>
+							</then>
+							<else>
+								<integer value="5"/>
+							</else>
+						</if>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.polyInPolyOut">
+		<class kind="function">
+			<component name="x1" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="x2" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<local name="x1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<local name="x2"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<integer value="2"/>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.functionCallInFunction">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="AtomicModelAtomicIntegerFunctions.monoInMonoOut"/>
+							</function>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="internal">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<tuple>
+							<local name="y"/>
+							<local name="internal"/>
+						</tuple>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="AtomicModelAtomicIntegerFunctions.monoInPolyOut"/>
+							</function>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="internal">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="internal"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<integer value="3"/>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="x"/>
+							<local name="internal"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="internal"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<integer value="1"/>
+							<local name="y"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="x"/>
+							<local name="internal"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal">
+		<class kind="function">
+			<component name="x1" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="x2" causality="input">
+				<builtin name="Integer"/>
+			</component>
+			<component name="internal1">
+				<builtin name="Integer"/>
+			</component>
+			<component name="internal2">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Integer"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="internal1"/>
+					</to>
+					<from>
+						<local name="x1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="internal2"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="x2"/>
+							<local name="internal1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<local name="internal1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="internal2"/>
+							<local name="x1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<integer value="1"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="u1" variability="discrete" causality="input">
+		<builtin name="Integer"/>
+	</component>
+	<component name="u2" variability="discrete" causality="input">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x1" variability="discrete">
+		<builtin name="Integer"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x2" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x3" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x4" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x5" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x6" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x7" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x8" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x9" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x10" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x11" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x12" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x1)" variability="discrete">
+		<builtin name="Integer"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="pre(x2)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x3)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x4)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x5)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x6)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x7)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x8)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x9)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x10)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x11)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x12)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<operator name="pre">
+				<local name="x1"/>
+			</operator>
+			<integer value="2"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x2"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x3"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x4"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x5"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x6"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x7"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x8"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x9"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x10"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x11"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x12"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.monoInMonoOut"/>
+				</function>
+				<local name="u1"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.polyInMonoOut"/>
+				</function>
+				<local name="u1"/>
+				<local name="u2"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x3"/>
+				<local name="x4"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.monoInPolyOut"/>
+				</function>
+				<local name="u2"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x5"/>
+				<local name="x6"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.polyInPolyOut"/>
+				</function>
+				<local name="u1"/>
+				<local name="u2"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x7"/>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn"/>
+				</function>
+				<local name="u1"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x8"/>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.functionCallInFunction"/>
+				</function>
+				<local name="u2"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x9"/>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction"/>
+				</function>
+				<local name="u1"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x10"/>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal"/>
+				</function>
+				<local name="u2"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x11"/>
+				<local name="x12"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal"/>
+				</function>
+				<local name="u1"/>
+				<local name="u2"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

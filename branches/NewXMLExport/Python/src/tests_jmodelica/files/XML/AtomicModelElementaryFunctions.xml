@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+	</component>
+	<component name="x3">
+		<builtin name="Real"/>
+	</component>
+	<component name="x4">
+		<builtin name="Real"/>
+	</component>
+	<component name="x5">
+		<builtin name="Real"/>
+	</component>
+	<component name="x6">
+		<builtin name="Real"/>
+	</component>
+	<component name="x7">
+		<builtin name="Real"/>
+	</component>
+	<component name="x8">
+		<builtin name="Real"/>
+	</component>
+	<component name="x9">
+		<builtin name="Real"/>
+	</component>
+	<component name="x10">
+		<builtin name="Real"/>
+	</component>
+	<component name="x11">
+		<builtin name="Real"/>
+	</component>
+	<component name="x12">
+		<builtin name="Real"/>
+	</component>
+	<component name="x13">
+		<builtin name="Real"/>
+	</component>
+	<component name="x14">
+		<builtin name="Real"/>
+	</component>
+	<component name="x15">
+		<builtin name="Real"/>
+	</component>
+	<component name="x16">
+		<builtin name="Real"/>
+	</component>
+	<component name="x17">
+		<builtin name="Real"/>
+	</component>
+	<component name="x18">
+		<builtin name="Real"/>
+	</component>
+	<component name="x19">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x3"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x4"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x5"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x6"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x7"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x8"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x9"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x10"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x11"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x12"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x13"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x14"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x15"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x16"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x17"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x18"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x19"/>
+			<real value="0.0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="^">
+				<local name="x1"/>
+				<integer value="5"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x2"/>
+			</operator>
+			<call builtin="abs">
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x3"/>
+			</operator>
+			<call builtin="min">
+				<local name="x3"/>
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x4"/>
+			</operator>
+			<call builtin="max">
+				<local name="x4"/>
+				<local name="x3"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x5"/>
+			</operator>
+			<call builtin="sqrt">
+				<local name="x5"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x6"/>
+			</operator>
+			<call builtin="sin">
+				<local name="x6"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x7"/>
+			</operator>
+			<call builtin="cos">
+				<local name="x7"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x8"/>
+			</operator>
+			<call builtin="tan">
+				<local name="x8"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x9"/>
+			</operator>
+			<call builtin="asin">
+				<local name="x9"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x10"/>
+			</operator>
+			<call builtin="acos">
+				<local name="x10"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x11"/>
+			</operator>
+			<call builtin="atan">
+				<local name="x11"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x12"/>
+			</operator>
+			<call builtin="atan2">
+				<local name="x12"/>
+				<local name="x11"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x13"/>
+			</operator>
+			<call builtin="sinh">
+				<local name="x13"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x14"/>
+			</operator>
+			<call builtin="cosh">
+				<local name="x14"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x15"/>
+			</operator>
+			<call builtin="tanh">
+				<local name="x15"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x16"/>
+			</operator>
+			<call builtin="exp">
+				<local name="x16"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x17"/>
+			</operator>
+			<call builtin="log">
+				<local name="x17"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x18"/>
+			</operator>
+			<call builtin="log10">
+				<local name="x18"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x19"/>
+			</operator>
+			<call builtin="-">
+				<local name="x18"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

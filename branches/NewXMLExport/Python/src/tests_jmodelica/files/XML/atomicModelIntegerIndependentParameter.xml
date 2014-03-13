@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="pi" variability="parameter">
+		<builtin name="Integer"/>
+		<bindingExpression>
+			<integer value="3"/>
+		</bindingExpression>
+	</component>
+
+</class>

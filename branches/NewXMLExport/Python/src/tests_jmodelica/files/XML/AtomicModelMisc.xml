@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="x2" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="x3" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x4" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x2)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x3)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x4)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x2"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x3"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x4"/>
+			</operator>
+			<false/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<real value="1.11"/>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<if>
+				<cond>
+					<call builtin="&gt;">
+						<local name="x1"/>
+						<integer value="1"/>
+					</call>
+				</cond>
+				<then>
+					<integer value="3"/>
+				</then>
+				<else>
+					<integer value="4"/>
+				</else>
+			</if>
+		</equal>
+		<equal>
+			<local name="x3"/>
+			<call builtin="or">
+				<true/>
+				<call builtin="&gt;">
+					<local name="x2"/>
+					<integer value="1"/>
+				</call>
+			</call>
+		</equal>
+		<equal>
+			<local name="x4"/>
+			<call builtin="or">
+				<false/>
+				<local name="x3"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

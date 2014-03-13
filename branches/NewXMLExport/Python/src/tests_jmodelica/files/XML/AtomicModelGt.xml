@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="3"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="u" causality="input">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="10"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<integer value="3"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<if>
+				<cond>
+					<call builtin="&gt;">
+						<local name="x1"/>
+						<integer value="1"/>
+					</call>
+				</cond>
+				<then>
+					<real value="0.3"/>
+				</then>
+				<else>
+					<local name="u"/>
+				</else>
+			</if>
+		</equal>
+	</equation>
+</class>

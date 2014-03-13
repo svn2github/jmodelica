@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="atomicModelPolyOutFunctionCallForDependentParameter.f">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<local name="Real[2]"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="x"/>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="p1" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<integer value="2"/>
+		</bindingExpression>
+	</component>
+	<component name="temp_1[1]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[2]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="p2[1]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="p2[2]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="parameter">
+		<equal>
+			<call>
+				<function>
+					<local name="atomicModelPolyOutFunctionCallForDependentParameter.f"/>
+				</function>
+				<local name="p1"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="p2[1]"/>
+			<local name="temp_1[1]"/>
+		</equal>
+		<equal>
+			<local name="p2[2]"/>
+			<local name="temp_1[2]"/>
+		</equal>
+	</equation>
+
+</class>

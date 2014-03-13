@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="A[1]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[2]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="temp_1[1]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[2]">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="A[1]"/>
+			<integer value="1"/>
+		</equal>
+		<equal>
+			<local name="A[2]"/>
+			<integer value="2"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<call>
+				<function>
+					<local name="AtomicModelVector2.f"/>
+				</function>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1]"/>
+			</operator>
+			<local name="temp_1[1]"/>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[2]"/>
+			</operator>
+			<local name="temp_1[2]"/>
+		</equal>
+	</equation>
+
+	<classDefinition name="AtomicModelVector2.f">
+		<class kind="function">
+			<component name="A" causality="input">
+				<local name="Real[2]"/>
+			</component>
+			<component name="B" causality="output">
+				<local name="Real[2]"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="B"/>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="AtomicModelVector2.f2"/>
+							</function>
+								<local name="A"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+	<classDefinition name="AtomicModelVector2.f2">
+		<class kind="function">
+			<component name="A" causality="input">
+				<local name="Real[2]"/>
+			</component>
+			<component name="B" causality="output">
+				<local name="Real[2]"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="B"/>
+					</to>
+					<from>
+						<call builtin="-">
+							<local name="A"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="B"/>
+					</to>
+					<from>
+						<call builtin="-">
+							<local name="A"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+</class>

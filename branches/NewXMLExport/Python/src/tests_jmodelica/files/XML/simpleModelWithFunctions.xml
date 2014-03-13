@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="simpleModelWithFunctions.f2">
+		<class kind="function">
+			<component name="in1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="in2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="out1"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="in1"/>
+							<real value="0.5"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="out2"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="in2"/>
+							<local name="out1"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+	
+	<classDefinition name="simpleModelWithFunctions.f">
+		<class kind="function">
+			<component name="in1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="in2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<tuple>
+							<local name="out1"/>
+							<local name="out2"/>
+						</tuple>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="simpleModelWithFunctions.f2"/>
+							</function>
+							<local name="in1"/>
+							<local name="in2"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="internal"/>
+					</to>
+					<from>
+						<local name="out1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="out2"/>
+					</to>
+					<from>
+						<call builtin="-">
+							<local name="out2"/>
+							<local name="internal"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="out1"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="out1"/>
+							<real value="2.0"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<tuple>
+							<local name="out1"/>
+							<local name="out2"/>
+						</tuple>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="simpleModelWithFunctions.f2"/>
+							</function>
+							<local name="in1"/>
+							<local name="in2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="a1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<real value="0.1"/>
+			</item>
+			<item name="fixed">
+				<true/>
+			</item>
+		</modifier>
+	</component>
+	<component name="a2">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<real value="0.4"/>
+			</item>
+			<item name="fixed">
+				<true/>
+			</item>
+		</modifier>
+	</component>
+	<component name="b1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<call builtin="-">
+					<real value="1.0"/>
+				</call>
+			</item>
+		</modifier>
+	</component>
+	<component name="b2">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<real value="1.0"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="a1"/>
+			<real value="0.1"/>
+		</equal>
+		<equal>
+			<local name="a2"/>
+			<real value="0.4"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="a1"/>
+			</operator>
+			<call builtin="-">
+				<call builtin="-">
+					<call builtin="*">
+						<real value="-3.14"/>
+						<local name="a1"/>
+					</call>
+					<real value="0.1"/>
+				</call>
+				<local name="b2"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="a2"/>
+			</operator>
+			<call builtin="-">
+				<call builtin="*">
+					<real value="-2.7"/>
+					<local name="a2"/>
+				</call>
+				<real value="0.3"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="b1"/>
+				<local name="b2"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="simpleModelWithFunctions.f"/>
+				</function>
+				<local name="a1"/>
+				<local name="a2"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

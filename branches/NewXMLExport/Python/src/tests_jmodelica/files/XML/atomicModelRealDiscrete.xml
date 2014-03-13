@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1" variability="discrete">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="pre(x1)" variability="discrete">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<operator name="pre">
+				<local name="x1"/>
+			</operator>
+			<integer value="1"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<if>
+				<cond>
+					<call builtin="&gt;">
+						<operator name="time"/>
+						<real value="1.0"/>
+					</call>
+				</cond>
+				<then>
+					<integer value="1"/>
+				</then>
+				<else>
+					<integer value="2"/>
+				</else>
+			</if>
+		</equal>
+	</equation>
+</class>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="p1" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<integer value="2"/>
+		</bindingExpression>
+	</component>
+	<component name="p2" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="parameter">
+		<equal>
+			<local name="p2"/>
+			<local name="p1"/>
+		</equal>
+	</equation>
+
+</class>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="Voltage">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="quantity">
+				<string value="ElectricalPotential"/>
+			</item>
+			<item name="unit">
+				<string value="V"/>
+			</item>
+		</modifier>
+	</classDefinition>
+	<component name="v">
+		<local name="Voltage"/>
+		<modifier>
+			<item name="start">
+				<real value="1.9"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="v"/>
+			<real value="1.9"/>
+		</equal>
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="v"/>
+			</operator>
+			<call builtin="-">
+				<call builtin="sin">
+					<local name="v"/>
+				</call>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="-">
+				<local name="x1"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="AtomicModelAtomicRealFunctions.monoInMonoOut">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.polyInMonoOut">
+		<class kind="function">
+			<component name="x1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="x2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="x1"/>
+							<local name="x2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.monoInPolyOut">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<if>
+							<cond>
+								<call builtin="&gt;">
+									<local name="x"/>
+									<integer value="2"/>
+								</call>
+							</cond>
+							<then>
+								<integer value="1"/>
+							</then>
+							<else>
+								<integer value="5"/>
+							</else>
+						</if>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.polyInPolyOut">
+		<class kind="function">
+			<component name="x1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="x2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<local name="x1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<local name="x2"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.monoInMonoOutReturn">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<local name="x"/>
+					</from>
+				</assign>
+				<return/>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<integer value="2"/>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.functionCallInFunction">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="AtomicModelAtomicRealFunctions.monoInMonoOut"/>
+							</function>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.functionCallEquationInFunction">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<tuple>
+							<local name="y"/>
+							<local name="internal"/>
+						</tuple>
+					</to>
+					<from>
+						<call>
+							<function>
+								<local name="AtomicModelAtomicRealFunctions.monoInPolyOut"/>
+							</function>
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.monoInMonoOutInternal">
+		<class kind="function">
+			<component name="x" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal">
+				<builtin name="Real"/>
+			</component>
+			<component name="y" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="internal"/>
+					</to>
+					<from>
+						<call builtin="sin">
+							<local name="x"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="x"/>
+							<local name="internal"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="internal"/>
+					</to>
+					<from>
+						<call builtin="sin">
+							<local name="y"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="x"/>
+							<local name="internal"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelAtomicRealFunctions.polyInPolyOutInternal">
+		<class kind="function">
+			<component name="x1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="x2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal1">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal2">
+				<builtin name="Real"/>
+			</component>
+			<component name="y1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="y2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="internal1"/>
+					</to>
+					<from>
+						<local name="x1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="internal2"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="x2"/>
+							<local name="internal1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y1"/>
+					</to>
+					<from>
+						<local name="internal1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="internal2"/>
+							<local name="x1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="y2"/>
+					</to>
+					<from>
+						<integer value="1"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+	</component>
+	<component name="x3">
+		<builtin name="Real"/>
+	</component>
+	<component name="x4">
+		<builtin name="Real"/>
+	</component>
+	<component name="x5">
+		<builtin name="Real"/>
+	</component>
+	<component name="x6">
+		<builtin name="Real"/>
+	</component>
+	<component name="x7">
+		<builtin name="Real"/>
+	</component>
+	<component name="x8">
+		<builtin name="Real"/>
+	</component>
+	<component name="x9">
+		<builtin name="Real"/>
+	</component>
+	<component name="x10">
+		<builtin name="Real"/>
+	</component>
+	<component name="x11">
+		<builtin name="Real"/>
+	</component>
+	<component name="x12">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x7"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x8"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x9"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x10"/>
+			<real value="0.0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="sin">
+				<call>
+					<function>
+						<local name="AtomicModelAtomicRealFunctions.monoInMonoOut"/>
+					</function>
+					<local name="x1"/>
+				</call>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x2"/>
+			</operator>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.polyInMonoOut"/>
+				</function>
+				<local name="x1"/>
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x3"/>
+				<local name="x4"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.monoInPolyOut"/>
+				</function>
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x5"/>
+				<local name="x6"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.polyInPolyOut"/>
+				</function>
+				<local name="x1"/>
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x7"/>
+			</operator>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.monoInMonoOutReturn"/>
+				</function>
+				<local name="x7"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x8"/>
+			</operator>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.functionCallInFunction"/>
+				</function>
+				<local name="x8"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x9"/>
+			</operator>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.functionCallEquationInFunction"/>
+				</function>
+				<local name="x9"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x10"/>
+			</operator>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.monoInMonoOutInternal"/>
+				</function>
+				<local name="x10"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x11"/>
+				<local name="x12"/>
+			</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelAtomicRealFunctions.polyInPolyOutInternal"/>
+				</function>
+				<local name="x9"/>
+				<local name="x10"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="Steps">
+		<builtin name="Integer"/>
+		<modifier>
+			<item name="quantity">
+				<string value="steps"/>
+			</item>
+		</modifier>
+	</classDefinition>
+	<component name="v" variability="parameter">
+		<local name="Steps"/>
+		<bindingExpression>
+			<integer value="2"/>
+		</bindingExpression>
+	</component>
+
+</class>

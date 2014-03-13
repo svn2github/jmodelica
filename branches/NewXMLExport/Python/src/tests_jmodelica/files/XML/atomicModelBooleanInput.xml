@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1" variability="discrete" causality="input">
+		<builtin name="Boolean"/>
+	</component>
+
+</class>

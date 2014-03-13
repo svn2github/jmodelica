@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="atomicModelDependentParameter.f">
+		<class kind="function">
+			<component name="inVar" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="outVar" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="outVar"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="inVar"/>
+							<integer value="2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="p1" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<integer value="10"/>
+		</bindingExpression>
+	</component>
+	<component name="p2" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="p4" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="p3" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="parameter">
+		<equal>
+			<local name="p2"/>
+			<call builtin="*">
+				<local name="p1"/>
+				<integer value="2"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="p4"/>
+			<call>
+				<function>
+					<local name="atomicModelDependentParameter.f"/>
+				</function>
+				<local name="p1"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="p3"/>
+			<call builtin="*">
+				<local name="p1"/>
+				<local name="p2"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

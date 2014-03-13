@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="IsDone">
+		<builtin name="Boolean"/>
+		<modifier>
+			<item name="quantity">
+				<string value="Done"/>
+			</item>
+		</modifier>
+	</classDefinition>
+	<component name="p" variability="parameter">
+		<local name="IsDone"/>
+		<bindingExpression>
+			<false/>
+		</bindingExpression>
+	</component>
+
+</class>

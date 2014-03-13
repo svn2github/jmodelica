@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="y">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="y"/>
+			<real value="0.0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="y"/>
+			</operator>
+			<integer value="-2"/>
+		</equal>
+	</equation>
+</class>

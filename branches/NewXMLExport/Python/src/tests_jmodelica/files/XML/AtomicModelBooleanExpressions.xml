@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="x2" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x3" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x4" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x5" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x6" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x7" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x8" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="x9" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x2)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x3)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x4)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x5)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x6)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x7)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x8)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+	<component name="pre(x9)" variability="discrete">
+		<builtin name="Boolean"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x2"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x3"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x4"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x5"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x6"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x7"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x8"/>
+			</operator>
+			<false/>
+		</equal>
+		<equal>
+			<operator name="pre">
+				<local name="x9"/>
+			</operator>
+			<false/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<if>
+				<cond>
+					<local name="x2"/>
+				</cond>
+				<then>
+					<integer value="1"/>
+				</then>
+				<else>
+					<integer value="2"/>
+				</else>
+			</if>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<call builtin="&gt;">
+				<local name="x1"/>
+				<integer value="0"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x3"/>
+			<call builtin="&gt;=">
+				<local name="x1"/>
+				<integer value="0"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x4"/>
+			<call builtin="&lt;">
+				<local name="x1"/>
+				<integer value="0"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x5"/>
+			<call builtin="&lt;=">
+				<local name="x1"/>
+				<integer value="0"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x6"/>
+			<call builtin="==">
+				<local name="x5"/>
+				<local name="x4"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x7"/>
+			<call builtin="&lt;&gt;">
+				<local name="x6"/>
+				<local name="x5"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x8"/>
+			<call builtin="and">
+				<local name="x6"/>
+				<local name="x5"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x9"/>
+			<call builtin="or">
+				<local name="x6"/>
+				<local name="x5"/>
+			</call>
+		</equal>
+	</equation>
+</class>

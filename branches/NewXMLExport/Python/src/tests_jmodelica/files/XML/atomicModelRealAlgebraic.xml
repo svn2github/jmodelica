@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<real value="0.5"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call builtin="sin">
+				<local name="x1"/>
+			</call>
+		</equal>
+	</equation>
+</class>

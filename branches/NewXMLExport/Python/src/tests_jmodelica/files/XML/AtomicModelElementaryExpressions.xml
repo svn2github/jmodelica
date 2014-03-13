@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+	</component>
+	<component name="x3">
+		<builtin name="Real"/>
+	</component>
+	<component name="x4">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x3"/>
+			<real value="0.0"/>
+		</equal>
+		<equal>
+			<local name="x4"/>
+			<real value="0.0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="+">
+				<local name="x1"/>
+				<integer value="2"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x2"/>
+			</operator>
+			<call builtin="-">
+				<local name="x2"/>
+				<local name="x1"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x3"/>
+			</operator>
+			<call builtin="*">
+				<local name="x3"/>
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="x4"/>
+			</operator>
+			<call builtin="/">
+				<local name="x4"/>
+				<local name="x3"/>
+			</call>
+		</equal>
+	</equation>
+</class>

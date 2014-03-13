@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<real value="5.0E-4"/>
+			</item>
+			<item name="max">
+				<real value="100.0"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<real value="5.0E-4"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="log10">
+				<local name="x1"/>
+			</call>
+		</equal>
+	</equation>
+</class>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1" causality="output">
+		<builtin name="Real"/>
+	</component>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<integer value="2"/>
+		</equal>
+	</equation>
+</class>

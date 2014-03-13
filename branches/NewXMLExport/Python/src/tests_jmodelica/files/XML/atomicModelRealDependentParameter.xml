@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="pi" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="3.14"/>
+		</bindingExpression>
+	</component>
+	<component name="pi2" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="parameter">
+		<equal>
+			<local name="pi2"/>
+			<call builtin="*">
+				<integer value="2"/>
+				<local name="pi"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

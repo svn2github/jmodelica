@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+	<component name="pre(x1)" variability="discrete">
+		<builtin name="Integer"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<operator name="pre">
+				<local name="x1"/>
+			</operator>
+			<integer value="0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<if>
+				<cond>
+					<call builtin="&gt;">
+						<operator name="time"/>
+						<integer value="1"/>
+					</call>
+				</cond>
+				<then>
+					<integer value="2"/>
+				</then>
+				<else>
+					<integer value="3"/>
+				</else>
+			</if>
+		</equal>
+	</equation>
+</class>

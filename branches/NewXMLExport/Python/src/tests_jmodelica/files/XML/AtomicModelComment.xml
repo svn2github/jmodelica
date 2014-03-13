@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="x1" comment="I am x1's comment">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="3"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<integer value="3"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="-">
+				<local name="x1"/>
+			</call>
+		</equal>
+	</equation>
+</class>

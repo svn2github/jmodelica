@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<component name="pi" variability="parameter">
+		<builtin name="Boolean"/>
+		<bindingExpression>
+			<true/>
+		</bindingExpression>
+	</component>
+	<component name="pi2" variability="parameter">
+		<builtin name="Boolean"/>
+	</component>
+
+	<equation kind="parameter">
+		<equal>
+			<local name="pi2"/>
+			<call builtin="and">
+				<local name="pi"/>
+				<true/>
+			</call>
+		</equal>
+	</equation>
+
+</class>
