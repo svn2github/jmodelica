@@ -535,7 +535,34 @@ class TestFortranBasic:
         nose.tools.assert_equals(model.get('xArray[2]'), 2)
         nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 1)
         
-        
+class TestAdvanced:
+    '''
+    Test advanced external fortran functions.
+    '''
+    @classmethod
+    def setUpClass(self):
+        self.fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
+    
+    @testattr(stddist = True)
+    def testDGELSX(self):
+        '''
+        A test using the external fortran function dgelsx from lapack.
+        Compares simulation results with constant evaluation results.
+        '''
+        cpath = "ExtFunctionTests.CEval.Advanced.DgelsxTest"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(fmu_name)
+        resSim = model.simulate()
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={'variability_propagation':True})
+        model = load_fmu(fmu_name)
+        resConst = model.simulate()
+        for i in range(1,4):
+          for j in range(1,4):
+            x = 'out[{0},{1}]'.format(i,j)
+            nose.tools.assert_almost_equals(resSim.final(x), resConst.final(x), places=13)
+        nose.tools.assert_equals(resSim.final('a'), resConst.final('a'))
+        nose.tools.assert_equals(resSim.final('b'), resConst.final('b'))
+    
 class TestUtilities:
     '''
     Test utility functions in external C functions.

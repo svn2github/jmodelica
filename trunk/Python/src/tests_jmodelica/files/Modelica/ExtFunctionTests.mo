@@ -437,6 +437,51 @@ package CEval
       Real xError = func_with_ModelicaError(2.1);
     end LogTest;
   end Utility;
+  
+  package Advanced
+    model DgelsxTest
+      function dgelsx
+        "Computes the minimum-norm solution to a real linear least squares problem with rank deficient A"
+        input Real A[3, 2];
+        input Real B[size(A, 1), 3];
+        input Real rcond=0.0 "Reciprocal condition number to estimate rank";
+        output Real X[max(size(A, 1), size(A, 2)), size(B, 2)]=cat(1,B) "Solution is in first size(A,2) rows";
+        output Integer info;
+        output Integer rank "Effective rank of A";
+      protected
+        Integer nrow=size(A, 1);
+        Integer ncol=size(A, 2);
+        Integer nx=max(nrow, ncol);
+        Integer nrhs=size(B, 2);
+        Integer lwork=max(min(nrow, ncol) + 3*ncol, 2*min(nrow, ncol) + nrhs);
+        Real work[max(min(size(A, 1), size(A, 2)) + 3*size(A, 2), 2*min(size(A, 1),
+          size(A, 2)) + size(B, 2))];
+        Real Awork[size(A, 1), size(A, 2)]=A;
+        Integer jpvt[size(A, 2)]=zeros(ncol);
+      external"FORTRAN 77" dgelsx(
+                nrow,
+                ncol,
+                nrhs,
+                Awork,
+                nrow,
+                X,
+                nx,
+                jpvt,
+                rcond,
+                rank,
+                work,
+                lwork,
+                info);
+      end dgelsx;
+      
+      Real[3,3] out;
+      Real a;
+      Real b;
+    equation
+      (out,a,b) = dgelsx({{1,2},{3,4}, {5,6}},{{7,8,9},{10,11,12}, {13,14,15}});
+      
+    end DgelsxTest;
+  end Advanced;
 end CEval;
 
 end ExtFunctionTests;
