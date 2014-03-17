@@ -310,7 +310,7 @@ class CompilerLogHandler:
 class CompilationException():
     """
     Temporary container class for exceptions that are thrown by the compiler
-    and cought by the SAX parser. This class should only be used internaly in
+    and caught by the SAX parser. This class should only be used internally in
     this module.
     """
     def __init__(self, kind, message, stacktrace):
