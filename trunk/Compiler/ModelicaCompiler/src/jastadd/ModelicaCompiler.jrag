@@ -1593,7 +1593,12 @@ public class ModelicaCompiler {
 				if (targetType.equals("parse")) {
 					parseFiles(name);
 				} else if (targetType.equals("check")) {
-					instantiateModel(name, cl, TargetObject.CHECK);
+                    try {
+                        instantiateModel(name, cl, TargetObject.CHECK);
+                    } finally {
+                        if (outDir != null)
+                            deleteOutDir();
+                    }
 				} else {
 					//Compile
 					compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
@@ -1687,6 +1692,8 @@ public class ModelicaCompiler {
     private String getCompiledExternal(FExternalStmt ext) {
         String executable = compiledExternals.get(ext.getName());
         if (executable == null) {
+            if (outDir == null)
+                setRandomOutDir();
             String source = ext.getName().replace(".", "_");
             TargetObject target = createTargetObject("ceval", "0.1");
             Set<String> libs = new HashSet<String>();
