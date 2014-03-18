@@ -3,11 +3,11 @@ package org.jmodelica.util.exceptions;
 /**
  * Thrown by the compiler when failing to compile a binary file from c code.
  */
-@SuppressWarnings("serial")
 public class CcodeCompilationException extends RuntimeException {
 
-    public CcodeCompilationException() {
-    }
+    private static final long serialVersionUID = 1;
+
+    public CcodeCompilationException() {}
 
     public CcodeCompilationException(String msg) {
         super(msg);

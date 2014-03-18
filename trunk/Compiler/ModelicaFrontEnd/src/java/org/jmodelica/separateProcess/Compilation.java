@@ -2,6 +2,7 @@ package org.jmodelica.separateProcess;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -23,7 +24,6 @@ public final class Compilation {
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.environment().put("JMODELICA_HOME", jmodelicaHome);
         builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-//        builder.redirectError(ProcessBuilder.Redirect.INHERIT);
         
         process = builder.start();
         
@@ -85,6 +85,17 @@ public final class Compilation {
             } catch (ClassNotFoundException e) {
                 if (exception == null)
                     exception = e;
+            }
+            readAndThrow(process.getErrorStream());
+        }
+        
+        private void readAndThrow(InputStream stream) {
+            try {
+                byte[] buffer = new byte[2048];
+                while (stream.read(buffer) != -1);
+            } catch (IOException e) {
+                // Not much to do here, we are in serious problems if we get here!
+                e.printStackTrace();
             }
         }
     }

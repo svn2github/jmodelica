@@ -1,7 +1,8 @@
 package org.jmodelica.util.exceptions;
 
-@SuppressWarnings("serial")
 public class MunkresException extends IndexReductionException {
+    private static final long serialVersionUID = 1;
+
     public MunkresException(String message) {
         super(message);
     }

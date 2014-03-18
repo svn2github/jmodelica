@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jmodelica.util.Problem;
 import org.jmodelica.util.logging.IllegalLogStringException;
 
 public class CompilerInstance {
@@ -212,6 +213,12 @@ public class CompilerInstance {
 
     public Compilation compile(String modelName, String... sourceFiles) throws IOException {
         return new Compilation(buildArgs(modelName, sourceFiles), jmodelicaHome);
+    }
+
+    public static void main(String[] args) throws Throwable {
+        CompilerInstance ci = new CompilerInstance();
+        Compilation c = ci.compile("Modelica.Mechanics.MultiBody.Examples.Elementary.FreeBody");
+        c.join();
     }
 
     private static String join(String delimiter, String... args) {
