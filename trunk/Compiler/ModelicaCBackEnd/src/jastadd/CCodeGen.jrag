@@ -1700,7 +1700,7 @@ aspect CCodeGen {
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
 		// Generate temp arrays for all array inputs and outputs
 		// and transpose array for if array is input (Fortran 77 only)
-		getFExternalLanguage().genPreFuncCall(p, str, indent, this);
+		getFExternalLanguage().prepExternalArg(p, str, indent, this, false);
 		
 		// return variable?
 		if(hasReturnVar()) {
@@ -1715,16 +1715,21 @@ aspect CCodeGen {
 		getFExternalLanguage().genFuncCall(p, str, indent, this);
 		
 		// If there are any output arrays, transpose these before returning (Fortran 77 only)
-		getFExternalLanguage().genPostFuncCall(p, str, indent, this);
+		getFExternalLanguage().prepExternalArg(p, str, indent, this, true);
 	}
 			
 	public class MatrixOp {
 		
 		private String function;
 		
-		public MatrixOp(String function) {
-			this.function = function;
-		}
+        public MatrixOp(FType type, FExternalLanguage lang, boolean writeback) {
+            boolean isFortran = lang instanceof FFortran77ExternalLanguage;
+            this.function = String.format("jmi_%smatrix_%s_%s%s", 
+                    isFortran ? "" : "copy_",
+                    writeback ? "from" : "to",
+                    isFortran ? "fortran_" : "",
+                    type.isReal() ? "real" : "int");
+        }
 		
 		public void genMatrixOp(CodePrinter p, CodeStream str, String indent, String arr, String src, String dest) {
 			str.print(indent + function + "(");
@@ -1735,173 +1740,42 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FExternalLanguage.genPreFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt){
-		//TODO: Only need to call prepExternalInput for inputs and variables with binding expressions
-		// but for simplicity will do this for all args for now (does not hurt but is not optimal)
-		for (FExp arg : stmt.getArgs()) {
-			arg.type().prepExternalInput(p, str, indent, arg, this);
-		}
-	}	
-
-	public void FType.prepExternalInput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {}
-	
-	public void FRealType.prepExternalInput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-		arg.prepExternalRealInput(p, str, indent, lang);
-	}
-	
-	public void FIntegerType.prepExternalInput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-		arg.prepExternalIntegerInput(p, str, indent, lang);
-	}
-	
-    public void FBooleanType.prepExternalInput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-        arg.prepExternalIntegerInput(p, str, indent, lang);
+    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback){
+        for (FExp arg : stmt.getArgs())
+            if (extShouldArgConvert(arg))
+                arg.prepExternalArg(p, str, indent, this, writeback);
     }
     
-    public void FEnumType.prepExternalInput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-        arg.prepExternalIntegerInput(p, str, indent, lang);
-    }
-	
-	public void FExp.prepExternalRealInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {}
-	
-	public void FIdUseExp.prepExternalRealInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {		
-		if (lang instanceof FFortran77ExternalLanguage && ndims() > 1) {
-			// We need to transpose if Fortran and we have >1 dimensions
-			// generate tempname
-			String tempName = tempName_C();
-			// set useTempVar flag to true
-			useTempVar = true;
-			// create static or dynamic temp array
-			type().printExternInit_C(p, str, indent, tempName, this);
-			MatrixOp op = new MatrixOp("jmi_matrix_to_fortran_real");
-			String src = prettyPrint_C(indent);
-			op.genMatrixOp(p, str, indent, src, src, tempName);
-		}
-	}
-	
-	public void FLitExp.prepExternalRealInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {
-		if (lang instanceof FFortran77ExternalLanguage) {
-			String tempName = tempName_C();
-			useTempVar = true;
-			str.print(indent + tempName + " = ");
-			p.print(this, str, indent);
-			str.print(";\n");
-		}
-	}
-	
-	public void FExp.prepExternalIntegerInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {}
-	
-	public void FIdUseExp.prepExternalIntegerInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {
-		// generate temp name
-		String tempName = tempName_C();
-		// set useTempVar flag to true
-		useTempVar = true;
-		if (isArray()) {
-			// create static or dynamic temp array
-			type().printExternInit_C(p, str, indent, tempName, this);
-			// if Fortran: cast to int and transpose (and copy - included in transpose)
-			// if c: cast to int and copy
-			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_to_int") : new MatrixOp("jmi_matrix_to_fortran_int");
-			String src = prettyPrint_C(indent);
-			op.genMatrixOp(p, str, indent, src, src, tempName);			
-		} else {
-			// copy to temp and cast
-			str.print(indent + tempName + " = (int)");
-			p.print(this, str, indent);
-			str.print(";\n");
-		}
-	}	
-	
-	public void FLitExp.prepExternalIntegerInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {
-		if (lang instanceof FFortran77ExternalLanguage) {
-			String tempName = tempName_C();
-			useTempVar = true;
-			str.print(indent + tempName + " = ");
-			p.print(this, str, indent);
-			str.print(";\n");
-		}
-	}
-	
-	public void FExternalLanguage.genPostFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
-		for (FExp arg : stmt.getArgs()) {
-			arg.prepExternalOutput(p, str, indent, this);
-		}		
-	}
-	
-	public void FExp.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {}
-	
-	public void FIdUseExp.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {
-		if (myCommonVarDecl().isOutput())
-			type().prepExternalOutput(p, str, indent, this, lang);
-	}
-	
-	public void FType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {}
-	
-	public void FRealType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-		if (lang instanceof FFortran77ExternalLanguage && arg.ndims() > 1) {
-			// We need to transpose if Fortran and we have >1 dimensions
-			// generate tempname
-			String tempName = arg.tempName_C();
-			MatrixOp op = new MatrixOp("jmi_matrix_from_fortran_real");
-			String dest = arg.prettyPrint_C(indent);
-			op.genMatrixOp(p, str, indent, dest, tempName, dest);
-		}		
-
-	}
-	
-	public void FIntegerType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-		// generate temp name
-		String tempName = arg.tempName_C();
-		if (arg.isArray()) {
-			// if Fortran: cast to int and transpose (and copy - included in transpose)
-			// if c: cast to int and copy
-			MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_matrix_from_fortran_int");
-			String dest = arg.prettyPrint_C(indent);
-			op.genMatrixOp(p, str, indent, dest, tempName, dest);
-		} else {
-			// scalar, only copy needed
-			str.print(indent);
-			p.print(arg, str, indent);
-			str.print(" = " + tempName);
-			str.print(";\n");
-		}
-	}
-	
-    public void FBooleanType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-        // generate temp name
-        String tempName = arg.tempName_C();
-        if (arg.isArray()) {
-            // if Fortran: cast to int and transpose (and copy - included in transpose)
-            // if c: cast to int and copy
-            MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_matrix_from_fortran_int");
-            String dest = arg.prettyPrint_C(indent);
-            op.genMatrixOp(p, str, indent, dest, tempName, dest);
+    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
+        String tempName = tempName_C();
+        String src = prettyPrint_C(indent);
+        useTempVar = true;
+        if (isArray()) {
+            MatrixOp op = new MatrixOp(type(), lang, writeback);
+            if (writeback)
+                op.genMatrixOp(p, str, indent, src, tempName, src);
+            else
+                op.genMatrixOp(p, str, indent, src, src, tempName);
         } else {
-            // scalar, only copy needed
-            str.print(indent);
-            p.print(arg, str, indent);
-            str.print(" = " + tempName);
-            str.print(";\n");
+            if (writeback)
+                str.formatln("%s%s = %s;", indent, src, tempName);
+            else
+                str.formatln("%s%s = (int)%s;", indent, tempName, src);
         }
     }
     
-    public void FEnumType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
-        // generate temp name
-        String tempName = arg.tempName_C();
-        if (arg.isArray()) {
-            // if Fortran: cast to int and transpose (and copy - included in transpose)
-            // if c: cast to int and copy
-            MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_matrix_from_fortran_int");
-            String dest = arg.prettyPrint_C(indent);
-            op.genMatrixOp(p, str, indent, dest, tempName, dest);
-        } else {
-            // scalar, only copy needed
-            str.print(indent);
-            p.print(arg, str, indent);
-            str.print(" = " + tempName);
-            str.print(";\n");
+    public void FIdUseExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
+        if (!writeback || myCommonVarDecl().isOutput()) {
+            if (isArray() && !writeback)
+                type().printExternInit_C(p, str, indent, tempName_C(), this);
+            super.prepExternalArg(p, str, indent, lang, writeback);
         }
     }
-	
+    
+    public void FLitExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
+        if (!writeback)
+            super.prepExternalArg(p, str, indent, lang, writeback);
+    }
 	
 	public void FExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
 	
@@ -3269,11 +3143,6 @@ aspect Serialize {
     public void FExternalStmt.genSerializeMain_C(CodeStream str, String indent) {
         ArrayList<CommonVariableDecl> vars  = varsToSerialize();
         
-        for (CommonVariableDecl cvd : vars)
-            cvd.type().setParent(this);
-            
-            
-        
         str.println("/* Declarations */");
         for (CommonVariableDecl cvd : vars)
             cvd.type().printDecl_C(ASTNode.printer_C, str, indent, cvd.name_C(), null, false);
@@ -3315,7 +3184,7 @@ aspect Serialize {
     public void FType.genSerializeInitIn_C(CodeStream str, String indent, String name) {
         if (isArray()) {
             boolean unknown = size().isUnknown();
-            str.println(indent + "parseArrayDims("+ndims()+");");
+            str.println(indent + "JMCEVAL_parseArrayDims("+ndims()+");");
             str.format("%s%s_%s_INIT_%d(%s%s", indent, arrayMacroType_C(), 
                     (unknown ? "DYNAMIC" : "STATIC"), ndims(), arrayInitExtraArgs_C(), name);
             if (unknown) {
@@ -3334,7 +3203,7 @@ aspect Serialize {
      * <code>this</code> from stdin.
      */
     public void FType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
-        str.formatln("%s%s%s(%s, %s);",
+        str.formatln("%sJMCEVAL_%s%s(%s, %s);",
                 indent,
                 parse ? "parse" : "print",
                 isArray() ? "Array" : "",
@@ -3353,39 +3222,21 @@ aspect Serialize {
      * Generate code to free strings
      */
     public void FType.genFreeStrings_C(CodeStream str, String indent, String name) {
-        Set<String> strComps = genStringComps_C(name);
-        if (strComps.size() > 0) {
-            if (isArray()) {
-                str.format("%sfor (vi = 1; vi < 1 + ", indent);
-                size().printNumElements_C(ASTNode.printer_C, str, indent, this);
-                str.println("; vi++) {");
-                for (String s : strComps) {
-                    str.formatln("%sfree(jmi_array_ref_1(%s,vi));", indent+"    ", s);
-                }
-                str.println("}");
-            } else {
-                for (String s : strComps) {
-                    str.formatln("%sfree(%s);", indent, s);
-                }
-            }
+        if (isString()) {
+            str.formatln("JMCEVAL_free%s(%s);", isArray() ? "Array" : "", name);
         }
     }
-    public Set<String> FType.genStringComps_C(String name) {
-        Set<String> s = new HashSet<String>();
-        genStringComps_C(s, name);
-        return s;
-    }
-    public void FType.genStringComps_C(Set<String> s, String name) {
-        if (isString())
-            s.add(name);
-    }
-    public void FRecordType.genStringComps_C(Set<String> s, String name) {
+    public void FRecordType.genFreeStrings_C(CodeStream str, String indent, String name) {
         for (FRecordComponentType t : getComponents()) {
-            t.getFType().genStringComps_C(s, name + "." + t.getName());
+            String n = name + "." + t.getName();
+            t.getFType().genFreeStrings_C(str, indent, n);
         }
     }
     
-    
+    /**
+     * List of CommonVariableDecl which has to be sent to the process
+     * when evaluating an external function.
+     */
     syn ArrayList<CommonVariableDecl> FExternalStmt.varsToSerialize() {
         if (!hasArg() && !hasReturnVar())
             return myCommonVarDecls();
@@ -3396,14 +3247,6 @@ aspect Serialize {
         for (FExp e : getArgs()) {
             e.varsToSerialize(res);
         }
-        return res;
-    }
-    
-    syn ArrayList<CommonVariableDecl> FExternalStmt.varsToDeserialize() {
-        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>();
-        for (CommonVariableDecl cvd : varsToSerialize())
-            if (cvd.isOutput())
-                res.add(cvd);
         return res;
     }
     
@@ -3422,6 +3265,18 @@ aspect Serialize {
     }
     
     /**
+     * List of CommonVariableDecl which has to be read from the process
+     * when evaluating an external function.
+     */
+    syn ArrayList<CommonVariableDecl> FExternalStmt.varsToDeserialize() {
+        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>();
+        for (CommonVariableDecl cvd : varsToSerialize())
+            if (cvd.isOutput())
+                res.add(cvd);
+        return res;
+    }
+    
+    /**
      * CommonVariableDecls from enclosing function
      */
     private ArrayList<CommonVariableDecl> FExternalStmt.myCommonVarDecls() {
@@ -3431,42 +3286,21 @@ aspect Serialize {
         else
             return new ArrayList<CommonVariableDecl>(enclosingInstClassDecl().getInstComponentDecls().toArrayList());
     }
-    
-    /**
-     * Non-output CommonVariableDecls from enclosing function
-     */
-    private ArrayList<CommonVariableDecl> FExternalStmt.myInputs() {
-        ArrayList<CommonVariableDecl> stmtInputs = myCommonVarDecls();
-        stmtInputs.removeAll(myOutputs());
-        return stmtInputs;
-    }
-    
-    /**
-     * Output CommonVariableDecls from enclosing function
-     */
-    private ArrayList<CommonVariableDecl> FExternalStmt.myOutputs() {
-        FFunctionDecl decl = containingFFunctionDecl();
-        if (decl != null)
-            return new ArrayList<CommonVariableDecl>(decl.myOutputs());
-        else
-            return new ArrayList<CommonVariableDecl>(enclosingInstClassDecl().myOutputs());
-    }
-    
+
     /**
      * Declarations of records used in this function
      */
     syn Collection<FRecordDecl> FExternalStmt.usedRecords() {
         Set<FRecordDecl> res = new LinkedHashSet<FRecordDecl>();
-        for (CommonVariableDecl cvd : myInputs())
-            if (cvd.type().isRecord())
-                res.add(cvd.type().myFRecordDecl());
-        for (CommonVariableDecl cvd : myOutputs())
+        for (CommonVariableDecl cvd : varsToSerialize())
             if (cvd.type().isRecord())
                 res.add(cvd.type().myFRecordDecl());
         return res;
     }
     
-    
+    /*
+     * Some code generation for the instance tree.
+     */
     syn String FIdUseInstAccess.name_C() = toString_C(printer_C);
     
     syn String FIdUseInstAccess.toString_C(CodePrinter p) {

@@ -3587,11 +3587,6 @@ aspect ExternalCEval {
             getCell(i).serialize(buff, type.scalarType(), allowUninitialized);
         }
     }
-//    public void CValueRecord.serialize(BufferedWriter buff) throws IOException {
-//        for (CValue v : values) {
-//            v.serialize(buff);
-//        }
-//    }
     public void CValueReal.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         buff.write(Double.toString(realValue()));
         buff.write("\n");

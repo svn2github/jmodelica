@@ -12349,7 +12349,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
     }
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(b_a, 0));
-    tmp_1 = 1;
+    tmp_1 = (int)1;
     JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
     tmp_3 = (int)lda_v;
@@ -14053,66 +14053,35 @@ $C_ode_derivatives$
 ")})));
 end TruncDivString1;
 
-model ExternalCeval1
-function f
-	input Real a;
-	output Real b;
-	external annotation(Include="#include \"example.h\"");
-end f;
-	Real x = f(2);
+package ExternalFunction
+package CEval
+model Scalar
+    type E = enumeration(A,B);
+    function f
+        input Real a1;
+        input Integer a2;
+        input Boolean a3;
+        input String a4;
+        input E a5;
+        output Real b1;
+        output Integer b2;
+        output Boolean b3;
+        output String b4;
+        output E b5;
+        external;
+    end f;
+    
+    Real x1;
+    Integer x2;
+    Boolean x3;
+    String x4;
+    E x5;
 equation
-
+    (x1,x2,x3,x4,x5) = f(1,2,true,"s",E.A);
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
-			name="ExternalCeval1",
-			description="Test code gen ceval of external functions.",
-			variability_propagation=false,
-			inline_functions="none",
-			template="
-$ECE_external_includes$
-$ECE_record_definitions$
-$ECE_main$
-",
-			generatedCode="
-#include \"example.h\"
-
-/* Declarations */
-jmi_ad_var_t b_v;
-jmi_ad_var_t a_v;
-
-printf(\"START\\n\"); fflush(stdout);
-/* Parse */
-parse(Real, b_v);
-parse(Real, a_v);
-
-/* Call the function */
-printf(\"CALC\\n\"); fflush(stdout);
-b_v = f(a_v);
-printf(\"DONE\\n\"); fflush(stdout);
-
-/* Print */
-print(Real, b_v);
-
-
-/* Free strings */
-
-printf(\"END\\n\"); fflush(stdout);
-")})));
-end ExternalCeval1;
-
-model ExternalCeval2
-function f
-	input Real[:,:] a;
-	output Real b[size(a,1),size(a,2)];
-	external "FORTRAN 77";
-end f;
-	Real[1,1] x = f({{1}});
-equation
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalCeval2",
-			description="Test code gen ceval of external functions.",
+			name="ExternalFunction_CEval_Scalar",
+			description="Test code gen for external C functions evaluation. Scalars.",
 			variability_propagation=false,
 			inline_functions="none",
 			template="
@@ -14122,225 +14091,189 @@ $ECE_main$
 ",
 			generatedCode="
 /* Declarations */
-JMI_ARRAY_DYNAMIC(a_a, 2)
-JMI_ARRAY_DYNAMIC(b_a, 2)
-JMI_ARRAY_DYNAMIC(tmp_1, 2)
-JMI_ARRAY_DYNAMIC(tmp_2, 2)
-extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
-
-printf(\"START\\n\"); fflush(stdout);
-/* Parse */
-parseArrayDims(2);
-JMI_ARRAY_DYNAMIC_INIT_2(a_a, d[0]*d[1], d[0], d[1]);
-parseArray(Real, a_a);
-parseArrayDims(2);
-JMI_ARRAY_DYNAMIC_INIT_2(b_a, d[0]*d[1], d[0], d[1]);
-parseArray(Real, b_a);
-
-/* Call the function */
-printf(\"CALC\\n\"); fflush(stdout);
-JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
-jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
-JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(b_a, 0) * jmi_array_size(b_a, 1), jmi_array_size(b_a, 0), jmi_array_size(b_a, 1))
-jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
-f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
-jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
-printf(\"DONE\\n\"); fflush(stdout);
-
-/* Print */
-printArray(Real, b_a);
-
-/* Free strings */
-
-printf(\"END\\n\"); fflush(stdout);
-")})));
-end ExternalCeval2;
-
-//  model ExternalCeval3
-//  record R1
-//      Real x;
-//      R2 r2;
-//      Integer k;
-//  end R1;
-//  record R2
-//      Boolean b;
-//      String s;
-//  end R2;
-//  function f
-//      input R1 in1;
-//      input R2 in2;
-//      input String[:,:] sin;
-//      output R1 out1;
-//      output String[size(sin,1)*size(sin,2)] sout;
-//      external;
-//  end f;
-//      R1 rec;
-//      R2 t;
-//  equation
-//      t = R2(false,"hej");
-//      (rec) = f(R1(1,t,2), R2(true,"hej2"),{{"hej3"}});
-//
-//      annotation(__JModelica(UnitTesting(tests={
-//          CCodeGenTestCase(
-//              name="ExternalCeval3",
-//              description="Test code gen ceval of external functions.",
-//              variability_propagation=false,
-//              inline_functions="none",
-//              template="
-//  $ECE_external_includes$
-//  $ECE_record_definitions$
-//  $ECE_main$
-//  ",
-//              generatedCode="
-//  typedef struct _R1_1_r {
-//      jmi_ad_var_t x;
-//      R2_0_r* r2;
-//      jmi_ad_var_t k;
-//  } R1_1_r;
-//  JMI_RECORD_ARRAY_TYPE(R1_1_r, R1_1_ra)
-//
-//  typedef struct _R2_0_r {
-//      jmi_ad_var_t b;
-//      char* s;
-//  } R2_0_r;
-//  JMI_RECORD_ARRAY_TYPE(R2_0_r, R2_0_ra)
-//
-//
-//  size_t d[25];
-//
-//  /* Input declarations */
-//  JMI_RECORD_STATIC(R1_1_r, in1_v)
-//  JMI_RECORD_STATIC(R2_0_r, tmp_1)
-//  JMI_RECORD_STATIC(R2_0_r, in2_v)
-//  JMI_ARRAY_DYNAMIC(sin_a, 2)
-//
-//  /* Output declarations */
-//  JMI_RECORD_STATIC(R1_1_r, out1_v)
-//  JMI_RECORD_STATIC(R2_0_r, tmp_2)
-//  JMI_ARRAY_DYNAMIC(sout_a, 1)
-//
-//  /* Temp declarations */
-//
-//  printf(\"START\\n\"); fflush(stdout);
-//  /* Parse inputs */
-//  parse(Real, in1_v.x);
-//  parse(Boolean, in1_v.r2.b);
-//  parse(String, in1_v.r2.s);
-//  parse(Integer, in1_v.k);
-//
-//  parse(Boolean, in2_v.b);
-//  parse(String, in2_v.s);
-//
-//  parseArrayDims(2, d);
-//  JMI_ARRAY_DYNAMIC_INIT_2(sin_a, d[0]*d[1], d[0], d[1]);
-//  parseArray(String, sin_a);
-//
-//
-//  /* Initialize outputs */
-//  JMI_ARRAY_DYNAMIC_INIT_1(sout_a, jmi_array_size(sin_a, 0) * jmi_array_size(sin_a, 1), jmi_array_size(sin_a, 0) * jmi_array_size(sin_a, 1));
-//
-//  /* Call the function */
-//  printf(\"CALC\\n\"); fflush(stdout);
-//  f(in1_v, in2_v, sin_a->var, jmi_array_size(sin_a, 0), jmi_array_size(sin_a, 1), &out1_v, sout_a->var, jmi_array_size(sout_a, 0));
-//  printf(\"DONE\\n\"); fflush(stdout);
-//
-//  /* Print outputs */
-//  print(Real, out1_v.x);
-//  print(Boolean, out1_v.r2.b);
-//  print(String, out1_v.r2.s);
-//  print(Integer, out1_v.k);
-//
-//  printArray(String, sout_a);
-//
-//
-//  /* Free strings */
-//  free(in1_v.r2.s)
-//  free(in2_v.s)
-//  for (i = 0; i < jmi_array_size(sin_a, 0) * jmi_array_size(sin_a, 1); i++) {
-//      free(jmi_array_ref_1(sin_a,i));
-//
-//
-//  printf(\"END\\n\"); fflush(stdout);
-//  ")})));
-//  end ExternalCeval3;
-
-model ExternalCeval4
-	
-record R
-	String s;
-	Boolean b;
-end R;
-function f
-	input String s;
-	input Boolean b;
-	output R r;
-	output Integer i;
-	external i = realFunc(s,b,r);
-end f;
-	R x;
-	Integer y;
-equation
-	(x,y) = f("hej", true);
-
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ExternalCeval4",
-			description="Test code gen ceval of external functions.",
-			variability_propagation=false,
-			inline_functions="none",
-			template="
-$ECE_external_includes$
-$ECE_record_definitions$
-$ECE_main$
-",
-			generatedCode="
-typedef struct _R_0_r {
-    char* s;
-    jmi_ad_var_t b;
-} R_0_r;
-JMI_RECORD_ARRAY_TYPE(R_0_r, R_0_ra)
-
-
-/* Declarations */
-jmi_ad_var_t i_v;
-char* s_v;
-jmi_ad_var_t b_v;
-JMI_RECORD_STATIC(R_0_r, r_v)
+jmi_ad_var_t a1_v;
+jmi_ad_var_t a2_v;
+jmi_ad_var_t a3_v;
+char* a4_v;
+jmi_ad_var_t a5_v;
+jmi_ad_var_t b1_v;
+jmi_ad_var_t b2_v;
+jmi_ad_var_t b3_v;
+char* b4_v;
+jmi_ad_var_t b5_v;
 jmi_int_t tmp_1;
+jmi_int_t tmp_2;
+jmi_int_t tmp_3;
+jmi_int_t tmp_4;
+jmi_int_t tmp_5;
+jmi_int_t tmp_6;
 
 printf(\"START\\n\"); fflush(stdout);
 /* Parse */
-parse(Integer, i_v);
-parse(String, s_v);
-parse(Boolean, b_v);
-parse(String, r_v.s);
-parse(Boolean, r_v.b);
+JMCEVAL_parse(Real, a1_v);
+JMCEVAL_parse(Integer, a2_v);
+JMCEVAL_parse(Boolean, a3_v);
+JMCEVAL_parse(String, a4_v);
+JMCEVAL_parse(Enum, a5_v);
+JMCEVAL_parse(Real, b1_v);
+JMCEVAL_parse(Integer, b2_v);
+JMCEVAL_parse(Boolean, b3_v);
+JMCEVAL_parse(String, b4_v);
+JMCEVAL_parse(Enum, b5_v);
 
 /* Call the function */
 printf(\"CALC\\n\"); fflush(stdout);
-tmp_1 = (int)b_v;
-i_v = realFunc(s_v, tmp_1, &r_v);
+tmp_1 = (int)a2_v;
+tmp_2 = (int)a3_v;
+tmp_3 = (int)a5_v;
+tmp_4 = (int)b2_v;
+tmp_5 = (int)b3_v;
+tmp_6 = (int)b5_v;
+f(a1_v, tmp_1, tmp_2, a4_v, tmp_3, &b1_v, &tmp_4, &tmp_5, &b4_v, &tmp_6);
+b2_v = tmp_4;
+b3_v = tmp_5;
+b5_v = tmp_6;
 printf(\"DONE\\n\"); fflush(stdout);
 
 /* Print */
-print(Integer, i_v);
-print(String, r_v.s);
-print(Boolean, r_v.b);
+JMCEVAL_print(Real, b1_v);
+JMCEVAL_print(Integer, b2_v);
+JMCEVAL_print(Boolean, b3_v);
+JMCEVAL_print(String, b4_v);
+JMCEVAL_print(Enum, b5_v);
 
 /* Free strings */
-free(s_v);
-free(r_v.s);
+JMCEVAL_free(a4_v);
+JMCEVAL_free(b4_v);
 
 printf(\"END\\n\"); fflush(stdout);
 ")})));
-end ExternalCeval4;
+end Scalar;
 
-model ExternalCeval5
-	
+model Array
+type E = enumeration(A,B);
+function f
+    input Real[:] a1;
+    input Integer[:] a2;
+    input Boolean[:] a3;
+    input String[:] a4;
+    input E[:] a5;
+    output Real[size(a1,1)] b1;
+    output Integer[size(a2,1)] b2;
+    output Boolean[size(a3,1)] b3;
+    output String[size(a4,1)] b4;
+    output E[size(a5,1)] b5;
+    external;
+end f;
+    Real[1] x1;
+    Integer[1] x2;
+    Boolean[1] x3;
+    String[1] x4;
+    E[1] x5;
+equation
+	(x1,x2,x3,x4,x5) = f({1},{2},{true},{"s"},{E.A});
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+            name="ExternalFunction_CEval_Array",
+			description="Test code gen for external C functions evaluation. Arrays.",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+			generatedCode="
+/* Declarations */
+JMI_ARRAY_DYNAMIC(a1_a, 1)
+JMI_ARRAY_DYNAMIC(a2_a, 1)
+JMI_ARRAY_DYNAMIC(a3_a, 1)
+JMI_STRING_ARRAY_DYNAMIC(a4_a, 1)
+JMI_ARRAY_DYNAMIC(a5_a, 1)
+JMI_ARRAY_DYNAMIC(b1_a, 1)
+JMI_ARRAY_DYNAMIC(b2_a, 1)
+JMI_ARRAY_DYNAMIC(b3_a, 1)
+JMI_STRING_ARRAY_DYNAMIC(b4_a, 1)
+JMI_ARRAY_DYNAMIC(b5_a, 1)
+JMI_INT_ARRAY_DYNAMIC(tmp_1, 1)
+JMI_INT_ARRAY_DYNAMIC(tmp_2, 1)
+JMI_INT_ARRAY_DYNAMIC(tmp_3, 1)
+JMI_INT_ARRAY_DYNAMIC(tmp_4, 1)
+JMI_INT_ARRAY_DYNAMIC(tmp_5, 1)
+JMI_INT_ARRAY_DYNAMIC(tmp_6, 1)
+
+printf(\"START\\n\"); fflush(stdout);
+/* Parse */
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(a1_a, d[0], d[0]);
+JMCEVAL_parseArray(Real, a1_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(a2_a, d[0], d[0]);
+JMCEVAL_parseArray(Integer, a2_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(a3_a, d[0], d[0]);
+JMCEVAL_parseArray(Boolean, a3_a);
+JMCEVAL_parseArrayDims(1);
+JMI_STRING_ARRAY_DYNAMIC_INIT_1(a4_a, d[0], d[0]);
+JMCEVAL_parseArray(String, a4_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(a5_a, d[0], d[0]);
+JMCEVAL_parseArray(Enum, a5_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(b1_a, d[0], d[0]);
+JMCEVAL_parseArray(Real, b1_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(b2_a, d[0], d[0]);
+JMCEVAL_parseArray(Integer, b2_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(b3_a, d[0], d[0]);
+JMCEVAL_parseArray(Boolean, b3_a);
+JMCEVAL_parseArrayDims(1);
+JMI_STRING_ARRAY_DYNAMIC_INIT_1(b4_a, d[0], d[0]);
+JMCEVAL_parseArray(String, b4_a);
+JMCEVAL_parseArrayDims(1);
+JMI_ARRAY_DYNAMIC_INIT_1(b5_a, d[0], d[0]);
+JMCEVAL_parseArray(Enum, b5_a);
+
+/* Call the function */
+printf(\"CALC\\n\"); fflush(stdout);
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_1, jmi_array_size(a2_a, 0), jmi_array_size(a2_a, 0))
+jmi_copy_matrix_to_int(a2_a, a2_a->var, tmp_1->var);
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_2, jmi_array_size(a3_a, 0), jmi_array_size(a3_a, 0))
+jmi_copy_matrix_to_int(a3_a, a3_a->var, tmp_2->var);
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_3, jmi_array_size(a5_a, 0), jmi_array_size(a5_a, 0))
+jmi_copy_matrix_to_int(a5_a, a5_a->var, tmp_3->var);
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_4, jmi_array_size(b2_a, 0), jmi_array_size(b2_a, 0))
+jmi_copy_matrix_to_int(b2_a, b2_a->var, tmp_4->var);
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_5, jmi_array_size(b3_a, 0), jmi_array_size(b3_a, 0))
+jmi_copy_matrix_to_int(b3_a, b3_a->var, tmp_5->var);
+JMI_INT_ARRAY_DYNAMIC_INIT_1(tmp_6, jmi_array_size(b5_a, 0), jmi_array_size(b5_a, 0))
+jmi_copy_matrix_to_int(b5_a, b5_a->var, tmp_6->var);
+f(a1_a->var, jmi_array_size(a1_a, 0), tmp_1->var, jmi_array_size(a2_a, 0), tmp_2->var, jmi_array_size(a3_a, 0), a4_a->var, jmi_array_size(a4_a, 0), tmp_3->var, jmi_array_size(a5_a, 0), b1_a->var, jmi_array_size(b1_a, 0), tmp_4->var, jmi_array_size(b2_a, 0), tmp_5->var, jmi_array_size(b3_a, 0), b4_a->var, jmi_array_size(b4_a, 0), tmp_6->var, jmi_array_size(b5_a, 0));
+jmi_copy_matrix_from_int(b2_a, tmp_4->var, b2_a->var);
+jmi_copy_matrix_from_int(b3_a, tmp_5->var, b3_a->var);
+jmi_copy_matrix_from_int(b5_a, tmp_6->var, b5_a->var);
+printf(\"DONE\\n\"); fflush(stdout);
+
+/* Print */
+JMCEVAL_printArray(Real, b1_a);
+JMCEVAL_printArray(Integer, b2_a);
+JMCEVAL_printArray(Boolean, b3_a);
+JMCEVAL_printArray(String, b4_a);
+JMCEVAL_printArray(Enum, b5_a);
+
+/* Free strings */
+JMCEVAL_freeArray(a4_a);
+JMCEVAL_freeArray(b4_a);
+
+printf(\"END\\n\"); fflush(stdout);
+")})));
+end Array;
+
+model Dgelsx
     function dgelsx
       "Computes the minimum-norm solution to a real linear least squares problem with rank deficient A"
-
-      extends Modelica.Icons.Function;
       input Real A[:, :];
       input Real B[size(A, 1), :];
       input Real rcond=0.0 "Reciprocal condition number to estimate rank";
@@ -14385,7 +14318,7 @@ model ExternalCeval5
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
-			name="ExternalCeval5",
+			name="ExternalFunction_CEval_Dgelsx",
 			description="Test code gen ceval of external functions.",
 			variability_propagation=false,
 			inline_functions="none",
@@ -14423,26 +14356,26 @@ extern void dgelsx_(jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t
 
 printf(\"START\\n\"); fflush(stdout);
 /* Parse */
-parse(Integer, nrow_v);
-parse(Integer, ncol_v);
-parse(Integer, nrhs_v);
-parseArrayDims(2);
+JMCEVAL_parse(Integer, nrow_v);
+JMCEVAL_parse(Integer, ncol_v);
+JMCEVAL_parse(Integer, nrhs_v);
+JMCEVAL_parseArrayDims(2);
 JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, d[0]*d[1], d[0], d[1]);
-parseArray(Real, Awork_a);
-parseArrayDims(2);
+JMCEVAL_parseArray(Real, Awork_a);
+JMCEVAL_parseArrayDims(2);
 JMI_ARRAY_DYNAMIC_INIT_2(X_a, d[0]*d[1], d[0], d[1]);
-parseArray(Real, X_a);
-parse(Integer, nx_v);
-parseArrayDims(1);
+JMCEVAL_parseArray(Real, X_a);
+JMCEVAL_parse(Integer, nx_v);
+JMCEVAL_parseArrayDims(1);
 JMI_ARRAY_DYNAMIC_INIT_1(jpvt_a, d[0], d[0]);
-parseArray(Integer, jpvt_a);
-parse(Real, rcond_v);
-parse(Integer, rank_v);
-parseArrayDims(1);
+JMCEVAL_parseArray(Integer, jpvt_a);
+JMCEVAL_parse(Real, rcond_v);
+JMCEVAL_parse(Integer, rank_v);
+JMCEVAL_parseArrayDims(1);
 JMI_ARRAY_DYNAMIC_INIT_1(work_a, d[0], d[0]);
-parseArray(Real, work_a);
-parse(Integer, lwork_v);
-parse(Integer, info_v);
+JMCEVAL_parseArray(Real, work_a);
+JMCEVAL_parse(Integer, lwork_v);
+JMCEVAL_parse(Integer, info_v);
 
 /* Call the function */
 printf(\"CALC\\n\"); fflush(stdout);
@@ -14467,14 +14400,16 @@ info_v = tmp_11;
 printf(\"DONE\\n\"); fflush(stdout);
 
 /* Print */
-printArray(Real, X_a);
-print(Integer, rank_v);
-print(Integer, info_v);
+JMCEVAL_printArray(Real, X_a);
+JMCEVAL_print(Integer, rank_v);
+JMCEVAL_print(Integer, info_v);
 
 /* Free strings */
 
 printf(\"END\\n\"); fflush(stdout);
 ")})));
-end ExternalCeval5;
+end Dgelsx;
+end CEval;
+end ExternalFunction;
 
 end CCodeGenTests;

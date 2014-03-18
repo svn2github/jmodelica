@@ -23,74 +23,76 @@
 $ECE_external_includes$
  
 /* Manual debugging */
-#define DEBUG 0
-#define DBGP(x) if (DEBUG) { printf(x); fflush(stdout);}
+#define JMCEVAL_DEBUG 0
+#define JMCEVAL_DBGP(x) if (JMCEVAL_DEBUG) { printf(x); fflush(stdout);}
 
 /* Format specifier when printing jmi_ad_var_t */
-#define jmi_real_format "%.16f"
+#define JMCEVAL_realFormat "%.16f"
 
 /* Used record definitions */
 $ECE_record_definitions$
 
 /* Parses ND dimensions into dimension buffer d*/
-#define parseArrayDims(ND) \
+#define JMCEVAL_parseArrayDims(ND) \
     for (di = 0; di < ND; di++) { scanf("%d",&d[di]); }
 
 /* Parse/print basic types */
-double parseReal() {
+double JMCEVAL_parseReal() {
     /* Char buffer when reading jmi_ad_var_t. This is necessary
        since "%lf" is not allowed in c89. */
     char buff[32];
-    DBGP("Parse number: "); 
+    JMCEVAL_DBGP("Parse number: "); 
     scanf("%s",buff);
     return strtod(buff, 0);
 }
 
-void printReal(double x) {
-    printf(jmi_real_format, x); \
+void JMCEVAL_printReal(double x) {
+    printf(JMCEVAL_realFormat, x); \
     printf("\n"); \
     fflush(stdout); \
 }
 
-char* parseString() {
+char* JMCEVAL_parseString() {
     int d[1];
     char* str;
     size_t si,di;
-    parseArrayDims(1);
+    JMCEVAL_parseArrayDims(1);
     getchar();
     str = ModelicaAllocateString(d[0]);
-    DBGP("Parse string: ");
+    JMCEVAL_DBGP("Parse string: ");
     for (si = 0; si < d[0]; si++) str[si] = getchar();
     str[d[0]] = '\0';
     return str;
 }
 
-void printString(const char* str) {
+void JMCEVAL_printString(const char* str) {
     printf("%d\n%s\n", strlen(str), str);
     fflush(stdout);
 }
 
-#define parseInteger()  parseReal()
-#define parseBoolean()  parseInteger()
-#define parseEnum()     parseInteger()
-#define printInteger(X) printReal(X)
-#define printBoolean(X) printInteger(X)
-#define printEnum(X)    printInteger(X)
-#define parse(TYPE, X)  X = parse##TYPE()
-#define print(TYPE, X)  print##TYPE(X)
+#define JMCEVAL_parseInteger()  JMCEVAL_parseReal()
+#define JMCEVAL_parseBoolean()  JMCEVAL_parseInteger()
+#define JMCEVAL_parseEnum()     JMCEVAL_parseInteger()
+#define JMCEVAL_printInteger(X) JMCEVAL_printReal(X)
+#define JMCEVAL_printBoolean(X) JMCEVAL_printInteger(X)
+#define JMCEVAL_printEnum(X)    JMCEVAL_printInteger(X)
+#define JMCEVAL_parse(TYPE, X)  X = JMCEVAL_parse##TYPE()
+#define JMCEVAL_print(TYPE, X)  JMCEVAL_print##TYPE(X)
+#define JMCEVAL_free(X)         free(X)
 
 /* Parse/print arrays */
-#define parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { parse(TYPE, jmi_array_ref_1(ARR,vi)); }
-#define printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { print(TYPE, jmi_array_val_1(ARR,vi)); }
+#define JMCEVAL_parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_parse(TYPE, jmi_array_ref_1(ARR,vi)); }
+#define JMCEVAL_printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_print(TYPE, jmi_array_val_1(ARR,vi)); }
+#define JMCEVAL_freeArray(ARR)       for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_free(jmi_array_val_1(ARR,vi)); }
 
 /* Used by ModelicaUtilities */
 void jmi_global_log(int warning, const char* name, const char* fmt, const char* value)
 {
     printf("LOG\n");
-    printInteger((double)warning);
-    printString(name);
-    printString(fmt);
-    printString(value);
+    JMCEVAL_printInteger((double)warning);
+    JMCEVAL_printString(name);
+    JMCEVAL_printString(fmt);
+    JMCEVAL_printString(value);
 }
 
 void* jmi_global_calloc(size_t n, size_t s)
