@@ -9,6 +9,8 @@ import org.jmodelica.util.Problem;
 
 public class ObjectStreamLogger extends PipeLogger {
     
+    public static final byte[] START_BYTES = new byte[]{ 74, 77, 54, 46, 50, 56, 51, 49, 56, 53, 51 };
+    
     public ObjectStreamLogger(Level level, String filename) throws IOException {
         super(level, filename);
     }
@@ -18,7 +20,7 @@ public class ObjectStreamLogger extends PipeLogger {
     }
     
     public ObjectStreamLogger(Level level, OutputStream stream) throws IOException {
-        super(level, new ObjectOutputStream(stream));
+        super(level, createStream(stream));
     }
     
     @Override
@@ -29,7 +31,7 @@ public class ObjectStreamLogger extends PipeLogger {
 
     @Override
     protected OutputStream createStream(File file) throws IOException {
-        return new ObjectOutputStream(super.createStream(file));
+        return createStream(super.createStream(file));
     }
     
     @Override
@@ -51,5 +53,9 @@ public class ObjectStreamLogger extends PipeLogger {
     protected void do_write(Problem problem) throws IOException {
         getStream().writeObject(problem);
     }
-
+    
+    private static ObjectOutputStream createStream(OutputStream stream) throws IOException {
+        stream.write(START_BYTES);
+        return new ObjectOutputStream(stream);
+    }
 }
