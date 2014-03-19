@@ -422,7 +422,7 @@ aspect ErrorCheck {
      * 
      * @see ASTNode.addErrorCheck()
      */
-    private static Collection<ErrorChecker> ASTNode.errorCheckers;
+    private static Collection<ErrorChecker> ASTNode.ERROR_CHECKERS;
 
     /**
      * Add ErrorChecker checker to the list of error checkers. This method
@@ -431,9 +431,9 @@ aspect ErrorCheck {
      * visibility.
      */
     private static ErrorChecker ASTNode.addErrorChecker(ErrorChecker checker) {
-        if (errorCheckers == null)
-            errorCheckers = new ArrayList<ErrorChecker>();
-        errorCheckers.add(checker);
+        if (ERROR_CHECKERS == null)
+            ERROR_CHECKERS = new ArrayList<ErrorChecker>();
+        ERROR_CHECKERS.add(checker);
         return checker;
     }
 
@@ -443,7 +443,7 @@ aspect ErrorCheck {
      * @see ASTNode.addErrorCheck()
      */
     protected void ASTNode.allChecks(ErrorCheckType checkType) {
-        for (ErrorChecker checker : errorCheckers)
+        for (ErrorChecker checker : ERROR_CHECKERS)
             checker.check(this, checkType);
     }
   

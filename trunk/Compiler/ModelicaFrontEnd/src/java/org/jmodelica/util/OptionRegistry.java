@@ -74,7 +74,7 @@ abstract public class OptionRegistry {
          * against the same contributor being added several times. One example is when 
          * Modelica and Optimica versions of compiler are loaded in the same JVM.
          * 
-         * Reccommended is a string literal in the jrag file.
+         * Recommended is a string literal in the jrag file.
          */
         public abstract Object identity();
     }

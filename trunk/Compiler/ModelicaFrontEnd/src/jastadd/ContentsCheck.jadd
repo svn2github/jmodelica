@@ -39,7 +39,7 @@ aspect ContentCheck {
         }
     }
 
-    private static ErrorChecker ASTNode.contentChecker = addErrorChecker(new ErrorChecker.ContentChecker());
+    private static ErrorChecker ASTNode.CONTENT_CHECKER = addErrorChecker(new ErrorChecker.ContentChecker());
 
 	public void FAbstractEquation.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) 

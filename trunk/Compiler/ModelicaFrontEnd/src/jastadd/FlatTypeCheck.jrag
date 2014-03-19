@@ -36,7 +36,7 @@ aspect FlatTypeCheck {
         }
     }
 
-    private static ErrorChecker ASTNode.typeChecker = addErrorChecker(new ErrorChecker.TypeChecker());
+    private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
 
     public void InstNode.typeCheck(ErrorCheckType checkType) {
         typeCheckSystemResiduals(checkType);

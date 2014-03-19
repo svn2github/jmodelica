@@ -39,7 +39,7 @@ aspect ComplianceCheck {
         }
     }
 
-    private static ErrorChecker ASTNode.complianceChecker = addErrorChecker(new ErrorChecker.ComplianceChecker());
+    private static ErrorChecker ASTNode.COMPLIANCE_CHECKER = addErrorChecker(new ErrorChecker.ComplianceChecker());
 	
 	public void FIfWhenClause.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
