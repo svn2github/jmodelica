@@ -18,13 +18,28 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect ComplianceCheck {
 
-	/**
-	 * \brief Check for code that is not allowed in its current context.
-	 * 
-	 * Examples would be checking that classes follow the requirements of 
-	 * their restriction. 
-	 */
-	public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
+    /**
+     * \brief Check for code that is not allowed in its current context.
+     * 
+     * Examples would be checking that classes follow the requirements of 
+     * their restriction. 
+     */
+    public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
+
+    public abstract class ErrorChecker {
+        public static class ComplianceChecker extends ErrorChecker {
+            public ComplianceChecker() {
+                super("ComplianceCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.complianceCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.complianceChecker = addErrorChecker(new ErrorChecker.ComplianceChecker());
 	
 	public void FIfWhenClause.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);

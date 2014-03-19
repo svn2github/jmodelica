@@ -20,9 +20,24 @@ import org.jmodelica.util.Criteria;
 import org.jmodelica.util.ErrorCheckType;
 
 aspect FlatTypeCheck {
-	
+
     public void ASTNode.typeCheck(ErrorCheckType checkType) {}
-    
+
+    public abstract class ErrorChecker {
+        public static class TypeChecker extends ErrorChecker {
+            public TypeChecker() {
+                super("TypeCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.typeCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.typeChecker = addErrorChecker(new ErrorChecker.TypeChecker());
+
     public void InstNode.typeCheck(ErrorCheckType checkType) {
         typeCheckSystemResiduals(checkType);
     }

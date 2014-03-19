@@ -18,14 +18,29 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect ContentCheck {
 
-	/**
-	 * \brief Check for code that is not allowed in its current context.
-	 * 
-	 * Examples would be checking that classes follow the requirements of 
-	 * their restriction. 
-	 */
-	public void ASTNode.contentCheck(ErrorCheckType checkType) {}
-	
+    /**
+     * \brief Check for code that is not allowed in its current context.
+     * 
+     * Examples would be checking that classes follow the requirements of 
+     * their restriction. 
+     */
+    public void ASTNode.contentCheck(ErrorCheckType checkType) {}
+
+    public abstract class ErrorChecker {
+        public static class ContentChecker extends ErrorChecker {
+            public ContentChecker() {
+                super("ContentCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.contentCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.contentChecker = addErrorChecker(new ErrorChecker.ContentChecker());
+
 	public void FAbstractEquation.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) 
 			error("Equations are not allowed in functions");

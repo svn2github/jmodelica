@@ -18,8 +18,23 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect SourceNameCheck {
 
-	public void ASTNode.nameCheck(ErrorCheckType checkType) {}
-    
+    private static ErrorChecker ASTNode.nameChecker = addErrorChecker(new ErrorChecker.NameChecker());
+
+    public void ASTNode.nameCheck(ErrorCheckType checkType) {}
+
+    public abstract class ErrorChecker {
+        public static class NameChecker extends ErrorChecker {
+            public NameChecker() {
+                super("NameCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.nameCheck(checkType);
+            }
+        }
+    }
+
 }
 
 aspect InstanceNameCheck {
