@@ -5294,6 +5294,214 @@ end FunctionTests.ArrayExpInFunc30;
 ")})));
 end ArrayExpInFunc30;
 
+model ArrayExpInFunc31
+type E = enumeration(A,B);
+function f
+  input Real[:] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input E[:] d;
+  output Real ao = max(a);
+  output Integer bo = max(b);
+  output Boolean co = max(c);
+  output E do = max(d);
+  algorithm
+end f;
+    Real a;
+    Integer b;
+    Boolean c;
+    E d;
+equation
+    (a,b,c,d) = f({1},{1},{true},{E.A});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc31",
+            description="Scalarization of functions: unknown size max expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc31
+ Real a;
+ discrete Integer b;
+ discrete Boolean c;
+ discrete FunctionTests.ArrayExpInFunc31.E d;
+initial equation 
+ pre(b) = 0;
+ pre(c) = false;
+ pre(d) = FunctionTests.ArrayExpInFunc31.E.A;
+equation
+ (a, b, c, d) = FunctionTests.ArrayExpInFunc31.f({1}, {1}, {true}, {FunctionTests.ArrayExpInFunc31.E.A});
+
+public
+ function FunctionTests.ArrayExpInFunc31.f
+  input Real[:] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input FunctionTests.ArrayExpInFunc31.E[:] d;
+  output Real ao;
+  output Integer bo;
+  output Boolean co;
+  output FunctionTests.ArrayExpInFunc31.E do;
+  Real temp_1;
+  Integer temp_2;
+  Boolean temp_3;
+  FunctionTests.ArrayExpInFunc31.E temp_4;
+ algorithm
+  temp_1 := -1.7976931348623157E308;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := if temp_1 > a[i1] then temp_1 else a[i1];
+  end for;
+  ao := temp_1;
+  temp_2 := -2147483648;
+  for i1 in 1:size(b, 1) loop
+   temp_2 := if temp_2 > b[i1] then temp_2 else b[i1];
+  end for;
+  bo := temp_2;
+  temp_3 := false;
+  for i1 in 1:size(c, 1) loop
+   temp_3 := if temp_3 > c[i1] then temp_3 else c[i1];
+  end for;
+  co := temp_3;
+  temp_4 := FunctionTests.ArrayExpInFunc31.E.A;
+  for i1 in 1:size(d, 1) loop
+   temp_4 := if temp_4 > d[i1] then temp_4 else d[i1];
+  end for;
+  do := temp_4;
+  return;
+ end FunctionTests.ArrayExpInFunc31.f;
+
+ type FunctionTests.ArrayExpInFunc31.E = enumeration(A, B);
+
+end FunctionTests.ArrayExpInFunc31;
+")})));
+end ArrayExpInFunc31;
+
+model ArrayExpInFunc32
+type E = enumeration(A,B);
+function f
+  input Real[:,:] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input E[:] d;
+  output Real ao = min(a);
+  output Integer bo = min(b);
+  output Boolean co = min(c);
+  output E do = min(d);
+  algorithm
+end f;
+    Real a;
+    Integer b;
+    Boolean c;
+    E d;
+equation
+    (a,b,c,d) = f({{1}},{1},{true},{E.A});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc32",
+            description="Scalarization of functions: unknown size min expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc32
+ Real a;
+ discrete Integer b;
+ discrete Boolean c;
+ discrete FunctionTests.ArrayExpInFunc32.E d;
+initial equation 
+ pre(b) = 0;
+ pre(c) = false;
+ pre(d) = FunctionTests.ArrayExpInFunc32.E.A;
+equation
+ (a, b, c, d) = FunctionTests.ArrayExpInFunc32.f({{1}}, {1}, {true}, {FunctionTests.ArrayExpInFunc32.E.A});
+
+public
+ function FunctionTests.ArrayExpInFunc32.f
+  input Real[:, :] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input FunctionTests.ArrayExpInFunc32.E[:] d;
+  output Real ao;
+  output Integer bo;
+  output Boolean co;
+  output FunctionTests.ArrayExpInFunc32.E do;
+  Real temp_1;
+  Integer temp_2;
+  Boolean temp_3;
+  FunctionTests.ArrayExpInFunc32.E temp_4;
+ algorithm
+  temp_1 := 1.7976931348623157E308;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    temp_1 := if temp_1 < a[i1,i2] then temp_1 else a[i1,i2];
+   end for;
+  end for;
+  ao := temp_1;
+  temp_2 := 2147483647;
+  for i1 in 1:size(b, 1) loop
+   temp_2 := if temp_2 < b[i1] then temp_2 else b[i1];
+  end for;
+  bo := temp_2;
+  temp_3 := true;
+  for i1 in 1:size(c, 1) loop
+   temp_3 := if temp_3 < c[i1] then temp_3 else c[i1];
+  end for;
+  co := temp_3;
+  temp_4 := FunctionTests.ArrayExpInFunc32.E.B;
+  for i1 in 1:size(d, 1) loop
+   temp_4 := if temp_4 < d[i1] then temp_4 else d[i1];
+  end for;
+  do := temp_4;
+  return;
+ end FunctionTests.ArrayExpInFunc32.f;
+
+ type FunctionTests.ArrayExpInFunc32.E = enumeration(A, B);
+
+end FunctionTests.ArrayExpInFunc32;
+")})));
+end ArrayExpInFunc32;
+
+model ArrayExpInFunc33
+function f
+  input Integer k;
+  output Real ao = max(i for i in 1:k);
+  algorithm
+end f;
+    Real a;
+equation
+    (a) = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc33",
+            description="Scalarization of functions: unknown size max-iter expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc33
+ Real a;
+equation
+ a = FunctionTests.ArrayExpInFunc33.f(1);
+
+public
+ function FunctionTests.ArrayExpInFunc33.f
+  input Integer k;
+  output Real ao;
+  Integer temp_1;
+ algorithm
+  temp_1 := -2147483648;
+  for i1 in 1:k loop
+   temp_1 := if temp_1 > i1 then temp_1 else i1;
+  end for;
+  ao := temp_1;
+  return;
+ end FunctionTests.ArrayExpInFunc33.f;
+
+end FunctionTests.ArrayExpInFunc33;
+")})));
+end ArrayExpInFunc33;
+
 
 model ArrayOutputScalarization1
  function f

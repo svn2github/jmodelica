@@ -649,12 +649,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 737, column 7:
   Unknown size arg in operator identity() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 739, column 7:
-  Unknown sizes in operator min() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 740, column 7:
-  Unknown sizes in operator max() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 741, column 7:
   Unknown sizes in operator ^ is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':

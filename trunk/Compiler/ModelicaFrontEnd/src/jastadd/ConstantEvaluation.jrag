@@ -1111,6 +1111,12 @@ aspect ConstantEvaluation {
  	public CValue FStringType.convert(CValue v)  { return v.convertString(); }
  	public CValue FBooleanType.convert(CValue v) { return v.convertBoolean(); }
  	
+    public CValue FType.limitCValueScalar(boolean high)        { return CValue.UNSUPPORTED; }
+    public CValue FRealType.limitCValueScalar(boolean high)    { return new CValueReal(      high ? Double.MAX_VALUE  : -Double.MAX_VALUE); }
+    public CValue FIntegerType.limitCValueScalar(boolean high) { return new CValueInteger(   high ? Integer.MAX_VALUE : Integer.MIN_VALUE); }
+    public CValue FBooleanType.limitCValueScalar(boolean high) { return new CValueBoolean(   high ? true : false); }
+    public CValue FEnumType.limitCValueScalar(boolean high)    { return new CValueEnum(this, high ? getNumFEnumLiteralType() : 1); }
+ 	
     
     /** 
      * \build Creates an FExp with literals from this Array.
@@ -1404,6 +1410,10 @@ aspect ConstantEvaluation {
   syn CValue FReductionExp.scalarReduceStartValue();
   eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
   eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
+  
+  syn CValue FMinMaxExp.scalarReduceStartValue();
+  eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);
+  eq FMinExp.scalarReduceStartValue() = type().limitCValueScalar(true);
   
   syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
   eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);

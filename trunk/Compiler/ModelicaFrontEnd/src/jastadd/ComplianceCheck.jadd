@@ -189,13 +189,6 @@ aspect ComplianceCheck {
 	eq FScalarExp.unknownSizeSupported()             = false;
 	eq FVectorExp.unknownSizeSupported()             = false;
 	eq FMatrixExp.unknownSizeSupported()             = false;
-		
-	public void FMinMaxExp.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction() && (getX().size().isUnknown() || (hasY() && getY().size().isUnknown()))) {
-			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
-		}
-	}
 	
 	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);

@@ -1079,6 +1079,7 @@ aspect Scalarization {
     syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray() && canAcceptArray();
     eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
     eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
+    eq FMinMaxExp.extractTemp()    = getX().size().isUnknown();
     eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause() && !(variability().structuralOrLess() && inBindingExp());
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
@@ -1089,6 +1090,7 @@ aspect Scalarization {
      */
     syn boolean FExp.extractAsUnknown() = size().isUnknown();
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
+    eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
     eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
     
     /**
@@ -1333,12 +1335,44 @@ aspect Scalarization {
         
         FStatement initStmt = new FAssignStmt(reducer, scalarReduceStartValue().buildLiteral());
         
-        // Scalarize exp
+        clauses = unknownReductionSub(clauses, vars, indexMap, names, exp, initStmt);
+        
+        // Add statement updating temp var to loop
+        FBinExp scalarizedExp = scalarReduceExp();
+        scalarizedExp.setLeft(reducer.fullCopy());
+        scalarizedExp.setRight(exp.scalarize(indexMap));
+        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
+        
+        names.removeLayer();
+    }
+    
+    /**
+     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     */
+    public void FMinMaxExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // Set up names and create for loop(s)
+        FExp exp = getX();
+        names.addLayer(exp.ndims());
+        names.fillLayer(this);
+        
+        FIdUseExp reducer = tempExp();
+        
+        FStatement initStmt = new FAssignStmt(reducer, scalarReduceStartValue().buildLiteral());
+        
+        clauses = unknownReductionSub(clauses, vars, indexMap, names, exp, initStmt);
+        
+        // Add statement updating temp var to loop
+        FExp scalarizedExp = scalarReduceExp(reducer, exp.scalarize(indexMap));
+        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
+        
+        names.removeLayer();
+    }
+    
+    protected List FExp.unknownReductionSub(List clauses, List vars, Map<String,FExp> indexMap, ForNames names, FExp exp, FStatement initStmt) {
         List<FStatement> inner = new List<FStatement>();
         boolean iter = exp.editNamesIter(indexMap, names);
         exp.createArrayTemporaries(inner, vars, indexMap, names);
         exp.addArrayUsesToIndexMap(indexMap, names);
-        FExp scalar = exp.scalarize(indexMap);
         if (iter) {
             names.removeLayer();
             clauses = names.createForLoops(clauses, exp, 0, ndims());
@@ -1350,15 +1384,12 @@ aspect Scalarization {
             clauses.add(initStmt);
             clauses = names.createForLoops(clauses, exp);
         }
-        
-        // Add statement updating temp var to loop
-        FBinExp scalarizedExp = scalarReduceExp();
-        scalarizedExp.setLeft(reducer.fullCopy());
-        scalarizedExp.setRight(scalar);
-        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
-        
-        names.removeLayer();
-	}
+        return clauses;
+    }
+    
+    syn FExp FMinMaxExp.scalarReduceExp(FExp reducer, FExp scalar);
+    eq FMaxExp.scalarReduceExp(FExp reducer, FExp scalar) = new FIfExp(new FGtExp(reducer.unboundCopy(), scalar.unboundCopy()), reducer.unboundCopy(), scalar.unboundCopy());
+    eq FMinExp.scalarReduceExp(FExp reducer, FExp scalar) = new FIfExp(new FLtExp(reducer.unboundCopy(), scalar.unboundCopy()), reducer.unboundCopy(), scalar.unboundCopy());
 	
     /**
      * Helper for unknown size expressions containing iteration expressions.
