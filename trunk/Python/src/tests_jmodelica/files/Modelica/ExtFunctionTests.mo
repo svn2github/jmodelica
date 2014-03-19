@@ -445,7 +445,11 @@ package CEval
         input Real A[3, 2];
         input Real B[size(A, 1), 3];
         input Real rcond=0.0 "Reciprocal condition number to estimate rank";
-        output Real X[max(size(A, 1), size(A, 2)), size(B, 2)]=cat(1,B) "Solution is in first size(A,2) rows";
+        output Real X[max(size(A, 1), size(A, 2)), size(B, 2)]=cat(
+                1,
+                B,
+                zeros(max(nrow, ncol) - nrow, nrhs))
+        "Solution is in first size(A,2) rows";
         output Integer info;
         output Integer rank "Effective rank of A";
       protected

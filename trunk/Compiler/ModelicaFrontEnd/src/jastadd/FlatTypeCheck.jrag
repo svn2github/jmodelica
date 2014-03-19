@@ -612,7 +612,7 @@ aspect FlatTypeCheck {
 	  if (!getDim().type().isUnknown() && !fIntegerScalarType().typeCompatible(getDim().type()))
 		  error("Dimension argument of cat() is not compatible with Integer: " + getDim());
 	  else if (!getDim().type().isUnknown() && !getDim().variability().lessOrEqual(fParameter()))
-		  error("Dimension argument of cat() does not have constant or parameter variability: " + getDim());
+		  error("Dimension argument of cat() does not have constant variability: " + getDim());
   }
   
   public void FAbstractCat.typeCheckFExps() {}
@@ -717,7 +717,7 @@ aspect FlatTypeCheck {
   eq FAbstractCat.checkTypeAsExpression() = dimensionIsOk();
   
   syn boolean FAbstractCat.dimensionIsOk(); 
-  eq FCatExp.dimensionIsOk()    = getDim().variability().lessOrEqual(fParameter()) && 
+  eq FCatExp.dimensionIsOk()    = getDim().isConstantExp() && 
   								  getDim().type().isInteger() && getDim().type().isScalar();
   eq FMatrix.dimensionIsOk()    = true;
   eq FMatrixRow.dimensionIsOk() = true;

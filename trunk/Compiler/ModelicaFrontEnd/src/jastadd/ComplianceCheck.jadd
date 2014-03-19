@@ -197,17 +197,6 @@ aspect ComplianceCheck {
 		}
 	}
 	
-	public void FCatExp.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction()) {
-			for (FExp exp: getFExpList()) {
-				if (exp.size().isUnknown()) {
-					compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
-				}
-			}
-		}
-	}
-	
 	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess() && inFunction()) {

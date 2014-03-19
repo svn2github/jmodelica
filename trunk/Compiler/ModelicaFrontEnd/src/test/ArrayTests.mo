@@ -928,7 +928,6 @@ end ArrayTests.General.ArrayTest34;
 end ArrayTest34;
 
 
-// TODO: the result is wrong, but tests a fixed crash bug - change when cat + unknown array sizes are supported
 model ArrayTest35
 	function f
 		input Real[:] x;
@@ -944,11 +943,11 @@ model ArrayTest35
 			description="Test adding array sizes that are present as expressions in tree",
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
- constant Real z[1] = {1, 2, 0, 0, 0};
- constant Real z[2] = {1, 2, 0, 0, 0};
- constant Real z[3] = {1, 2, 0, 0, 0};
- constant Real z[4] = {1, 2, 0, 0, 0};
- constant Real z[5] = {1, 2, 0, 0, 0};
+ constant Real z[1] = 1;
+ constant Real z[2] = 2;
+ constant Real z[3] = 0;
+ constant Real z[4] = 0;
+ constant Real z[5] = 0;
 end ArrayTests.General.ArrayTest35;
 ")})));
 end ArrayTest35;
