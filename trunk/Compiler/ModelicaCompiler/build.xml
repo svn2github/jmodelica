@@ -29,10 +29,11 @@
 
     <property name="sets" value="${mc_set.sets}"/>
     <property name="sub_package" value="modelica" />
-	
-	<property name="jars" value="ModelicaCompiler,util"/>
+    
+    <property name="jars" value="ModelicaCompiler,util,separateProcess"/>
     <property name="ModelicaCompiler.jar.packages" value="${base_package}"/>
-    <property name="util.jar.packages" value="org.jmodelica.util,org.jmodelica.separateProcess"/>
-	
-	<import file="../build-base.xml"/>
+    <property name="util.jar.packages" value="org.jmodelica.util"/>
+    <property name="separateProcess.jar.packages" value="org.jmodelica.util,org.jmodelica.separateProcess"/>
+    
+    <import file="../build-base.xml"/>
 </project>
