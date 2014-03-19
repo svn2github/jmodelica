@@ -77,8 +77,10 @@ public class CompilerInstance {
     }
 
     public void addClassPath(String... paths) {
-        for (String path : paths)
-            classPath.add(path);
+        if (paths != null) {
+            for (String path : paths)
+                classPath.add(path);
+        }
     }
 
     public Iterator<String> getClassPath() {
@@ -123,8 +125,10 @@ public class CompilerInstance {
     }
 
     public void addModelicaPath(String... paths) {
-        for (String path : paths)
-            modelicaPath.add(path);
+        if (paths != null) {
+            for (String path : paths)
+                modelicaPath.add(path);
+        }
     }
 
     public Iterator<String> getModelicaPath() {
@@ -137,10 +141,12 @@ public class CompilerInstance {
     }
 
     public void addLog(String... logs) {
-        for (String log : logs) {
-            if (log.contains("|stderr"))
-                throw new IllegalLogStringException("Piping compiler log to stderr is not allowed while separate process is used.", null);
-            this.log.add(log);
+        if (logs != null) {
+            for (String log : logs) {
+                if (log.contains("|stderr"))
+                    throw new IllegalLogStringException("Piping compiler log to stderr is not allowed while separate process is used.", null);
+                this.log.add(log);
+            }
         }
     }
 
@@ -202,9 +208,7 @@ public class CompilerInstance {
         if (platform != null)
             args.add("-platform=" + platform);
         if (outputPath != null)
-            args.add("-out=" + outputPath);
-        if (outputPath != null)
-            args.add("-out=" + outputPath);
+            args.add("-out=\"" + outputPath + "\"");
         args.add("," + join(",", sourceFiles));
         args.add(modelName);
         return args;
@@ -221,6 +225,8 @@ public class CompilerInstance {
     }
 
     private static String join(String delimiter, String... args) {
+        if (args == null)
+            return "";
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String str : args) {
