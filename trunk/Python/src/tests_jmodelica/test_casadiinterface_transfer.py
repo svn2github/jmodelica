@@ -404,9 +404,6 @@ def test_OptimicaMixedConstraints():
     
 @testattr(casadi = True)    
 def test_OptimicaTimedVariables():
-    def heurestic_MC_variables_equal(MC_var1, MC_var2):
-        return MC_var1.getVar().isEqual(MC_var2.getVar()) and str(MC_var1) == str(MC_var2)
-
     optProblem =  load_optimization_problem("atomicOptimizationTimedVariables", optproblemsFile)
     # test there are 3 timed
     timedVars = optProblem.getTimedVariables()
@@ -417,10 +414,10 @@ def test_OptimicaTimedVariables():
     x2 = optProblem.getVariable("x2")
     x3 = optProblem.getVariable("x3")
 
-    assert heurestic_MC_variables_equal(x1, timedVars[0].getBaseVariable())
-    assert heurestic_MC_variables_equal(x2, timedVars[1].getBaseVariable())
-    assert heurestic_MC_variables_equal(x3, timedVars[2].getBaseVariable())
-    assert heurestic_MC_variables_equal(x1, timedVars[3].getBaseVariable())
+    assert x1 == timedVars[0].getBaseVariable()
+    assert x2 == timedVars[1].getBaseVariable()
+    assert x3 == timedVars[2].getBaseVariable()
+    assert x1 == timedVars[3].getBaseVariable()
         
         
     # Test their time expression has start/final parameter MX in them and
@@ -448,7 +445,7 @@ def test_OptimicaTimedVariables():
     assert tv1.isEqual(point_constraints[0].getLhs())
     assert tv2.isEqual(path_constraints[0].getLhs())
     assert tv3.isEqual(path_constraints[1].getLhs())
-    assert tv4.isEqual(optProblem.getMayerTerm())
+    assert tv4.isEqual(optProblem.getObjective())
 
 @testattr(casadi = True)
 def test_OptimicaStartTime():
@@ -461,18 +458,18 @@ def test_OptimicaFinalTime():
     assert( optProblem.getFinalTime().getValue() == 10)
 
 @testattr(casadi = True)
-def test_OptimicaLagrangeTerm():
+def test_OptimicaObjectiveIntegrand():
     optProblem =  load_optimization_problem("atomicLagrangeX1", optproblemsFile)
-    assert str(optProblem.getLagrangeTerm()) == str(x1) 
+    assert str(optProblem.getObjectiveIntegrand()) == str(x1) 
     optProblem =  load_optimization_problem("atomicLagrangeNull", optproblemsFile)
-    assert str(optProblem.getLagrangeTerm()) == str(MX(0))  
+    assert str(optProblem.getObjectiveIntegrand()) == str(MX(0))  
 
 @testattr(casadi = True)
-def test_OptimicaMayerTerm():
+def test_OptimicaObjective():
     optProblem =  load_optimization_problem("atomicMayerFinalTime", optproblemsFile)
-    assert str(optProblem.getMayerTerm()) == str(MX("finalTime")) 
+    assert str(optProblem.getObjective()) == str(MX("finalTime")) 
     optProblem =  load_optimization_problem("atomicMayerNull", optproblemsFile)
-    assert str(optProblem.getMayerTerm()) == str(MX(0))
+    assert str(optProblem.getObjective()) == str(MX(0))
 
 @testattr(casadi = True)
 def test_OptimicaFree():

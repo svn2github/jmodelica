@@ -186,15 +186,15 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         /***** OptimizationProblem *****/
         
         // Mayer and Lagrange
-        MX lagrangeTerm = fclass.objectiveIntegrandExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveIntegrandExp());
-        MX mayerTerm = fclass.objectiveExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveExp());
+        MX objectiveIntegrand = fclass.objectiveIntegrandExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveIntegrandExp());
+        MX objective = fclass.objectiveExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveExp());
         
         optProblem->setPathConstraints(*(transferPathConstraints(fclass)));
         optProblem->setPointConstraints(*(transferPointConstraints(fclass)));
         optProblem->setStartTime(MX(fclass.startTimeAttribute()));
         optProblem->setFinalTime(MX(fclass.finalTimeAttribute()));
-        optProblem->setLagrangeTerm(lagrangeTerm);
-        optProblem->setMayerTerm(mayerTerm);
+        optProblem->setObjectiveIntegrand(objectiveIntegrand);
+        optProblem->setObjective(objective);
     }
     catch (JavaError e) {
         rethrowJavaException(e);

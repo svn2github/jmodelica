@@ -887,14 +887,14 @@ def test_OptimizationProblemLagrangeMayer():
     mayer = MX("mayer")
     opt = OptimizationProblem()
 
-    assert( opt.getLagrangeTerm().isNull() )
-    assert( opt.getMayerTerm().isNull() )
+    assert( opt.getObjectiveIntegrand().isNull() )
+    assert( opt.getObjective().isNull() )
     
-    opt.setMayerTerm(mayer)
-    opt.setLagrangeTerm(lagrange)
+    opt.setObjective(mayer)
+    opt.setObjectiveIntegrand(lagrange)
     
-    assert( isEqual(lagrange, opt.getLagrangeTerm()) )
-    assert( isEqual(mayer, opt.getMayerTerm()) )
+    assert( isEqual(lagrange, opt.getObjectiveIntegrand()) )
+    assert( isEqual(mayer, opt.getObjective()) )
 
 @testattr(casadi = True)    
 def test_OptimizationProblemPathConstraints():
@@ -970,7 +970,7 @@ def test_OptimizationProblemPrinting():
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "----------------------- Optimization information ------------------------\n\n" +
                      "Start time = not set\nFinal time = not set\n\n\n" +
-                     "-- Lagrange term --\nnot set\n-- Mayer term --\nnot set")
+                     "-- Objective integrand term --\nnot set\n-- Objective term --\nnot set")
     print simpleOptProblem
     assert( str(simpleOptProblem) == expectedPrint )
 
