@@ -81,12 +81,13 @@ ifcasadi: casadi
 	esac 
 	cd $(MC_BUILD)/ifcasadi;  make
 
-$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi
+$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar $(MC_SRC)/bin/separateProcess.jar ifcasadi
 	rm -rf $(MC_LIB)
 	mkdir -p $(MC_LIB)
 	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_LIB)
 	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_LIB)
 	cp $(MC_SRC)/bin/util.jar $(MC_LIB)
+	cp $(MC_SRC)/bin/separateProcess.jar $(MC_LIB)
 	case $(build) in \
 	*-cygwin*) \
 	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
@@ -106,9 +107,11 @@ mc_optimica: ifcasadi
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
 $(MC_SRC)/bin/util.jar:             mc_modelica
+$(MC_SRC)/bin/separateProcess.jar:  mc_modelica
 
 $(OC_SRC)/bin/OptimicaCompiler.jar: mc_optimica
 $(OC_SRC)/bin/util.jar:             mc_optimica
+$(OC_SRC)/bin/separateProcess.jar:  mc_optimica
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
@@ -241,6 +244,7 @@ if HAVE_ANT
 	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
 	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
 endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
