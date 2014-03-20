@@ -839,13 +839,12 @@ ifcasadi: casadi
 	esac 
 	cd $(MC_BUILD)/ifcasadi;  make
 
-$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar $(MC_SRC)/bin/separateProcess.jar ifcasadi
+$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi
 	rm -rf $(MC_LIB)
 	mkdir -p $(MC_LIB)
 	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_LIB)
 	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_LIB)
 	cp $(MC_SRC)/bin/util.jar $(MC_LIB)
-	cp $(MC_SRC)/bin/separateProcess.jar $(MC_LIB)
 	case $(build) in \
 	*-cygwin*) \
 	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
