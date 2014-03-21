@@ -204,7 +204,7 @@ public class CompilerInstance {
         else
             args.add("-log=w,w|os|stderr");
         if (compilerOptions.size() > 0)
-            args.add("-options=" + join(",", ":", compilerOptions));
+            args.add("-opt=" + join(",", ":", compilerOptions));
         if (platform != null)
             args.add("-platform=" + platform);
         if (outputPath != null)
