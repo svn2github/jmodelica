@@ -34,11 +34,23 @@ public final class Compilation {
     }
     
     public boolean join() throws Throwable, InterruptedException {
+        return join(true);
+    }
+
+    public boolean join(boolean throwException) throws Throwable, InterruptedException {
         process.waitFor();
-        if (exception != null)
-            throw exception;
-        
+        if (exception != null) {
+            if (throwException)
+                throw exception;
+            else
+                return false;
+        }
+
         return true;
+    }
+    
+    public Throwable getException() {
+        return exception;
     }
     
     public Iterator<Problem> getProblems() {
@@ -97,7 +109,7 @@ public final class Compilation {
             readAndThrow(process.getErrorStream());
         }
         
-        private void readStartBytes(InputStream stream) throws IOException {
+        private void readStartBytes(InputStream stream) throws IOException, InvalidLogStartException {
             byte[] readStartBytes = new byte[ObjectStreamLogger.START_BYTES.length];
             int read = 0;
             while (read < readStartBytes.length) {

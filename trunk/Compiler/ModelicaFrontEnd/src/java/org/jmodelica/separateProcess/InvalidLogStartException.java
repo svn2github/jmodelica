@@ -1,6 +1,6 @@
 package org.jmodelica.separateProcess;
 
-public class InvalidLogStartException extends RuntimeException {
+public class InvalidLogStartException extends SeparateProcessException {
     private static final long serialVersionUID = 1;
     private final String completeLog;
     public InvalidLogStartException(String log) {
