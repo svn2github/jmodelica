@@ -72,7 +72,7 @@ class Model: public RefCountedNode {
                                   // variables may be explicitly defined with a number
         }; // End enum VariableKind
         /** Create a blank, uninitialized Model */
-        Model() { dirty = false; }
+    Model() { dirty = false; timeVar = CasADi::MX(0); /* todo: just create a time variable instead? */}
         /** Initialize the Model, before populating it.
          * @param string identifier, typically <packagename>_<classname>, default empty string */
         void initializeModel(std::string identifier = "");

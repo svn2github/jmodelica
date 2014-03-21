@@ -31,15 +31,15 @@ namespace ModelicaCasADi
 class OptimizationProblem : public Model {
     public:
         /** Create a blank, uninitialized OptimizationProblem */
-        OptimizationProblem() {}
+        OptimizationProblem() { normalizedTime = false; startTime = finalTime = objective = objectiveIntegrand = CasADi::MX(0); }
         virtual ~OptimizationProblem();
         /**
          * Initialize the OptimizationProblem, before populating it.
          * @param An optional string identifier, default is empty string. 
          * @param An option flag telling whether minumum time normalisation
-         * has been performed (by the compiler). Default is true.
+         * has been performed (by the compiler). Default is false.
          */ 
-        void initializeProblem(std::string identifier = "", bool normalizedTime = true);
+        void initializeProblem(std::string identifier = "", bool normalizedTime = false);
         /** @return An MX */
         CasADi::MX getStartTime() const;
         /** @return An MX */

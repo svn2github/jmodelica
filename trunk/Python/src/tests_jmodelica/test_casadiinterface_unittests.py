@@ -15,6 +15,10 @@
 from tests_jmodelica import testattr
 from modelicacasadi_transfer import *
 
+def MX_equal(x, y):
+    eq = (x == y)
+    return eq.isConstant() and eq.getValue() == 1
+
 @testattr(casadi = True)    
 def test_SharedNode_eq():
     m = Model()
@@ -874,8 +878,8 @@ def test_OptimizationProblemTime():
     final = MX(1)
     opt = OptimizationProblem()
     
-    assert( opt.getStartTime().isNull() )
-    assert( opt.getFinalTime().isNull() )
+    assert( MX_equal(opt.getStartTime(), MX(0)) )
+    assert( MX_equal(opt.getFinalTime(), MX(0)) )
     opt.setStartTime(start)
     opt.setFinalTime(final)
     assert( isEqual(start, opt.getStartTime()) )
@@ -887,8 +891,8 @@ def test_OptimizationProblemLagrangeMayer():
     mayer = MX("mayer")
     opt = OptimizationProblem()
 
-    assert( opt.getObjectiveIntegrand().isNull() )
-    assert( opt.getObjective().isNull() )
+    assert( MX_equal(opt.getObjectiveIntegrand(), MX(0)) )
+    assert( MX_equal(opt.getObjective(), MX(0)) )
     
     opt.setObjective(mayer)
     opt.setObjectiveIntegrand(lagrange)
@@ -964,13 +968,14 @@ def test_OptimizationProblemTimedVariables():
 def test_OptimizationProblemPrinting():
     simpleOptProblem = OptimizationProblem()
     expectedPrint = ("Model contained in OptimizationProblem:\n\n" +
-                     "------------------------------- Variables -------------------------------\n\n\n" +
+                     "------------------------------- Variables -------------------------------\n\n" +
+                     "Time variable: 0\n\n" +
                      "---------------------------- Variable types  ----------------------------\n\n\n" +
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "----------------------- Optimization information ------------------------\n\n" +
-                     "Start time = not set\nFinal time = not set\n\n\n" +
-                     "-- Objective integrand term --\nnot set\n-- Objective term --\nnot set")
+                     "Start time = 0\nFinal time = 0\n\n\n" +
+                     "-- Objective integrand term --\n0\n-- Objective term --\n0")
     print simpleOptProblem
     assert( str(simpleOptProblem) == expectedPrint )
 
@@ -1344,6 +1349,7 @@ def test_ModelPrinting():
     model.addDaeEquation(eq1)
     model.addInitialEquation(eq2)
     expectedPrint = ("------------------------------- Variables -------------------------------\n\n" +
+                    "Time variable: 0\n" +
                     "Real node;\n\n" +
                     "---------------------------- Variable types  ----------------------------\n\n" +
                     "Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );\n\n" +
