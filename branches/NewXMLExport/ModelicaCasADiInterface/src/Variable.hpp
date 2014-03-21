@@ -135,6 +135,10 @@ class Variable : public OwnedNode {
          * @return A MX
          */        
         const CasADi::MX getVar() const;
+		/**
+		 * Sets the variable to the provided MX
+		 */
+		 void setVar(CasADi::MX newVar);
         /**
          * @return An enum for the primitive data type.
          */ 
@@ -224,6 +228,7 @@ inline const Variable::Type Variable::getType() const { throw std::runtime_error
 inline void Variable::setDeclaredType(Ref<VariableType> declaredType) { this->declaredType = declaredType; }
 inline Ref<VariableType> Variable::getDeclaredType() const { return declaredType; }
 inline const CasADi::MX Variable::getVar() const { return var; }
+inline void Variable::setVar(CasADi::MX newVar) { this->var = newVar; }
 inline const Variable::Causality Variable::getCausality() const { return causality; }
 inline const Variable::Variability Variable::getVariability() const { return variability; }
 }; // End namespace

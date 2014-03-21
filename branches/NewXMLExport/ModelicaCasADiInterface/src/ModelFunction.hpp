@@ -40,6 +40,7 @@ class ModelFunction : public RefCountedNode {
         std::vector<CasADi::MX> call(const std::vector<CasADi::MX> &arg);
         /** Returns the name of the MXFunction */
         std::string getName() const;
+		CasADi::MXFunction getMx();
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 

@@ -52,6 +52,10 @@ void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::X
 void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void transferEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void transferParameters(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
+void transferFunction(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
+
+CasADi::MXVector getInputVector(ModelicaCasADi::Ref<ModelicaCasADi::Model>, tinyxml2::XMLElement* elem);
+CasADi::MXVector getFuncVars(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement *elem);
 
 void addRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
 void addIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
@@ -71,5 +75,8 @@ CasADi::MX builtinBinaryToMx(CasADi::MX lhs, CasADi::MX rhs, const char* builtin
 bool hasDerivativeVar(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar);
 ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseType(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, std::string baseTypeName);
 ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
+
+int findIndex(CasADi::MXVector vector, std::string elem);
+void addFunctionHeaders(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
 #endif

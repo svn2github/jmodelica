@@ -18,8 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using ModelicaCasADi::Model;
 using ModelicaCasADi::Ref;
+using ModelicaCasADi::Variable;
+using ModelicaCasADi::RealVariable;
+using ModelicaCasADi::IntegerVariable;
+using ModelicaCasADi::BooleanVariable;
 using std::string;
 using tinyxml2::XMLElement;
+using CasADi::MX;
+using CasADi::MXVector;
 
 /**
 * Parses an XML document representing an Modelica model and then
@@ -40,6 +46,7 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 	}
 	XMLElement* root = doc.FirstChildElement();
 	if (root != NULL) {
+		addFunctionHeaders(m, root);
 		for (XMLElement* elem = root->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement()) {
 			if (!strcmp(elem->Value(), "component") || !strcmp(elem->Value(), "classDefinition") 
 				|| !strcmp(elem->Value(), "extends")) {
@@ -98,11 +105,13 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 			}
 		}
 	} else if(!strcmp(elem->Value(), "classDefinition")) {
-		// maybe put in separate method for clearer code
 		XMLElement* child = elem->FirstChildElement();
-		if (strcmp(child->Value(), "enumeration")) {
-			std::string typeName = elem->Attribute("name");
-			std::string baseTypeName = child->Attribute("name");
+		if (!strcmp(child->Value(), "class") && !strcmp(child->Attribute("kind"), "function")) {
+			// function transfers are handled in its own method for clarity
+			transferFunction(m, elem);
+		} else if (strcmp(child->Value(), "enumeration")) {
+			string typeName = elem->Attribute("name");
+			string baseTypeName = child->Attribute("name");
 			Ref<ModelicaCasADi::UserType> userType = new ModelicaCasADi::UserType(typeName, getBaseType(m, baseTypeName));
 			for (child = child->NextSiblingElement(); child != NULL; child = child->NextSiblingElement()) {
 				if (!strcmp(child->Value(), "modifier")) {
@@ -115,7 +124,9 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 			m->addNewVariableType(userType);
 		}
 	} else {
-		// extends clause, not supported in casadiinterface
+		std::stringstream errorMessage;
+		errorMessage << "Extends clauses are not supported in the CasADiInterface";
+		throw std::runtime_error(errorMessage.str());
 	}
 }
 
@@ -157,21 +168,166 @@ void transferParameters(Ref<Model> m, XMLElement* elem) {
 		if (!strcmp(parameter->Value(), "equal")) {
 			XMLElement* lhs = parameter->FirstChildElement();
 			XMLElement* rhs = lhs->NextSiblingElement();
-			Ref<ModelicaCasADi::Variable> var =  m->getVariable(lhs->Attribute("name"));
+			Ref<Variable> var =  m->getVariable(lhs->Attribute("name"));
 			var->setAttribute("bindingExpression", expressionToMx(m, rhs));
 		}
 	}
 }
 
 /**
+* Construct an MXFunction from the XML and adds it to the model
+*/
+void transferFunction(Ref<Model> m, XMLElement* elem) {
+	XMLElement* child = elem->FirstChildElement();
+	MXVector expressions = getFuncVars(m, child);
+	MXVector vars = getFuncVars(m, child);
+	MXVector inputVars = getInputVector(m, child);
+	for (XMLElement* var = child->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
+		if (!strcmp(var->Value(), "algorithm")) {
+			for (XMLElement* stmt = var->FirstChildElement(); stmt != NULL; stmt = stmt->NextSiblingElement()) {
+				if (!strcmp(stmt->Value(), "return")) {
+					break;
+				}
+				if (!strcmp(stmt->Value(), "assign")) {
+					MXVector lhs = MXVector();
+					XMLElement* left = stmt->FirstChildElement()->FirstChildElement();
+					if (strcmp(left->Value(), "tuple")) {
+						MX leftCas;
+						int index = findIndex(vars, left->Attribute("name"));
+						if (index != -1) {
+							leftCas = vars.at(index);
+						} else {
+							leftCas = MX(left->Attribute("name"));
+						}
+						lhs.push_back(leftCas);
+						MXVector rhs = MXVector();
+						XMLElement* right = stmt->FirstChildElement()->NextSiblingElement()->FirstChildElement();
+						MX rightCas = expressionToMx(m, right);
+						rhs.push_back(rightCas);
+						MX updated = CasADi::substitute(rhs, vars, expressions).at(0);
+						index = findIndex(vars, lhs.at(0).getName());
+						expressions.at(index) = updated;
+					} else {
+						for (XMLElement* tupleChild = left->FirstChildElement(); tupleChild != NULL; tupleChild = tupleChild->NextSiblingElement()) {
+							MX leftCas;
+							int index = findIndex(vars, tupleChild->Attribute("name"));
+							if (index != -1) {
+								leftCas = vars.at(index);
+							} else {
+								leftCas = MX(tupleChild->Attribute("name"));
+							}
+							lhs.push_back(leftCas);
+						}
+						XMLElement* right = stmt->FirstChildElement()->NextSiblingElement()->FirstChildElement()->FirstChildElement();
+						string funcName = right->FirstChildElement()->Attribute("name");
+						CasADi::MXFunction f = m->getModelFunction(funcName)->getMx();
+						MXVector argVec = MXVector();
+						for (XMLElement* arg = right->NextSiblingElement(); arg != NULL; arg = arg->NextSiblingElement()) {
+							argVec.push_back(expressionToMx(m, arg));
+						}
+						MXVector outputs = f.call(argVec);
+						MXVector updatedVec = CasADi::substitute(outputs, vars, expressions);
+						for (int i=0; i < lhs.size(); ++i) {
+							int index = findIndex(vars, lhs.at(i).getName());
+							expressions.at(index) = updatedVec.at(i);
+						}
+					}
+				}
+			}
+		}
+	}
+	MXVector outputVars = MXVector();
+	int i=0;
+	for (XMLElement* var = child->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
+		if (var->Attribute("causality") != NULL) {
+			if (!strcmp(var->Attribute("causality"), "output")) {
+				outputVars.push_back(expressions.at(i));
+			}
+		}
+		i++;
+	}
+	CasADi::MXFunction f = CasADi::MXFunction(inputVars, outputVars);
+	f.setOption("name", elem->Attribute("name"));
+	f.init();
+	m->setModelFunctionByItsName(new ModelicaCasADi::ModelFunction(f));
+}
+
+/**
+* Construct the input vector used in a function and add input variables to the model
+*/
+MXVector getInputVector(Ref<Model> m, XMLElement* elem) {
+	MXVector inputVars = MXVector();
+	for (XMLElement* var = elem->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
+		if (!strcmp(var->Value(), "component")) {
+			const char* causality = var->Attribute("causality");
+			const char* variability = var->Attribute("variability");
+			if (causality != NULL) {
+				if (!strcmp(causality, "input")) {
+					MX casVar = MX(var->Attribute("name"));
+					inputVars.push_back(casVar);
+					Ref<Variable> input = m->getVariable(var->Attribute("name"));
+					if (input == NULL) {
+						Ref<RealVariable> inputVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
+							getVariability(variability), getUserType(m, var->FirstChildElement()));
+						m->addVariable(inputVar);
+					} else {
+						input->setVar(casVar);
+					}
+				}
+			}
+		}
+	}
+	return inputVars;
+}
+
+/**
+* Construct vector containing all variables in the function and add non-input variables
+* to the model variable list
+*/
+MXVector getFuncVars(Ref<Model> m, XMLElement *elem) {
+	MXVector vars = MXVector();
+	for (XMLElement* var = elem->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
+		if (!strcmp(var->Value(), "component")) {
+			const char* causality = var->Attribute("causality");
+			const char* variability = var->Attribute("variability");
+			MX casVar = MX(var->Attribute("name"));
+			vars.push_back(casVar);
+			if (causality != NULL) {
+				// only add to model if it isn't an input
+				if (strcmp(causality, "input")) {
+					Ref<Variable> funcVar = m->getVariable(var->Attribute("name"));
+					if (funcVar == NULL) {
+						Ref<RealVariable> globalVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
+							getVariability(variability), getUserType(m, var->FirstChildElement()));
+						m->addVariable(globalVar);
+					} else {
+						funcVar->setVar(casVar);
+					}
+				}
+			} else {
+				Ref<Variable> funcVar = m->getVariable(var->Attribute("name"));
+				if (funcVar == NULL) {
+					Ref<RealVariable> globalVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
+						getVariability(variability), getUserType(m, var->FirstChildElement()));
+					m->addVariable(globalVar);
+				} else {
+					funcVar->setVar(casVar);
+				}
+			}
+		}
+	}
+	return vars;
+}
+
+/**
 * Add an variable of type real and its attributes to the Model object
 */
 void addRealVariable(Ref<Model> m, XMLElement* variable) {
-	CasADi::MX var = CasADi::MX(variable->Attribute("name"));
+	MX var = MX(variable->Attribute("name"));
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
 	const char* comment = variable->Attribute("comment");
-	Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), var, getCausality(causality), 
+	Ref<RealVariable> realVar = new RealVariable(m.getNode(), var, getCausality(causality), 
 		getVariability(variability), getUserType(m, variable->FirstChildElement()));
 	if (comment != NULL) {
 		realVar->setAttribute("comment", CasADi::MX(comment));
@@ -194,11 +350,11 @@ void addRealVariable(Ref<Model> m, XMLElement* variable) {
 * Add an variable of type integer and its attributes to the Model object
 */
 void addIntegerVariable(Ref<Model> m, XMLElement* variable) {
-	CasADi::MX var = CasADi::MX(variable->Attribute("name"));
+	MX var = MX(variable->Attribute("name"));
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
 	const char* comment = variable->Attribute("comment");
-	Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), var, getCausality(causality), 
+	Ref<IntegerVariable> intVar = new IntegerVariable(m.getNode(), var, getCausality(causality), 
 		getVariability(variability), getUserType(m, variable->FirstChildElement()));
 	if (comment != NULL) {
 		intVar->setAttribute("comment", CasADi::MX(comment));
@@ -221,11 +377,11 @@ void addIntegerVariable(Ref<Model> m, XMLElement* variable) {
 * Add an variable of type boolean and its attributes to the Model object
 */
 void addBooleanVariable(Ref<Model> m, XMLElement* variable) {
-	CasADi::MX var = CasADi::MX(variable->Attribute("name"));
+	MX var = MX(variable->Attribute("name"));
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
 	const char* comment = variable->Attribute("comment");
-	Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), var, getCausality(causality), 
+	Ref<BooleanVariable> boolVar = new BooleanVariable(m.getNode(), var, getCausality(causality), 
 		getVariability(variability), getUserType(m, variable->FirstChildElement()));
 	if (comment != NULL) {
 		boolVar->setAttribute("comment", CasADi::MX(comment));
@@ -244,12 +400,15 @@ void addBooleanVariable(Ref<Model> m, XMLElement* variable) {
 	m->addVariable(boolVar);
 }
 
-
-void addDerivativeVar (Ref<Model> m, Ref<ModelicaCasADi::RealVariable> realVar, string name) {
+/**
+* Add an derivative variable to the model, no attributes are added in this case since 
+* these are not accesible with the current way that imports works.
+*/
+void addDerivativeVar (Ref<Model> m, Ref<RealVariable> realVar, string name) {
 	string derName = "der(";
 	derName += name;
 	derName += ")";
-	CasADi::MX derMx = CasADi::MX(derName);
+	MX derMx = MX(derName);
 	ModelicaCasADi::Ref<ModelicaCasADi::DerivativeVariable> derVar = new ModelicaCasADi::DerivativeVariable(m.getNode(), derMx, realVar, NULL);
 	realVar->setMyDerivativeVariable(derVar);
 	// no attributes added since we can't access them
@@ -257,20 +416,23 @@ void addDerivativeVar (Ref<Model> m, Ref<ModelicaCasADi::RealVariable> realVar, 
 }
 
 /**
-* Takes an XML node containing an expression and then returns a corresponding MX expression
+* Takes an XML node containing an expression and then returns a corresponding MX expression.
 */
 CasADi::MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 	const char* name = expression->Value();
 	if (!strcmp(name, "integer") || !strcmp(name, "real")) {
-		return CasADi::MX(atof(expression->Attribute("value")));
+		return MX(atof(expression->Attribute("value")));
 	} else if (!strcmp(name, "string")) {
-		return CasADi::MX(expression->Attribute("value"));
+		return MX(expression->Attribute("value"));
 	} else if (!strcmp(name, "true")) {
-		return CasADi::MX(1);
+		return MX(1);
 	} else if (!strcmp(name, "false")) {
 		return CasADi::MX(0);
 	} else if (!strcmp(name, "local")) {
-		return CasADi::MX(expression->Attribute("name"));
+		if (m->getVariable(expression->Attribute("name")) != NULL) {
+			return m->getVariable(expression->Attribute("name"))->getVar();
+		}
+		return MX(expression->Attribute("name"));
 	} else if (!strcmp(name, "call")) {
 		const char* builtinAttr = expression->Attribute("builtin");
 		if (builtinAttr != NULL) {
@@ -283,7 +445,30 @@ CasADi::MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 				return builtinUnaryToMx(expressionToMx(m, lhs), builtinAttr);
 			}
 		} else {
-			// regular function calls, how to handle these?
+			XMLElement* func = expression->FirstChildElement();
+			string funcName = func->FirstChildElement()->Attribute("name");
+			CasADi::MXFunction f = m->getModelFunction(funcName)->getMx();
+			MXVector argVec = MXVector();
+			for (XMLElement* arg = func->NextSiblingElement(); arg != NULL; arg = arg->NextSiblingElement()) {
+				argVec.push_back(expressionToMx(m, arg));
+			}
+			MXVector outputs = f.call(argVec);
+			MX returnMx = MX();
+			for (int i=0; i < outputs.size(); ++i) {
+				returnMx.append(outputs.at(i));
+			}
+			return returnMx;
+		}
+	} else if (!strcmp(name, "builtin")) {
+		// time variable
+		if (!strcmp(expression->Attribute("name"), "time")) {
+			if (m->getTimeVariable().isNull()) {
+				MX timeMx = MX(expression->Attribute("name"));
+				m->setTimeVariable(timeMx);
+				return timeMx;
+			} else {
+				return m->getTimeVariable();
+			}
 		}
 	} else if (!strcmp(name, "operator")) {
 		if (!strcmp(expression->Attribute("name"), "der")) {
@@ -293,31 +478,31 @@ CasADi::MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 			XMLElement* derChild = expression->FirstChildElement();
 			if (!strcmp(derChild->Value(), "local")) {
 				const char* name = derChild->Attribute("name");
-				std::string derCall = "der(";
+				string derCall = "der(";
 				derCall.append(name);
 				derCall.append(")");
-				Ref<ModelicaCasADi::Variable> var = m->getVariable(name);
-				Ref<ModelicaCasADi::RealVariable> realVar = (ModelicaCasADi::RealVariable*)var.getNode();
+				Ref<Variable> var = m->getVariable(name);
+				Ref<RealVariable> realVar = (RealVariable*)var.getNode();
 				if (!hasDerivativeVar(m, realVar)) {
 					addDerivativeVar(m, realVar, name);
 				}
-				return CasADi::MX(derCall);
+				return MX(derCall);
 			} else {
-				std::string derCall = "der(";
+				string derCall = "der(";
 				derCall.append(derChild->Attribute("value"));
 				derCall.append(")");
-				return CasADi::MX(derCall);
+				return MX(derCall);
 			}
 		} else if (!strcmp(expression->Attribute("name"), "pre")) {
 			XMLElement* preChild = expression->FirstChildElement();
-			std::string preCall = "pre(";
+			string preCall = "pre(";
 			preCall.append(preChild->Attribute("name"));
 			preCall.append(")");
-			return CasADi::MX(preCall);
+			return MX(preCall);
 		} else if (!strcmp(expression->Attribute("name"), "assert")) {
 			// ignore asserts
 		} else if (!strcmp(expression->Attribute("name"), "time")) {
-			return CasADi::MX("time");
+			return MX("time");
 		} else {
 			// unsupported operators
 			std::stringstream errorMessage;
@@ -328,15 +513,21 @@ CasADi::MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 		XMLElement* branching = expression->FirstChildElement();
 		XMLElement* condition = branching->FirstChildElement();
 		XMLElement* thenBranch = branching->NextSiblingElement()->FirstChildElement();
-		XMLElement* elseBranch = branching->NextSiblingElement()->FirstChildElement();
+		XMLElement* elseBranch = branching->NextSiblingElement()->NextSiblingElement()->FirstChildElement();
 		return CasADi::if_else(expressionToMx(m, condition), expressionToMx(m, thenBranch), expressionToMx(m, elseBranch));
+	} else if (!strcmp(name, "tuple")) {
+		MX left = MX();
+		for (XMLElement* child = expression->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
+			left.append(MX(child->Attribute("name")));
+		}
+		return left;
 	} else {
 		// unsupported expressions come here, throw an error for now
 		std::stringstream errorMessage;
-		errorMessage << "Unsupported expression: " << expression->Attribute("name");
+		errorMessage << "Unsupported expression: " << expression->Value();
 		throw std::runtime_error(errorMessage.str());
 	}
-	return CasADi::MX();
+	return MX();
 }
 
 /**
@@ -372,26 +563,26 @@ ModelicaCasADi::Variable::Variability getVariability(const char* variability) {
 }
 
 /**
-* Applies an builtin unary function to an casadi expression and returns the result
+* Applies an builtin unary function to an MX expression and returns the result
 */
-CasADi::MX builtinUnaryToMx(CasADi::MX exp, const char* builtinName) {
+MX builtinUnaryToMx(MX exp, const char* builtinName) {
 	if (!strcmp(builtinName, "sin")) {
 		return exp.sin();
 	} else if (!strcmp(builtinName, "sinh")) {
 		return exp.sinh();
-	} else if (!strcmp(builtinName, "arcsin")) {
+	} else if (!strcmp(builtinName, "asin")) {
 		return exp.arcsin();
 	} else if (!strcmp(builtinName, "cos")) {
 		return exp.cos();
 	} else if (!strcmp(builtinName, "cosh")) {
 		return exp.cosh();
-	} else if (!strcmp(builtinName, "arccos")) {
+	} else if (!strcmp(builtinName, "acos")) {
 		return exp.arccos();
 	} else if (!strcmp(builtinName, "tan")) {
 		return exp.tan();
 	} else if (!strcmp(builtinName, "tanh")) {
 		return exp.tanh();
-	} else if (!strcmp(builtinName, "arctan")) {
+	} else if (!strcmp(builtinName, "atan")) {
 		return exp.arctan();
 	} else if (!strcmp(builtinName, "log")) {
 		return exp.log();
@@ -415,9 +606,9 @@ CasADi::MX builtinUnaryToMx(CasADi::MX exp, const char* builtinName) {
 }
 
 /**
-* Applies an builtin binary function to two expressions and returns the result
+* Applies an builtin binary function to two MX expressions and returns the result
 */
-CasADi::MX builtinBinaryToMx(CasADi::MX lhs, CasADi::MX rhs, const char* builtinName) {
+MX builtinBinaryToMx(MX lhs, MX rhs, const char* builtinName) {
 	if (!strcmp(builtinName, "+")) {
 		return lhs.__add__(rhs);
 	} else if (!strcmp(builtinName, "-")) {
@@ -432,7 +623,7 @@ CasADi::MX builtinBinaryToMx(CasADi::MX lhs, CasADi::MX rhs, const char* builtin
 		return lhs.fmin(rhs);
 	} else if (!strcmp(builtinName, "max")) {
 		return lhs.fmax(rhs);
-	} else if (!strcmp(builtinName, "arctan2")) {
+	} else if (!strcmp(builtinName, "atan2")) {
 		return lhs.arctan2(rhs);
 	} else if (!strcmp(builtinName, ">")) {
 		return rhs.__lt__(lhs);
@@ -462,14 +653,17 @@ CasADi::MX builtinBinaryToMx(CasADi::MX lhs, CasADi::MX rhs, const char* builtin
 /**
 * Check if an variable has an derivative variable linked to it
 */
-bool hasDerivativeVar(Ref<Model> m, Ref<ModelicaCasADi::RealVariable> realVar) {
+bool hasDerivativeVar(Ref<Model> m, Ref<RealVariable> realVar) {
 	if (realVar->getMyDerivativeVariable() != NULL) {
 		return true;
 	}
 	return false;
 }
 
-Ref<ModelicaCasADi::PrimitiveType> getBaseType(Ref<Model> m, std::string baseTypeName) {
+/**
+* Convert an basetype string to the actual object type
+*/
+Ref<ModelicaCasADi::PrimitiveType> getBaseType(Ref<Model> m, string baseTypeName) {
 	if (m->getVariableType(baseTypeName).getNode() == NULL) {
 		if (baseTypeName == "Real") {
 			m->addNewVariableType(new ModelicaCasADi::RealType);
@@ -482,6 +676,10 @@ Ref<ModelicaCasADi::PrimitiveType> getBaseType(Ref<Model> m, std::string baseTyp
 	return (ModelicaCasADi::PrimitiveType*) m->getVariableType(baseTypeName).getNode();
 }
 
+/**
+* Takes an model and an XMLElement that points to an variable, retrieve
+* the derived type of the variable from the model.
+*/
 Ref<ModelicaCasADi::UserType> getUserType(Ref<Model> m, XMLElement* elem) {
 	if (!strcmp(elem->Value(), "local")) {
 		Ref<ModelicaCasADi::UserType> userType = (ModelicaCasADi::UserType*) m->getVariableType(elem->Attribute("name")).getNode();
@@ -491,4 +689,55 @@ Ref<ModelicaCasADi::UserType> getUserType(Ref<Model> m, XMLElement* elem) {
 		return userType;
 	}
 	return NULL;
+}
+
+/**
+* Helper function used when transferring functions to find the index of MX element
+* in an MXVector
+*/
+int findIndex(MXVector vector, string elem) {
+	for (int i=0; i < vector.size(); ++i) {
+		if (elem == vector.at(i).getName()) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+/**
+* Method that adds function headers to the model object so that import of
+* functions with function calls to other functions will work properly
+* if the other function is not already imported.
+*/
+void addFunctionHeaders(Ref<Model> m, XMLElement* elem) {
+	for (XMLElement* child = elem->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
+		if (!strcmp(child->Value(), "classDefinition")) {
+			XMLElement* function = child->FirstChildElement();
+			if (!strcmp(function->Value(), "class") && !strcmp(function->Attribute("kind"), "function")) {
+				MXVector inputVars = MXVector();
+				MXVector expressions = MXVector();
+				MXVector outputVars = MXVector();
+				int i=0;
+				for (XMLElement* var = function->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
+					if (!strcmp(var->Value(), "component")) {
+						MX casVar = MX(var->Attribute("name"));
+						const char* causality = var->Attribute("causality");
+						expressions.push_back(casVar);
+						if (causality != NULL) {
+							if (!strcmp(causality, "output")) {
+								outputVars.push_back(expressions.at(i));
+							} else if (!strcmp(causality, "input")) {
+								inputVars.push_back(casVar);
+							}
+						}
+					}
+					i++;
+				}
+				CasADi::MXFunction f = CasADi::MXFunction(inputVars, outputVars);
+				f.setOption("name", child->Attribute("name"));
+				f.init();
+				m->setModelFunctionByItsName(new ModelicaCasADi::ModelFunction(f));
+			}
+		}
+	}
 }

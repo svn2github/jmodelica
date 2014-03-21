@@ -11,7 +11,7 @@
 			<algorithm>
 				<assign>
 					<to>
-						<local name="y"/>
+						<local name="y[1]"/>
 					</to>
 					<from>
 						<local name="x"/>
@@ -19,7 +19,7 @@
 				</assign>
 				<assign>
 					<to>
-						<local name="y"/>
+						<local name="y[2]"/>
 					</to>
 					<from>
 						<call builtin="*">
@@ -54,6 +54,10 @@
 
 	<equation kind="parameter">
 		<equal>
+			<tuple>
+				<local name="temp_1[1]"/>
+				<local name="temp_1[2]"/>
+			</tuple>
 			<call>
 				<function>
 					<local name="atomicModelPolyOutFunctionCallForDependentParameter.f"/>

@@ -29,6 +29,10 @@ string ModelFunction::getName() const {
     return myFunction.getOption("name");
 }
 
+MXFunction ModelFunction::getMx() {
+	return myFunction;
+}
+
 void ModelFunction::print(ostream& os) const { 
     os << "ModelFunction : " << myFunction << "\n";
     myFunction.print(os);

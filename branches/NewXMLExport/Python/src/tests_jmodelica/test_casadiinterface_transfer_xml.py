@@ -362,6 +362,15 @@ def test_ConstructMisc():
      "MX(vertcat(x1,pre(x2),pre(x3),pre(x4)))")
     assert (repr(model.getDaeResidual()) + repr(model.getInitialResidual()))  == expected
     
+@testattr(xml = True)    
+def test_ConstructVariableLaziness():
+    model = load_model("AtomicModelVariableLaziness", modelFile)
+    x2_eq = model.getDaeResidual()[0].getDep(1)
+    x1_eq = model.getDaeResidual()[1].getDep(1)
+    x1_var = model.getVariables(Model.DIFFERENTIATED)[0].getVar()
+    x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
+    assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
+    
 @testattr(xml = True)
 def test_ConstructFunctionsInRhs():
     model = load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"})
@@ -377,6 +386,537 @@ def test_ConstructFunctionsInRhs():
     model = load_model("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"})
     expected = "vertcat((x1-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([u1]){0}),(x2-function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([u1,u2]){0}),(vertcat(x3,x4)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){0},function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){1})),(vertcat(x5,x6)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1,u2]){0},function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1,u2]){1})),(x7-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\").call([u1]){0}),(x8-function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\").call([u2]){0}),(x9-function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\").call([u1]){0}),(x10-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\").call([u2]){0}),(vertcat(x11,x12)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1,u2]){0},function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1,u2]){1})))"
     assert str(model.getDaeResidual()) == expected 
+    
+
+@testattr(xml = True)
+def test_ConstructVariousRealValuedFunctions():
+    model = load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
+    #function monoInMonoOut
+        #input Real x
+        #output Real y
+    #algorithm
+        #y := x
+    #end monoInMonoOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOut")) == expected 
+
+    #function polyInMonoOut
+        #input Real x1
+        #input Real x2
+        #output Real y
+    #algorithm
+        #y := x1+x2
+    #end polyInMonoOut
+    #end monoInMonoOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = input[1]\n"
+                "@0 = (@0+@1)\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInMonoOut")) == expected 
+
+    #function monoInPolyOut
+        #input Real x
+        #output Real y1
+        #output Real y2
+    #algorithm
+        #y1 := if(x > 2) then 1 else 5
+        #y2 := x
+    #end monoInPolyOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = 2\n"
+                "@1 = input[0]\n"
+                "@0 = (@0<@1)\n"
+                "@2 = 1\n"
+                "@2 = (@0?@2:0)\n"
+                "@0 = (!@0)\n"
+                "@3 = 5\n"
+                "@0 = (@0?@3:0)\n"
+                "@2 = (@2+@0)\n"
+                "output[0] = @2\n"
+                "output[1] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInPolyOut")) == expected
+    
+    #function polyInPolyOut
+        #input Real x1
+        #input Real x2
+        #output Real y1
+        #output Real y2
+    #algorithm
+        #y1 := x1
+        #y2 := x2
+    #end polyInPolyOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n"
+                "@0 = input[1]\n"
+                "output[1] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOut")) == expected
+    
+    #function monoInMonoOutReturn
+        #input Real x
+        #output Real y
+    #algorithm
+        #y := x
+        #return
+        #y := 2*x
+    #end monoInMonoOutReturn
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutReturn")) == expected
+
+    #function functionCallInFunction
+        #input Real x
+        #output Real y
+    #algorithm
+        #y := monoInMonoOut(x)
+    #end functionCallInFunction
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([@0])\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallInFunction")) == expected
+    
+    #function functionCallEquationInFunction
+        #input Real x
+        #Real internal
+        #output Real y
+    #algorithm
+        #(y,internal) := monoInPolyOut(x)
+    #end functionCallEquationInFunction
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "{@1,NULL} = function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([@0])\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallEquationInFunction")) == expected
+
+    #function monoInMonoOutInternal
+        #input Real x
+        #Real internal
+        #output Real y
+    #algorithm
+        #internal := sin(x)
+        #y := x*internal
+        #internal := sin(y)
+        #y := x + internal
+    #end monoInMonoOutInternal
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = sin(@0)\n"
+                "@1 = (@0*@1)\n"
+                "@1 = sin(@1)\n"
+                "@0 = (@0+@1)\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutInternal")) == expected
+
+    #function polyInPolyOutInternal
+        #input Real x1
+        #input Real x2
+        #Real internal1
+        #Real internal2
+        #output Real y1
+        #output Real y2
+    #algorithm
+        #internal1 := x1
+        #internal2 := x2 + internal1
+        #y1 := internal1
+        #y2 := internal2 + x1
+        #y2 := 1
+    #end polyInPolyOutInternal
+    expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n"
+                "@0 = 1\n"
+                "output[1] = @0\n"
+                "@0 = input[1]\n")
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOutInternal")) == expected
+     
+     
+@testattr(xml = True)    
+def test_ConstructVariousIntegerValuedFunctions():
+    model = load_model("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
+    #function monoInMonoOut
+        #input Integer x
+        #output Integer y
+    #algorithm
+        #y := x
+    #end monoInMonoOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOut")) == expected 
+
+    #function polyInMonoOut
+        #input Integer x1
+        #input Integer x2
+        #output Integer y
+    #algorithm
+        #y := x1+x2
+    #end polyInMonoOut
+    #end monoInMonoOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = input[1]\n"
+                "@0 = (@0+@1)\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInMonoOut")) == expected 
+
+    #function monoInPolyOut
+        #input Integer x
+        #output Integer y1
+        #output Integer y2
+    #algorithm
+        #y1 := if(x > 2) then 1 else 5
+        #y2 := x
+    #end monoInPolyOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = 2\n"
+                "@1 = input[0]\n"
+                "@0 = (@0<@1)\n"
+                "@2 = 1\n"
+                "@2 = (@0?@2:0)\n"
+                "@0 = (!@0)\n"
+                "@3 = 5\n"
+                "@0 = (@0?@3:0)\n"
+                "@2 = (@2+@0)\n"
+                "output[0] = @2\n"
+                "output[1] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInPolyOut")) == expected
+    
+    #function polyInPolyOut
+        #input Integer x1
+        #input Integer x2
+        #output Integer y1
+        #output Integer y2
+    #algorithm
+        #y1 := x1
+        #y2 := x2
+    #end polyInPolyOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n"
+                "@0 = input[1]\n"
+                "output[1] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOut")) == expected
+    
+    #function monoInMonoOutReturn
+        #input Integer x
+        #output Integer y
+    #algorithm
+        #y := x
+        #return
+        #y := 2*x
+    #end monoInMonoOutReturn
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn")) == expected
+
+    #function functionCallInFunction
+        #input Integer x
+        #output Integer y
+    #algorithm
+        #y := monoInMonoOut(x)
+    #end functionCallInFunction
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([@0])\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallInFunction")) == expected
+    
+    #function functionCallEquationInFunction
+        #input Integer x
+        #Integer internal
+        #output Integer y
+    #algorithm
+        #(y,internal) := monoInPolyOut(x)
+    #end functionCallEquationInFunction
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "{@1,NULL} = function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([@0])\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction")) == expected
+
+    #function monoInMonoOutInternal
+        #input Integer x
+        #Integer internal
+        #output Integer y
+    #algorithm
+        #internal := 3*x
+        #y := x*internal
+        #internal := 1+y
+        #y := x + internal
+    #end monoInMonoOutInternal
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = 3\n"
+                "@1 = input[0]\n"
+                "@0 = (@0*@1)\n"
+                "@0 = (@1*@0)\n"
+                "@2 = 1\n"
+                "@2 = (@2+@0)\n"
+                "@1 = (@1+@2)\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal")) == expected
+
+    #function polyInPolyOutInternal
+        #input Integer x1
+        #input Integer x2
+        #Integer internal1
+        #Integer internal2
+        #output Integer y1
+        #output Integer y2
+    #algorithm
+        #internal1 := x1
+        #internal2 := x2 + internal1
+        #y1 := internal1
+        #y2 := internal2 + x1
+        #y2 := 1
+    #end polyInPolyOutInternal
+    expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n"
+                "@0 = 1\n"
+                "output[1] = @0\n"
+                "@0 = input[1]\n")
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal")) == expected
+     
+     
+@testattr(xml = True)    
+def test_ConstructVariousBooleanValuedFunctions():
+    model = load_model("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
+    #function monoInMonoOut
+        #input Boolean x
+        #output Boolean y
+    #algorithm
+        #y := x
+    #end monoInMonoOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOut")) == expected 
+
+    #function polyInMonoOut
+        #input Boolean x1
+        #input Boolean x2
+        #output Boolean y
+    #algorithm
+        #y := x1 and x2
+    #end polyInMonoOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = input[1]\n"
+                "@0 = (@0&&@1)\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInMonoOut")) == expected 
+
+    #function monoInPolyOut
+        #input Boolean x
+        #output Boolean y1
+        #output Boolean y2
+    #algorithm
+        #y1 := if(x) then false else (x or false)
+        #y2 := x
+    #end monoInPolyOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = 0\n"
+                "@1 = input[0]\n"
+                "@0 = (@0||@1)\n"
+                "@2 = (!@1)\n"
+                "@2 = (@2?@0:0)\n"
+                "output[0] = @2\n"
+                "output[1] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInPolyOut")) == expected
+    
+    #function polyInPolyOut
+        #input Boolean x1
+        #input Boolean x2
+        #output Boolean y1
+        #output Boolean y2
+    #algorithm
+        #y1 := x1
+        #y2 := x2
+    #end polyInPolyOut
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n"
+                "@0 = input[1]\n"
+                "output[1] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOut")) == expected
+    
+    #function monoInMonoOutReturn
+        #input Boolean x
+        #output Boolean y
+    #algorithm
+        #y := x
+        #return
+        #y := x or false
+    #end monoInMonoOutReturn
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn")) == expected
+
+    #function functionCallInFunction
+        #input Boolean x
+        #output Boolean y
+    #algorithm
+        #y := monoInMonoOut(x)
+    #end functionCallInFunction
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([@0])\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallInFunction")) == expected
+    
+    #function functionCallEquationInFunction
+        #input Boolean x
+        #Boolean internal
+        #output Boolean y
+    #algorithm
+        #(y,internal) := monoInPolyOut(x)
+    #end functionCallEquationInFunction
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "{@1,NULL} = function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([@0])\n"
+                "output[0] = @1\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction")) == expected
+
+    #function monoInMonoOutInternal
+        #input Boolean x
+        #Boolean internal
+        #output Boolean y
+    #algorithm
+        #internal := x
+        #y := x and internal
+        #internal := false or y
+        #y := false or internal
+    #end monoInMonoOutInternal
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@0 = (@0&&@0)\n"
+                "@1 = 0\n"
+                "@1 = (@1||@0)\n"
+                "@0 = 0\n"
+                "@0 = (@0||@1)\n"
+                "output[0] = @0\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal")) == expected
+
+    #function polyInPolyOutInternal
+        #input Boolean x1
+        #input Boolean x2
+        #Boolean internal1
+        #Boolean internal2
+        #output Boolean y1
+        #output Boolean y2
+    #algorithm
+        #internal1 := x1
+        #internal2 := x2  or internal1
+        #y1 := internal1
+        #y2 := internal2 or x1
+        #y2 := true
+    #end polyInPolyOutInternal
+    expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "output[0] = @0\n"
+                "@0 = 1\n"
+                "output[1] = @0\n"
+                "@0 = input[1]\n")
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal")) == expected
+
+    
     
 @testattr(xml = True)    
 def test_TransferVariableType():

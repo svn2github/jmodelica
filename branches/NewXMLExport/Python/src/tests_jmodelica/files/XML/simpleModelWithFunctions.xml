@@ -1,47 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class kind="model">
-	<classDefinition name="simpleModelWithFunctions.f2">
-		<class kind="function">
-			<component name="in1" causality="input">
-				<builtin name="Real"/>
-			</component>
-			<component name="in2" causality="input">
-				<builtin name="Real"/>
-			</component>
-			<component name="out1" causality="output">
-				<builtin name="Real"/>
-			</component>
-			<component name="out2" causality="output">
-				<builtin name="Real"/>
-			</component>
-			<algorithm>
-				<assign>
-					<to>
-						<local name="out1"/>
-					</to>
-					<from>
-						<call builtin="*">
-							<local name="in1"/>
-							<real value="0.5"/>
-						</call>
-					</from>
-				</assign>
-				<assign>
-					<to>
-						<local name="out2"/>
-					</to>
-					<from>
-						<call builtin="+">
-							<local name="in2"/>
-							<local name="out1"/>
-						</call>
-					</from>
-				</assign>
-				<return/>
-			</algorithm>
-		</class>
-	</classDefinition>
-	
 	<classDefinition name="simpleModelWithFunctions.f">
 		<class kind="function">
 			<component name="in1" causality="input">
@@ -121,6 +79,48 @@
 							</function>
 							<local name="in1"/>
 							<local name="in2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+	
+	<classDefinition name="simpleModelWithFunctions.f2">
+		<class kind="function">
+			<component name="in1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="in2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<local name="out1"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<local name="in1"/>
+							<real value="0.5"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<local name="out2"/>
+					</to>
+					<from>
+						<call builtin="+">
+							<local name="in2"/>
+							<local name="out1"/>
 						</call>
 					</from>
 				</assign>
