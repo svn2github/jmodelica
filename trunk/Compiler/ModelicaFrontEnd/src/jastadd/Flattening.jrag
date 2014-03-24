@@ -189,32 +189,32 @@ aspect Flattening {
 		icd.flattenThisFunction(fc);
 	}
 	
-	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
-		if (fc.lookupFunc(qualifiedName()) == null) {
+    public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
+        if (fc.lookupFunc(qualifiedName()) == null) {
             InstExternal ie = findFunctionExternal();
-			
-			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
-			FFunctionDecl ffd = createFFunction(fc, ie);
-			if (der != null)
-				ffd.setFDerivativeFunction(der);
-			// TODO: should we look in extends as well?
-			ffd.readInlineAnnotation(annotation());
-			ffd.readSmoothOrderAnnotation(annotation());
-			
-			ffd.ensureFQNamesFull();
-			addLocalFunctionConstants(ffd, fc);
-			flattenUsedFuncsAndEnums(fc);
-			ffd.updateRecordArraySizes();
-		}
-	}
-	
-	private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
+
+            FDerivativeFunction der = createFDerivativeFunction(fc, ie);
+            FFunctionDecl ffd = createFFunction(fc, ie);
+            if (der != null)
+                ffd.setFDerivativeFunction(der);
+            // TODO: should we look in extends as well?
+            ffd.readInlineAnnotation(annotation());
+            ffd.setSmoothOrder(smoothOrder());
+
+            ffd.ensureFQNamesFull();
+            addLocalFunctionConstants(ffd, fc);
+            flattenUsedFuncsAndEnums(fc);
+            ffd.updateRecordArraySizes();
+        }
+    }
+
+    private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
         if (isConstructor())
             return new FConstructorDecl();
         if (isDestructor())
             return new FDestructorDecl();
-	    return new FFunctionDecl();
-	}
+        return new FFunctionDecl();
+    }
 	
 	public AnnotationNode InstClassDecl.derivativeAnnotation(InstExternal ie) {
 		AnnotationNode functionDer = annotation("derivative");

@@ -920,13 +920,13 @@ aspect FlatAPI {
             l.add(e);
         return l;
     }
+    
+    syn int FSmoothExp.order() = getOrder().ceval().intValue(); 
 
 	/**
 	 * Check if an expression will generate an event
 	 */
-	syn boolean FExp.generatesEvent() =
-			generatesEventExp() &&
-			!inWhen();
+	syn boolean FExp.generatesEvent() = generatesEventExp() && !inDiscreteLocation();
 	
 	/**
 	 * Check if an expression will generate an event.

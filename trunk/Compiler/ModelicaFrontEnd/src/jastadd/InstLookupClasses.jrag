@@ -520,6 +520,7 @@ aspect InstLookupClasses {
 	}
 	eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
 	eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
+	syn InstClassDecl InstFunctionCall.myInstClassDecl()  = getName().myInstClassDecl(); 
 	
 	syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
 	eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();

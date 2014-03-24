@@ -888,7 +888,7 @@ aspect Constructors {
 	}
 	
 	public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
-	    this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new Opt<FDerivativeFunction>());
+	    this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new Opt<FDerivativeFunction>(), SMOOTH_ORDER_ANNOTATION_DEFAULT);
 	}
 	
 }

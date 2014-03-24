@@ -1154,7 +1154,7 @@ aspect TransformCanonical {
 			
 			// Add return statement, create function declaration and add it to FClass 
 			alg.addFStatement(new FReturnStmt());
-			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new Opt()));
+			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new Opt(), SMOOTH_ORDER_ANNOTATION_DEFAULT));
 		}
 	}
 
@@ -2307,6 +2307,7 @@ aspect WhenClauses{
 	syn boolean FAbstractEquation.isWhen() = isWhen;
 	eq FWhenEquation.isWhen()              = true;
 	syn boolean FStatement.isWhen()        = isWhen;
+	eq FWhenStmt.isWhen()                  = true;
 	syn boolean FIfExp.isWhen()            = isWhen;
 	public void FAbstractEquation.setWhen() { isWhen = true; }
 	public void FStatement.setWhen()        { isWhen = true; }
