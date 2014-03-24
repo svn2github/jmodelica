@@ -4281,6 +4281,45 @@ equation
 ")})));
 end CRecordDecl19;
 
+model CRecordDecl20
+    record R
+        Real x1 = -1;
+        constant Real y = 2;
+        final parameter Real z = 3; 
+        Real x2;
+    end R;
+    
+    function f
+        input R i;
+        output Real o = i.x1;
+        algorithm
+    end f;
+    
+    Real r = f(R(time,time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CRecordDecl20",
+            description="Record constructor of record with unmodifiable components.",
+            inline_functions="none",
+            template="$C_ode_derivatives$",
+            generatedCode="
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    tmp_1->x1 = _time;
+    tmp_1->y = 2;
+    tmp_1->z = 3;
+    tmp_1->x2 = _time;
+    _r_0 = func_CCodeGenTests_CRecordDecl20_f_exp(tmp_1);
+/********* Write back reinits *******/
+
+")})));
+end CRecordDecl20;
+
 
 model RemoveCopyright
 	annotation(__JModelica(UnitTesting(tests={

@@ -223,7 +223,8 @@ aspect TransformCanonical {
 	 */
 	public void FRecordDecl.clearBindingEquations() {
 		for (FVariable fv : getFVariables())
-			fv.setBindingExpOpt(new Opt());
+		    if (fv.modifiableInRecord)
+		        fv.setBindingExpOpt(new Opt());
 	}
 	
 
@@ -1034,9 +1035,9 @@ aspect TransformCanonical {
 		return new FIdUseExp(name);
 	}
 	
-	public FExp FRecordConstructor.extractRecordFExp(String suffix) {
-		return getArg(getRecord().myFRecordDecl().indexOf(suffix)).fullCopy();
-	}
+    public FExp FRecordConstructor.extractRecordFExp(String suffix) {
+        return myArgFExp(suffix).fullCopy();
+    }
 	
 	public FExp FArray.extractRecordFExp(String suffix) {
 		FArray res = createEmptyNode();
@@ -3618,9 +3619,8 @@ aspect FunctionInlining {
 	
 	public void FRecordConstructor.addInliningVarsAndEqns(FunctionInliner fi, String oldName, boolean noEvent) {
 		oldName += ".";
-		Iterator<FExp> exps = getArgs().iterator();
 		for (FRecordComponentType part : ((FRecordType) type()).getComponents())
-			exps.next().addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
+		    myArgFExp(part.getName()).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
 	}
 	
 	

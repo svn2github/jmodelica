@@ -1944,9 +1944,9 @@ aspect CCodeGen {
 		return dynamicFExp(new FIdUseExp(fqn));
 	}
 	
-	public FExp FRecordConstructor.extractRecordComponentExp(String name) {
-		return getArg(getRecord().myFRecordDecl().indexOf(name));
-	}
+    public FExp FRecordConstructor.extractRecordComponentExp(String name) {
+        return myArgFExp(name);
+    }
 	
 	public void FExp.genTempOutput_C(CodePrinter p, CodeStream str, String indent) {}
 	

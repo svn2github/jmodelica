@@ -820,7 +820,7 @@ parameter equation
 
 public
  record RecordTests.RecordBinding9.A
-  constant Real a;
+  constant Real a = 1;
   Real b;
  end RecordTests.RecordBinding9.A;
 
@@ -852,7 +852,7 @@ equation
 
 public
  record RecordTests.RecordBinding10.A
-  constant Real a;
+  constant Real a = 1;
   Real b;
  end RecordTests.RecordBinding10.A;
 
@@ -982,6 +982,49 @@ public
 end RecordTests.RecordBinding13;
 ")})));
 end RecordBinding13;
+
+
+model RecordBinding14
+    record R
+        Real x1 = -1;
+        constant Real y = 2;
+        final parameter Real z = 3; 
+        Real x2;
+    end R;
+    
+    R rec = R(x2=4);
+    R[2] recs = {R(1,4),R(1,4)};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding14",
+            description="Record constructor for record of unmodifiable components",
+            flatModel="
+fclass RecordTests.RecordBinding14
+ constant Real rec.x1 = -1;
+ constant Real rec.y = 2;
+ parameter Real rec.z = 3 /* 3 */;
+ constant Real rec.x2 = 4;
+ constant Real recs[1].x1 = 1;
+ constant Real recs[1].y = 2;
+ parameter Real recs[1].z = 3 /* 3 */;
+ constant Real recs[1].x2 = 4;
+ constant Real recs[2].x1 = 1;
+ constant Real recs[2].y = 2;
+ parameter Real recs[2].z = 3 /* 3 */;
+ constant Real recs[2].x2 = 4;
+
+public
+ record RecordTests.RecordBinding14.R
+  Real x1;
+  constant Real y = 2;
+  parameter Real z = 3 /* 3 */;
+  Real x2;
+ end RecordTests.RecordBinding14.R;
+
+end RecordTests.RecordBinding14;
+")})));
+end RecordBinding14;
 
 
 model RecordArray1
