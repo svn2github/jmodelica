@@ -2354,10 +2354,10 @@ fclass NameTests.ImportTest8
  Modelica.SIunits.ElectricCurrent r.p.i \"Current flowing into the pin\";
  Modelica.SIunits.ElectricPotential r.n.v \"Potential at the pin\";
  Modelica.SIunits.ElectricCurrent r.n.i \"Current flowing into the pin\";
- parameter Boolean r.useHeatPort = false "=true, if heatPort is enabled" /* false */;
- parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref "Fixed device temperature if useHeatPort = false";
- Modelica.SIunits.Power r.LossPower "Loss power leaving component via heatPort";
- Modelica.SIunits.ThermodynamicTemperature r.T_heatPort "Temperature of heatPort";
+ parameter Boolean r.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
+ parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
+ Modelica.SIunits.Power r.LossPower \"Loss power leaving component via heatPort\";
+ Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of heatPort\";
 equation
  assert(1 + r.alpha * (r.T_heatPort - r.T_ref) >= 1.0E-15, \"Temperature outside scope of model!\");
  r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));
