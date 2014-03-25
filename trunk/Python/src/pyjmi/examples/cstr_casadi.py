@@ -131,7 +131,7 @@ def run_demo(with_plots=True):
     t_init_sim = init_res['time']
     c_init_sim = init_res['cstr.c']
     T_init_sim = init_res['cstr.T']
-    Tc_init_sim = init_res['cstr.Tc'] + N.zeros(t_init_sim.shape) # make Tc_init_sim be a vector
+    Tc_init_sim = init_res['cstr.Tc']
 
     # Plot the initial guess trajectories
     if with_plots:
@@ -185,9 +185,9 @@ def run_demo(with_plots=True):
     Tc_res = res['cstr.Tc']
     time_res = res['time']
 
-    c_ref = res['c_ref'][0] # extract constant value as first element
-    T_ref = res['T_ref'][0]
-    Tc_ref = res['Tc_ref'][0]
+    c_ref = res.final('c_ref') # extract constant value as last element
+    T_ref = res.final('T_ref')
+    Tc_ref = res.final('Tc_ref')
     
     # Verify solution for testing purposes
     try:
