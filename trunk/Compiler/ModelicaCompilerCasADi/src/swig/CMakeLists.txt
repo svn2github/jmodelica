@@ -11,7 +11,6 @@ project(ModelicaCompilerCasADi CXX)
 # import environment variables
 set(CASADI_HOME $ENV{CASADI_HOME})
 set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
-set(JAVA_HOME $ENV{JAVA_HOME})
 
 find_library(CASADI_DLL
   NAMES libcasadi.so libcasadi.dll
@@ -20,10 +19,8 @@ find_library(CASADI_DLL
 )
 
 #JNI
-include_directories(${JAVA_HOME}/include)
-if(WIN32)
-  include_directories(${JAVA_HOME}/include/win32)
-endif(WIN32)
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
 
 
 set(CPPFLAGS -fPIC -shared -D_REENTRANT)
