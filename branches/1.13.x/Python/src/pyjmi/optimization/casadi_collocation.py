@@ -2908,22 +2908,24 @@ class LocalDAECollocatorOld(CasadiCollocator):
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
                     for var_type in ['x', 'unelim_u', 'w']:
-                        for var in var_vectors[var_type]:
-                            vr = var.getValueReference()
-                            (ind, _) = vr_map[vr]
-                            global_ind = var_indices[i][k][var_type][ind]
-                            xx_i_k = primal_opt[global_ind]
-                            if self.nominal_traj is None:
-                                xx_i_k *= sf[var_type][ind]
-                            else:
-                                sf_index = self._vr_sf_map[vr]
-                                if self._is_variant[vr]:
-                                    xx_i_k *= variant_sf[i][k][sf_index]
+                        if (not self.blocking_factors or
+                            var_type != "unelim_u"):
+                            for var in var_vectors[var_type]:
+                                vr = var.getValueReference()
+                                (ind, _) = vr_map[vr]
+                                global_ind = var_indices[i][k][var_type][ind]
+                                xx_i_k = primal_opt[global_ind]
+                                if self.nominal_traj is None:
+                                    xx_i_k *= sf[var_type][ind]
                                 else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    xx_i_k = d * xx_i_k + e
-                            primal_opt[global_ind] = xx_i_k
+                                    sf_index = self._vr_sf_map[vr]
+                                    if self._is_variant[vr]:
+                                        xx_i_k *= variant_sf[i][k][sf_index]
+                                    else:
+                                        d = invariant_d[sf_index]
+                                        e = invariant_e[sf_index]
+                                        xx_i_k = d * xx_i_k + e
+                                primal_opt[global_ind] = xx_i_k
                     
                     # Treat state derivatives separately
                     if not self.eliminate_der_var:
@@ -2946,6 +2948,30 @@ class LocalDAECollocatorOld(CasadiCollocator):
                                     xx_i_k = d * xx_i_k + e
                             primal_opt[global_ind] = xx_i_k
                         t_index += 1
+
+        # Rescale inputs with blocking factors
+        if (self.variable_scaling and not self.write_scaled_result and
+            self.blocking_factors is not None):
+            var_type = "unelim_u"
+            k = 1
+            for i in N.cumsum(self.blocking_factors): # Only once per factor
+                for var in var_vectors[var_type]:
+                    vr = var.getValueReference()
+                    (ind, _) = vr_map[vr]
+                    global_ind = var_indices[i][k][var_type][ind]
+                    
+                    u_i_k = primal_opt[global_ind]
+                    if self.nominal_traj is None:
+                        u_i_k *= sf[var_type][ind]
+                    else:
+                        sf_index = self._vr_sf_map[vr]
+                        if self._is_variant[vr]:
+                            u_i_k *= variant_sf[i][k][sf_index]
+                        else:
+                            d = invariant_d[sf_index]
+                            e = invariant_e[sf_index]
+                            u_i_k = d * u_i_k + e
+                    primal_opt[global_ind] = u_i_k
         
         # Rescale continuity variables
         if (self.variable_scaling and not self.eliminate_cont_var and
@@ -5358,22 +5384,47 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
                     for var_type in var_types:
-                        for var in mvar_vectors[var_type]:
-                            name = var.getName()
-                            (ind, _) = name_map[name]
-                            global_ind = var_indices[i][k][var_type][ind]
-                            xx_i_k = primal_opt[global_ind]
-                            if self.nominal_traj is None:
-                                xx_i_k *= sf[var_type][ind]
-                            else:
-                                sf_index = self._name_idx_sf_map[name]
-                                if self._is_variant[name]:
-                                    xx_i_k *= variant_sf[i][k][sf_index]
+                        if (not self.blocking_factors or
+                            var_type != "unelim_u"):
+                            for var in mvar_vectors[var_type]:
+                                name = var.getName()
+                                (ind, _) = name_map[name]
+                                global_ind = var_indices[i][k][var_type][ind]
+                                xx_i_k = primal_opt[global_ind]
+                                if self.nominal_traj is None:
+                                    xx_i_k *= sf[var_type][ind]
                                 else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    xx_i_k = d * xx_i_k + e
-                            primal_opt[global_ind] = xx_i_k
+                                    sf_index = self._name_idx_sf_map[name]
+                                    if self._is_variant[name]:
+                                        xx_i_k *= variant_sf[i][k][sf_index]
+                                    else:
+                                        d = invariant_d[sf_index]
+                                        e = invariant_e[sf_index]
+                                        xx_i_k = d * xx_i_k + e
+                                primal_opt[global_ind] = xx_i_k
+
+        # Rescale inputs with blocking factors
+        if (self.variable_scaling and not self.write_scaled_result and
+            self.blocking_factors is not None):
+            var_type = "unelim_u"
+            k = 1
+            for i in N.cumsum(self.blocking_factors): # Only once per factor
+                for var in mvar_vectors[var_type]:
+                    name = var.getName()
+                    (ind, _) = name_map[name]
+                    global_ind = var_indices[i][k][var_type][ind]
+                    u_i_k = primal_opt[global_ind]
+                    if self.nominal_traj is None:
+                        u_i_k *= sf[var_type][ind]
+                    else:
+                        sf_index = self._name_idx_sf_map[name]
+                        if self._is_variant[name]:
+                            u_i_k *= variant_sf[i][k][sf_index]
+                        else:
+                            d = invariant_d[sf_index]
+                            e = invariant_e[sf_index]
+                            u_i_k = d * u_i_k + e
+                    primal_opt[global_ind] = u_i_k
 
         # Rescale continuity variables
         if (self.variable_scaling and not self.eliminate_cont_var and

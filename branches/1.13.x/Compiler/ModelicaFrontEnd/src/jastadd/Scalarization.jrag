@@ -1983,13 +1983,13 @@ aspect Scalarization {
 	}
 	
 	public FExp FQNameString.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
-		FExp arg = con.getArg(con.getRecord().myFRecordDecl().indexOf(getName()));
+		FExp arg = con.myArgFExp(getName());
 		return arg.scalarRecordFExp(indexMap, new FQNameEmpty());
 	}
 	
 	public FExp FQNameFull.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
 		FQNamePart first = getFQNamePart(0);
-		FExp arg = con.getArg(con.getRecord().myFRecordDecl().indexOf(first.getName()));
+		FExp arg = con.myArgFExp(first.getName());
 		if (first.hasFArraySubscripts())
 			arg = arg.getArray().get(first.getFArraySubscripts().asIndex());
 		return arg.scalarRecordFExp(indexMap, copySuffix());

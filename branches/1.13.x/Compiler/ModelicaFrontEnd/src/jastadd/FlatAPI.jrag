@@ -1622,6 +1622,30 @@ aspect FlatTypes {
 		return -1;
 	}
 	
+    syn int FRecordDecl.indexOfArg(String name) {
+        int k = 0;
+        for (int i = 0; i < getNumFVariable(); i++) {
+            if (getFVariable(i).modifiableInRecord) {
+                if (getFVariable(i).name().equals(name))
+                    return k;
+                k++;
+            }
+        }
+        return -1;
+    }
+    
+    syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
+        FVariable fv = getFVariable(indexOf(name));
+        if (fv.modifiableInRecord)
+            return frc.getArg(indexOfArg(name));
+        else
+            return fv.getBindingExp();
+    }
+    
+    syn FExp FRecordConstructor.myArgFExp(String name) {
+        return getRecord().myFRecordDecl().extractArg(this, name);
+    }
+	
     inh FRecordDecl FExp.containingRecordDecl();
     inh FRecordDecl FAbstractVariable.containingRecordDecl();
 	eq FRecordDecl.getChild().containingRecordDecl() = this;

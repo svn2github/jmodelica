@@ -242,7 +242,7 @@ aspect ContentCheck {
 	}
     
     public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
-        if (getName().hasFArraySubscripts())
+        if (getName().hasFArraySubscripts() && !getName().getFArraySubscripts().isFullSize())
             error("Modifiers of specific array elements are not allowed");
     }
     

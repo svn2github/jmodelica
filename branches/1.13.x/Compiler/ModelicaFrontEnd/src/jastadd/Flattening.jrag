@@ -637,12 +637,16 @@ aspect Flattening {
 	
 	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {}
 	
-	public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
-	    if (names.add(name())) {
-    		frd.addFVariable(createFVariable());
+    public boolean FVariable.modifiableInRecord = true;
+    public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
+        if (names.add(name())) {
+            FVariable fv = createFVariable();
+            if (isConstant() || (isParameter() && tokenComponentDecl_ComponentDecl.hasFinal()))
+                fv.modifiableInRecord = false;
+            frd.addFVariable(fv);
             flattenMyType(fc);
-	    }
-	}
+        }
+    }
 	
 	public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		if (useInFlattening()) {

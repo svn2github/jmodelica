@@ -1275,6 +1275,24 @@ class TestLocalDAECollocator:
         assert_results(res, 3.620908059907745e0, 3.049446667587375e-1,
                        cost_rtol=8e-2, u_norm_rtol=3e-2)
 
+    @testattr(casadi = True)
+    def test_blocking_factors_cstr(self):
+        """Test blocking factors for CSTR."""
+        op = self.cstr_lagrange_op
+        
+        opts = op.optimize_options(self.algorithm)
+        opts['blocking_factors'] = [12, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+                                    2, 2, 2, 3, 3, 6]
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, 1.873e3, 3.053e2,
+                       cost_rtol=8e-2, u_norm_rtol=3e-2)
+
+        opts['init_traj'] = res.result_data
+        opts['nominal_traj'] = res.result_data
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, 1.873e3, 3.053e2,
+                       cost_rtol=8e-2, u_norm_rtol=3e-2)
+
     @testattr(casadi_new = True)
     def test_eliminate_der_var(self):
         """

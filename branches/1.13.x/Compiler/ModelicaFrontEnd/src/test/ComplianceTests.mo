@@ -274,6 +274,7 @@ model ArrayCellMod_ComplErr
  end A;
  
  A a(b[1] = 1, b[1](start=2));
+ A a2(b[:] = {1,2}, b[:](start={2,3}));
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(

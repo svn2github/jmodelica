@@ -934,7 +934,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 		/* Evaluate discrete variables after a regularization. */
 		if (block->at_event) {
             jmi_log_node_t inner_node;
-			if(block->callbacks->log_options.log_level >= 5) {
+			if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
                 inner_node =jmi_log_enter_fmt(block->log, logInfo, "RegularizationDiscreteUpdate", 
                                 "Evaluating switches after regularization.");
                 jmi_log_fmt(block->log, inner_node, logInfo, "Pre discrete variables");
@@ -943,7 +943,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
             block->F(block->problem_data, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
             
-            if(block->callbacks->log_options.log_level >= 5) {
+            if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
                 jmi_log_fmt(block->log, inner_node, logInfo, "Post discrete variables");
                 block->log_discrete_variables(block->problem_data, inner_node);
                 jmi_log_leave(block->log, inner_node);
