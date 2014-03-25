@@ -35,18 +35,130 @@ if modelicacasadi_present:
     from modelicacasadi_transfer import transfer_model as _transfer_model
     from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
 
-    def transfer_model(*args, **kwargs):
-        model = modelicacasadi_wrapper.Model() # no wrapper exists for Model yet
-        _transfer_model(model, *args, **kwargs)
-        return model
+def transfer_model(class_name, file_name=[],
+                   compiler_options={}, compiler_log_level='warning'):
+    """ 
+    Compiles and transfers a model to the ModelicaCasADi interface. 
+    
+    A model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be file or library paths.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+        
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries.
+            Default: Empty list.
+                        
+        compiler_options --
+            Options for the compiler.
+            Note that MODELICAPATH is set to the standard for this
+            installation if not given as an option.
+            Default: Empty dict.
+            
+        compiler_log_level --
+            Set the logging for the compiler. Valid options are:
+            'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
+            Default: 'warning'
 
-    def transfer_optimization_problem(*args, **kwargs):
-        model = OptimizationProblem()
-        _transfer_optimization_problem(model, *args, **kwargs)
-        return model
+                  
+    Returns::
+    
+        A Model representing the class given by class_name.
 
-    def transfer_to_casadi_interface(*args, **kwargs):
-        return transfer_optimization_problem(*args, **kwargs)
+"""
+    model = modelicacasadi_wrapper.Model() # no wrapper exists for Model yet
+    _transfer_model(model, class_name=class_name, file_name=file_name,
+                    compiler_options=compiler_options,
+                    compiler_log_level=compiler_log_level)
+    return model
+
+def transfer_optimization_problem(class_name, file_name=[],
+                                  compiler_options={}, compiler_log_level='warning',
+                                  accept_model=False):
+    """ 
+    Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
+    
+    A  model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be file or library paths.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+        
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries.
+            Default: Empty list.
+
+        compiler_options --
+            Options for the compiler.
+            Note that MODELICAPATH is set to the standard for this
+            installation if not given as an option.
+            Default: Empty dict.
+            
+        compiler_log_level --
+            Set the logging for the compiler. Valid options are:
+            'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
+            Default: 'warning'
+
+        accept_model --
+            If true, allows to transfer a model. Only the model parts of the
+            OptimizationProblem will be initialized.
+
+
+    Returns::
+    
+        An OptimizationProblem representing the class given by class_name.
+
+    """
+    model = OptimizationProblem()
+    _transfer_optimization_problem(model, class_name=class_name, file_name=file_name,
+                                   compiler_options=compiler_options,
+                                   compiler_log_level=compiler_log_level,
+                                   accept_model=accept_model)
+    return model
+
+def transfer_to_casadi_interface(*args, **kwargs):
+    return transfer_optimization_problem(*args, **kwargs)
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
