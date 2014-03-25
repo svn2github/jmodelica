@@ -131,7 +131,7 @@
     </listitem>
 
     <listitem>
-      <para>The following limitations applies to JMUs compiled with
+      <para>The following limitations apply to JMUs compiled with
       JModelica.org:</para>
 
       <itemizedlist>
@@ -152,7 +152,7 @@
     </listitem>
 
     <listitem>
-      <para>The following limitations applies to FMUs compiled with
+      <para>The following limitations apply to FMUs compiled with
       JModelica.org:</para>
 
       <itemizedlist>
@@ -166,6 +166,27 @@
           work.</para>
         </listitem>
       </itemizedlist>
+    </listitem>
+
+    <listitem>
+      <para>The following limitations apply to optimization using CasADi-based
+      collocation with JModelica.org:<itemizedlist>
+          <listitem>
+            <para>Incomplete support for the <literal>Integer</literal> and
+            <literal>Boolean</literal> types: To the extent that they are
+            supported, they be treated more or less like reals.</para>
+          </listitem>
+
+          <listitem>
+            <para>No support for <literal>String</literal> and
+            <literal>enumeration</literal> types.</para>
+          </listitem>
+
+          <listitem>
+            <para>Attributes with any name can be set on any type of
+            variable.</para>
+          </listitem>
+        </itemizedlist></para>
     </listitem>
   </itemizedlist>
 </chapter>
