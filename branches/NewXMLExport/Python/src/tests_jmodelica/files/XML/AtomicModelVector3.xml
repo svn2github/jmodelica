@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class kind="model">
-	<classDefinition name="AtomicModelVector2.f">
+	<classDefinition name="AtomicModelVector3.f">
 		<class kind="function">
 			<component name="A" causality="input">
+				<local name="Real[2]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<component name="inParams" causality="input">
 				<local name="Real[2]"/>
 				<dimension>
 					<integer value="2"/>
@@ -14,40 +20,7 @@
 					<integer value="2"/>
 				</dimension>
 			</component>
-			<algorithm>
-				<assign>
-					<to>
-						<reference>
-							<local name="B"/>
-						</reference>
-					</to>
-					<from>
-						<call>
-							<function>
-								<reference>
-									<local name="AtomicModelVector2.f2"/>
-								</reference>
-							</function>
-							<reference>
-								<local name="A"/>
-							</reference>
-						</call>
-					</from>
-				</assign>
-				<return/>
-			</algorithm>
-		</class>
-	</classDefinition>
-
-	<classDefinition name="AtomicModelVector2.f2">
-		<class kind="function">
-			<component name="A" causality="input">
-				<local name="Real[2]"/>
-				<dimension>
-					<integer value="2"/>
-				</dimension>
-			</component>
-			<component name="B" causality="output">
+			<component name="outParams" causality="output">
 				<local name="Real[2]"/>
 				<dimension>
 					<integer value="2"/>
@@ -94,6 +67,48 @@
 						</call>
 					</from>
 				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="outParams"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="*">
+							<reference>
+								<local name="inParams"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+							</reference>
+							<integer value="2"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="outParams"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="*">
+							<reference>
+								<local name="inParams"/>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+							</reference>
+							<integer value="2"/>
+						</call>
+					</from>
+				</assign>
 				<return/>
 			</algorithm>
 		</class>
@@ -115,51 +130,48 @@
 			</item>
 		</modifier>
 	</component>
-	<component name="temp_1[1]">
+	<component name="B[1]">
 		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="20"/>
+			</item>
+		</modifier>
 	</component>
-	<component name="temp_1[2]">
+	<component name="B[2]">
 		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
 	</component>
-
-	<equation kind="initial">
-		<equal>
-			<local name="A[1]"/>
-			<integer value="1"/>
-		</equal>
-		<equal>
-			<local name="A[2]"/>
-			<integer value="2"/>
-		</equal>
-	</equation>
 
 	<equation>
 		<equal>
 			<tuple>
-				<local name="temp_1[1]"/>
-				<local name="temp_1[2]"/>
+				<tuple>
+					<local name="A[1]"/>
+					<local name="A[2]"/>
+				</tuple>
+				<tuple>
+					<local name="B[1]"/>
+					<local name="B[2]"/>
+				</tuple>
 			</tuple>
 			<call>
 				<function>
-					<local name="AtomicModelVector2.f"/>
+					<local name="AtomicModelVector3.f"/>
 				</function>
 				<tuple>
 					<local name="A[1]"/>
 					<local name="A[2]"/>
 				</tuple>
+				<tuple>
+					<integer value="1"/>
+					<integer value="2"/>
+				</tuple>
 			</call>
-		</equal>
-		<equal>
-			<operator name="der">
-				<local name="A[1]"/>
-			</operator>
-			<local name="temp_1[1]"/>
-		</equal>
-		<equal>
-			<operator name="der">
-				<local name="A[2]"/>
-			</operator>
-			<local name="temp_1[2]"/>
 		</equal>
 	</equation>
 

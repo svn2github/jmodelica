@@ -37,6 +37,7 @@ class Model: public RefCountedNode {
     private:
         typedef std::map< std::string, Ref<ModelFunction> > functionMap;
         typedef std::map< std::string, Ref<VariableType> > typeMap;
+		typedef std::map<std::string, Variable*> variableMap;
     public:
         enum VariableKind {
             REAL_CONSTANT,       
@@ -118,7 +119,6 @@ class Model: public RefCountedNode {
          * @return A reference to a VariableType, a reference to NULL if not present. 
          * */
         Ref<VariableType> getVariableType(std::string typeName) const;
-
         /** 
          * Get a vector of pointers to variables of a specific kind, as defined in 
          * the VariableKind enum.
@@ -237,6 +237,8 @@ class Model: public RefCountedNode {
         void assignVariableTypeToBooleanVariable(Ref<Variable> var);
         void handleVariableTypeForAddedVariable(Ref<Variable> var);
         void assignVariableTypeToVariable(Ref<Variable> var);
+		
+		variableMap modelVariableMap;
 };
 inline std::string Model::getIdentifier() { return identifier; }
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}

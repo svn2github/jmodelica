@@ -274,6 +274,7 @@ void Model::addVariable(Ref<Variable> var) {
     dirty = true; // todo: only if (dependent) parameter, or with dependent attributes?
     handleVariableTypeForAddedVariable(var);
     z.push_back(var.getNode());
+	modelVariableMap.insert(std::pair<string, Variable*>(var->getName(), var.getNode()));
 }
 
 vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
@@ -292,12 +293,13 @@ vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
 
 Ref<Variable> Model::getVariable(std::string name) {
     Ref<Variable> returnVar = Ref<Variable>(NULL);
-    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
-        if ((*it)->getName() == name) {
-            returnVar = *it;
-            break;
-        }
-    }
+	returnVar = modelVariableMap.find(name)->second;
+	/*for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
+		if ((*it)->getName() == name) {
+			returnVar = *it;
+			break;
+		}
+	}*/
     return returnVar;
 }
 

@@ -79,4 +79,6 @@ ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<Mo
 int findIndex(CasADi::MXVector vector, std::string elem);
 void addFunctionHeaders(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
+int calculateFlatArrayIndex(tinyxml2::XMLElement* reference);
+
 #endif

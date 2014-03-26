@@ -1,45 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class kind="model">
-	<classDefinition name="AtomicModelVector2.f">
-		<class kind="function">
-			<component name="A" causality="input">
-				<local name="Real[2]"/>
-				<dimension>
-					<integer value="2"/>
-				</dimension>
-			</component>
-			<component name="B" causality="output">
-				<local name="Real[2]"/>
-				<dimension>
-					<integer value="2"/>
-				</dimension>
-			</component>
-			<algorithm>
-				<assign>
-					<to>
-						<reference>
-							<local name="B"/>
-						</reference>
-					</to>
-					<from>
-						<call>
-							<function>
-								<reference>
-									<local name="AtomicModelVector2.f2"/>
-								</reference>
-							</function>
-							<reference>
-								<local name="A"/>
-							</reference>
-						</call>
-					</from>
-				</assign>
-				<return/>
-			</algorithm>
-		</class>
-	</classDefinition>
-
-	<classDefinition name="AtomicModelVector2.f2">
+	<classDefinition name="AtomicModelVector1.f">
 		<class kind="function">
 			<component name="A" causality="input">
 				<local name="Real[2]"/>
@@ -141,7 +102,7 @@
 			</tuple>
 			<call>
 				<function>
-					<local name="AtomicModelVector2.f"/>
+					<local name="AtomicModelVector1.f"/>
 				</function>
 				<tuple>
 					<local name="A[1]"/>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="atomicModelSimpleArrayIndexing.f">
+		<class kind="function">
+			<component name="out" causality="output">
+				<local name="Real[2, 2]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<reference>
+							<local name="out"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<integer value="1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="out"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<integer value="2"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="out"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<integer value="3"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="out"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<integer value="4"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="temp_1[1,1]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,2]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[2,1]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[2,2]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="A[1,1]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="A[1,2]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="A[2,1]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+	<component name="A[2,2]" variability="parameter">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="parameter">
+		<equal>
+			<tuple>
+				<tuple>
+					<local name="temp_1[1,1]"/>
+					<local name="temp_1[1,2]"/>
+				</tuple>
+				<tuple>
+					<local name="temp_1[2,1]"/>
+					<local name="temp_1[2,2]"/>
+				</tuple>
+			</tuple>
+			<call>
+				<function>
+					<local name="atomicModelSimpleArrayIndexing.f"/>
+				</function>
+			</call>
+		</equal>
+		<equal>
+			<local name="A[1,1]"/>
+			<local name="temp_1[1,1]"/>
+		</equal>
+		<equal>
+			<local name="A[1,2]"/>
+			<local name="temp_1[1,2]"/>
+		</equal>
+		<equal>
+			<local name="A[2,1]"/>
+			<local name="temp_1[2,1]"/>
+		</equal>
+		<equal>
+			<local name="A[2,2]"/>
+			<local name="temp_1[2,2]"/>
+		</equal>
+	</equation>
+
+</class>

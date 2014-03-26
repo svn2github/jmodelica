@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="AtomicModelLargerThanTwoDimensionArray.f">
+		<class kind="function">
+			<component name="A" causality="input">
+				<local name="Real[1, 2, 3]"/>
+				<dimension>
+					<integer value="1"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="3"/>
+				</dimension>
+			</component>
+			<component name="B" causality="output">
+				<local name="Real[1, 2, 3]"/>
+				<dimension>
+					<integer value="1"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="3"/>
+				</dimension>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="3"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="3"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="3"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+								<subscripts>
+									<integer value="3"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="3"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<integer value="10"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="A[1,1,1]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[1,1,2]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[1,1,3]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="3"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[1,2,1]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="4"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[1,2,2]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="5"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[1,2,3]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="6"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="temp_1[1,1,1]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,1,2]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,1,3]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,2,1]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,2,2]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,2,3]">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="A[1,1,1]"/>
+			<integer value="1"/>
+		</equal>
+		<equal>
+			<local name="A[1,1,2]"/>
+			<integer value="2"/>
+		</equal>
+		<equal>
+			<local name="A[1,1,3]"/>
+			<integer value="3"/>
+		</equal>
+		<equal>
+			<local name="A[1,2,1]"/>
+			<integer value="4"/>
+		</equal>
+		<equal>
+			<local name="A[1,2,2]"/>
+			<integer value="5"/>
+		</equal>
+		<equal>
+			<local name="A[1,2,3]"/>
+			<integer value="6"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+				<tuple>
+					<tuple>
+						<local name="temp_1[1,1,1]"/>
+						<local name="temp_1[1,1,2]"/>
+						<local name="temp_1[1,1,3]"/>
+					</tuple>
+					<tuple>
+						<local name="temp_1[1,2,1]"/>
+						<local name="temp_1[1,2,2]"/>
+						<local name="temp_1[1,2,3]"/>
+					</tuple>
+				</tuple>
+			<call>
+				<function>
+					<local name="AtomicModelLargerThanTwoDimensionArray.f"/>
+				</function>
+					<tuple>
+						<tuple>
+							<local name="A[1,1,1]"/>
+							<local name="A[1,1,2]"/>
+							<local name="A[1,1,3]"/>
+						</tuple>
+						<tuple>
+							<local name="A[1,2,1]"/>
+							<local name="A[1,2,2]"/>
+							<local name="A[1,2,3]"/>
+						</tuple>
+					</tuple>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,1,1]"/>
+			</operator>
+			<local name="temp_1[1,1,1]"/>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,1,2]"/>
+			</operator>
+			<local name="temp_1[1,1,2]"/>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,1,3]"/>
+			</operator>
+			<local name="temp_1[1,1,3]"/>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,2,1]"/>
+			</operator>
+			<local name="temp_1[1,2,1]"/>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,2,2]"/>
+			</operator>
+			<local name="temp_1[1,2,2]"/>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,2,3]"/>
+			</operator>
+			<local name="temp_1[1,2,3]"/>
+		</equal>
+	</equation>
+
+</class>
