@@ -13,10 +13,10 @@
   <para>This page lists the current limitations of the JModelica.org platform.
   The development of the platform can be followed at the <link
   xlink:href="http://trac.jmodelica.org">Trac</link> site, where future
-  releases and associated features are planned. In order to get an idea of the
-  current Modelica compliance of the compiler front-end, you may look at the
-  associated test suite. All models with a test annotation can be
-  flattened.</para>
+  releases and associated features are planned. The <link
+  xlink:href="http://www.jmodelica.org/binary">JModelica.org platform download
+  page</link> has links to compliance reports detailing the current MSL
+  compliance.</para>
 
   <itemizedlist>
     <listitem>
