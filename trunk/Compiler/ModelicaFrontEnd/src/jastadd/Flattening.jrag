@@ -882,10 +882,13 @@ aspect Flattening {
 	 */
 	syn FExp InstAssignable.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
-	/**
-	 * \brief Check if this primitive or record has a binding expression.
-	 */
-	syn boolean InstAssignable.hasBindingFExp() = myBindingInstExp() != null;
+    /**
+     * Check if this component has a binding expression.
+     * 
+     * Always false for components that are not assignable.
+     */
+    syn boolean InstComponentDecl.hasBindingFExp() = false;
+    eq InstAssignable.hasBindingFExp()             = myBindingInstExp() != null;
 
 	/**
 	 * \brief Retrieve the part of the binding expression that applies to this InstAssignable.

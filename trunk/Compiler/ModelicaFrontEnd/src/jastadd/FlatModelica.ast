@@ -303,6 +303,13 @@ abstract FType : BaseNode ::= <Size:Size>;
 FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 
 /**
+ * An operator record type. 
+ *
+ * Only used in instance tree.
+ */
+FOperatorRecordType : FRecordType ::= <Operators:Map<String,InstClassDecl>>;
+
+/**
  * The type description of a record component.
  */
 FRecordComponentType : BaseNode ::= <Name> FType;

@@ -80,6 +80,10 @@ aspect ComplianceCheck {
 		}
 	}
 
+    public void InstOperatorRecord.collectErrors(ErrorCheckType checkType) {
+        compliance("Operator records are not supported");
+    }
+
 	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
 	}

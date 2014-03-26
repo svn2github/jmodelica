@@ -1770,7 +1770,28 @@ aspect InstanceAST_API {
 	protected Iterator<InstComponentDecl> InstSimpleShortClassDecl.allInstComponentDeclsIterator() {
 		return actualInstClass().allInstComponentDeclsIterator();
 	}
-	
+
+    /**
+     * Iterate over all classes in this node and all InstExtends (recursively).
+     * 
+     * @return  an Iterable over the classes
+     */
+    public Iterable<InstClassDecl> InstNode.allInstClassDecls() {
+        return new Iterable<InstClassDecl>() {
+            public Iterator<InstClassDecl> iterator() {
+                return allInstClassDeclsIterator();
+            }
+        };
+    }
+    
+    protected Iterator<InstClassDecl> InstNode.allInstClassDeclsIterator() {
+        return new InstClassIterator();
+    }
+    
+    protected Iterator<InstClassDecl> InstSimpleShortClassDecl.allInstClassDeclsIterator() {
+        return actualInstClass().allInstClassDeclsIterator();
+    }
+
 	public class InstNode {
 		
 		private class InstComponentIterator implements Iterator<InstComponentDecl> {
@@ -1805,7 +1826,40 @@ aspect InstanceAST_API {
 			}
 			
 		}
-		
+
+        private class InstClassIterator implements Iterator<InstClassDecl> {
+
+            private Iterator<InstClassDecl> current;
+            private Iterator<InstExtends> exts;
+
+            public InstClassIterator() {
+                current = getInstClassDecls().iterator();
+                exts = getInstExtendss().iterator();
+                update();
+            }
+
+            public boolean hasNext() {
+                return current.hasNext();
+            }
+
+            public InstClassDecl next() {
+                InstClassDecl res = current.next();
+                update();
+                return res;
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            private void update() {
+                while (!current.hasNext() && exts.hasNext()) {
+                    current = exts.next().allInstClassDeclsIterator();
+                }
+            }
+            
+        }
+
 	}
 	
 	inh InstNode InstNode.containingInstNode();

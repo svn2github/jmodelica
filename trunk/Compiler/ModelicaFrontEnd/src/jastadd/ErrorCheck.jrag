@@ -460,24 +460,6 @@ aspect ErrorCheck {
 		root().breakOnErrors();
 	}
 
-/*
-    syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
-      for(int i = 0; i < getNumChild(); i++) {
-		  FullClassDecl fcd = getChild(i).retrieveFullClassDecl(className);
-	  	  if (fcd != null)
-	  	  	return fcd;
-	  }
-	  return null;
-    }   
-  	
-  	eq FullClassDecl.retrieveFullClassDecl(String className) {
-	   	if (className.equals(qualifiedName())) {
-	   		return this;
-		} else
-			return getClassDeclList().retrieveFullClassDecl(className);
-	}
-*/
-   
 }
 
 aspect InstanceErrorCheck {
@@ -552,39 +534,24 @@ aspect InstanceErrorCheck {
         }
     }
 
-  	public void InstBaseClassDecl.collectErrors(ErrorCheckType checkType) {
-    	if (!errorChecked) {
-	        super.collectErrors(checkType);
-	    	errorChecked = true;
- //       for (InstClassDecl icd : instClassDecls())
- //       	icd.collectErrors(checkType);
- /*
-        for (InstComponentDecl icd : instComponentDecls())
-        	icd.collectErrors(checkType);
-        for (InstExtends ie : instExtends())
-        	ie.collectErrors(checkType);	
-*/        	
-	        for (InstImport ii : getInstImports())
-	        	ii.collectErrors(checkType);		
-			if (hasInstConstraining())
-				getInstConstraining().collectErrors(checkType);
-//        for (FAbstractEquation e : getFAbstractEquations())
-//        	e.collectErrors(checkType);
-//    	getEquationList().collectErrors(checkType);
-//    	getAlgorithmList().collectErrors(checkType);
-//    	getSuperList().collectErrors(checkType);
-//    	getImportList().collectErrors(checkType);
-//    	getComponentDeclList().collectErrors(checkType);
-			if (getBaseClassDecl() instanceof FullClassDecl) { 	
-				FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
-				//log.debug(fcd.getName().getID() +  " " + fcd.getEndName());
-				if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
-					error("The declaration and end names of a class should be the same");
-				}
-			}
-  		}
-  	}
-  	
+    public void InstBaseClassDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            super.collectErrors(checkType);
+            errorChecked = true;
+            for (InstImport ii : getInstImports())
+                ii.collectErrors(checkType);
+            if (hasInstConstraining())
+                getInstConstraining().collectErrors(checkType);
+            getInstRestriction().collectErrors(checkType);
+            if (getBaseClassDecl() instanceof FullClassDecl) {  
+                FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+                if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
+                    error("The declaration and end names of a class should be the same");
+                }
+            }
+        }
+    }
+
   	public void InstFullClassDecl.collectErrors(ErrorCheckType checkType) {
     	if (!errorChecked) {
             super.collectErrors(checkType);
@@ -601,52 +568,58 @@ aspect InstanceErrorCheck {
         }    	
     }
 
-//  	public void InstEnumClassDecl.collectErrors(ErrorCheckType checkType) {  		
-//  		// TODO: Error checking of enumeration declarations
-//  	}
-  	
     public void InstImport.collectErrors(ErrorCheckType checkType) {
     	if (!errorChecked) {
     		errorChecked = true;
 			getPackageName().collectErrors(checkType);
 		}
 	}
-	
-	public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-	    	errorChecked = true;
-	    	boolean checkInner = isOuter() && 
-	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
-	    	if (isRecursed()) {
-	    		error("Recursive class structure");
-	    	} else if (checkInner) {
-	    		if (myInnerInstComponentDecl().isUnknown())
-	    			error("Cannot find inner declaration for outer " + name());
-	    		else
-	    			myInnerInstComponentDecl().collectErrors(checkType);
-	    	} else if (inOuter()) {
-	    		surroundingOuterComponentDecl().collectErrors(checkType);
-	    	} else {
-  		  		collectErrorsInClassName(checkType);
-  		  		if (hasFArraySubscripts())
-  		  		    getFArraySubscripts().collectErrors(checkType);
-	    		if (hasConditionalAttribute()) 
-	    			getConditionalAttribute().collectErrors(checkType);
-	    		if (isActive() && hasInstModification())
-	    			getInstModification().collectErrors(checkType);
+
+    public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            errorChecked = true;
+            boolean checkInner = isOuter() && 
+                    !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
+            if (isRecursed()) {
+                error("Recursive class structure");
+            } else if (checkInner) {
+                if (myInnerInstComponentDecl().isUnknown())
+                    error("Cannot find inner declaration for outer " + name());
+                else
+                    myInnerInstComponentDecl().collectErrors(checkType);
+            } else if (inOuter()) {
+                surroundingOuterComponentDecl().collectErrors(checkType);
+            } else {
+                collectErrorsInClassName(checkType);
+                myInstClass().checkRestriction(checkType);
+                if (hasFArraySubscripts())
+                    getFArraySubscripts().collectErrors(checkType);
+                if (hasConditionalAttribute()) 
+                    getConditionalAttribute().collectErrors(checkType);
+                if (isActive() && hasInstModification())
+                    getInstModification().collectErrors(checkType);
                 for (InstModification im : getMergedEnvironment())
                     im.checkModificationNames(checkType);
-	    		
-	    		if (shouldCheckInto(checkType)) {
-  		  		    errorChecked = false;
-    	    		super.collectErrors(checkType);
-    	    		if (hasInstConstraining())
-    	    			getInstConstraining().collectErrors(checkType);
-	    		}
-	    	}
-		}
-	}
-    
+                
+                if (shouldCheckInto(checkType)) {
+                    errorChecked = false;
+                    super.collectErrors(checkType);
+                    if (hasInstConstraining())
+                        getInstConstraining().collectErrors(checkType);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check that the restriction of this class is fulfilled.
+     */
+    public void InstClassDecl.checkRestriction(ErrorCheckType checkType) {}
+    public void InstBaseClassDecl.checkRestriction(ErrorCheckType checkType) {
+        if (!errorChecked)
+            getInstRestriction().collectErrors(checkType);
+    }
+
     public void InstModification.checkModificationNames(ErrorCheckType checkType) {}
     
     public void InstElementModification.checkModificationNames(ErrorCheckType checkType) {

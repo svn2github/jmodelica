@@ -354,16 +354,7 @@ aspect ContentCheck {
 		if (!myInstClassDecl().isOkPackage())
 			error("Packages may only contain classes and constants");
 	}
-	
-	/**
-	 * Check that the restriction of this class is fulfilled.
-	 */
-	public void InstClassDecl.checkRestriction(ErrorCheckType checkType) {}
-	
-	public void InstBaseClassDecl.checkRestriction(ErrorCheckType checkType) {
-		getInstRestriction().contentCheck(checkType);
-	}
-	
+
 	/**
 	 * Get the class this restriction is attached to.
 	 */
