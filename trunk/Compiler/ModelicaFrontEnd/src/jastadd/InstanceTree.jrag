@@ -1148,6 +1148,34 @@ aspect InstanceTreeConstruction {
     public InstOperatorFunction    OperatorFunction.newInstRestriction()    { return new InstOperatorFunction(); }
     public InstOperatorRecord      OperatorRecord.newInstRestriction()      { return new InstOperatorRecord(); }
 
+    /**
+     * A connector class inheriting a record class is both connector and record, 
+     * this method finds any inherited restriction that should be kept.
+     */
+    syn InstRestriction InstRestriction.inheritedRestriction()       = null;
+    eq InstMRecord.inheritedRestriction()                            = this;
+    eq InstOperatorRecord.inheritedRestriction()                     = this;
+    inh lazy InstRestriction InstConnector.inheritedRestriction();
+    eq InstBaseClassDecl.getInstRestriction().inheritedRestriction() = inheritedRestriction(false);
+    
+    /**
+     * A connector class inheriting a record class is both connector and record, 
+     * this method finds any inherited restriction that should be kept.
+     */
+    syn InstRestriction InstClassDecl.inheritedRestriction(boolean checkMine) = null;
+    eq InstSimpleShortClassDecl.inheritedRestriction(boolean checkMine)       = 
+        actualInstClass().inheritedRestriction(true);
+    eq InstBaseClassDecl.inheritedRestriction(boolean checkMine) {
+        if (checkMine)
+            return getInstRestriction().inheritedRestriction();
+        for (InstExtends ie : getInstExtendss()) {
+            InstRestriction ir = ie.myInstClass().inheritedRestriction(true);
+            if (ir != null)
+                return ir;
+        }
+        return null;
+    }
+
     // Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
 		InstNormalExtends ie = newEmptyInstExtends();

@@ -4869,4 +4869,38 @@ end RecordTests.RecordModification1;
 ")})));
 end RecordModification1;
 
+
+model RecordConnector1
+    record A
+        Real x;
+        Real y;
+    end A;
+
+    connector B = A;
+    
+    B b;
+equation
+    b = B(time, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConnector1",
+            description="Check that class can be both record and connector",
+            flatModel="
+fclass RecordTests.RecordConnector1
+ RecordTests.RecordConnector1.B b;
+equation
+ b = RecordTests.RecordConnector1.B(time, 2);
+
+public
+ record RecordTests.RecordConnector1.B
+  Real x;
+  Real y;
+ end RecordTests.RecordConnector1.B;
+
+end RecordTests.RecordConnector1;
+")})));
+end RecordConnector1;
+
+
 end RecordTests;

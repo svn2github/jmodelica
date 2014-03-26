@@ -369,6 +369,11 @@ aspect Flattening {
 	}
 	
 	public void InstRestriction.flattenRecord(FClass fc, InstBaseClassDecl icd) {}
+    
+    public void InstConnector.flattenRecord(FClass fc, InstBaseClassDecl icd) {
+        if (inheritedRestriction() != null)
+            inheritedRestriction().flattenRecord(fc, icd);
+    }
 	
 	private FClass InstMRecord.flatRecordAddedTo = null;
 	

@@ -138,6 +138,8 @@ aspect FlatTypeAnalysis {
         new FRecordType(s, name, new List(), null);
     eq InstOperatorRecord.createEmptyFRecordType(Size s, String name)           = 
         new FOperatorRecordType(s, name, new List(), null, operatorMap());
+    eq InstConnector.createEmptyFRecordType(Size s, String name)                = 
+        (inheritedRestriction() != null) ? inheritedRestriction().createEmptyFRecordType(s, name) : super.createEmptyFRecordType(s, name);
 
     syn      Map<String,InstClassDecl> InstRestriction.operatorMap() = null;
     syn lazy Map<String,InstClassDecl> InstOperatorRecord.operatorMap() {
@@ -147,6 +149,8 @@ aspect FlatTypeAnalysis {
                 res.put(icd.name(), icd);
         return res;
     }
+    eq InstConnector.operatorMap() = 
+        (inheritedRestriction() != null) ? inheritedRestriction().operatorMap() : super.operatorMap();
 
 	public class FRecordComponentType implements Comparable<FRecordComponentType> {
 		public int compareTo(FRecordComponentType other) {
@@ -1034,16 +1038,20 @@ aspect OverloadedOperatorBinding {
         new OperatorMatches(operatorFunctions(), a, b, aIsLeft);
     syn lazy OperatorMatches InstOperatorFunction.matchOverloadedOperators(FType a, FType b, boolean aIsLeft) = 
         new OperatorMatches(operatorFunctions(), a, b, aIsLeft);
+    eq InstConnector.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)                              = 
+        (inheritedRestriction() != null) ? inheritedRestriction().matchOverloadedOperators(a, b, aIsLeft) : super.matchOverloadedOperators(a, b, aIsLeft);
 
     syn java.util.List<InstClassDecl> InstRestriction.operatorFunctions() = Collections.emptyList();
     eq InstOperatorFunction.operatorFunctions() = Collections.singletonList(myInstClassDecl());
-    eq InstOperator.operatorFunctions() {
+    syn lazy java.util.List<InstClassDecl> InstOperator.operatorFunctions() {
         ArrayList<InstClassDecl> res = new ArrayList<InstClassDecl>();
         for (InstClassDecl icd : myInstClassDecl().allInstClassDecls())
             if (icd.isFunction())
                 res.add(icd);
         return res;
     }
+    eq InstConnector.operatorFunctions() = 
+        (inheritedRestriction() != null) ? inheritedRestriction().operatorFunctions() : super.operatorFunctions();
 
     /**
      * Check if this function matches the two given types as an overloaded operator.
@@ -1497,76 +1505,78 @@ aspect BuiltInFlatTypes {
 }
  
 aspect InstClassRestriction {
-	
+
 	/**
 	 * Is this class a connector?
 	 */
 	syn boolean InstClassDecl.isConnector() = false;
 	eq InstBaseClassDecl.isConnector()      = getInstRestriction().isConnector();
 	eq UnknownInstClassDecl.isConnector()   = false;
-	
+
 	/**
 	 * Is this restriction "connector"?
 	 */
 	syn boolean InstRestriction.isConnector() = false;
 	eq InstConnector.isConnector() = true;
-	
+
 	/**
 	 * Is this component a connector?
 	 */
 	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
-    
+
     /**
      * Is this class an expandable connector?
      */
     syn boolean InstClassDecl.isExpandableConnector() = false;
     eq InstBaseClassDecl.isExpandableConnector()      = getInstRestriction().isExpandableConnector();
     eq UnknownInstClassDecl.isExpandableConnector()   = false;
-    
+
     /**
      * Is this restriction "expandable connector"?
      */
     syn boolean InstRestriction.isExpandableConnector() = false;
     eq InstExpandableConnector.isExpandableConnector()  = true;
-    
+
     /**
      * Is this component an expandable connector?
      */
     syn boolean InstComponentDecl.isExpandableConnector() = myInstClass().isExpandableConnector();
-    
+
     /**
      * Is this class an operator record?
      */
     syn boolean InstClassDecl.isOperatorRecord() = false;
     eq InstBaseClassDecl.isOperatorRecord()      = getInstRestriction().isOperatorRecord();
     eq UnknownInstClassDecl.isOperatorRecord()   = false;
-    
+
     /**
      * Is this restriction "operator record"?
      */
     syn boolean InstRestriction.isOperatorRecord() = false;
     eq InstOperatorRecord.isOperatorRecord()       = true;
-    
+    eq InstConnector.isOperatorRecord()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isOperatorRecord() : super.isOperatorRecord();
+
+    /**
+     * Is this component an operator record?
+     */
+    syn boolean InstComponentDecl.isOperatorRecord() = false;
+    eq InstRecord.isOperatorRecord()                 = myInstClass().isOperatorRecord();
+
     /**
      * Is this class an operator?
      */
     syn boolean InstClassDecl.isOperator() = false;
     eq InstBaseClassDecl.isOperator()      = getInstRestriction().isOperator();
     eq UnknownInstClassDecl.isOperator()   = false;
-    
+
     /**
      * Is this restriction "operator" or "operator function"?
      */
     syn boolean InstRestriction.isOperator() = false;
     eq InstOperator.isOperator()             = true;
     eq InstOperatorFunction.isOperator()     = true;
-    
-    /**
-     * Is this component an operator record?
-     */
-    syn boolean InstComponentDecl.isOperatorRecord() = false;
-    eq InstRecord.isOperatorRecord()                 = myInstClass().isOperatorRecord();
-	
+
 	/**
 	 * \brief Is this class a function?
 	 */
@@ -1586,27 +1596,31 @@ aspect InstClassRestriction {
 	syn boolean InstClassDecl.isRecord() = false;
 	eq InstBaseClassDecl.isRecord()      = getInstRestriction().isRecord();
 	eq UnknownInstClassDecl.isRecord()   = false;
-	
-	/**
-	 * \brief Is this restriction "record"?
-	 */
-	syn boolean InstRestriction.isRecord() = false;
-	eq InstMRecord.isRecord() = true;
-	
+
+    /**
+     * \brief Is this restriction "record"?
+     */
+    syn boolean InstRestriction.isRecord() = false;
+    eq InstMRecord.isRecord()              = true;
+    eq InstConnector.isRecord()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isRecord() : super.isRecord();
+
 	/**
 	 * \brief Is this class a function or record?
 	 */
 	syn boolean InstClassDecl.isCallable() = false;
 	eq InstBaseClassDecl.isCallable()      = getInstRestriction().isCallable();
 	eq UnknownInstClassDecl.isCallable()   = false;
-	
-	/**
-	 * \brief Is this restriction "function" or "record"?
-	 */
-	syn boolean InstRestriction.isCallable() = false;
-	eq InstFunction.isCallable() = true;
-	eq InstMRecord.isCallable()  = true;
-	
+
+    /**
+     * \brief Is this restriction "function" or "record"?
+     */
+    syn boolean InstRestriction.isCallable() = false;
+    eq InstFunction.isCallable()             = true;
+    eq InstMRecord.isCallable()              = true;
+    eq InstConnector.isCallable()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isCallable() : super.isCallable();
+
 	/**
 	 * \brief Is this class a package?
 	 */
