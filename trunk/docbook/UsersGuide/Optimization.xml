@@ -3282,9 +3282,8 @@ opts? # View the help text</programlisting>
 
               <entry>Return the scaled optimization result if set to True,
               otherwise return the unscaled optimization result. This option
-              is only applicable when the CasadiModel has been instantiated
-              with scale_variables=True. This option is only intended for
-              debugging.</entry>
+              is only applicable when variable_scaling is enabled and is only
+              intended for debugging.</entry>
             </row>
 
             <row>
@@ -4771,15 +4770,23 @@ plt.show()
   <section xml:id="opt_sec_pseudo-spectral">
     <title>Optimization of ODEs using Pseduo-Spectral methods</title>
 
-    <para>The automatic differentiation tool CasADi connected to IPOPT. The
+    <para>The automatic differentiation tool CasADi is connected to IPOPT. The
     collocation algorithms are the Gauss Pseudospectral-, the Legendre
     Pseudospectral- and the Radau Pseudospectral-method. These methods can be
     used either as a local method or a global method where in the local case
     the time horizon is discretized into elements and each element is
     approximated with a polynomial. In the global case, a polynomial is used
     over the complete time horizon. For a mathematic overview of the methods,
-    see the Python API documentation, for the class
+    see the Python API documentation for the class
     <literal>PseudoSpectral</literal>.</para>
+
+    <para>This section relies on a model format called FMUX, and the Python
+    class <literal>CasadiModel</literal>. These are supported in
+    JModelica.org, but no longer used for the main CasADi-based optimization
+    tool chain. For more information about the FMUX format and the
+    <literal>CasadiModel</literal> class, see the JModelica.org-1.12 User
+    Guide, available from <link
+    xlink:href="http://jmodelica.org/page/236">http://jmodelica.org/page/236</link>.</para>
 
     <para>The implementation resides in the module
     <literal>casadi_interface</literal> and contains a model class
