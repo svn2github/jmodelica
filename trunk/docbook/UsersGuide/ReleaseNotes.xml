@@ -104,7 +104,11 @@
     <section>
       <title>Optimization</title>
 
-      <para/>
+      <section>
+        <title>New CasADi toolchain</title>
+
+        <para/>
+      </section>
     </section>
   </section>
 
