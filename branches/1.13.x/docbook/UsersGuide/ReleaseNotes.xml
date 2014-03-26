@@ -11,6 +11,104 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.13</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>FMI 2.0 Export, according to RC1</para>
+          </listitem>
+
+          <listitem>
+            <para>New CasADi toolchain</para>
+          </listitem>
+
+          <listitem>
+            <para>In-lined switches</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved compliance</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>FMI 2.0 RC1 export</title>
+
+        <para>FMI 2.0 export according to RC1 is supported. There are some
+        limitations, summarized in the list below.</para>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Support for dependencies but not for dependenciesKind in
+              the XML tag ModelStructure</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for directional derivative but known to have
+              limitations in some cases</para>
+            </listitem>
+
+            <listitem>
+              <para>No support for strings and running asynchronuously</para>
+            </listitem>
+
+            <listitem>
+              <para>No support for FMU states (set, get and serialize)</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>Compliance</title>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Improved support for expandable connectors</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved support for unknown array sizes in
+              functions</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved handling of the state select attribute</para>
+            </listitem>
+
+            <listitem>
+              <para>Many bug fixes</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <section>
+        <title>In-lined switches</title>
+
+        <para>In-lined switches have been introduced, which gives a more
+        robust initialization and simulation of systems with discrete
+        parts.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para/>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.12</title>
 
     <section>

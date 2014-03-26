@@ -378,4 +378,25 @@ end CheckTests.IfEquationElse2;
 ")})));
 end IfEquationElse2;
 
+model IfEquationElse3
+  Real x;
+equation
+  if time > 2 then
+  else
+    assert(time < 2, "msg");
+    x = 1;
+  end if;
+  x = 2;
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IfEquationElse3",
+            description="Check error for imbalanced else clause with empty if clause.",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 384, column 3:
+  All branches in if equation with non-parameter tests must have the same number of equations
+")})));
+end IfEquationElse3;
+
 end CheckTests;

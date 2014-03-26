@@ -494,7 +494,7 @@ y = init_result['y']
         </section>
 
         <section xml:id="sec_verbosity">
-          <title xml:id="sec_verbosity">Verbosity of KINSOL</title>
+          <title>Verbosity of KINSOL</title>
 
           <para>There are four different levels of verbosity in KINSOL with 0
           being silent and 3 being the most verbose. The verbosity level is
