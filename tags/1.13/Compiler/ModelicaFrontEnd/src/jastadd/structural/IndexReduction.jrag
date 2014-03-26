@@ -1,0 +1,9 @@
+/* This doesn't work
+ * import org.jmodelica.graph.EqnGraph;
+ */
+
+aspect IndexReduction {
+	
+	public void ASTNode.removeMe() {}
+	
+}
