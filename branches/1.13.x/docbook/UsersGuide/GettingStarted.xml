@@ -78,10 +78,10 @@
     </section>
 
     <section>
-      <title>Linux or Mac OS</title>
+      <title>Linux</title>
 
-      <para>To start the IPython shell with pylab on Linux or Mac OS X, open a
-      terminal and enter the command:</para>
+      <para>To start the IPython shell with pylab on Linux open a terminal and
+      enter the command:</para>
 
       <programlisting language="python">&gt; $JMODELICA_HOME/bin/jm_ipython.sh -pylab
 </programlisting>

@@ -42,7 +42,8 @@
       <para>FMUs are created by compiling Modelica models with JModelica.org,
       or any other tool supporting FMU export. JModelica.org supports both
       export of FMUs for Model Exchange (FMU-ME) and export of FMUs for
-      Co-Simulation (FMU-CS). The generated FMU can be loaded in an
+      Co-Simulation (FMU-CS), version 1.0 and 2.0 RC1. Generated FMUs (only
+      version 1.0 is supported for import) can be loaded in an
       <literal>FMUModel(ME/CS)1</literal> object in Python and then be used
       for simulation purposes. Optimica models can not be compiled into
       FMUs.</para>
@@ -85,7 +86,8 @@
     <section xml:id="models_sec_simple_fmume_compilation">
       <title>Simple FMU-ME compilation example</title>
 
-      <para>The following steps compiles a model to an FMU-ME:<procedure>
+      <para>The following steps compiles a model to an FMU-ME version
+      1.0:<procedure>
           <step>
             <para>Import the JModelica.org compiler function
             <literal>compile_fmu</literal> from the package
@@ -116,12 +118,17 @@ my_fmu = compile_fmu(model_name, mo_file)
       <para>There is a compiler parameter: <literal>target</literal> which
       controls whether the model will be exported as an FMU-ME or FMU-CS. The
       default is to compile an FMU-ME, so <literal>target</literal> must not
-      be set in this example.</para>
+      be set in this example. The compiler parameter
+      <literal>version</literal> specifies if the model should be exported as
+      a FMU 1.0 or 2.0 RC1. As the default is to compile a FMU 1.0,
+      <literal>version</literal> must not be set either in this example. To
+      compile an FMU 2.0 RC1, <literal>version</literal> should be set to
+      <literal>'2.0'</literal>.</para>
 
-      <para>Once compilation has completed successfully, an FMU-ME will have
-      been created on the file system. The FMU is essentially a compressed
-      file archive containing the files created during compilation that are
-      needed when instantiating a model object. Return argument for
+      <para>Once compilation has completed successfully, an FMU-ME 1.0 will
+      have been created on the file system. The FMU is essentially a
+      compressed file archive containing the files created during compilation
+      that are needed when instantiating a model object. Return argument for
       <literal>compile_fmu</literal> is the full file path of the FMU that has
       just been created, this will be useful later when we want to create
       model objects. More about the FMU and loading models can be found in
@@ -138,7 +145,8 @@ my_fmu = compile_fmu(model_name, mo_file)
     <section xml:id="models_sec_simple_fmucs_compilation">
       <title>Simple FMU-CS compilation example</title>
 
-      <para>The following steps compiles a model to an FMU-CS:</para>
+      <para>The following steps compiles a model to an FMU-CS version
+      1.0:</para>
 
       <procedure>
         <step>
@@ -305,97 +313,98 @@ Help on function compile_fmu in module pymodelica.compiler:
 compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
             compiler_options={}, compile_to='.', compiler_log_level='warning', 
             separate_process=True, jvm_args='')
-    Compile a Modelica model to an FMU.
+Compile a Modelica model to an FMU.
 
-    A model class name must be passed, all other arguments have default values.
-    The different scenarios are:
+A model class name must be passed, all other arguments have default values.
+The different scenarios are:
 
-    * Only class_name is passed:
-        - Class is assumed to be in MODELICAPATH.
+* Only class_name is passed:
+    - Class is assumed to be in MODELICAPATH.
 
-    * class_name and file_name is passed:
-        - file_name can be a single path as a string or a list of paths
-          (strings). The paths can be file or library paths.
-        - Default compiler setting is 'auto' which means that the appropriate
-          compiler will be selected based on model file ending, i.e.
-          ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is
-          found in file_name list.
+* class_name and file_name is passed:
+    - file_name can be a single path as a string or a list of paths
+      (strings). The paths can be file or library paths.
+    - Default compiler setting is 'auto' which means that the appropriate
+      compiler will be selected based on model file ending, i.e.
+      ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is
+      found in file_name list.
 
-    Library directories can be added to MODELICAPATH by listing them in a
-    special compiler option 'extra_lib_dirs', for example:
+Library directories can be added to MODELICAPATH by listing them in a
+special compiler option 'extra_lib_dirs', for example:
 
-        compiler_options =
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+    compiler_options =
+        {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
 
-    Other options for the compiler should also be listed in the compiler_options
-    dict.
+Other options for the compiler should also be listed in the compiler_options
+dict.
 
-    The compiler target is 'me' by default which means that the shared
-    file contains the FMI for Model Exchange API. Setting this parameter to
-    'cs' will generate an FMU containing the FMI for Co-Simulation API.
+The compiler target is 'me' by default which means that the shared
+file contains the FMI for Model Exchange API. Setting this parameter to
+'cs' will generate an FMU containing the FMI for Co-Simulation API.
 
-    Parameters::
+Parameters::
 
-        class_name --
-            The name of the model class.
+    class_name --
+        The name of the model class.
 
-        file_name --
-            A path (string) or paths (list of strings) to model files and/or
-            libraries.
-            Default: Empty list.
+    file_name --
+        A path (string) or paths (list of strings) to model files and/or
+        libraries.
+        Default: Empty list.
 
-        compiler --
-            The compiler used to compile the model. The different options are:
-              - 'auto': the compiler is selected automatically depending on
-                 file ending
-              - 'modelica': the ModelicaCompiler is used
-              - 'optimica': the OptimicaCompiler is used
-            Default: 'auto'
+    compiler --
+        The compiler used to compile the model. The different options are:
+          - 'auto': the compiler is selected automatically depending on
+             file ending
+          - 'modelica': the ModelicaCompiler is used
+          - 'optimica': the OptimicaCompiler is used
+        Default: 'auto'
 
-        target --
-            Compiler target. Possible values are 'me', 'cs' or 'me+cs'.
-            Default: 'me'
+    target --
+        Compiler target. Possible values are 'me', 'cs' or 'me+cs'.
+        Default: 'me'
 
-        version --
-            The FMI version. Valid options are '1.0' and '2.0'.
-            Default: '1.0'
-            Note: Must currently be set to '1.0'.
+    version --
+        The FMI version. Valid options are '1.0' and '2.0'.
+        Default: '1.0'
 
-        compiler_options --
-            Options for the compiler.
-            Default: Empty dict.
+    compiler_options --
+        Options for the compiler.
+        Default: Empty dict.
 
-        compile_to --
-            Specify target file or directory. If file, any intermediate directories
-            will be created if they don't exist. If directory, the path given must exist.
-            Default: Current directory.
+    compile_to --
+        Specify target file or directory. If file, any intermediate directories 
+        will be created if they don't exist. If directory, the path given must 
+        exist.
+        Default: Current directory.
 
-        compiler_log_level --
-            Set the logging for the compiler. Takes a comma separated list with
-            log outputs. Log outputs start with a flag :'warning'/'w',
-            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
-            by appended flag with a colon and file name.
-            Default: 'warning'
+    compiler_log_level --
+        Set the logging for the compiler. Takes a comma separated list with
+        log outputs. Log outputs start with a flag :'warning'/'w',
+        'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
+        by appended flag with a colon and file name.
+        Default: 'warning'
 
-        separate_process --
-            Run the compilation of the model in a separate process.
-            Checks the environment variables (in this order):
-                1. SEPARATE_PROCESS_JVM
-                2. JAVA_HOME
-            to locate the Java installation to use.
-            For example (on Windows) this could be:
-                SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: True
+    separate_process --
+        Run the compilation of the model in a separate process.
+        Checks the environment variables (in this order):
+            1. SEPARATE_PROCESS_JVM
+            2. JAVA_HOME
+        to locate the Java installation to use.
+        For example (on Windows) this could be:
+            SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
+        Default: True
 
-        jvm_args --
-            String of arguments to be passed to the JVM when compiling in a
-            separate process.
-            Default: Empty string
+    jvm_args --
+        String of arguments to be passed to the JVM when compiling in a
+        separate process.
+        Default: Empty string
 
-    Returns::
 
-        A compilation result, represents the name of the FMU which has been
-        created and a list of warnings that was raised.
+Returns::
+
+    A compilation result, represents the name of the FMU which has been
+    created and a list of warnings that was raised.
 </programlisting>
       </section>
 
@@ -1017,38 +1026,38 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
 
       <para>In JModelica.org, the compilers
       (<literal>ModelicaCompiler</literal> and
-      <literal>OptimicaCompiler</literal>) are written in Java. To compile a
-      model from the Python interface, with e.g.
-      <literal>compile_fmu</literal>, the Python package
-      <emphasis>JPype</emphasis> is used to access the compilers from Python
-      (this is the default behavior).</para>
-
-      <para>Another option is to compile the model in a separate process, that
-      is not via JPype. This means that a specific JRE (Java Runtime
-      Environment) can be used for the compilation. For those on a 64 bit
+      <literal>OptimicaCompiler</literal>) are written in Java. When compiling
+      a model from the Python interface, with e.g.
+      <literal>compile_fmu</literal>, the default behavior is to compile the
+      model in a separate process. This means that a specific JRE (Java
+      Runtime Environment) is used for the compilation. For those on a 64 bit
       Windows this is can be very useful as the default JRE used with JPype is
       32 bit. Also, in most cases, the JVM (Java Virtual Machine) can be given
       a larger heap space (especially when using a 64 bit JRE instead of a 32
       bit) which enables compilation of larger models.</para>
 
-      <para>Set the environment variable
-      <literal>SEPARATE_PROCESS_JVM</literal> to point at a specific Java
-      installation (JRE or JDK) for the compilation. For Windows users, the
-      environment variable can be found (and set) in the file
-      <filename>setenv.bat</filename> which is located in the JModelica.org
-      installation folder. It can also be set locally in the Python shell. If
-      <literal>SEPARATE_PROCESS_JVM</literal> is not set,
+      <para>The environment variable <literal>SEPARATE_PROCESS_JVM</literal>
+      can be set to point at a specific Java installation (JRE or JDK) for the
+      compilation. For Windows users, the environment variable can be found
+      (and set) in the file <filename>setenv.bat</filename> which is located
+      in the JModelica.org installation folder. It can also be set locally in
+      the Python shell. If <literal>SEPARATE_PROCESS_JVM</literal> is not set,
       <literal>JAVA_HOME</literal> will be used instead. It is also possible
       to pass arguments to the JVM with the <literal>compile_fmu</literal>
       parameter '<literal>jvm_args</literal>'.</para>
 
-      <para>The following example demonstrates how to compile an FMU in a
-      separate process, setting the maximum heap space for the JVM to one
-      gigabyte:<programlisting># Import the compiler function
+      <para>The following example demonstrates how to set the maximum heap
+      space for the JVM to one gigabyte by setting the parameter
+      <literal>jvm_args</literal>:<programlisting># Import the compiler function
 from pymodelica import compile_fmu
 
 # Compile in separate process
-compile_fmu('myPackage.myModel', 'myModelFile.mo', separate_process=True, jvm_args='-Xmx1g')</programlisting></para>
+compile_fmu('myPackage.myModel', 'myModelFile.mo', jvm_args='-Xmx1g')</programlisting>Another
+      option is to access the compilers through the Python package
+      <emphasis>JPype</emphasis> (this used to be the default behavior). This
+      option is still possible and can be turned on by setting the argument
+      <literal>separate_process</literal> to <literal>False</literal> when
+      calling e.g. <literal>compile_fmu</literal>.</para>
     </section>
 
     <section xml:id="models_sec_compilation_in_more_detail">
@@ -1066,12 +1075,13 @@ compile_fmu('myPackage.myModel', 'myModelFile.mo', separate_process=True, jvm_ar
 
         <para>A compiler (which can be either a Modelica or Optimica compiler)
         is created by importing the Python classes from the compiler module.
-        This example code will create a Modelica compiler.<programlisting
-        language="python"># Import the class ModelicaCompiler from the compiler module
+        This example code will create a Modelica compiler and a target
+        object.<programlisting language="python"># Import the class ModelicaCompiler from the compiler module
 from pymodelica.compiler_wrappers import ModelicaCompiler
 
-# Create a compiler instance
+# Create a compiler and compiler target object for FMU-ME version 1.0
 mc = ModelicaCompiler()
+target = mc.create_target_object("me", "1.0")
 </programlisting></para>
       </section>
 
@@ -1092,10 +1102,10 @@ mc = ModelicaCompiler()
 source_root = mc.parse_model('myPackage.mo')
 
 # Generate an instance tree representation and get a reference to the model instance
-model_instance = mc.instantiate_model(source_root, 'myPackage.myModel')
+model_instance = mc.instantiate_model(source_root, 'myPackage.myModel', target)
 
 # Perform flattening and get a flat representation
-flat_rep = mc.flatten_model(model_instance)
+flat_rep = mc.flatten_model(model_instance, target)
 </programlisting></para>
       </section>
 
@@ -1107,7 +1117,7 @@ flat_rep = mc.flatten_model(model_instance)
         model meta data such as variable names and types. Note that in the
         <literal>compile_fmux</literal> case, only XML code is generated in
         this step.<programlisting language="python"># Generate code
-mc.generate_code(flat_rep)
+mc.generate_code(flat_rep, target)
 </programlisting></para>
       </section>
     </section>
@@ -1151,9 +1161,10 @@ mc.generate_code(flat_rep)
       <para>There are two types of FMUs, Model Exchange and Co-Simulation. In
       a Co-Simulation FMU, the integrator for solving the system is contained
       in the model while in an Model Exchange FMU, an external integrator is
-      needed to solve the system. JModelica.org supports export and import of
-      both FMU-ME and FMU-CS version 1.0. The solvers supported for FMU-CS are
-      CVode and Explicit Euler.</para>
+      needed to solve the system. JModelica.org supports export of FMU-ME and
+      FMU-CS version 1.0 and 2.0 RC1. Import supports FMU-ME and FMU-CS
+      version 1.0. The solvers supported for FMU-CS are CVode and Explicit
+      Euler.</para>
     </section>
 
     <section xml:id="models_sec_the_jmu_file">
@@ -1199,7 +1210,7 @@ myModel = JMUModel('myPackage_myModel.jmu')
     </section>
 
     <section xml:id="models_sec_transferring_an_optproblem">
-      <title>Transferring an <literal>OptimizationProblem</literal></title>
+      <title>Transferring an OptimizationProblem</title>
 
       <para>An optimization problem can be transferred directly from the
       compiler in JModelica.org into the class

@@ -22,7 +22,7 @@
           </listitem>
 
           <listitem>
-            <para>New CasADi toolchain</para>
+            <para>New CasADi tool chain for optimization</para>
           </listitem>
 
           <listitem>
@@ -104,7 +104,37 @@
     <section>
       <title>Optimization</title>
 
-      <para/>
+      <section>
+        <title>New CasADi tool chain</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Support for more Modelica features than previous
+            CasADi-based tool chain</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>User defined functions in models</para>
+
+                <itemizedlist>
+                  <listitem>
+                    <para>No support for control flow</para>
+                  </listitem>
+                </itemizedlist>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Flat model is exposed in Python in symbolic form using
+            CasADi, and can be inspected and manipulated</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for a variety of collocation options</para>
+          </listitem>
+        </itemizedlist>
+      </section>
     </section>
   </section>
 
