@@ -22,6 +22,8 @@ aspect FlatVariability {
 	
 	syn boolean FTypePrefixVariability.constantVariability() = false;
 	eq FConstant.constantVariability() = true;	
+    syn boolean FTypePrefixVariability.structParameterVariability() = false;
+    eq FStructParameter.structParameterVariability() = true;
 	syn boolean FTypePrefixVariability.parameterVariability() = false;
 	eq FParameter.parameterVariability() = true;	
 	syn boolean FTypePrefixVariability.discreteVariability() = false;
@@ -39,13 +41,18 @@ aspect FlatVariability {
 	eq Continuous.continuousVariability() = true;
 	
 	
+    syn int FTypePrefixVariability.compareTo(FTypePrefixVariability other)
+        = variabilityLevel() - other.variabilityLevel();
+    syn boolean FTypePrefixVariability.equals(FTypePrefixVariability other)
+        = compareTo(other) == 0;
+	
 	/**
 	 * \brief Test if variability is at most the same as <code>other</code>.
 	 * 
 	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
 	 */
-	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
-		variabilityLevel() <= other.variabilityLevel();
+    syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
+            compareTo(other) <= 0;
 	
 	syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
 	syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
@@ -124,14 +131,15 @@ aspect FlatVariability {
 	}
 	
 	eq FAlgorithm.variability() {
-		FTypePrefixVariability var = fConstant();
+		FTypePrefixVariability rhsVar = fConstant();
+		FTypePrefixVariability lhsVar = fConstant();
 		for (FVariable fv : referencedFVariablesInLHS()) {
-			var = var.combine(fv.variability());
+			lhsVar = lhsVar.combine(fv.variability());
 		}
 		for (FVariable fv : referencedFVariablesInRHS()) {
-			var = var.combine(fv.variability());
+			rhsVar = rhsVar.combine(fv.variability());
 		}
-		return var;
+		return lhsVar.combineDown(rhsVar);
 	}
 	
 	syn boolean FAbstractEquation.isConstant() = false;
@@ -191,8 +199,23 @@ aspect FlatVariability {
 	
 	syn FTypePrefixVariability InstComponentDecl.combinedVariability() = 
 		definedVariability().flatten().combineDown(defaultVariability());
-	eq InstAssignable.combinedVariability() = 
-		isStructuralParam ? fStructParameter() : super.combinedVariability();
+
+    // This is used before errorcheck so we have to guard from circular parameter binding exps
+    private boolean InstAssignable.circularVariability = false;
+    eq InstAssignable.combinedVariability() {
+        FTypePrefixVariability v = super.combinedVariability();
+        if (v.parameterVariability()) {
+            if (circularVariability)
+                return v;
+            circularVariability = true;
+            if (isStructuralParam || (annotation().forPath("Evaluate").bool() && canEvaluateAsStructural()))
+                v = fStructParameter();
+            else if (hasBindingFExp() && getBindingFExp().variability().structParameterVariability())
+                v = fStructParameter();
+            circularVariability = false;
+        }
+        return v;
+    }
 	
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
 	eq InstEnumLiteral.variability() = fConstant();
@@ -303,7 +326,7 @@ aspect FlatVariability {
     }
 
     /**
-     * Convert all continous variables that are this expression refers to into discrete variables.
+     * Convert all continous variables that this expression refers to into discrete variables.
      */
     public void FExp.makeContinuousVariablesDiscrete() {}
     
@@ -451,7 +474,14 @@ aspect FlatVariability {
 	eq FCardinality.expVariability() = fParameter();
 	
 	eq FIterExp.expVariability() {
-		FTypePrefixVariability total = size().isEmpty() ? fConstant() : getArray().iteratorFExp().next().variability();
+        FTypePrefixVariability total;
+        if (size().isUnknown())
+            total = getFExp().variability();
+        else if (size().isEmpty())
+            total = fConstant();
+        else
+            total = getArray().iteratorFExp().next().variability();
+        
 		for (CommonForIndex ind : getForIndexList())
 			if (ind.hasFExp())
 				total = total.combine(ind.getFExp().variability());

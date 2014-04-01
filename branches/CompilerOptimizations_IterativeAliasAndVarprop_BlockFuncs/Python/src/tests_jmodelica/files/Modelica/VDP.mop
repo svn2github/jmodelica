@@ -209,12 +209,52 @@ package VDP_pack
     der(x2) = x1;
   
   constraint
+    x1(finalTime) = 0;
+    x2(finalTime) = 0;
+  
+  end VDP_Opt_Unscaled_Min_Time;
+  
+  optimization VDP_Opt_Unscaled_Min_Time_FMUX(objective=finalTime, startTime=0,
+      finalTime(min=0.2, free=true, initialGuess=2))
+                                                   
+    
+    Real x1(start=0, fixed=true) "First state";
+    Real x2(start=1, fixed=true) "Second state";
+    
+    input Real u(min=-1, max=1) "Control signal";
+  
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = x1;
+  
+  constraint
     x1(1) = 0;
     x2(1) = 0;
   
-  end VDP_Opt_Unscaled_Min_Time;
+  end VDP_Opt_Unscaled_Min_Time_FMUX;
 
-  optimization VDP_Opt_Min_Time_Nonzero_Start(objectiveIntegrand=1, startTime=5,
+  optimization VDP_Opt_Min_Time_Nonzero_Start(
+      objectiveIntegrand=1, startTime=5,
+      finalTime(min=5.2, free=true, initialGuess=7))
+                                                   
+    
+    Real x1(start=0, fixed=true) "First state";
+    Real x2(start=1, fixed=true) "Second state";
+    
+    input Real u(min=-1, max=1) "Control signal";
+  
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = x1;
+  
+  constraint
+    x1(finalTime) = 0;
+    x2(finalTime) = 0;
+  
+  end VDP_Opt_Min_Time_Nonzero_Start;
+  
+  optimization VDP_Opt_Min_Time_Nonzero_Start_FMUX(
+      objectiveIntegrand=1, startTime=5,
       finalTime(min=5.2, free=true, initialGuess=7))
                                                    
     
@@ -231,7 +271,7 @@ package VDP_pack
     x1(1) = 0;
     x2(1) = 0;
   
-  end VDP_Opt_Min_Time_Nonzero_Start;
+  end VDP_Opt_Min_Time_Nonzero_Start_FMUX;
   
   optimization VDP_Opt_Initial_Equations(
         objectiveIntegrand=x1^2 + x2^2 + u^2,
@@ -267,5 +307,33 @@ package VDP_pack
     der(x2) = w/2;
     w = 2*x1;
   end VDP_Opt_DAE;
+  
+  optimization VDP_Opt_Function(
+        objectiveIntegrand=x1^2 + x2^2 + u^2,
+        startTime=0, finalTime=20)
+    
+    Real x1(start=0, fixed=true) "First state";
+    Real x2(start=1, fixed=true) "Second state";
+    Real der_x1;
+    Real der_x2;
+    
+    input Real u(max=0.75) "Control signal";
+    
+    function RHS
+      input Real x1;
+      input Real x2;
+      input Real u;
+      output Real der_x1;
+      output Real der_x2;
+    algorithm
+      der_x1 := (1 - x2^2) * x1 - x2 + u;
+      der_x2 := x1;
+    end RHS;
+  
+  equation
+    (der_x1, der_x2) = RHS(x1, x2, u);
+    der(x1) = der_x1;
+    der(x2) = der_x2;
+  end VDP_Opt_Function;
   
 end VDP_pack;

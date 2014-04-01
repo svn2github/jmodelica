@@ -607,15 +607,15 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
 
 #define check_lbound(x, xmin, message) \
     if(jmi->options.block_solver_options.enforce_bounds_flag && (x < xmin)) \
-        { jmi_log_node(jmi->log, logInfo, "LBoundExceeded", "<message:%s>", \
+        { jmi_log_node(jmi->log, logWarning, "LBoundExceeded", "<message:%s>", \
                        message);                                        \
-            return 1; }
+        }
 
 #define check_ubound(x, xmax, message) \
     if(jmi->options.block_solver_options.enforce_bounds_flag && (x > xmax)) \
-        { jmi_log_node(jmi->log, logInfo, "UBoundExceeded", "<message:%s>", \
+        { jmi_log_node(jmi->log, logWarning, "UBoundExceeded", "<message:%s>", \
                        message);                                        \
-            return 1; }
+        }
 
 #define init_with_lbound(x, xmin, message) \
     if(jmi->options.block_solver_options.enforce_bounds_flag && (x < xmin)) \
@@ -1088,6 +1088,8 @@ struct jmi_t {
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
+	
+	int nbr_event_iter;                  /**< Counter for the nummber of global event iterations performed. */ 
 
     jmi_simple_color_info_t* color_info_A;  /**< \brief CPR coloring info for the ODE Jacobian A */
     jmi_simple_color_info_t* color_info_B;  /**< \brief CPR coloring info for the ODE Jacobian B */
@@ -1098,6 +1100,7 @@ struct jmi_t {
 
     jmi_options_t options;               /**< \brief Runtime options */
     jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
+    jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
 
@@ -1352,20 +1355,6 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
  * \brief Call a jmi_generic_func_t, and handle exceptions and setting the current jmi_t pointer.
  */
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func);
-
-/**
- * \brief Evaluates the switches.
- * 
- * Evaluates the switches. Depending on the mode, it either evaluates
- * all the switches at initial time (mode=0) or otherwise (mode=1).
- * 
- * @param jmi The jmi_t struct
- * @param switches The switches (Input, Output)
- * @param eps The epsilon used in determining if a switch or not
- * @param mode Determine if we are evaluating initial switches or not.
- * @return Error code.
- */
-int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode);
 
 /**
  * \brief Compares two sets of switches.

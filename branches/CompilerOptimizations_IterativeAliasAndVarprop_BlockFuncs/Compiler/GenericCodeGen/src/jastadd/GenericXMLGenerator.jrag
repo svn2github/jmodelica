@@ -90,10 +90,10 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * Instead, the tag returned by {@link #rootTag()} is generated.
      * 
      * @param templateReader  a Reader object from which the template file can be used
-     * @param genPrinter      a PrintStream object to which the generated code is written
+     * @param genPrinter      a CodeStream object to which the generated code is written
      * @param includeDir      directory to look for included files in. If null, includes are not supported
      */
-    public void generate(Reader templateReader, PrintStream genPrinter, File includeDir) {
+    public void generate(Reader templateReader, CodeStream genPrinter, File includeDir) {
         if (templateReader == null) {
         	generateXMLDeclaration(genPrinter);
             rootTag().generate(genPrinter);
@@ -106,7 +106,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     /**
      * Generates the XML Declaration.
      */
-    protected void generateXMLDeclaration(PrintStream printer) {	
+    protected void generateXMLDeclaration(CodeStream printer) {	
 		printer.print("<?xml");		
 		printer.format(" %s=\"%s\"", "version", getXMLVersion());
 		printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
@@ -158,7 +158,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param name     the name of the tag
      * @param printer  the print stream to use
      */
-    protected void generateTagStart(String name, PrintStream printer) {
+    protected void generateTagStart(String name, CodeStream printer) {
         indent(printer);
         printer.print('<');
         printer.print(name);
@@ -169,7 +169,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * 
      * @param printer  the print stream to use
      */
-    protected void generateOpenEnd(PrintStream printer) {
+    protected void generateOpenEnd(CodeStream printer) {
         printer.print(">\n");
         indentation++;
     }
@@ -181,7 +181,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * 
      * @param printer  the print stream to use
      */
-    protected void generateClosedEnd(PrintStream printer) {
+    protected void generateClosedEnd(CodeStream printer) {
         printer.print(" />\n");
     }
     
@@ -191,7 +191,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param name     the name of the tag
      * @param printer  the print stream to use
      */
-    protected void generateClosing(String name, PrintStream printer) {
+    protected void generateClosing(String name, CodeStream printer) {
         indentation--;
         indent(printer);
         printer.format("</%s>\n", name);
@@ -204,7 +204,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param value    the value of the attribute
      * @param printer  the print stream to use
      */
-    protected void generateAttribute(String name, Object value, PrintStream printer) {
+    protected void generateAttribute(String name, Object value, CodeStream printer) {
         printer.format(" %s=\"%s\"", name, value);
     }
     
@@ -212,7 +212,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     /**
      * Print the current indentation to printer.
      */
-    private void indent(PrintStream printer) {
+    private void indent(CodeStream printer) {
         for (int i = 0; i < indentation; i++)
             printer.print(indentStep);
     }
@@ -305,7 +305,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         /**
          * Generate the children of this tag.
          */
-        public void generateChildren(PrintStream printer) {
+        public void generateChildren(CodeStream printer) {
             for (AbstractTag child : childTags()) 
                 child.generateTag(printer);
         }
@@ -313,7 +313,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         /**
          * Generate the attributes of this tag.
          */
-        public void generateAttributes(PrintStream printer) {
+        public void generateAttributes(CodeStream printer) {
             for (AbstractTag attribute : attributeTags()) 
                 attribute.generateTag(printer);
         }
@@ -325,7 +325,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * @param name     the name of the XML tag
          * @param printer  the print stream to use
          */
-        public void generateOpening(String name, PrintStream printer) {
+        public void generateOpening(String name, CodeStream printer) {
             generateTagStart(name, printer);
             generateAttributes(printer);
             generateOpenEnd(printer);
@@ -338,7 +338,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * @param name     the name of the XML tag
          * @param printer  the print stream to use
          */
-        public void generateNode(String name, PrintStream printer) {
+        public void generateNode(String name, CodeStream printer) {
             generateOpening(name, printer);
             generateChildren(printer);
             generateClosing(name, printer);
@@ -350,7 +350,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * @param name     the name of the XML tag
          * @param printer  the print stream to use
          */
-        public void generateClosed(String name, PrintStream printer) {
+        public void generateClosed(String name, CodeStream printer) {
             generateTagStart(name, printer);
             generateAttributes(printer);
             generateClosedEnd(printer);
@@ -368,9 +368,9 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * {@link #generateClosed(String, java.io.PrintStream)}.
          * </ul>
          * 
-         * @param printer A PrintStream object for output of the generated code.
+         * @param printer A CodeStream objectfor output of the generated code.
          */
-        public void generate(PrintStream printer) {
+        public void generate(CodeStream printer) {
         	Object val = value();
             if (val != null)
                 generateAttribute(xml, val, printer);

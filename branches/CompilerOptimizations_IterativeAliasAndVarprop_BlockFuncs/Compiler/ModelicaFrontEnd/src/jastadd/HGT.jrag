@@ -1,0 +1,409 @@
+/*
+    Copyright (C) 2009-2014 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.Collection;
+
+aspect EquationName {
+    
+    public abstract class EquationContributer {
+        public static class EquationNameContributer extends EquationContributer {
+            
+            public EquationNameContributer() {
+                super("EquationNameContributer");
+            }
+            
+            @Override
+            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+                AnnotationNode nameNode = src.annotation().vendorNode().forPath("name");
+                if (!nameNode.exists())
+                    return;
+                Exp nameExp = nameNode.exp();
+                if (nameExp == null)
+                    nameNode.ast().error("Name annotation is incorrect");
+                else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
+                    nameExp.error("Illegal equation name \"%s\"", nameExp);
+                else
+                    dest.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
+            }
+        }
+    }
+    
+    private static EquationContributer AbstractEquation.EQUATION_NAME_CONTRIBUTER =
+            addEquationContributer(new EquationContributer.EquationNameContributer());
+    
+}
+
+aspect HGT {
+    
+    public abstract class EquationContributer {
+        public static class HGTContributer extends EquationContributer {
+            
+            public HGTContributer() {
+                super("HGTContributer");
+            }
+            
+            @Override
+            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+                if (!src.root().options.getBooleanOption("hand_guided_tearing"))
+                    return;
+                AnnotationNode residualNode = src.annotation().vendorNode().forPath("ResidualEquation");
+                if (!residualNode.exists())
+                    return;
+                
+                FExp enabledFExp = null;
+                boolean enabledEach = false;
+                FExp iterationVariableFExp = null;
+                AnnotationNode enabledAnnotation = residualNode.forPath("enabled");
+                Exp enabledExp = enabledAnnotation.exp();
+                if (enabledExp != null) {
+                    enabledFExp = enabledExp.instantiate();
+                    enabledEach = enabledAnnotation.isEachSet();
+                }
+                AnnotationNode iterationVariableAnnotation = residualNode.forPath("iterationVariable");
+                Exp iterationVariableExp = iterationVariableAnnotation.exp();
+                if (iterationVariableExp != null) {
+                    if (!iterationVariableExp.isAccess()) {
+                        iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
+                        return;
+                    } else {
+                        iterationVariableFExp = iterationVariableExp.instantiate();
+                    }
+                }
+                dest.setHGTResidual(Integer.MAX_VALUE, enabledFExp, enabledEach, iterationVariableFExp);
+            }
+        }
+    }
+    
+    private static EquationContributer AbstractEquation.HGT_CONTRIBUTER =
+            addEquationContributer(new EquationContributer.HGTContributer());
+    
+    syn int FAbstractEquation.HGTLevel() {
+        FAttribute residual = findAttribute("ResidualEquation");
+        if (residual == null)
+            return Integer.MAX_VALUE;
+        else
+            return residual.getLevel();
+        
+    }
+    
+    syn boolean FAbstractEquation.isHGTResidual() {
+        FAttribute residual = findAttribute("ResidualEquation");
+        if (residual == null)
+            return false;
+        FAttribute enabled = residual.findAttribute("enabled");
+        return enabled == null || !enabled.hasValue() || enabled.getValue().ceval().booleanValue();
+    }
+    
+    syn boolean FAbstractEquation.isHGTPairedResidual() {
+        if (!isHGTResidual())
+            return false;
+        return getHGTIterationVariable() != null;
+    }
+    
+    syn boolean FAbstractEquation.isHGTUnpairedResidual() {
+        if (!isHGTResidual())
+            return false;
+        return getHGTIterationVariable() == null;
+    }
+    
+    syn FVariable FAbstractEquation.getHGTIterationVariable() {
+        if (!isHGTResidual())
+            return null;
+        FAttribute iterationVariable = findAttribute("ResidualEquation").findAttribute("iterationVariable");
+        if (iterationVariable != null && iterationVariable.hasValue())
+            return iterationVariable.getValue().asFIdUse().myFV().asFVariable();
+        else
+            return null;
+    }
+    
+    public boolean Eq.markedAsResidualEquation() {
+        return getEquation().isHGTResidual();
+    }
+    
+    protected void FAbstractEquation.typeCheckHGTResidual(ErrorCheckType checkType) {
+        FAttribute residualAttr = findAttribute("ResidualEquation");
+        if (residualAttr == null)
+            return;
+        FAttribute enabledAttr = residualAttr.findAttribute("enabled");
+        if (enabledAttr != null) {
+            FExp enabledExp = enabledAttr.getValue();
+            typeCheckHGTEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
+        }
+        FAttribute iterVarAttr = residualAttr.findAttribute("iterationVariable");
+        if (iterVarAttr != null && !iterVarAttr.getValue().asInstAccess().isUnknown()) {
+            FExp var = iterVarAttr.getValue();
+            FTypePrefixVariability variability = var.variability();
+            if (!variability.continuousVariability())
+                var.error("Iteration variable should have continuous variability, %s has %svariability", var, variability);
+            Size size = size();
+            Size varSize = var.size();
+            if (!size.equals(varSize))
+                var.error("Size of iteration variable %s is not the same size as the surrounding equation, size of variable %s, size of equation %s", var, varSize, size);
+        }
+    }
+    
+    protected static void ASTNode.typeCheckHGTEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
+        enabledExp.collectErrors(checkType);
+        if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
+            enabledExp.error("The type of the enabled expression is not boolean");
+        } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
+            if (enabledExp.ndims() == 0) {
+                enabledExp.warning("Assuming 'each' for enabled expression");
+            } else {
+                enabledExp.error("Array size mismatch for the enabled attribute" +
+                        ", size of component declaration is " + parentType.size() + 
+                        " and size of expression is " + enabledExp.size());
+            }
+        } else if (eachSet) { 
+            if (parentType.ndims() == 0) {
+                enabledExp.error("The 'each' keyword cannot be applied to attributes of scalar components");
+            } else if (enabledExp.ndims() > 0) {
+                enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
+            }
+        }
+    }
+    
+    public void FAbstractEquation.setHGTResidual(FVariable iterationVariable) {
+        setHGTResidual(Integer.MAX_VALUE, iterationVariable.createUseExp());
+    }
+    
+    public void FAbstractEquation.setHGTResidual(int level, FExp iterationVariable) {
+        setHGTResidual(level, null, false, iterationVariable);
+    }
+    
+    public void FAbstractEquation.setHGTResidual(int level, FExp enabledExp, boolean enabledEach, FExp iterationVariableExp) {
+        FAttribute residualAttr = findAttribute("ResidualEquation");
+        if (residualAttr == null) {
+            residualAttr = new FInternalAttribute("ResidualEquation", level);
+             addFAttribute(residualAttr);
+        }
+        FAttribute enabledAttr = residualAttr.findAttribute("enabled");
+        if (enabledAttr == null) {
+            if (enabledExp != null)
+                residualAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp, level, enabledEach));
+        } else {
+            if (enabledExp == null) // remove attribute?
+                enabledAttr.setValueOpt(new Opt<FExp>());
+            else
+                enabledAttr.setValue(enabledExp);
+        }
+        FAttribute iterationVariableAttr = residualAttr.findAttribute("iterationVariable");
+        if (iterationVariableAttr == null) {
+            if (iterationVariableExp != null)
+                residualAttr.addFAttribute(new FInternalAttribute("*", "iterationVariable", iterationVariableExp, level));
+        } else {
+            if (iterationVariableExp == null) // remove attribute?
+                iterationVariableAttr.setValueOpt(new Opt<FExp>());
+            else
+                iterationVariableAttr.setValue(iterationVariableExp);
+        }
+    }
+    
+    public void FAbstractEquation.unsetHGT() {
+        setHGTResidual(Integer.MAX_VALUE, new FBooleanLitExpFalse(), false, null);
+    }
+    
+    private static void EquationBlockFactory.tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing, int blockNumber) throws BLTException {
+        boolean recalculateMatchings = false;
+        Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
+        for (Eq e : block) {
+            varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
+        }
+        Iterator<Eq> it = block.iterator();
+        Collection<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
+        Collection<Var> unmatchedHGTVariables = new ArrayList<Var>();
+        for (Eq eqn : block) {
+            if (eqn.getEquation().isHGTUnpairedResidual())
+                unmatchedHGTEquations.add(eqn);
+        }
+        for (Var var : varsInBlock.values()) {
+            if (var.getVariable().isHGTVarComponent())
+                unmatchedHGTVariables.add(var);
+        }
+        if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
+            Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
+            Iterator<Var> varIt = unmatchedHGTVariables.iterator();
+            while (eqnIt.hasNext() && varIt.hasNext()) {
+                Eq eqn = eqnIt.next();
+                Var var = varIt.next();
+                eqn.getEquation().setHGTResidual(var.getVariable());
+                var.getVariable().setHGTAsPair();
+            }
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Unable to apply hand-guided tearing selections on block " + blockNumber + ". The number of unmatched hand guided equations and variables are not equal.\n");
+            sb.append("  Unmatched hand guided equations(" + unmatchedHGTEquations.size() + "):\n");
+            for (Eq eqn : unmatchedHGTEquations)
+                sb.append("    " + eqn.getEquation() + "\n");
+            sb.append("\n");
+            sb.append("  Unmatched hand guided variables(" + unmatchedHGTVariables.size() + "):\n");
+            for (Var var : unmatchedHGTVariables)
+                sb.append("    " + var.getName() + "\n");
+            throw new BLTException(sb.toString());
+        }
+        while (it.hasNext()) {
+            Eq e = it.next();
+            FVariable fIterVar = e.getEquation().getHGTIterationVariable();
+            if (fIterVar != null) {
+                Var iterVar = varsInBlock.get(fIterVar);
+                if (iterVar == null) {
+                    e.getEquation().warning("Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: " + fIterVar.name() + ". Equation: " + e.getEquation());
+                    continue;
+                }
+                it.remove();
+                varsInBlock.remove(fIterVar);
+                recalculateMatchings = true;
+                ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), iterVar.getVariable().name());
+                eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, iterVar));
+            }
+        }
+        if (recalculateMatchings) {
+            BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
+            newGraph.maximumMatching(true);
+            Collection<Eq> unmatchedEquations = newGraph.getUnmatchedEquations();
+            Collection<Var> unmatchedVariables = newGraph.getUnmatchedVariables();
+            if (unmatchedEquations.size() > 0 || unmatchedVariables.size() > 0) {
+                ASTNode.log.info("Unmatched equations and variables in block after hand guided, adding them as tearing pairs!");
+                Iterator<Eq> eIt = unmatchedEquations.iterator();
+                Iterator<Var> vIt = unmatchedVariables.iterator();
+                while (eIt.hasNext() && vIt.hasNext()) {
+                    Eq e = eIt.next();
+                    Var v = vIt.next();
+                    ASTNode.log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
+                    newGraph.removeEquation(e);
+                    newGraph.removeVariable(v);
+                    eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
+                }
+                if (eIt.hasNext() || vIt.hasNext()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Hand guided tearing selections in block " + blockNumber + " results in a structurally singular block.\n");
+                    if (eIt.hasNext()) {
+                        sb.append("  The follwowing equation(s) could not be matched to any variable:\n");
+                            while (eIt.hasNext())
+                                sb.append("    " + eIt.next().getEquation());
+                    }
+                    if (vIt.hasNext()) {
+                        sb.append("  The following varible(s) could not be matched to any equation:\n");
+                        while (vIt.hasNext())
+                            sb.append("    " + vIt.next().getVariable().name());
+                    }
+                    throw new BLTException(sb.toString());
+                }
+            }
+            Collection<Collection<Eq>> innerBLT = newGraph.tarjan(false);
+            boolean allInnerAreSolved = true;
+            Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+            for (Collection<Eq> innerBlock : innerBLT) {
+                SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
+                if (seb != null && seb.isSolvable()) {
+                    solvedBlocks.add(seb);
+                } else {
+                    allInnerAreSolved = false;
+                    break;
+                }
+            }
+            if (allInnerAreSolved) {
+                ASTNode.log.info("Remaining system is solvable.");
+                for (SimpleEquationBlock seb : solvedBlocks)
+                    eb.addSolvedBlock(seb);
+                return;
+            }
+            block = new ArrayList<Eq>();
+            block.addAll(newGraph.getEquations());
+            ASTNode.log.info("Additional tearing is needed, continuing with automatic tearing.");
+        }
+        if (!useTearing)
+            throw new BLTException("Hand guided tearing selections in block " + blockNumber + " does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
+        else
+            tear(block, eb);
+    }
+    
+}
+
+aspect ResidualPairPropagation{
+    
+    public static final int FInternalAttribute.HGTVarLevel_COMPONENT = 1;
+    public static final int FInternalAttribute.HGTVarLevel_PAIR = 2;
+    
+    public static final String FAttribute.HGT         = "hgt()";
+    
+    syn CValue FVariable.HGTVarCValue() {
+        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
+        return attr == null ? null : attr.getValue().ceval();
+    }
+    
+    syn boolean FVariable.isHGTVar() {
+        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
+        return attr != null && attr.getValue().ceval().booleanValue();
+    }
+    
+    syn boolean FVariable.isHGTVarPair() {
+        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
+        return attr != null && attr.getLevel() == FInternalAttribute.HGTVarLevel_PAIR &&
+                attr.getValue().ceval().booleanValue();
+    }
+    
+    syn boolean FVariable.isHGTVarComponent() {
+        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
+        return attr != null && attr.getLevel() == FInternalAttribute.HGTVarLevel_COMPONENT &&
+                attr.getValue().ceval().booleanValue();
+    }
+    
+    public void FAbstractVariable.setHGTAsPair() {
+        throw new UnsupportedOperationException();
+    }
+    public void FVariable.setHGTAsPair() {
+        setAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_PAIR);
+    }
+    
+    public void FVariable.unsetHGT() {
+        setAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpFalse());
+    }
+    
+    public class FClass {
+        public class propagateResidualPairs extends Transformation {
+            public void perform() {
+                for (FAbstractEquation eqn : getFAbstractEquations()) {
+                    if (eqn.isHGTPairedResidual())
+                        eqn.getHGTIterationVariable().setHGTAsPair();
+                }
+                
+                for (FResidualPair pair : getFResidualPairs()) {
+                    pair.propagate();
+                }
+            }
+        }
+    }
+    
+    protected void FResidualPair.propagate() {
+        FAbstractEquation fae = getResidualEquation().myFEquation();
+        if (fae == null) {
+            error("Internal HGT Error, unable to find fae");
+            return;
+        }
+        FAbstractVariable fv = getIterationVariable().myFV();
+        int otherLevel = fae.HGTLevel();
+        if (otherLevel == getLevel()) {
+            error("Internal HGT Error, same level, decalred twise?");
+            return;
+        }
+        if (otherLevel > getLevel()) {
+            fae.setHGTResidual(getLevel(), getIterationVariable().myFV().createUseExp());
+            getIterationVariable().myFV().setHGTAsPair();
+        }
+    }
+}
+

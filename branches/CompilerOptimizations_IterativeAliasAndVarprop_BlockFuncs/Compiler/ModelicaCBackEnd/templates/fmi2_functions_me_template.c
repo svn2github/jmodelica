@@ -14,9 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-
 /* FMI 2.0 functions specific for ME.*/
 
 FMI_Export fmiStatus fmiEnterEventMode(fmiComponent c) {

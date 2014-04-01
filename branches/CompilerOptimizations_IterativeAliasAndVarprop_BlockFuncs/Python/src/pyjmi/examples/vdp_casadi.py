@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 Modelon AB
+# Copyright (C) 2014 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,25 +22,21 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-# Import the JModelica.org Python packages
-from pymodelica import compile_fmux
-from pyjmi import CasadiModel
-
 def run_demo(with_plots=True):
     """
-    Demonstrate how to optimize a VDP oscillator using LocalDAECollocationAlg.
+    Demonstrate how to optimize a VDP oscillator using CasADiInterface.
     """
-    # Compile and load model
-    curr_dir = os.path.dirname(os.path.abspath(__file__));
-    jn = compile_fmux("VDP_pack.VDP_Opt2", curr_dir + "/files/VDP.mop")
-    model = CasadiModel(jn)
+    # Compile and load optimization problem
+    from pyjmi import get_files_path, transfer_to_casadi_interface
+    file_path = os.path.join(get_files_path(), "VDP.mop")
+    op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", file_path)
     
     # Set algorithm options
-    opts = model.optimize_options(algorithm="LocalDAECollocationAlg")
-    opts['graph'] = "SX"
+    opts = op.optimize_options()
+    opts['n_e'] = 30
     
     # Optimize
-    res = model.optimize(algorithm="LocalDAECollocationAlg", options=opts)
+    res = op.optimize(options=opts)
     
     # Extract variable profiles
     x1 = res['x1']
@@ -48,8 +44,8 @@ def run_demo(with_plots=True):
     u = res['u']
     time = res['time']
     
-    assert N.abs(res.final('x1') - 8.41026105e-07) < 1e-3
-    assert N.abs(res.final('x2') + 3.56828261e-07) < 1e-3
+    assert N.abs(res.final('x1')) < 1e-3
+    assert N.abs(res.final('x2')) < 1e-3
     
     # Plot
     if with_plots:

@@ -126,15 +126,17 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		int arg = programarguments.size();
 	}
 	
-	public static void main(String args[]) {		
+	public static void main(String args[]) {
 		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
 		// create an empty compiler
 		OptimicaCompiler oc = new OptimicaCompiler();
 		// set arguments
 		try {
 			oc.setArguments("OptimicaCompiler", args, programarguments);
-		} catch(JModelicaHomeNotFoundException e) {
-			log.error(e);
+		} catch(Throwable t) {
+			log.error(t);
+			log.close();
+			System.exit(1);
 		}
 		// Compile model
 		oc.compileModelFromCommandLine(args, programarguments);
@@ -145,7 +147,7 @@ aspect OptimicaCompilationHelpers {
 	 
     //Overshadowing the use of templates in case of optimization.
     refine CompilationHelpers private String Templates.getCTemplateName(FClass fc) {
-        if (fc instanceof FOptClass)
+        if (fc != null && fc instanceof FOptClass)
             return (this == JMU) ? "jmi_optimica_template.c" : null;
         else
             return template(C);

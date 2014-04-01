@@ -244,6 +244,8 @@ aspect Arrays {
 	eq InstPositionalArgument.ndims()    = getFExp().ndims();
 	eq InstNamedArgument.ndims()         = getFExp().ndims();
 	
+	eq FArgumentExp.ndims() = copiedFExp().ndims();
+	
 	eq FBinExp.ndims() = getLeft().ndims();
 	eq FUnaryExp.ndims() = getFExp().ndims();
 	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getRight().ndims());
@@ -553,11 +555,11 @@ aspect Arrays {
 		return left.equals(right) ? left : Size.SCALAR;
 	}
 	
-	inh Size InstResidual.size();
-	inh Size InstNominal.size();
-	eq FAbstractEquation.getResidual().size() = size();
-	eq FAbstractEquation.getNominal().size() = size();
-	
+	inh Size FIdDeclAttribute.size();
+    eq FAbstractEquation.getFAttribute().size() = size();
+    eq FVariable.getFAttribute().size() = size();
+    eq FDerivedType.getFAttribute().size() = getBaseType().size();
+    
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
 	
 	inh Size FAbstractEquation.parentTotalSize();
@@ -1020,6 +1022,8 @@ aspect Arrays {
 	eq InstDefaultArgument.size()        = getFExp().size();
 	eq InstPositionalArgument.size()     = getFExp().size();
 	eq InstNamedArgument.size()          = getFExp().size();
+    
+    eq FArgumentExp.size() = copiedFExp().size();
 	
 	syn Size FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
 	
@@ -1831,10 +1835,31 @@ aspect Arrays {
 	        getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 	
+	eq InstFunctionCall.getArray() {
+	      if (variability().structuralOrLess() && inBindingExp()) {
+	          Array arr = new Array(indices());
+	          CValueArray carr = (CValueArray) cevalArray(Index.NULL);
+	          for (Index i : arr.indices()) {
+	              arr.set(i, carr.getCell(i).buildLiteral());
+	          }
+	          return arr;
+	      }
+	      return super.getArray();
+	}
+	
 	eq FFunctionCall.getArray() {
 		FClass fc = myFClass();
 		if (!isArray() || fc == null)
 			return super.getArray();
+		
+		if (variability().structuralOrLess() && inBindingExp()) {
+            Array arr = new Array(indices());
+            CValueArray carr = (CValueArray) cevalArray(Index.NULL);
+            for (Index i : arr.indices()) {
+                arr.set(i, carr.getCell(i).buildLiteral());
+            }
+            return arr;
+        }
 		
 		FArraySubscripts fas = collectIterExpSubscripts();
 		Array arr = new Array(indices());

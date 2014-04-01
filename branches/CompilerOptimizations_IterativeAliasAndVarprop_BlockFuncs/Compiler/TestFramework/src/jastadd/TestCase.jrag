@@ -76,7 +76,7 @@ abstract public class TestCase {
 	 * Options may be further changed by test annotation.
 	 */
 	protected OptionRegistry createOptionsRegistry() {
-		OptionRegistry or = new OptionRegistry();
+		OptionRegistry or = ModelicaCompiler.createOptions();
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
 		or.addStringOption("MODELICAPATH", modelica_path);
@@ -350,7 +350,7 @@ abstract public class TestCase {
         
         // Flatten class and check errors reported during flattening
         InstClassDecl icd = ipr.lookupInstClassQualified(getClassName());
-        FClass fc = FClass.create(icd, getSourceFileName());
+        FClass fc = FClass.create(icd, getSourceFileName(), null);
         try {
             icd.flattenInstClassDecl(fc);
             problems = sr.collectWarnings();

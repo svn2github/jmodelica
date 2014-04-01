@@ -41,6 +41,10 @@ aspect FlatNameBinding {
 		FAbstractVariable fv = lookupOutermostFV(getFQName());
 		return (fv instanceof FFunctionVariable) ? (FFunctionVariable) fv: null;
 	}
+	
+    syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getFIdUse().myCommonVarDecl();
+    syn CommonVariableDecl FIdUse.myCommonVarDecl() = myFV();
+    eq  FIdUseInstAccess.myCommonVarDecl() = getInstAccess().myInstComponentDecl();
     
 	eq Root.getChild().lookupFV(FQName fqn)          = null;
 	eq Root.getChild().lookupDerFV(FQName fqn)       = null;
@@ -620,8 +624,9 @@ aspect FlatFEquationBinding {
 	syn lazy Map<String, FAbstractEquation> FClass.equationMap() {
 		Map<String, FAbstractEquation> equationMap = new HashMap<String, FAbstractEquation>();
 		for (FAbstractEquation fae : getFAbstractEquations()) {
-			if (fae.hasName())
-				equationMap.put(fae.getName().toString(), fae);
+		    String name = fae.name();
+			if (name != null)
+				equationMap.put(name, fae);
 		}
 		return equationMap;
 	}

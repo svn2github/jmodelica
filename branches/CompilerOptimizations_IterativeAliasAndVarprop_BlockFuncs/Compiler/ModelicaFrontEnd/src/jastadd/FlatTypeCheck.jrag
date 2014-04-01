@@ -20,9 +20,24 @@ import org.jmodelica.util.Criteria;
 import org.jmodelica.util.ErrorCheckType;
 
 aspect FlatTypeCheck {
-	
+
     public void ASTNode.typeCheck(ErrorCheckType checkType) {}
-    
+
+    public abstract class ErrorChecker {
+        public static class TypeChecker extends ErrorChecker {
+            public TypeChecker() {
+                super("TypeCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.typeCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
+
     public void InstNode.typeCheck(ErrorCheckType checkType) {
         typeCheckSystemResiduals(checkType);
     }
@@ -140,24 +155,7 @@ aspect FlatTypeCheck {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
 			    FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-			    enabledExp.collectErrors(checkType);
-			    if (!enabledExp.type().isBoolean()) {
-			        enabledExp.error("The type of the HGT enabled expression is not boolean");
-			    } else if (!enabledNode.isEachSet() && !type().dimensionCompatible(enabledExp.type())) { 
-			        if (enabledExp.ndims() == 0) {
-			            enabledExp.warning("Assuming 'each' for enabled expression");
-			        } else {
-			            enabledExp.error("Array size mismatch for the enabled attribute" +
-			                    ", size of component declaration is " + size() + 
-			                    " and size of expression is " + enabledExp.size());
-			        }
-			    } else if (enabledNode.isEachSet()) { 
-			        if (ndims() == 0) {
-			            error("The 'each' keyword cannot be applied to attributes of scalar components");
-			        } else if (enabledExp.ndims() > 0) {
-			            error("The enabled attribute is declared 'each' and the expression is not scalar");
-			        }
-			    }
+			    typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
 			}
 		}
 		
@@ -181,34 +179,34 @@ aspect FlatTypeCheck {
     public void InstModification.typeCheckAttribute(InstNode owner) {}
 
     public void InstComponentModification.typeCheckAttribute(InstNode owner) {
-    	if (hasInstModification() && getInstModification().hasInstValueMod()) {
-			FExp val_mod = getInstModification().instValueMod();
-			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
-				FType attr_type = owner.attributeType(this);
-				boolean checkSize = !owner.isInRedeclareMod();
-				if (!type().typeCompatible(val_mod.type().scalarType())) {
-					error("The type of the binding expression of the attribute " + name() +
-					  " does not match the declared type of the variable");
-				} else if (checkSize) {
-				    if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
-    					if (val_mod.ndims() == 0) {
-    						warning("Assuming 'each' for the attribute " + name());
-    					} else {
-    						error("Array size mismatch for the attribute " + name() +
-    								", size of declaration is " + attr_type.size() + 
-    								" and size of " + name() + " expression is " + val_mod.size());
-    					}
-    				} else if (getEach()) { 
-    					if (owner.ndims() == 0) {
-    						error("The 'each' keyword cannot be applied to attributes of scalar components");
-    					} else if (val_mod.ndims() > 0) {
-    						error("The attribute " + name() + 
-    								" is declared 'each' and the binding expression is not scalar");
-    					}
-    				}
-				}
-			}
-    	}
+        if (hasInstModification() && getInstModification().hasInstValueMod()) {
+            FExp valMod = getInstModification().instValueMod();
+            if (!type().isUnknown() && !valMod.type().isUnknown()) {
+                Size attrSize = owner.attributeSize(this);
+                boolean checkSize = !owner.isInRedeclareMod();
+                if (!type().typeCompatible(valMod.type().scalarType())) {
+                    error("The type of the binding expression of the attribute " + name() +
+                            " does not match the declared type of the variable");
+                } else if (checkSize) {
+                    if (!getEach() && !attrSize.equivalent(valMod.size(), false)) { 
+                        if (valMod.ndims() == 0) {
+                            warning("Assuming 'each' for the attribute " + name());
+                        } else {
+                            error("Array size mismatch for the attribute " + name() +
+                                    ", size of declaration is " + attrSize + 
+                                    " and size of " + name() + " expression is " + valMod.size());
+                        }
+                    } else if (getEach()) { 
+                        if (owner.ndims() == 0) {
+                            error("The 'each' keyword cannot be applied to attributes of scalar components");
+                        } else if (valMod.ndims() > 0) {
+                            error("The attribute " + name() + 
+                                    " is declared 'each' and the binding expression is not scalar");
+                        }
+                    }
+                }
+            }
+        }
     }
     
     inh boolean InstNode.isInRedeclareMod();
@@ -219,19 +217,21 @@ aspect FlatTypeCheck {
     
     
   public void FEquation.typeCheck(ErrorCheckType checkType) {
-	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
+      typeCheckHGTResidual(checkType);
+      typeCheckNominal(checkType);
+      typeCheckLocalIteration(checkType);
       FType left = getLeft().type();
       FType right = getRight().type();
-	  if (!left.isUnknown() && !right.isUnknown()) {
-		  if (!left.equivalentTo(right)) {
-		      if (left.scalarType().equivalentTo(right.scalarType())) {
-		          if (!lockBranch(checkType))
-		              error("The array sizes of right and left hand side of equation are not compatible");        
-		      } else {
-	              error("The right and left expression types of equation are not compatible");        
-		      }
-		  }
-	  }
+      if (!left.isUnknown() && !right.isUnknown()) {
+          if (!left.equivalentTo(right)) {
+              if (left.scalarType().equivalentTo(right.scalarType())) {
+                  if (!lockBranch(checkType))
+                      error("The array sizes of right and left hand side of equation are not compatible");
+              } else {
+                  error("The right and left expression types of equation are not compatible");
+              }
+          }
+      }
   }
   
   public void FConnectClause.typeCheck(ErrorCheckType checkType) {
@@ -536,6 +536,13 @@ aspect FlatTypeCheck {
   eq InstNode.getChild().isInstComponentSize()                          = false;
   eq FlatRoot.getChild().isInstComponentSize()                          = false;
 	
+  syn boolean FArraySubscripts.isFullSize() {
+      for (FSubscript fs : getFSubscripts())
+          if (!fs.isColon())
+              return false;
+      return true;
+  }
+  
   
   public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
@@ -605,7 +612,7 @@ aspect FlatTypeCheck {
 	  if (!getDim().type().isUnknown() && !fIntegerScalarType().typeCompatible(getDim().type()))
 		  error("Dimension argument of cat() is not compatible with Integer: " + getDim());
 	  else if (!getDim().type().isUnknown() && !getDim().variability().lessOrEqual(fParameter()))
-		  error("Dimension argument of cat() does not have constant or parameter variability: " + getDim());
+		  error("Dimension argument of cat() does not have constant variability: " + getDim());
   }
   
   public void FAbstractCat.typeCheckFExps() {}
@@ -710,7 +717,7 @@ aspect FlatTypeCheck {
   eq FAbstractCat.checkTypeAsExpression() = dimensionIsOk();
   
   syn boolean FAbstractCat.dimensionIsOk(); 
-  eq FCatExp.dimensionIsOk()    = getDim().variability().lessOrEqual(fParameter()) && 
+  eq FCatExp.dimensionIsOk()    = getDim().isConstantExp() && 
   								  getDim().type().isInteger() && getDim().type().isScalar();
   eq FMatrix.dimensionIsOk()    = true;
   eq FMatrixRow.dimensionIsOk() = true;
@@ -983,45 +990,6 @@ aspect FlatTypeCheck {
 	  return true;
   }
 	
-	public void InstResidual.typeCheck(ErrorCheckType checkType) {
-		if (hasEnabled()) {
-			FExp enabledExp = getEnabled();
-			try {
-				enabledExp.ceval().booleanValue();
-			} catch (ConstantEvaluationException e) {
-				enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
-			}
-		}
-		if (hasIterationVariable() && !getIterationVariable().isUnknown()) {
-			FIdUse var = getIterationVariable();
-			FTypePrefixVariability variability = var.variability();
-			if (!variability.continuousVariability())
-				var.error("Iteration variable should have continuous variability, %s has %svariability", var, variability);
-			Size size = size();
-			Size varSize = var.size();
-			if (!size.equals(varSize))
-				var.error("Size of iteration variable %s is not the same size as the surrounding equation, size of variable %s, size of equation %s", var, varSize, size);
-		}
-	}
-	
-	public void InstNominal.typeCheck(ErrorCheckType checkType) {
-		if (hasEnabled()) {
-			FExp enabledExp = getEnabled();
-			try {
-				enabledExp.ceval().booleanValue();
-			} catch (ConstantEvaluationException e) {
-				enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
-			}
-		}
-		FExp exp = getValue();
-		FTypePrefixVariability variability = exp.variability();
-		if (!variability.parameterOrLess())
-			exp.error("Nominal expression should have parameter variability or less, %s has %svariability", exp, variability);
-		Size size = size();
-		Size expSize = exp.size();
-		if (!size.equals(expSize))
-			exp.error("Size of nominal expression %s is not the same size as the surrounding equation, size of expression %s, size of equation %s", exp, expSize, size);
-	}
 }
 
 aspect FlatVariabilityCheck {

@@ -33,6 +33,39 @@ fmiStatus fmi2_set_debug_logging(fmiComponent    c,
                                  fmiBoolean      loggingOn, 
                                  size_t          nCategories, 
                                  const fmiString categories[]) {
+
+    fmi2_me_t* self = (fmi2_me_t*)c;
+    int i, max_log_level, tmp_log_level;
+    if (c == NULL) {
+		return fmiFatal;
+    }
+
+    max_log_level = 0;
+    for (i = 0; i < nCategories; i++) {
+        if (strcmp(categories[i], "logLevel1")) {
+            tmp_log_level = 1;
+        } else if (strcmp(categories[i], "logLevel2")) {
+            tmp_log_level = 2;
+        } else if (strcmp(categories[i], "logLevel3")) {
+            tmp_log_level = 3;
+        } else if (strcmp(categories[i], "logLevel4")) {
+            tmp_log_level = 4;
+        } else if (strcmp(categories[i], "logLevel5")) {
+            tmp_log_level = 5;
+        } else if (strcmp(categories[i], "logLevel6")) {
+            tmp_log_level = 6;
+        } else {
+            jmi_log_node(self->jmi.log, logError, "Error", "The log category '%s' is not allowed", categories[i]);
+            return fmiError;
+        }
+
+        if (tmp_log_level > max_log_level) {
+            max_log_level = tmp_log_level;
+        }
+    }
+    
+    self->jmi.jmi_callbacks.log_options.logging_on_flag = loggingOn;
+    self->jmi.jmi_callbacks.log_options.log_level = max_log_level;
     return fmiOK;
 }
 
@@ -88,24 +121,6 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
     return component;
 }
 
-BOOL fmi2_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category) {
-/*BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category) {
-
-    jmi_callbacks_t* jmi_callbacks = cb;
-    fmi1_me_t * self = (fmi1_me_t *)cb->model_data;
-    if ((self != NULL) && !jmi_callbacks->logging_on_flag) {
-        return FALSE;
-    }
-    
-    switch (category) {
-        case logError:   break;
-        case logWarning: if(cb->log_level < 3) return FALSE; break;
-        case logInfo:    if(cb->log_level < 4) return FALSE; break;
-    }*/
-    return TRUE;
-}
-
-/*
 static fmiStatus category_to_fmiStatus(jmi_log_category_t c) {
     switch (c) {
     case logError:   return fmiError;
@@ -123,16 +138,14 @@ static const char *category_to_fmiCategory(jmi_log_category_t c) {
     default:         return "UNKNOWN CATEGORY";
     }
 }
-*/
 
 void fmi2_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message) {
- /* void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message) {
 
-    fmi1_me_t* c = (fmi1_me_t*)(jmi_callbacks->model_data);
-  
+    fmi2_me_t* c = (fmi2_me_t*)(jmi_callbacks->model_data);
+    
     if(c){
-        if(c->fmi_functions.logger)
-            c->fmi_functions.logger(c,jmi_callbacks->instance_name, 
+        if(c->fmi_functions->logger)
+            c->fmi_functions->logger(c,jmi_callbacks->instance_name, 
                                     category_to_fmiStatus(category),
                                    category_to_fmiCategory(severest_category),
                                    message);       
@@ -149,7 +162,22 @@ void fmi2_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t categor
             break;
         }
     }
-    */
+}
+
+BOOL fmi2_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category) {
+
+    jmi_callbacks_t* jmi_callbacks = cb;
+    fmi2_me_t * self = (fmi2_me_t *)cb->model_data;
+    if ((self != NULL) && !jmi_callbacks->log_options.logging_on_flag) {
+        return FALSE;
+    }
+    
+    switch (category) {
+        case logError:   break;
+        case logWarning: if(cb->log_options.log_level < 3) return FALSE; break;
+        case logInfo:    if(cb->log_options.log_level < 4) return FALSE; break;
+    }
+    return TRUE;
 }
 
 void fmi2_free_instance(fmiComponent c)  {
@@ -369,7 +397,6 @@ fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
     fmiReal* negated_value;
     int i;
     
-    
     if (c == NULL) {
 		return fmiFatal;
     }
@@ -379,6 +406,8 @@ fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
     for (i = 0; i < nvr; i++) {
         if (is_negated(vr[i])) {
             negated_value[i] = -value[i];
+        } else {
+            negated_value[i] = value[i];
         }
     }
     
@@ -519,6 +548,13 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
     }
     
     event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
+
+    event_info->iteration_converged        = !fmiEventInfo->newDiscreteStatesNeeded;
+    event_info->terminate_simulation       =  fmiEventInfo->terminateSimulation;
+    event_info->nominals_of_states_changed =  fmiEventInfo->nominalsOfContinuousStatesChanged;
+    event_info->state_values_changed       =  fmiEventInfo->valuesOfContinuousStatesChanged;
+    event_info->next_event_time_defined    =  fmiEventInfo->nextEventTimeDefined;
+    event_info->next_event_time            =  fmiEventInfo->nextEventTime;
     
     retval = jmi_event_iteration(&((fmi2_me_t *)c)->jmi, TRUE, event_info);
     if (retval != 0) {
@@ -526,11 +562,11 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
     }
     
     fmiEventInfo->newDiscreteStatesNeeded           = !event_info->iteration_converged;
-    fmiEventInfo->terminateSimulation               = event_info->terminate_simulation;
-    fmiEventInfo->nominalsOfContinuousStatesChanged = event_info->nominals_of_states_changed;
-    fmiEventInfo->valuesOfContinuousStatesChanged   = event_info->state_values_changed;
-    fmiEventInfo->nextEventTimeDefined              = event_info->next_event_time_defined;
-    fmiEventInfo->nextEventTime                     = event_info->next_event_time;
+    fmiEventInfo->terminateSimulation               =  event_info->terminate_simulation;
+    fmiEventInfo->nominalsOfContinuousStatesChanged =  event_info->nominals_of_states_changed;
+    fmiEventInfo->valuesOfContinuousStatesChanged   =  event_info->state_values_changed;
+    fmiEventInfo->nextEventTimeDefined              =  event_info->next_event_time_defined;
+    fmiEventInfo->nextEventTime                     =  event_info->next_event_time;
     
     free(event_info);
     

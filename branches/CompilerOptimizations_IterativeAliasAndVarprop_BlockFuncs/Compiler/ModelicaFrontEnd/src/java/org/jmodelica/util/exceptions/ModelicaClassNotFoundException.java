@@ -4,8 +4,8 @@ package org.jmodelica.util.exceptions;
  * Exception to be thrown when the Modelica class to instantiate is not
  * found.
  */
-@SuppressWarnings("serial")
 public class ModelicaClassNotFoundException extends ModelicaException {
+    private static final long serialVersionUID = 1;
 	private String className;
 
 	public ModelicaClassNotFoundException(String className) {

@@ -112,15 +112,17 @@ struct jmi_block_residual_t {
     int n;                         /**< \brief The number of real unknowns in the equation system */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
     int n_nr;                      /**< \brief The number of non-real unknowns in the equation system */
+    int n_sw;                      /**< \brief The number of active switches in the equation system */
     /* Not used anywhere: jmi_real_t* x_nr;   */              /**< \brief Work vector for the non-real variables */
 
-    int n_sw;                      /**< \brief The number of switches to check in this block (currently all in the system) */
-    int mode_sw;                    /**< \brief Used as a parameter to jmi_evaluate_switches() */
     int event_iter;                 /**< \brief Current iteration for the switches. Used to index the saved switches/booleans in sw_old/bool_old */
     jmi_real_t* sw_old;             /**< \brief  Saved states of the switches during passed event iterations. Used for infinite loop detection. */
-    jmi_real_t* bool_old;           /**< \brief  Saved states of the booleans during passed event iterations. Used for infinite loop detection. */
+    jmi_real_t* nr_old;             /**< \brief  Saved states of the booleans during passed event iterations. Used for infinite loop detection. */
+    jmi_int_t* sw_index;            /**< \brief  Index of the active switches for this block. */
+    jmi_int_t* nr_index;            /**< \brief  Index of the non-reals in this block. */
+    jmi_int_t* nr_vref;             /**< \brief  Valuereference of the non-reals in this block. */
 
-    jmi_real_t* dx;                /**< \brief Work vector for the seed vector */
+    jmi_real_t* dx;                 /**< \brief Work vector for the seed vector */
     jmi_real_t* dv;                 /**< \brief Work vector for (dF/dv)*dv */
     int index ;
 
@@ -152,6 +154,7 @@ struct jmi_block_residual_t {
     */
     
     int init;              /**< \brief A flag for initialization */
+    int at_event;          /**< \brief A flag indicating if we are at an event */
     
     long int nb_calls;                    /**< \brief Nb of times the block has been solved */
     long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
@@ -169,12 +172,13 @@ struct jmi_block_residual_t {
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
  * @param n_nr Integer size of the block of non-real variables
+ * @param n_as Integer size of the number of active switches
  * @param jacobian_variability Variability of the Jacobian coefficients
  * @param solver Solver to be used for the block
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -184,12 +188,13 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
  * @param n_nr Integer size of the block of non-real variables
+ * @param n_as Integer size of the number of active switches
  * @param jacobian_variability Variability of the Jacobian coefficients
  * @param solver Solver to be used for the block
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
 
 
 /**
@@ -207,7 +212,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
  * @return Error code.
  */
 int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver_kind_t solver,
-                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, int index);
+                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, int index);
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
@@ -279,13 +284,26 @@ jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t n
  */
 jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, jmi_int_t nR, jmi_real_t tolerance);
 
+/**
+ * \brief Finds the current values of the swithces and non-reals that belong to the block.
+ * 
+ * This is a helper method for jmi_block_update_discrete_variables,
+ * jmi_block_log_discrete_variables and jmi_block_check_discrete_variables_change
+ * that finds the current switches and non-reals for this block.
+ *
+ * @param block The current block being solved for.
+ * @param switches Holder for the switch values
+ * @param non_reals Holder for the non-real values
+ */
+int jmi_block_get_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals);
+
+
 int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
 int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
 
 /* Utilized Lapack routines */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
-
 
 
 #endif /* _JMI_COMMON_H */

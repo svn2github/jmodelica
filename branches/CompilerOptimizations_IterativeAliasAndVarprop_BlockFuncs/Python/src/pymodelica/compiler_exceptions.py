@@ -133,6 +133,13 @@ class CcodeCompilationError(JError):
     """
     pass
 
+class PackingFailedError(JError):
+    """ 
+    Class for errors throw by the compiler when it fails to pack the compiled
+    model.
+    """
+    pass
+
 class XPathExpressionError(JError):
     """ 
     Class representing errors in XPath expressions. 

@@ -82,8 +82,10 @@ if [[ "${IPOPT_HOME}" != "" ]]; then
   if [[ "${SYS}" == Win ]]; then
     TAGS="${TAGS} -a windows"
   fi
-  if [[ "${SYS}" != Mac ]]; then
+  if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
     TAGS="${TAGS} -a casadi"
+  else
+    echo Skipping casadi tests, since CasADi does not seem to be installed.
   fi
 fi
 
@@ -204,14 +206,14 @@ function filter_python_separate() {
   
 function junit_test() {
   print_name $1
-  cd ${JMODELICA_SRC}/Compiler/$1Compiler
+  cd ${BUILD}/java
   case ${OUTPUT} in
     v)
-      ant_test 2>&1 \
+      ant_test $1 2>&1 \
       | log
       ;;
     q)
-      ant_test 2>&1 \
+      ant_test $1 2>&1 \
       | log \
       | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
       | sed -n \
@@ -229,7 +231,7 @@ function junit_test() {
 	    -e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
       ;;
     n)
-      ant_test \
+      ant_test $1 \
       | log \
       | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
       ;;
@@ -237,7 +239,7 @@ function junit_test() {
 }
 
 function ant_test() {
-  ant ${CLEAN_JUNIT} test
+  ant -f ${JMODELICA_SRC}/Compiler/$1Compiler/build.xml ${CLEAN_JUNIT} test
 }
 
 function build_jmodelica() {

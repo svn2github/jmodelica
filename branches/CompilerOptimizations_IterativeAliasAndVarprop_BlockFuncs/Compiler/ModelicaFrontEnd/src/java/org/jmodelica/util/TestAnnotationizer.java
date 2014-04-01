@@ -30,8 +30,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.jmodelica.modelica.compiler.*;
-
 /**
  * \brief Generates a test case annotation for a test model.
  * 

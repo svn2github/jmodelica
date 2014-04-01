@@ -195,7 +195,17 @@ aspect AliasVariables {
 				return null;
 			return alias.getSet();
 		}
-
+		
+		/**
+		 * \brief Remove a variable and its alias set from the alias manager.
+		 */
+        public void unAlias(FVariable fv) {
+            AliasSet as = fv.aliasSet();
+            for (AliasVariable av : as)
+                variableMap.remove(av.fv);
+            aliasSets.remove(as);
+        }
+        
 		/**
 		 * \brief Add a pair of alias variables to the alias manager.
 		 */
@@ -567,15 +577,12 @@ aspect AliasVariables {
 			}
 
 			private AttributePropagator createAttributePropagator(String name) {
-				// TODO: add support for more attributes
 				if (name.equals(FAttribute.START) || name.equals(FAttribute.NOMINAL))
 					return new LevelAttributePropagator(name);
 				else if (name.equals(FAttribute.FIXED))
 				    return new BooleanReduceAttributePropagator(name, false);
                 else if (name.equals(FAttribute.MIN) || name.equals(FAttribute.MAX))
                     return new MinMaxAttributePropagator(name);
-                else if (name.equals(FAttribute.STATE_SELECT))
-                    return new StateSelectAttributePropagator(name);
 				else
 					return new KeepAttributePropagator(name);
 			}
@@ -804,45 +811,7 @@ aspect AliasVariables {
                 }
                 
             }
-            
-            /**
-             * Take the value that is furthest from StateSelect.default, prefering positive ones over negative.
-             */
-            private class StateSelectAttributePropagator extends AttributePropagator {
-                
-                public StateSelectAttributePropagator(String name) {
-                    super(name);
-                }
-
-                public void propagate(List<FAttribute> l) {
-                    int i = 0;
-                    int selIndex = -1;
-                    int cur = 0;
-                    for (FAttribute attr : list) {
-                        int val = 0;
-                        try {
-                            if (attr.hasValue())
-                                val = attr.getValue().ceval().intValue();
-                        } catch (ConstantEvaluationException e) {}
-                        if (val > 0) {
-                            // Convert to a ranking value: always > never > prefer > avoid > default
-                            val = (val < 3 ? 11 - 2 * val : 2* val) - 5;
-                            if (val > cur) {
-                                cur = val;
-                                selIndex = i;
-                            }
-                        }
-                        i++;
-                    }
-                    select(selIndex, l);
-               }
-                
-                protected void negate(FAttribute sel) {}
-                
-            }
-			
 		}
-	
 	}
 	
 	/**
@@ -851,47 +820,42 @@ aspect AliasVariables {
 	 * The variable with the highest score should be kept. Score is always > 0.
 	 */
 	syn int FVariable.aliasHeuristicScore() {
-		int score = 1000;
-		
-		// Temporary variables added during transformations should get lower priority
-		if (isTemporary())
-			score -= 100;
-		
-		// 0. Derivatives
-		if (isDerivativeVariable())
-			return score;
-		score--;
-		
-		// 1. Input
-		if (isInput())
-			return score;
-		score--;
-		
-		// 2. parameter
-		if (isParameter())
-			return score;
-		score--;
-		
-		// 3. non-parameter with fixed attribute set to true
-		if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
-			return score;
-		score--;
-				
-		// 4. Variables with StateSelect-information
-		if (isReal() && ((FRealVariable)this).stateSelectAttributeSet()) 
-			return score;
-		score--;
-		
-		if (isHGTVar())
-			return score;
-		score--;
-		
-		// 5. start attribute set
-		if (startAttributeSet())
-			return score;
-		score--;
-		
-		return score;
+        int score = 0;
+        
+        // Temporary variables added during transformations should get lower priority
+        if (!isTemporary())
+            score += 1;
+        
+        // Input
+        score *= 10;
+        if (isInput())
+            score += 1;
+        
+        // Stateselect level
+        score *= 10;
+        if (isReal()) 
+            score += stateSelectAttribute().ordinal();
+        
+        // HGT
+        score *= 10;
+        if (isHGTVar())
+            score += 1;
+        
+        // Fixed attribute == true
+        score *= 10;
+        if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
+            score += 1;
+        
+        // Start attribute set
+        score *= 10;
+        if (startAttributeSet())
+            score += 1;
+        
+        // Distance to user
+        score *= 1000;
+        score += 999 - Math.min(getFQName().numDots(), 999);
+        
+        return score;
 	}
 
 }

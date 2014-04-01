@@ -513,6 +513,8 @@ equation
 fclass ArrayTests.General.ArrayTest21
  constant Real x[1] = 0;
  constant Real x[2] = 0;
+ constant Real y[1] = 0;
+ constant Real y[2] = 0;
 end ArrayTests.General.ArrayTest21;
 ")})));
 end ArrayTest21;
@@ -532,7 +534,10 @@ equation
 fclass ArrayTests.General.ArrayTest22
  constant Real x[1] = 1;
  constant Real x[2] = 1;
+ constant Real y[1] = 1;
+ constant Real y[2] = 1;
 end ArrayTests.General.ArrayTest22;
+			
 ")})));
 end ArrayTest22;
 
@@ -553,7 +558,12 @@ fclass ArrayTests.General.ArrayTest23
  constant Real x[1,2] = 1;
  constant Real x[2,1] = 1;
  constant Real x[2,2] = 1;
+ constant Real y[1,1] = 1;
+ constant Real y[1,2] = 1;
+ constant Real y[2,1] = 1;
+ constant Real y[2,2] = 1;
 end ArrayTests.General.ArrayTest23;
+			
 ")})));
 end ArrayTest23;
 
@@ -918,7 +928,6 @@ end ArrayTests.General.ArrayTest34;
 end ArrayTest34;
 
 
-// TODO: the result is wrong, but tests a fixed crash bug - change when cat + unknown array sizes are supported
 model ArrayTest35
 	function f
 		input Real[:] x;
@@ -934,11 +943,11 @@ model ArrayTest35
 			description="Test adding array sizes that are present as expressions in tree",
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
- constant Real z[1] = {1, 2, 0, 0, 0};
- constant Real z[2] = {1, 2, 0, 0, 0};
- constant Real z[3] = {1, 2, 0, 0, 0};
- constant Real z[4] = {1, 2, 0, 0, 0};
- constant Real z[5] = {1, 2, 0, 0, 0};
+ constant Real z[1] = 1;
+ constant Real z[2] = 2;
+ constant Real z[3] = 0;
+ constant Real z[4] = 0;
+ constant Real z[5] = 0;
 end ArrayTests.General.ArrayTest35;
 ")})));
 end ArrayTest35;
@@ -958,10 +967,18 @@ model ArrayTest36
 			description="",
 			flatModel="
 fclass ArrayTests.General.ArrayTest36
+ parameter Real c[1].x;
  parameter Real c[1].b = 1 /* 1 */;
+ parameter Real c[2].x;
  parameter Real c[2].b = 4 /* 4 */;
+ parameter Real c[3].x;
  parameter Real c[3].b = 9 /* 9 */;
+parameter equation
+ c[1].x = c[1].b;
+ c[2].x = c[2].b;
+ c[3].x = c[3].b;
 end ArrayTests.General.ArrayTest36;
+			
 ")})));
 end ArrayTest36;
 
@@ -4876,6 +4893,12 @@ fclass ArrayTests.Constructors.LongForm.LongArrayForm4
  constant Real x3[3,1] = 7;
  constant Real x3[3,2] = 8;
  constant Real x3[3,3] = 9;
+ constant Real x1[1] = 1;
+ constant Real x1[2] = 2;
+ constant Real x1[3] = 3;
+ constant Real x2[1] = 4;
+ constant Real x2[2] = 5;
+ constant Real x2[3] = 6;
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -4934,6 +4957,10 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
  constant Real xx[1,2] = 2;
  constant Real xx[2,1] = 3;
  constant Real xx[2,2] = 4;
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 end EmptyArray3;
@@ -4992,8 +5019,8 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  parameter Real D[2,1] = 2 /* 2 */;
  parameter Real D[2,2] = 4 /* 4 */;
 equation
- y[1] = D[1,1] * u[1] + D[1,2] * u[2];
- y[2] = D[2,1] * u[1] + D[2,2] * u[2];
+ y[1] = u[1] + 2.0 * u[2];
+ y[2] = 2.0 * u[1] + 4.0 * u[2];
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;
@@ -5247,6 +5274,9 @@ fclass ArrayTests.For.ForEquation2
  constant Real a.x[1] = 1;
  constant Real a.x[2] = 2;
  constant Real a.x[3] = 3;
+ constant Real a.y[1] = 3;
+ constant Real a.y[2] = 2;
+ constant Real a.y[3] = 1;
 end ArrayTests.For.ForEquation2;
 ")})));
 end ForEquation2;
@@ -5585,6 +5615,14 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real z[2,1,2] = 0;
  constant Real z[2,2,1] = 0;
  constant Real z[2,2,2] = 1;
+ constant Real m[1].x[1,1] = 1;
+ constant Real m[1].x[1,2] = 0;
+ constant Real m[1].x[2,1] = 0;
+ constant Real m[1].x[2,2] = 1;
+ constant Real m[2].x[1,1] = 1;
+ constant Real m[2].x[1,2] = 0;
+ constant Real m[2].x[2,1] = 0;
+ constant Real m[2].x[2,2] = 1;
 initial equation 
  y[1,1,1] = 0.0;
  y[1,1,2] = 0.0;
@@ -6305,7 +6343,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf3",
-			description="",
+			description="Test that array size errors lock if branches if possible",
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf3
  parameter Boolean a = true /* true */;
@@ -6320,6 +6358,36 @@ fclass ArrayTests.Other.ArraySizeInIf3
 end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
+
+
+model ArraySimplify1
+    Real x[2], y[2], z[2];
+equation
+    der(x) = {1, 2} * time;
+    y = 0 * x;
+    z = x * 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySimplify1",
+			description="Correct simplification of array expressions",
+			flatModel="
+fclass ArrayTests.Other.ArraySimplify1
+ Real x[1];
+ Real x[2];
+ constant Real y[1] = 0;
+ constant Real y[2] = 0;
+ constant Real z[1] = 0;
+ constant Real z[2] = 0;
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ der(x[1]) = time;
+ der(x[2]) = 2 * time;
+end ArrayTests.Other.ArraySimplify1;
+")})));
+end ArraySimplify1;
 
 end Other;
 

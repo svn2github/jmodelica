@@ -695,8 +695,14 @@ $C_DAE_equation_directional_derivative$
     jmi_ad_var_t v_3;
     jmi_ad_var_t v_4;
     jmi_ad_var_t v_5;
-    (*res)[0] = _temp_1_1 - (_der_x_2);
+    (*res)[0] = _temp_1_1 - (_der_x_3);
     (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")) - (pre_temp_1_1), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")) - (pre_temp_1_1 + AD_WRAP_LITERAL(1)), _sw(1), jmi->events_epsilon, JMI_REL_GEQ);
+    }
     (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")), pre_temp_1_1) - (_temp_1_1);
 
 ")})));
@@ -758,8 +764,9 @@ equation
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
     char tmp_1[27];
-    snprintf(tmp_1, 27, \"Time (%.6g) > 0.5\", _time);
     if (COND_EXP_GT(_time, AD_WRAP_LITERAL(0.5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        char tmp_1[27];
+        snprintf(tmp_1, 27, \"Time (%.6g) > 0.5\", _time);
         jmi_assert_failed(tmp_1, JMI_ASSERT_ERROR);
     }
 ")})));
@@ -1002,7 +1009,7 @@ equation
     }
     (*res)[0] = v_0 - (_u_1);
     (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
-    (*res)[1] = _u_1 - (_der_x_3);
+    (*res)[1] = _u_1 - (_der_x_4);
     (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[2] = JMI_FALSE - (_b_2);
 ")})));
@@ -3603,105 +3610,6 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
 ")})));
 end CADTorn1;
 
-model LocalLoopTearingTest1
-	Real a, b, c;
-equation
-	20 = c * a;
-	23 = c * b;
-	c = a + b;
-
-	annotation(__JModelica(UnitTesting(tests={
-		CADCodeGenTestCase(
-			name="LocalLoopTearingTest1",
-			description="Tests generation of local loops in torn blocks",
-			generate_ode=true,
-			equation_sorting=true,
-			automatic_tearing=true,
-			hand_guided_tearing=true,
-			local_iteration_in_tearing=true,
-			generate_block_jacobian=true,
-			template="
-$CAD_dae_blocks_residual_functions$
-$CAD_dae_add_blocks_residual_functions$
-",
-			generatedCode="
-static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    jmi_real_t** dF = &dRes;
-    jmi_real_t** dz;
-    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _b_1;
-        return 0;
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-        dz = jmi->dz_active_variables;
-        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[0];
-        _b_1 = x[0];
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
-        dz = jmi->dz;
-    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-        dz = jmi->dz;
-        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[0];
-    } else {
-        return -1;
-    }
-    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        (*res)[0] = _c_2 * _b_1 - (23);
-        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _b_1 + _c_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));
-        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
-    }
-    return ef;
-}
-
-static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    jmi_real_t** dF = &dRes;
-    jmi_real_t** dz;
-    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _c_2;
-        return 0;
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-        dz = jmi->dz_active_variables;
-        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[0];
-        _c_2 = x[0];
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
-        dz = jmi->dz;
-    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-        dz = jmi->dz;
-        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[0];
-    } else {
-        return -1;
-    }
-    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-    v_1 = - _c_2;
-    d_1 = - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
-    v_0 = (v_1 + _b_1);
-    d_0 = d_1 + (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    v_2 = (- 1.0);
-    _a_0 = jmi_divide_equation(jmi, v_0,v_2,\"(- c + b) / (- 1.0)\");
-    (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (d_0 * v_2 - v_0 * AD_WRAP_LITERAL(0)) / (v_2 * v_2);
-    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        (*res)[0] = _c_2 * _a_0 - (20);
-        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _a_0 + _c_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));
-        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
-    }
-    return ef;
-}
-
-
-    jmi_dae_add_equation_block(*jmi, dae_block_0, dae_block_dir_der_0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 0);
-    jmi_dae_add_equation_block(*jmi, dae_block_1, dae_block_dir_der_1, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 1);
-
-")})));
-end LocalLoopTearingTest1;
-
-
 model CADOde1
 	function F
 		input Real x1;
@@ -4980,6 +4888,9 @@ jmi_ad_var_t tmp_der_1;
     (*dF)[0] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = _time * 2 - (_b_3);
     (*dF)[1] = (*dz)[jmi->offs_t] * 2 + _time * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (1), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
     (*res)[2] = _sw(0) - (_temp_1_4);
     if (LOG_EXP_OR(v_0, v_1)) {
       func_CADCodeGenTests_WhenEqu8_f_der_AD(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
@@ -5199,6 +5110,9 @@ $C_DAE_equation_directional_derivative$
          generatedCode="
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (2), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+    }
     (*res)[0] = _sw(0) - (_temp_1_2);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, pre_x_0, pre_z_1) - (_z_1);
     (*res)[2] = _time - (_x_0);
@@ -5450,7 +5364,7 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
       (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = tmp_der_2;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        if (_sw(1)) {
+        if (_sw(0)) {
           func_CADCodeGenTests_dummyFunc_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx], &tmp_var_4, &tmp_var_5, &tmp_der_4, &tmp_der_5);
           (*res)[0] = tmp_var_5 - (_b_3);
           (*dF)[0] = tmp_der_5 - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
@@ -5459,7 +5373,7 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
           (*res)[0] = tmp_var_7 - (_b_3);
           (*dF)[0] = tmp_der_7 - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
         }
-        if (_sw(1)) {
+        if (_sw(0)) {
           (*res)[1] = tmp_var_4 - (_a_2);
           (*dF)[1] = tmp_der_4 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
         } else {

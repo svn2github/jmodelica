@@ -16,7 +16,7 @@
 
 aspect OptimicaPrettyPrint {
 
-	public void OptClassDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void OptClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
  		str.print(indent + getRestriction().toString());
  		str.print(" " + getName().getID());
  		if (hasClassModification()) {
@@ -90,7 +90,7 @@ aspect OptimicaPrettyPrint {
 		str.print(indent + "end " + getName().getID());
 	} 
 	
-	public void RelationConstraint.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void RelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(op());
 		p.print(getRight(),str,indent);
@@ -101,7 +101,7 @@ aspect OptimicaPrettyPrint {
 	eq ConstraintLeq.op() = " <= ";
 	eq ConstraintGeq.op() = " >= ";
 	
-	public void FForClauseC.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FForClauseC.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");
 		str.print(" loop\n");
@@ -111,14 +111,14 @@ aspect OptimicaPrettyPrint {
 
 	eq OptimizationClass.toString() = "optimization";
 
-	public void TimedVariable.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void TimedVariable.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		p.print(getArg(), str, indent);
 		str.print(")");
 	}
 
-	protected void InstTimedVariable.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void InstTimedVariable.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		p.print(getArg(), str, indent);
@@ -128,7 +128,7 @@ aspect OptimicaPrettyPrint {
 }
 
 aspect FlatOptimicaPrettyPrint {
-	public void FOptClass.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FOptClass.prettyPrint(Printer p, CodeStream str, String indent) {
 		// TODO: refactor to decrease code duplication
 		String nextInd = p.indent(indent);
 		str.print(indent+"optimization "+ name());
@@ -187,7 +187,7 @@ aspect FlatOptimicaPrettyPrint {
   		str.print(";\n");
 	}
 
-	public void FRelationConstraint.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void FRelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		p.print(getLeft(),str,indent);
 		str.print(op());
@@ -199,19 +199,19 @@ aspect FlatOptimicaPrettyPrint {
 	eq FConstraintLeq.op() = " <= ";
 	eq FConstraintGeq.op() = " >= ";
 	
-	protected void FTimedVariable.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FTimedVariable.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getName(), str, indent);
 		str.print("(");
 		p.print(getArg(), str, indent);
 		str.print(")");
 	}
 
-	protected void FStartTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		str.append("startTime");
+	protected void FStartTimeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+		str.print("startTime");
 	}
 	
-	protected void FFinalTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		str.append("finalTime");
+	protected void FFinalTimeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+		str.print("finalTime");
 	}
 	
 }

@@ -584,7 +584,7 @@ fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time){
 
 int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event){
     int retval;
-    
+
     retval = fmi1_me_completed_integrator_step(ode_problem->fmix_me, step_event);
     if (retval != fmiOK) {
         return -1;

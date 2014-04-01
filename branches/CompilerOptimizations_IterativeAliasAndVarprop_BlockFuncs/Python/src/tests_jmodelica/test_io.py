@@ -26,7 +26,7 @@ import nose
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu, compile_fmu
-from pyfmi.common.io import ResultDymolaTextual, ResultWriterDymola, JIOError, ResultHandlerCSV
+from pyfmi.common.io import ResultDymolaTextual, ResultDymolaBinary, ResultWriterDymola, JIOError, ResultHandlerCSV
 from pyjmi.common.io import VariableNotTimeVarying
 from pyfmi.common.io import ResultHandlerFile as fmi_ResultHandlerFile
 from pyjmi.jmi import JMUModel
@@ -204,6 +204,32 @@ class TestIO:
         res = ResultDymolaTextual(res_file)
         time_traj = res.get_variable_data('time')
         assert N.abs(time_traj.t[-1] - 1.0) < 1e-6
+        
+    @testattr(stddist = True)    
+    def test_result_only_variable_data_bin(self):
+        """
+        Test that it is possible to get time data from a binary result file 
+        with only variable data.
+        """
+        res_file = os.path.join(path_to_results, 'onlyVars.mat')
+        res = ResultDymolaBinary(res_file)
+        time_traj = res.get_variable_data('time')
+        assert N.abs(time_traj.t[-1] - 1.0) < 1e-6
+        time_traj_dym = res.get_variable_data('Time')
+        assert N.abs(time_traj_dym.t[-1] - 1.0) < 1e-6 
+        
+    @testattr(stddist = True)    
+    def test_result_only_variable_data_txt(self):
+        """
+        Test that it is possible to get time data from a textual result file 
+        with only variable data.
+        """
+        res_file = os.path.join(path_to_results, 'onlyVars.txt')
+        res = ResultDymolaTextual(res_file)
+        time_traj = res.get_variable_data('time')
+        assert N.abs(time_traj.t[-1] - 1.0) < 1e-6
+        time_traj_dym = res.get_variable_data('Time')
+        assert N.abs(time_traj_dym.t[-1] - 1.0) < 1e-6 
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""

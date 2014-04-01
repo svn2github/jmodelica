@@ -429,8 +429,32 @@ Semantic error at line 404, column 7:
 
 ")})));
 end ModTest15_Err;
-  
- 
+
+
+model ModTest16
+    model A
+        Real x;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    extends B(a(x(start={1,2})));
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModTest16",
+			description="Modification on member of array in extends directly in compiled model",
+			flatModel="
+fclass ModificationTests.ModTest16
+ Real a[1].x(start = 1);
+ Real a[2].x(start = 2);
+end ModificationTests.ModTest16;
+")})));
+end ModTest16;
+
+
 
 model ShortClassDeclModTest1
   model A

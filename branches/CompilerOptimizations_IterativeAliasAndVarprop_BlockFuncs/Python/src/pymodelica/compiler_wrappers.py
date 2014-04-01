@@ -43,7 +43,7 @@ class ModelicaCompiler(object):
         Modelica models. A compiler instance can be used multiple times.
         """
         try:
-            options = OptionRegistryInterface(self.options_file_path)
+            options = ModelicaCompilerInterface.createOptions(self.options_file_path)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
@@ -76,8 +76,6 @@ class ModelicaCompiler(object):
                 self.set_integer_option(key,value)
             elif isinstance(value, float):
                 self.set_real_option(key,value)
-            elif isinstance(value, list):
-                self.set_string_option(key, list_to_string(value))
             else:
                 raise JMIException("Unknown compiler option type for key: %s. \
                 Should be of the following types: boolean, string, integer, \
@@ -345,7 +343,6 @@ class ModelicaCompiler(object):
                 
             version --
                 The FMI version. Valid options are '1.0' and '2.0'.
-                Note: Must currently be set to '1.0'.
                 
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 
@@ -614,7 +611,7 @@ class OptimicaCompiler(ModelicaCompiler):
         times.
         """
         try:
-            options = OptionRegistryInterface(self.options_file_path)
+            options = OptimicaCompilerInterface.createOptions(self.options_file_path)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             

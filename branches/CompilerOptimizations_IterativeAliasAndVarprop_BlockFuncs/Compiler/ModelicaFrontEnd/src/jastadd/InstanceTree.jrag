@@ -464,16 +464,29 @@ aspect Environments {
 	public void FExp.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {}
 	
-	public void FRecordConstructor.populateInstRecordModificationList(
+	public void InstRecordConstructor.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {
-		InstClassDecl icd = ((FIdUseInstAccess) getRecord()).getInstAccess().myInstClassDecl();
+		InstClassDecl icd = getRecord().myInstClassDecl();
 		ArrayList<InstComponentDecl> inputs = icd.myModifiableComponents();
 		Modification mod = org.getModification();
 		for (int i = 0; i < inputs.size(); i++) {
 			String name = inputs.get(i).name();
-			list.add(new InstRecordModification(mod, name, getArg(i)));
+			list.add(getArg(i).createInstRecordModification(mod, name));
 		}
 	}
+    
+    public InstRecordModification InstFunctionArgument.createInstRecordModification(Modification mod, String name) {
+        return new InstRecordModification(mod, name, getFExp());
+    }
+    
+    public InstRecordModification InstDefaultArgument.createInstRecordModification(Modification mod, String name) {
+        InstModification source = null;
+        if (getFExp().findComponentWithThisBindingExp() == null) {
+            source = getFExp().surroundingInstModification();
+            mod = source.getModification();
+        }
+        return new InstDefaultRecordModification(mod, name, getFExp(), source);
+    }
 	
 	public void FIdUseExp.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {
@@ -505,6 +518,14 @@ aspect Environments {
 			}
 		}
 	}
+	
+	/**
+	 * Find the InstModification containing this expression, if any.
+	 */
+	inh InstModification FExp.surroundingInstModification();
+    eq InstModification.getChild().surroundingInstModification() = this;
+    eq InstNode.getChild().surroundingInstModification()         = null;
+    eq Root.getChild().surroundingInstModification()             = null;
 	
 	
 	syn InstComponentRedeclare InstModification.matchInstComponentRedeclare(String name) = null;
@@ -1114,15 +1135,46 @@ aspect InstanceTreeConstruction {
     }
     
     public abstract InstRestriction Restriction.newInstRestriction();
-    public InstModel Model.newInstRestriction()         { return new InstModel(); }
-    public InstBlock Block.newInstRestriction()         { return new InstBlock(); }
-    public InstMClass MClass.newInstRestriction()       { return new InstMClass(); }
-    public InstConnector Connector.newInstRestriction() { return new InstConnector(); }
+    public InstModel               Model.newInstRestriction()               { return new InstModel(); }
+    public InstBlock               Block.newInstRestriction()               { return new InstBlock(); }
+    public InstMClass              MClass.newInstRestriction()              { return new InstMClass(); }
+    public InstConnector           Connector.newInstRestriction()           { return new InstConnector(); }
     public InstExpandableConnector ExpandableConnector.newInstRestriction() { return new InstExpandableConnector(); }
-    public InstMType MType.newInstRestriction()         { return new InstMType(); }
-    public InstMPackage MPackage.newInstRestriction()   { return new InstMPackage(); }
-    public InstFunction Function.newInstRestriction()   { return new InstFunction(); }
-    public InstMRecord Record.newInstRestriction()      { return new InstMRecord(); }
+    public InstMType               MType.newInstRestriction()               { return new InstMType(); }
+    public InstMPackage            MPackage.newInstRestriction()            { return new InstMPackage(); }
+    public InstFunction            Function.newInstRestriction()            { return new InstFunction(); }
+    public InstMRecord             Record.newInstRestriction()              { return new InstMRecord(); }
+    public InstOperator            Operator.newInstRestriction()            { return new InstOperator(); }
+    public InstOperatorFunction    OperatorFunction.newInstRestriction()    { return new InstOperatorFunction(); }
+    public InstOperatorRecord      OperatorRecord.newInstRestriction()      { return new InstOperatorRecord(); }
+
+    /**
+     * A connector class inheriting a record class is both connector and record, 
+     * this method finds any inherited restriction that should be kept.
+     */
+    syn InstRestriction InstRestriction.inheritedRestriction()       = null;
+    eq InstMRecord.inheritedRestriction()                            = this;
+    eq InstOperatorRecord.inheritedRestriction()                     = this;
+    inh lazy InstRestriction InstConnector.inheritedRestriction();
+    eq InstBaseClassDecl.getInstRestriction().inheritedRestriction() = inheritedRestriction(false);
+    
+    /**
+     * A connector class inheriting a record class is both connector and record, 
+     * this method finds any inherited restriction that should be kept.
+     */
+    syn InstRestriction InstClassDecl.inheritedRestriction(boolean checkMine) = null;
+    eq InstSimpleShortClassDecl.inheritedRestriction(boolean checkMine)       = 
+        actualInstClass().inheritedRestriction(true);
+    eq InstBaseClassDecl.inheritedRestriction(boolean checkMine) {
+        if (checkMine)
+            return getInstRestriction().inheritedRestriction();
+        for (InstExtends ie : getInstExtendss()) {
+            InstRestriction ir = ie.myInstClass().inheritedRestriction(true);
+            if (ir != null)
+                return ir;
+        }
+        return null;
+    }
 
     // Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
@@ -1633,6 +1685,12 @@ aspect InstanceAST_API {
 	syn boolean InstNode.isClassDecl() = false;
 	eq InstClassDecl.isClassDecl()     = true;
 	eq InstExtends.isClassDecl()       = isInClassDecl();
+    
+    /**
+     * Check if this node is an extends.
+     */
+    syn boolean InstNode.isExtends() = false;
+    eq InstExtends.isExtends()     = true;
 	
 	/**
 	 * Check if this extends is part of a class declaration.
@@ -1740,7 +1798,28 @@ aspect InstanceAST_API {
 	protected Iterator<InstComponentDecl> InstSimpleShortClassDecl.allInstComponentDeclsIterator() {
 		return actualInstClass().allInstComponentDeclsIterator();
 	}
-	
+
+    /**
+     * Iterate over all classes in this node and all InstExtends (recursively).
+     * 
+     * @return  an Iterable over the classes
+     */
+    public Iterable<InstClassDecl> InstNode.allInstClassDecls() {
+        return new Iterable<InstClassDecl>() {
+            public Iterator<InstClassDecl> iterator() {
+                return allInstClassDeclsIterator();
+            }
+        };
+    }
+    
+    protected Iterator<InstClassDecl> InstNode.allInstClassDeclsIterator() {
+        return new InstClassIterator();
+    }
+    
+    protected Iterator<InstClassDecl> InstSimpleShortClassDecl.allInstClassDeclsIterator() {
+        return actualInstClass().allInstClassDeclsIterator();
+    }
+
 	public class InstNode {
 		
 		private class InstComponentIterator implements Iterator<InstComponentDecl> {
@@ -1775,7 +1854,40 @@ aspect InstanceAST_API {
 			}
 			
 		}
-		
+
+        private class InstClassIterator implements Iterator<InstClassDecl> {
+
+            private Iterator<InstClassDecl> current;
+            private Iterator<InstExtends> exts;
+
+            public InstClassIterator() {
+                current = getInstClassDecls().iterator();
+                exts = getInstExtendss().iterator();
+                update();
+            }
+
+            public boolean hasNext() {
+                return current.hasNext();
+            }
+
+            public InstClassDecl next() {
+                InstClassDecl res = current.next();
+                update();
+                return res;
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            private void update() {
+                while (!current.hasNext() && exts.hasNext()) {
+                    current = exts.next().allInstClassDeclsIterator();
+                }
+            }
+            
+        }
+
 	}
 	
 	inh InstNode InstNode.containingInstNode();
@@ -1954,10 +2066,12 @@ aspect InstArrays {
 	 * class declarations).
 	 */
 	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
+	    if (myFSubscripts().isEmpty())
+	        return null;
 		FArraySubscripts fas = new FArraySubscripts();
 		for (FSubscript fs : myFSubscripts()) 
 			fas.addFSubscript(fs.deferredCopy());
-		return (fas.getNumChild() > 0) ? fas : null;
+		return fas;
 	}
 	
 	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;

@@ -300,4 +300,103 @@ Semantic error at line 261, column 14:
 ")})));
 end FunctionNoAlgorithm3;
 
+model IfEquationElse1
+  Real x;
+equation
+  der(x) = time;
+  if time > 1 then
+    assert(time > 2, "msg");
+  else
+  end if;
+  when time > 2 then
+    if time > 1 then
+      reinit(x,1);
+    else
+    end if;
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationElse1",
+			description="Test empty else",
+			flatModel="
+fclass CheckTests.IfEquationElse1
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ x = 0.0;
+ pre(temp_1) = false;
+equation
+ der(x) = time;
+ if time > 1 then
+  assert(time > 2, \"msg\");
+ end if;
+ temp_1 = time > 2;
+ if temp_1 and not pre(temp_1) then
+  if time > 1 then
+   reinit(x, 1);
+  end if;
+ end if;
+end CheckTests.IfEquationElse1;
+")})));
+end IfEquationElse1;
+
+model IfEquationElse2
+  Real x;
+equation
+  der(x) = time;
+  if time > 1 then
+    assert(time > 2, "msg");
+  end if;
+  when time > 2 then
+    if time > 1 then
+      reinit(x,1);
+    end if;
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationElse2",
+			description="Test no else",
+			flatModel="
+fclass CheckTests.IfEquationElse2
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ x = 0.0;
+ pre(temp_1) = false;
+equation
+ der(x) = time;
+ if time > 1 then
+  assert(time > 2, \"msg\");
+ end if;
+ temp_1 = time > 2;
+ if temp_1 and not pre(temp_1) then
+  if time > 1 then
+   reinit(x, 1);
+  end if;
+ end if;
+end CheckTests.IfEquationElse2;
+")})));
+end IfEquationElse2;
+
+model IfEquationElse3
+  Real x;
+equation
+  if time > 2 then
+  else
+    assert(time < 2, "msg");
+    x = 1;
+  end if;
+  x = 2;
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IfEquationElse3",
+            description="Check error for imbalanced else clause with empty if clause.",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 384, column 3:
+  All branches in if equation with non-parameter tests must have the same number of equations
+")})));
+end IfEquationElse3;
+
 end CheckTests;

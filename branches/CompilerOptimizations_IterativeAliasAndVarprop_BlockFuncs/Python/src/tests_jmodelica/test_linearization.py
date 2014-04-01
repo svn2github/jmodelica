@@ -94,18 +94,22 @@ class TestLinearization:
 
         assert N.abs(E_dae-N.array(([[-1.,  0.,  0.],
      [ 0., -1.,  0.],
-     [ 0.,  0., -1.]]))<=small).all()==True
+     [ 0.,  0., -1.],
+     [ 0.,  0.,  0.]]))<=small).all()==True
         assert (N.abs(A_dae-N.array([[ -0.00000000e+00,  -1.00000000e+03,  -6.00000000e+01],
      [ -0.00000000e+00,   1.66821993e-02,   1.19039519e+00],
-     [ -0.00000000e+00,  -3.48651310e-03,  -2.14034026e-01]]))<=small).all()==True
-        assert (N.abs(B_dae-N.array([[ -1.00000000e+02],
+     [ -0.00000000e+00,  -3.48651310e-03,  -2.14034026e-01],
+     [ -0.00000000e+00,  -0.00000000e+00,  -0.00000000e+00]]))<=small).all()==True
+        assert (N.abs(B_dae-N.array([[ -0.00000000e+00],
      [ -0.00000000e+00],
-     [ -3.49859575e-02]]))<=small).all()==True
+     [ -0.00000000e+00],
+     [  1.00000000e+00]]))<=small).all()==True
         assert (N.abs(g_dae-N.array([[-0.],
+     [-0.],
      [-0.],
      [-0.]]))<=small).all()==True
 
         assert (state_names==['cost', 'cstr.c', 'cstr.T'])==True
         assert (input_names==['u'])==True
-        assert (algebraic_names==[])==True
+        assert (algebraic_names==['cstr.Tc'])==True
 

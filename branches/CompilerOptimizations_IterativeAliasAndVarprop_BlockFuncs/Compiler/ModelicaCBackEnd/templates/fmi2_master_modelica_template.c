@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* Run-time. */
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
@@ -29,20 +30,31 @@
 #include "fmiFunctionTypes.h"
 #include "fmiTypesPlatform.h"
 
-#define FMI_FUNCTION_PREFIX $C_model_id$
-
+/* Generated code. */
 $INCLUDE: fmi_code_gen_template.c$
-/*
-void _emit(log_t *log, char* message) { }
-void create_log_file_if_needed(log_t *log) { }
-BOOL emitted_category(log_t *log, category_t category) { 0; }
-*/
-$INCLUDE: fmi2_functions_common_template.c$
 
+/* FMI Funcitons. */
+$INCLUDE: fmi2_functions_common_template.c$
 #ifdef FMUME20
 $INCLUDE: fmi2_functions_me_template.c$
 #endif
-
 #ifdef FMUCS20
 $INCLUDE: fmi2_functions_cs_template.c$
 #endif
+
+/* Helper function for instantiating the FMU. */
+int can_instantiate(fmiType fmuType, fmiString instanceName,
+                    const fmiCallbackFunctions* functions) {
+    if (fmuType == fmiCoSimulation) {
+#ifndef FMUCS20
+        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Co-Simulation FMU.");
+        return 0;
+#endif
+    } else if (fmuType == fmiModelExchange) {
+#ifndef FMUME20
+        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Model Exchange FMU.");
+        return 0;
+#endif
+    }
+    return 1;
+}

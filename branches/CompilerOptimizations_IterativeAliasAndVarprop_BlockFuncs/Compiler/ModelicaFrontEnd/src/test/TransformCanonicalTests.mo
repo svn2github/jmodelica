@@ -222,6 +222,7 @@ fclass TransformCanonicalTests.TransformCanonicalTest7
  parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
  constant Real y = 2;
+ constant Real x[2] = 2;
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;
@@ -452,8 +453,8 @@ Input variables:
   end LinearityTest1;
 
   model AliasTest1
-    Real x1 = 1;
-    Real x2 = 1;
+    Real x1 = time;
+    Real x2 = time;
     Real x3,x4,x5,x6;
   equation
     x1 = -x3;
@@ -476,7 +477,7 @@ Alias sets:
   end AliasTest1;
 
   model AliasTest2
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -497,7 +498,7 @@ Alias sets:
   end AliasTest2;
 
   model AliasTest3
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -518,7 +519,7 @@ Alias sets:
   end AliasTest3;
 
   model AliasTest4
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -539,7 +540,7 @@ Alias sets:
   end AliasTest4;
 
   model AliasTest5
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -560,7 +561,7 @@ Alias sets:
   end AliasTest5;
 
   model AliasTest6
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -581,7 +582,7 @@ Alias sets:
   end AliasTest6;
 
   model AliasTest7
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -602,7 +603,7 @@ Alias sets:
   end AliasTest7;
 
   model AliasTest8
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -623,7 +624,7 @@ Alias sets:
   end AliasTest8;
 
   model AliasTest9
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -644,7 +645,7 @@ Alias sets:
   end AliasTest9;
 
   model AliasTest10
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = x2;
@@ -664,7 +665,7 @@ Alias sets:
   end AliasTest10;
 
   model AliasTest11
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = x2;
@@ -684,7 +685,7 @@ Alias sets:
   end AliasTest11;
 
   model AliasTest12
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = -x2;
@@ -704,7 +705,7 @@ Alias sets:
   end AliasTest12;
 
   model AliasTest13
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = -x2;
@@ -724,7 +725,7 @@ Alias sets:
   end AliasTest13;
 
   model AliasTest14
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     -x1 = x2;
@@ -744,7 +745,7 @@ Alias sets:
   end AliasTest14;
 
   model AliasTest15
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     -x1 = x2;
@@ -863,6 +864,8 @@ Semantic error at line 0, column 0:
 			flatModel="
 fclass TransformCanonicalTests.AliasTest20
  constant Real x1 = 1;
+ constant Real x2 = - 1;
+ constant Real x3 = 1;
 end TransformCanonicalTests.AliasTest20;
 ")})));
   end AliasTest20;
@@ -871,7 +874,7 @@ end TransformCanonicalTests.AliasTest20;
     Real x1,x2,x3;
   equation
     0 = x1 + x2;
-    x1 = 1;   
+    x1 = time;   
     x3 = x2^2;
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -901,6 +904,7 @@ Alias sets:
 fclass TransformCanonicalTests.AliasTest22
  constant Real x1 = 1;
  constant Real x3 = 1.0;
+ constant Real x2 = - 1;
 end TransformCanonicalTests.AliasTest22;
 ")})));
   end AliasTest22;
@@ -941,10 +945,12 @@ end TransformCanonicalTests.AliasTest23;
 			flatModel="
 fclass TransformCanonicalTests.AliasTest24
  Real x1;
+ Real x2;
  input Real u;
 initial equation 
  x1 = 0.0;
 equation 
+ x2 = u;
  der(x1) = u;
 
 end TransformCanonicalTests.AliasTest24;
@@ -991,10 +997,13 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest26
  parameter Real p = 1 /* 1 */;
+ parameter Real x;
  parameter Real y;
 parameter equation
- y = p + 3;
+ x = p;
+ y = x + 3;
 end TransformCanonicalTests.AliasTest26;
+			
 ")})));
 end AliasTest26;
 
@@ -1009,7 +1018,7 @@ equation
  x1 = x3;
  x2 = x4;
  x3 = x5;
- x3 =1;
+ x3 = 1;
 
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -1019,6 +1028,10 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest27
  constant Real x1 = 1;
+ constant Real x2 = 1;
+ constant Real x3 = 1;
+ constant Real x4 = 1;
+ constant Real x5 = 1;
 end TransformCanonicalTests.AliasTest27;
 ")})));
 end AliasTest27;
@@ -1036,11 +1049,14 @@ equation
 			description="Test elimination of alias variables.",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest28
+ parameter Real x;
  parameter Real y;
  parameter Real p = 1 /* 1 */;
 parameter equation
- y = - p + 1;
+ x = - p;
+ y = x + 1;
 end TransformCanonicalTests.AliasTest28;
+			
 ")})));
 end AliasTest28;
 
@@ -1139,9 +1155,13 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
- constant Real y = 0.0;
- parameter Real p(start = 3, fixed = f) = 5 /* 5 */;
+ parameter Real x(start = 3,fixed = true);
+ constant Real y = -0.0;
+ parameter Real p = 5 /* 5 */;
+parameter equation
+ x = p;
 end TransformCanonicalTests.AliasTest30;
+			
 ")})));
 end AliasTest30;
 
@@ -1154,7 +1174,7 @@ equation
  x1 = -x2;
  x3 = -x4;
  x2 = -x4;
- x3 =1;
+ x3 = time;
 
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -1426,8 +1446,8 @@ end AliasPropStart1;
 
 model AliasPropFixed1
 	Real x1(fixed = true);
-	Real x2 = x1;
-	input Real x3(start = 1) = x2;
+	Real x2(start = 1) = x1;
+	Real x3(stateSelect=StateSelect.prefer) = x2;
 equation
 	der(x3) = -x2 * time;
 
@@ -1437,17 +1457,21 @@ equation
 			description="Test propagation of fixed attribute in alias set",
 			flatModel="
 fclass TransformCanonicalTests.AliasPropFixed1
- input Real x3(start = 1,fixed = true);
+ Real x3(stateSelect = StateSelect.prefer,start = 1,fixed = true);
 initial equation 
  x3 = 1;
 equation
  der(x3) = (- x3) * time;
+ 
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ 
 end TransformCanonicalTests.AliasPropFixed1;
 ")})));
 end AliasPropFixed1;
 
 
-model AliasPropStateSelect1
+model AliasStateSelect1
 	package A
         constant StateSelect ss[5] = { StateSelect.always, StateSelect.prefer, StateSelect.default, StateSelect.avoid, StateSelect.never };
 		
@@ -1466,10 +1490,10 @@ model AliasPropStateSelect1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="AliasPropStateSelect1",
+			name="AliasStateSelect1",
 			description="Test propagation of stateSelect attribute in alias set",
 			flatModel="
-fclass TransformCanonicalTests.AliasPropStateSelect1
+fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[1].s1 = StateSelect.always;
  constant StateSelect b[1].s2 = StateSelect.prefer;
  Real b[1].x1(stateSelect = StateSelect.always);
@@ -1490,16 +1514,23 @@ fclass TransformCanonicalTests.AliasPropStateSelect1
  Real b[6].x1(stateSelect = StateSelect.prefer);
  constant StateSelect b[7].s1 = StateSelect.prefer;
  constant StateSelect b[7].s2 = StateSelect.never;
- Real b[7].x1(stateSelect = StateSelect.never);
+ Real b[7].x1(stateSelect = StateSelect.prefer);
  constant StateSelect b[8].s1 = StateSelect.default;
  constant StateSelect b[8].s2 = StateSelect.avoid;
- Real b[8].x1(stateSelect = StateSelect.avoid);
+ Real b[8].x1(stateSelect = StateSelect.default);
  constant StateSelect b[9].s1 = StateSelect.default;
  constant StateSelect b[9].s2 = StateSelect.never;
- Real b[9].x1(stateSelect = StateSelect.never);
+ Real b[9].x1(stateSelect = StateSelect.default);
  constant StateSelect b[10].s1 = StateSelect.avoid;
  constant StateSelect b[10].s2 = StateSelect.never;
- Real b[10].x1(stateSelect = StateSelect.never);
+ Real b[10].x1(stateSelect = StateSelect.avoid);
+ Real b[1]._der_x1;
+ Real b[2]._der_x1;
+ Real b[3]._der_x1;
+ Real b[4]._der_x1;
+ Real b[5]._der_x1;
+ Real b[6]._der_x1;
+ Real b[7]._der_x1;
 equation
  b[1].x1 = time;
  b[2].x1 = time;
@@ -1511,13 +1542,44 @@ equation
  b[8].x1 = time;
  b[9].x1 = time;
  b[10].x1 = time;
+ b[1]._der_x1 = 1.0;
+ b[2]._der_x1 = 1.0;
+ b[3]._der_x1 = 1.0;
+ b[4]._der_x1 = 1.0;
+ b[5]._der_x1 = 1.0;
+ b[6]._der_x1 = 1.0;
+ b[7]._der_x1 = 1.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
-end TransformCanonicalTests.AliasPropStateSelect1;
+end TransformCanonicalTests.AliasStateSelect1;
 ")})));
-end AliasPropStateSelect1;
+end AliasStateSelect1;
+
+model AliasStateSelect2
+    Real a_s(stateSelect = StateSelect.always, start=1);
+    Real a_s2(stateSelect = StateSelect.always);
+    Real a_v,a_a;
+equation
+    a_s = a_s2;
+    a_v = der(a_s);
+    a_a = der(a_v);
+    a_v = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="AliasStateSelect2",
+            description="Test warnings for state select.",
+            automatic_tearing=false,
+            errorMessage="
+3 warnings found:
+
+Warning: in file '...':
+At line 0, column 0:
+  a_s2 has stateSelect=always, but could not be selected as state
+")})));
+end AliasStateSelect2;
 
 
 model ParameterBindingExpTest3_Warn
@@ -1821,7 +1883,7 @@ equation
  2.0 + v3 + v4 + v6 = 1;
  2.0 + v3 + v4 = 1;
  2.0 + v3 + v4 = 1;
- v5 + v6 + v8 + v7 + 0.0 = 1;
+ v5 + v6 + v8 + v7 = 1;
  v5 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
@@ -2253,7 +2315,9 @@ fclass TransformCanonicalTests.InitialEqTest14
  Real m.t(start = 0);
  discrete Real m.x1(start = 1,fixed = true);
  discrete Boolean m.b1(start = false,fixed = true);
+ discrete Boolean m.ub1;
  discrete Integer m.i1(start = 4,fixed = true);
+ discrete Integer m.ui1;
  discrete Real m.x2(start = 2);
  discrete Boolean temp_1;
 initial equation 
@@ -2262,6 +2326,8 @@ initial equation
  m.pre(i1) = 4;
  m.pre(x2) = 2;
  m.t = 0;
+ m.pre(ub1) = false;
+ m.pre(ui1) = 0;
  pre(temp_1) = false;
 equation
  m.der(t) = 1;
@@ -2270,8 +2336,9 @@ equation
  m.i1 = if temp_1 and not pre(temp_1) then 3 else m.pre(i1);
  m.x1 = if temp_1 and not pre(temp_1) then m.pre(x1) + 1 else m.pre(x1);
  m.x2 = if temp_1 and not pre(temp_1) then m.pre(x2) + 1 else m.pre(x2);
+ m.ub1 = ub1;
+ m.ui1 = ui1;
 end TransformCanonicalTests.InitialEqTest14;
-			
 ")})));
   end InitialEqTest14;
 
@@ -2419,8 +2486,11 @@ equation
 			description="Test that derivatives of parameters are translated into zeros.",
 			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
+ parameter Real x(start = 1);
  constant Real y = 0.0;
- parameter Real p(start = 1) = 2 /* 2 */;
+ parameter Real p = 2 /* 2 */;
+parameter equation
+ x = p;
 end TransformCanonicalTests.ParameterDerivativeTest;
 ")})));
 end ParameterDerivativeTest;
@@ -4035,16 +4105,12 @@ fclass TransformCanonicalTests.IfEqu22
  parameter Integer nX = 2 /* 2 */;
  Real x[1];
  Real x[2];
- Real temp_1[1];
- Real temp_1[2];
 equation
- x[1] = temp_1[1];
- x[2] = temp_1[2];
- if b then
-  ({temp_1[1], temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
+ if true then
+  ({x[1], x[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
  else
-  temp_1[1] = 0.0;
-  temp_1[2] = 0.0;
+  x[1] = 0.0;
+  x[2] = 0.0;
  end if;
 
 public
@@ -4061,8 +4127,6 @@ end TransformCanonicalTests.IfEqu22;
 ")})));
 end IfEqu22;
 
-
-// Temporarily disabled until if equations are handled in BLT
 model IfEqu23
     record R
         Real x;
@@ -4087,7 +4151,7 @@ equation
     else
         r = F(x+y,y);
     end if;
-  annotation(__JModelica_disabled(UnitTesting(tests={
+  annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
       name="IfEqu23",
       description="Function call equation generated by scalarization inside else branch of if equation",
@@ -4106,8 +4170,13 @@ fclass TransformCanonicalTests.IfEqu23
 equation
  r.x = if time > 1 then temp_1.x else temp_2.x;
  r.y = if time > 1 then temp_1.y else temp_2.y;
- (TransformCanonicalTests.IfEqu23.R(temp_1.x, temp_1.y)) = TransformCanonicalTests.IfEqu23.F(x, y);
- (TransformCanonicalTests.IfEqu23.R(temp_2.x, temp_2.y)) = TransformCanonicalTests.IfEqu23.F(x + y, y);
+ 0.0 = if time > 1 then temp_2.x else temp_1.x;
+ 0.0 = if time > 1 then temp_2.y else temp_1.y;
+ if time > 1 then
+  (TransformCanonicalTests.IfEqu23.R(temp_1.x, temp_1.y)) = TransformCanonicalTests.IfEqu23.F(x, y);
+ else
+  (TransformCanonicalTests.IfEqu23.R(temp_2.x, temp_2.y)) = TransformCanonicalTests.IfEqu23.F(x + y, y);
+ end if;
  x = 1;
  y = 2;
 
@@ -5121,11 +5190,11 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z + 0.8414709848078965
-  x1 - x2 = z * 1.0
-  x2 = 1.0 * z + 1 + 1.0
+  x1 - x2 = z
+  x2 = z + 1 + 1.0
 Jacobian:
   |1.0, - 1.0, 1.0|
-  |1.0, (- 1.0), - 1.0|
+  |1.0, - 1.0, - 1.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
@@ -5222,7 +5291,7 @@ Coefficient variability: Discrete
 Unknown continuous variables:
   b
   a
-Unknown discrete variables:
+Solved discrete variables:
   d
 Continuous equations:
   a = b * (if d then 1 else 2)
@@ -5338,22 +5407,22 @@ Solution:
 -------------------------------
 Solved block of 2 variables:
 Unknown variables:
-  temp_2
-  temp_3
+  temp_4
+  temp_5
 Equations:
-  ({temp_2, temp_3}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  ({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z[1]
 Solution:
-  temp_2 / (- 1.0)
+  temp_4 / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z[2]
 Solution:
-  temp_3 / (- 1.0)
+  temp_5 / (- 1.0)
 -------------------------------
 ")})));
 end BlockTest10;
@@ -5834,48 +5903,6 @@ Semantic error at line 9480, column 2:
   Constructors and destructors for ExternalObjects can not be used directly
 ")})));
 end TestExternalObj10;
-
-model TestRuntimeOptions1
-	Real x = 1;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="TestRuntimeOptions1",
-			description="Test that parameters for runtime options are generated properly",
-			generate_runtime_option_parameters=true,
-			nle_solver_tol_factor=1e-3,
-			generate_ode=true,
-			flatModel="
-fclass TransformCanonicalTests.TestRuntimeOptions1
- constant Real x = 1;
- parameter Boolean _block_jacobian_check = false /* false */;
- parameter Real _block_jacobian_check_tol = 1.0E-6 /* 1.0E-6 */;
- parameter Integer _block_solver_experimental_mode = 0 /* 0 */;
- parameter Real _cs_rel_tol = 1.0E-6 /* 1.0E-6 */;
- parameter Integer _cs_solver = 0 /* 0 */;
- parameter Real _cs_step_size = 0.001 /* 0.001 */;
- parameter Boolean _enforce_bounds = false /* false */;
- parameter Real _events_default_tol = 1.0E-10 /* 1.0E-10 */;
- parameter Real _events_tol_factor = 1.0E-4 /* 1.0E-4 */;
- parameter Integer _iteration_variable_scaling = 1 /* 1 */;
- parameter Integer _log_level = 3 /* 3 */;
- parameter Boolean _nle_solver_check_jac_cond = false /* false */;
- parameter Real _nle_solver_default_tol = 1.0E-10 /* 1.0E-10 */;
- parameter Integer _nle_solver_max_iter = 100 /* 100 */;
- parameter Real _nle_solver_min_tol = 1.0E-12 /* 1.0E-12 */;
- parameter Real _nle_solver_regularization_tolerance = -1.0 /* -1.0 */;
- parameter Real _nle_solver_step_limit_factor = 10.0 /* 10.0 */;
- parameter Real _nle_solver_tol_factor = 0.001 /* 0.001 */;
- parameter Boolean _rescale_after_singular_jac = true /* true */;
- parameter Boolean _rescale_each_step = false /* false */;
- parameter Integer _residual_equation_scaling = 1 /* 1 */;
- parameter Boolean _runtime_log_to_file = false /* false */;
- parameter Boolean _use_Brent_in_1d = false /* false */;
- parameter Boolean _use_jacobian_equilibration = false /* false */;
-end TransformCanonicalTests.TestRuntimeOptions1;
-")})));
-end TestRuntimeOptions1;
-
 
 
 package EventGeneratingExps
@@ -6540,5 +6567,46 @@ Semantic error at line 0, column 0:
 ")})));
 end IllegalWhen3_Err;
 
+model BLTError1
+    Real x;
+    Integer i;
+equation
+    x = if i > 10 then time else - time;
+    42 * (i + 1) = integer(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BLTError1",
+            description="Test error message given by BLT when non-real equations are unsolved",
+            errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Unable to solve variable 'i' from equation:
+42 * (i + 1) = temp_1
+")})));
+end BLTError1;
+
+model BLTError2
+    Integer i, j;
+equation
+    i = j + integer(time);
+    i * j = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BLTError2",
+            description="Test error message given by BLT when non-real equation contains a loop",
+            errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Non-real equations contains an algebraic loop:
+i = j + temp_1
+i * j = 0
+")})));
+end BLTError2;
 
 end TransformCanonicalTests;

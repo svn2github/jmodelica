@@ -29,17 +29,19 @@
 
 /** \brief Evaluation modes for the residual function.*/
 /** TODO: convert into enum */
-#define JMI_BLOCK_INITIALIZE 0
-#define JMI_BLOCK_EVALUATE 1
-#define JMI_BLOCK_WRITE_BACK 2
-#define JMI_BLOCK_EVALUATE_INACTIVE 4
-#define JMI_BLOCK_EVALUATE_NON_REALS 8
-#define JMI_BLOCK_MIN 16
-#define JMI_BLOCK_MAX 32
-#define JMI_BLOCK_NOMINAL 64
-#define JMI_BLOCK_EVALUATE_JACOBIAN 128
-#define JMI_BLOCK_EQUATION_NOMINAL 256
-#define JMI_BLOCK_VALUE_REFERENCE 512
+#define JMI_BLOCK_INITIALIZE               0
+#define JMI_BLOCK_EVALUATE                 1
+#define JMI_BLOCK_WRITE_BACK               2
+#define JMI_BLOCK_EVALUATE_INACTIVE        4
+#define JMI_BLOCK_EVALUATE_NON_REALS       8
+#define JMI_BLOCK_MIN                      16
+#define JMI_BLOCK_MAX                      32
+#define JMI_BLOCK_NOMINAL                  64
+#define JMI_BLOCK_EVALUATE_JACOBIAN        128
+#define JMI_BLOCK_EQUATION_NOMINAL         256
+#define JMI_BLOCK_VALUE_REFERENCE          512
+#define JMI_BLOCK_NON_REAL_VALUE_REFERENCE 1024
+#define JMI_BLOCK_ACTIVE_SWITCH_INDEX      2048
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -53,7 +55,8 @@ typedef enum jmi_block_solver_jac_variability_t {
 typedef enum {
      JMI_SIMPLE_NEWTON_SOLVER, /* Only used for testing at some point. Not maintained. */
      JMI_KINSOL_SOLVER,
-     JMI_LINEAR_SOLVER
+     JMI_LINEAR_SOLVER,
+     JMI_MINPACK_SOLVER
 } jmi_block_solver_kind_t;
 
 /** \brief Scaling mode for the residuals in non-linear solver*/
@@ -74,9 +77,8 @@ typedef enum jmi_block_solver_iv_scaling_mode_t {
 /** \brief Experimental features in the solver */
 typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_none = 0,
-    jmi_block_solver_experimental_converge_switches_first = 1,
-    jmi_block_solver_experimental_steepest_descent = 2,
-    jmi_block_solver_experimental_steepest_descent_first = 4
+    jmi_block_solver_experimental_steepest_descent = 1,
+    jmi_block_solver_experimental_steepest_descent_first = 2
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
@@ -145,15 +147,6 @@ typedef int (*jmi_block_solver_check_discrete_variables_change_func_t)(void* pro
  */
 typedef jmi_block_solver_status_t (*jmi_block_solver_update_discrete_variables_func_t)(void* problem_data, int* non_reals_changed_flag);
 
-/**
- * \brief Function signature for evaluating discrete variables due to regularization.
- * Values from the last residuals evaluation are used.
- *
- * @param problem_data (Input) Problem data pointer passed in the jmi_block_solver_new.
- * @return 0 on successful execution or error code.
- */
-typedef int (*jmi_block_solver_evaluate_discrete_variables)(void* problem_data);
-
 /* TODO: log_discrete_variables is not really needed. Kept just to make sure there are not changes during refactoring */
 typedef int (*jmi_block_solver_log_discrete_variables)(void* problem_data, jmi_log_node_t node);
 
@@ -163,18 +156,17 @@ typedef struct jmi_block_solver_options_t jmi_block_solver_options_t;
 /**
  * \brief Allocate the internal structure for the block solver.
  */
-int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr, 
-                            jmi_callbacks_t* cb, 
-                            jmi_log_t* log,                          
-                           jmi_block_solver_residual_func_t F, 
-                           jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
-                           jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
-                           jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
-                           jmi_block_solver_log_discrete_variables log_discrete_variables, /* can be NULL, only needed during restructuring for regression testing */
-                           jmi_block_solver_evaluate_discrete_variables evaluate_discrete_variables, /* can be NULL, only needed after a regularization. */
-                           int n,                            
-                           jmi_block_solver_options_t* options,
-                           void* problem_data);
+int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
+                         jmi_callbacks_t* cb,
+                         jmi_log_t* log,
+                         jmi_block_solver_residual_func_t F,
+                         jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
+                         jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
+                         jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
+                         jmi_block_solver_log_discrete_variables log_discrete_variables, /* Function for logging the discrete variables, can be NULL and then there is no logging of discrete variables */
+                         int n,
+                         jmi_block_solver_options_t* options,
+                         void* problem_data);
 
 /* Free allocated memory */
 void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr);

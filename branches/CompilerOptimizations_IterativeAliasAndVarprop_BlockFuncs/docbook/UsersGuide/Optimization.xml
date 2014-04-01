@@ -177,12 +177,11 @@ plt.show()
         collocation with CasADi.</emphasis> This algorithm solves optimal
         control and parameter estimation problems. It is implemented in
         Python, uses CasADi for computing function derivatives and IPOPT for
-        solving the resulting NLP. Only regular equations in models are
-        supported currently. Use this method if you would like to test the
-        future default collocation algorithm in JModelica.org and if your
-        model is a continuous time DAE that does not contain functions or
-        records. Note that this algorithm offers significantly increased
-        performance as compared to the default algorithm.</para>
+        solving the resulting NLP. In terms of functionality, this algorithm
+        is very similar to the default JMU-based algorithm, but offers
+        significant performance improvements in several regards. It is however
+        still in a state of development, and is not as mature as the default
+        algorithm.</para>
       </listitem>
 
       <listitem>
@@ -216,12 +215,12 @@ model = JMUModel(model_name)
 </programlisting>
 
     <para>In this case, a JMU is compiled, corresponding compilation functions
-    are available for XML-based models required by the CasADi-based algorithms
-    and for compilation of FMUs. All operations that can be performed on the
-    model are available as methods of the <literal>model</literal> object and
-    can be accessed by tab completion. Invoking an optimization algorithm is
-    done by calling the method <literal>JMUModel.optimize</literal>, which
-    performs the following tasks:</para>
+    are available for the other algorithms. All operations that can be
+    performed on the model are available as methods of the
+    <literal>model</literal> object and can be accessed by tab completion.
+    Invoking an optimization algorithm is done by calling the method
+    <literal>JMUModel.optimize</literal>, which performs the following
+    tasks:</para>
 
     <itemizedlist>
       <listitem>
@@ -288,8 +287,9 @@ model = JMUModel(model_name)
 </programlisting>
 
     <para>Again, note that the parameters differs for different model classes.
-    The optimize method can be invoked without any arguments, which case the
-    default optimization algorithm, with default options, is invoked:</para>
+    The optimize method can be invoked without any arguments, in which case
+    the default optimization algorithm, with default options, is
+    invoked:</para>
 
     <programlisting>res = vdp.optimize()
 </programlisting>
@@ -343,12 +343,11 @@ opts['n_e'] = 5
 x1 = res['x1']
 </programlisting>
 
-    <para>Variable data is returned as numpy arrays in case of variables and
-    as numeric values in the case of parameters. The result object also
+    <para>Variable data is returned as NumPy arrays. The result object also
     contains references to the model that was optimized, the name of the
     result file that was written to disk, a solver object representing the
-    optimization algorithm and an options object that as used when solving the
-    optimization problem.</para>
+    optimization algorithm and an options object that was used when solving
+    the optimization problem.</para>
   </section>
 
   <section>
@@ -392,18 +391,21 @@ x1 = res['x1']
     <programlisting language="python">T_scaled*T_nom = f(p_scaled*p_nom)
 </programlisting>
 
-    <para>when <literal>variable scaling</literal> is enabled. The algorithm
-    in <xref linkend="opt-sec-dae-casadi"/> also has support for time-varying
-    scale factors.</para>
+    <para>when <literal>variable scaling</literal> is enabled.</para>
+
+    <para>The algorithm in <xref linkend="opt-sec-dae-casadi"/> also has
+    support for providing trajectories (obtained by for example simulation)
+    that are used for scaling. This means that it usually is not necessary to
+    provide nominal values for all variables, and that it is possible to use
+    time-varying scaling factors.</para>
 
     <para>For debugging purposes, is is sometimes useful to write a
     simulation/optimization/initialization result to file in scaled format, in
     order to detect if there are some variables which require additional
     scaling. The option <literal>write_scaled_result</literal> has been
     introduced as an option to the <literal>initialize</literal>,
-    <literal>simulate</literal> and <literal>optimize</literal> methods of
-    <literal>JMUModel</literal> and <literal>CasadiModel</literal> for this
-    purpose.</para>
+    <literal>simulate</literal> and <literal>optimize</literal> methods for
+    this purpose.</para>
   </section>
 
   <section xml:id="opt-sec-dae-jmu">
@@ -1753,7 +1755,7 @@ plt.show()
 
                   <m:mo>=</m:mo>
 
-                  <m:mn>0</m:mn>
+                  <m:mn>1</m:mn>
                 </m:mtd>
               </m:mtr>
             </m:mtable>
@@ -1769,7 +1771,11 @@ plt.show()
             <m:mtable>
               <m:mtr>
                 <m:mtd columnalign="right">
-                  <m:mi>x</m:mi>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
                   <m:mo>⁡</m:mo>
 
@@ -1785,13 +1791,17 @@ plt.show()
                 <m:mtd columnalign="left">
                   <m:mo>=</m:mo>
 
-                  <m:mn>1</m:mn>
+                  <m:mn>0</m:mn>
 
                   <m:mi>,</m:mi>
 
                   <m:mspace width="1em"/>
 
-                  <m:mi>v</m:mi>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
 
                   <m:mo>⁡</m:mo>
 
@@ -1808,49 +1818,15 @@ plt.show()
                   <m:mn>0</m:mn>
                 </m:mtd>
               </m:mtr>
-
-              <m:mtr>
-                <m:mtd columnalign="right">
-                  <m:mi>v</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mtd>
-
-                <m:mtd columnalign="left">
-                  <m:mo>≤</m:mo>
-
-                  <m:mn>0.5</m:mn>
-
-                  <m:mi>,</m:mi>
-
-                  <m:mspace width="1em"/>
-
-                  <m:mo>-</m:mo>
-
-                  <m:mn>1</m:mn>
-
-                  <m:mo>≤</m:mo>
-
-                  <m:mi>u</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-
-                  <m:mo>≤</m:mo>
-
-                  <m:mn>1</m:mn>
-                </m:mtd>
-              </m:mtr>
             </m:mtable>
 
             <m:mspace linebreak="newline"/>
+          </m:math>
+        </informalequation>
+
+        <informalequation>
+          <m:math display="block">
+            <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
           </m:math>
         </informalequation>
 
@@ -3099,60 +3075,58 @@ print "a4: " + str(sens_res.final('a4')) + ", standard deviation: " + str(sigma_
       estimation of DAEs based on the same collocation scheme that has proven
       successful in the default algorithm has been initiated. The new
       algorithm is based on the CasADi package for evaluation of first and
-      second order derivatives, instead of CppAD, and for integration with the
-      IPOPT algorithm. The two main benefits of using CasADi, through its
-      Python interface, is significantly increased flexibility and
-      extensibility of the implementation on one hand and significantly
-      improved performance on the other. The goal is for the CasADi-based
-      algorithm to replace the C-based algorithm.</para>
+      second order derivatives, and for integration with the IPOPT algorithm.
+      The two main benefits of using CasADi, through its Python interface, is
+      increased flexibility and extensibility of the implementation improved
+      performance. The goal is for the CasADi-based algorithm to replace the
+      C-based algorithm, once it has sufficiently matured.</para>
 
-      <para>The implementation relies on the class
-      <literal>CasadiModel</literal>. A compiler method for creating compiled
-      models compatible with CasADi resides in <literal>pymodelica</literal>,
-      <literal>compile_fmux</literal>. This function is similar to the
-      compilation functions for JMUs and FMUs, but rather than producing a
-      model representation that is based on compiled C code,
-      <literal>compile_fmux</literal> generates an XML model representation,
-      which in turn is imported into CasADi through creation of a
-      <literal>CasadiModel</literal> object. The commands for invoking the
-      compilation and optimization commands are shown below.</para>
+      <para>The direct collocation method can be used to solve dynamic
+      optimization problems, including optimal control problems and parameter
+      optimization problems. In the collocation method, the dynamic model
+      variable profiles are approximated by piecewise polynomials. This method
+      of approximating a differential equation corresponds to a fixed step
+      implicit Runge-Kutta scheme, where the mesh defines the length of each
+      step. Also, the number of collocation points in each element, or step,
+      needs to be provided. This number corresponds to the stage order of the
+      Runge-Kutta scheme. The selection of mesh is analogous to the choice of
+      step length in a one-step algorithm for solving differential equations.
+      Accordingly, the mesh needs to be fine-grained enough to ensure
+      sufficiently accurate approximation of the differential constraint. For
+      an overview of simultaneous optimization algorithms, see [2]. The
+      algorithm <link
+      xlink:href="https://projects.coin-or.org/Ipopt">IPOPT</link> is used to
+      solve the non-linear program resulting from collocation.</para>
 
-      <programlisting language="python">from pymodelica import compile_fmux
-from pyjmi import CasadiModel
+      <para>The collocation method requires that the model to be optimized
+      does not contain discontinuities such as if equations, when clauses or
+      integer variables.</para>
 
-fmux_name = compile_fmux("MyModel", "MyModels.mop")
-model = CasadiModel(fmux_name)
+      <para>The mathematical formulation of the algorithm can be found in the
+      <link
+      xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
+      API documentation</link>.</para>
 
-res = model.optimize()
-
-#Plot...
-</programlisting>
-
-      <para>As can be seen, the code for compiling and loading models, and for
-      invoking the optimization algorithm is similar to the default
-      optimization algorithm.</para>
-
-      <para>An object containing all the options for the optimization
-      algorithm can be retrieved from the model object. The object
-      <literal>model</literal> in the code below is a
-      <literal>CasadiModel</literal> instance.</para>
+      <para>Optimization models are represented using the class
+      <literal>OptimizationProblem</literal>. An object containing all the
+      options for the optimization algorithm can be retrieved from the model
+      object:</para>
 
       <programlisting language="python">opts = model.optimize_options()
 
 opts? # View the help text</programlisting>
 
-      <para>Options are set in the same way as for the other simulation and
-      optimization algorithms, and the options object can then be propagated
+      <para>After options have been set, the options object can be propagated
       to the <literal>optimize</literal> method:</para>
 
       <programlisting language="python">res = model.optimize(options=opts)</programlisting>
 
-      <para>In <xref linkend="opt-tab-casadi-dae-opts"/> the options for the
-      algorithm are shown. Additional documentation is available in the Python
-      class documentation.</para>
+      <para>The options for the algorithm are shown in <xref
+      linkend="opt-tab-casadi-dae-opts"/>. Additional documentation is
+      available in the Python class documentation.</para>
 
       <table xml:id="opt-tab-casadi-dae-opts">
-        <title>Options for the CasADi and collocation-based optimization
+        <title>Options for the CasADi- and collocation-based optimization
         algorithm</title>
 
         <tgroup cols="3">
@@ -3226,23 +3200,23 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>graph</literal></entry>
+              <entry><literal>expand_to_SX</literal></entry>
 
-              <entry>'SX'</entry>
+              <entry>True</entry>
 
-              <entry>CasADi graph type. Possible values are "SX" and
-              "MX".</entry>
+              <entry>Whether to expand the CasADi MX graphs to SX
+              graphs.</entry>
             </row>
 
             <row>
-              <entry><literal>rename_vars</literal></entry>
+              <entry><literal>named_vars</literal></entry>
 
               <entry>False</entry>
 
-              <entry>Rename NLP variables according to their corresponding
-              Modelica/Optimica names. This only works if graph == "SX". This
-              is done in an inefficient manner and should only be used for
-              investigative purposes.</entry>
+              <entry>Whether to name the NLP variables according to their
+              corresponding Modelica/Optimica names. This disables the
+              solution of the NLP and should only be done for investigative
+              purposes..</entry>
             </row>
 
             <row>
@@ -3308,9 +3282,8 @@ opts? # View the help text</programlisting>
 
               <entry>Return the scaled optimization result if set to True,
               otherwise return the unscaled optimization result. This option
-              is only applicable when the CasadiModel has been instantiated
-              with scale_variables=True. This option is only intended for
-              debugging.</entry>
+              is only applicable when variable_scaling is enabled and is only
+              intended for debugging.</entry>
             </row>
 
             <row>
@@ -3436,17 +3409,17 @@ opts? # View the help text</programlisting>
       </table>
 
       <para>A few of the options are experimental, so changing default values
-      should be done with some care. The last option,
-      <literal>IPOPT_options</literal>, serves as an interface for setting
-      options in IPOPT. Note that this option utilizes CasADi's IPOPT
-      interface, which includes more options than just the original IPOPT
-      options. Thus, please see the documentation for CasADi's IpoptSolver
-      class for a complete list of the available IPOPT options, which is
-      available at
+      should be done with some care.</para>
+
+      <para>The last option, <literal>IPOPT_options</literal>, serves as an
+      interface for setting options in IPOPT. Note that this option utilizes
+      CasADi's IPOPT interface, which includes more options than just the
+      original IPOPT options. Thus, please see the documentation for CasADi's
+      IpoptSolver class for a complete list of the available IPOPT options,
+      which is available at
       http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html.
-      To exemplify the usage of this algorithm option, setting the maximum
-      number of iterations in IPOPT can be done using the following
-      syntax.</para>
+      To exemplify the usage of this algorithm option, the maximum number of
+      iterations in IPOPT can be set using the following syntax:</para>
 
       <programlisting>opts = model.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
@@ -3466,15 +3439,34 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       algorithm.</para>
 
       <para>JModelica.org's CasADi framework does not support simulation and
-      initialization of models. It is recommended to instead use FMI for these
-      purposes.</para>
+      initialization of models. It is recommended to use PyFMI for these
+      purposes instead.</para>
 
-      <para>A limitation of the algorithm is that it currently does not
-      support record and function constructs in the Modelica code. Otherwise
-      the algorithm supports solution of the same problems as the JMI
-      algorithm. The solution of parameter estimation problems is done in a
-      slightly different way, which is still undocumented in this
-      document.</para>
+      <para>Some statistics from IPOPT can be obtained by issuing the
+      command</para>
+
+      <programlisting>res_opt.solver.get_ipopt_statistics()
+</programlisting>
+
+      <para>The return argument of this function can be found by using the
+      interactive help:</para>
+
+      <programlisting>help(res.solver.opt_get_ipopt_statistics)
+Get statistics from the last optimization run.
+    
+Returns::
+    
+    return_status -- 
+        Return status from IPOPT.
+            
+    nbr_iter -- 
+        Number of iterations.
+            
+    objective -- 
+       Final value of objective function.
+            
+    total_exec_time -- 
+        Execution time.</programlisting>
     </section>
 
     <section>
@@ -3483,42 +3475,349 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       <section>
         <title>Optimal control</title>
 
-        <para>This example is based on the CSTR example presented in <xref
-        linkend="opt-sec-dae-c-cstr"/>. It is shown how to perform the same
-        steps using the new CasADi-based algorithm instead of the default JMI
-        algorithm. It is thus recommended that the user is familiar with the
-        steps performed in the previous example. A complete script for this
-        example can be found in
-        <literal>${JMODELICA_HOME}/Python/pyjmi/examples/cstr_casadi.py</literal>.</para>
+        <para>This tutorial is based on the Hicks-Ray Continuously Stirred
+        Tank Reactors (CSTR) system. The model was originally presented in
+        [1]. The system has two states, the concentration, c, and the
+        temperature, T. The control input to the system is the temperature,
+        Tc, of the cooling flow in the reactor jacket. The chemical reaction
+        in the reactor is exothermic, and also temperature dependent; high
+        temperature results in high reaction rate. The CSTR dynamics are given
+        by:</para>
 
-        <section xml:id="opt-sec-dae-casadi-cstr-init">
-          <title>Solve the initialization problem</title>
+        <informalequation>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mover>
+                    <m:mi>c</m:mi>
 
-          <para>The first step is to find the two stationary points via
-          initialization. We start by importing all the needed Python
-          packages.</para>
+                    <m:mo>.</m:mo>
+                  </m:mover>
 
-          <para><programlisting language="python"># Import matplotlib and NumPy
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>F</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mfenced separators="">
+                        <m:msub>
+                          <m:mi>c</m:mi>
+
+                          <m:mn>0</m:mn>
+                        </m:msub>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>c</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mi>V</m:mi>
+                  </m:mfrac>
+
+                  <m:mo>-</m:mo>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>0</m:mn>
+                  </m:msub>
+
+                  <m:mi>c</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+
+                  <m:msup>
+                    <m:mi>e</m:mi>
+
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+
+                      <m:mi>EdivR</m:mi>
+
+                      <m:mo>/</m:mo>
+
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+                  </m:msup>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mover>
+                    <m:mi>T</m:mi>
+
+                    <m:mo>.</m:mo>
+                  </m:mover>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>F</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mfenced separators="">
+                        <m:msub>
+                          <m:mi>T</m:mi>
+
+                          <m:mn>0</m:mn>
+                        </m:msub>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>T</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mi>V</m:mi>
+                  </m:mfrac>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+
+                        <m:mi>H</m:mi>
+                      </m:mrow>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mi>c</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:mi>ρ</m:mi>
+
+                      <m:msub>
+                        <m:mi>C</m:mi>
+
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mfrac>
+
+                  <m:msup>
+                    <m:mi>e</m:mi>
+
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+
+                      <m:mi>EdivR</m:mi>
+
+                      <m:mo>/</m:mo>
+
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+                  </m:msup>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>U</m:mi>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:mi>r</m:mi>
+
+                      <m:mi>ρ</m:mi>
+
+                      <m:msub>
+                        <m:mi>C</m:mi>
+
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mfrac>
+
+                  <m:mfenced separators="">
+                    <m:mrow>
+                      <m:mi>T</m:mi>
+
+                      <m:mi>c</m:mi>
+                    </m:mrow>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>T</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
+        </informalequation>
+
+        <para>This tutorial will cover the following topics:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>How to solve a DAE initialization problem. The
+            initialization model has equations specifying that all derivatives
+            should be identically zero, which implies that a stationary
+            solution is obtained. Two stationary points, corresponding to
+            different inputs, are computed. We call the stationary points A
+            and B respectively. Point A corresponds to operating conditions
+            where the reactor is cold and the reaction rate is low, whereas
+            point B corresponds to a higher temperature where the reaction
+            rate is high.</para>
+          </listitem>
+
+          <listitem>
+            <para>An optimal control problem is solved where the objective is
+            to transfer the state of the system from stationary point A to
+            point B. The challenge is to ignite the reactor while avoiding
+            uncontrolled temperature increases. It is also demonstrated how to
+            set parameter and variable values in a model. More information
+            about the simultaneous optimization algorithm can be found at
+            JModelica.org API documentation.</para>
+          </listitem>
+
+          <listitem>
+            <para>The optimization result is saved to file and then the
+            important variables are plotted.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The Python commands in this tutorial may be copied and pasted
+        directly into a Python shell, in some cases with minor modifications.
+        Alternatively, you may copy the commands into a text file, e.g.,
+        <filename>cstr_casadi.py</filename>.</para>
+
+        <para>Start the tutorial by creating a working directory and copy the
+        file
+        <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/CSTR.mop</filename>
+        to your working directory. An online version of <link
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/CSTR.mop"><filename>CSTR.mop</filename></link>
+        is also available (depending on which browser you use, you may have to
+        accept the site certificate by clicking through a few steps). If you
+        choose to create a Python script file, save it to the working
+        directory.</para>
+
+        <section>
+          <title>Compile and instantiate a model object</title>
+
+          <para>The functions and classes used in the tutorial script need to
+          be imported into the Python script. This is done by the following
+          Python commands. Copy them and paste them either directly into your
+          Python shell or, preferably, into your Python script file.</para>
+
+          <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
-import numpy as N
 
-# Import the needed JModelica.org Python methods 
-from pymodelica import compile_fmu, compile_fmux
+from pymodelica import compile_fmu
 from pyfmi import load_fmu
-from pyjmi import CasadiModel
-</programlisting>The next step is to compile initialization model and load the
-          resulting FMU.</para>
+from pyjmi import transfer_optimization_problem
+</programlisting>
 
-          <programlisting># Compile the stationary initialization model into a FMU
+          <para>To solve the initialization problem and simulate the model, we
+          will first compile it as an FMU and load it in Python. These steps
+          are described in more detail in Section 4.</para>
+
+          <programlisting language="python"># Compile the stationary initialization model into an FMU
 init_fmu = compile_fmu("CSTR.CSTR_Init", "CSTR.mop")
-
+    
 # Load the FMU
-init_model = load_fmu(init_fmu)</programlisting>
+init_model = load_fmu(init_fmu)
+</programlisting>
 
-          <para>We find the first stationary point by specifying the desired
-          input and then solving the initialization problem.</para>
+          <para>At this point, you may open the file
+          <filename>CSTR.mop</filename>, containing the CSTR model and the
+          static initialization model used in this section. Study the classes
+          <literal>CSTR.CSTR</literal> and <literal>CSTR.CSTR_Init</literal>
+          and make sure you understand the models. Before proceeding, have a
+          look at the interactive help for one of the functions you
+          used:</para>
 
-          <programlisting># Set input for Stationary point A
+          <programlisting language="python">help(compile_fmu)
+</programlisting>
+        </section>
+
+        <section>
+          <title>Solve the DAE initialization problem</title>
+
+          <para>In the next step, we would like to specify the first operating
+          point, A, by means of a constant input cooling temperature, and then
+          solve the initialization problem assuming that all derivatives are
+          zero.</para>
+
+          <programlisting language="python"># Set input for Stationary point A
 Tc_0_A = 250
 init_model.set('Tc', Tc_0_A)
 
@@ -3532,12 +3831,22 @@ init_model.initialize()
 print(' *** Stationary point A ***')
 print('Tc = %f' % Tc_0_A)
 print('c = %f' % c_0_A)
-print('T = %f' % T_0_A)</programlisting>
+print('T = %f' % T_0_A)
+</programlisting>
 
-          <para>We then do the same for the second stationary point.</para>
+          <para>Notice how the method <literal>set</literal> is used to set
+          the value of the control input. The initialization algorithm is
+          invoked by calling the method <literal>initialize</literal>, which
+          returns a result object from which the initialization result can be
+          accessed. The values of the states corresponding to point A can then
+          be extracted from the result object. Look carefully at the printouts
+          in the Python shell to see a printout of the stationary values.
+          Display the help text for the <literal>initialize</literal> method
+          and take a moment to look it through. The procedure is now repeated
+          for operating point B:</para>
 
-          <programlisting># Set inputs for Stationary point B
-init_model = load_fmu(init_fmu)
+          <programlisting language="python"># Set inputs for Stationary point B
+init_model.reset() # reset the FMU so that we can initialize it again
 Tc_0_B = 280
 init_model.set('Tc', Tc_0_B)
 
@@ -3553,29 +3862,245 @@ print('Tc = %f' % Tc_0_B)
 print('c = %f' % c_0_B)
 print('T = %f' % T_0_B)
 </programlisting>
-        </section>
 
-        <section xml:id="opt-sec-dae-casadi-cstr-guess">
-          <title>Find initial guess by simulation</title>
+          <para>We have now computed two stationary points for the system
+          based on constant control inputs. In the next section, these will be
+          used to set up an optimal control problem.</para>
 
-          <para>In order to find decent initial guesses for the NLP variables,
-          we simulate the system with the initial values given by stationary
-          point A and with the input fixed to the value of stationary point B.
-          We start by compiling and loading the model used for this
-          purpose.</para>
+          <section>
+            <title>Solving an optimal control problem</title>
 
-          <programlisting># Compile the optimization initialization model
+            <para>The optimal control problem we are about to solve is given
+            by:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:msub>
+                        <m:mi mathvariant="normal">min</m:mi>
+
+                        <m:mrow>
+                          <m:mi>u</m:mi>
+
+                          <m:mo>⁡</m:mo>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mrow>
+                      </m:msub>
+
+                      <m:munderover>
+                        <m:mo>∫</m:mo>
+
+                        <m:mn>0</m:mn>
+
+                        <m:mn>150</m:mn>
+                      </m:munderover>
+
+                      <m:msup>
+                        <m:mfenced close=")" open="(" separators="">
+                          <m:msup>
+                            <m:mi>c</m:mi>
+
+                            <m:mrow>
+                              <m:mi>r</m:mi>
+
+                              <m:mi>e</m:mi>
+
+                              <m:mi>f</m:mi>
+                            </m:mrow>
+                          </m:msup>
+
+                          <m:mo>-</m:mo>
+
+                          <m:mi>c</m:mi>
+
+                          <m:mo>⁡</m:mo>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mfenced>
+
+                        <m:mn>2</m:mn>
+                      </m:msup>
+
+                      <m:mo>+</m:mo>
+
+                      <m:msup>
+                        <m:mfenced close=")" open="(" separators="">
+                          <m:msup>
+                            <m:mi>T</m:mi>
+
+                            <m:mrow>
+                              <m:mi>r</m:mi>
+
+                              <m:mi>e</m:mi>
+
+                              <m:mi>f</m:mi>
+                            </m:mrow>
+                          </m:msup>
+
+                          <m:mo>-</m:mo>
+
+                          <m:mi>T</m:mi>
+
+                          <m:mo>⁡</m:mo>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mfenced>
+
+                        <m:mn>2</m:mn>
+                      </m:msup>
+
+                      <m:mo>+</m:mo>
+
+                      <m:msup>
+                        <m:mfenced close=")" open="(" separators="">
+                          <m:msubsup>
+                            <m:mi>T</m:mi>
+
+                            <m:mi>c</m:mi>
+
+                            <m:mrow>
+                              <m:mi>r</m:mi>
+
+                              <m:mi>e</m:mi>
+
+                              <m:mi>f</m:mi>
+                            </m:mrow>
+                          </m:msubsup>
+
+                          <m:mo>-</m:mo>
+
+                          <m:msub>
+                            <m:mi>T</m:mi>
+
+                            <m:mi>c</m:mi>
+                          </m:msub>
+
+                          <m:mfenced>
+                            <m:mi>t</m:mi>
+                          </m:mfenced>
+                        </m:mfenced>
+
+                        <m:mn>2</m:mn>
+                      </m:msup>
+
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+
+                        <m:mi>t</m:mi>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:mstyle mathvariant="normal">
+                        <m:mi>subject</m:mi>
+
+                        <m:mo> </m:mo>
+
+                        <m:mo> </m:mo>
+
+                        <m:mi>to</m:mi>
+                      </m:mstyle>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:mn>230</m:mn>
+
+                      <m:mo>≤</m:mo>
+
+                      <m:mi>u</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:msub>
+                        <m:mi>T</m:mi>
+
+                        <m:mi>c</m:mi>
+                      </m:msub>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+
+                      <m:mn>≤ 370</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right"/>
+
+                    <m:mtd columnalign="left">
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+
+                      <m:mo>≤</m:mo>
+
+                      <m:mn>350</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+            </informalequation>
+
+            <para>and is expressed in Optimica format in the class
+            <literal>CSTR.CSTR_Opt2</literal> in the
+            <filename>CSTR.mop</filename> file above. Have a look at this
+            class and make sure that you understand how the optimization
+            problem is formulated and what the objective is.</para>
+
+            <para>Direct collocation methods often require good initial
+            guesses in order to ensure robust convergence. Since initial
+            guesses are needed for all discretized variables along the
+            optimization interval, simulation provides a convenient means to
+            generate state and derivative profiles given an initial guess for
+            the control input(s). It is then convenient to set up a dedicated
+            model for computation of initial trajectories. In the model
+            <literal>CSTR.CSTR_Init_Optimization</literal> in the
+            <filename>CSTR.mop</filename> file, a step input is applied to the
+            system in order obtain an initial guess. Notice that the variable
+            names in the initialization model must match those in the optimal
+            control model.</para>
+
+            <para>First, compile the model and set model parameters:</para>
+
+            <programlisting language="python"># Compile the optimization initialization model
 init_sim_fmu = compile_fmu("CSTR.CSTR_Init_Optimization", "CSTR.mop")
 
 # Load the model
 init_sim_model = load_fmu(init_sim_fmu)
-</programlisting>
 
-          <para>Next we provide the initial values and reference values. The
-          reference values are needed in order to compute a trajectory for the
-          introduced cost state.</para>
-
-          <programlisting># Set initial and reference values
+# Set initial and reference values
 init_sim_model.set('cstr.c_init', c_0_A)
 init_sim_model.set('cstr.T_init', T_0_A)
 init_sim_model.set('c_ref', c_0_B)
@@ -3583,22 +4108,28 @@ init_sim_model.set('T_ref', T_0_B)
 init_sim_model.set('Tc_ref', Tc_0_B)
 </programlisting>
 
-          <para>We simulate the model and extract the results.</para>
+            <para>Having initialized the model parameters, we can simulate the
+            model using the <literal>simulate</literal> function.</para>
 
-          <programlisting># Simulate with constant input Tc
-init_res = init_sim_model.simulate(start_time=0., final_time=150.)
+            <programlisting language="python">init_res = init_sim_model.simulate(start_time=0., final_time=150.)
+</programlisting>
 
-# Extract variable profilesS
+            <para>The method <literal>simulate</literal> first computes
+            consistent initial conditions and then simulates the model in the
+            interval 0 to 150 seconds. Take a moment to read the interactive
+            help for the <literal>simulate</literal> method.</para>
+
+            <para>The simulation result object is returned and to retrieve the
+            simulation data use Python dictionary access to retrieve the
+            variable trajectories.</para>
+
+            <programlisting language="python"># Extract variable profiles
+t_init_sim = init_res['time']
 c_init_sim = init_res['cstr.c']
 T_init_sim = init_res['cstr.T']
 Tc_init_sim = init_res['cstr.Tc']
-t_init_sim = init_res['time']
-</programlisting>
 
-          <para>Finally, we plot the simulated trajectories, which we will use
-          as initial guesses in the next section.</para>
-
-          <programlisting># Plot the initial guess trajectories
+# Plot the initial guess trajectories
 plt.close(1)
 plt.figure(1)
 plt.hold(True)
@@ -3606,7 +4137,7 @@ plt.subplot(3, 1, 1)
 plt.plot(t_init_sim, c_init_sim)
 plt.grid()
 plt.ylabel('Concentration')
-plt.title('Initial guess obtained by simulation') 
+plt.title('Initial guess obtained by simulation')
 
 plt.subplot(3, 1, 2)
 plt.plot(t_init_sim, T_init_sim)
@@ -3620,72 +4151,94 @@ plt.ylabel('Cooling temperature')
 plt.xlabel('time')
 plt.show()
 </programlisting>
-        </section>
 
-        <section>
-          <title>Solve the optimal control problem</title>
+            <para>Look at the plots and try to relate the trajectories to the
+            optimal control problem. Why is this a good initial guess?</para>
 
-          <para>We are now ready to solve the optimal control problem of
-          moving the system from stationary point A to stationary point B with
-          a quadratic cost function. As per usual, we start by compiling and
-          loading the Optimica specification.</para>
+            <para>Once the initial guess is generated, we compile the optimal
+            control problem:</para>
 
-          <programlisting># Compile model
-fmux = compile_fmux("CSTR.CSTR_Opt2", "CSTR.mop")
-
-# Load model
-cstr = CasadiModel(fmux)
+            <programlisting language="python"># Compile and load optimization problem
+op = transfer_optimization_problem("CSTR.CSTR_Opt2", "CSTR.mop")
 </programlisting>
 
-          <para>Next, we specify the initial and reference values, according
-          to the two stationary points computed in <xref
-          linkend="opt-sec-dae-casadi-cstr-init"/>.</para>
+            <para>We will now initialize the parameters of the model so that
+            their values correspond to the optimization objective of
+            transferring the system state from operating point A to operating
+            point B. Accordingly, we set the parameters representing the
+            initial values of the states to point A and the reference values
+            in the cost function to point B:</para>
 
-          <programlisting># Set reference values
-cstr.set('Tc_ref', Tc_0_B)
-cstr.set('c_ref', c_0_B)
-cstr.set('T_ref', T_0_B)
+            <programlisting language="python"># Set reference values
+op.set('Tc_ref', Tc_0_B)
+op.set('c_ref', float(c_0_B))
+op.set('T_ref', float(T_0_B))
 
 # Set initial values
-cstr.set('cstr.c_init', c_0_A)
-cstr.set('cstr.T_init', T_0_A)
+op.set('cstr.c_init', float(c_0_A))
+op.set('cstr.T_init', float(T_0_A))
 </programlisting>
 
-          <para>Before we solve the problem, we want to specify a few options.
-          We first obtain an options object, containing all the default
-          options. We then change number of finite elements from the default
-          value of 50 to 100. We also specify that the trajectories computed
-          in <xref linkend="opt-sec-dae-casadi-cstr-guess"/> are to be used as
-          initial guesses for the NLP variables.</para>
+            <para>Collocation-based optimization algorithms often require a
+            good initial guess in order to achieve fast convergence. Also, if
+            the problem is non-convex, initialization is even more critical.
+            Initial guesses can be provided in Optimica by the
+            <literal>initialGuess</literal> attribute, see the
+            <filename>CSTR.mop</filename> file for an example for this. Notice
+            that initialization in the case of collocation-based optimization
+            methods means initialization of all the control and state profiles
+            as a function of time. In some cases, it is sufficient to use
+            constant profiles. For this purpose, the
+            <literal>initialGuess</literal> attribute works well. In more
+            difficult cases, however, it may be necessary to initialize the
+            profiles using simulation data, where an initial guess for the
+            input(s) has been used to generate the profiles for the dependent
+            variables. This approach for initializing the optimization problem
+            is used in this tutorial.</para>
 
-          <programlisting># Set options
-opt_opts = cstr.optimize_options()
-opt_opts['n_e'] = 100 # Number of elements
+            <para>We are now ready to solve the actual optimization problem.
+            This is done by invoking the method optimize:</para>
+
+            <programlisting language="python"># Set options
+opt_opts = op.optimize_options()
+opt_opts['n_e'] = 19 # Number of elements
 opt_opts['init_traj'] = init_res.result_data
+opt_opts['IPOPT_options']['tol'] = 1e-10
+
+# Solve the optimal control problem
+res = op.optimize(options=opt_opts)
 </programlisting>
 
-          <para>We are now ready to solve the optimization problem and extract
-          the solution.</para>
+            <para>In this case, we would like to increase the number of finite
+            elements in the mesh from 50 to 100. This is done by setting the
+            corresponding option and provide it as an argument to the
+            <literal>optimize</literal> method. We also lower the tolerance of
+            Ipopt to get a more accurate result. You should see the output of
+            Ipopt in the Python shell as the algorithm iterates to find the
+            optimal solution. Ipopt should terminate with a message like
+            'Optimal solution found' or 'Solved to an acceptable level' in
+            order for an optimum to be found. The optimization result object
+            is returned and the optimization data are stored in
+            <literal>res</literal>.</para>
 
-          <programlisting># Solve the optimal control problem
-res = cstr.optimize(options=opt_opts)
+            <para>We can now retrieve the trajectories of the variables that
+            we intend to plot:</para>
 
-# Extract variable profiles
+            <programlisting language="python"># Extract variable profiles
 c_res = res['cstr.c']
 T_res = res['cstr.T']
 Tc_res = res['cstr.Tc']
 time_res = res['time']
 
-c_ref = res['c_ref']
-T_ref = res['T_ref']
-Tc_ref = res['Tc_ref']
+c_ref = res.final('c_ref') # extract constant value as last element
+T_ref = res.final('T_ref')
+Tc_ref = res.final('Tc_ref')
 </programlisting>
 
-          <para>Finally, we plot the obtained solution. The results should be
-          very similar to those shown in <xref
-          linkend="opt-fig-cstr-opt1"/>.</para>
+            <para>Finally, we plot the result using the functions available in
+            matplotlib:</para>
 
-          <programlisting># Plot the results
+            <programlisting language="python"># Plot the results
 plt.close(2)
 plt.figure(2)
 plt.hold(True)
@@ -3694,7 +4247,7 @@ plt.plot(time_res, c_res)
 plt.plot([time_res[0], time_res[-1]], [c_ref, c_ref], '--')
 plt.grid()
 plt.ylabel('Concentration')
-plt.title('Optimized trajectories') 
+plt.title('Optimized trajectories')
 
 plt.subplot(312)
 plt.plot(time_res,T_res)
@@ -3710,20 +4263,60 @@ plt.ylabel('Cooling temperature')
 plt.xlabel('time')
 plt.show()
 </programlisting>
+
+            <para>Notice that parameters are returned as scalar values whereas
+            variables are returned as vectors and that this must be taken into
+            account when plotting. You should now see the plot shown in <xref
+            linkend="opt-fig-cstr-casadi-opt1"/>.</para>
+
+            <figure xml:id="opt-fig-cstr-casadi-opt1">
+              <title>Optimal profiles for the CSTR problem.</title>
+
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref="images/cstr_casadi.svg" scalefit="1"
+                             width="60%"/>
+                </imageobject>
+              </mediaobject>
+            </figure>
+
+            <para>Take a minute to analyze the optimal profiles and to answer
+            the following questions:</para>
+
+            <orderedlist>
+              <listitem>
+                <para>Why is the concentration high in the beginning of the
+                interval?</para>
+              </listitem>
+
+              <listitem>
+                <para>Why is the input cooling temperature high in the
+                beginning of the interval?</para>
+              </listitem>
+            </orderedlist>
+          </section>
         </section>
 
         <section>
-          <title>Solution verification</title>
+          <title>Verify optimal control solution</title>
 
-          <para>As a final step, we verify the optimal control solution. This
-          is important, because the optimization algorithm does not make any
-          guarantees with regards to solution accuracy. An insufficient number
-          of elements and collocation points may result in poor solution
-          accuracy. We start by compiling and loading the model used for
-          simulation.</para>
+          <para>Solving optimal control problems by means of direct
+          collocation implies that the differential equation is approximated
+          by a time-discrete counterpart. The accuracy of the solution is
+          dependent on the method of collocation and the number of elements.
+          In order to assess the accuracy of the discretization, we may
+          simulate the system using the optimal control profile as input. With
+          this approach, the state profiles are computed with high accuracy
+          and the result may then be compared with the profiles resulting from
+          optimization. Notice that this procedure does not verify the
+          optimality of the resulting optimal control profiles, but only the
+          accuracy of the discretization of the dynamics.</para>
+
+          <para>We start by compiling and loading the model used for
+          simulation:</para>
 
           <programlisting># Compile model
-sim_fmu = compile_fmu("CSTR.CSTR", "CSTR.mop")
+sim_fmu = compile_fmu("CSTR.CSTR", file_path)
 
 # Load model
 sim_model = load_fmu(sim_fmu)
@@ -3743,55 +4336,432 @@ sim_model = load_fmu(sim_fmu)
 </programlisting>
 
           <para>We specify the initial values and simulate using the optimal
-          trajectory.</para>
+          trajectory:</para>
 
           <programlisting># Set initial values
-sim_model.set('c_init',c_0_A)
-sim_model.set('T_init',T_0_A)
+sim_model.set('c_init', c_0_A)
+sim_model.set('T_init', T_0_A)
 
 # Simulate using optimized input
+sim_opts = sim_model.simulate_options()
+sim_opts['CVode_options']['rtol'] = 1e-6
+sim_opts['CVode_options']['atol'] = 1e-8
 res = sim_model.simulate(start_time=0., final_time=150.,
-                         input=('Tc', opt_input))
+                         input=('Tc', opt_input), options=sim_opts)
 </programlisting>
 
-          <para>Finally, we extract the simulation results and plot them. They
-          should be similar to those shown in <xref
-          linkend="opt-fig-cstr-opt2"/>.</para>
+          <para>Finally, we load the simulated data and plot it to compare
+          with the optimized trajectories:</para>
 
-          <programlisting># Extract variable profiles
+          <programlisting language="python"># Extract variable profiles
 c_sim=res['c']
 T_sim=res['T']
 Tc_sim=res['Tc']
 time_sim = res['time']
 
 # Plot the results
-plt.close(3)
 plt.figure(3)
+plt.clf()
 plt.hold(True)
-plt.subplot(3, 1, 1)
-plt.plot(time_res, c_res, '--', lw=5)
-plt.plot(time_sim, c_sim, lw=2)
-plt.legend(('optimized', 'simulated'))
+plt.subplot(311)
+plt.plot(time_res,c_res,'--')
+plt.plot(time_sim,c_sim)
+plt.legend(('optimized','simulated'))
 plt.grid()
 plt.ylabel('Concentration')
-plt.title('Verification') 
 
-plt.subplot(3, 1, 2)
-plt.plot(time_res, T_res, '--', lw=5)
-plt.plot(time_sim, T_sim, lw=2)
-plt.legend(('optimized', 'simulated'))
+plt.subplot(312)
+plt.plot(time_res,T_res,'--')
+plt.plot(time_sim,T_sim)
+plt.legend(('optimized','simulated'))
 plt.grid()
 plt.ylabel('Temperature')
 
-plt.subplot(3, 1, 3)
-plt.plot(time_res, Tc_res, '--', lw=5)
-plt.plot(time_sim, Tc_sim, lw=2)
-plt.legend(('optimized', 'simulated'))
+plt.subplot(313)
+plt.plot(time_res,Tc_res,'--')
+plt.plot(time_sim,Tc_sim)
+plt.legend(('optimized','simulated'))
 plt.grid()
 plt.ylabel('Cooling temperature')
 plt.xlabel('time')
 plt.show()
 </programlisting>
+
+          <para>You should now see the plot shown in <xref
+          linkend="opt-fig-cstr-casadi-opt2"/>.</para>
+
+          <figure xml:id="opt-fig-cstr-casadi-opt2">
+            <title>Optimal control profiles and simulated trajectories
+            corresponding to the optimal control input.</title>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="images/cstr_opt_cmp_casadi.svg"
+                           scalefit="1" width="60%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+
+          <para>Discuss why the simulated trajectories differ from their
+          optimized counterparts.</para>
+        </section>
+
+        <section>
+          <title>Exercises</title>
+
+          <para>After completing the tutorial you may continue to modify the
+          optimization problem and study the results.</para>
+
+          <orderedlist>
+            <listitem>
+              <para>Remove the constraint on cstr.T. What is then the maximum
+              temperature?</para>
+            </listitem>
+
+            <listitem>
+              <para>Play around with weights in the cost function. What
+              happens if you penalize the control variable with a larger
+              weight? Do a parameter sweep for the control variable weight and
+              plot the optimal profiles in the same figure.</para>
+            </listitem>
+
+            <listitem>
+              <para>Add terminal constraints
+              ('cstr.T(finalTime)=someParameter') for the states so that they
+              are equal to point B at the end of the optimization interval.
+              Now reduce the length of the optimization interval. How short
+              can you make the interval?</para>
+            </listitem>
+
+            <listitem>
+              <para>Try varying the number of elements in the mesh and the
+              number of collocation points in each interval.</para>
+            </listitem>
+          </orderedlist>
+        </section>
+
+        <section>
+          <title>References</title>
+
+          <para>[1] G.A. Hicks and W.H. Ray. Approximation Methods for Optimal
+          Control Synthesis. <emphasis>Can. J. Chem. Eng</emphasis>.,
+          40:522–529, 1971.</para>
+
+          <para>[2] Bieger, L., A. Cervantes, and A. Wächter (2002): "Advances
+          in simultaneous strategies for dynamic optimization."
+          <emphasis>Chemical Engineering Science</emphasis>, <emphasis
+          role="bold">57</emphasis>, pp. 575-593.</para>
+
+          <section>
+            <title>Minimum time problems</title>
+
+            <para>Minimum time problems are dynamic optimization problems
+            where not only the control inputs are optimized, but also the
+            final time. Typically, elements of such problems include initial
+            and terminal state constraints and an objective function where the
+            transition time is minimized. The following example will be used
+            to illustrate how minimum time problems are formulated in
+            Optimica. We consider the optimization problem:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:munder>
+                  <m:mi>min</m:mi>
+
+                  <m:mrow>
+                    <m:mi>u</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+                </m:munder>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mi>f</m:mi>
+                </m:msub>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+            </informalequation>
+
+            <para>subject to the Van der Pol dynamics:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd columnalign="right">
+                      <m:msub>
+                        <m:mover>
+                          <m:mi>x</m:mi>
+
+                          <m:mo>.</m:mo>
+                        </m:mover>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mtd>
+
+                    <m:mtd columnalign="left">
+                      <m:mo>=</m:mo>
+
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msubsup>
+                          <m:mi>x</m:mi>
+
+                          <m:mn>2</m:mn>
+
+                          <m:mn>2</m:mn>
+                        </m:msubsup>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mo>-</m:mo>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mi>u</m:mi>
+
+                      <m:mi>,</m:mi>
+
+                      <m:mspace width="1em"/>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mfenced>
+                        <m:mn>0</m:mn>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mn>0</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right">
+                      <m:msub>
+                        <m:mover>
+                          <m:mi>x</m:mi>
+
+                          <m:mo>.</m:mo>
+                        </m:mover>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mtd>
+
+                    <m:mtd columnalign="left">
+                      <m:mo>=</m:mo>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mi>,</m:mi>
+
+                      <m:mspace width="1em"/>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:mfenced>
+                        <m:mn>0</m:mn>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+            </informalequation>
+
+            <para>and the constraints:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd columnalign="right">
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:msub>
+                          <m:mi>t</m:mi>
+
+                          <m:mi>f</m:mi>
+                        </m:msub>
+                      </m:mfenced>
+                    </m:mtd>
+
+                    <m:mtd columnalign="left">
+                      <m:mo>=</m:mo>
+
+                      <m:mn>0</m:mn>
+
+                      <m:mi>,</m:mi>
+
+                      <m:mspace width="1em"/>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:msub>
+                          <m:mi>t</m:mi>
+
+                          <m:mi>f</m:mi>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mn>0</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+            </informalequation>
+
+            <para><informalequation>
+                <m:math display="block">
+                  <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
+                </m:math>
+              </informalequation></para>
+
+            <para>This problem is encoded in the following Optimica
+            specification:</para>
+
+            <programlisting language="optimica">optimization VDP_Opt_Min_Time (objective = finalTime,
+                               startTime = 0,
+                               finalTime(free=true,min=0.2,initialGuess=1)) 
+
+  // The states
+  Real x1(start = 0,fixed=true);
+  Real x2(start = 1,fixed=true);
+
+  // The control signal
+  input Real u(free=true,min=-1,max=1);
+
+equation
+  // Dynamic equations
+  der(x1) = (1 - x2^2) * x1 - x2 + u;
+  der(x2) = x1;
+
+constraint
+  // terminal constraints
+  x1(finalTime)=0;
+  x2(finalTime)=0;
+end VDP_Opt_Min_Time;
+</programlisting>
+
+            <para>Notice how the class attribute <literal>finalTime</literal>
+            is set to be free in the optimization. The problem is solved by
+            the following Python script:</para>
+
+            <programlisting language="python"># Import numerical libraries
+import numpy as N
+import matplotlib.pyplot as plt
+
+# Import the JModelica.org Python packages
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
+from pyjmi import transfer_optimization_problem
+
+vdp = transfer_optimization_problem("VDP_Opt_Min_Time", "VDP_Opt_Min_Time.mop")
+res = vdp.optimize()
+
+# Extract variable profiles
+x1=res['x1']
+x2=res['x2']
+u=res['u']
+t=res['time']
+
+# Plot
+plt.figure(1)
+plt.clf()
+plt.subplot(311)
+plt.plot(t,x1)
+plt.grid()
+plt.ylabel('x1')
+
+plt.subplot(312)
+plt.plot(t,x2)
+plt.grid()
+plt.ylabel('x2')
+
+plt.subplot(313)
+plt.plot(t,u,'x-')
+plt.grid()
+plt.ylabel('u')
+plt.xlabel('time')
+plt.show()
+</programlisting>
+
+            <para>The resulting control and state profiles are shown in <xref
+            linkend="opt-fig-vdp-min-time-casadi"/>. Notice the difference as
+            compared to Figure <xref linkend="fig-vdp-opt"/>, where the Van
+            der Pol oscillator system is optimized using a quadratic objective
+            function.</para>
+
+            <figure xml:id="opt-fig-vdp-min-time-casadi">
+              <title>Minimum time profiles for the Van der Pol
+              Oscillator.</title>
+
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref="images/vdp_min_time.svg" scalefit="1"
+                             width="60%"/>
+                </imageobject>
+              </mediaobject>
+            </figure>
+          </section>
         </section>
       </section>
     </section>
@@ -3800,15 +4770,23 @@ plt.show()
   <section xml:id="opt_sec_pseudo-spectral">
     <title>Optimization of ODEs using Pseduo-Spectral methods</title>
 
-    <para>The automatic differentiation tool CasADi connected to IPOPT. The
+    <para>The automatic differentiation tool CasADi is connected to IPOPT. The
     collocation algorithms are the Gauss Pseudospectral-, the Legendre
     Pseudospectral- and the Radau Pseudospectral-method. These methods can be
     used either as a local method or a global method where in the local case
     the time horizon is discretized into elements and each element is
     approximated with a polynomial. In the global case, a polynomial is used
     over the complete time horizon. For a mathematic overview of the methods,
-    see the Python API documentation, for the class
+    see the Python API documentation for the class
     <literal>PseudoSpectral</literal>.</para>
+
+    <para>This section relies on a model format called FMUX, and the Python
+    class <literal>CasadiModel</literal>. These are supported in
+    JModelica.org, but no longer used for the main CasADi-based optimization
+    tool chain. For more information about the FMUX format and the
+    <literal>CasadiModel</literal> class, see the JModelica.org-1.12 User
+    Guide, available from <link
+    xlink:href="http://jmodelica.org/page/236">http://jmodelica.org/page/236</link>.</para>
 
     <para>The implementation resides in the module
     <literal>casadi_interface</literal> and contains a model class

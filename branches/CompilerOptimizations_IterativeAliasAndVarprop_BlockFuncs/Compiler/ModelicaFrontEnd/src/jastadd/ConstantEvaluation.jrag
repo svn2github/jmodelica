@@ -22,6 +22,12 @@ import org.jmodelica.util.BinaryOperation;
 import org.jmodelica.util.SingleIterator;
 import org.jmodelica.util.ConstArrayIterator;
 
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * \brief Provides methods to evaluate flat constant 
  * expressions. 
@@ -1105,6 +1111,12 @@ aspect ConstantEvaluation {
  	public CValue FStringType.convert(CValue v)  { return v.convertString(); }
  	public CValue FBooleanType.convert(CValue v) { return v.convertBoolean(); }
  	
+    public CValue FType.limitCValueScalar(boolean high)        { return CValue.UNSUPPORTED; }
+    public CValue FRealType.limitCValueScalar(boolean high)    { return new CValueReal(      high ? Double.MAX_VALUE  : -Double.MAX_VALUE); }
+    public CValue FIntegerType.limitCValueScalar(boolean high) { return new CValueInteger(   high ? Integer.MAX_VALUE : Integer.MIN_VALUE); }
+    public CValue FBooleanType.limitCValueScalar(boolean high) { return new CValueBoolean(   high ? true : false); }
+    public CValue FEnumType.limitCValueScalar(boolean high)    { return new CValueEnum(this, high ? getNumFEnumLiteralType() : 1); }
+ 	
     
     /** 
      * \build Creates an FExp with literals from this Array.
@@ -1302,6 +1314,14 @@ aspect ConstantEvaluation {
 	  return res;
   }
   
+  eq InstRecordConstructor.cevalCalc() {
+      CValueRecord res = new CValueRecord((FRecordType) type());
+      int i = 0;
+      for (InstFunctionArgument arg : getArgs())
+          res.setMember(i++, arg.getFExp().ceval());
+      return res;
+  }
+  
   // TODO: expand to handle boolean end enum index
   eq FEndExp.cevalCalc() {
 	  int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;
@@ -1390,6 +1410,10 @@ aspect ConstantEvaluation {
   syn CValue FReductionExp.scalarReduceStartValue();
   eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
   eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
+  
+  syn CValue FMinMaxExp.scalarReduceStartValue();
+  eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);
+  eq FMinExp.scalarReduceStartValue() = type().limitCValueScalar(true);
   
   syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
   eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
@@ -2043,6 +2067,12 @@ aspect ConstantEvaluation {
 	  public void prepareForFunctionEval();
 	  public CValue evaluationValue();
 	  public String name();
+        
+        // Added for codegeneration when evaluating external functions
+        public FType   type();
+        public String  name_C();
+        public boolean isInput();
+        public boolean isOutput();
   }
   
   FAbstractVariable implements CommonVariableDecl;
@@ -2191,11 +2221,15 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
- 	  FAlgorithm fab = findFunctionAlgorithm();
-   	  if (fab == null || hasInstExternal()) {
-		  values.clear();
-		  return;
-   	  }
+        FAlgorithm fab = findFunctionAlgorithm();
+        if (fab == null) {
+            if (hasInstExternal()) {
+                fab = getInstExternal().getFAlgorithm();
+            } else {
+                values.clear();
+                return;
+            }
+        }
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
@@ -2727,11 +2761,13 @@ aspect ConstantEvaluation {
 	  }
 	  return left;
   }
-
+  
   public int FExternalStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  // Make sure everything evaluates to CValueUnknown
-	  values.clear();
-	  return EVAL_RETURN;
+      if (!canEvaluate()) {
+          values.clear();
+          return EVAL_RETURN;
+      }
+      return evaluateExternal(values);
   }
   
   public int FInitArrayStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
@@ -3288,4 +3324,335 @@ aspect AritmeticTransformations {
 		return getFExp();
 	}
 	
+}
+
+aspect ExternalCEval {
+    
+    /**
+     * Retrieve ModelicaCompiler from root. Might be null.
+     */
+    inh ModelicaCompiler FExternalStmt.myCompiler();
+    eq FlatRoot.getChild().myCompiler() = getCompiler();
+    eq InstRoot.getChild().myCompiler() = getCompiler();
+    
+    private ModelicaCompiler FlatRoot.compiler = null;
+    public void FlatRoot.setCompiler(ModelicaCompiler mc) { compiler = mc; }
+    public ModelicaCompiler FlatRoot.getCompiler()        { return compiler; }
+    
+    private ModelicaCompiler InstRoot.compiler = null;
+    public void InstRoot.setCompiler(ModelicaCompiler mc) { compiler = mc; }
+    public ModelicaCompiler InstRoot.getCompiler()        { return compiler; }
+    
+    /**
+     * Check external arguments
+     */
+    syn boolean FExternalStmt.canEvaluate() {
+        if (root().options.getIntegerOption("external_constant_evaluation") == 0)
+            return false;
+        for (CommonVariableDecl cvd : varsToSerialize()) {
+            if (cvd.type().isExternalObject() || cvd.type().isRecord()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Create a process of this external function. Returns null if there was no
+     * compiler or the process could not be started.
+     */
+    public Process FExternalStmt.createExternCEvalProc(FExternalStmt ext) {
+        ModelicaCompiler mc = myCompiler();
+        if (mc != null)
+            return mc.createExternCEvalProc(this);
+        return null;
+    }
+    
+    /**
+     * Make sure we dont try evaluation again.
+     */
+    public void FExternalStmt.invalidateExternal() {
+        myCompiler().invalidateExternal(this);
+    }
+    
+    /**
+     * External functions does not have a FAlgorithm in the instance tree
+     * so we have to generate one.
+     */
+    syn nta FAlgorithm InstExternal.getFAlgorithm() {
+        FAlgorithm fab = new FAlgorithm(new List());
+        fab.addFStatement(createStmt(myInstFullClassDecl(), new FQNameFull(""), false));
+        return fab;
+    }
+    
+    /**
+     * Evaluate this external statement.
+     */
+    public int FExternalStmt.evaluateExternal(Map<CommonVariableDecl, CValue> values) {
+        
+        Process proc = createExternCEvalProc(this);
+        
+        if (proc == null) {
+            values.clear();
+            return EVAL_RETURN;
+        } 
+        
+        int res = 0;
+        int timeout = root().options.getIntegerOption("external_constant_evaluation");
+        ProcessCommunicator com = new ProcessCommunicator(proc, timeout);
+        try {
+            com.accept("START");
+            for (CommonVariableDecl cvd : varsToSerialize())
+                com.put(values.get(cvd), cvd.type(), !cvd.isInput());
+            com.accept("CALC");
+            com.log();
+            com.accept("DONE");
+            for (CommonVariableDecl cvd : varsToDeserialize())
+                values.put(cvd, com.get(cvd.type()));
+            com.accept("END");
+            res = com.end();
+        } catch (IOException e) {
+//            ModelicaCompiler.log.debug(e);
+            res = -2;
+        }
+        com.destroy();
+        
+        if (res != 0) {
+            invalidateExternal();
+            values.clear();
+            ModelicaCompiler.log.debug("Could not evaluate external function " + getName() + ", error code: " + res);
+            return EVAL_RETURN;
+        }
+        
+        return EVAL_CONT;
+    }
+    
+    
+    /**
+     * A class for handling communication with an external process during
+     * constant evaluation.
+     */
+    public class ProcessCommunicator {
+        private BufferedReader in;
+        private BufferedWriter out;
+        private Process process;
+        private Timer timer;
+        String buffLine = null;
+        
+        public ProcessCommunicator(Process proc, int timeout) {
+            process = proc;
+            in  = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            out = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            timer = new Timer();
+            if (timeout >= 0) {
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        process.destroy();
+                        cancel();
+                    }
+                }, timeout);
+            }
+        }
+        
+        private String getLine() throws IOException {
+            String line = buffLine;
+            if (line == null)
+                line = in.readLine();
+            if (line == null)
+                throw new IOException();
+            buffLine = null;
+            return line;
+        }
+        
+        private void buffLine(String line) {
+            buffLine = line;
+        }
+        
+        /**
+         * Print <code>val</code>, serialized, to the process 
+         */
+        public void put(CValue val, FType type, boolean allowUninitialized) throws IOException {
+//            ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString() + " of type: "+type.toString());
+            val.serialize(out, type, allowUninitialized);
+            out.flush();
+        }
+        
+        /**
+         * Read <code>type</code>, serialized, from the process 
+         */
+        public CValue get(FType type) throws IOException {
+            CValue val = type.deserialize(this);
+//            ModelicaCompiler.log.debug("ProcessCommunicator READ: " + val.toString());
+            return val;
+        }
+        
+        /**
+         * Read a line. Check equals to <code>s</code>.
+         */
+        public void accept(String s) throws IOException {
+            String line = getLine();
+            if (line == null || !line.equals(s)) {
+                ModelicaCompiler.log.debug(String.format("ProcessCommunicator did not receive expected line\n\t'%s' != '%s'", s, (line == null ? "null" : line)));
+                throw new IOException();
+            }
+        }
+        
+        public void log() throws IOException {
+            String line = getLine();
+            while (line.equals("LOG")) {
+                double warning = deserializeReal();
+                String name    = deserializeString();
+                String format  = deserializeString();
+                String value   = deserializeString();
+                if (warning != 0)
+                    ModelicaCompiler.log.warning("%s: " + format, name, value);
+                else
+                    ModelicaCompiler.log.info("%s: " + format, name, value);
+                line = getLine();
+            }
+            buffLine(line);
+        }
+        
+        /**
+         * Wait for and retrieve exit value from process.
+         */
+        public int end() {
+            int res;
+            try {
+                process.waitFor();
+                res = process.exitValue();
+            } catch (InterruptedException e) {
+                res = -99;
+            } catch (IllegalThreadStateException e) {
+                res = -100;
+            }
+            return res;
+        }
+        
+        /**
+         * Tear down everything
+         */
+        public void destroy() {
+            try {
+                in.close();
+            } catch (IOException e) {
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+            }
+            
+            process.destroy();
+            process = null;
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
+        
+        public double deserializeReal() throws IOException {
+            String s = in.readLine();
+            if (s == null)
+                throw new IOException();
+            try {
+                return Double.parseDouble(s);
+            } catch (NumberFormatException e) {
+                throw new IOException();
+            }
+        }
+        
+        public String deserializeString() throws IOException {
+            String s = in.readLine();
+            if (s == null)
+                throw new IOException();
+            try {
+                int len = Integer.parseInt(s);
+                char[] c = new char[len];
+                in.read(c,0,len);
+                s = in.readLine();
+                return new String(c);
+            } catch (NumberFormatException e) {
+                throw new IOException();
+            }
+        }
+    }
+    
+    /**
+     * Print this constant value to <code>buff</code>
+     */
+    public void CValue.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        throw new IOException();
+    }
+    public void CValueUnknown.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        if (allowUninitialized)
+            type.uninitialized().serialize(buff, type, false);
+        else
+            super.serialize(buff, type, allowUninitialized);
+    }
+    public void CValueArray.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        for (int s : size().size) {
+            buff.write("" + s + "\n");
+        }
+        for (Index i : indices()) {
+            getCell(i).serialize(buff, type.scalarType(), allowUninitialized);
+        }
+    }
+    public void CValueReal.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(Double.toString(realValue()));
+        buff.write("\n");
+    }
+    public void CValueInteger.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(Integer.toString(intValue()));
+        buff.write("\n");
+    }
+    public void CValueBoolean.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(booleanValue() ? "1\n" : "0\n");
+    }
+    public void CValueString.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        String s = stringValue();
+        buff.write("" + s.length() + " ");
+        buff.write(s);
+        buff.write("\n");
+    }
+    public void CValueEnum.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        buff.write(Integer.toString(intValue()));
+        buff.write("\n");
+    }
+    
+    public CValue FType.uninitialized() { return zeroCValue(); }
+    public CValue FEnumType.uninitialized() { return (new FIntegerType(size())).zeroCValue(); }
+    
+    
+    /**
+     * Read a constant value of <code>this</code> type from <code>buff</code>
+     */
+    public CValue FType.deserialize(ProcessCommunicator com) throws IOException {
+        if (isArray()) {
+            CValueArray a = new CValueArray(size().ceval());
+            for (Index i : a.indices()) {
+                a.setCell(i, deserializeScalar(com));
+            }
+            return a;
+        } else {
+            return deserializeScalar(com);
+        }
+    }
+    public CValue FType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        throw new IOException();
+    }
+    public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueReal(com.deserializeReal());
+    }
+    public CValue FIntegerType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueInteger((int) com.deserializeReal());
+    }
+    public CValue FBooleanType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueBoolean(com.deserializeReal() != 0);
+    }
+    public CValue FStringType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueString(com.deserializeString());
+    }
+    public CValue FEnumType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        return new CValueEnum(this, (int) com.deserializeReal());
+    }
 }

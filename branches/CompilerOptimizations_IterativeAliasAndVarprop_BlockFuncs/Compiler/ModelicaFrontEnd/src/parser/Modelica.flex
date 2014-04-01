@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2014 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,7 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+package $PARSER_PACKAGE$;
 
+import $PARSER_PACKAGE$.ModelicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
 import org.jmodelica.util.formattedPrint.FormattingItem;
 import beaver.Scanner;
@@ -95,7 +97,6 @@ import beaver.Scanner;
   }
 
   private Symbol newSymbol(short id) {
-    //System.out.println(id);
     return new Symbol(id);
   }
 
@@ -127,14 +128,12 @@ ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
 NONDIGIT = [a-zA-Z_]
 S_CHAR = [^\"\\]
 Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
-//Q_IDENT = "\'" ( {DIGIT}|{NONDIGIT} ) ( {DIGIT}|{NONDIGIT} )* "\'"
 STRING = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
 Q_CHAR = [^\'\\]
 S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
 DIGIT = [0-9]
 UNSIGNED_INTEGER = {DIGIT} {DIGIT}*
 UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
-// UNSIGNED_NUMBER = {DIGIT} {DIGIT}* "." ( {UNSIGNED_INTEGER} )?  ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* "." ( {UNSIGNED_INTEGER} )? 
 
 
 LineTerminator = \r|\n|\r\n
@@ -170,6 +169,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "package"       { return newSymbol(Terminals.PACKAGE); }
   "function"      { return newSymbol(Terminals.FUNCTION); }
   "record"        { return newSymbol(Terminals.RECORD); }
+  "operator"      { return newSymbol(Terminals.OPERATOR); }
   
   "end"           { return newSymbol(Terminals.END); }
   "external"      { return newSymbol(Terminals.EXTERNAL); }
@@ -185,7 +185,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
   "flow"          { return newSymbol(Terminals.FLOW); }
   "stream"        { return newSymbol(Terminals.STREAM); }
-  
+
   "discrete"      { return newSymbol(Terminals.DISCRETE); }
   "parameter"     { return newSymbol(Terminals.PARAMETER); }
   "constant"      { return newSymbol(Terminals.CONSTANT); }
@@ -194,20 +194,14 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   "equation"      { return newSymbol(Terminals.EQUATION); }
   "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
-  
+
   "initial" {WhiteSpace} "equation"   { addWhiteSpaces(yytext()); 
 	  									addLineBreaks(yytext()); 
   	                                    return newSymbol(Terminals.INITIAL_EQUATION); }
   "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
   										addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
-  "operator" {WhiteSpace} "record"  { addWhiteSpaces(yytext());
-  										addLineBreaks(yytext());
-                                        return newSymbol(Terminals.RECORD); }
-  "operator" {WhiteSpace} "function"  { addWhiteSpaces(yytext());
-  										addLineBreaks(yytext()); 
-                                        return newSymbol(Terminals.FUNCTION); }
-                                        
+
   "end" {WhiteSpace} "for"    { String s = yytext();
                                 addWhiteSpaces(s);
 	  							addLineBreaks(s); 
@@ -261,7 +255,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
   "when"          { return newSymbol(Terminals.WHEN); }
   "elsewhen"      { return newSymbol(Terminals.ELSEWHEN); }
-	
+
   "break"         { return newSymbol(Terminals.BREAK); }
   "return"        { return newSymbol(Terminals.RETURN); }
  
@@ -269,7 +263,6 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "time"          { return newSymbol(Terminals.TIME); }
   "der"           { return newSymbol(Terminals.DER); }
  
-  
   
   "("             { return newSymbol(Terminals.LPAREN); }
   ")"             { return newSymbol(Terminals.RPAREN); }
@@ -281,7 +274,6 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ":"             { return newSymbol(Terminals.COLON); }
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
-
 
   "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
                     return newSymbol(Terminals.PLUS); }  

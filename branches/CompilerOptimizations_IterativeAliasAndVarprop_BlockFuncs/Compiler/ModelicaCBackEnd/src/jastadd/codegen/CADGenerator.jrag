@@ -68,7 +68,7 @@ public class CADGenerator extends CGenerator {
 			super("C_DAE_equation_directional_derivative", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			int i = 0;
 			if (shouldGenerateDAEJacobians(fclass)) {
 				for (FAbstractEquation e : fclass.equations()) {
@@ -96,7 +96,7 @@ public class CADGenerator extends CGenerator {
 		}
 		// Function calls might appear in dae_dir_df, in model_ode_derivatives or in blocks and should
 		// therefore be generated if one of them is true. 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateDAEJacobians(fclass) || shouldGenerateODEJacobians(fclass) || shouldGenerateBlockJacobians(fclass)){
 				for (FFunctionDecl func : fclass.getFFunctionDecls()){
 					func.genHeader_CAD(genPrinter, "");
@@ -115,7 +115,7 @@ public class CADGenerator extends CGenerator {
 		}
 		// Function calls might appear in dae_dir_df, in model_ode_derivatives or in blocks and should
 		// therefore be generated if one of them is true. 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateDAEJacobians(fclass) || shouldGenerateODEJacobians(fclass) || shouldGenerateBlockJacobians(fclass)){
 				for (FFunctionDecl func : fclass.getFFunctionDecls()){
 					func.prettyPrint_CAD(genPrinter, "");
@@ -133,7 +133,7 @@ public class CADGenerator extends CGenerator {
 			super("CAD_dae_blocks_residual_functions", myGenerator, fclass);
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
@@ -152,7 +152,7 @@ public class CADGenerator extends CGenerator {
 			super("CAD_dae_init_blocks_residual_functions", myGenerator, fclass);
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if ( shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
@@ -173,11 +173,11 @@ public class CADGenerator extends CGenerator {
 			super("CAD_dae_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-					block.genBlockAddCall_C(true, false, ASTNode.printer_CAD.indent(""), genPrinter);
+					block.genBlockAddCall_C(true, false, ASTNode.printer_CAD.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
 			}
 		}
 	}
@@ -191,11 +191,11 @@ public class CADGenerator extends CGenerator {
 			super("CAD_dae_init_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-					block.genBlockAddCall_C(true, true, ASTNode.printer_CAD.indent(""), genPrinter);
+					block.genBlockAddCall_C(true, true, ASTNode.printer_CAD.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
 			}
 		}
 	}
@@ -211,7 +211,7 @@ public class CADGenerator extends CGenerator {
             addOptions("!generate_only_initial_system");
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateODEJacobians(fclass)) {
 				genPrinter.print("\n/******** Declarations *******/\n");
 				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
@@ -230,7 +230,7 @@ public class CADGenerator extends CGenerator {
 			super("C_DAE_ODE_jacobian_sparsity", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateODEJacobians(fclass)) {
 			    
 			    int A_n_nz = 0;
@@ -437,7 +437,7 @@ public class CADGenerator extends CGenerator {
 			super("C_DAE_equation_sparsity", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateDAEJacobians(fclass)) {
 			    
 			    int dae_n_nz = fclass.freeParametersEquationSparsity_n_nz()+

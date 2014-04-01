@@ -101,56 +101,58 @@ aspect BLT{
 			
 		}
 
-		/**
-		 * This method takes as input a set of Eq objects corresponeing to
-		 * a BLT block. First the, the Eq objects are grouped using
-		 * groupComponent to simplify the analysis. Then, if there is
-		 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
-		 * a real or mixed equation block is created.
-		 */
-		public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean useTearing, boolean useHGT, int blockNumber) {
-			
-			SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
-			if (seb != null) {
-				if (seb.equation().hasResidual() && seb.equation().getResidual().hasIterationVariable())
-					seb.equation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getResidual().getIterationVariable().name() + ". Equation: " + seb.equation());
-				if (seb.isSolvable())
-					return seb;
-			}
-			
-			Collection<Eq> realEquations = new ArrayList<Eq>();
-			Collection<Eq> nonRealEquations = new ArrayList<Eq>();
-			
-			// Check if an equation block is mixed, i.e., contains both continous
-			// and discrete variables, and if it is linear in the unknowns
-			Set<FVariable> activeVariables = new HashSet<FVariable>();
-			for (Eq e : component)
-				activeVariables.add(e.getMatching().getVariable());
-			
-			boolean linear = true;
-			for (Eq e : component) {
-				if (e.getEquation().isReal()) {
-				    realEquations.add(e);
-				    linear = linear && e.getEquation().checkLinearity(activeVariables);
-				} else {
-				    nonRealEquations.add(e);
-				}
-			}
-
-			EquationBlock block = null;
-			if ((useTearing || useHGT) && realEquations.size() > 1) {
-			    TornEquationBlock tornBlock = tear(realEquations, useTearing, useHGT, blockNumber);
-			    if (!tornBlock.solvedBlocks().isEmpty())
-			        block = tornBlock;
-			}
-			if (block == null)
-				block = new EquationBlock(createSimpleBlocks(groupComponent(realEquations)));
-			
-			block.addNonRealBlocks(createSimpleBlocks(groupComponent(nonRealEquations)));
-			if (linear)
-			    block.computeJacobian();
-			return block;
-		}
+        /**
+         * This method takes as input a set of Eq objects corresponeing to
+         * a BLT block. First the, the Eq objects are grouped using
+         * groupComponent to simplify the analysis. Then, if there is
+         * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
+         * a real or mixed equation block is created.
+         */
+        public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean useTearing, boolean useHGT, int blockNumber) {
+            
+            SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
+            if (seb != null) {
+                if (useHGT && seb.equation().isHGTPairedResidual())
+                    seb.equation().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getHGTIterationVariable().name() + ". Equation: " + seb.equation());
+                if (seb.isSolvable())
+                    return seb;
+            }
+            
+            Collection<Eq> realEquations = new ArrayList<Eq>();
+            Collection<Eq> nonRealEquations = new ArrayList<Eq>();
+            
+            // Check if an equation block is mixed, i.e., contains both continous
+            // and discrete variables, and if it is linear in the unknowns
+            Set<FVariable> activeVariables = new HashSet<FVariable>();
+            for (Eq e : component)
+                activeVariables.add(e.getMatching().getVariable());
+            
+            boolean linear = true;
+            for (Eq e : component) {
+                if (e.getEquation().isReal()) {
+                    realEquations.add(e);
+                    linear = linear && e.getEquation().checkLinearity(activeVariables);
+                } else {
+                    nonRealEquations.add(e);
+                }
+            }
+            
+            EquationBlock block = null;
+            if ((useTearing || useHGT) && realEquations.size() > 1) {
+                TornEquationBlock tornBlock = tear(component, useTearing, useHGT, blockNumber);
+                if (!tornBlock.solvedRealBlocks().isEmpty())
+                    block = tornBlock;
+            }
+            if (block == null) {
+                BiPGraph g = new BiPGraph(nonRealEquations);
+                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks();
+                block = new EquationBlock(nonRealBlocks, createSimpleBlocks(groupComponent(realEquations)));
+            }
+            
+            if (linear)
+                block.computeJacobian();
+            return block;
+        }
 		
 		public static Collection<SimpleEquationBlock> createSimpleBlocks(Collection<Collection<Eq>> eqs) {
 			Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
@@ -166,120 +168,6 @@ aspect BLT{
 			else
 				tear(block, eb);
 			return eb;
-		}
-		
-		private static void tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing, int blockNumber) throws BLTException {
-			boolean recalculateMatchings = false;
-			Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
-			for (Eq e : block) {
-				varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
-			}
-			Iterator<Eq> it = block.iterator();
-			Collection<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
-			Collection<Var> unmatchedHGTVariables = new ArrayList<Var>();
-			for (Eq eqn : block) {
-				if (eqn.getEquation().hasResidual() && !eqn.getEquation().getResidual().hasIterationVariable())
-					unmatchedHGTEquations.add(eqn);
-			}
-			for (Var var : varsInBlock.values()) {
-				if (var.getVariable().isHGTVarComponent())
-					unmatchedHGTVariables.add(var);
-			}
-			if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
-				Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
-				Iterator<Var> varIt = unmatchedHGTVariables.iterator();
-				while (eqnIt.hasNext() && varIt.hasNext()) {
-					Eq eqn = eqnIt.next();
-					Var var = varIt.next();
-					eqn.getEquation().getResidual().setIterationVariable(new FIdUse(var.getName()));
-					var.getVariable().setHGTAsPair();
-				}
-			} else {
-				StringBuilder sb = new StringBuilder();
-				sb.append("Unable to apply hand-guided tearing selections on block " + blockNumber + ". The number of unmatched hand guided equations and variables are not equal.\n");
-				sb.append("  Unmatched hand guided equations(" + unmatchedHGTEquations.size() + "):\n");
-				for (Eq eqn : unmatchedHGTEquations)
-					sb.append("    " + eqn.getEquation() + "\n");
-				sb.append("\n");
-				sb.append("  Unmatched hand guided variables(" + unmatchedHGTVariables.size() + "):\n");
-				for (Var var : unmatchedHGTVariables)
-					sb.append("    " + var.getName() + "\n");
-				throw new BLTException(sb.toString());
-			}
-			while (it.hasNext()) {
-				Eq e = it.next();
-				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
-					FVariable fIterVar = e.getEquation().getResidual().iterationVariable();
-					Var iterVar = varsInBlock.get(fIterVar);
-					if (iterVar == null) {
-						e.getEquation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: " + fIterVar.name() + ". Equation: " + e.getEquation());
-						continue;
-					}
-					it.remove();
-					varsInBlock.remove(fIterVar);
-					recalculateMatchings = true;
-					ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), iterVar.getVariable().name());
-					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, iterVar));
-				}
-			}
-			if (recalculateMatchings) {
-				BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
-				newGraph.maximumMatching(true);
-				Collection<Eq> unmatchedEquations = newGraph.getUnmatchedEquations();
-				Collection<Var> unmatchedVariables = newGraph.getUnmatchedVariables();
-				if (unmatchedEquations.size() > 0 || unmatchedVariables.size() > 0) {
-					ASTNode.log.info("Unmatched equations and variables in block after hand guided, adding them as tearing pairs!");
-					Iterator<Eq> eIt = unmatchedEquations.iterator();
-					Iterator<Var> vIt = unmatchedVariables.iterator();
-					while (eIt.hasNext() && vIt.hasNext()) {
-						Eq e = eIt.next();
-						Var v = vIt.next();
-						ASTNode.log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
-						newGraph.removeEquation(e);
-						newGraph.removeVariable(v);
-						eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
-					}
-					if (eIt.hasNext() || vIt.hasNext()) {
-						StringBuilder sb = new StringBuilder();
-						sb.append("Hand guided tearing selections in block " + blockNumber + " results in a structurally singular block.\n");
-						if (eIt.hasNext()) {
-							sb.append("  The follwowing equation(s) could not be matched to any variable:\n");
-								while (eIt.hasNext())
-									sb.append("    " + eIt.next().getEquation());
-						}
-						if (vIt.hasNext()) {
-							sb.append("  The following varible(s) could not be matched to any equation:\n");
-							while (vIt.hasNext())
-								sb.append("    " + vIt.next().getVariable().name());
-						}
-						throw new BLTException(sb.toString());
-					}
-				}
-				Collection<Collection<Eq>> innerBLT = newGraph.tarjan(false);
-				boolean allInnerAreSolved = true;
-				Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-				for (Collection<Eq> innerBlock : innerBLT) {
-					SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
-					if (seb != null && seb.isSolvable()) {
-						solvedBlocks.add(seb);
-					} else {
-						allInnerAreSolved = false;
-						break;
-					}
-				}
-				if (allInnerAreSolved) {
-					ASTNode.log.info("Remaining system is solvable.");
-					for (SimpleEquationBlock seb : solvedBlocks)
-						eb.addSolvedBlock(seb);
-					return;
-				} else if (!useTearing) {
-					throw new BLTException("Hand guided tearing selections in block " + blockNumber + " does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
-				}
-				block = new ArrayList<Eq>();
-				block.addAll(newGraph.getEquations());
-				ASTNode.log.info("Additional tearing is needed, continuing with automatic tearing.");
-			}
-			tear(block, eb);
 		}
 		
 		private static void tear(Collection<Eq> block, TornEquationBlock eb) {
@@ -510,10 +398,10 @@ aspect BLT{
 	
 	public class BiPGraph{}
 	
-	public BLT BiPGraph.computeBLT(OptionRegistry options) {
-		return computeBLT(options.getBooleanOption("merge_blt_blocks"),
+	public BLT BiPGraph.computeBLT(OptionRegistry options, boolean duringInteractiveFMU) {
+		return computeBLT(options.getBooleanOption("merge_blt_blocks") && !duringInteractiveFMU,
 				options.getBooleanOption("automatic_tearing"),
-				options.getBooleanOption("hand_guided_tearing"));
+				options.getBooleanOption("hand_guided_tearing") && !duringInteractiveFMU);
 	}
 	
 	public BLT BiPGraph.computeBLT(boolean mergeBLT, boolean useTearing, boolean useHGT) {
@@ -530,6 +418,31 @@ aspect BLT{
 		}
 	}
 	
+    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks() {
+        Collection<Collection<Eq>> components = tarjan(false);
+        Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+        for (Collection<Eq> component : components) {
+            SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, true);
+            if (block == null) {
+                StringBuffer sb = new StringBuffer();
+                sb.append("Non-real equations contains an algebraic loop:");
+                for (Eq e : component) {
+                    sb.append("\n");
+                    sb.append(e.getEquation());
+                }
+                throw new BLTException(sb.toString());
+            } else if (!block.isSolvable()) {
+                Eq e = component.iterator().next();
+                StringBuffer sb = new StringBuffer();
+                sb.append("Unable to solve variable '" + e.getMatching().getName() + "' from equation:\n");
+                sb.append(e.getEquation());
+                throw new BLTException(sb.toString());
+        }
+            blocks.add(block);
+        }
+        return blocks;
+    }
+    
 	public class BLT extends ArrayList<AbstractEquationBlock> {
 		
 		public ArrayList<Integer> unsolvedBlockSizes() {
@@ -546,7 +459,7 @@ aspect BLT{
 			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
 			for (AbstractEquationBlock b : this) {
 				if (!b.isSolvable()) {
-					blockSizes.add(new Integer(b.iterationVariables().size()));
+					blockSizes.add(new Integer(b.unsolvedVariables().size()));
 				}		
 			}
 			return blockSizes;
@@ -569,14 +482,14 @@ aspect BLT{
 		}
 		
 		public void writeIterationVariablesToFile(File file) throws FileNotFoundException {
-			PrintStream out = new PrintStream(file);
+			CodeStream out = new CodeStream(file);
 			for (AbstractEquationBlock block : this)
 				block.printIterationVariables(out);
 			out.close();
 		}
 		
 		public void writeTearingPairsToFile(File file) throws FileNotFoundException {
-			PrintStream out = new PrintStream(file);
+			CodeStream out = new CodeStream(file);
 			int count = 0;
 			for (AbstractEquationBlock block : this)
 				block.printTearingPairs(out, count++);
@@ -600,9 +513,9 @@ aspect BLT{
 			}
 		}
 		
-		public void checkStartValues() {
+		public void errorCheck() {
 		    for (AbstractEquationBlock block : this)
-		        block.checkStartValues();
+		        block.errorCheck();
 		}
 
 	}
@@ -912,7 +825,7 @@ aspect BLT{
          * 
          * @return Collection<FAbstractEquation> all unsolved real equations
          */
-        public abstract Collection<FAbstractEquation> residualEquations();
+        public abstract Collection<FAbstractEquation> unsolvedEquations();
 
         /**
          * Returns all variables in this block.
@@ -945,7 +858,7 @@ aspect BLT{
          * 
          * @return Collection<FVariable> all unsolved real variables
          */
-        public abstract Collection<FVariable> iterationVariables();
+        public abstract Collection<FVariable> unsolvedVariables();
 
 		public FTypePrefixVariability variability() {
 			return FContinuous.instance;
@@ -1061,22 +974,22 @@ aspect BLT{
 		
 		public final String toString() {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			prettyPrint(new NotNullPrintStream(os));
+			prettyPrint(new NotNullCodeStream(os));
 			return os.toString();
 		}
 		
-		public abstract void prettyPrint(PrintStream str);
+		public abstract void prettyPrint(CodeStream str);
 		
 		/**
 		 * This method is call on blocks that are used in iterations. This
 		 * method should check the start values of its variable and verify
 		 * that a start value is set.
 		 */
-		public abstract void checkStartValues();
+		public abstract void errorCheck();
 		
-		protected void printIterationVariables(PrintStream str) {}
+		protected void printIterationVariables(CodeStream str) {}
 		
-		protected void printTearingPairs(PrintStream str, int blockNumber) {}
+		protected void printTearingPairs(CodeStream str, int blockNumber) {}
 		
         protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
             FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
@@ -1151,21 +1064,34 @@ aspect BLT{
     public class EquationBlock extends AbstractEquationBlock {
 
         private Collection<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
-        private Collection<SimpleEquationBlock> nonRealBlocks = new ArrayList<SimpleEquationBlock>();
+        private Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+        private Collection<SimpleEquationBlock> realBlocks_cache = null;
+        private Collection<SimpleEquationBlock> nonRealBlocks_cache = null;
+        private Collection<SimpleEquationBlock> solvedRealBlocks_cache = null;
         private FExp[][] jacobian = null;
         private FTypePrefixVariability variability = FContinuous.instance;
 
-        public EquationBlock(Collection<SimpleEquationBlock> unsolvedBlocks) {
+        protected EquationBlock() {}
+        
+        public EquationBlock(Collection<SimpleEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
+            this.solvedBlocks.addAll(solvedBlocks);
             this.unsolvedBlocks.addAll(unsolvedBlocks);
         }
-
+        
+        private void resetCache() {
+            realBlocks_cache = null;
+            nonRealBlocks_cache = null;
+            solvedRealBlocks_cache = null;
+        }
+        
         /**
-         * Addas a list of non-real blocks to the list of non-real blocks in this block.
+         * Addas a solved block to the list of solved blocks in this block.
          * 
-         * @param blocks A list of non-real blocks to add
+         * @param block Block to add to the list of solved blocks
          */
-        public void addNonRealBlocks(Collection<SimpleEquationBlock> blocks) {
-            nonRealBlocks.addAll(blocks);
+        public void addSolvedBlock(SimpleEquationBlock block) {
+            solvedBlocks.add(block);
+            resetCache();
         }
 
         /**
@@ -1175,6 +1101,7 @@ aspect BLT{
          */
         protected void addUnsolvedBlock(SimpleEquationBlock block) {
             unsolvedBlocks.add(block);
+            resetCache();
         }
 
         /**
@@ -1187,12 +1114,63 @@ aspect BLT{
         }
 
         /**
+         * Returns all solved blocks in this block.
+         * 
+         * @return Collection<FAbstractEquation> all solved blocks
+         */
+        public Collection<SimpleEquationBlock> solvedBlocks() {
+            return solvedBlocks;
+        }
+
+        /**
+         * Returns all real blocks in this block.
+         * 
+         * @return Collection<FAbstractEquation> all real blocks
+         */
+        public Collection<SimpleEquationBlock> realBlocks() {
+            if (realBlocks_cache == null) {
+                realBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (SimpleEquationBlock block : solvedBlocks())
+                    if (block.isReal())
+                        realBlocks_cache.add(block);
+                for (SimpleEquationBlock block : unsolvedBlocks())
+                    if (block.isReal())
+                        realBlocks_cache.add(block);
+            }
+            return realBlocks_cache;
+        }
+
+        /**
          * Returns all non-real blocks in this block.
          * 
          * @return Collection<FAbstractEquation> all non-real blocks
          */
         public Collection<SimpleEquationBlock> nonRealBlocks() {
-            return nonRealBlocks;
+            if (nonRealBlocks_cache == null) {
+                nonRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (SimpleEquationBlock block : solvedBlocks())
+                    if (!block.isReal())
+                        nonRealBlocks_cache.add(block);
+                for (SimpleEquationBlock block : unsolvedBlocks())
+                    if (!block.isReal())
+                        nonRealBlocks_cache.add(block);
+            }
+            return nonRealBlocks_cache;
+        }
+
+        /**
+         * Returns all solved real blocks in this block.
+         * 
+         * @return Collection<FAbstractEquation> all solved real blocks
+         */
+        public Collection<SimpleEquationBlock> solvedRealBlocks() {
+            if (solvedRealBlocks_cache == null) {
+                solvedRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (SimpleEquationBlock block : solvedBlocks())
+                    if (block.isReal())
+                        solvedRealBlocks_cache.add(block);
+            }
+            return solvedRealBlocks_cache;
         }
 
         /**
@@ -1229,7 +1207,7 @@ aspect BLT{
          * @return boolean True if contains non-real blocks
          */
         public boolean isMixed() {
-            return !nonRealBlocks.isEmpty();
+            return !nonRealBlocks().isEmpty();
         }
 
         /**
@@ -1249,7 +1227,7 @@ aspect BLT{
          */
         @Override
         public Collection<FVariable> realVariables() {
-            return iterationVariables();
+            return collectVariables(realBlocks());
         }
 
         /**
@@ -1263,12 +1241,21 @@ aspect BLT{
         }
 
         /**
+         * Returns all variables in this block that are solved.
+         * 
+         * @return Collection<FVariable> all solved variables
+         */
+        public Collection<FVariable> solvedVariables() {
+            return collectVariables(solvedBlocks());
+        }
+
+        /**
          * Returns all variables in this block that are of type real and is unsolved.
          * 
          * @return Collection<FVariable> all unsolved real variables
          */
         @Override
-        public Collection<FVariable> iterationVariables() {
+        public Collection<FVariable> unsolvedVariables() {
             return collectVariables(unsolvedBlocks());
         }
 
@@ -1279,7 +1266,7 @@ aspect BLT{
          */
         @Override
         public Collection<FAbstractEquation> realEquations() {
-            return residualEquations();
+            return collectEquations(realBlocks());
         }
 
         /**
@@ -1291,6 +1278,15 @@ aspect BLT{
         public Collection<FAbstractEquation> nonRealEquations() {
             return collectEquations(nonRealBlocks());
         }
+        /**
+         * Returns all equations in this block that are solved.
+         * 
+         * @return Collection<FAbstractEquation> all solved equations
+         */
+        public Collection<FAbstractEquation> solvedEquations() {
+            return collectEquations(solvedBlocks());
+        }
+
 
         /**
          * Returns all equations in this block that are of type real and is unsolved.
@@ -1298,7 +1294,7 @@ aspect BLT{
          * @return Collection<FAbstractEquation> all unsolved real equations
          */
         @Override
-        public Collection<FAbstractEquation> residualEquations() {
+        public Collection<FAbstractEquation> unsolvedEquations() {
             return collectEquations(unsolvedBlocks());
         }
 
@@ -1308,15 +1304,20 @@ aspect BLT{
         }
 
         @Override
-        public void checkStartValues() {
+        public void errorCheck() {
+            for (SimpleEquationBlock seb : unsolvedBlocks)
+                if (!seb.isReal())
+                    seb.equation().error("Non-real equation used as residual:\n" + seb.equation());
             if (isLinear())
                 return;
+            for (SimpleEquationBlock seb : solvedBlocks()) // Local iterations.
+                seb.errorCheck();
             for (SimpleEquationBlock seb : unsolvedBlocks)
-                seb.checkStartValues();
+                seb.errorCheck();
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             prettyPrint_typeStr(str);
             prettyPrint_mixedStr(str);
             prettyPrint_linearStr(str);
@@ -1330,7 +1331,7 @@ aspect BLT{
             for (SimpleEquationBlock seb : unsolvedBlocks())
                 seb.prettyPrintActiveVariables(str, !isLinear());
             if (isMixed()) {
-                str.println("Unknown discrete variables:");
+                str.println("Solved discrete variables:");
                 for (SimpleEquationBlock seb : nonRealBlocks())
                     seb.prettyPrintActiveVariables(str);
             }
@@ -1357,42 +1358,42 @@ aspect BLT{
             }
         }
 
-        protected void prettyPrint_beforeVariablesStr(PrintStream str) {}
+        protected void prettyPrint_beforeVariablesStr(CodeStream str) {}
 
-        protected void prettyPrint_beforeEquationsStr(PrintStream str) {}
+        protected void prettyPrint_beforeEquationsStr(CodeStream str) {}
 
-        protected void prettyPrint_typeStr(PrintStream str) {
+        protected void prettyPrint_typeStr(CodeStream str) {
             str.print("Non-solved");
         }
 
-        protected void prettyPrint_mixedStr(PrintStream str) {
+        protected void prettyPrint_mixedStr(CodeStream str) {
             if (isMixed())
                 str.print(" mixed");
         }
 
-        protected void prettyPrint_linearStr(PrintStream str) {
+        protected void prettyPrint_linearStr(CodeStream str) {
             if (isLinear())
                 str.print(" linear");
         }
 
-        protected void prettyPrint_numVarStr(PrintStream str) {
+        protected void prettyPrint_numVarStr(CodeStream str) {
             str.print(allVariables().size() + " variables");
         }
 
-        protected void prettyPrint_unsolvedVariablesStr(PrintStream str) {
+        protected void prettyPrint_unsolvedVariablesStr(CodeStream str) {
             if (isMixed())
                 str.println("Unknown continuous variables:");
             else
                 str.println("Unknown variables:");
         }
 
-        protected void prettyPrint_unsolvedEquationsStr(PrintStream str) {
+        protected void prettyPrint_unsolvedEquationsStr(CodeStream str) {
             if (isMixed())
                 str.println("Continuous equations:");
             else
                 str.println("Equations:");
         }
-        protected void prettyPrint_unsolvedVar(PrintStream str, SimpleEquationBlock block) {
+        protected void prettyPrint_unsolvedVar(CodeStream str, SimpleEquationBlock block) {
             block.prettyPrintEquation(str);
         }
     }
@@ -1401,128 +1402,63 @@ aspect BLT{
      * TornEquationBlock represents an equation block resulting from tearing.
      */
     public class TornEquationBlock extends EquationBlock {
-        private java.util.List<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
 
-        public TornEquationBlock() {
-            super(Collections.<SimpleEquationBlock>emptyList());
-        }
+        public TornEquationBlock() {}
 
-        /**
-         * Adds a solved block to this torn block.
-         * 
-         * @param block Block to add to the list of solved blocks
-         */
-        public void addSolvedBlock(SimpleEquationBlock seb) {
-            solvedBlocks.add(seb);
-        }
-
-        /**
-         * Returns all solved blocks in this block.
-         * 
-         * @return Collection<FAbstractEquation> all solved blocks
-         */
-        public Collection<SimpleEquationBlock> solvedBlocks() {
-            return solvedBlocks;
-        }
-
-        /**
-         * Adds an unsolved block to this torn block.
-         * 
-         * @param block Block to add to the list of unsolved blocks
-         */
-        public void addUnsolvedBlock(SimpleEquationBlock block) {
-            super.addUnsolvedBlock(block);
-        }
-
-        @Override
-        public Collection<FVariable> realVariables() {
-            return collectVariables(solvedBlocks, unsolvedBlocks());
-        }
-
-        @Override
-        public Collection<FAbstractEquation> realEquations() {
-            return collectEquations(solvedBlocks, unsolvedBlocks());
-        }
-
-        /**
-         * Returns all variables in this block that are solved.
-         * 
-         * @return Collection<FAbstractEquation> all solved variables
-         */
-        public Collection<FVariable> solvedVariables() {
-            return collectVariables(solvedBlocks());
-        }
-
-        /**
-         * Returns all equations in this block that are solved.
-         * 
-         * @return Collection<FAbstractEquation> all solved equations
-         */
-        public Collection<FAbstractEquation> solvedEquations() {
-            return collectEquations(solvedBlocks());
-        }
-
-        @Override
-        public void checkStartValues() {
-            super.checkStartValues();
-            for (SimpleEquationBlock seb : solvedBlocks())
-                seb.checkStartValues();
-        }
-
-        protected void prettyPrint_typeStr(PrintStream str) {
+        protected void prettyPrint_typeStr(CodeStream str) {
             str.print("Torn");
         }
 
         @Override
-        protected void prettyPrint_beforeVariablesStr(PrintStream str) {
+        protected void prettyPrint_beforeVariablesStr(CodeStream str) {
             str.println("Solved variables:");
-            for (SimpleEquationBlock seb : solvedBlocks())
+            for (SimpleEquationBlock seb : solvedRealBlocks())
                 seb.prettyPrintActiveVariables(str);
         }
 
         @Override
-        protected void prettyPrint_beforeEquationsStr(PrintStream str) {
+        protected void prettyPrint_beforeEquationsStr(CodeStream str) {
             str.println("Solved equations:");
-            for (SimpleEquationBlock seb : solvedBlocks()) {
+            for (SimpleEquationBlock seb : solvedRealBlocks()) {
                 seb.prettyPrintIterationVariables(str);
                 seb.prettyPrintEquation(str);
            }
         }
 
         @Override
-        protected void prettyPrint_numVarStr(PrintStream str) {
-            str.print((iterationVariables().size() + nonRealVariables().size()) + " iteration variables and " + solvedVariables().size() + " solved variables");
+        protected void prettyPrint_numVarStr(CodeStream str) {
+            str.print(unsolvedVariables().size() + " iteration variables and " + solvedVariables().size() + " solved variables");
         }
 
         @Override
-        protected void prettyPrint_unsolvedVariablesStr(PrintStream str) {
+        protected void prettyPrint_unsolvedVariablesStr(CodeStream str) {
             str.println("Iteration variables:");
         }
 
         @Override
-        protected void prettyPrint_unsolvedEquationsStr(PrintStream str) {
+        protected void prettyPrint_unsolvedEquationsStr(CodeStream str) {
             str.println("Residual equations:");
         }
 
         @Override
-        protected void prettyPrint_unsolvedVar(PrintStream str, SimpleEquationBlock block) {
+        protected void prettyPrint_unsolvedVar(CodeStream str, SimpleEquationBlock block) {
             block.prettyPrintIterationVariables(str);
             block.prettyPrintEquation(str);
         }
 
         @Override
-        protected void printIterationVariables(PrintStream str) {
-            for (FVariable var : iterationVariables())
+        protected void printIterationVariables(CodeStream str) {
+            for (FVariable var : unsolvedVariables())
                 str.println(var.name());
         }
 
         @Override
-        protected void printTearingPairs(PrintStream str, int blockNumber) {
+        protected void printTearingPairs(CodeStream str, int blockNumber) {
             int counter = 0;
             str.println("In block #" + blockNumber);
             for (SimpleEquationBlock block : unsolvedBlocks()) {
-                boolean equationHasHGT = block.equation().hasResidual();
-                FVariable iterVar = (equationHasHGT) ? block.equation().getResidual().iterationVariable() : null;
+                boolean equationHasHGT = block.equation().isHGTResidual();
+                FVariable iterVar = block.equation().getHGTIterationVariable();
                 for (FVariable var : block.allVariables()) {
                     boolean variableHasHGT = var.isHGTVarComponent() || var == iterVar;
                     str.print(" (");
@@ -1534,7 +1470,7 @@ aspect BLT{
                     str.print(equationHasHGT ? 'M' : 'A');
                     str.print(") " + block.equation().toString()); 
                     if (block.equation().hasNominal())
-                        str.print("    (Nominal=" + block.equation().getNominal().getValue() + ")");
+                        str.print("    (Nominal=" + block.equation().getNominal() + ")");
                     str.println();
                 }
                 str.println();
@@ -1558,6 +1494,10 @@ aspect BLT{
 		public FAbstractEquation equation() {
 			return equation;
 		}
+		
+		public boolean isReal() {
+		    return equation().isReal();
+		}
 
 		@Override
 		public Collection<FAbstractEquation> allEquations() {
@@ -1566,7 +1506,7 @@ aspect BLT{
 
         @Override
         public Collection<FAbstractEquation> realEquations() {
-            if (equation().isReal())
+            if (isReal())
                 return allEquations();
             else
                 return Collections.emptyList();
@@ -1574,14 +1514,14 @@ aspect BLT{
 
         @Override
         public Collection<FAbstractEquation> nonRealEquations() {
-            if (equation().isReal())
+            if (isReal())
                 return Collections.emptyList();
             else
                 return allEquations();
         }
 
         @Override
-        public Collection<FAbstractEquation> residualEquations() {
+        public Collection<FAbstractEquation> unsolvedEquations() {
             if (isSolvable())
                 return Collections.emptyList();
             else
@@ -1590,7 +1530,7 @@ aspect BLT{
 
         @Override
         public Collection<FVariable> realVariables() {
-            if (equation().isReal())
+            if (isReal())
                 return allVariables();
             else
                 return Collections.emptyList();
@@ -1598,21 +1538,21 @@ aspect BLT{
 
         @Override
         public Collection<FVariable> nonRealVariables() {
-            if (equation().isReal())
+            if (isReal())
                 return Collections.emptyList();
             else
                 return allVariables();
         }
 
         @Override
-        public Collection<FVariable> iterationVariables() {
+        public Collection<FVariable> unsolvedVariables() {
             if (isSolvable())
                 return Collections.emptyList();
             else
                 return allVariables();
         }
 
-        public void prettyPrintActiveVariables(PrintStream str) {
+        public void prettyPrintActiveVariables(CodeStream str) {
             prettyPrintActiveVariables(str, false);
         }
 
@@ -1621,9 +1561,9 @@ aspect BLT{
         }
 
         @Override
-		public void checkStartValues() {}
+		public void errorCheck() {}
 
-		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+		public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
 			for (FVariable fv : allVariables()) {
 				str.print("  " + fv.name());
 				if (printAttributes) {
@@ -1635,20 +1575,20 @@ aspect BLT{
 			}
 		}
 		
-		public void prettyPrintEquation(PrintStream str) {
+		public void prettyPrintEquation(CodeStream str) {
 			str.print("  " + equation());
 			if (equation().hasNominal())
-				str.print("    (Nominal=" + equation().getNominal().getValue() + ")");
+				str.print("    (Nominal=" + equation().getNominal() + ")");
 			str.println();
 		}
 		
 		
-		public void prettyPrintIterationVariables(PrintStream str) {
+		public void prettyPrintIterationVariables(CodeStream str) {
 			if (!isSolvable())
 				doPrettyPrintIterationVariables(str);
 		}
 		
-		public void doPrettyPrintIterationVariables(PrintStream str) {
+		public void doPrettyPrintIterationVariables(CodeStream str) {
 			boolean first = true;
 			for (FVariable var : allVariables()) {
 				if (first)
@@ -1689,7 +1629,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Meta equation block:");
 			str.println("Equation:");
 			prettyPrintEquation(str);
@@ -1740,7 +1680,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Solved block of 1 variables:");
 			str.println("Computed variable:");
 			prettyPrintActiveVariables(str);
@@ -1760,7 +1700,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void checkStartValues() {
+		public void errorCheck() {
 			fv.warnStartAttributeNotSet();
 		}
 
@@ -1770,7 +1710,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Non-solved block of 1 variables:");
 			str.println("Unknown variables:");
 			prettyPrintActiveVariables(str);
@@ -1790,7 +1730,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void checkStartValues() {
+		public void errorCheck() {
 			fv.warnStartAttributeNotSet();
 		}
 
@@ -1800,26 +1740,26 @@ aspect BLT{
 		}
 
         @Override
-        public Collection<FAbstractEquation> residualEquations() {
+        public Collection<FAbstractEquation> unsolvedEquations() {
             return allEquations();
         }
         
         @Override
-        public Collection<FVariable> iterationVariables() {
+        public Collection<FVariable> unsolvedVariables() {
             return allVariables();
         }
 		@Override
-		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+		public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
 			super.prettyPrintActiveVariables(str, true);
 		}
 
 		@Override
-		public void prettyPrintIterationVariables(PrintStream str) {
+		public void prettyPrintIterationVariables(CodeStream str) {
 			doPrettyPrintIterationVariables(str);
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Numerically solved block of 1 variables:");
 			str.println("Computed variable:");
 			prettyPrintActiveVariables(str);
@@ -1860,7 +1800,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             str.print(isSolvable() ? "Solved" : "Non-solved");
             str.println(" block of " + allVariables().size() + " variables:");
             str.println("Unknown variables:");
@@ -1897,7 +1837,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void checkStartValues() {
+		public void errorCheck() {
 			for (FVariable var : activeVars)
 				var.warnStartAttributeNotSet();
 		}
@@ -1944,7 +1884,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             String prefix = isSolvable() ? "Solved" : "Non-solved";
             str.format("%s algorithm block of %d variables:\n", prefix, allVariables().size());
             str.println("Unknown variables:");
@@ -2022,7 +1962,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             String prefix = isSolvable() ? "Solved" : "Non-solved";
             str.format("%s if equation block of %d variables:\n", prefix, allVariables().size());
             str.println("Unknown variables:");

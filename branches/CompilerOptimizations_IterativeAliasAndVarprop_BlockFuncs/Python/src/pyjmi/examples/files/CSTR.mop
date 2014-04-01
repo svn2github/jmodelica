@@ -78,12 +78,11 @@ optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_re
                       finalTime=150)
  
   input Real u(start = 350,initialGuess=350,min=230,max=370)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300, max=350),Tc(initialGuess=350),
-            c_init=956.271065,T_init=250.051971);
+  CSTR cstr(c(initialGuess=300),T(initialGuess=300, max=350),Tc(initialGuess=350));
 
-  parameter Real c_ref = 338.775766;
-  parameter Real T_ref = 280.099198;
-  parameter Real Tc_ref = 280;
+  parameter Real c_ref = 500;
+  parameter Real T_ref = 320;
+  parameter Real Tc_ref = 300;
   parameter Real q_c = 1;
   parameter Real q_T = 1;
   parameter Real q_Tc = 1;

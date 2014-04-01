@@ -85,7 +85,7 @@ abstract public class TestAnnotationizerHelper {
      */
     public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
         try {
-            SourceRoot root = parse(filePath, modelName, new OptionRegistry());
+            SourceRoot root = parse(filePath, modelName, ModelicaCompiler.createOptions());
             ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
             if (cd.isUnknown()) {
                 System.err.println("Class " + modelName + " not found");
@@ -333,7 +333,7 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Creates the options registry to use.
 	 */
 	protected OptionRegistry createOptionRegistry(String[] opts) throws Exception {
-		OptionRegistry or = new OptionRegistry();
+		OptionRegistry or = ModelicaCompiler.createOptions();
 		or.setBooleanOption("generate_runtime_option_parameters", false);
 		for (String opt : opts) {
 			String parts[] = opt.split("=");
@@ -471,21 +471,21 @@ abstract public class TestAnnotationizerHelper {
 	
 	private final static String HEADER = "annotation(__JModelica(UnitTesting(tests={";
 
-	/**
-	 * \brief Generates the test annotation and ouputs it on the given stream.
-	 */
-	public void outputAnnotation(PrintStream out) throws Exception {
-		out.println("\t" + HEADER);
-		out.println("\t\t" + getClass().getSimpleName() + "(");
-		out.println("\t\t\tname=\"" + testName + "\",");
-		out.println("\t\t\tdescription=\"" + description + "\",");
-		for (String opt : opts) 
-			out.println("\t\t\t" + opt + ",");
-		if (checkType != null)
-		    out.println("\t\t\tcheckType=" + checkType.toString().toLowerCase() + ",");
-		printSpecific(out, "\t\t\t");
-		out.println(")})));");
-	}
+    /**
+     * \brief Generates the test annotation and ouputs it on the given stream.
+     */
+    public void outputAnnotation(PrintStream out) throws Exception {
+        out.println("    " + HEADER);
+        out.println("        " + getClass().getSimpleName() + "(");
+        out.println("            name=\"" + testName + "\",");
+        out.println("            description=\"" + description + "\",");
+        for (String opt : opts) 
+            out.println("            " + opt + ",");
+        if (checkType != null)
+            out.println("            checkType=" + checkType.toString().toLowerCase() + ",");
+        printSpecific(out, "            ");
+        out.println(")})));");
+    }
 	
 	/**
 	 * \brief Escapes unallowed characters in the fields of the test annotation.
@@ -524,7 +524,7 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Performs the flattening step of the compilation.
 	 */
 	protected FClass flatten(InstClassDecl icd) {
-		FClass fc = FClass.create(icd, filePath);
+		FClass fc = FClass.create(icd, filePath, null);
 		icd.flattenInstClassDecl(fc);
 		return fc;
 	}
@@ -625,7 +625,7 @@ abstract public class TestAnnotationizerHelper {
 			FClass fc = compile();
 			AbstractGenerator generator = createGenerator(fc);
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			generator.generate(new StringReader(template), new NotNullPrintStream(os));
+			generator.generate(new StringReader(template), new NotNullCodeStream(os));
 			code = prepare(os.toString());
 		}
 		

@@ -62,15 +62,18 @@ InstReplacingSimpleShortClassDecl : InstSimpleShortClassDecl ::=
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl;
 
 abstract InstRestriction : BaseNode;
-InstModel     : InstRestriction;
-InstBlock     : InstRestriction;
-InstMClass    : InstRestriction;
-InstConnector : InstRestriction;
+InstModel               : InstRestriction;
+InstBlock               : InstRestriction;
+InstMClass              : InstRestriction;
+InstConnector           : InstRestriction;
 InstExpandableConnector : InstConnector;
-InstMType     : InstRestriction;
-InstMPackage  : InstRestriction;
-InstFunction  : InstRestriction;
-InstMRecord   : InstRestriction;
+InstMType               : InstRestriction;
+InstMPackage            : InstRestriction;
+InstFunction            : InstRestriction;
+InstMRecord             : InstRestriction;
+InstOperator            : InstRestriction;
+InstOperatorFunction    : InstFunction;
+InstOperatorRecord      : InstMRecord;
 
 InstExternal     : BaseNode ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
 InstExternalCall : BaseNode ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
@@ -139,12 +142,12 @@ abstract InstScalarAccess : InstNamedAccess ::= /ExpandedSubscripts:FArraySubscr
 InstParseAccess           : InstScalarAccess;
 InstAmbiguousAccess       : InstScalarAccess;
 InstComponentAccess       : InstScalarAccess;
-InstEquationAccess       : InstScalarAccess;
+InstEquationAccess        : InstScalarAccess;
 abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts /ExpandedSubscripts:FArraySubscripts/;
 InstParseArrayAccess      : InstArrayAccess;
 InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;
-InstEquationArrayAccess  : InstArrayAccess;
+InstEquationArrayAccess   : InstArrayAccess;
 InstGlobalAccess          : InstAccess ::= InstAccess;
 
 InstForIndex : CommonForIndex ::= InstPrimitive;
@@ -165,6 +168,7 @@ InstValueModification    : InstModification ::= /FExp/
 InstClassModification    : InstModification ::= InstArgument*;
 //Virtual modification for member of record type modification.
 InstRecordModification : InstValueModification ::= <Name:String> <Value:FExp>;
+InstDefaultRecordModification : InstRecordModification ::= <Source:InstModification>;
 //Virtual modification for cell of array constant value modification.
 InstArrayModification : InstValueModification ::= <Cell:FExp>;
 

@@ -18,13 +18,28 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect ComplianceCheck {
 
-	/**
-	 * \brief Check for code that is not allowed in its current context.
-	 * 
-	 * Examples would be checking that classes follow the requirements of 
-	 * their restriction. 
-	 */
-	public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
+    /**
+     * \brief Check for code that is not allowed in its current context.
+     * 
+     * Examples would be checking that classes follow the requirements of 
+     * their restriction. 
+     */
+    public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
+
+    public abstract class ErrorChecker {
+        public static class ComplianceChecker extends ErrorChecker {
+            public ComplianceChecker() {
+                super("ComplianceCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.complianceCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.COMPLIANCE_CHECKER = addErrorChecker(new ErrorChecker.ComplianceChecker());
 	
 	public void FIfWhenClause.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
@@ -65,6 +80,10 @@ aspect ComplianceCheck {
 		}
 	}
 
+    public void InstOperatorRecord.collectErrors(ErrorCheckType checkType) {
+        compliance("Operator records are not supported");
+    }
+
 	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
 	}
@@ -81,28 +100,7 @@ aspect ComplianceCheck {
 	public void FUnsupportedExp.collectErrors(ErrorCheckType checkType) {
 		compliance("Unsupported expression type");
 	}
-    
-    
-    public void FConnectClause.complianceCheck(ErrorCheckType checkType) {
-        InstAccess left  = getConnector1().getInstAccess();
-        InstAccess right = getConnector2().getInstAccess();
-        if (left.isNestledExpandableConnectorPart() || right.isNestledExpandableConnectorPart())
-            compliance("Adding variables to non-declared nested expandable connectors is not supported");
-    }
-    
-    syn boolean InstAccess.isNestledExpandableConnectorPart() = false;
-    eq InstDot.isNestledExpandableConnectorPart() {
-        InstComponentDecl exp = findReferencedExpandableConnector();
-        int n = getNumInstAccess();
-        return exp != null && n > 2 && getInstAccess(n - 2).myInstComponentDecl() != exp;
-    }
-    
-    inh boolean InstComponentDecl.inExpandableConnector();
-    eq InstExpandableConnectorDecl.getChild().inExpandableConnector() = true;
-    eq InstClassDecl.getChild().inExpandableConnector()               = false;
-    eq InstRoot.getChild().inExpandableConnector()                    = false;
-    eq FlatRoot.getChild().inExpandableConnector()                    = false;
-    
+
 	
 	public void FBreakStmt.complianceCheck(ErrorCheckType checkType) {
 		if (!inFunction() && enclosingLoop() instanceof InstForStmt)
@@ -195,24 +193,6 @@ aspect ComplianceCheck {
 	eq FScalarExp.unknownSizeSupported()             = false;
 	eq FVectorExp.unknownSizeSupported()             = false;
 	eq FMatrixExp.unknownSizeSupported()             = false;
-		
-	public void FMinMaxExp.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction() && (getX().size().isUnknown() || (hasY() && getY().size().isUnknown()))) {
-			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
-		}
-	}
-	
-	public void FCatExp.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction()) {
-			for (FExp exp: getFExpList()) {
-				if (exp.size().isUnknown()) {
-					compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
-				}
-			}
-		}
-	}
 	
 	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
@@ -240,15 +220,15 @@ aspect ComplianceCheck {
 		}
 	}
 	
-	public void FRecordConstructor.complianceCheck(ErrorCheckType checkType) {
-		for (FExp e : getArgs())
-			if (e.size().isUnknown())
+	public void InstRecordConstructor.complianceCheck(ErrorCheckType checkType) {
+		for (InstFunctionArgument a : getArgs())
+			if (a.getFExp().size().isUnknown())
 				compliance("Unknown sizes in record constructors is not supported");
 	}
 	
 	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (inFunction() && getFExp().ceval().isUnknown()) {
+		if (inFunction() && !getFExp().canCeval()) {
 			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
 		}
 	}

@@ -402,10 +402,9 @@ jmi_t* fmi1_me_get_jmi_t(fmiComponent c);
  */
 const char* fmi1_me_get_model_types_platform();
 
-/** Logging functions that are specific for fmi1_me, are used from jmi_log.c via templates */
-BOOL fmi1_me_emitted_category(jmi_log_t *log, jmi_log_category_t category);
-void fmi1_me_create_log_file_if_needed(jmi_log_t *log);
-void fmi1_me_emit(jmi_log_t *log, char* message);
+/** Logging functions that are specific for fmi1_me, are used from jmi_log.c via callbacks */
+void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message);
+BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category);
 
 /**
  * \brief Extracts info from nl-solver to logger.

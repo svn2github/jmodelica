@@ -392,18 +392,60 @@ aspect ErrorCheck {
 	  }
   }
 
-  /**
-   * \brief Call all *Check() methods for this node.
-   * 
-   * Helper method to make it easier to add new check methods 
-   * for all nodes.
-   */
-  protected void ASTNode.allChecks(ErrorCheckType checkType) {
-	  nameCheck(checkType);
-	  typeCheck(checkType);
-	  contentCheck(checkType);	  
-	  complianceCheck(checkType);	  
-  }
+  
+    /**
+     * Class used by the error check to delegate to different error checks.
+     * This class is subtyped for each error check with different
+     * implementations of check() that delegate to corresponding check.
+     */
+    public abstract class ErrorChecker {
+        private final String name;
+
+        public ErrorChecker(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Do check on ASTNode node with the ErrorCheckType check type.
+         */
+        public abstract void check(ASTNode node, ErrorCheckType checkType);
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    /**
+     * A list that contains all error checkers. New error checkers are added
+     * dynamically during static evaluation by calling addErrorChecker().
+     * 
+     * @see ASTNode.addErrorCheck()
+     */
+    private static Collection<ErrorChecker> ASTNode.ERROR_CHECKERS;
+
+    /**
+     * Add ErrorChecker checker to the list of error checkers. This method
+     * should only be called from ASTnode in order to ensure that the checker
+     * is added corretly during static evaluation, hence the private
+     * visibility.
+     */
+    private static ErrorChecker ASTNode.addErrorChecker(ErrorChecker checker) {
+        if (ERROR_CHECKERS == null)
+            ERROR_CHECKERS = new ArrayList<ErrorChecker>();
+        ERROR_CHECKERS.add(checker);
+        return checker;
+    }
+
+    /**
+     * A helper method that calls all registered error checkers.
+     * 
+     * @see ASTNode.addErrorCheck()
+     */
+    protected void ASTNode.allChecks(ErrorCheckType checkType) {
+        for (ErrorChecker checker : ERROR_CHECKERS)
+            checker.check(this, checkType);
+    }
   
   public void ASTNode.collectErrors(ErrorCheckType checkType) {
 	  allChecks(checkType);
@@ -418,24 +460,6 @@ aspect ErrorCheck {
 		root().breakOnErrors();
 	}
 
-/*
-    syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
-      for(int i = 0; i < getNumChild(); i++) {
-		  FullClassDecl fcd = getChild(i).retrieveFullClassDecl(className);
-	  	  if (fcd != null)
-	  	  	return fcd;
-	  }
-	  return null;
-    }   
-  	
-  	eq FullClassDecl.retrieveFullClassDecl(String className) {
-	   	if (className.equals(qualifiedName())) {
-	   		return this;
-		} else
-			return getClassDeclList().retrieveFullClassDecl(className);
-	}
-*/
-   
 }
 
 aspect InstanceErrorCheck {
@@ -510,39 +534,24 @@ aspect InstanceErrorCheck {
         }
     }
 
-  	public void InstBaseClassDecl.collectErrors(ErrorCheckType checkType) {
-    	if (!errorChecked) {
-	        super.collectErrors(checkType);
-	    	errorChecked = true;
- //       for (InstClassDecl icd : instClassDecls())
- //       	icd.collectErrors(checkType);
- /*
-        for (InstComponentDecl icd : instComponentDecls())
-        	icd.collectErrors(checkType);
-        for (InstExtends ie : instExtends())
-        	ie.collectErrors(checkType);	
-*/        	
-	        for (InstImport ii : getInstImports())
-	        	ii.collectErrors(checkType);		
-			if (hasInstConstraining())
-				getInstConstraining().collectErrors(checkType);
-//        for (FAbstractEquation e : getFAbstractEquations())
-//        	e.collectErrors(checkType);
-//    	getEquationList().collectErrors(checkType);
-//    	getAlgorithmList().collectErrors(checkType);
-//    	getSuperList().collectErrors(checkType);
-//    	getImportList().collectErrors(checkType);
-//    	getComponentDeclList().collectErrors(checkType);
-			if (getBaseClassDecl() instanceof FullClassDecl) { 	
-				FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
-				//log.debug(fcd.getName().getID() +  " " + fcd.getEndName());
-				if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
-					error("The declaration and end names of a class should be the same");
-				}
-			}
-  		}
-  	}
-  	
+    public void InstBaseClassDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            super.collectErrors(checkType);
+            errorChecked = true;
+            for (InstImport ii : getInstImports())
+                ii.collectErrors(checkType);
+            if (hasInstConstraining())
+                getInstConstraining().collectErrors(checkType);
+            getInstRestriction().collectErrors(checkType);
+            if (getBaseClassDecl() instanceof FullClassDecl) {  
+                FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+                if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
+                    error("The declaration and end names of a class should be the same");
+                }
+            }
+        }
+    }
+
   	public void InstFullClassDecl.collectErrors(ErrorCheckType checkType) {
     	if (!errorChecked) {
             super.collectErrors(checkType);
@@ -559,49 +568,63 @@ aspect InstanceErrorCheck {
         }    	
     }
 
-//  	public void InstEnumClassDecl.collectErrors(ErrorCheckType checkType) {  		
-//  		// TODO: Error checking of enumeration declarations
-//  	}
-  	
     public void InstImport.collectErrors(ErrorCheckType checkType) {
     	if (!errorChecked) {
     		errorChecked = true;
 			getPackageName().collectErrors(checkType);
 		}
 	}
-	
-	public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-	    	errorChecked = true;
-	    	boolean checkInner = isOuter() && 
-	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
-	    	if (isRecursed()) {
-	    		error("Recursive class structure");
-	    	} else if (checkInner) {
-	    		if (myInnerInstComponentDecl().isUnknown())
-	    			error("Cannot find inner declaration for outer " + name());
-	    		else
-	    			myInnerInstComponentDecl().collectErrors(checkType);
-	    	} else if (inOuter()) {
-	    		surroundingOuterComponentDecl().collectErrors(checkType);
-	    	} else {
-  		  		collectErrorsInClassName(checkType);
-  		  		if (hasFArraySubscripts())
-  		  		    getFArraySubscripts().collectErrors(checkType);
-	    		if (hasConditionalAttribute()) 
-	    			getConditionalAttribute().collectErrors(checkType);
-	    		if (isActive() && hasInstModification())
-	    			getInstModification().collectErrors(checkType);
-	    		
-	    		if (shouldCheckInto(checkType)) {
-  		  		    errorChecked = false;
-    	    		super.collectErrors(checkType);
-    	    		if (hasInstConstraining())
-    	    			getInstConstraining().collectErrors(checkType);
-	    		}
-	    	}
-		}
-	}
+
+    public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            errorChecked = true;
+            boolean checkInner = isOuter() && 
+                    !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
+            if (isRecursed()) {
+                error("Recursive class structure");
+            } else if (checkInner) {
+                if (myInnerInstComponentDecl().isUnknown())
+                    error("Cannot find inner declaration for outer " + name());
+                else
+                    myInnerInstComponentDecl().collectErrors(checkType);
+            } else if (inOuter()) {
+                surroundingOuterComponentDecl().collectErrors(checkType);
+            } else {
+                collectErrorsInClassName(checkType);
+                myInstClass().checkRestriction(checkType);
+                if (hasFArraySubscripts())
+                    getFArraySubscripts().collectErrors(checkType);
+                if (hasConditionalAttribute()) 
+                    getConditionalAttribute().collectErrors(checkType);
+                if (isActive() && hasInstModification())
+                    getInstModification().collectErrors(checkType);
+                for (InstModification im : getMergedEnvironment())
+                    im.checkModificationNames(checkType);
+                
+                if (shouldCheckInto(checkType)) {
+                    errorChecked = false;
+                    super.collectErrors(checkType);
+                    if (hasInstConstraining())
+                        getInstConstraining().collectErrors(checkType);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check that the restriction of this class is fulfilled.
+     */
+    public void InstClassDecl.checkRestriction(ErrorCheckType checkType) {}
+    public void InstBaseClassDecl.checkRestriction(ErrorCheckType checkType) {
+        if (!errorChecked)
+            getInstRestriction().collectErrors(checkType);
+    }
+
+    public void InstModification.checkModificationNames(ErrorCheckType checkType) {}
+    
+    public void InstElementModification.checkModificationNames(ErrorCheckType checkType) {
+        getName().allChecks(checkType);
+    }
 	
 	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
 	        !isDisabled() || checkType.checkInactiveComponents() || root().options.getBooleanOption("check_inactive_contitionals");
@@ -678,12 +701,15 @@ aspect InstanceErrorCheck {
 				}
     		}
     		
-    		// Mark parameters with Evaluate=true as structural
-    		if (isParameter() && annotation().forPath("Evaluate").bool())
-    		    if (canEvaluateAsStructural())
-    		        markAsStructuralParameter(checkType);
-    		    else
-    		        warning("Evaluate annotation is ignored when fixed equals false");
+            // Mark parameters with Evaluate=true as structural
+            if (isParameter() && annotation().forPath("Evaluate").bool()) {
+                if (canEvaluateAsStructural())
+                    markAsStructuralParameter(checkType);
+                else
+                    warning("Evaluate annotation is ignored when fixed equals false");
+            } else if (variability().structParameterVariability() && hasBindingFExp() && getBindingFExp().canCeval()) {
+                markAsStructuralParameter(checkType);
+            }
 			
 			// Check array indices
 			getClassName().collectErrors(checkType);
@@ -704,7 +730,7 @@ aspect InstanceErrorCheck {
 	}
     syn boolean FExp.canEvaluateAsStructural() {
         for (FExp n : childFExps())
-            if (n.canEvaluateAsStructural())
+            if (!n.canEvaluateAsStructural())
                 return false;
         return true;
     }
@@ -803,10 +829,6 @@ aspect InstanceErrorCheck {
 		if (!errorChecked) {
 		    super.collectErrors(checkType);
 		    errorChecked = true;
-		    // TODO: The InstComponentDecl doesn't really have enough information to check this, 
-		    //       as it doesn't know about the original declaration or constraining type.
-		    //       Fixing that might need redesign of this part of the instance tree
-		    getInstComponentDecl().checkRedeclares(checkType);
 		}
 	}
 	
@@ -855,8 +877,8 @@ aspect InstanceErrorCheck {
 
 	public void InstClassRedeclare.collectErrors(ErrorCheckType checkType) {
 		super.collectErrors(checkType);
-		if (!inInstComponent())
-			getInstClassDecl().collectErrors(checkType);	
+//		if (!inInstComponent())
+//			getInstClassDecl().collectErrors(checkType);	
 	}
 
 	public void InstValueModification.collectErrors(ErrorCheckType checkType) {
@@ -1089,8 +1111,9 @@ aspect InstanceErrorCheck {
 	}
 	
 	syn String FAbstractFunctionCall.functionCallDecription() = "Calling function " + name() + "()";
-	eq FRecordConstructor.functionCallDecription() = "Record constructor for " + name();
-	eq InstFunctionCall.functionCallDecription()   = getName().myInstClassDecl().isRecord() ? 
+	eq FRecordConstructor.functionCallDecription()    = "Record constructor for " + name();
+    eq InstRecordConstructor.functionCallDecription() = "Record constructor for " + name();
+	eq InstFunctionCall.functionCallDecription()      = getName().myInstClassDecl().isRecord() ? 
 			"Record constructor for " + name() : super.functionCallDecription();
 	  
 	public boolean InstFunctionArgument.generateUnbindableError(String desc, boolean genForPos) {

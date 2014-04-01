@@ -1190,7 +1190,7 @@ initial equation
  pre(temp_2) = 0.0;
  pre(temp_3) = 0.0;
 equation
- x = 3.0 - temp_3 * 3.0 + (3 - temp_2 * 3.0) + (3.0 - temp_1 * 3) + 0;
+ x = 3.0 - temp_3 * 3.0 + (3 - temp_2 * 3.0) + (3.0 - temp_1 * 3);
  temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1.0 else pre(temp_1);
  temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
  temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
@@ -1574,16 +1574,16 @@ equation
 			errorMessage="
 3 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1358, column 49:
-  Cannot evaluate boolean enabled expression: pEnabled
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The type of the enabled expression is not boolean
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1358, column 59:
-  Nominal expression should have parameter variability or less, pValues has variability
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Nominal expression should have parameter variability or less, pValues has Continuousv ariability
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1358, column 59:
+Error: in file '...':
+Semantic error at line 0, column 0:
   Size of nominal expression pValues is not the same size as the surrounding equation, size of expression [2], size of equation scalar
 ")})));
 end EquationNominalTypeTest1;

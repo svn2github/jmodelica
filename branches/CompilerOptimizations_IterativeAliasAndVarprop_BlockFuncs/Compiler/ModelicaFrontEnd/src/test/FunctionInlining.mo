@@ -776,16 +776,16 @@ end FunctionInlining.RecordInline4;
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline5
- Real x.a[1];
+ Real y;
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
 initial equation 
  x.pre(b) = 0;
 equation
- x.a[1] = 1;
- x.a[2] = 2 * x.a[1];
- x.a[3] = 3 * x.a[1];
+ y = 1;
+ x.a[2] = 2 * y;
+ x.a[3] = 3 * y;
  x.b = 2;
 
 public

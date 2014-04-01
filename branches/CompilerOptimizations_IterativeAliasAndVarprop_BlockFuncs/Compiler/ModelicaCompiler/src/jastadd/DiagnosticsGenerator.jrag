@@ -159,7 +159,7 @@ public class DiagnosticsGenerator {
 			super("Flattened model", "raw", false);
 		}
 		
-		protected void writeContents(FClass fc, PrintStream out) {
+		protected void writeContents(FClass fc, CodeStream out) {
 			// Dump model to file
 			out.print("<pre>\n");
 			fc.prettyPrint(out, "");
@@ -174,8 +174,8 @@ public class DiagnosticsGenerator {
 	public void writeTransformedFlattenedModel(FClass fc) {
 		// Dump model to file
 		try {
-		    PrintStream out;
-			out = new PrintStream(transformedModelAbsFileName,"UTF-8");
+		    CodeStream out;
+			out = new CodeStream(new PrintStream(transformedModelAbsFileName,"UTF-8"));
 			out.print(html_header);
 			out.print("<pre>\n");
 			fc.prettyPrint(out, "");
@@ -193,8 +193,8 @@ public class DiagnosticsGenerator {
 	public void writeBLTFile(FClass fc) {
 		// Dump model to file
 		try {
-		    PrintStream out;
-			out = new PrintStream(bltAbsFileName,"UTF-8");
+		    CodeStream out;
+			out = new CodeStream(new PrintStream(bltAbsFileName,"UTF-8"));
 			out.print(html_header);
 			if (fc.root().options.getBooleanOption("equation_sorting")) {
 				int ind = 0;
@@ -261,7 +261,7 @@ public class DiagnosticsGenerator {
 				Set<FVariable> vars = new HashSet<FVariable>();
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT())
 					if (eb instanceof TornEquationBlock)
-						vars.addAll(eb.iterationVariables());
+						vars.addAll(eb.unsolvedVariables());
 				for (AliasManager.AliasSet as : fc.getAliasManager().getAliasSets())
 					if (vars.contains(as.getIterationVariable().getFVariable()))
 						out.println(as.toStringWithStart());
@@ -390,7 +390,7 @@ public class DiagnosticsGenerator {
 	
 	private void produceIndexDiagnostics(FClass fc) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		PrintStream out = new PrintStream(os);
+		CodeStream out = new CodeStream(os);
 		out.println("<h2>" + modelName + "</h2>");
 		out.println("{problemsString}"); 
 		
@@ -529,7 +529,7 @@ public class DiagnosticsGenerator {
 
 	public void writeBLTTableFile(FClass fc) {
 		try {
-			PrintStream out = new PrintStream(bltTableAbsFileName, "UTF-8");
+			CodeStream out = new CodeStream(new PrintStream(bltTableAbsFileName, "UTF-8"));
 			out.print(html_header.replaceFirst("</head>", "<style type=\"text/css\">" + BLT_style + "</style></head>"));
 			if (fc.root().options.getBooleanOption("equation_sorting")) {
 				if (fc.numEquations() > 250) {
@@ -569,9 +569,9 @@ public class DiagnosticsGenerator {
 		}
 		
 		public void write(FClass fc) {
-			PrintStream out = null;
+		    CodeStream out = null;
 			try {
-				out = new PrintStream(path, "UTF-8");
+				out = new CodeStream(new PrintStream(path, "UTF-8"));
 				out.print(html_header);
 				if (addTitle) {
 					if (title != null)
@@ -599,15 +599,15 @@ public class DiagnosticsGenerator {
 			} 
 		}
 		
-		public void writeLink(PrintStream out) {
+		public void writeLink(CodeStream out) {
 			writeLink(out, "");
 		}
 		
-		public void writeLink(PrintStream out, String suffix) {
+		public void writeLink(CodeStream out, String suffix) {
 			out.format("<p><a href=\"%s\">%s</a>%s</p>\n", fileName, title, suffix);
 		}
 		
-		protected abstract void writeContents(FClass fc, PrintStream out);
+		protected abstract void writeContents(FClass fc, CodeStream out);
 		
 	}
 	
@@ -760,7 +760,7 @@ public class DiagnosticsGenerator {
 	
 }
 	
-	public void BLT.diagnostics_generateBLTTable(PrintStream out, boolean isInit) {
+	public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
 		Deque<FVariable> orderList = new ArrayDeque<FVariable>();
 		for (AbstractEquationBlock aeb : this) {
 			orderList.addAll(aeb.allVariables());
@@ -804,7 +804,7 @@ public class DiagnosticsGenerator {
 	
 	protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Collections.emptyMap();
 
-	public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm) {
+	public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
 		tm.enterBlock();
 		int xStart = tm.getYPos();
 		int yStart = tm.getYPos();
@@ -816,7 +816,7 @@ public class DiagnosticsGenerator {
 		tm.leaveBlock();
 	}
 	
-	public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+	public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		for (FAbstractEquation equation : allEquations()) {
 			if (varFilter == EMPTY_VAR_FILTER)
 				size = equation.numScalarEquations();
@@ -870,9 +870,9 @@ public class DiagnosticsGenerator {
 		throw new IllegalArgumentException("Unsupported solvability type " + s);
 	}
 	
-	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		int startL = tm.getYPos();
-		int endL = startL + allVariables().size() - iterationVariables().size() - 1;
+		int endL = startL + allVariables().size() - unsolvedVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startL, startL, endL, endL, "1px solid black", "#F0E4E4"));
 		int startJ = endL + 1;
 		int endJ = startL + allVariables().size() - 1;
@@ -887,7 +887,7 @@ public class DiagnosticsGenerator {
 		tm.popStyleRule();
 	}
 	
-	public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+	public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		varFilter = new HashMap<FVariable, Integer>();
 		int index = 0;
 		for (FVariable var : equation().referencedFVariablesInLHS()) {
@@ -903,7 +903,7 @@ public class DiagnosticsGenerator {
 		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
 	}
 	
-	public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+	public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		varFilter = new HashMap<FVariable, Integer>();
 		int index = 0;
 		for (FVariable var : equation().referencedFVariablesInLHS()) {
@@ -919,7 +919,7 @@ public class DiagnosticsGenerator {
 		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
 	}
 	
-	public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
+	public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
 		
 	}
 	

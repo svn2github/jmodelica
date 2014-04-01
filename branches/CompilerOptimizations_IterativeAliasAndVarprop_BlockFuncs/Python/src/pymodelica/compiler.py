@@ -32,12 +32,12 @@ from compiler_exceptions import IllegalCompilerArgumentError
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
-from pymodelica.common.core import get_unit_name
+from pymodelica.common.core import get_unit_name, list_to_string
 
 
 def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0',
                 compiler_options={}, compile_to='.', compiler_log_level='warning',
-                separate_process=False, jvm_args=''):
+                separate_process=True, jvm_args=''):
     """ 
     Compile a Modelica model to an FMU.
     
@@ -93,7 +93,6 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         version --
             The FMI version. Valid options are '1.0' and '2.0'.
             Default: '1.0'
-            Note: Must currently be set to '1.0'.
             
         compiler_options --
             Options for the compiler.
@@ -119,7 +118,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             to locate the Java installation to use. 
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
             
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a 
@@ -141,7 +140,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
                 separate_process, jvm_args)       
 
 def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, 
-                 compile_to='.', compiler_log_level='warning', separate_process=False,
+                 compile_to='.', compiler_log_level='warning', separate_process=True,
                  jvm_args=''):
     """ 
     Compile a Modelica model to an FMUX.
@@ -204,7 +203,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             to locate the Java installation to use. 
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
             
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a 
@@ -222,7 +221,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
                 separate_process, jvm_args)
 
 def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={}, 
-                compile_to='.', compiler_log_level='warning', separate_process = False,
+                compile_to='.', compiler_log_level='warning', separate_process=True,
                 jvm_args=''):
     """ 
     Compile a Modelica or Optimica model to a JMU.
@@ -291,7 +290,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             to locate the Java installation to use. 
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
             
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a 
@@ -315,6 +314,10 @@ def _compile_unit(class_name, file_name, compiler, target, version,
     """
     Helper function for compile_fmu, compile_jmu and compile_fmux.
     """
+    for key, value in compiler_options.iteritems():
+        if isinstance(value, list):
+            compiler_options[key] = list_to_string(value)
+    
     if isinstance(file_name, basestring):
         file_name = [file_name]
         
@@ -399,7 +402,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     """
     JVM_PATH = _get_separate_JVM()
         
-    JAVA_CLASS_PATH = pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver.jar')
+    JAVA_CLASS_PATH = pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar')
  
     comp = _which_compiler(file_name, compiler)
     if comp is 'MODELICA':

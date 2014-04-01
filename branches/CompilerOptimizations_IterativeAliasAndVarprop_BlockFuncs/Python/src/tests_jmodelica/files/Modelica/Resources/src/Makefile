@@ -23,6 +23,9 @@ SHARED_FLAGS=-shared -Wl,-soname,
 endif
 
 CC=gcc
+FC=gfortran
+
+FFLAGS=
 
 DIR=../Library/$(PLATFORM)
 INC=-I../Include -I$(JMODELICA_HOME)/include
@@ -42,6 +45,11 @@ array_shared: $(PREF)arrayFunctions.$(SUFF) lib_dir
 array_static: libarrayFunctions.a lib_dir
 	mv $< $(DIR)
 
+basic_static_c: libexternalFunctionsC.a lib_dir
+	mv $< $(DIR)
+	
+basic_static_f: libexternalFunctionsFortran.a lib_dir
+	mv $< $(DIR)
 
 ext_objects: libextObjects.a lib_dir
 	mv $< $(DIR)

@@ -1391,6 +1391,46 @@ end ConnectTests.ConnectOuterTest6;
 end ConnectOuterTest6;
 
 
+model ConnectOuterTest7
+    /* This verifies #3452, but the result is wrong, and should be updated 
+	   when #3451 is fixed. */
+    connector C
+		Real x;
+		flow Real y;
+	end C;
+    
+    model A
+        C c;
+    end A;
+    
+    model B
+        inner outer A a;
+    end B;
+    
+	model D
+        inner A a;
+        B b;
+	end D;
+	
+	D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest7",
+			description="Non-connected connector in component declared inner outer",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest7
+ Real d.a.c.x;
+ Real d.a.c.y;
+ Real d.b.a.c.x;
+ Real d.b.a.c.y;
+equation
+ d.a.c.y = 0;
+end ConnectTests.ConnectOuterTest7;
+")})));
+end ConnectOuterTest7;
+
+
 
 model ConnectErrTest1
     model A

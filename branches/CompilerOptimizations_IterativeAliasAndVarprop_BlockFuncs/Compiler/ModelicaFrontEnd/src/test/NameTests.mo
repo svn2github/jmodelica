@@ -412,7 +412,11 @@ end NameTest12_Err;
 			name="NameTest13_Err",
 			description="Test that names are looked up correct.",
 			errorMessage="
-2 errors found:
+3 errors found:
+
+Error: in file '/src/test/NameTests.mo':
+Semantic error at line 399, column 31:
+  Cannot find component declaration for z
 
 Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
@@ -462,9 +466,13 @@ end NameTest13_Err;
 2 errors found:
  
 Error: in file 'src/test/modelica/NameTests.mo':
+Semantic error at line 459, column 18:
+  Cannot find component declaration for z
+ 
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 18:
   Cannot find component declaration for z
-
+  
 Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 20:
   Cannot find class or component declaration for pp
@@ -2346,10 +2354,10 @@ fclass NameTests.ImportTest8
  Modelica.SIunits.ElectricCurrent r.p.i \"Current flowing into the pin\";
  Modelica.SIunits.ElectricPotential r.n.v \"Potential at the pin\";
  Modelica.SIunits.ElectricCurrent r.n.i \"Current flowing into the pin\";
- parameter Boolean r.useHeatPort = false \"=true, if HeatPort is enabled\" /* false */;
+ parameter Boolean r.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
- Modelica.SIunits.Power r.LossPower \"Loss power leaving component via HeatPort\";
- Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of HeatPort\";
+ Modelica.SIunits.Power r.LossPower \"Loss power leaving component via heatPort\";
+ Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of heatPort\";
 equation
  assert(1 + r.alpha * (r.T_heatPort - r.T_ref) >= 1.0E-15, \"Temperature outside scope of model!\");
  r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));

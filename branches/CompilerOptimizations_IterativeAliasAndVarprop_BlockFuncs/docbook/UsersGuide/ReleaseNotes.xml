@@ -11,34 +11,26 @@
   <title>Release notes</title>
 
   <section>
-    <title>Release notes for JModelica.org version 1.12</title>
+    <title>Release notes for JModelica.org version 1.13</title>
 
     <section>
       <title>Highlights</title>
 
       <para><itemizedlist>
           <listitem>
-            <para>Modelica.Mechanics.MultiBody</para>
+            <para>FMI 2.0 Export, according to RC1</para>
           </listitem>
 
           <listitem>
-            <para>expandable connectors</para>
+            <para>New CasADi tool chain for optimization</para>
           </listitem>
 
           <listitem>
-            <para>when statements</para>
+            <para>In-lined switches</para>
           </listitem>
 
           <listitem>
-            <para>event generating functions</para>
-          </listitem>
-
-          <listitem>
-            <para>over-constrained connection graphs</para>
-          </listitem>
-
-          <listitem>
-            <para>reinit() operator</para>
+            <para>Improved compliance</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -46,13 +38,213 @@
     <section>
       <title>Compilers</title>
 
-      <para/>
+      <section>
+        <title>FMI 2.0 RC1 export</title>
+
+        <para>FMI 2.0 export according to RC1 is supported. There are some
+        limitations, summarized in the list below.</para>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Support for dependencies but not for dependenciesKind in
+              the XML tag ModelStructure</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for directional derivative but known to have
+              limitations in some cases</para>
+            </listitem>
+
+            <listitem>
+              <para>No support for strings and running asynchronuously</para>
+            </listitem>
+
+            <listitem>
+              <para>No support for FMU states (set, get and serialize)</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>Compliance</title>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Improved support for expandable connectors</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved support for unknown array sizes in
+              functions</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved handling of the state select attribute</para>
+            </listitem>
+
+            <listitem>
+              <para>Many bug fixes</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <section>
+        <title>In-lined switches</title>
+
+        <para>In-lined switches have been introduced, which gives a more
+        robust initialization and simulation of systems with discrete
+        parts.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <section>
+        <title>New CasADi tool chain</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Support for more Modelica features than previous
+            CasADi-based tool chain</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>User defined functions in models</para>
+
+                <itemizedlist>
+                  <listitem>
+                    <para>No support for control flow</para>
+                  </listitem>
+                </itemizedlist>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Flat model is exposed in Python in symbolic form using
+            CasADi, and can be inspected and manipulated</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for a variety of collocation options</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Release notes for JModelica.org version 1.12</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Greatly improved support for
+            Modelica.Mechanics.MultiBody</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for expandable connectors</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for when statements</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for event generating built-in functions</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for overconstrained connection graphs</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for reinit() operator</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <para>The following compliance improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved support for algorithms, including when
+          statements.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved support for if equations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of discrete constructs.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of attributes in alias sets.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved index reduction algorithm.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for expandable connectors and for
+          overconstrained connection systems.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for automatic differentiation of functions with
+          smoothOrder annotation.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for String operations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Many bug fixes.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Added check mode, where a class is checked for errors to see if it
+      can be used in a simulation class.</para>
+
+      <para>Class annotations are now only allowed as the last element of the
+      class, as per the Modelica 3.2 specification.</para>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <para>The following simulation improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved the simulation run-time with support for the
+          improvements made in the compiler</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved the robustness when solving linear and nonlinear
+          blocks.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>JModelica.org now simulates the example models from the MultiBody
+      package in MSL with the exception of the few models that require dynamic
+      state selection.</para>
     </section>
 
     <section>
@@ -72,6 +264,8 @@
 
       <para>Jonathan Kämpe</para>
 
+      <para>Björn Lennernäs</para>
+
       <para>Fredrik Magnusson</para>
 
       <para>Jesper Mattsson</para>
@@ -88,8 +282,6 @@
         <title>Previous contributors</title>
 
         <para>Sofia Gedda</para>
-
-        <para>Björn Lennernäs</para>
 
         <para>Petter Lindgren</para>
 
@@ -172,7 +364,8 @@
         </listitem>
 
         <listitem>
-          <para>Inlining of simple functions is now activate by default</para>
+          <para>Inlining of simple functions is now activated by
+          default</para>
         </listitem>
 
         <listitem>

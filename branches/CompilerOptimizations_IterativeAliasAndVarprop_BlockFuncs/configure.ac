@@ -39,6 +39,9 @@ AC_SUBST(SHAREDEXT)
 AC_SUBST(SHARED_LDFLAGS)
 AC_SUBST(SEP)
 SEP=':'
+# Handle BSD-stype cp - TODO: detect other BSD systems than Mac
+AC_SUBST(CP)
+CP="cp -au"
 AC_SUBST(CURR_DIR)
 CURR_DIR=`pwd`
 case $build in
@@ -63,6 +66,7 @@ case $build in
 	AC_DEFINE([WIN32],[0],[Not a win32])    
 	SHAREDEXT=".dylib";
 	SHARED_LDFLAGS=" -dynamiclib ";
+	CP="cp -a"
     ;;
   *)
 	echo "Linux detected"   
@@ -174,6 +178,9 @@ AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 
 AC_SUBST(SUNDIALS_HOME)
 SUNDIALS_HOME=$sundials
+
+AC_SUBST(MINPACK_HOME)
+MINPACK_HOME="$CURR_DIR/minpack_install"
 
 AC_ARG_WITH([superlu],
   [AS_HELP_STRING([--with-superlu],
@@ -341,6 +348,7 @@ AC_CONFIG_FILES([
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
+ ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile
  external/FMILibrary/Makefile
  JMI/src/Makefile

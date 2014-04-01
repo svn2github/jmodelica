@@ -69,7 +69,23 @@ except:
 #Import the model class allowing for users to type: from pyjmi import JMUModel
 from jmi import JMUModel
 #Import the model class allowing for users to type: from pyjmi import CasadiModel
-from casadi_interface import CasadiModel
+try:
+    import casadi
+    casadi_present = True
+except ImportError:
+    casadi_present = False
+if casadi_present:
+    from casadi_interface import CasadiModel
+    try:
+        import modelicacasadi_wrapper
+        modelicacasadi_present = True
+    except ImportError:
+        modelicacasadi_present = False
+    if modelicacasadi_present:
+        from casadi_interface import (OptimizationProblem,
+                                      transfer_to_casadi_interface,
+                                      transfer_optimization_problem,
+                                      transfer_model)
 
 def get_files_path():
     """Get the absolute path to the example files directory."""
