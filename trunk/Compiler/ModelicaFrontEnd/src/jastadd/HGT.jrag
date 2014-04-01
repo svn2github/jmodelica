@@ -14,36 +14,81 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect HGT {
+import java.util.Collection;
+
+aspect EquationName {
     
-    public void Equation.contributeHGT(FEquation equation) {
-        if (!root().options.getBooleanOption("hand_guided_tearing"))
-            return;
-        AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
-        if (!residualNode.exists())
-            return;
-        
-        FExp enabledFExp = null;
-        boolean enabledEach = false;
-        FExp iterationVariableFExp = null;
-        AnnotationNode enabledAnnotation = residualNode.forPath("enabled");
-        Exp enabledExp = enabledAnnotation.exp();
-        if (enabledExp != null) {
-            enabledFExp = enabledExp.instantiate();
-            enabledEach = enabledAnnotation.isEachSet();
-        }
-        AnnotationNode iterationVariableAnnotation = residualNode.forPath("iterationVariable");
-        Exp iterationVariableExp = iterationVariableAnnotation.exp();
-        if (iterationVariableExp != null) {
-            if (!iterationVariableExp.isAccess()) {
-                iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
-                return;
-            } else {
-                iterationVariableFExp = iterationVariableExp.instantiate();
+    public abstract class EquationContributer {
+        public static class EquationNameContributer extends EquationContributer {
+            
+            public EquationNameContributer() {
+                super("EquationNameContributer");
+            }
+            
+            @Override
+            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+                AnnotationNode nameNode = src.annotation().vendorNode().forPath("name");
+                if (!nameNode.exists())
+                    return;
+                Exp nameExp = nameNode.exp();
+                if (nameExp == null)
+                    nameNode.ast().error("Name annotation is incorrect");
+                else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
+                    nameExp.error("Illegal equation name \"%s\"", nameExp);
+                else
+                    dest.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
             }
         }
-        equation.setHGTResidual(Integer.MAX_VALUE, enabledFExp, enabledEach, iterationVariableFExp);
     }
+    
+    private static EquationContributer AbstractEquation.EQUATION_NAME_CONTRIBUTER =
+            addEquationContributer(new EquationContributer.EquationNameContributer());
+    
+}
+
+aspect HGT {
+    
+    public abstract class EquationContributer {
+        public static class HGTContributer extends EquationContributer {
+            
+            public HGTContributer() {
+                super("HGTContributer");
+            }
+            
+            @Override
+            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+                if (!src.root().options.getBooleanOption("hand_guided_tearing"))
+                    return;
+                AnnotationNode residualNode = src.annotation().vendorNode().forPath("ResidualEquation");
+                if (!residualNode.exists())
+                    return;
+                
+                FExp enabledFExp = null;
+                boolean enabledEach = false;
+                FExp iterationVariableFExp = null;
+                AnnotationNode enabledAnnotation = residualNode.forPath("enabled");
+                Exp enabledExp = enabledAnnotation.exp();
+                if (enabledExp != null) {
+                    enabledFExp = enabledExp.instantiate();
+                    enabledEach = enabledAnnotation.isEachSet();
+                }
+                AnnotationNode iterationVariableAnnotation = residualNode.forPath("iterationVariable");
+                Exp iterationVariableExp = iterationVariableAnnotation.exp();
+                if (iterationVariableExp != null) {
+                    if (!iterationVariableExp.isAccess()) {
+                        iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
+                        return;
+                    } else {
+                        iterationVariableFExp = iterationVariableExp.instantiate();
+                    }
+                }
+                dest.setHGTResidual(Integer.MAX_VALUE, enabledFExp, enabledEach, iterationVariableFExp);
+            }
+        }
+    }
+    
+    private static EquationContributer AbstractEquation.HGT_CONTRIBUTER =
+            addEquationContributer(new EquationContributer.HGTContributer());
     
     syn int FAbstractEquation.HGTLevel() {
         FAttribute residual = findAttribute("ResidualEquation");

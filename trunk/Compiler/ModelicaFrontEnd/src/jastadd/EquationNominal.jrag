@@ -15,25 +15,38 @@
 */
 
 aspect EquationNominal{
-    private void Equation.contributeNominal(FEquation equation) {
-        AnnotationNode nominalNode = annotation().vendorNode().forPath("nominal");
-        if (!nominalNode.exists())
-            return;
-        Exp valueExp = nominalNode.exp();
-        if (valueExp == null) {
-            nominalNode.ast().error("Nominal value is missing from nominal annotation");
-            return;
+    public abstract class EquationContributer {
+        public static class EquationNominalContributer extends EquationContributer {
+            
+            public EquationNominalContributer() {
+                super("EquationNominalContributer");
+            }
+            
+            @Override
+            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+                AnnotationNode nominalNode = src.annotation().vendorNode().forPath("nominal");
+                if (!nominalNode.exists())
+                    return;
+                Exp valueExp = nominalNode.exp();
+                if (valueExp == null) {
+                    nominalNode.ast().error("Nominal value is missing from nominal annotation");
+                    return;
+                }
+                
+                FAttribute nominalAttr = new FInternalAttribute("Nominal", valueExp.instantiate());
+                dest.addFAttribute(nominalAttr);
+                
+                AnnotationNode enabledAnnotation = nominalNode.forPath("enabled");
+                Exp enabledExp = enabledAnnotation.exp();
+                if (enabledExp != null)
+                    nominalAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
+            }
         }
-        
-        FAttribute nominalAttr = new FInternalAttribute("Nominal", valueExp.instantiate());
-        equation.addFAttribute(nominalAttr);
-        
-        AnnotationNode enabledAnnotation = nominalNode.forPath("enabled");
-        Exp enabledExp = enabledAnnotation.exp();
-        if (enabledExp != null)
-            nominalAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
     }
     
+    private static EquationContributer AbstractEquation.EQUATION_NOMINAL_CONTRIBUTER =
+            addEquationContributer(new EquationContributer.EquationNominalContributer());
+
     protected void FAbstractEquation.typeCheckNominal(ErrorCheckType checkType) {
         FAttribute nominalAttr = findAttribute("Nominal");
         if (nominalAttr == null || !nominalAttr.hasValue())

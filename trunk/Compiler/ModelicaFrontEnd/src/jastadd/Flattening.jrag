@@ -2197,40 +2197,70 @@ aspect FlatExpressions {
 
 aspect InstantiatedExpressions {
 
-	public FEquationType AbstractEquation.equationType() {
-		return isInitial() ? new FInitialEquation() : new FNormalEquation();
-	}
+    public FEquationType AbstractEquation.equationType() {
+        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+    }
 
-	public FEquationType Algorithm.equationType() {
-		return hasInitial() ? new FInitialEquation() : new FNormalEquation();
-	}
+    public FEquationType Algorithm.equationType() {
+        return hasInitial() ? new FInitialEquation() : new FNormalEquation();
+    }
 
-	public FAbstractEquation AbstractEquation.instantiate() {
-		return copyLocationTo(new FUnsupportedEquation(equationType()));
-	}
+    public FAbstractEquation AbstractEquation.instantiate() {
+        return copyLocationTo(new FUnsupportedEquation(equationType()));
+    }
 
-    public FAbstractEquation Equation.instantiate() {
-        FEquation eqn = copyLocationTo(new FEquation(equationType(), getLeft().instantiate(), getRight().instantiate()));
-        contributeHGT(eqn);
-        contributeNameAttribute(eqn);
-        contributeNominal(eqn);
-        contributeLocalIteration(eqn);
-        return eqn;
+    /**
+     * Class used during instantiation of equations to delecate to different
+     * contributers. This class is subtyped for each contributer!
+     */
+    public abstract class EquationContributer {
+        private final String name;
+
+        public EquationContributer(String name) {
+            this.name = name;
+        }
+
+        protected abstract void contribute(AbstractEquation originalEquation, FAbstractEquation newEquation);
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    /**
+     * A list that contains all error checkers. New error checkers are added
+     * dynamically during static evaluation by calling addErrorChecker().
+     * 
+     * @see ASTNode.addErrorCheck()
+     */
+    private static Collection<EquationContributer> AbstractEquation.EQUATION_CONTRIBUTES;
+    
+    /**
+     * Add InstantiationContributer to the list of contributers. This method
+     * should only be called from AbstractEquation in order to ensure that the
+     * checker is added corretly during static evaluation, hence the private
+     * visibility.
+     */
+    private static EquationContributer AbstractEquation.addEquationContributer(EquationContributer contributer) {
+        if (EQUATION_CONTRIBUTES == null)
+            EQUATION_CONTRIBUTES = new ArrayList<EquationContributer>();
+        EQUATION_CONTRIBUTES.add(contributer);
+        return contributer;
     }
     
-    public void Equation.contributeNameAttribute(FEquation eqn) {
-        AnnotationNode nameNode = annotation().vendorNode().forPath("name");
-        if (!nameNode.exists())
-            return;
-        Exp nameExp = nameNode.exp();
-        if (nameExp == null)
-            nameNode.ast().error("Name annotation is incorrect");
-        else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
-            nameExp.error("Illegal equation name \"%s\"", nameExp);
-        else
-            eqn.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
+    public class AbstractEquation {
+        public <N extends FAbstractEquation> N contribute(N equation) {
+            for (EquationContributer contributer : EQUATION_CONTRIBUTES)
+                contributer.contribute(this, equation);
+            return equation;
+        }
     }
-	
+    
+    public FAbstractEquation Equation.instantiate() {
+        return contribute(copyLocationTo(new FEquation(equationType(), getLeft().instantiate(), getRight().instantiate())));
+    }
+    
 	public FAbstractEquation ConnectClause.instantiate() {
 	    Opt o = null;
 	    if (getComment().hasStringComment())
@@ -2278,7 +2308,7 @@ aspect InstantiatedExpressions {
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FunctionCallLeft a : getLefts()) 
 			l.add(a.instantiate());
-		return copyLocationTo(new FFunctionCallEquation(equationType(), l, getCall().instantiate()));
+		return contribute(copyLocationTo(new FFunctionCallEquation(equationType(), l, getCall().instantiate())));
 	}
 	
 	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
