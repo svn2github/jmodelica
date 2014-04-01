@@ -156,17 +156,17 @@ typedef struct jmi_block_solver_options_t jmi_block_solver_options_t;
 /**
  * \brief Allocate the internal structure for the block solver.
  */
-int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
-                         jmi_callbacks_t* cb,
-                         jmi_log_t* log,
-                         jmi_block_solver_residual_func_t F,
-                         jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
-                         jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
-                         jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
-                         jmi_block_solver_log_discrete_variables log_discrete_variables, /* Function for logging the discrete variables, can be NULL and then there is no logging of discrete variables */
-                         int n,
-                         jmi_block_solver_options_t* options,
-                         void* problem_data);
+int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr, 
+                            jmi_callbacks_t* cb, 
+                            jmi_log_t* log,                          
+                           jmi_block_solver_residual_func_t F, 
+                           jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
+                           jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
+                           jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
+                           jmi_block_solver_log_discrete_variables log_discrete_variables, /* can be NULL, only needed during restructuring for regression testing */
+                           int n,                            
+                           jmi_block_solver_options_t* options,
+                           void* problem_data);
 
 /* Free allocated memory */
 void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr);

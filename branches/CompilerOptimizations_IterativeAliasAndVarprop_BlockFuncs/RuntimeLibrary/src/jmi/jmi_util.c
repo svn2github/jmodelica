@@ -923,6 +923,27 @@ int jmi_save_last_successful_values(jmi_t *jmi) {
     return 0;
 }
 
+int jmi_block_completed_integrator_step(jmi_t *jmi) {
+    /*
+    int i;
+    
+    for (i = 0; i < jmi->n_dae_blocks; i++) {
+		jmi_block_residual_t* block = jmi->dae_block_residuals[i];
+        jmi_block_solver_t* block_solver = block->block_solver;
+        
+        if (block_solver->completed_integrator_step) {
+            int ret;
+            
+            ret = block_solver->completed_integrator_step(block_solver);
+            if (ret != 0) {
+                return -1;
+            }
+        }
+    }
+    */
+    return 0;
+}
+
 int jmi_reset_last_successful_values(jmi_t *jmi) {
     jmi_real_t* z;
     jmi_real_t* z_last;

@@ -48,7 +48,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
                        
     jmi_t* jmi_ = jmi;
     int retval;
-    
+      
     retval = jmi_new(&jmi, jmi_callbacks);
     if(retval != 0) {
         /* creating jmi struct failed */
@@ -568,7 +568,7 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     /* Save the z values to the z_last vector */
     jmi_save_last_successful_values(jmi);
     /* Block completed step */
-    /* jmi_block_completed_integrator_step(jmi); */
+    jmi_block_completed_integrator_step(jmi);
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         jmi_log_leave(jmi->log, node);
@@ -665,22 +665,22 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     /* Used for logging */
     jmi_dae_get_sizes(jmi, &nF, &nR);
     switches = jmi_get_sw(jmi);
+
+    /* Reset eventInfo */
+    event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
+    event_info->next_event_time = 0.0;                   /* A reset. */
+    event_info->state_value_references_changed = FALSE;  /* No support for dynamic state selection */
+    event_info->terminate_simulation = FALSE;            /* Don't terminate the simulation unless flagged to. */
+    event_info->iteration_converged = FALSE;             /* The iteration has not converged */
+    event_info->nominals_of_states_changed = FALSE;      /* Not used, get_nominals is not implemented. */
+    event_info->state_values_changed = FALSE;            /* State variables have not been changed by reinit. */
     
-    jmi->terminate = 0;  /* Reset terminate flag. */
+    jmi->terminate = 0; /* Reset terminate flag. */
+
     max_iterations = 30; /* Maximum number of event iterations */
 
     /* Performed at the fist event iteration: */
     if (jmi->nbr_event_iter == 0) {
-
-        /* Reset eventInfo */
-        event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
-        event_info->next_event_time = 0.0;                   /* A reset. */
-        event_info->state_value_references_changed = FALSE;  /* No support for dynamic state selection */
-        event_info->terminate_simulation = FALSE;            /* Don't terminate the simulation unless flagged to. */
-        event_info->iteration_converged = FALSE;             /* The iteration has not converged */
-        event_info->nominals_of_states_changed = FALSE;      /* Not used, get_nominals is not implemented. */
-        event_info->state_values_changed = FALSE;            /* State variables have not been changed by reinit. */
-
         top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
                                  "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
         
@@ -808,7 +808,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
         /* Block completed step */
-        /* jmi_block_completed_integrator_step(jmi); */
+        jmi_block_completed_integrator_step(jmi);
         
         jmi_log_leave(jmi->log, final_node);
     }

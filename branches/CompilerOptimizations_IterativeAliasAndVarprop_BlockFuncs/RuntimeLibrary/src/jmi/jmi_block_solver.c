@@ -457,13 +457,11 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 /* Log iteration variables and discrete variables. */
                 jmi_log_reals(log, iter_node, logInfo, "ivs (old)", x, block_solver->n);
                 jmi_log_reals(log, iter_node, logInfo, "ivs (new)", x_new, block_solver->n);
-                if(block_solver->log_discrete_variables)
-                    block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
+                block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 non_reals_not_changed_flag = block_solver->check_discrete_variables_change(block_solver->problem_data, x_new);
                 
-                if(block_solver->log_discrete_variables)
-                    block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
+                block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 /* Check for consistency */
                 if (non_reals_not_changed_flag){
