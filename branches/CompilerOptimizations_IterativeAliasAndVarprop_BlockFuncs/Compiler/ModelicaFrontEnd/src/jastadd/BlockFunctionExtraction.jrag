@@ -16,20 +16,7 @@
 
 
 aspect BlockFunctionExtraction {
-	
-    public class FClass {
-        
-        // Runs block function extraction if option is set.
-        
-        public class blockFunctionExtractionIfSet extends Transformation {
-            public blockFunctionExtractionIfSet() {
-                super("block_func_extract");
-            }
-            
-            public void perform() {}
-        }
-    }
-    
+	    
     public boolean FClass.blockFunctionExtraction(BLT blt, BiPGraph g) {
         ArrayList<FFunctionCall> functions = new ArrayList<FFunctionCall>();
         HashMap<String,FVariable> newVars = new HashMap<String, FVariable>();
@@ -51,14 +38,25 @@ aspect BlockFunctionExtraction {
             if ((funcRepVariable = newVars.get(fCall.toString())) == null) { // If funcCall hasn't been processed before
                 // Create new temp. variable and add it to the variable list and the BiPGraph
                 String newTempName = fCall.calcTempVarName();
-                funcRepVariable = fCall.type().createTempFVariable(new FQNameFull(newTempName), fCall.variability());
+                Collection<Eq> eqs = g.getEquations(fCall.myFEquation());
+                funcRepVariable = fCall.type().createTempFVariable(new FQNameFull(newTempName), fCall.variability().fullCopy());
                 addFVariable(funcRepVariable);
-                g.addVariable(newTempName, funcRepVariable);
+                if (!fCall.variability().parameterOrLess()) {
+                    Var var = g.addVariable(newTempName, funcRepVariable);
+                    for (Eq eqn : eqs) {
+                        eqn.addVariable(var);
+                    }
+                }
                 newVars.put(fCall.toString(), funcRepVariable);
                 // Create new equation "temp = funcCall()" and add it to the equation list and list for BiPGraph
+                
                 FEquation newEq = new FEquation(funcRepVariable.createUseExp(), fCall.fullCopy());
-                addFEquation(newEq);
-                newEqs.add(newEq);
+                if (!fCall.variability().parameterOrLess()) {
+                    addFEquation(newEq);
+                    newEqs.add(newEq);
+                } else {
+                    addFParameterEquation(newEq);
+                }
             }
             // Replace the functionCall with a use of the corresponding temp variable
             fCall.replaceMe(funcRepVariable.createUseExp());
@@ -113,6 +111,40 @@ aspect BlockFunctionExtraction {
         if(!dep) {
             functions.add(this);
         }
-    } 
+    }
+    
+    /* Depends on block */
+
+    public boolean FExp.dependsOnBlock(AbstractEquationBlock block) {
+        return false;
+    }
+    
+    public boolean FBinExp.dependsOnBlock(AbstractEquationBlock block) {
+        boolean left = getLeft().dependsOnBlock(block);
+        boolean right = getRight().dependsOnBlock(block);
+        return left || right;
+    }
+    
+    public boolean FUnaryExp.dependsOnBlock(AbstractEquationBlock block) {
+        return getFExp().dependsOnBlock(block);
+    }
+
+    public boolean FMathematicalFunctionCall.dependsOnBlock(AbstractEquationBlock block) {
+        return getFExp().dependsOnBlock(block);
+    }
+    
+    public boolean FFunctionCall.dependsOnBlock(AbstractEquationBlock block) {
+        for (FExp exp: getArgs()){
+            if (exp.dependsOnBlock(block)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean FIdUseExp.dependsOnBlock(AbstractEquationBlock block) {
+        return block.allVariables().contains(myFV());
+    }
+
     
 }

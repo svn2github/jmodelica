@@ -441,7 +441,7 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
 				daeBLT = g.computeBLT(root().options);
-				if (root().options.getBooleanOption("block_func_extract") && blockFunctionExtraction(daeBLT, g)) {
+				if (blockFunctionExtraction(daeBLT, g)) {
 				    daeBLT = g.computeBLT(root().options);
 				}
 			} catch (BLTException e) {
@@ -552,7 +552,7 @@ aspect TransformCanonical {
 			g.tarjanReset();
 			try {
 				daeInitBLT = g.computeBLT(root().options);
-				if (root().options.getBooleanOption("block_func_extract") && blockFunctionExtraction(daeInitBLT, g)) {
+				if (blockFunctionExtraction(daeInitBLT, g)) {
                     daeInitBLT = g.computeBLT(root().options);
                 }
 			} catch (BLTException e) {
