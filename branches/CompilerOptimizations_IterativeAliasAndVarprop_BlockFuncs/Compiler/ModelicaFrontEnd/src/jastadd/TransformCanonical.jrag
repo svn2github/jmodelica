@@ -96,8 +96,7 @@ aspect TransformCanonical {
 		    addFDerivativeVariables,
 		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
-		    variabilityPropagation,
-		    new aliasElimAndVariabilityPropagationIfSet(),
+		    new variabilityPropagationIfSet(),
 		    new evaluateAsserts(),
 		    new enableSemiLinearRewrite(),
 		    new genInitialEquations(),
@@ -112,9 +111,6 @@ aspect TransformCanonical {
 	public void FClass.transformCanonicalCleanup() {
 		removeUnusedFunctions();
 	    root().flushAllRecursive();
-	    (new countPotAliasIfSet()).apply();
-	    (new findFunInBlockIfSet()).apply();
-	    (new findIdentFunIfSet()).apply();
 		for (FRecordDecl rec : getFRecordDecls())
 			rec.clearBindingEquations();
 	}

@@ -81,7 +81,6 @@ aspect VariabilityPropagation {
                 root().flushAllRecursiveClearFinal(); // Enable expression rewrites
             }
         }
-        public variabilityPropagationIfSet variabilityPropagation = new variabilityPropagationIfSet();
     }
 	
 	/**
