@@ -390,16 +390,14 @@ aspect ResidualPairs{
     
     protected void FResidualPair.propagate() {
         FAbstractEquation fae = getResidualEquation().myFEquation();
-        if (fae == null) {
-            error("Internal HGT Error, unable to find fae");
-            return;
-        }
+        if (fae == null)
+            throw new UnsupportedOperationException("Internal HGT Error, unable to find equation declaration for tearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!");
         FAbstractVariable fv = getIterationVariable().myFV();
+        if (fv == null)
+            throw new UnsupportedOperationException("Internal HGT Error, unable to find variable declaration for tearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!");
         int otherLevel = fae.HGTLevel();
-        if (otherLevel == getLevel()) {
-            error("Internal HGT Error, same level, decalred twise?");
-            return;
-        }
+        if (otherLevel == getLevel())
+            throw new UnsupportedOperationException("Internal HGT Error, found equation with two (or more) residual pairs declared at the same level. Should not be possible!\nCurrent tearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!\nTearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!");
         if (otherLevel > getLevel()) {
             fae.setHGTResidual(getLevel(), getIterationVariable().myFV().createUseExp());
             getIterationVariable().myFV().setHGTAsPair();
@@ -439,6 +437,12 @@ aspect ResidualPairs{
             fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), 
                     new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
         }
+    }
+    
+    @Override
+    protected void InstComponentDecl.createAndFlattenResidualPairs(FClass fc) {
+        if (useInFlattening())
+            super.createAndFlattenResidualPairs(fc);
     }
     
     public void InstNode.typeCheckSystemResiduals(ErrorCheckType checkType) {
