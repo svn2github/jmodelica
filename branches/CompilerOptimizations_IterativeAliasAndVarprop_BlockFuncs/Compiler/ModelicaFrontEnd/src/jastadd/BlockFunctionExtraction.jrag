@@ -97,12 +97,19 @@ aspect BlockFunctionExtraction {
         getFExp().findBlockFunctionExtraction(block, functions);
     }
     
-    public void FFunctionCall.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
-        boolean dep = false;
-        for (FExp exp: getArgs()){
+    public void FArray.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+        for (FExp exp: getFExps()) {
             exp.findBlockFunctionExtraction(block, functions);
         }
-        for (FExp exp: getArgs()){
+
+    }
+    
+    public void FFunctionCall.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+        boolean dep = false;
+        for (FExp exp: getArgs()) {
+            exp.findBlockFunctionExtraction(block, functions);
+        }
+        for (FExp exp: getArgs()) {
             if (exp.dependsOnBlock(block)) {
                 dep = true;
                 break;
@@ -116,6 +123,14 @@ aspect BlockFunctionExtraction {
     /* Depends on block */
 
     public boolean FExp.dependsOnBlock(AbstractEquationBlock block) {
+        return true;
+    }
+    
+    public boolean FAbstractScalarExp.dependsOnBlock(AbstractEquationBlock block) {
+        return false;
+    }
+    
+    public boolean FLitExp.dependsOnBlock(AbstractEquationBlock block) {
         return false;
     }
     
@@ -123,6 +138,15 @@ aspect BlockFunctionExtraction {
         boolean left = getLeft().dependsOnBlock(block);
         boolean right = getRight().dependsOnBlock(block);
         return left || right;
+    }
+    
+    public boolean FArray.dependsOnBlock(AbstractEquationBlock block) {
+        for (FExp exp: getFExps()) {
+            if (exp.dependsOnBlock(block)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public boolean FUnaryExp.dependsOnBlock(AbstractEquationBlock block) {
@@ -134,7 +158,7 @@ aspect BlockFunctionExtraction {
     }
     
     public boolean FFunctionCall.dependsOnBlock(AbstractEquationBlock block) {
-        for (FExp exp: getArgs()){
+        for (FExp exp: getArgs()) {
             if (exp.dependsOnBlock(block)) {
                 return true;
             }
