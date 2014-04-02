@@ -1,0 +1,96 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import org.jmodelica.util.ErrorCheckType;
+
+aspect SourceNameCheck {
+
+    public void ASTNode.nameCheck(ErrorCheckType checkType) {}
+
+    public abstract class ErrorChecker {
+        public static class NameChecker extends ErrorChecker {
+            public NameChecker() {
+                super("NameCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.nameCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.NAME_CHECKERS = addErrorChecker(new ErrorChecker.NameChecker());
+
+}
+
+aspect InstanceNameCheck {
+
+	public void InstAmbiguousAccess.nameCheck(ErrorCheckType checkType) {
+	    if (!isExpandableConnectorMemberInConnect())
+	        error("Cannot find class or component declaration for "+qualifiedName());
+  	}
+	
+	public void InstAmbiguousArrayAccess.nameCheck(ErrorCheckType checkType) {
+        if (!isExpandableConnectorMemberInConnect())
+            error("Cannot find class or component declaration for "+qualifiedName());
+  	}
+	
+	public void InstComponentAccess.nameCheck(ErrorCheckType checkType) {
+    	//log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
+		if (myInstComponentDecl().isUnknown()) 
+       		error("Cannot find component declaration for "+qualifiedName());
+		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
+			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
+		}
+    }
+  
+	public void InstComponentArrayAccess.nameCheck(ErrorCheckType checkType) {
+    	//log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
+		if (myInstComponentDecl().isUnknown()) 
+       		error("Cannot find component declaration for "+qualifiedName());
+		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
+			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
+		}
+    }
+  
+    public void InstClassAccess.nameCheck(ErrorCheckType checkType) {
+    	//log.debug("InstClassAccess.nameCheck(" + checkType + "): " + name() + " " + myInstClassDecl().name());
+		if (myInstClassDecl().isUnknown()) {
+			//getParent().dumpTree("");
+			error("Cannot find class declaration for "+qualifiedName());
+		}
+    }
+
+	public void InstEquationAccess.nameCheck(ErrorCheckType checkType) {
+		if (myEquation() == null)
+			error("Cannot find equation declaration for " + qualifiedName());
+	}
+	
+	
+	inh boolean InstAccess.isExpandableConnectorMemberInConnect();
+	eq InstDot.getInstAccess(int i).isExpandableConnectorMemberInConnect() = 
+	    isExpandableConnectorPart() && inConnectWithExistingComponent();
+	eq BaseNode.getChild().isExpandableConnectorMemberInConnect()          = false;
+	
+    inh boolean InstAccess.inConnectWithExistingComponent();
+    inh boolean FIdUseInstAccess.inConnectWithExistingComponent();
+	eq FIdUseInstAccess.getInstAccess().inConnectWithExistingComponent() = inConnectWithExistingComponent();
+	eq FConnectClause.getConnector1().inConnectWithExistingComponent()   = !getConnector2().getInstAccess().isExpandableConnectorPart();
+    eq FConnectClause.getConnector2().inConnectWithExistingComponent()   = !getConnector1().getInstAccess().isExpandableConnectorPart();
+	eq BaseNode.getChild().inConnectWithExistingComponent()              = false;
+	
+}

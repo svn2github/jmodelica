@@ -1,0 +1,939 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.Iterator;
+
+aspect DiagnosticsGeneration {
+
+/**
+ * A class for generating 
+ */
+public class DiagnosticsGenerator {
+
+	private String modelName;
+	private String modelNameUnderscore;
+	private String diagnosticsDirString;
+	
+	private String rawFlattenedModelFileName;
+	private String transformedModelFileName;	
+	private String errorsFileName;
+	private String bltFileName;	
+	private String bltTableFileName;	
+	private String aliasFileName;		
+	private String connectionsFileName;		
+    private String indexFileName;			
+    private String ivFileName;			
+
+	private String rawFlattenedModelAbsFileName;
+	private String transformedModelAbsFileName;	
+	private String errorsAbsFileName;
+	private String bltAbsFileName;	
+	private String bltTableAbsFileName;	
+	private String aliasAbsFileName;		
+	private String connectionsAbsFileName;		
+    private String indexAbsFileName;		
+    private String ivAbsFileName;
+    
+    private DiagnosticsFile rawFlattenedModel;
+	
+	private int numErrors = -1;
+	private int numComplianceErrors = -1;
+	private int numWarnings = -1;
+	
+	private Collection<Problem> problems = new TreeSet<Problem>();
+
+	/**
+	 * Default constructor for the Diagnostics generator.
+	 *
+	 * The diagnostics generator generates a number of HTML files containing
+	 * diagnostics for the compilation of a model.
+	 */	
+	private String html_header ="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n" +   
+								"<html>\n" + 
+								"<head>\n" + 
+								"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n" +
+								"<title>Model diagnosis</title>\n" + 
+								"</head>\n" + 
+								"<body style=\"background-color: rgb(255, 255, 255);\">\n";
+	
+	private String html_tail = "</body>\n </html>\n";
+	
+	private String indexDiagnostics;
+	
+	public DiagnosticsGenerator(String modelName) {
+		this.modelName = modelName;
+		this.modelNameUnderscore = modelName.replace('.','_');
+		// Create directory containing the diagnostics files	
+		File currDir = new File(".");
+		String currDirString = currDir.getAbsolutePath().substring(0,currDir.getAbsolutePath().length()-2);
+		File diagnosticsDir = new File(currDirString,this.modelNameUnderscore + "_html_diagnostics");
+		boolean success = diagnosticsDir.mkdir();
+		diagnosticsDirString = diagnosticsDir.getAbsolutePath();
+		
+		rawFlattenedModel = new RawFlatModelFile();
+		
+		DiagnosticsFile[] files = new DiagnosticsFile[] {
+				rawFlattenedModel
+		};
+		
+		for (DiagnosticsFile file : files)
+			file.clear();
+		
+//		this.rawFlattenedModelFileName = this.modelNameUnderscore + "_raw.html";
+		this.transformedModelFileName = this.modelNameUnderscore + "_transformed.html";
+		this.errorsFileName = this.modelNameUnderscore + "_errors.html";
+		this.bltFileName = this.modelNameUnderscore + "_blt.html";
+		this.bltTableFileName = this.modelNameUnderscore + "_bltTable.html";
+		this.aliasFileName = this.modelNameUnderscore + "_alias.html";
+		this.connectionsFileName = this.modelNameUnderscore + "_connections.html";
+		this.ivFileName = this.modelNameUnderscore + "_iv.html";
+		this.indexFileName = "index.html";
+		
+		indexDiagnostics = "<h2>" + modelName + "</h2>\n{problemsString}\n";
+		
+//		this.rawFlattenedModelAbsFileName = (new File(diagnosticsDirString,this.rawFlattenedModelFileName)).getAbsolutePath();
+		this.transformedModelAbsFileName = (new File(diagnosticsDirString,this.transformedModelFileName)).getAbsolutePath();
+		this.errorsAbsFileName = (new File(diagnosticsDirString,this.errorsFileName)).getAbsolutePath();
+		this.bltAbsFileName = (new File(diagnosticsDirString,this.bltFileName)).getAbsolutePath();
+		this.bltTableAbsFileName = (new File(diagnosticsDirString,this.bltTableFileName)).getAbsolutePath();
+		this.aliasAbsFileName = (new File(diagnosticsDirString,this.aliasFileName)).getAbsolutePath();
+		this.connectionsAbsFileName = (new File(diagnosticsDirString,this.connectionsFileName)).getAbsolutePath();
+		this.ivAbsFileName = (new File(diagnosticsDirString,this.ivFileName)).getAbsolutePath();
+		this.indexAbsFileName = (new File(diagnosticsDirString,this.indexFileName)).getAbsolutePath();
+		
+		// Clear old files
+		PrintStream out;
+		try {
+//			out = new PrintStream(rawFlattenedModelAbsFileName,"UTF-8");
+//			out.close();
+			out = new PrintStream(transformedModelAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(errorsAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(bltAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(bltTableAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(aliasAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(connectionsAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(ivAbsFileName,"UTF-8");
+			out.close();
+			out = new PrintStream(indexAbsFileName,"UTF-8");
+			out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		} 
+	}
+
+    /**
+     *  Write a file containing the raw flattened model.
+     */
+	public void writeRawFlattenedModel(FClass fc) {
+		rawFlattenedModel.write(fc);
+	}
+	
+	public class RawFlatModelFile extends DiagnosticsFile {
+		
+		public RawFlatModelFile() {
+			super("Flattened model", "raw", false);
+		}
+		
+		protected void writeContents(FClass fc, CodeStream out) {
+			// Dump model to file
+			out.print("<pre>\n");
+			fc.prettyPrint(out, "");
+			out.print("</pre>\n");
+		}
+		
+	}
+
+    /**
+     *  Write a file containing the transformed scalarized model..
+     */	
+	public void writeTransformedFlattenedModel(FClass fc) {
+		// Dump model to file
+		try {
+		    CodeStream out;
+			out = new CodeStream(new PrintStream(transformedModelAbsFileName,"UTF-8"));
+			out.print(html_header);
+			out.print("<pre>\n");
+			fc.prettyPrint(out, "");
+			out.print("</pre>\n");	
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		} 
+	}
+
+    /**
+     *  Write a file containing BLT information
+     */	
+	public void writeBLTFile(FClass fc) {
+		// Dump model to file
+		try {
+		    CodeStream out;
+			out = new CodeStream(new PrintStream(bltAbsFileName,"UTF-8"));
+			out.print(html_header);
+			if (fc.root().options.getBooleanOption("equation_sorting")) {
+				int ind = 0;
+				int unSInd = 0;
+				out.print("<h2>BLT for initialization system </h2>\n");
+				for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
+					out.print("<pre>\n");
+					out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + ind + "\">Block " + ind + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + "</a> ---\n");
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
+					ind++;
+				}
+				ind = 0;
+				unSInd = 0;
+				out.print("<h2>BLT for DAE system </h2>\n");
+				out.print("<h3> ODE blocks </h3>\n");	
+				// Loop over all derivatives
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
+				}
+				out.print("<h3> Real output blocks </h3>\n");
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
+				}
+				out.print("<h3> Integer and boolean output blocks </h3>\n");	
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
+				}
+				out.print("<h3> Other output blocks </h3>\n");
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+					eb.prettyPrint(out);
+					out.print("</pre>\n");
+				}		
+			}
+			out.print("</pre>\n");	
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {
+		}
+		writeIVFile(fc);
+	}
+	
+	public void writeIVFile(FClass fc) {
+		// Dump model to file
+		try {
+		    PrintStream out;
+			out = new PrintStream(ivAbsFileName, "UTF-8");
+			out.print(html_header);
+			if (fc.root().options.getBooleanOption("equation_sorting")) {
+				out.print("<h2>Alias sets of iteration variables:</h2>\n");
+				out.print("<pre>\n");
+				Set<FVariable> vars = new HashSet<FVariable>();
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT())
+					if (eb instanceof TornEquationBlock)
+						vars.addAll(eb.unsolvedVariables());
+				for (AliasManager.AliasSet as : fc.getAliasManager().getAliasSets())
+					if (vars.contains(as.getIterationVariable().getFVariable()))
+						out.println(as.toStringWithStart());
+				out.print("</pre>\n");
+			}
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {
+		}
+	}
+
+    /**
+     *  Write a file containing the alias elimination information
+     */	
+	public void writeAliasFile(FClass fc) {
+		// Dump model to file
+		try {
+		    PrintStream out;
+			out = new PrintStream(aliasAbsFileName,"UTF-8");
+			out.print(html_header);
+			out.print("<h2>Alias sets: " + modelName + "</h2>\n"); 
+			out.print("<pre>\n");
+			out.print(fc.aliasDiagnostics());
+			out.print("</pre>\n");	
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		} 
+	}
+
+    /**
+     *  Write a file containing the alias elimination information
+     */	
+	public void writeConnectionsFile(FClass fc) {
+		try {
+		    PrintStream out;
+			out = new PrintStream(connectionsAbsFileName,"UTF-8");
+			out.print(html_header);
+			out.print("<h2>Connection sets: " + modelName + "</h2>\n"); 
+			out.print("<pre>\n");
+			out.print(fc.getConnectionSetManager().printConnectionSets());
+			out.print("</pre>\n");	
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		} 
+	}
+	
+	/**
+     *  Write a file containing the problems in the model.
+     */
+	public void writeProblems(Collection<Problem> newProblems) {
+		// Add the problems to our set of problems
+		problems.addAll(newProblems);
+		// Print problems
+		try {
+			PrintStream out;
+			out = new PrintStream(errorsAbsFileName,"UTF-8");
+			out.print(html_header);
+			out.print("<h2>Problems: " + modelName + "</h2>\n"); 
+			out.print("<pre>\n");
+			StringBuffer errs = new StringBuffer();
+			StringBuffer compErrs = new StringBuffer();
+			StringBuffer warns = new StringBuffer();
+			numErrors = 0;
+			numComplianceErrors = 0;
+			numWarnings = 0;
+			for (Problem p : problems) {
+				if (p.severity() == Problem.Severity.ERROR && 
+				    p.kind() != Problem.Kind.COMPLIANCE) {
+					errs.append(p.toString() + "\n");
+					numErrors++; 
+				} else if (p.severity() == Problem.Severity.ERROR &&
+				           p.kind() == Problem.Kind.COMPLIANCE) {
+					compErrs.append(p.toString() + "\n");
+					numComplianceErrors++;
+				} else if (p.severity() == Problem.Severity.WARNING) {
+					warns.append(p.toString() + "\n");
+					numWarnings++;
+				}
+			}
+			out.print(errs.toString());
+			out.print(compErrs.toString());
+			out.print(warns.toString());
+			out.print("</pre>\n");	
+			out.print(html_tail);
+			out.close();
+			
+			// Update the index file.
+			writeIndexFile();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {
+		} 
+	}
+	
+	private String modelDiagnosticsBeforeTransform;
+	
+	public void setModelDiagnosticsBeforeTransform(String s) {
+		modelDiagnosticsBeforeTransform = s;
+	}
+	
+	
+	/**
+     *  Write index.html.
+     */
+	public void writeDiagnostics(FClass fc) {
+		
+		produceIndexDiagnostics(fc);
+		writeIndexFile();
+		
+		// Create BLT diagnostics file (if equation_sorting is true)
+		writeBLTFile(fc);
+				
+		// Create BLT table diagnostics file (if equation_sorting is true)
+		writeBLTTableFile(fc);
+				
+		// Create connection set information file
+		writeConnectionsFile(fc);
+				
+		// Create a file for alias information
+		writeAliasFile(fc);
+	}
+	
+	private void produceIndexDiagnostics(FClass fc) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		CodeStream out = new CodeStream(os);
+		out.println("<h2>" + modelName + "</h2>");
+		out.println("{problemsString}"); 
+		
+		out.println("<h3>Model before transformation</h3>");
+		out.println("<p><pre>");
+		// Diagnostics about model sizes
+		out.print(modelDiagnosticsBeforeTransform);
+		out.println("</pre></p>");
+		rawFlattenedModel.writeLink(out);
+//		out.println("<p><a href=\"" + rawFlattenedModelFileName + "\">Flattened model</a></p>"); 
+		out.println("<p><a href=\"" + connectionsFileName + "\">Connection sets</a></p>"); 
+		
+		
+		out.println("<h3>Model after transformation</h3>");
+		out.println("<p><pre>");
+		// Diagnostics about model sizes
+		out.print(fc.modelDiagnostics());
+		out.println("</pre></p>");	
+		// Model name and links to the flattened models
+		out.println("<p><a href=\"" + transformedModelFileName + "\">Transformed model</a></p>"); 
+		out.println("<p><a href=\"" + aliasFileName + "\"> Alias sets</a> (" + fc.aliasDiagnosticsShort()  + ")</p>"); 
+		out.println("<p><a href=\"" + bltFileName + "\">BLT diagnostics</a><br />"); 
+		out.println("<a href=\"" + bltTableFileName + "\">BLT diagnostics table</a></p>"); 
+		
+		if (fc.root().options.getBooleanOption("equation_sorting")) {
+			ArrayList<Integer> unsolvedDAEInitBlockSizes =
+			    fc.getDAEInitBLT().unsolvedBlockSizes(); 
+			ArrayList<Integer> unsolvedDAEBlockSizes =
+			    fc.getDAEBLT().unsolvedBlockSizes(); 
+			out.print("<p>Number of unsolved equation blocks in DAE initialization system: " + 
+		              unsolvedDAEInitBlockSizes.size() + ": {");   
+			int ind = 0;
+			for (Integer bs : unsolvedDAEInitBlockSizes) {
+				out.print(bs.toString());
+				if (ind<unsolvedDAEInitBlockSizes.size()-1) {
+					out.print(",");
+				}	
+				ind++;
+			}
+			out.println("}<br />");
+			out.print("Number of unsolved equation blocks in DAE system: " + 
+		              unsolvedDAEBlockSizes.size() + ": {");   
+			ind = 0;
+			for (Integer bs : unsolvedDAEBlockSizes) {
+				out.print(bs.toString());
+				if (ind<unsolvedDAEBlockSizes.size()-1) {
+					out.print(",");
+				}	
+				ind++;
+			}
+			out.println("}</p>");
+			if (fc.root().options.getBooleanOption("automatic_tearing") || fc.root().options.getBooleanOption("hand_guided_tearing")) {
+				unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
+				unsolvedDAEBlockSizes = fc.getDAEBLT().unsolvedBlockIterationSizes();
+				out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
+			              unsolvedDAEInitBlockSizes.size() + ": {");   
+				ind = 0;
+				for (Integer bs : unsolvedDAEInitBlockSizes) {
+					out.print(bs.toString());
+					if (ind<unsolvedDAEInitBlockSizes.size()-1) {
+						out.print(",");
+					}	
+					ind++;
+				}
+				out.println("}<br />");
+				out.print("Number of unsolved equation blocks in DAE system after tearing: " + 
+			              unsolvedDAEBlockSizes.size() + ": {");
+				ind = 0;
+				for (Integer bs : unsolvedDAEBlockSizes) {
+					out.print(bs.toString());
+					if (ind<unsolvedDAEBlockSizes.size()-1) {
+						out.print(",");
+					}	
+					ind++;
+				}
+				out.println("}</p>\n");
+			}
+		}
+		indexDiagnostics = os.toString();
+	}
+	
+	public void writeIndexFile() {
+		// Create index.html containing:
+		
+		try {
+			PrintStream out;
+			out = new PrintStream(indexAbsFileName,"UTF-8");
+			out.print(html_header);
+			out.print(indexDiagnostics.replaceFirst("\\{problemsString\\}", "<p><a href=\"" + errorsFileName + "\"> Problems:</a><br />\n" +
+					"  " + numErrors + " errors, " + numComplianceErrors + " compliance errors, " + numWarnings + " warnings</p>"));
+			out.print(html_tail);
+		   	out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		} 
+		
+	}
+
+	/**
+     *  Finalize the generation.
+     */
+	public void finalize() {}
+	
+	private static String BLT_style = "table.incidenceMatrix {\n" +
+			"	border-collapse:collapse;\n" +
+			"}\n" +
+			"\n" +
+			"th.var {\n" +
+			"	border-right:1px solid black;\n" +
+			"	border-left:1px solid black;\n" +
+			"}\n" +
+			"\n" +
+			"div.var {\n" +
+			"	width:30px;\n" +
+			"	overflow:hidden;\n" +
+			"	white-space:nowrap;\n" +
+			"}\n" +
+			"\n" +
+			"th.eqn {\n" +
+			"	text-align:right;\n" +
+			"	border-top:1px solid black;\n" +
+			"	border-bottom:1px solid black;\n" +
+			"}\n" +
+			"\n" +
+			"div.eqn {\n" +
+			"	max-width:200px;\n" +
+			"	overflow:hidden;\n" +
+			"	white-space:nowrap;\n" +
+			"}\n" +
+			"\n" +
+			"table.incidenceMatrix td {\n" +
+			"text-align:center;\n" +
+			"height:30px;\n" +
+			"}\n";
+	
+
+	public void writeBLTTableFile(FClass fc) {
+		try {
+			CodeStream out = new CodeStream(new PrintStream(bltTableAbsFileName, "UTF-8"));
+			out.print(html_header.replaceFirst("</head>", "<style type=\"text/css\">" + BLT_style + "</style></head>"));
+			if (fc.root().options.getBooleanOption("equation_sorting")) {
+				if (fc.numEquations() > 250) {
+					out.println("<p>The system is too big</p>");
+				} else {
+					out.println("<h1>BLT for Init DAE System</h1>");
+					fc.getDAEInitBLT().diagnostics_generateBLTTable(out, true);
+					
+					out.println("<h1>BLT for DAE System</h1>");
+					fc.getDAEBLT().diagnostics_generateBLTTable(out, false);
+				}
+			}
+			out.print(html_tail);
+			out.close();
+		} catch(FileNotFoundException e) {
+		} catch(UnsupportedEncodingException e) {		
+		}
+	}
+	
+	public abstract class DiagnosticsFile {
+		
+		protected String title;
+		protected String fileName;
+		protected File path;
+		protected boolean addTitle;
+		
+		protected DiagnosticsFile(String title, String suffix, boolean addTitle) {
+			this(title, String.format("%s_%s.html", modelNameUnderscore, suffix));
+			this.addTitle = addTitle;
+		}
+		
+		protected DiagnosticsFile(String title, String fileName) {
+			this.title = title;
+			this.fileName = fileName;
+			path = new File(diagnosticsDirString, fileName).getAbsoluteFile();
+			addTitle = false;
+		}
+		
+		public void write(FClass fc) {
+		    CodeStream out = null;
+			try {
+				out = new CodeStream(new PrintStream(path, "UTF-8"));
+				out.print(html_header);
+				if (addTitle) {
+					if (title != null)
+						out.format("<h2>%s: %s</h2>\n", title, modelName);
+					else
+						out.format("<h2>%s</h2>\n", modelName);
+				}
+				writeContents(fc, out);
+				out.print(html_tail);
+			} catch(FileNotFoundException e) {
+			} catch(UnsupportedEncodingException e) {		
+			} finally {
+				if (out != null)
+					out.close();
+			}
+		}
+		
+		public void clear() {
+			PrintStream out;
+			try {
+				out = new PrintStream(path, "UTF-8");
+				out.close();
+			} catch(FileNotFoundException e) {
+			} catch(UnsupportedEncodingException e) {		
+			} 
+		}
+		
+		public void writeLink(CodeStream out) {
+			writeLink(out, "");
+		}
+		
+		public void writeLink(CodeStream out, String suffix) {
+			out.format("<p><a href=\"%s\">%s</a>%s</p>\n", fileName, title, suffix);
+		}
+		
+		protected abstract void writeContents(FClass fc, CodeStream out);
+		
+	}
+	
+	protected static class TableManager {
+		private LinkedList<StyleRule> rules = new LinkedList<StyleRule>();
+		private int blockCounter = -1;
+		private int blockDepth;
+		private boolean blockIdSet = true;
+		private int xPos = 0;
+		private int yPos = 0;
+		private String blockPrefix;
+		
+		protected TableManager(String blockPrefix) {
+			this.blockPrefix = blockPrefix;
+		}
+		
+		public String getBlockPrefix() {
+			return blockPrefix;
+		}
+		
+		public String getStyle() {
+			for (StyleRule rule : rules) {
+				if (!rule.withIn(xPos, yPos))
+					continue;
+				
+				String style = "";
+				if (rule.getBackground() != null)
+					style = "background:" + rule.getBackground() + ";";
+				if (rule.onTopEdge(xPos, yPos))
+					style += "border-top:" + rule.getStyle() + ";";
+				if (rule.onRightEdge(xPos, yPos))
+					style += "border-right:" + rule.getStyle() + ";";
+				if (rule.onBottomEdge(xPos, yPos))
+					style += "border-bottom:" + rule.getStyle() + ";";
+				if (rule.onLeftEdge(xPos, yPos))
+					style += "border-left:" + rule.getStyle() + ";";
+				return style;
+			}
+			return "";
+		}
+		
+		public void newRow() {
+			yPos++;
+			xPos = 0;
+		}
+		
+		public int getYPos() {
+			return yPos;
+		}
+		
+		public void newCol() {
+			xPos++;
+		}
+		
+		public int getXPos() {
+			return xPos;
+		}
+		
+		public void addStyleRule(StyleRule rule) {
+			rules.addFirst(rule);
+		}
+		
+		public void popStyleRule() {
+			rules.removeFirst();
+		}
+		
+		public void enterBlock() {
+			blockDepth++;
+			if (blockDepth > 1)
+				return;
+			if (blockDepth == 1)
+				blockIdSet = false;
+			blockCounter++;
+		}
+		
+		public void leaveBlock() {
+			if (blockDepth > 0)
+				blockDepth--;
+		}
+		
+		public int getBlockId() {
+			return blockCounter;
+		}
+		
+		
+		public boolean blockIdSet() {
+			return blockIdSet;
+		}
+		
+		public void blockIdIsSet() {
+			blockIdSet = true;
+		}
+		
+	}
+	
+	protected static class StyleRule {
+		private final int xStart;
+		private final int yStart;
+		private final int xEnd;
+		private final int yEnd;
+		private final String style;
+		private final String background;
+		
+		public StyleRule(int xStart, int yStart, int xEnd, int yEnd, String style) {
+			this (xStart, yStart, xEnd, yEnd, style, null);
+		}
+
+		public StyleRule(int xStart, int yStart, int xEnd, int yEnd, String style, String background) {
+			this.xStart = xStart;
+			this.yStart = yStart;
+			this.xEnd = xEnd;
+			this.yEnd = yEnd;
+			this.style = style;
+			this.background = background;
+		}
+		
+		public boolean withIn(int x, int y) {
+			return yStart <= y && yEnd >= y && xStart <= x && xEnd >= x;
+		}
+		
+		public boolean onTopEdge(int x, int y) {
+			return y == yStart;
+		}
+		
+		public boolean onRightEdge(int x, int y) {
+			return x == xEnd;
+		}
+		
+		public boolean onBottomEdge(int x, int y) {
+			return y == yEnd;
+		}
+		
+		public boolean onLeftEdge(int x, int y) {
+			return x == xStart;
+		}
+		
+		public String getStyle() {
+			return style;
+		}
+		
+		public String getBackground() {
+			return background;
+		}
+		
+		@Override
+		public String toString() {
+			return yStart + " " + xEnd + " " + yEnd + " " + xStart + " " + style;
+		}
+	}
+	
+}
+	
+	public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
+		Deque<FVariable> orderList = new ArrayDeque<FVariable>();
+		for (AbstractEquationBlock aeb : this) {
+			orderList.addAll(aeb.allVariables());
+		}
+		FVariable[] order = orderList.toArray(new FVariable[orderList.size()]);
+		
+		DiagnosticsGenerator.TableManager tm = new DiagnosticsGenerator.TableManager(isInit ? "block_init_" : "block_");
+		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(0, 0, order.length - 1, order.length - 1, "1px dashed black"));
+		
+		out.println("<table class=\"incidenceMatrix\">");
+		out.println("	<tr>");
+		out.println("		<th />");
+		for (FVariable fv : order) {
+			out.println("		<th class=\"var\"><div class=\"var\" title=\"" + ASTNode.escapeHTML(fv.name()) + "\">" + ASTNode.escapeHTML(fv.name()) + "</div></th>");
+		}
+		out.println("	</tr>");
+		
+		for (AbstractEquationBlock aeb : this) {
+			aeb.diagnostics_generateBLTTable_block(order, out, tm);
+		}
+
+		out.println("</table>");
+	}
+	
+	protected abstract String AbstractEquationBlock.diagnostics_generateBLTTable_color();
+	protected String TornEquationBlock.diagnostics_generateBLTTable_color() {
+		return "#F0CCCC";
+	}
+
+	protected String SimpleEquationBlock.diagnostics_generateBLTTable_color() {
+		return "#CCF0CC";
+	}
+
+	protected String AlgorithmBlock.diagnostics_generateBLTTable_color() {
+		return "#CCF0CC";
+	}
+	
+	protected String EquationBlock.diagnostics_generateBLTTable_color() {
+		return "#CCCCF0";
+	}
+	
+	protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Collections.emptyMap();
+
+	public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
+		tm.enterBlock();
+		int xStart = tm.getYPos();
+		int yStart = tm.getYPos();
+		int xEnd = xStart + allVariables().size() - 1;
+		int yEnd = yStart + allVariables().size() - 1;
+		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(xStart, yStart, xEnd, yEnd, "1px solid black", diagnostics_generateBLTTable_color()));
+		diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
+		tm.popStyleRule();
+		tm.leaveBlock();
+	}
+	
+	public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+		for (FAbstractEquation equation : allEquations()) {
+			if (varFilter == EMPTY_VAR_FILTER)
+				size = equation.numScalarEquations();
+			String equationStr = ASTNode.escapeHTML(equation);
+			for (int i = 0; i < size; i++) {
+				out.println("	<tr>");
+				if (i == 0) {
+					out.print("		<th class=\"eqn\"");
+					if (size > 1)
+						out.print(" rowspan=\"" + size + "\"");
+					out.println("><div class=\"eqn\" title=\"" + equationStr + "\">" + equationStr + "</div></th>");
+				}
+				for (FVariable var : order) {
+					Integer pos = varFilter.get(var);
+					boolean contains = (equation.variables().contains(var) 
+							|| equation.discretePreVariables().contains(var)
+							|| equation.nonFixedParameters().contains(var))
+							&& (pos == null || pos == i);
+					out.print("		<td");
+					String style = tm.getStyle();
+					if (!style.isEmpty())
+						out.print(" style=\"" + style + "\"");
+					if (contains) {
+						out.print(" title=\"" + ASTNode.escapeHTML(var.name()) + "&#13;&#13;" + equationStr + "\"");
+						if (!tm.blockIdSet()) {
+							tm.blockIdIsSet();
+							out.print(" id=\"" + tm.getBlockPrefix() + tm.getBlockId() + "\"");
+						}
+					}
+					out.print(">");
+					if (contains)
+						out.print(diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var.name(), inTearBlock)));
+					out.println("</td>");
+					tm.newCol();
+				}
+				out.println("	</tr>");
+				tm.newRow();
+			}
+		}
+	}
+	
+	private String AbstractEquationBlock.diagnostics_generateBLTTable_solvabilitySymbol(Solvability s) {
+		switch (s) {
+		case ANALYTICALLY_SOLVABLE:
+			return "O";
+		case NUMERICALLY_SOLVABLE:
+			return "@";
+		case UNSOLVABLE:
+			return "X";
+		}
+		throw new IllegalArgumentException("Unsupported solvability type " + s);
+	}
+	
+	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+		int startL = tm.getYPos();
+		int endL = startL + allVariables().size() - unsolvedVariables().size() - 1;
+		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startL, startL, endL, endL, "1px solid black", "#F0E4E4"));
+		int startJ = endL + 1;
+		int endJ = startL + allVariables().size() - 1;
+		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startJ, startJ, endJ, endJ, "1px solid black", "#F0C0C0"));
+		java.util.List<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+		blocks.addAll(solvedBlocks());
+		blocks.addAll(unsolvedBlocks());
+		for (SimpleEquationBlock seb : blocks) {
+			seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
+		}
+		tm.popStyleRule();
+		tm.popStyleRule();
+	}
+	
+	public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+		varFilter = new HashMap<FVariable, Integer>();
+		int index = 0;
+		for (FVariable var : equation().referencedFVariablesInLHS()) {
+			varFilter.put(var, -1);
+		}
+		for (FVariable var : activeVars) {
+			varFilter.put(var, index);
+			index++;
+		}
+		for (FVariable var : equation().referencedFVariablesInRHS()) {
+			varFilter.remove(var);
+		}
+		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+	}
+	
+	public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+		varFilter = new HashMap<FVariable, Integer>();
+		int index = 0;
+		for (FVariable var : equation().referencedFVariablesInLHS()) {
+			varFilter.put(var, -1);
+		}
+		for (FVariable var : activeVars) {
+			varFilter.put(var, index);
+			index++;
+		}
+		for (FVariable var : equation().referencedFVariablesInRHS()) {
+			varFilter.remove(var);
+		}
+		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+	}
+	
+	public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
+		
+	}
+	
+	
+	protected static String ASTNode.escapeHTML(Object o) {
+		return escapeHTML(o.toString());
+	}
+	protected static String ASTNode.escapeHTML(String str) {
+		str = str.replace("&", "&amp;");
+		str = str.replace("\"", "&quot;");
+		str = str.replace("\'", "&039;");
+		str = str.replace("<", "&lt;");
+		str = str.replace(">", "&gt;");
+		return str;
+	}
+	
+}
