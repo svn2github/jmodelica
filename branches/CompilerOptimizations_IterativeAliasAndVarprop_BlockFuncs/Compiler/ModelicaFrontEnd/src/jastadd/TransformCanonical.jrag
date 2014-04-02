@@ -452,6 +452,9 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
 				daeBLT = g.computeBLT(root().options, duringInteractiveFMU);
+				if (blockFunctionExtraction(daeBLT, g)) {
+				    daeBLT = g.computeBLT(root().options, duringInteractiveFMU);
+				}
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
@@ -518,7 +521,7 @@ aspect TransformCanonical {
 		g.addEquations(initialEquations(), VAR_TYPES_ALL, "eq_", g.getEquations().size() + 1);
 
 		log.info(g);
-		g.maximumMatching(false);	
+		g.maximumMatching(false);
 		log.info("DAE initial ");
 		log.info(g.printMatchingObj());
 
@@ -560,6 +563,9 @@ aspect TransformCanonical {
 			g.tarjanReset();
 			try {
 				daeInitBLT = g.computeBLT(root().options, duringInteractiveFMU);
+				if (blockFunctionExtraction(daeInitBLT, g)) {
+                    daeInitBLT = g.computeBLT(root().options, duringInteractiveFMU);
+                }
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
