@@ -18,8 +18,8 @@ import java.util.Collection;
 
 aspect EquationName {
     
-    public abstract class EquationContributer {
-        public static class EquationNameContributer extends EquationContributer {
+    public abstract class AttributeContributer {
+        public static class EquationNameContributer extends AttributeContributer {
             
             public EquationNameContributer() {
                 super("EquationNameContributer");
@@ -38,18 +38,21 @@ aspect EquationName {
                 else
                     dest.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
             }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {}
         }
     }
     
-    private static EquationContributer AbstractEquation.EQUATION_NAME_CONTRIBUTER =
-            addEquationContributer(new EquationContributer.EquationNameContributer());
+    private static AttributeContributer ASTNode.EQUATION_NAME_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.EquationNameContributer());
     
 }
 
 aspect HGT {
     
-    public abstract class EquationContributer {
-        public static class HGTContributer extends EquationContributer {
+    public abstract class AttributeContributer {
+        public static class HGTContributer extends AttributeContributer {
             
             public HGTContributer() {
                 super("HGTContributer");
@@ -84,11 +87,25 @@ aspect HGT {
                 }
                 dest.setHGTResidual(Integer.MAX_VALUE, enabledFExp, enabledEach, iterationVariableFExp);
             }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {
+                AnnotationNode iterationNode = src.annotation().vendorNode().forPath("IterationVariable");
+                if (iterationNode.exists() && src.root().options.getBooleanOption("hand_guided_tearing")) {
+                    AnnotationNode enabledNode = iterationNode.forPath("enabled");
+                    if (!enabledNode.exists() || enabledNode.exp() == null) {
+                        dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, src.isArray()));
+                    } else {
+                        dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, src.containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(src.getFQNamePrefix()), 
+                                FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEachSet()));
+                    }
+                }
+            }
         }
     }
     
-    private static EquationContributer AbstractEquation.HGT_CONTRIBUTER =
-            addEquationContributer(new EquationContributer.HGTContributer());
+    private static AttributeContributer ASTNode.HGT_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.HGTContributer());
     
     syn int FAbstractEquation.HGTLevel() {
         FAttribute residual = findAttribute("ResidualEquation");

@@ -1,6 +1,6 @@
 aspect LocalIteration{
-    public abstract class EquationContributer {
-        public static class LocalIterationContributer extends EquationContributer {
+    public abstract class AttributeContributer {
+        public static class LocalIterationContributer extends AttributeContributer {
             
             public LocalIterationContributer() {
                 super("LocalIterationContributer");
@@ -19,11 +19,14 @@ aspect LocalIteration{
                 if (enabledExp != null)
                     localIterationAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
             }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {}
         }
     }
     
-    private static EquationContributer AbstractEquation.LOCAL_ITERATION_CONTRIBUTER =
-            addEquationContributer(new EquationContributer.LocalIterationContributer());
+    private static AttributeContributer ASTNode.LOCAL_ITERATION_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.LocalIterationContributer());
     
     syn boolean FAbstractEquation.canUseLocalIteration() {
         String option = root().options.getStringOption("local_iteration_in_tearing");

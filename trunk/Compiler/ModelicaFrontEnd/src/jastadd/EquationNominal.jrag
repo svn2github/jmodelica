@@ -15,8 +15,8 @@
 */
 
 aspect EquationNominal{
-    public abstract class EquationContributer {
-        public static class EquationNominalContributer extends EquationContributer {
+    public abstract class AttributeContributer {
+        public static class EquationNominalContributer extends AttributeContributer {
             
             public EquationNominalContributer() {
                 super("EquationNominalContributer");
@@ -41,11 +41,14 @@ aspect EquationNominal{
                 if (enabledExp != null)
                     nominalAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
             }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {}
         }
     }
     
-    private static EquationContributer AbstractEquation.EQUATION_NOMINAL_CONTRIBUTER =
-            addEquationContributer(new EquationContributer.EquationNominalContributer());
+    private static AttributeContributer ASTNode.EQUATION_NOMINAL_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.EquationNominalContributer());
 
     protected void FAbstractEquation.typeCheckNominal(ErrorCheckType checkType) {
         FAttribute nominalAttr = findAttribute("Nominal");
