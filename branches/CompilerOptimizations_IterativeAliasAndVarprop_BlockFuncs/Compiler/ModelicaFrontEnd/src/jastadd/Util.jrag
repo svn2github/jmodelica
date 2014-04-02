@@ -1,0 +1,3296 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.nio.charset.Charset;
+
+import org.jmodelica.util.logging.StreamingLogger;
+import org.jmodelica.util.logging.Level;
+import org.jmodelica.util.AbstractModelicaScanner;
+
+aspect RootAccess {
+    
+    syn String SourceRoot.language() = "Modelica";
+    
+    inh Root ASTNode.retrieveRoot();
+    eq SourceRoot.getChild().retrieveRoot() = this;
+    eq FlatRoot.getChild().retrieveRoot()   = this;
+    syn Root ASTNode.root() = retrieveRoot();
+    syn Root BaseNode.root() = retrieveRoot();
+    eq Root.root() = this;
+    
+    // TODO: When uses of ArrayList has been generalised to List, replace with Collections.emptyList()
+    public static final ArrayList ASTNode.EMPTY_ARRAY_LIST = new ArrayList(0);
+    syn ArrayList ASTNode.emptyArrayList() = EMPTY_ARRAY_LIST;
+    
+    public boolean ASTNode.hasRoot() { return (getParent() == null) ? false : getParent().hasRoot(); }
+    public boolean Root.hasRoot()    { return true; }
+    
+    /*
+     * These four methods are the only with references to the package containing 
+     * the parser. Refine when needed.
+     */
+    public static beaver.Parser ParserHandler.createModelicaParser(AbstractModelicaScanner scanner) {
+    	org.jmodelica.modelica.parser.ModelicaParser parser = 
+    		new org.jmodelica.modelica.parser.ModelicaParser();
+        parser.setLineBreakMap(scanner.getLineBreakMap());
+        parser.setFormattingInfo(scanner.getFormattingInfo());
+		return parser;
+    }
+    
+    public static AbstractModelicaScanner ParserHandler.createModelicaScanner(Reader in) {
+    	return new org.jmodelica.modelica.parser.ModelicaScanner(in);
+    }
+    
+    public static AbstractFlatModelicaScanner ParserHandler.createModelicaFlatScanner(Reader in) {
+    	return new org.jmodelica.modelica.parser.FlatModelicaScanner(in);
+    }
+    
+    public static short ParserHandler.expModelicaGoal() {
+    	return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.exp;
+    }
+    
+    public SourceRoot ParserHandler.parseFile(String fileName) 
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        return parseModelicaFile(fileName);
+    }
+    
+    public SourceRoot ParserHandler.parseString(String str, String fileName) 
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        return parseModelicaString(str,fileName);
+    }
+    
+    public Exp ParserHandler.parseExpString(String str)
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        return parseModelicaExpString(str);
+    }
+    
+    public SourceRoot ParserHandler.parseModelicaFile(String fileName) 
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        SourceRoot sr = null;
+        Reader reader = fileReader(fileName);
+        AbstractModelicaScanner scanner = createModelicaScanner(new BufferedReader(reader));
+        beaver.Parser parser = createModelicaParser(scanner);
+        sr = (SourceRoot) parser.parse(scanner);
+        sr.setFileName(fileName);
+        reader.close();
+        return sr;
+    }
+    
+    public SourceRoot ParserHandler.parseModelicaString(String str, String fileName) 
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        SourceRoot sr = null;
+        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(str));
+        beaver.Parser parser = createModelicaParser(scanner);
+        sr = (SourceRoot) parser.parse(scanner);
+        sr.setFileName(fileName);
+        return sr;
+    }
+    
+    public Exp ParserHandler.parseModelicaExpString(String str)
+       throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+        Exp exp = null;
+        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(str));
+        beaver.Parser parser = createModelicaParser(scanner);
+        exp = (Exp) parser.parse(scanner, expModelicaGoal());
+        //log.debug("ModelicaParser.parseExpString: "+str);
+        //exp.dumpTreeBasic("");
+        return exp;
+    }
+    
+    public static Reader ParserHandler.fileReader(File file) throws FileNotFoundException {
+		return new InputStreamReader(new FileInputStream(file), UTF8);
+    }
+    
+    public static Reader ParserHandler.fileReader(String path) throws FileNotFoundException {
+		return fileReader(new File(path));
+    }
+    
+    public static final Charset ASTNode.UTF8 = Charset.forName("UTF-8");
+    
+}
+
+aspect SourceUtil {
+	syn boolean Exp.isAccess() = false;
+	eq AccessExp.isAccess() = true;
+	
+	syn Access Exp.asAccess() {
+		throw new UnsupportedOperationException();
+	}
+	eq AccessExp.asAccess() = getAccess();
+	
+	syn boolean Access.isNamed() = false;
+	eq NamedAccess.isNamed() = true;
+	
+	syn String Access.asID() {
+		throw new UnsupportedOperationException();
+	}
+	eq NamedAccess.asID() = getID();
+}
+
+aspect Logging {
+
+    public static ModelicaLogger ASTNode.log = ModelicaCompiler.log;
+    
+}
+
+aspect NodeMethods {
+	  
+    public class ASTNode{
+        /**
+         * \brief Copies the member variables defining the location within 
+         *        the source to another node.
+         *        
+         * @param n  the node to copy the location to
+         * @return   the node given as <code>n</code>, for convenience
+         */
+        public <N extends ASTNode> N copyLocationTo(N n) {
+      	    n.setLocation(this, this);
+            return n;
+        }
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied another node.
+     */
+    public void ASTNode.setLocation(ASTNode node) {
+  	    setLocation(node, node);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes.
+     * 
+     * @param start  the node to copy the <code>start</code> member from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void ASTNode.setLocation(ASTNode start, ASTNode end) {
+        this.start = start.start;
+        this.end = end.end;
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes.
+     * 
+     * @param start  the node to copy the <code>start</code> and <code>fName</code> 
+     *               members from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void BaseNode.setLocation(ASTNode start, ASTNode end) {
+        super.setLocation(start, end);
+        fName = start.fileName();
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied another node, that might not be in a 
+     *        proper AST.
+     */
+    public void ASTNode.setLocationNoTree(ASTNode node) {
+  	    setLocationNoTree(node, node);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes, that might not be 
+     *        in a proper AST.
+     * 
+     * @param start  the node to copy the <code>start</code> member from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void ASTNode.setLocationNoTree(ASTNode start, ASTNode end) {
+        setLocation(start, end);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes, that might not be 
+     *        in a proper AST.
+     * 
+     * @param start  the node to copy the <code>start</code> and <code>fName</code> 
+     *               members from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end) {
+    	setLocationNoTree(start, end, start);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within
+     *        the source to values copied from two other nodes, that might not be
+     *        in a proper AST.
+     * @param start      the node to copy the <code>start</code> member from.
+     * @param end        the node to copy the <code>end</code> member from.
+     * @param fNameNode  the node to copy the <code>fName</code> member from.
+     */
+    public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end, ASTNode fNameNode) {
+        super.setLocation(start, end);
+        if (fNameNode instanceof BaseNode)
+        	fName = ((BaseNode) fNameNode).fName;
+    }
+    
+    public int ASTNode.beginLine()   { return getLine(getStart()); }
+    public int ASTNode.beginColumn() { return getColumn(getStart()); }
+    public int ASTNode.endLine()     { return getLine(getEnd()); }
+    public int ASTNode.endColumn()   { return getColumn(getEnd()); }
+
+    public String ASTNode.getNodeName() {
+        return dump();
+    }
+    
+    public String IdDecl.getNodeName() {
+        return dump() + ": '" + getID() + "'";
+    }
+
+    public String NamedAccess.getNodeName() {
+        return dump() + ": '" + getID() + "'";
+    }
+    
+    public String RealLitExp.getNodeName() {
+        return dump() + ": " + getUNSIGNED_NUMBER();
+    }
+    
+    public String InstComponentDecl.getNodeName() {
+        return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
+    }
+    
+    
+   	public class List {
+   		
+	    /**
+	     * \brief Creates a new ArrayList containing all the elements in this list, in the same order.
+	     */
+	    public ArrayList<T> toArrayList() {
+	        ArrayList<T> l = new ArrayList<T>(getNumChild());
+	        for (T e : this)
+	            l.add(e);
+	        return l;
+	    }
+	    
+	    /**
+	     * Adds all nodes in an iterable to the list.
+	     */
+	    public void addAll(Iterable<? extends T> list) {
+	        for (T e : list)
+	            add(e);
+	    }
+	    
+	    /**
+	     * Adds all nodes in an array to the list.
+	     */
+	     public <S extends T> void addAll(S[] list) {
+	         for (S e : list)
+	             add(e);
+	    }
+	    
+    }
+
+    
+    /**
+     * \brief Replace <code>from</code> with <code>to</code>.
+     * 
+     * Search through children after <code>from</code>. If it is found, 
+     * replace it with <code>to</code> and return <code>true</code>.
+     * Comparisons are done with ==, not with equals().
+     */
+    public boolean List.replaceChild(T oldNode, T newNode) {
+    	int n = getNumChildNoTransform();
+        for (int i = 0; i < n; i++) {
+            if (getChildNoTransform(i) == oldNode) {
+                setChild(newNode, i);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * \brief Return a copy of node that is not in any tree.
+     * 
+     * Returns <code>this</code> if node has no parent, <code>fullCopy()</code> otherwise.
+     */
+    public ASTNode ASTNode.unboundCopy() {
+        return (parent == null) ? this : fullCopy();
+    }
+    
+    /**
+     * Check if this node is a direct child (only List/Opt between) of <code>parent</code>.
+     */
+    public boolean ASTNode.isChildOf(BaseNode parent) {
+        ASTNode par = getParent();
+        return par != null && par.isChildOfHelper(parent);
+    }
+    
+    /**
+     * Helper method for {@link #isChildOf(BaseNode parent)}, should not be called directly.
+     */
+    protected boolean ASTNode.isChildOfHelper(BaseNode parent) {
+        return isChildOf(parent);
+    }
+
+    protected boolean BaseNode.isChildOfHelper(BaseNode parent) {
+        return parent == this;
+    }
+    
+    /**
+     * \brief Returns an iterable, that has an iterator that iterates over all direct FExp children.
+     * 
+     * The iterator passes through Lists and Opts.
+     */
+    public Iterable<FExp> FExp.childFExps() {
+        return new ChildFExpIterable();
+    }
+    
+    public class FExp {
+        
+        private class ChildFExpIterable implements Iterable<FExp> {
+            public Iterator<FExp> iterator() {
+                return new ChildFExpIterator();
+            }
+        }
+        
+        
+        private class ChildFExpIterator implements Iterator<FExp> {
+            
+            Iterator<ASTNode> it1;
+            Iterator<ASTNode> it2;
+            FExp next = null;
+
+            public ChildFExpIterator() {
+                it1 = iterator();
+                it2 = null;
+                update();
+            }
+            
+            private void update() {
+                boolean cont = true;
+                ASTNode node = null;
+                while (cont) {
+                    node = null;
+                    if (it2 == null) {
+                        if (it1.hasNext())
+                            node = it1.next();
+                        else 
+                            cont = false;
+                        if (node instanceof List || node instanceof Opt)
+                            it2 = node.iterator();
+                    } else {
+                        if (it2.hasNext()) 
+                            node = it2.next();
+                        else 
+                            it2 = null;
+                    }
+                    if (node instanceof FExp) 
+                        cont = false;
+                }
+                next = (FExp) node;
+            }
+
+            public boolean hasNext() {
+                return next != null;
+            }
+
+            public FExp next() {
+                FExp res = next;
+                update();
+                return res;
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            
+        }
+        
+    }
+
+}
+
+aspect FileNames {
+    
+    protected String BaseNode.fName = null;
+
+    public String ASTNode.fileName() { 
+    	return retrieveFileName(); 
+    }
+    public String BaseNode.fileName() {
+    	if (fName == null)
+    	    fName = retrieveFileName();
+    	return fName;
+    }
+    public String Root.fileName() { 
+    	return fName; 
+    }
+    
+    syn String ASTNode.dirName() = 
+    	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
+//    syn String ASTNode.dirName() {
+//    	String res = fileName();
+//    	if (res == null)
+//    		return res;
+//    	res = res.replaceFirst("^[^\\\\/]*$", ".");
+//    	return res.replaceFirst("[\\\\/][^\\\\/]*$", "");
+//    }
+    
+    inh String ASTNode.retrieveFileName();
+    eq BaseNode.getChild().retrieveFileName() = fileName();
+    
+    public void Root.setFileName(String fName)             { this.fName = fName; }
+    public void StoredDefinition.setFileName(String fName) { this.fName = fName; }
+}
+    
+aspect Names {
+  // simple names
+  syn String IdDecl.name()            = getID();
+  syn String Access.name();
+  eq NamedAccess.name()               = getID();
+  eq PN_Dot.name()                    = 
+  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
+  syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
+  syn lazy String Dot.name() {
+	  StringBuilder buf = new StringBuilder();
+	  List<Access> l = getAccessListNoTransform();
+	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
+		  buf.append(l.getChildNoTransform(i).name());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
+  
+   // simple names of InstAccess:es
+  syn String InstAccess.name();
+  eq InstNamedAccess.name()               = getID();
+  syn lazy String InstGlobalAccess.name() = "." + getInstAccessNoTransform().name();
+  syn lazy String InstDot.name() {
+	  StringBuilder buf = new StringBuilder();
+	  List<InstAccess> l = getInstAccessListNoTransform();
+	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
+		  buf.append(l.getChildNoTransform(i).name());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
+  
+  syn String InstNamedModification.name() = getNameNoTransform().name();
+  
+  syn String Access.qualifiedName();
+  eq NamedAccess.qualifiedName()               = getID();
+  eq PN_Dot.qualifiedName()                    = 
+  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  eq GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
+  eq Dot.qualifiedName() {
+	  StringBuilder buf = new StringBuilder();
+	  for (Access a : getAccesss()) {
+		  buf.append(a.qualifiedName());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
+  
+  syn String InstAccess.qualifiedName();
+  eq InstNamedAccess.qualifiedName()           = getID();
+  eq InstDot.qualifiedName() {
+	  StringBuilder buf = new StringBuilder();
+	  for (InstAccess ia : getInstAccesss()) {
+		  buf.append(ia.qualifiedName());
+		  buf.append('.');
+	  }
+	  return buf.substring(0, buf.length() - 1);
+  }
+  eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
+  
+  syn String ClassDecl.name();
+  eq BaseClassDecl.name()    = getNameNoTransform().getID();
+  eq BuiltInClassDecl.name() = getNameNoTransform().getID();
+  //eq LibNode.name() = getName();
+  
+  syn String ComponentDecl.name() = getNameNoTransform().getID();
+  
+  syn String FunctionCall.name() = getNameNoTransform().name();
+  
+  syn String InstImport.name();
+  eq InstImportQualified.name()   = getPackageNameNoTransform().lastName();
+  eq InstImportRename.name()      = 
+	  ((ImportClauseRename) getImportClause()).getIdDeclNoTransform().getID();
+  eq InstImportUnqualified.name() = "*";    // To avoid returning null
+  
+  syn String Access.lastName() = name();
+  eq Dot.lastName()            = getAccessListNoTransform().lastChildNoTransform().lastName();
+  eq GlobalAccess.lastName()   = getAccessNoTransform().lastName();
+  
+  syn String InstAccess.lastName() = name();
+  eq InstDot.lastName()            = getInstAccessListNoTransform().lastChildNoTransform().lastName();
+  eq InstGlobalAccess.lastName()   = getInstAccessNoTransform().lastName();
+  
+  public T List.lastChildNoTransform() {
+	  return getChildNoTransform(getNumChildNoTransform() - 1);
+  }
+  
+  syn String ClassDecl.qualifiedName();
+  eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
+  inh String BaseClassDecl.classNamePrefix();
+  inh String ComponentDecl.classNamePrefix();
+  eq FullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());
+  eq BuiltInClassDecl.qualifiedName() = getName().getID();
+  
+  // For proxy
+  public String SourceRoot.computeClassNamePrefix() {
+      return "";
+  }
+  
+  eq SourceRoot.getProgram().classNamePrefix() = computeClassNamePrefix();
+  eq Root.getChild().classNamePrefix() = "";
+  
+  /**
+   * \brief Compose a dotted name of two components.
+   * 
+   * Each component can be a dotted name, a single name or empty.
+   */
+  public static String ASTNode.combineName(String first, String second) {
+	  if (first.equals(""))
+		  return second;
+	  if (second.equals(""))
+		  return first;
+	  return first + "." + second;
+  }
+  
+  syn String InstClassDecl.primitiveName();
+  eq InstBaseClassDecl.primitiveName() = name();
+  eq InstBuiltInClassDecl.primitiveName() = name();
+  
+  eq InstFullClassDecl.primitiveName() {
+      if (extendsPrimitive())
+          return getInstExtends(0).myInstClass().finalClass().primitiveName();
+      else 
+          return name();
+  }
+  
+  syn String InstForIndex.name() = getInstPrimitiveNoTransform().name();
+  syn String FForIndex.name()    = getFVariableNoTransform().name();
+ 
+  syn String InstAccess.enclosingName() = "";
+  eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
+  eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
+  
+  
+  inh String InstExternal.packageName();
+  inh String InstBaseClassDecl.packageName();
+  eq InstBaseClassDecl.getChild().packageName() = isPackage() ? qualifiedName() : packageName();
+  eq Root.getChild().packageName() = null;
+  
+  syn String InstExternal.libraryName() = findLibraryName();
+  syn String InstNode.libraryName() {
+	  InstClassDecl icd = myInstClass();
+	  String res = icd.isUnknown() ? findLibraryName() : icd.findLibraryName();
+	  return (res == null) ? name() : res;
+  }
+  
+  inh String InstExternal.findLibraryName();
+  inh String InstNode.findLibraryName();
+  eq InstNode.getChild().findLibraryName() = libraryName();
+  eq InstRoot.getChild().findLibraryName() = null;
+  eq Root.getChild().findLibraryName()     = null;
+  
+  inh String ASTNode.packagePath(String name);
+  eq Root.getChild().packagePath(String name) = null;
+  eq InstNode.getChild().packagePath(String name) {
+	  InstClassDecl icd = lookupInstClassDotted(name);
+	  return (icd == null) ? null : icd.dirName();
+  }
+  eq FullClassDecl.getChild().packagePath(String name) {
+	  ClassDecl cd = simpleLookupClassDotted(name);
+	  return (cd == null) ? null : cd.dirName();
+  }
+  
+  inh String ASTNode.topPackagePath();
+  eq Root.getChild().topPackagePath() = null;
+  eq InstClassDecl.getChild().topPackagePath() {
+	  String path = topPackagePath();
+	  return (path == null) ? dirName() : path;
+  }
+  eq FullClassDecl.getChild().topPackagePath() {
+	  String path = topPackagePath();
+	  return (path == null) ? dirName() : path;
+  }
+
+  /**
+   * \brief Converts an URI to a file-system path.
+   * 
+   * Only modelica:// and file:// URIs are supported. 
+   * If the string is a simple path, then it is interpreted as relative to the 
+   * top level package this node is in, or if that path does not exist, relative 
+   * to the parent directory the file this node is in.
+   * 
+   * @param str  the string to interpret as an URI
+   */
+  public String ASTNode.uri2path(String str) {
+      try {
+          URI uri = new URI(str);
+    	  String scheme = uri.getScheme();
+          if (scheme == null) {
+              String pack = topPackagePath();
+              if (pack != null) {
+            	  File f = new File(pack, uri.getPath());
+            	  if (f.exists())
+            		  return f.getAbsolutePath();
+              }
+              File dir = new File(fileName()).getParentFile();
+              return new File(dir, uri.getPath()).getAbsolutePath();
+          } else if (scheme.equals("file")) {
+              return uri.getPath();
+          } else if (scheme.equals("modelica")) {
+              String pack = packagePath(uri.getAuthority());
+              if (pack != null) 
+            	  return new File(pack, uri.getPath()).getAbsolutePath();
+          }
+      } catch (URISyntaxException e) {
+      }
+      return null;
+  }
+
+  
+  inh InstClassDecl ASTNode.enclosingInstClassDecl();
+  eq SourceRoot.getProgram().enclosingInstClassDecl() = null;
+  eq FlatRoot.getChild().enclosingInstClassDecl() = null;
+  eq InstBaseClassDecl.getChild().enclosingInstClassDecl() = this;
+  eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
+  
+  inh BaseClassDecl ASTNode.enclosingClassDecl();
+  eq Root.getChild().enclosingClassDecl() = null;
+
+  eq FullClassDecl.getEquation().enclosingClassDecl() = this; 
+  eq FullClassDecl.getAlgorithm().enclosingClassDecl() = this; 
+  eq FullClassDecl.getSuper().enclosingClassDecl() = this;  
+  eq FullClassDecl.getImport().enclosingClassDecl() = this; 
+  eq FullClassDecl.getClassDecl().enclosingClassDecl() = this; 
+  eq FullClassDecl.getComponentDecl().enclosingClassDecl() = this; 
+  eq FullClassDecl.getAnnotation().enclosingClassDecl() = this; 
+  eq FullClassDecl.getExternalClause().enclosingClassDecl() = this;     
+
+  eq ShortClassDecl.getExtendsClauseShortClass().enclosingClassDecl() = this;
+  
+  inh FStatement FStatement.enclosingLoop();
+  eq FAlgorithm.getChild().enclosingLoop()     = null;
+  eq Root.getChild().enclosingLoop()           = null;
+  eq FWhileStmt.getWhileStmt().enclosingLoop() = this;
+  eq FForStmt.getForStmt().enclosingLoop()     = this;
+  eq InstForStmt.getForStmt().enclosingLoop()  = this;
+  
+  
+    /**
+     * Access method for the last Access of a qualified or
+     * unqualified name.
+     */ 
+    syn Access Access.getLastAccess() = this;
+    eq Dot.getLastAccess()            = getAccess(getNumAccess() - 1);
+    eq GlobalAccess.getLastAccess()   = getAccess().getLastAccess();
+    
+    syn InstAccess InstAccess.getLastInstAccess() = this;
+    eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccessNoTransform() - 1);
+    eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
+    
+    /**
+     * Access method for the first Access of a qualified or
+     * unqualified name.
+     */
+    syn Access Access.getFirstAccess() = this;
+    eq Dot.getFirstAccess()            = getAccess(0);
+    eq GlobalAccess.getFirstAccess()   = getAccess().getFirstAccess();
+
+    // For proxy
+    public Access SourceRoot.computeNextAccess() {
+        return null;
+    }
+    
+    inh Access Access.getNextAccess();
+    eq Dot.getAccess(int i).getNextAccess()    = (i >= getNumAccess() - 1) ? null : getAccess(i + 1);
+    eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
+    eq Root.getChild().getNextAccess()         = null;
+
+    /**
+     * Access method for the first Access of a qualified or
+     * unqualified name.
+     */
+    syn InstAccess InstAccess.getFirstInstAccess() = this;
+    eq InstDot.getFirstInstAccess()                = getInstAccess(0);
+    eq InstGlobalAccess.getFirstInstAccess()       = getInstAccess().getFirstInstAccess();
+   
+    inh InstAccess InstAccess.getNextInstAccess();
+    eq InstDot.getInstAccess(int i).getNextInstAccess() = 
+    		(i >= getNumInstAccessNoTransform() - 1) ? null : getInstAccess(i + 1);
+    eq BaseNode.getChild().getNextInstAccess()          = null;
+
+    
+    /**
+     * stripFirstAccess removes the first access in a qualified
+     * name. If the name is not qualified, null is returned. 
+     */
+    public Access Access.stripFirstAccess() {
+        return null;
+    }
+    
+    public Access Dot.stripFirstAccess() {
+    	int n = getNumAccess();
+    	if (n <= 2)
+    		return getAccess(n - 1);
+    	List<Access> l = new List<Access>();
+    	for (int i = 1; i < n; i++)
+    		l.add(getAccess(i));
+        return new Dot(l);
+    }
+    
+    public Access GlobalAccess.stripFirstAccess() {
+    	return getAccess().stripFirstAccess();
+    }
+    
+    syn boolean Access.isQualified() = false;
+    eq Dot.isQualified()             = true;
+    eq GlobalAccess.isQualified()    = getAccess().isQualified();
+    
+    /**
+     * \brief Get the top node in an access (possibly qualified).
+     */
+    syn Access Access.getTopAccess() = retrieveTopAccess(this);
+    
+    inh Access Access.retrieveTopAccess(Access pre);
+    eq ASTNode.getChild().retrieveTopAccess(Access pre)      = pre;
+    eq Dot.getChild().retrieveTopAccess(Access pre)          = retrieveTopAccess(this);
+    eq GlobalAccess.getChild().retrieveTopAccess(Access pre) = retrieveTopAccess(this);
+    
+    /**
+     * \brief Get the top node in an access (possibly qualified).
+     */
+    syn InstAccess InstAccess.getTopInstAccess() = retrieveTopInstAccess(this);
+    
+    inh InstAccess InstAccess.retrieveTopInstAccess(InstAccess pre);
+    eq BaseNode.getChild().retrieveTopInstAccess(InstAccess pre)         = pre;
+    eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre)          = retrieveTopInstAccess(this);
+    eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = this;
+    
+    /**
+     * \brief Get the array subscripts of the last name part.
+     */
+    syn FArraySubscripts InstAccess.getLastFArraySubscripts() = 
+        getLastInstAccess().getFArraySubscripts();
+    
+    syn FArraySubscripts InstAccess.getFArraySubscripts() = null;
+    eq InstDot.getFArraySubscripts() = getLastInstAccess().getFArraySubscripts();
+
+    syn boolean InstAccess.hasFArraySubscripts() = false;
+    eq InstArrayAccess.hasFArraySubscripts() = true;
+    eq InstDot.hasFArraySubscripts() = getLastInstAccess().hasFArraySubscripts();
+    
+    /**
+     * \brief Copy this access, append a name part to the copy and return the copy.
+     */
+    public InstDot InstAccess.copyAndAppend(String id) {
+    	InstAccess left = fullCopy();
+    	InstAccess right = createPartToAppend(id);
+        return new InstDot(new List<InstAccess>().add(left).add(right));
+    }
+    
+    public InstDot InstDot.copyAndAppend(String id) {
+    	InstDot res = fullCopy();
+    	res.addInstAccess(createPartToAppend(id));
+    	return res;
+    }
+    
+    /**
+     * \brief Create an InstAccess suitable for appending to this access.
+     */
+    public InstAccess InstAccess.createPartToAppend(String id) {
+    	return new InstParseAccess(id);
+    }
+    
+    public InstAccess InstComponentAccess.createPartToAppend(String id) {
+    	return new InstComponentAccess(id);
+    }
+    
+}
+
+aspect Slices {
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
+    eq InstDot.isSlice() {
+    	int last = getNumInstAccess() - 1;
+    	for (int i = 0; i < last; i++)
+    		if (getInstAccess(i).isArray())
+    			return true;
+    	return getInstAccess(last).isSlice();
+    }
+    
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FQName.isSlice() = false;
+    eq FQNameFull.isSlice() {
+    	int n = getNumFQNamePart() - 1;
+    	for (int i = 0; i < n; i++) {
+    		FQNamePart part = getFQNamePart(i);
+    		if (part.hasFArraySubscripts())
+    			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts())
+    				if (fs.ndims() > 0)
+    					return true;
+    	}
+    	boolean array = false;
+    	boolean exp = false;
+		FQNamePart part = getFQNamePart(n);
+		if (part.hasFArraySubscripts()) {
+			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
+				if (fs instanceof FExpSubscript) 
+					exp = true;
+				if (fs.ndims() > 0)
+					array = true;
+			}
+		}
+		return array && exp;
+    }
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
+    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FInstAccessExp.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    // TODO: change order
+    syn boolean FIdUseExp.isSlice() = getFIdUse().isSlice() && isArray();
+    
+}
+
+aspect FlatNames {
+    
+    syn String FVariable.varKind() {
+        if (isIndependentConstant()) {
+            return "ci";
+        } else if (isDependentConstant()) {
+            return "cd";
+        } else if (isIndependentParameter()) {
+            return "pi";
+        } else if (isDependentParameter()) {
+            return "pd";
+        } else if (isDifferentiatedVariable()) {
+            return "x";
+        } else if (isDerivativeVariable()) {
+            return "dx";
+        } else if (isAlgebraicVariable()) {
+            return "w";
+        } else if (isInput()) {
+            return "u";
+        } else {
+            return "unknown";
+        }
+    }
+    
+    syn FQNamePart FQNameFull.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
+    
+    syn boolean FQNamePart.hasFArraySubscripts()          = false;
+    eq FQNamePartArray.hasFArraySubscripts()              = true;
+    syn FArraySubscripts FQNamePart.getFArraySubscripts() = null;
+    // FQNamePartArray.getFArraySubscripts() declared from .ast file
+
+    syn boolean FQName.hasFArraySubscripts()          = false;
+    syn FArraySubscripts FQName.getFArraySubscripts() = null;
+    eq FQNameFull.hasFArraySubscripts()               = lastFQNamePart().hasFArraySubscripts();
+    eq FQNameFull.getFArraySubscripts()               = lastFQNamePart().getFArraySubscripts();
+
+    syn boolean FIdUse.hasFArraySubscripts() = 
+        getFQName().hasFArraySubscripts();
+    syn FArraySubscripts FIdUse.getFArraySubscripts() = 
+        getFQName().getFArraySubscripts();
+
+    syn boolean FIdUseInstAccess.hasFArraySubscripts() = 
+        getInstAccess().hasFArraySubscripts();
+    syn FArraySubscripts FIdUseInstAccess.getFArraySubscripts() = 
+        getInstAccess().getFArraySubscripts();
+
+    syn boolean FIdUseExp.hasFArraySubscripts() = 
+        getFIdUse().hasFArraySubscripts();
+    syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
+        getFIdUse().getFArraySubscripts();
+    
+    syn FQName InstNode.getFQNamePrefix() = retrieveFQName();
+
+    syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
+    eq InstClassDecl.getFQName()         = new FQNameEmpty();
+    eq InstComponentDecl.getFQName()     = appendMyName(retrieveFQName());
+    
+    syn FQName InstComponentDecl.appendMyName(FQName prefix) = 
+    	(isAssignable() && isArrayDecl()) ? 
+    			prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
+    			prefix.copyAndAppend(name());
+    eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
+    	prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex()));
+    eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
+    
+    inh lazy FQName InstNode.retrieveFQName();
+    inh FQName FExp.retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQName()                      = getFQName();
+    eq InstComponentDecl.getInstModification().retrieveFQName()           = retrieveFQName();
+    eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()    = retrieveFQName();
+    eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
+    eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() || isRecord() ? new FQNameEmpty() : retrieveFQName();
+    eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
+    eq InstValueModification.getChild().retrieveFQName()                  = retrieveFQNameFromModification();
+    eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
+    eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQNameString(qualifiedName());
+    eq InstRoot.getChild().retrieveFQName()                               = new FQNameEmpty();
+    eq SourceRoot.getProgram().retrieveFQName()                           = new FQNameEmpty();
+    eq FClass.getChild().retrieveFQName()                                 = null;
+    
+    inh FQName InstModification.retrieveFQNameFromModification();
+    eq InstClassDecl.getChild().retrieveFQNameFromModification()          = retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQNameFromModification()      = retrieveFQName();
+    eq InstRoot.getChild().retrieveFQNameFromModification()               = new FQNameEmpty();
+
+    /**
+     * \brief Get a string representation of a prefix of this name.
+     * 
+     * @param n     the number of parts to include. If <code>n <= 0</code>, then 
+     *              all but the last <code>-n</code> parts are included.
+     * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "a.der(b)")
+     * @param eval  if <code>true</code>, then evaluate all expressions first
+     */
+    private String FQNameFull.prefixName(int n, String op, boolean eval) {
+    	int tot = getNumFQNamePart();
+    	if (n <= 0)
+    		n = tot + n;
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            FQNamePart part = getFQNamePart(i);
+            boolean last = i == n - 1;
+            if (last && op != null) {
+            	str.append(op);
+            	str.append("(");
+            }
+            str.append(part.getName());
+            if ((!last || op != null || isScalarized()) && part.hasFArraySubscripts()) {
+            	FArraySubscripts fas = part.getFArraySubscripts();
+            	if (eval)
+            		fas = fas.createEvaluated();
+            	str.append(fas);
+            }
+            if (!last) 
+                str.append(".");
+        }
+        if (op != null)
+        	str.append(")");
+        return str.toString();
+    }
+    
+    /**
+     * Gets a specific name part. Consides FQNameString as always having a single part.
+     */
+    syn String FQName.partName(int i) {
+    	throw new UnsupportedOperationException();
+    }
+    eq FQNameString.partName(int i) = (i == 0) ? getName() : super.partName(i);
+    eq FQNameFull.partName(int i)   = getFQNamePart(i).getName();
+    
+    /**
+     * Gets the last name part. Consides FQNameString as always having a single part.
+     */
+    syn String FQName.lastPartName() = partName(numParts() - 1);
+
+    /**
+     * Gets the last name part. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.lastActualPartName() = lastPartName();
+    eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
+
+    /**
+     * Gets the last name part. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.firstActualPartName() = partName(0);
+    eq FQNameString.firstActualPartName() {
+        int pos = getName().indexOf('.');
+        return pos == -1 ? getName() : getName().substring(0, pos);
+    }
+
+    /**
+     * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.prefixActualPartName();
+    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false);
+    eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
+    eq FQNameEmpty.prefixActualPartName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * The number of name parts.
+     */
+    syn int InstAccess.numParts() = 1;
+    eq InstDot.numParts()         = getNumInstAccess();
+
+    /**
+     * The number of name parts. Will always report 1 for FQNameString.
+     */
+    syn int FQName.numParts()  = 0;
+    eq FQNameString.numParts() = 1;
+    eq FQNameFull.numParts()   = getNumFQNamePart();
+    
+    /**
+     * The number of dots in the name.
+     */
+    syn int FQName.numDots() = 0;
+    eq FQNameFull.numDots()  = getNumFQNamePart() - 1;
+    eq FQNameString.numDots() {
+    	String name = getName();
+    	int n = 0;
+    	for (int i = name.indexOf('.'); i >= 0; n++, i = name.indexOf('.', i + 1));
+    	return n;
+    }
+    
+    syn int FQName.numMatchingParts(FQNameFull fqn)  = 0;
+    eq FQNameString.numMatchingParts(FQNameFull fqn) = 
+    	fqn.getFQNamePart(0).getName().equals(getName()) ? 1 : 0;
+    eq FQNameFull.numMatchingParts(FQNameFull fqn) {
+    	int n = getNumFQNamePart();
+    	for (int i = 0; i < n; i++)
+    		if (!getFQNamePart(i).getName().equals(fqn.getFQNamePart(i).getName()))
+    			return i;
+    	return n;
+    }
+    
+    public FArraySubscripts FArraySubscripts.createEvaluated() {
+    	FArraySubscripts res = new FArraySubscripts(new List());
+        for (FSubscript fs : getFSubscripts())
+        	res.addFSubscript(fs.createEvaluated());
+        return res;
+    }
+    
+    public FSubscript FSubscript.createEvaluated() {
+    	return (FSubscript) fullCopy();
+    }
+    
+    public FSubscript FExpSubscript.createEvaluated() {
+    	try {
+    		return getFExp().ceval().createFSubscript();
+    	} catch (ConstantEvaluationException e) {
+    		return fullCopy();
+    	}
+    }
+    
+    syn boolean FSubscript.isColon() = false;
+    eq FColonSubscript.isColon()     = true;
+    
+    syn boolean FSubscript.isExpSubscript() = false;
+    eq FExpSubscript.isExpSubscript()       = true;
+    
+    syn FExpSubscript FSubscript.asExpSubscript() {
+        throw new UnsupportedOperationException();
+    }
+    eq FExpSubscript.asExpSubscript() = this;
+    
+    syn FQName FAbstractVariable.getFQName() = null;
+
+    syn String FQName.name()         = "";
+    syn String FQName.resolvedName() = "";
+    syn String FQName.derName()      = "";
+    syn String FQName.preName()      = "";
+    
+    eq FQNameString.name()                 = getName();
+    eq FQNameString.resolvedName()         = getName();
+    syn lazy String FQNameString.derName() = applyOpToName(getName(), DER);
+    syn lazy String FQNameString.preName() = applyOpToName(getName(), PRE);
+    
+    syn lazy String FQNameFull.name()         = prefixName(0, null, false);
+    syn lazy String FQNameFull.resolvedName() = prefixName(0, null, true);
+    syn lazy String FQNameFull.derName()      = prefixName(0, DER, false);
+    syn lazy String FQNameFull.preName()      = prefixName(0, PRE, false);
+    
+    protected static final String FQName.DER = "der";
+    protected static final String FQName.PRE = "pre";
+    
+    private String FQNameString.applyOpToName(String name, String op) {
+    	int p = name.lastIndexOf('.') + 1;
+    	return name.substring(0, p) + op + '(' + name.substring(p) + ')';
+    }
+
+    syn String FQName.scalarName() = name();
+    eq FQNameFull.scalarName() {
+    	boolean scalar = scalarized;
+    	scalarized = true;
+    	String res = prefixName(0, null, true);
+    	scalarized = scalar;
+    	return res;
+    }
+    
+	syn lazy String FQName.hDerName(int derOrder) {
+	   	StringBuilder str = new StringBuilder(derName());
+	   	int len = str.length();
+	   	str.replace(len - 1, len, ",");
+	   	str.append(derOrder);
+	   	str.append(")");
+    	return str.toString();
+	}
+    
+	private static String FQName.derPrefixString = "_der_der_der_der";
+	
+	protected static String FQName.createDerPrefixString(int order) {
+		while (4 * order >= derPrefixString.length())
+			derPrefixString = derPrefixString + derPrefixString;
+		return derPrefixString.substring(0, 4 * order + 1);
+	}
+	
+	syn String FQName.derPrefixName(int order) {
+		String name = prefixActualPartName();
+		if (!name.isEmpty())
+			name += ".";
+		String last = lastActualPartName();
+		if (last.startsWith("_"))
+		    last = last.substring(1);
+		name += createDerPrefixString(order) + last;
+		if (hasFArraySubscripts())
+			name += getFArraySubscripts();
+		return name;
+	}
+	
+	syn String FDummyDerivativeVariable.derPrefixName() = getFQName().derPrefixName(order());
+	syn String FDummyDerExp.derPrefixName() = getFIdUse().getFQName().derPrefixName(order());
+	
+    syn String FQNamePart.name() = getName();
+
+    syn String FIdUse.name()           = getFQName().name();
+    syn String FIdUseExp.name()        = getFIdUse().name();
+    eq FDerExp.name()                  = derName();
+    eq FDummyDerExp.name()             = derName();
+    eq FHDerExp.name()                 = hDerName(getOrder());
+    eq FHDummyDerExp.name()            = hDerName(getOrder());
+    eq FPreExp.name()                  = preName();
+    syn String FInstAccessExp.name()   = getInstAccessNoTransform().name();
+    syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
+    
+    syn String FIdDecl.name() = getFQNameNoTransform().name();
+
+    syn String FClass.name()        = getFQNameNoTransform().name();
+    syn String FFunctionDecl.name() = getFQNameNoTransform().name();
+    syn String FRecordDecl.name()   = getFQNameNoTransform().name();
+    syn String FAttribute.name()    = getName().name();
+    
+    syn String FAbstractFunctionCall.name();
+    eq InstFunctionCall.name()      = getNameNoTransform().name();
+    eq FFunctionCall.name()         = getNameNoTransform().name();
+    eq InstRecordConstructor.name() = getRecordNoTransform().name();
+    eq FBuiltInFunctionCall.name()  = builtInName();
+    
+    syn String FAbstractVariable.name() = null;
+    eq FVariable.name()         = getFQNameNoTransform().name();
+    eq FFunctionVariable.name() = getFQNameNoTransform().name();
+    
+    syn String FEnumDecl.name() = getName().name();
+    
+    syn String FEnumLiteral.name() = getName().name();
+    
+    syn String FDerivativeFunction.name() = getNameNoTransform().name();
+      
+    eq FDerivativeVariable.name()       = getFQNameNoTransform().derName();
+    eq FHDerivativeVariable.name()      = getFQNameNoTransform().hDerName(getOrder());
+    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FHDummyDerivativeVariable.name() = getFQNameNoTransform().hDerName(getOrder());
+
+    syn String FIdUse.derName()    = getFQNameNoTransform().derName();
+    syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
+    syn String FIdUse.hDerName(int derOrder)    = getFQNameNoTransform().hDerName(derOrder);
+    syn String FIdUseExp.hDerName(int derOrder) = getFIdUseNoTransform().hDerName(derOrder);
+
+    eq FPreRealVariable.name()     = getFQNameNoTransform().preName();
+    eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();	
+    eq FPreBooleanVariable.name()  = getFQNameNoTransform().preName();
+    eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
+    eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
+
+    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
+    syn String FIdUseExp.preName() = getFIdUseNoTransform().preName();
+    
+    syn String FIdUse.scalarName()    = getFQName().scalarName();
+    syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
+
+    
+    //syn String FIdUse.derName2() = getFQName().derName2();
+    //syn String FIdUseExp.derName2() = getFIdUse().derName2();
+    
+    syn String FQName.nameUnderscore()            = "";
+    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[\\[,.]", "_");
+    syn lazy String FQNameFull.nameUnderscore() {
+        StringBuilder str = new StringBuilder();
+        int i = 0;
+        int last = getNumFQNamePart() - 1;
+        String sep = "";
+        for (FQNamePart part : getFQNameParts()) {
+        	str.append(sep);
+        	sep = "_";
+        	str.append(part.getName());
+        	if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
+        		for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
+                    str.append(sep);
+                    str.append(fs.prettyPrint(""));
+        		}
+        	}
+        }
+        return str.toString();
+    }
+
+    syn String FQNamePart.nameUnderscore() = getName();
+
+    syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
+    syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
+    eq FDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
+    eq FDummyDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
+    eq FHDummyDerExp.nameUnderscore() = "der_" + getOrder() + "_" + getFIdUse().nameUnderscore();
+    
+    //syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
+    //syn String FIdUseInstAccess.nameUnderscore() = getInstAccess().nameUnderscore();
+    
+    syn String FIdDecl.nameUnderscore() = getFQName().nameUnderscore();
+
+    syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
+    
+    public static String FClass.convertClassNameToUnderscore(String name) {
+    	return name.replace(".", "_");
+    }
+    
+    syn String FAbstractVariable.nameUnderscore() = null;
+    eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();
+    eq FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+    eq FDummyDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+    eq FHDummyDerivativeVariable.nameUnderscore() = "der_" + getOrder() + "_" + getFQName().nameUnderscore();
+    eq FFunctionVariable.nameUnderscore()   = getFQName().nameUnderscore();
+    
+    syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
+    syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FFunctionCall.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+    syn String FFunctionDecl.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+
+    syn int FAbstractVariable.variableIndex() = findVariableIndex();
+    eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
+    eq FPreIntegerVariable.variableIndex()    = myNonPreVariable().variableIndex();
+    eq FPreRealVariable.variableIndex()       = myNonPreVariable().variableIndex();
+    eq FPreStringVariable.variableIndex()     = myNonPreVariable().variableIndex();
+    eq FPreEnumVariable.variableIndex()       = myNonPreVariable().variableIndex();
+    
+    inh int FAbstractVariable.findVariableIndex();
+    eq FClass.getFVariable(int i).findVariableIndex()     = i;
+    eq FClass.getAliasVariable(int i).findVariableIndex() = getNumFVariable() + i;
+    eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
+    eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
+    eq FEnumDecl.getChild().findVariableIndex()           = -1;
+    eq FClass.getChild().findVariableIndex()              = -1;
+    
+    inh lazy int FForIndex.forIndexIndex();
+    eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
+    eq Root.getChild().forIndexIndex()   = -1;
+    
+    private int FClass.nextForIndexIndex = 0;
+
+    inh int FRecordDecl.recordIndex();
+    eq FClass.getFRecordDecl(int i).recordIndex() = i;
+
+    inh int FEnumDecl.enumIndex();
+    eq FClass.getFEnumDecl(int i).enumIndex() = i;
+    
+    /**
+     * Check if this is a simple name, i.e. just a string or empty name.
+     */
+    syn boolean FQName.isSimple() = true;
+    eq FQNameFull.isSimple()      = false;
+
+    /**
+     * Check if this name has any expression or colon array subscripts. 
+     */
+    syn boolean FQName.hasNonLiteralSubscripts() = false;
+    eq FQNameFull.hasNonLiteralSubscripts() {
+    	for (FQNamePart part : getFQNameParts())
+    		if (part.hasNonLiteralSubscripts())
+    			return true;
+    	return false;
+    }
+
+    /**
+     * Check if this name part has any expression or colon array subscripts.
+     */
+    syn boolean FQNamePart.hasNonLiteralSubscripts() = false;
+    eq FQNamePartArray.hasNonLiteralSubscripts()     = getFArraySubscripts().hasNonLiteralSubscripts();
+    
+    /**
+     * Check if this array subscript list has any expression or colon subscripts.
+     */
+    syn boolean FArraySubscripts.hasNonLiteralSubscripts() {
+    	for (FSubscript s : getFSubscripts())
+    		if (s.hasNonLiteralSubscripts())
+    			return true;
+    	return false;
+    }
+
+    /**
+     * Check if this array subscript is an expression or colon. 
+     */
+    syn boolean FSubscript.hasNonLiteralSubscripts() = false;
+    eq FExpSubscript.hasNonLiteralSubscripts()       = true;
+    eq FColonSubscript.hasNonLiteralSubscripts()     = true;
+   
+    /**
+     * Append a new name part.
+     */
+    public FQName FQName.append(String name) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQNameString FQNameString.append(String name) {
+        setName(getName() + '.' + name);
+        return this;
+    }
+    
+    public FQNameFull FQNameFull.append(String name) {
+        addFQNamePart(name);
+        return this;
+    }
+
+    /**
+     * Copy and append all name parts from <code>fqn</code>.
+     * 
+     * @return  <code>this</code>, for convenience
+     */
+    public FQNameFull FQNameFull.append(FQName fqn) {
+        return fqn.appendTo(this);
+    }
+ 
+    protected abstract FQNameFull FQName.appendTo(FQNameFull fqn);
+    
+    protected FQNameFull FQNameEmpty.appendTo(FQNameFull fqn) {
+        return fqn;
+    }
+    
+    protected FQNameFull FQNameString.appendTo(FQNameFull fqn) {
+        return fqn.append(getName());
+    }
+    
+    protected FQNameFull FQNameFull.appendTo(FQNameFull fqn) {
+        return fqn.appendFull(this);
+    }
+    
+    protected FQNameFull FQNameFull.appendFull(FQNameFull fqn) {
+        for (FQNamePart part : fqn.getFQNameParts())
+            addFQNamePart(part.fullCopy());
+        return this;
+    }
+    
+    /**
+     * Create a copy of the name, with a new name part appended.
+     */
+    public abstract FQName FQName.copyAndAppend(String name);
+    
+    public FQNameString FQNameEmpty.copyAndAppend(String name) {
+        return new FQNameString(name);
+    }
+    
+    public FQNameString FQNameString.copyAndAppend(String name) {
+        return new FQNameString(getName() + '.' + name);
+    }
+    
+    public FQNameFull FQNameFull.copyAndAppend(String name) {
+        return fullCopy().append(name);
+    }
+    
+    /**
+     * Create a copy of the name, with a new name part appended.
+     * 
+     * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
+     * to using {@link #copyAndAppend(String)}.
+     */
+	public FQName FQName.copyAndAppend(String name, FArraySubscripts fas) {
+    	if (fas == null)
+    		return copyAndAppend(name);
+    	FQNameFull res = copyAsFQNameFull();
+    	res.addFQNamePart(new FQNamePartArray(name, fas));
+    	return res;
+    }
+    
+    /**
+     * Create a copy of the name, with another name appended, and <code>fas</code> applied to the last part.
+     * 
+     * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
+     * to using {@link #copyAndAppend(FQName)}.
+     */
+	public FQName FQName.copyAndAppend(FQName name, FArraySubscripts fas) {
+		FQName res = copyAndAppend(name);
+		return (fas == null) ? res : res.asFQNameFull().addFArraySubscripts(fas);
+    }
+    
+    /**
+     * Create a copy of the name as an FQNameFull.
+     */
+    public abstract FQNameFull FQName.copyAsFQNameFull();
+    
+    public FQNameFull FQNameEmpty.copyAsFQNameFull() {
+        return new FQNameFull();
+    }
+    
+    public FQNameFull FQNameString.copyAsFQNameFull() {
+        return new FQNameFull(getName());
+    }
+    
+    public FQNameFull FQNameFull.copyAsFQNameFull() {
+        return fullCopy();
+    }
+    
+    /**
+     * Return this name as an FQNameFull. 
+     * 
+     * Creates a copy only if needed.
+     */
+    public FQNameFull FQName.asFQNameFull() {
+    	return copyAsFQNameFull();
+    }
+    
+    public FQNameFull FQNameFull.asFQNameFull() {
+        return this;
+    }
+    
+    /**
+     * Create a copy of the name, with a new name part prepended.
+     */
+    public abstract FQName FQName.copyAndPrepend(String name);
+    
+    public FQNameString FQNameEmpty.copyAndPrepend(String name) {
+        return new FQNameString(name);
+    }
+    
+    public FQNameString FQNameString.copyAndPrepend(String name) {
+        return new FQNameString(name + '.' + getName());
+    }
+    
+    public FQNameFull FQNameFull.copyAndPrepend(String name) {
+    	FQNameFull res = new FQNameFull(name);
+    	int n = res.getNumFQNamePart();
+    	for (int i = getNumFQNamePart() - 1; i >= 0; i--)
+    		res.setFQNamePart(getFQNamePart(i), i + n);
+        return res;
+    }
+    
+    public FQNameFullScalarize FQNameFullScalarize.copyAndPrepend(String name) {
+    	return new FQNameFullScalarize(super.copyAndPrepend(name).getFQNamePartList());
+     }
+   
+    /**
+     * Create a copy of the name, with a prefix added to the first name part.
+     */
+    public abstract FQName FQName.copyAndAddPrefix(String prefix);
+    
+    public FQNameString FQNameEmpty.copyAndAddPrefix(String prefix) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public FQNameString FQNameString.copyAndAddPrefix(String prefix) {
+        return new FQNameString(prefix + getName());
+    }
+    
+    public FQNameFull FQNameFull.copyAndAddPrefix(String prefix) {
+    	FQNameFull res = fullCopy();
+    	res.getFQNamePart(0).setName(prefix + res.getFQNamePart(0).getName());
+        return res;
+    }
+    
+    /**
+     * Create a copy of the name, with another FQName appended.
+     */
+    public abstract FQName FQName.copyAndAppend(FQName name);
+    
+    public FQName FQNameEmpty.copyAndAppend(FQName name) {
+        return name.fullCopy();
+    }
+    
+    public FQName FQNameString.copyAndAppend(FQName name) {
+        return name.copyAndPrepend(getName());
+    }
+    
+    public FQName FQNameFull.copyAndAppend(FQName name) {
+        return fullCopy().append(name);
+    }
+    
+    /**
+     * Create a copy of the name, with an FSubscript added to the last part.
+     */
+    public abstract FQName FQName.copyAndAddSubscript(FSubscript s);
+    
+    public FQName FQNameEmpty.copyAndAddSubscript(FSubscript s) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQName FQNameString.copyAndAddSubscript(FSubscript s) {
+        return new FQNameFull(getName()).addSubscript(s);
+    }
+    
+    public FQName FQNameFull.copyAndAddSubscript(FSubscript s) {
+        return fullCopy().addSubscript(s);
+    }
+
+    /**
+     * Add new FSubscript to the last name part.
+     */
+    public FQName FQNameFull.addSubscript(FSubscript s) {
+    	int i = getNumFQNamePart() - 1;
+    	setFQNamePart(getFQNamePart(i).addSubscript(s), i);
+    	return this;
+    }
+    
+    /**
+     * Add an array subscript to this name part, if necessary creating a new name part.
+     * 
+     * This name part might or might not be altered - replace it with the return value.
+     */
+    public FQNamePartArray FQNamePart.addSubscript(FSubscript s) {
+    	return new FQNamePartArray(getName(), new FArraySubscripts(new List(s)));
+    }
+   
+    public FQNamePartArray FQNamePartArray.addSubscript(FSubscript s) {
+    	getFArraySubscripts().addFSubscript(s);
+    	return this;
+    }
+    
+    /**
+     * Create a copy of the name, with an FArraySubscripts added to the last part.
+     * 
+     * Any previous FArraySubscripts is removed. Passing null as fas is equivalent 
+     * to calling {@link #removeFArraySubscripts()}.
+     */
+    public abstract FQName FQName.copyAndAddFas(FArraySubscripts fas);
+    
+    public FQName FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
+    	if (fas == null)
+    		return fullCopy();
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQName FQNameString.copyAndAddFas(FArraySubscripts fas) {
+    	if (fas == null)
+    		return fullCopy();
+        return new FQNameFull(getName()).addFArraySubscripts(fas);
+    }
+    
+    public FQName FQNameFull.copyAndAddFas(FArraySubscripts fas) {
+        return fullCopy().addFArraySubscripts(fas);
+    }
+    
+    /**
+     * Set the FArraySubscripts of the last FQNamePart.
+     * 
+     * Passing null as fas is equivalent to calling {@link #removeFArraySubscripts()}.
+     * 
+     * @return  <code>this</code>, for convenience
+     */
+    public FQNameFull FQNameFull.addFArraySubscripts(FArraySubscripts fas) {
+    	if (fas == null)
+    		return removeFArraySubscripts();
+    	int i = getNumFQNamePart() - 1;
+    	setFQNamePart(new FQNamePartArray(getFQNamePart(i).getName(), fas), i);
+        return this;
+    }
+    
+    /**
+     * Remove the FArraySubscripts of the last FQNamePart, if any.
+     * 
+     * @return  <code>this</code>, for convenience
+     */
+    public FQName FQName.removeFArraySubscripts() {
+        return this;
+    }
+   
+    public FQNameFull FQNameFull.removeFArraySubscripts() {
+    	int i = getNumFQNamePart() - 1;
+    	if (getFQNamePart(i).hasFArraySubscripts())
+    		setFQNamePart(new FQNamePart(getFQNamePart(i).getName()), i);
+        return this;
+    }
+   
+    /**
+     * Create a copy of the name excluding the first part.
+     */
+    public FQName FQName.copySuffix() {
+        return copyPart(1, numDots());
+    }
+    
+    /**
+     * Create a copy of the last part of this name.
+     */
+    public FQName FQName.copyLastSuffix() {
+    	int i = numDots();
+        return copyPart(i, i);
+    }
+    
+    /**
+     * Create a copy of the last <code>n</code> parts of this name.
+     */
+    public FQName FQName.copySuffix(int n) {
+    	int m = numDots();
+        return copyPart(m - n + 1, m);
+    }
+    
+    /**
+     * Create a copy of all but the first <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyWithoutPrefix(int n) {
+        return copyPart(n, numDots());
+    }
+
+    /**
+     * Create a copy of the name excluding the last part.
+     */
+    public FQName FQName.copyPrefix() {
+    	return copyPart(0, numDots() - 1);
+    }
+    
+    /**
+     * Create a copy of the first part of this name.
+     */
+    public FQName FQName.copyFirstPrefix() {
+    	return copyPart(0, 0);
+    }
+
+    /**
+     * Create a copy of the first <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyPrefix(int n) {
+        return copyPart(0, n - 1);
+    }
+
+    /**
+     * Create a copy of all but the last <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyWithoutSuffix(int n) {
+        return copyPart(0, numDots() - n);
+    }
+    
+    /**
+     * Create a copy of parts <code>first</code> to <code>last</code> of this name (zero-based).
+     */
+    public abstract FQName FQName.copyPart(int first, int last);
+    
+    public FQName FQNameEmpty.copyPart(int first, int last) {
+    	throw new UnsupportedOperationException();
+    }
+    
+    public FQName FQNameString.copyPart(int first, int last) {
+    	if (last < first)
+    		return new FQNameEmpty();
+    	int fp = -1;
+    	String name = getName();
+    	for (int i = 0; i < first && (i == 0 || fp >= 0); i++)
+    		fp = name.indexOf('.', fp + 1);
+    	if (fp < 0 && first > 0)
+    		throw new ArrayIndexOutOfBoundsException(first);
+    	int lp = (fp < 0) ? 0 : fp;
+    	for (int i = first; i < last && lp >= 0; i++)
+    		lp = name.indexOf('.', lp + 1);
+    	if (lp < 0 && last > 0)
+    		throw new ArrayIndexOutOfBoundsException(last);
+    	lp = name.indexOf('.', lp + 1);
+    	return new FQNameString((lp < 0) ? name.substring(fp + 1) : name.substring(fp + 1, lp));
+    }
+    
+    public FQName FQNameFull.copyPart(int first, int last) {
+    	if (last < first)
+    		return new FQNameEmpty();
+    	if (last == first)
+    		return getFQNamePart(first).createFQName();
+    	FQNameFull res = new FQNameFull();
+        for (int i = first; i <= last; i++)
+            res.addFQNamePart(getFQNamePart(i).fullCopy());
+        return res;
+    }
+
+    public FQName FQNameFullScalarize.copyPart(int first, int last) {
+    	FQName res = super.copyPart(first, last);
+    	if (res instanceof FQNameFull)
+    		return new FQNameFullScalarize(((FQNameFull) res).getFQNamePartList());
+    	else 
+    		return res;
+    }
+
+    /**
+     * Create an FQName containing only a copy of this part.
+     */
+    public FQName FQNamePart.createFQName() {
+    	return new FQNameString(getName());
+    }
+    
+    public FQName FQNamePartArray.createFQName() {
+    	return new FQNameFull(new List(fullCopy()));
+    }
+    
+    /**
+     * \brief Create a copy of this name without array subscripts.
+     */
+    public FQName FQName.copyWithoutSubscripts() {
+        return fullCopy();
+    }
+    
+    public FQName FQNameFull.copyWithoutSubscripts() {
+        FQNameFull res = new FQNameFull();
+        for (FQNamePart part : getFQNameParts())
+        	res.addFQNamePart(part.getName());
+        return res;
+    }
+    
+    /**
+     * Create a copy of this name with all array subscripts replaced with indices 
+     * from <code>i</code>.
+     * 
+     * The number of dimensions of <code>i</code> must be the same as the number 
+     * of non-literal subscripts. The subscripts to be replaced can be spread out 
+     * over several name parts.
+     */
+    public FQName FQName.copyReplacingSubscripts(Index i) {
+        return fullCopy();
+    }
+    
+    public FQName FQNameFull.copyReplacingSubscripts(Index i) {
+        FQNameFull res = new FQNameFull();
+        int j = 0;
+        for (FQNamePart part : getFQNameParts()) 
+        	j = part.appendWithReplacedSubscripts(res, i, j);
+        return res;
+    }
+    
+    /**
+     * Append this name part to <code>name</code>, but with 
+     * all array subscripts replaced with indices from <code>i</code>.
+     * 
+     * The first index in <code>i</code> to use should be given in <code>j</code>, and 
+     * the new value for <code>j</code> is returned.
+     */
+    public int FQNamePart.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+        name.append(getName());
+    	return j;
+    }
+    
+    public int FQNamePartArray.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+    	int k = j + getFArraySubscripts().getNumFSubscript();
+        name.append(getName());
+        name.addFArraySubscripts(i.partIndex(j, k).createFArraySubscripts());
+    	return k;
+    }
+    
+    /**
+     * \brief Interface for variable declarations in flat and instance trees.
+     */
+    public interface CommonVariableDecl {
+    	public FExp createUseExp();
+    }
+    
+    /**
+     * Create an access to this variable.
+     */
+	public FIdUse FAbstractVariable.createFIdUse() {
+		 return null;
+	}
+	// TODO: Add implementation for enum
+   
+	public FIdUse FVariable.createFIdUse() {
+		 return getFQName().createUseFQName().createFIdUse();
+	}  
+   
+	public FIdUse FFunctionVariable.createFIdUse() {
+		 return getFQName().createUseFQName().createFIdUse();
+	}  
+   
+    /**
+     * Create an access expression to this variable.
+     */
+	public FIdUseExp FVariable.createUseExp() {
+		 return getFQName().createUseFQName().createFIdUseExp();
+	}
+
+	public FIdUseExp FDerivativeVariable.createUseExp() {
+		 return getFQName().createUseFQName().createFDerExp();
+	}
+
+	public FIdUseExp FHDerivativeVariable.createUseExp() {
+		 return getFQName().createUseFQName().createFHDerExp(getOrder());
+	}
+
+	public FIdUseExp FDummyDerivativeVariable.createUseExp() {
+		 return getFQName().createUseFQName().createFDummyDerExp();
+	}
+
+	public FIdUseExp FHDummyDerivativeVariable.createUseExp() {
+		 return getFQName().createUseFQName().createFHDummyDerExp(getOrder());
+	}
+    
+	public FIdUseExp FFunctionVariable.createUseExp() {
+		 return getFQName().createUseFQName().createFIdUseExp();
+	}
+    
+	public FExp FEnumLiteral.createUseExp() {
+		 return new FEnumLitExp(myFEnumDecl().name(), name(), null);
+	}
+    
+	public FExp UnknownFVariable.createUseExp() {
+		 return null;
+	}
+
+    /**
+     * Create an access to this variable, from a scope where it can be accessed unqualified.
+     */
+	public FIdUseExp InstComponentDecl.createUseExp() {
+		 return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+	}
+	
+	/**
+	 * Create a pre() expression for this variable.
+	 */
+	public FPreExp FVariable.createFPreExp() {
+		return new FPreExp(createFIdUse());
+	}
+
+    /**
+     * Create an FDerExp for this name, using a copy if needed.
+     */
+    public FDerExp FQName.createFDerExp() {
+        return new FDerExp(createFIdUse()); 
+    }
+
+    /**
+     * Create an FHDerExp for this name, using a copy if needed.
+     */
+    public FHDerExp FQName.createFHDerExp(int order) {
+        return new FHDerExp(createFIdUse(), order); 
+    }
+
+    /**
+     * Create an FDummyDerExp for this name, using a copy if needed.
+     */
+    public FDummyDerExp FQName.createFDummyDerExp() {
+        return new FDummyDerExp(createFIdUse()); 
+    }
+
+    /**
+     * Create an FHDummyDerExp for this name, using a copy if needed.
+     */
+    public FHDummyDerExp FQName.createFHDummyDerExp(int order) {
+        return new FHDummyDerExp(createFIdUse(), order); 
+    }
+    
+    /**
+     * Create an FIdUseExp for this name, using a copy if needed.
+     */
+    public FIdUseExp FQName.createFIdUseExp() {
+        return new FIdUseExp(createFIdUse()); 
+    }
+    
+    /**
+     * Create a copy of this name that is suitable for an FIdUse.
+     * 
+     * It is assumed that this name is from a variable declaration.
+     */
+    public FQName FQName.createUseFQName() {
+    	if (!isScalarized() && ndims() > 0)
+    		return copyAndAddFas(size().createExpandedFArraySubscripts());
+    	else
+    		return fullCopy();
+    }
+    
+    /**
+     * Create an FIdUse for this name, using a copy if needed.
+     */
+    public FIdUse FQName.createFIdUse() {
+        return new FIdUse((FQName) unboundCopy()); 
+    }
+    
+    /**
+     * \brief Create an FIdUseExp using a copy of this name.
+     * 
+     * @param fas  array subscripts to use for the last name part.
+     */
+    public FIdUseExp FQName.createFIdUseExp(FArraySubscripts fas) {
+        return new FIdUseExp(createFIdUse(fas)); 
+    }
+    
+    /**
+     * \brief Create an FIdUse using a copy of this name.
+     * 
+     * @param fas  array subscripts to use for the last name part.
+     */
+    public FIdUse FQName.createFIdUse(FArraySubscripts fas) {
+        return new FIdUse(copyAndAddFas(fas)); 
+    }
+    
+    syn String FType.name();
+    eq FRealType.name()        		= "Real";
+    eq FIntegerType.name()     		= "Integer";
+    eq FBooleanType.name()     		= "Boolean";
+    eq FStringType.name()      		= "String";
+    eq FEnumType.name()        		= getName();
+    eq FEnumLiteralType.name() 		= getName();
+    eq FRecordType.name()      		= getName();
+    eq FUnknownType.name()     		= "(unknown type)";
+    eq FNoType.name()               = "(no return value)";
+    eq FExternalObjectType.name()	= "ExternalObject";
+    
+    
+    syn boolean FAbstractFunctionCall.ignoreInFlattening() = false;
+    eq FIgnoredBuiltIn.ignoreInFlattening()                = true;
+    eq FConnectionsOp.ignoreInFlattening()                 = true;
+    
+    syn boolean FAbstractEquation.ignoreInFlattening() = false;
+    eq FFunctionCallEquation.ignoreInFlattening()      = getCall().ignoreInFlattening();
+    
+    syn boolean FAbstractFunctionCall.isIgnored() = false;
+    eq FIgnoredBuiltIn.isIgnored()                = true;
+    
+    syn boolean FAbstractEquation.isIgnored() = false;
+    eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
+    
+    /**
+     * \brief Add an equation to the first equation block.
+     */
+    public void FClass.addFEquation(FAbstractEquation feq) {
+        addFAbstractEquation(feq);
+    }
+    
+}
+
+aspect DebugHelpers {
+    
+    /**
+     * \brief Convert to string. Primarily useful for debugging.
+     * 
+     * Default implementation uses prettyPrint().
+     */
+    public String ASTNode.toString() {
+        return prettyPrint("");
+    }
+    
+}
+
+aspect FlatFunctionUtils {
+     
+     syn boolean FFunctionVariable.isInput()  = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
+     syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
+     
+     /**
+      * \brief Returns a list of all InstComponentDecls declared as "input".
+      */
+     syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
+         ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         Set<String> names = new HashSet<String>();
+         for (InstExtends ie : getInstExtendss())
+        	 for (InstComponentDecl icd : ie.myInputs())
+        		 if (names.add(icd.name()))
+                     l.add(icd);
+         for (InstComponentDecl icd : getInstComponentDecls())
+             if (icd.isInput() && names.add(icd.name()))
+                 l.add(icd);
+         return l;
+     }
+     eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
+     
+     /**
+      * \brief Returns a list of all InstComponentDecls not declared as "input".
+      */
+     syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
+         ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         Set<String> names = new HashSet<String>();
+         for (InstExtends ie : getInstExtendss())
+        	 for (InstComponentDecl icd : ie.myNonInputs())
+        		 if (names.add(icd.name()))
+                     l.add(icd);
+         for (InstComponentDecl icd : getInstComponentDecls())
+             if (!icd.isInput() && names.add(icd.name()))
+                 l.add(icd);
+         return l;
+     }
+     eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
+     
+     /**
+      * \brief Returns a list of all InstComponentDecls declared as "output".
+      */
+     syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
+         ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         Set<String> names = new HashSet<String>();
+         for (InstExtends ie : getInstExtendss())
+        	 for (InstComponentDecl icd : ie.myOutputs())
+        		 if (names.add(icd.name()))
+                     l.add(icd);
+         for (InstComponentDecl icd : getInstComponentDecls())
+             if (icd.isOutput() && names.add(icd.name()))
+                 l.add(icd);
+         return l;
+     }
+     eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
+     
+     /**
+      * \brief Returns a list of all contained InstComponentDecls that may be altered by a modification.
+      */
+     syn lazy ArrayList<InstComponentDecl> InstNode.myModifiableComponents() {
+         ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myModifiableComponents());
+         for (InstComponentDecl icd : getInstComponentDecls())
+             if (icd.isModifiable())
+                 l.add(icd);
+         return l;
+     }
+     eq InstSimpleShortClassDecl.myModifiableComponents() = actualInstClass().myModifiableComponents();
+     
+     /**
+      * May this component be altered by a modification?
+      */
+     syn boolean InstComponentDecl.isModifiable() = !isConstant() && !getComponentDecl().hasFinal();
+     // TODO: Are there other reasons a component might not be modifiable?
+     
+     /**
+      * \brief Returns a list of all FFunctionVariables declared as "input".
+      */
+     syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myInputs() {
+         ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+         for (FFunctionVariable var : getFFunctionVariables())
+             if (var.isInput())
+                 l.add(var);
+         return l;
+     }
+     
+	/**
+	 * \brief Returns the i:th FFunctionVariable that is  declared as "input".
+	 */
+	syn FFunctionVariable FFunctionDecl.myInput(int i) = myInputs().get(i);
+     
+     /**
+      * \brief Returns a list of all FFunctionVariables not declared as "input" or "output".
+      */
+     syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myProtected() {
+         ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+         for (FFunctionVariable var : myNonInputs())
+             if (!var.isOutput())
+                 l.add(var);
+         return l;
+     }
+     
+     /**
+      * \brief Returns a list of all FFunctionVariables not declared as "input".
+      */
+     syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myNonInputs() {
+         ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+         for (FFunctionVariable var : getFFunctionVariables())
+             if (!var.isInput())
+                 l.add(var);
+         return l;
+     }
+     
+     /**
+      * \brief Returns a list of all FFunctionVariables declared as "output".
+      */
+     syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myOutputs() {
+         ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+         for (FFunctionVariable var : getFFunctionVariables())
+             if (var.isOutput())
+                 l.add(var);
+         return l;
+     }
+     
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = myInstClassDecl().myCallInputs();
+
+     /**
+      * Returns a list of all components in this class that would be inputs in a function call or 
+      * record constructor. Treats all non-records as functions.
+      */
+     syn ArrayList<InstComponentDecl> InstClassDecl.myCallInputs() = isRecord() ? myModifiableComponents() : myInputs();
+    	 
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = myInstClassDecl().myOutputs();
+     syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
+     syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFFunctionDecl().myOutputs();
+     
+     syn boolean InstFunctionCall.hasOutputs() = !myOutputs().isEmpty();
+     syn boolean FFunctionDecl.hasOutputs()    = !myOutputs().isEmpty();
+     syn boolean FFunctionCall.hasOutputs()    = myFFunctionDecl().hasOutputs();
+     
+     syn InstComponentDecl InstFunctionCall.expOutput() = myOutputs().get(0);
+     syn FFunctionVariable FFunctionDecl.expOutput()    = myOutputs().get(0);
+     syn FFunctionVariable FFunctionCall.expOutput()    = myFFunctionDecl().expOutput();
+    
+     syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
+     inh FunctionReturnDefinition FReturnStmt.returnDefinition();
+     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
+     eq InstProgramRoot.getChild().returnDefinition()         = null;
+     eq FClass.getChild().returnDefinition()                  = null;
+     
+     inh String InstFunctionArgument.funcName();
+     inh String FFunctionCallLeft.funcName();
+     eq FAbstractFunctionCall.getChild().funcName() = name();
+     eq FFunctionCallEquation.getChild().funcName() = getCall().name();
+     eq FFunctionCallStmt.getChild().funcName()     = getCall().name();
+     
+     /**
+      * \brief Check if this function returns an array when used as an expression.
+      */
+     syn boolean FFunctionDecl.isArray() = hasOutputs() ? expOutput().isArray() : false;
+     
+     /**
+      * \brief Check if this function returns a record when used as an expression.
+      */
+     syn boolean FFunctionDecl.isRecord() = hasOutputs() ? expOutput().type().isRecord() : false;
+     
+     /**
+      * \brief Check if this function returns a non-primitive when used as an expression.
+      */
+     syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
+     
+	syn boolean FFunctionDecl.containsRealInputs() {
+		for (FFunctionVariable var : myInputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FFunctionDecl.containsRealOutputs() {
+		for (FFunctionVariable var : myOutputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	
+	syn boolean FFunctionDecl.requiresDerivative() = true;
+	eq FConstructorDecl.requiresDerivative()       = false;
+	eq FDestructorDecl.requiresDerivative()        = false;
+	
+	syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+	
+	/**
+	 * Determines if the compiler is able to differentiate this function declaration
+	 */
+	syn boolean FFunctionDecl.canDifferentiate() {
+		if (hasFDerivativeFunction())
+			return true;
+		if (derivativEqualsZero())
+			return true;
+		for (FStatement statement : getFAlgorithm().getFStatements())
+			if (!statement.canDifferentiate())
+				return false;
+		return true;
+	}
+	
+	syn boolean FStatement.canDifferentiate() = true;
+	eq FExternalStmt.canDifferentiate()       = false;
+	
+     
+     /**
+      * Returns a string (tersely) describing the signature of the function.
+      * 
+      * Intended to make it easier to compare the signatures of functions.
+      * The string consists of one character for each input/output, followed by the number 
+      * of dimensions. The inputs are first, followed by a colon, and then the oututs.
+      * The characters used are R - Real, I - Integer, B - Boolean and S - String. 
+      * Records are represented by the record name within parenthesis, followed by the number
+      * of dimensions. Enumerations are treated the same way, but with brackets instead of 
+      * parenthesis.
+      * 
+      * Example:
+      * Inputs: Real, Integer[2], Real[:,4], outputs: Real, Real gives "r0i1r2:r0r0".
+      */
+     syn lazy String FFunctionDecl.signatureString() {
+    	 StringBuilder buf = new StringBuilder();
+    	 for (FFunctionVariable v : myInputs())
+    		 buf.append(v.type().signatureString());
+    	 buf.append(':');
+    	 for (FFunctionVariable v : myOutputs())
+    		 buf.append(v.type().signatureString());
+    	 return buf.toString();
+     }
+     
+     /**
+      * Returns a string (tersely) describing this type.
+      * 
+      * @see FFunctionDecl#signatureString()
+      */
+     syn String FType.signatureString() = "-";
+     eq FRealType.signatureString()     = String.format("r%d", ndims());
+     eq FIntegerType.signatureString()  = String.format("i%d", ndims());
+     eq FBooleanType.signatureString()  = String.format("b%d", ndims());
+     eq FStringType.signatureString()   = String.format("s%d", ndims());
+     eq FEnumType.signatureString()     = String.format("[%s]%d", getName(), ndims());
+     eq FRecordType.signatureString()   = String.format("(%s)%d", getName(), ndims());
+     
+     /**
+      * Set to a class to make all children behave as if this was declared in that function.
+      */
+     private InstClassDecl InstAssignable.temporarilyInFunction = null;
+     
+     /**
+      * \brief Check is this node is in a function.
+      */
+     inh boolean FQName.inFunction();
+     inh boolean InstFunctionArgument.inFunction();
+     inh boolean InstComponentDecl.inFunction();
+     inh boolean InstExternal.inFunction();
+     inh boolean InstAccess.inFunction();
+     inh boolean InstForIndex.inFunction();
+     inh boolean FExp.inFunction();
+     inh boolean FIdUse.inFunction();
+     inh boolean FStatement.inFunction();
+     inh boolean FAbstractEquation.inFunction();
+     inh boolean FSubscript.inFunction();
+     inh boolean FFunctionCallLeft.inFunction();
+     eq InstBaseClassDecl.getChild().inFunction() = isFunction();
+     eq FFunctionDecl.getChild().inFunction()     = true;
+     eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
+     eq Root.getChild().inFunction()              = false;
+     
+     /**
+      * Get the containing FFunctionDecl.
+      * 
+      * Only valid in flat tree.
+      */
+     inh FFunctionDecl FExp.containingFFunctionDecl();
+     inh FFunctionDecl FVariable.containingFFunctionDecl();
+     inh FFunctionDecl FExternalStmt.containingFFunctionDecl();
+     eq FFunctionDecl.getChild().containingFFunctionDecl()  = this;
+     eq InstNode.getChild().containingFFunctionDecl()       = null;
+     eq Root.getChild().containingFFunctionDecl()           = null;
+     
+     /**
+      * Get the class or component containing this node.
+      */
+     inh InstNode InstNode.containingEntity();
+     eq InstClassDecl.getChild().containingEntity()     = this;
+     eq InstComponentDecl.getChild().containingEntity() = this;
+     eq Root.getChild().containingEntity()              = null;
+     
+     /**
+      * \brief Check is this node is in a non-function algorithm.
+      */
+     inh boolean FSubscript.inAlgorithm();
+     inh boolean FFunctionCall.inAlgorithm();
+     inh boolean FIdUse.inAlgorithm();
+     inh boolean FExp.inAlgorithm();
+     eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
+     eq InstNode.getChild().inAlgorithm()          = false;
+     eq FAbstractEquation.getChild().inAlgorithm() = false;
+     eq FClass.getChild().inAlgorithm()            = false;
+     
+     /**
+      * \brief Check is this node is in an algorithm or a function.
+      */
+     syn boolean FSubscript.inAlgorithmOrFunction() = inFunction() || inAlgorithm();
+     
+     /**
+      * \brief Check if this function call is the call of a function call equation 
+      *        or function call statement.
+      */
+     inh boolean FAbstractFunctionCall.isFunctionCallClause();
+     eq ASTNode.getChild().isFunctionCallClause()              = false;
+     eq FFunctionCallEquation.getCall().isFunctionCallClause() = true;
+     eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
+     
+     inh boolean FStatement.insideBlockStmt();
+     eq Root.getChild().insideBlockStmt()        = false;
+     eq FAlgorithm.getChild().insideBlockStmt()  = false;
+     eq FIfWhenStmt.getChild().insideBlockStmt() = true;
+     eq FWhileStmt.getChild().insideBlockStmt()  = true;
+     eq FForStmt.getChild().insideBlockStmt()    = true;
+     eq InstForStmt.getChild().insideBlockStmt() = true;
+     
+     inh boolean FStatement.insideBranchedStmt();
+     eq Root.getChild().insideBranchedStmt()        = false;
+     eq FAlgorithm.getChild().insideBranchedStmt()  = false;
+     eq FIfWhenStmt.getChild().insideBranchedStmt() = true;
+     
+     /**
+      * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
+      *        all those assigned by the same FFunctionCallEquation/Stmt
+      */
+     syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFExp() ? 1 : 0);
+     inh int FFunctionCallLeft.prevIndex();
+     eq FFunctionCallEquation.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myLastIndex();
+     eq FFunctionCallStmt.getLeft(int i).prevIndex()     = (i == 0) ? -1 : getLeft(i - 1).myLastIndex();
+     
+     syn int FFunctionCallLeft.myLastIndex() = myIndex() + (hasFExp() ? numScalarVars() - 1 : 0);
+     
+     /**
+      * \brief Get the number of scalar variables assigned by this FFunctionCallLeft.
+      * 
+      * Only valid after scalarization.
+      */
+     syn int FFunctionCallLeft.numScalarVars() = (hasFExp() ? getFExp().numScalarVars() : 0);
+     
+     /**
+      * \brief Get the number of scalar variables assigned by this a FFunctionCallLeft with this 
+      *        FExp as its expression.
+      * 
+      * Only valid after scalarization.
+      */
+     syn int FExp.numScalarVars() = 1;
+     eq FArray.numScalarVars() {
+    	 int n = getNumFExp();
+    	 return (n == 0) ? 0 : n * getFExp(0).numScalarVars();
+     }
+     eq FRecordConstructor.numScalarVars() {
+         int n = 0;
+         for (FExp e : getArgs())
+             n += e.numScalarVars();
+         return n;
+     }
+     
+     inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
+     eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
+     eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
+     syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
+     eq InstFunctionCall.findOutput(int i)                         = 
+         (i >= myOutputs().size()) ? unknownInstComponentDecl() : myOutputs().get(i);
+     
+     inh boolean FAbstractFunctionCall.functionCallIsExp();
+     eq FExp.getChild().functionCallIsExp()                 = true;
+     eq FClass.getChild().functionCallIsExp()               = true;
+     eq InstNode.getChild().functionCallIsExp()             = true;
+     eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
+     eq FFunctionCallStmt.getCall().functionCallIsExp()     = false;
+     
+     inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
+     eq FExp.getChild().myLefts()                 = new ArrayList<FFunctionCallLeft>();
+     eq FClass.getChild().myLefts()               = new ArrayList<FFunctionCallLeft>();
+     eq InstNode.getChild().myLefts()             = new ArrayList<FFunctionCallLeft>();
+     eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
+     eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
+     
+     inh FAbstractFunctionCall FExp.myFunctionCall();
+     eq Root.getChild().myFunctionCall() = null;
+     eq FFunctionCall.getChild().myFunctionCall() = this;
+     eq FFunctionCallEquation.getLeft().myFunctionCall() = getCall();
+     eq FFunctionCallStmt.getLeft().myFunctionCall() = getCall();
+     
+     /**
+      * Get the name this expression should use for temporary variable.
+      * 
+      * Uses custom caching to avoid flushing.
+      */
+     syn String FExp.tempVarName() {
+    	 if (myTempVarName == null)
+    		 myTempVarName = calcTempVarName();
+    	 return myTempVarName;
+     }
+     private String FExp.myTempVarName;
+     inh String FExp.calcTempVarName();
+     eq InstNode.getChild().calcTempVarName()      = null;
+     eq FFunctionCall.getArray().calcTempVarName() = tempVarName();
+     eq FClass.getChild().calcTempVarName()        = nextTempVarName();
+     eq FFunctionDecl.getChild().calcTempVarName() = nextTempVarName();
+     
+     /**
+      * Creates expressions based on tempVarName();
+      */
+     syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
+     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FIdUse(tempVarName()));
+     syn FVariable FExp.tempVar() = tempVar(variability(), type());
+     syn FVariable FExp.tempVar(FTypePrefixVariability variability, FType type)
+         = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
+     
+     /**
+      * Throw away calculated temp names.
+      */
+     public void ASTNode.flushTempVarNames() {
+    	 for (ASTNode n : this)
+    		 n.flushTempVarNames();
+     }
+     public void FExp.flushTempVarNames() {
+    	 myTempVarName = null;
+    	 super.flushTempVarNames();
+     }
+     
+     public String FClass.nextTempVarName() {
+    	 FlatVariableMap vars = variablesMap();
+         String name;
+         do {
+             name = "temp_" + nextTempVarIndex++;
+         } while (vars.lookup(name) != null);
+         return name;
+     }
+     public String FFunctionDecl.nextTempVarName() {
+    	 FlatVariableMap vars = variablesMap();
+         String name;
+         do {
+             name = "temp_" + nextTempVarIndex++;
+         } while (vars.lookup(name) != null);
+         return name;
+     }
+     public String FClass.nextTempVarName(FFunctionDecl func) {
+    	 FlatVariableMap vars1 = variablesMap();
+    	 FlatVariableMap vars2 = func.variablesMap();
+         String name;
+         do {
+             name = "temp_" + nextTempVarIndex++;
+         } while (vars1.lookup(name) != null || vars2.lookup(name) != null);
+         return name;
+     }
+     
+     private int FFunctionDecl.nextTempVarIndex = 1;
+     private int FClass.nextTempVarIndex = 1;
+
+    public String FClass.nextTempFuncName() {
+        String name;
+        do {
+            name = "temp_" + nextTempFuncIndex++;
+        } while (lookupFunc(name) != null);
+        return name;
+    }
+    private int FClass.nextTempFuncIndex = 1;
+}
+
+aspect Visibility {
+    
+    syn boolean BaseClassDecl.isPublic() = getVisibilityType().isPublic();
+    syn boolean ComponentDecl.isPublic() = getVisibilityType().isPublic();
+
+    syn boolean BaseClassDecl.isProtected() = getVisibilityType().isProtected();
+    syn boolean ComponentDecl.isProtected() = getVisibilityType().isProtected();
+
+    syn boolean VisibilityType.isPublic() = false;
+    eq PublicVisibilityType.isPublic()    = true;
+
+    syn boolean VisibilityType.isProtected() = false;
+    eq ProtectedVisibilityType.isProtected() = true;
+
+    syn boolean FVisibilityType.isPublic() = false;
+    eq FPublicVisibilityType.isPublic()    = true;
+
+    syn boolean FVisibilityType.isProtected() = false;
+    eq FProtectedVisibilityType.isProtected() = true;
+
+    syn boolean FVisibilityType.isTemporary() = false;
+    eq FTemporaryVisibilityType.isTemporary() = true;
+
+    syn boolean FVariable.isPublic()    = getFVisibilityType().isPublic();
+    syn boolean FVariable.isProtected() = getFVisibilityType().isProtected();
+    syn boolean FVariable.isTemporary() = getFVisibilityType().isTemporary();
+    
+}
+
+aspect ComponentDeclMethods {
+	
+    /**
+     * \brief Check if a ComponentDecl is declared flow.
+     */
+	syn boolean ComponentDecl.isFlow()  = hasTypePrefixFlow() && getTypePrefixFlow().isFlow();
+	syn boolean TypePrefixFlow.isFlow() = false;
+	eq Flow.isFlow()                    = true;
+	
+    /**
+     * \brief Check if a ComponentDecl is declared stream.
+     */
+	syn boolean ComponentDecl.isStream()  = hasTypePrefixFlow() && getTypePrefixFlow().isStream();
+	syn boolean TypePrefixFlow.isStream() = false;
+	eq Stream.isStream()                  = true;
+      
+    /**
+     * Check if a ComponentDecl is declared inner.
+     */
+    syn boolean ComponentDecl.isInner() = hasInner();
+    
+    /**
+     * Check if a ComponentDecl is declared outer.
+     */
+    syn boolean ComponentDecl.isOuter() = hasOuter();
+
+    /**
+     * Check if a ClassDecl is declared inner.
+     */
+    syn boolean ClassDecl.isInner() = false;
+    eq BaseClassDecl.isInner() = hasInner();
+    
+    /**
+     * Check if a ClassDecl is declared outer.
+     */
+    syn boolean ClassDecl.isOuter() = false;
+    eq BaseClassDecl.isOuter() = hasOuter();
+
+    /**
+     * Check if this component is declared parameter.
+     */
+    syn boolean ComponentDecl.isParameter() = hasTypePrefixVariability() && getTypePrefixVariability().parameterVariability();
+    
+     /**
+     * Check if this component is declared constant.
+     */
+    syn boolean ComponentDecl.isConstant() = hasTypePrefixVariability() && getTypePrefixVariability().constantVariability();
+    
+    /**
+     * Check if this component is declared discrete.
+     */
+    syn boolean ComponentDecl.isDiscrete() = hasTypePrefixVariability() && getTypePrefixVariability().discreteVariability();
+
+    /**
+     * Check if this component is an input component.
+     */
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
+    
+    /**
+     * Check if this component inherits input from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsInput() {
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isDeclaredInput();
+    }
+    
+    /**
+     * Check if this component is declared input.
+     */
+    syn boolean InstComponentDecl.isDeclaredInput() = getComponentDecl().isInput() || myInstClass().isInput();
+    
+    /**
+     * Check if this component is declared input.
+     */
+    syn boolean ComponentDecl.isInput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isInput();
+    
+    /**
+     * Check if this prefix is "input".
+     */
+    syn boolean TypePrefixInputOutput.isInput() = false;
+    eq Input.isInput()                          = true;
+
+    /**
+     * Check if this component is an output component.
+     */
+    syn boolean InstComponentDecl.isOutput() = isDeclaredOutput() || inheritsOutput();
+    
+    /**
+     * Check if this component inherits output from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsOutput() {
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isDeclaredOutput();
+    }
+ 
+    /**
+     * Check if this component is declared output.
+     */
+    syn boolean InstComponentDecl.isDeclaredOutput() = getComponentDecl().isOutput() || myInstClass().isOutput();
+
+    /**
+     * Check if this component is declared output.
+     */
+    syn boolean ComponentDecl.isOutput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isOutput();
+    
+    /**
+     * Check if this prefix is "output".
+     */
+    syn boolean TypePrefixInputOutput.isOutput() = false;
+    eq Output.isOutput()                         = true;
+    
+    /**
+     * Find the component that this component inherits input or output from, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
+    eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
+    eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
+    eq Root.getChild().inheritsInputOutputFrom()              = null;
+    
+    /**
+     * Check if this component is or is part of a component that is declared input or output on the top level.
+     */
+    syn boolean InstComponentDecl.isTopLevelInputOutput() {
+        if (isTopLevel())
+            return isDeclaredInput() || isDeclaredOutput();
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isTopLevel();
+    }
+    
+    /**
+     * Check if this component is declared at the top level, i.e. not part of any other component.
+     */
+    inh boolean InstComponentDecl.isTopLevel();
+    eq InstComponentDecl.getChild().isTopLevel() = false;
+    eq InstClassDecl.getChild().isTopLevel()     = true;
+    eq InstRoot.getChild().isTopLevel()          = true;
+    eq Root.getChild().isTopLevel()              = true;
+
+    /**
+     * Check if this equation is declared initial.
+     */
+    syn boolean AbstractEquation.isInitial() = hasAbstractEquationModifier() && getAbstractEquationModifier().isInitial();
+    
+    /**
+     * Check if this equation modifier is "initial".
+     */
+    syn boolean AbstractEquationModifier.isInitial() = false;
+    eq Initial.isInitial()                           = true;
+    
+    /**
+     * Check if this component is a flow component.
+     */
+    syn boolean InstComponentDecl.isFlow() = isDeclaredFlow() || inheritsFlow();
+    
+    /**
+     * Check if this component inherits output from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsFlow() = inheritsFlowFrom() != null;
+    
+    /**
+     * Find the component that this component inherits input or output from, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.inheritsFlowFrom();
+    eq InstComponentDecl.getChild().inheritsFlowFrom() = isDeclaredFlow() ? this : inheritsFlowFrom();
+    eq InstClassDecl.getChild().inheritsFlowFrom()     = null;
+    eq InstRoot.getChild().inheritsFlowFrom()          = null;
+    eq Root.getChild().inheritsFlowFrom()              = null;
+
+    /**
+     * Check if this component is declared flow.
+     */
+    syn boolean InstComponentDecl.isDeclaredFlow() = getComponentDecl().isFlow();
+
+    /**
+     * Check if this component is declared stream.
+     */
+    syn boolean InstComponentDecl.isStream() = getComponentDecl().isStream();
+
+    /**
+     * Check if this component is declared inner.
+     */
+    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
+
+    /**
+     * Check if this component is declared outer.
+     */
+    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
+    
+    /**
+     * Check if this class is declared inner.
+     */
+    syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
+
+    /**
+     * Check if this component is declared outer.
+     */
+    syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
+    
+    /**
+     * Check if this component is disabled by a conditional clause
+     */
+    syn boolean InstComponentDecl.isDisabled() {
+        try {
+            return hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
+        } catch (ConstantEvaluationException e) {
+            return false;
+        }
+    }
+    
+    syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
+    syn boolean InstAccess.isDisabled() = false;
+    eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
+    eq InstComponentArrayAccess.isDisabled() = myInstComponentDecl().isDisabled();
+    eq InstDot.isDisabled() {
+    	for (InstAccess ia : getInstAccesss())
+    		if (ia.isDisabled())
+    			return true;
+    	return false;
+    }
+    
+}
+
+aspect ShortClassUtil {
+
+    syn InstClassDecl InstClassDecl.finalClass() = this;
+    eq InstShortClassDecl.finalClass()           = getInstExtends(0).myInstClass().finalClass();
+    eq InstSimpleShortClassDecl.finalClass()     = actualInstClass().finalClass();
+
+
+    syn boolean ClassDecl.isInput() = false;
+    eq ShortClassDecl.isInput() {
+        if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
+            if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Input)
+                return true;
+        return false;
+    }
+    
+    syn boolean ClassDecl.isOutput() = false;
+    eq ShortClassDecl.isOutput() {
+        if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
+            if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Output)
+                return true;
+        return false;
+    }
+
+    syn boolean InstClassDecl.isInput()   = false;
+    eq InstShortClassDecl.isInput()       = 
+    	getClassDecl().isInput() || getInstExtends(0).myInstClass().isInput();
+    eq InstSimpleShortClassDecl.isInput() = actualInstClass().isInput();
+
+    syn boolean InstClassDecl.isOutput()   = false;
+    eq InstShortClassDecl.isOutput()       =
+        getClassDecl().isOutput() || getInstExtends(0).myInstClass().isOutput();
+    eq InstSimpleShortClassDecl.isOutput() = actualInstClass().isOutput();
+    
+    syn boolean BaseComponentDecl.isEnumLiteral() = false;
+    eq EnumLiteralDecl.isEnumLiteral() = true;
+    syn boolean InstComponentDecl.isEnumLiteral() = false;
+    eq InstEnumLiteral.isEnumLiteral() = true;
+    
+}
+
+aspect FlatExpressions {
+    
+    inh boolean FExp.inEquationSection();
+    inh boolean FAbstractEquation.inEquationSection();
+    inh boolean FStatement.inEquationSection();
+    eq FClass.getFAbstractEquation().inEquationSection() = true;
+    eq Root.getChild().inEquationSection() = false;
+    inh boolean FExp.inInitialEquationSection();
+    inh boolean FAbstractEquation.inInitialEquationSection();
+    inh boolean FStatement.inInitialEquationSection();
+    eq FClass.getFInitialEquation().inInitialEquationSection() = true;
+    eq Root.getChild().inInitialEquationSection() = false;
+
+    inh boolean FExp.inEquation();
+    eq FAbstractEquation.getChild().inEquation() = true;
+    eq Root.getChild().inEquation() = false;
+    
+    inh boolean FExp.inNoEventExp();
+    eq FNoEventExp.getChild().inNoEventExp() = true;
+    eq FAssert.getChild().inNoEventExp() = true;
+    eq FFunctionDecl.getChild().inNoEventExp() = true;
+    eq SourceRoot.getChild().inNoEventExp() = false;
+    eq FlatRoot.getChild().inNoEventExp() = false;
+    eq FClass.getFParameterEquation().inNoEventExp() = true;
+
+    inh boolean FExp.inSmoothExp(int order);
+    eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;
+    eq SourceRoot.getChild().inSmoothExp(int order) = false;
+    eq FlatRoot.getChild().inSmoothExp(int order) = false;
+    
+    inh boolean InstAccess.inConnectClause();
+    inh boolean FExp.inConnectClause();
+    eq FConnectClause.getChild().inConnectClause()    = true;
+    eq FAbstractEquation.getChild().inConnectClause() = false;
+    eq SourceRoot.getChild().inConnectClause()        = false;
+    eq FlatRoot.getChild().inConnectClause()          = false;
+
+    inh boolean FExp.inIfCondition();
+    eq FIfExp.getChild().inIfCondition()            = true;
+    eq FAssert.getTest().inIfCondition()            = true;
+    eq FAbsExp.getChild().inIfCondition()           = true;
+    eq FSignExp.getChild().inIfCondition()          = true;
+    eq FAbstractEquation.getChild().inIfCondition() = false;
+    eq SourceRoot.getChild().inIfCondition()        = false;
+    eq FlatRoot.getChild().inIfCondition()          = false;
+
+    inh boolean FAbstractEquation.inWhen();
+    eq FClass.getChild().inWhen()                          = false;
+    eq InstNode.getChild().inWhen()                        = false;
+    eq FIfWhenElseEquation.getFAbstractEquation().inWhen() = isWhen() || inWhen();
+    
+    inh boolean FStatement.inWhen();
+    inh boolean FIfClause.inWhen();
+    eq FIfClause.getFStatement().inWhen()   = myFStatement().isWhen() || inWhen();
+    eq FIfStmt.getElseStmt().inWhen()       = isWhen() || inWhen();
+    eq FWhenClause.getFStatement().inWhen() = true;
+    
+    inh boolean FExp.inWhen();
+    eq FIfExp.getThenExp().inWhen() = isWhen() || inWhen();
+    eq FIfExp.getElseExp().inWhen() = isWhen() || inWhen();
+    
+    inh boolean FAbstractEquation.isInitial();
+    inh boolean FIfExp.isInitial();
+    eq FClass.getChild().isInitial()                      = false;
+    eq FClass.getFInitialEquation().isInitial()           = true;
+    eq InstNode.getChild().isInitial()                    = false;
+    eq FAbstractEquation.getInitialEquation().isInitial() = true;
+    
+    /**
+     * \brief Is this expression of a type that is valid for most uses?
+     * 
+     * Only dummy expressions and similar return false.
+     */
+    syn boolean FExp.isValidExp()       = true;
+    eq FNoExp.isValidExp()              = false;
+    eq FUnsupportedExp.isValidExp()     = false;
+    eq FUnsupportedBuiltIn.isValidExp() = false;
+    eq FUnknownSizeExp.isValidExp()     = false;
+    
+}
+
+aspect LineOffsets {
+    private int[] StoredDefinition.lineBreakMap;
+    
+    public void StoredDefinition.setLineBreakMap(int[] map) {
+        lineBreakMap = map;
+    }
+}
+
+aspect ParserHelpers {
+
+    /**
+     * An exception for parser errors.
+     */
+    public class ParserException extends java.lang.RuntimeException {
+        private Problem p;
+        
+        /**
+         * Default constructor.
+         */
+        public ParserException(Problem p) {
+            this.p = p;
+        }
+        
+        /**
+         * Getter for problem.
+         */
+         public Problem getProblem() {
+             return p;
+         }
+         
+         /**
+          * Return String representation.
+          */
+         public String toString() {
+         	return getClass().getName() + ":\n" + p;
+         }
+        
+    }
+    
+}
+
+aspect NodeSearch {
+    
+    /**
+     * \brief Does node match <code>string</code>? Override for node types that 
+     * need to be searched for.
+     * 
+     * Base implementation always returns <code>false</code.
+     * Generally, this is implemented with something like 
+     * <code>str.equals(name())</code>.
+     * 
+     * @param str  the string to match
+     * @return     <code>true</code if <code>str</code> matches this node, 
+     *             <code>false</code> otherwise
+     */
+    syn boolean ASTNode.matches(String str) = false;
+    eq Access.matches(String str)           = name().equals(str);
+    eq InstAccess.matches(String str)       = name().equals(str);
+    
+    
+    public class ASTNode {
+        
+        /**
+         * \brief Searches <code>set</code> for a node that returns <code>true</code> for 
+         * <code>node.matches(str)</code>.
+         * 
+         * @param set  the container to search for a matching node
+         * @param str  the string to match nodes to
+         * @return     a matching node if one is found, <code>null</code> otherwise
+         */
+        public static <T extends ASTNode> T findMatching(Iterable<T> set, String str) {
+            for (T node : set) 
+                if (node.matches(str)) 
+                    return node;
+            return null;
+        }
+        
+    }
+    
+}
+
+aspect Strings {
+	
+	/**
+	 * \brief Get the value of this string literal with all escape sequences 
+	 *        replaced with their actual meaning.
+	 */
+	syn String StringLitExp.unEscape() = unEscape(getSTRING());
+	
+	/**
+	 * Replace all escape sequences with their actual meaning.
+	 */
+	public static String ASTNode.unEscape(String str) {
+		StringBuffer buf = new StringBuffer();
+		Matcher m = ESCAPE_PATTERN.matcher(str);
+		Map<String,String> repl = escapeReplacements();
+		while (m.find())
+			m.appendReplacement(buf, repl.get(m.group(1)));
+		m.appendTail(buf);
+		return buf.toString();
+	}
+	
+	private static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
+	
+	private static Map<String,String> ASTNode.escapeReplacements() {
+		if (ESCAPE_REPLACEMENTS == null) {
+			ESCAPE_REPLACEMENTS = new HashMap<String,String>();
+			ESCAPE_REPLACEMENTS.put("'", "'");
+			ESCAPE_REPLACEMENTS.put("\"", "\"");
+			ESCAPE_REPLACEMENTS.put("?", "?");
+			ESCAPE_REPLACEMENTS.put("\\", Matcher.quoteReplacement("\\"));
+			ESCAPE_REPLACEMENTS.put("a", "\007");
+			ESCAPE_REPLACEMENTS.put("b", "\b");
+			ESCAPE_REPLACEMENTS.put("f", "\f");
+			ESCAPE_REPLACEMENTS.put("n", "\n");
+			ESCAPE_REPLACEMENTS.put("r", "\r");
+			ESCAPE_REPLACEMENTS.put("v", "\013");
+			ESCAPE_REPLACEMENTS.put("t", "\t");
+		}
+		return ESCAPE_REPLACEMENTS;
+	}
+
+	private static Map<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+
+}
+
+aspect StringComments {
+	
+	syn boolean       ClassDecl.hasStringComment() = false;
+	syn StringComment ClassDecl.getStringComment() = null;
+	
+	eq ShortClassDecl.hasStringComment() = getExtendsClauseShortClass().getComment().hasStringComment();
+	eq ShortClassDecl.getStringComment() = getExtendsClauseShortClass().getComment().getStringComment();
+	
+}
+
+aspect Sorting {
+    
+	public static final Comparator<FAbstractVariable> FAbstractVariable.NAME_COMPARATOR = 
+		new Comparator<FAbstractVariable>() {
+			public int compare(FAbstractVariable fv1, FAbstractVariable fv2) {
+				String n1 = (fv1 == null) ? null : fv1.name();
+				String n2 = (fv2 == null) ? null : fv2.name();
+				if (n1 != null)
+					return n1.compareTo(n2);
+				else
+					return (n2 != null) ? 1 : 0;
+			}
+			
+			public boolean equals(Object obj) { 
+				return obj == this; 
+			}
+		};
+	    
+		public static final Comparator<ASTNode> ASTNode.CHILD_ORDER_COMPARATOR =
+		    new Comparator<ASTNode>() {
+				public int compare(ASTNode n1, ASTNode n2) {
+			    	return childIndex(n1) - childIndex(n2);
+			    }
+				
+				private int childIndex(ASTNode n) {
+					return (n.parent == null) ? 0 : n.parent.getIndexOfChild(n);
+				}
+			    
+				public boolean equals(Object obj) { 
+			    	return obj == this; 
+			    }
+			};
+		    
+		public static final Comparator<ASTNode> ASTNode.TOSTRING_COMPARATOR =
+		    new Comparator<ASTNode>() {
+				public int compare(ASTNode n1, ASTNode n2) {
+			    	return n1.toString().compareTo(n2.toString());
+			    }
+			    
+				public boolean equals(Object obj) { 
+			    	return obj == this; 
+			    }
+			};
+
+}
+
+aspect GeneralHelpers {
+	
+	abstract public FExp FExp.fullCopy();
+	abstract public FQName FQName.fullCopy();
+    abstract public Access Access.fullCopy();
+	abstract public InstAccess InstAccess.fullCopy();
+	abstract public InstNamedAccess InstNamedAccess.fullCopy();
+	abstract public InstScalarAccess InstScalarAccess.fullCopy();
+	abstract public InstArrayAccess InstArrayAccess.fullCopy();
+    abstract public VisibilityType VisibilityType.fullCopy();
+	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
+	abstract public FStatement FStatement.fullCopy();
+	abstract public FEquationType FEquationType.fullCopy();
+	abstract public FType FType.fullCopy();
+	abstract public FVisibilityType FVisibilityType.fullCopy();
+	abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
+	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
+	abstract public FSubscript FSubscript.fullCopy();
+    abstract public CommonForIndex CommonForIndex.fullCopy();
+	
+	abstract public FExp FExp.copy();
+	abstract public InstAccess InstAccess.copy();
+	
+	public FExp FExp.unboundCopy() { return (FExp) super.unboundCopy(); }
+	
+	inh boolean ASTNode.isFirst();
+	eq List.getChild(int i).isFirst()    = i == 0;
+	eq ASTNode.getChild(int i).isFirst() = true;
+	
+	inh boolean ASTNode.isLast();
+	eq List.getChild(int i).isLast()     = i == getNumChild() - 1;
+	eq ASTNode.getChild(int i).isLast()  = true;
+	
+	public class ASTNode {
+		
+		/**
+		 * Used to iterate over the children of an AST node without triggering rewrites.
+		 */
+		public Iterable<T> noTransform() { 
+			return new Iterable<T>() {
+				public Iterator<T> iterator() {
+					return new NoTransformIterator();
+				}
+			};
+		}
+		
+		/**
+		 * Used to iterate over the children of an AST node without triggering rewrites.
+		 */
+		public class NoTransformIterator implements Iterator<T> {
+			
+			private int i = 0;
+			private int n = getNumChildNoTransform();
+			
+			public boolean hasNext() {
+				return i < n;
+			}
+			
+			public T next() {
+				return getChildNoTransform(i++);
+			}
+			
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		}
+		
+	}
+		
+	/**
+	 * Adds all children to a Collection.
+	 */
+	public void ASTNode.addAllTo(Collection<? super T> col) {
+		for (T n : this)
+			col.add(n);
+	}
+	
+	/**
+	 * Is this class partial?
+	 */
+	syn boolean ClassDecl.isPartial() = false;
+	eq BaseClassDecl.isPartial()      = hasPartial();
+	
+	syn boolean Restriction.isModel() = false;
+	eq Model.isModel() = true;
+	syn boolean ClassDecl.isModel() = false;
+	eq BaseClassDecl.isModel() = getRestriction().isModel();
+	syn boolean InstClassDecl.isModel() = getClassDecl().isModel();
+
+	syn boolean Restriction.isBlock() = false;
+	eq Block.isBlock() = true;
+	syn boolean ClassDecl.isBlock() = false;
+	eq BaseClassDecl.isBlock() = getRestriction().isBlock();
+	syn boolean InstClassDecl.isBlock() = getClassDecl().isBlock();
+
+	syn boolean Restriction.isClass() = false;
+	eq MClass.isClass() = true;
+	syn boolean ClassDecl.isClass() = false;
+	eq BaseClassDecl.isClass() = getRestriction().isClass();
+	syn boolean InstClassDecl.isClass() = getClassDecl().isClass();
+	
+	/**
+	 * \brief Is this class a package?
+	 */
+	syn boolean ClassDecl.isPackage() = false;
+	eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
+	eq UnknownClassDecl.isPackage()   = false;
+	
+	/**
+	 * \brief Is this restriction "package"?
+	 */
+	syn boolean Restriction.isPackage() = false;
+	eq MPackage.isPackage()             = true;
+	
+	/**
+     * Check if this when equation is the else part of another when equation.
+     */
+    inh boolean FIfWhenElseEquation.isElse();
+    eq FIfWhenEquation.getElse().isElse()    = true;
+    eq FAbstractEquation.getChild().isElse() = false;
+    eq FClass.getChild().isElse()            = false;
+    eq InstNode.getChild().isElse()          = false;
+
+	/**
+	 * \brief Round a number to 2 decimals if it is < 10, 1 decimal otherwise.
+	 */
+	public static double ASTNode.roundFriendly(double val) {
+		double round = val < 10.0 ? 100.0 : 10.0;
+		return Math.round(val * round) / round;
+	}
+
+	/**
+	 * Create a human-readable memory size string (e.g. 2.34 kB).
+	 * 
+	 * @param mem  size to format, in bytes. May be negative.
+	 */
+	public static String ASTNode.formatMem(long mem) {
+		int i = 0;
+		double scaledMem = Math.abs(mem);
+		for (; i < 4 && scaledMem >= 1000.0; i++)
+			scaledMem /= 1024.0;
+		StringBuilder buf = new StringBuilder();
+		if (i == 0) {
+			buf.append(mem);
+		} else {
+			if (mem < 0)
+				buf.append('-');
+			buf.append(roundFriendly(scaledMem));
+		}
+		buf.append(memUnits[i]);
+		return buf.toString();
+	}
+
+	/**
+	 * Parse a human-readable memory size string (e.g. 2.34 kB).
+	 * 
+	 * @param str  string to parse
+	 * @return  the amount of memory described by the string
+	 */
+	public static long ASTNode.parseMem(String str) {
+		Matcher m = memPattern.matcher(str);
+		if (m.matches()) {
+			double val = Double.parseDouble(m.group(1));
+			String suff = m.group(4);
+			if (suff != null && !suff.isEmpty()) {
+				char sc = Character.toLowerCase(suff.charAt(0));
+				for (int i = 0; i < memUnits.length && Character.toLowerCase(memUnits[i].charAt(1)) != sc; i++)
+					val *= 1024.0;
+			}
+			if (val < Long.MAX_VALUE && val > Long.MIN_VALUE)
+				return (long) val;
+		}
+		throw new IllegalArgumentException(str);
+	}
+	
+	private static final String[] ASTNode.memUnits = { 
+		" B", " kB", " MB", " GB", " TB" , " PB" , " EB" };
+	private static final Pattern ASTNode.memPattern = 
+			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
+	
+}
+
+aspect DebugHelpers {
+
+	/**
+	 * Check if the list contains an instance of the specified class.
+	 */
+	public boolean List.containsInstance(Class c) {
+		 for (ASTNode n : children)
+			 if (c.isInstance(n))
+				 return true;
+		 return false;
+	}
+
+}
+
+aspect DefaultExperiment {
+	
+	/**
+	 * Check if a class has an "experiment" annotation.
+	 */
+	syn boolean ClassDecl.isExperiment() = annotation("experiment").exists();
+	
+	/**
+	 * Check if a class has an "experiment" annotation.
+	 */
+	syn boolean InstClassDecl.isExperiment() = annotation("experiment").exists();
+	
+	public class FClass {
+		
+		public Experiment experiment = null;
+		
+		/**
+		 * Create an experiment description from an experiment annotation, if it exists.
+		 */
+		public void createExperiment(AnnotationNode a) {
+			if (a.exists())
+				experiment = new Experiment(a);
+		}
+		
+		/**
+		 * Represents an experiment annotation.
+		 */
+		public static class Experiment {
+			
+			public boolean hasStart = false;
+			public double start;
+			public boolean hasStop = false;
+			public double stop;
+			public boolean hasInterval = false;
+			public double interval;
+			public boolean hasTolerance = false;
+			public double tolerance;
+			
+			public Experiment(AnnotationNode expr) {
+				for (AnnotationNode val : expr) {
+					if (val.isRealValue()) {
+						if (val.name().equals("StartTime")) {
+							hasStart = true;
+							start = val.real();
+						} else if (val.name().equals("StopTime")) {
+							hasStop = true;
+							stop = val.real();
+						} else if (val.name().equals("Interval")) {
+							hasInterval = true;
+							interval = val.real();
+						} else if (val.name().equals("Tolerance")) {
+							hasTolerance = true;
+							tolerance = val.real();
+						}
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
+}
