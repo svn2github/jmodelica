@@ -15,6 +15,7 @@
 */
 
 import java.util.Map;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
@@ -162,7 +163,22 @@ aspect Flattening {
 		if (ia.isAssignable() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
 		    ia.myInstComponentDecl().flattenUsedFuncsAndEnums(fc);
 	}
-	
+
+    public void FExp.flattenUsedFuncsAndEnums(FClass fc) {
+        super.flattenUsedFuncsAndEnums(fc);
+        InstClassDecl oper = overloadedOperator();
+        if (oper != null) {
+            oper.flattenFunction(fc);
+            int i = 0;
+            for (FExp arg : childFExps()) {
+                InstComponentDecl in = oper.myInputs().get(i);
+                if (!in.type().typeCompatible(arg.type()))
+                    in.type().matchOverloadedConstructor(arg.type()).flattenFunction(fc);
+                i++;
+            }
+        }
+    }
+
 	public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
 		if (myInstClassDecl().extendsEnum())
 			myInstClassDecl().flattenEnum(fc);
@@ -1924,8 +1940,22 @@ aspect FlatExpressions {
 		                  getElseExp().flatten(prefix));
 	}
 
-	public FExp FBinExp.flatten(FQName prefix)     { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
-	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
+    public FExp FBinExp.flatten(FQName prefix) {
+        InstClassDecl oper = overloadedOperator();
+        if (oper != null)
+            return oper.flattenOverloadedFunctionCall(prefix, getLeft(), getRight());
+        else
+            return createNode(getLeft().flatten(prefix), getRight().flatten(prefix));
+    }
+
+    public FExp FUnaryExp.flatten(FQName prefix)   {
+        InstClassDecl oper = overloadedOperator();
+        if (oper != null)
+            return oper.flattenOverloadedFunctionCall(prefix, getFExp());
+        else
+            return createNode(getFExp().flatten(prefix));
+    }
+
 	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
 	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
 	
@@ -2118,6 +2148,29 @@ aspect FlatExpressions {
 			vectorFlags[i++] = e.isVectorized();
 		return new FVectorFunctionCall(name, args, sizes, size(), vectorFlags);
 	}
+
+    public FFunctionCall InstClassDecl.flattenOverloadedFunctionCall(FQName prefix, FExp... args) {
+        // TODO: handle array operations (scalar * matrix, etc)
+        FIdUse name = new FIdUse(new FQNameString(qualifiedName()));
+        int nIn = myInputs().size();
+        if (nIn > args.length)
+            args = Arrays.copyOf(args, nIn);
+        for (int i = 0; i < nIn; i++) {
+            InstComponentDecl in = myInputs().get(i);
+            if (args[i] == null) {
+                args[i] = in.createInstDefaultArgument().flatten(prefix);
+            } else if (!in.type().typeCompatible(args[i].type())) {
+                InstClassDecl constructor = in.type().matchOverloadedConstructor(args[i].type());
+                args[i] = constructor.flattenOverloadedFunctionCall(prefix, args[i]);
+            } else {
+                args[i] = args[i].flatten(prefix);
+            }
+        }
+        List<FExp> argList = new List<FExp>(args);
+        Size[] sizes = new Size[myOutputs().size()];
+        sizes[0] = myOutputs().get(0).size();
+        return new FFunctionCall(name, argList, sizes);
+    }
 
 	public FExp InstFunctionArgument.flatten(FQName prefix) {
 		return getFExp().flatten(prefix);

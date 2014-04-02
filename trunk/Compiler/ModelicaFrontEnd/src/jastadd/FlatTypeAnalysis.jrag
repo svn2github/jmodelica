@@ -930,32 +930,25 @@ aspect TypePromotion {
      * If non-<code>null</code>, <code>operator</code> defines what operator 
      * to use in operator overloading.
      */
-    syn FType FType.scalarNumericPromotion(FType type, String operator) = fUnknownType();
-
+    syn FType FType.scalarNumericPromotion(FType type, String operator) = matchOverloadedOperatorType(type, operator);
     eq FPrimitiveNumericType.scalarNumericPromotion(FType type, String operator) {
         if (type.isNumeric()) 
             return isReal() ? scalarType() : type.scalarType();
-        else if (type.isOperatorRecord()) 
-            return type.matchOverloadedOperatorType(this, operator, false);
         else 
-            return fUnknownType();
+            return super.scalarNumericPromotion(type, operator);
     }
-
-    eq FOperatorRecordType.scalarNumericPromotion(FType type, String operator) =
-        matchOverloadedOperatorType(type, operator, true);
 
 
     /**
      * Calculate the type of an operator expression involving operator records.
      * 
-     * @param other     the type of the other side of the expression, <code>null</code> for unary operators
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
      * @param operator  the name of the operator to look for
-     * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
-     *                  must be <code>true</code> for unary operators
      */
-    syn FType FType.matchOverloadedOperatorType(FType other, String operator, boolean isLeft) = fUnknownType();
-    eq FOperatorRecordType.matchOverloadedOperatorType(FType other, String operator, boolean isLeft) {
-        InstClassDecl func = matchOverloadedOperator(other, operator, isLeft);
+    syn FType FType.matchOverloadedOperatorType(FType right, String operator) {
+        InstClassDecl func = matchOverloadedOperator(right, operator);
         return (func == null) ? fUnknownType() : func.myOutputs().get(0).type();
     }
 
@@ -964,29 +957,70 @@ aspect TypePromotion {
 aspect OverloadedOperatorBinding {
 
     /**
+     * Calculate the function to use for this operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or if this is not an operator record expression.
+     */
+    syn InstClassDecl FExp.overloadedOperator() = null;
+    eq FBinExp.overloadedOperator()   = getLeft().type().matchOverloadedOperator(getRight().type(), operatorName());
+    eq FUnaryExp.overloadedOperator() = getFExp().type().matchOverloadedOperator(null, operatorName());
+
+    /**
      * Calculate the function to use for an operator expression involving operator records.
      * 
-     * Returns null if none or more than one function matches.
+     * Returns null if none or more than one function matches or expression does not include operator records.
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn InstClassDecl FType.matchOverloadedOperator(FType right, String operator) = 
+        matchOverloadedOperator(right, operator, true);
+
+    /**
+     * Calculate the function to use for an operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or expression does not include operator records.
      * 
      * @param other     the type of the other side of the expression, <code>null</code> for unary operators
      * @param operator  the name of the operator to look for
      * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
      *                  must be <code>true</code> for unary operators
      */
-    syn InstClassDecl FOperatorRecordType.matchOverloadedOperator(FType other, String operator, boolean isLeft) {
+    syn InstClassDecl FType.matchOverloadedOperator(FType other, String operator, boolean isLeft) {
         Collection<InstClassDecl> match = matchOverloadedOperators(other, operator, isLeft);
         return (match.size() == 1) ? match.iterator().next() : null;
     }
 
     /**
-     * Calculate the functions that matches an operator expression involving operator records.
+     * Calculate the functions that match an operator expression involving operator records.
+     * 
+     * If expression does not include operator records, the empty set is returned.
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedOperators(FType right, String operator) = 
+        matchOverloadedOperators(right, operator, true);
+
+    /**
+     * Calculate the functions that match an operator expression involving operator records.
+     * 
+     * If expression does not include operator records, the empty set is returned.
      * 
      * @param other     the type of the other side of the expression, <code>null</code> for unary operators
      * @param operator  the name of the operator to look for
      * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
      *                  must be <code>true</code> for unary operators
      */
-    syn Collection<InstClassDecl> FOperatorRecordType.matchOverloadedOperators(FType other, String operator, boolean isLeft) {
+    syn Collection<InstClassDecl> FType.matchOverloadedOperators(FType other, String operator, boolean isLeft) =
+        (other != null && other.isOperatorRecord()) ? 
+                other.matchOverloadedOperators(this, operator, !isLeft) : 
+                Collections.<InstClassDecl>emptyList();
+    eq FOperatorRecordType.matchOverloadedOperators(FType other, String operator, boolean isLeft) {
+        if (operator == null)
+            return Collections.emptyList();
         OperatorMatches mine = matchOverloadedOperators(operator, this, other, isLeft);
         OperatorMatches others = OperatorMatches.EMPTY;
         if (other instanceof FOperatorRecordType) {
@@ -996,6 +1030,30 @@ aspect OverloadedOperatorBinding {
         }
         return mine.combine(others).matches();
     }
+
+    /**
+     * Find the constructor to use to convert a given type to this type.
+     * 
+     * Returns null if none or more than one constructor matches or this is not a operator record type.
+     * 
+     * @param other     the type to convert
+     */
+    syn InstClassDecl FType.matchOverloadedConstructor(FType other) = null;
+    eq FOperatorRecordType.matchOverloadedConstructor(FType other) {
+        Collection<InstClassDecl> match = matchOverloadedConstructors(other);
+        return (match.size() == 1) ? match.iterator().next() : null;
+    }
+
+    /**
+     * Find the constructors that match for a conversion a given type to this type.
+     * 
+     * If this is not a operator record type, the empty set is returned.
+     * 
+     * @param other     the type to convert
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedConstructors(FType other) = null;
+    eq FOperatorRecordType.matchOverloadedConstructors(FType other)              = 
+        matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
 
     /**
      * Calculate the functions in this operator record type that matches an operator expression 
@@ -1085,8 +1143,8 @@ aspect OverloadedOperatorBinding {
             if (bin == null || !bin.type().isOperatorRecord())  // if b isn't an operator record, no indirect match
                 return false;
             // Find constructor matching single argument
-            FOperatorRecordType binType = (FOperatorRecordType) bin.type();
-            return binType.matchOverloadedOperators(FExp.OP_CON, b, null, true).isOK();
+            return ain != null && ain.type().typeCompatible(a) &&     // a matches its argument
+                   bin.type().matchOverloadedConstructor(b) != null;  // there is a single matching constructor for b
         }
         
         // Direct binary case
