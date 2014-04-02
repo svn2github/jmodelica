@@ -1256,7 +1256,7 @@ aspect FlatNames {
     //syn String FIdUseExp.derName2() = getFIdUse().derName2();
     
     syn String FQName.nameUnderscore()            = "";
-    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[\\[,.]", "_");
+    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[^0-9a-zA-Z_]", "_");
     syn lazy String FQNameFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
@@ -1265,7 +1265,7 @@ aspect FlatNames {
         for (FQNamePart part : getFQNameParts()) {
         	str.append(sep);
         	sep = "_";
-        	str.append(part.getName());
+        	str.append(part.nameUnderscore());
         	if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
         		for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
                     str.append(sep);
@@ -1276,7 +1276,7 @@ aspect FlatNames {
         return str.toString();
     }
 
-    syn String FQNamePart.nameUnderscore() = getName();
+    syn String FQNamePart.nameUnderscore() = getName().replaceAll("[^0-9a-zA-Z_]", "_");
 
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
@@ -1302,11 +1302,20 @@ aspect FlatNames {
     eq FHDummyDerivativeVariable.nameUnderscore() = "der_" + getOrder() + "_" + getFQName().nameUnderscore();
     eq FFunctionVariable.nameUnderscore()   = getFQName().nameUnderscore();
     
-    syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
-    syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
-    syn String FFunctionCall.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
-    syn String FFunctionDecl.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
-    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+    syn String FQName.funcNameUnderscore(String suffix)              = "func_" + nameUnderscore() + "_" + suffix;
+    syn String FIdUse.funcNameUnderscore(String suffix)              = getFQName().funcNameUnderscore(suffix);
+    syn String FFunctionCall.funcNameUnderscore(String suffix)       = getName().funcNameUnderscore(suffix) + functionIndex();
+    syn String FFunctionDecl.funcNameUnderscore(String suffix)       = getFQName().funcNameUnderscore(suffix) + functionIndex();
+    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix) + functionIndex();
+
+    /**
+     * Get the index of this function.
+     */
+    inh int FFunctionDecl.functionIndex();
+    eq FClass.getFFunctionDecl(int i).functionIndex() = i;
+
+    syn int FFunctionCall.functionIndex()       = myFFunctionDecl().functionIndex();
+    syn int FDerivativeFunction.functionIndex() = myFFunctionDecl().functionIndex();
 
     syn int FAbstractVariable.variableIndex() = findVariableIndex();
     eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
