@@ -1209,40 +1209,6 @@ aspect Flattening {
 	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
 	
 	
-    /**
-     * \brief Find functions, record and enumeration declarations that need to be flattened.
-     */
-	protected void ASTNode.createAndFlattenResidualPairs(FClass fc) {
-		for (ASTNode n : this)
-			n.createAndFlattenResidualPairs(fc);
-	}
-	
-	protected void InstNode.createAndFlattenResidualPairs(FClass fc) {
-		if (!root().options.getBooleanOption("hand_guided_tearing"))
-			return;
-		getInstComponentDecls().createAndFlattenResidualPairs(fc);
-		getInstExtendsList().createAndFlattenResidualPairs(fc);
-		FQName prefix = getFQName();
-		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
-			if (!pair.name().equals("Pair"))
-				continue;
-			Exp enabledExp = pair.forPath("enabled").exp();
-			if (enabledExp != null && !dynamicFExp(enabledExp.instantiate()).ceval().booleanValue())
-				continue;
-			
-			Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
-			InstAccess via = iterationVariableExp.asAccess().instantiate();
-			FQName iterationVariableName = dynamicFExp(new FInstAccessExp(via)).asInstAccess().flatten(prefix);
-			
-			Exp residualEquationExp = pair.forPath("residualEquation").exp();
-			InstAccess eia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
-			FQName residualEquationName = dynamicFExp(new FInstAccessExp(eia)).asInstAccess().flatten(prefix);
-			
-			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), 
-					new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
-		}
-	}
-	
 }
 
 aspect FlatteningDebug {
