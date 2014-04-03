@@ -957,28 +957,35 @@ aspect FlatAPI {
     
     /**
      * Check if an expression will generate an event.
-     * The argument checkNonFixedParameters controls whether parameters
-     * with fixed = false should be considered to generate events.
+     * 
+     * @param boolean Controls whether parameters with fixed = false should be
+     *      considered to generate events.
      */
-    syn boolean FExp.generatesEvent(boolean checkNonFixedParameters) = generatesEventExp(checkNonFixedParameters) && !inDiscreteLocation();
+    syn boolean FExp.generatesEvent(boolean checkNonFixedParameters) = generatesEvent(false, checkNonFixedParameters);
+    
+    /**
+     * Check if an expression will generate an event.
+     * 
+     * @param boolean Controles whether variability should be ignored.
+     * @param boolean Controls whether parameters with fixed = false should be
+     *      considered to generate events.
+     */
+    syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
+            inEventGeneratingLocation() && hasEventGeneratingType() &&
+            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters));
     
     /**
      * Check if an expression will generate an event.
      * Does not check context further than expressions.
      */
-    syn boolean FExp.generatesEventExp(boolean checkNonFixedParameters) = false;
-    eq FRelExp.generatesEventExp(boolean checkNonFixedParameters) = 
-            !inNoEventExp() &&
-            !inSmoothExp(1) &&
-            isRealComparison() &&
-            (!variability().lessOrEqual(fParameter()) ||
-                    checkNonFixedParameters && containsNonFixedParameter());
-    eq FEventGenExp.generatesEventExp(boolean checkNonFixedParameters) =
-            !inNoEventExp() &&
-            !inSmoothExp(1) &&
-            argType().isReal() &&
-            (!variability().lessOrEqual(fParameter()) ||
-                    checkNonFixedParameters && containsNonFixedParameter());
+    syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
+            !variability().lessOrEqual(fParameter()) || (checkNonFixedParameters && containsNonFixedParameter());
+
+    syn boolean FExp.inEventGeneratingLocation() = !inDiscreteLocation() && !inNoEventExp() && !inSmoothExp(1);
+
+    syn boolean FExp.hasEventGeneratingType() = false;
+    eq FRelExp.hasEventGeneratingType() = isRealComparison();
+    eq FEventGenExp.hasEventGeneratingType() = argType().isReal();
 
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
