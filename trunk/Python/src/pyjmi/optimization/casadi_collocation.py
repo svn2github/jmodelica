@@ -3461,11 +3461,27 @@ class LocalDAECollocator(CasadiCollocator):
         """
         # Scale variables
         if self.variable_scaling and self.nominal_traj is None:
+            # Fetch scaling factors
             sf = {}
             var_kinds = ["dx", "x", "unelim_u", "w", "p_opt"]
             for vk in var_kinds:
                 sf[vk] = N.array([N.abs(self.op.get_attr(v, "nominal")) for
                                   v in self.mvar_vectors[vk]])
+
+                # Check for zero nominal values
+                zero_sf_indices = N.where(sf[vk] == 0.0)[0]
+                if len(zero_sf_indices) > 0:
+                    zero_sf_names = [var.getName() for var
+                                     in self.mvar_vectors[vk][zero_sf_indices]]
+                    names = ""
+                    for name in zero_sf_names[:-1]:
+                        names += name + ", "
+                    names += zero_sf_names[-1]
+                    raise CasadiCollocatorException(
+                            "Nominal value(s) for variable(s) %s is zero." %
+                            names)
+
+            # Compose scaling factors
             sf["time"] = N.array([1.])
             sf["elim_u"] = N.ones(self.n_var["elim_u"])
             self._sf = sf
