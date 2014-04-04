@@ -296,23 +296,24 @@ aspect FlatTypeAnalysis {
     syn boolean FRelExp.isStringComparison()  = getRight().type().numericPromotion(getLeft().type()).isString();
 
 
-    public static final String FExp.OP_CON = "'constructor'";
-    public static final String FExp.OP_STR = "'String'";
-    public static final String FExp.OP_ADD = "'+'";
-    public static final String FExp.OP_SUB = "'-'";
-    public static final String FExp.OP_MUL = "'*'";
-    public static final String FExp.OP_DIV = "'/'";
-    public static final String FExp.OP_POW = "'^'";
-    public static final String FExp.OP_EQ  = "'=='";
-    public static final String FExp.OP_NEQ = "'<>'";
-    public static final String FExp.OP_GT  = "'>'";
-    public static final String FExp.OP_LT  = "'<'";
-    public static final String FExp.OP_GEQ = "'>='";
-    public static final String FExp.OP_LEQ = "'<='";
-    public static final String FExp.OP_AND = "'and'";
-    public static final String FExp.OP_OR  = "'or'";
-    public static final String FExp.OP_NEG = "'-'";
-    public static final String FExp.OP_NOT = "'not'";
+    public static final String FExp.OP_CON  = "'constructor'";
+    public static final String FExp.OP_ZERO = "'0'";
+    public static final String FExp.OP_STR  = "'String'";
+    public static final String FExp.OP_ADD  = "'+'";
+    public static final String FExp.OP_SUB  = "'-'";
+    public static final String FExp.OP_MUL  = "'*'";
+    public static final String FExp.OP_DIV  = "'/'";
+    public static final String FExp.OP_POW  = "'^'";
+    public static final String FExp.OP_EQ   = "'=='";
+    public static final String FExp.OP_NEQ  = "'<>'";
+    public static final String FExp.OP_GT   = "'>'";
+    public static final String FExp.OP_LT   = "'<'";
+    public static final String FExp.OP_GEQ  = "'>='";
+    public static final String FExp.OP_LEQ  = "'<='";
+    public static final String FExp.OP_AND  = "'and'";
+    public static final String FExp.OP_OR   = "'or'";
+    public static final String FExp.OP_NEG  = "'-'";
+    public static final String FExp.OP_NOT  = "'not'";
 
     /**
      * The name of the operator to use for expressions of this type containing overloaded operators.
@@ -1056,6 +1057,20 @@ aspect OverloadedOperatorBinding {
         matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
 
     /**
+     * Find the zero function for an operator record type.
+     * 
+     * Returns null if none or more than one constructor matches or this is not a operator record type.
+     */
+    syn InstClassDecl FType.matchOverloadedZero() = null;
+    eq FOperatorRecordType.matchOverloadedZero() {
+        InstClassDecl op = getOperators().get(FExp.OP_ZERO);
+        if (op == null) 
+            return null;
+        Collection<InstClassDecl> match = op.operatorFunctions();
+        return (match.size() == 1) ? match.iterator().next() : null;
+    }
+
+    /**
      * Calculate the functions in this operator record type that matches an operator expression 
      * involving operator records.
      * 
@@ -1099,6 +1114,19 @@ aspect OverloadedOperatorBinding {
     eq InstConnector.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)                              = 
         (inheritedRestriction() != null) ? inheritedRestriction().matchOverloadedOperators(a, b, aIsLeft) : super.matchOverloadedOperators(a, b, aIsLeft);
 
+    /**
+     * Get a list of all functions in this operator.
+     * 
+     * If this is not an operator or operator function, an empty list is returned.
+     */
+    syn java.util.List<InstClassDecl> InstClassDecl.operatorFunctions() = Collections.emptyList();
+    eq InstBaseClassDecl.operatorFunctions()                            = getInstRestriction().operatorFunctions();
+
+    /**
+     * Get a list of all functions in the operator that has this restriction.
+     * 
+     * If this is not an operator or operator function, an empty list is returned.
+     */
     syn java.util.List<InstClassDecl> InstRestriction.operatorFunctions() = Collections.emptyList();
     eq InstOperatorFunction.operatorFunctions() = Collections.singletonList(myInstClassDecl());
     syn lazy java.util.List<InstClassDecl> InstOperator.operatorFunctions() {
@@ -1532,7 +1560,9 @@ aspect BuiltInFlatTypes {
     eq FNoType.arrayType(Size size)             = this;
 
     /**
-     * \brief Create a literal with the zero value for this type, if applicable.
+     * Create a literal with the zero value for this type, if applicable.
+     * 
+     * For operator records, a function call is created.
      */
     public FExp FType.zeroLiteral()        { return new FNoExp(); }
     public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
@@ -1546,7 +1576,10 @@ aspect BuiltInFlatTypes {
             args.add(t.getFType().zeroLiteral());
         return new FRecordConstructor(new FIdUse(getName()), args); 
     }
-    // TODO: Add for operator record (using '0')
+    public FExp FOperatorRecordType.zeroLiteral() {
+        InstClassDecl func = matchOverloadedZero();
+        return (func != null) ? func.flattenOverloadedFunctionCall(new FQNameEmpty()) : super.zeroLiteral();
+    }
  
     /**
      * \brief Create a literal of the given integer value for this type, if applicable.

@@ -30,6 +30,12 @@ package OperatorRecordTests
             c.im := im;
         end 'constructor';
 
+        operator function '0'
+            output Cplx c;
+        algorithm
+            c := Cplx(0, 0);
+        end '0';
+
         operator function '+'
             input Cplx a;
             input Cplx b;
@@ -265,6 +271,243 @@ public
 end OperatorRecordTests.OperatorOverload6;
 ")})));
     end OperatorOverload6;
+
+
+    model OperatorRecordConnect1
+        connector C
+            Cplx x;
+            flow Cplx y;
+        end C;
+
+        C c1, c2, c3;
+    equation
+        connect(c1, c2);
+        connect(c1, c3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect1",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect1
+ OperatorRecordTests.Cplx c1.x;
+ OperatorRecordTests.Cplx c1.y;
+ OperatorRecordTests.Cplx c2.x;
+ OperatorRecordTests.Cplx c2.y;
+ OperatorRecordTests.Cplx c3.x;
+ OperatorRecordTests.Cplx c3.y;
+equation
+ c1.x = c2.x;
+ c2.x = c3.x;
+ OperatorRecordTests.Cplx.'-'.sub(OperatorRecordTests.Cplx.'-'.sub(OperatorRecordTests.Cplx.'-'.neg(c1.y), c2.y), c3.y) = OperatorRecordTests.Cplx.'0'();
+ c1.y = OperatorRecordTests.Cplx.'0'();
+ c2.y = OperatorRecordTests.Cplx.'0'();
+ c3.y = OperatorRecordTests.Cplx.'0'();
+
+public
+ function OperatorRecordTests.Cplx.'0'
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(0, 0);
+  return;
+ end OperatorRecordTests.Cplx.'0';
+
+ function OperatorRecordTests.Cplx.'-'.neg
+  input OperatorRecordTests.Cplx a;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(- a.re, - a.im);
+  return;
+ end OperatorRecordTests.Cplx.'-'.neg;
+
+ function OperatorRecordTests.Cplx.'-'.sub
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(a.re - b.re, a.im - b.im);
+  return;
+ end OperatorRecordTests.Cplx.'-'.sub;
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorRecordConnect1;
+")})));
+    end OperatorRecordConnect1;
+
+
+    model OperatorRecordConnect2
+        connector C
+            Cplx x;
+            flow Cplx y;
+        end C;
+
+        model A
+            C c;
+        end A;
+
+        A a1, a2, a3, a4;
+    equation
+        connect(a1.c, a2.c);
+        connect(a1.c, a3.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect2",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect2
+ OperatorRecordTests.Cplx a1.c.x;
+ OperatorRecordTests.Cplx a1.c.y;
+ OperatorRecordTests.Cplx a2.c.x;
+ OperatorRecordTests.Cplx a2.c.y;
+ OperatorRecordTests.Cplx a3.c.x;
+ OperatorRecordTests.Cplx a3.c.y;
+ OperatorRecordTests.Cplx a4.c.x;
+ OperatorRecordTests.Cplx a4.c.y;
+equation
+ a1.c.x = a2.c.x;
+ a2.c.x = a3.c.x;
+ OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'+'(a1.c.y, a2.c.y), a3.c.y) = OperatorRecordTests.Cplx.'0'();
+ a4.c.y = OperatorRecordTests.Cplx.'0'();
+
+public
+ function OperatorRecordTests.Cplx.'0'
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(0, 0);
+  return;
+ end OperatorRecordTests.Cplx.'0';
+
+ function OperatorRecordTests.Cplx.'-'.neg
+  input OperatorRecordTests.Cplx a;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(- a.re, - a.im);
+  return;
+ end OperatorRecordTests.Cplx.'-'.neg;
+
+ function OperatorRecordTests.Cplx.'-'.sub
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(a.re - b.re, a.im - b.im);
+  return;
+ end OperatorRecordTests.Cplx.'-'.sub;
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorRecordConnect2;
+")})));
+    end OperatorRecordConnect2;
+
+
+    model OperatorRecordConnect3
+        connector C = Cplx;
+
+        C c1, c2, c3;
+    equation
+        connect(c1, c2);
+		c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect3",
+            description="Connectors that are operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect3
+ OperatorRecordTests.OperatorRecordConnect3.C c1;
+ OperatorRecordTests.OperatorRecordConnect3.C c2;
+ OperatorRecordTests.OperatorRecordConnect3.C c3;
+equation
+ c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
+ c1 = c2;
+
+public
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.OperatorRecordConnect3.C
+  Real re;
+  Real im;
+ end OperatorRecordTests.OperatorRecordConnect3.C;
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorRecordConnect3;
+")})));
+    end OperatorRecordConnect3;
+
+
+    model OperatorRecordConnect4
+        connector C
+            Cplx x;
+            flow Cplx y;
+        end C;
+
+        C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect4",
+            description="Connector with flow operator record without connection",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect4
+ OperatorRecordTests.Cplx c.x;
+ OperatorRecordTests.Cplx c.y;
+equation
+ c.y = OperatorRecordTests.Cplx.'0'();
+
+public
+ function OperatorRecordTests.Cplx.'0'
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx(0, 0);
+  return;
+ end OperatorRecordTests.Cplx.'0';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorRecordConnect4;
+")})));
+    end OperatorRecordConnect4;
 
 
     model OperatorOverloadCompliance
