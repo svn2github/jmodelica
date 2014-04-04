@@ -1785,31 +1785,32 @@ aspect Scalarization {
 		stmts.add(stmt);
 	}
 	
-	/**
-	 * \brief Scalarize the function, replacing all array assignments with separate scalar 
-	 *        assignments and scalarize all expressions.
-	 */
-	public FFunctionDecl FFunctionDecl.scalarize() {
-		Map<String,FExp> emptyIndexMap = Collections.emptyMap();
-		List<FFunctionVariable> vars = new List<FFunctionVariable>();
-		List<FStatement> stmts = new List<FStatement>();
+    /**
+     * \brief Scalarize the function, replacing all array assignments with separate scalar 
+     *        assignments and scalarize all expressions.
+     */
+    public FFunctionDecl FFunctionDecl.scalarize() {
+        Map<String,FExp> emptyIndexMap = Collections.emptyMap();
+        List<FFunctionVariable> vars = new List<FFunctionVariable>();
+        List<FStatement> stmts = new List<FStatement>();
 
-		FFunctionDecl fd = createDecl();
-		fd.setFQName(getFQName().fullCopy());
-		fd.setFFunctionVariableList(vars);
-		fd.setFAlgorithm(new FAlgorithm(stmts));
-		if (hasFDerivativeFunction())
-		    fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
-		fd.smoothOrder(smoothOrder());
-		fd.inlineAnnotation = inlineAnnotation;
-		fd.parent = this;
-		
-		for (FFunctionVariable var : getFFunctionVariables())
-			var.scalarize(vars, stmts, emptyIndexMap);
+        FFunctionDecl fd = createDecl();
+        fd.setFQName(getFQName().fullCopy());
+        fd.setFFunctionVariableList(vars);
+        fd.setFAlgorithm(new FAlgorithm(stmts));
+        for (FAttribute a : getFAttributes()) 
+            fd.addFAttribute(a.scalarize(Index.NULL, Collections.<String,FExp>emptyMap()));
+        if (hasFDerivativeFunction())
+            fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
+        fd.inlineAnnotation = inlineAnnotation;
+        fd.parent = this;
+
+        for (FFunctionVariable var : getFFunctionVariables())
+            var.scalarize(vars, stmts, emptyIndexMap);
         FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, vars, emptyIndexMap);
-		
-		return fd;
-	}
+
+        return fd;
+    }
 	
 	public FFunctionDecl FFunctionDecl.createDecl() {
 		return new FFunctionDecl();

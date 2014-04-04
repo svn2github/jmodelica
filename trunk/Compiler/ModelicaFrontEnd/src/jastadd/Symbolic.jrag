@@ -876,10 +876,10 @@ aspect Derivatives {
 	
 }
 
-aspect AlgorithmDifferentiation{
+aspect SmoothOrder{
+
     public static final int ASTNode.SMOOTH_ORDER_ANNOTATION_DEFAULT = -1;
-    
-    
+
     public static int ASTNode.readSmoothOrderAnnotation(AnnotationNode a) {
         AnnotationNode smoothOrder = a.forPath("smoothOrder");
         if (smoothOrder.isIntegerValue())
@@ -908,6 +908,9 @@ aspect AlgorithmDifferentiation{
     syn int InstFunctionCall.smoothOrder() = myInstClassDecl().smoothOrder();
     syn int FFunctionCall.smoothOrder() = myFFunctionDecl().smoothOrder();
     
+}
+
+aspect AlgorithmDifferentiation{
     syn FFunctionDecl FFunctionDecl.diff(boolean inFunction) {
         int order = order() + 1;
         if (smoothOrder() == 0 && !inFunction)

@@ -221,6 +221,8 @@ aspect Flattening {
             addLocalFunctionConstants(ffd, fc);
             flattenUsedFuncsAndEnums(fc);
             ffd.updateRecordArraySizes();
+
+            contribute(ffd);
         }
     }
 
@@ -2672,6 +2674,8 @@ aspect AttributeContributer {
 
         protected abstract void contribute(InstAssignable src, FVariable dest);
 
+        protected abstract void contribute(InstBaseClassDecl src, FFunctionDecl dest);
+
         @Override
         public String toString() {
             return name;
@@ -2719,7 +2723,13 @@ aspect AttributeContributer {
         }
     }
     
-    
+    public class InstBaseClassDecl {
+        public <N extends FFunctionDecl> N contribute(N function) {
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(this, function);
+            return function;
+        }
+    }
     
 }
 
