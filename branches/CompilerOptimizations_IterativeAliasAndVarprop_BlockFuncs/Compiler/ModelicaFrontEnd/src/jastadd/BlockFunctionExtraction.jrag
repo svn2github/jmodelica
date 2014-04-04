@@ -105,19 +105,13 @@ aspect BlockFunctionExtraction {
     }
     
     public void FFunctionCall.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
-        boolean dep = false;
-        for (FExp exp: getArgs()) {
-            exp.findBlockFunctionExtraction(block, functions);
-        }
-        for (FExp exp: getArgs()) {
+        for (FExp exp: getArgs())
             if (exp.dependsOnBlock(block)) {
-                dep = true;
-                break;
+                for (FExp expr: getArgs()) 
+                    expr.findBlockFunctionExtraction(block, functions);
+                return;
             }
-        }
-        if(!dep) {
-            functions.add(this);
-        }
+        functions.add(this);
     }
     
     /* Depends on block */
