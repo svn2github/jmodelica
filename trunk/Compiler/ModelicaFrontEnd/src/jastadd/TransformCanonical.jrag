@@ -1155,7 +1155,7 @@ aspect TransformCanonical {
 			
 			// Add return statement, create function declaration and add it to FClass 
 			alg.addFStatement(new FReturnStmt());
-			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new Opt(), SMOOTH_ORDER_ANNOTATION_DEFAULT));
+			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new Opt(), new List<FAttribute>()));
 		}
 	}
 

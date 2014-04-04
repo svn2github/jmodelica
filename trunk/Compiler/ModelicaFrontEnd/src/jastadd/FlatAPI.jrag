@@ -1737,6 +1737,7 @@ aspect Attributes {
 	syn FAttribute FAttribute.findAttribute(String name)        = findMatching(getFAttributes(), name);
 	syn FAttribute FDerivedType.findAttribute(String name)      = findMatching(getFAttributes(), name);
 	syn FAttribute FAbstractEquation.findAttribute(String name) = findMatching(getFAttributes(), name);
+    syn FAttribute FFunctionDecl.findAttribute(String name)     = findMatching(getFAttributes(), name);
 	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) && a.getAttributeSet();
 	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
 	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));

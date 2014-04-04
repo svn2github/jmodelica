@@ -1800,7 +1800,7 @@ aspect Scalarization {
 		fd.setFAlgorithm(new FAlgorithm(stmts));
 		if (hasFDerivativeFunction())
 		    fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
-		fd.setSmoothOrder(getSmoothOrder());
+		fd.smoothOrder(smoothOrder());
 		fd.inlineAnnotation = inlineAnnotation;
 		fd.parent = this;
 		
