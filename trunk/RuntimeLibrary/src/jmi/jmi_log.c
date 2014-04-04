@@ -93,12 +93,14 @@ static void buffer_raw_char(buf_t *buf, char c) {
 }
 
 static void buffer_char(buf_t *buf, char c) {
-    /* Escape # used for value references. */
-    if (c == '#') buffer_raw_char(buf, c);
-
-    if (c == '\n') { /* emit newlines as &#10; */
+    if (c == '#') {
+        /* Escape # as ## since it's used for value references */
+        buffer_raw_char(buf, '#'); buffer_raw_char(buf, '#');
+    }
+    else if (c == '\n') {
+        /* Escape newlines as &#10; so that they don't break JMI log filtering */
         buffer_raw_char(buf, '&');
-        buffer_raw_char(buf, '#');
+        buffer_raw_char(buf, '#'); buffer_raw_char(buf, '#'); /* Escape # as ## here too */
         buffer_raw_char(buf, '1');
         buffer_raw_char(buf, '0');
         buffer_raw_char(buf, ';');
