@@ -1,11 +1,12 @@
 model Car
   constant Real pi = Modelica.Constants.pi;
 
-  // init parameters (adjust init parameters above instead)
+  // init parameters
   parameter Real X0 = 0;
   parameter Real Y0 = 0;
   parameter Real vx0 = 25;
   parameter Real psi0 = 0;
+  
   // vehicle properties
   parameter Real l = 2.8;
   parameter Real lf = 1.3;
@@ -22,7 +23,7 @@ model Car
   parameter Real Iw = 2;
   parameter Real sig = .3;
 
-  // Dry Asphalt
+  // Tire parameters corresponding to dry asphalt
   // Front tire model parameters
   parameter Real muxf = 1.1959;
   parameter Real Bxf = 11.6848;
@@ -72,15 +73,15 @@ model Car
 
   // inputs
   Modelica.Blocks.Interfaces.RealInput delta(min=-.5, max=.5, nominal=.2);
-  Modelica.Blocks.Interfaces.RealInput Twf(min=Twfmin, max=Twfmax, nominal=Twrmax);
+  Modelica.Blocks.Interfaces.RealInput Twf(min=Twfmin, max=Twfmax, nominal=Twfmax);
   Modelica.Blocks.Interfaces.RealInput Twr(min=Twrmin, max=Twrmax, nominal=Twrmax);
 
   // variables
-  Real X(nominal=50, start=X0,fixed=true);
-  Real Y(nominal=10, start=Y0,fixed=true);
-  Real psi(nominal=pi, start=psi0,fixed=true);
+  Real X(nominal=50, start=X0, fixed=true);
+  Real Y(nominal=10, start=Y0, fixed=true);
+  Real psi(nominal=pi, start=psi0, fixed=true);
   Real vy(nominal=1, start=0, fixed=true);
-  Real vx(nominal=10, start=vx0,fixed=true, min=0.1, max=100);
+  Real vx(nominal=10, start=vx0, fixed=true, min=0.1, max=100);
   Real dpsi(nominal=1, start=0, fixed=true);
   Real alphaf(nominal=.2, start=0, fixed=true);
   Real alphar(nominal=.2, start=0, fixed=true);
@@ -174,17 +175,19 @@ optimization Turn (objective=finalTime, startTime = 0,
 
   // steering signal
   constant Real ddeltamax = 1; // max steer rate
-  constant Real deltamax = .5;   // max steer angle
+  constant Real deltamax = .5; // max steer angle
   Real delta(start=0, fixed=true, min=-deltamax, max=deltamax, nominal=.2);
   input Real delta_u(min=-deltamax, max=deltamax);
+  
+  // torque signals
   parameter Real tau_Tw = .1;
-      parameter Real tau_delta = .1;
+  parameter Real tau_delta = .1;
 
   parameter Real dTwmax = car.muxf*car.m*car.g*car.Rw/2 / .2;
   input Real Twf_u(min=car.Twfmin, max=car.Twfmax, nominal=car.Twrmax);
   input Real Twr_u(min=car.Twrmin, max=car.Twrmax, nominal=car.Twrmax);
-parameter Real Twf_start = 0;
-parameter Real Twr_start = 0;
+  parameter Real Twf_start = 0;
+  parameter Real Twr_start = 0;
   Real Twf(start=0,fixed=true,min=car.Twfmin, max=car.Twfmax, nominal=car.Twrmax);
   Real Twr(start=0,fixed=true,min=car.Twrmin, max=car.Twrmax, nominal=car.Twrmax);
 
@@ -207,25 +210,30 @@ parameter Real Twr_start = 0;
   parameter Real Y_final = (Ri+Ro)/2;
   parameter Real psi_final = pi;
 
-  // define car model. init coordinates and vx
-  Car car(X0=X_start, psi0=psi_start,Y0=Y_start, vx0=vx_start,X(min=Xmin,max=Xmax),Y(min=Ymin,max=Ymax));
+  // Define car model, init coordinates and vx
+  Car car(X0=X_start, psi0=psi_start, Y0=Y_start, vx0=vx_start,
+          X(min=Xmin, max=Xmax), Y(min=Ymin, max=Ymax));
 
 equation
-
-  delta= car.delta;
-   der(delta)*tau_delta + delta = delta_u;
-  delta= car.delta;
-der(Twf)*tau_Tw + Twf = Twf_u;
+  
+  // First-order dynamics on actuation
+  delta = car.delta;
+  der(delta)*tau_delta + delta = delta_u;
+  delta = car.delta;
+  der(Twf)*tau_Tw + Twf = Twf_u;
   der(Twr)*tau_Tw + Twr = Twr_u;
-Twf=car.Twf;
-Twr=car.Twr;
+  Twf=car.Twf;
+  Twr=car.Twr;
 
 constraint
-
+  
+  // Road constraints
   (car.X/Ri)^8 + (car.Y/Ri)^8 >= 1;
   (car.X/Ro)^8 + (car.Y/Ro)^8 <= 1;
-
+  
+  // Terminal constraints
   car.X(finalTime) = X_final;
   car.Y(finalTime) = Y_final;
   car.psi(finalTime) = psi_final;
+
 end Turn;
