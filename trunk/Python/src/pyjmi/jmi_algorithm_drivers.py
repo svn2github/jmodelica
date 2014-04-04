@@ -2552,9 +2552,9 @@ class LocalDAECollocationAlgOptions(OptionBase):
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
-            return the unscaled optimization result. This option is 
-            only applicable when the CasadiModel has been instantiated with
-            scale_variables=True. This option is only intended for debugging.
+            return the unscaled optimization result. This option is only
+            applicable when variable_scaling is enabled and is only intended
+            for debugging.
             
             Type: bool
             Default: False
