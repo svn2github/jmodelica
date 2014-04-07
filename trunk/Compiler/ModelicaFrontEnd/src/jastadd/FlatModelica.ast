@@ -169,6 +169,11 @@ FParameter : FTypePrefixVariability;
 FStructParameter : FParameter;
 
 /**
+ * Evaluate true parameter variability.
+ */
+FEvalParameter : FParameter;
+
+/**
  * Constant variability.
  */
 FConstant : FTypePrefixVariability;
