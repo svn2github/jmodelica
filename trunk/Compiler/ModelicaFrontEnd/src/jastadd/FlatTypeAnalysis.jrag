@@ -797,6 +797,13 @@ aspect InstBindingType {
     eq Root.getChild().findInheritingNode()                    = null;
     
     /**
+     * Find the surrounding class, if any.
+     */
+    inh InstClassDecl InstNode.surroundingInstClass();
+    eq InstClassDecl.getChild().surroundingInstClass() = this;
+    eq Root.getChild().surroundingInstClass()          = null;
+    
+    /**
      * Is this a member of an array component?
      */
 	inh boolean InstAssignable.inArrayComponent();
@@ -855,7 +862,7 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.typePromotion(FType type, boolean allowUnknown, String operator) {
-        if (isNumeric() || isOperatorRecord() || type.isOperatorRecord())
+        if (isNumeric() || ((isOperatorRecord() || type.isOperatorRecord()) && operator != null))
             return numericPromotion(type, allowUnknown, operator);
         else if (!equivalentTo(type, allowUnknown))
             return fUnknownType();
@@ -1247,6 +1254,8 @@ aspect OverloadedOperatorBinding {
         }
 
     }
+
+    syn Map<String,InstClassDecl> FRecordType.getOperators() = Collections.emptyMap();
 
 }
 

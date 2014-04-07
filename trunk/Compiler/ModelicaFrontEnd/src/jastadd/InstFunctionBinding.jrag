@@ -20,34 +20,35 @@ import java.util.HashSet;
 
 
 aspect InstFunctionBinding {
-	
-	/**
-	 * \brief Finds which, if any, of the inputs for its function a single argument should 
-	 * bind to, and adds it to an array in the corresponding place.
-	 * 
-	 * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
-	 * is placed there.
-	 * 
-	 * @param arr     the array to place the argument in
-	 * @param inputs  the list of inputs for the function
-	 * @return        <code>true</code> it the position for the argument could be found, 
-	 *                <code>false</code> otherwise.
-	 */
-	public boolean InstFunctionArgument.bindArgument(InstFunctionArgument[] arr, 
-			                                         ArrayList<InstComponentDecl> inputs) {
-		int pos = findArgumentPosition(inputs);
-		if (pos < 0 || pos >= arr.length)
-			return false;
-		
-		if (arr[pos] == null)
-			arr[pos] = (InstFunctionArgument) fullCopy();
-		else
-			arr[pos] = arr[pos].addMultipleBoundArgument(this);
-		
-		arr[pos].setBoundInput(inputs.get(pos));
-		return true;
-	}
-	
+
+    /**
+     * \brief Finds which, if any, of the inputs for its function a single argument should 
+     * bind to, and adds it to an array in the corresponding place.
+     * 
+     * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
+     * is placed there.
+     * 
+     * @param arr     the array to place the argument in
+     * @param inputs  the list of inputs for the function
+     * @return        <code>true</code> it the position for the argument could be found, 
+     *                <code>false</code> otherwise.
+     */
+    public boolean InstFunctionArgument.bindArgument(InstFunctionArgument[] arr, 
+                                                     ArrayList<InstComponentDecl> inputs) {
+        int pos = findArgumentPosition(inputs);
+        if (pos < 0 || pos >= arr.length)
+            return false;
+        
+        if (arr[pos] == null)
+            arr[pos] = (InstFunctionArgument) fullCopy();
+        else
+            arr[pos] = arr[pos].addMultipleBoundArgument(this);
+        
+        arr[pos].setBoundInput(inputs.get(pos));
+        arr[pos].parent = parent; // Temporarily add to tree
+        return true;
+    }
+
 	/**
 	 * \brief Return an InstMultipleBoundArgument containing both <code>this</code> and <code>arg</code>.
 	 * 
@@ -129,14 +130,13 @@ aspect InstFunctionBinding {
 	syn boolean InstFunctionArgument.isOKArg() = true;
 	eq InstMissingArgument.isOKArg() = false;
 	eq InstMultipleBoundArgument.isOKArg() = false;
-	
-	/**
-	 * \brief List of arguments that could not be bound to inputs.
-	 */
-	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
-		new ArrayList<InstFunctionArgument>();
-	private ArrayList<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = null;
-	
+
+    /**
+     * \brief List of arguments that could not be bound to inputs.
+     */
+    private java.util.List<InstFunctionArgument> InstFunctionCall.unbindableArgs     = Collections.emptyList();
+    private java.util.List<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = Collections.emptyList();
+
 	public void FAbstractFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
 		throw new UnsupportedOperationException();
 	}
@@ -441,149 +441,258 @@ aspect InstFunctionBinding {
 	}
 
 	/**
-	 * \brief Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
-	 * for built-in functions.
+	 * Change access to point to <code>this</code> class instead of <code>orig</code>.
 	 * 
-	 * If arguments could not be bound to inputs properly (to few args, to many args, bad 
-	 * named args, etc), then the node remains an InstFunctionCall.
-	 * 
-	 * Any arguments that could not be bound to an input are gathered in unbindableArgs.
-	 * 
-	 * If function call was rewritten to a FBuiltinFunctionCall, then the InstFunctionArgument 
-	 * nodes describing them are gathered in originalArgs.
+	 * <code>orig</code> must be ancestor of <code>this</code>. Creates new access if necessary.
 	 */
-	rewrite InstFunctionCall {
-    	when (!bound) to FAbstractFunctionCall {
-		    // Make sure we only do this once.
-    		bound = true;
+    public InstAccess InstClassDecl.retargetFrom(InstClassDecl orig, InstAccess access) {
+        if (this == orig)
+            return access;
+        access = surroundingInstClass().retargetFrom(orig, access);
+        InstDot dot = (access instanceof InstDot) ? (InstDot) access : new InstDot(new List(access));
+        dot.addInstAccess(new InstClassAccess(name()));
+        return dot;
+    }
 
-		    // Get info
-    		boolean externalObject = false;
-		    InstClassDecl target = getName().myInstClassDecl();
-	    	String name = target.qualifiedName();
-		    if (target.isPrimitive()) {
-		    	// Look for conversion operator with same name as primitive class (if one exists)
-				InstClassDecl icd = getName().lookupInstClass("!" + target.name());
-				if (icd != null)
-					target = icd;
-		    } if (target.isExternalObject()) {
-		    	InstClassDecl icd = target.myConstructor();
-				if (icd.isFunction())
-					target = icd;
-		    	externalObject = true;
-		    }
-    		ArrayList<InstComponentDecl> inputs = target.myCallInputs();
-		    
-		    /* If we can't resolve the name as a function or record, don't try to bind arguments, 
-		     * just leave it for the error check. */
-		    if (!target.isCallable())
-		    	return this;
+    public class ArgumentBinding {
 
-	    	// Check if we should try to bind arguments
-	    	InstFunctionArgument[] temp;
-	    	boolean argsOK = true;
-	    	boolean infArgs = builtInTranslator.isInfArgs(name);
-	    	if (infArgs) {
-	    		
-	    		// Just collect all positional arguments
-	    		ArrayList<InstFunctionArgument> args = new ArrayList<InstFunctionArgument>();
-	    		for (InstFunctionArgument arg : getArgs()) {
-	    			if (arg instanceof InstPositionalArgument)
-	    				args.add(arg);
-	    			else
-	    				unbindableArgs.add(arg);
-	    		}
-	    		
-	    		// Make sure we have any fixed arguments
-	    		for (int i = args.size(); i < inputs.size(); i++) {
-	    			InstMissingArgument arg = new InstMissingArgument();
-	    			args.add(arg);
-	    			argsOK = false;
-	    		}
-	    		temp = args.toArray(new InstFunctionArgument[args.size()]);
+        private InstFunctionArgument[] bound;
+        private ArrayList<InstFunctionArgument> unbindable;
+        private ArrayList<InstComponentDecl> inputs;
+        private InstFunctionCall source;
+        private boolean ok = true;
 
-	    		// Connect fixed arguments to inputs
-	    		for (int i = 0; i < inputs.size(); i++)
-	    			temp[i].setBoundInput(inputs.get(i));
-	    	} else {
-		    
-	    		// Bind arguments
-	    		temp = new InstFunctionArgument[inputs.size()];
-	    		for (InstFunctionArgument arg : getArgs()) 
-	    			if (!arg.bindArgument(temp, inputs))
-	    				unbindableArgs.add(arg);
-		    		
-	    		// Add default argument and check for problems.
-	    		for (int i = 0; i < temp.length; i++) {
-	    			if (temp[i] == null) 
-	    				temp[i] = inputs.get(i).createInstDefaultArgument();
-	    			temp[i].setErrorArgLocation(this);
-	    			argsOK = argsOK && temp[i].isOKArg();
-	    		}
-		
-		    	argsOK = argsOK && unbindableArgs.isEmpty();
-	    	}
-	    		
-    		// Create replacement node.
-		    FAbstractFunctionCall n = null;
-		    if (argsOK) 
-		    	n = builtInTranslator.create(name, temp);
-		    if (n == null) {
-				if (target.isRecord() && argsOK) {
-					n = new InstRecordConstructor(getName(), new List());
-				} else {
-					InstAccess accessName = getName();
-					if (externalObject)
-						accessName = accessName.copyAndAppend("constructor");
-					InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
-					ifc.generated = externalObject || generated;
-					ifc.unbindableArgs = unbindableArgs;
-					ifc.bound = true;
-					n = ifc;
-				}
-				for (InstFunctionArgument arg : temp)
-					n.addArgument(arg);
-			} else if (infArgs) {
-				n.setUnbindableArgsList(unbindableArgs);
-			}
-			n.setLocation(this);
-			
-			return n;	
-    	}
-  	}
-	private boolean InstFunctionCall.bound = false;
-	public boolean InstFunctionCall.generated = false;
-	
-	
-	/**
-	 * Calculate if this is a vectorized function call.
-	 */
-	rewrite InstFunctionCall {
-    	when (bound && !vectorizationChecked) to InstFunctionCall {
-    		vectorizationChecked = true;
-    		
-    		if (isFunctionCallClause() && myLefts().size() != 1)
-    			return this;
-    		if (getName().myInstClassDecl().isUnknown() || !unbindableArgs.isEmpty())
-    			return this;
-    		if (!hasOutputs() || myOutputs().get(0).isComposite())
-    			return this;
-    		
-    		int dims = 0;
-    		for (InstFunctionArgument arg : getArgs()) 
-    			dims = arg.findVectorizationNdims(dims);
-    		if (dims <= 0)
-    			return this;
-    		
-    		InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), dims);
-    		res.vectorizationChecked = res.bound = true;
-    		res.generated = generated;
-    		res.setLocation(this);
-    		return res;
-    	}
-	}
-	private boolean InstFunctionCall.vectorizationChecked = false;
-	
+        public ArgumentBinding(InstClassDecl target, InstFunctionCall source, boolean infArgs) {
+            inputs = target.myCallInputs();
+            unbindable = new ArrayList<InstFunctionArgument>();
+            this.source = source;
+            if (infArgs) 
+                bindInfArgs();
+            else 
+                bindNormal();
+        }
+
+        /**
+         * Is this binding a match?
+         */
+        public boolean isOK() {
+            return ok;
+        }
+
+        /**
+         * Get the bound arguments.
+         */
+        public InstFunctionArgument[] bound() {
+            return bound;
+        }
+
+        /**
+         * Get the list of arguments that could not be bound to any input.
+         */
+        public ArrayList<InstFunctionArgument> unbindable() {
+            return unbindable;
+        }
+
+        /**
+         * A heuristic score for how well the arguments match the function, including 
+         * type. Lower is better, 0 is a perfect match.
+         */
+        public int typeMatchScore() {
+            int score = unbindable.size() * 2000;
+            int i = 0;
+            for (InstFunctionArgument arg : bound) {
+                if (arg.isOKArg()) {
+                    FType argType = arg.getFExp().type();
+                    FType inType = inputs.get(i).type();
+                    if (!inType.dimensionCompatible(argType, true))
+                        score++;
+                    if (!inType.scalarType().typeCompatible(argType.scalarType(), true))
+                        score++;
+                } else {
+                    score += 1000;
+                }
+                i++;
+            }
+            return score;
+        }
+
+        /**
+         * Update the bound inputs of all arguments. Needed when several ArgumentBinding objects 
+         * have been created for the same function call (used for overloaded constructors).
+         */
+        public void updateBoundInputs() {
+            for (int i = 0; i < inputs.size(); i++) {
+                bound[i].setBoundInput(inputs.get(i));
+                if (!bound[i].isOKArg())
+                    bound[i].setErrorArgLocation(source);
+            }
+        }
+
+        private void bindNormal() {
+            // Bind arguments
+            bound = new InstFunctionArgument[inputs.size()];
+            for (InstFunctionArgument arg : source.getArgs()) 
+                if (!arg.bindArgument(bound, inputs))
+                    unbindable.add(arg);
+
+            // Add default argument and check for problems.
+            for (int i = 0; i < bound.length; i++) {
+                if (bound[i] == null) 
+                    bound[i] = inputs.get(i).createInstDefaultArgument();
+                bound[i].setErrorArgLocation(source);
+                ok = ok && bound[i].isOKArg();
+            }
+
+            ok = ok && unbindable.isEmpty();
+        }
+
+        private void bindInfArgs() {
+            // Just collect all positional arguments
+            ArrayList<InstFunctionArgument> args = new ArrayList<InstFunctionArgument>();
+            for (InstFunctionArgument arg : source.getArgs()) {
+                if (arg instanceof InstPositionalArgument)
+                    args.add(arg);
+                else
+                    unbindable.add(arg);
+            }
+
+            // Make sure we have any fixed arguments
+            for (int i = args.size(); i < inputs.size(); i++) {
+                InstMissingArgument arg = new InstMissingArgument();
+                args.add(arg);
+                ok = false;
+            }
+            bound = args.toArray(new InstFunctionArgument[args.size()]);
+            updateBoundInputs();
+        }
+
+    }
+
+    /**
+     * Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
+     * for built-in functions.
+     * 
+     * If arguments could not be bound to inputs properly (to few args, to many args, bad 
+     * named args, etc), then the node remains an InstFunctionCall.
+     * 
+     * Any arguments that could not be bound to an input are gathered in unbindableArgs.
+     * 
+     * If function call was rewritten to a FBuiltinFunctionCall, then the InstFunctionArgument 
+     * nodes describing them are gathered in originalArgs.
+     */
+    rewrite InstFunctionCall {
+        when (!bound) to FAbstractFunctionCall {
+            // Make sure we only do this once.
+            bound = true;
+
+            // Get info
+            boolean generated = this.generated;
+            InstClassDecl target = getName().myInstClassDecl().actualInstClass();
+            InstClassDecl namedTarget = target;
+            String name = target.qualifiedName();
+            ArgumentBinding binding = null;
+
+            // Handle special cases
+            if (target.isPrimitive()) {
+                // Look for conversion operator with same name as primitive class (if one exists)
+                InstClassDecl icd = getName().lookupInstClass("!" + target.name());
+                if (icd != null)
+                    target = icd;
+            } else if (target.isExternalObject()) {
+                // Use the external object constructor
+                InstClassDecl icd = target.myConstructor();
+                if (icd.isFunction())
+                    target = icd;
+                generated = true;
+            } else if (target.isOperatorRecord()) {
+                // If the operator record defines constructors, find the one that matches the best
+                // TODO: Error if several perfect matches
+                // TODO: Make toString() match original decl
+                InstClassDecl op = target.recordType().getOperators().get(FExp.OP_CON);
+                if (op != null) {
+                    int score = Integer.MAX_VALUE;
+                    for (InstClassDecl func : op.operatorFunctions()) {
+                        ArgumentBinding binding2 = new ArgumentBinding(func, this, false);
+                        int score2 = binding2.typeMatchScore();
+                        if (score2 < score) {
+                            score = score2;
+                            binding = binding2;
+                            target = func;
+                        }
+                    }
+                    binding.updateBoundInputs();
+                    generated = true;
+                }
+            }
+
+            /* If we can't resolve the name as a function or record, don't try to bind arguments, 
+             * just leave it for the error check. */
+            if (!target.isCallable())
+                return this;
+
+            // Bind arguments
+            boolean infArgs = builtInTranslator.isInfArgs(name);
+            if (binding == null)
+                binding = new ArgumentBinding(target, this, infArgs);
+
+            // Create replacement node.
+            FAbstractFunctionCall n = null;
+            if (binding.isOK()) 
+                n = builtInTranslator.create(name, binding.bound());
+            if (n == null) {
+                if (target.isRecord() && binding.isOK()) {
+                    n = new InstRecordConstructor(getName(), new List());
+                } else {
+                    InstAccess accessName = generated ? target.retargetFrom(namedTarget, getName()) : getName();
+                    InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
+                    ifc.generated = generated;
+                    ifc.unbindableArgs = binding.unbindable();
+                    ifc.bound = true;
+                    n = ifc;
+                }
+                for (InstFunctionArgument arg : binding.bound())
+                    n.addArgument(arg);
+            } else if (infArgs) {
+                n.setUnbindableArgsList(binding.unbindable());
+            }
+            n.setLocation(this);
+
+            return n;
+        }
+    }
+    private boolean InstFunctionCall.bound = false;
+    public boolean InstFunctionCall.generated = false;
+
+
+    /**
+     * Calculate if this is a vectorized function call.
+     */
+    rewrite InstFunctionCall {
+        when (bound && !vectorizationChecked) to InstFunctionCall {
+            vectorizationChecked = true;
+            
+            if (isFunctionCallClause() && myLefts().size() != 1)
+                return this;
+            if (getName().myInstClassDecl().isUnknown() || !unbindableArgs.isEmpty())
+                return this;
+            if (!hasOutputs() || myOutputs().get(0).isComposite())
+                return this;
+            
+            int dims = 0;
+            for (InstFunctionArgument arg : getArgs()) 
+                dims = arg.findVectorizationNdims(dims);
+            if (dims <= 0)
+                return this;
+            
+            InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), dims);
+            res.vectorizationChecked = res.bound = true;
+            res.generated = generated;
+            res.setLocation(this);
+            return res;
+        }
+    }
+    private boolean InstFunctionCall.vectorizationChecked = false;
+
 	/**
 	 * Check if this argument can be a vectorized argument, given the 
 	 * results to calls to this function for previous arguments.

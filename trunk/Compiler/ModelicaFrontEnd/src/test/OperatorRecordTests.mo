@@ -33,7 +33,7 @@ package OperatorRecordTests
         operator function '0'
             output Cplx c;
         algorithm
-            c := Cplx(0, 0);
+            c := Cplx(0);
         end '0';
 
         operator function '+'
@@ -74,17 +74,27 @@ package OperatorRecordTests
             description="Basic test of overloaded operators: addition",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload1
- OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
- OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx(3, 4);
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
  function OperatorRecordTests.Cplx.'+'
   input OperatorRecordTests.Cplx a;
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -109,17 +119,27 @@ end OperatorRecordTests.OperatorOverload1;
             description="Basic test of overloaded operators: subtraction",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload2
- OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
- OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx(3, 4);
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'-'.sub(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
  function OperatorRecordTests.Cplx.'-'.sub
   input OperatorRecordTests.Cplx a;
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re - b.re, a.im - b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'-'.sub;
 
@@ -143,15 +163,25 @@ end OperatorRecordTests.OperatorOverload2;
             description="Basic test of overloaded operators: negation",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload3
- OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'-'.neg(c1);
 
 public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
  function OperatorRecordTests.Cplx.'-'.neg
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(- a.re, - a.im);
+  c := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'-'.neg;
 
@@ -194,20 +224,11 @@ Semantic error at line 130, column 19:
             description="Automatic type conversion for overloaded operators: right",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload5
- OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
  Real r = 3;
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, OperatorRecordTests.Cplx.'constructor'(r, 0));
 
 public
- function OperatorRecordTests.Cplx.'+'
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output OperatorRecordTests.Cplx c;
- algorithm
-  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
-  return;
- end OperatorRecordTests.Cplx.'+';
-
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -217,6 +238,15 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -239,20 +269,11 @@ end OperatorRecordTests.OperatorOverload5;
             description="Automatic type conversion for overloaded operators: left",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload6
- OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
  Real r = 3;
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'constructor'(r * 4, 0), c1);
 
 public
- function OperatorRecordTests.Cplx.'+'
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output OperatorRecordTests.Cplx c;
- algorithm
-  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
-  return;
- end OperatorRecordTests.Cplx.'+';
-
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -262,6 +283,15 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -308,15 +338,25 @@ public
  function OperatorRecordTests.Cplx.'0'
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(0, 0);
+  c := OperatorRecordTests.Cplx.'constructor'(0, 0);
   return;
  end OperatorRecordTests.Cplx.'0';
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
 
  function OperatorRecordTests.Cplx.'-'.neg
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(- a.re, - a.im);
+  c := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'-'.neg;
 
@@ -325,7 +365,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re - b.re, a.im - b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'-'.sub;
 
@@ -334,7 +374,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -387,15 +427,25 @@ public
  function OperatorRecordTests.Cplx.'0'
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(0, 0);
+  c := OperatorRecordTests.Cplx.'constructor'(0, 0);
   return;
  end OperatorRecordTests.Cplx.'0';
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
 
  function OperatorRecordTests.Cplx.'-'.neg
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(- a.re, - a.im);
+  c := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'-'.neg;
 
@@ -404,7 +454,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re - b.re, a.im - b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'-'.sub;
 
@@ -413,7 +463,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -454,9 +504,19 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(a.re + b.re, a.im + b.im);
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
 
  record OperatorRecordTests.OperatorRecordConnect3.C
   Real re;
@@ -496,9 +556,19 @@ public
  function OperatorRecordTests.Cplx.'0'
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx(0, 0);
+  c := OperatorRecordTests.Cplx.'constructor'(0, 0);
   return;
  end OperatorRecordTests.Cplx.'0';
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
 
  record OperatorRecordTests.Cplx
   Real re;
