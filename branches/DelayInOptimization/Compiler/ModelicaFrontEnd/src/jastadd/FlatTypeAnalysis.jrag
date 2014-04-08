@@ -1,0 +1,1790 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.TreeSet;
+
+aspect FlatTypeAnalysis {
+
+	syn lazy FType FAbstractVariable.type();
+	eq FRealVariable.type()       		= fRealType(size());
+	eq FIntegerVariable.type()    		= fIntegerType(size());
+	eq FBooleanVariable.type()    		= fBooleanType(size());
+	eq FStringVariable.type()     		= fStringType(size());
+	eq FEnumVariable.type()       		= getType();
+	eq FRecordVariable.type()     		= getType();
+	eq FDerivativeVariable.type() 		= fRealScalarType();
+	eq FFunctionVariable.type()   		= getType();
+	eq UnknownFVariable.type()    		= fUnknownType();
+	eq FExternalObjectVariable.type()	= fExternalObjectType(size());
+	
+	syn FType FRealVariable.stateSelectType() = myFClass().stateSelectType();
+	syn lazy FType FClass.stateSelectType() {
+		FEnumType type = new FEnumType(Size.SCALAR, "StateSelect", new List());
+		for (String el : new String[] { "never", "avoid", "default", "prefer", "always" }) 
+			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el));
+		return type;
+	}
+		
+	// Re-evaluate record types for function variables
+	private boolean FFunctionVariable.typeRewritten = false;
+	rewrite FFunctionVariable { 
+		when (!typeRewritten) to FFunctionVariable {
+			if (getType().isRecord()) {
+				FRecordType type = (FRecordType) getType();
+				type.setFClass(myFClass());
+				setType((FType) type.myFRecordDecl().type().sizedType(type.size()).unboundCopy());
+			}
+			typeRewritten = true;
+			return this;
+		}
+	}
+
+	syn FType FRecordVariable.getType() = myFRecordDecl().type().sizedType(size());
+	
+	syn FType FEnumVariable.getType() = myFEnumDecl().type().sizedType(size());
+	
+	syn FType InstComponentModification.type() {
+		if (getName().myInstComponentDecl().isAssignable()) {
+			InstAssignable ip = ((InstAssignable)getName().myInstComponentDecl());
+			return ip.type();
+		} else {
+			return fUnknownType();
+		}
+	}
+	
+	syn lazy FType InstAssignable.type();
+	
+	eq InstPrimitive.type() {
+		FType scalar = primitiveScalarType();
+		return isArray() ? scalar.arrayType(size()) : scalar;
+	}
+	
+	/**
+	 * The scalar type of this class or component, if it is a primitive type, otherwise the unknown type.
+	 */
+	syn FType InstNode.primitiveScalarType() {
+		if (isReal()) 
+			return fRealScalarType();
+		else if (isInteger()) 
+			return fIntegerScalarType();
+		else if (isBoolean()) 
+			return fBooleanScalarType();
+		else if (isString()) 
+			return fStringScalarType();
+		else if (isExternalObject())
+			return fExternalObjectScalarType();
+		return fUnknownType();
+	}
+	eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
+	eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
+	
+	// TODO: Reduce code duplication here
+	syn lazy FRecordType FRecordDecl.type() {
+		FRecordType type = new FRecordType(Size.SCALAR, name(), new List(), myFClass());
+		for (FVariable fv : getFVariables()) 
+			type.addComponent(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
+		return type;
+	}
+
+    eq InstRecord.type() {
+        TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
+        InstComponentDecl root = this;
+        for (int i = 0; i < ndims(); i++) {
+            if (root.getNumInstComponentDecl() == 0)
+                return myInstClass().recordType().sizedType(size());
+            root = root.getInstComponentDecl(0);
+        }
+        for (InstComponentDecl icd : root.allInstComponentDecls()) 
+            comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
+        FRecordType type = myInstClass().createEmptyFRecordType(size());
+        for (FRecordComponentType comp : comps)
+            type.addComponent(comp);
+        return type;
+    }
+
+    syn lazy FRecordType InstClassDecl.recordType() {
+        TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
+        for (InstComponentDecl icd : allInstComponentDecls()) 
+            comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
+        FRecordType type = createEmptyFRecordType(Size.SCALAR);
+        for (FRecordComponentType comp : comps)
+            type.addComponent(comp);
+        return type;
+    }
+
+    syn FRecordType InstClassDecl.createEmptyFRecordType(Size s) = null;
+    eq InstBaseClassDecl.createEmptyFRecordType(Size s)          = 
+        getInstRestriction().createEmptyFRecordType(s, qualifiedName());
+
+    syn FRecordType InstRestriction.createEmptyFRecordType(Size s, String name) = null;
+    eq InstMRecord.createEmptyFRecordType(Size s, String name)                  = 
+        new FRecordType(s, name, new List(), null);
+    eq InstOperatorRecord.createEmptyFRecordType(Size s, String name)           = 
+        new FOperatorRecordType(s, name, new List(), null, operatorMap());
+    eq InstConnector.createEmptyFRecordType(Size s, String name)                = 
+        (inheritedRestriction() != null) ? inheritedRestriction().createEmptyFRecordType(s, name) : super.createEmptyFRecordType(s, name);
+
+    syn      Map<String,InstClassDecl> InstRestriction.operatorMap() = null;
+    syn lazy Map<String,InstClassDecl> InstOperatorRecord.operatorMap() {
+        Map<String,InstClassDecl> res = new HashMap<String,InstClassDecl>();
+        for (InstClassDecl icd : myInstClassDecl().allInstClassDecls())
+            if (icd.isOperator())
+                res.put(icd.name(), icd);
+        return res;
+    }
+    eq InstConnector.operatorMap() = 
+        (inheritedRestriction() != null) ? inheritedRestriction().operatorMap() : super.operatorMap();
+
+	public class FRecordComponentType implements Comparable<FRecordComponentType> {
+		public int compareTo(FRecordComponentType other) {
+			return getName().compareTo(other.getName());
+		}
+	}
+
+	syn lazy FType FEnumDecl.type() {
+		FEnumType type = new FEnumType(Size.SCALAR, name(), new List());
+		for (FEnumLiteral el : enumLiterals()) 
+			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
+		return type;
+	}
+	
+	syn FType FEnumLiteral.type() = myFEnumDecl().type();
+	
+	eq InstEnum.type()        = myInstClass().enumType().sizedType(size());
+	eq InstEnumLiteral.type() = myInstEnumClassDecl().enumType();
+	eq FEnumLitExp.type()     = hasType() ? getType() : myFEnumDecl().type();
+	
+	syn FType InstClassDecl.enumType() {
+		FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
+		for (InstEnumLiteral el : enumLiterals()) 
+			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
+		return type;
+	}
+	
+	public FType FExp.promoteTypeForFExpList(Iterable<FExp> exps) {
+		Iterator<FExp> it = exps.iterator();
+		if (!it.hasNext())
+			return fUnknownType();
+		FType tot = it.next().type();
+		while (it.hasNext())
+			tot = tot.typePromotion(it.next().type());
+		return tot;
+	}
+	
+	syn lazy FType FAbstractEquation.type() = fUnknownType();
+	eq FEquation.type() = getRight().type().numericPromotion(getLeft().type());
+	
+	syn lazy FType FStatement.type() = fUnknownType();
+	eq FAssignStmt.type()            = getRight().type().numericPromotion(getLeft().type());
+	eq FFunctionCallStmt.type()      = getCall().type();
+	eq FInitArrayStmt.type()         = getFIdUseExp().type();
+	
+	// TODO: Role of attribute is unclear - used to find blocks that contain equations 
+	//       over *any* reals. Probably needs refactoring.
+	syn boolean FAbstractEquation.isReal()    = type().isReal();
+	syn boolean FAbstractEquation.isInteger() = type().isInteger();
+	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
+	syn boolean FAbstractEquation.isString()  = type().isString();
+
+	eq FFunctionCallEquation.isReal() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().onlyContainsReal()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+
+	eq FFunctionCallEquation.isInteger() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isInteger()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+
+	eq FFunctionCallEquation.isBoolean() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isBoolean()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+
+	eq FFunctionCallEquation.isString() {
+		for (FFunctionCallLeft l : getLefts()) {
+			if (l.hasFExp()) {
+				if (!l.getFExp().type().isString()) {
+					return false;
+				}
+			}	
+		}	
+		return true;
+	}
+	
+	eq FIfWhenElseEquation.isReal() {
+		for (FAbstractEquation equation : getFAbstractEquations())
+			if (!equation.isReal())
+				return false;
+		return true;
+	}
+	eq FIfEquation.isReal() {
+		return super.isReal() && (!hasElse() || getElse().isReal());
+	}
+	// TODO: isInteger(), etc. for if equation
+	
+	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
+	// TODO: isInteger(), etc. for algorithm
+	
+	syn boolean FStatement.assignsOnlyReals() = true;
+	eq FAssignStmt.assignsOnlyReals()         = getLeft().type().onlyContainsReal();
+	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
+	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
+	eq FIfStmt.assignsOnlyReals()             = 
+		super.assignsOnlyReals() && statementsAssignsOnlyReals(getElseStmts());
+	eq FIfWhenStmt.assignsOnlyReals() {
+		for (FIfWhenClause s : getFIfWhenClauses())
+			if (!s.assignsOnlyReals())
+				return false;
+		return true;
+	}
+	eq FFunctionCallStmt.assignsOnlyReals() {
+		for (FFunctionCallLeft l : getLefts()) 
+			if (l.hasFExp()) 
+				if (!l.getFExp().type().onlyContainsReal()) 
+					return false;
+		return true;
+	}
+	
+	syn boolean FIfWhenClause.assignsOnlyReals() = FStatement.statementsAssignsOnlyReals(getFStatements());
+	
+	public static boolean FStatement.statementsAssignsOnlyReals(Iterable<? extends FStatement> stmts) {
+		for (FStatement s : stmts)
+			if (!s.assignsOnlyReals())
+				return false;
+		return true;
+	}
+
+    syn boolean FRelExp.isRealComparison()    = getRight().type().numericPromotion(getLeft().type()).isReal();
+    syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();
+    syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
+    syn boolean FRelExp.isStringComparison()  = getRight().type().numericPromotion(getLeft().type()).isString();
+
+
+    public static final String FExp.OP_CON  = "'constructor'";
+    public static final String FExp.OP_ZERO = "'0'";
+    public static final String FExp.OP_STR  = "'String'";
+    public static final String FExp.OP_ADD  = "'+'";
+    public static final String FExp.OP_SUB  = "'-'";
+    public static final String FExp.OP_MUL  = "'*'";
+    public static final String FExp.OP_DIV  = "'/'";
+    public static final String FExp.OP_POW  = "'^'";
+    public static final String FExp.OP_EQ   = "'=='";
+    public static final String FExp.OP_NEQ  = "'<>'";
+    public static final String FExp.OP_GT   = "'>'";
+    public static final String FExp.OP_LT   = "'<'";
+    public static final String FExp.OP_GEQ  = "'>='";
+    public static final String FExp.OP_LEQ  = "'<='";
+    public static final String FExp.OP_AND  = "'and'";
+    public static final String FExp.OP_OR   = "'or'";
+    public static final String FExp.OP_NEG  = "'-'";
+    public static final String FExp.OP_NOT  = "'not'";
+
+    /**
+     * The name of the operator to use for expressions of this type containing overloaded operators.
+     */
+    syn String FExp.operatorName() = null;
+    eq FStringExp.operatorName()   = OP_STR;
+    eq FDotAddExp.operatorName()   = OP_ADD;
+    eq FDotSubExp.operatorName()   = OP_SUB;
+    eq FDotMulExp.operatorName()   = OP_MUL;
+    eq FDotDivExp.operatorName()   = OP_DIV;
+    eq FPowExp.operatorName()      = OP_POW;
+    eq FEqExp.operatorName()       = OP_EQ;
+    eq FNeqExp.operatorName()      = OP_NEQ;
+    eq FGtExp.operatorName()       = OP_GT;
+    eq FLtExp.operatorName()       = OP_LT;
+    eq FGeqExp.operatorName()      = OP_GEQ;
+    eq FLeqExp.operatorName()      = OP_LEQ;
+    eq FAndExp.operatorName()      = OP_AND;
+    eq FOrExp.operatorName()       = OP_OR;
+    eq FNegExp.operatorName()      = OP_NEG;
+    eq FNotExp.operatorName()      = OP_NOT;
+
+
+    syn FType FExp.type() = fUnknownType();
+    
+    syn lazy FType FAbstractArrayExp.type() = super.type();
+
+    eq FUnaryExp.type()   = getFExp().type();
+    eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type(), false, operatorName());
+    eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type(), false, operatorName());
+    eq FNegExp.type()     = getFExp().type().hasNeg() ? getFExp().type() : fUnknownType();
+
+    eq FDotAddExp.type() {
+        FType t = rawType();
+        return t.hasAdd() ? t : fUnknownType();
+    }
+
+    syn FType FDotAddExp.rawType() = getLeft().type().looseTypePromotion(getRight().type(), false, operatorName());
+    eq FAddExp.rawType()           = getLeft().type().typePromotion(getRight().type(), false, operatorName());
+
+    eq FUnaryBuiltIn.type() = getFExp().type();
+    eq FEdgeExp.type()      = fBooleanType(size());
+    eq FChangeExp.type()    = fBooleanType(size());
+    eq FLoadResource.type() = fStringScalarType();
+
+	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
+	
+	eq FDotDivExp.type() {
+		FType t = super.type();
+		if (t.isInteger())
+			t = fRealType(t.size());
+		return t;
+	}
+	
+	eq FDivExp.type() {
+		if (getRight().type().isScalar())
+			return super.type();
+		else
+			return fUnknownType();
+	}
+	
+	eq FMulExp.type() {
+		if (ndims() < 0)
+			return fUnknownType();
+		if (isElementWise())
+			return super.type();
+		Size left = getLeft().size();
+		Size right = getRight().size();
+		if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
+			return fUnknownType();
+		if (left.ndims() > 2 || right.ndims() > 2)
+			return fUnknownType();
+		FType res = getLeft().type().scalarNumericPromotion(getRight().type(), operatorName());
+		if (left.ndims() == 1 && right.ndims() == 1) 
+			return res;
+		else
+			return res.arrayType(size());
+	}
+	
+	eq FDotPowExp.type() {
+		FType t = getLeft().type().looseNumericPromotion(getRight().type());
+		return t.isUnknown() ? t : fRealType(t.size());
+	}
+	
+	eq FPowExp.type() {
+		if (getRight().type().isUnknown() || getRight().ndims() != 0)
+			return fUnknownType();
+		if (getLeft().ndims() == 0)
+			return super.type();
+		// Left operand is not scalar, must be matrix exponentiation
+		if (ndims() != 2 || size().get(0) != size().get(1))
+			return fUnknownType();
+		if (!getRight().type().isInteger() || !getRight().isConstantExp())
+			return fUnknownType();
+		if (getRight().ceval().intValue() < 0)
+			return fUnknownType();
+		return fRealArrayType(size());
+	}
+
+	eq FEnumIntegerExp.type() = getFExp().type().isEnumScalar() ? fIntegerScalarType() : fUnknownType();
+	eq FStringExp.type()      = fStringScalarType();
+	
+	eq FEventGenExp.type()    = fRealType(size());
+	eq FIntegerFuncExp.type() = fIntegerType(size());
+	eq FBinEventGenExp.type() = argType();
+	
+	eq FHomotopyExp.type()    = getActual().type();
+	eq FSemiLinearExp.type()  = fRealType(size());
+	
+	syn FType FEventGenExp.argType() = getX().type();
+	eq FBinEventGenExp.argType() = getX().type().numericPromotion(getY().type());
+	
+	eq FRecordConstructor.type() = getType();
+	syn FType FRecordConstructor.getType() {
+		FRecordType res = getRecord().recordType().fullCopy();
+		int n = getNumArg();
+		for (int i = 0; i < n; i++)
+		    if (getArg(i).size().isUnknown())
+		        res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
+		return res;
+	}
+    
+    eq InstRecordConstructor.type() = getRecord().recordType();
+	
+	syn FRecordType FIdUse.recordType()     = myFRecordDecl().type();
+	eq FIdUseInstAccess.recordType()        = getInstAccess().recordType();
+    syn FRecordType InstAccess.recordType() = myInstClassDecl().recordType();
+	
+	eq FTranspose.type() = 
+		getFExp().ndims() < 2 ? 
+			fUnknownType() : 
+			getFExp().type().arrayType(size());
+	
+	eq FSymmetric.type() = getFExp().ndims() == 2 && getFExp().size().get(0) == getFExp().size().get(1) ?
+		getFExp().type() : 
+		fUnknownType();
+		
+	eq FCross.type() = getX().type().numericPromotion(getY().type());
+	eq FSkew.type()  = getFExp().type().arrayType(size());
+
+	eq FOuterProduct.type() { 
+		if (getX().ndims() != 1 || getY().ndims() != 1)
+			return fUnknownType();
+		FType scalar = getX().type().scalarType().numericPromotion(getY().type().scalarType());
+		return scalar.sizedType(size());
+	}
+
+	eq FNdimsExp.type() = fIntegerScalarType();
+	
+	eq FSizeExp.type() {
+		if (hasDim()) {
+			if (!getDim().variability().lessOrEqual(fParameter()))
+				return fUnknownType();
+			if (!getDim().type().isIntegerScalar())
+				return fUnknownType();
+			int dim = dimension();
+			if (dim < 0 || dim > getFExp().ndims() - 1)
+				return fUnknownType();
+			return fIntegerScalarType();
+		} else {
+			return fIntegerArrayType(size());
+		}
+	}
+	eq FUnknownSizeExp.type() = fIntegerScalarType();
+	
+	eq FMinMaxExp.type() = 
+		hasY() ? 
+			getX().type().scalarType().typePromotion(getY().type().scalarType()) : 
+			getX().type().scalarType();
+	
+	eq FRangeExp.type() {
+		FType tot = promoteTypeForFExpList(getFExps());
+		if (!tot.isScalar() || !tot.canBeRange() || (!tot.isNumeric() && hasStep()))
+				return fUnknownType();
+		return tot.arrayType(size());
+	}
+	
+	syn boolean FType.canBeRange() = false;
+	eq FIntegerType.canBeRange()   = true;
+	eq FRealType.canBeRange()      = true;
+	eq FBooleanType.canBeRange()   = true;
+	eq FEnumType.canBeRange()      = true;
+    
+    eq FArgumentExp.type() = copiedFExp().type();
+	
+	eq FLinspace.type() {
+		// TODO: check that endpoints are real
+		if ((!getN().variability().lessOrEqual(fParameter()) || getN().ceval().intValue() < 2)
+				&& !inFunction())
+			return fUnknownType();
+		return fRealArrayType(size());
+	}
+	
+	eq FRelExp.type() {
+		FType left  = getLeft().type();
+		if (left.equivalentTo(getRight().type()) && left.isScalar())
+			return fBooleanScalarType();
+		else
+			return fUnknownType();
+	}
+	eq FEqRelExp.type() {
+		if ((getLeft().type().isReal() || getRight().type().isReal()) && !inFunction())
+			return fUnknownType();
+		return super.type();
+	}
+	eq FLogBinExp.type() {
+		FType left = getLeft().type();
+		if (left.typeCompatible(getRight().type()) && left.isBoolean())
+			return left;
+		else
+			return fUnknownType();
+	}
+	eq FNotExp.type() = getFExp().type().isBoolean() ? getFExp().type() : fUnknownType();
+	
+	eq FIfExp.type() {
+		FType thenType = getThenExp().type();
+		FType elseType = getElseExp().type();
+		if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims())
+			return fUnknownType();
+
+		if (isParameterIf()) {
+			try {
+				FExp sel = cevalSelectExp();
+				FType scalar = thenType.scalarType();
+				scalar = scalar.typePromotion(elseType.scalarType());
+				return scalar.arrayType(sel.size());
+			} catch (ConstantEvaluationException e) {
+			}
+		}
+		
+		// Test doesn't seem to be parameter expression - require sizes to be same
+		return thenType.typePromotion(elseType, inFunction(), null);
+	}
+	
+	syn boolean FIfExp.isParameterIf() = getIfExp().variability().parameterOrLess();
+	
+	syn boolean FExp.isOKTestExp() = type().isBoolean() && type().isScalar();
+
+	eq FRealLitExp.type()    = fRealScalarType();
+	eq FIntegerLitExp.type() = fIntegerScalarType();
+	eq FBooleanLitExp.type() = fBooleanScalarType();
+	eq FStringLitExp.type()  = fStringScalarType();
+	eq FTimeExp.type()       = fRealScalarType();
+	eq FDerExp.type()        = fRealType(size());
+	
+	eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
+	
+	eq FSmoothExp.type() = getFExp().type();
+	
+	eq FConnectionsOp.type() = fNoType();
+	eq FConnBoolOp.type()    = fBooleanScalarType();
+	
+	eq FCardinality.type() = fIntegerScalarType();
+
+    eq FTerminate.type() = fNoType();
+    eq FReinit.type() = fNoType();
+	eq FAssert.type() = fNoType();
+	eq FGetInstanceName.type() = fStringScalarType();
+
+	/**
+	 * The scalar type of the expression.
+	 * 
+	 * Base implementation assumes same as argument.
+	 */
+	syn FType FVectUnaryBuiltIn.scalarType() = getFExp().type().scalarType();
+	eq FSignExp.scalarType() = fIntegerScalarType();
+
+	// TODO: expand to handle boolean and enum index
+	eq FEndExp.type() = fIntegerScalarType();
+	
+	eq FSampleExp.type() {
+		for (FExp ch : childFExps())
+			if (!ch.variability().parameterOrLess())
+				return fUnknownType();
+		return fBooleanScalarType();
+	}
+	
+	eq FSimulationStateBuiltIn.type() = fBooleanScalarType();
+	
+	/**
+	 * \brief Check if this FArray is on the form "{exp for i in exp}".
+	 */
+	syn boolean FArray.isIterArray() = getNumFExp() == 1 && getFExp(0).isIterExp();
+	
+	/**
+	 * \brief Check if this FExp is on the form "exp for i in exp".
+	 */
+	syn boolean FExp.isIterExp() = false;
+	eq FIterExp.isIterExp()      = true;
+	
+	/**
+	 * \brief Returns the expression being iterated over in an FIterExp child. 
+	 *        Only valid if {@link #isIterExp()} returns <code>true</code>.
+	 */
+	public FExp FReductionExp.iterExp() { return ((FIterExp) getFExp()).getFExp(); }
+	
+	eq FArray.type() {
+		if (isIterArray())
+			return getFExp(0).type();
+		
+		// Check that the types of the elements are consistent
+		FType t = getFExp(0).type();
+		boolean func = inFunction();
+		for (int i = 1; i < getNumFExp(); i++) {
+			if (!t.equivalentTo(getFExp(i).type(), func)) 
+				return fUnknownType();
+			if (t.isNumeric()) 
+				t = t.numericPromotion(getFExp(i).type(), func, null);
+		}
+		return t.arrayType(size());
+	}
+	
+	eq FAbstractCat.type() {
+		if (!dimensionIsOk())
+			return fUnknownType();
+		int dim = dimension();
+		
+		FType t = getFExp(0).type().scalarType();
+		Size s = getFExp(0).size().promote(ndimsForArg(0));
+		boolean func = inFunction();
+		for (int i = 1; i < getNumFExp(); i++) {
+			// Check that the types of the elements are consistent
+			FType t2 = getFExp(i).type().scalarType();
+			if (!t.equivalentTo(t2, func)) 
+				return fUnknownType();
+			if (t.isNumeric()) 
+				t = t.numericPromotion(t2, func, null);
+			
+			// Check that the sizes are consistent
+			Size s2 = getFExp(i).size().promote(ndimsForArg(i));
+			if (!s.equivalentExcept(s2, func, dim))
+				return fUnknownType();
+		}
+		return t.arrayType(size());
+	}
+	
+	syn int FAbstractCat.ndimsForArg(int i) = ndims();
+	eq FCatExp.ndimsForArg(int i)           = getFExp(i).ndims();
+	
+	eq FReductionExp.type() {
+		if (getFExp().isIterExp())
+			return iterExp().type();
+		return getFExp().type().scalarType();
+	}
+	
+	eq FIterExp.type() {
+		if (ndims() < 0)
+			return fUnknownType();
+		return getFExp().type().arrayType(size());
+	}
+	
+	eq FIdentity.type() {
+		if (!getFExp().variability().lessOrEqual(fParameter()) && !inFunction())
+			return fUnknownType();
+		return fIntegerArrayType(size());
+	}
+	eq FDiagonal.type() = getFExp().type().arrayType(size());
+	
+	eq FSubscriptedExp.type() = getFExp().type().sizedType(size());
+
+	eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
+	eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
+	
+	eq FIdUseExp.type() = getFIdUse().type();
+	eq FInstAccessExp.type() = getInstAccess().type();
+	
+	syn lazy FType FIdUse.type() = myFV().type().sizedType(size());
+	eq FIdUseInstAccess.type() = getInstAccess().type();
+
+	syn FType InstAccess.type() {
+		if (myInstComponentDecl().isAssignable()) {
+			InstAssignable ip = (InstAssignable) myInstComponentDecl();
+			FType t = ip.type().scalarType();
+			return isArray() ? t.arrayType(size()) : t;
+		} else {
+			return fUnknownType();
+		}
+	}
+	
+	eq FIgnoredBuiltIn.type() = fUnknownType();
+	
+	inh FType FFunctionCallLeft.type();
+	eq FFunctionCallEquation.getLeft(int i).type() = getCall().typeOfOutput(i);
+	eq FFunctionCallStmt.getLeft(int i).type()     = getCall().typeOfOutput(i);
+	
+	syn lazy FType InstComponentDecl.type() = fUnknownType();
+	
+	syn FType FAbstractFunctionCall.typeOfOutput(int i) = (i == 0) ? type() : fUnknownType();
+	syn lazy FType InstFunctionCall.typeOfOutput(int i) = myOutputs().get(i).type().sizedType(sizeOfOutput(i));
+	syn lazy FType FFunctionCall.typeOfOutput(int i)    = myOutputs().get(i).type().sizedType(sizeOfOutput(i));
+
+	eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
+	eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
+	eq FMathematicalFunctionCall.type() = fRealType(size());
+	
+	// TODO: expand to handle boolean end enum index
+	syn lazy FType FSubscript.type();
+	eq FColonSubscript.type()   = fIntegerArrayType(size());
+	eq FIntegerSubscript.type() = fIntegerScalarType();
+	eq FExpSubscript.type()     = getFExp().type();
+}
+
+aspect InstBindingType {
+	
+	/**
+	 * \brief Returns the type the binding expression should have.
+	 */
+	syn FType InstAssignable.bindingType() {
+		InstNode decl = myInstValueMod().myInstNode();
+		if (myBindingExpHasEach() || decl == this) {
+			return type();
+		} else {
+		    if (!decl.isClassDecl())
+		        decl = commonAncestor(decl);
+			return expandBindingType(type(), decl);
+		}
+	}
+		
+    /**
+     * Constructs the size a specific attribute to this instance tree node should have. 
+     * 
+     * Default is <code>null</code>, so override is necessary for all InstNode 
+     * subclasses that needs this check.
+     */
+    syn Size InstNode.attributeSize(InstComponentModification icm) = null;
+
+    /**
+     * Constructs the size a specific attribute to this instance tree node should have. 
+     */
+    eq InstAssignable.attributeSize(InstComponentModification icm) {
+        InstNode decl = icm.myInstNode();
+        if (decl == this)
+            return size();
+        else if (icm.getEach()) 
+            return Size.SCALAR;
+        else if (decl == myInstClass())
+            return decl.size();
+        else
+            return expandBindingSize(size(), decl);
+    }
+
+    /**
+     * Add array dimensions for surrounding InstArrayComponentDecls to size for binding expression.
+     */
+    inh Size InstNode.expandBindingSize(Size size, InstNode node);
+    eq InstClassDecl.getChild().expandBindingSize(Size size, InstNode node)          = size;
+    eq InstRoot.getChild().expandBindingSize(Size size, InstNode node)               = size;
+    eq Root.getChild().expandBindingSize(Size size, InstNode node)                   = size;
+    eq InstArrayComponentDecl.getChild().expandBindingSize(Size size, InstNode node) = 
+        expandBindingSize(size.expand(myDimensionLength()), node);
+    eq InstNode.getChild().expandBindingSize(Size size, InstNode node)               = 
+        isMeOrMyClass(node) ? size : expandBindingSize(size, node);
+    
+    /**
+     * Add array dimensions for surrounding InstArrayComponentDecls to type for binding expression.
+     */
+    syn FType InstNode.expandBindingType(FType type, InstNode node) = 
+        type.sizedType(expandBindingSize(type.size(), node));
+    
+    /**
+     * Check if node is the same as this or the class of this component (if this is a component).
+     */
+    syn boolean InstNode.isMeOrMyClass(InstNode node) = node == this;
+    eq InstClassDecl.isMeOrMyClass(InstNode node)     = node.inheritingNode() == this;
+    eq InstComponentDecl.isMeOrMyClass(InstNode node) {
+        InstNode inherit = node.inheritingNode();
+        return inherit == this || inherit == myInstClass();
+    }
+    
+    /**
+     * If this is an extends, get the surrounding class or component, otherwise return this.
+     */
+    syn InstNode InstNode.inheritingNode() = this;
+    eq InstExtends.inheritingNode()        = findInheritingNode();
+    
+    /**
+     * Find the surrounding class or component.
+     */
+    inh InstNode InstExtends.findInheritingNode();
+    eq InstClassDecl.getInstExtends().findInheritingNode()     = this;
+    eq InstComponentDecl.getInstExtends().findInheritingNode() = this;
+    eq Root.getChild().findInheritingNode()                    = null;
+    
+    /**
+     * Find the surrounding class, if any.
+     */
+    inh InstClassDecl InstNode.surroundingInstClass();
+    eq InstClassDecl.getChild().surroundingInstClass() = this;
+    eq Root.getChild().surroundingInstClass()          = null;
+    
+    /**
+     * Is this a member of an array component?
+     */
+	inh boolean InstAssignable.inArrayComponent();
+	eq InstClassDecl.getChild().inArrayComponent()          = false;
+	eq InstRoot.getChild().inArrayComponent()               = false;
+	eq FlatRoot.getChild().inArrayComponent()               = false;
+	eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+
+}
+
+aspect TypePromotion {
+
+    /**
+     * Combine two types to the broadest common denominator.
+     * 
+     * If types are not compatible, the unknown type is returned.
+     * An integer type combined with a real type results in a real type.
+     */
+    syn FType FType.typePromotion(FType type) = typePromotion(type, false, null);
+
+    /**
+     * Combine two types to the broadest common denominator.
+     * 
+     * If scalar types are not compatible or if both are array and sizes 
+     * doesn't match, the unknown type is returned.
+     * An integer type combined with a real type results in a real type.
+     */
+    syn FType FType.looseTypePromotion(FType type) = looseTypePromotion(type, false, null);
+
+    /**
+     * Combine two types to the broadest common numeric denominator.
+     * 
+     * If either is non-numeric or if sizes doesn't match, 
+     * the unknown type is returned.
+     * An integer type combined with a real type results in a real type.
+     */
+    syn FType FType.numericPromotion(FType type) = numericPromotion(type, false, null);
+
+    /**
+     * Combine two types to the broadest common numeric denominator.
+     * 
+     * If either is non-numeric or if both are array and sizes doesn't match, 
+     * the unknown type is returned. 
+     * An integer type combined with a real type results in a real type.
+     */
+    syn FType FType.looseNumericPromotion(FType type) = looseNumericPromotion(type, false, null);
+
+    /**
+     * Combine two types to the broadest common denominator.
+     * 
+     * If types are not compatible, the unknown type is returned.
+     * An integer type combined with a real type results in a real type.
+     * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+     * lengths are considered equal to any length. If non-<code>null</code>, 
+     * <code>operator</code> defines what operator to use in operator 
+     * overloading.
+     */
+    syn FType FType.typePromotion(FType type, boolean allowUnknown, String operator) {
+        if (isNumeric() || ((isOperatorRecord() || type.isOperatorRecord()) && operator != null))
+            return numericPromotion(type, allowUnknown, operator);
+        else if (!equivalentTo(type, allowUnknown))
+            return fUnknownType();
+        else
+            return this;
+    }
+
+    /**
+     * Combine two types to the broadest common denominator.
+     * 
+     * If scalar types are not compatible or if both are array and sizes 
+     * doesn't match, the unknown type is returned.
+     * An integer type combined with a real type results in a real type.
+     * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+     * lengths are considered equal to any length. If non-<code>null</code>, 
+     * <code>operator</code> defines what operator to use in operator 
+     * overloading.
+     */
+    syn FType FType.looseTypePromotion(FType type, boolean allowUnknown, String operator) {
+        if (looslyDimensionCompatible(type, allowUnknown)) {
+            FType scalar = scalarType().typePromotion(type.scalarType(), false, operator);
+            return scalar.sizedType(isScalar() ? type.size() : size());
+        } else {
+            return fUnknownType();
+        }
+    }
+
+    /**
+     * Combine two types to the broadest common numeric denominator.
+     * 
+     * If either is non-numeric or if sizes doesn't match, 
+     * the unknown type is returned. Operator records with suitable 
+     * overloaded operators are considered numeric for this purpose.
+     * An integer type combined with a real type results in a real type.
+     * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+     * lengths are considered equal to any length. If non-<code>null</code>, 
+     * <code>operator</code> defines what operator to use in operator 
+     * overloading.
+     */
+    syn FType FType.numericPromotion(FType type, boolean allowUnknown, String operator) {
+        if (dimensionCompatible(type, allowUnknown)) {
+            return scalarNumericPromotion(type, operator).arrayType(size());
+        } else {
+            return fUnknownType();
+        }
+    }
+
+    /**
+     * Combine two types to the broadest common numeric denominator.
+     * 
+     * If either is non-numeric or if both are array and sizes doesn't match, 
+     * the unknown type is returned. Operator records with suitable 
+     * overloaded operators are considered numeric for this purpose.
+     * An integer type combined with a real type results in a real type.
+     * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+     * lengths are considered equal to any length. If non-<code>null</code>, 
+     * <code>operator</code> defines what operator to use in operator 
+     * overloading.
+     */
+    syn FType FType.looseNumericPromotion(FType type, boolean allowUnknown, String operator) {
+        if (looslyDimensionCompatible(type, allowUnknown)) {
+            return scalarNumericPromotion(type, operator).sizedType(isScalar() ? type.size() : size());
+        } else {
+            return fUnknownType();
+        }
+    }
+
+    /**
+     * Combine two types to the broadest common scalar numeric denominator.
+     * 
+     * If either is non-numeric, the unknown type is returned.
+     * An integer type combined with a real type results in a real type.
+     * If non-<code>null</code>, <code>operator</code> defines what operator 
+     * to use in operator overloading.
+     */
+    syn FType FType.scalarNumericPromotion(FType type, String operator) = matchOverloadedOperatorType(type, operator);
+    eq FPrimitiveNumericType.scalarNumericPromotion(FType type, String operator) {
+        if (type.isNumeric()) 
+            return isReal() ? scalarType() : type.scalarType();
+        else 
+            return super.scalarNumericPromotion(type, operator);
+    }
+
+
+    /**
+     * Calculate the type of an operator expression involving operator records.
+     * 
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn FType FType.matchOverloadedOperatorType(FType right, String operator) {
+        InstClassDecl func = matchOverloadedOperator(right, operator);
+        return (func == null) ? fUnknownType() : func.myOutputs().get(0).type();
+    }
+
+}
+
+aspect OverloadedOperatorBinding {
+
+    /**
+     * Calculate the function to use for this operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or if this is not an operator record expression.
+     */
+    syn InstClassDecl FExp.overloadedOperator() = null;
+    eq FBinExp.overloadedOperator()   = getLeft().type().matchOverloadedOperator(getRight().type(), operatorName());
+    eq FUnaryExp.overloadedOperator() = getFExp().type().matchOverloadedOperator(null, operatorName());
+
+    /**
+     * Calculate the function to use for an operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or expression does not include operator records.
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn InstClassDecl FType.matchOverloadedOperator(FType right, String operator) = 
+        matchOverloadedOperator(right, operator, true);
+
+    /**
+     * Calculate the function to use for an operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or expression does not include operator records.
+     * 
+     * @param other     the type of the other side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
+     *                  must be <code>true</code> for unary operators
+     */
+    syn InstClassDecl FType.matchOverloadedOperator(FType other, String operator, boolean isLeft) {
+        Collection<InstClassDecl> match = matchOverloadedOperators(other, operator, isLeft);
+        return (match.size() == 1) ? match.iterator().next() : null;
+    }
+
+    /**
+     * Calculate the functions that match an operator expression involving operator records.
+     * 
+     * If expression does not include operator records, the empty set is returned.
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedOperators(FType right, String operator) = 
+        matchOverloadedOperators(right, operator, true);
+
+    /**
+     * Calculate the functions that match an operator expression involving operator records.
+     * 
+     * If expression does not include operator records, the empty set is returned.
+     * 
+     * @param other     the type of the other side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
+     *                  must be <code>true</code> for unary operators
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedOperators(FType other, String operator, boolean isLeft) =
+        (other != null && other.isOperatorRecord()) ? 
+                other.matchOverloadedOperators(this, operator, !isLeft) : 
+                Collections.<InstClassDecl>emptyList();
+    eq FOperatorRecordType.matchOverloadedOperators(FType other, String operator, boolean isLeft) {
+        if (operator == null)
+            return Collections.emptyList();
+        OperatorMatches mine = matchOverloadedOperators(operator, this, other, isLeft);
+        OperatorMatches others = OperatorMatches.EMPTY;
+        if (other instanceof FOperatorRecordType) {
+            FOperatorRecordType other2 = (FOperatorRecordType) other;
+            if (!other2.getName().equals(getName()))
+                others = other2.matchOverloadedOperators(operator, other, this, !isLeft);
+        }
+        return mine.combine(others).matches();
+    }
+
+    /**
+     * Find the constructor to use to convert a given type to this type.
+     * 
+     * Returns null if none or more than one constructor matches or this is not a operator record type.
+     * 
+     * @param other     the type to convert
+     */
+    syn InstClassDecl FType.matchOverloadedConstructor(FType other) = null;
+    eq FOperatorRecordType.matchOverloadedConstructor(FType other) {
+        Collection<InstClassDecl> match = matchOverloadedConstructors(other);
+        return (match.size() == 1) ? match.iterator().next() : null;
+    }
+
+    /**
+     * Find the constructors that match for a conversion a given type to this type.
+     * 
+     * If this is not a operator record type, the empty set is returned.
+     * 
+     * @param other     the type to convert
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedConstructors(FType other) = null;
+    eq FOperatorRecordType.matchOverloadedConstructors(FType other)              = 
+        matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
+
+    /**
+     * Find the zero function for an operator record type.
+     * 
+     * Returns null if none or more than one constructor matches or this is not a operator record type.
+     */
+    syn InstClassDecl FType.matchOverloadedZero() = null;
+    eq FOperatorRecordType.matchOverloadedZero() {
+        InstClassDecl op = getOperators().get(FExp.OP_ZERO);
+        if (op == null) 
+            return null;
+        Collection<InstClassDecl> match = op.operatorFunctions();
+        return (match.size() == 1) ? match.iterator().next() : null;
+    }
+
+    /**
+     * Calculate the functions in this operator record type that matches an operator expression 
+     * involving operator records.
+     * 
+     * @param operator  the name of the operator to look for
+     * @param a         an operand that is of the operator record type that contains this function
+     * @param b         the other operand. If it is <code>null</code>, then the function should be unary.
+     * @param aIsLeft   <code>true</code> if a is the left operand, must be true if b is <code>null</code>
+     */
+    syn OperatorMatches FOperatorRecordType.matchOverloadedOperators(String operator, FType a, FType b, boolean aIsLeft) {
+        InstClassDecl op = getOperators().get(operator);
+        return (op != null) ? op.matchOverloadedOperators(a, b, aIsLeft) : OperatorMatches.EMPTY;
+    }
+
+    /**
+     * Calculate the functions that matches the two given types in this operator.
+     * 
+     * Delegates to the restriction, where results are cached.
+     * 
+     * @param a         an operand that is of the operator record type that contains this function
+     * @param b         the other operand. If it is <code>null</code>, then the function should be unary.
+     * @param aIsLeft   <code>true</code> if a is the left operand, must be true if b is <code>null</code>
+     */
+    syn OperatorMatches InstClassDecl.matchOverloadedOperators(FType a, FType b, boolean aIsLeft) =
+        OperatorMatches.EMPTY;
+    eq InstBaseClassDecl.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)              =
+        getInstRestriction().matchOverloadedOperators(a, b, aIsLeft);
+
+    /**
+     * Calculate the functions that matches the two given types in this operator.
+     * 
+     * @param a         an operand that is of the operator record type that contains this function
+     * @param b         the other operand. If it is <code>null</code>, then the function should be unary.
+     * @param aIsLeft   <code>true</code> if a is the left operand, must be true if b is <code>null</code>
+     */
+    syn OperatorMatches InstRestriction.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)           = 
+        OperatorMatches.EMPTY;
+    syn lazy OperatorMatches InstOperator.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)         = 
+        new OperatorMatches(operatorFunctions(), a, b, aIsLeft);
+    syn lazy OperatorMatches InstOperatorFunction.matchOverloadedOperators(FType a, FType b, boolean aIsLeft) = 
+        new OperatorMatches(operatorFunctions(), a, b, aIsLeft);
+    eq InstConnector.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)                              = 
+        (inheritedRestriction() != null) ? inheritedRestriction().matchOverloadedOperators(a, b, aIsLeft) : super.matchOverloadedOperators(a, b, aIsLeft);
+
+    /**
+     * Get a list of all functions in this operator.
+     * 
+     * If this is not an operator or operator function, an empty list is returned.
+     */
+    syn java.util.List<InstClassDecl> InstClassDecl.operatorFunctions() = Collections.emptyList();
+    eq InstBaseClassDecl.operatorFunctions()                            = getInstRestriction().operatorFunctions();
+
+    /**
+     * Get a list of all functions in the operator that has this restriction.
+     * 
+     * If this is not an operator or operator function, an empty list is returned.
+     */
+    syn java.util.List<InstClassDecl> InstRestriction.operatorFunctions() = Collections.emptyList();
+    eq InstOperatorFunction.operatorFunctions() = Collections.singletonList(myInstClassDecl());
+    syn lazy java.util.List<InstClassDecl> InstOperator.operatorFunctions() {
+        ArrayList<InstClassDecl> res = new ArrayList<InstClassDecl>();
+        for (InstClassDecl icd : myInstClassDecl().allInstClassDecls())
+            if (icd.isFunction())
+                res.add(icd);
+        return res;
+    }
+    eq InstConnector.operatorFunctions() = 
+        (inheritedRestriction() != null) ? inheritedRestriction().operatorFunctions() : super.operatorFunctions();
+
+    /**
+     * Check if this function matches the two given types as an overloaded operator.
+     * 
+     * @param a         an operand that is of the operator record type that contains this function
+     * @param b         the other operand. If it is <code>null</code>, then the function should be unary.
+     * @param aIsLeft   <code>true</code> if a is the left operand, must be true if b is <code>null</code>
+     * @param indirect  if <code>true</code>, then look for a constructor that can convert b to fit this function
+     */
+    syn boolean InstClassDecl.matchesAsOperatorFunction(FType a, FType b, boolean aIsLeft, boolean indirect) {
+        java.util.List<InstComponentDecl> inputs = myInputs();
+        int n = inputs.size();
+        InstComponentDecl in1 = (n > 0) ? inputs.get(0) : null;
+        InstComponentDecl in2 = (n > 1) ? inputs.get(1) : null;
+        InstComponentDecl ain = aIsLeft ? in1 : in2;
+        InstComponentDecl bin = aIsLeft ? in2 : in1;
+        
+        // Check that function is unary in unary case and binary in binary case (since '-' can contain both)
+        if ((n < 2 || in2.hasBindingFExp()) != (b == null))
+            return false;
+        for (int i = 2; i < n; i++)
+            if (inputs.get(i).hasBindingFExp())
+                return false;
+        
+        // Unary case
+        if (b == null)
+            return ain != null && ain.type().typeCompatible(a);  // a matches first argument
+        
+        // Indirect binary case
+        if (indirect) {
+            if (bin == null || !bin.type().isOperatorRecord())  // if b isn't an operator record, no indirect match
+                return false;
+            // Find constructor matching single argument
+            return ain != null && ain.type().typeCompatible(a) &&     // a matches its argument
+                   bin.type().matchOverloadedConstructor(b) != null;  // there is a single matching constructor for b
+        }
+        
+        // Direct binary case
+        return ain != null && ain.type().typeCompatible(a) &&  // a matches its argument
+               bin != null && bin.type().typeCompatible(b);    // b matches its argument
+    }
+
+    /**
+     * A set of functions matching an expression involving operator records.
+     */
+    public class OperatorMatches {
+
+        public static final OperatorMatches EMPTY = new OperatorMatches();
+
+        // As this object will be cached, save memory by using efficient versions when possible
+        java.util.List<InstClassDecl> direct   = Collections.emptyList();
+        java.util.List<InstClassDecl> indirect = Collections.emptyList();
+
+        private OperatorMatches() {}
+
+        public OperatorMatches(Iterable<InstClassDecl> functions, FType a, FType b, boolean aIsLeft) {
+            for (InstClassDecl func : functions)
+                if (func.matchesAsOperatorFunction(a, b, aIsLeft, false))
+                    direct = add(direct, func);
+            if (b != null && direct.isEmpty())
+                for (InstClassDecl func : functions)
+                    if (func.matchesAsOperatorFunction(a, b, aIsLeft, true))
+                        indirect = add(direct, func);
+        }
+
+        public boolean isEmpty() {
+            return direct.isEmpty() && indirect.isEmpty();
+        }
+
+        public boolean isOK() {
+            return (direct.isEmpty() ? direct.size() : indirect.size()) == 1;
+        }
+
+        public java.util.List<InstClassDecl> matches() {
+            return direct.isEmpty() ? indirect : direct;
+        }
+
+        public OperatorMatches combine(OperatorMatches other) {
+            if (other.isEmpty())
+                return this;
+            if (isEmpty())
+                return other;
+            OperatorMatches res = new OperatorMatches();
+            res.direct = merge(direct, other.direct);
+            res.indirect = merge(indirect, other.indirect);
+            return res;
+        }
+
+        private static java.util.List<InstClassDecl> merge(java.util.List<InstClassDecl> a, java.util.List<InstClassDecl> b) {
+            if (b.isEmpty())
+                return a;
+            if (a.isEmpty())
+                return b;
+            ArrayList<InstClassDecl> res = new ArrayList<InstClassDecl>(a.size() + b.size());
+            res.addAll(a);
+            res.addAll(b);
+            return res;
+        }
+
+        private static java.util.List<InstClassDecl> add(java.util.List<InstClassDecl> list, InstClassDecl element) {
+            if (list.isEmpty())
+                return Collections.singletonList(element);
+            if (list.size() == 1)
+                list = new ArrayList<InstClassDecl>(list);
+            list.add(element);
+            return list;
+        }
+
+    }
+
+    syn Map<String,InstClassDecl> FRecordType.getOperators() = Collections.emptyMap();
+
+}
+
+aspect FTypeCompatibility {
+	
+	syn boolean FType.typeCompatible(FType type) = typeCompatible(type, false);
+
+	syn boolean FType.typeCompatible(FType type, boolean allowUnknown) = false;
+	eq FRealType.typeCompatible(FType type, boolean allowUnknown) = 
+		(type.isReal() || type.isInteger()) && dimensionCompatible(type, allowUnknown);
+	eq FIntegerType.typeCompatible(FType type, boolean allowUnknown) = 
+		type.isInteger() && dimensionCompatible(type, allowUnknown);
+	eq FBooleanType.typeCompatible(FType type, boolean allowUnknown) = 
+		type.isBoolean() && dimensionCompatible(type, allowUnknown);
+	eq FStringType.typeCompatible(FType type, boolean allowUnknown) = 
+		type.isString() && dimensionCompatible(type, allowUnknown);
+	eq FRecordType.typeCompatible(FType type, boolean allowUnknown) = 
+		typeMatches(type, true, allowUnknown);
+	eq FEnumType.typeCompatible(FType type, boolean allowUnknown) = 
+		typeMatches(type, true, allowUnknown);
+	eq FExternalObjectType.typeCompatible(FType type, boolean allowUnknown) = 
+			type.isExternalObject() && dimensionCompatible(type, allowUnknown);
+	
+	syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
+		compatible ? typeCompatible(type, allowUnknown) : equivalentTo(type, allowUnknown);
+	eq FRecordType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+		if (!dimensionCompatible(type, allowUnknown) || !type.isRecord())
+			return false;
+		FRecordType rec = (FRecordType) type;
+		if (getName().equals(rec.getName())) 
+			return true;
+		if (getNumComponent() != rec.getNumComponent())
+			return false;
+		for (int i = 0; i < getNumComponent(); i++) {
+			FRecordComponentType c1 = getComponent(i);
+			FRecordComponentType c2 = rec.getComponent(i);
+			if (!c1.getName().equals(c2.getName()) || 
+					!c1.getFType().typeMatches(c2.getFType(), compatible, allowUnknown))
+				return false;
+		}
+		return true;
+	}
+	eq FEnumType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+		if (!dimensionCompatible(type, allowUnknown) || !type.isEnum())
+			return false;
+		FEnumType enu = (FEnumType) type;
+		if (getName().equals(enu.getName())) 
+			return true;
+		int n1 = getNumFEnumLiteralType(), n2 = enu.getNumFEnumLiteralType();
+		if (n1 != n2)
+			return n1 == 0 || n2 == 0;
+		Iterator<FEnumLiteralType> it = enu.getFEnumLiteralTypes().iterator();
+		for (FEnumLiteralType elt : getFEnumLiteralTypes())
+			if (!elt.getName().equals(it.next().getName()))
+				return false;
+		return true;
+	}
+	
+	syn boolean FType.dimensionCompatible(FType type) = dimensionCompatible(type, false);
+	syn boolean FType.dimensionCompatible(FType type, boolean allowUnknown) = 
+		size().equivalent(type.size(), allowUnknown);
+
+    syn boolean FType.looslyDimensionCompatible(FType type, boolean allowUnknown) = 
+        isScalar() || type.isScalar() || dimensionCompatible(type, allowUnknown);
+
+}
+
+aspect FTypeEquivalent {
+	/* The function equivalentTo is used in equation type checking where equations
+	 * like
+	 * x=0
+	 * where x is declared as Real is ok.
+	 */
+	syn boolean FType.equivalentTo(FType type) = equivalentTo(type, false);
+
+	syn boolean FType.equivalentTo(FType type, boolean allowUnknown) = false;
+	eq FPrimitiveNumericType.equivalentTo(FType type, boolean allowUnknown) = 
+		type.isNumeric() && dimensionCompatible(type, allowUnknown);
+	eq FBooleanType.equivalentTo(FType type, boolean allowUnknown) = 
+		type.isBoolean() && dimensionCompatible(type, allowUnknown);
+	eq FStringType.equivalentTo(FType type, boolean allowUnknown) = 
+		type.isString() && dimensionCompatible(type, allowUnknown);
+	eq FRecordType.equivalentTo(FType type, boolean allowUnknown) = 
+		typeMatches(type, false, allowUnknown);
+	eq FEnumType.equivalentTo(FType type, boolean allowUnknown) = 
+		typeMatches(type, false, allowUnknown);
+    eq FExternalObjectType.equivalentTo(FType type, boolean allowUnknown) = 
+            type.isExternalObject() && dimensionCompatible(type, allowUnknown);
+ 
+}
+
+aspect BuiltInFlatTypes {
+ 	
+ 	syn boolean InstNode.isReal()    		= false;
+ 	syn boolean InstNode.isInteger()		= false;
+ 	syn boolean InstNode.isBoolean() 		= false;
+ 	syn boolean InstNode.isString()  		= false;
+ 	syn boolean InstNode.isEnum()    		= false;
+ 	syn boolean InstNode.isExternalObject() = false;
+ 	
+ 	eq InstPrimitive.isReal()    		= myInstClass().isReal();
+ 	eq InstPrimitive.isInteger() 		= myInstClass().isInteger();
+ 	eq InstPrimitive.isBoolean() 		= myInstClass().isBoolean();
+ 	eq InstPrimitive.isString()  		= myInstClass().isString();
+ 	eq InstEnum.isEnum()         		= true;
+ 	eq InstPrimitive.isExternalObject() = myInstClass().isExternalObject();
+ 	
+ 	eq InstClassDecl.isReal()    = finalClass().primitiveName().equals("Real");
+ 	eq InstClassDecl.isInteger() = finalClass().primitiveName().equals("Integer");
+ 	eq InstClassDecl.isBoolean() = finalClass().primitiveName().equals("Boolean");
+ 	eq InstClassDecl.isString()  = finalClass().primitiveName().equals("String");
+ 	eq InstClassDecl.isEnum()    = extendsEnum();
+
+ 	eq InstBuiltIn.isReal() = 
+ 		myInstClass().finalClass().primitiveName().equals("RealType");
+ 	eq InstBuiltIn.isInteger() = 
+ 		myInstClass().finalClass().primitiveName().equals("IntegerType");
+ 	eq InstBuiltIn.isBoolean() = 
+ 		myInstClass().finalClass().primitiveName().equals("BooleanType");
+ 	eq InstBuiltIn.isString() = 
+ 		myInstClass().finalClass().primitiveName().equals("StringType");
+
+	 
+	public static final FRealType    FRealType.SCALAR    				= new FRealType(Size.SCALAR);
+	public static final FIntegerType FIntegerType.SCALAR 				= new FIntegerType(Size.SCALAR);
+	public static final FBooleanType FBooleanType.SCALAR 				= new FBooleanType(Size.SCALAR);
+	public static final FStringType  FStringType.SCALAR  				= new FStringType(Size.SCALAR);
+	public static final FUnknownType FUnknownType.SCALAR 				= new FUnknownType(Size.SCALAR);
+	public static final FExternalObjectType FExternalObjectType.SCALAR 	= new FExternalObjectType(Size.SCALAR);
+    public static final FNoType      FNoType.SCALAR                     = new FNoType(Size.SCALAR);
+
+	syn boolean FType.isReal()    				= false;
+	eq FRealType.isReal()						= true;
+	syn boolean FType.isInteger() 				= false;
+	eq FIntegerType.isInteger()   				= true;
+	syn boolean FType.isBoolean() 				= false;
+	eq FBooleanType.isBoolean()   				= true;
+	syn boolean FType.isString()  				= false;
+	eq FStringType.isString()     				= true;
+	syn boolean FType.isRecord()  				= false;
+	eq FRecordType.isRecord()     				= true;
+    syn boolean FType.isOperatorRecord()        = false;
+    eq FOperatorRecordType.isOperatorRecord()   = true;
+	syn boolean FType.isEnum()    				= false;
+	eq FEnumType.isEnum()         				= true;
+	syn boolean FType.isExternalObject()    	= false;
+	eq FExternalObjectType.isExternalObject()	= true;
+	
+	syn boolean FType.isArray()  = getSize() != Size.SCALAR;
+	syn boolean FType.isScalar() = getSize() == Size.SCALAR;
+	
+	syn boolean FType.isNumeric()        = false;
+	eq FPrimitiveNumericType.isNumeric() = true;
+	
+	syn boolean FType.isPrimitive() = false;
+	eq FPrimitiveType.isPrimitive() = true;
+	
+	syn boolean FType.isRealScalar()      		= isReal() && isScalar();
+	syn boolean FType.isRealArray()       		= isReal() && isArray();
+	syn boolean FType.isIntegerScalar()   		= isInteger() && isScalar();
+	syn boolean FType.isIntegerArray()    		= isInteger() && isArray();
+	syn boolean FType.isBooleanScalar()   		= isBoolean() && isScalar();
+	syn boolean FType.isBooleanArray()    		= isBoolean() && isArray();
+	syn boolean FType.isStringScalar()    		= isString() && isScalar();
+	syn boolean FType.isStringArray()     		= isString() && isArray();
+	syn boolean FType.isRecordScalar()    		= isRecord() && isScalar();
+	syn boolean FType.isRecordArray()     		= isRecord() && isArray();
+	syn boolean FType.isEnumScalar()      		= isEnum() && isScalar();
+	syn boolean FType.isEnumArray()       		= isEnum() && isArray();
+	syn boolean FType.isNumericScalar()   		= isNumeric() && isScalar();
+	syn boolean FType.isNumericArray()    		= isNumeric() && isArray();
+	syn boolean FType.isPrimitiveScalar() 		= isPrimitive() && isScalar();
+	syn boolean FType.isPrimitiveArray() 		= isPrimitive() && isArray();
+	syn boolean FType.isExternalObjectScalar()	= isExternalObject() && isScalar();
+	syn boolean FType.isExternalObjectArray()	= isExternalObject() && isArray();
+	
+	syn boolean FType.containsReal() = isReal();
+	eq FRecordType.containsReal() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsInteger() = isInteger();
+	eq FRecordType.containsInteger() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsInteger())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsBoolean() = isBoolean();
+	eq FRecordType.containsBoolean() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsBoolean())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsRecord() = isRecord();
+	syn boolean FType.containsEnum() = isEnum();
+	eq FRecordType.containsEnum() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsEnum())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsExternalObject() = isExternalObject();
+	eq FRecordType.containsExternalObject() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsExternalObject())
+				return true;
+		return false;
+	}
+	
+	// For type comparisons ending with "or records of such types"
+	public abstract class FType {
+		protected static interface TypeChecker {
+			public boolean check(FType t);
+		}
+		
+		private static final TypeChecker IS_REAL = new TypeChecker() {
+			public boolean check(FType t) { return t.isReal(); }
+		};
+	}
+		
+	protected boolean FType.recursiveTypeCheck(TypeChecker ch) {
+		return ch.check(this);
+	}
+	
+	protected boolean FRecordType.recursiveTypeCheck(TypeChecker ch) {
+		for (FRecordComponentType c : getComponents())
+			if (!c.getFType().recursiveTypeCheck(ch))
+				return false;
+		return true;
+	}
+	
+	syn boolean FType.onlyContainsReal() = recursiveTypeCheck(IS_REAL);
+
+    syn boolean FType.hasAdd()        = false;
+    eq FPrimitiveNumericType.hasAdd() = true;
+    eq FStringType.hasAdd()           = true;
+    eq FOperatorRecordType.hasAdd()   = getOperators().get(FExp.OP_ADD) != null;
+
+    syn boolean FType.hasNeg()        = false;
+    eq FPrimitiveNumericType.hasNeg() = true;
+    eq FOperatorRecordType.hasNeg()   = getOperators().get(FExp.OP_NEG) != null;
+
+    syn boolean FType.canBeIndex() = false;
+    eq FIntegerType.canBeIndex()   = true;
+    eq FBooleanType.canBeIndex()   = true;
+    eq FEnumType.canBeIndex()      = true;
+
+    syn int FType.ndims() = getSize().ndims();
+
+    syn Size FType.size() = getSize();
+
+    syn FType FType.sizedType(Size s) = 
+        (s == Size.SCALAR) ? scalarType() : arrayType(s);
+
+    syn FType FType.scalarType() {
+        if (isScalar())
+            return this;
+        FType copy = (FType) fullCopy();
+        copy.setSize(Size.SCALAR);
+        return copy;
+    }
+    eq FUnknownType.scalarType()        = this;
+    eq FNoType.scalarType()             = this;
+    eq FRealType.scalarType()           = FRealType.SCALAR;
+    eq FIntegerType.scalarType()        = FIntegerType.SCALAR;
+    eq FBooleanType.scalarType()        = FBooleanType.SCALAR;
+    eq FStringType.scalarType()         = FStringType.SCALAR;
+    eq FExternalObjectType.scalarType() = FExternalObjectType.SCALAR;
+
+    syn boolean FType.isUnknown() = false;
+    eq FUnknownType.isUnknown()   = true;
+
+    syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
+    syn FType ASTNode.fNoType()      = FNoType.SCALAR;
+
+    syn FPrimitiveType ASTNode.fRealScalarType()            = FRealType.SCALAR;
+    syn FPrimitiveType ASTNode.fIntegerScalarType()         = FIntegerType.SCALAR;
+    syn FPrimitiveType ASTNode.fBooleanScalarType()         = FBooleanType.SCALAR;
+    syn FPrimitiveType ASTNode.fStringScalarType()          = FStringType.SCALAR;
+    syn FPrimitiveType ASTNode.fExternalObjectScalarType()  = FExternalObjectType.SCALAR;
+
+    syn FPrimitiveType ASTNode.fRealArrayType(Size size)            = new FRealType(size);
+    syn FPrimitiveType ASTNode.fIntegerArrayType(Size size)         = new FIntegerType(size);
+    syn FPrimitiveType ASTNode.fBooleanArrayType(Size size)         = new FBooleanType(size);
+    syn FPrimitiveType ASTNode.fStringArrayType(Size size)          = new FStringType(size);
+    syn FPrimitiveType ASTNode.fExternalObjectArrayType(Size size)  = new FExternalObjectType(size);
+
+    syn FPrimitiveType ASTNode.fRealType(Size size) = 
+        (size == Size.SCALAR) ? fRealScalarType() : fRealArrayType(size);
+    syn FPrimitiveType ASTNode.fIntegerType(Size size) = 
+        (size == Size.SCALAR) ? fIntegerScalarType() : fIntegerArrayType(size);
+    syn FPrimitiveType ASTNode.fBooleanType(Size size) = 
+        (size == Size.SCALAR) ? fBooleanScalarType() : fBooleanArrayType(size);
+    syn FPrimitiveType ASTNode.fStringType(Size size) = 
+        (size == Size.SCALAR) ? fStringScalarType() : fStringArrayType(size);
+    syn FPrimitiveType ASTNode.fExternalObjectType(Size size) = 
+        (size == Size.SCALAR) ? fExternalObjectScalarType() : fExternalObjectArrayType(size);
+
+    syn FType FType.arrayType(Size size) {
+        if (size == size())
+            return this;
+        FType copy = (FType) fullCopy();
+        copy.setSize(size);
+        return copy;
+    }
+    eq FUnknownType.arrayType(Size size)        = this;
+    eq FNoType.arrayType(Size size)             = this;
+
+    /**
+     * Create a literal with the zero value for this type, if applicable.
+     * 
+     * For operator records, a function call is created.
+     */
+    public FExp FType.zeroLiteral()        { return new FNoExp(); }
+    public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
+    public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
+    public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }
+    public FExp FBooleanType.zeroLiteral() { return new FBooleanLitExpFalse(); }
+    public FExp FEnumType.zeroLiteral()    { return new FEnumLitExp(this, 1); }
+    public FExp FRecordType.zeroLiteral()  {
+        List<FExp> args = new List<FExp>();
+        for (FRecordComponentType t : getComponents())
+            args.add(t.getFType().zeroLiteral());
+        return new FRecordConstructor(new FIdUse(getName()), args); 
+    }
+    public FExp FOperatorRecordType.zeroLiteral() {
+        InstClassDecl func = matchOverloadedZero();
+        return (func != null) ? func.flattenOverloadedFunctionCall(new FQNameEmpty()) : super.zeroLiteral();
+    }
+ 
+    /**
+     * \brief Create a literal of the given integer value for this type, if applicable.
+     */
+    public FExp FType.createLiteral(int v)        { return null; }
+    public FExp FIntegerType.createLiteral(int v) { return new FIntegerLitExp(v); }
+    public FExp FRealType.createLiteral(int v)    { return new FRealLitExp(v); }
+    public FExp FEnumType.createLiteral(int v)    { return new FEnumLitExp(this, v); }
+
+    public FExp FBooleanType.createLiteral(int v) { 
+        return (v == 1 || v == 2) ? FBooleanLitExp.create(v == 2) : null; 
+    }
+
+}
+ 
+aspect InstClassRestriction {
+
+	/**
+	 * Is this class a connector?
+	 */
+	syn boolean InstClassDecl.isConnector() = false;
+	eq InstBaseClassDecl.isConnector()      = getInstRestriction().isConnector();
+	eq UnknownInstClassDecl.isConnector()   = false;
+
+	/**
+	 * Is this restriction "connector"?
+	 */
+	syn boolean InstRestriction.isConnector() = false;
+	eq InstConnector.isConnector() = true;
+
+	/**
+	 * Is this component a connector?
+	 */
+	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
+
+    /**
+     * Is this class an expandable connector?
+     */
+    syn boolean InstClassDecl.isExpandableConnector() = false;
+    eq InstBaseClassDecl.isExpandableConnector()      = getInstRestriction().isExpandableConnector();
+    eq UnknownInstClassDecl.isExpandableConnector()   = false;
+
+    /**
+     * Is this restriction "expandable connector"?
+     */
+    syn boolean InstRestriction.isExpandableConnector() = false;
+    eq InstExpandableConnector.isExpandableConnector()  = true;
+
+    /**
+     * Is this component an expandable connector?
+     */
+    syn boolean InstComponentDecl.isExpandableConnector() = myInstClass().isExpandableConnector();
+
+    /**
+     * Is this class an operator record?
+     */
+    syn boolean InstClassDecl.isOperatorRecord() = false;
+    eq InstBaseClassDecl.isOperatorRecord()      = getInstRestriction().isOperatorRecord();
+    eq UnknownInstClassDecl.isOperatorRecord()   = false;
+
+    /**
+     * Is this restriction "operator record"?
+     */
+    syn boolean InstRestriction.isOperatorRecord() = false;
+    eq InstOperatorRecord.isOperatorRecord()       = true;
+    eq InstConnector.isOperatorRecord()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isOperatorRecord() : super.isOperatorRecord();
+
+    /**
+     * Is this component an operator record?
+     */
+    syn boolean InstComponentDecl.isOperatorRecord() = false;
+    eq InstRecord.isOperatorRecord()                 = myInstClass().isOperatorRecord();
+
+    /**
+     * Is this class an operator?
+     */
+    syn boolean InstClassDecl.isOperator() = false;
+    eq InstBaseClassDecl.isOperator()      = getInstRestriction().isOperator();
+    eq UnknownInstClassDecl.isOperator()   = false;
+
+    /**
+     * Is this restriction "operator" or "operator function"?
+     */
+    syn boolean InstRestriction.isOperator() = false;
+    eq InstOperator.isOperator()             = true;
+    eq InstOperatorFunction.isOperator()     = true;
+
+	/**
+	 * \brief Is this class a function?
+	 */
+	syn boolean InstNode.isFunction()      = false;
+	eq InstBaseClassDecl.isFunction()      = getInstRestriction().isFunction();
+	eq UnknownInstClassDecl.isFunction()   = false;
+	
+	/**
+	 * \brief Is this restriction "function"?
+	 */
+	syn boolean InstRestriction.isFunction() = false;
+	eq InstFunction.isFunction() = true;
+	
+	/**
+	 * \brief Is this class a record?
+	 */
+	syn boolean InstClassDecl.isRecord() = false;
+	eq InstBaseClassDecl.isRecord()      = getInstRestriction().isRecord();
+	eq UnknownInstClassDecl.isRecord()   = false;
+
+    /**
+     * \brief Is this restriction "record"?
+     */
+    syn boolean InstRestriction.isRecord() = false;
+    eq InstMRecord.isRecord()              = true;
+    eq InstConnector.isRecord()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isRecord() : super.isRecord();
+
+	/**
+	 * \brief Is this class a function or record?
+	 */
+	syn boolean InstClassDecl.isCallable() = false;
+	eq InstBaseClassDecl.isCallable()      = getInstRestriction().isCallable();
+	eq UnknownInstClassDecl.isCallable()   = false;
+
+    /**
+     * \brief Is this restriction "function" or "record"?
+     */
+    syn boolean InstRestriction.isCallable() = false;
+    eq InstFunction.isCallable()             = true;
+    eq InstMRecord.isCallable()              = true;
+    eq InstConnector.isCallable()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isCallable() : super.isCallable();
+
+	/**
+	 * \brief Is this class a package?
+	 */
+	syn boolean InstClassDecl.isPackage() = false;
+	eq InstBaseClassDecl.isPackage()      = getInstRestriction().isPackage();
+	eq UnknownInstClassDecl.isPackage()   = false;
+	
+	/**
+	 * \brief Is this restriction "package"?
+	 */
+	syn boolean InstRestriction.isPackage() = false;
+	eq InstMPackage.isPackage()             = true;
+
+	/**
+	 * \brief Is this class an external object?
+	 */
+	syn boolean InstClassDecl.isExternalObject() {
+		for (InstExtends ie : getInstExtendss()) {
+			String name = ie.getClassName().name();
+			if (name.equals("ExternalObject"))
+				return true;
+		}
+		return false;	
+	}
+	eq InstSimpleShortClassDecl.isExternalObject() = false;
+	
+}
+
+aspect ExternalObjectTypes {
+    
+    syn boolean FExp.isConstructorCall()    = false;
+    eq InstFunctionCall.isConstructorCall() = getName().myInstClassDecl().isConstructor();
+    eq FFunctionCall.isConstructorCall()    = myFFunctionDecl().isConstructor();
+    syn boolean FExp.isDestructorCall()     = false;
+    eq InstFunctionCall.isDestructorCall()  = getName().myInstClassDecl().isDestructor();
+    eq FFunctionCall.isDestructorCall()     = myFFunctionDecl().isDestructor();
+    
+    syn boolean InstClassDecl.isDestructor()  = name().equals("destructor") && inExternalObject();
+    syn boolean FFunctionDecl.isDestructor()  = false;
+    eq FDestructorDecl.isDestructor()         = true;
+    syn boolean InstClassDecl.isConstructor() = name().equals("constructor") && inExternalObject();
+    syn boolean FFunctionDecl.isConstructor() = false;
+    eq FConstructorDecl.isConstructor()       = true;
+
+    syn boolean FExternalObjectVariable.hasConstructorCall(Index i) {
+        if (hasBindingExp()) {
+            FExp exp = (i == Index.NULL) ? getBindingExp() : getBindingExp().getArray().get(i);
+            return exp.isConstructorCall();
+        } else {
+            return hasParameterEquation() && parameterEquation().hasConstructorCall(i);
+        }
+        
+    }
+    syn boolean FAbstractEquation.hasConstructorCall(Index i) = false;
+    eq FEquation.hasConstructorCall(Index i) {
+        FExp exp = getRight();
+        if (i != Index.NULL)
+            exp = exp.getArray().get(i);
+        return exp.isConstructorCall();
+    }
+}
+
+aspect AliasTypes {
+	syn boolean FType.typeAliasCompatible(FType type) = typeCompatible(type);
+	eq FRealType.typeAliasCompatible(FType type) = type.isReal() && typeCompatible(type);
+}

@@ -1,0 +1,885 @@
+import java.lang.IllegalArgumentException;
+import org.jmodelica.icons.Layer;
+import org.jmodelica.icons.coord.CoordinateSystem;
+import org.jmodelica.icons.coord.Extent;
+import org.jmodelica.icons.coord.Placement;
+import org.jmodelica.icons.coord.Point;
+import org.jmodelica.icons.coord.Transformation;
+import org.jmodelica.icons.drawing.IconConstants.Context;
+import org.jmodelica.icons.exceptions.FailedConstructionException;
+import org.jmodelica.icons.exceptions.NotEnoughParametersException;
+import org.jmodelica.icons.primitives.Bitmap;
+import org.jmodelica.icons.primitives.Color;
+import org.jmodelica.icons.primitives.Ellipse;
+import org.jmodelica.icons.primitives.FilledRectShape;
+import org.jmodelica.icons.primitives.FilledShape;
+import org.jmodelica.icons.primitives.GraphicItem;
+import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.icons.primitives.Polygon;
+import org.jmodelica.icons.primitives.Rectangle;
+import org.jmodelica.icons.primitives.Text;
+import org.jmodelica.icons.primitives.Types;
+
+aspect AnnotationParsing {
+	
+	public abstract class AnnotationNode {
+		
+		/**
+		* Creates the icon layer represented by this AnnotationNode. 
+		* @return icon layer if annotationNode exist else a NO_LAYER 
+		*/
+		public Layer createIconLayer() {
+			Layer layer;
+			if (forPath("Icon").exists()) {
+				layer = new Layer(
+						forPath("Icon/coordinateSystem").createCoordinateSystem(), 
+						forPath("Icon/graphics").createGraphics()
+				); 
+			}else {
+				layer = Layer.NO_LAYER;
+			}
+			return layer;
+		}
+		/**
+		* Creates the diagram layer represented by this AnnotationNode.
+		* @return diagram layer if annotationNode exist else a NO_LAYER 
+		*/
+		public Layer createDiagramLayer() {
+			Layer layer;
+			if (forPath("Diagram").exists()) {
+				layer =  new Layer(
+						forPath("Diagram/coordinateSystem").createCoordinateSystem(), 
+						forPath("Diagram/graphics").createGraphics()
+				);
+			} else {
+				layer = Layer.NO_LAYER;
+			}
+			return layer;
+		}
+		/**
+		* Creates a Placement represented by this AnnotationNode.
+		* @param context for which layer transformation is to be set for the component.   
+		* @return placement
+		* @throws NotEnoughParametersException if too few parameters are provided for palcement.
+		* @throws FailedConstructionExceptionException if placement annotatioNode does not exist. 
+		*/
+		public Placement createPlacement(Context context) 
+				throws FailedConstructionException, NotEnoughParametersException {
+			AnnotationNode placementAnnotation = forPath("Placement");
+			if(placementAnnotation.exists()) {
+				boolean visible = Placement.DEFAULT_VISIBLE;
+				Transformation diagramTransformation = null;
+				Transformation iconTransformation = null;
+				for (AnnotationNode a : placementAnnotation) {
+					if ("transformation".equals(a.name())) {
+						diagramTransformation = a.createTransformation();
+					} else if ("iconTransformation".equals(a.name())) {	
+						iconTransformation = a.createTransformation();
+					} else if ("visible".equals(a.name())) {
+						visible = a.bool();
+					}
+				}
+				if(diagramTransformation != null) {
+					if(iconTransformation != null) {
+						if (context.equals(Context.ICON)) {
+							return new Placement(visible, iconTransformation);
+						} else {
+							return new Placement(visible, diagramTransformation);
+						}
+					}
+					else {
+						return new Placement(visible, diagramTransformation);
+					}
+				}
+				throw new NotEnoughParametersException("Placement");
+			}
+			throw new FailedConstructionException("Placement");
+		}
+		
+		/**
+		 * Creates a Connection represented by this AnnotationNode
+		 * @return the created connection
+		 * @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		 */
+		public Connection createConnection() throws FailedConstructionException {
+			AnnotationNode lineAnnotation = forPath("Line");
+			if (lineAnnotation.exists()) {
+				Connection con = new Connection();
+				lineAnnotation.initializeLine(con);
+				return con;
+			}
+			throw new FailedConstructionException("Connection");
+		}
+		
+		/**
+		 * Creates a connection Line represented by this AnnotationNode
+		 * @return the created connection
+		 * @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		 */
+		public Line createConnectionLine() throws FailedConstructionException {
+			AnnotationNode lineAnnotation = forPath("Line");
+			if (lineAnnotation.exists()) {
+				//TODO: Once refactor of graphical editor done, remove createConnection() and inline initializeLine()
+				Line con = new Line();
+				lineAnnotation.initializeLine(con);
+				return con;
+			}
+			throw new FailedConstructionException("ConnectionLine");
+		}
+		
+		public boolean hasPlacement() {
+			return forPath("Placement").exists();
+		}
+		/**
+		* Creates a Transformation represented by this AnnotationNode.
+		* @return the created transformation.
+		* @throws NotEnoughParametersException if the extent parameter was not given.
+		* @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		*/
+		public Transformation createTransformation() 
+			throws FailedConstructionException, NotEnoughParametersException {
+			Transformation transformation = new Transformation();
+			boolean extentSet = false;
+			for (AnnotationNode a : this) {
+				try {
+					if ("extent".equals(a.name())) {
+						transformation.setExtent(a.createExtent());
+						extentSet = true;
+					} else if ("origin".equals(a.name())) {
+						transformation.setOrigin(a.createOrigin());
+					} else if ("rotation".equals(a.name())) {
+						transformation.setRotation(a.createRotation());
+					}
+				} catch(FailedConstructionException e) {
+				}
+			}
+			if (!extentSet) {
+				throw new NotEnoughParametersException("Transformation");
+			}
+			return transformation;
+		}
+		/**
+		* Creates a Coordinatesystem represented by this AnnotationNode.
+		* @return the created CoordinateSystem if the annotationNode exists else a 
+		* deafult Coordinatesystem according to MLS. 
+		*/
+		public CoordinateSystem createCoordinateSystem() {
+			if (!exists()) {
+				return CoordinateSystem.DEFAULT_COORDINATE_SYSTEM;
+			}
+			CoordinateSystem co = new CoordinateSystem();
+			for(AnnotationNode c : this) {
+				try {
+					if ("preserveAspectRatio".equals(c.name())) {
+						co.setPreserveAspectRatio(c.bool());
+					} else if ("extent".equals(c.name())) {
+						co.setExtent(c.createExtent());
+					} else if ("grid".equals(c.name())) {
+						co.setGrid(c.createGrid());	
+					} else if ("initialScale".equals(c.name())) {
+						//co.setInitialScale(c.real());
+					}
+				} catch (FailedConstructionException e) {
+				} catch(IllegalArgumentException ie) {
+				}
+			}
+			return co;
+		}
+		/**
+		* Return the grid attribute represented by this AnnotationNode.
+		* @return a grid vector.
+		* @throws FailedConstructionException if grid vector was null.	
+		* */
+		public double[] createGrid() 
+			throws FailedConstructionException, NotEnoughParametersException, IllegalArgumentException {
+			if(realVector() != null) {
+				double[] grid = realVector();
+				return grid;
+			}
+			throw new FailedConstructionException("Grid");
+		}
+		
+		/**
+		* Creates a list with the graphics attribute represented by this AnnotationNode.
+		* @return the created list.		
+		* */
+		public ArrayList<GraphicItem> createGraphics() {
+			ArrayList<GraphicItem> items = new ArrayList<GraphicItem>();
+			for (AnnotationNode a : this) {
+				try {
+					if ("Line".equals(a.name())) {
+						items.add(a.createLine());
+					}
+					else if ("Rectangle".equals(a.name())) {
+						items.add(a.createRectangle());
+					}
+					else if ("Polygon".equals(a.name())) {
+						items.add(a.createPolygon());
+					}
+					else if ("Ellipse".equals(a.name())) {
+						items.add(a.createEllipse());
+					}
+					else if ("Text".equals(a.name())) {
+						items.add(a.createText());
+					} 
+					else if ("Bitmap".equals(a.name())) {
+						items.add(a.createBitmap());
+					}
+				} catch (FailedConstructionException e) {
+				}
+			}
+			return items;
+		}
+	
+		/**
+		* Create a FilledShape that is represented by this AnnotationNode uses 
+		* 	default values for the attributes if the attributes are not set.
+		* @return the created FilledShape
+		*/
+		private void initializeFilledShape(FilledShape filledShape) {
+			for (AnnotationNode a : this) {
+				try {
+					if ("lineColor".equals(a.name())) {
+						filledShape.setLineColor(a.createColor());
+					}
+					else if ("pattern".equals(a.name())) {
+						filledShape.setLinePattern(a.createLinePattern());
+					}
+					else if ("fillColor".equals(a.name())) {
+						filledShape.setFillColor(a.createColor());
+					}
+					else if ("fillPattern".equals(a.name())) {
+						filledShape.setFillPattern(a.createFillPattern());
+					} 
+					else if ("lineThickness".equals(a.name())) {
+						filledShape.setLineThickness(a.createLineThickness());
+					}
+				} catch (FailedConstructionException e){
+					
+				}
+			}
+			initializeGraphicItem(filledShape);
+		}
+		
+		/**
+		* Create a GraphicItem object that is represented by this AnnotationNode.
+		* @param graphicItem
+		*/
+		private void initializeGraphicItem(GraphicItem graphicItem) {
+			for (AnnotationNode a : this) {
+				if ("visible".equals(a.name())) {
+					graphicItem.setVisible(a.bool());
+				} else if ("origin".equals(a.name())) {
+					try {
+						graphicItem.setOrigin(a.createOrigin());
+					} catch (FailedConstructionException e) {}
+				} else if ("rotation".equals(a.name())) {
+					graphicItem.setRotation(a.createRotation());
+				}
+			}
+		}
+		
+		/**
+		* Create a FilledShape that is represented by this AnnotationNode. 
+		* @param FilledRectShape
+		* @return the created FilledShape
+		* @throws NotEnoughParametersException if the extent parameter was not given.
+		*/
+		private void initializeFilledRectShape(FilledRectShape filledRectShape) 
+				throws FailedConstructionException, NotEnoughParametersException {
+			
+			for (AnnotationNode a : this) {
+				if ("extent".equals(a.name())) {
+					filledRectShape.setExtent(a.createExtent());
+					initializeFilledShape(filledRectShape);
+					return;
+				}
+			}
+			throw new NotEnoughParametersException("FilledRectShape");
+		}
+	
+		/**
+		* Create an Ellipse primitive that is represented by this AnnotationNode. 
+		* @return the created Ellipse primitive
+		* @throws NotEnoughParametersException if the extent parameter was not given.
+		*/
+		private Ellipse createEllipse()
+				throws FailedConstructionException, NotEnoughParametersException {
+			Ellipse ellipse = new Ellipse();
+			initializeFilledRectShape(ellipse);
+			for (AnnotationNode a : this) {
+				if ("startAngle".equals(a.name())) {
+					ellipse.setStartAngle(a.createStartAngle());
+				} else if ("endAngle".equals(a.name())) {
+					ellipse.setEndAngle(a.createEndAngle());
+				}
+			}
+			return ellipse;
+		}
+		/**
+		* Create a Bitmap primitive that is represented by this AnnotationNode uses 
+		* @return the created Bitmap primitive
+		* @throws NotEnoughParametersException if the extent, file name or image source 
+		* 	parameters were not given.
+		*/
+		private Bitmap createBitmap() 
+		throws FailedConstructionException, NotEnoughParametersException {
+			Bitmap bitmap = new Bitmap();
+			initializeGraphicItem(bitmap);
+			boolean extentSet = false;
+			boolean fileNameSet = false;
+			boolean imageSourceSet = false;
+			for (AnnotationNode a : this) {
+				if ("extent".equals(a.name())) {
+					bitmap.setExtent(a.createExtent());
+					extentSet = true;
+				} else if ("fileName".equals(a.name())) {
+					bitmap.setFileName(a.path());
+					fileNameSet = true;
+				} else if ("imageSource".equals(a.name())) {
+					bitmap.setImageSource(a.string());
+					imageSourceSet = true;
+				}
+			}
+			if (!extentSet || !(fileNameSet || imageSourceSet)) {
+				throw new NotEnoughParametersException("Bitmap");
+			}
+			return bitmap;
+		}
+
+		/**
+		* Create a Line primitive that is represented by this AnnotationNode uses 
+		* 	default values for the attributes if the attributes are not set.
+		* @return the created Line primitive
+		* @throws NotEnoughParametersException if two points were not given.
+		*/
+		private Line createLine() 
+				throws FailedConstructionException, NotEnoughParametersException {
+			Line line = new Line();
+			initializeLine(line);
+			return line;
+		}
+		
+		/**
+		* Initializes a AbstractLine object with the information in the AnnotationNode.
+		* @param graphicItem
+		*/
+		private void initializeLine(Line line) 
+				throws FailedConstructionException, NotEnoughParametersException {
+			initializeGraphicItem(line);
+			boolean pointsSet = false;
+			for (AnnotationNode a : this) {
+				if ("points".equals(a.name())) {
+					line.setPoints(a.createPoints());
+					pointsSet = true;
+				} else { 
+					try {
+						if ("color".equals(a.name())) {
+							line.setColor(a.createColor());
+						} else if ("thickness".equals(a.name())) {
+							line.setThickness(a.createThickness());
+						} else if ("pattern".equals(a.name())) {
+							line.setLinePattern(a.createLinePattern());
+						} else if ("smooth".equals(a.name())) {
+							line.setSmooth(a.createSmooth());
+						} else if ("arrow".equals(a.name())) {
+							line.setArrow(a.createArrow());
+						} else if ("arrowSize".equals(a.name())) {
+							line.setArrowSize(a.createArrowSize());
+						}
+					} catch(FailedConstructionException e) {}
+				}
+			}
+			if (!pointsSet) {
+				throw new NotEnoughParametersException("Line");
+			}
+		}
+	
+		/**
+		* Create the Point object represented by this AnnotationNode.
+		* @return the created Point
+		* @throws FailedConstructionException if the provided data is anything else than 2 real numbers.
+		*/
+		private Point createPoint() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createPoint();
+				}
+			}
+			double[] vector = realVector();
+			if (vector == null || vector.length != 2) 
+				throw new FailedConstructionException("Point");
+			return new Point(vector[0], vector[1]);
+		}
+	
+		/**
+		* Creates a origin represented by this AnnotationNode.
+		* @return the created origin.
+		* @throws FailedConstructionException if the creating Point object fails.
+		*/
+		private Point createOrigin() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createOrigin();
+				}
+			}
+			try {
+				return createPoint();
+			} catch(FailedConstructionException e) {
+				throw new FailedConstructionException("Origin");
+			}
+		}
+		
+		/**
+		* Create the arrow parameter represented by this AnnotationNode.
+		* @return the created arrow.
+		* @throws FailedConstructionException if the data provided is anything else than 2 
+		* String objects, or if one of the String objects doesn't match a legal Arrow value. 
+		*/
+		private Types.Arrow[] createArrow() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createArrow();
+				}
+			}
+			ArrayList<String> strings = stringList();
+			if (strings == null || strings.size() != 2) {
+				throw new FailedConstructionException("Arrow");
+			}
+			Types.Arrow[] arrow = new Types.Arrow[2];
+			for (int i = 0; i < 2; i++) {
+				String s = strings.get(i);
+				arrow[i] = Types.Arrow.valueOf(
+					s.substring(s.indexOf(".")+1).toUpperCase()
+				);
+				if (arrow[i] == null) {
+					throw new FailedConstructionException("Arrow");
+				}
+			}
+			return arrow;
+		}
+		/**
+		* Return rotaion value for this AnnotationNode.
+		* @return rotation
+		*/
+		private double createRotation() {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createRotation();
+				}
+			}
+			return real();
+		}
+		/**
+		* Return thickness value for this AnnotationNode.
+		* @return thickness
+		* @throws FailedConstructionException if thickness < 0.
+		*/
+		private double createThickness() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createThickness();
+				}
+			}
+			double thickness = real();
+			if (thickness >= 0) {
+				return thickness;
+			} else throw new FailedConstructionException("Thickness");
+		}
+		/**
+		* Return line thickness value for this AnnotationNode.
+		* @return line thickness
+		* @throws FailedConstructionException if line thickness < 0.
+		*/
+		private double createLineThickness() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createLineThickness();
+				}
+			}
+			return createThickness();
+		}
+		/**
+		* Return arrow size value for this AnnotationNode.
+		* @return arrow size
+		* @throws FailedConstructionException if size < 0.
+		*/
+		private double createArrowSize() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createArrowSize();
+				}
+			}
+			double size = real();
+			if (size >= 0) {
+				return size;
+			} else throw new FailedConstructionException("Arrow size");
+		}	
+		/**
+		* Return radius value for this AnnotationNode.
+		* @return radius
+		* @throws FailedConstructionException if radius < 0.
+		*/
+		private double createRadius() 
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createRadius();
+				}
+			}
+			double radius = real();
+			if (radius >= 0) {
+				return radius;
+			}
+			throw new IllegalArgumentException("Illegal value radius");
+		}
+		/**
+		* Return start angle value for this AnnotationNode.
+		* @return start angle
+		*/
+		private double createStartAngle() { 
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createStartAngle();
+				}
+			}
+			return real();
+		}
+		/**
+		* Return end angle value for this AnnotationNode.
+		* @return end angle
+		*/
+		private double createEndAngle() { 
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createEndAngle();
+				}
+			}
+			return real();
+		}
+		
+		/**
+		* Creates the Rectangle primitive represented by this AnnotationNode.
+		* @return the created Rectangle.
+		* @throws FailedConstructionException if the construction of one of its component fails.
+		* @throws NotEnoughParametersException if the extent parameter is not provided.
+		*/
+		private Rectangle createRectangle()
+				throws FailedConstructionException, NotEnoughParametersException {
+			Rectangle rect = new Rectangle();
+			initializeFilledRectShape(rect);
+			for (AnnotationNode a : this) {
+				try {
+					if ("borderPattern".equals(a.name())) {
+						rect.setBorderPattern(a.createBorderPattern());
+					} else if ("radius".equals(a.name())) {
+						rect.setRadius(a.createRadius());
+					}
+				} catch(FailedConstructionException e) {
+				} catch(IllegalArgumentException ia) {
+				}
+			}
+			return rect;
+		}
+		
+		
+		/**
+		* Returns the Text primitive represented by this AnnotationNode.
+		* @return the created Text primitive.
+		* @throws FailedConstructionException if the construction of one of its parameters
+		* fails.
+		* @throws NotEnoughParametersException if either the extent or the textString
+		* parameter was not provided.
+		*/
+		private Text createText()
+				throws FailedConstructionException, NotEnoughParametersException {
+			Text text = new Text();
+			initializeFilledRectShape(text);
+			boolean textStringSet = false;
+			for (AnnotationNode a : this) {
+				try {
+					if ("textStyle".equals(a.name())) {
+						text.setTextStyle(a.createTextStyle()); 
+					} else if ("fontSize".equals(a.name())) {
+						text.setFontSize(a.createFontSize());
+					} else if ("fontName".equals(a.name())) {
+						text.setFontName(a.createFontName());
+					} else if ("textString".equals(a.name())) {
+						if(a.string() != null) {	
+							text.setTextString(a.string());
+							textStringSet = true;
+						}
+					} else if ("horizontalAlignment".equals(a.name())) {
+						text.setHorizontalAlignment(a.createHorizontalAlignment());
+					}
+				}
+				catch(FailedConstructionException e) {
+				}
+			}
+			if (!textStringSet) {
+				throw new NotEnoughParametersException("Text");
+			}
+			return text;
+		}
+		
+		/**
+		* Returns the Polygon primitive represented by this AnnotationNode.
+		* @return the created Polygon
+		* @throws NotEnoughParametersException if no points parameter was given.
+		* @throws FailedConstructionException if construction of points failes.
+		*/
+		private Polygon createPolygon()
+				throws FailedConstructionException, NotEnoughParametersException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createPolygon();
+				}
+			}
+			Polygon polygon = new Polygon();
+			initializeFilledShape(polygon);
+			boolean pointsSet = false;
+			for (AnnotationNode a : this) {
+				if ("points".equals(a.name())) {
+					polygon.setPoints(a.createPoints());
+					pointsSet = true;
+				} else if ("smooth".equals(a.name())) {
+					try {
+						polygon.setSmooth(a.createSmooth());
+					} catch (FailedConstructionException e) {}
+				}
+			}
+			if (!pointsSet) {
+				throw new NotEnoughParametersException("Polygon");
+			}
+			return polygon;
+		}
+		
+		/**
+		* Returns the horizontalAlignment value represented by this AnnotationNode.
+		* @return TextAlignment
+		* @throws FailedConstructionException if an illegal TextAlignment value was found.
+		*/
+		private Types.TextAlignment createHorizontalAlignment() throws FailedConstructionException {
+			return createEnumValue(Types.TextAlignment.class); 
+		}
+		
+		/**
+		* Returns the fillPattern value represented by this AnnotationNode.
+		* @return fillpattern
+		* @throws FailedConstructionException if no String value was given or
+		* if an illegal fillPattern value was given. 
+		*/
+		private Types.FillPattern createFillPattern() throws FailedConstructionException {
+			return createEnumValue(Types.FillPattern.class); 
+		}
+		
+		/**
+		* Returns the linePattern value represented by the given AnnotationNode.
+		* @return pattern
+		* @throws FailedConstructionException if no String value was given or
+		* if an illegal linePattern value was given. 
+		*/
+		private Types.LinePattern createLinePattern() throws FailedConstructionException {
+			return createEnumValue(Types.LinePattern.class); 
+		}
+		
+		/**
+		* Returns the borderPattern value represented by this AnnotationNode.
+		* @return borderpattern
+		* @throws FailedConstructionException if no String value was given or
+		* if an illegal borderPattern value was given. 
+		*/
+		private Types.BorderPattern createBorderPattern() throws FailedConstructionException {
+			return createEnumValue(Types.BorderPattern.class); 
+		}
+		
+		/**
+		* Returns the smooth value represented by this AnnotationNode.
+		* @return smooth value
+		* @throws FailedConstructionException if no String value was given or
+		* if an illegal smooth value was given. 
+		*/
+		private Types.Smooth createSmooth() throws FailedConstructionException {
+			return createEnumValue(Types.Smooth.class); 
+		}
+		
+		/**
+		* Returns the value represented by this AnnotationNode, given that it is a 
+		* value from the specified enumeration.
+		* 
+		* @param enumClass  the the enumeration to use
+		* @throws FailedConstructionException if no String value was given or
+		*         if an illegal value was given. 
+		*/
+		private <T extends Enum> T createEnumValue(Class<T> enumClass)
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) 
+				if ("DynamicSelect".equals(a.name())) 
+					return a.iterator().next().createEnumValue(enumClass);
+			try {
+				String str = string().split("\\.", 2)[1].toUpperCase();
+				return (T) Enum.valueOf(enumClass, str);
+			} catch (NullPointerException e) {
+			} catch (IllegalArgumentException e) {
+			}
+			throw new FailedConstructionException(enumClass.getSimpleName());
+		}
+		
+		/**
+		* Returns the textStyle value represented by this AnnotationNode.
+		* @return textstyle
+		* @throws FailedConstructionException If too many modifications are found or if
+		* any of the string values doesn't match a legal TextStyle.
+		*/
+		private ArrayList<Types.TextStyle> createTextStyle()
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createTextStyle();
+				}
+			}
+			ArrayList<Types.TextStyle> textStyle = new ArrayList<Types.TextStyle>();
+			ArrayList<String> stringList = stringList();
+			if(stringList == null)
+			{
+				throw new FailedConstructionException("ConstructTextstyle");
+			}
+			int i = 0;
+			try {
+				for(String s : stringList)
+				{
+					textStyle.add(i,Types.TextStyle.valueOf(
+							s.substring(
+									s.indexOf(".")+1,
+									s.length()
+							).toUpperCase()
+					));
+					i++;
+				}
+			} catch (IllegalArgumentException e) {
+				throw new FailedConstructionException("TextStyle");
+			}
+			return textStyle;
+		}
+		
+		/**
+		* Returns the fontName parameter that is represented by this AnnotationNode.
+		* @return fontname
+		*/
+		private String createFontName()
+		{	
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createFontName();
+				}
+			}
+			return string();
+		}
+		
+		/**
+		* Returns the fontSize value represented by this AnnotationNode.
+		* @return font size
+		* @throws FailedConstructionException if the font size is less than zero.
+		*/
+		private int createFontSize()
+				throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createFontSize();
+				}
+			}
+			int fontSize = (int)real();
+			if (fontSize >= 0) {
+				return fontSize;
+			} 
+			throw new FailedConstructionException("Font size");
+		}
+		
+		/**
+		* Create color represented by this AnnotationNode.
+		* @return Color
+		* @throws FailedConstructionException if anything else than 3 values were given 
+		* 	or if each value in the vector is value < 0 or value > 255.
+		*/
+		private Color createColor() 
+			throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createColor();
+				}
+			}
+			double[] vector = realVector();
+			if (vector != null) {
+				if (vector.length != 3) {
+					throw new FailedConstructionException("Color");
+				} else {
+					for(int i = 0; i < 3; i++) {
+						if(vector[i] < 0 || vector[i]> 255) { 
+							throw new FailedConstructionException("Color");
+						}
+					}
+				}
+			} else {
+				throw new FailedConstructionException("Color");
+			}
+			return new Color((int)vector[0], (int)vector[1], (int)vector[2]);
+		}
+		
+		/**
+		* Creates a list of points represented by this AnnotationNode.
+		* @return the created list of points
+		* @throws FailedConstructionException if no values were given.
+		*/
+		private ArrayList<Point> createPoints() 
+			throws FailedConstructionException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createPoints();
+				}
+			}
+			ArrayList<Point> points = new ArrayList<Point>();
+			double[][] matrix = realMatrix();
+			if(matrix != null) { 
+				for (int i = 0; i < matrix.length; i++) {
+					if(matrix[i] == null) {	
+						continue;
+					} 
+					if(matrix[i].length > 1) {
+						points.add(new Point(
+							matrix[i][0], 
+							matrix[i][1]
+						));
+					} 
+				}
+			} else {
+				throw new NotEnoughParametersException("points");
+			}
+			return points;
+		}
+		
+		/**
+		* Returns the extent represented by this AnnotationNode.
+		* @throws FailedConstructionException if too few or too many values are given. 
+		*/
+	
+		private Extent createExtent() 
+			throws FailedConstructionException, NotEnoughParametersException {
+			for (AnnotationNode a : this) {
+				if ("DynamicSelect".equals(a.name())) {
+					return a.iterator().next().createExtent();
+				}
+			}
+			ArrayList<Point> points = createPoints();
+			if (points.size() < 2) {
+				throw new NotEnoughParametersException("extent");
+			}
+			return new Extent(points.get(0), points.get(1));
+		}
+	}
+}
