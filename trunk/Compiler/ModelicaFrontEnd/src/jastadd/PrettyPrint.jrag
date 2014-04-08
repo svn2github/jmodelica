@@ -1795,6 +1795,7 @@ aspect FlatPrettyPrint {
 	eq InstPreExp.builtInName()          = "pre";
 	eq FEdgeExp.builtInName()            = "edge";
 	eq FChangeExp.builtInName()          = "change";
+    eq FLoadResource.builtInName()       = "loadResource";
 	eq FSampleExp.builtInName()          = "sample";
 	eq FInitialExp.builtInName()         = "initial";
 	eq FTerminalExp.builtInName()        = "terminal";

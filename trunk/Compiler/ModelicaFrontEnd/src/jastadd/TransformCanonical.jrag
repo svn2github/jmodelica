@@ -5433,3 +5433,61 @@ aspect EliminateEqualSwitches{
         list.add(this);
     }
 }
+
+aspect LoadResource {
+    
+    
+    /**
+     * Rewrite all loadResource() arguments to absolute paths.
+     */
+    rewrite FLoadResource {
+        when (!absolute) to FLoadResource {
+            String old = getFExp().ceval().stringValue();
+            String path = getFExp().abspath(old);
+            absolute = true;
+            if (path != old) {
+                setFExp(new FStringLitExp(path));
+            }
+            return this;
+        }
+    }
+    private boolean FLoadResource.absolute = false;
+    
+    /**
+     * Copies all files included by loadResource() to Resource folder.
+     */
+    public void FClass.copyResources(File resourcePath) {
+        ArrayList<String> list = resourcesToLoad();
+        for (int i = 0; i < list.size(); i++) {
+            String srcName = list.get(i);
+            File src  = new File(srcName);
+            String destName = String.format("%d_%s", i, new File(srcName).getName());
+            File dest = new File(resourcePath, destName);
+            try {
+                java.nio.file.Files.copy(src.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                error("loadResource(): Could not copy resource: " + srcName + " to destination: '" + destName + "'");
+            }
+        }
+    }
+    
+    syn lazy ArrayList<String> FClass.resourcesToLoad() {
+        LinkedHashSet<String> s = new LinkedHashSet<String>();
+        collectResourcesToLoad(s);
+        return new ArrayList<String>(s);
+    }
+    public void ASTNode.collectResourcesToLoad(LinkedHashSet<String> list) {
+        for (ASTNode n : this)
+            n.collectResourcesToLoad(list);
+    }
+    public void FLoadResource.collectResourcesToLoad(LinkedHashSet<String> list) {
+        list.add(ceval().stringValue());
+    }
+    
+    syn String FLoadResource.resourceName() {
+        int index = myFClass().resourcesToLoad().indexOf(ceval().stringValue());
+        if (index < 0)
+            throw new UnsupportedOperationException();
+        return String.format("%d_%s", index, new File(ceval().stringValue()).getName());
+    }
+}

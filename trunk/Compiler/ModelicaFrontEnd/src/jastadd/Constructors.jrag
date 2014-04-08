@@ -1007,6 +1007,7 @@ aspect InheritedFactoryMethods {
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
 	public FEdgeExp        FEdgeExp.createEmptyNode()        { return new FEdgeExp();        }
     public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
+    public FLoadResource   FLoadResource.createEmptyNode()   { return new FLoadResource();   }
     public FReinit         FReinit.createEmptyNode()         { return new FReinit();         }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();     }

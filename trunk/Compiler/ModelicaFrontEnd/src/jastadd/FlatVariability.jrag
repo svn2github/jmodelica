@@ -553,6 +553,7 @@ aspect FlatVariability {
 	
 	eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
 	eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
+	eq FLoadResource.expVariability() = fParameter();
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();

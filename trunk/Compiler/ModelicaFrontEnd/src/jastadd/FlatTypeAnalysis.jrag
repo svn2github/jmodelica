@@ -357,6 +357,7 @@ aspect FlatTypeAnalysis {
     eq FUnaryBuiltIn.type() = getFExp().type();
     eq FEdgeExp.type()      = fBooleanType(size());
     eq FChangeExp.type()    = fBooleanType(size());
+    eq FLoadResource.type() = fStringScalarType();
 
 	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
 	

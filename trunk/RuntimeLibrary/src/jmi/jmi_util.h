@@ -1109,6 +1109,8 @@ struct jmi_t {
     jmi_int_t terminate;                 /**< \brief Flag to trigger termination of the simulation. */
 
     jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
+    
+    jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. May be null. */
 };
 
 /**
@@ -1385,5 +1387,40 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  * @return The new switch value
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+
+/**
+ * \brief Check if file exists.
+ *
+ * @param file File path
+ * @return Zero if not exist, non-zero otherwise.
+ */
+int jmi_file_exists(const char* file);
+
+/**
+ * \brief Check if directory exists.
+ *
+ * @param dir Directory path
+ * @return Zero if not exist, non-zero otherwise.
+ */
+int jmi_dir_exists(const char* dir);
+
+/**
+ * \brief Returns absolute path to file in resource folder.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res A string to put the result in.
+ * @param file A string describing a files relative location in the resource folder.
+ * @return Absolute file path to the file.
+ */
+void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file);
+
+/* Maximum file path length allowed */
+#ifdef _WIN32
+    #include <windows.h>
+    #define JMI_PATH_MAX MAX_PATH
+#else
+    #include <linux/limits.h>
+    #define JMI_PATH_MAX PATH_MAX
+#endif
 
 #endif

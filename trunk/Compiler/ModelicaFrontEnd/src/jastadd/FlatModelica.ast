@@ -1312,6 +1312,11 @@ FEdgeExp : FUnaryBuiltIn;
 FChangeExp : FUnaryBuiltIn;
 
 /**
+ * loadResource built-in function.
+ */
+FLoadResource : FUnaryBuiltIn;
+
+/**
  * Reinit built-in function.
  */
 FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
