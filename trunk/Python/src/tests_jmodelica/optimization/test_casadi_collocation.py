@@ -1259,39 +1259,72 @@ class TestLocalDAECollocator:
     def test_blocking_factors(self):
         """Test blocking factors."""
         op = self.vdp_bounds_lagrange_op
-        
+
+        # Check constant blocking factors
         opts = op.optimize_options(self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 3
         opts['blocking_factors'] = N.array(opts['n_e'] * [1])
         res = op.optimize(self.algorithm, opts)
-        assert_results(res, 3.3109070531151135e0, 2.8718067708687645e-1,
-                       cost_rtol=8e-2, u_norm_rtol=3e-2)
-        
+        assert_results(res, 3.310907e0, 2.8718067e-1,
+                       cost_rtol=1e-2, u_norm_rtol=5e-3)
+
+        # Check varying blocking factors
         opts['n_e'] = 20
         opts['n_cp'] = 4
-        opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
+        opts['blocking_factors'] = [1, 1, 1, 1, 1, 2, 2, 2, 9]
         res = op.optimize(self.algorithm, opts)
-        assert_results(res, 3.620908059907745e0, 3.049446667587375e-1,
-                       cost_rtol=8e-2, u_norm_rtol=3e-2)
+        assert_results(res, 3.620908e0, 3.048898e-1,
+                       cost_rtol=1e-2, u_norm_rtol=5e-3)
+
+        # Check blocking factors with bound and penalty
+        factors = {'u': [1, 1, 1, 1, 1, 2, 2, 2, 9]}
+        du_quad_pen = {'u': 1}
+        du_bounds = {'u': 0.6}
+        bf = BlockingFactors(factors, du_quad_pen, du_bounds)
+        opts['blocking_factors'] = bf
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, 3.883757e0, 3.068191e-1,
+                       cost_rtol=1e-2, u_norm_rtol=5e-3)
 
     @testattr(casadi = True)
     def test_blocking_factors_cstr(self):
         """Test blocking factors for CSTR."""
         op = self.cstr_lagrange_op
-        
-        opts = op.optimize_options(self.algorithm)
-        opts['blocking_factors'] = [12, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-                                    2, 2, 2, 3, 3, 6]
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, 1.873e3, 3.053e2,
-                       cost_rtol=8e-2, u_norm_rtol=3e-2)
+        cost_ref = 1.873e3
+        u_norm_ref = 3.053e2
+        blocking_factors = [12, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+                            2, 2, 2, 3, 3, 6]
 
+        # Check blocking factors without scaling
+        opts = op.optimize_options(self.algorithm)
+        opts['blocking_factors'] = blocking_factors
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref,
+                       cost_rtol=1e-2, u_norm_rtol=5e-3)
+
+        # Check blocking factors with scaling
         opts['init_traj'] = res.result_data
         opts['nominal_traj'] = res.result_data
         res = op.optimize(self.algorithm, opts)
-        assert_results(res, 1.873e3, 3.053e2,
-                       cost_rtol=8e-2, u_norm_rtol=3e-2)
+        assert_results(res, cost_ref, u_norm_ref,
+                       cost_rtol=1e-2, u_norm_rtol=5e-3)
+
+        # Check blocking factors for non-inputs
+        du_bounds = {'cstr.Tc': 15}
+        factors = {'cstr.Tc': blocking_factors}
+        bf = BlockingFactors(factors, du_bounds=du_bounds)
+        opts['blocking_factors'] = bf
+        N.testing.assert_raises(ValueError, op.optimize, self.algorithm, opts)
+
+        # Check blocking factors with bounds and scaling
+        du_bounds = {'u': 15}
+        factors = {'u': blocking_factors}
+        bf = BlockingFactors(factors, du_bounds=du_bounds)
+        opts['blocking_factors'] = bf
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, 2.280259e3, 3.07723e2,
+                       cost_rtol=1e-2, u_norm_rtol=5e-3)
 
     @testattr(casadi_new = True)
     def test_eliminate_der_var(self):
