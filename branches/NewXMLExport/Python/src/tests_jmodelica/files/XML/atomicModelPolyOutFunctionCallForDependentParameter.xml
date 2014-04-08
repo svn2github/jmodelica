@@ -7,24 +7,37 @@
 			</component>
 			<component name="y" causality="output">
 				<local name="Real[2]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
 			</component>
 			<algorithm>
 				<assign>
 					<to>
-						<local name="y[1]"/>
+						<reference>
+							<local name="y"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
 					</to>
 					<from>
-						<local name="x"/>
+							<local name="x"/>
 					</from>
 				</assign>
 				<assign>
 					<to>
-						<local name="y[2]"/>
+						<reference>
+							<local name="y"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
 					</to>
 					<from>
 						<call builtin="*">
-							<local name="x"/>
-							<local name="x"/>
+								<local name="x"/>
+								<local name="x"/>
 						</call>
 					</from>
 				</assign>
@@ -54,10 +67,10 @@
 
 	<equation kind="parameter">
 		<equal>
-			<tuple>
+			<call builtin="array">
 				<local name="temp_1[1]"/>
 				<local name="temp_1[2]"/>
-			</tuple>
+			</call>
 			<call>
 				<function>
 					<local name="atomicModelPolyOutFunctionCallForDependentParameter.f"/>

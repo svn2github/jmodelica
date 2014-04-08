@@ -96,18 +96,18 @@
 
 	<equation>
 		<equal>
-			<tuple>
+			<call builtin="array">
 				<local name="temp_1[1]"/>
 				<local name="temp_1[2]"/>
-			</tuple>
+			</call>
 			<call>
 				<function>
 					<local name="AtomicModelVector1.f"/>
 				</function>
-				<tuple>
+				<call builtin="array">
 					<local name="A[1]"/>
 					<local name="A[2]"/>
-				</tuple>
+				</call>
 			</call>
 		</equal>
 		<equal>

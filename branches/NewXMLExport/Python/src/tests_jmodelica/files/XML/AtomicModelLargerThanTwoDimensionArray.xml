@@ -339,34 +339,38 @@
 
 	<equation>
 		<equal>
-				<tuple>
-					<tuple>
+			<call builtin="array">
+				<call builtin="array">
+					<call builtin="array">
 						<local name="temp_1[1,1,1]"/>
 						<local name="temp_1[1,1,2]"/>
 						<local name="temp_1[1,1,3]"/>
-					</tuple>
-					<tuple>
+					</call>
+					<call builtin="array">
 						<local name="temp_1[1,2,1]"/>
 						<local name="temp_1[1,2,2]"/>
 						<local name="temp_1[1,2,3]"/>
-					</tuple>
-				</tuple>
+					</call>
+				</call>
+			</call>
 			<call>
 				<function>
 					<local name="AtomicModelLargerThanTwoDimensionArray.f"/>
 				</function>
-					<tuple>
-						<tuple>
+				<call builtin="array">
+					<call builtin="array">
+						<call builtin="array">
 							<local name="A[1,1,1]"/>
 							<local name="A[1,1,2]"/>
 							<local name="A[1,1,3]"/>
-						</tuple>
-						<tuple>
+						</call>
+						<call builtin="array">
 							<local name="A[1,2,1]"/>
 							<local name="A[1,2,2]"/>
 							<local name="A[1,2,3]"/>
-						</tuple>
-					</tuple>
+						</call>
+					</call>
+				</call>
 			</call>
 		</equal>
 		<equal>

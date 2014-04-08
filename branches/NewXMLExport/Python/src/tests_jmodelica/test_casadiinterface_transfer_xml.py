@@ -371,6 +371,204 @@ def test_ConstructVariableLaziness():
     x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
     assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
     
+@testattr(xml = True)    
+def test_ConstructArrayInOutFunction1():
+    model = load_model("AtomicModelVector1", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"AtomicModelVector1.f\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@0 = (-@0)\n"
+                "output[0] = @0\n"
+                "@0 = input[1]\n"
+                "@0 = (-@0)\n"
+                "output[1] = @0\n")
+    assert str(model.getModelFunction("AtomicModelVector1.f")) == expected
+    expected = ("vertcat((vertcat(temp_1[1],temp_1[2])-vertcat(function(\"AtomicModelVector1.f\").call([A[1],A[2]]){0},function(\"AtomicModelVector1.f\").call([A[1],A[2]]){1})),(der(A[1])-temp_1[1]),(der(A[2])-temp_1[2]))")
+    assert str(model.getDaeResidual()) == expected
+ 
+@testattr(xml = True)
+def test_ConstructArrayInOutFunction2():
+    model = load_model("AtomicModelVector2", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"AtomicModelVector2.f\")\n"
+                " Inputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@1 = input[1]\n"
+                "{@2,@3} = function(\"AtomicModelVector2.f2\").call([@0,@1])\n"
+                "output[0] = @2\n"
+                "output[1] = @3\n")
+    assert str(model.getModelFunction("AtomicModelVector2.f")) == expected
+    expected = "vertcat((vertcat(temp_1[1],temp_1[2])-vertcat(function(\"AtomicModelVector2.f\").call([A[1],A[2]]){0},function(\"AtomicModelVector2.f\").call([A[1],A[2]]){1})),(der(A[1])-temp_1[1]),(der(A[2])-temp_1[2]))"
+    assert str(model.getDaeResidual()) == expected
+    
+
+    
+@testattr(xml = True)    
+def test_ConstructArrayInOutFunctionCallEquation():
+    model = load_model("AtomicModelVector3", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"AtomicModelVector3.f\")\n"
+                " Inputs (4):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "  2. 1-by-1 (dense)\n"
+                "  3. 1-by-1 (dense)\n"
+                " Outputs (4):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "  2. 1-by-1 (dense)\n"
+                "  3. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@0 = (-@0)\n"
+                "output[0] = @0\n"
+                "@0 = input[1]\n"
+                "@0 = (-@0)\n"
+                "output[1] = @0\n"
+                "@0 = input[2]\n"
+                "@0 = (2.*@0)\n"
+                "output[2] = @0\n"
+                "@0 = input[3]\n"
+                "@0 = (2.*@0)\n"
+                "output[3] = @0\n")
+    assert str(model.getModelFunction("AtomicModelVector3.f")) == expected
+    expected = "(vertcat(A[1],A[2],B[1],B[2])-vertcat(function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2]){0},function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2]){1},function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2]){2},function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2]){3}))"
+    assert str(model.getDaeResidual()) == expected
+    
+@testattr(xml = True)    
+def test_FunctionCallEquationOmittedOuts():
+    model = load_model("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
+    expected = "vertcat((der(x2)-(x1+x2)),(vertcat(x1,x2)-vertcat(function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){0},function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){2})))"
+    assert str(model.getDaeResidual()) == expected  
+
+@testattr(xml = True)    
+def test_FunctionCallStatementOmittedOuts():
+    model = load_model("atomicModelFunctionCallStatementIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredOuts.f2\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = 10\n"
+                "@1 = input[0]\n"
+                "{NULL,NULL,@2} = function(\"atomicModelFunctionCallStatementIgnoredOuts.f\").call([@0,@1])\n"
+                "output[0] = @2\n")
+    assert str(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2")) == expected
+    
+@testattr(casadi = True)    
+def test_OmittedArrayRecordOuts():
+    model = load_model("atomicModelFunctionCallStatementIgnoredArrayRecordOuts", modelFile, compiler_options={"inline_functions":"none"})
+    expectedFunctionPrint = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\")\n"
+                            " Input: 1-by-1 (dense)\n"
+                            " Outputs (6):\n"
+                            "  0. 1-by-1 (dense)\n"
+                            "  1. 1-by-1 (dense)\n"
+                            "  2. 1-by-1 (dense)\n"
+                            "  3. 1-by-1 (dense)\n"
+                            "  4. 1-by-1 (dense)\n"
+                            "  5. 1-by-1 (dense)\n"
+                            "@0 = 10\n"
+                            "@1 = input[0]\n"
+                            "{@2,@3,@4,NULL,NULL,@5,@6,@7} = function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f\").call([@0,@1])\n"
+                            "output[0] = @2\n"
+                            "output[1] = @3\n"
+                            "output[2] = @4\n"
+                            "output[3] = @5\n"
+                            "output[4] = @6\n"
+                            "output[5] = @7\n")
+    expectedResidualPrint = "(vertcat(x1,x2)-vertcat(function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){2},function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){5}))"
+    assert str(model.getModelFunction("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2")) == expectedFunctionPrint
+    assert str(model.getDaeResidual()) == expectedResidualPrint
+    
+"(vertcat(x1,x2)-vertcat(function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){2},function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){5}))"
+
+@testattr(xml = True)    
+def test_ConstructFunctionMatrix():
+    model = load_model("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"
+                " Inputs (4):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "  2. 1-by-1 (dense)\n"
+                "  3. 1-by-1 (dense)\n"
+                " Outputs (2):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "@0 = input[2]\n"
+                "output[0] = @0\n"
+                "@0 = input[3]\n"
+                "output[1] = @0\n"
+                "@0 = input[0]\n"
+                "@1 = input[1]\n")
+    assert str(model.getModelFunction("AtomicModelMatrix.f")) == expected
+    expected = "vertcat((vertcat(temp_1[1,1],temp_1[1,2])-vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1,0.3]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1,0.3]){1})),(der(A[1,1])+temp_1[1,1]),(der(A[1,2])+temp_1[1,2]),(vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])-vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})),(der(dx[1,1])+temp_2[1,1]),(der(dx[1,2])+temp_2[1,2]),(der(dx[2,1])+temp_2[2,1]),(der(dx[2,2])+temp_2[2,2]))"
+    assert str(model.getDaeResidual()) == expected
+        
+@testattr(xml = True)    
+def test_ConstructFunctionMatrixDimsGreaterThanTwo():
+    model = load_model("AtomicModelLargerThanTwoDimensionArray", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"AtomicModelLargerThanTwoDimensionArray.f\")\n"
+                " Inputs (6):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "  2. 1-by-1 (dense)\n"
+                "  3. 1-by-1 (dense)\n"
+                "  4. 1-by-1 (dense)\n"
+                "  5. 1-by-1 (dense)\n"
+                " Outputs (6):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "  2. 1-by-1 (dense)\n"
+                "  3. 1-by-1 (dense)\n"
+                "  4. 1-by-1 (dense)\n"
+                "  5. 1-by-1 (dense)\n"
+                "@0 = input[0]\n"
+                "@0 = (-@0)\n"
+                "output[0] = @0\n"
+                "@0 = input[1]\n"
+                "@0 = (-@0)\n"
+                "output[1] = @0\n"
+                "@0 = input[2]\n"
+                "@0 = (-@0)\n"
+                "output[2] = @0\n"
+                "@0 = input[3]\n"
+                "@0 = (-@0)\n"
+                "output[3] = @0\n"
+                "@0 = input[4]\n"
+                "@0 = (-@0)\n"
+                "output[4] = @0\n"
+                "@0 = 10\n"
+                "output[5] = @0\n"
+                "@0 = input[5]\n")
+    assert str(model.getModelFunction("AtomicModelLargerThanTwoDimensionArray.f")) == expected
+    expected = "vertcat((vertcat(temp_1[1,1,1],temp_1[1,1,2],temp_1[1,1,3],temp_1[1,2,1],temp_1[1,2,2],temp_1[1,2,3])-vertcat(function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){0},function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){1},function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){2},function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){3},function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){4},function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){5})),(der(A[1,1,1])-temp_1[1,1,1]),(der(A[1,1,2])-temp_1[1,1,2]),(der(A[1,1,3])-temp_1[1,1,3]),(der(A[1,2,1])-temp_1[1,2,1]),(der(A[1,2,2])-temp_1[1,2,2]),(der(A[1,2,3])-temp_1[1,2,3]))"
+    assert str(model.getDaeResidual()) == expected
+    
+@testattr(xml = True)
+def test_ConstructArrayFlattening():
+    model =  load_model("atomicModelSimpleArrayIndexing", modelFile, compiler_options={"inline_functions":"none"})
+    expected = ("ModelFunction : function(\"atomicModelSimpleArrayIndexing.f\")\n"
+                " Inputs (0):\n"
+                " Outputs (4):\n"
+                "  0. 1-by-1 (dense)\n"
+                "  1. 1-by-1 (dense)\n"
+                "  2. 1-by-1 (dense)\n"
+                "  3. 1-by-1 (dense)\n"
+                "@0 = 1\n"
+                "output[0] = @0\n"
+                "@0 = 2\n"
+                "output[1] = @0\n"
+                "@0 = 3\n"
+                "output[2] = @0\n"
+                "@0 = 4\n"
+                "output[3] = @0\n")
+    assert str(model.getModelFunction("atomicModelSimpleArrayIndexing.f")) == expected
+    
 @testattr(xml = True)
 def test_ConstructFunctionsInRhs():
     model = load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"})
@@ -916,8 +1114,6 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = input[1]\n")
     assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal")) == expected
 
-    
-    
 @testattr(xml = True)    
 def test_TransferVariableType():
     model = load_model("AtomicModelMisc", modelFile)

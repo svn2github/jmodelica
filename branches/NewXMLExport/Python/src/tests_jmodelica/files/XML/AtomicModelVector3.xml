@@ -150,27 +150,27 @@
 	<equation>
 		<equal>
 			<tuple>
-				<tuple>
+				<call builtin="array">
 					<local name="A[1]"/>
 					<local name="A[2]"/>
-				</tuple>
-				<tuple>
+				</call>
+				<call builtin="array">
 					<local name="B[1]"/>
 					<local name="B[2]"/>
-				</tuple>
+				</call>
 			</tuple>
 			<call>
 				<function>
 					<local name="AtomicModelVector3.f"/>
 				</function>
-				<tuple>
+				<call builtin="array">
 					<local name="A[1]"/>
 					<local name="A[2]"/>
-				</tuple>
-				<tuple>
+				</call>
+				<call builtin="array">
 					<integer value="1"/>
 					<integer value="2"/>
-				</tuple>
+				</call>
 			</call>
 		</equal>
 	</equation>
