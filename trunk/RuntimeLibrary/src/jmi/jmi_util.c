@@ -18,7 +18,11 @@
 */
 
 #include <stdarg.h>
-#include <dirent.h>
+#ifdef _WIN32
+    #include <win32_dirent.h>
+#else
+    #include <dirent.h>
+#endif
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_global.h"
@@ -2218,12 +2222,17 @@ int jmi_dir_exists(const char* dir) {
 void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
     size_t len;
     jmi_string_t loc = jmi->resource_location;
-    if (!loc)
-        jmi_log_node(jmi->log, logError, "Error", "Resource location unavailable <Path:%s>", loc);
+    if (!loc) {
+        jmi_log_node(jmi->log, logError, "Error", "Resource location unavailable.");
+        strcpy(res,file);
+        return;
+    }
     len = strlen(loc) + strlen(file);
-    if (len >= JMI_PATH_MAX)
-        jmi_log_node(jmi->log, logError, "Error", "File path too long <Path:%s><File:%s>", loc, file);
     strcpy(res, loc);
+    if (len >= JMI_PATH_MAX) {
+        jmi_log_node(jmi->log, logError, "Error", "File path too long <Path:%s><File:%s>", loc, file);
+        return;
+    }
     strcat(res, file);
     if (!jmi_file_exists(res))
         jmi_log_node(jmi->log, logError, "Error", "Could not locate resource <File:%s>", res);
