@@ -220,23 +220,18 @@ aspect InstFunctionBinding {
 			private HashMap<String, BuiltInCreator> map;
 			private static final String MATH_PREF = "Modelica.Math.";
 			private static final int MATH_LEN = MATH_PREF.length();
-			private static final String FILES_PREF = "Modelica.Utilities.Files.";
-            private static final int FILES_LEN = FILES_PREF.length();
             
             /* Built-In-Type*/
             public enum BIT {
-                NONE, MATH, FILE
+                NONE, MATH
             }
 			
 			public FBuiltInFunctionCall create(String name, InstFunctionArgument[] args) {
 				boolean math = name.startsWith(MATH_PREF);
-				boolean files = name.startsWith(FILES_PREF);
 				if (math) 
 					name = name.substring(MATH_LEN);
-				else if (files) 
-                    name = name.substring(FILES_LEN);
 				BuiltInCreator creator = map.get(name);
-				if (creator == null || (math && !creator.match(BIT.MATH)) || (files && !creator.match(BIT.FILE)))
+				if (creator == null || (math && !creator.match(BIT.MATH)))
 					return null;
 				FBuiltInFunctionCall res = creator.create(args);
 				if (res != null)
@@ -282,7 +277,6 @@ aspect InstFunctionBinding {
                 map.put("pre",             new BuiltInCreator(BIT.NONE, new InstPreExp(),       1));
                 map.put("edge",            new BuiltInCreator(BIT.NONE, new FEdgeExp(),         1));
                 map.put("change",          new BuiltInCreator(BIT.NONE, new FChangeExp(),       1));
-                map.put("loadResource",    new BuiltInCreator(BIT.FILE, new FLoadResource(),    1));
                 map.put("sample",          new BuiltInCreator(BIT.NONE, new FSampleExp(),       2));
                 map.put("initial",         new BuiltInCreator(BIT.NONE, new FInitialExp(),      0));
                 map.put("terminal",        new BuiltInCreator(BIT.NONE, new FTerminalExp(),     0));
@@ -308,6 +302,10 @@ aspect InstFunctionBinding {
                 map.put("actualStream",    new BuiltInCreator(BIT.NONE, new FActualStream(),    1));
                 map.put("cardinality",     new BuiltInCreator(BIT.NONE, new FCardinality(),     1));
                 map.put("getInstanceName", new BuiltInCreator(BIT.NONE, new FGetInstanceName(), 0));
+                map.put("Modelica.Utilities.Files.loadResource", 
+                        new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
+                map.put("ModelicaServices.ExternalReferences.loadResource", 
+                        new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
 				//       name                                            node           # fixed args
 				map.put("array",           new InfArgsBuiltInCreator(new FParseArray(), 0));
 				map.put("ones",            new InfArgsBuiltInCreator(new FOnes(),       0));
