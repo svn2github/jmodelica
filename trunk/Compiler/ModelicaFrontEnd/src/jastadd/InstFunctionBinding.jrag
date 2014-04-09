@@ -624,6 +624,7 @@ aspect InstFunctionBinding {
                 // If the operator record defines constructors, find the one that matches the best
                 // TODO: Error if several perfect matches
                 // TODO: Make toString() match original decl
+                // TODO: handle vectorized constructors
                 InstClassDecl op = target.recordType().getOperators().get(FExp.OP_CON);
                 if (op != null) {
                     int score = Integer.MAX_VALUE;

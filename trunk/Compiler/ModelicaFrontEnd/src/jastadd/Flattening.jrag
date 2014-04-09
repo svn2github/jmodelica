@@ -205,7 +205,7 @@ aspect Flattening {
             int i = 0;
             for (FExp arg : childFExps()) {
                 InstComponentDecl in = oper.myInputs().get(i);
-                if (!in.type().typeCompatible(arg.type()))
+                if (!in.type().typeCompatible(arg.type().scalarType()))
                     in.type().matchOverloadedConstructor(arg.type()).flattenFunction(fc);
                 i++;
             }
@@ -1964,18 +1964,48 @@ aspect FlatExpressions {
 
     public FExp FBinExp.flatten(FQName prefix) {
         InstClassDecl oper = overloadedOperator();
-        if (oper != null)
-            return oper.flattenOverloadedFunctionCall(prefix, getLeft(), getRight());
-        else
+        if (oper == null)
             return createNode(getLeft().flatten(prefix), getRight().flatten(prefix));
+        else if (getLeft().isArray() || getRight().isArray())
+            return getArray().buildFlattened(prefix, this);
+        else
+            return oper.flattenOverloadedFunctionCall(prefix, getLeft(), getRight());
     }
 
     public FExp FUnaryExp.flatten(FQName prefix)   {
         InstClassDecl oper = overloadedOperator();
-        if (oper != null)
-            return oper.flattenOverloadedFunctionCall(prefix, getFExp());
-        else
+        if (oper == null)
             return createNode(getFExp().flatten(prefix));
+        else if (getFExp().isArray())
+            return getArray().buildFlattened(prefix, this);
+        else
+            return oper.flattenOverloadedFunctionCall(prefix, getFExp());
+    }
+
+    /**
+     * Create an FArray containing flattened subexpressions.
+     */
+    public FExp Array.buildFlattened(FQName prefix, FExp context) {
+        return buildFArray(new FlattenedBuilder(prefix, context));
+    }
+
+    public class Array {
+        /**
+         * Helper object for {@link #buildFlattened(java.util.Map<String,FExp>)}.
+         */
+        protected static class FlattenedBuilder implements ElementBuilder {
+            private FQName prefix;
+            private FExp context;
+            
+            public FlattenedBuilder(FQName prefix, FExp context) {
+                this.prefix = prefix;
+                this.context = context;
+            }
+            
+            public FExp build(FExp e) {
+                return context.dynamicFExp(e).flatten(prefix);
+            }
+        }
     }
 
 	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
