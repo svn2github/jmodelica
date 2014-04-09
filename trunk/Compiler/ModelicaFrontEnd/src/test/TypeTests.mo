@@ -1861,19 +1861,7 @@ algorithm
  i.innerInteger[1] := outerInteger[1];
  i.innerInteger[2] := outerInteger[2];
  i.innerInteger[3] := outerInteger[3];
-
-public
- record TypeTests.AlgorithmType2.R
-  discrete Real r;
- end TypeTests.AlgorithmType2.R;
-
- record TypeTests.AlgorithmType2.I
-  discrete TypeTests.AlgorithmType2.R innerR[3];
-  discrete Integer innerInteger[3];
- end TypeTests.AlgorithmType2.I;
-
 end TypeTests.AlgorithmType2;
-
 ")})));
 end AlgorithmType2;
 

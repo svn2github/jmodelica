@@ -113,18 +113,18 @@ aspect TransformCanonical {
             t.apply();
     }
 
-	public void FClass.transformCanonicalCleanup() {
-		removeUnusedFunctions();
-	    root().flushAllRecursive();
-		for (FRecordDecl rec : getFRecordDecls())
-			rec.clearBindingEquations();
-	}
-	
-	public class FClass {
-	    
-	    /**
-	     * Base class for transformations on the flat tree.
-	     */
+    public void FClass.transformCanonicalCleanup() {
+        removeUnusedFunctionsAndRecords();
+        root().flushAllRecursive();
+        for (FRecordDecl rec : getFRecordDecls())
+            rec.clearBindingEquations();
+    }
+
+    public class FClass {
+        
+        /**
+         * Base class for transformations on the flat tree.
+         */
     	public abstract class Transformation {
     	    
     	    private String option;
@@ -4657,105 +4657,6 @@ aspect FunctionInlining {
 		return (s == null) ? Arrays.FFunctionArray.size() : s;
 	}
 	
-	
-	/**
-	 * Remove unused function declarations from the flat model.
-	 */
-	public void FClass.removeUnusedFunctions() {
-		beginStep("removeUnusedFunctions()");
-		getFVariables().markUsedFunctions();
-		getFInitialEquations().markUsedFunctions();
-		getFParameterEquations().markUsedFunctions();
-		getFAbstractEquations().markUsedFunctions();
-		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
-		for (FFunctionDecl func : getFFunctionDecls())
-			if (func.functionIsUsed())
-				funcs.add(func);
-		setFFunctionDeclList(funcs);
-		endStep("removeUnusedFunctions()");
-	}
-	
-	public class FFunctionDecl {
-		public enum UseType{
-			NONE(false, false),
-			ALIAS_ATTRIBUTE_USE(false, false),
-			ANNOTATION_DERIVATIVE(true, false),
-			DIRECT(true, true);
-			
-			private final boolean normalUse;
-			private final boolean derivativeUse;
-			UseType(boolean normalUse, boolean derivativeUse) {
-				this.normalUse = normalUse;
-				this.derivativeUse = derivativeUse;
-			}
-			public boolean normalUse() {
-				return normalUse;
-			}
-			public boolean derivativeUse() {
-				return derivativeUse;
-			}
-			
-			public UseType combine(UseType other) {
-				return compareTo(other) > 0 ? this : other;
-			}
-		}
-	}
-	
-	private UseType FFunctionDecl.functionUsed = UseType.NONE;
-	
-	/**
-	 * Has this function been marked as used?
-	 */
-	syn boolean FFunctionDecl.functionIsUsed() = functionUsed != UseType.NONE;
-	
-	/**
-	 * Has this function been marked as used?
-	 */
-	syn boolean FFunctionDecl.functionIsUsedAsDerivative() = functionUsed.derivativeUse();
-	
-	/**
-	 * Mark all called functions as used.
-	 */
-	public void ASTNode.markUsedFunctions() {
-		markUsedFunctions(FFunctionDecl.UseType.DIRECT);
-	}
-	public void ASTNode.markUsedFunctions(FFunctionDecl.UseType type) {
-		for (ASTNode node : this)
-			node.markUsedFunctions(type);
-	}
-	
-	public void FVariable.markUsedFunctions(FFunctionDecl.UseType type) {
-		AliasManager.AliasSet set = aliasSet();
-		if (type != FFunctionDecl.UseType.ALIAS_ATTRIBUTE_USE && set != null)
-			for (AliasManager.AliasVariable alias : set)
-				if (alias.getFVariable() != this)
-					alias.getFVariable().markUsedFunctions(FFunctionDecl.UseType.ALIAS_ATTRIBUTE_USE);
-		super.markUsedFunctions(type);
-	}
-	
-	public void FFunctionCall.markUsedFunctions(FFunctionDecl.UseType type) {
-		myFFunctionDecl().markUsedFunctions(type);
-		super.markUsedFunctions(type);
-	}
-	
-	public void FFunctionDecl.markUsedFunctions(UseType type) {
-		UseType oldType = functionUsed;
-		functionUsed = functionUsed.combine(type);
-		if (functionUsed != oldType) {
-			if (functionUsed == UseType.DIRECT &&
-			   (root().options.getBooleanOption("generate_block_jacobian") ||
-			    root().options.getBooleanOption("generate_dae_jacobian") ||
-			    root().options.getBooleanOption("generate_ode_jacobian"))) {
-				if (requiresDerivative() && !canDifferentiate()) {
-					error("Unable to determine derivative function for function '" + name() + "'");
-				} else if (hasFDerivativeFunction()) {
-					getFDerivativeFunction().myFFunctionDecl().markUsedFunctions(UseType.ANNOTATION_DERIVATIVE);
-				}
-			}
-			super.markUsedFunctions(functionUsed);
-		}
-	}
-
 }
 
 aspect StateInitialEquations {
@@ -5490,4 +5391,149 @@ aspect LoadResource {
             throw new UnsupportedOperationException();
         return String.format("%d_%s", index, new File(ceval().stringValue()).getName());
     }
+}
+
+aspect FunctionAndRecordCleanup {
+    /**
+     * Remove unused function and record declarations from the flat model.
+     */
+    public void FClass.removeUnusedFunctionsAndRecords() {
+        beginStep("removeUnusedFunctionsAndRecords()");
+        for (FFunctionDecl decl : getFFunctionDecls())
+            decl.resetUsedIndicator();
+        for (FRecordDecl decl : getFRecordDecls())
+            decl.resetUsedIndicator();
+        getFVariables().markUsedFunctionsAndRecords();
+        getFInitialEquations().markUsedFunctionsAndRecords();
+        getFParameterEquations().markUsedFunctionsAndRecords();
+        getFAbstractEquations().markUsedFunctionsAndRecords();
+        List<FFunctionDecl> funcs = new List<FFunctionDecl>();
+        for (FFunctionDecl func : getFFunctionDecls())
+            if (func.functionIsUsed())
+                funcs.add(func);
+        setFFunctionDeclList(funcs);
+        List<FRecordDecl> records = new List<FRecordDecl>();
+        for (FRecordDecl decl : getFRecordDecls())
+            if (decl.isRecordUsed())
+                records.add(decl);
+        setFRecordDeclList(records);
+        endStep("removeUnusedFunctionsAndRecords()");
+    }
+    
+    public class FFunctionDecl {
+        public enum UseType{
+            NONE(false, false),
+            ALIAS_ATTRIBUTE_USE(false, false),
+            ANNOTATION_DERIVATIVE(true, false),
+            DIRECT(true, true);
+            
+            private final boolean normalUse;
+            private final boolean derivativeUse;
+            UseType(boolean normalUse, boolean derivativeUse) {
+                this.normalUse = normalUse;
+                this.derivativeUse = derivativeUse;
+            }
+            public boolean normalUse() {
+                return normalUse;
+            }
+            public boolean derivativeUse() {
+                return derivativeUse;
+            }
+            
+            public UseType combine(UseType other) {
+                return compareTo(other) > 0 ? this : other;
+            }
+        }
+    }
+    
+    private UseType FFunctionDecl.functionUsed = UseType.NONE;
+    
+    public void FFunctionDecl.resetUsedIndicator() {
+        functionUsed = UseType.NONE;
+    }
+    
+    /**
+     * Has this function been marked as used?
+     */
+    syn boolean FFunctionDecl.functionIsUsed() = functionUsed != UseType.NONE;
+    
+    /**
+     * Has this function been marked as used?
+     */
+    syn boolean FFunctionDecl.functionIsUsedAsDerivative() = functionUsed.derivativeUse();
+    
+    private boolean FRecordDecl.recordUsed = false;
+    
+    public void FRecordDecl.resetUsedIndicator() {
+        recordUsed = false;
+    }
+    
+    syn boolean FRecordDecl.isRecordUsed() = recordUsed;
+    
+    /**
+     * Mark all called functions as used.
+     */
+    public final void ASTNode.markUsedFunctionsAndRecords() {
+        markUsedFunctionsAndRecords(FFunctionDecl.UseType.DIRECT);
+    }
+    public void ASTNode.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        for (ASTNode node : this)
+            node.markUsedFunctionsAndRecords(type);
+    }
+    
+    @Override
+    public void FVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        AliasManager.AliasSet set = aliasSet();
+        if (type != FFunctionDecl.UseType.ALIAS_ATTRIBUTE_USE && set != null)
+            for (AliasManager.AliasVariable alias : set)
+                if (alias.getFVariable() != this)
+                    alias.getFVariable().markUsedFunctionsAndRecords(FFunctionDecl.UseType.ALIAS_ATTRIBUTE_USE);
+        super.markUsedFunctionsAndRecords(type);
+    }
+    
+    @Override
+    public void FFunctionCall.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        myFFunctionDecl().markUsedFunctionsAndRecords(type);
+        super.markUsedFunctionsAndRecords(type);
+    }
+    
+    @Override
+    public void FFunctionDecl.markUsedFunctionsAndRecords(UseType type) {
+        UseType oldType = functionUsed;
+        functionUsed = functionUsed.combine(type);
+        if (functionUsed != oldType) {
+            if (functionUsed == UseType.DIRECT &&
+               (root().options.getBooleanOption("generate_block_jacobian") ||
+                root().options.getBooleanOption("generate_dae_jacobian") ||
+                root().options.getBooleanOption("generate_ode_jacobian"))) {
+                if (requiresDerivative() && !canDifferentiate()) {
+                    error("Unable to determine derivative function for function '" + name() + "'");
+                } else if (hasFDerivativeFunction()) {
+                    getFDerivativeFunction().myFFunctionDecl().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
+                }
+            }
+            super.markUsedFunctionsAndRecords(functionUsed);
+        }
+    }
+    
+    @Override
+    public void FRecordType.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        myFRecordDecl().markUsedFunctionsAndRecords(type);
+    }
+    
+    @Override
+    public void FRecordConstructor.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        getRecord().myFRecordDecl().markUsedFunctionsAndRecords(type);
+    }
+    
+    @Override
+    public void FRecordDecl.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        if (!recordUsed) {
+            recordUsed = true;
+            super.markUsedFunctionsAndRecords(type);
+        }
+    }
+    
 }

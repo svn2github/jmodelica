@@ -3350,25 +3350,29 @@ void func_CCodeGenTests_CUnknownArray6_f_def0(jmi_array_t* i1_a, jmi_array_t* i2
 end CUnknownArray6;
 
 model CRecordDecl1
- record A
-  Real a;
-  Real b;
- end A;
+    record A
+        Real a;
+        Real b;
+    end A;
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a + i.b;
+        annotation(Inline=false);
+    end F;
  
- A x;
-equation
- x.a = 1;
- x.b = 2;
+    Real r = F(A(time, time));
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl1",
-			description="C code generation for records: structs: basic test",
-			variability_propagation=false,
-			generate_ode=false,
-			generate_dae=true,
-			template="$C_records$",
-			generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CRecordDecl1",
+            description="C code generation for records: structs: basic test",
+            variability_propagation=false,
+            generate_ode=false,
+            generate_dae=true,
+            template="$C_records$",
+            generatedCode="
 typedef struct _A_0_r {
     jmi_ad_var_t a;
     jmi_ad_var_t b;
@@ -3380,19 +3384,25 @@ end CRecordDecl1;
 
 
 model CRecordDecl2
- record A
-  Real a;
-  B b;
- end A;
+    record A
+        Real a;
+        B b;
+    end A;
+
+    record B
+        Real c;
+    end B;
+
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a + i.b.c;
+        annotation(Inline=false);
+    end F;
  
- record B
-  Real c;
- end B;
- 
- A x;
-equation
- x.a = 1;
- x.b.c = 2;
+    Real r = F(A(time, B(time)));
+
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -3419,13 +3429,18 @@ end CRecordDecl2;
 
 
 model CRecordDecl3
- record A
-  Real a[2];
- end A;
-
- A x;
-equation
- x.a = {1,2};
+    record A
+        Real a[2];
+    end A;
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a[1] + i.a[2];
+        annotation(Inline=false);
+    end F;
+ 
+    Real r = F(A({time, time}));
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -3446,20 +3461,23 @@ end CRecordDecl3;
 
 
 model CRecordDecl4
- record A
-  Real a;
-  B b[2];
- end A;
+    record A
+        Real a;
+        B b[2];
+    end A;
+
+    record B
+        Real c;
+    end B;
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a + i.b[1].c + i.b[2].c;
+        annotation(Inline=false);
+    end F;
  
- record B
-  Real c;
- end B;
- 
- A x;
-equation
- x.a = 1;
- x.b[1].c = 2;
- x.b[2].c = 3;
+    Real r = F(A(time, {B(time), B(time)}));
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -4204,19 +4222,25 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp0(A_1_ra* x_a) {
 end CRecordDecl16;
 
 model CRecordDecl17
- record A
- end A;
+    record A
+    end A;
+    function F
+        input Real i;
+        output Real o;
+        A a;
+    algorithm
+        o := i;
+        annotation(Inline=false);
+    end F;
  
- A x;
-
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="CRecordDecl17",
-			description="Test that a default field is created for an empty record.",
-			variability_propagation=false,
-			template="$C_records$",
-			generatedCode=
+    A x;
+    Real r = F(time);
+    annotation(__JModelica(UnitTesting(tests={ 
+        CCodeGenTestCase(
+            name="CRecordDecl17",
+            description="Test that a default field is created for an empty record.",
+            template="$C_records$",
+            generatedCode=
 "typedef struct _A_0_r {
     char dummy;
 } A_0_r;

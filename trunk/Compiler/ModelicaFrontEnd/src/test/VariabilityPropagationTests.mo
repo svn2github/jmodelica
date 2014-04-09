@@ -891,13 +891,6 @@ fclass VariabilityPropagationTests.ConstantRecord1
  constant Real c.a[2] = 2;
  constant Real c.a[3] = 3;
  constant Real c.b = 4;
-
-public
- record VariabilityPropagationTests.ConstantRecord1.A
-  Real a[:];
-  Real b;
- end VariabilityPropagationTests.ConstantRecord1.A;
-
 end VariabilityPropagationTests.ConstantRecord1;
 ")})));
 end ConstantRecord1;
