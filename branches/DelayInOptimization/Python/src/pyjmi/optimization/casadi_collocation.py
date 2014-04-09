@@ -4915,6 +4915,53 @@ class LocalDAECollocator(CasadiCollocator):
                         if self.named_vars:
                             input_constr = casadi.vertcat(input_constr)
                         c_e.append(input_constr)
+
+        # Equality constraints for delayed feedback
+        if self.delayed_feedback is not None:
+
+            # Check for unsupported cases
+            if self.variable_scaling: raise CasadiCollocatorException(
+                "Variable scaling is not yet supported with delayed feedback.")
+            if self._normalize_min_time: raise CasadiCollocatorException(
+                "Free time horizon os not supported with delayed feedback.")
+            if self.hs is not None: raise CasadiCollocatorException(
+                "Non-uniform element lengths are not supported with delayed feedback.")
+            
+##            if self.variable_scaling and self.nominal_traj is None:
+##                sfs = self._sf
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
+                        # Retrieve variable and value
+                        (u_ind, u_vt) = name_map[u_name]
+                        (y_ind, y_vt) = name_map[y_name]
+
+                        u_var = self.var_map[i][k][u_vt][u_ind]
+                        if i > delay_n_e:
+                            y_value = self.var_map[i-delay_n_e][k][y_vt][y_ind]
+                        else:
+                            y_value = 0 # todo: take initial part of trajectory from initial guess
+                        
+##                        # Scale variable
+##                        if self.variable_scaling:
+##                            if self.nominal_traj is None:
+##                                sf = sfs[vt][ind]
+##                                constr_var *= sf
+##                            else:
+##                                sf_index = name_idx_sf_map[name]
+##                                if is_variant[name]:
+##                                    sf = variant_sf[i][k][sf_index]
+##                                    constr_var *= sf
+##                                else:
+##                                    d = invariant_d[sf_index]
+##                                    e = invariant_e[sf_index]
+##                                    constr_var = d * constr_var + e
+                        
+                        # Add constraint
+                        input_constr = u_var - y_value
+                        if self.named_vars:
+                            input_constr = casadi.vertcat(input_constr) # why?
+                        c_e.append(input_constr)
         
         # Store constraints, time and timed variables as data attributes
         self.c_e = c_e
