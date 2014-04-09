@@ -970,14 +970,12 @@ aspect OverloadedOperatorBinding {
     /**
      * Check if this expression should use an overloaded operator.
      * 
-     * Returns true if any FExp child is of operator record type.
+     * Returns <code>true</code> for binary and unary expressions if any FExp child is of operator record type.
+     * Note that this might return <code>true</code> for an expression that has <code>operatorName() == null</code>.
      */
-    syn boolean FExp.shouldUseOverloadedOperator() {
-        for (FExp e : childFExps()) 
-            if (e.type().isOperatorRecord())
-                return true;
-        return false;
-    }
+    syn boolean FExp.shouldUseOverloadedOperator() = false;
+    eq FBinExp.shouldUseOverloadedOperator()       = getLeft().type().isOperatorRecord() || getRight().type().isOperatorRecord();
+    eq FUnaryExp.shouldUseOverloadedOperator()     = getFExp().type().isOperatorRecord();
 
     /**
      * Calculate the function to use for this operator expression involving operator records.

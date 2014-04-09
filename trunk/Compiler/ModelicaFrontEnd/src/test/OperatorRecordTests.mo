@@ -482,6 +482,102 @@ end OperatorRecordTests.OperatorOverload11;
     end OperatorOverload11;
 
 
+// Note: this test gives wrong result due to the bug in #2779
+    model OperatorOverload12
+        constant Cplx c1 = Cplx(1, 2);
+        constant Cplx c2 = Cplx(3, 4);
+        constant Cplx c3 = c1 + c2;
+        constant Cplx c4 = c3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload12",
+            description="Constant eval of overloaded operator expression: scalars",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload12
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ constant OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ constant OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(4, 3));
+ constant OperatorRecordTests.Cplx c4 = OperatorRecordTests.Cplx(6.0, 4.0);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload12;
+")})));
+    end OperatorOverload12;
+
+
+// Note: this test gives wrong result due to the bug in #2779
+    model OperatorOverload13
+        constant Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        constant Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
+        constant Cplx[2] c3 = c1 + c2;
+        constant Cplx[2] c4 = c3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload13",
+            description="Constant eval of overloaded operator expression: arrays",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload13
+ constant OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)};
+ constant OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)};
+ constant OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(6, 5)), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(4, 3), OperatorRecordTests.Cplx(8, 7))};
+ constant OperatorRecordTests.Cplx c4[2] = {OperatorRecordTests.Cplx(8.0, 6.0), OperatorRecordTests.Cplx(12.0, 10.0)};
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload13;
+")})));
+    end OperatorOverload13;
+
+
     model OperatorRecordConnect1
         connector C
             Cplx x;
