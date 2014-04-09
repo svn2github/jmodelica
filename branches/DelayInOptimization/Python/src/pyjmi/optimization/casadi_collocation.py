@@ -4920,8 +4920,6 @@ class LocalDAECollocator(CasadiCollocator):
         if self.delayed_feedback is not None:
 
             # Check for unsupported cases
-            if self.variable_scaling: raise CasadiCollocatorException(
-                "Variable scaling is not yet supported with delayed feedback.")
             if self.blocking_factors is not None: raise CasadiCollocatorException(
                 "Blocking factors are not supported with delayed feedback.")
             if self._normalize_min_time: raise CasadiCollocatorException(
@@ -4929,36 +4927,15 @@ class LocalDAECollocator(CasadiCollocator):
             if self.hs is not None: raise CasadiCollocatorException(
                 "Non-uniform element lengths are not supported with delayed feedback.")
             
-##            if self.variable_scaling and self.nominal_traj is None:
-##                sfs = self._sf
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
-                        # Retrieve variable and value
-                        (u_ind, u_vt) = name_map[u_name]
-                        (y_ind, y_vt) = name_map[y_name]
-
-                        u_var = self.var_map[i][k][u_vt][u_ind]
+                        u_var = self._get_unscaled_expr(u_name, i, k)
                         if i > delay_n_e:
-                            y_value = self.var_map[i-delay_n_e][k][y_vt][y_ind]
+                            y_value = self._get_unscaled_expr(y_name, i-delay_n_e, k)
                         else:
                             y_value = 0 # todo: take initial part of trajectory from initial guess
-                        
-##                        # Scale variable
-##                        if self.variable_scaling:
-##                            if self.nominal_traj is None:
-##                                sf = sfs[vt][ind]
-##                                constr_var *= sf
-##                            else:
-##                                sf_index = name_idx_sf_map[name]
-##                                if is_variant[name]:
-##                                    sf = variant_sf[i][k][sf_index]
-##                                    constr_var *= sf
-##                                else:
-##                                    d = invariant_d[sf_index]
-##                                    e = invariant_e[sf_index]
-##                                    constr_var = d * constr_var + e
-                        
+                                                
                         # Add constraint
                         input_constr = u_var - y_value
                         if self.named_vars:
@@ -4974,6 +4951,29 @@ class LocalDAECollocator(CasadiCollocator):
         self.time = N.array(time)
         self._timed_variables = timed_variables
         self._nlp_timed_variables = nlp_timed_variables
+
+    def _get_unscaled_expr(self, name, i, k):
+        """
+        Get an expression for the unscaled value of variable name at a collocation point.
+        """
+        
+        (ind, vt) = self.name_map[name]
+        val = self.var_map[i][k][vt][ind]
+        if self.variable_scaling:
+            if self.nominal_traj is None:
+                sf = self._sf[vt][ind]
+                return sf * val
+            else:
+                sf_index = self._name_idx_sf_map[name]
+                if self._is_variant[name]:
+                    sf = variant_sf[i][k][sf_index]
+                    return sf * val
+                else:
+                    d = self._invariant_d[sf_index]
+                    e = self._invariant_e[sf_index]
+                    return d * val + e
+        else:
+            return val    
         
     def _create_cost(self):
         """
@@ -5069,12 +5069,6 @@ class LocalDAECollocator(CasadiCollocator):
         if (self.measurement_data is not None and
             (len(self.measurement_data.unconstrained) +
              len(self.measurement_data.constrained) > 0)):
-            # Retrieve scaling factors
-            if self.variable_scaling and self.nominal_traj is not None:
-                invariant_d = self._invariant_d
-                invariant_e = self._invariant_e
-                is_variant = self._is_variant
-                name_idx_sf_map = self._name_idx_sf_map
             
             # Create nested dictionary for storage of errors and calculate
             # reference values
@@ -5094,32 +5088,15 @@ class LocalDAECollocator(CasadiCollocator):
             
             # Calculate errors
             name_map = self.name_map
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
             var_names = (self.measurement_data.constrained.keys() +
                          self.measurement_data.unconstrained.keys())
             for j in xrange(len(var_names)):
                 name = var_names[j]
-                (ind, vt) = name_map[name]
                 for i in range(1, self.n_e + 1):
                     for k in range(1, self.n_cp + 1):
-                        val = self.var_map[i][k][vt][ind]
+                        unscaled_val = self._get_unscaled_expr(name, i, k)
                         ref_val = y_ref[i][k][j]
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                err[i][k].append(sf * val - ref_val)
-                            else:
-                                sf_index = name_idx_sf_map[name]
-                                if is_variant[name]:
-                                    sf = variant_sf[i][k][sf_index]
-                                    err[i][k].append(sf * val - ref_val)
-                                else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    err[i][k].append(d * val + e - ref_val)
-                        else:
-                            err[i][k].append(val - ref_val)
+                        err[i][k].append(unscaled_val - ref_val)
             
             # Calculate cost contribution from each collocation point
             Q = self.measurement_data.Q
