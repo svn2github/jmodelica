@@ -195,8 +195,7 @@ int fileLength(const char* name) {
     constant  Integer x = fileLength(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
     parameter Integer y = fileLength(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
     discrete  Integer z = fileLength(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
-    
-    discrete Integer rel = fileLength(loadResource("../Data/String.txt")); 
+     
 end LoadResource;
 
 end OperatorTests;

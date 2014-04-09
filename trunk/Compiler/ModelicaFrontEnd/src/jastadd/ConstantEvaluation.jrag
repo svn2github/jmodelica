@@ -1422,7 +1422,12 @@ aspect ConstantEvaluation {
   
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
-  eq FLoadResource.cevalCalc() = getFExp().ceval();
+  eq FLoadResource.cevalCalc() {
+      String arg = getFExp().ceval().stringValue();
+      if (!new File(arg).isAbsolute())
+          arg = resolve(arg);
+      return new CValueString(arg);
+  }
   
   eq FEdgeExp.cevalCalc()    = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
   eq FChangeExp.cevalCalc()  = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;

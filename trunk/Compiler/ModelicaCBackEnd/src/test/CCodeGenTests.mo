@@ -14560,11 +14560,12 @@ model LoadResource1
         output Integer n;
         external;
     end strlen;
-    parameter Integer y = strlen(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
-    discrete  Integer z = strlen(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    parameter Integer y = strlen(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    discrete  Integer z = strlen(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
     
-    discrete Integer rel = strlen(Modelica.Utilities.Files.loadResource("../Data/String.txt")); 
-    discrete Integer abs = strlen(loadResource("/home/user/Data/String.txt")); 
+    discrete Integer rel  = strlen(Modelica.Utilities.Files.loadResource("../Data/String.txt"));
+    discrete Integer abs  = strlen(Modelica.Utilities.Files.loadResource("/C:/home/user/Data/String.txt"));
+    discrete Integer file = strlen(Modelica.Utilities.Files.loadResource("file:///C:/home/user/Data/String.txt"));
     
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -14579,6 +14580,7 @@ $C_DAE_initial_dependent_parameter_assignments$
     char tmp_1[JMI_PATH_MAX];
     char tmp_2[JMI_PATH_MAX];
     char tmp_3[JMI_PATH_MAX];
+    char tmp_4[JMI_PATH_MAX];
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
@@ -14590,11 +14592,13 @@ $C_DAE_initial_dependent_parameter_assignments$
     _rel_2 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_2);
     jmi_load_resource(jmi, tmp_3, \"2_String.txt\");
     _abs_3 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_3);
+    jmi_load_resource(jmi, tmp_4, \"2_String.txt\");
+    _file_4 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4);
 /********* Write back reinits *******/
 
-    char tmp_4[JMI_PATH_MAX];
-    jmi_load_resource(jmi, tmp_4, \"0_Examples_readRealParameters.txt\");
-    _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4));
+    char tmp_5[JMI_PATH_MAX];
+    jmi_load_resource(jmi, tmp_5, \"0_Examples_readRealParameters.txt\");
+    _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_5));
 ")})));
 end LoadResource1;
 

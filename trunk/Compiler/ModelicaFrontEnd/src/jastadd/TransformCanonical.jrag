@@ -5337,39 +5337,25 @@ aspect EliminateEqualSwitches{
 
 aspect LoadResource {
     
-    
-    /**
-     * Rewrite all loadResource() arguments to absolute paths.
-     */
-    rewrite FLoadResource {
-        when (!absolute) to FLoadResource {
-            String old = getFExp().ceval().stringValue();
-            String path = getFExp().abspath(old);
-            absolute = true;
-            if (path != old) {
-                setFExp(new FStringLitExp(path));
-            }
-            return this;
-        }
-    }
-    private boolean FLoadResource.absolute = false;
-    
     /**
      * Copies all files included by loadResource() to Resource folder.
      */
-    public void FClass.copyResources(File resourcePath) {
+    public void FClass.loadResources(File resourcePath) {
         ArrayList<String> list = resourcesToLoad();
         for (int i = 0; i < list.size(); i++) {
-            String srcName = list.get(i);
-            File src  = new File(srcName);
-            String destName = String.format("%d_%s", i, new File(srcName).getName());
-            File dest = new File(resourcePath, destName);
+            File src  = new File(list.get(i));
+            File dest = new File(resourcePath, String.format("%d_%s", i, src.getName()));
+            if (!src.exists() || !src.isFile()) {
+                error(String.format("loadResource(): Resource file '%s' does not exist", src.getAbsolutePath()));
+                continue;
+            }
             try {
                 java.nio.file.Files.copy(src.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                error("loadResource(): Could not copy resource: " + srcName + " to destination: '" + destName + "'");
+                error("loadResource(): Could not copy resource: " + src.getAbsolutePath() + " to destination: '" + dest.getAbsolutePath() + "'");
             }
         }
+        breakOnErrors();
     }
     
     syn lazy ArrayList<String> FClass.resourcesToLoad() {
