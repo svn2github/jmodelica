@@ -4922,6 +4922,8 @@ class LocalDAECollocator(CasadiCollocator):
             # Check for unsupported cases
             if self.variable_scaling: raise CasadiCollocatorException(
                 "Variable scaling is not yet supported with delayed feedback.")
+            if self.blocking_factors is not None: raise CasadiCollocatorException(
+                "Blocking factors are not supported with delayed feedback.")
             if self._normalize_min_time: raise CasadiCollocatorException(
                 "Free time horizon os not supported with delayed feedback.")
             if self.hs is not None: raise CasadiCollocatorException(
