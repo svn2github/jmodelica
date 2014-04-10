@@ -4205,7 +4205,7 @@ class LocalDAECollocator(CasadiCollocator):
                                 (self.n_e, self.n_cp + 1)
                     else:
                         raise CasadiCollocatorException(
-                                "Constraint point " + `constraint_point` +
+                                "Time point " + `constraint_point` +
                                 " does not coincide with a collocation point.")
                 else:
                     (e, cp) = divmod(tp_index, self.n_cp)
