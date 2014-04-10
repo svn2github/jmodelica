@@ -4884,32 +4884,14 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Equality constraints for constrained inputs
         if self.measurement_data is not None:
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     for j in xrange(len(self.measurement_data.constrained)):
                         # Retrieve variable and value
                         name = self.measurement_data.constrained.keys()[j]
-                        (ind, _) = name_map[name]
-                        constr_var = self.var_map[i][k]['unelim_u'][ind]
+                        constr_var = self._get_unscaled_expr(name, i, k)
                         constr_val = self.var_map[i][k]['constr_u'][j]
-                        
-                        # Scale variable
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                constr_var *= sf
-                            else:
-                                sf_index = name_idx_sf_map[name]
-                                if is_variant[name]:
-                                    sf = variant_sf[i][k][sf_index]
-                                    constr_var *= sf
-                                else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    constr_var = d * constr_var + e
-                        
+                                                
                         # Add constraint
                         input_constr = constr_var - constr_val
                         if self.named_vars:
