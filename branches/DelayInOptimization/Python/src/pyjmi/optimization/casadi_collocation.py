@@ -4934,6 +4934,26 @@ class LocalDAECollocator(CasadiCollocator):
         self._timed_variables = timed_variables
         self._nlp_timed_variables = nlp_timed_variables
 
+    def _get_affine_scaling(self, name, i, k):
+        """
+        Get the affine scaling (d, e) of variable name at a collocation point.
+
+            unscaled_value = d*scaled_value + e
+        """
+        
+        if self.variable_scaling:
+            if self.nominal_traj is None:
+                (ind, vt) = self.name_map[name]
+                return (self._sf[vt][ind], 0.0)
+            else:
+                sf_index = self._name_idx_sf_map[name]
+                if self._is_variant[name]:
+                    return (variant_sf[i][k][sf_index], 0.0)
+                else:
+                    return (self._invariant_d[sf_index], self._invariant_e[sf_index])
+        else:
+            return (1.0, 0.0)
+
     def _get_unscaled_expr(self, name, i, k):
         """
         Get an expression for the unscaled value of variable name at a collocation point.
@@ -4941,21 +4961,8 @@ class LocalDAECollocator(CasadiCollocator):
         
         (ind, vt) = self.name_map[name]
         val = self.var_map[i][k][vt][ind]
-        if self.variable_scaling:
-            if self.nominal_traj is None:
-                sf = self._sf[vt][ind]
-                return sf * val
-            else:
-                sf_index = self._name_idx_sf_map[name]
-                if self._is_variant[name]:
-                    sf = variant_sf[i][k][sf_index]
-                    return sf * val
-                else:
-                    d = self._invariant_d[sf_index]
-                    e = self._invariant_e[sf_index]
-                    return d * val + e
-        else:
-            return val    
+        d, e = self._get_affine_scaling(name, i, k)        
+        return d*val + e
         
     def _create_cost(self):
         """
