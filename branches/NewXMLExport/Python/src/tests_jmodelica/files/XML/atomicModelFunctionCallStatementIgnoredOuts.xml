@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="atomicModelFunctionCallStatementIgnoredOuts.f2">
+		<class kind="function">
+			<component name="in1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal1">
+				<builtin name="Real"/>
+			</component>
+			<component name="internal2">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+							<local name="internal2"/>
+					</to>
+					<from>
+							<local name="in1"/>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<tuple>
+								<local name="internal1"/>
+							<nothing/>
+								<local name="out1"/>
+						</tuple>
+					</to>
+					<from>
+						<call>
+							<function>
+									<local name="atomicModelFunctionCallStatementIgnoredOuts.f"/>
+							</function>
+							<integer value="10"/>
+								<local name="internal2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="atomicModelFunctionCallStatementIgnoredOuts.f">
+		<class kind="function">
+			<component name="in1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="in2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out3" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+							<local name="out1"/>
+					</to>
+					<from>
+						<call builtin="+">
+								<local name="in1"/>
+							<integer value="1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out2"/>
+					</to>
+					<from>
+						<call builtin="+">
+								<local name="in2"/>
+							<integer value="1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out3"/>
+					</to>
+					<from>
+						<call builtin="+">
+								<local name="in1"/>
+								<local name="in2"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call>
+				<function>
+					<local name="atomicModelFunctionCallStatementIgnoredOuts.f2"/>
+				</function>
+				<local name="x1"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

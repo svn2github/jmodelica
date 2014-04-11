@@ -46,6 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "OwnedNode.hpp"
 #include "Ref.hpp"
 #include "transferXML.hpp"
+#include "transferXMLOptimization.hpp"
 %}
 
 %rename(_transferModelicaModel) transferModelicaModel;
@@ -135,6 +136,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "transferModelica.hpp"
 %include "transferOptimica.hpp"
 %include "transferXML.hpp"
+%include "transferXMLOptimization.hpp"
 
 %extend ModelicaCasADi::SharedNode {
     // Should be ok to take the argument as a SharedNode * instead of a Ref<SharedNode>,

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<optimization>
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="0"/>
+			</item>
+			<item name="free">
+				<false/>
+			</item>
+			<item name="fixed">
+				<true/>
+			</item>
+		</modifier>
+	</component>
+	<component name="startTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.0"/>
+		</bindingExpression>
+	</component>
+	<component name="finalTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<integer value="10"/>
+		</bindingExpression>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x1"/>
+			<integer value="0"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x1"/>
+			</operator>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+	</equation>
+
+	<constraint>
+		<greaterThan kind="pathConstraint">
+			<local name="x1"/>
+			<real value="1.0"/>
+		</greaterThan>
+	</constraint>
+	<finalTime>
+		<integer value="10"/>
+	</finalTime>
+	<objectiveIntegrand>
+		<local name="x1"/>
+	</objectiveIntegrand>
+</optimization>

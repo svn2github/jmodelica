@@ -74,6 +74,8 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 					// handle equations
 					transferEquations(m, elem);
 				}
+			} else {
+				// do nothing
 			}
 		}
 	} else {
@@ -642,8 +644,10 @@ MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 		if (funcVars.find(varName)->second != NULL) {
 			return funcVars.find(varName)->second->getVar();
 		} else if (m->getVariable(varName) != NULL) {
+			std::cout << m->getVariable(varName) << std::endl;
 			return m->getVariable(varName)->getVar();
 		}
+		std::cout << "new mx: " << m->getVariable(varName) << std::endl;
 		return MX(varName);
 	} else if (!strcmp(name, "call")) {
 		return functionCallToMx(m, expression);

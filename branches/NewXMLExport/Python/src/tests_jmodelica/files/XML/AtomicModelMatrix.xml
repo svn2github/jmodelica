@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="AtomicModelMatrix.f">
+		<class kind="function">
+			<component name="A" causality="input">
+				<local name="Real[1, 2]"/>
+				<dimension>
+					<integer value="1"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<component name="X" causality="input">
+				<local name="Real[2, 1]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="1"/>
+				</dimension>
+			</component>
+			<component name="B" causality="output">
+				<local name="Real[1, 2]"/>
+				<dimension>
+					<integer value="1"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<component name="B_i1">
+				<local name="Real[2, 1]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="1"/>
+				</dimension>
+			</component>
+			<component name="B_i2">
+				<local name="Real[2, 2]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<reference>
+							<local name="A"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<reference>
+							<local name="A"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B_i1"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<reference>
+							<local name="X"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B_i1"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<reference>
+							<local name="X"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<reference>
+							<local name="B_i1"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="B_i2"/>
+					</to>
+					<from>
+						<call>
+							<function>
+									<local name="AtomicModelMatrix.f2"/>
+							</function>
+							<call builtin="array">
+								<call builtin="array">
+									<integer value="1"/>
+									<integer value="2"/>
+								</call>
+								<call builtin="array">
+									<integer value="3"/>
+									<integer value="4"/>
+								</call>
+							</call>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<reference>
+							<local name="B_i1"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelMatrix.f2">
+		<class kind="function">
+			<component name="A" causality="input">
+				<local name="Real[2, 2]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<component name="B" causality="output">
+				<local name="Real[2, 2]"/>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+				<dimension>
+					<integer value="2"/>
+				</dimension>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+								<subscripts>
+									<integer value="1"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+						<reference>
+							<local name="B"/>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+							<subscripts>
+								<integer value="2"/>
+							</subscripts>
+						</reference>
+					</to>
+					<from>
+						<call builtin="-">
+							<reference>
+								<local name="A"/>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+							</reference>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="A[1,1]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="A[1,2]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="X[1,1]" variability="constant">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.1"/>
+		</bindingExpression>
+	</component>
+	<component name="X[2,1]" variability="constant">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.3"/>
+		</bindingExpression>
+	</component>
+	<component name="dx[1,1]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="dx[1,2]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="dx[2,1]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="4"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="dx[2,2]">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="5"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="temp_1[1,1]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_1[1,2]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_2[1,1]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_2[1,2]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_2[2,1]">
+		<builtin name="Real"/>
+	</component>
+	<component name="temp_2[2,2]">
+		<builtin name="Real"/>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="A[1,1]"/>
+			<integer value="1"/>
+		</equal>
+		<equal>
+			<local name="A[1,2]"/>
+			<integer value="2"/>
+		</equal>
+		<equal>
+			<local name="dx[1,1]"/>
+			<integer value="1"/>
+		</equal>
+		<equal>
+			<local name="dx[1,2]"/>
+			<integer value="2"/>
+		</equal>
+		<equal>
+			<local name="dx[2,1]"/>
+			<integer value="4"/>
+		</equal>
+		<equal>
+			<local name="dx[2,2]"/>
+			<integer value="5"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<call builtin="array">
+				<call builtin="array">
+					<local name="temp_1[1,1]"/>
+					<local name="temp_1[1,2]"/>
+				</call>
+			</call>
+			<call>
+				<function>
+					<local name="AtomicModelMatrix.f"/>
+				</function>
+				<call builtin="array">
+					<call builtin="array">
+						<local name="A[1,1]"/>
+						<local name="A[1,2]"/>
+					</call>
+				</call>
+				<call builtin="array">
+					<call builtin="array">
+						<real value="0.1"/>
+					</call>
+					<call builtin="array">
+						<real value="0.3"/>
+					</call>
+				</call>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,1]"/>
+			</operator>
+			<call builtin="-">
+				<local name="temp_1[1,1]"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="A[1,2]"/>
+			</operator>
+			<call builtin="-">
+				<local name="temp_1[1,2]"/>
+			</call>
+		</equal>
+		<equal>
+			<call builtin="array">
+				<call builtin="array">
+					<local name="temp_2[1,1]"/>
+					<local name="temp_2[1,2]"/>
+				</call>
+				<call builtin="array">
+					<local name="temp_2[2,1]"/>
+					<local name="temp_2[2,2]"/>
+				</call>
+			</call>
+			<call>
+				<function>
+					<local name="AtomicModelMatrix.f2"/>
+				</function>
+				<call builtin="array">
+					<call builtin="array">
+						<local name="dx[1,1]"/>
+						<local name="dx[1,2]"/>
+					</call>
+					<call builtin="array">
+						<local name="dx[2,1]"/>
+						<local name="dx[2,2]"/>
+					</call>
+				</call>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="dx[1,1]"/>
+			</operator>
+			<call builtin="-">
+				<local name="temp_2[1,1]"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="dx[1,2]"/>
+			</operator>
+			<call builtin="-">
+				<local name="temp_2[1,2]"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="dx[2,1]"/>
+			</operator>
+			<call builtin="-">
+				<local name="temp_2[2,1]"/>
+			</call>
+		</equal>
+		<equal>
+			<operator name="der">
+				<local name="dx[2,2]"/>
+			</operator>
+			<call builtin="-">
+				<local name="temp_2[2,2]"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

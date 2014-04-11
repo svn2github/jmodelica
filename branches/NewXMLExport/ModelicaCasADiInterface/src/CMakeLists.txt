@@ -51,6 +51,7 @@ set(MC_CPP
   transferModelica.cpp
   transferOptimica.cpp
   transferXML.cpp
+  transferXMLOptimization.cpp
   Variable.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
@@ -82,6 +83,7 @@ set(MC_HPP
   transferModelica.hpp
   transferOptimica.hpp
   transferXML.hpp
+  transferXMLOptimization.cpp
   Variable.hpp
   ${TYPES_HPP}
   jcc/initjcc.h

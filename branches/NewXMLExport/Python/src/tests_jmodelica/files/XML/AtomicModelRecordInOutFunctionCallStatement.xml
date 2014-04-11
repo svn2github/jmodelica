@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="AtomicModelRecordInOutFunctionCallStatement.f1">
+		<class kind="function">
+			<component name="num" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="r2">
+				<local name="AtomicModelRecordInOutFunctionCallStatement.Rec2"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+							<local name="r2"/>
+					</to>
+					<from>
+						<call>
+							<function>
+									<local name="AtomicModelRecordInOutFunctionCallStatement.f2"/>
+							</function>
+							<call>
+								<function>
+									<call name="AtomicModelRecordInOutFunctionCallStatement.Rec1"/>
+								</function>
+								<call builtin="array">
+										<local name="num"/>
+									<call builtin="+">
+											<local name="num"/>
+										<integer value="2"/>
+									</call>
+								</call>
+							</call>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out"/>
+					</to>
+					<from>
+						<call builtin="*">
+								<local name="r2.A"/>
+								<local name="r2.B"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelRecordInOutFunctionCallStatement.f2">
+		<class kind="function">
+			<component name="r1" causality="input">
+				<local name="AtomicModelRecordInOutFunctionCallStatement.Rec1"/>
+			</component>
+			<component name="out" causality="output">
+				<local name="AtomicModelRecordInOutFunctionCallStatement.Rec2"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+							<local name="out.A"/>
+					</to>
+					<from>
+						<reference>
+							<local name="r1.A"/>
+							<subscripts>
+								<integer value="1"/>
+							</subscripts>
+						</reference>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out.B"/>
+					</to>
+					<from>
+						<call builtin="*">
+							<reference>
+								<local name="r1.A"/>
+								<subscripts>
+									<integer value="2"/>
+								</subscripts>
+							</reference>
+							<integer value="10"/>
+						</call>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<classDefinition name="AtomicModelRecordInOutFunctionCallStatement.Rec2">
+		<class kind="record">
+			<component name="A">
+				<builtin name="Real"/>
+			</component>
+			<component name="B">
+				<builtin name="Real"/>
+			</component>
+		</class>
+	</classDefinition>
+	<classDefinition name="AtomicModelRecordInOutFunctionCallStatement.Rec1">
+		<class kind="record">
+			<component name="A[2]">
+				<builtin name="Real"/>
+			</component>
+		</class>
+	</classDefinition>
+	<component name="a">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="a"/>
+			<integer value="1"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="a"/>
+			</operator>
+			<call builtin="-">
+				<call>
+					<function>
+						<local name="AtomicModelRecordInOutFunctionCallStatement.f1"/>
+					</function>
+					<local name="a"/>
+				</call>
+			</call>
+		</equal>
+	</equation>
+
+</class>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<optimization>
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="0"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="0"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="startTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.0"/>
+		</bindingExpression>
+	</component>
+	<component name="finalTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="1.0"/>
+		</bindingExpression>
+	</component>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+	</equation>
+
+	<constraint>
+		<lessThan kind="pathConstraint">
+			<local name="x2"/>
+			<real value="1.0"/>
+		</lessThan>
+		<greaterThan kind="pathConstraint">
+			<local name="x1"/>
+			<real value="1.0"/>
+		</greaterThan>
+	</constraint>
+	<objectiveIntegrand>
+		<local name="x1"/>
+	</objectiveIntegrand>
+</optimization>

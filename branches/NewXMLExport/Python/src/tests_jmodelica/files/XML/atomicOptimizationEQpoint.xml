@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<optimization>
+	<component name="x1">
+		<builtin name="Real"/>
+	</component>
+	<component name="startTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.0"/>
+		</bindingExpression>
+	</component>
+	<component name="finalTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="1.0"/>
+		</bindingExpression>
+	</component>
+	<timedVariable>
+		<local name="x1"/>
+		<local name="finalTime"/>
+	</timedVariable>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+	</equation>
+
+	<constraint>
+		<equal kind="pointConstraint">
+			<timedVariable>
+				<local name="x1"/>
+				<local name="finalTime"/>
+			</timedVariable>
+			<real value="1.0"/>
+		</equal>
+	</constraint>
+	<objective>
+		<local name="finalTime"/>
+	</objective>
+</optimization>

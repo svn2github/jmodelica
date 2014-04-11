@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class kind="model">
+	<classDefinition name="atomicModelFunctionCallEquationIgnoredOuts.f">
+		<class kind="function">
+			<component name="in1" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="in2" causality="input">
+				<builtin name="Real"/>
+			</component>
+			<component name="out1" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out2" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out3" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<component name="out4" causality="output">
+				<builtin name="Real"/>
+			</component>
+			<algorithm>
+				<assign>
+					<to>
+							<local name="out1"/>
+					</to>
+					<from>
+						<call builtin="+">
+								<local name="in1"/>
+							<integer value="1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out2"/>
+					</to>
+					<from>
+						<call builtin="+">
+								<local name="in2"/>
+							<integer value="1"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out3"/>
+					</to>
+					<from>
+						<call builtin="+">
+								<local name="in1"/>
+								<local name="in2"/>
+						</call>
+					</from>
+				</assign>
+				<assign>
+					<to>
+							<local name="out4"/>
+					</to>
+					<from>
+						<integer value="100"/>
+					</from>
+				</assign>
+				<return/>
+			</algorithm>
+		</class>
+	</classDefinition>
+
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="1"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x3">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="2"/>
+			</item>
+		</modifier>
+	</component>
+
+	<equation kind="initial">
+		<equal>
+			<local name="x2"/>
+			<integer value="2"/>
+		</equal>
+	</equation>
+
+	<equation>
+		<equal>
+			<operator name="der">
+				<local name="x2"/>
+			</operator>
+			<call builtin="+">
+				<local name="x1"/>
+				<local name="x2"/>
+			</call>
+		</equal>
+		<equal>
+			<tuple>
+				<local name="x1"/>
+				<nothing/>
+				<local name="x2"/>
+				<nothing/>
+			</tuple>
+			<call>
+				<function>
+					<local name="atomicModelFunctionCallEquationIgnoredOuts.f"/>
+				</function>
+				<integer value="1"/>
+				<local name="x3"/>
+			</call>
+		</equal>
+	</equation>
+
+</class>

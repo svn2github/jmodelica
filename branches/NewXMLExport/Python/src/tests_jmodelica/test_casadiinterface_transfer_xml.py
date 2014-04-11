@@ -36,7 +36,14 @@ def load_model(*args, **kwargs):
 
 def load_optimization_problem(*args, **kwargs):
     ocp = OptimizationProblem()
-    transfer_optimization_problem(ocp, *args, **kwargs)
+    arglist = []
+    for arg in args:
+        arglist.append(arg)
+    modelname = os.path.join(modelFile, arglist[0])
+    modelname += '.xml'
+    modelname = modelname.replace("/", "\\")
+    print modelname
+    transfer_optimization_problem(ocp, arglist[0], modelname, **kwargs)
     return ocp
 
 # Common variables used in the tests
@@ -1123,3 +1130,145 @@ def test_TransferVariableType():
     assert isinstance(model.getVariable('x2'), IntegerVariable)
     assert isinstance(model.getVariable('x3'), BooleanVariable)
     assert isinstance(model.getVariable('x4'), BooleanVariable)
+
+
+# Optimica tests
+def computeStringRepresentationForContainer(myContainer):
+    stringRepr = ""
+    for index in range(len(myContainer)):
+        stringRepr += str(myContainer[index])
+    return stringRepr
+
+@testattr(xml = True)    
+def test_OptimicaLessThanPathConstraint():
+    optProblem =  load_optimization_problem("atomicOptimizationLEQ", optproblemsFile)
+    expected = str(x1) + " <= " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
+
+@testattr(xml = True)
+def test_OptimicaGreaterThanPathConstraint():
+    optProblem =  load_optimization_problem("atomicOptimizationGEQ", optproblemsFile)
+    expected = str(x1) + " >= " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
+    
+@testattr(xml = True)    
+def test_OptimicaSevaralPathConstraints():
+    optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQ", optproblemsFile)
+    expected = str(x2) + " <= " + str(MX(1.0)) +  str(x1) + " >= " + str(MX(1.0)) 
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)    
+
+@testattr(xml = True)
+def test_OptimicaEqualityPointConstraint():
+    optProblem =  load_optimization_problem("atomicOptimizationEQpoint", optproblemsFile)
+    expected = str(MX("x1(finalTime)")) + " = " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+    
+@testattr(xml = True)    
+def test_OptimicaLessThanPointConstraint():
+    optProblem =  load_optimization_problem("atomicOptimizationLEQpoint", optproblemsFile)
+    expected = str(MX("x1(finalTime)")) + " <= " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+
+@testattr(xml = True)
+def test_OptimicaGreaterThanPointConstraint():
+    optProblem =  load_optimization_problem("atomicOptimizationGEQpoint", optproblemsFile)
+    expected = str(MX("x1(finalTime)")) + " >= " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+    
+@testattr(xml = True)    
+def test_OptimicaSevaralPointConstraints():
+    optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQandEQpoint", optproblemsFile)
+    expected = str(MX("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX("x1(startTime + 1)")) + " >= " + str(MX(1.0)) + str(MX("x2(finalTime + 1)")) + " = " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+    
+@testattr(xml = True)    
+def test_OptimicaMixedConstraints():
+    optProblem =  load_optimization_problem("atomicOptimizationMixedConstraints", optproblemsFile)
+    expectedPath = str(MX("x3(startTime + 1)")) + " <= " + str(x1)
+    expectedPoint =  str(MX("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX("x1(startTime + 1)")) + " >= " + str(MX(1.0)) 
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expectedPath)
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expectedPoint)
+
+@testattr(xml = True)
+def test_OptimicaTimedVariables():
+    def heurestic_MC_variables_equal(MC_var1, MC_var2):
+        return MC_var1.getVar().isEqual(MC_var2.getVar()) and str(MC_var1) == str(MC_var2)
+
+    optProblem =  load_optimization_problem("atomicOptimizationTimedVariables", optproblemsFile)
+    # test there are 3 timed
+    timedVars = optProblem.getTimedVariables()
+    assert len(timedVars) == 4
+
+    # test they contain model vars
+    x1 = optProblem.getVariable("x1")
+    x2 = optProblem.getVariable("x2")
+    x3 = optProblem.getVariable("x3")
+
+    assert heurestic_MC_variables_equal(x1, timedVars[0].getBaseVariable())
+    assert heurestic_MC_variables_equal(x2, timedVars[1].getBaseVariable())
+    assert heurestic_MC_variables_equal(x3, timedVars[2].getBaseVariable())
+    assert heurestic_MC_variables_equal(x1, timedVars[3].getBaseVariable())
+        
+        
+    # Test their time expression has start/final parameter MX in them and
+    # that timed variables are lazy.
+    startTime = optProblem.getVariable("startTime")
+    finalTime = optProblem.getVariable("finalTime")
+    path_constraints = optProblem.getPathConstraints()
+    point_constraints = optProblem.getPointConstraints()
+
+    tp1 = timedVars[0].getTimePoint()
+    tp2 = timedVars[1].getTimePoint()
+    tp3 = timedVars[2].getTimePoint()
+    tp4 = timedVars[3].getTimePoint()
+
+    tv1 = timedVars[0].getVar()
+    tv2 = timedVars[1].getVar()
+    tv3 = timedVars[2].getVar()
+    tv4 = timedVars[3].getVar()
+
+    assert tp1.getDep(1).isEqual(startTime.getVar())
+    assert tp2.getDep(1).isEqual(startTime.getVar())
+    assert tp3.getDep(0).isEqual(finalTime.getVar())
+    assert tp4.isEqual(finalTime.getVar())
+
+    assert tv1.isEqual(point_constraints[0].getLhs())
+    assert tv2.isEqual(path_constraints[0].getLhs())
+    assert tv3.isEqual(path_constraints[1].getLhs())
+    assert tv4.isEqual(optProblem.getMayerTerm())    
+    
+@testattr(xml = True)
+def test_OptimicaStartTime():
+    optProblem =  load_optimization_problem("atomicOptimizationStart5", optproblemsFile)
+    assert( optProblem.getStartTime().getValue() == 5)
+    
+@testattr(xml = True)    
+def test_OptimicaFinalTime():
+    optProblem =  load_optimization_problem("atomicOptimizationFinal10", optproblemsFile)
+    assert( optProblem.getFinalTime().getValue() == 10)
+
+@testattr(xml = True)
+def test_OptimicaLagrangeTerm():
+    optProblem =  load_optimization_problem("atomicLagrangeX1", optproblemsFile)
+    assert str(optProblem.getLagrangeTerm()) == str(x1) 
+    optProblem =  load_optimization_problem("atomicLagrangeNull", optproblemsFile)
+    assert str(optProblem.getLagrangeTerm()) == str(MX(0))  
+
+@testattr(xml = True)
+def test_OptimicaMayerTerm():
+    optProblem =  load_optimization_problem("atomicMayerFinalTime", optproblemsFile)
+    assert str(optProblem.getMayerTerm()) == str(MX("finalTime")) 
+    optProblem =  load_optimization_problem("atomicMayerNull", optproblemsFile)
+    assert str(optProblem.getMayerTerm()) == str(MX(0))
+    
+@testattr(xml = True)
+def test_OptimicaFree():
+    model =  load_optimization_problem("atomicWithFree", optproblemsFile)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
+    assert str((diffs[0].getAttribute("free"))) == str(MX(False))
+
+@testattr(xml = True)
+def test_OptimicaInitialGuess():
+    model =  load_optimization_problem("atomicWithInitialGuess", optproblemsFile)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
+    assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
