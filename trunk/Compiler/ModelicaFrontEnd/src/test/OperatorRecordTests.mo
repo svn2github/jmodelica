@@ -61,12 +61,25 @@ package OperatorRecordTests
             end neg;
         end '-';
 
-        operator function '*'
-            input Cplx a;
-            input Cplx b;
-            output Cplx c;
-        algorithm
-            c := Cplx(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
+        operator '*'
+            function mul
+                input Cplx a;
+                input Cplx b;
+                output Cplx c;
+            algorithm
+                c := Cplx(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
+            end mul;
+
+            function prod
+                input Cplx[:] a;
+                input Cplx[size(a,1)] b;
+                output Cplx c;
+            algorithm
+                c := Complex(0);
+                for i in 1:size(a, 1) loop
+                    c :=c + a[i] * b[i];
+                end for;
+            end prod;
         end '*';
     end Cplx;
 
@@ -402,9 +415,22 @@ end OperatorRecordTests.OperatorOverload8;
 
 
     model OperatorOverload9
-        Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
-        Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
-        Cplx c3 = c1 * c2;
+		operator record Op
+			Real x;
+			Real y;
+			
+			operator function '*'
+				input Op a;
+				input Op b;
+				output Op c;
+			algorithm
+				c := Op(a.x * b.x, a.y * b.y);
+			end '*';
+		end Op;
+		
+        Op[2] c1 = { Op(1, 2), Op(3, 4) };
+        Op[2] c2 = { Op(5, 6), Op(7, 8) };
+        Op c3 = c1 * c2;
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
@@ -450,7 +476,7 @@ Semantic error at line 425, column 22:
 fclass OperatorRecordTests.OperatorOverload11
  OperatorRecordTests.Cplx c1[2,2] = {{OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)}, {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)}};
  OperatorRecordTests.Cplx c2[2,2] = {{OperatorRecordTests.Cplx.'constructor'(11, 12), OperatorRecordTests.Cplx.'constructor'(13, 14)}, {OperatorRecordTests.Cplx.'constructor'(15, 16), OperatorRecordTests.Cplx.'constructor'(17, 18)}};
- OperatorRecordTests.Cplx c3[2,2] = {{OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[1,1], c2[1,1]), OperatorRecordTests.Cplx.'*'(c1[1,2], c2[2,1])), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[1,1], c2[1,2]), OperatorRecordTests.Cplx.'*'(c1[1,2], c2[2,2]))}, {OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[2,1], c2[1,1]), OperatorRecordTests.Cplx.'*'(c1[2,2], c2[2,1])), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[2,1], c2[1,2]), OperatorRecordTests.Cplx.'*'(c1[2,2], c2[2,2]))}};
+ OperatorRecordTests.Cplx c3[2,2] = {{OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'.mul(c1[1,1], c2[1,1]), OperatorRecordTests.Cplx.'*'.mul(c1[1,2], c2[2,1])), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'.mul(c1[1,1], c2[1,2]), OperatorRecordTests.Cplx.'*'.mul(c1[1,2], c2[2,2]))}, {OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'.mul(c1[2,1], c2[1,1]), OperatorRecordTests.Cplx.'*'.mul(c1[2,2], c2[2,1])), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'.mul(c1[2,1], c2[1,2]), OperatorRecordTests.Cplx.'*'.mul(c1[2,2], c2[2,2]))}};
 
 public
  function OperatorRecordTests.Cplx.'constructor'
@@ -463,14 +489,14 @@ public
   return;
  end OperatorRecordTests.Cplx.'constructor';
 
- function OperatorRecordTests.Cplx.'*'
+ function OperatorRecordTests.Cplx.'*'.mul
   input OperatorRecordTests.Cplx a;
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
   c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   return;
- end OperatorRecordTests.Cplx.'*';
+ end OperatorRecordTests.Cplx.'*'.mul;
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -576,6 +602,136 @@ public
 end OperatorRecordTests.OperatorOverload13;
 ")})));
     end OperatorOverload13;
+
+
+    model OperatorOverload14
+		operator record Cplx2 = Cplx;
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload14",
+            description="Short class decls of operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload14
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorOverload14.Cplx2 c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+ record OperatorRecordTests.OperatorOverload14.Cplx2
+  Real re;
+  Real im;
+ end OperatorRecordTests.OperatorOverload14.Cplx2;
+
+end OperatorRecordTests.OperatorOverload14;
+")})));
+    end OperatorOverload14;
+
+
+    model OperatorOverload15
+        Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
+        Cplx c3 = c1 * c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload15",
+            description="Using overloaded operator taking array args",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload15
+ OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)};
+ OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)};
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'*'.prod(c1[1:2], c2[1:2]);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'*'.prod
+  input OperatorRecordTests.Cplx[:] a;
+  input OperatorRecordTests.Cplx[size(a, 1)] b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := Complex.'constructor'.fromReal(0, 0);
+  for i in 1:size(a, 1) loop
+   c := OperatorRecordTests.Cplx.'+'(c, OperatorRecordTests.Cplx.'*'.mul(a[i], b[i]));
+  end for;
+  return;
+ end OperatorRecordTests.Cplx.'*'.prod;
+
+ function Complex.'constructor'.fromReal
+  input Real re;
+  input Real im := 0;
+  output Complex result;
+ algorithm
+  return;
+ end Complex.'constructor'.fromReal;
+
+ function OperatorRecordTests.Cplx.'*'.mul
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  return;
+ end OperatorRecordTests.Cplx.'*'.mul;
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+ record Complex
+  Real re \"Real part of complex number\";
+  Real im \"Imaginary part of complex number\";
+ end Complex;
+
+end OperatorRecordTests.OperatorOverload15;
+")})));
+    end OperatorOverload15;
 
 
     model OperatorRecordConnect1

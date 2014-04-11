@@ -1545,16 +1545,18 @@ aspect InstanceAST_API {
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
-    syn String InstComponentDecl.qualifiedName() = getFQName().name();
-    
+    syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
+    eq InstComponentDecl.qualifiedName()    = getFQName().name();
+    eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
     eq InstBaseClassDecl.qualifiedName()    = buildQualifiedName(name());
     eq InstBuiltInClassDecl.qualifiedName() = name();
+    eq InstProgramRoot.qualifiedName()      = "";
     
     syn String InstNode.buildQualifiedName(String last) = combineName(instClassNamePrefix(), last);
     
     inh lazy String InstNode.instClassNamePrefix();
-    eq InstBaseClassDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
+    eq InstBaseClassDecl.getChild().instClassNamePrefix() = qualifiedName();
     eq InstComponentDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
     eq SourceRoot.getChild().instClassNamePrefix()        = "";
     eq FlatRoot.getChild().instClassNamePrefix()          = "";
