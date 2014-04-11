@@ -1638,8 +1638,14 @@ class TestLocalDAECollocator:
         cost_ref = 3.17619580332244e0
         u_norm_ref = 2.8723837585e-1
 
-        # Test with SX expansion
         opts = op.optimize_options()
+
+        # Test with partial SX expansion
+        opts['expand_to_SX'] = 'partial'
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+        # Test with SX expansion
         opts['expand_to_SX'] = True
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)

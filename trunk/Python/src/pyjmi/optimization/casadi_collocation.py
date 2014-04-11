@@ -4607,21 +4607,21 @@ class LocalDAECollocator(CasadiCollocator):
         coll_der = self._collocation['coll_der']
         if not self.variable_scaling or self.nominal_traj is None:
             self._eliminate_der_var()
-            initial_fcn = casadi.MXFunction(sym_input + sym_input_dx,
+            initial_fcn = self._FXFunction(sym_input + sym_input_dx,
                                             [self.initial])
             if self.eliminate_der_var:
-                dae_fcn = casadi.MXFunction(sym_input + x_i + [der_vals_k,h_i],
-                                            [self.dae])
-                dae_fcn_t0 = casadi.MXFunction(sym_input, [self.dae_t0])
+                dae_fcn = self._FXFunction(sym_input + x_i + [der_vals_k,h_i],
+                                           [self.dae])
+                dae_fcn_t0 = self._FXFunction(sym_input, [self.dae_t0])
                 dae_fcn_t0.setOption("name", "dae_fcn_t0")
                 dae_fcn_t0.init()
             else:
-                coll_eq_fcn = casadi.MXFunction(
+                coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k, [coll_eq])
                 coll_eq_fcn.setOption("name", "coll_eq_fcn")
                 coll_eq_fcn.init()
-                dae_fcn = casadi.MXFunction(sym_input + sym_input_dx,
-                                            [self.dae])
+                dae_fcn = self._FXFunction(sym_input + sym_input_dx,
+                                           [self.dae])
         else:
             # Compose scaling factors for collocation equations
             x_i_d = n_var['x'] * [None]
@@ -4747,23 +4747,23 @@ class LocalDAECollocator(CasadiCollocator):
                  self.mterm, self.lterm] = scaled_expressions
 
             # Create functions
-            initial_fcn = casadi.MXFunction(
+            initial_fcn = self._FXFunction(
                     sym_input + sym_input_dx + [sym_sf], [self.initial])
             if self.eliminate_der_var:
-                dae_fcn = casadi.MXFunction(sym_input + x_i +
+                dae_fcn = self._FXFunction(sym_input + x_i +
                                             [der_vals_k, h_i, sym_sf, x_i_sf], 
                                             [self.dae])
-                dae_fcn_t0 = casadi.MXFunction(sym_input + [sym_sf],
+                dae_fcn_t0 = self._FXFunction(sym_input + [sym_sf],
                                                [self.dae_t0])
                 dae_fcn_t0.setOption("name", "dae_fcn_t0")
                 dae_fcn_t0.init()
             else:
-                coll_eq_fcn = casadi.MXFunction(
+                coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k +
                         [x_i_sf, dx_i_k_sf], [coll_eq])
                 coll_eq_fcn.setOption("name", "coll_eq_fcn")
                 coll_eq_fcn.init()
-                dae_fcn = casadi.MXFunction(
+                dae_fcn = self._FXFunction(
                         sym_input + sym_input_dx + [sym_sf], [self.dae])
         
         # Initialize functions
@@ -4793,9 +4793,9 @@ class LocalDAECollocator(CasadiCollocator):
         path_constraint_input += timed_variables
         if self.variable_scaling and self.nominal_traj is not None:
             path_constraint_input.append(sym_sf)
-        g_e_fcn = casadi.MXFunction(path_constraint_input,
+        g_e_fcn = self._FXFunction(path_constraint_input,
                                     [casadi.vertcat(g_e)])
-        g_i_fcn = casadi.MXFunction(path_constraint_input,
+        g_i_fcn = self._FXFunction(path_constraint_input,
                                     [casadi.vertcat(g_i)])
         g_e_fcn.setOption("name", "g_e_fcn")
         g_e_fcn.init()
@@ -4818,9 +4818,9 @@ class LocalDAECollocator(CasadiCollocator):
         # Note that sym_input is needed as input since the point constraints
         # may depend on free parameters
         point_constraint_input = sym_input + timed_variables
-        G_e_fcn = casadi.MXFunction(point_constraint_input,
+        G_e_fcn = self._FXFunction(point_constraint_input,
                                     [casadi.vertcat(G_e)])
-        G_i_fcn = casadi.MXFunction(point_constraint_input,
+        G_i_fcn = self._FXFunction(point_constraint_input,
                                     [casadi.vertcat(G_i)])
         G_e_fcn.setOption("name", "G_e_fcn")
         G_e_fcn.init()
@@ -5087,6 +5087,13 @@ class LocalDAECollocator(CasadiCollocator):
         self.time = N.array(time)
         self._timed_variables = timed_variables
         self._nlp_timed_variables = nlp_timed_variables
+
+    def _FXFunction(self, *args):
+        f = casadi.MXFunction(*args)
+        if self.expand_to_SX == 'partial':
+            f.init()
+            f = casadi.SXFunction(f)
+        return f
         
     def _create_cost(self):
         """
@@ -5127,7 +5134,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Create function for evaluation of Mayer term
             mterm_input = self.mvar_struct_cat + self._timed_variables
-            mterm_fcn = casadi.MXFunction(mterm_input, [self.mterm])
+            mterm_fcn = self._FXFunction(mterm_input, [self.mterm])
             mterm_fcn.setOption("name", "mterm_fcn")
             mterm_fcn.init()
 
@@ -5147,7 +5154,7 @@ class LocalDAECollocator(CasadiCollocator):
             if self.variable_scaling and self.nominal_traj is not None:
                 fcn_input.append(self._sym_sf)
 
-            lterm_fcn = casadi.MXFunction(fcn_input, [self.lterm])
+            lterm_fcn = self._FXFunction(fcn_input, [self.lterm])
             lterm_fcn.setOption("name", "lterm_fcn")
             lterm_fcn.init()
 
@@ -5536,7 +5543,7 @@ class LocalDAECollocator(CasadiCollocator):
             self.solver = casadi.IpoptSolver(nlp)
 
         # Expand to SX
-        self.solver.setOption("expand", self.expand_to_SX)
+        self.solver.setOption("expand", self.expand_to_SX == True)
     
     def get_equality_constraint(self):
         return self.c_e
