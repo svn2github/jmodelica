@@ -124,6 +124,7 @@ public class ModelicaCompiler {
 	protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
 	
     private CCompilerDelegator delegator = null;
+    private String delegator_name = null;
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
 	
@@ -218,8 +219,11 @@ public class ModelicaCompiler {
 	}
 	
     public CCompilerDelegator getCCompiler() {
-        if (delegator == null)
-            delegator = CCompilerDelegator.delegatorFor(options);
+        String c_compiler = options.getStringOption(CCompilerDelegator.OPTION);
+        if (delegator == null || !c_compiler.equals(delegator_name)) {
+            delegator_name = c_compiler;
+            delegator = CCompilerDelegator.delegatorFor(c_compiler);
+        }
         return delegator;
     }
 	
@@ -2292,8 +2296,8 @@ public abstract class CCompilerDelegator {
     /**
      * Create a C compiler delegator for the given set of options.
      */
-    public static CCompilerDelegator delegatorFor(OptionRegistry opt) {
-        return creators().get(opt.getStringOption(OPTION)).create();
+    public static CCompilerDelegator delegatorFor(String c_compiler) {
+        return creators().get(c_compiler).create();
     }
     
     public static void addCompilerOptionValues(OptionRegistry opt) {
