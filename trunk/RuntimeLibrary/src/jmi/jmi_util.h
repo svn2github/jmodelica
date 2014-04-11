@@ -1418,6 +1418,9 @@ void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file);
 #ifdef _WIN32
     #include <windows.h>
     #define JMI_PATH_MAX MAX_PATH
+#elif __APPLE__
+    #include <limits.h>
+    #define JMI_PATH_MAX PATH_MAX
 #else
     #include <linux/limits.h>
     #define JMI_PATH_MAX PATH_MAX
