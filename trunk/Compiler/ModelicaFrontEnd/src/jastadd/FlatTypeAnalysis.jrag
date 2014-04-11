@@ -141,18 +141,6 @@ aspect FlatTypeAnalysis {
     eq InstConnector.createEmptyFRecordType(Size s)                = 
         (inheritedRestriction() != null) ? inheritedRestriction().createEmptyFRecordType(s) : super.createEmptyFRecordType(s);
 
-    /**
-     * Get the qualified class name of the oldest ancestor in the inheritance structure.
-     * 
-     * For classes inheriting multiple classes, only the first one is considered.
-     * This is useful mostly for classes that only allows inheriting from one other class.
-     */
-    syn String InstNode.baseClassName()                  = 
-        (getNumInstExtends() > 0) ? getInstExtends(0).baseClassName() : qualifiedName();
-    eq InstComponentDecl.baseClassName()                 = myInstClass().baseClassName();
-    eq InstSimpleShortClassDecl.baseClassName()          = actualInstClass().baseClassName();
-    eq InstReplacingSimpleShortClassDecl.baseClassName() = actualInstClass().baseClassName();
-
     syn      Map<String,InstClassDecl> InstRestriction.operatorMap() = null;
     syn lazy Map<String,InstClassDecl> InstOperatorRecord.operatorMap() {
         Map<String,InstClassDecl> res = new HashMap<String,InstClassDecl>();

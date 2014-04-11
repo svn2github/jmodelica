@@ -50,7 +50,7 @@ aspect Types {
    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) {
        if (subType == this) 
            return true;
-       return subType.className().equals(className()) && 
+       return subType.baseClassName().equals(baseClassName()) && 
                (subType.ndims() == ndims() || top && subType.ndims() == 0);
    }
    
