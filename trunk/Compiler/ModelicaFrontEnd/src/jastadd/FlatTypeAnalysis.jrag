@@ -708,9 +708,13 @@ aspect FlatTypeAnalysis {
 			InstAssignable ip = (InstAssignable) myInstComponentDecl();
 			FType t = ip.type().scalarType();
 			return isArray() ? t.arrayType(size()) : t;
-		} else {
-			return fUnknownType();
-		}
+        } else if (myInstClassDecl().isEnum()) {
+            return myInstClassDecl().enumType();
+        } else if (myInstClassDecl().isBoolean()) {
+            return myInstClassDecl().fBooleanType(size());
+        } else {
+            return fUnknownType();
+        }
 	}
 	
 	eq FIgnoredBuiltIn.type() = fUnknownType();

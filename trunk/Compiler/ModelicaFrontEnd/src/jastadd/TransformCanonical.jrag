@@ -5171,7 +5171,7 @@ aspect ArrayAccessRewrite {
                         if (!sub.variability().parameterOrLess()) {
                             args.add(sub.asExpSubscript().getFExp().fullCopy());
                             String varName = "i_" + funcVarEnumerator.next();
-                            funcVars.add(new FFunctionVariable(FIntegerType.SCALAR, varName, new FInput()));
+                            funcVars.add(new FFunctionVariable(sub.type().scalarType(), varName, new FInput()));
                             arrayUse.addSubscript(new FExpSubscript(new FIdUseExp(varName)));
                             newPart = newPart.addSubscript(new FColonSubscript());
                             inputSize = inputSize.expandRight(Size.UNKNOWN);

@@ -39,6 +39,7 @@ aspect Arrays {
 	 */
 	inh boolean FExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
+	eq FAbstractEquation.getChild().inArraySubscripts() = false;
 	eq Root.getChild().inArraySubscripts() = false;
 	
 	/**

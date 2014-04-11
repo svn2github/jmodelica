@@ -1595,6 +1595,10 @@ aspect ConstantEvaluation {
           }
           if (iHere != Index.NULL)
               res = res.array().getCell(iHere);
+        } else if (myInstClassDecl().isEnum()) {
+            res = new CValueInteger(myInstClassDecl().enumLiterals().size());
+        } else if (myInstClassDecl().isBoolean()) {
+            res = new CValueInteger(2);
         }
         return res;
     }
