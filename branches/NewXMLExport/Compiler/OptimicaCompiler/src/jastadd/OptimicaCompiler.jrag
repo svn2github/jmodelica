@@ -157,6 +157,8 @@ aspect OptimicaCompilationHelpers {
     refine CompilationHelpers public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
         if (fc instanceof FOptClass && (this == JMI || this == FMIX))
             return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+        else if (fc instanceof FOptClass && (this == XML))
+        	return new OptimicaGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
         else
             return refined(fc);
     }

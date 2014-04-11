@@ -8,7 +8,6 @@ import org.jmodelica.util.NotNullCodeStream;
 
 /**
  * Aspect that adds XML codegeneration for flat models to the compiler
- * 
  */
 aspect XMLCodeGenerator {
 	
@@ -324,10 +323,16 @@ aspect XMLCodeGenerator {
 	}
 	
 	public void FRecordConstructor.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		generateClosedTag(str, "local", indent, "name", getRecord().name());
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "call", indent);
+		generateOpenTag(str, "function", indentOneStep);
+		generateClosedTag(str, "call", indentTwoSteps, "name", getRecord().name());
+		generateCloseTag(str, "function", indentOneStep);
 		for (FExp arg : getArgs()) {
-			p.print(arg, str, p.indent(indent));
+			p.print(arg, str, indentOneStep);
 		}
+		generateCloseTag(str, "call", indent);
 	}
 	
 	//=========================================================================
@@ -358,15 +363,11 @@ aspect XMLCodeGenerator {
 	
 	// TODO implement generation for arrays
 	public void FArray.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		if (getNumFExp() > 1) {
-			generateOpenTag(str, "tuple", indent);
-		}
+		generateOpenTag(str, "call", indent, "builtin", "array");
 		for (FExp exp : getFExps()) {
 			p.print(exp, str, p.indent(indent));
 		}
-		if (getNumFExp() > 1) {
-			generateCloseTag(str, "tuple", indent);
-		}
+		generateCloseTag(str, "call", indent);
 	}
 	
 	// binary operators
@@ -469,31 +470,42 @@ aspect XMLCodeGenerator {
 	public void FQNameFull.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
 		String indentTwoSteps = p.indent(indentOneStep);
-		generateOpenTag(str, "reference", indent);
-		StringBuilder name = new StringBuilder();
-		ArrayList<Integer> subscripts = new ArrayList<Integer>();
+		boolean firstPart = true;
+		boolean isRef = false;
 		for (int i=0; i < getNumFQNamePart(); i++) {
 			FQNamePart part = getFQNamePart(i);
-			name.append(part.getName());
+			if (firstPart) {
+				if (part.hasFArraySubscripts() || getNumFQNamePart() > 1) {
+					generateOpenTag(str, "reference", indent);
+					isRef = true;
+				}
+				generateClosedTag(str, "local", indentOneStep, "name", part.getName());
+				firstPart = false;
+			} else {
+				generateClosedTag(str, "member", indentOneStep, "name", part.getName());
+			}
 			if (part.hasFArraySubscripts()) {
 				FArraySubscripts sub = part.getFArraySubscripts();
 				if (sub.getNumFSubscript() > 0) {
 					for (int j=0; j < sub.getNumFSubscript(); j++) {
-						subscripts.add(Integer.parseInt(sub.getFSubscript(j).toString()));
+						generateOpenTag(str, "subscripts", indentOneStep);
+						p.print(sub.getFSubscript(j), str, indentTwoSteps);
+						generateCloseTag(str, "subscripts", indentOneStep);
 					}
 				}
 			}
-			if (i < getNumFQNamePart() - 1) {
-				name.append(".");
-			}
 		}
-		generateClosedTag(str, "local", indentOneStep, "name", name.toString());
-		for (int i=0; i < subscripts.size(); i++ ) {
-			generateOpenTag(str, "subscripts", indentOneStep);
-			generateClosedTag(str, "integer", indentTwoSteps, "value", Integer.toString(subscripts.get(i)));
-			generateCloseTag(str, "subscripts", indentOneStep);
+		if (isRef) {
+			generateCloseTag(str, "reference", indent);
 		}
-		generateCloseTag(str, "reference", indent);
+	}
+	
+	public void FIntegerSubscript.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		generateClosedTag(str, "integer", indent, "value", Integer.toString(getValue()));
+	}
+	
+	public void FExpSubscript.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		p.print(getFExp(), str, indent);
 	}
 	
 	//=========================================================================
@@ -519,14 +531,14 @@ aspect XMLCodeGenerator {
 		String indentTwoSteps = p.indent(indentOneStep);
 		generateOpenTag(str, "call", indent);
 		generateOpenTag(str, "function", indentOneStep);
-		if (getName().getFQName().isScalarized()) {
+		//if (getName().getFQName().isScalarized()) {
 			generateClosedTag(str, "local", indentTwoSteps, "name", name());
-		} else {
+		/*} else {
 			p.print(getName().getFQName(), str, indentTwoSteps);
-		}
+		}*/
 		generateCloseTag(str, "function", indentOneStep);
 		for (FExp arg : getArgs()) {
-			p.print(arg, str, p.indent(indent));
+			p.print(arg, str, indentOneStep);
 		}
 		generateCloseTag(str, "call", indent);
 	}
@@ -869,7 +881,7 @@ aspect XMLCodeGenerator {
 			generateCloseTag(str, "tuple", indentTwoSteps);
 		} else {
 			for (FFunctionCallLeft left : getLefts()) {
-				p.print(left, str, indentTwoSteps);
+				p.print(left, str, indentOneStep);
 			}
 		}
 		generateCloseTag(str, "to", indentOneStep);

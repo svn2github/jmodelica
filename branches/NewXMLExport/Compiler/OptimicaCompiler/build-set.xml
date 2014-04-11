@@ -21,5 +21,5 @@
     
     <property name="oc_set.sets" value="${mc_set.sets},oc_set"/>
     <dirname property="oc_set.base" file="${oc_set.dir}"/>
-    <property name="oc_set.modules" value="OptimicaFrontEnd,OptimicaFMUXBackEnd,OptimicaCBackEnd,OptimicaCompiler"/>
+    <property name="oc_set.modules" value="OptimicaFrontEnd,OptimicaFMUXBackEnd,OptimicaCBackEnd,OptimicaCompiler,OptimicaXMLBackend"/>
 </project>

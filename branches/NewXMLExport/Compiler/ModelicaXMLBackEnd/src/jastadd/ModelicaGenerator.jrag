@@ -24,6 +24,17 @@ public class ModelicaGenerator extends GenericXMLGenerator {
 		}
 	}
 	
+	public class XMLOptimization extends DAETag {
+		
+		public XMLOptimization(AbstractGenerator myGenerator, FClass fclass) {
+			super("optimizationXML", myGenerator, fclass);
+		}
+		
+		public void generate(CodeStream genPrinter) {
+			// do nothing
+		}
+	}
+	
 	/**
 	 * Name of the root tag to use if no template is given
 	 */

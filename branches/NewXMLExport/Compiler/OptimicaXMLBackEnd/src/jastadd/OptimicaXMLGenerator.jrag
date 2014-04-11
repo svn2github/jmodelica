@@ -1,0 +1,177 @@
+
+/**
+ * Aspect for generating XML from flat Optimica model
+ */
+aspect OptimicaXMLCodeGenerator {
+	
+	public void FOptClass.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "optimization", indent);
+		for (FFunctionDecl function : getFFunctionDeclList()) {
+			p.print(function, str, indentOneStep);
+			str.print("\n");
+		}
+		
+		for (FRecordDecl record : getFRecordDecls()) {
+			p.print(record, str, indentOneStep);
+		}
+		
+		for (FDerivedType ftype : getFDerivedTypes()) {
+			p.print(ftype, str, indentOneStep);
+		}
+		
+		// generate enums
+		for (FEnumDecl fenum : getFEnumDecls()) {
+			p.print(fenum, str, indentOneStep);
+		}
+		
+		// generate variable declarations
+		for (FVariable fv : getFVariables()) {
+			p.print(fv, str, indentOneStep);
+		}
+		
+		for (FTimedVariable timedVar : timedRealVariables()) {
+			p.print(timedVar, str, indentOneStep);
+		}
+		
+		// add a newline between sections for clearer XML
+		str.print("\n");
+		
+		// generate xml for initial equations
+		if (getNumFInitialEquation() > 0) {
+			generateOpenTag(str, "equation", indentOneStep, "kind", "initial");
+			for (FAbstractEquation initEqu : getFInitialEquations()) {
+				p.print(initEqu, str, indentTwoSteps);
+			}
+			generateCloseTag(str, "equation", indentOneStep);
+			// add a newline between sections for clearer XML
+			str.print("\n");
+		}
+		
+		// generate xml for parameter equations
+		if (getNumFParameterEquation() > 0) {
+			generateOpenTag(str, "equation", indentOneStep, "kind", "parameter");
+			for (FAbstractEquation paramEqu : getFParameterEquations()) {
+				p.print(paramEqu, str, indentTwoSteps);
+			}
+			generateCloseTag(str, "equation", indentOneStep);
+			str.print("\n");
+		}
+		
+		// generate xml for equations
+		if (hasFAbstractEquation()) {
+			ArrayList<FAbstractEquation> algorithms = new ArrayList<FAbstractEquation>();
+			generateOpenTag(str, "equation", indentOneStep);
+			for (FAbstractEquation equ : getFAbstractEquations()) {
+				if (equ instanceof FAlgorithm) {
+					algorithms.add(equ);
+				} else {
+					p.print(equ, str, indentTwoSteps);
+				}
+			}
+			generateCloseTag(str, "equation", indentOneStep);
+			
+			// add a newline between sections for clearer XML
+			str.print("\n");
+			
+			for (FAbstractEquation alg : algorithms) {
+				p.print(alg, str, indentOneStep);
+			}
+		}
+		
+		// tramsfer constraints
+		if (getNumFConstraint() > 0) {
+			generateOpenTag(str, "constraint", indentOneStep);
+			for (FConstraint c : pathLeqConstraints()) {
+				generateOpenTag(str, "lessThan", indentTwoSteps, "kind", "pathConstraint");
+				p.print(c, str, indentTwoSteps);
+				generateCloseTag(str, "lessThan", indentTwoSteps);
+			}
+			for (FConstraint c : pathEqConstraints()) {
+				generateOpenTag(str, "equal", indentTwoSteps, "kind", "pathConstraint");
+				p.print(c, str, indentTwoSteps);
+				generateCloseTag(str, "equal", indentTwoSteps);
+			}
+			for (FConstraint c : pathGeqConstraints()) {
+				generateOpenTag(str, "greaterThan", indentTwoSteps, "kind", "pathConstraint");
+				p.print(c, str, indentTwoSteps);
+				generateCloseTag(str, "greaterThan", indentTwoSteps);
+			}
+			for (FConstraint c : pointLeqConstraints()) {
+				generateOpenTag(str, "lessThan", indentTwoSteps, "kind", "pointConstraint");
+				p.print(c, str, indentTwoSteps);
+				generateCloseTag(str, "lessThan", indentTwoSteps);
+			}
+			for (FConstraint c : pointEqConstraints()) {
+				generateOpenTag(str, "equal", indentTwoSteps, "kind", "pointConstraint");
+				p.print(c, str, indentTwoSteps);
+				generateCloseTag(str, "equal", indentTwoSteps);
+			}
+			for (FConstraint c : pointGeqConstraints()) {
+				generateOpenTag(str, "greaterThan", indentTwoSteps, "kind", "pointConstraint");
+				p.print(c, str, indentTwoSteps);
+				generateCloseTag(str, "greaterThan", indentTwoSteps);
+			}
+			generateCloseTag(str, "constraint", indentOneStep);
+		}
+		
+		if (startTimeAttributeSet()) {
+			generateOpenTag(str, "startTime", indentOneStep);
+			p.print(startTimeAttributeExp(), str, indentTwoSteps);
+			generateCloseTag(str, "startTime", indentOneStep);
+		}
+		
+		if (finalTimeAttributeSet()) {
+			generateOpenTag(str, "finalTime", indentOneStep);
+			p.print(finalTimeAttributeExp(), str, indentTwoSteps);
+			generateCloseTag(str, "finalTime", indentOneStep);
+		}
+		
+		if (objectiveExp() != null) {
+			generateOpenTag(str, "objective", indentOneStep);
+			p.print(objectiveExp(), str, indentTwoSteps);
+			generateCloseTag(str, "objective", indentOneStep);
+		}
+		
+		if (objectiveIntegrandExp() != null) {
+			generateOpenTag(str, "objectiveIntegrand", indentOneStep);
+			p.print(objectiveIntegrandExp(), str, indentTwoSteps);
+			generateCloseTag(str, "objectiveIntegrand", indentOneStep);
+		}
+		
+		generateCloseTag(str, "optimization", indent);
+	}
+	
+	syn String FRelationConstraint.getName();
+	eq FConstraintEq.getName() = "equal";
+	eq FConstraintLeq.getName() = "lessThan";
+	eq FConstraintGeq.getName() = "greaterThan";
+	
+	public void FRelationConstraint.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		//generateOpenTag(str, getName(), indent);
+		p.print(getLeft(), str, p.indent(indent));
+		p.print(getRight(), str, p.indent(indent));
+		//generateCloseTag(str, getName(), indent);
+	}
+	
+	public void FForClauseC.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		// is this needed?
+	}
+	
+	public void FTimedVariable.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		generateOpenTag(str, "timedVariable", indent);
+		p.print(getName(), str, indentOneStep);
+		p.print(getArg(), str, indentOneStep);
+		generateCloseTag(str, "timedVariable", indent);
+	}
+	
+	public void FTimed.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		
+	}
+	
+	public void FOptParameter.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		
+	}
+}

@@ -1,0 +1,20 @@
+
+
+public class OptimicaGenerator extends ModelicaGenerator {
+	
+	public OptimicaGenerator(Printer expPrinter, char escapeCharacter, 
+			FClass fclass) {
+		super(expPrinter, escapeCharacter, fclass);
+	}
+	
+	class XMLOptimization extends ModelicaGenerator.XMLOptimization {
+		
+		public XMLOptimization(AbstractGenerator myGenerator, FClass fclass) {
+			super(myGenerator, fclass);
+		}
+		
+		public void generate(CodeStream genPrinter) {
+			fclass.prettyPrintXML(genPrinter, "");
+		}
+	}
+}
