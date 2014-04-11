@@ -81,6 +81,19 @@ package OperatorRecordTests
                 end for;
             end prod;
         end '*';
+
+        operator function 'String'
+			input Cplx a;
+			output String b;
+		algorithm
+			if a.im == 0 then
+				b := String(a.re);
+		    elseif a.re == 0 then
+                b := String(a.im) + "j";
+            else
+                b := String(a.re) + " + " + String(a.im) + "j";
+    		end if;
+		end 'String';
     end Cplx;
 
 
@@ -732,6 +745,57 @@ public
 end OperatorRecordTests.OperatorOverload15;
 ")})));
     end OperatorOverload15;
+
+
+// Note: this test gives wrong result due to the bug in #2779
+    model OperatorOverload16
+        constant Cplx c1 = Cplx(1, 2);
+        constant String s1 = String(c1);
+        constant String s2 = s1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload16",
+            description="Overloading of String()",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload16
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ constant String s1 = OperatorRecordTests.Cplx.'String'(OperatorRecordTests.Cplx(2, 1));
+ constant String s2 = \"1.00000 + 2.00000j\";
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'String'
+  input OperatorRecordTests.Cplx a;
+  output String b;
+ algorithm
+  if a.im == 0 then
+   b := String(a.re);
+  elseif a.re == 0 then
+   b := String(a.im) + \"j\";
+  else
+   b := String(a.re) + \" + \" + String(a.im) + \"j\";
+  end if;
+  return;
+ end OperatorRecordTests.Cplx.'String';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload16;
+")})));
+    end OperatorOverload16;
 
 
     model OperatorRecordConnect1

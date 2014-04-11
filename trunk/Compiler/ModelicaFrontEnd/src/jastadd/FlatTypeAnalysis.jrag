@@ -1369,7 +1369,7 @@ aspect OverloadedOperatorBinding {
 
     }
 
-    syn Map<String,InstClassDecl> FRecordType.getOperators() = Collections.emptyMap();
+    syn Map<String,InstClassDecl> FType.getOperators() = Collections.emptyMap();
 
 }
 
