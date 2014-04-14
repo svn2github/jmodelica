@@ -887,7 +887,7 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.typePromotion(FType type, boolean allowUnknown, String operator) {
-        if (isOperatorRecord() || type.isOperatorRecord()) {
+        if ((isOperatorRecord() || type.isOperatorRecord()) && operator != null) {
             return matchOverloadedOperatorType(type, operator, false, allowUnknown);
         } else if (isNumeric())
             return numericPromotion(type, allowUnknown, operator);
@@ -909,7 +909,7 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.looseTypePromotion(FType type, boolean allowUnknown, String operator) {
-        if (isOperatorRecord() || type.isOperatorRecord()) {
+        if ((isOperatorRecord() || type.isOperatorRecord()) && operator != null) {
             return matchOverloadedOperatorType(type, operator, true, allowUnknown);
         } else if (looslyDimensionCompatible(type, allowUnknown)) {
             FType scalar = scalarType().typePromotion(type.scalarType(), false, operator);

@@ -747,6 +747,42 @@ end OperatorRecordTests.OperatorOverload15;
     end OperatorOverload15;
 
 
+    model OperatorOverload16
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Cplx c3 = if time < 2 then c1 else c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload16",
+            description="If expression with operator record",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload16
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = if time < 2 then c1 else c2;
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload16;
+")})));
+    end OperatorOverload16;
+
+
 // Note: this test gives wrong result due to the bug in #2779
     model OperatorOverload16
         constant Cplx c1 = Cplx(1, 2);
