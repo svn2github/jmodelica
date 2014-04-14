@@ -701,11 +701,11 @@ aspect IndexReduction {
             
             @Override
             public int compareTo(BiPGraphCost other) {
-                int diff = Boolean.compare(unmatched, other.unmatched);
+                int diff = new Boolean(unmatched).compareTo(other.unmatched);
                 if (diff != 0)
                     return diff;
                 for (int i = 0; i < weights.length; i++) {
-                    diff = Long.compare(weights[i], other.weights[i]);
+                    diff = new Integer(weights[i]).compareTo(other.weights[i]);
                     if (diff != 0)
                         return diff;
                 }

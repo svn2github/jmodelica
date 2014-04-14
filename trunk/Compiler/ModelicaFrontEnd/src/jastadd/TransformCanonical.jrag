@@ -5350,7 +5350,7 @@ aspect LoadResource {
                 continue;
             }
             try {
-                java.nio.file.Files.copy(src.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                copyFile(src, dest);
             } catch (IOException e) {
                 error("loadResource(): Could not copy resource: " + src.getAbsolutePath() + " to destination: '" + dest.getAbsolutePath() + "'");
             }

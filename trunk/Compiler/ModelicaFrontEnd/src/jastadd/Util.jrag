@@ -3253,6 +3253,22 @@ aspect GeneralHelpers {
 	private static final Pattern ASTNode.memPattern = 
 			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
 	
+    /**
+     * Copies a file from src to dst. Destination file is overwritten if it already exisits
+     */
+    public static void ASTNode.copyFile(File src, File dst) throws IOException {
+        if (dst.exists())
+            dst.delete();
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) != -1)
+            out.write(buf, 0, len);
+        in.close();
+        out.close();
+    }
+
 }
 
 aspect DebugHelpers {
