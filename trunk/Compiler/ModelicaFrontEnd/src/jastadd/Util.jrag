@@ -2657,7 +2657,11 @@ aspect ComponentDeclMethods {
      * Find the component that this component inherits input or output from, if any.
      */
     inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
-    eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    eq InstComponentDecl.getChild().inheritsInputOutputFrom() {
+        if (myInstClass().isFunction())
+            return null;
+        return (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    }
     eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
     eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
     eq Root.getChild().inheritsInputOutputFrom()              = null;
