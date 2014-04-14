@@ -83,17 +83,104 @@ package OperatorRecordTests
         end '*';
 
         operator function 'String'
-			input Cplx a;
-			output String b;
-		algorithm
-			if a.im == 0 then
-				b := String(a.re);
-		    elseif a.re == 0 then
+            input Cplx a;
+            output String b;
+        algorithm
+            if a.im == 0 then
+                b := String(a.re);
+            elseif a.re == 0 then
                 b := String(a.im) + "j";
             else
                 b := String(a.re) + " + " + String(a.im) + "j";
-    		end if;
-		end 'String';
+            end if;
+        end 'String';
+
+        operator function '/' // Dummy implementation for simplicity
+            input Cplx a;
+            input Cplx b;
+            output Cplx c;
+        algorithm
+            c := Cplx(a.re / b.re, a.im / b.im);
+        end '/';
+
+        operator function '^' // Dummy implementation for simplicity
+            input Cplx a;
+            input Cplx b;
+            output Cplx c;
+        algorithm
+            c := Cplx(a.re ^ b.re, a.im ^ b.im);
+        end '^';
+
+        operator function '=='
+            input Cplx a;
+            input Cplx b;
+            output Boolean c;
+        algorithm
+            c := a.re == b.re and a.im == b.im;
+        end '==';
+
+        operator function '<>'
+            input Cplx a;
+            input Cplx b;
+            output Boolean c;
+        algorithm
+            c := a.re <> b.re or a.im <> b.im;
+        end '<>';
+
+        operator function '>'
+            input Cplx a;
+            input Cplx b;
+            output Boolean c;
+        algorithm
+            c := a.re ^ 2 + a.im ^ 2 > b.re ^ 2 + b.im ^ 2;
+        end '>';
+
+        operator function '<'
+            input Cplx a;
+            input Cplx b;
+            output Boolean c;
+        algorithm
+            c := a.re ^ 2 + a.im ^ 2 < b.re ^ 2 + b.im ^ 2;
+        end '<';
+
+        operator function '>='
+            input Cplx a;
+            input Cplx b;
+            output Boolean c;
+        algorithm
+            c := a.re ^ 2 + a.im ^ 2 >= b.re ^ 2 + b.im ^ 2;
+        end '>=';
+
+        operator function '<='
+            input Cplx a;
+            input Cplx b;
+            output Boolean c;
+        algorithm
+            c := a.re ^ 2 + a.im ^ 2 <= b.re ^ 2 + b.im ^ 2;
+        end '<=';
+
+        operator function 'and' // Dummy implementation for testing
+            input Cplx a;
+            input Cplx b;
+            output Cplx c;
+        algorithm
+            c := Cplx(a.re + b.re, a.im + b.im);
+        end 'and';
+
+        operator function 'or' // Dummy implementation for testing
+            input Cplx a;
+            input Cplx b;
+            output Cplx c;
+        algorithm
+            c := Cplx(a.re - b.re, a.im - b.im);
+        end 'or';
+
+        operator function 'not' // Dummy implementation for testing (conjugate)
+            input Cplx a;
+            output Cplx c;
+        algorithm
+            c := Cplx(a.re, -a.im);
+        end 'not';
     end Cplx;
 
 
@@ -747,42 +834,6 @@ end OperatorRecordTests.OperatorOverload15;
     end OperatorOverload15;
 
 
-    model OperatorOverload16
-        Cplx c1 = Cplx(1, 2);
-        Cplx c2 = Cplx(3, 4);
-        Cplx c3 = if time < 2 then c1 else c2;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="OperatorOverload16",
-            description="If expression with operator record",
-            flatModel="
-fclass OperatorRecordTests.OperatorOverload16
- OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
- OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
- OperatorRecordTests.Cplx c3 = if time < 2 then c1 else c2;
-
-public
- function OperatorRecordTests.Cplx.'constructor'
-  input Real re;
-  input Real im := 0;
-  output OperatorRecordTests.Cplx c;
- algorithm
-  c.re := re;
-  c.im := im;
-  return;
- end OperatorRecordTests.Cplx.'constructor';
-
- record OperatorRecordTests.Cplx
-  Real re;
-  Real im;
- end OperatorRecordTests.Cplx;
-
-end OperatorRecordTests.OperatorOverload16;
-")})));
-    end OperatorOverload16;
-
-
 // Note: this test gives wrong result due to the bug in #2779
     model OperatorOverload16
         constant Cplx c1 = Cplx(1, 2);
@@ -832,6 +883,534 @@ public
 end OperatorRecordTests.OperatorOverload16;
 ")})));
     end OperatorOverload16;
+
+
+    model OperatorOverload17
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Cplx c3 = c1 / c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload17",
+            description="Basic test of overloaded operators: division",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload17
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'/'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'/'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re / b.re, a.im / b.im);
+  return;
+ end OperatorRecordTests.Cplx.'/';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload17;
+")})));
+    end OperatorOverload17;
+
+
+    model OperatorOverload18
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Cplx c3 = c1 ^ c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload18",
+            description="Basic test of overloaded operators: power",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload18
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'^'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'^'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re ^ b.re, a.im ^ b.im);
+  return;
+ end OperatorRecordTests.Cplx.'^';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload18;
+")})));
+    end OperatorOverload18;
+
+
+    model OperatorOverload19
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Boolean b = c1 == c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload19",
+            description="Basic test of overloaded operators: equals",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload19
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ discrete Boolean b = OperatorRecordTests.Cplx.'=='(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'=='
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re == b.re and a.im == b.im;
+  return;
+ end OperatorRecordTests.Cplx.'==';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload19;
+")})));
+    end OperatorOverload19;
+
+
+    model OperatorOverload20
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Boolean b = c1 <> c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload20",
+            description="Basic test of overloaded operators: not equals",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload20
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ discrete Boolean b = OperatorRecordTests.Cplx.'<>'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'<>'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re <> b.re or a.im <> b.im;
+  return;
+ end OperatorRecordTests.Cplx.'<>';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload20;
+")})));
+    end OperatorOverload20;
+
+
+    model OperatorOverload21
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Boolean b = c1 < c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload21",
+            description="Basic test of overloaded operators: less",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload21
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ discrete Boolean b = OperatorRecordTests.Cplx.'<'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'<'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 < b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'<';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload21;
+")})));
+    end OperatorOverload21;
+
+
+    model OperatorOverload22
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Boolean b = c1 > c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload22",
+            description="Basic test of overloaded operators: greater",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload22
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ discrete Boolean b = OperatorRecordTests.Cplx.'>'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'>'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 > b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'>';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload22;
+")})));
+    end OperatorOverload22;
+
+
+    model OperatorOverload23
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Boolean b = c1 <= c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload23",
+            description="Basic test of overloaded operators: less or equal",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload23
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ discrete Boolean b = OperatorRecordTests.Cplx.'<='(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'<='
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 <= b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'<=';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload23;
+")})));
+    end OperatorOverload23;
+
+
+    model OperatorOverload24
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Boolean b = c1 >= c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload24",
+            description="Basic test of overloaded operators: greater or equal",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload24
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ discrete Boolean b = OperatorRecordTests.Cplx.'>='(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'>='
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 >= b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'>=';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload24;
+")})));
+    end OperatorOverload24;
+
+
+    model OperatorOverload25
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Cplx c3 = c1 and c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload25",
+            description="Basic test of overloaded operators: and",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload25
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'and'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'and'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'and';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload25;
+")})));
+    end OperatorOverload25;
+
+
+    model OperatorOverload26
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Cplx c3 = c1 or c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload26",
+            description="Basic test of overloaded operators: or",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload26
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'or'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'or'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
+  return;
+ end OperatorRecordTests.Cplx.'or';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload26;
+")})));
+    end OperatorOverload26;
+
+
+    model OperatorOverload27
+        Cplx c1 = Cplx(1, 2);
+        Cplx c3 = not c1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload27",
+            description="Basic test of overloaded operators: not",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload27
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'not'(c1);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'not'
+  input OperatorRecordTests.Cplx a;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re, - a.im);
+  return;
+ end OperatorRecordTests.Cplx.'not';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload27;
+")})));
+    end OperatorOverload27;
+
+
+    model OperatorOverload28
+        Cplx c1 = Cplx(1, 2);
+        Cplx c2 = Cplx(3, 4);
+        Cplx c3 = if time < 2 then c1 else c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload28",
+            description="If expression with operator record",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload28
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = if time < 2 then c1 else c2;
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload28;
+")})));
+    end OperatorOverload28;
 
 
     model OperatorRecordConnect1
