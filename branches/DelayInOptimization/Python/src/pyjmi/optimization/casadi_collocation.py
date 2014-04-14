@@ -4152,6 +4152,9 @@ class LocalDAECollocator(CasadiCollocator):
             self._denorm_t0_nom = t_nom["startTime"]
             self._denorm_tf_nom = t_nom["finalTime"]
 
+        # must be called after time has been denormalized and self._denorm_t0_init etc have been set
+        self._create_initial_trajectories()
+
         # Create nominal trajectories
         if self.variable_scaling and self.nominal_traj is not None:
             nom_traj = {}
@@ -5110,6 +5113,45 @@ class LocalDAECollocator(CasadiCollocator):
                             self.var_map[i][k]['dx'])
                     length_cost += (h_i ** (1 + a) * integrand * self.pol.w[k])
             self.cost += c * length_cost
+
+    def _create_initial_trajectories(self):
+        """
+        Create interpolated initial trajectories and store in self.init_traj_interp
+        """
+
+        if self.init_traj is not None:
+            n = len(self.init_traj.get_data_matrix()[:, 0])
+            self.init_traj_interp = traj = {}
+
+            for vt in ["dx", "x", "w", "unelim_u"]:
+                traj[vt] = {}
+                for var in mvar_vectors[vt]:
+                    data_matrix = N.empty([n, len(mvar_vectors[vt])])
+                    name = var.getName()
+                    (var_index, _) = name_map[name]
+                    if name == "startTime":
+                        abscissae = N.array([0])
+                        ordinates = N.array([[self._denorm_t0_init]])
+                    elif name == "finalTime":
+                        abscissae = N.array([0])
+                        ordinates = N.array([[self._denorm_tf_init]])
+                    else:
+                        try:
+                            data = self.init_traj.get_variable_data(name)
+                        except VariableNotFoundError:
+                            print("Warning: Could not find initial " +
+                                  "trajectory for variable " + name +
+                                  ". Using initialGuess attribute value " +
+                                  "instead.")
+                            ordinates = N.array([[
+                                    op.get_attr(var, "initialGuess")]])
+                            abscissae = N.array([0])
+                        else:
+                            abscissae = data.t
+                            ordinates = data.x.reshape([-1, 1])
+                        traj[vt][var_index] = TrajectoryLinearInterpolation(
+                                abscissae, ordinates)
+
     
     def _compute_bounds_and_init(self):
         """
@@ -5175,40 +5217,9 @@ class LocalDAECollocator(CasadiCollocator):
         xx_lb[var_indices['p_opt']] = p_min
         xx_ub[var_indices['p_opt']] = p_max
         xx_init[var_indices['p_opt']] = p_init
-        
-        # Manipulate initial trajectories
-        if self.init_traj is not None:
-            n = len(self.init_traj.get_data_matrix()[:, 0])
-            traj = {}
 
-            for vt in ["dx", "x", "w", "unelim_u"]:
-                traj[vt] = {}
-                for var in mvar_vectors[vt]:
-                    data_matrix = N.empty([n, len(mvar_vectors[vt])])
-                    name = var.getName()
-                    (var_index, _) = name_map[name]
-                    if name == "startTime":
-                        abscissae = N.array([0])
-                        ordinates = N.array([[self._denorm_t0_init]])
-                    elif name == "finalTime":
-                        abscissae = N.array([0])
-                        ordinates = N.array([[self._denorm_tf_init]])
-                    else:
-                        try:
-                            data = self.init_traj.get_variable_data(name)
-                        except VariableNotFoundError:
-                            print("Warning: Could not find initial " +
-                                  "trajectory for variable " + name +
-                                  ". Using initialGuess attribute value " +
-                                  "instead.")
-                            ordinates = N.array([[
-                                    op.get_attr(var, "initialGuess")]])
-                            abscissae = N.array([0])
-                        else:
-                            abscissae = data.t
-                            ordinates = data.x.reshape([-1, 1])
-                        traj[vt][var_index] = TrajectoryLinearInterpolation(
-                                abscissae, ordinates)
+        if self.init_traj is not None:
+            traj = self.init_traj_interp
 
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
