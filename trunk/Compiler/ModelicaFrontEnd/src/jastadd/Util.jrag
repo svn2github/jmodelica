@@ -2658,7 +2658,7 @@ aspect ComponentDeclMethods {
      */
     inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
     eq InstComponentDecl.getChild().inheritsInputOutputFrom() {
-        if (myInstClass().isFunction())
+        if (isFunctionalArg())
             return null;
         return (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
     }
@@ -2767,6 +2767,11 @@ aspect ComponentDeclMethods {
     	return false;
     }
     
+    /**
+     * Check if this component is a functional input argument
+     */
+    syn boolean InstComponentDecl.isFunctionalArg() = false;
+    eq InstComposite.isFunctionalArg() = isInput() && myInstFullClassDecl().isFunction() && myInstClass().isFunction();
 }
 
 aspect ShortClassUtil {
