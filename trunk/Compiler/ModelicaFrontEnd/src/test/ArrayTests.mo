@@ -16,7 +16,20 @@
 
 within ;
 package ArrayTests
-
+	
+model Test
+    connector C = Real;
+    C x[3];
+equation
+    for i in 1:3 loop
+        if i < 3 then
+            connect(x[i], x[i+1]);
+        else
+            connect(x[i], x[1]);
+        end if;
+    end for;
+end Test;
+	
 package General
 		
   model ArrayTest1
@@ -1348,6 +1361,35 @@ Semantic error at line 1451, column 5:
   Array index out of bounds: 5, index expression: i + j * max(i * (1:4))
 ")})));
 end SubscriptExpression8;
+
+
+model SubscriptExpression9
+    connector C = Real;
+    C x[3], y;
+equation
+    for i in 1:3 loop
+        if i < 3 then
+            connect(x[i], x[i+1]);
+        else
+            connect(x[i], y);
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Subscripts_SubscriptExpression9",
+            description="",
+            flatModel="
+fclass ArrayTests.Subscripts.SubscriptExpression9
+ Real x[3];
+ Real y;
+equation
+ x[1] = x[2];
+ x[2] = x[3];
+ x[3] = y;
+end ArrayTests.Subscripts.SubscriptExpression9;
+")})));
+end SubscriptExpression9;
 
 
 
