@@ -16,44 +16,59 @@
 
 aspect InteractiveFMU{
 	
-    public void FClass.computeInteractiveFMUIfSet() {
-		if (root().options.getBooleanOption("interactive_fmu")) {
-			// Convert equations
-			Collection<FAbstractEquation> localIterations = new HashSet<FAbstractEquation>();
-			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator(), localIterations);
-			
-			// Flush cache
-			root().flushAllRecursive();
-			
-			// Print the model
-			log.info("FClass after interactiveFMU:");
-			log.info(this);
-			
-			// Eliminate aliases
-			aliasElimination.apply();
-			
-			// Redo BLT
-			computeMatchingsAndBLT(true);
-			
-			// Check for unsolved blocks
-			boolean allSolved = true;
-			for (AbstractEquationBlock aeb : daeBLT) {
-				if (aeb.isSolvable())
-					continue;
-				for (FAbstractEquation fae : aeb.allEquations())
-					if (!localIterations.contains(fae))
-						allSolved = false;
-			}
-			for (AbstractEquationBlock aeb : daeInitBLT) {
-				if (aeb.isSolvable())
-					continue;
-				for (FAbstractEquation fae : aeb.allEquations())
-					if (!localIterations.contains(fae))
-						allSolved = false;
-			}
-			if (!allSolved)
-				error("Generation of interactive FMU failed, system still contains unsolved blocks, contact JModelica.org developer!");
+    public class FClass {
+        /**
+         * Run matchings and BLT.
+         */
+        public class interactiveFMU extends Transformation {
+            public interactiveFMU() {
+                super("interactive_fmu");
+            }
+            
+            public void perform() {
+                computeInteractiveFMU();
+                daeBLT.complianceCheck(ErrorCheckType.COMPILE);
+                breakOnErrors();
+            }
+        }
+    }
+    
+    public void FClass.computeInteractiveFMU() {
+		// Convert equations
+		Collection<FAbstractEquation> localIterations = new HashSet<FAbstractEquation>();
+		getDAEInitBLT().computeInteractiveFMU(this, new Enumerator(), localIterations);
+		
+		// Flush cache
+		root().flushAllRecursive();
+		
+		// Print the model
+		log.info("FClass after interactiveFMU:");
+		log.info(this);
+		
+		// Eliminate aliases
+		aliasElimination.apply();
+		
+		// Redo BLT
+		computeMatchingsAndBLT(true);
+		
+		// Check for unsolved blocks
+		boolean allSolved = true;
+		for (AbstractEquationBlock aeb : daeBLT) {
+			if (aeb.isSolvable())
+				continue;
+			for (FAbstractEquation fae : aeb.allEquations())
+				if (!localIterations.contains(fae))
+					allSolved = false;
 		}
+		for (AbstractEquationBlock aeb : daeInitBLT) {
+			if (aeb.isSolvable())
+				continue;
+			for (FAbstractEquation fae : aeb.allEquations())
+				if (!localIterations.contains(fae))
+					allSolved = false;
+		}
+		if (!allSolved)
+			error("Generation of interactive FMU failed, system still contains unsolved blocks, contact JModelica.org developer!");
 	}
 	
 	public void BLT.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {

@@ -107,7 +107,8 @@ aspect TransformCanonical {
             new setFDerivativeVariablesPreBLT(),
             new propagateNonFixedParameters(),
             new sortDependentParameters(),
-            new addRuntimeOptionParameters()
+            new addRuntimeOptionParameters(),
+            new indexReduction()
         };
         for (Transformation t : transformations)
             t.apply();
@@ -226,228 +227,224 @@ aspect TransformCanonical {
 		    if (fv.modifiableInRecord)
 		        fv.setBindingExpOpt(new Opt());
 	}
-	
 
-	public void FClass.transformCanonical() {
-		beginStep("transformCanonical()");
-	
-		transformCanonicalBase();
-	
-		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
-			// Equations are added as part of this this method
-			computeMatchingsAndBLT();
-			computeInteractiveFMUIfSet();
-			daeBLT.complianceCheck(ErrorCheckType.COMPILE);
-		}
-	
-		root().flushAllRecursive();	
-		transformCanonicalCleanup();
+    protected boolean FClass.doneTransformCanonical = false;
+    
+    public void FClass.transformCanonical() {
+        if (doneTransformCanonical)
+            return;
+        doneTransformCanonical = true;
+        beginStep("transformCanonical()");
 
-		endStep("transformCanonical()");
-	}
-	
-	syn lazy Set<FVariable> FVariable.initDependsOn() {
-		if (myDAEInitEquationBlock() != null)
-			return myDAEInitEquationBlock().dependsOn();
-		else
-			return new LinkedHashSet<FVariable>();
-	}
-		
-	syn lazy Set<FVariable> FVariable.dependsOn() {
-		if (myDAEEquationBlock() != null)
-			return myDAEEquationBlock().dependsOn();
-		else
-			return new LinkedHashSet<FVariable>();
-	}
+        transformCanonicalBase();
+        
+        new computeMatchingsAndBLT().apply();
+        new interactiveFMU().apply();
 
-	syn lazy AbstractEquationBlock FVariable.myDAEEquationBlock() = 
-		myFClass().getDAEFVariableEquationBlockMap().get(this);
+        root().flushAllRecursive();	
+        transformCanonicalCleanup();
 
-	private HashMap<FVariable,AbstractEquationBlock> FClass.daeFVariableEquationBlockMap = null;
-	syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEFVariableEquationBlockMap() {
-		if (daeFVariableEquationBlockMap == null) 
-			computeMatchingsAndBLT();
-		return daeFVariableEquationBlockMap;
-	}
-
-	syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
-		myFClass().getDAEInitFVariableEquationBlockMap().get(this);
-	
-	private HashMap<FVariable,AbstractEquationBlock> FClass.daeInitFVariableEquationBlockMap = null;	
-	syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
-		if (daeInitFVariableEquationBlockMap == null) 
-			computeMatchingsAndBLT();
-		return daeInitFVariableEquationBlockMap;
-	}
-
-	private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = null;
-	syn ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() { 
-		if (daeUnmatchedEquations == null) 
-			computeMatchingsAndBLT();
-		return daeUnmatchedEquations;
-	}	
-
-	private ArrayList<FVariable> FClass.daeUnmatchedVariables = null;
-	syn ArrayList<FVariable> FClass.getDAEUnmatchedVariables() { 
-		if (daeUnmatchedVariables == null) 
-			computeMatchingsAndBLT();
-		return daeUnmatchedVariables;
-	}	
-
-	private ArrayList<FAbstractEquation> FClass.daeInitUnmatchedEquations = null;
-	syn ArrayList<FAbstractEquation> FClass.getDAEInitUnmatchedEquations() { 
-		if (daeInitUnmatchedEquations == null) 
-			computeMatchingsAndBLT();
-		return daeInitUnmatchedEquations;
-	}	
-
-	private ArrayList<FVariable> FClass.daeInitUnmatchedVariables = null;
-	syn ArrayList<FVariable> FClass.getDAEInitUnmatchedVariables() { 
-		if (daeUnmatchedVariables == null) 
-			computeMatchingsAndBLT();
-		return daeInitUnmatchedVariables;
-	}	
-
-	private BLT FClass.daeBLT = null;
-	syn BLT FClass.getDAEBLT() {
-		if (daeBLT == null) 
-			computeMatchingsAndBLT();
-		return daeBLT;
-	}
-
-	private StructuredBLT FClass.daeStructuredBLT = null;
-	syn StructuredBLT FClass.getDAEStructuredBLT() {
-		if (daeStructuredBLT == null) 
-			computeMatchingsAndBLT();
-		return daeStructuredBLT;
-	}
-	
-	private BLT FClass.daeInitBLT = null;	
-	syn BLT FClass.getDAEInitBLT() {
-		if (daeInitBLT == null) 
-			computeMatchingsAndBLT();
-		return daeInitBLT;
-	}	
-	
-	/**
-	 * The symbolic equation sorting and canonicalization proceeds in the
-	 * following steps:
-	 * 
-	 * - The DAE system consisting of the DAE equations with algebraics and
-	 *   derivatives treated as unknowns is matched to obtain a pairing
-	 *   between equations and variables. Discrete and continuous algebraic
-	 *   variables are treated equally in this respect.
-	 *
-	 * - If a perfect matching is found, i.e., if there are no unmatched
-	 *   equations or variables, the BLT algoritm is applied to compute
-	 *   a sequence of stron components, corresponding to systems of equations.
-	 * 
-	 * - Having computed a matching and transformed the DAE into BLT form, 
-	 *   the DAE initialization system is analyzed:
-	 *    - The differentiated variables are added to the set of unknown 
-	 *      variables of the system.
-	 *    - The pre variables are added to the set of unknown variables of the
-	 *      system.
-	 *    - The initial equations are added to the set of equations of the 
-	 *      system. This includes equations resulting from start values with
-	 *      a corresonding fixed attribute set to true.
-	 *    - When clauses are analyzed: if a when clause is explicitly enabled by
-	 *      the initial() operator (whatever this means...), the when clause 
-	 *      is excluded, otherwhise the equation pre(x) = x is added, where x 
-	 *      is the variable that is solved for in the when clause.
-	 *      
-	 * - The matching algoritm is applied to the updated graph. Notice that it
-	 *   is important that the result of the DAE matching is used as a starting
-	 *   point: using this approach, derivatives and algebraics will remain
-	 *   matched if possible and additional equations are added, if needed,
-	 *   for differentiated variables. If there are 
-	 *   unmatched equations, the transformation sequence terminates. If there
-	 *   are unmatched variables, then additional initial equations are added 
-	 *   in order to obtained a balanced system. For continuous variables, 
-	 *   equations such as x = x.start are added, whereas for discrete variables
-	 *   equations such as pre(x) = x.start are added.
-	 *
-	 *  - Finally, the BLT algorithm is applied to the resulting perfect
-	 *    matchibng for the DAE initialization system.
-     */	
-	public void FClass.computeMatchingsAndBLT() {
-        computeMatchingsAndBLT(false);
+        endStep("transformCanonical()");
     }
-	
-	
-	public void FClass.computeMatchingsAndBLT(boolean duringInteractiveFMU) {
-		beginStep("computeMatchingsAndBLT()");
-		computeMatchingsAndBLTWrapped(duringInteractiveFMU);
-		endStep("computeMatchingsAndBLT()");
-	}
-	
-	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
-			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
-					   BiPGraph.VarType.ALGEBRAIC_VARIABLES);
-	
-	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_REAL = 
-			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
-					   BiPGraph.VarType.CONTINUOUS_ALGEBRAIC_VARIABLES);
-	
-	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_INIT = 
-			EnumSet.of(BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
-					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
-					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
-	
-	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_ALL = 
-			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
-					   BiPGraph.VarType.ALGEBRAIC_VARIABLES, 
-					   BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
-					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
-					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
-	
-	private void FClass.computeMatchingsAndBLTWrapped(boolean duringInteractiveFMU) {
+
+    syn lazy Set<FVariable> FVariable.initDependsOn() {
+        if (myDAEInitEquationBlock() != null)
+            return myDAEInitEquationBlock().dependsOn();
+        else
+            return new LinkedHashSet<FVariable>();
+    }
+
+    syn lazy Set<FVariable> FVariable.dependsOn() {
+        if (myDAEEquationBlock() != null)
+            return myDAEEquationBlock().dependsOn();
+        else
+            return new LinkedHashSet<FVariable>();
+    }
+
+    syn lazy AbstractEquationBlock FVariable.myDAEEquationBlock() =
+            myFClass().getDAEFVariableEquationBlockMap().get(this);
+
+    private HashMap<FVariable, AbstractEquationBlock> FClass.daeFVariableEquationBlockMap =
+            new HashMap<FVariable, AbstractEquationBlock>();
+
+    syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEFVariableEquationBlockMap() {
+        transformCanonical();
+        return daeFVariableEquationBlockMap;
+    }
+
+    syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
+            myFClass().getDAEInitFVariableEquationBlockMap().get(this);
+
+    private HashMap<FVariable,AbstractEquationBlock> FClass.daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
+    syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
+        transformCanonical();
+        return daeInitFVariableEquationBlockMap;
+    }
+
+    private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = new ArrayList<FAbstractEquation>();
+    syn ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() {
+        transformCanonical();
+        return daeUnmatchedEquations;
+    }
+
+    private ArrayList<FVariable> FClass.daeUnmatchedVariables = new ArrayList<FVariable>();
+    syn ArrayList<FVariable> FClass.getDAEUnmatchedVariables() {
+        transformCanonical();
+        return daeUnmatchedVariables;
+    }
+
+    private ArrayList<FAbstractEquation> FClass.daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();
+    syn ArrayList<FAbstractEquation> FClass.getDAEInitUnmatchedEquations() {
+        transformCanonical();
+        return daeInitUnmatchedEquations;
+    }
+
+    private ArrayList<FVariable> FClass.daeInitUnmatchedVariables = new ArrayList<FVariable>();
+    syn ArrayList<FVariable> FClass.getDAEInitUnmatchedVariables() {
+        transformCanonical();
+        return daeInitUnmatchedVariables;
+    }
+
+    private BLT FClass.daeBLT = new BLT();
+    syn BLT FClass.getDAEBLT() {
+        transformCanonical();
+        return daeBLT;
+    }
+
+    private StructuredBLT FClass.daeStructuredBLT = new StructuredBLT(this);
+    syn StructuredBLT FClass.getDAEStructuredBLT() {
+        transformCanonical();
+        return daeStructuredBLT;
+    }
+
+    private BLT FClass.daeInitBLT = new BLT();
+    syn BLT FClass.getDAEInitBLT() {
+        transformCanonical();
+        return daeInitBLT;
+    }
+
+    public class FClass {
+        /**
+         * Run matchings and BLT.
+         */
+        public class computeMatchingsAndBLT extends Transformation {
+            public computeMatchingsAndBLT() {
+                super("automatic_add_initial_equations");
+            }
+            
+            public void perform() {
+                computeMatchingsAndBLT(false);
+                daeBLT.complianceCheck(ErrorCheckType.COMPILE);
+                breakOnErrors();
+            }
+        }
+    }
+    
+    private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
+            EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
+                    BiPGraph.VarType.ALGEBRAIC_VARIABLES);
+    
+    private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_REAL = 
+            EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
+                    BiPGraph.VarType.CONTINUOUS_ALGEBRAIC_VARIABLES);
+    
+    private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_INIT = 
+            EnumSet.of(BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
+                    BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
+                    BiPGraph.VarType.NON_FIXED_PARAMETERS);
+    
+    private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_ALL = 
+            EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
+                    BiPGraph.VarType.ALGEBRAIC_VARIABLES, 
+                    BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
+                    BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
+                    BiPGraph.VarType.NON_FIXED_PARAMETERS);
+    
+    private BiPGraph FClass.computeMatchedDAEBiPGraph() {
+        BiPGraph g = new BiPGraph();
+        g.addVariables(this, VAR_TYPES_NORMAL);
+        g.addEquations(equations(), VAR_TYPES_NORMAL,"eq_",1);
+        g.maximumMatching(true);
+        daeUnmatchedVariables.clear();
+        for (Var var : g.getUnmatchedVariables())
+            daeUnmatchedVariables.add(var.getVariable());
+        daeUnmatchedEquations.clear();
+        for (Eq ee : g.getUnmatchedEquations())
+            daeUnmatchedEquations.add(ee.getEquation());
+        return g;
+    }
+    
+    private BiPGraph FClass.DAEBiPGraph = null;
+    
+    /**
+     * The symbolic equation sorting and canonicalization proceeds in the
+     * following steps:
+     * 
+     * - The DAE system consisting of the DAE equations with algebraics and
+     *   derivatives treated as unknowns is matched to obtain a pairing
+     *   between equations and variables. Discrete and continuous algebraic
+     *   variables are treated equally in this respect.
+     *
+     * - If a perfect matching is found, i.e., if there are no unmatched
+     *   equations or variables, the BLT algoritm is applied to compute
+     *   a sequence of stron components, corresponding to systems of equations.
+     * 
+     * - Having computed a matching and transformed the DAE into BLT form, 
+     *   the DAE initialization system is analyzed:
+     *    - The differentiated variables are added to the set of unknown 
+     *      variables of the system.
+     *    - The pre variables are added to the set of unknown variables of the
+     *      system.
+     *    - The initial equations are added to the set of equations of the 
+     *      system. This includes equations resulting from start values with
+     *      a corresonding fixed attribute set to true.
+     *    - When clauses are analyzed: if a when clause is explicitly enabled by
+     *      the initial() operator (whatever this means...), the when clause 
+     *      is excluded, otherwhise the equation pre(x) = x is added, where x 
+     *      is the variable that is solved for in the when clause.
+     *      
+     * - The matching algoritm is applied to the updated graph. Notice that it
+     *   is important that the result of the DAE matching is used as a starting
+     *   point: using this approach, derivatives and algebraics will remain
+     *   matched if possible and additional equations are added, if needed,
+     *   for differentiated variables. If there are 
+     *   unmatched equations, the transformation sequence terminates. If there
+     *   are unmatched variables, then additional initial equations are added 
+     *   in order to obtained a balanced system. For continuous variables, 
+     *   equations such as x = x.start are added, whereas for discrete variables
+     *   equations such as pre(x) = x.start are added.
+     *
+     *  - Finally, the BLT algorithm is applied to the resulting perfect
+     *    matchibng for the DAE initialization system.
+     */
+    private void FClass.computeMatchingsAndBLT(boolean duringInteractiveFMU) {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
 
         log.info("Flat tree before index reduction and BLT:");
-		log.info(this);
+        log.info(this);
 
-		daeBLT = new BLT();
-		daeStructuredBLT = new StructuredBLT(this);
-		daeInitBLT = new BLT();		
-		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();
-		daeUnmatchedVariables = new ArrayList<FVariable>();
-		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();
-		daeInitUnmatchedVariables = new ArrayList<FVariable>();
-		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
-		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();
-			
-		BiPGraph g = new BiPGraph();
-		
-		Eq eqn = null;
-		Var v = null;		
-		
-		// First try a global matching with all variables
-		g.addVariables(this, VAR_TYPES_NORMAL);
-		g.addEquations(equations(), VAR_TYPES_NORMAL,"eq_",1);
-		
-		log.info(g);
-		g.maximumMatching(true);
-		log.info("DAE system");
-		log.info(g.printMatchingObj());
-			
-		for (Var var : g.getUnmatchedVariables()) {
-			daeUnmatchedVariables.add(var.getVariable());
-		}
+        Eq eqn = null;
+        Var v = null;
 
-		for (Eq ee : g.getUnmatchedEquations()) {
-			daeUnmatchedEquations.add(ee.getEquation());
-		}
-	
-		// If no complete matching found, then try index reduction
-		if (!g.isComplete()) {
-			g = reduceIndex();
-			breakOnErrors();
-			if (g == null)
-				return;
-		} 
-			
+        BiPGraph g;
+        if (DAEBiPGraph == null) {
+            g = computeMatchedDAEBiPGraph();
+            log.info("DAE BiPGraph");
+            log.info(g);
+            log.info("DAE BiPGraph matching");
+            log.info(g.printMatchingObj());
+        } else {
+            g = DAEBiPGraph;
+            DAEBiPGraph = null;
+        }
+		
+        // If no complete matching found, then fail
+        if (!g.isComplete()) {
+            checkStructure();
+            breakOnErrors();
+        } 
+
 		// Perform BLT
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
@@ -517,10 +514,11 @@ aspect TransformCanonical {
 
 		g.addEquations(initialEquations(), VAR_TYPES_ALL, "eq_", g.getEquations().size() + 1);
 
-		log.info(g);
-		g.maximumMatching(false);	
-		log.info("DAE initial ");
-		log.info(g.printMatchingObj());
+		g.maximumMatching(false);
+        log.info("Init DAE BiPGraph");
+        log.info(g);
+        log.info("Init BiPGraph matching");
+        log.info(g.printMatchingObj());
 
 		// Add initial equations if needed
 		if (g.getUnmatchedEquations().isEmpty() && root().options.getBooleanOption("automatic_add_initial_equations")) {
@@ -537,11 +535,11 @@ aspect TransformCanonical {
 			}
 			root().flushAllRecursive();
 
-			g.maximumMatching(false);	
-			log.info("DAE initial after addition of initial equations");
-			log.info(g);
-			log.info(g.printMatchingObj());
-
+            g.maximumMatching(false);
+            log.info("Init DAE BiPGraph after addition of initial equations");
+            log.info(g);
+            log.info("Init BiPGraph matching after addition of initial equations");
+            log.info(g.printMatchingObj());
 		}
 
 		for (Var var : g.getUnmatchedVariables()) {
