@@ -5150,6 +5150,19 @@ class LocalDAECollocator(CasadiCollocator):
                     traj[var] = TrajectoryLinearInterpolation(
                         abscissae, ordinates)
 
+    def _eval_initial(self, var, i, k):
+        """
+        Evaluate initial value of Variable var at a given collocation point.
+
+        self._create_initial_trajectories() must have been called first.
+        """
+        if self.init_traj is None:
+            return self.op.get_attr(var, "initialGuess")
+        else:
+            time = self.time_points[i][k]
+            if self._normalize_min_time:
+                time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
+            return self.init_traj_interp[var].eval(time)
     
     def _compute_bounds_and_init(self):
         """
@@ -5216,9 +5229,6 @@ class LocalDAECollocator(CasadiCollocator):
         xx_ub[var_indices['p_opt']] = p_max
         xx_init[var_indices['p_opt']] = p_init
 
-        if self.init_traj is not None:
-            traj = self.init_traj_interp
-
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
             t0 = self._denorm_t0_init
@@ -5233,8 +5243,6 @@ class LocalDAECollocator(CasadiCollocator):
                 name = var.getName()
                 v_min = op.get_attr(var, "min")
                 v_max = op.get_attr(var, "max")
-                if self.init_traj is None:
-                    v_init = op.get_attr(var, "initialGuess")
                 (var_idx, _) = name_map[name]
                 if self.variable_scaling:
                     if self.nominal_traj is None:
@@ -5247,11 +5255,7 @@ class LocalDAECollocator(CasadiCollocator):
                             for i in xrange(1, self.n_e + 1):
                                 for k in self.time_points[i].keys():
                                     d = variant_sf[i][k][sf_index]
-                                    if self.init_traj is not None:
-                                        time = time_points[i][k]
-                                        if self._normalize_min_time:
-                                            time = t0 + (tf - t0) * time
-                                        v_init = traj[var].eval(time)
+                                    v_init = self._eval_initial(var, i, k)
                                     xx_lb[var_indices[i][k][vt][var_idx]] = \
                                             (v_min - e) / d
                                     xx_ub[var_indices[i][k][vt][var_idx]] = \
@@ -5268,11 +5272,7 @@ class LocalDAECollocator(CasadiCollocator):
                     or (not is_variant[name])):
                     for i in xrange(1, self.n_e + 1):
                         for k in self.time_points[i].keys():
-                            if self.init_traj is not None:
-                                time = time_points[i][k]
-                                if self._normalize_min_time:
-                                    time = t0 + (tf - t0) * time
-                                v_init = traj[var].eval(time)
+                            v_init = self._eval_initial(var, i, k)
                             xx_lb[var_indices[i][k][vt][var_idx]] = \
                                             (v_min - e) / d
                             xx_ub[var_indices[i][k][vt][var_idx]] = \
