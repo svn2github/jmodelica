@@ -55,8 +55,10 @@ void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::X
 void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void transferEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void transferParameters(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
-void transferFunction(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
+void transferFunction(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
+void updateFunctionCall(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* stmt,
+	CasADi::MXVector &expressions, CasADi::MXVector &vars, std::string functionName);
 CasADi::MXVector getInputVector(ModelicaCasADi::Ref<ModelicaCasADi::Model>, tinyxml2::XMLElement* elem);
 CasADi::MXVector getFuncVars(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement *elem);
 
@@ -84,7 +86,7 @@ ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<Mo
 int findIndex(CasADi::MXVector vector, std::string elem);
 void addFunctionHeaders(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
-int calculateFlatArrayIndex(tinyxml2::XMLElement* reference, std::string functionName);
+int calculateFlatArrayIndex(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* reference, std::string functionName);
 std::vector<std::string> getArrayVariables(tinyxml2::XMLElement* elem, std::string functionName);
 
 };

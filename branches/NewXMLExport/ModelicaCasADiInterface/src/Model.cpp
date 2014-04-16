@@ -293,7 +293,13 @@ vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
 
 Ref<Variable> Model::getVariable(std::string name) {
     Ref<Variable> returnVar = Ref<Variable>(NULL);
-	returnVar = modelVariableMap.find(name)->second;
+	std::map<std::string, Variable*>::iterator it = modelVariableMap.find(name);
+	if (it != modelVariableMap.end()) {
+		returnVar = it->second;;
+	} else {
+		return NULL;
+	}
+	//returnVar = modelVariableMap.find(name)->second;
 	/*for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
 		if ((*it)->getName() == name) {
 			returnVar = *it;

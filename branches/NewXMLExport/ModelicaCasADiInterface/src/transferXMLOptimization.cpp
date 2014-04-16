@@ -31,9 +31,10 @@ namespace ModelicaCasADi {
 void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelName,
 	const std::vector<string> &modelFiles) {
 		// transfer model parts first
-		//transferXmlModel(optProblem, modelName, modelFiles);
-
+		transferXmlModel(optProblem, modelName, modelFiles);
 		optProblem->initializeProblem(modelName, true);
+		optProblem->setTimeVariable(MX("time"));
+
 		string fullPath;
 		for (int i=0; i < modelFiles.size(); i++) {
 			fullPath += modelFiles[i];
@@ -48,8 +49,8 @@ void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelNa
 		XMLElement* root = doc.FirstChildElement();
 		bool lagrangeSet = false;
 		bool mayerSet = false;
-		for(XMLElement* rootChild = root->FirstChildElement(); rootChild != NULL; rootChild = rootChild->NextSiblingElement()) {
-			if (!strcmp(rootChild->Value(), "component") || !strcmp(rootChild->Value(), "classDefinition")) {
+		for (XMLElement* rootChild = root->FirstChildElement(); rootChild != NULL; rootChild = rootChild->NextSiblingElement()) {
+			/*if (!strcmp(rootChild->Value(), "component") || !strcmp(rootChild->Value(), "classDefinition")) {
 				transferVariables(optProblem, rootChild);
 			} else if (!strcmp(rootChild->Value(), "equation")) {
 				const char* equType = rootChild->Attribute("kind");
@@ -64,7 +65,8 @@ void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelNa
 					// handle equations
 					transferEquations(optProblem, rootChild);
 				}
-			} else if (!strcmp(rootChild->Value(), "objective")) {
+			} else*/ 
+			if (!strcmp(rootChild->Value(), "objective")) {
 				mayerSet = true;
 				transferObjective(optProblem, rootChild);
 			} else if(!strcmp(rootChild->Value(), "objectiveIntegrand")) {
@@ -93,9 +95,7 @@ void transferObjective(Ref<OptimizationProblem> optProblem, XMLElement* objectiv
 }
 
 void transferObjectiveIntegrand(Ref<OptimizationProblem> optProblem, XMLElement* objectiveIntegrand) {
-	std::cout << "integrand" << std::endl;
 	optProblem->setLagrangeTerm(expressionToMx(optProblem, objectiveIntegrand->FirstChildElement()));
-	std::cout << "end integrand" << std::endl;
 }
 
 void transferStartTime(Ref<OptimizationProblem> optProblem, XMLElement* startTime) {

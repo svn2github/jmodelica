@@ -37,6 +37,7 @@ class Model: public RefCountedNode {
     private:
         typedef std::map< std::string, Ref<ModelFunction> > functionMap;
         typedef std::map< std::string, Ref<VariableType> > typeMap;
+	protected:
 		typedef std::map<std::string, Variable*> variableMap;
     public:
         enum VariableKind {
@@ -238,6 +239,7 @@ class Model: public RefCountedNode {
         void handleVariableTypeForAddedVariable(Ref<Variable> var);
         void assignVariableTypeToVariable(Ref<Variable> var);
 		
+	protected:
 		variableMap modelVariableMap;
 };
 inline std::string Model::getIdentifier() { return identifier; }
