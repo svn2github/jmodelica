@@ -239,6 +239,24 @@ aspect HGT {
         setHGTResidual(Integer.MAX_VALUE, new FBooleanLitExpFalse(), false, null);
     }
     
+    public static Comparator<Eq> Eq.stringComparator() {
+        return new Comparator<Eq>() {
+            @Override
+            public int compare(Eq eqn1, Eq eqn2) {
+                return eqn1.getEquation().toString().compareTo(eqn2.getEquation().toString());
+            }
+        };
+    }
+    
+    public static Comparator<Var> Var.stringComparator() {
+        return new Comparator<Var>() {
+            @Override
+            public int compare(Var var1, Var var2) {
+                return var1.getVariable().toString().compareTo(var2.getVariable().toString());
+            }
+        };
+    }
+    
     private static void EquationBlockFactory.tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing, int blockNumber) throws BLTException {
         boolean recalculateMatchings = false;
         Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
@@ -246,8 +264,8 @@ aspect HGT {
             varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
         }
         Iterator<Eq> it = block.iterator();
-        Collection<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
-        Collection<Var> unmatchedHGTVariables = new ArrayList<Var>();
+        java.util.List<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
+        java.util.List<Var> unmatchedHGTVariables = new ArrayList<Var>();
         for (Eq eqn : block) {
             if (eqn.getEquation().isHGTUnpairedResidual())
                 unmatchedHGTEquations.add(eqn);
@@ -257,6 +275,8 @@ aspect HGT {
                 unmatchedHGTVariables.add(var);
         }
         if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
+            Collections.sort(unmatchedHGTEquations, Eq.stringComparator());
+            Collections.sort(unmatchedHGTVariables, Var.stringComparator());
             Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
             Iterator<Var> varIt = unmatchedHGTVariables.iterator();
             while (eqnIt.hasNext() && varIt.hasNext()) {
@@ -277,6 +297,7 @@ aspect HGT {
                 sb.append("    " + var.getName() + "\n");
             throw new BLTException(sb.toString());
         }
+        java.util.List<Eq> HGTEquations = new ArrayList<Eq>();
         while (it.hasNext()) {
             Eq e = it.next();
             FVariable fIterVar = e.getEquation().getHGTIterationVariable();
@@ -287,11 +308,15 @@ aspect HGT {
                     continue;
                 }
                 it.remove();
-                varsInBlock.remove(fIterVar);
+                HGTEquations.add(e);
                 recalculateMatchings = true;
-                ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), iterVar.getVariable().name());
-                eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, iterVar));
             }
+        }
+        Collections.sort(HGTEquations, Eq.stringComparator());
+        for (Eq hgtEqn : HGTEquations) {
+            Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
+            ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());
+            eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(hgtEqn, iterVar));
         }
         if (recalculateMatchings) {
             BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
