@@ -4912,17 +4912,18 @@ class LocalDAECollocator(CasadiCollocator):
             if self.hs is not None: raise CasadiCollocatorException(
                 "Non-uniform element lengths are not supported with delayed feedback.")
             
-            for i in xrange(1, self.n_e + 1):
-                for k in xrange(1, self.n_cp + 1):
-                    for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
+            for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
+                u_dae_var = self.op.getVariable(u_name)
+                for i in xrange(1, self.n_e + 1):
+                    for k in xrange(1, self.n_cp + 1):
                         u_var = self._get_unscaled_expr(u_name, i, k)
                         if i > delay_n_e:
-                            y_value = self._get_unscaled_expr(y_name, i-delay_n_e, k)
+                            u_value = self._get_unscaled_expr(y_name, i-delay_n_e, k)
                         else:
-                            y_value = 0 # todo: take initial part of trajectory from initial guess
+                            u_value = self._eval_initial(u_dae_var, i, k)
                                                 
                         # Add constraint
-                        input_constr = u_var - y_value
+                        input_constr = u_var - u_value
                         if self.named_vars:
                             input_constr = casadi.vertcat(input_constr) # why?
                         c_e.append(input_constr)
