@@ -5127,26 +5127,19 @@ class LocalDAECollocator(CasadiCollocator):
                 for var in self.mvar_vectors[vt]:
                     data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
                     name = var.getName()
-                    if name == "startTime":
+                    try:
+                        data = self.init_traj.get_variable_data(name)
+                    except VariableNotFoundError:
+                        print("Warning: Could not find initial " +
+                              "trajectory for variable " + name +
+                              ". Using initialGuess attribute value " +
+                              "instead.")
+                        ordinates = N.array([[
+                            self.op.get_attr(var, "initialGuess")]])
                         abscissae = N.array([0])
-                        ordinates = N.array([[self._denorm_t0_init]])
-                    elif name == "finalTime":
-                        abscissae = N.array([0])
-                        ordinates = N.array([[self._denorm_tf_init]])
                     else:
-                        try:
-                            data = self.init_traj.get_variable_data(name)
-                        except VariableNotFoundError:
-                            print("Warning: Could not find initial " +
-                                  "trajectory for variable " + name +
-                                  ". Using initialGuess attribute value " +
-                                  "instead.")
-                            ordinates = N.array([[
-                                    self.op.get_attr(var, "initialGuess")]])
-                            abscissae = N.array([0])
-                        else:
-                            abscissae = data.t
-                            ordinates = data.x.reshape([-1, 1])
+                        abscissae = data.t
+                        ordinates = data.x.reshape([-1, 1])
                     traj[var] = TrajectoryLinearInterpolation(
                         abscissae, ordinates)
 
