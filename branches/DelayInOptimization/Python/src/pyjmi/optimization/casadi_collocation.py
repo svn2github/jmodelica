@@ -5124,11 +5124,9 @@ class LocalDAECollocator(CasadiCollocator):
             self.init_traj_interp = traj = {}
 
             for vt in ["dx", "x", "w", "unelim_u"]:
-                traj[vt] = {}
                 for var in self.mvar_vectors[vt]:
                     data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
                     name = var.getName()
-                    (var_index, _) = self.name_map[name]
                     if name == "startTime":
                         abscissae = N.array([0])
                         ordinates = N.array([[self._denorm_t0_init]])
@@ -5149,7 +5147,7 @@ class LocalDAECollocator(CasadiCollocator):
                         else:
                             abscissae = data.t
                             ordinates = data.x.reshape([-1, 1])
-                    traj[vt][var_index] = TrajectoryLinearInterpolation(
+                    traj[var] = TrajectoryLinearInterpolation(
                         abscissae, ordinates)
 
     
@@ -5253,7 +5251,7 @@ class LocalDAECollocator(CasadiCollocator):
                                         time = time_points[i][k]
                                         if self._normalize_min_time:
                                             time = t0 + (tf - t0) * time
-                                        v_init = traj[vt][var_idx].eval(time)
+                                        v_init = traj[var].eval(time)
                                     xx_lb[var_indices[i][k][vt][var_idx]] = \
                                             (v_min - e) / d
                                     xx_ub[var_indices[i][k][vt][var_idx]] = \
@@ -5274,7 +5272,7 @@ class LocalDAECollocator(CasadiCollocator):
                                 time = time_points[i][k]
                                 if self._normalize_min_time:
                                     time = t0 + (tf - t0) * time
-                                v_init = traj[vt][var_idx].eval(time)
+                                v_init = traj[var].eval(time)
                             xx_lb[var_indices[i][k][vt][var_idx]] = \
                                             (v_min - e) / d
                             xx_ub[var_indices[i][k][vt][var_idx]] = \
