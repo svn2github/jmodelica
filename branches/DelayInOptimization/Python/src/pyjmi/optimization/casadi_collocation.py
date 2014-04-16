@@ -5125,10 +5125,10 @@ class LocalDAECollocator(CasadiCollocator):
 
             for vt in ["dx", "x", "w", "unelim_u"]:
                 traj[vt] = {}
-                for var in mvar_vectors[vt]:
-                    data_matrix = N.empty([n, len(mvar_vectors[vt])])
+                for var in self.mvar_vectors[vt]:
+                    data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
                     name = var.getName()
-                    (var_index, _) = name_map[name]
+                    (var_index, _) = self.name_map[name]
                     if name == "startTime":
                         abscissae = N.array([0])
                         ordinates = N.array([[self._denorm_t0_init]])
@@ -5144,13 +5144,13 @@ class LocalDAECollocator(CasadiCollocator):
                                   ". Using initialGuess attribute value " +
                                   "instead.")
                             ordinates = N.array([[
-                                    op.get_attr(var, "initialGuess")]])
+                                    self.op.get_attr(var, "initialGuess")]])
                             abscissae = N.array([0])
                         else:
                             abscissae = data.t
                             ordinates = data.x.reshape([-1, 1])
-                        traj[vt][var_index] = TrajectoryLinearInterpolation(
-                                abscissae, ordinates)
+                    traj[vt][var_index] = TrajectoryLinearInterpolation(
+                        abscissae, ordinates)
 
     
     def _compute_bounds_and_init(self):
