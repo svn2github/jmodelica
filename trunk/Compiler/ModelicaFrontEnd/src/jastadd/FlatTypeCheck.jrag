@@ -478,8 +478,6 @@ aspect FlatTypeCheck {
 	                  }
 	              }
 	          } catch (ConstantEvaluationException e) {
-	              error("Could not evaluate array index expression: " + getFExp());
-	              reportedOutOfBound = true;
 	          }
 		  }
 	  }
