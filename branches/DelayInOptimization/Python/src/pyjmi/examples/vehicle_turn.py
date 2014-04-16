@@ -17,6 +17,7 @@
 
 # Import JModelica functions
 from pyjmi import transfer_optimization_problem, get_files_path
+from pyjmi.optimization.casadi_collocation import BlockingFactors
 from pymodelica.common.io import ResultDymolaTextual
 
 # Import other stuff
@@ -41,7 +42,16 @@ def run_demo(with_plots=True):
     opts = op.optimize_options()
     opts['IPOPT_options']['linear_solver'] = "ma27"
     opts['IPOPT_options']['tol'] = 1e-10
-    opts['blocking_factors'] = opts['n_e'] / 2 * [2]
+    opts['n_e'] = 60
+
+    # Set blocking factors
+    factors = {'delta_u': opts['n_e'] / 2 * [2],
+               'Twf_u': opts['n_e'] / 4 * [4],
+               'Twr_u': opts['n_e'] / 4 * [4]}
+    rad2deg = 180. / (2*N.pi)
+    du_bounds = {'delta_u': 2. / rad2deg}
+    bf = BlockingFactors(factors, du_bounds=du_bounds)
+    opts['blocking_factors'] = bf
 
     # Use Dymola simulation result as initial guess
     init_path = os.path.join(get_files_path(), "vehicle_turn_dymola.txt")
@@ -62,7 +72,7 @@ def run_demo(with_plots=True):
     Ro = op.get('Ro')
 
     # Verify result
-    N.testing.assert_allclose(time[-1], 4.008, rtol=5e-3)
+    N.testing.assert_allclose(time[-1], 4.0118, rtol=5e-3)
 
     # Plot solution
     if with_plots:
@@ -83,7 +93,7 @@ def run_demo(with_plots=True):
         # Plot inputs
         plt.close(2)
         plt.figure(2)
-        plt.plot(time, delta * 180. / (2*N.pi), drawstyle='steps-post')
+        plt.plot(time, delta * rad2deg, drawstyle='steps-post')
         plt.plot(time, Twf * 1e-3, drawstyle='steps-post')
         plt.plot(time, Twr * 1e-3, drawstyle='steps-post')
         plt.xlabel('time [s]')

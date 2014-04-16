@@ -409,4 +409,3 @@ class TestLoadResource(SimulationTest):
         self.assert_end_value('y', 110)
         self.assert_end_value('z', 110)
         
-        self.assert_end_value('rel', 45)

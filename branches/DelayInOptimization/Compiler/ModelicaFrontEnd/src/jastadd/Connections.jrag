@@ -1958,6 +1958,16 @@ aspect ExpandableConnectors {
                         for (ConnectorMember m : set.members.values())
                             error = !m.checkNonExisting(template) || error;
                     
+                    // Check array index types. If there is a declaration they are checked in FExpSubscript.typeCheckAsIndex;
+                    if (declared.isEmpty()) {
+                        Source tmpl = null;
+                        for (Source src : sources) {
+                            if (tmpl == null)
+                                tmpl = src;
+                            if (!src.checkIndexType(tmpl))
+                                break;
+                        }
+                    }
                     calculated = true;
                 }
                 
@@ -2027,6 +2037,20 @@ aspect ExpandableConnectors {
                     public void checkType(InstComponentDecl template) {
                         if (!target.myInstComponentDecl().connectableTypes(template))
                             error("Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector");
+                    }
+                    
+                    public boolean checkIndexType(Source other) {
+                        if (fas == null || other.fas == null)
+                            return true;
+                        for (int dim = 0; dim < Math.min(fas.ndims(), other.fas.ndims()); dim++) {
+                            if (!fas.getFSubscript(dim).type().scalarType().typeCompatible(
+                                    other.fas.getFSubscript(dim).type().scalarType())) {
+                                error("Array index type of component introduced to external connector does not match other"
+                                        + " connections to same name in connection set");
+                                return false;
+                            }
+                        }
+                        return true;
                     }
                     
                     private void mismatchError() {

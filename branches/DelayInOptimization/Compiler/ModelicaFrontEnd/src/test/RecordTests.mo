@@ -715,12 +715,6 @@ fclass RecordTests.RecordBinding6
  Real y;
 equation
  y = time;
-
-public
- record RecordTests.RecordBinding6.A
-  Real a;
- end RecordTests.RecordBinding6.A;
-
 end RecordTests.RecordBinding6;
 ")})));
 end RecordBinding6;
@@ -784,13 +778,6 @@ equation
  y1[2].b = time;
  y2[1].b = x[1] * x[1];
  y2[2].b = x[2] * x[2];
-
-public
- record RecordTests.RecordBinding8.A
-  Real a;
-  Real b;
- end RecordTests.RecordBinding8.A;
-
 end RecordTests.RecordBinding8;
 ")})));
 end RecordBinding8;
@@ -817,13 +804,6 @@ fclass RecordTests.RecordBinding9
  parameter Real y.b;
 parameter equation
  y.b = x.b;
-
-public
- record RecordTests.RecordBinding9.A
-  constant Real a = 1;
-  Real b;
- end RecordTests.RecordBinding9.A;
-
 end RecordTests.RecordBinding9;
 ")})));
 end RecordBinding9;
@@ -849,13 +829,6 @@ fclass RecordTests.RecordBinding10
  Real y.b;
 equation
  y.b = time;
-
-public
- record RecordTests.RecordBinding10.A
-  constant Real a = 1;
-  Real b;
- end RecordTests.RecordBinding10.A;
-
 end RecordTests.RecordBinding10;
 ")})));
 end RecordBinding10;
@@ -887,14 +860,6 @@ fclass RecordTests.RecordBinding11
  parameter String r.s1 = \"foobar\" /* \"foobar\" */;
  parameter Boolean r.b1 = true /* true */;
  parameter Boolean r.b2 = true /* true */;
-
-public
- record RecordTests.RecordBinding11.R
-  parameter String s1;
-  parameter Boolean b1;
-  discrete Boolean b2;
- end RecordTests.RecordBinding11.R;
-
 end RecordTests.RecordBinding11;
 ")})));
 end RecordBinding11;
@@ -926,17 +891,6 @@ parameter equation
  a.b.c = 2 * a.d;
 equation
  x = a.b.c * time;
-
-public
- record RecordTests.RecordBinding12.B
-  Real c;
- end RecordTests.RecordBinding12.B;
-
- record RecordTests.RecordBinding12.A
-  RecordTests.RecordBinding12.B b(c);
-  Real d;
- end RecordTests.RecordBinding12.A;
-
 end RecordTests.RecordBinding12;
 ")})));
 end RecordBinding12;
@@ -968,17 +922,6 @@ parameter equation
  a.b.c = 2 * a.d;
 equation
  x = a.b.c * time;
-
-public
- record RecordTests.RecordBinding13.B
-  Real c;
- end RecordTests.RecordBinding13.B;
-
- record RecordTests.RecordBinding13.A
-  RecordTests.RecordBinding13.B b;
-  Real d;
- end RecordTests.RecordBinding13.A;
-
 end RecordTests.RecordBinding13;
 ")})));
 end RecordBinding13;
@@ -1013,15 +956,6 @@ fclass RecordTests.RecordBinding14
  constant Real recs[2].y = 2;
  parameter Real recs[2].z = 3 /* 3 */;
  constant Real recs[2].x2 = 4;
-
-public
- record RecordTests.RecordBinding14.R
-  Real x1;
-  constant Real y = 2;
-  parameter Real z = 3 /* 3 */;
-  Real x2;
- end RecordTests.RecordBinding14.R;
-
 end RecordTests.RecordBinding14;
 ")})));
 end RecordBinding14;
@@ -1404,13 +1338,6 @@ model RecordConstructor7
 fclass RecordTests.RecordConstructor7
  constant Real b.x = 1;
  constant Real b.y = 2;
-
-public
- record RecordTests.RecordConstructor7.B
-  Real x;
-  Real y;
- end RecordTests.RecordConstructor7.B;
-
 end RecordTests.RecordConstructor7;
 ")})));
 end RecordConstructor7;
@@ -1573,13 +1500,6 @@ equation
  y.b = x.b;
  x.a = 1;
  x.b = 2;
-
-public
- record RecordTests.RecordScalarize1.A
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize1.A;
-
 end RecordTests.RecordScalarize1;
 ")})));
 end RecordScalarize1;
@@ -1615,13 +1535,6 @@ equation
  y.b = x.b;
  x.a = 1;
  x.b = 2;
-
-public
- record RecordTests.RecordScalarize2.A
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize2.A;
-
 end RecordTests.RecordScalarize2;
 ")})));
 end RecordScalarize2;
@@ -1655,13 +1568,6 @@ equation
  y.a = x.a;
  x.b = 1;
  x.a = 2;
-
-public
- record RecordTests.RecordScalarize3.A
-  Real b;
-  Real a;
- end RecordTests.RecordScalarize3.A;
-
 end RecordTests.RecordScalarize3;
 ")})));
 end RecordScalarize3;
@@ -1698,18 +1604,6 @@ equation
  x.b = 2;
  y.c = 3;
  y.d = 4;
-
-public
- record RecordTests.RecordScalarize4.A
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize4.A;
-
- record RecordTests.RecordScalarize4.B
-  Real c;
-  Real d;
- end RecordTests.RecordScalarize4.B;
-
 end RecordTests.RecordScalarize4;
 ")})));
 end RecordScalarize4;
@@ -1749,18 +1643,6 @@ equation
  x.b.d = y.d;
  y.c = 2;
  y.d = 3;
-
-public
- record RecordTests.RecordScalarize5.B
-  Real c;
-  Real d;
- end RecordTests.RecordScalarize5.B;
-
- record RecordTests.RecordScalarize5.A
-  Real a;
-  RecordTests.RecordScalarize5.B b;
- end RecordTests.RecordScalarize5.A;
-
 end RecordTests.RecordScalarize5;
 ")})));
 end RecordScalarize5;
@@ -1799,18 +1681,6 @@ equation
  y.a = x.a;
  x.a = 1;
  x.b = 2;
-
-public
- record RecordTests.RecordScalarize6.A
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize6.A;
-
- record RecordTests.RecordScalarize6.B
-  Real b;
-  Real a;
- end RecordTests.RecordScalarize6.B;
-
 end RecordTests.RecordScalarize6;
 ")})));
 end RecordScalarize6;
@@ -1863,28 +1733,6 @@ equation
  x.c = 1;
  x.x.b = 2;
  x.x.a = 3;
-
-public
- record RecordTests.RecordScalarize7.A
-  Real b;
-  Real a;
- end RecordTests.RecordScalarize7.A;
-
- record RecordTests.RecordScalarize7.C
-  Real c;
-  RecordTests.RecordScalarize7.A x;
- end RecordTests.RecordScalarize7.C;
-
- record RecordTests.RecordScalarize7.B
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize7.B;
-
- record RecordTests.RecordScalarize7.D
-  RecordTests.RecordScalarize7.B x;
-  Real c;
- end RecordTests.RecordScalarize7.D;
-
 end RecordTests.RecordScalarize7;
 ")})));
 end RecordScalarize7;
@@ -1912,13 +1760,6 @@ equation
  x.a[1] = 1;
  x.a[2] = 2;
  x.b = 1;
-
-public
- record RecordTests.RecordScalarize8.A
-  Real a[2];
-  Real b;
- end RecordTests.RecordScalarize8.A;
-
 end RecordTests.RecordScalarize8;
 ")})));
 end RecordScalarize8;
@@ -1950,13 +1791,6 @@ equation
  x.a[1] = 1;
  x.a[2] = 2;
  x.b = 1;
-
-public
- record RecordTests.RecordScalarize9.A
-  Real a[2];
-  Real b;
- end RecordTests.RecordScalarize9.A;
-
 end RecordTests.RecordScalarize9;
 ")})));
 end RecordScalarize9;
@@ -1994,13 +1828,6 @@ equation
  x.a[1] = 1;
  x.a[2] = 2;
  x.b = 3;
-
-public
- record RecordTests.RecordScalarize10.A
-  Real a[2];
-  Real b;
- end RecordTests.RecordScalarize10.A;
-
 end RecordTests.RecordScalarize10;
 ")})));
 end RecordScalarize10;
@@ -2090,13 +1917,6 @@ equation
  x[2].a = 3;
  x[1].b = 2;
  x[2].b = 4;
-
-public
- record RecordTests.RecordScalarize13.A
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize13.A;
-
 end RecordTests.RecordScalarize13;
 ")})));
 end RecordScalarize13;
@@ -2157,16 +1977,6 @@ equation
  x[2].b[1].a[2] = 6;
  x[2].b[2].a[1] = 7;
  x[2].b[2].a[2] = 8;
-
-public
- record RecordTests.RecordScalarize14.B
-  Real a[2];
- end RecordTests.RecordScalarize14.B;
-
- record RecordTests.RecordScalarize14.A
-  RecordTests.RecordScalarize14.B b[2];
- end RecordTests.RecordScalarize14.A;
-
 end RecordTests.RecordScalarize14;
 ")})));
 end RecordScalarize14;
@@ -2211,16 +2021,6 @@ equation
  x[2].b[2].a[1] = 7;
  x[2].b[2].a[2] = 8;
  y = x[1].b[1].a[2];
-
-public
- record RecordTests.RecordScalarize15.B
-  Real a[2];
- end RecordTests.RecordScalarize15.B;
-
- record RecordTests.RecordScalarize15.A
-  RecordTests.RecordScalarize15.B b[2];
- end RecordTests.RecordScalarize15.A;
-
 end RecordTests.RecordScalarize15;
 ")})));
 end RecordScalarize15;
@@ -2262,16 +2062,6 @@ equation
  x[2].b[1].a[2] = 6;
  x[2].b[2].a[1] = 7;
  x[2].b[2].a[2] = 8;
-
-public
- record RecordTests.RecordScalarize16.B
-  Real a[2];
- end RecordTests.RecordScalarize16.B;
-
- record RecordTests.RecordScalarize16.A
-  RecordTests.RecordScalarize16.B b[2];
- end RecordTests.RecordScalarize16.A;
-
 end RecordTests.RecordScalarize16;
 ")})));
 end RecordScalarize16;
@@ -2297,13 +2087,6 @@ fclass RecordTests.RecordScalarize17
 equation
  x.a = 1;
  x.b = 2;
-
-public
- record RecordTests.RecordScalarize17.A
-  Real a;
-  Real b;
- end RecordTests.RecordScalarize17.A;
-
 end RecordTests.RecordScalarize17;
 ")})));
 end RecordScalarize17;
@@ -2333,17 +2116,6 @@ fclass RecordTests.RecordScalarize18
 equation
  x.b1.a = 1;
  x.b2.a = 2;
-
-public
- record RecordTests.RecordScalarize18.A
-  Real a;
- end RecordTests.RecordScalarize18.A;
-
- record RecordTests.RecordScalarize18.B
-  RecordTests.RecordScalarize18.A b1;
-  RecordTests.RecordScalarize18.A b2;
- end RecordTests.RecordScalarize18.B;
-
 end RecordTests.RecordScalarize18;
 ")})));
 end RecordScalarize18;
@@ -2375,10 +2147,6 @@ equation
  a1.der(x[2]) = - a1.x[2];
 
 public
- record RecordTests.RecordScalarize19.A
-  Real x[2];
- end RecordTests.RecordScalarize19.A;
-
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end RecordTests.RecordScalarize19;
@@ -2412,10 +2180,6 @@ equation
  a1.der(x[2]) = - a1.x[2];
 
 public
- record RecordTests.RecordScalarize20.A
-  Real x[2](stateSelect = {StateSelect.default, StateSelect.default},start = {1, 2});
- end RecordTests.RecordScalarize20.A;
-
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end RecordTests.RecordScalarize20;
@@ -2450,13 +2214,6 @@ equation
  a.x[1] = 1;
  a.x[2] = 2;
  a.y = 4;
-
-public
- record RecordTests.RecordScalarize21.A
-  Real x[2];
-  Real y;
- end RecordTests.RecordScalarize21.A;
-
 end RecordTests.RecordScalarize21;
 ")})));
 end RecordScalarize21;
@@ -2579,12 +2336,6 @@ parameter equation
  s[1] = 0.4 - p;
 equation
  r.X[1] = 1;
-
-public
- record RecordTests.RecordScalarize23.R
-  Real X[1];
- end RecordTests.RecordScalarize23.R;
-
 end RecordTests.RecordScalarize23;
 ")})));
 end RecordScalarize23;
@@ -2609,12 +2360,6 @@ fclass RecordTests.RecordScalarize24
  Real r.X[1](start = 0.4 - p);
 equation
  r.X[1] = 1;
-
-public
- record RecordTests.RecordScalarize24.R
-  Real X[1];
- end RecordTests.RecordScalarize24.R;
-
 end RecordTests.RecordScalarize24;
 ")})));
 end RecordScalarize24;
@@ -2645,11 +2390,6 @@ equation
  b.y = if b.x < 3 then RecordTests.RecordScalarize25.A.a1 else RecordTests.RecordScalarize25.A.a2;
 
 public
- record RecordTests.RecordScalarize25.B
-  Real x;
-  discrete RecordTests.RecordScalarize25.A y;
- end RecordTests.RecordScalarize25.B;
-
  type RecordTests.RecordScalarize25.A = enumeration(a1, a2);
 
 end RecordTests.RecordScalarize25;
@@ -2676,13 +2416,6 @@ fclass RecordTests.RecordScalarize26
  Real r.y;
 equation
  r.y = time;
-
-public
- record RecordTests.RecordScalarize26.R
-  parameter Real x[2];
-  Real y;
- end RecordTests.RecordScalarize26.R;
-
 end RecordTests.RecordScalarize26;
 ")})));
 end RecordScalarize26;
@@ -3970,13 +3703,6 @@ fclass RecordTests.RecordParBexp1
  parameter Real r[1].y = 3 /* 3 */;
  parameter Real r[2].x = 4 /* 4 */;
  parameter Real r[2].y = 6 /* 6 */;
-
-public
- record RecordTests.RecordParBexp1.R
-  Real x;
-  Real y;
- end RecordTests.RecordParBexp1.R;
-
 end RecordTests.RecordParBexp1;
 ")})));
 end RecordParBexp1;
@@ -4002,13 +3728,6 @@ fclass RecordTests.RecordWithParam1
  Real c.b;
 equation
  c.b = 2;
-
-public
- record RecordTests.RecordWithParam1.R
-  parameter Real a;
-  Real b;
- end RecordTests.RecordWithParam1.R;
-
 end RecordTests.RecordWithParam1;
 ")})));
 end RecordWithParam1;
@@ -4037,13 +3756,6 @@ parameter equation
  c.a = d;
 equation
  c.b = 2;
-
-public
- record RecordTests.RecordWithParam2.R
-  parameter Real a;
-  Real b;
- end RecordTests.RecordWithParam2.R;
-
 end RecordTests.RecordWithParam2;
 ")})));
 end RecordWithParam2;
@@ -4081,13 +3793,6 @@ equation
  d.a[1] = 5;
  d.a[2] = 6;
  d.b = 7;
-
-public
- record RecordTests.RecordWithColonArray1.A
-  Real a[:];
-  Real b;
- end RecordTests.RecordWithColonArray1.A;
-
 end RecordTests.RecordWithColonArray1;
 ")})));
 end RecordWithColonArray1;
@@ -4146,13 +3851,6 @@ equation
  d.a[1] = 5;
  d.a[2] = 6;
  d.b = 7;
-
-public
- record RecordTests.RecordWithColonArray3.A
-  Real a[:];
-  Real b;
- end RecordTests.RecordWithColonArray3.A;
-
 end RecordTests.RecordWithColonArray3;
 ")})));
 end RecordWithColonArray3;
@@ -4205,13 +3903,6 @@ initial equation
 equation
  a.der(x) = - a.y;
  a.der(y) = - a.x;
-
-public
- record RecordTests.RecordDer1.A
-  Real x;
-  Real y;
- end RecordTests.RecordDer1.A;
-
 end RecordTests.RecordDer1;
 ")})));
 end RecordDer1;
@@ -4237,13 +3928,6 @@ fclass RecordTests.RecordParam1
  Real a1.y;
 equation
  a1.y = 2;
-
-public
- record RecordTests.RecordParam1.A
-  parameter Real x;
-  Real y;
- end RecordTests.RecordParam1.A;
-
 end RecordTests.RecordParam1;
 ")})));
 end RecordParam1;
@@ -4268,13 +3952,6 @@ fclass RecordTests.RecordParam2
  Real a1.y;
 equation
  a1.y = 2;
-
-public
- record RecordTests.RecordParam2.A
-  parameter Real x;
-  Real y;
- end RecordTests.RecordParam2.A;
-
 end RecordTests.RecordParam2;
 ")})));
 end RecordParam2;
@@ -4324,11 +4001,6 @@ public
   return;
  end RecordTests.RecordParam3.f;
 
- record RecordTests.RecordParam3.A
-  parameter Real x[2];
-  Real y;
- end RecordTests.RecordParam3.A;
-
 end RecordTests.RecordParam3;
 ")})));
 end RecordParam3;
@@ -4357,14 +4029,6 @@ parameter equation
  a1.z = a1.x;
 equation
  a1.y = 2;
-
-public
- record RecordTests.RecordParam4.A
-  parameter Real x;
-  parameter Real z;
-  Real y;
- end RecordTests.RecordParam4.A;
-
 end RecordTests.RecordParam4;
 ")})));
 end RecordParam4;
@@ -4393,14 +4057,6 @@ parameter equation
  a1.z = a1.x;
 equation
  a1.y = 2;
-
-public
- record RecordTests.RecordParam5.A
-  parameter Real x;
-  parameter Real z;
-  Real y;
- end RecordTests.RecordParam5.A;
-
 end RecordTests.RecordParam5;
 ")})));
 end RecordParam5;
@@ -4461,11 +4117,6 @@ public
   return;
  end RecordTests.RecordParam6.f;
 
- record RecordTests.RecordParam6.A
-  parameter Real x[2];
-  parameter Real y[2];
- end RecordTests.RecordParam6.A;
-
 end RecordTests.RecordParam6;
 ")})));
 end RecordParam6;
@@ -4495,12 +4146,6 @@ fclass RecordTests.RecordParam7
 equation
  x[1] = time;
  x[2] = time;
-
-public
- record RecordTests.RecordParam7.B
-  discrete Integer n;
- end RecordTests.RecordParam7.B;
-
 end RecordTests.RecordParam7;
 ")})));
 end RecordParam7;
@@ -4590,17 +4235,6 @@ equation
  b.b.a = time;
  b.c = time + 1;
  c.a = time;
-
-public
- record RecordTests.RecordMerge2.C
-  Real a;
- end RecordTests.RecordMerge2.C;
-
- record RecordTests.RecordMerge2.B
-  RecordTests.RecordMerge2.C b;
-  Real c;
- end RecordTests.RecordMerge2.B;
-
 end RecordTests.RecordMerge2;
 ")})));
 end RecordMerge2;
@@ -4629,13 +4263,6 @@ fclass RecordTests.RecordEval1
 equation
  z[1] = time;
  z[2] = 2 * time;
-
-public
- record RecordTests.RecordEval1.A
-  Real x;
-  Real y;
- end RecordTests.RecordEval1.A;
-
 end RecordTests.RecordEval1;
 ")})));
 end RecordEval1;
@@ -4664,13 +4291,6 @@ fclass RecordTests.RecordEval2
 equation
  z[1] = time;
  z[2] = 2 * time;
-
-public
- record RecordTests.RecordEval2.A
-  Real x;
-  Real y;
- end RecordTests.RecordEval2.A;
-
 end RecordTests.RecordEval2;
 ")})));
 end RecordEval2;
@@ -4701,13 +4321,6 @@ fclass RecordTests.RecordEval3
 equation
  z[1] = time;
  z[2] = 2 * time;
-
-public
- record RecordTests.RecordEval3.A
-  Real x;
-  Real y;
- end RecordTests.RecordEval3.A;
-
 end RecordTests.RecordEval3;
 ")})));
 end RecordEval3;
@@ -4738,13 +4351,6 @@ fclass RecordTests.RecordEval4
 equation
  z[1] = time;
  z[2] = 2 * time;
-
-public
- record RecordTests.RecordEval4.A
-  Real x;
-  Real y;
- end RecordTests.RecordEval4.A;
-
 end RecordTests.RecordEval4;
 ")})));
 end RecordEval4;
@@ -4787,17 +4393,6 @@ fclass RecordTests.RecordEval5
 equation
  z[1] = time;
  z[2] = 2 * time;
-
-public
- record RecordTests.RecordEval5.A
-  Real x[2];
-  Real y;
- end RecordTests.RecordEval5.A;
-
- record RecordTests.RecordEval5.B
-  RecordTests.RecordEval5.A a[2];
- end RecordTests.RecordEval5.B;
-
 end RecordTests.RecordEval5;
 ")})));
 end RecordEval5;
@@ -4828,13 +4423,6 @@ equation
  y[1] = time;
  y[2] = time;
  z = y[1] + y[2] * 2;
-
-public
- record RecordTests.RecordEval6.R
-  parameter Integer n1;
-  Real x;
- end RecordTests.RecordEval6.R;
-
 end RecordTests.RecordEval6;
 ")})));
 end RecordEval6;
@@ -4859,12 +4447,6 @@ fclass RecordTests.RecordModification1
 equation
  y = time;
  z.x = y + 2;
-
-public
- record RecordTests.RecordModification1.R
-  Real x;
- end RecordTests.RecordModification1.R;
-
 end RecordTests.RecordModification1;
 ")})));
 end RecordModification1;

@@ -1083,41 +1083,41 @@ aspect ConstantEvaluation {
 	    }
     	
     }
-    
-	
- 	/**
- 	 * \brief Create a CValue with the zero value for this type, if applicable.
- 	 */
- 	public CValue FType.zeroCValue() {
- 		if (isArray() && !zeroCValueScalar().isUnknown()) {
-	 		CValueArray res = new CValueArray(size());
-	 		while (!res.isFilled())
-	 			res.addCell(zeroCValueScalar());
-	 		return res; 
- 		} else {
- 			return zeroCValueScalar();
- 		}
- 	}
 
- 	public CValue FType.zeroCValueScalar()        { return CValue.UNSUPPORTED; }
- 	public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
- 	public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
- 	public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
- 	public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
 
- 	public CValue FType.convert(CValue v)        { return v; }
- 	public CValue FRealType.convert(CValue v)    { return v.convertReal(); }
- 	public CValue FIntegerType.convert(CValue v) { return v.convertInteger(); }
- 	public CValue FStringType.convert(CValue v)  { return v.convertString(); }
- 	public CValue FBooleanType.convert(CValue v) { return v.convertBoolean(); }
- 	
+    /**
+     * \brief Create a CValue with the zero value for this type, if applicable.
+     */
+    public CValue FType.zeroCValue() {
+        if (isArray() && !zeroCValueScalar().isUnknown()) {
+            CValueArray res = new CValueArray(size());
+            while (!res.isFilled())
+                res.addCell(zeroCValueScalar());
+            return res; 
+        } else {
+            return zeroCValueScalar();
+        }
+    }
+
+    public CValue FType.zeroCValueScalar()        { return CValue.UNSUPPORTED; }
+    public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
+    public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
+    public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
+    public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
+
+    public CValue FType.convert(CValue v)        { return v; }
+    public CValue FRealType.convert(CValue v)    { return v.convertReal(); }
+    public CValue FIntegerType.convert(CValue v) { return v.convertInteger(); }
+    public CValue FStringType.convert(CValue v)  { return v.convertString(); }
+    public CValue FBooleanType.convert(CValue v) { return v.convertBoolean(); }
+
     public CValue FType.limitCValueScalar(boolean high)        { return CValue.UNSUPPORTED; }
     public CValue FRealType.limitCValueScalar(boolean high)    { return new CValueReal(      high ? Double.MAX_VALUE  : -Double.MAX_VALUE); }
     public CValue FIntegerType.limitCValueScalar(boolean high) { return new CValueInteger(   high ? Integer.MAX_VALUE : Integer.MIN_VALUE); }
     public CValue FBooleanType.limitCValueScalar(boolean high) { return new CValueBoolean(   high ? true : false); }
     public CValue FEnumType.limitCValueScalar(boolean high)    { return new CValueEnum(this, high ? getNumFEnumLiteralType() : 1); }
- 	
-    
+
+
     /** 
      * \build Creates an FExp with literals from this Array.
      * 
@@ -1128,542 +1128,563 @@ aspect ConstantEvaluation {
     public FExp Array.buildLiteral(boolean toReal) {
     	return buildFArray(new LiteralBuilder(toReal));
     }
-    
+
     public class Array {
-	    /**
-	     * Helper object for {@link #buildLiteral(boolean)}.
-	     */
-	    protected static class LiteralBuilder implements ElementBuilder {
-	    	private boolean toReal;
-	    	
-	    	public LiteralBuilder(boolean toReal) {
-	    		this.toReal = toReal;
-	    	}
-	    	
-			public FExp build(FExp e) {
-				return toReal ? e.ceval().convertReal().buildLiteral() : e.ceval().buildLiteral();
-			}
-	    }
+        /**
+         * Helper object for {@link #buildLiteral(boolean)}.
+         */
+        protected static class LiteralBuilder implements ElementBuilder {
+            private boolean toReal;
+            
+            public LiteralBuilder(boolean toReal) {
+                this.toReal = toReal;
+            }
+            
+            public FExp build(FExp e) {
+                return toReal ? e.ceval().convertReal().buildLiteral() : e.ceval().buildLiteral();
+            }
+        }
     }
-    
-  /** 
-   * \brief Convenience function for savely checking if an expression as a particular value.
-   * 
-   */ 
-  syn boolean FExp.equalsRealValue(double val) {
-  	try {
-  		return variability().lessOrEqual(fConstant()) && ceval().realValue()==val;
-  	} catch(Exception e) {
-  		return false;
-  	}
-  }  
-    
-    
-  /**
-   * \brief Returns the constant value of a flat expression. 
-   * 
-   * If the expression is not constant, or if it contains type errors, a 
-   * CValueUnknown object is returned.
-   * 
-   * The actual evaluation of concrete FExp nodes is performed by dispatching
-   * with respect to the primitive type of the expression. For example, when an
-   * FAddExp node is evaluated, the computation proceeds in the following steps:
-   * 
-   *  - The primitive type of the expression is retreived using the type()
-   *    attribute.
-   *  - The method add() defined for FType is invoked.
-   *  - The resulting CValue is returned. 
-   *  
-   *  Using this strategy, a particular FExp node need not know the details of
-   *  how to evaluate itself in the case of operands of different types. Rather,
-   *  these computations are delegated to the respective types. In particular,
-   *  this design simplifies the task of extending the evaluation framework
-   *  to composite types such as arrays and complex numbers. In addition
-   *  the type dispatch makes implementation of support for operator overloading
-   *  simpler.
-   *  
-   *  Note that function evaluation depends on nothing being cached in constant 
-   *  evaluation. If caching is later needed, an argument to avoid caching must be 
-   *  added to cevalCalc() and an alternate ceval() created. Also, the form taking 
-   *  an Index should then probably be removed .
-   * 
-   * @return The constant value of the expression.
-   */
-  syn CValue FExp.ceval() {
-	  if (isCircular()) 
-		  return CValue.UNKNOWN;
-	  if (isArray()) {
-          if (size().evaluated().isUnknown())
-	          return CValue.UNKNOWN;
-		  return cevalArray(Index.NULL);
-	  }
-	  return cevalCalc();
-  }
-  
-  /**
-   * \brief Like {@see #ceval()}, but in the case of an array, only calculate 
-   *        the given cell, if possible. 
-   */
-  syn CValue FExp.ceval(Index i) {
-	  if (isCircular()) 
-		  return CValue.UNKNOWN;
-	  if (isArray())
-		  return cevalArray(i);
-	  return cevalCalc();
-  }
-  
-  /**
-   * Check if this expression can be constant evaluated.
-   * 
-   * Calls ceval and checks that no exception is thrown, and that the result isn't unknown.
-   * Use only for error checking, since it does not guarantee that the expression can be 
-   * evaluated at the moment - only after calculating overconstrained connection graph.
-   */
-  syn boolean FExp.canCeval() {
-  	  try {
-  	  	  return !ceval().isUnknown();
-	  } catch (ConstantEvaluationNotReadyException e) {
-		  // Will be evaluatable later, ignore for now
-		  return true;
-  	  } catch (Exception e) {
-  	  	  return false;
-  	  }
-  }
 
-  
-  /**
-   * \brief Constant evaluation for arrays.
-   * 
-   * @param i  the index of the cell to calculate, 
-   *           where Index.NULL means to calculate all cells
-   * @see #ceval()
-   */
-  syn CValue FExp.cevalArray(Index i) {
-	  CValueArray res = new CValueArray(size());
-	  Array arr = getArray();
-	  if (i == Index.NULL)
-		  for (Index j : arr.indices())
-			  res.setCell(j, arr.get(j).cevalCalc());
-	  else if (size().isOKIndex(i))
-		  res.setCell(i, arr.get(i).cevalCalc());
-	  else
-		  throw new ConstantEvaluationException();
-	  return res;
-  }
-  // Bypass for nodes with inherent support for constant evaluation of arrays.
-  eq FFunctionCall.cevalArray(Index i)    = cevalCalc();
-  eq InstFunctionCall.cevalArray(Index i) = cevalCalc();
-  eq FInstAccessExp.cevalArray(Index i)   = isSlice() ? super.cevalArray(i) : getInstAccess().ceval(i);
-  eq FIdUseExp.cevalArray(Index i)        = isSlice() ? super.cevalArray(i) : cevalCalc();
-  eq FIfExp.cevalArray(Index i)           = cevalSelectExp().cevalArray(i);
-  
-  /**
-   * \brief Delegate attribute for ceval().
-   * 
-   * This needs to be overridden for subclasses of FExp.
-   */
-  syn CValue FExp.cevalCalc() = CValue.UNSUPPORTED;
-  
-  eq FDotAddExp.cevalCalc() = type().add(getLeft().ceval(), getRight().ceval());
-  eq FDotSubExp.cevalCalc() = type().sub(getLeft().ceval(), getRight().ceval());
-  eq FDotMulExp.cevalCalc() = type().mul(getLeft().ceval(), getRight().ceval());
-  eq FDotDivExp.cevalCalc() = type().div(getLeft().ceval(), getRight().ceval());
-  eq FDotPowExp.cevalCalc() = type().pow(getLeft().ceval(), getRight().ceval());
-  
-  eq FMulExp.cevalCalc() {
-	  if (isElementWise() || isArray())
-		  return super.cevalCalc();
-	  
-	  FType t = type();
-	  CValue sum = new CValueInteger(0);
-	  CValueArray l = getLeft().ceval().array();
-	  CValueArray r = getRight().ceval().array();
-	  for (Index i : l.indices())
-		  sum = t.add(sum, t.mul(l.getCell(i), r.getCell(i)));
-	  return sum;
-  }
-  
-  eq FNegExp.cevalCalc() = type().neg(getFExp().ceval());
-  
-  eq FAndExp.cevalCalc() = type().and(getLeft().ceval(), getRight().ceval());
-  eq FOrExp.cevalCalc()  = type().or(getLeft().ceval(), getRight().ceval());
-  eq FNotExp.cevalCalc() = type().not(getFExp().ceval());
-  
-  syn FType FRelExp.cevalType() = getLeft().type().typePromotion(getRight().type());
-  
-  eq FEqExp.cevalCalc()  = cevalType().equ(getLeft().ceval(), getRight().ceval());
-  eq FNeqExp.cevalCalc() = cevalType().neq(getLeft().ceval(), getRight().ceval());
-  eq FGtExp.cevalCalc()  = cevalType().gt(getLeft().ceval(), getRight().ceval());
-  eq FGeqExp.cevalCalc() = cevalType().geq(getLeft().ceval(), getRight().ceval());
-  eq FLtExp.cevalCalc()  = cevalType().lt(getLeft().ceval(), getRight().ceval());
-  eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
-  
-  eq FIfExp.cevalCalc() = cevalSelectExp().ceval();
-  eq FHomotopyExp.cevalCalc()   = getActual().ceval();
-  eq FSemiLinearExp.cevalCalc() = type().mul(getX().ceval(),cevalSelectExp().ceval());
-  
-  syn FExp FIfExp.cevalSelectExp() =
-	  getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
-  syn FExp FSemiLinearExp.cevalSelectExp() = type().geq(getX().ceval(), type().zeroCValue()).booleanValue() ? getPosSlope() : getNegSlope();
-  
-  eq FRecordConstructor.cevalCalc() {
-	  CValueRecord res = new CValueRecord((FRecordType) type());
-	  int i = 0;
-	  for (FExp arg : getArgs())
-		  res.setMember(i++, arg.ceval());
-	  return res;
-  }
-  
-  eq InstRecordConstructor.cevalCalc() {
-      CValueRecord res = new CValueRecord((FRecordType) type());
-      int i = 0;
-      for (InstFunctionArgument arg : getArgs())
-          res.setMember(i++, arg.getFExp().ceval());
-      return res;
-  }
-  
-  // TODO: expand to handle boolean end enum index
-  eq FEndExp.cevalCalc() {
-	  int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;
-	  return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
-  }
-  
-  eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
-  
-  // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
-  eq FCardinality.cevalCalc() = new CValueInteger(1);
-  
-  eq FConnectionsOp.cevalCalc() {
-	  throw new ConstantEvaluationException();
-  }
-  eq FConnBoolOp.cevalCalc() {
-	  if (connectionGraph != null && connectionGraph.builtTreesDone()) 
-		  return new CValueBoolean(cevalFromGraph());
-	  else
-		  throw new ConstantEvaluationNotReadyException();
-  }
-  
-  syn boolean FConnBoolOp.cevalFromGraph();
-  eq FConnIsRoot.cevalFromGraph() = connectionGraph.ops(getA()).isRoot;
-  eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
+    /** 
+     * \brief Convenience function for savely checking if an expression as a particular value.
+     * 
+     */ 
+    syn boolean FExp.equalsRealValue(double val) {
+    	try {
+    		return variability().lessOrEqual(fConstant()) && ceval().realValue()==val;
+    	} catch(Exception e) {
+    		return false;
+    	}
+    }  
 
-  eq FTerminate.cevalCalc() {
-      throw new ConstantEvaluationException();
-  }
-  eq FReinit.cevalCalc() {
-      throw new ConstantEvaluationException();
-  }
-  eq FAssert.cevalCalc() {
-	  throw new ConstantEvaluationException();
-  }
 
-  /**
-   * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
-   */
-  protected OverconstrainedConnectionGraph FConnBoolOp.connectionGraph = null;
-  
-  eq FSizeExp.cevalCalc() {
-	  if (!hasDim())
-		  return CValue.UNKNOWN;
-	  int s = getFExp().size().get(dimension());
-	  return (s == Size.UNKNOWN) ? CValue.UNKNOWN : new CValueInteger(s);
-  }
-  
-  eq FUnknownSizeExp.cevalCalc() {
-      if (getVariable() == null)
+    /**
+     * \brief Returns the constant value of a flat expression. 
+     * 
+     * If the expression is not constant, or if it contains type errors, a 
+     * CValueUnknown object is returned.
+     * 
+     * The actual evaluation of concrete FExp nodes is performed by dispatching
+     * with respect to the primitive type of the expression. For example, when an
+     * FAddExp node is evaluated, the computation proceeds in the following steps:
+     * 
+     *  - The primitive type of the expression is retreived using the type()
+     *    attribute.
+     *  - The method add() defined for FType is invoked.
+     *  - The resulting CValue is returned. 
+     *  
+     *  Using this strategy, a particular FExp node need not know the details of
+     *  how to evaluate itself in the case of operands of different types. Rather,
+     *  these computations are delegated to the respective types. In particular,
+     *  this design simplifies the task of extending the evaluation framework
+     *  to composite types such as arrays and complex numbers. In addition
+     *  the type dispatch makes implementation of support for operator overloading
+     *  simpler.
+     *  
+     *  Note that function evaluation depends on nothing being cached in constant 
+     *  evaluation. If caching is later needed, an argument to avoid caching must be 
+     *  added to cevalCalc() and an alternate ceval() created. Also, the form taking 
+     *  an Index should then probably be removed.
+     * 
+     * @return The constant value of the expression.
+     */
+    syn CValue FExp.ceval() {
+        if (isCircular()) 
+            return CValue.UNKNOWN;
+        if (isArray()) {
+            if (size().evaluated().isUnknown())
+                return CValue.UNKNOWN;
+            return cevalArray(Index.NULL);
+        }
+        CValue resOver = cevalOverloaded();
+        return (resOver != null) ? resOver : cevalCalc();
+    }
+
+    /**
+     * \brief Like {@see #ceval()}, but in the case of an array, only calculate 
+     *        the given cell, if possible. 
+     */
+    syn CValue FExp.ceval(Index i) {
+        if (isCircular()) 
+            return CValue.UNKNOWN;
+        if (isArray())
+            return cevalArray(i);
+        CValue resOver = cevalOverloaded();
+        return (resOver != null) ? resOver : cevalCalc();
+    }
+
+    /**
+     * If this is an overloaded operator expression, evaluate it as such, otherwise return null.
+     */
+    syn CValue FExp.cevalOverloaded() {
+        if (!shouldUseOverloadedOperator() || operatorName() == null)
+            return null;
+        InstClassDecl func = overloadedOperator();
+        return (func == null) ? CValue.UNKNOWN : func.evaluateFirst(childFExps());
+    }
+
+    /**
+     * Check if this expression can be constant evaluated.
+     * 
+     * Calls ceval and checks that no exception is thrown, and that the result isn't unknown.
+     * Use only for error checking, since it does not guarantee that the expression can be 
+     * evaluated at the moment - only after calculating overconstrained connection graph.
+     */
+    syn boolean FExp.canCeval() {
+          try {
+              return !ceval().isUnknown();
+        } catch (ConstantEvaluationNotReadyException e) {
+          // Will be evaluatable later, ignore for now
+          return true;
+          } catch (Exception e) {
+              return false;
+          }
+    }
+
+
+    /**
+     * \brief Constant evaluation for arrays.
+     * 
+     * @param i  the index of the cell to calculate, 
+     *           where Index.NULL means to calculate all cells
+     * @see #ceval()
+     */
+    syn CValue FExp.cevalArray(Index i) {
+        CValueArray res = new CValueArray(size());
+        Array arr = getArray();
+        if (i == Index.NULL)
+          for (Index j : arr.indices())
+              res.setCell(j, arr.get(j).ceval());
+        else if (size().isOKIndex(i))
+          res.setCell(i, arr.get(i).ceval());
+        else
+          throw new ConstantEvaluationException();
+        return res;
+    }
+    // Bypass for nodes with inherent support for constant evaluation of arrays.
+    eq FFunctionCall.cevalArray(Index i)    = cevalCalc();
+    eq InstFunctionCall.cevalArray(Index i) = cevalCalc();
+    eq FInstAccessExp.cevalArray(Index i)   = isSlice() ? super.cevalArray(i) : getInstAccess().ceval(i);
+    eq FIdUseExp.cevalArray(Index i)        = isSlice() ? super.cevalArray(i) : cevalCalc();
+    eq FIfExp.cevalArray(Index i)           = cevalSelectExp().cevalArray(i);
+
+    /**
+     * \brief Delegate attribute for ceval().
+     * 
+     * This needs to be overridden for subclasses of FExp.
+     */
+    syn CValue FExp.cevalCalc() = CValue.UNSUPPORTED;
+
+    eq FDotAddExp.cevalCalc() = type().add(getLeft().ceval(), getRight().ceval());
+    eq FDotSubExp.cevalCalc() = type().sub(getLeft().ceval(), getRight().ceval());
+    eq FDotMulExp.cevalCalc() = type().mul(getLeft().ceval(), getRight().ceval());
+    eq FDotDivExp.cevalCalc() = type().div(getLeft().ceval(), getRight().ceval());
+    eq FDotPowExp.cevalCalc() = type().pow(getLeft().ceval(), getRight().ceval());
+
+    eq FMulExp.cevalCalc() {
+        if (isElementWise() || isArray())
+          return super.cevalCalc();
+        
+        FType t = type();
+        CValue sum = new CValueInteger(0);
+        CValueArray l = getLeft().ceval().array();
+        CValueArray r = getRight().ceval().array();
+        for (Index i : l.indices())
+          sum = t.add(sum, t.mul(l.getCell(i), r.getCell(i)));
+        return sum;
+    }
+
+    eq FNegExp.cevalCalc() = type().neg(getFExp().ceval());
+
+    eq FAndExp.cevalCalc() = type().and(getLeft().ceval(), getRight().ceval());
+    eq FOrExp.cevalCalc()  = type().or(getLeft().ceval(), getRight().ceval());
+    eq FNotExp.cevalCalc() = type().not(getFExp().ceval());
+
+    syn FType FRelExp.cevalType() = getLeft().type().typePromotion(getRight().type());
+
+    eq FEqExp.cevalCalc()  = cevalType().equ(getLeft().ceval(), getRight().ceval());
+    eq FNeqExp.cevalCalc() = cevalType().neq(getLeft().ceval(), getRight().ceval());
+    eq FGtExp.cevalCalc()  = cevalType().gt(getLeft().ceval(), getRight().ceval());
+    eq FGeqExp.cevalCalc() = cevalType().geq(getLeft().ceval(), getRight().ceval());
+    eq FLtExp.cevalCalc()  = cevalType().lt(getLeft().ceval(), getRight().ceval());
+    eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
+
+    eq FIfExp.cevalCalc() = cevalSelectExp().ceval();
+    eq FHomotopyExp.cevalCalc()   = getActual().ceval();
+    eq FSemiLinearExp.cevalCalc() = type().mul(getX().ceval(),cevalSelectExp().ceval());
+
+    syn FExp FIfExp.cevalSelectExp() =
+        getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+    syn FExp FSemiLinearExp.cevalSelectExp() = type().geq(getX().ceval(), type().zeroCValue()).booleanValue() ? getPosSlope() : getNegSlope();
+
+    eq FRecordConstructor.cevalCalc() {
+        CValueRecord res = new CValueRecord((FRecordType) type());
+        int i = 0;
+        for (FExp arg : getArgs())
+          res.setMember(i++, arg.ceval());
+        return res;
+    }
+
+    eq InstRecordConstructor.cevalCalc() {
+        CValueRecord res = new CValueRecord((FRecordType) type());
+        int i = 0;
+        for (InstFunctionArgument arg : getArgs())
+            res.setMember(i++, arg.getFExp().ceval());
+        return res;
+    }
+
+    // TODO: expand to handle boolean end enum index
+    eq FEndExp.cevalCalc() {
+        int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;
+        return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
+    }
+
+    eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
+
+    // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
+    eq FCardinality.cevalCalc() = new CValueInteger(1);
+
+    eq FConnectionsOp.cevalCalc() {
+        throw new ConstantEvaluationException();
+    }
+    eq FConnBoolOp.cevalCalc() {
+        if (connectionGraph != null && connectionGraph.builtTreesDone()) 
+          return new CValueBoolean(cevalFromGraph());
+        else
+          throw new ConstantEvaluationNotReadyException();
+    }
+
+    syn boolean FConnBoolOp.cevalFromGraph();
+    eq FConnIsRoot.cevalFromGraph() = connectionGraph.ops(getA()).isRoot;
+    eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
+
+    eq FTerminate.cevalCalc() {
+        throw new ConstantEvaluationException();
+    }
+    eq FReinit.cevalCalc() {
+        throw new ConstantEvaluationException();
+    }
+    eq FAssert.cevalCalc() {
+        throw new ConstantEvaluationException();
+    }
+
+    /**
+     * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
+     */
+    protected OverconstrainedConnectionGraph FConnBoolOp.connectionGraph = null;
+
+    eq FSizeExp.cevalCalc() {
+        if (!hasDim())
           return CValue.UNKNOWN;
-	  CValue val = getVariable().evaluationValue();
-	  return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
-  }
-  
-  eq FMinMaxExp.cevalCalc() {
-	  if (hasY()) {
-		  CValue x = getX().ceval();
-		  CValue y = getY().ceval();
-		  boolean selectX = type().lt(x, y).booleanValue() ^ !selectLesser();
-		  return selectX ? x : y;
-	  } else {
-		  Iterator<FExp> it = getX().getArray().iteratorFExp();
-		  boolean less = selectLesser();
-		  CValue sel = it.next().ceval();
-		  while (it.hasNext()) {
-			  CValue val = it.next().ceval();
-			  if (type().lt(val, sel).booleanValue() ^ !less)
-				  sel = val;
-		  }
-		  return sel;
-	  }
-  }
-  
-  eq FReductionExp.cevalCalc() {
-	  Iterator<FExp> it = getFExp().getArray().iteratorFExp();
-	  CValue value = reduceStartValue();
-	  while (it.hasNext())
-		  value = reduceOperation(value, it.next().ceval());
-	  return value;
-  }
-  
-  syn CValue FReductionExp.reduceStartValue();
-  eq FSumExp.reduceStartValue()     = type().zeroCValue();
-  eq FProductExp.reduceStartValue() = new CValueInteger(1);
-  
-  syn CValue FReductionExp.scalarReduceStartValue();
-  eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
-  eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
-  
-  syn CValue FMinMaxExp.scalarReduceStartValue();
-  eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);
-  eq FMinExp.scalarReduceStartValue() = type().limitCValueScalar(true);
-  
-  syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
-  eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
-  eq FProductExp.reduceOperation(CValue leftValue, CValue rightValue) = type().mul(leftValue, rightValue);
+        int s = getFExp().size().get(dimension());
+        return (s == Size.UNKNOWN) ? CValue.UNKNOWN : new CValueInteger(s);
+    }
 
-  
-  eq FNoEventExp.cevalCalc() = getFExp().ceval();
-  eq FSmoothExp.cevalCalc()  = getFExp().ceval();
-  eq FLoadResource.cevalCalc() = getFExp().ceval();
-  
-  eq FEdgeExp.cevalCalc()    = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
-  eq FChangeExp.cevalCalc()  = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
-  eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
-  
-  /** Decides what initial() is currently evaluated to. */
-  private static CValue FInitialExp.evaluationValue = CValueBoolean.FALSE;
-  
-  /** Set the value for initial() to evaluate to. */
-  public static void FInitialExp.setIsInitial(boolean value) {
-  	  evaluationValue = new CValueBoolean(value);
-  }
-  
-  /** Set if constant evaluation should consider simulation to be during initialization or not. */
-  public void FClass.setIsInitial(boolean initial) {
-  	  FInitialExp.setIsInitial(initial);
-  }
-  
-  eq FInitialExp.cevalCalc()  = evaluationValue;
-  eq FTerminalExp.cevalCalc() = CValueBoolean.FALSE;
-  
-  syn boolean FMinMaxExp.selectLesser();
-  eq FMinExp.selectLesser() = true;
-  eq FMaxExp.selectLesser() = false;
+    eq FUnknownSizeExp.cevalCalc() {
+        if (getVariable() == null)
+            return CValue.UNKNOWN;
+        CValue val = getVariable().evaluationValue();
+        return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
+    }
 
-  eq FRealLitExp.cevalCalc()         = new CValueReal(getValue());
-  eq FIntegerLitExp.cevalCalc()      = new CValueInteger(getValue());
-  eq FBooleanLitExpTrue.cevalCalc()  = new CValueBoolean(true);
-  eq FBooleanLitExpFalse.cevalCalc() = new CValueBoolean(false);
-  eq FStringLitExp.cevalCalc()       = new CValueString(getString());
-  eq FEnumLitExp.cevalCalc()         = new CValueEnum(type(), getValue());
-  
- 	syn CValue FIdUse.ceval() {
-		boolean func = inFunction();
-		FQName name = getFQName();
-		if (func)
-			name = name.resolveSubscripts();
-		FAbstractVariable var = func ? lookupFV(name) : myFV();
-		if (var != null && !var.isUnknown()) {
-			Index i = Index.NULL;
-			if (hasFArraySubscripts() && !name.isScalarized()) {
-				i = name.getFArraySubscripts().createIndex();
-			} else if (var instanceof FVariable && name.isScalarized() && !((FVariable) var).isScalarized()) {
-				i = ((FVariable) var).getFQName().getFArraySubscripts().createIndex();
-			}
-			if (i != Index.NULL) {
-				return var.inRecord() ? cevalRecordMember(name).array().getCell(i) : var.ceval(i);
-			} else {
-				return var.inRecord() ? cevalRecordMember(name) : var.ceval();
-			}
-		} else {
-			return CValue.UNKNOWN;
-		}
-	}
- 	eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
+    eq FMinMaxExp.cevalCalc() {
+        if (hasY()) {
+          CValue x = getX().ceval();
+          CValue y = getY().ceval();
+          boolean selectX = type().lt(x, y).booleanValue() ^ !selectLesser();
+          return selectX ? x : y;
+        } else {
+          Iterator<FExp> it = getX().getArray().iteratorFExp();
+          boolean less = selectLesser();
+          CValue sel = it.next().ceval();
+          while (it.hasNext()) {
+              CValue val = it.next().ceval();
+              if (type().lt(val, sel).booleanValue() ^ !less)
+                  sel = val;
+          }
+          return sel;
+        }
+    }
 
-  /**
-   * \brief Create a copy with all array subscripts replaced by literals.
-   */
-  public FQName FQName.resolveSubscripts() {
-	  return fullCopy();
-  }
-  
-  public FQNameFull FQNameFull.resolveSubscripts() {
-	  FQNameFull res = new FQNameFull();
-	  for (FQNamePart part : getFQNameParts())
-		  res.addFQNamePart(part.resolveSubscripts());
-	  return res;
-  }
-  
-  /**
-   * \brief Create a copy with all array subscripts replaced by literals.
-   */
-  public FQNamePart FQNamePart.resolveSubscripts() {
-	  return fullCopy();
-  }
-  
-  public FQNamePartArray FQNamePartArray.resolveSubscripts() {
-	  return new FQNamePartArray(getName(), getFArraySubscripts().resolveSubscripts());
-  }
-  
-  /**
-   * \brief Create a copy with all array subscripts replaced by literals.
-   */
-  public FArraySubscripts FArraySubscripts.resolveSubscripts() {
-	  FArraySubscripts res = new FArraySubscripts();
-	  for (FSubscript fs : getFSubscripts())
-		  res.addFSubscript(fs.resolveSubscripts());
-	  return res;
-  }
-  
-  /**
-   * \brief Create a copy with all array subscripts replaced by literals.
-   */
-  public FSubscript FSubscript.resolveSubscripts() {
-	  return this;
-  }
-  
-  /**
-   * \brief Create a copy with all array subscripts replaced by literals.
-   */
-  public FExpSubscript FExpSubscript.resolveSubscripts() {
-	  return new FExpSubscript(ceval().buildLiteral());
-  }
-  
-  /**
-   * \brief Perform constant evaluation of an access to a record member.
-   */
-  syn CValue FIdUse.cevalRecordMember(FQName name) {
-	  if (name.numDots() < 1)
-		  return CValue.UNKNOWN;
-	  String last = name.lastActualPartName();
-	  FQName prefix = name.copyPrefix();
-	  FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
-	  CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
-	  if (prefix.hasFArraySubscripts())
-		  res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
-	  return res.record().getMember(last);
-  }
- 
-  eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
-  eq FDerExp.cevalCalc() = 
-			getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
-  eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
-  eq FPreExp.cevalCalc()  = variability().constantVariability() ? super.cevalCalc()   : CValue.UNKNOWN;
-  
-  syn CValue InstAccess.ceval()        = ceval(Index.NULL);
-  syn CValue InstAccess.ceval(Index i) = CValue.UNKNOWN;
-  eq InstDot.ceval(Index i)            = getLastInstAccess().ceval(i);
-  eq InstGlobalAccess.ceval(Index i)   = getInstAccess().ceval(i);
-  eq InstNamedAccess.ceval(Index i) {
-	  CValue res = CValue.UNKNOWN;
-	  if (myInstComponentDecl().isAssignable()) {
-		  Index iHere = Index.NULL;
-		  InstAssignable var = (InstAssignable) myInstComponentDecl();
-		  InstComponentDecl inner = var.myInnerInstComponentDecl();
-		  if (!inner.isUnknown())
-			  var = (InstAssignable) inner;
-		  
-		  if (hasFArraySubscripts()) {
-			  FArraySubscripts fas = getFArraySubscripts();
-			  iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
-			  i = iHere.expand(i);
-		  }
-		  
-		  if (shouldCevalThroughParent(var)) {
-			  res = cevalRecordMember(getID());
-			  if (i != Index.NULL)
-				  res = res.array().getCell(i);
-			  return res;
-		  } else {
-			  res = var.ceval(i);
-		  }
-		  if (iHere != Index.NULL)
-			  res = res.array().getCell(iHere);
-	  }
-	  return res;
-  }
-  
-  /**
-   * \brief Check if constant evaluation should go through surrounding record.
-   */
-  protected boolean InstNamedAccess.shouldCevalThroughParent(InstAssignable var) {
-	  if (!var.inRecord() || !var.inFunction() || 
-			  containingInstComponent() == var.containingInstComponent())
-		  return false;
-	  InstAccess first = getTopInstAccess().getFirstInstAccess();
-	  return !first.myInstComponentDecl().evaluationValue().isUnknown();
-  }
-  
-  /**
-   * \brief Perform constant evaluation of an access to a record member.
-   */
-  inh CValue InstAccess.cevalRecordMember(String id);
-  eq BaseNode.getChild().cevalRecordMember(String id)          = CValue.UNKNOWN;
-  eq InstDot.getInstAccess(int i).cevalRecordMember(String id) = 
-		  (i == 0) ? cevalRecordMember(id) : getInstAccess(i - 1).ceval().record().getMember(id);
-  
-  // TODO: if caching, use cevalFunction() instead
-  eq FFunctionCall.cevalCalc()    = evaluate()[0];
-  eq InstFunctionCall.cevalCalc() = hasOutputs() ? evaluate()[0] : CValue.UNKNOWN;
-  
-  eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
-  eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
-  eq FSqrtExp.cevalCalc()  = new CValueReal(StrictMath.sqrt(getFExp().ceval().realValue()));
-  eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
-  eq FStringExp.cevalCalc() {
-	  Object value;
-	  if (getValue().type().isReal())
-		  value = getValue().ceval().realValue();
-	  else if (getValue().type().isInteger())
-		  value = getValue().ceval().intValue();
-	  else if (getValue().type().isBoolean() || getValue().type().isEnum())
-		  value = getValue().ceval().stringValue();
-	  else
-		  throw new UnsupportedOperationException();
-	  return new CValueString(String.format((Locale) null, formatString(), value));
-  }
-  
-  // TODO: support format args
-  syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
-  
-  syn String FStringExp.formatWidth() = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
-  syn String FStringExp.formatFlags() = leftJustified() && minimumLength() > 0 ? "-" : "";
-  syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";
-  syn String FStringExp.formatSpecifier() = getValue().type().formatSpecifier();
-  syn int FStringExp.minimumLength() = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
-  syn boolean FStringExp.leftJustified() = hasLeftJustified() ? getLeftJustified().ceval().booleanValue() : true;
-  syn int FStringExp.significantDigits() = hasSignificantDigits() ? getSignificantDigits().ceval().intValue() : DEFAULT_PRECISION;
-  syn String FType.formatSpecifier() {
-	  throw new UnsupportedOperationException();
-  }
-  eq FRealType.formatSpecifier()    = "g";
-  eq FIntegerType.formatSpecifier() = "d";
-  eq FBooleanType.formatSpecifier() = "s";
-  eq FEnumType.formatSpecifier()    = "s";
-  public static final int FStringExp.DEFAULT_PRECISION = 6;
-  
-  eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
-  eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));
-  eq FRemFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().truncToZero(type().div(getX().ceval(), getY().ceval())), getY().ceval()));
-  eq FCeilFuncExp.cevalCalc()        = type().ceil(getX().ceval());  
-  eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
-  eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
-  
-  eq FSinExp.cevalCalc()   = new CValueReal(StrictMath.sin(getFExp().ceval().realValue()));
-  eq FCosExp.cevalCalc()   = new CValueReal(StrictMath.cos(getFExp().ceval().realValue()));
-  eq FTanExp.cevalCalc()   = new CValueReal(StrictMath.tan(getFExp().ceval().realValue()));	  
-  eq FAsinExp.cevalCalc()  = new CValueReal(StrictMath.asin(getFExp().ceval().realValue()));
-  eq FAcosExp.cevalCalc()  = new CValueReal(StrictMath.acos(getFExp().ceval().realValue()));
-  eq FAtanExp.cevalCalc()  = new CValueReal(StrictMath.atan(getFExp().ceval().realValue()));	  
-  eq FAtan2Exp.cevalCalc() = new CValueReal(StrictMath.atan2(getFExp().ceval().realValue(),
-		                                               getY().ceval().realValue()));	  
-  eq FSinhExp.cevalCalc()  = new CValueReal(StrictMath.sinh(getFExp().ceval().realValue()));
-  eq FCoshExp.cevalCalc()  = new CValueReal(StrictMath.cosh(getFExp().ceval().realValue()));
-  eq FTanhExp.cevalCalc()  = new CValueReal(StrictMath.tanh(getFExp().ceval().realValue()));	  
-  eq FExpExp.cevalCalc()   = new CValueReal(StrictMath.exp(getFExp().ceval().realValue()));
-  eq FLogExp.cevalCalc()   = new CValueReal(StrictMath.log(getFExp().ceval().realValue()));
-  eq FLog10Exp.cevalCalc() = new CValueReal(StrictMath.log10(getFExp().ceval().realValue()));	  
-  
-  eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
+    eq FReductionExp.cevalCalc() {
+        Iterator<FExp> it = getFExp().getArray().iteratorFExp();
+        CValue value = reduceStartValue();
+        while (it.hasNext())
+          value = reduceOperation(value, it.next().ceval());
+        return value;
+    }
+
+    syn CValue FReductionExp.reduceStartValue();
+    eq FSumExp.reduceStartValue()     = type().zeroCValue();
+    eq FProductExp.reduceStartValue() = new CValueInteger(1);
+
+    syn CValue FReductionExp.scalarReduceStartValue();
+    eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
+    eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
+
+    syn CValue FMinMaxExp.scalarReduceStartValue();
+    eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);
+    eq FMinExp.scalarReduceStartValue() = type().limitCValueScalar(true);
+
+    syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
+    eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
+    eq FProductExp.reduceOperation(CValue leftValue, CValue rightValue) = type().mul(leftValue, rightValue);
+
+
+    eq FNoEventExp.cevalCalc() = getFExp().ceval();
+    eq FSmoothExp.cevalCalc()  = getFExp().ceval();
+    eq FLoadResource.cevalCalc() {
+        String arg = getFExp().ceval().stringValue();
+        if (!new File(arg).isAbsolute())
+            arg = resolve(arg);
+        return new CValueString(arg);
+    }
+
+    eq FEdgeExp.cevalCalc()    = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
+    eq FChangeExp.cevalCalc()  = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
+    eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
+
+    /** Decides what initial() is currently evaluated to. */
+    private static CValue FInitialExp.evaluationValue = CValueBoolean.FALSE;
+
+    /** Set the value for initial() to evaluate to. */
+    public static void FInitialExp.setIsInitial(boolean value) {
+          evaluationValue = new CValueBoolean(value);
+    }
+
+    /** Set if constant evaluation should consider simulation to be during initialization or not. */
+    public void FClass.setIsInitial(boolean initial) {
+          FInitialExp.setIsInitial(initial);
+    }
+
+    eq FInitialExp.cevalCalc()  = evaluationValue;
+    eq FTerminalExp.cevalCalc() = CValueBoolean.FALSE;
+
+    syn boolean FMinMaxExp.selectLesser();
+    eq FMinExp.selectLesser() = true;
+    eq FMaxExp.selectLesser() = false;
+
+    eq FRealLitExp.cevalCalc()         = new CValueReal(getValue());
+    eq FIntegerLitExp.cevalCalc()      = new CValueInteger(getValue());
+    eq FBooleanLitExpTrue.cevalCalc()  = new CValueBoolean(true);
+    eq FBooleanLitExpFalse.cevalCalc() = new CValueBoolean(false);
+    eq FStringLitExp.cevalCalc()       = new CValueString(getString());
+    eq FEnumLitExp.cevalCalc()         = new CValueEnum(type(), getValue());
+
+      syn CValue FIdUse.ceval() {
+        boolean func = inFunction();
+        FQName name = getFQName();
+        if (func)
+            name = name.resolveSubscripts();
+        FAbstractVariable var = func ? lookupFV(name) : myFV();
+        if (var != null && !var.isUnknown()) {
+            Index i = Index.NULL;
+            if (hasFArraySubscripts() && !name.isScalarized()) {
+                i = name.getFArraySubscripts().createIndex();
+            } else if (var instanceof FVariable && name.isScalarized() && !((FVariable) var).isScalarized()) {
+                i = ((FVariable) var).getFQName().getFArraySubscripts().createIndex();
+            }
+            if (i != Index.NULL) {
+                return var.inRecord() ? cevalRecordMember(name).array().getCell(i) : var.ceval(i);
+            } else {
+                return var.inRecord() ? cevalRecordMember(name) : var.ceval();
+            }
+        } else {
+            return CValue.UNKNOWN;
+        }
+      }
+      eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
+
+    /**
+     * \brief Create a copy with all array subscripts replaced by literals.
+     */
+    public FQName FQName.resolveSubscripts() {
+        return fullCopy();
+    }
+
+    public FQNameFull FQNameFull.resolveSubscripts() {
+        FQNameFull res = new FQNameFull();
+        for (FQNamePart part : getFQNameParts())
+          res.addFQNamePart(part.resolveSubscripts());
+        return res;
+    }
+
+    /**
+     * \brief Create a copy with all array subscripts replaced by literals.
+     */
+    public FQNamePart FQNamePart.resolveSubscripts() {
+        return fullCopy();
+    }
+
+    public FQNamePartArray FQNamePartArray.resolveSubscripts() {
+        return new FQNamePartArray(getName(), getFArraySubscripts().resolveSubscripts());
+    }
+
+    /**
+     * \brief Create a copy with all array subscripts replaced by literals.
+     */
+    public FArraySubscripts FArraySubscripts.resolveSubscripts() {
+        FArraySubscripts res = new FArraySubscripts();
+        for (FSubscript fs : getFSubscripts())
+          res.addFSubscript(fs.resolveSubscripts());
+        return res;
+    }
+
+    /**
+     * \brief Create a copy with all array subscripts replaced by literals.
+     */
+    public FSubscript FSubscript.resolveSubscripts() {
+        return this;
+    }
+
+    /**
+     * \brief Create a copy with all array subscripts replaced by literals.
+     */
+    public FExpSubscript FExpSubscript.resolveSubscripts() {
+        return new FExpSubscript(ceval().buildLiteral());
+    }
+
+    /**
+     * \brief Perform constant evaluation of an access to a record member.
+     */
+    syn CValue FIdUse.cevalRecordMember(FQName name) {
+        if (name.numDots() < 1)
+          return CValue.UNKNOWN;
+        String last = name.lastActualPartName();
+        FQName prefix = name.copyPrefix();
+        FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
+        CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
+        if (prefix.hasFArraySubscripts())
+          res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
+        return res.record().getMember(last);
+    }
+
+    eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
+    eq FDerExp.cevalCalc() = 
+        getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
+    eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
+    eq FPreExp.cevalCalc()  = variability().constantVariability() ? super.cevalCalc()   : CValue.UNKNOWN;
+
+    syn CValue InstAccess.ceval()        = ceval(Index.NULL);
+    syn CValue InstAccess.ceval(Index i) = CValue.UNKNOWN;
+    eq InstDot.ceval(Index i)            = getLastInstAccess().ceval(i);
+    eq InstGlobalAccess.ceval(Index i)   = getInstAccess().ceval(i);
+    eq InstNamedAccess.ceval(Index i) {
+        CValue res = CValue.UNKNOWN;
+        if (myInstComponentDecl().isAssignable()) {
+          Index iHere = Index.NULL;
+          InstAssignable var = (InstAssignable) myInstComponentDecl();
+          InstComponentDecl inner = var.myInnerInstComponentDecl();
+          if (!inner.isUnknown())
+              var = (InstAssignable) inner;
+          
+          if (hasFArraySubscripts()) {
+              FArraySubscripts fas = getFArraySubscripts();
+              iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
+              i = iHere.expand(i);
+          }
+          
+          if (shouldCevalThroughParent(var)) {
+              res = cevalRecordMember(getID());
+              if (i != Index.NULL)
+                  res = res.array().getCell(i);
+              return res;
+          } else {
+              res = var.ceval(i);
+          }
+          if (iHere != Index.NULL)
+              res = res.array().getCell(iHere);
+        } else if (myInstClassDecl().isEnum()) {
+            res = new CValueInteger(myInstClassDecl().enumLiterals().size());
+        } else if (myInstClassDecl().isBoolean()) {
+            res = new CValueInteger(2);
+        }
+        return res;
+    }
+
+    /**
+     * \brief Check if constant evaluation should go through surrounding record.
+     */
+    protected boolean InstNamedAccess.shouldCevalThroughParent(InstAssignable var) {
+        if (!var.inRecord() || !var.inFunction() || 
+              containingInstComponent() == var.containingInstComponent())
+          return false;
+        InstAccess first = getTopInstAccess().getFirstInstAccess();
+        return !first.myInstComponentDecl().evaluationValue().isUnknown();
+    }
+
+    /**
+     * \brief Perform constant evaluation of an access to a record member.
+     */
+    inh CValue InstAccess.cevalRecordMember(String id);
+    eq BaseNode.getChild().cevalRecordMember(String id)          = CValue.UNKNOWN;
+    eq InstDot.getInstAccess(int i).cevalRecordMember(String id) = 
+        (i == 0) ? cevalRecordMember(id) : getInstAccess(i - 1).ceval().record().getMember(id);
+
+    // TODO: if caching, use cevalFunction() instead
+    eq FFunctionCall.cevalCalc()    = evaluate()[0];
+    eq InstFunctionCall.cevalCalc() = hasOutputs() ? evaluate()[0] : CValue.UNKNOWN;
+
+    eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
+    eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
+    eq FSqrtExp.cevalCalc()  = new CValueReal(StrictMath.sqrt(getFExp().ceval().realValue()));
+    eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
+    eq FStringExp.cevalCalc() {
+        Object value;
+        if (getValue().type().isReal())
+          value = getValue().ceval().realValue();
+        else if (getValue().type().isInteger())
+          value = getValue().ceval().intValue();
+        else if (getValue().type().isBoolean() || getValue().type().isEnum())
+          value = getValue().ceval().stringValue();
+        else
+          throw new UnsupportedOperationException();
+        return new CValueString(String.format((Locale) null, formatString(), value));
+    }
+
+    // TODO: support format args
+    syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
+
+    syn String FStringExp.formatWidth() = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
+    syn String FStringExp.formatFlags() = leftJustified() && minimumLength() > 0 ? "-" : "";
+    syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";
+    syn String FStringExp.formatSpecifier() = getValue().type().formatSpecifier();
+    syn int FStringExp.minimumLength() = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
+    syn boolean FStringExp.leftJustified() = hasLeftJustified() ? getLeftJustified().ceval().booleanValue() : true;
+    syn int FStringExp.significantDigits() = hasSignificantDigits() ? getSignificantDigits().ceval().intValue() : DEFAULT_PRECISION;
+    syn String FType.formatSpecifier() {
+        throw new UnsupportedOperationException();
+    }
+    eq FRealType.formatSpecifier()    = "g";
+    eq FIntegerType.formatSpecifier() = "d";
+    eq FBooleanType.formatSpecifier() = "s";
+    eq FEnumType.formatSpecifier()    = "s";
+    public static final int FStringExp.DEFAULT_PRECISION = 6;
+
+    eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
+    eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));
+    eq FRemFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().truncToZero(type().div(getX().ceval(), getY().ceval())), getY().ceval()));
+    eq FCeilFuncExp.cevalCalc()        = type().ceil(getX().ceval());
+    eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
+    eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
+
+    eq FSinExp.cevalCalc()   = new CValueReal(StrictMath.sin(getFExp().ceval().realValue()));
+    eq FCosExp.cevalCalc()   = new CValueReal(StrictMath.cos(getFExp().ceval().realValue()));
+    eq FTanExp.cevalCalc()   = new CValueReal(StrictMath.tan(getFExp().ceval().realValue()));
+    eq FAsinExp.cevalCalc()  = new CValueReal(StrictMath.asin(getFExp().ceval().realValue()));
+    eq FAcosExp.cevalCalc()  = new CValueReal(StrictMath.acos(getFExp().ceval().realValue()));
+    eq FAtanExp.cevalCalc()  = new CValueReal(StrictMath.atan(getFExp().ceval().realValue()));
+    eq FAtan2Exp.cevalCalc() = new CValueReal(StrictMath.atan2(getFExp().ceval().realValue(),
+                                                               getY().ceval().realValue()));
+    eq FSinhExp.cevalCalc()  = new CValueReal(StrictMath.sinh(getFExp().ceval().realValue()));
+    eq FCoshExp.cevalCalc()  = new CValueReal(StrictMath.cosh(getFExp().ceval().realValue()));
+    eq FTanhExp.cevalCalc()  = new CValueReal(StrictMath.tanh(getFExp().ceval().realValue()));
+    eq FExpExp.cevalCalc()   = new CValueReal(StrictMath.exp(getFExp().ceval().realValue()));
+    eq FLogExp.cevalCalc()   = new CValueReal(StrictMath.log(getFExp().ceval().realValue()));
+    eq FLog10Exp.cevalCalc() = new CValueReal(StrictMath.log10(getFExp().ceval().realValue()));
+
+    eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval()      = getFExp().ceval();
@@ -2208,54 +2229,78 @@ aspect ConstantEvaluation {
 	  }
   }
   private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
-  
-  /**
-   * \brief Perform constant evaluation of functions.
-   * 
-   * @param values  constant values for the variables. 
-   *                Should be filled with the values of the inputs.
-   */
-  public void InstClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  values.clear(); // Make sure evaluation returns CValue.UNKNOWN
-  }
 
-  public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  // We assume this class is a function
-	  
-        FAlgorithm fab = findFunctionAlgorithm();
-        if (fab == null) {
-            if (hasInstExternal()) {
-                fab = getInstExternal().getFAlgorithm();
-            } else {
-                values.clear();
-                return;
-            }
+    /**
+     * Constant-evaluate function with given set of arguments and return value for first output.
+     * 
+     * @param args  arguments of the function call
+     */
+    public CValue InstClassDecl.evaluateFirst(Iterable<FExp> args) {
+        Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
+        for (CommonVariableDecl var : myInputs()) 
+            var.prepareForFunctionEval();
+        int i = 0;
+        for (FExp arg : args) {
+            if (i < myInputs().size())
+                values.put(myInputs().get(i), arg.ceval());
+            else
+                throw new ConstantEvaluationException();
+            i++;
         }
-	  
-	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
-	  currentEvaluationValues = values;
-	  for (InstComponentDecl var : allInstComponentDecls())
-		  var.setEvaluationValue(null);
-	  fab.prepareForFunctionEval();
-	  
-	  for (InstComponentDecl var : myInputs())
-		  var.readEvaluationValue(values);
-	  for (InstComponentDecl var : myNonInputs())
-		  var.readEvaluationValue(values);
-	  
-	  try {
-		  fab.getFStatements().evaluateList(values);
-	  } finally {
-		  for (InstComponentDecl var : allInstComponentDecls())
-			  var.setEvaluationValue(null);
-		  if (oldVal != null)
-			  for (CommonVariableDecl var : oldVal.keySet())
-				  var.readEvaluationValue(oldVal);
-		  currentEvaluationValues = oldVal;
-	  }
-  }
-  private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
-  
+        
+        evaluate(values);
+        
+        CValue res = myOutputs().isEmpty() ? null : values.get(myOutputs().get(0));
+        return (res == null) ? CValue.UNKNOWN : res;
+    }
+
+    /**
+     * Perform constant evaluation of functions.
+     * 
+     * @param values  constant values for the variables. 
+     *                Should be filled with the values of the inputs.
+     */
+    public void InstClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
+        values.clear(); // Make sure evaluation returns CValue.UNKNOWN
+    }
+
+    public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
+        // We assume this class is a function
+        
+          FAlgorithm fab = findFunctionAlgorithm();
+          if (fab == null) {
+              if (hasInstExternal()) {
+                  fab = getInstExternal().getFAlgorithm();
+              } else {
+                  values.clear();
+                  return;
+              }
+          }
+        
+        Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
+        currentEvaluationValues = values;
+        for (InstComponentDecl var : allInstComponentDecls())
+          var.setEvaluationValue(null);
+        fab.prepareForFunctionEval();
+        
+        for (InstComponentDecl var : myInputs())
+          var.readEvaluationValue(values);
+        for (InstComponentDecl var : myNonInputs())
+          var.readEvaluationValue(values);
+        
+        try {
+          fab.getFStatements().evaluateList(values);
+        } finally {
+          for (InstComponentDecl var : allInstComponentDecls())
+              var.setEvaluationValue(null);
+          if (oldVal != null)
+              for (CommonVariableDecl var : oldVal.keySet())
+                  var.readEvaluationValue(oldVal);
+          currentEvaluationValues = oldVal;
+        }
+    }
+    private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
+
   /**
    * \brief Save current function evaluation value to map.
    */

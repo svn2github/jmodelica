@@ -226,7 +226,7 @@ aspect FlatVariability {
         }
         return v;
     }
-	
+
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
 	eq InstEnumLiteral.variability() = fConstant();
 	
@@ -241,17 +241,17 @@ aspect FlatVariability {
 	}
 	eq InstRecord.defaultVariability() {
 		InstComponentDecl rec = this;
-		if (isArray()) {
-			if (getNumInstComponentDecl() == 0)
-				return fConstant();
-			rec = getInstComponentDecl(0);
+		for (int i = 0; i < ndims(); i++) {
+			if (rec.getNumInstComponentDecl() == 0)
+				return fContinuous();
+			rec = rec.getInstComponentDecl(0);
 		}
 		FTypePrefixVariability var = fConstant();
 		for (InstComponentDecl icd : rec.allInstComponentDecls()) 
 			var = var.combine(icd.variability());
 		return var;
 	}
-	
+
 	syn FTypePrefixVariability FType.funcOutputVariability() = fDiscrete();
 	eq FRealType.funcOutputVariability() = fContinuous();
 	eq FRecordType.funcOutputVariability() {

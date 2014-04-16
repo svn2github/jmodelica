@@ -153,6 +153,8 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     cb->model_data = component;
     
     resource_location = jmi_locate_resources(functions.allocateMemory);
+    if (!resource_location)
+        functions.logger(0, instanceName, fmiWarning, "Warning", "Could not find resource location.");
     
     retval = jmi_me_init(cb, &component->jmi, GUID, resource_location);
     

@@ -192,11 +192,10 @@ int fileLength(const char* name) {
         ");
     end fileLength;
 
-    constant  Integer x = fileLength(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
-    parameter Integer y = fileLength(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
-    discrete  Integer z = fileLength(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
-    
-    discrete Integer rel = fileLength(loadResource("../Data/String.txt")); 
+    constant  Integer x = fileLength(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    parameter Integer y = fileLength(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    discrete  Integer z = fileLength(ModelicaServices.ExternalReferences.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+     
 end LoadResource;
 
 end OperatorTests;

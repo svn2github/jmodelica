@@ -21,146 +21,159 @@ import org.jmodelica.util.munkres.MunkresCost;
 
 aspect IndexReduction {
     
+    syn boolean FClass.indexReductionErrorsAsWarnings() = false;
+    
+    public class FClass {
+        /**
+         * Generate array initialization statements for unknown function arrays.
+         */
+        public class indexReduction extends Transformation {
+            public indexReduction() {
+                super("index_reduction");
+            }
+            
+            public void perform() {
+                try {
+                    // Make sure that we don't do this if any errors have been reported previously
+                    breakOnErrors();
+                    
+                    DAEBiPGraph = computeMatchedDAEBiPGraph();
+                    if (shouldReduceIndex(DAEBiPGraph))
+                        reduceIndex();
+                } catch (IndexReductionException e) {
+                    if (indexReductionErrorsAsWarnings())
+                        warning(e.getMessage());
+                    else
+                        error(e.getMessage());
+                    // We need to check structure and give warning since a bad system can affect index reduction
+                    checkStructure();
+                } catch (EquationDifferentiationException e) {
+                    error(e.getMessage());
+                }
+                breakOnErrors();
+            }
+        }
+    }
+    
+    private boolean FClass.shouldReduceIndex(BiPGraph g) {
+        return !g.isComplete() && continuousEquations().size() > 0 && derivativeVariables().size() > 0;
+    }
+    
+    
     /**
      * Perform index reduction on model.
      * 
      * @return  the new graph
      */
-    private BiPGraph FClass.reduceIndex() {
-        if (!root().options.getBooleanOption("index_reduction"))
-            return null;
-        beginStep("reduceIndex()");
-        try {
-            // Make sure that we don't do this if any errors have been reported previously
-            breakOnErrors();
-            
-            // Only do index reduction based on real variables and equations
-            BiPGraph g = new BiPGraph();
-            g.addVariables(this, VAR_TYPES_REAL);
-            g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
-            log.info("Index reduction starts");
-            log.info(g);
-            g.maximumMatching(true);    
-            log.info("DAE system real variables only");
-            log.info(g.printMatchingObj());
-            
-            IndexReductionResult result = null;
-            result = g.reduceIndex(false);
-            
-            // Add the new equations
-            // Replace selected dummy derivatives with algebraics
-            // Enable rewrite of identifiers? (not necessary?)
-            for (FAbstractEquation fe : result.getEquations()) {
-                addFEquation((FAbstractEquation)fe.fullCopy());
-            }
-            
-            Collection<FVariable> l = new ArrayList<FVariable>();
-            
-            for (FVariable fv : getFVariables()) {
-                if (result.getDummyDerivatives().contains(fv)) {
-                    if (fv instanceof FHDerivativeVariable) {
-                        FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-                            fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
-                            ((FHDerivativeVariable)fv).getOrder());
-                        l.add(fdv);
-                    } else if (fv instanceof FDerivativeVariable) {
-                        FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-                            fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-                        l.add(fdv);
-                    } else {
-                        l.add(fv);
-                    }
-                } else if (fv instanceof FHDerivativeVariable) {
-                    // Convert higher order derivative variables into
-                    // first order derivatives, generating variables for each step
-                    FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
-                    FQName fqnPrev = fv.getFQName().fullCopy();
-                    for (int i = 1; i < fhdv.getOrder(); i++) {
-                        FQName fqn = fv.getFQName().createDerPrefixedName(i);
-                        l.add(new FRealVariable(new FPublicVisibilityType(),
-                            fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
-                        // Derivative variable is added later
-                        addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
-                        fqnPrev = fqn;
-                    }
-                } else if (!fv.isDerivativeVariable()) {
-                    // Derivative variables are added later
+    private void FClass.reduceIndex() {
+        // Only do index reduction based on real variables and equations
+        BiPGraph g = new BiPGraph();
+        g.addVariables(this, VAR_TYPES_REAL);
+        g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
+        log.info("Index reduction starts");
+        log.info(g);
+        g.maximumMatching(true);    
+        log.info("DAE system real variables only");
+        log.info(g.printMatchingObj());
+        
+        IndexReductionResult result = null;
+        result = g.reduceIndex(false);
+        
+        // Add the new equations
+        // Replace selected dummy derivatives with algebraics
+        // Enable rewrite of identifiers? (not necessary?)
+        for (FAbstractEquation fe : result.getEquations()) {
+            addFEquation((FAbstractEquation)fe.fullCopy());
+        }
+        
+        Collection<FVariable> l = new ArrayList<FVariable>();
+        
+        for (FVariable fv : getFVariables()) {
+            if (result.getDummyDerivatives().contains(fv)) {
+                if (fv instanceof FHDerivativeVariable) {
+                    FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+                        fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
+                        ((FHDerivativeVariable)fv).getOrder());
+                    l.add(fdv);
+                } else if (fv instanceof FDerivativeVariable) {
+                    FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+                        fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
+                    l.add(fdv);
+                } else {
                     l.add(fv);
                 }
-            }
-
-            setFVariableList(new List<FVariable>(l));
-
-            
-            log.info(this);
-            
-            enableFHDerRewrite();
-
-            // flushAllRecursiveClearFinal must be used here in order to
-            // trigger rewrites of FDerExp -> FDummyDerExp
-            root().flushAllRecursiveClearFinal();
-
-            aliasElimination.apply();
-            // Add derivative variables
-            setFDerivativeVariables.apply();
-
-            root().flushAllRecursive();
-
-            log.info(this);
-            log.info(aliasManager.printAliasSets());
-
-            log.info("States:");
-            Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
-            for (FVariable fv : variables()) {
-                if (fv.aliasSet() != null) {
-                    for (AliasManager.AliasVariable av : fv.aliasSet()) {
-                        if (av.getFVariable().stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
-                            stateSelectAlwaysVars.add(av.getFVariable());
-                    }
-                } else if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS) {
-                    stateSelectAlwaysVars.add(fv);
+            } else if (fv instanceof FHDerivativeVariable) {
+                // Convert higher order derivative variables into
+                // first order derivatives, generating variables for each step
+                FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
+                FQName fqnPrev = fv.getFQName().fullCopy();
+                for (int i = 1; i < fhdv.getOrder(); i++) {
+                    FQName fqn = fv.getFQName().createDerPrefixedName(i);
+                    l.add(new FRealVariable(new FPublicVisibilityType(),
+                        fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
+                    // Derivative variable is added later
+                    addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
+                    fqnPrev = fqn;
                 }
+            } else if (!fv.isDerivativeVariable()) {
+                // Derivative variables are added later
+                l.add(fv);
             }
-            for (FVariable fv : differentiatedRealVariables()) {
-                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
-                    fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");
-                stateSelectAlwaysVars.remove(fv);
-                log.info(new PrettyPrintDelegate(fv, "  "));
-            }
-            for (FVariable fv : stateSelectAlwaysVars) 
-                if (fv.isSetInReinit())
-                    fv.error(fv.name() + " is assigned in reinit(), but could not be selected as state");
-                else
-                    fv.warning(fv.name() + " has stateSelect=always, but could not be selected as state");
-            
-            // Calculate new graph
-            g = new BiPGraph();
-            g.addVariables(this, VAR_TYPES_NORMAL);
-            g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
-    
-            log.info(g);
-            g.maximumMatching(true);
-            log.info("DAE system ");
-            log.info(g.printMatchingObj());
+        }
 
-            if (g.isComplete()) {
-                daeUnmatchedVariables.clear();
-                daeUnmatchedEquations.clear();
-                return g;
+        setFVariableList(new List<FVariable>(l));
+
+        
+        log.info(this);
+        
+        enableFHDerRewrite();
+
+        // flushAllRecursiveClearFinal must be used here in order to
+        // trigger rewrites of FDerExp -> FDummyDerExp
+        root().flushAllRecursiveClearFinal();
+
+        aliasElimination.apply();
+        // Add derivative variables
+        setFDerivativeVariables.apply();
+
+        root().flushAllRecursive();
+
+        log.info(this);
+        log.info(aliasManager.printAliasSets());
+
+        log.info("States:");
+        Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
+        for (FVariable fv : variables()) {
+            if (fv.aliasSet() != null) {
+                for (AliasManager.AliasVariable av : fv.aliasSet()) {
+                    if (av.getFVariable().stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+                        stateSelectAlwaysVars.add(av.getFVariable());
+                }
+            } else if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS) {
+                stateSelectAlwaysVars.add(fv);
             }
-            
+        }
+        for (FVariable fv : differentiatedRealVariables()) {
+            if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
+                fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");
+            stateSelectAlwaysVars.remove(fv);
+            log.info(new PrettyPrintDelegate(fv, "  "));
+        }
+        for (FVariable fv : stateSelectAlwaysVars) 
+            if (fv.isSetInReinit())
+                fv.error(fv.name() + " is assigned in reinit(), but could not be selected as state");
+            else
+                fv.warning(fv.name() + " has stateSelect=always, but could not be selected as state");
+
+        DAEBiPGraph = computeMatchedDAEBiPGraph();
+        log.info("BiPGraph after index reduction");
+        log.info(DAEBiPGraph);
+        log.info("BiPGraph matching after index reduction");
+        log.info(DAEBiPGraph.printMatchingObj());
+
+        if (!DAEBiPGraph.isComplete()) {
             // If we get here, index reduction failed
             throw new IndexReductionException();
-        } catch (IndexReductionException e) {
-            error(e.getMessage());
-            // We need to check structure and give warning since a bad system can affect index reduction
-            checkStructure();
-            return null;
-        } catch (EquationDifferentiationException e) {
-            error(e.getMessage());
-            return null;
-        } finally {
-            endStep("reduceIndex()");
         }
     }
 
@@ -701,11 +714,11 @@ aspect IndexReduction {
             
             @Override
             public int compareTo(BiPGraphCost other) {
-                int diff = Boolean.compare(unmatched, other.unmatched);
+                int diff = new Boolean(unmatched).compareTo(other.unmatched);
                 if (diff != 0)
                     return diff;
                 for (int i = 0; i < weights.length; i++) {
-                    diff = Long.compare(weights[i], other.weights[i]);
+                    diff = new Integer(weights[i]).compareTo(other.weights[i]);
                     if (diff != 0)
                         return diff;
                 }

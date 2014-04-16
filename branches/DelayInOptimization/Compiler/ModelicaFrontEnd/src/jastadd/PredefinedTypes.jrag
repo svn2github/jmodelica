@@ -264,10 +264,6 @@ aspect PredefinedTypes {
     		+ "  input Real x;\n"      // Type not used
     		+ "  output Real y;\n"     // Type not used
     		+ "end change;\n"
-            + "function loadResource\n"
-            + "  input String x;\n"
-            + "  output String y;\n"
-            + "end loadResource;\n"
     		+ "function reinit\n"
             + "  input Real x;\n"      // Type not used
             + "  input Real expr;\n"     // Type not used

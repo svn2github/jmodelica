@@ -199,14 +199,20 @@ aspect Flattening {
 
     public void FExp.flattenUsedFuncsAndEnums(FClass fc) {
         super.flattenUsedFuncsAndEnums(fc);
-        InstClassDecl oper = overloadedOperator();
+        InstClassDecl oper = overloadedOperator(true);
+        boolean scalar = oper == null;
+        if (scalar)
+            oper = overloadedOperator(false);
         if (oper != null) {
             oper.flattenFunction(fc);
             int i = 0;
             for (FExp arg : childFExps()) {
-                InstComponentDecl in = oper.myInputs().get(i);
-                if (!in.type().typeCompatible(arg.type()))
-                    in.type().matchOverloadedConstructor(arg.type()).flattenFunction(fc);
+                FType inType = oper.myInputs().get(i).type();
+                FType argType = arg.type();
+                if (scalar) 
+                    argType = argType.scalarType();
+                if (!inType.typeCompatible(argType, true))
+                    inType.matchOverloadedConstructor(argType).flattenFunction(fc);
                 i++;
             }
         }
@@ -1964,18 +1970,48 @@ aspect FlatExpressions {
 
     public FExp FBinExp.flatten(FQName prefix) {
         InstClassDecl oper = overloadedOperator();
-        if (oper != null)
-            return oper.flattenOverloadedFunctionCall(prefix, getLeft(), getRight());
-        else
+        if (oper == null)
             return createNode(getLeft().flatten(prefix), getRight().flatten(prefix));
+        else if (oper.myInputs().get(0).ndims() != getLeft().ndims() || oper.myInputs().get(1).ndims() != getRight().ndims())
+            return getArray().buildFlattened(prefix, this);
+        else
+            return oper.flattenOverloadedFunctionCall(prefix, getLeft(), getRight());
     }
 
     public FExp FUnaryExp.flatten(FQName prefix)   {
         InstClassDecl oper = overloadedOperator();
-        if (oper != null)
-            return oper.flattenOverloadedFunctionCall(prefix, getFExp());
-        else
+        if (oper == null)
             return createNode(getFExp().flatten(prefix));
+        else if (oper.myInputs().get(0).ndims() != getFExp().ndims())
+            return getArray().buildFlattened(prefix, this);
+        else
+            return oper.flattenOverloadedFunctionCall(prefix, getFExp());
+    }
+
+    /**
+     * Create an FArray containing flattened subexpressions.
+     */
+    public FExp Array.buildFlattened(FQName prefix, FExp context) {
+        return buildFArray(new FlattenedBuilder(prefix, context));
+    }
+
+    public class Array {
+        /**
+         * Helper object for {@link #buildFlattened(java.util.Map<String,FExp>)}.
+         */
+        protected static class FlattenedBuilder implements ElementBuilder {
+            private FQName prefix;
+            private FExp context;
+            
+            public FlattenedBuilder(FQName prefix, FExp context) {
+                this.prefix = prefix;
+                this.context = context;
+            }
+            
+            public FExp build(FExp e) {
+                return context.dynamicFExp(e).flatten(prefix);
+            }
+        }
     }
 
 	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
@@ -1993,7 +2029,7 @@ aspect FlatExpressions {
 	public FExp FUnaryBuiltIn.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
 	public FExp FEdgeExp.flatten(FQName prefix)        { return new FAndExp(getFExp().flatten(prefix), new FNotExp(FPreExp.create(getFExp().flatten(prefix)))); }
 	
-    public FExp FLoadResource.flatten(FQName prefix)   { return new FLoadResource(getFExp().flatten(prefix)); }
+    public FExp FLoadResource.flatten(FQName prefix)   { return new FLoadResource(new FStringLitExp(ceval().stringValue())); }
     
 	// These operators save reference to source node in instance tree until end of flattening - used for error checking them
 	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), FPreExp.create(getFExp().flatten(prefix), this)); }
@@ -2190,7 +2226,7 @@ aspect FlatExpressions {
             InstComponentDecl in = myInputs().get(i);
             if (args[i] == null) {
                 args[i] = in.createInstDefaultArgument().flatten(prefix);
-            } else if (!in.type().typeCompatible(argTypes[i])) {
+            } else if (!in.type().typeCompatible(argTypes[i], true)) {
                 InstClassDecl constructor = in.type().matchOverloadedConstructor(argTypes[i]);
                 args[i] = constructor.flattenOverloadedFunctionCall(prefix, args[i]);
             } else {

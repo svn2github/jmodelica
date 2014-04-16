@@ -80,10 +80,6 @@ aspect ComplianceCheck {
 		}
 	}
 
-    public void InstOperatorRecord.collectErrors(ErrorCheckType checkType) {
-        compliance("Operator records are not supported");
-    }
-
 	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
 	}
@@ -326,4 +322,8 @@ aspect ComplianceCheck {
 		}
 	}
 	
+    public void InstComposite.complianceCheck(ErrorCheckType checkType) {
+        if (isFunctionalArg())
+            compliance("Using functional input arguments is currently not supported");
+    }
 }
