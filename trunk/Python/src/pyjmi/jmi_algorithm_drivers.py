@@ -2763,6 +2763,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'measurement_data': None,
+                'delayed_feedback': None,
                 'IPOPT_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
