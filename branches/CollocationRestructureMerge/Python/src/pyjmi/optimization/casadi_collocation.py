@@ -4367,9 +4367,10 @@ class LocalDAECollocator(CasadiCollocator):
             
             self.cp_var_map = cp_var_map2
             self.cp_mx_to_name = cp_mx_to_name2
-            
-            print "____Map was updated____"
+
             """
+            print "____Map was updated____"
+
             for key,value in var_indices.iteritems():
                 print key
                 if key!='p_opt':
@@ -4393,6 +4394,7 @@ class LocalDAECollocator(CasadiCollocator):
                     print "\n"
                 else:
                     print value
+            """
                     
             if self.blocking_factors is not None:
                 raise CasadiCollocatorException(
@@ -4400,7 +4402,8 @@ class LocalDAECollocator(CasadiCollocator):
         ## assert(index == n_xx)
         if self.named_vars:
             assert(n_xx == len(xx))
-        
+
+        """
         for key,value in var_indices.iteritems():
             print key
             if key!='p_opt':
@@ -4424,6 +4427,8 @@ class LocalDAECollocator(CasadiCollocator):
                 print "\n"
             else:
                 print value
+        """
+                
         # Save variables and indices as data attributes
         self.xx = xx
         self.n_xx = n_xx
