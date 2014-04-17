@@ -26,17 +26,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.jmodelica.util.OptionRegistry.OptionType;
 import org.xml.sax.SAXException;
 
 /**
@@ -635,47 +632,38 @@ abstract public class OptionRegistry {
 		loadOptions(filepath);
 	}
 	
- 	protected void loadOptions(String filepath) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-		//logger.info("Loading options...");
-		org.w3c.dom.Document doc = parseAndGetDOM(filepath);
-		
-		javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
-		javax.xml.xpath.XPath xpath = factory.newXPath();
-			
-		javax.xml.xpath.XPathExpression expr;
-			
-		//set other options if there are any
-		expr = xpath.compile("OptionsRegistry/Options");
-		org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
-		if (options !=null && options.hasChildNodes()) {				
-			expr = xpath.compile("OptionsRegistry/Options/Option");
-			org.w3c.dom.NodeList theOptions = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-			expr = xpath.compile("OptionsRegistry/Options/Option/*");
-			org.w3c.dom.NodeList theAttributes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-			
-			for (int i=0; i<theOptions.getLength();i++) {
-				org.w3c.dom.Node n = theOptions.item(i);
-				org.w3c.dom.NamedNodeMap attributes = n.getAttributes();					
-				String type = attributes.getNamedItem("type").getTextContent();
-				
-				org.w3c.dom.Node a = theAttributes.item(i);
-				attributes = a.getAttributes();
-				String key = attributes.getNamedItem("key").getTextContent();
-				String value = attributes.getNamedItem("value").getTextContent();
-				
-				if (type.equals("string")) {
-					setStringOption(key, value);
-				} else if(type.equals("integer")) {
-					setIntegerOption(key, Integer.parseInt(value));
-				} else if(type.equals("real")) {
-					setRealOption(key, Double.parseDouble(value));
-				} else if(type.equals("boolean")) {
-					setBooleanOption(key, Boolean.parseBoolean(value));
-				}
-			}				
-		}	
- 	}
- 		 	
+    protected void loadOptions(String filepath) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        //logger.info("Loading options...");
+        org.w3c.dom.Document doc = parseAndGetDOM(filepath);
+
+        javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
+        javax.xml.xpath.XPath xpath = factory.newXPath();
+
+        javax.xml.xpath.XPathExpression expr;
+
+        //set other options if there are any
+        expr = xpath.compile("OptionsRegistry/Options");
+        org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
+        if (options !=null && options.hasChildNodes()) {				
+            expr = xpath.compile("OptionsRegistry/Options/Option");
+            org.w3c.dom.NodeList theOptions = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+            expr = xpath.compile("OptionsRegistry/Options/Option/*");
+            org.w3c.dom.NodeList theAttributes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+
+            for (int i=0; i<theOptions.getLength();i++) {
+                org.w3c.dom.Node n = theOptions.item(i);
+                org.w3c.dom.NamedNodeMap attributes = n.getAttributes();
+
+                org.w3c.dom.Node a = theAttributes.item(i);
+                attributes = a.getAttributes();
+                String key = attributes.getNamedItem("key").getTextContent();
+                String value = attributes.getNamedItem("value").getTextContent();
+
+                setOption(key, value);
+            }
+        }
+    }
+
 	/**
 	 * Parses an XML file and returns the DOM document instance.
 	 * 
@@ -807,6 +795,12 @@ abstract public class OptionRegistry {
 		return ((Boolean) o).booleanValue();
 	}
 	
+	public void setOption(String key, String value) {
+	    Option o = optionsMap.get(key);
+	    if (o == null)
+	        throw new UnknownOptionException(unknownOptionMessage(key));
+	    o.setValue(value);
+	}
 	
 	protected void createIntegerOption(String key, String description, int defaultValue) {
 		createIntegerOption(key, compiler, description, defaultValue);			
@@ -1216,12 +1210,14 @@ abstract public class OptionRegistry {
 		public String toString() {
 			return "\'"+key+"\': " + description; 
 		}
-		
-		protected void invalidValue(Object value, String allowedMsg) {
-			throw new InvalidOptionValueException("Option '" + key + "' does not allow the value '" +
-					value + "', " + allowedMsg);
-		}
 
+        protected void invalidValue(Object value, String allowedMsg) {
+            throw new InvalidOptionValueException("Option '" + key + "' does not allow the value '" +
+                    value + "'" + allowedMsg);
+        }
+
+		protected abstract void setValue(String str);
+		
         protected void changeDefault() {
             if (defaultChanged)
                 throw new IllegalArgumentException("Default value for " + key + " has already been changed.");
@@ -1245,12 +1241,25 @@ abstract public class OptionRegistry {
 			this.min = min;
 			this.max = max;
 		}
+		
+        @Override
+        protected void setValue(String str) {
+            try {
+                setValue(Integer.parseInt(str));
+            } catch (NumberFormatException e) {
+                invalidValue(str, ", expecting integer value" + minMaxStr());
+            }
+        }
 
-		public void setValue(int value) {
-			if (value < min || value > max)
-				invalidValue(value, "min: " + min + ", max: " + max);
-			this.value = value;
-		}
+        public void setValue(int value) {
+            if (value < min || value > max)
+                invalidValue(value, minMaxStr());
+            this.value = value;
+        }
+
+        private String minMaxStr() {
+            return (min == Integer.MIN_VALUE ? "" : ", min: " + min) + (max == Integer.MAX_VALUE ? "" : ", max: " + max);
+        }
 
         public void setDefault(int value) {
             changeDefault();
@@ -1302,22 +1311,23 @@ abstract public class OptionRegistry {
 			}
 		}
 
-		public void setValue(String value) {
-			if (vals != null) {
-			    String v = vals.get(value);
-			    if (v != null) {
-					this.value = v;
-					return;
-				}
-			    StringBuilder buf = new StringBuilder("allowed values: ");
-			    Object[] arr = vals.keySet().toArray();
-			    Arrays.sort(arr);
-			    buf.append(Arrays.toString(arr).substring(1));
-				invalidValue(value, buf.substring(0, buf.length() - 1));
-			} else {
-				this.value = value;
-			}
-		}
+        @Override
+        public void setValue(String value) {
+            if (vals != null) {
+                String v = vals.get(value);
+                if (v != null) {
+                    this.value = v;
+                    return;
+                }
+                StringBuilder buf = new StringBuilder(", allowed values: ");
+                Object[] arr = vals.keySet().toArray();
+                Arrays.sort(arr);
+                buf.append(Arrays.toString(arr).substring(1));
+                invalidValue(value, buf.substring(0, buf.length() - 1));
+            } else {
+                this.value = value;
+            }
+        }
 
         public void setDefault(String value) {
             changeDefault();
@@ -1366,11 +1376,24 @@ abstract public class OptionRegistry {
 			this.max = max;
 		}
 
-		public void setValue(double value) {
-			if (value < min || value > max)
-				invalidValue(value, "min: " + min + ", max: " + max);
-			this.value = value;
-		}
+        @Override
+        protected void setValue(String str) {
+            try {
+                setValue(Double.parseDouble(str));
+            } catch (NumberFormatException e) {
+                invalidValue(str, ", expecting integer value" + minMaxStr());
+            }
+        }
+
+        public void setValue(double value) {
+            if (value < min || value > max)
+                invalidValue(value, minMaxStr());
+            this.value = value;
+        }
+
+        private String minMaxStr() {
+            return (min == Double.MIN_VALUE ? "" : ", min: " + min) + (max == Double.MAX_VALUE ? "" : ", max: " + max);
+        }
 
         public void setDefault(double value) {
             changeDefault();
@@ -1410,6 +1433,16 @@ abstract public class OptionRegistry {
 			this.value = value;
 		}
 		
+        @Override
+        protected void setValue(String str) {
+            if (str.equals("true") || str.equals("yes") || str.equals("on"))
+                setValue(true);
+            else if (str.equals("false") || str.equals("no") || str.equals("off"))
+                setValue(false);
+            else
+                invalidValue(str, ", expecting boolean value.");
+        }
+
 		public void setValue(boolean value) {
 			this.value = value;
 		}

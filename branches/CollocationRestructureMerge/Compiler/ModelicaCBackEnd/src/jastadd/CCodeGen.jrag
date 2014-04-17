@@ -917,6 +917,10 @@ aspect CCodeGen {
 			super.genVarDecls_C(p, str, indent);
 	}
 	
+    public void FLoadResource.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        str.formatln("%schar %s[JMI_PATH_MAX];", indent, tempName_C());
+    }
+	
 	public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
 		super.genVarDecls_C(p, str, indent);
 		for (FExp arg : getArgs()) 
@@ -1533,6 +1537,10 @@ aspect CCodeGen {
 		p.print(getFExp(), str, indent);
 		str.print(')');
 	}
+	
+    public void FLoadResource.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(tempName_C());
+    }
 
 	public void FInitialExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("_atInitial");
@@ -1867,6 +1875,10 @@ aspect CCodeGen {
 		else
 			super.genTempVars_C(p, str, indent);
 	}
+	
+    public void FLoadResource.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        str.formatln("%sjmi_load_resource(jmi, %s, \"%s\");", indent, tempName_C(), resourceName());
+    }
 	
 	public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(getArgs(), str, indent);

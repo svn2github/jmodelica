@@ -449,25 +449,68 @@ aspect Constructors {
 	public FRangeExp.FRangeExp(FExp start, FExp step, FExp stop) {
 		this(new List().add(start).add(step).add(stop));
 	}
-	
-	/**
-	 * Add this expression to another.
-	 * 
-	 * Used to gradually builf up a sum, and handles special case for first term. 
-	 * The so far accumulated expession is then passed as exp, and this node will be 
-	 * the right child of the created expression. May return <code>this</code>, 
-	 * if exp is <code>null</code>.
-	 * 
-	 * @param exp  the first term, may be null
-	 * @param neg  if <code>true</code>, then this will be subtracted instead of added
-	 */
-	public FExp FExp.appendSum(FExp exp, boolean neg) {
-		if (exp == null)
-			return neg ? new FNegExp(this) : this;
-		else
-			return neg ? new FSubExp(exp, this) : new FAddExp(exp, this);	
-	}
-	
+
+    /**
+     * Add this expression to another.
+     * 
+     * Used to gradually builf up a sum, and handles special case for first term. 
+     * The so far accumulated expession is then passed as exp, and this node will be 
+     * the right child of the created expression. May return <code>this</code>, 
+     * if exp is <code>null</code>.
+     * 
+     * @param exp   the first term, may be null
+     * @param neg   if <code>true</code>, then this will be subtracted instead of added
+     * @param type  the type of this expression (can't be calculated locally, since this 
+     *              is generally not in tree at this point). The result is calculated with 
+     *              the assumption that <code>exp</code> is of the same type. When one is 
+     *              Integer and the other Real, this assumption gives the correct result.
+     */
+    public FExp FExp.appendSum(FExp exp, boolean neg, FType type) {
+        if (exp == null)
+            return neg ? type.createFNegExp(this) : this;
+        else
+            return neg ? type.createFSubExp(exp, this) : type.createFAddExp(exp, this);
+    }
+
+    /**
+     * Create a negation expression for the flat tree for an expression of this type.
+     */
+    public FExp FType.createFNegExp(FExp a) {
+        return new FNegExp(a);
+    }
+
+    public FExp FOperatorRecordType.createFNegExp(FExp a) {
+        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(new FQNameEmpty(), arr(a), arr(this));
+    }
+
+    /**
+     * Create a subtraction expression for the flat tree for two expressions of this type.
+     */
+    public FExp FType.createFSubExp(FExp a, FExp b) {
+        return new FSubExp(a, b);
+    }
+
+    public FExp FOperatorRecordType.createFSubExp(FExp a, FExp b) {
+        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(new FQNameEmpty(), arr(a, b), arr(this, this));
+    }
+
+    /**
+     * Create an addition expression for the flat tree for two expressions of this type.
+     */
+    public FExp FType.createFAddExp(FExp a, FExp b) {
+        return new FAddExp(a, b);
+    }
+
+    public FExp FOperatorRecordType.createFAddExp(FExp a, FExp b) {
+        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(new FQNameEmpty(), arr(a, b), arr(this, this));
+    }
+
+    public class ASTNode {
+        public static <T> T[] arr(T... args) { 
+            return args;
+        }
+    }
+
 	/**
 	 * \brief Constructs an FRecordConstructor for a record with the given name and no arguments.
 	 */
@@ -888,7 +931,7 @@ aspect Constructors {
 	}
 	
 	public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
-	    this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new Opt<FDerivativeFunction>(), SMOOTH_ORDER_ANNOTATION_DEFAULT);
+	    this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new Opt<FDerivativeFunction>(), new List<FAttribute>());
 	}
 	
 }
@@ -964,6 +1007,7 @@ aspect InheritedFactoryMethods {
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
 	public FEdgeExp        FEdgeExp.createEmptyNode()        { return new FEdgeExp();        }
     public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
+    public FLoadResource   FLoadResource.createEmptyNode()   { return new FLoadResource();   }
     public FReinit         FReinit.createEmptyNode()         { return new FReinit();         }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();     }

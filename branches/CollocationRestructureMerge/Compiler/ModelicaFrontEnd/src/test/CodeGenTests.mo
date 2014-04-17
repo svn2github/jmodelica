@@ -72,6 +72,7 @@ package CodeGenTests
             variability_propagation=false,
             automatic_add_initial_equations=false,
             enable_structural_diagnosis=false,
+            index_reduction=false,
             compliance_as_warning=true,
             template="
 n_ci: $n_ci$

@@ -20,34 +20,35 @@ import java.util.HashSet;
 
 
 aspect InstFunctionBinding {
-	
-	/**
-	 * \brief Finds which, if any, of the inputs for its function a single argument should 
-	 * bind to, and adds it to an array in the corresponding place.
-	 * 
-	 * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
-	 * is placed there.
-	 * 
-	 * @param arr     the array to place the argument in
-	 * @param inputs  the list of inputs for the function
-	 * @return        <code>true</code> it the position for the argument could be found, 
-	 *                <code>false</code> otherwise.
-	 */
-	public boolean InstFunctionArgument.bindArgument(InstFunctionArgument[] arr, 
-			                                         ArrayList<InstComponentDecl> inputs) {
-		int pos = findArgumentPosition(inputs);
-		if (pos < 0 || pos >= arr.length)
-			return false;
-		
-		if (arr[pos] == null)
-			arr[pos] = (InstFunctionArgument) fullCopy();
-		else
-			arr[pos] = arr[pos].addMultipleBoundArgument(this);
-		
-		arr[pos].setBoundInput(inputs.get(pos));
-		return true;
-	}
-	
+
+    /**
+     * \brief Finds which, if any, of the inputs for its function a single argument should 
+     * bind to, and adds it to an array in the corresponding place.
+     * 
+     * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
+     * is placed there.
+     * 
+     * @param arr     the array to place the argument in
+     * @param inputs  the list of inputs for the function
+     * @return        <code>true</code> it the position for the argument could be found, 
+     *                <code>false</code> otherwise.
+     */
+    public boolean InstFunctionArgument.bindArgument(InstFunctionArgument[] arr, 
+                                                     ArrayList<InstComponentDecl> inputs) {
+        int pos = findArgumentPosition(inputs);
+        if (pos < 0 || pos >= arr.length)
+            return false;
+        
+        if (arr[pos] == null)
+            arr[pos] = (InstFunctionArgument) fullCopy();
+        else
+            arr[pos] = arr[pos].addMultipleBoundArgument(this);
+        
+        arr[pos].setBoundInput(inputs.get(pos));
+        arr[pos].parent = parent; // Temporarily add to tree
+        return true;
+    }
+
 	/**
 	 * \brief Return an InstMultipleBoundArgument containing both <code>this</code> and <code>arg</code>.
 	 * 
@@ -129,14 +130,13 @@ aspect InstFunctionBinding {
 	syn boolean InstFunctionArgument.isOKArg() = true;
 	eq InstMissingArgument.isOKArg() = false;
 	eq InstMultipleBoundArgument.isOKArg() = false;
-	
-	/**
-	 * \brief List of arguments that could not be bound to inputs.
-	 */
-	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
-		new ArrayList<InstFunctionArgument>();
-	private ArrayList<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = null;
-	
+
+    /**
+     * \brief List of arguments that could not be bound to inputs.
+     */
+    private java.util.List<InstFunctionArgument> InstFunctionCall.unbindableArgs     = Collections.emptyList();
+    private java.util.List<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = Collections.emptyList();
+
 	public void FAbstractFunctionCall.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
 		throw new UnsupportedOperationException();
 	}
@@ -220,13 +220,18 @@ aspect InstFunctionBinding {
 			private HashMap<String, BuiltInCreator> map;
 			private static final String MATH_PREF = "Modelica.Math.";
 			private static final int MATH_LEN = MATH_PREF.length();
+            
+            /* Built-In-Type*/
+            public enum BIT {
+                NONE, MATH
+            }
 			
 			public FBuiltInFunctionCall create(String name, InstFunctionArgument[] args) {
 				boolean math = name.startsWith(MATH_PREF);
 				if (math) 
 					name = name.substring(MATH_LEN);
 				BuiltInCreator creator = map.get(name);
-				if (creator == null || (math && !creator.matchMath))
+				if (creator == null || (math && !creator.match(BIT.MATH)))
 					return null;
 				FBuiltInFunctionCall res = creator.create(args);
 				if (res != null)
@@ -240,62 +245,67 @@ aspect InstFunctionBinding {
 				return creator != null && creator.isInfArgs();
 			}
 			
+			
 			public BuiltInTranslator() {
 				map = new HashMap<String, BuiltInCreator>();
 				//       name                                 math       node                # args
-				map.put("abs",             new BuiltInCreator(false, new FAbsExp(),          1));
-				map.put("sign",            new BuiltInCreator(false, new FSignExp(),         1));
-				map.put("sqrt",            new BuiltInCreator(false, new FSqrtExp(),         1));
-				map.put("Integer",         new BuiltInCreator(false, new FEnumIntegerExp(),  1));
-				map.put("div",             new BuiltInCreator(false, new FDivFuncExp(),      2));
-				map.put("mod",             new BuiltInCreator(false, new FModFuncExp(),      2));
-				map.put("rem",             new BuiltInCreator(false, new FRemFuncExp(),      2));
-				map.put("ceil",            new BuiltInCreator(false, new FCeilFuncExp(),     1));
-				map.put("floor",           new BuiltInCreator(false, new FFloorFuncExp(),    1));
-				map.put("integer",         new BuiltInCreator(false, new FIntegerFuncExp(),  1));
-				map.put("sin",             new BuiltInCreator(true,  new FSinExp(),          1));
-				map.put("cos",             new BuiltInCreator(true,  new FCosExp(),          1));
-				map.put("tan",             new BuiltInCreator(true,  new FTanExp(),          1));
-				map.put("asin",            new BuiltInCreator(true,  new FAsinExp(),         1));
-				map.put("acos",            new BuiltInCreator(true,  new FAcosExp(),         1));
-				map.put("atan",            new BuiltInCreator(true,  new FAtanExp(),         1));
-				map.put("atan2",           new BuiltInCreator(true,  new FAtan2Exp(),        2));
-				map.put("sinh",            new BuiltInCreator(true,  new FSinhExp(),         1));
-				map.put("cosh",            new BuiltInCreator(true,  new FCoshExp(),         1));
-				map.put("tanh",            new BuiltInCreator(true,  new FTanhExp(),         1));
-				map.put("exp",             new BuiltInCreator(true,  new FExpExp(),          1));
-				map.put("log",             new BuiltInCreator(true,  new FLogExp(),          1));
-				map.put("log10",           new BuiltInCreator(true,  new FLog10Exp(),        1));
-				map.put("noEvent",         new BuiltInCreator(false, new FNoEventExp(),      1));
-				map.put("smooth",          new BuiltInCreator(false, new FSmoothExp(),       2));
-				map.put("pre",             new BuiltInCreator(false, new InstPreExp(),       1));
-				map.put("edge",            new BuiltInCreator(false, new FEdgeExp(),         1));
-				map.put("change",          new BuiltInCreator(false, new FChangeExp(),       1));
-				map.put("sample",          new BuiltInCreator(false, new FSampleExp(),       2));
-				map.put("initial",         new BuiltInCreator(false, new FInitialExp(),      0));
-				map.put("terminal",        new BuiltInCreator(false, new FTerminalExp(),     0));
-                map.put("terminate",       new BuiltInCreator(false, new FTerminate(),       1));
-                map.put("reinit",          new BuiltInCreator(false, new FReinit(),          2));
-				map.put("identity",        new BuiltInCreator(false, new FIdentity(),        1));
-				map.put("diagonal",        new BuiltInCreator(false, new FDiagonal(),        1));
-				map.put("scalar",          new BuiltInCreator(false, new FScalarExp(),       1));
-				map.put("vector",          new BuiltInCreator(false, new FVectorExp(),       1));
-				map.put("matrix",          new BuiltInCreator(false, new FMatrixExp(),       1));
-				map.put("transpose",       new BuiltInCreator(false, new FTranspose(),       1));
-				map.put("symmetric",       new BuiltInCreator(false, new FSymmetric(),       1));
-				map.put("cross",           new BuiltInCreator(false, new FCross(),           2));
-				map.put("skew",            new BuiltInCreator(false, new FSkew(),            1));
-				map.put("outerProduct",    new BuiltInCreator(false, new FOuterProduct(),    2));
-				map.put("sum",             new BuiltInCreator(false, new FSumExp(),          1));
-				map.put("product",         new BuiltInCreator(false, new FProductExp(),      1));
-				map.put("ndims",           new BuiltInCreator(false, new FNdimsExp(),        1));
-				map.put("linspace",        new BuiltInCreator(false, new FLinspace(),        3));
-				map.put("homotopy",        new BuiltInCreator(false, new FHomotopyExp(),     2));
-				map.put("semiLinear",      new BuiltInCreator(false, new FSemiLinearExp(),   3));
-				map.put("inStream",        new BuiltInCreator(false, new FInStream(),        1));
-				map.put("actualStream",    new BuiltInCreator(false, new FActualStream(),    1));
-				map.put("cardinality",     new BuiltInCreator(false, new FCardinality(),     1));
-				map.put("getInstanceName", new BuiltInCreator(false, new FGetInstanceName(), 0));
+                map.put("abs",             new BuiltInCreator(BIT.NONE, new FAbsExp(),          1));
+                map.put("sign",            new BuiltInCreator(BIT.NONE, new FSignExp(),         1));
+                map.put("sqrt",            new BuiltInCreator(BIT.NONE, new FSqrtExp(),         1));
+                map.put("Integer",         new BuiltInCreator(BIT.NONE, new FEnumIntegerExp(),  1));
+                map.put("div",             new BuiltInCreator(BIT.NONE, new FDivFuncExp(),      2));
+                map.put("mod",             new BuiltInCreator(BIT.NONE, new FModFuncExp(),      2));
+                map.put("rem",             new BuiltInCreator(BIT.NONE, new FRemFuncExp(),      2));
+                map.put("ceil",            new BuiltInCreator(BIT.NONE, new FCeilFuncExp(),     1));
+                map.put("floor",           new BuiltInCreator(BIT.NONE, new FFloorFuncExp(),    1));
+                map.put("integer",         new BuiltInCreator(BIT.NONE, new FIntegerFuncExp(),  1));
+                map.put("sin",             new BuiltInCreator(BIT.MATH,  new FSinExp(),          1));
+                map.put("cos",             new BuiltInCreator(BIT.MATH,  new FCosExp(),          1));
+                map.put("tan",             new BuiltInCreator(BIT.MATH,  new FTanExp(),          1));
+                map.put("asin",            new BuiltInCreator(BIT.MATH,  new FAsinExp(),         1));
+                map.put("acos",            new BuiltInCreator(BIT.MATH,  new FAcosExp(),         1));
+                map.put("atan",            new BuiltInCreator(BIT.MATH,  new FAtanExp(),         1));
+                map.put("atan2",           new BuiltInCreator(BIT.MATH,  new FAtan2Exp(),        2));
+                map.put("sinh",            new BuiltInCreator(BIT.MATH,  new FSinhExp(),         1));
+                map.put("cosh",            new BuiltInCreator(BIT.MATH,  new FCoshExp(),         1));
+                map.put("tanh",            new BuiltInCreator(BIT.MATH,  new FTanhExp(),         1));
+                map.put("exp",             new BuiltInCreator(BIT.MATH,  new FExpExp(),          1));
+                map.put("log",             new BuiltInCreator(BIT.MATH,  new FLogExp(),          1));
+                map.put("log10",           new BuiltInCreator(BIT.MATH,  new FLog10Exp(),        1));
+                map.put("noEvent",         new BuiltInCreator(BIT.NONE, new FNoEventExp(),      1));
+                map.put("smooth",          new BuiltInCreator(BIT.NONE, new FSmoothExp(),       2));
+                map.put("pre",             new BuiltInCreator(BIT.NONE, new InstPreExp(),       1));
+                map.put("edge",            new BuiltInCreator(BIT.NONE, new FEdgeExp(),         1));
+                map.put("change",          new BuiltInCreator(BIT.NONE, new FChangeExp(),       1));
+                map.put("sample",          new BuiltInCreator(BIT.NONE, new FSampleExp(),       2));
+                map.put("initial",         new BuiltInCreator(BIT.NONE, new FInitialExp(),      0));
+                map.put("terminal",        new BuiltInCreator(BIT.NONE, new FTerminalExp(),     0));
+                map.put("terminate",       new BuiltInCreator(BIT.NONE, new FTerminate(),       1));
+                map.put("reinit",          new BuiltInCreator(BIT.NONE, new FReinit(),          2));
+                map.put("identity",        new BuiltInCreator(BIT.NONE, new FIdentity(),        1));
+                map.put("diagonal",        new BuiltInCreator(BIT.NONE, new FDiagonal(),        1));
+                map.put("scalar",          new BuiltInCreator(BIT.NONE, new FScalarExp(),       1));
+                map.put("vector",          new BuiltInCreator(BIT.NONE, new FVectorExp(),       1));
+                map.put("matrix",          new BuiltInCreator(BIT.NONE, new FMatrixExp(),       1));
+                map.put("transpose",       new BuiltInCreator(BIT.NONE, new FTranspose(),       1));
+                map.put("symmetric",       new BuiltInCreator(BIT.NONE, new FSymmetric(),       1));
+                map.put("cross",           new BuiltInCreator(BIT.NONE, new FCross(),           2));
+                map.put("skew",            new BuiltInCreator(BIT.NONE, new FSkew(),            1));
+                map.put("outerProduct",    new BuiltInCreator(BIT.NONE, new FOuterProduct(),    2));
+                map.put("sum",             new BuiltInCreator(BIT.NONE, new FSumExp(),          1));
+                map.put("product",         new BuiltInCreator(BIT.NONE, new FProductExp(),      1));
+                map.put("ndims",           new BuiltInCreator(BIT.NONE, new FNdimsExp(),        1));
+                map.put("linspace",        new BuiltInCreator(BIT.NONE, new FLinspace(),        3));
+                map.put("homotopy",        new BuiltInCreator(BIT.NONE, new FHomotopyExp(),     2));
+                map.put("semiLinear",      new BuiltInCreator(BIT.NONE, new FSemiLinearExp(),   3));
+                map.put("inStream",        new BuiltInCreator(BIT.NONE, new FInStream(),        1));
+                map.put("actualStream",    new BuiltInCreator(BIT.NONE, new FActualStream(),    1));
+                map.put("cardinality",     new BuiltInCreator(BIT.NONE, new FCardinality(),     1));
+                map.put("getInstanceName", new BuiltInCreator(BIT.NONE, new FGetInstanceName(), 0));
+                map.put("Modelica.Utilities.Files.loadResource", 
+                        new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
+                map.put("ModelicaServices.ExternalReferences.loadResource", 
+                        new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
 				//       name                                            node           # fixed args
 				map.put("array",           new InfArgsBuiltInCreator(new FParseArray(), 0));
 				map.put("ones",            new InfArgsBuiltInCreator(new FOnes(),       0));
@@ -309,11 +319,11 @@ aspect InstFunctionBinding {
 				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
 				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
 				//       name                                    math       node              # args
-				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
-				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));
-				map.put("Connections.isRoot", new BuiltInCreator(false, new FConnIsRoot(),    1));
-				map.put("Connections.rooted", new BuiltInCreator(false, new FConnRooted(),    1));
-				map.put("rooted",             new BuiltInCreator(false, new FConnRootedDep(), 1));
+                map.put("Connections.branch", new BuiltInCreator(BIT.NONE, new FConnBranch(),    2));
+                map.put("Connections.root",   new BuiltInCreator(BIT.NONE, new FConnRoot(),      1));
+                map.put("Connections.isRoot", new BuiltInCreator(BIT.NONE, new FConnIsRoot(),    1));
+                map.put("Connections.rooted", new BuiltInCreator(BIT.NONE, new FConnRooted(),    1));
+                map.put("rooted",             new BuiltInCreator(BIT.NONE, new FConnRootedDep(), 1));
 				//       name                                                      node                  min/max # args
 				map.put("Connections.potentialRoot", new VarArgsBuiltInCreator(new FConnPotentialRoot(), 1, 2));
 				
@@ -334,12 +344,12 @@ aspect InstFunctionBinding {
 			
 			private static class BuiltInCreator {
 				
-				public boolean matchMath;
+                protected BIT type;
 				protected FBuiltInFunctionCall template;
 				protected int numArgs;
 				
-				public BuiltInCreator(boolean math, FBuiltInFunctionCall tmpl, int nArgs) { 
-					matchMath = math;
+                public BuiltInCreator(BIT t, FBuiltInFunctionCall tmpl, int nArgs) { 
+                    type = t;
 					template = tmpl;
 					numArgs = nArgs;
 				}
@@ -365,12 +375,16 @@ aspect InstFunctionBinding {
 					return arg.getFExpNoTransform().fullCopy();
 				}
 				
+                public boolean match(BIT t) {
+                    return type == t;
+                }
+				
 			}
 			
 			private static class InfArgsBuiltInCreator extends BuiltInCreator {
 				
 				public InfArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int nFixed) {
-					super(false, tmpl, nFixed);
+				    super(BIT.NONE, tmpl, nFixed);
 				}
 				
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
@@ -393,7 +407,7 @@ aspect InstFunctionBinding {
 				private int maxArgs;
 				
 				public VarArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
-					super(false, tmpl, minArgs);
+					super(BIT.NONE, tmpl, minArgs);
 					this.maxArgs = maxArgs;
 				}
 				
@@ -441,149 +455,298 @@ aspect InstFunctionBinding {
 	}
 
 	/**
-	 * \brief Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
-	 * for built-in functions.
+	 * Change access to point to <code>this</code> class instead of <code>orig</code>.
 	 * 
-	 * If arguments could not be bound to inputs properly (to few args, to many args, bad 
-	 * named args, etc), then the node remains an InstFunctionCall.
-	 * 
-	 * Any arguments that could not be bound to an input are gathered in unbindableArgs.
-	 * 
-	 * If function call was rewritten to a FBuiltinFunctionCall, then the InstFunctionArgument 
-	 * nodes describing them are gathered in originalArgs.
+	 * Creates new access if necessary.
 	 */
-	rewrite InstFunctionCall {
-    	when (!bound) to FAbstractFunctionCall {
-		    // Make sure we only do this once.
-    		bound = true;
+    public InstAccess InstClassDecl.retargetFrom(InstClassDecl orig, InstAccess access) {
+        if (this == orig)
+            return access;
+        InstAccess part = new InstClassAccess(name());
+        InstClassDecl parent = surroundingInstClass();
+        if (parent == null)
+            return part;
+        access = parent.retargetFrom(orig, access);
+        InstDot dot = (access instanceof InstDot) ? (InstDot) access : new InstDot(new List(access));
+        dot.addInstAccess(part);
+        return dot;
+    }
 
-		    // Get info
-    		boolean externalObject = false;
-		    InstClassDecl target = getName().myInstClassDecl();
-	    	String name = target.qualifiedName();
-		    if (target.isPrimitive()) {
-		    	// Look for conversion operator with same name as primitive class (if one exists)
-				InstClassDecl icd = getName().lookupInstClass("!" + target.name());
-				if (icd != null)
-					target = icd;
-		    } if (target.isExternalObject()) {
-		    	InstClassDecl icd = target.myConstructor();
-				if (icd.isFunction())
-					target = icd;
-		    	externalObject = true;
-		    }
-    		ArrayList<InstComponentDecl> inputs = target.myCallInputs();
-		    
-		    /* If we can't resolve the name as a function or record, don't try to bind arguments, 
-		     * just leave it for the error check. */
-		    if (!target.isCallable())
-		    	return this;
+    public class ArgumentBinding {
 
-	    	// Check if we should try to bind arguments
-	    	InstFunctionArgument[] temp;
-	    	boolean argsOK = true;
-	    	boolean infArgs = builtInTranslator.isInfArgs(name);
-	    	if (infArgs) {
-	    		
-	    		// Just collect all positional arguments
-	    		ArrayList<InstFunctionArgument> args = new ArrayList<InstFunctionArgument>();
-	    		for (InstFunctionArgument arg : getArgs()) {
-	    			if (arg instanceof InstPositionalArgument)
-	    				args.add(arg);
-	    			else
-	    				unbindableArgs.add(arg);
-	    		}
-	    		
-	    		// Make sure we have any fixed arguments
-	    		for (int i = args.size(); i < inputs.size(); i++) {
-	    			InstMissingArgument arg = new InstMissingArgument();
-	    			args.add(arg);
-	    			argsOK = false;
-	    		}
-	    		temp = args.toArray(new InstFunctionArgument[args.size()]);
+        private InstFunctionArgument[] bound;
+        private ArrayList<InstFunctionArgument> unbindable;
+        private ArrayList<InstComponentDecl> inputs;
+        private InstClassDecl target;
+        private InstFunctionCall source;
+        private boolean ok = true;
 
-	    		// Connect fixed arguments to inputs
-	    		for (int i = 0; i < inputs.size(); i++)
-	    			temp[i].setBoundInput(inputs.get(i));
-	    	} else {
-		    
-	    		// Bind arguments
-	    		temp = new InstFunctionArgument[inputs.size()];
-	    		for (InstFunctionArgument arg : getArgs()) 
-	    			if (!arg.bindArgument(temp, inputs))
-	    				unbindableArgs.add(arg);
-		    		
-	    		// Add default argument and check for problems.
-	    		for (int i = 0; i < temp.length; i++) {
-	    			if (temp[i] == null) 
-	    				temp[i] = inputs.get(i).createInstDefaultArgument();
-	    			temp[i].setErrorArgLocation(this);
-	    			argsOK = argsOK && temp[i].isOKArg();
-	    		}
-		
-		    	argsOK = argsOK && unbindableArgs.isEmpty();
-	    	}
-	    		
-    		// Create replacement node.
-		    FAbstractFunctionCall n = null;
-		    if (argsOK) 
-		    	n = builtInTranslator.create(name, temp);
-		    if (n == null) {
-				if (target.isRecord() && argsOK) {
-					n = new InstRecordConstructor(getName(), new List());
-				} else {
-					InstAccess accessName = getName();
-					if (externalObject)
-						accessName = accessName.copyAndAppend("constructor");
-					InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
-					ifc.generated = externalObject || generated;
-					ifc.unbindableArgs = unbindableArgs;
-					ifc.bound = true;
-					n = ifc;
-				}
-				for (InstFunctionArgument arg : temp)
-					n.addArgument(arg);
-			} else if (infArgs) {
-				n.setUnbindableArgsList(unbindableArgs);
-			}
-			n.setLocation(this);
-			
-			return n;	
-    	}
-  	}
-	private boolean InstFunctionCall.bound = false;
-	public boolean InstFunctionCall.generated = false;
-	
-	
-	/**
-	 * Calculate if this is a vectorized function call.
-	 */
-	rewrite InstFunctionCall {
-    	when (bound && !vectorizationChecked) to InstFunctionCall {
-    		vectorizationChecked = true;
-    		
-    		if (isFunctionCallClause() && myLefts().size() != 1)
-    			return this;
-    		if (getName().myInstClassDecl().isUnknown() || !unbindableArgs.isEmpty())
-    			return this;
-    		if (!hasOutputs() || myOutputs().get(0).isComposite())
-    			return this;
-    		
-    		int dims = 0;
-    		for (InstFunctionArgument arg : getArgs()) 
-    			dims = arg.findVectorizationNdims(dims);
-    		if (dims <= 0)
-    			return this;
-    		
-    		InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), dims);
-    		res.vectorizationChecked = res.bound = true;
-    		res.generated = generated;
-    		res.setLocation(this);
-    		return res;
-    	}
-	}
-	private boolean InstFunctionCall.vectorizationChecked = false;
-	
+        public ArgumentBinding(InstClassDecl target, InstFunctionCall source, boolean infArgs) {
+            inputs = target.myCallInputs();
+            unbindable = new ArrayList<InstFunctionArgument>();
+            this.target = target;
+            this.source = source;
+            if (infArgs) 
+                bindInfArgs();
+            else 
+                bindNormal();
+        }
+
+        /**
+         * Is this binding a match?
+         */
+        public boolean isOK() {
+            return ok;
+        }
+
+        /**
+         * Get the target function.
+         */
+        public InstClassDecl target() {
+            return target;
+        }
+
+        /**
+         * Get the bound arguments.
+         */
+        public InstFunctionArgument[] bound() {
+            return bound;
+        }
+
+        /**
+         * Get the list of arguments that could not be bound to any input.
+         */
+        public ArrayList<InstFunctionArgument> unbindable() {
+            return unbindable;
+        }
+
+        /**
+         * A heuristic score for how well the arguments match the function, including 
+         * type. Lower is better, 0 is a perfect match.
+         */
+        public int typeMatchScore() {
+            int score = unbindable.size() * 2000;
+            int i = 0;
+            for (InstFunctionArgument arg : bound) {
+                if (arg.isOKArg()) {
+                    FType argType = arg.getFExp().type();
+                    FType inType = inputs.get(i).type();
+                    if (!inType.dimensionCompatible(argType, true))
+                        score++;
+                    if (!inType.scalarType().typeCompatible(argType.scalarType(), true))
+                        score++;
+                } else {
+                    score += 1000;
+                }
+                i++;
+            }
+            return score;
+        }
+
+        /**
+         * Update the bound inputs of all arguments. Needed when several ArgumentBinding objects 
+         * have been created for the same function call (used for overloaded constructors).
+         */
+        public void updateBoundInputs() {
+            for (int i = 0; i < inputs.size(); i++) {
+                bound[i].setBoundInput(inputs.get(i));
+                if (!bound[i].isOKArg())
+                    bound[i].setErrorArgLocation(source);
+            }
+        }
+
+        private void bindNormal() {
+            // Bind arguments
+            bound = new InstFunctionArgument[inputs.size()];
+            for (InstFunctionArgument arg : source.getArgs()) 
+                if (!arg.bindArgument(bound, inputs))
+                    unbindable.add(arg);
+
+            // Add default argument and check for problems.
+            for (int i = 0; i < bound.length; i++) {
+                if (bound[i] == null) 
+                    bound[i] = inputs.get(i).createInstDefaultArgument();
+                bound[i].setErrorArgLocation(source);
+                ok = ok && bound[i].isOKArg();
+            }
+
+            ok = ok && unbindable.isEmpty();
+        }
+
+        private void bindInfArgs() {
+            // Just collect all positional arguments
+            ArrayList<InstFunctionArgument> args = new ArrayList<InstFunctionArgument>();
+            for (InstFunctionArgument arg : source.getArgs()) {
+                if (arg instanceof InstPositionalArgument)
+                    args.add(arg);
+                else
+                    unbindable.add(arg);
+            }
+
+            // Make sure we have any fixed arguments
+            for (int i = args.size(); i < inputs.size(); i++) {
+                InstMissingArgument arg = new InstMissingArgument();
+                args.add(arg);
+                ok = false;
+            }
+            bound = args.toArray(new InstFunctionArgument[args.size()]);
+            updateBoundInputs();
+        }
+
+    }
+
+    /**
+     * Select the function in the given operator for the given type that best fits this call, and 
+     * create an argument binding for it.
+     * 
+     * Returns null if the type does not have any functions for that operator.
+     */
+    public ArgumentBinding InstFunctionCall.matchOverloadedFunctionCall(FType type, String operator) {
+        ArgumentBinding binding = null;
+        InstClassDecl op = type.getOperators().get(operator);
+        if (op != null) {
+            int score = Integer.MAX_VALUE;
+            for (InstClassDecl func : op.operatorFunctions()) {
+                ArgumentBinding binding2 = new ArgumentBinding(func, this, false);
+                int score2 = binding2.typeMatchScore();
+                if (score2 < score) {
+                    score = score2;
+                    binding = binding2;
+                }
+            }
+            if (binding != null)
+                binding.updateBoundInputs();
+        }
+        return binding;
+    }
+
+    /**
+     * Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
+     * for built-in functions.
+     * 
+     * If arguments could not be bound to inputs properly (to few args, to many args, bad 
+     * named args, etc), then the node remains an InstFunctionCall.
+     * 
+     * Any arguments that could not be bound to an input are gathered in unbindableArgs.
+     * 
+     * If function call was rewritten to a FBuiltinFunctionCall, then the InstFunctionArgument 
+     * nodes describing them are gathered in originalArgs.
+     */
+    rewrite InstFunctionCall {
+        when (!bound) to FAbstractFunctionCall {
+            // Make sure we only do this once.
+            bound = true;
+
+            // Get info
+            boolean generated = this.generated;
+            InstClassDecl target = getName().myInstClassDecl().actualInstClass();
+            InstClassDecl namedTarget = target;
+            String name = target.qualifiedName();
+            ArgumentBinding binding = null;
+
+            // Handle special cases
+            if (target.isPrimitive()) {
+                // Check if this is an overloaded version of String()
+                // TODO: Error if several perfect matches
+                // TODO: Make toString() match original decl
+                if (target.name().equals("String") && getNumArg() > 0) 
+                    binding = matchOverloadedFunctionCall(getArg(0).getFExp().type(), FExp.OP_STR);
+                if (binding != null) {
+                    target = binding.target();
+                    name = target.qualifiedName();
+                    generated = true;
+                } else {
+                    // If not, look for conversion operator with same name as primitive class (if one exists)
+                    InstClassDecl icd = getName().lookupInstClass("!" + target.name());
+                    if (icd != null)
+                        target = icd;
+                }
+            } else if (target.isExternalObject()) {
+                // Use the external object constructor
+                InstClassDecl icd = target.myConstructor();
+                if (icd.isFunction())
+                    target = icd;
+                generated = true;
+            } else if (target.isOperatorRecord()) {
+                // If the operator record defines constructors, find the one that matches the best
+                // TODO: Error if several perfect matches
+                // TODO: Make toString() match original decl
+                // TODO: handle vectorized constructors
+                binding = matchOverloadedFunctionCall(target.recordType(), FExp.OP_CON);
+                if (binding != null) {
+                    target = binding.target();
+                    generated = true;
+                }
+            }
+
+            /* If we can't resolve the name as a function or record, don't try to bind arguments, 
+             * just leave it for the error check. */
+            if (!target.isCallable())
+                return this;
+
+            // Bind arguments
+            boolean infArgs = builtInTranslator.isInfArgs(name);
+            if (binding == null)
+                binding = new ArgumentBinding(target, this, infArgs);
+
+            // Create replacement node.
+            FAbstractFunctionCall n = null;
+            if (binding.isOK()) 
+                n = builtInTranslator.create(name, binding.bound());
+            if (n == null) {
+                if (target.isRecord() && binding.isOK()) {
+                    n = new InstRecordConstructor(getName(), new List());
+                } else {
+                    InstAccess accessName = generated ? target.retargetFrom(namedTarget, getName()) : getName();
+                    InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
+                    ifc.generated = generated;
+                    ifc.unbindableArgs = binding.unbindable();
+                    ifc.bound = true;
+                    n = ifc;
+                }
+                for (InstFunctionArgument arg : binding.bound())
+                    n.addArgument(arg);
+            } else if (infArgs) {
+                n.setUnbindableArgsList(binding.unbindable());
+            }
+            n.setLocation(this);
+
+            return n;
+        }
+    }
+    private boolean InstFunctionCall.bound = false;
+    public boolean InstFunctionCall.generated = false;
+
+
+    /**
+     * Calculate if this is a vectorized function call.
+     */
+    rewrite InstFunctionCall {
+        when (bound && !vectorizationChecked) to InstFunctionCall {
+            vectorizationChecked = true;
+            
+            if (isFunctionCallClause() && myLefts().size() != 1)
+                return this;
+            if (getName().myInstClassDecl().isUnknown() || !unbindableArgs.isEmpty())
+                return this;
+            if (!hasOutputs() || myOutputs().get(0).isComposite())
+                return this;
+            
+            int dims = 0;
+            for (InstFunctionArgument arg : getArgs()) 
+                dims = arg.findVectorizationNdims(dims);
+            if (dims <= 0)
+                return this;
+            
+            InstFunctionCall res = new InstVectorFunctionCall(getName(), getArgs(), dims);
+            res.vectorizationChecked = res.bound = true;
+            res.generated = generated;
+            res.setLocation(this);
+            return res;
+        }
+    }
+    private boolean InstFunctionCall.vectorizationChecked = false;
+
 	/**
 	 * Check if this argument can be a vectorized argument, given the 
 	 * results to calls to this function for previous arguments.

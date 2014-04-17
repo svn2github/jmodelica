@@ -21,6 +21,7 @@ pyjmi.jmi.JMUModel.initialize respectively.
 """
 
 #from abc import ABCMeta, abstractmethod
+import collections
 import logging
 import time
 import numpy as N
@@ -2330,10 +2331,60 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                       "compatible with eliminate_der_var.")
         
         # Check validity of blocking_factors
-        if (self.blocking_factors is not None and 
-            N.sum(self.blocking_factors) != self.n_e):
-            raise ValueError("The sum of all elements in blocking factors " +
-                             "must be the same as the number of elements.")
+        if self.blocking_factors is not None:
+            if isinstance(self.blocking_factors, collections.Iterable):
+                if N.sum(self.blocking_factors) != self.n_e:
+                    raise ValueError(
+                            "The sum of blocking factors does not " +
+                            "match the number of collocation elements.")
+            elif isinstance(self.blocking_factors, BlockingFactors):
+                for (name, facs) in self.blocking_factors.factors.iteritems():
+                    var = self.op.getVariable(name)
+                    if var is None:
+                        raise ValueError('Variable %s not found in ' % name +
+                                         'optimization problem.')
+                    if var not in self.op.getVariables(self.op.REAL_INPUT):
+                        raise ValueError(
+                                "Blocking factors provided for variable " +
+                                "%s, but %s is not a real " % (name, name) +
+                                "input.")
+
+                    # Check that factors correspond to number of elements
+                    if N.sum(facs) != self.n_e:
+                        raise ValueError(
+                                "The sum of blocking factors for variable " +
+                                "%s does not match the number of " % name +
+                                "collocation elements.")
+
+                    # Check if variable is in optimization problem
+                    if var is None:
+                        raise ValueError(
+                                "Blocking factors provided for variable " +
+                                "%s, but variable %s not " % (name, name) +
+                                "found in optimization problem.")
+
+                    # Check bound
+                    if name in self.blocking_factors.du_bounds:
+                        if self.blocking_factors.du_bounds[name] < 0:
+                            raise ValueError("du bound for variable %s "%name+
+                                             "is negative.")
+
+                    # Replace alias variables
+                    if var.isAlias():
+                        mvar = var.getModelVariable()
+                        self.blocking_factors.factors[mvar.getName()] = facs
+                        del self.blocking_factors.factors[name]
+                        if name in self.blocking_factors.du_bounds:
+                            self.blocking_factors.du_bounds[mvar.getName()] = \
+                                    self.blocking_factors.du_bounds[name]
+                            del self.blocking_factors.du_bounds[name]
+                        if name in self.blocking_factors.du_quad_pen:
+                            self.blocking_factors.du_quad_pen[mvar.getName()]=\
+                                    self.blocking_factors.du_quad_pen[name]
+                            del self.blocking_factors.du_quad_pen[name]
+            else:
+                raise ValueError('blocking_factors must either be an ' +
+                                 'iterable or an instance of BlockingFactors.')
         
         # Check validity of nominal_traj_mode
         for name in self.nominal_traj_mode.keys():
@@ -2342,11 +2393,13 @@ class LocalDAECollocationAlg(AlgorithmBase):
                 if var is None:
                     raise ValueError(
                             "Nominal mode provided for variable %s, " % name +
-                            "but variable %s not found in model." % name)
+                            "but variable %s not found in " % name +
+                            "optimization problem.")
                 if var.isAlias():
                     mvar = var.getModelVariable()
-                    nominal_traj_mode[mvar.getName()] = nominal_traj_mode[name]
-                    del nominal_traj_mode[name]
+                    self.nominal_traj_mode[mvar.getName()] = \
+                            self.nominal_traj_mode[name]
+                    del self.nominal_traj_mode[name]
         
         # Solver options
         self.solver_options = self.IPOPT_options
@@ -2552,9 +2605,9 @@ class LocalDAECollocationAlgOptions(OptionBase):
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
-            return the unscaled optimization result. This option is 
-            only applicable when the CasadiModel has been instantiated with
-            scale_variables=True. This option is only intended for debugging.
+            return the unscaled optimization result. This option is only
+            applicable when variable_scaling is enabled and is only intended
+            for debugging.
             
             Type: bool
             Default: False
@@ -2590,17 +2643,30 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Default: 20
         
         blocking_factors --
-            The iterable of blocking factors, where each element corresponds to
-            the number of collocation elements for which all the control
-            profiles should be constant. For example, if blocking_factors ==
-            [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum
-            of all elements in the iterable must be the same as the number of
-            elements.
+            Blocking factors are used to enforce piecewise constant inputs. The
+            inputs may only change values at some of the element boundaries.
+            The option is either None (disabled), given as an instance of
+            pyjmi.optimization.casadi_collocation.BlockingFactors or as a list
+            of blocking factors.
+
+            If the options is a list of blocking factors, then each element in
+            the list specifies the number of collocation elements for which all
+            of the inputs must be constant. For example, if blocking_factors ==
+            [2, 2, 1], then the inputs will attain 3 different values (number
+            of elements in the list), and it will change values between
+            collocation element number 2 and 3 as well as number 4 and 5. The
+            sum of all elements in the list must be the same as the number of
+            collocation elements and the length of the list determines the
+            number of separate values that the inputs may attain.
+
+            See the documentation of the BlockingFactors class for how to use
+            it.
             
             If blocking_factors is None, then the usual collocation polynomials
             are instead used to represent the controls.
             
-            Type: None or iterable of ints
+            Type: None, iterable of ints, or instance of
+                  pyjmi.optimization.casadi_collocation.BlockingFactors
             Default: None
         
         quadrature_constraint --
@@ -2697,6 +2763,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'measurement_data': None,
+                'delayed_feedback': None,
                 'check_point': False,
                 'reorder_vars': False,
                 'IPOPT_options': {}}

@@ -1909,11 +1909,6 @@ fclass ModificationTests.TypeModifications6
  constant ModificationTests.TypeModifications6.T z.y[3](each min = 0.4) = 1;
 
 public
- record ModificationTests.TypeModifications6.R
-  ModificationTests.TypeModifications6.T x[3];
-  ModificationTests.TypeModifications6.T y[3];
- end ModificationTests.TypeModifications6.R;
-
  type ModificationTests.TypeModifications6.T = Real;
 end ModificationTests.TypeModifications6;
 ")})));
@@ -1988,10 +1983,6 @@ fclass ModificationTests.TypeModifications8
  constant ModificationTests.TypeModifications8.T y[4].x[2,3](min = 0.3) = 1;
 
 public
- record ModificationTests.TypeModifications8.R
-  ModificationTests.TypeModifications8.T x[2,3];
- end ModificationTests.TypeModifications8.R;
-
  type ModificationTests.TypeModifications8.T = Real;
 end ModificationTests.TypeModifications8;
 ")})));

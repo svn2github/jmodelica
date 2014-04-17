@@ -50,7 +50,7 @@ aspect Types {
    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) {
        if (subType == this) 
            return true;
-       return subType.className().equals(className()) && 
+       return subType.baseClassName().equals(baseClassName()) && 
                (subType.ndims() == ndims() || top && subType.ndims() == 0);
    }
    
@@ -119,64 +119,6 @@ aspect Types {
   syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
   	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
   
-	public void InstNode.typeCheckSystemResiduals(ErrorCheckType checkType) {
-		if (!root().options.getBooleanOption("hand_guided_tearing"))
-			return;
-		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
-			if (!pair.name().equals("Pair"))
-				continue;
-			Exp enabledExp = pair.forPath("enabled").exp();
-			if (enabledExp != null) {
-				FExp enabledFExp = dynamicFExp(enabledExp.instantiate());
-				enabledFExp.collectErrors(checkType);
-				try {
-					enabledFExp.ceval().booleanValue();
-				} catch (ConstantEvaluationException e) {
-					enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
-				}
-			}
-			Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
-			InstAccess iterationVariable = null;
-			if (iterationVariableExp == null) {
-				pair.ast().error("Iteration variable definition is missing from tearing pair.");
-			} else if (!iterationVariableExp.isAccess()) {
-				iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
-			} else {
-				InstAccess ia = iterationVariableExp.asAccess().instantiate();
-				iterationVariable = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
-				iterationVariable.collectErrors(checkType);
-				if (iterationVariable.isUnknown()) {
-					iterationVariable = null;
-				} else {
-					FTypePrefixVariability variability = iterationVariable.myInstComponentDecl().variability();
-					if (!variability.continuousVariability()) {
-						iterationVariable.error("Iteration variable should have continuous variability, %s has %svariability", iterationVariable.qualifiedName(), variability);
-						iterationVariable = null;
-					}
-				}
-			}
-			Exp residualEquationExp = pair.forPath("residualEquation").exp();
-			InstAccess residualEquation = null;
-			if (residualEquationExp == null) {
-				pair.ast().error("Residual equation definition is missing from tearing pair.");
-			} else if (!residualEquationExp.isAccess()) {
-				residualEquationExp.error("Expression \"%s\" is not a legal residual equation reference", residualEquationExp);
-			} else {
-				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
-				residualEquation = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
-				residualEquation.collectErrors(checkType);
-				if (residualEquation.isUnknown())
-					residualEquation = null;
-			}
-			if (iterationVariable != null && residualEquation != null) {
-				Size eqnSize = residualEquation.myEquation().totalSize();
-				Size varSize = iterationVariable.myInstComponentDecl().size();
-				if (!eqnSize.equals(varSize))
-					pair.ast().error("Size of the iteration variable is not the same size as the size of the residual equation, size of variable %s, size of equation %s", varSize, eqnSize);
-			}
-		}
-	}
-
 }
 
 aspect ConnectorTypes {
