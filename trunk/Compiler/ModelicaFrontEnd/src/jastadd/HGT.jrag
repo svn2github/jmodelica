@@ -253,6 +253,15 @@ aspect HGT {
         };
     }
     
+    public static Comparator<Eq> Eq.stringMatchingComparator() {
+        return new Comparator<Eq>() {
+            @Override
+            public int compare(Eq eqn1, Eq eqn2) {
+                return eqn1.getMatching().toString().compareTo(eqn2.getMatching().toString());
+            }
+        };
+    }
+    
     public static Comparator<Var> Var.stringComparator() {
         return new Comparator<Var>() {
             @Override
@@ -317,7 +326,7 @@ aspect HGT {
                 recalculateMatchings = true;
             }
         }
-        Collections.sort(HGTEquations, Eq.stringComparator());
+        Collections.sort(HGTEquations, Eq.stringMatchingComparator());
         for (Eq hgtEqn : HGTEquations) {
             Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
             ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());
