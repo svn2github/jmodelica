@@ -110,6 +110,7 @@ aspect InteractiveFMU{
         resVar.setFTypePrefixVariability(fv.getFTypePrefixVariability().fullCopy());
         resVar.setFQName(new FQNameString(resName));
         resVar.setFTypePrefixInputOutput(new FOutput());
+        resVar.setFStringComment(new FStringComment(equation.toString()));
         fclass.addFVariable(resVar);
 
         // Add alias equation
@@ -127,6 +128,7 @@ aspect InteractiveFMU{
             } else {
                 String nameName = equation.name();
                 // Alias variable for the residual variable
+                resVar.setFStringComment(new FStringComment(nameName));
                 FVariable nameVar = (FVariable) fv.createEmptyNode();
                 nameVar.setFVisibilityType(new FPublicVisibilityType());
                 nameVar.setFTypePrefixVariability(fv.getFTypePrefixVariability().fullCopy());
