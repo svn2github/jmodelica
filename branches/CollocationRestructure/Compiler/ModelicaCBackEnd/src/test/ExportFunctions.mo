@@ -28,28 +28,28 @@ model Scalar2To1
 algorithm
   f(1.0, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="Scalar2To1",
-			description="",
-			export_functions=true,
-			export_functions_vba=true,
-			inline_functions="none",
-			template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Scalar2To1",
+            description="",
+            export_functions=true,
+            export_functions_vba=true,
+            inline_functions="none",
+            template="
 $C_export_functions$
 $C_export_wrappers$
 ",
-         generatedCode="
-DllExport double func_ExportFunctions_Scalar2To1_f_export(double x_v, int y_v) {
+            generatedCode="
+DllExport double func_ExportFunctions_Scalar2To1_f_export0(double x_v, int y_v) {
     double z_v;
-    func_ExportFunctions_Scalar2To1_f_def(x_v, y_v, &z_v);
+    func_ExportFunctions_Scalar2To1_f_def0(x_v, y_v, &z_v);
     return z_v;
 }
 
 
 char* select_vba_1_names[] = { \"ExportFunctions_Scalar2To1_f\" };
 int select_vba_1_lengths[] = { 28 };
-double (*select_vba_1_funcs[])(double, int) = { *func_ExportFunctions_Scalar2To1_f_export };
+double (*select_vba_1_funcs[])(double, int) = { *func_ExportFunctions_Scalar2To1_f_export0 };
 DllExport double __stdcall select_vba_1(char* name, double x_v, int y_v) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
@@ -100,23 +100,25 @@ model Options2
 algorithm
   f(1.0, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="Options2",
-			description="Check that the options activate/deactivate the export functions properly.",
-			export_functions=true,
-			export_functions_vba=false,
-			inline_functions="none",
-			template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Options2",
+            description="Check that the options activate/deactivate the export functions properly.",
+            export_functions=true,
+            export_functions_vba=false,
+            inline_functions="none",
+            template="
 $C_export_functions$
 $C_export_wrappers$
 ",
-         generatedCode="
-DllExport double func_ExportFunctions_Options2_f_export(double x_v, int y_v) {
+            generatedCode="
+DllExport double func_ExportFunctions_Options2_f_export0(double x_v, int y_v) {
     double z_v;
-    func_ExportFunctions_Options2_f_def(x_v, y_v, &z_v);
+    func_ExportFunctions_Options2_f_def0(x_v, y_v, &z_v);
     return z_v;
 }
+
+
 ")})));
 end Options2;
 	
@@ -154,46 +156,46 @@ algorithm
   fb1(0, 0);
   fb2(0, 0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ScalarGrouping1",
-			description="",
-			export_functions=true,
-			export_functions_vba=true,
-			inline_functions="none",
-			template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ScalarGrouping1",
+            description="",
+            export_functions=true,
+            export_functions_vba=true,
+            inline_functions="none",
+            template="
 $C_export_functions$
 $C_export_wrappers$
 ",
-         generatedCode="
-DllExport double func_ExportFunctions_ScalarGrouping1_fa2_export(double y_v) {
+            generatedCode="
+DllExport double func_ExportFunctions_ScalarGrouping1_fa2_export0(double y_v) {
     double w_v;
-    func_ExportFunctions_ScalarGrouping1_fa2_def(y_v, &w_v);
+    func_ExportFunctions_ScalarGrouping1_fa2_def0(y_v, &w_v);
     return w_v;
 }
 
-DllExport double func_ExportFunctions_ScalarGrouping1_fa1_export(double x_v) {
+DllExport double func_ExportFunctions_ScalarGrouping1_fa1_export1(double x_v) {
     double z_v;
-    func_ExportFunctions_ScalarGrouping1_fa1_def(x_v, &z_v);
+    func_ExportFunctions_ScalarGrouping1_fa1_def1(x_v, &z_v);
     return z_v;
 }
 
-DllExport double func_ExportFunctions_ScalarGrouping1_fb1_export(double x1_v, double x2_v) {
+DllExport double func_ExportFunctions_ScalarGrouping1_fb1_export2(double x1_v, double x2_v) {
     double y_v;
-    func_ExportFunctions_ScalarGrouping1_fb1_def(x1_v, x2_v, &y_v);
+    func_ExportFunctions_ScalarGrouping1_fb1_def2(x1_v, x2_v, &y_v);
     return y_v;
 }
 
-DllExport double func_ExportFunctions_ScalarGrouping1_fb2_export(double x_v, double y_v) {
+DllExport double func_ExportFunctions_ScalarGrouping1_fb2_export3(double x_v, double y_v) {
     double z_v;
-    func_ExportFunctions_ScalarGrouping1_fb2_def(x_v, y_v, &z_v);
+    func_ExportFunctions_ScalarGrouping1_fb2_def3(x_v, y_v, &z_v);
     return z_v;
 }
 
 
 char* select_vba_1_names[] = { \"ExportFunctions_ScalarGrouping1_fa1\", \"ExportFunctions_ScalarGrouping1_fa2\" };
 int select_vba_1_lengths[] = { 35, 35 };
-double (*select_vba_1_funcs[])(double) = { *func_ExportFunctions_ScalarGrouping1_fa1_export, *func_ExportFunctions_ScalarGrouping1_fa2_export };
+double (*select_vba_1_funcs[])(double) = { *func_ExportFunctions_ScalarGrouping1_fa1_export1, *func_ExportFunctions_ScalarGrouping1_fa2_export0 };
 DllExport double __stdcall select_vba_1(char* name, double x_v) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
@@ -204,7 +206,7 @@ DllExport double __stdcall select_vba_1(char* name, double x_v) {
 
 char* select_vba_2_names[] = { \"ExportFunctions_ScalarGrouping1_fb1\", \"ExportFunctions_ScalarGrouping1_fb2\" };
 int select_vba_2_lengths[] = { 35, 35 };
-double (*select_vba_2_funcs[])(double, double) = { *func_ExportFunctions_ScalarGrouping1_fb1_export, *func_ExportFunctions_ScalarGrouping1_fb2_export };
+double (*select_vba_2_funcs[])(double, double) = { *func_ExportFunctions_ScalarGrouping1_fb1_export2, *func_ExportFunctions_ScalarGrouping1_fb2_export3 };
 DllExport double __stdcall select_vba_2(char* name, double x1_v, double x2_v) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
@@ -234,19 +236,19 @@ algorithm
   f2({0});
   f1({0});
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ArrayInputs1",
-			description="",
-			export_functions=true,
-			export_functions_vba=true,
-			inline_functions="none",
-			template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ArrayInputs1",
+            description="",
+            export_functions=true,
+            export_functions_vba=true,
+            inline_functions="none",
+            template="
 $C_export_functions$
 $C_export_wrappers$
 ",
-         generatedCode="
-DllExport double func_ExportFunctions_ArrayInputs1_f2_export(double* y_ap, int y_a0) {
+            generatedCode="
+DllExport double func_ExportFunctions_ArrayInputs1_f2_export0(double* y_ap, int y_a0) {
     double w_v;
     int y_a_size[1];
     jmi_array_t y_a_obj;
@@ -256,28 +258,28 @@ DllExport double func_ExportFunctions_ArrayInputs1_f2_export(double* y_ap, int y
     y_a_obj.num_dims = 1;
     y_a_obj.num_elems = 1 * y_a0;
     y_a_size[0] = y_a0;
-    func_ExportFunctions_ArrayInputs1_f2_def(y_a, &w_v);
+    func_ExportFunctions_ArrayInputs1_f2_def0(y_a, &w_v);
     return w_v;
 }
 
-DllExport double func_ExportFunctions_ArrayInputs1_f1_export(double* x_ap, int x_a0) {
+DllExport double func_ExportFunctions_ArrayInputs1_f1_export1(double* x_ap, int x_a0) {
     double z_v;
     int x_a_size[1];
     jmi_array_t x_a_obj;
     jmi_array_t* x_a = &x_a_obj;
     x_a_obj.var = x_ap;
     x_a_obj.size = x_a_size;
-	x_a_obj.num_dims = 1;
+    x_a_obj.num_dims = 1;
     x_a_obj.num_elems = 1 * x_a0;
     x_a_size[0] = x_a0;
-    func_ExportFunctions_ArrayInputs1_f1_def(x_a, &z_v);
+    func_ExportFunctions_ArrayInputs1_f1_def1(x_a, &z_v);
     return z_v;
 }
 
 
 char* select_vba_1_names[] = { \"ExportFunctions_ArrayInputs1_f1\", \"ExportFunctions_ArrayInputs1_f2\" };
 int select_vba_1_lengths[] = { 31, 31 };
-double (*select_vba_1_funcs[])(double*, int) = { *func_ExportFunctions_ArrayInputs1_f1_export, *func_ExportFunctions_ArrayInputs1_f2_export };
+double (*select_vba_1_funcs[])(double*, int) = { *func_ExportFunctions_ArrayInputs1_f1_export1, *func_ExportFunctions_ArrayInputs1_f2_export0 };
 DllExport double __stdcall select_vba_1(char* name, double* x_ap, int x_a0) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
@@ -307,52 +309,52 @@ algorithm
   f2({{0}});
   f1({{0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="ArrayInputs2",
-			description="",
-			export_functions=true,
-			export_functions_vba=true,
-			inline_functions="none",
-			template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ArrayInputs2",
+            description="",
+            export_functions=true,
+            export_functions_vba=true,
+            inline_functions="none",
+            template="
 $C_export_functions$
 $C_export_wrappers$
 ",
-         generatedCode="
-DllExport double func_ExportFunctions_ArrayInputs2_f2_export(double* y_ap, int y_a0, int y_a1) {
+            generatedCode="
+DllExport double func_ExportFunctions_ArrayInputs2_f2_export0(double* y_ap, int y_a0, int y_a1) {
     double w_v;
     int y_a_size[2];
     jmi_array_t y_a_obj;
     jmi_array_t* y_a = &y_a_obj;
     y_a_obj.var = y_ap;
     y_a_obj.size = y_a_size;
-	y_a_obj.num_dims = 2;
+    y_a_obj.num_dims = 2;
     y_a_obj.num_elems = 1 * y_a0 * y_a1;
     y_a_size[0] = y_a0;
     y_a_size[1] = y_a1;
-    func_ExportFunctions_ArrayInputs2_f2_def(y_a, &w_v);
+    func_ExportFunctions_ArrayInputs2_f2_def0(y_a, &w_v);
     return w_v;
 }
 
-DllExport double func_ExportFunctions_ArrayInputs2_f1_export(double* x_ap, int x_a0, int x_a1) {
+DllExport double func_ExportFunctions_ArrayInputs2_f1_export1(double* x_ap, int x_a0, int x_a1) {
     double z_v;
     int x_a_size[2];
     jmi_array_t x_a_obj;
     jmi_array_t* x_a = &x_a_obj;
     x_a_obj.var = x_ap;
     x_a_obj.size = x_a_size;
-	x_a_obj.num_dims = 2;
+    x_a_obj.num_dims = 2;
     x_a_obj.num_elems = 1 * x_a0 * x_a1;
     x_a_size[0] = x_a0;
     x_a_size[1] = x_a1;
-    func_ExportFunctions_ArrayInputs2_f1_def(x_a, &z_v);
+    func_ExportFunctions_ArrayInputs2_f1_def1(x_a, &z_v);
     return z_v;
 }
 
 
 char* select_vba_1_names[] = { \"ExportFunctions_ArrayInputs2_f1\", \"ExportFunctions_ArrayInputs2_f2\" };
 int select_vba_1_lengths[] = { 31, 31 };
-double (*select_vba_1_funcs[])(double*, int, int) = { *func_ExportFunctions_ArrayInputs2_f1_export, *func_ExportFunctions_ArrayInputs2_f2_export };
+double (*select_vba_1_funcs[])(double*, int, int) = { *func_ExportFunctions_ArrayInputs2_f1_export1, *func_ExportFunctions_ArrayInputs2_f2_export0 };
 DllExport double __stdcall select_vba_1(char* name, double* x_ap, int x_a0, int x_a1) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 

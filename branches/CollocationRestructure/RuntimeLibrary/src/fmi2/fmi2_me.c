@@ -146,9 +146,9 @@ void fmi2_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t categor
     if(c){
         if(c->fmi_functions->logger)
             c->fmi_functions->logger(c,jmi_callbacks->instance_name, 
-                                    category_to_fmiStatus(category),
-                                   category_to_fmiCategory(severest_category),
-                                   message);       
+                                     category_to_fmiStatus(category),
+                                     category_to_fmiCategory(severest_category),
+                                     "%s", message); /* prevent interpretation of message as format string */
     } else {
         switch (category) {
             case logError:

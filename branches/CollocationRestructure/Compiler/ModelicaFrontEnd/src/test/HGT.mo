@@ -3463,6 +3463,32 @@ Jacobian:
 ")})));
         end Extends2;
         
+        model Conditional1
+            model A
+                Real a;
+                Real b;
+                Real c;
+            equation
+                a=c + 1;
+                a=b + 2;
+                c=b - 3 annotation(__Modelon(name=res));
+            annotation(__Modelon(tearingPairs={Pair(residualEquation=res,iterationVariable=c)}));
+            end A;
+            
+            A a if 1 == 2;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="SystemPairs_Conditional1",
+                description="Test of hand guided tearing with pairs defined on system level in an conditional false class.",
+                automatic_tearing=false,
+                hand_guided_tearing=true,
+                methodName="printDAEBLT",
+                methodResult="
+-------------------------------
+")})));
+        end Conditional1;
+        
         model Error1
             Real x;
             Real y;

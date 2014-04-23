@@ -311,6 +311,7 @@ aspect InstLookupComponents {
 		InstComponentDecl icd = lookupInstComponent(name());
 		return (icd != null) ? icd : unknownInstComponentDecl();
 	}
+	syn InstComponentDecl FInstAccessExp.myInstComponentDecl() = getInstAccess().myInstComponentDecl();
 	
 }
 

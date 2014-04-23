@@ -4,6 +4,8 @@ project(ModelicaCasADi CXX)
 
 add_definitions(-DMODELICACASADI_WITH_SWIG) # todo: might not always want this...
 
+set(Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 2.4)
+
 
 function(make_paths_absolute DEST_VAR DIRS)  
   set(ABS_DIRS "")

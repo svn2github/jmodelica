@@ -58,7 +58,7 @@ aspect ExportFunctions {
 	 * The name of the export wrapper of this function.
 	 */
 	syn String FFunctionDecl.funcNameExportWrapper() = 
-		getFQName().funcNameUnderscore(C_SUFFIX_EXPORT);
+		funcNameUnderscore(C_SUFFIX_EXPORT);
 	
 	// TODO: handle more types
 	syn String FType.exportWrapperType_C() = "void";
@@ -90,7 +90,7 @@ aspect ExportFunctions {
 		for (FFunctionVariable var : myInputs()) 
 			var.exportWrapperInitTemp_C(str, bodyInd);
 		// - Call function
-		str.format("%s%s(", bodyInd, getFQName().funcNameUnderscore(C_SUFFIX_DEF));
+		str.format("%s%s(", bodyInd, funcNameUnderscore(C_SUFFIX_DEF));
 		for (FFunctionVariable var : myInputs()) 
 			str.format("%s, ", var.name_C());
 		str.format("&%s);\n", out.name_C());

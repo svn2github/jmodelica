@@ -93,10 +93,19 @@ static void buffer_raw_char(buf_t *buf, char c) {
 }
 
 static void buffer_char(buf_t *buf, char c) {
-    /* Escape #, used for value references, 
-       and %, since the logger callback takes a printf format string. */
-    if (c == '#' || c == '%') buffer_raw_char(buf, c);
-    buffer_raw_char(buf, c);    
+    /* Escape # used for value references. */
+    if (c == '#') buffer_raw_char(buf, c);
+
+    if (c == '\n') { /* emit newlines as &#10; */
+        buffer_raw_char(buf, '&');
+        buffer_raw_char(buf, '#');
+        buffer_raw_char(buf, '1');
+        buffer_raw_char(buf, '0');
+        buffer_raw_char(buf, ';');
+    }
+    else {
+        buffer_raw_char(buf, c);
+    }
 }
 
 static void buffer(buf_t *buf, const char *str) {
@@ -220,6 +229,7 @@ static void emit(log_t *log);
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim, 
                      const char *name, const char *name_end);
 static void leave_(log_t *log, node_t node);
+static void leave_all(log_t *log);
 static void log_value_(log_t *log, const char *value);
 static void log_comment_(log_t *log, category_t c, const char *msg);
 static void log_vref_(log_t *log, char t, int vref);
@@ -236,18 +246,32 @@ static void force_commas(log_t *log) {
 
 static INLINE int current_indent_of(log_t *log) { return 2*log->topindex; }
 
+/** \brief Like fputs, but convert ## into #. */
+static void fputs_unescape_hashmarks(const char *str, FILE *out) {
+    char c;
+    while ((c = *(str++)) != 0) {
+        if ((c == '#') && (*str == '#')) str++;
+        fputc(c, out);
+    }
+}
+
 void file_logger(FILE *out, FILE *err, 
                         category_t category, category_t severest_category, 
                         const char *message) {
     switch (category) {
     case logError:
-        fprintf(err, "<!-- ERROR:   --> %s\n", message);
+        fprintf(err, "<!-- ERROR:   --> ");
+        fputs_unescape_hashmarks(message, err);
+        fputc('\n', err);
         break;
     case logWarning:
-        fprintf(err, "<!-- WARNING: --> %s\n", message);
+        fprintf(err, "<!-- WARNING: --> ");
+        fputs_unescape_hashmarks(message, err);
+        fputc('\n', err);
         break;
     case logInfo:
-        fprintf(out, "%s\n", message);
+        fputs_unescape_hashmarks(message, out);
+        fputc('\n', out);
         break;
     }
 
@@ -277,7 +301,7 @@ static void emit(log_t *log) {
 
         if (!emitted_category(log, log->c)) return;
 
-        cb->emit_log(cb, log->c, log->severest_category,buf->msg);            
+        cb->emit_log(cb, log->c, log->severest_category, buf->msg);
 
     /* create_log_file_if_needed(log); */
         if (log->log_file) {
@@ -398,6 +422,8 @@ static void create_log_file_if_needed(log_t *log) {
            ==> will try to reopen the file at the next emit. Do we want this? 
            Not an issue if create_log_file_if_needed is only called once.*/
         log->log_file = fopen(filename, "w");
+
+        fprintf(log->log_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<JMILog>\n");
     }
 }
 
@@ -420,7 +446,11 @@ static void initialize(log_t *log) {
 }
 
 static void delete_log(log_t *log) {
-    if (log->log_file) fclose(log->log_file);
+    leave_all(log);
+    if (log->log_file) {
+        fprintf(log->log_file, "</JMILog>\n");
+        fclose(log->log_file);
+    }
     delete_buffer(bufof(log));
     free(log->frames);
     free(log);
@@ -458,6 +488,11 @@ static void leave_frame_(log_t *log) {
     if (!_leave_frame_(log)) {
         logging_error(log, "leave_frame_: frame stack empty; unable to pop.");
     }
+}
+
+static void leave_all(log_t *log) {
+    while (_leave_frame_(log)) {}
+    emit(log);
 }
 
 static void _leave_(log_t *log, node_t node) {
@@ -651,7 +686,7 @@ static node_t jmi_log_enter_matrix_(log_t *log, node_t node, category_t c,
 void jmi_log_leave(log_t *log, node_t node) { jmi_log_leave_(log, node); emit(log); }
 void jmi_log_leave_(log_t *log, node_t node) { leave_(log, node); }
 
-/** \brief Like jmi_log_leave, but may doesn't need to take innermost node. */
+/** \brief Like jmi_log_leave, but doesn't need to take innermost node. */
 void jmi_log_unwind(log_t *log, node_t node) { _leave_(log, node); emit(log); }
 
 
