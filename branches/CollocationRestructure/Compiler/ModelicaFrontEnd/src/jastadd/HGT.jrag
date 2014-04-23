@@ -41,6 +41,9 @@ aspect EquationName {
 
             @Override
             protected void contribute(InstAssignable src, FVariable dest) {}
+
+            @Override
+            protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
         }
     }
     
@@ -101,6 +104,9 @@ aspect HGT {
                     }
                 }
             }
+
+            @Override
+            protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
         }
     }
     

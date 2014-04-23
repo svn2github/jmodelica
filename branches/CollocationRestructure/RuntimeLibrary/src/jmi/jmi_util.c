@@ -18,6 +18,11 @@
 */
 
 #include <stdarg.h>
+#ifdef _WIN32
+    #include <win32_dirent.h>
+#else
+    #include <dirent.h>
+#endif
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_global.h"
@@ -2194,4 +2199,41 @@ int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {
 		return_status = func(jmi);
     jmi_set_current(NULL);
     return return_status;
+}
+
+int jmi_file_exists(const char* file) {
+    FILE *fp;
+    if (file && (fp = fopen(file,"r")))
+        fclose(fp);
+    else
+        return 0;
+    return 1;
+}
+
+int jmi_dir_exists(const char* dir) {
+    DIR* dh;
+    if(dir && (dh = opendir(dir)))
+        closedir(dh);
+    else
+        return 0;
+    return 1;
+}
+
+void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
+    size_t len;
+    jmi_string_t loc = jmi->resource_location;
+    if (!loc) {
+        jmi_log_node(jmi->log, logError, "Error", "Resource location unavailable.");
+        strcpy(res,file);
+        return;
+    }
+    len = strlen(loc) + strlen(file);
+    strcpy(res, loc);
+    if (len >= JMI_PATH_MAX) {
+        jmi_log_node(jmi->log, logError, "Error", "File path too long <Path:%s><File:%s>", loc, file);
+        return;
+    }
+    strcat(res, file);
+    if (!jmi_file_exists(res))
+        jmi_log_node(jmi->log, logError, "Error", "Could not locate resource <File:%s>", res);
 }

@@ -678,6 +678,37 @@ fmiStatus fmi2_get_nominals_of_continuous_states(fmiComponent c,
     return fmiOK;
 }
 
+/* Local helper for fmi2_me_instantiate. */
+int uri_to_path(char *path, const char* uri) {
+    char* scheme   = "file://";
+    int scheme_len = strlen(scheme);
+    int uri_len    = strlen(uri);
+    int len;
+    
+    if (strncmp(uri, scheme, scheme_len))
+        return 1;
+        
+    if (uri[scheme_len] != '/' && uri[scheme_len] != '\\')
+        return 1;
+    
+#ifdef _WIN32
+    scheme_len++;
+#endif
+    
+    len = uri_len - scheme_len;
+    if (len <= 0)
+        return 1;
+    
+    strcpy(path, &uri[scheme_len]);
+    
+    if (path[len-1] != '/' && path[len-1] != '\\') {
+        path[len] = '/';
+        path[len+1] = '\0';
+    }
+    
+    return 0;
+}
+
 /* Helper method for fmi2_instatiate. */
 fmiStatus fmi2_me_instantiate(fmiComponent c,
                               fmiString    instanceName,
@@ -689,6 +720,7 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
                               fmiBoolean                  loggingOn) {
     fmiInteger retval;
     char* tmpname;
+    char* resource_location;
     size_t inst_name_len;
     
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
@@ -708,16 +740,24 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
     cb->instance_name               = tmpname;                       /**< \brief Name of this model instance. */
     cb->model_data                  = fmi2_me;
     
-    retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID);
+    resource_location = (char*)(fmi2_me_t *)functions->allocateMemory(strlen(fmuResourceLocation), sizeof(char));
+    retval = uri_to_path(resource_location, fmuResourceLocation);
+    if (retval) {
+        functions->logger(0, instanceName, fmiError, "ERROR", "Invalid fmuResourceLocation <URI:%s>. Expected format: 'file:///absolute/path/resources'", fmuResourceLocation);
+        functions->freeMemory(resource_location);
+        return fmiError;
+    }
+    
+    fmi2_me->fmi_instance_name = tmpname;
+    fmi2_me->fmi_functions     = functions;
+    fmi2_me->fmu_type          = fmuType;
+    fmi2_me->fmi_mode          = instantiatedMode;
+    
+    retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID, resource_location);
           
     if (retval != 0) {
         return fmiError;
     }
-    
-    fmi2_me -> fmi_instance_name = tmpname;
-    fmi2_me -> fmi_functions     = functions;
-    fmi2_me -> fmu_type          = fmuType;
-	fmi2_me -> fmi_mode          = instantiatedMode;
     
     return fmiOK;
 }
@@ -727,6 +767,7 @@ void fmi2_me_free_instance(fmiComponent c) {
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
     fmiCallbackFreeMemory fmi_free = fmi2_me->fmi_functions->freeMemory;
 
+    fmi_free(fmi2_me->jmi.resource_location);
     jmi_delete(&fmi2_me->jmi);
     fmi_free((void*)fmi2_me -> fmi_instance_name);
 }

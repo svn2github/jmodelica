@@ -116,14 +116,47 @@ aspect Flattening {
 		getInstExtendsList().flattenUsedFuncsAndEnums(fc);
 		super.flattenUsedFuncsAndEnums(fc);
     }
-    
+
     public void InstComponentDecl.flattenUsedFuncsAndEnums(FClass fc) {
-        if (useInFlattening())
+        if (useInFlattening()) {
             super.flattenUsedFuncsAndEnums(fc);
+            if (isOperatorRecord() && isFlow())
+                type().matchOverloadedZero().flattenFunction(fc);
+        }
     }
 
     public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
-    	actualInstClass().flattenUsedFuncsAndEnums(fc);
+        actualInstClass().flattenUsedFuncsAndEnums(fc);
+    }
+
+    public void FConnectClause.flattenUsedFuncsAndEnums(FClass fc) {
+        super.flattenUsedFuncsAndEnums(fc);
+        getConnector1().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
+        getConnector2().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
+    }
+
+    public void InstNode.flattenOverloadedOperatorsForFlow(FClass fc) {
+        for (InstComponentDecl icd : getInstComponentDecls())
+            icd.flattenOverloadedOperatorsForFlow(fc);
+        for (InstExtends ie : getInstExtendss())
+            ie.flattenOverloadedOperatorsForFlow(fc);
+    }
+
+    public void InstComponentDecl.flattenOverloadedOperatorsForFlow(FClass fc) {
+        if (useInFlattening()) {
+            if (isOperatorRecord() && isFlow())
+                type().flattenOverloadedOperatorsForFlow(fc);
+            else
+                super.flattenOverloadedOperatorsForFlow(fc);
+        }
+    }
+
+    public void FType.flattenOverloadedOperatorsForFlow(FClass fc) {}
+
+    public void FOperatorRecordType.flattenOverloadedOperatorsForFlow(FClass fc) {
+        matchOverloadedOperator(null, FExp.OP_NEG).flattenFunction(fc);
+        matchOverloadedOperator(this, FExp.OP_SUB).flattenFunction(fc);
+        matchOverloadedOperator(this, FExp.OP_ADD).flattenFunction(fc);
     }
 
 	public void InstValueModification.flattenUsedFuncsAndEnums(FClass fc) {
@@ -215,12 +248,14 @@ aspect Flattening {
                 ffd.setFDerivativeFunction(der);
             // TODO: should we look in extends as well?
             ffd.readInlineAnnotation(annotation());
-            ffd.setSmoothOrder(smoothOrder());
+            ffd.smoothOrder(smoothOrder());
 
             ffd.ensureFQNamesFull();
             addLocalFunctionConstants(ffd, fc);
             flattenUsedFuncsAndEnums(fc);
             ffd.updateRecordArraySizes();
+
+            contribute(ffd);
         }
     }
 
@@ -390,37 +425,32 @@ aspect Flattening {
         if (inheritedRestriction() != null)
             inheritedRestriction().flattenRecord(fc, icd);
     }
-	
-	private FClass InstMRecord.flatRecordAddedTo = null;
-	
-	public void InstMRecord.flattenRecord(FClass fc, InstBaseClassDecl icd) {
-		if (flatRecordAddedTo != fc) {
-			flatRecordAddedTo = fc;
-			icd.flattenThisRecord(fc);
-		}
-	}
-	
-	public void InstBaseClassDecl.flattenThisRecord(FClass fc) {
-		if (fc.lookupFRec(qualifiedName()) == null) {
-			FRecordDecl frd = new FRecordDecl();
-	   		frd.setFQName(new FQNameString(qualifiedName()));
-	   		
-	   		Set<String> names = new HashSet<String>();
-	   		actualInstClass().flattenComponentsInRecord(frd, fc, names);
-			
-			fc.addFRecordDecl(frd);
-			
-			flattenUsedFuncsAndEnums(fc);
-		}
-	}
-	
-	public void InstNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
+
+    public void InstMRecord.flattenRecord(FClass fc, InstBaseClassDecl icd) {
+        icd.flattenThisRecord(fc);
+    }
+
+    public void InstBaseClassDecl.flattenThisRecord(FClass fc) {
+        if (fc.lookupFRec(qualifiedName()) == null) {
+            FRecordDecl frd = new FRecordDecl();
+            frd.setFQName(new FQNameString(qualifiedName()));
+            
+            Set<String> names = new HashSet<String>();
+            actualInstClass().flattenComponentsInRecord(frd, fc, names);
+            
+            fc.addFRecordDecl(frd);
+            
+            flattenUsedFuncsAndEnums(fc);
+        }
+    }
+
+    public void InstNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         for (InstExtends ie : getInstExtendss())
             ie.flattenComponentsInRecord(frd, fc, names);
         for (InstComponentDecl icd : getInstComponentDecls())
             icd.flattenInRecord(frd, fc, names);
-	}
-	
+    }
+
     public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
         return createStmt(func, prefix, true);
     }
@@ -1963,6 +1993,8 @@ aspect FlatExpressions {
 	public FExp FUnaryBuiltIn.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
 	public FExp FEdgeExp.flatten(FQName prefix)        { return new FAndExp(getFExp().flatten(prefix), new FNotExp(FPreExp.create(getFExp().flatten(prefix)))); }
 	
+    public FExp FLoadResource.flatten(FQName prefix)   { return new FLoadResource(getFExp().flatten(prefix)); }
+    
 	// These operators save reference to source node in instance tree until end of flattening - used for error checking them
 	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), FPreExp.create(getFExp().flatten(prefix), this)); }
 	public FExp InstPreExp.flatten(FQName prefix)      { return FPreExp.create(getFExp().flatten(prefix), this); }
@@ -2142,6 +2174,13 @@ aspect FlatExpressions {
 	}
 
     public FFunctionCall InstClassDecl.flattenOverloadedFunctionCall(FQName prefix, FExp... args) {
+        FType[] argTypes = new FType[args.length];
+        for (int i = 0; i < args.length; i++)
+            argTypes[i] = args[i].type();
+        return flattenOverloadedFunctionCall(prefix, args, argTypes);
+    }
+
+    public FFunctionCall InstClassDecl.flattenOverloadedFunctionCall(FQName prefix, FExp[] args, FType[] argTypes) {
         // TODO: handle array operations (scalar * matrix, etc)
         FIdUse name = new FIdUse(new FQNameString(qualifiedName()));
         int nIn = myInputs().size();
@@ -2151,8 +2190,8 @@ aspect FlatExpressions {
             InstComponentDecl in = myInputs().get(i);
             if (args[i] == null) {
                 args[i] = in.createInstDefaultArgument().flatten(prefix);
-            } else if (!in.type().typeCompatible(args[i].type())) {
-                InstClassDecl constructor = in.type().matchOverloadedConstructor(args[i].type());
+            } else if (!in.type().typeCompatible(argTypes[i])) {
+                InstClassDecl constructor = in.type().matchOverloadedConstructor(argTypes[i]);
                 args[i] = constructor.flattenOverloadedFunctionCall(prefix, args[i]);
             } else {
                 args[i] = args[i].flatten(prefix);
@@ -2672,6 +2711,8 @@ aspect AttributeContributer {
 
         protected abstract void contribute(InstAssignable src, FVariable dest);
 
+        protected abstract void contribute(InstBaseClassDecl src, FFunctionDecl dest);
+
         @Override
         public String toString() {
             return name;
@@ -2719,7 +2760,13 @@ aspect AttributeContributer {
         }
     }
     
-    
+    public class InstBaseClassDecl {
+        public <N extends FFunctionDecl> N contribute(N function) {
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(this, function);
+            return function;
+        }
+    }
     
 }
 

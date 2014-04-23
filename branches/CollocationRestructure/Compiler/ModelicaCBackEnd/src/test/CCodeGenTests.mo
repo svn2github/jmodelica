@@ -14530,4 +14530,48 @@ jmi_ad_var_t func_CCodeGenTests_QuotedIdentifierFunc1_______exp1(jmi_ad_var_t x_
 ")})));
 end QuotedIdentifierFunc1;
 
+model LoadResource1
+    function strlen
+        input String s;
+        output Integer n;
+        external;
+    end strlen;
+    parameter Integer y = strlen(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    discrete  Integer z = strlen(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    
+    discrete Integer rel = strlen(Modelica.Utilities.Files.loadResource("../Data/String.txt")); 
+    discrete Integer abs = strlen(loadResource("/home/user/Data/String.txt")); 
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="LoadResource1",
+            description="",
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$
+$C_DAE_initial_dependent_parameter_assignments$
+",
+            generatedCode="
+    char tmp_1[JMI_PATH_MAX];
+    char tmp_2[JMI_PATH_MAX];
+    char tmp_3[JMI_PATH_MAX];
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    jmi_load_resource(jmi, tmp_1, \"0_Examples_readRealParameters.txt\");
+    _z_1 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_1);
+    jmi_load_resource(jmi, tmp_2, \"1_String.txt\");
+    _rel_2 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_2);
+    jmi_load_resource(jmi, tmp_3, \"2_String.txt\");
+    _abs_3 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_3);
+/********* Write back reinits *******/
+
+    char tmp_4[JMI_PATH_MAX];
+    jmi_load_resource(jmi, tmp_4, \"0_Examples_readRealParameters.txt\");
+    _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4));
+")})));
+end LoadResource1;
+
 end CCodeGenTests;

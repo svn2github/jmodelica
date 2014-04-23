@@ -36,6 +36,7 @@ def run_demo(with_plots=True):
     # Optimization
     model = CasadiModel(fmux_name)
     opts = model.optimize_options(algorithm="CasadiPseudoSpectralAlg")
+    opts['IPOPT_options']['linear_solver'] = "mumps"
     opts["n_cp"] = 40                                      # Number of collocation points
     opts["n_e"] = 2                                        # Number of phases
     opts["free_phases"] = True                             # The phase boundary is allowed to be changed in time

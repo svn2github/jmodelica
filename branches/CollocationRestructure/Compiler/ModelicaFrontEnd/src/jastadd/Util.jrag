@@ -680,6 +680,14 @@ aspect Names {
       }
       return null;
   }
+  
+  public String ASTNode.abspath(String str) {
+    String path = null;
+    path = uri2path(str);
+    if (path == null)
+        path = new File(str).getAbsolutePath();
+    return path;
+  }
 
   
   inh InstClassDecl ASTNode.enclosingInstClassDecl();

@@ -51,7 +51,7 @@ FFunctionDecl : BaseNode ::= FQName
                              FAlgorithm 
                              [FDerivativeFunction] 
                              /DummyExp:FExp/
-                             <SmoothOrder:int>;
+                             FAttribute*;
 
 /**
  * A function that is the constructor of an external object.
@@ -167,6 +167,11 @@ FParameter : FTypePrefixVariability;
  * Structural parameter variability.
  */
 FStructParameter : FParameter;
+
+/**
+ * Evaluate true parameter variability.
+ */
+FEvalParameter : FParameter;
 
 /**
  * Constant variability.
@@ -1305,6 +1310,11 @@ FEdgeExp : FUnaryBuiltIn;
  * Change built-in function.
  */
 FChangeExp : FUnaryBuiltIn;
+
+/**
+ * loadResource built-in function.
+ */
+FLoadResource : FUnaryBuiltIn;
 
 /**
  * Reinit built-in function.

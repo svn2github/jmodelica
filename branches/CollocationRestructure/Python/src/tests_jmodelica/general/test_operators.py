@@ -384,3 +384,29 @@ class TestStringExpParameter(SimulationTest):
         Test that results match the expected ones.
         """
         # Tested with asserts in model
+
+class TestLoadResource(SimulationTest):
+    """
+    Basic test of loadResource().
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 'OperatorTests.LoadResource', 
+            options={'variability_propagation':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base()
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_end_value('x', 110)
+        self.assert_end_value('y', 110)
+        self.assert_end_value('z', 110)
+        
+        self.assert_end_value('rel', 45)

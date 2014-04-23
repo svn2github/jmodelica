@@ -922,6 +922,7 @@ public class ModelicaCompiler {
 				dumpMemoryUseFile(fc, "generated", false);
 			}
 			
+            fc.copyResources(new File(outDir, "resources"));
             removeCompiledExternals();
             
 		} finally {

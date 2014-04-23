@@ -1422,6 +1422,7 @@ aspect ConstantEvaluation {
   
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
+  eq FLoadResource.cevalCalc() = getFExp().ceval();
   
   eq FEdgeExp.cevalCalc()    = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
   eq FChangeExp.cevalCalc()  = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
