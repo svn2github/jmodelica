@@ -3462,6 +3462,7 @@ class LocalDAECollocator(CasadiCollocator):
         """
         # Scale variables
         if self.variable_scaling and self.nominal_traj is None:
+            # Fetch scaling factors
             sf = {}
             scaled_vars={}
             list_struct=list()
