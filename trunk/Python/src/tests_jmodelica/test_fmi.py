@@ -893,7 +893,7 @@ class Test_FMI_Compile:
         """
         Sets up the test case.
         """
-        self._model  = FMUModelME1(cls.fmuname)
+        self._model  = FMUModelME1(Test_FMI_Compile.fmuname)
 
     @testattr(fmi = True)
     def test_get_version(self):
