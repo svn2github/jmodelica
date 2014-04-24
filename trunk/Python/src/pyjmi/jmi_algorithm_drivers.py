@@ -2322,7 +2322,8 @@ class LocalDAECollocationAlg(AlgorithmBase):
         # Check named_vars
         if self.named_vars:
             print("Warning: Named NLP variables is currently enabled. This " +
-                  "may have significant performance impacts.")
+                  "may have significant performance impacts and will also " +
+                  "disable the solution of the NLP.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and

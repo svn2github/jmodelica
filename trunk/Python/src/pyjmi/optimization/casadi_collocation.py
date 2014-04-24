@@ -6166,8 +6166,14 @@ class LocalDAECollocator(CasadiCollocator):
             f.init()
             return f.eval(debug_xx)[0]
         else:
-            raise CasadiCollocatorException(
-                    "_debug_eval_expr only works with named variables.")
+            try:
+                debug_xx = self._debug_xx
+            except AttributeError:
+                debug_xx = casadi.ssym("xx", self.n_xx)
+                self._debug_xx = debug_xx
+            f = casadi.MXFunction([self.xx], [expr])
+            f.init()
+            return f.eval([self._debug_xx])[0]
 
 class PseudoSpectral(CasadiCollocator):
     
