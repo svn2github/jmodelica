@@ -676,70 +676,74 @@ public class ModelicaCompiler {
 		compileUnit(className, fileName, targetObject, compileTo);
 	}
 
-    /**
-     * Compiles a JMU, FMU or FMUX.
-     * 
-     * @param className Name of model class in the model file to compile.
+	/**
+	 * Compiles a JMU, FMU or FMUX.
+	 * 
+	 * @param className Name of model class in the model file to compile.
      * @param fileName Array of model file or library paths.
      * @param target Target object, contains information about the target, its unit suffix for example.
      * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist..
-     */
-    protected void compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
-            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        // Always set certain options when compiling
-        // First save these options in temp options registry to reset when compiling has finished
-        OptionRegistry tempOptions = options.copy();    
-        
-        //Set options for the target.
-        target.setDefaultOptions(options);
-        
-        try {
-            // set invokegc if set
-            StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
-            
-            // Set output dir
-            if (outDir == null)
-                setRandomOutDir();
-            
-            
+	 */
+	protected void compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
+	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// Always set certain options when compiling
+		// First save these options in temp options registry to reset when compiling has finished
+		OptionRegistry tempOptions = options.copy();    
+		
+		//Set options for the target.
+		target.setDefaultOptions(options);
+		
+		try {
+			// set invokegc if set
+			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
+			
+			// Set output dir
+			if (outDir == null)
+				setRandomOutDir();
+			
+			
             if (target.getMakeFileFlag() != null) {
                 // Might be used by constant evaluation
                 CCompilerDelegator ccompiler = getCCompiler();
                 ccompiler.setTargetPlatforms(targetPlatforms);
             }
-            
-            // compile mo-file + generate code for all templates that are not null
-            FClass fc = compileModel(fileName, className, target);
-            
-            if (target.hasCodeGen()) {
-                // compile c code if Makefile flag is not null
-                hookCheckAbort();
-                if (target.getMakeFileFlag() != null) {
-                    ASTNode.beginStep("compileCCode()");
-                    String cFileName = FClass.convertClassNameToUnderscore(className);
-                    CCompilerDelegator ccompiler = getCCompiler();
-                    ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
-                    ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
-                    ASTNode.endStep("compileCCode()");
-                }
-                hookCodeCompiled();
-                
-                // package JMU/FMU
-                ASTNode.beginStep("packUnit()");
-                packUnit(className, compileTo, target);
-                deleteOutDir();
-                ASTNode.endStep("packUnit()");
-            }
-        } finally {
-            log.debug("Time useage and memory usage change during compilation steps:");
-            ASTNode.getStepInfo().logReport();
-            if (options.getBooleanOption("debug_csv_step_info"))
-                ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
-        }
-        // set back all options
-        options.copyAllOptions(tempOptions);
-    }
-
+			
+			// compile mo-file + generate code for all templates that are not null
+			FClass fc = compileModel(fileName, className, target);
+			
+			if (!target.getCodeGenFlag()) {
+				//No code have been generated.
+				options.copyAllOptions(tempOptions);
+				return;
+			}
+			
+			// compile c code if Makefile flag is not null
+			hookCheckAbort();
+			if (target.getMakeFileFlag() != null) {
+				ASTNode.beginStep("compileCCode()");
+				String cFileName = FClass.convertClassNameToUnderscore(className);
+				CCompilerDelegator ccompiler = getCCompiler();
+				ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+				ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
+				ASTNode.endStep("compileCCode()");
+			}
+			hookCodeCompiled();
+			
+			// package JMU
+			ASTNode.beginStep("packUnit()");
+			packUnit(className, compileTo, target);
+			deleteOutDir();
+			ASTNode.endStep("packUnit()");
+		} finally {
+			log.debug("Time useage and memory usage change during compilation steps:");
+			ASTNode.getStepInfo().logReport();
+			if (options.getBooleanOption("debug_csv_step_info"))
+				ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
+		}
+		// set back all options
+		options.copyAllOptions(tempOptions);
+	}
+	
 	/**
 	 * \brief Packs either a JMU or FMU (helper function for compileUnit).
 	 * 
@@ -872,72 +876,74 @@ public class ModelicaCompiler {
 		}
 	}
 
-    /**
-     * Compiles a Modelica model. A model file name and class must be provided.
-     * Prints an error and returns without completion if, for example, a file 
-     * can not be found or if the parsing fails. Supports multiple model files.
-     * 
-     * @param name
-     *            Array of model file or library paths.
-     * @param cl
-     *            The name of the class in the model file to compile.
-     * @param target
-     *            The target object for the compiler.
-     * @throws beaver.Parser.Exception
-     *             If there was an Beaver parsing exception.
-     * @throws CompilerException
-     *             If errors have been found during the parsing, instantiation
-     *             or flattening.
-     * @throws FileNotFoundException
-     *             If the model file can not be found.
-     * @throws IOException
-     *             If there was an error reading the model file. (Beaver
-     *             exception.)
-     * @throws IOException
-     *             If there was an error creating the .mof file.
-     * @throws ModelicaClassNotFoundException
-     *             If the Modelica class to parse, instantiate or flatten is not
-     *             found.
-     * 
-     */
-    public FClass compileModel(String name[], String cl, TargetObject target)
-      throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        log.info("======= Compiling model =======");
-        resetCompilationInfo();
-        
-        FClass fc = null;
-        try {
-            // compute instance tree
-            InstClassDecl icl = instantiateModel(name, cl, target);
-            
-            // flattening
-            // Throw away source and instance trees when they are not needed any more
-            PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
-            icl = null;
-            fc = flattenModel(buf.pass(), target);
+	/**
+	 * Compiles a Modelica model. A model file name and class must be provided.
+	 * Prints an error and returns without completion if, for example, a file 
+	 * can not be found or if the parsing fails. Supports multiple model files.
+	 * 
+	 * @param name
+	 *            Array of model file or library paths.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @param target
+	 *            The target object for the compiler.
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver
+	 *             exception.)
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to parse, instantiate or flatten is not
+	 *             found.
+	 * 
+	 */
+	public FClass compileModel(String name[], String cl, TargetObject target)
+	  throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		log.info("======= Compiling model =======");
+		resetCompilationInfo();
+		
+		FClass fc = null;
+		try {
+			// compute instance tree
+			InstClassDecl icl = instantiateModel(name, cl, target);
+			
+			// flattening
+			// Throw away source and instance trees when they are not needed any more
+			PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
+			icl = null;
+			fc = flattenModel(buf.pass(), target);
 
-            // Generate code 
-            generateCode(fc, target);
-            dumpMemoryUseFile(fc, "generated", false);
-            
+			// Generate code 
+			if (target.getCodeGenFlag()) {
+				generateCode(fc, target);
+				dumpMemoryUseFile(fc, "generated", false);
+			}
+			
             fc.loadResources(new File(outDir, "resources"));
             removeCompiledExternals();
             
-        } finally {
+		} finally {
 //          logCompilationInfo();
-            // The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
+			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
 //          dumpNodeCountFile("node_count.txt");
-        }
+		}
 
-        if (options.getBooleanOption("generate_html_diagnostics")) {
-            getDiagnosticsGenerator().finalize();
-            setDiagnosticsGenerator(null);
-        }
+		if (options.getBooleanOption("generate_html_diagnostics")) {
+			getDiagnosticsGenerator().finalize();
+			setDiagnosticsGenerator(null);
+		}
 
-        log.info("====== Model compiled successfully =======");
-        
-        return fc;
-    }
+		log.info("====== Model compiled successfully =======");
+		
+		return fc;
+	}
 
 	/**
 	 * 
@@ -1150,128 +1156,125 @@ public class ModelicaCompiler {
 		warnings = new ArrayList<Problem>();
 		return oldWarnings;
 	}
+	
+	/**
+	 * Computes the flattened model representation from a model instance.
+	 * 
+	 * @param icd
+	 *            A reference to the model instance node.
+	 * @param target
+	 *            The model represenation type the model should be compiled to.
+	 * 
+	 * @return FClass object representing the flattened model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the flattening.
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to flatten is not found.
+	 */
+	public FClass flattenModel(InstClassDecl icl, TargetObject target) 
+			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		hookCheckAbort();
+		ASTNode.beginStep("flattenModel()");
+		
+		String instName = icl.qualifiedName();
+		File flatFile = new File(sourceDir, instName + ".mof");
+		final FClass fc = FClass.create(icl, flatFile.getPath(), this);
+		
+		ASTNode.beginStep("flatten()");
+		log.info("Flattening model...");
+		icl.flattenInstClassDecl(fc);
+		dumpMemoryUseFile(fc, "flat", true);
+		dumpNodeCountFile();
+		icl = null;
+		ASTNode.endStep("flatten()");
+		
+		findFlatToInstanceLinks(fc);
+		hookModelFlattened(fc);
+		hookCheckAbort();
+		
+		//fc.dumpTree("");
+		// Output the untransformed flattened model
+		ASTNode.beginStep("prettyPrintRawFlat()");
+		if (fc.root().options.getBooleanOption("generate_mof_files")) {
+			log.debug("Creating raw .mof file...");
+			CodeStream out = new CodeStream(flatFile);
+			fc.prettyPrint_MC(out, "");
+			out.close();
+			log.debug("... raw .mof file created.");
+		}
 
-    /**
-     * Computes the flattened model representation from a model instance.
-     * 
-     * @param icd
-     *            A reference to the model instance node.
-     * @param target
-     *            The model represenation type the model should be compiled to.
-     * 
-     * @return FClass object representing the flattened model.
-     * 
-     * @throws CompilerException
-     *             If errors have been found during the flattening.
-     * @throws IOException
-     *             If there was an error creating the .mof file.
-     * @throws ModelicaClassNotFoundException
-     *             If the Modelica class to flatten is not found.
-     */
-    public FClass flattenModel(InstClassDecl icl, TargetObject target) 
-            throws CompilerException, ModelicaClassNotFoundException, IOException {
-        hookCheckAbort();
-        ASTNode.beginStep("flattenModel()");
-        
-        String instName = icl.qualifiedName();
-        File flatFile = new File(sourceDir, instName + ".mof");
-        final FClass fc = FClass.create(icl, flatFile.getPath(), this);
-        
-        ASTNode.beginStep("flatten()");
-        log.info("Flattening model...");
-        icl.flattenInstClassDecl(fc);
-        dumpMemoryUseFile(fc, "flat", true);
-        dumpNodeCountFile();
-        icl = null;
-        ASTNode.endStep("flatten()");
-        
-        findFlatToInstanceLinks(fc);
-        hookModelFlattened(fc);
-        hookCheckAbort();
-        
-        //fc.dumpTree("");
-        // Output the untransformed flattened model
-        ASTNode.beginStep("prettyPrintRawFlat()");
-        if (fc.root().options.getBooleanOption("generate_mof_files")) {
-            log.debug("Creating raw .mof file...");
-            CodeStream out = new CodeStream(flatFile);
-            fc.prettyPrint_MC(out, "");
-            out.close();
-            log.debug("... raw .mof file created.");
-        }
+		log.info("Raw flattened model:");
+		log.info(fc);
+		ASTNode.endStep("prettyPrintRawFlat()");
 
-        log.info("Raw flattened model:");
-        log.info(fc);
-        ASTNode.endStep("prettyPrintRawFlat()");
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+			ASTNode.beginStep("htmlDiagnostics()");
+			getDiagnosticsGenerator().writeRawFlattenedModel(fc);
+			getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
+			ASTNode.endStep("htmlDiagnostics()");
+		}
+		
+		fc.transformCanonical();
+		
+		hookModelTransformed(fc);
+		hookCheckAbort();
+		
+		ASTNode.beginStep("prettyPrintFlat()");
+		if (fc.root().options.getBooleanOption("generate_mof_files")) {
+			log.debug("Creating transformed .mof file...");
+			CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
+			fc.prettyPrint_MC(out, "");
+			out.close();
+			log.debug("... transformed .mof file created.");
+		}
+		
+		log.info("Diagnostics for transformed flattened model:");
+		log.info(new Object() {
+			public String toString() {
+				return fc.diagnostics();
+			};
+		});
+		
+		log.info("Transformed flattened model:");
+		log.info(fc);
+		
+		ASTNode.endStep("prettyPrintFlat()");
+		
+		dumpMemoryUseFile(fc, "transformed", false);
+		
+		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
+			ASTNode.beginStep("writeIterationVariables()");
+			fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
+			fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
+			ASTNode.endStep("writeIterationVariables()");
+		}
+		
+		if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
+			ASTNode.beginStep("writeIterationVariables()");
+			fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
+			fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
+			ASTNode.endStep("writeIterationVariables()");
+		}
+		
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+			ASTNode.beginStep("htmlDiagnostics()");
+			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
+			getDiagnosticsGenerator().writeDiagnostics(fc);
+			ASTNode.endStep("htmlDiagnostics()");
+		}
+		
+		fc.errorCheck(target.getCheckType());
+		handleCompilerWarnings(fc.collectWarnings());
 
-        if (target != TargetObject.CHECK) {
-            if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
-                ASTNode.beginStep("htmlDiagnostics()");
-                getDiagnosticsGenerator().writeRawFlattenedModel(fc);
-                getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
-                ASTNode.endStep("htmlDiagnostics()");
-            }
-            
-            fc.transformCanonical();
-            
-            hookModelTransformed(fc);
-            hookCheckAbort();
-            
-            ASTNode.beginStep("prettyPrintFlat()");
-            if (fc.root().options.getBooleanOption("generate_mof_files")) {
-                log.debug("Creating transformed .mof file...");
-                CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
-                fc.prettyPrint_MC(out, "");
-                out.close();
-                log.debug("... transformed .mof file created.");
-            }
-            
-            log.info("Diagnostics for transformed flattened model:");
-            log.info(new Object() {
-                public String toString() {
-                    return fc.diagnostics();
-                };
-            });
-            
-            log.info("Transformed flattened model:");
-            log.info(fc);
-            
-            ASTNode.endStep("prettyPrintFlat()");
-            
-            dumpMemoryUseFile(fc, "transformed", false);
-            
-            if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
-                ASTNode.beginStep("writeIterationVariables()");
-                fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
-                fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
-                ASTNode.endStep("writeIterationVariables()");
-            }
-            
-            if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
-                ASTNode.beginStep("writeIterationVariables()");
-                fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
-                fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
-                ASTNode.endStep("writeIterationVariables()");
-            }
-            
-            if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
-                ASTNode.beginStep("htmlDiagnostics()");
-                getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
-                getDiagnosticsGenerator().writeDiagnostics(fc);
-                ASTNode.endStep("htmlDiagnostics()");
-            }
-            
-            fc.errorCheck(target.getCheckType());
-            handleCompilerWarnings(fc.collectWarnings());
-    
-            hookFlatModelChecked(fc);
-        }
-        
-        ASTNode.endStep("flattenModel()");
+		hookFlatModelChecked(fc);
+		ASTNode.endStep("flattenModel()");
 
-        return fc;
-    }
-
+		return fc;
+	}
+	
 	/**
 	 * \brief Create a new CGenerator object.
 	 * 
@@ -1588,7 +1591,7 @@ public class ModelicaCompiler {
 					parseFiles(name);
 				} else if (targetType.equals("check")) {
                     try {
-                        compileModel(name, cl, TargetObject.CHECK);
+                        instantiateModel(name, cl, TargetObject.CHECK);
                     } finally {
                         if (outDir != null)
                             deleteOutDir();
@@ -1797,8 +1800,8 @@ public class ModelicaCompiler {
         FMUX      (Templates.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
         FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
         FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK),
-        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL),
+        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.FMI1, ErrorCheckType.CHECK),
+        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false),
         CEVAL     (Templates.CEVAL,     "ceval",     null  , null);
 
         private final Templates templates;
@@ -1806,15 +1809,21 @@ public class ModelicaCompiler {
         private final String suffix;
         private final XMLGeneratorHolder xmlGenerator;
         private final ErrorCheckType checkType;
+        private final boolean codeGen;
 
-        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType) {
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType, boolean codeGen) {
             this.templates = templates;
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
             this.checkType = checkType;
+            this.codeGen = codeGen;
             this.xmlGenerator = xmlGenerator;
         }
 
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, checkType, true);
+        }
+        
         private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator) {
             this(templates, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
@@ -1866,7 +1875,7 @@ public class ModelicaCompiler {
                 throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU, jmu to compile an JMU or fmux to compile an FMUX."); 
             }
         }
-
+        
         /**
          * get the C model description template file path.
          * 
@@ -1878,7 +1887,7 @@ public class ModelicaCompiler {
         public String getCTemplates(FClass fc) {
             return templates.getCTemplates(fc);
         }
-
+        
         /**
          * get the XML model description template file path.
          * 
@@ -1890,16 +1899,16 @@ public class ModelicaCompiler {
         public String getXMLTemplates(FClass fc) {
             return templates.getXMLTemplates(fc);
         }
-
-        /**
-         * \brief Create a new XMLGenerator object.
-         * 
-         * Override for subclasses needing another subclass of XMLGenerator.
-         */
-        public GenericXMLGenerator getXMLGenerator(FClass fc) {
-            return xmlGenerator.getXMLGenerator(fc);
-        }
-
+        
+    	/**
+    	 * \brief Create a new XMLGenerator object.
+    	 * 
+    	 * Override for subclasses needing another subclass of XMLGenerator.
+    	 */
+    	public GenericXMLGenerator getXMLGenerator(FClass fc) {
+    		return xmlGenerator.getXMLGenerator(fc);
+    	}
+        
         /**
          * get the flag should be used in the Makefile.
          * 
@@ -1909,28 +1918,28 @@ public class ModelicaCompiler {
         public String getMakeFileFlag() {
             return makeFileFlag;
         }
-
+        
         /**
          * Gets the file suffix for a the target object. 
          */
         public String getUnitSuffix() {
             return suffix;
         }
-
+        
         /**
          * Get the check type to use when error checking.
          */
         public ErrorCheckType getCheckType() {
             return checkType;
         }
-
+        
         /**
-         * Check if this target has any code generation.
+         * Get a flag that determines if there should be any code-generation.
          */
-        public boolean hasCodeGen() {
-            return templates != Templates.NULL || xmlGenerator != XMLGeneratorHolder.NULL;
+        public boolean getCodeGenFlag() {
+            return codeGen;
         }
-
+        
         /**
          * Sets the default options that should be used for this target object. 
          * 
@@ -2057,17 +2066,17 @@ eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
 public class Templates {
     
     public static final Templates NULL      = new Templates();
-    public static final Templates FMUME10   = new Templates("fmi1_me_modelica_template.c");
-    public static final Templates FMUME20   = new Templates("fmi2_master_modelica_template.c");
-    public static final Templates FMUCS10   = new Templates("fmi1_cs_modelica_template.c");
-    public static final Templates FMUCS20   = new Templates("fmi2_master_modelica_template.c");
-    public static final Templates FMUMECS20 = new Templates("fmi2_master_modelica_template.c");
-    public static final Templates CEVAL     = new Templates("ceval_external_template.c");
-    public static final Templates JMU       = new Templates("jmi_modelica_template.c", "jmodelica_model_description.tpl");
-    public static final Templates FMUX      = new Templates(null,                      "jmodelica_model_description.tpl");
+    public static final Templates FMUME10   = new Templates(null,                              "fmi1_me_modelica_template.c");
+    public static final Templates FMUME20   = new Templates(null,                              "fmi2_master_modelica_template.c");
+    public static final Templates FMUCS10   = new Templates(null,                              "fmi1_cs_modelica_template.c");
+    public static final Templates FMUCS20   = new Templates(null,                              "fmi2_master_modelica_template.c");
+    public static final Templates FMUMECS20 = new Templates(null,                              "fmi2_master_modelica_template.c");
+    public static final Templates CEVAL     = new Templates(null,                              "ceval_external_template.c");
+    public static final Templates JMU       = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
+    public static final Templates FMUX      = new Templates("jmodelica_model_description.tpl");
     
-    private static final int C   = 0;
-    private static final int XML = 1;
+    private static final int XML = 0;
+    private static final int C   = 1;
     
     private String[] templates;
     
