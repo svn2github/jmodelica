@@ -384,7 +384,7 @@ fclass InteractiveFMU.EquationName1
  Real eq_1;
 equation
  x = abs(y) + time;
- res_0 = y - (x - 2) annotation(__Modelon(name=eq_1));
+ res_0 = y - (x - 2);
  iter_0 = y;
  res_0 = eq_1;
 end InteractiveFMU.EquationName1;
