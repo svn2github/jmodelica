@@ -12043,13 +12043,6 @@ fclass FunctionTests.FunctionLike.EventRel.NoEventRecord1
  constant Real x.b = 2;
  constant Real y.a = 1.0;
  constant Real y.b = 2.0;
-
-public
- record FunctionTests.FunctionLike.EventRel.NoEventRecord1.A
-  Real a;
-  Real b;
- end FunctionTests.FunctionLike.EventRel.NoEventRecord1.A;
-
 end FunctionTests.FunctionLike.EventRel.NoEventRecord1;
 ")})));
 end NoEventRecord1;

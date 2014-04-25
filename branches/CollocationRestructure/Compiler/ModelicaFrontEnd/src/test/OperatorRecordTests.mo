@@ -60,6 +60,14 @@ package OperatorRecordTests
                 c := Cplx(-a.re, -a.im);
             end neg;
         end '-';
+
+        operator function '*'
+            input Cplx a;
+            input Cplx b;
+            output Cplx c;
+        algorithm
+            c := Cplx(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
+        end '*';
     end Cplx;
 
 
@@ -301,6 +309,273 @@ public
 end OperatorRecordTests.OperatorOverload6;
 ")})));
     end OperatorOverload6;
+
+
+    model OperatorOverload7
+        Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
+        Cplx[2] c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload7",
+            description="Array addition with operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload7
+ OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)};
+ OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)};
+ OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx.'+'(c1[1], c2[1]), OperatorRecordTests.Cplx.'+'(c1[2], c2[2])};
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload7;
+")})));
+    end OperatorOverload7;
+
+
+    model OperatorOverload8
+        Cplx c1 = Cplx(1, 2);
+        Real[2] r = { 3, 4 };
+        Cplx[2] c3 = c1 .+ r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload8",
+            description="Scalar-array addition with operator records and automatic type conversion",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload8
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ Real r[2] = {3, 4};
+ OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx.'+'(c1, OperatorRecordTests.Cplx.'constructor'(r[1], 0)), OperatorRecordTests.Cplx.'+'(c1, OperatorRecordTests.Cplx.'constructor'(r[2], 0))};
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload8;
+")})));
+    end OperatorOverload8;
+
+
+    model OperatorOverload9
+        Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
+        Cplx c3 = c1 * c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorOverload9",
+            description="Error for array multiplication cases not allowed for operator records: vector*vector",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 407, column 19:
+  Type error in expression: c1 * c2
+")})));
+    end OperatorOverload9;
+
+
+    model OperatorOverload10
+        Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        Cplx[2,2] c2 = { { Cplx(5, 6), Cplx(7, 8) }, { Cplx(9, 10), Cplx(11, 12) } };
+        Cplx[2] c3 = c1 * c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorOverload10",
+            description="Error for array multiplication cases not allowed for operator records: vector*matrix",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 425, column 22:
+  Type error in expression: c1 * c2
+")})));
+    end OperatorOverload10;
+
+
+    model OperatorOverload11
+        Cplx[2,2] c1 = { { Cplx(1, 2), Cplx(3, 4) }, { Cplx(5, 6), Cplx(7, 8) } };
+        Cplx[2,2] c2 = { { Cplx(11, 12), Cplx(13, 14) }, { Cplx(15, 16), Cplx(17, 18) } };
+        Cplx[2,2] c3 = c1 * c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload11",
+            description="Matrix multiplication with operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload11
+ OperatorRecordTests.Cplx c1[2,2] = {{OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)}, {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)}};
+ OperatorRecordTests.Cplx c2[2,2] = {{OperatorRecordTests.Cplx.'constructor'(11, 12), OperatorRecordTests.Cplx.'constructor'(13, 14)}, {OperatorRecordTests.Cplx.'constructor'(15, 16), OperatorRecordTests.Cplx.'constructor'(17, 18)}};
+ OperatorRecordTests.Cplx c3[2,2] = {{OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[1,1], c2[1,1]), OperatorRecordTests.Cplx.'*'(c1[1,2], c2[2,1])), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[1,1], c2[1,2]), OperatorRecordTests.Cplx.'*'(c1[1,2], c2[2,2]))}, {OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[2,1], c2[1,1]), OperatorRecordTests.Cplx.'*'(c1[2,2], c2[2,1])), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx.'*'(c1[2,1], c2[1,2]), OperatorRecordTests.Cplx.'*'(c1[2,2], c2[2,2]))}};
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'*'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  return;
+ end OperatorRecordTests.Cplx.'*';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload11;
+")})));
+    end OperatorOverload11;
+
+
+// Note: this test gives wrong result due to the bug in #2779
+    model OperatorOverload12
+        constant Cplx c1 = Cplx(1, 2);
+        constant Cplx c2 = Cplx(3, 4);
+        constant Cplx c3 = c1 + c2;
+        constant Cplx c4 = c3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload12",
+            description="Constant eval of overloaded operator expression: scalars",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload12
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ constant OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ constant OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(4, 3));
+ constant OperatorRecordTests.Cplx c4 = OperatorRecordTests.Cplx(6.0, 4.0);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload12;
+")})));
+    end OperatorOverload12;
+
+
+// Note: this test gives wrong result due to the bug in #2779
+    model OperatorOverload13
+        constant Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        constant Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
+        constant Cplx[2] c3 = c1 + c2;
+        constant Cplx[2] c4 = c3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload13",
+            description="Constant eval of overloaded operator expression: arrays",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload13
+ constant OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)};
+ constant OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)};
+ constant OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(6, 5)), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(4, 3), OperatorRecordTests.Cplx(8, 7))};
+ constant OperatorRecordTests.Cplx c4[2] = {OperatorRecordTests.Cplx(8.0, 6.0), OperatorRecordTests.Cplx(12.0, 10.0)};
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload13;
+")})));
+    end OperatorOverload13;
 
 
     model OperatorRecordConnect1
@@ -578,24 +853,6 @@ public
 end OperatorRecordTests.OperatorRecordConnect4;
 ")})));
     end OperatorRecordConnect4;
-
-
-    model OperatorOverloadCompliance
-        Cplx c1 = Cplx(1, 2);
-        Cplx c2 = Cplx(3, 4);
-        Cplx c3 = c1 + c2;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="OperatorOverloadCompliance",
-            description="Compliance check for operator records",
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Compliance error at line 20, column 5:
-  Operator records are not supported
-")})));
-    end OperatorOverloadCompliance;
 
 
 end OperatorRecordTests;

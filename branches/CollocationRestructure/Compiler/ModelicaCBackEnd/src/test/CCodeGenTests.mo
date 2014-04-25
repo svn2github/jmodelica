@@ -3350,25 +3350,29 @@ void func_CCodeGenTests_CUnknownArray6_f_def0(jmi_array_t* i1_a, jmi_array_t* i2
 end CUnknownArray6;
 
 model CRecordDecl1
- record A
-  Real a;
-  Real b;
- end A;
+    record A
+        Real a;
+        Real b;
+    end A;
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a + i.b;
+        annotation(Inline=false);
+    end F;
  
- A x;
-equation
- x.a = 1;
- x.b = 2;
+    Real r = F(A(time, time));
 
-	annotation(__JModelica(UnitTesting(tests={
-		CCodeGenTestCase(
-			name="CRecordDecl1",
-			description="C code generation for records: structs: basic test",
-			variability_propagation=false,
-			generate_ode=false,
-			generate_dae=true,
-			template="$C_records$",
-			generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CRecordDecl1",
+            description="C code generation for records: structs: basic test",
+            variability_propagation=false,
+            generate_ode=false,
+            generate_dae=true,
+            template="$C_records$",
+            generatedCode="
 typedef struct _A_0_r {
     jmi_ad_var_t a;
     jmi_ad_var_t b;
@@ -3380,19 +3384,25 @@ end CRecordDecl1;
 
 
 model CRecordDecl2
- record A
-  Real a;
-  B b;
- end A;
+    record A
+        Real a;
+        B b;
+    end A;
+
+    record B
+        Real c;
+    end B;
+
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a + i.b.c;
+        annotation(Inline=false);
+    end F;
  
- record B
-  Real c;
- end B;
- 
- A x;
-equation
- x.a = 1;
- x.b.c = 2;
+    Real r = F(A(time, B(time)));
+
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -3419,13 +3429,18 @@ end CRecordDecl2;
 
 
 model CRecordDecl3
- record A
-  Real a[2];
- end A;
-
- A x;
-equation
- x.a = {1,2};
+    record A
+        Real a[2];
+    end A;
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a[1] + i.a[2];
+        annotation(Inline=false);
+    end F;
+ 
+    Real r = F(A({time, time}));
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -3446,20 +3461,23 @@ end CRecordDecl3;
 
 
 model CRecordDecl4
- record A
-  Real a;
-  B b[2];
- end A;
+    record A
+        Real a;
+        B b[2];
+    end A;
+
+    record B
+        Real c;
+    end B;
+    function F
+        input A i;
+        output Real o;
+    algorithm
+        o := i.a + i.b[1].c + i.b[2].c;
+        annotation(Inline=false);
+    end F;
  
- record B
-  Real c;
- end B;
- 
- A x;
-equation
- x.a = 1;
- x.b[1].c = 2;
- x.b[2].c = 3;
+    Real r = F(A(time, {B(time), B(time)}));
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -4204,19 +4222,25 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp0(A_1_ra* x_a) {
 end CRecordDecl16;
 
 model CRecordDecl17
- record A
- end A;
+    record A
+    end A;
+    function F
+        input Real i;
+        output Real o;
+        A a;
+    algorithm
+        o := i;
+        annotation(Inline=false);
+    end F;
  
- A x;
-
-
-	annotation(__JModelica(UnitTesting(tests={ 
-		CCodeGenTestCase(
-			name="CRecordDecl17",
-			description="Test that a default field is created for an empty record.",
-			variability_propagation=false,
-			template="$C_records$",
-			generatedCode=
+    A x;
+    Real r = F(time);
+    annotation(__JModelica(UnitTesting(tests={ 
+        CCodeGenTestCase(
+            name="CRecordDecl17",
+            description="Test that a default field is created for an empty record.",
+            template="$C_records$",
+            generatedCode=
 "typedef struct _A_0_r {
     char dummy;
 } A_0_r;
@@ -14536,11 +14560,12 @@ model LoadResource1
         output Integer n;
         external;
     end strlen;
-    parameter Integer y = strlen(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
-    discrete  Integer z = strlen(loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    parameter Integer y = strlen(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    discrete  Integer z = strlen(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
     
-    discrete Integer rel = strlen(Modelica.Utilities.Files.loadResource("../Data/String.txt")); 
-    discrete Integer abs = strlen(loadResource("/home/user/Data/String.txt")); 
+    discrete Integer rel  = strlen(Modelica.Utilities.Files.loadResource("../Data/String.txt"));
+    discrete Integer abs  = strlen(Modelica.Utilities.Files.loadResource("/C:/home/user/Data/String.txt"));
+    discrete Integer file = strlen(Modelica.Utilities.Files.loadResource("file:///C:/home/user/Data/String.txt"));
     
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -14555,6 +14580,7 @@ $C_DAE_initial_dependent_parameter_assignments$
     char tmp_1[JMI_PATH_MAX];
     char tmp_2[JMI_PATH_MAX];
     char tmp_3[JMI_PATH_MAX];
+    char tmp_4[JMI_PATH_MAX];
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
@@ -14566,11 +14592,13 @@ $C_DAE_initial_dependent_parameter_assignments$
     _rel_2 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_2);
     jmi_load_resource(jmi, tmp_3, \"2_String.txt\");
     _abs_3 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_3);
+    jmi_load_resource(jmi, tmp_4, \"2_String.txt\");
+    _file_4 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4);
 /********* Write back reinits *******/
 
-    char tmp_4[JMI_PATH_MAX];
-    jmi_load_resource(jmi, tmp_4, \"0_Examples_readRealParameters.txt\");
-    _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4));
+    char tmp_5[JMI_PATH_MAX];
+    jmi_load_resource(jmi, tmp_5, \"0_Examples_readRealParameters.txt\");
+    _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_5));
 ")})));
 end LoadResource1;
 

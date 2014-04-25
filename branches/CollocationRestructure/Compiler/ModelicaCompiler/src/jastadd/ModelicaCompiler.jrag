@@ -922,7 +922,7 @@ public class ModelicaCompiler {
 				dumpMemoryUseFile(fc, "generated", false);
 			}
 			
-            fc.copyResources(new File(outDir, "resources"));
+            fc.loadResources(new File(outDir, "resources"));
             removeCompiledExternals();
             
 		} finally {
@@ -1988,6 +1988,7 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_me_xml", false);
                     options.setBooleanOption("generate_fmi_cs_xml", false);
                     options.setBooleanOption("generate_xml_equations", false);
+                    options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
                     break;
                 case FMUX:
                     options.setBooleanOption("generate_ode", false);

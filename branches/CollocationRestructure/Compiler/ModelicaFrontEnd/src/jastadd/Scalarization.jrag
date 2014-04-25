@@ -2417,33 +2417,33 @@ aspect Scalarization {
 	 * FIdUse 'x[2]' needs to be marked as scalarized, and the expression
 	 * scalar(x*A*x) needs to be replaced by a double sum.
 	 */
-	
-	/**
-	 * \brief Create an FArray containing scalarized subexpressions.
-	 */
-	public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
-    	return buildFArray(new ScalarizedBuilder(indexMap, context));
+
+    /**
+     * Create an FArray containing scalarized subexpressions.
+     */
+    public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
+        return buildFArray(new ScalarizedBuilder(indexMap, context));
     }
-    
-	public static class Array {
-	    /**
-	     * Helper object for {@link #buildScalarized(java.util.Map<String,FExp>)}.
-	     */
-	    protected class ScalarizedBuilder implements ElementBuilder {
-	    	private Map<String,FExp> indexMap;
-	    	private FExp context;
-	    	
-	    	public ScalarizedBuilder(Map<String,FExp> indexMap, FExp context) {
-	    		this.indexMap = indexMap;
-	    		this.context = context;
-	    	}
-	    	
-			public FExp build(FExp e) {
-				return context.dynamicFExp(e).scalarize(indexMap);
-			}
-	    }
-	}
-	
+
+    public class Array {
+        /**
+         * Helper object for {@link #buildScalarized(java.util.Map<String,FExp>)}.
+         */
+        protected static class ScalarizedBuilder implements ElementBuilder {
+            private Map<String,FExp> indexMap;
+            private FExp context;
+            
+            public ScalarizedBuilder(Map<String,FExp> indexMap, FExp context) {
+                this.indexMap = indexMap;
+                this.context = context;
+            }
+            
+            public FExp build(FExp e) {
+                return context.dynamicFExp(e).scalarize(indexMap);
+            }
+        }
+    }
+
 	/**
 	 * \brief Flag that signals that this expression should be replaced with a use of a temporary variable.
 	 */

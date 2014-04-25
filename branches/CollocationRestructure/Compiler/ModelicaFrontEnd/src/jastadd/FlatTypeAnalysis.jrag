@@ -374,25 +374,27 @@ aspect FlatTypeAnalysis {
 		else
 			return fUnknownType();
 	}
-	
-	eq FMulExp.type() {
-		if (ndims() < 0)
-			return fUnknownType();
-		if (isElementWise())
-			return super.type();
-		Size left = getLeft().size();
-		Size right = getRight().size();
-		if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
-			return fUnknownType();
-		if (left.ndims() > 2 || right.ndims() > 2)
-			return fUnknownType();
-		FType res = getLeft().type().scalarNumericPromotion(getRight().type(), operatorName());
-		if (left.ndims() == 1 && right.ndims() == 1) 
-			return res;
-		else
-			return res.arrayType(size());
-	}
-	
+
+    eq FMulExp.type() {
+        if (ndims() < 0)
+            return fUnknownType();
+        if (isElementWise())
+            return super.type();
+        Size left = getLeft().size();
+        Size right = getRight().size();
+        if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
+            return fUnknownType();
+        if (left.ndims() > 2 || right.ndims() > 2)
+            return fUnknownType();
+        if (left.ndims() == 1 && right.ndims() > 0 && shouldUseOverloadedOperator())
+            return fUnknownType();
+        FType res = getLeft().type().scalarNumericPromotion(getRight().type(), operatorName());
+        if (left.ndims() == 1 && right.ndims() == 1) 
+            return res;
+        else
+            return res.arrayType(size());
+    }
+
 	eq FDotPowExp.type() {
 		FType t = getLeft().type().looseNumericPromotion(getRight().type());
 		return t.isUnknown() ? t : fRealType(t.size());
@@ -966,6 +968,16 @@ aspect TypePromotion {
 aspect OverloadedOperatorBinding {
 
     /**
+     * Check if this expression should use an overloaded operator.
+     * 
+     * Returns <code>true</code> for binary and unary expressions if any FExp child is of operator record type.
+     * Note that this might return <code>true</code> for an expression that has <code>operatorName() == null</code>.
+     */
+    syn boolean FExp.shouldUseOverloadedOperator() = false;
+    eq FBinExp.shouldUseOverloadedOperator()       = getLeft().type().isOperatorRecord() || getRight().type().isOperatorRecord();
+    eq FUnaryExp.shouldUseOverloadedOperator()     = getFExp().type().isOperatorRecord();
+
+    /**
      * Calculate the function to use for this operator expression involving operator records.
      * 
      * Returns null if none or more than one function matches or if this is not an operator record expression.
@@ -1088,6 +1100,10 @@ aspect OverloadedOperatorBinding {
      * @param aIsLeft   <code>true</code> if a is the left operand, must be true if b is <code>null</code>
      */
     syn OperatorMatches FOperatorRecordType.matchOverloadedOperators(String operator, FType a, FType b, boolean aIsLeft) {
+        if (a != null && a.isArray())
+            a = a.scalarType();
+        if (b != null && b.isArray())
+            b = b.scalarType();
         InstClassDecl op = getOperators().get(operator);
         return (op != null) ? op.matchOverloadedOperators(a, b, aIsLeft) : OperatorMatches.EMPTY;
     }
