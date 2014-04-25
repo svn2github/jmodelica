@@ -3331,14 +3331,24 @@ opts? # View the help text</programlisting>
 
               <entry>None (not used)</entry>
 
-              <entry>The iterable of blocking factors, where each element
-              corresponds to the number of elements for which all the control
-              profiles should be constant. For example, if blocking_factors ==
-              [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The
-              sum of all elements in the iterable must be the same as the
-              number of elements. If blocking_factors is None, then the usual
-              collocation polynomials are instead used to represent the
-              controls.</entry>
+              <entry>Blocking factors are used to enforce piecewise constant
+              inputs. The inputs may only change values at some of the element
+              boundaries. The option is either None (disabled), given as an
+              instance of
+              pyjmi.optimization.casadi_collocation.BlockingFactors or as a
+              list of blocking factors. If the options is a list of blocking
+              factors, then each element in the list specifies the number of
+              collocation elements for which all of the inputs must be
+              constant. For example, if blocking_factors == [2, 2, 1], then
+              the inputs will attain 3 different values (number of elements in
+              the list), and it will change values between collocation element
+              number 2 and 3 as well as number 4 and 5. The sum of all
+              elements in the list must be the same as the number of
+              collocation elements and the length of the list determines the
+              number of separate values that the inputs may attain. See the
+              documentation of the BlockingFactors class for how to use it. If
+              blocking_factors is None, then the usual collocation polynomials
+              are instead used to represent the controls.</entry>
             </row>
 
             <row>
