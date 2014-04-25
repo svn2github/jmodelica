@@ -2764,7 +2764,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_cont_var': False,
                 'measurement_data': None,
                 'check_point': False,
-                'reorder_vars': False,
+                'reorder_vars': True,
+                'delayed_feedback': None,
                 'IPOPT_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)

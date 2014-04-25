@@ -4772,7 +4772,8 @@ class LocalDAECollocator(CasadiCollocator):
 
     def _create_nominal_trajectories(self):
         """
-        Returns a dictionary that contains the trajectories. 
+        Returns a dictionary that contains the trajectories. Must be called after time has 
+        been denormalized and self._denorm_t0_init etc have been set
 
         Returns::
 
@@ -6004,31 +6005,13 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Equality constraints for constrained inputs
         if self.measurement_data is not None:
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     for j in xrange(len(self.measurement_data.constrained)):
                         # Retrieve variable and value
                         name = self.measurement_data.constrained.keys()[j]
-                        (ind, _) = self.name_map[name]
-                        constr_var = self.var_map[i][k]['unelim_u'][ind]
-                        constr_val = self.var_map[i][k]['constr_u'][j]
-
-                        # Scale variable
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                constr_var *= sf
-                            else:
-                                sf_index = self._name_idx_sf_map[name]
-                                if self._is_variant[name]:
-                                    sf = self._variant_sf[i][k][sf_index]
-                                    constr_var *= sf
-                                else:
-                                    d = self._invariant_d[sf_index]
-                                    e = self._invariant_e[sf_index]
-                                    constr_var = d * constr_var + e
+                        constr_var = self._get_unscaled_expr(name, i, k)
+                        constr_val = self.var_map[i][k]['constr_u'][j]                            
 
                         # Add constraint
                         input_constr = constr_var - constr_val
@@ -6036,6 +6019,33 @@ class LocalDAECollocator(CasadiCollocator):
                             input_constr = casadi.vertcat(input_constr)
                         c_e.append(input_constr)
 
+        # Equality constraints for delayed feedback
+        if self.delayed_feedback is not None:
+
+            # Check for unsupported cases
+            if self.blocking_factors is not None: raise CasadiCollocatorException(
+                "Blocking factors are not supported with delayed feedback.")
+            if self._normalize_min_time: raise CasadiCollocatorException(
+                "Free time horizon os not supported with delayed feedback.")
+            if self.hs is not None: raise CasadiCollocatorException(
+                "Non-uniform element lengths are not supported with delayed feedback.")
+            
+            for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
+                u_dae_var = self.op.getVariable(u_name)
+                for i in xrange(1, self.n_e + 1):
+                    for k in xrange(1, self.n_cp + 1):
+                        u_var = self._get_unscaled_expr(u_name, i, k)
+                        if i > delay_n_e:
+                            u_value = self._get_unscaled_expr(y_name, i-delay_n_e, k)
+                        else:
+                            u_value = self._eval_initial(u_dae_var, i, k)
+                                                
+                        # Add constraint
+                        input_constr = u_var - u_value
+                        if self.named_vars:
+                            input_constr = casadi.vertcat(input_constr) # why?
+                        c_e.append(input_constr)
+        
         # Store constraints, time and timed variables as data attributes
         self.c_e = casadi.vertcat(c_e)
         self.c_i = c_i
@@ -6478,36 +6488,45 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Equality constraints for constrained inputs
         if self.measurement_data is not None:
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     for j in xrange(len(self.measurement_data.constrained)):
                         # Retrieve variable and value
                         name = self.measurement_data.constrained.keys()[j]
-                        (ind, _) = self.name_map[name]
-                        constr_var = self.var_map[i][k]['unelim_u'][ind]
-                        constr_val = self.var_map[i][k]['constr_u'][j]
-
-                        # Scale variable
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                constr_var *= sf
-                            else:
-                                sf_index = self._name_idx_sf_map[name]
-                                if self._is_variant[name]:
-                                    sf = self._variant_sf[i][k][sf_index]
-                                    constr_var *= sf
-                                else:
-                                    d = self._invariant_d[sf_index]
-                                    e = self._invariant_e[sf_index]
-                                    constr_var = d * constr_var + e
+                        constr_var = self._get_unscaled_expr(name, i, k)
+                        constr_val = self.var_map[i][k]['constr_u'][j]                            
 
                         # Add constraint
                         input_constr = constr_var - constr_val
                         if self.named_vars:
                             input_constr = casadi.vertcat(input_constr)
+                        c_e.append(input_constr)
+
+        # Equality constraints for delayed feedback
+        if self.delayed_feedback is not None:
+
+            # Check for unsupported cases
+            if self.blocking_factors is not None: raise CasadiCollocatorException(
+                "Blocking factors are not supported with delayed feedback.")
+            if self._normalize_min_time: raise CasadiCollocatorException(
+                "Free time horizon os not supported with delayed feedback.")
+            if self.hs is not None: raise CasadiCollocatorException(
+                "Non-uniform element lengths are not supported with delayed feedback.")
+            
+            for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
+                u_dae_var = self.op.getVariable(u_name)
+                for i in xrange(1, self.n_e + 1):
+                    for k in xrange(1, self.n_cp + 1):
+                        u_var = self._get_unscaled_expr(u_name, i, k)
+                        if i > delay_n_e:
+                            u_value = self._get_unscaled_expr(y_name, i-delay_n_e, k)
+                        else:
+                            u_value = self._eval_initial(u_dae_var, i, k)
+                                                
+                        # Add constraint
+                        input_constr = u_var - u_value
+                        if self.named_vars:
+                            input_constr = casadi.vertcat(input_constr) # why?
                         c_e.append(input_constr)
 
         # Store constraints, time and timed variables as data attributes
@@ -6619,6 +6638,8 @@ class LocalDAECollocator(CasadiCollocator):
         self.cost = self.cost_mayer + self.cost_lagrange
 
 
+    
+
     def _eliminate_der_var(self):
         """
         Eliminate derivative variables from OCP expressions.
@@ -6708,6 +6729,9 @@ class LocalDAECollocator(CasadiCollocator):
         # Denormalize time for minimum time problems
         self._denormalize_times()
 
+        # must be called after time has been denormalized and self._denorm_t0_init etc have been set
+        self._create_initial_trajectories()        
+
         #create trajectory scaling structures
         self._create_trajectory_scaling_factor_structures()
 
@@ -6773,26 +6797,11 @@ class LocalDAECollocator(CasadiCollocator):
                          self.measurement_data.unconstrained.keys())
             for j in xrange(len(var_names)):
                 name = var_names[j]
-                (ind, vt) = name_map[name]
                 for i in range(1, self.n_e + 1):
                     for k in range(1, self.n_cp + 1):
-                        val = self.var_map[i][k][vt][ind]
+                        unscaled_val = self._get_unscaled_expr(name, i, k)
                         ref_val = y_ref[i][k][j]
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                err[i][k].append(sf * val - ref_val)
-                            else:
-                                sf_index = name_idx_sf_map[name]
-                                if is_variant[name]:
-                                    sf = variant_sf[i][k][sf_index]
-                                    err[i][k].append(sf * val - ref_val)
-                                else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    err[i][k].append(d * val + e - ref_val)
-                        else:
-                            err[i][k].append(val - ref_val)
+                        err[i][k].append(unscaled_val - ref_val)
 
             # Calculate cost contribution from each collocation point
             Q = self.measurement_data.Q
@@ -6898,6 +6907,49 @@ class LocalDAECollocator(CasadiCollocator):
         if c_i.isNull():
             self.c_i = casadi.MX(0, 1)
 
+
+    def _create_initial_trajectories(self):
+        """
+        Create interpolated initial trajectories and store in self.init_traj_interp
+        """
+
+        if self.init_traj is not None:
+            n = len(self.init_traj.get_data_matrix()[:, 0])
+            self.init_traj_interp = traj = {}
+
+            for vt in ["dx", "x", "w", "unelim_u"]:
+                for var in self.mvar_vectors[vt]:
+                    data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
+                    name = var.getName()
+                    try:
+                        data = self.init_traj.get_variable_data(name)
+                    except VariableNotFoundError:
+                        print("Warning: Could not find initial " +
+                              "trajectory for variable " + name +
+                              ". Using initialGuess attribute value " +
+                              "instead.")
+                        ordinates = N.array([[
+                            self.op.get_attr(var, "initialGuess")]])
+                        abscissae = N.array([0])
+                    else:
+                        abscissae = data.t
+                        ordinates = data.x.reshape([-1, 1])
+                    traj[var] = TrajectoryLinearInterpolation(
+                        abscissae, ordinates)
+
+    def _eval_initial(self, var, i, k):
+        """
+        Evaluate initial value of Variable var at a given collocation point.
+
+        self._create_initial_trajectories() must have been called first.
+        """
+        if self.init_traj is None:
+            return self.op.get_attr(var, "initialGuess")
+        else:
+            time = self.time_points[i][k]
+            if self._normalize_min_time:
+                time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
+            return self.init_traj_interp[var].eval(time)
     def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.
@@ -7011,8 +7063,6 @@ class LocalDAECollocator(CasadiCollocator):
                 name = var.getName()
                 v_min = op.get_attr(var, "min")
                 v_max = op.get_attr(var, "max")
-                if self.init_traj is None:
-                    v_init = op.get_attr(var, "initialGuess")
                 (var_idx, _) = name_map[name]
                 if self.variable_scaling:
                     if self.nominal_traj is None:
@@ -7025,11 +7075,7 @@ class LocalDAECollocator(CasadiCollocator):
                             for i in xrange(1, self.n_e + 1):
                                 for k in self.time_points[i].keys():
                                     d = variant_sf[i][k][sf_index]
-                                    if self.init_traj is not None:
-                                        time = time_points[i][k]
-                                        if self._normalize_min_time:
-                                            time = t0 + (tf - t0) * time
-                                        v_init = traj[vt][var_idx].eval(time)
+                                    v_init = self._eval_initial(var, i, k)
                                     xx_lb[var_indices[i][k][vt][var_idx]] = \
                                         (v_min - e) / d
                                     xx_ub[var_indices[i][k][vt][var_idx]] = \
@@ -7046,11 +7092,7 @@ class LocalDAECollocator(CasadiCollocator):
                     or (not is_variant[name])):
                     for i in xrange(1, self.n_e + 1):
                         for k in self.time_points[i].keys():
-                            if self.init_traj is not None:
-                                time = time_points[i][k]
-                                if self._normalize_min_time:
-                                    time = t0 + (tf - t0) * time
-                                v_init = traj[vt][var_idx].eval(time)
+                            v_init = self._eval_initial(var, i, k)
                             xx_lb[var_indices[i][k][vt][var_idx]] = \
                                 (v_min - e) / d
                             xx_ub[var_indices[i][k][vt][var_idx]] = \
