@@ -391,12 +391,17 @@
             </sequential>
         </for>
         <!-- clean up intermediate files -->
-        <delete deleteonexit="true">
-            <fileset dir="${parser_output}">
-                <include name="*.parser" />
-                <include name="*.beaver" />
-            </fileset>
-        </delete>
+        <if>
+            <available file="${parser_output}" type="dir" />
+            <then>
+                <delete deleteonexit="true">
+                    <fileset dir="${parser_output}">
+                        <include name="*.parser" />
+                        <include name="*.beaver" />
+                    </fileset>
+                </delete>
+            </then>
+        </if>
     </target>
 
     <!-- generate all scanners -->
@@ -426,11 +431,16 @@
             </sequential>
         </for>
         <!-- clean up intermediate files -->
-        <delete deleteonexit="true">
-            <fileset dir="${parser_output}">
-                 <include name="*.flex" />
-            </fileset>
-        </delete>
+        <if>
+            <available file="${parser_output}" type="dir" />
+            <then>
+                <delete deleteonexit="true">
+                    <fileset dir="${parser_output}">
+                         <include name="*.flex" />
+                    </fileset>
+                </delete>
+            </then>
+        </if>
     </target>
 
     <!-- Generate JUnit test classes for all Modelica test files. -->

@@ -25,17 +25,19 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
 
 DynamicOpt : Opt;
 
-abstract InstRoot : InstNode;
-//InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
+abstract InstBaseNode : InstNode;
+
+abstract InstRoot : InstBaseNode;
 InstProgramRoot : InstRoot ::= <Program:Program>
-					           /UnknownInstClassDecl/
+                               /UnknownInstClassDecl/
                                /UnknownInstComponentDecl/
                                /InstPredefinedType:InstClassDecl*/ 
                                /InstBuiltInType:InstClassDecl*/   
                                /InstBuiltInFunction:InstClassDecl*/
-                               /InstLibClassDecl:InstClassDecl*/;
+                               /InstLibClassDecl:InstClassDecl*/
+                               [Dummy:InstNode];          // Dummy node to prevent InstNode from being classified as root
 
-abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
+abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl      : InstFullClassDecl;
@@ -83,19 +85,19 @@ InstImportQualified   : InstImport;
 InstImportUnqualified : InstImport;
 InstImportRename      : InstImport;
 
-abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode/;
+abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode:InstBaseNode/;
 InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
 InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl>;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess 
-                                          [LocalFArraySubscripts:FArraySubscripts] 
-                                          <ComponentDecl:ComponentDecl> 
-                                          [InstModification] 
-                                          [InstConstraining] 
-                                          /FArraySubscripts/ 
-                                          [ConditionalAttribute:FExp];
+abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess 
+                                              [LocalFArraySubscripts:FArraySubscripts] 
+                                              <ComponentDecl:ComponentDecl> 
+                                              [InstModification] 
+                                              [InstConstraining] 
+                                              /FArraySubscripts/ 
+                                              [ConditionalAttribute:FExp];
 InstComposite                 : InstComponentDecl;
 abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive                 : InstAssignable;

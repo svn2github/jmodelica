@@ -1157,6 +1157,83 @@ end RecordTests.RecordArray6;
 end RecordArray6;
 
 
+model RecordArray7
+    record A
+        parameter Integer n;
+        Real x[n];
+    end A;
+    
+    parameter Integer m = 2;
+    A a = A(m, 1:m);
+    Real y[m] = a.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray7",
+            description="Parameter in record controlling size of array in same record: record constructor",
+            flatModel="
+fclass RecordTests.RecordArray7
+ parameter Integer m = 2 /* 2 */;
+ RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2);
+ Real y[2] = a.x[1:2];
+
+public
+ record RecordTests.RecordArray7.A
+  parameter Integer n;
+  Real x[n];
+ end RecordTests.RecordArray7.A;
+
+end RecordTests.RecordArray7;
+")})));
+end RecordArray7;
+
+
+model RecordArray8
+    record A
+        parameter Integer n;
+        Real x[n];
+    end A;
+    
+    function f
+        input Integer n;
+        output A a(n=n);
+    algorithm
+        a.x := 1:n;
+    end f;
+    
+    parameter Integer m = 2;
+    parameter A a = f(m);
+    Real y[m] = a.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray8",
+            description="Flattening of model with record that gets array size of member from function call that returns entire record",
+            flatModel="
+fclass RecordTests.RecordArray8
+ parameter Integer m = 2 /* 2 */;
+ parameter RecordTests.RecordArray8.A a = RecordTests.RecordArray8.f(2);
+ Real y[2] = a.x[1:2];
+
+public
+ function RecordTests.RecordArray8.f
+  input Integer n;
+  output RecordTests.RecordArray8.A a;
+ algorithm
+  a.x := 1:n;
+  return;
+ end RecordTests.RecordArray8.f;
+
+ record RecordTests.RecordArray8.A
+  parameter Integer n;
+  Real x[n];
+ end RecordTests.RecordArray8.A;
+
+end RecordTests.RecordArray8;
+")})));
+end RecordArray8;
+
+
 
 model RecordConstructor1
  record A

@@ -2663,7 +2663,7 @@ aspect ArrayHelpers {
 		
 		/**
 		 * Return a Size that have the same lengths as this size where they are known, 
-		 * and any that are unknown int this size but known in <code>s</code> is copied from there. 
+		 * and any that are unknown in this size but known in <code>s</code> is copied from there. 
 		 */
 		public Size createKnown(Size s) {
 			Size known = clone();
