@@ -120,6 +120,10 @@ aspect XMLCodeGenerator {
 		for (FVariable fv : getFVariables()) {
 			p.print(fv, str, indentOneStep);
 		}
+			
+		for (FVariable fv : getAliasVariables()) {
+			p.print(fv, str, indentOneStep);
+		}
 		
 		// add a newline between sections for clearer XML
 		str.print("\n");
@@ -207,11 +211,17 @@ aspect XMLCodeGenerator {
 		
 		// loop through attributes and generate modifiers
 		if (hasFAttribute()) {
-			generateOpenTag(str, "modifier", indentOneStep);
-			for (FAttribute attr : getFAttributes()) {
-				p.print(attr, str, indentTwoSteps);
+			if (isAlias()) {
+				generateOpenTag(str, "bindingExpression", indentOneStep);
+				generateOpenTag(str, "local", indentTwoSteps, "name", alias().name());
+				generateCloseTag(str, "bindingExpression", indentOneStep);
+			} else {
+				generateOpenTag(str, "modifier", indentOneStep);
+				for (FAttribute attr : getFAttributes()) {
+					p.print(attr, str, indentTwoSteps);
+				}
+				generateCloseTag(str, "modifier", indentOneStep);
 			}
-			generateCloseTag(str, "modifier", indentOneStep);
 		}
 		
 		// generate bindingexpression if it exists
@@ -361,7 +371,6 @@ aspect XMLCodeGenerator {
 		generateCloseTag(str, "if", indent);
 	}
 	
-	// TODO implement generation for arrays
 	public void FArray.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		generateOpenTag(str, "call", indent, "builtin", "array");
 		for (FExp exp : getFExps()) {

@@ -31,9 +31,13 @@ aspect OptimicaXMLCodeGenerator {
 			p.print(fv, str, indentOneStep);
 		}
 		
-		for (FTimedVariable timedVar : timedRealVariables()) {
-			p.print(timedVar, str, indentOneStep);
+		for (FVariable fv : getAliasVariables()) {
+			p.print(fv, str, indentOneStep);
 		}
+		
+		/*for (FTimedVariable timedVar : timedRealVariables()) {
+			p.print(timedVar, str, indentOneStep);
+		}*/
 		
 		// add a newline between sections for clearer XML
 		str.print("\n");
@@ -139,7 +143,6 @@ aspect OptimicaXMLCodeGenerator {
 			p.print(objectiveIntegrandExp(), str, indentTwoSteps);
 			generateCloseTag(str, "objectiveIntegrand", indentOneStep);
 		}
-		
 		generateCloseTag(str, "optimization", indent);
 	}
 	
@@ -161,10 +164,14 @@ aspect OptimicaXMLCodeGenerator {
 	
 	public void FTimedVariable.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
-		generateOpenTag(str, "timedVariable", indent);
+		//generateOpenTag(str, "timedVariable", indent);
+		//p.print(getName(), str, indentOneStep);
+		//p.print(getArg(), str, indentOneStep);
+		//generateCloseTag(str, "timedVariable", indent);
+		generateOpenTag(str, "operator", indent, "name", "at");
 		p.print(getName(), str, indentOneStep);
 		p.print(getArg(), str, indentOneStep);
-		generateCloseTag(str, "timedVariable", indent);
+		generateCloseTag(str, "operator", indent);
 	}
 	
 	public void FTimed.prettyPrintXML(Printer p, CodeStream str, String indent) {
