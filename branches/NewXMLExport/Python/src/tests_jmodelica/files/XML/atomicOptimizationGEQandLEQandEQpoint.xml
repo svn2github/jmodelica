@@ -36,27 +36,27 @@
 			<real value="1.0"/>
 		</bindingExpression>
 	</component>
-	<timedVariable>
+	<operator name="at">
 		<local name="x1"/>
 		<call builtin="+">
 			<local name="startTime"/>
 			<integer value="1"/>
 		</call>
-	</timedVariable>
-	<timedVariable>
+	</operator>
+	<operator name="at">
 		<local name="x2"/>
 		<call builtin="+">
 			<local name="startTime"/>
 			<integer value="1"/>
 		</call>
-	</timedVariable>
-	<timedVariable>
+	</operator>
+	<operator name="at">
 		<local name="x2"/>
 		<call builtin="+">
 			<local name="finalTime"/>
 			<integer value="1"/>
 		</call>
-	</timedVariable>
+	</operator>
 
 	<equation>
 		<equal>
@@ -90,33 +90,33 @@
 
 	<constraint>
 		<lessThan kind="pointConstraint">
-			<timedVariable>
+			<operator name="at">
 				<local name="x2"/>
 				<call builtin="+">
 					<local name="startTime"/>
 					<integer value="1"/>
 				</call>
-			</timedVariable>
+			</operator>
 			<real value="1.0"/>
 		</lessThan>
 		<equal kind="pointConstraint">
-			<timedVariable>
+			<operator name="at">
 				<local name="x2"/>
 				<call builtin="+">
 					<local name="finalTime"/>
 					<integer value="1"/>
 				</call>
-			</timedVariable>
+			</operator>
 			<real value="1.0"/>
 		</equal>
 		<greaterThan kind="pointConstraint">
-			<timedVariable>
+			<operator name="at">
 				<local name="x1"/>
 				<call builtin="+">
 					<local name="startTime"/>
 					<integer value="1"/>
 				</call>
-			</timedVariable>
+			</operator>
 			<real value="1.0"/>
 		</greaterThan>
 	</constraint>

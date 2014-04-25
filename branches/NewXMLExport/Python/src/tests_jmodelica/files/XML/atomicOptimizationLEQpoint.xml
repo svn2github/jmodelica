@@ -20,10 +20,10 @@
 			<real value="1.0"/>
 		</bindingExpression>
 	</component>
-	<timedVariable>
+	<operator name="at">
 		<local name="x1"/>
 		<local name="finalTime"/>
-	</timedVariable>
+	</operator>
 
 	<equation>
 		<equal>
@@ -39,10 +39,10 @@
 
 	<constraint>
 		<lessThan kind="pointConstraint">
-			<timedVariable>
+			<operator name="at">
 				<local name="x1"/>
 				<local name="finalTime"/>
-			</timedVariable>
+			</operator>
 			<real value="1.0"/>
 		</lessThan>
 	</constraint>

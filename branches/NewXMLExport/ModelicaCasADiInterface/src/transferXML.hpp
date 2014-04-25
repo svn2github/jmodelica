@@ -88,6 +88,7 @@ void addFunctionHeaders(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::
 
 int calculateFlatArrayIndex(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* reference, std::string functionName);
 std::vector<std::string> getArrayVariables(tinyxml2::XMLElement* elem, std::string functionName);
+//void addFunc(std::string funcName, tinyxml2::XMLElement* elem, ModelicaCasADi::Ref<ModelicaCasADi::Model> m);
 
 };
 

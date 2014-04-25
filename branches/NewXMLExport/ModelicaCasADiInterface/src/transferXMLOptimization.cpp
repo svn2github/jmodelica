@@ -14,7 +14,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "transferXMLOptimization.hpp"
 
 #include "transferXML.hpp"
@@ -50,22 +49,6 @@ void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelNa
 		bool lagrangeSet = false;
 		bool mayerSet = false;
 		for (XMLElement* rootChild = root->FirstChildElement(); rootChild != NULL; rootChild = rootChild->NextSiblingElement()) {
-			/*if (!strcmp(rootChild->Value(), "component") || !strcmp(rootChild->Value(), "classDefinition")) {
-				transferVariables(optProblem, rootChild);
-			} else if (!strcmp(rootChild->Value(), "equation")) {
-				const char* equType = rootChild->Attribute("kind");
-				if (equType != NULL) {
-					if (!strcmp(equType, "initial")) {
-						// handle initial equations
-						transferInitialEquations(optProblem, rootChild);
-					} else if (!strcmp(equType, "parameter")) {
-						transferParameters(optProblem, rootChild);
-					}
-				} else {
-					// handle equations
-					transferEquations(optProblem, rootChild);
-				}
-			} else*/ 
 			if (!strcmp(rootChild->Value(), "objective")) {
 				mayerSet = true;
 				transferObjective(optProblem, rootChild);
@@ -119,12 +102,12 @@ void transferConstraints(Ref<OptimizationProblem> optProblem, XMLElement* constr
 			if (!strcmp(constraint->Attribute("kind"), "pathConstraint")) {
 				MX lhsMx = MX();
 				MX rhsMx = MX();
-				if (!strcmp(lhs->Value(), "timedVariable")) {
+				if (!strcmp(lhs->Value(), "operator") && !strcmp(lhs->Attribute("name"), "at")) {
 					lhsMx = timedVarToMx(optProblem, lhs);
 				} else {
 					lhsMx = expressionToMx(optProblem, lhs);
 				}
-				if (!strcmp(rhs->Value(), "timedVariable")) {
+				if (!strcmp(rhs->Value(), "operator") && !strcmp(rhs->Attribute("name"), "at")) {
 					rhsMx = timedVarToMx(optProblem, rhs);
 				} else {
 					rhsMx = expressionToMx(optProblem, rhs);
@@ -133,12 +116,12 @@ void transferConstraints(Ref<OptimizationProblem> optProblem, XMLElement* constr
 			} else {
 				MX lhsMx = MX();
 				MX rhsMx = MX();
-				if (!strcmp(lhs->Value(), "timedVariable")) {
+				if (!strcmp(lhs->Value(), "operator") && !strcmp(lhs->Attribute("name"), "at")) {
 					lhsMx = timedVarToMx(optProblem, lhs);
 				} else {
 					lhsMx = expressionToMx(optProblem, lhs);
 				}
-				if (!strcmp(rhs->Value(), "timedVariable")) {
+				if (!strcmp(rhs->Value(), "operator") && !strcmp(rhs->Attribute("name"), "at")) {
 					rhsMx = timedVarToMx(optProblem, rhs);
 				} else {
 					rhsMx = expressionToMx(optProblem, rhs);

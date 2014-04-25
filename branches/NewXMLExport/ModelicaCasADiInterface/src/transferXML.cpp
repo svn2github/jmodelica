@@ -121,6 +121,9 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 		XMLElement* child = elem->FirstChildElement();
 		if (!strcmp(child->Value(), "class") && !strcmp(child->Attribute("kind"), "function")) {
 			// function transfers are handled in its own method for clarity
+			/*if (m->getModelFunction(elem->Attribute("name")) == NULL) {
+				transferFunction(m, elem);
+			}*/
 			transferFunction(m, elem);
 		} else if (!strcmp(child->Value(), "class") && !strcmp(child->Attribute("kind"), "record")) {
 			// store information about record so that it can be used in import, how?
@@ -226,7 +229,6 @@ void transferParameters(Ref<Model> m, XMLElement* elem) {
 
 /**
  * Construct an MXFunction from the XML and adds it to the model
- * TODO: Split up in several smaller parts, one for handling assignments and one for functioncalls
  */
 void transferFunction(Ref<Model> m, XMLElement* elem) {
 	string functionName = elem->Attribute("name");
@@ -375,6 +377,10 @@ void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, M
 	}
 	XMLElement* right = stmt->FirstChildElement()->NextSiblingElement()->FirstChildElement()->FirstChildElement();
 	string funcName = right->FirstChildElement()->Attribute("name");
+	/*if (m->getModelFunction(funcName) == NULL) {
+		// add function before calling it
+		addFunc(funcName, stmt, m);
+	}*/
 	CasADi::MXFunction f = m->getModelFunction(funcName)->getMx();
 	MXVector argVec = MXVector();
 	for (XMLElement* arg = right->NextSiblingElement(); arg != NULL; arg = arg->NextSiblingElement()) {
@@ -735,6 +741,9 @@ MX functionCallToMx(Ref<Model> m, XMLElement* call) {
 	} else {
 		XMLElement* func = call->FirstChildElement();
 		string funcName = func->FirstChildElement()->Attribute("name");
+		/*if (m->getModelFunction(funcName) == NULL) {
+			addFunc(funcName, call, m);
+		}*/
 		CasADi::MXFunction f = m->getModelFunction(funcName)->getMx();
 		MXVector argVec = MXVector();
 		for (XMLElement* arg = func->NextSiblingElement(); arg != NULL; arg = arg->NextSiblingElement()) {
@@ -762,6 +771,11 @@ MX functionCallToMx(Ref<Model> m, XMLElement* call) {
 	}
 }
 
+/**
+ * Takes a reference to an operator in the XML document and convert this
+ * operator to a corresponding MX expression. If the operator is not supported,
+ * an error is thrown.
+ */
 MX operatorToMx(Ref<Model> m, XMLElement* op) {
 	if (!strcmp(op->Attribute("name"), "der")) {
 		// handle calls to the der operator, lookup if we have introduced a differentiated variable 
@@ -962,7 +976,7 @@ MX builtinBinaryToMx(MX lhs, MX rhs, const char* builtinName) {
 }
 
 /**
- * Check if an variable has an derivative variable linked to it
+ * Check if an variable has a derivative variable linked to it
  */
 bool hasDerivativeVar(Ref<Model> m, Ref<RealVariable> realVar) {
 	if (realVar->getMyDerivativeVariable() != NULL) {
@@ -972,7 +986,7 @@ bool hasDerivativeVar(Ref<Model> m, Ref<RealVariable> realVar) {
 }
 
 /**
- * Convert an basetype string to the actual object type
+ * Convert a basetype string to the actual object type
  */
 Ref<ModelicaCasADi::PrimitiveType> getBaseType(Ref<Model> m, string baseTypeName) {
 	if (m->getVariableType(baseTypeName).getNode() == NULL) {
@@ -1123,4 +1137,25 @@ std::vector<string> getArrayVariables(XMLElement* elem, string functionName) {
 	}
 	return arrayVars;
 }
+
+/**
+ * Finds a specific function in the XML and adds it to the model. Used to 
+ * ensure that all functions are added before they are called.
+ 
+void addFunc(string funcName, XMLElement* elem, Ref<Model> m) {
+	// get to rootnode of document and then find the function
+	XMLElement* function;
+	for (XMLElement* parent = elem->Parent()->ToElement(); parent != NULL; parent = parent->Parent()->ToElement()) {
+		function = parent;
+	}
+
+	for (XMLElement* func = function->FirstChildElement(); func != NULL; func = func->NextSiblingElement()) {
+		if (!strcmp(func->Value(), "classDefinition") && func->Attribute("name") != NULL && 
+			!strcmp(func->Attribute("name"), funcName.c_str())) {
+				transferFunction(m, func);
+				break;
+		}
+	}
+}*/
+
 }; // end namespace
