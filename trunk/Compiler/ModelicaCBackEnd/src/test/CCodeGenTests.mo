@@ -12985,6 +12985,7 @@ model TestRuntimeOptions1
 			generate_ode=true,
 			generate_runtime_option_parameters=true,
 			variability_propagation=false,
+			cs_step_size=0.0011, // This is done to prevent nasty Java 6 bug: http://stackoverflow.com/a/14661106
 			template="
 $C_runtime_option_map$
 $C_variable_aliases$
@@ -13059,7 +13060,7 @@ const int fmi_runtime_options_map_length = 24;
     __block_solver_experimental_mode_3 = (0);
     __cs_rel_tol_4 = (1.0E-6);
     __cs_solver_5 = (0);
-    __cs_step_size_6 = (0.001);
+    __cs_step_size_6 = (0.0011);
     __enforce_bounds_7 = (JMI_FALSE);
     __events_default_tol_8 = (1.0E-10);
     __events_tol_factor_9 = (1.0E-4);
