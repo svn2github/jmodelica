@@ -5296,7 +5296,7 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 initial_fcn = self._FXFunction(
                     s_sym_input, [self.initial])
-
+                
             if self.eliminate_der_var:
                 print "TODO define input for function with no derivatives"
                 raise NotImplementedError("eliminate_der_var not supported yet") 
@@ -6093,6 +6093,12 @@ class LocalDAECollocator(CasadiCollocator):
         # Sum up the two cost terms
         self.cost = self.cost_mayer + self.cost_lagrange
 
+    def _FXFunction(self, *args):
+        f = casadi.MXFunction(*args)
+        if self.expand_to_SX == 'partial':
+            f.init()
+            f = casadi.SXFunction(f)
+        return f
 
     def _call_l1_functions(self):
         """
@@ -6659,15 +6665,7 @@ class LocalDAECollocator(CasadiCollocator):
         cp_f.setInput(0., 0)
         cp_f.setInput(1., 1)
         cp_f.evaluate()
-        return cp_f.output().toScalar()
-
-    def _FXFunction(self, *args): 
-        f = casadi.MXFunction(*args) 
-        if self.expand_to_SX=='partial':
-            f.init() 
-            f = casadi.SXFunction(f) 
-        return f
-    
+        return cp_f.output().toScalar()    
     def _get_affine_scaling(self, name, i, k):
         """
         Get the affine scaling (d, e) of variable name at a collocation point.
@@ -7102,7 +7100,6 @@ class LocalDAECollocator(CasadiCollocator):
         # Expand to SX
         #self.solver.setOption("expand",True)
         self.solver.setOption("expand",self.expand_to_SX == True)
-
     def get_equality_constraint(self):
         return self.c_e
 
