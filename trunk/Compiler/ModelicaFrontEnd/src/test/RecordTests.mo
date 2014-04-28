@@ -1157,6 +1157,7 @@ end RecordTests.RecordArray6;
 end RecordArray6;
 
 
+// TODO: entire record is here turned into a structural parameter, but should only be n
 model RecordArray7
     record A
         parameter Integer n;
@@ -1164,7 +1165,7 @@ model RecordArray7
     end A;
     
     parameter Integer m = 2;
-    A a = A(m, 1:m);
+    parameter A a = A(m, 1:m);
     Real y[m] = a.x;
 
     annotation(__JModelica(UnitTesting(tests={
@@ -1174,8 +1175,8 @@ model RecordArray7
             flatModel="
 fclass RecordTests.RecordArray7
  parameter Integer m = 2 /* 2 */;
- RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2);
- Real y[2] = a.x[1:2];
+ parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ Real y[2] = {1.0, 2.0};
 
 public
  record RecordTests.RecordArray7.A

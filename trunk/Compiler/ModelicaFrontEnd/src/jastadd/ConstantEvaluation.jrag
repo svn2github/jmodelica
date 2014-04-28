@@ -1610,7 +1610,7 @@ aspect ConstantEvaluation {
         if (!var.inRecord())
             return false;
         if (!var.inFunction()) 
-            return var.hasParentRecordWithBindingExp();
+            return !var.hasBindingFExp() && var.hasParentRecordWithBindingExp();
         if (containingInstComponent() == var.containingInstComponent())
             return false;
         InstAccess first = getTopInstAccess().getFirstInstAccess();
@@ -2391,7 +2391,34 @@ aspect ConstantEvaluation {
     protected CValue InstRecord.cevalBindingExp() {
         if (hasBindingFExp())
             return myBindingInstExp().ceval();
-        CValueRecord res = new CValueRecord((FRecordType) type());
+        FRecordType type = (FRecordType) type().scalarType();
+        if (isArray()) {
+            CValueArray res = new CValueArray(size());
+            int ndims = ndims();
+            for (InstComponentDecl ch : getInstComponentDecls())
+                ch.cevalBindingExpForRecordArray(type, res, ndims);
+            return res;
+        } else {
+            return cevalBindingExpForRecord(type);
+        }
+    }
+
+    protected void InstComponentDecl.cevalBindingExpForRecordArray(FRecordType type, CValueArray arr, int ndims) {
+        throw new UnsupportedOperationException("Only valid for InstArrayComponentDecls.");
+    }
+
+    protected void InstArrayComponentDecl.cevalBindingExpForRecordArray(FRecordType type, CValueArray arr, int ndims) {
+        ndims--;
+        if (ndims > 0) {
+            for (InstComponentDecl ch : getInstComponentDecls())
+                ch.cevalBindingExpForRecordArray(type, arr, ndims);
+        } else {
+            arr.addCell(cevalBindingExpForRecord(type));
+        }
+    }
+
+    protected CValue InstComponentDecl.cevalBindingExpForRecord(FRecordType type) {
+        CValueRecord res = new CValueRecord(type);
         evaluationValue = res;
         for (InstComponentDecl ch : allInstComponentDecls())
             res.setMember(ch.name(), ch.cevalBindingExp());
