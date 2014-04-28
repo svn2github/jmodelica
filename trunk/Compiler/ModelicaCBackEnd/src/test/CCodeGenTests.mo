@@ -14075,6 +14075,37 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 ")})));
 end ActiveSwitches2;
 
+model SwitchesAsNoEvent1
+    Boolean x = time > 0.5;
+    Real y = abs(time + 0.5);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="SwitchesAsNoEvent1",
+            description="Test so that no switches are generated when generate_event_switches is set to false.",
+            generate_event_switches=false,
+            template="
+$C_DAE_initial_relations$
+$C_DAE_relations$
+$C_ode_derivatives$
+",
+            generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[] = { -1 };
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = COND_EXP_GT(_time, 0.5, JMI_TRUE, JMI_FALSE);
+    _y_1 = jmi_abs(_time + AD_WRAP_LITERAL(0.5));
+/********* Write back reinits *******/
+
+")})));
+end SwitchesAsNoEvent1;
+
 model TruncDivString1
 	Real[5,5] a_really_long_variable_name = ones(5,5) * time;
 	Real x;

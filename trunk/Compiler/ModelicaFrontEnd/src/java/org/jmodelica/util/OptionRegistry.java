@@ -414,6 +414,12 @@ abstract public class OptionRegistry {
 		    NonlinearSolver.KINSOL,
 		    "Decides which nonlinear equation solver that will be used. Default is kinsol.",
 		    NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
+        GENERATE_EVENT_SWITCHES
+            ("generate_event_switches",
+            compiler,
+            true,
+            "Controls whether event generating expressions should generate switches in the c-code. " +
+            "Setting this option to false can give unexpected results. Default is true."),
 		
 		// Runtime options
         /*

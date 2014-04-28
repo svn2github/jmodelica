@@ -972,7 +972,8 @@ aspect FlatAPI {
      */
     syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
             inEventGeneratingLocation() && hasEventGeneratingType() &&
-            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters));
+            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters)) &&
+            root().options.getBooleanOption("generate_event_switches");
     
     /**
      * Check if an expression will generate an event.
