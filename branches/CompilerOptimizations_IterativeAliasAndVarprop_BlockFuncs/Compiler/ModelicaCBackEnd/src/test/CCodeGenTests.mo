@@ -8065,8 +8065,6 @@ $C_dae_init_blocks_residual_functions$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
-    JMI_ARRAY_STATIC(tmp_1, 2, 1)
-    JMI_ARRAY_STATIC(tmp_2, 2, 1)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8080,19 +8078,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = _x_0;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 1 * sizeof(jmi_real_t));
-        JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
-        jmi_array_ref_1(tmp_1, 1) = _time;
-        jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
-        residual[0] = (- func_CCodeGenTests_BlockTest9_F_exp(tmp_1));
+        residual[0] = (- _temp_1_1);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
-            jmi_array_ref_1(tmp_2, 1) = _time;
-            jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
-            (*res)[0] = _x_0 * func_CCodeGenTests_BlockTest9_F_exp(tmp_2) - (0);
+            (*res)[0] = _x_0 * _temp_1_1 - (0);
         }
     }
     return ef;
@@ -8102,8 +8094,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
-    JMI_ARRAY_STATIC(tmp_3, 2, 1)
-    JMI_ARRAY_STATIC(tmp_2, 2, 1)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8117,19 +8107,13 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = _x_0;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 1 * sizeof(jmi_real_t));
-        JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
-        jmi_array_ref_1(tmp_3, 1) = _time;
-        jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
-        residual[0] = (- func_CCodeGenTests_BlockTest9_F_exp(tmp_3));
+        residual[0] = (- _temp_1_1);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
-            jmi_array_ref_1(tmp_2, 1) = _time;
-            jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
-            (*res)[0] = _x_0 * func_CCodeGenTests_BlockTest9_F_exp(tmp_2) - (0);
+            (*res)[0] = _x_0 * _temp_1_1 - (0);
         }
     }
     return ef;

@@ -3617,6 +3617,8 @@ fclass IndexReduction.AlgorithmDifferentiation.PlanarPendulum
  Real _der_vy;
  Real _der_der_x;
  Real _der_der_y;
+ Real temp_1;
+ Real temp_2;
 initial equation 
  x = 0.0;
  vx = 0.0;
@@ -3625,11 +3627,13 @@ equation
  _der_y = vy;
  der(vx) = lambda * x;
  _der_vy = lambda * y - g;
- IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(y) = L;
- IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(x, der(x)) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(y, _der_y) = 0.0;
+ temp_1 + IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(y) = L;
+ temp_2 + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(y, _der_y) = 0.0;
  _der_der_x = der(vx);
  _der_der_y = _der_vy;
  IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(x, der(x), _der_der_x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(y, _der_y, _der_der_y) = 0.0;
+ temp_1 = IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(x);
+ temp_2 = IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(x, der(x));
 
 public
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square
