@@ -222,7 +222,15 @@ aspect Flattening {
 		if (myInstClassDecl().extendsEnum())
 			myInstClassDecl().flattenEnum(fc);
 	}
-	
+
+    public void FReinit.flattenUsedFuncsAndEnums(FClass fc) {
+        containingInstNode().flattenStateSelect(fc);
+    }
+
+    public void InstNode.flattenStateSelect(FClass fc) {
+        lookupInstClass("StateSelect").flattenEnum(fc);
+    }
+
 	public void InstAccess.flattenMyRecord(FClass fc) {
 		myInstClassDecl().flattenRecord(fc);
 	}

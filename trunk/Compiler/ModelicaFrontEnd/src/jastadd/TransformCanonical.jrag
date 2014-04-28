@@ -5227,6 +5227,7 @@ aspect ReinitStates {
     }
     
     public void FIfWhenEquation.makeReinitedVarsStates() {
+        super.makeReinitedVarsStates();
         if (hasElse())
             getElse().makeReinitedVarsStates();
     }

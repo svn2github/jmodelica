@@ -1894,13 +1894,14 @@ aspect InstanceAST_API {
             
         }
 
-	}
-	
-	inh InstNode InstNode.containingInstNode();
-	eq InstNode.getChild().containingInstNode() = this;
-	eq InstRoot.getChild().containingInstNode() = null;
+    }
+
+    inh InstNode InstNode.containingInstNode();
+    inh InstNode FExp.containingInstNode();
+    eq InstNode.getChild().containingInstNode() = this;
+    eq InstRoot.getChild().containingInstNode() = null;
     eq Root.getChild().containingInstNode()     = null;
-	
+
 }
 
 aspect SourceAST_API {
