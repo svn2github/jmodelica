@@ -106,9 +106,11 @@ mc_optimica: ifcasadi
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
 $(MC_SRC)/bin/util.jar:             mc_modelica
+$(MC_SRC)/bin/separateProcess.jar:  mc_modelica
 
 $(OC_SRC)/bin/OptimicaCompiler.jar: mc_optimica
 $(OC_SRC)/bin/util.jar:             mc_optimica
+$(OC_SRC)/bin/separateProcess.jar:  mc_optimica
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
@@ -241,6 +243,7 @@ if HAVE_ANT
 	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
 	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
 endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
@@ -296,7 +299,15 @@ endif
 	cp $(CPPAD_HOME)/cppad/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local	
 	cp $(CPPAD_HOME)/cppad/local/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy MSL" || cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/ThirdParty
+	if [ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ]; then \
+	  echo "Installing in dist directory, don't copy MSL"; \
+	else \
+	  mkdir -p "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	  cd "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	  find . -depth -print0 | while read -d $$'\0' -r f ; do if [ ! -e "$(abs_top_srcdir)/ThirdParty/MSL/$${f}" ]; then rm -rf "$${f}"; fi; done; \
+	  cd "$(abs_top_srcdir)/ThirdParty/MSL"; \
+	  $(CP) Modelica ModelicaServices Complex.mo "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	fi
 	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/ceval_external_template.c $(DESTDIR)$(prefix)/CodeGenTemplates

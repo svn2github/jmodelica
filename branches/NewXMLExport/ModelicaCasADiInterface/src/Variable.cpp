@@ -134,7 +134,11 @@ void Variable::setAttribute(AttributeKey key, AttributeValue val) {
             if (bindingExpression.isConstant() && (!val.isConstant())) {
                 throw std::runtime_error("It is not allowed to make independent parameters dependent");
             } else if (!bindingExpression.isConstant()) {
-                throw std::runtime_error("It is not allowed to change binding expression of dependent parameters");
+                std::string name = getName();
+                // todo: Remove this workaround; _start_* parameters should not have binding expressions
+                if (!((name.length() >= 7) && (name.compare(0,7,"_start_") == 0))) {
+                    throw std::runtime_error("It is not allowed to change binding expression of dependent parameters");
+                }
             }
         }
     }

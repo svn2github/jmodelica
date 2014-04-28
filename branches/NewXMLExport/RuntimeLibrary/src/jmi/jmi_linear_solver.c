@@ -17,6 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+#include "string.h"
+
 #include "jmi_linear_solver.h"
 #include "jmi_block_solver_impl.h"
 #include "jmi_log.h"
@@ -35,6 +37,8 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     /* Initialize work vectors.*/
     solver->factorization = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
     solver->jacobian = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
+    solver->jacobian_temp = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
+    solver->singular_values = (jmi_real_t*)calloc(n_x,sizeof(jmi_real_t));
     solver->rScale = (double*)calloc(n_x,sizeof(double));
     solver->cScale = (double*)calloc(n_x,sizeof(double));
     solver->equed = 'N';
@@ -58,7 +62,6 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     int iwork;
     int rank;
     double rcond;
-    double* singular_values;
     int info;
     int i;
 	jmi_log_node_t destnode;
@@ -75,7 +78,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        info = block->F(block->problem_data,NULL,solver->factorization,JMI_BLOCK_EVALUATE_JACOBIAN);
+        info = block->F(block->problem_data,NULL,solver->jacobian,JMI_BLOCK_EVALUATE_JACOBIAN);
+        memcpy(solver->factorization, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
         if(info) {
             if(block->init) {
                 jmi_log_node(block->log, logError, "Error", "Failed in Jacobian calculation for <block: %d>", 
@@ -104,7 +108,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
 	if((block->callbacks->log_options.log_level >= 5)) {
 		destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
                                      "Linear solver invoked for <block:%d>", block->id);
-		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
+		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->jacobian, block->n, block->n);
 	}
 
 	/*  If jacobian is reevaluated then factorize Jacobian. */
@@ -177,12 +181,10 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
          * SUBROUTINE DGELSS( M, N, NRHS, A, LDA, B, LDB, S, RCOND, RANK,WORK, LWORK, INFO )
          *
          */
-        singular_values = (double*)calloc(n_x,sizeof(double));
         rcond = -1.0;
         
-        dgelss_(&n_x, &n_x, &i, solver->factorization, &n_x, block->res, &n_x ,singular_values, &rcond, &rank, solver->rwork, &iwork, &info);
-        
-        free(singular_values);
+        memcpy(solver->jacobian_temp, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
+        dgelss_(&n_x, &n_x, &i, solver->jacobian_temp, &n_x, block->res, &n_x ,solver->singular_values, &rcond, &rank, solver->rwork, &iwork, &info);
         
         if(info != 0) {
             jmi_log_node(block->log, logError, "Error", "DGELSS failed to solve the linear system in <block: %d> with error code <error: %d>", block->id, info);
@@ -232,6 +234,8 @@ void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     free(solver->ipiv);
     free(solver->factorization);
     free(solver->jacobian);
+    free(solver->singular_values);
+    free(solver->jacobian_temp);
     free(solver->rScale);
     free(solver->cScale);
     free(solver->rwork);

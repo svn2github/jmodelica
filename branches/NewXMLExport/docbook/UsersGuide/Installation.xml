@@ -13,8 +13,8 @@
   <section xml:id="inst_sec_supported_platforms">
     <title>Supported platforms</title>
 
-    <para>JModelica.org can be installed on Linux, Mac OS X, and Windows (XP,
-    Vista, 7) with 32-bit or 64-bit architectures.</para>
+    <para>JModelica.org is supported on Linux and Windows (XP, Vista, 7) with
+    32-bit or 64-bit architectures.</para>
   </section>
 
   <section xml:id="inst_sec_win">
@@ -138,6 +138,11 @@
               </listitem>
 
               <listitem>
+                <para><link xlink:href="https://pypi.python.org/pypi/JCC/">JCC
+                1.18</link></para>
+              </listitem>
+
+              <listitem>
                 <para><link xlink:href="http://jpype.sourceforge.net">JPype
                 0.5.4.2</link></para>
               </listitem>
@@ -232,16 +237,16 @@
       the JModelica.org start menu and run a few examples. Starting the Python
       session from the Windows start menu will set all the environment
       variables required to run the JModelica.org Python
-      interface.<programlisting language="python"># Import all examples from the pyjmi package
-from pyjmi.examples import *
-
-# Run the VDP_sim example and plot results
+      interface.<programlisting language="python"># Import and run the VDP_sim example and plot results
+from pyjmi.examples import VDP_sim
 VDP_sim.run_demo()
 
-# Run the CSTR example and plot results
+# Import and run the CSTR example and plot results
+from pyjmi.examples import cstr
 cstr.run_demo()
 
-# Run the CSTR example using CasADi and plot results
+# Import and run the CSTR example using CasADi and plot results
+from pyjmi.examples import cstr_casadi
 cstr_casadi.run_demo()</programlisting></para>
     </section>
 
@@ -290,6 +295,15 @@ sudo apt-get -y install cython
 sudo apt-get -y install python-lxml
 sudo apt-get -y install python-nose
 sudo apt-get -y install python-jpype
+sudo apt-get -y install zlib1g-dev
+sudo apt-get -y install libboost-dev
+</programlisting>
+
+        <para>On Ubuntu 12.04, the bundled jcc version is too old. A new
+        enough version can be installed using pip:</para>
+
+        <programlisting>sudo apt-get -y install python-pip
+sudo pip install jcc
 </programlisting>
 
         <para>The following versions of each package have been tested and
@@ -436,6 +450,30 @@ sudo apt-get -y install python-jpype
 
                 <entry>Tested version</entry>
               </row>
+
+              <row>
+                <entry>zlib1g-dev</entry>
+
+                <entry>1:1.2.3.4</entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry>libboost-dev</entry>
+
+                <entry>1.48.0.2</entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry>jcc</entry>
+
+                <entry>2.16</entry>
+
+                <entry>Minimum version</entry>
+              </row>
             </tbody>
           </tgroup>
         </table>
@@ -506,7 +544,7 @@ cd build
 ../configure --prefix=/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt; \
              --with-ipopt=/home/&lt;user_name&gt;/&lt;ipopt_install_location&gt; 
 make install
-make install_casadi
+make casadi_interface
 </programlisting>
 
       <para>where <literal>&lt;user_name&gt;</literal> and
@@ -521,12 +559,19 @@ make install_casadi
       <para>In order to verify that JModelica.org has been installed
       correctly, start an IPython shell using the command
       <literal>/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt;/bin/jm_ipython</literal>
-      and enter the the commands:</para>
+      and run a few examples:</para>
 
-      <programlisting language="python">from pyjmi.examples import *
+      <programlisting language="python"># Import and run the VDP_sim example and plot results
+from pyjmi.examples import VDP_sim
+VDP_sim.run_demo()
+
+# Import and run the CSTR example and plot results
+from pyjmi.examples import cstr
 cstr.run_demo()
+
+# Import and run the CSTR example using CasADi and plot results
+from pyjmi.examples import cstr_casadi
 cstr_casadi.run_demo()
-distillation_fmu.run_demo()
 </programlisting>
     </section>
   </section>

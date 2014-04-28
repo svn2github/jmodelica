@@ -154,6 +154,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     bool __ne__(SWIG_Object obj) {
         return true; // Should only happen if obj is not a proxy for a SharedNode
     }   
+
+    // Technically, we should return a uintptr_t to be sure to be able to hold the whole pointer.
+    // But size_t should be the same type on most modern platforms, and hashing still works if we
+    // truncate the pointer, while uintptr_t seems to be C++11.
+    size_t __hash__() {
+        return (size_t)$self;
+    }   
 }
 
 %extend ModelicaCasADi::Equation {

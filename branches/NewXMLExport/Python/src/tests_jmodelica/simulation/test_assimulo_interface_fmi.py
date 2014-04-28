@@ -274,6 +274,16 @@ class Test_FMI_ODE:
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         
     @testattr(stddist = True)
+    def test_no_result(self):
+        opts = self._bounce.simulate_options()
+        opts["result_handling"] = "none"
+        opts["initialize"] = False
+        res = self._bounce.simulate(options=opts)
+        
+        nose.tools.assert_raises(Exception,res._get_result_data)
+        
+        
+    @testattr(stddist = True)
     def test_cc_with_radau(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()

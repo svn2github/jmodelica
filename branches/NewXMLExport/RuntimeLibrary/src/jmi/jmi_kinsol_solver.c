@@ -165,7 +165,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
-    realtype *jac_fd;
+    realtype *jac_fd = NULL;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
@@ -296,7 +296,7 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
 
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
-    jmi_log_category_t category;
+    jmi_log_category_t category = logWarning;
     jmi_block_solver_t *block = eh_data;
     jmi_kinsol_solver_t* solver = block->solver;
     realtype fnorm, snorm;
@@ -934,7 +934,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 		/* Evaluate discrete variables after a regularization. */
 		if (block->at_event) {
             jmi_log_node_t inner_node;
-			if(block->callbacks->log_options.log_level >= 5) {
+			if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
                 inner_node =jmi_log_enter_fmt(block->log, logInfo, "RegularizationDiscreteUpdate", 
                                 "Evaluating switches after regularization.");
                 jmi_log_fmt(block->log, inner_node, logInfo, "Pre discrete variables");
@@ -943,7 +943,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
             block->F(block->problem_data, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
             
-            if(block->callbacks->log_options.log_level >= 5) {
+            if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
                 jmi_log_fmt(block->log, inner_node, logInfo, "Post discrete variables");
                 block->log_discrete_variables(block->problem_data, inner_node);
                 jmi_log_leave(block->log, inner_node);

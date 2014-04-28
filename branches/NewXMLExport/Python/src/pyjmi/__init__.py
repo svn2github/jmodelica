@@ -83,7 +83,9 @@ if casadi_present:
         modelicacasadi_present = False
     if modelicacasadi_present:
         from casadi_interface import (OptimizationProblem,
-                                      transfer_to_casadi_interface)
+                                      transfer_to_casadi_interface,
+                                      transfer_optimization_problem,
+                                      transfer_model)
 
 def get_files_path():
     """Get the absolute path to the example files directory."""

@@ -494,6 +494,9 @@ aspect FlatAPI {
 	  [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
 	FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
 	to FClass.differentiatedRealVariablesSet() for myFClass();
+	FDerivativeVariable contributes
+	    myDifferentiatedVariable() when (shouldContribute())
+	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
 
@@ -550,6 +553,32 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isNonFixedParameter() = false;
     eq FStringVariable.isNonFixedParameter()            = false;
     eq FVariable.isNonFixedParameter()                  = isParameter() && !fixedAttribute();
+    
+    syn boolean ASTNode.containsNonFixedParameter() {
+        for (ASTNode child : this)
+            if (child.containsNonFixedParameter())
+                return true;
+        return false;
+    }
+    eq FIdUseExp.containsNonFixedParameter() = myFV().isNonFixedParameter();
+    eq FInstAccessExp.containsNonFixedParameter() = myInstComponentDecl().isNonFixedParameter();
+    
+    syn boolean InstComponentDecl.isNonFixedParameter() = false;
+    eq InstAssignable.isNonFixedParameter() {
+        if (!isParameter())
+            return false;
+        for (InstModification mod : totalMergedEnvironment()) {
+            FExp exp = mod.findFixedAttribute();
+            if (exp == null)
+                continue;
+            if (!exp.ceval().booleanValue())
+                return true;
+        }
+        if (hasBindingFExp())
+            return getBindingFExp().containsNonFixedParameter();
+        return false;
+    }
+    
 
 	syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
 	syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
@@ -917,30 +946,47 @@ aspect FlatAPI {
             l.add(e);
         return l;
     }
+    
+    syn int FSmoothExp.order() = getOrder().ceval().intValue(); 
 
-	/**
-	 * Check if an expression will generate an event
-	 */
-	syn boolean FExp.generatesEvent() =
-			generatesEventExp() &&
-			!inWhen();
-	
-	/**
-	 * Check if an expression will generate an event.
-	 * Does not check context further than expressions.
-	 */
-	syn boolean FExp.generatesEventExp() = false;
-	eq FRelExp.generatesEventExp() = 
-			!inNoEventExp() &&
-			!inSmoothExp(1) &&
-			isRealComparison() &&
-			!variability().lessOrEqual(fParameter());
-	eq FEventGenExp.generatesEventExp() =
-			!inNoEventExp() &&
-			!inSmoothExp(1) &&
-			argType().isReal() &&
-			!variability().lessOrEqual(fParameter());
-	
+    /**
+     * Check if an expression will generate an event. Parameters with
+     * fixed=false are considered to generate events.
+     */
+    syn boolean FExp.generatesEvent() = generatesEvent(true);
+    
+    /**
+     * Check if an expression will generate an event.
+     * 
+     * @param boolean Controls whether parameters with fixed = false should be
+     *      considered to generate events.
+     */
+    syn boolean FExp.generatesEvent(boolean checkNonFixedParameters) = generatesEvent(false, checkNonFixedParameters);
+    
+    /**
+     * Check if an expression will generate an event.
+     * 
+     * @param boolean Controles whether variability should be ignored.
+     * @param boolean Controls whether parameters with fixed = false should be
+     *      considered to generate events.
+     */
+    syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
+            inEventGeneratingLocation() && hasEventGeneratingType() &&
+            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters));
+    
+    /**
+     * Check if an expression will generate an event.
+     * Does not check context further than expressions.
+     */
+    syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
+            !variability().lessOrEqual(fParameter()) || (checkNonFixedParameters && containsNonFixedParameter());
+
+    syn boolean FExp.inEventGeneratingLocation() = !inDiscreteLocation() && !inNoEventExp() && !inSmoothExp(1);
+
+    syn boolean FExp.hasEventGeneratingType() = false;
+    eq FRelExp.hasEventGeneratingType() = isRealComparison();
+    eq FEventGenExp.hasEventGeneratingType() = argType().isReal();
+
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
@@ -1619,6 +1665,30 @@ aspect FlatTypes {
 		return -1;
 	}
 	
+    syn int FRecordDecl.indexOfArg(String name) {
+        int k = 0;
+        for (int i = 0; i < getNumFVariable(); i++) {
+            if (getFVariable(i).modifiableInRecord) {
+                if (getFVariable(i).name().equals(name))
+                    return k;
+                k++;
+            }
+        }
+        return -1;
+    }
+    
+    syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
+        FVariable fv = getFVariable(indexOf(name));
+        if (fv.modifiableInRecord)
+            return frc.getArg(indexOfArg(name));
+        else
+            return fv.getBindingExp();
+    }
+    
+    syn FExp FRecordConstructor.myArgFExp(String name) {
+        return getRecord().myFRecordDecl().extractArg(this, name);
+    }
+	
     inh FRecordDecl FExp.containingRecordDecl();
     inh FRecordDecl FAbstractVariable.containingRecordDecl();
 	eq FRecordDecl.getChild().containingRecordDecl() = this;
@@ -1667,6 +1737,7 @@ aspect Attributes {
 	syn FAttribute FAttribute.findAttribute(String name)        = findMatching(getFAttributes(), name);
 	syn FAttribute FDerivedType.findAttribute(String name)      = findMatching(getFAttributes(), name);
 	syn FAttribute FAbstractEquation.findAttribute(String name) = findMatching(getFAttributes(), name);
+    syn FAttribute FFunctionDecl.findAttribute(String name)     = findMatching(getFAttributes(), name);
 	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) && a.getAttributeSet();
 	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
 	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
@@ -1818,43 +1889,47 @@ aspect Attributes {
 	}
 	
 	
-	/**
-	 * Check if this attribute is in an FVariable.
-	 */
-	inh boolean FAttribute.isInFV();
-	eq FVariable.getChild().isInFV()         = true;
-	eq FDerivedType.getChild().isInFV()      = false;
-	eq FAbstractEquation.getChild().isInFV() = false;
-	
-	/**
-	 * Check if this attribute is in a specific FVariable.
-	 */
-	inh boolean FAttribute.isInFV(FVariable fv);
-	eq FVariable.getChild().isInFV(FVariable fv)         = fv == this;
-	eq FDerivedType.getChild().isInFV(FVariable fv)      = false;
-	eq FAbstractEquation.getChild().isInFV(FVariable fv) = false;
-	
-	/**
-	 * Check if this attribute is in an FDerivedType.
-	 */
-	inh boolean FAttribute.isInDerivedType();
-	eq FVariable.getChild().isInDerivedType()         = false;
-	eq FDerivedType.getChild().isInDerivedType()      = true;
-	eq FAbstractEquation.getChild().isInDerivedType() = false;
-	
-	/**
-	 * Check if this attribute is in a specific FDerivedType.
-	 */
-	inh boolean FAttribute.isInDerivedType(FDerivedType t);
-	eq FVariable.getChild().isInDerivedType(FDerivedType t)         = false;
-	eq FDerivedType.getChild().isInDerivedType(FDerivedType t)      = t == this;
+    /**
+     * Check if this attribute is in an FVariable.
+     */
+    inh boolean FAttribute.isInFV();
+    eq FVariable.getChild().isInFV()         = true;
+    eq FDerivedType.getChild().isInFV()      = false;
+    eq FAbstractEquation.getChild().isInFV() = false;
+    eq FFunctionDecl.getChild().isInFV()     = false;
+
+    /**
+     * Check if this attribute is in a specific FVariable.
+     */
+    inh boolean FAttribute.isInFV(FVariable fv);
+    eq FVariable.getChild().isInFV(FVariable fv)         = fv == this;
+    eq FDerivedType.getChild().isInFV(FVariable fv)      = false;
+    eq FAbstractEquation.getChild().isInFV(FVariable fv) = false;
+    eq FFunctionDecl.getChild().isInFV(FVariable fv)     = false;
+
+    /**
+     * Check if this attribute is in an FDerivedType.
+     */
+    inh boolean FAttribute.isInDerivedType();
+    eq FVariable.getChild().isInDerivedType()         = false;
+    eq FDerivedType.getChild().isInDerivedType()      = true;
+    eq FAbstractEquation.getChild().isInDerivedType() = false;
+    eq FFunctionDecl.getChild().isInDerivedType()     = false;
+
+    /**
+     * Check if this attribute is in a specific FDerivedType.
+     */
+    inh boolean FAttribute.isInDerivedType(FDerivedType t);
+    eq FVariable.getChild().isInDerivedType(FDerivedType t)         = false;
+    eq FDerivedType.getChild().isInDerivedType(FDerivedType t)      = t == this;
     eq FAbstractEquation.getChild().isInDerivedType(FDerivedType t) = false;
-	
+    eq FFunctionDecl.getChild().isInDerivedType(FDerivedType t)     = false;
+
     syn boolean FAttribute.isDecl() = false;
     eq FIdDeclAttribute.isDecl()    = true;
-    
+
     syn FIdDecl FAttribute.getFIdDecl() = null;
-    
+
 }
 
 aspect FVariableUses {
@@ -1920,46 +1995,6 @@ aspect FVariableUses {
 	
 	
 	
-    syn ArrayList<FFunctionVariable> FExternalStmt.myInputs() {
-        FFunctionDecl decl = containingFFunctionDecl();
-        ArrayList<FFunctionVariable> stmtInputs = decl.getFFunctionVariables().toArrayList();
-        stmtInputs.removeAll(decl.myOutputs());
-        return stmtInputs;
-    }
-	
-    syn ArrayList<FFunctionVariable> FExternalStmt.myOutputs() {
-        ArrayList<FFunctionVariable> funcOutputs = containingFFunctionDecl().myOutputs();
-        ArrayList<FFunctionVariable> stmtOutputs = new ArrayList<FFunctionVariable>();
-        
-        if (hasReturnVar() ) {
-            FFunctionVariable fv = getReturnVar().myFuncVar();
-            if (funcOutputs.contains(fv))
-                stmtOutputs.add(fv);
-        }
-        
-        for (FExp e : getArgs()) {
-            if (e instanceof FIdUseExp) {
-                FFunctionVariable fv = ((FIdUseExp) e).getFIdUse().myFuncVar();
-                if (funcOutputs.contains(fv))
-                    stmtOutputs.add(fv);
-            }
-        }
-        return stmtOutputs;
-    }
-    
-    /**
-     * Declarations of records used in this function
-     */
-    syn Collection<FRecordDecl> FExternalStmt.usedRecords() {
-        Set<FRecordDecl> res = new LinkedHashSet<FRecordDecl>();
-        for (FFunctionVariable ffv : myInputs())
-            if (ffv.isRecord())
-                res.add(ffv.myFRecordDecl());
-        for (FFunctionVariable ffv : myOutputs())
-            if (ffv.isRecord())
-                res.add(ffv.myFRecordDecl());
-        return res;
-    }
 	
 	/**
 	 * Returnes the function input that this expressions corresponds to.
@@ -3159,4 +3194,31 @@ aspect Sparsity {
 		calculateEquationSparsity(sp, i, algebraicContinousRealVariables(), myFClass().algebraicContinousRealVariablesOffset());
 	}
 
+}
+
+aspect ExpressionGeneralisation {
+    /**
+     * Returns the expression stripped of any negations
+     */
+    syn FExp FExp.stripNegations()     = this;
+    eq FNegExp.stripNegations()        = getFExp().stripNegations();
+    
+    
+    syn boolean FEquation.isNegated() = getLeft().isNegated() ^ getRight().isNegated();
+    
+    /**
+     * Check if the expressions is negated
+     */
+    syn boolean FExp.isNegated()  = false;
+    eq FNegExp.isNegated()        = !getFExp().isNegated();
+    
+    /**
+     * Return this expression negated if <code>neg</code> is true.
+     */
+    syn FExp FExp.negated(boolean neg) {
+        if (neg)
+            return new FNegExp(unboundCopy());
+        else
+            return unboundCopy();
+    }
 }

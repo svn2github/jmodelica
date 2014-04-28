@@ -1,9 +1,9 @@
 package org.jmodelica.util.exceptions;
 
+public class BLTException extends ModelicaException {
+    private static final long serialVersionUID = 1L;
 
-@SuppressWarnings("serial")
-public class BLTException extends ModelicaException {	
-	public BLTException(String message) {
-		super(message);
-	}
+    public BLTException(String message) {
+        super(message);
+    }
 }

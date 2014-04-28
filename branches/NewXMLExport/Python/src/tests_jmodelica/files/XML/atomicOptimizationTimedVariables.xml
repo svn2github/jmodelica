@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<optimization>
+	<component name="x1">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="0"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x2">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="0"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="x3">
+		<builtin name="Real"/>
+		<modifier>
+			<item name="start">
+				<integer value="0"/>
+			</item>
+		</modifier>
+	</component>
+	<component name="c1" variability="constant">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.5"/>
+		</bindingExpression>
+	</component>
+	<component name="startTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="0.0"/>
+		</bindingExpression>
+	</component>
+	<component name="finalTime" variability="parameter">
+		<builtin name="Real"/>
+		<bindingExpression>
+			<real value="1.0"/>
+		</bindingExpression>
+	</component>
+
+	<equation>
+		<equal>
+			<local name="x1"/>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x2"/>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+		<equal>
+			<local name="x3"/>
+			<call builtin="+">
+				<call builtin="sin">
+					<local name="x1"/>
+				</call>
+				<real value="0.5"/>
+			</call>
+		</equal>
+	</equation>
+
+	<constraint>
+		<lessThan kind="pathConstraint">
+			<operator name="at">
+				<local name="x2"/>
+				<call builtin="+">
+					<local name="startTime"/>
+					<integer value="1"/>
+				</call>
+			</operator>
+			<builtin name="time"/>
+		</lessThan>
+		<lessThan kind="pathConstraint">
+			<operator name="at">
+				<local name="x3"/>
+				<call builtin="-">
+					<local name="finalTime"/>
+					<integer value="1"/>
+				</call>
+			</operator>
+			<local name="x1"/>
+		</lessThan>
+		<greaterThan kind="pointConstraint">
+			<operator name="at">
+				<local name="x1"/>
+				<call builtin="+">
+					<local name="startTime"/>
+					<integer value="1"/>
+				</call>
+			</operator>
+			<real value="1.0"/>
+		</greaterThan>
+	</constraint>
+	<objective>
+		<operator name="at">
+			<local name="x1"/>
+			<local name="finalTime"/>
+		</operator>
+	</objective>
+</optimization>

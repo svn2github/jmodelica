@@ -471,21 +471,21 @@ abstract public class TestAnnotationizerHelper {
 	
 	private final static String HEADER = "annotation(__JModelica(UnitTesting(tests={";
 
-	/**
-	 * \brief Generates the test annotation and ouputs it on the given stream.
-	 */
-	public void outputAnnotation(PrintStream out) throws Exception {
-		out.println("\t" + HEADER);
-		out.println("\t\t" + getClass().getSimpleName() + "(");
-		out.println("\t\t\tname=\"" + testName + "\",");
-		out.println("\t\t\tdescription=\"" + description + "\",");
-		for (String opt : opts) 
-			out.println("\t\t\t" + opt + ",");
-		if (checkType != null)
-		    out.println("\t\t\tcheckType=" + checkType.toString().toLowerCase() + ",");
-		printSpecific(out, "\t\t\t");
-		out.println(")})));");
-	}
+    /**
+     * \brief Generates the test annotation and ouputs it on the given stream.
+     */
+    public void outputAnnotation(PrintStream out) throws Exception {
+        out.println("    " + HEADER);
+        out.println("        " + getClass().getSimpleName() + "(");
+        out.println("            name=\"" + testName + "\",");
+        out.println("            description=\"" + description + "\",");
+        for (String opt : opts) 
+            out.println("            " + opt + ",");
+        if (checkType != null)
+            out.println("            checkType=" + checkType.toString().toLowerCase() + ",");
+        printSpecific(out, "            ");
+        out.println(")})));");
+    }
 	
 	/**
 	 * \brief Escapes unallowed characters in the fields of the test annotation.

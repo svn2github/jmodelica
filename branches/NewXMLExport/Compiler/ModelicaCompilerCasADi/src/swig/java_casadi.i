@@ -16,6 +16,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %module casadi
 
+// Expose the swig-generated function getCPtr as public in the proxy objects;
+// we need it to get back the underlying object.
+SWIG_JAVABODY_METHODS(protected, public, SWIGTYPE)
+
 %{
 #include <iostream>
 #include <cstdlib>

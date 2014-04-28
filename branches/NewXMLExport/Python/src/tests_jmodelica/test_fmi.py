@@ -75,68 +75,65 @@ class Test_FMUModelBase:
         """
         Sets up the test class.
         """
-        name = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
-        name = compile_fmu('TablesTest.Table1DfromArray', os.path.join(path_to_mofiles,'TablesTests.mo'))
-
-    def setUp(self):
-        """
-        Sets up the test case.
-        """
-        self.negated_alias  = load_fmu('NegatedAlias.fmu')
-        self.tables = load_fmu('TablesTest_Table1DfromArray.fmu')
+        cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
+        cls.tableFmu = compile_fmu('TablesTest.Table1DfromArray', os.path.join(path_to_mofiles,'TablesTests.mo'))
 
     @testattr(stddist = True)
     def test_initialize_once(self):
-        self.negated_alias.initialize()
-        nose.tools.assert_raises(FMUException, self.negated_alias.initialize)
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        negated_alias.initialize()
+        nose.tools.assert_raises(FMUException, negated_alias.initialize)
 
     @testattr(stddist = True)
     def test_set_get_negated_real(self):
-        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        x,y = negated_alias.get("x"), negated_alias.get("y")
         nose.tools.assert_almost_equal(x,1.0)
         nose.tools.assert_almost_equal(y,-1.0)
 
-        self.negated_alias.set("y",2)
+        negated_alias.set("y",2)
 
-        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        x,y = negated_alias.get("x"), negated_alias.get("y")
         nose.tools.assert_almost_equal(x,-2.0)
         nose.tools.assert_almost_equal(y,2.0)
 
-        self.negated_alias.set("x",3)
+        negated_alias.set("x",3)
 
-        x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
+        x,y = negated_alias.get("x"), negated_alias.get("y")
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
 
     @testattr(stddist = True)
     def test_set_get_negated_integer(self):
-        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        x,y = negated_alias.get("ix"), negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,1.0)
         nose.tools.assert_almost_equal(y,-1.0)
 
-        self.negated_alias.set("iy",2)
+        negated_alias.set("iy",2)
 
-        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        x,y = negated_alias.get("ix"), negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,-2.0)
         nose.tools.assert_almost_equal(y,2.0)
 
-        self.negated_alias.set("ix",3)
+        negated_alias.set("ix",3)
 
-        x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
+        x,y = negated_alias.get("ix"), negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
         
     @testattr(stddist = True)
     def test_set_get_enumeration(self):
-        self.tables.get("modelicaTable1D.smoothness") #Test that it works
-        self.tables.set("modelicaTable1D.smoothness",2)
+        tables = load_fmu(Test_FMUModelBase.tableFmu)
+        tables.get("modelicaTable1D.smoothness") #Test that it works
+        tables.set("modelicaTable1D.smoothness",2)
         
-        assert self.tables.get("modelicaTable1D.smoothness") == 2
+        assert tables.get("modelicaTable1D.smoothness") == 2
         
-        var = self.tables.get_model_variables()["modelicaTable1D.smoothness"]
+        var = tables.get_model_variables()["modelicaTable1D.smoothness"]
         
-        self.tables.set_integer([var.value_reference],3)
-        assert self.tables.get_integer([var.value_reference]) == 3
+        tables.set_integer([var.value_reference],3)
+        assert tables.get_integer([var.value_reference]) == 3
 
 
 class Test_FMUModelCS1:
@@ -149,29 +146,16 @@ class Test_FMUModelCS1:
         """
         Sets up the test class.
         """
-        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
-        rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
-        no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="cs")
-        simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
-        simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
-        input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
-
-    def setUp(self):
-        """
-        Sets up the test case.
-        """
-        self.rlc  = load_fmu('RLC_Circuit.fmu')
-        #self.rlc.initialize()
-        self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
-        self.no_state3 = load_fmu("NoState_Example3.fmu")
-        self.simple_input = load_fmu("Inputs_SimpleInput.fmu")
-        self.simple_input2 = load_fmu("Inputs_SimpleInput2.fmu")
-        self.input_discontinuity = load_fmu("Inputs_InputDiscontinuity.fmu")
-        #self.rlc_square.initialize()
+        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
+        cls.rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
+        cls.no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="cs")
+        cls.simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
 
     @testattr(stddist = True)
     def test_custom_result_handler(self):
-        model = self.rlc
+        model = load_fmu(Test_FMUModelCS1.rlc_circuit)
 
         class A:
             pass
@@ -191,7 +175,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_filter(self):
-        model = self.rlc
+        model = load_fmu(Test_FMUModelCS1.rlc_circuit)
 
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
@@ -217,7 +201,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_simulation_no_state(self):
-        model = self.no_state3
+        model = load_fmu(Test_FMUModelCS1.no_state3)
 
         #Test CVode
         res = model.simulate(final_time=1.0)
@@ -231,7 +215,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_input_derivatives(self):
-        model = self.simple_input
+        model = load_fmu(Test_FMUModelCS1.simple_input)
 
         model.initialize()
 
@@ -250,7 +234,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_input_derivatives2(self):
-        model = self.simple_input2
+        model = load_fmu(Test_FMUModelCS1.simple_input2)
 
         model.initialize()
 
@@ -271,7 +255,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_input_derivatives3(self):
-        model = self.simple_input
+        model = load_fmu(Test_FMUModelCS1.simple_input)
 
         model.initialize()
         model.set_input_derivatives("u",1.0, 1)
@@ -284,7 +268,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_input_derivatives4(self):
-        model = self.simple_input
+        model = load_fmu(Test_FMUModelCS1.simple_input)
 
         model.initialize()
         model.set_input_derivatives("u",1.0, 1)
@@ -299,7 +283,7 @@ class Test_FMUModelCS1:
 
     @testattr(stddist = True)
     def test_zero_step_size(self):
-        model = self.input_discontinuity
+        model = load_fmu(Test_FMUModelCS1.input_discontinuity)
 
         model.initialize()
         model.do_step(0, 1)
@@ -313,25 +297,28 @@ class Test_FMUModelCS1:
         """
         This tests the (get)-property of version.
         """
-        assert self.rlc._get_version() == '1.0'
+        rlc = load_fmu(Test_FMUModelCS1.rlc_circuit)
+        assert rlc._get_version() == '1.0'
 
     @testattr(stddist = True)
     def test_valid_platforms(self):
         """
         This tests the (get)-property of types platform
         """
-        assert self.rlc._get_types_platform() == 'standard32'
+        rlc = load_fmu('RLC_Circuit.fmu')
+        assert rlc._get_types_platform() == 'standard32'
 
     @testattr(stddist = True)
     def test_simulation_with_reset_cs_2(self):
         """
         Tests a simulation with reset of an JModelica generated CS FMU (final_time = 30).
         """
-        res1 = self.rlc.simulate(final_time=30)
+        rlc = load_fmu(Test_FMUModelCS1.rlc_circuit)
+        res1 = rlc.simulate(final_time=30)
         resistor_v = res1['resistor.v']
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
-        self.rlc.reset()
-        res2 = self.rlc.simulate(final_time=30)
+        rlc.reset()
+        res2 = rlc.simulate(final_time=30)
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
 
@@ -341,12 +328,13 @@ class Test_FMUModelCS1:
         Tests a simulation with reset of an JModelica generated CS FMU
         with events.
         """
-        res1 = self.rlc_square.simulate()
+        rlc_square = load_fmu(Test_FMUModelCS1.rlc_circuit_square)
+        res1 = rlc_square.simulate()
         resistor_v = res1['resistor.v']
         print resistor_v[-1]
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
-        self.rlc_square.reset()
-        res2 = self.rlc_square.simulate()
+        rlc_square.reset()
+        res2 = rlc_square.simulate()
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
 
@@ -355,29 +343,29 @@ class Test_FMUModelCS1:
         """
         Tests a simulation using Euler.
         """
-        self.rlc_square.set("_cs_solver",1)
+        rlc_square = load_fmu(Test_FMUModelCS1.rlc_circuit_square)
+        rlc_square.set("_cs_solver",1)
 
-        res1 = self.rlc_square.simulate()
+        res1 = rlc_square.simulate()
         resistor_v = res1['resistor.v']
 
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
 
     @testattr(stddist = True)
     def test_unknown_solver(self):
-        self.rlc.set("_cs_solver",2) #Does not exists
+        rlc = load_fmu(Test_FMUModelCS1.rlc_circuit)
+        rlc.set("_cs_solver",2) #Does not exists
 
-        nose.tools.assert_raises(FMUException, self.rlc.simulate)
+        nose.tools.assert_raises(FMUException, rlc.simulate)
 
     @testattr(windows = True)
     def test_simulation_cs(self):
-
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         res = model.simulate(final_time=1.5)
         assert (res.final("J1.w") - 3.245091100366517) < 1e-4
 
     @testattr(windows = True)
     def test_simulation_with_reset_cs(self):
-
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         res1 = model.simulate(final_time=1.5)
         assert (res1["J1.w"][-1] - 3.245091100366517) < 1e-4
@@ -440,7 +428,7 @@ class Test_FMUModelCS1:
     def test_result_name_file(self):
 
         #rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
-        rlc = FMUModelCS1("RLC_Circuit.fmu")
+        rlc = FMUModelCS1(Test_FMUModelCS1.rlc_circuit)
 
         res = rlc.simulate()
 
@@ -466,20 +454,8 @@ class Test_FMUModelME1:
         """
         Sets up the test class.
         """
-        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
-        depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
-
-    def setUp(self):
-        """
-        Sets up the test case.
-        """
-        self.rlc  = load_fmu('RLC_Circuit.fmu')
-        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
-        self._dq = load_fmu('dq.fmu',path_to_fmus_me1)
-        self._bounce.initialize()
-        self._dq.initialize()
-        self.dep = load_fmu("DepParTests_DepPar1.fmu")
-        self.dep.initialize()
+        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
+        cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
     
     @testattr(stddist = True)
     def test_check_against_unneccesary_derivatives_eval(self):
@@ -511,7 +487,7 @@ class Test_FMUModelME1:
     
     @testattr(stddist = True)
     def test_custom_result_handler(self):
-        model = self.rlc
+        model = load_fmu(Test_FMUModelME1.rlc_circuit)
 
         class A:
             pass
@@ -531,7 +507,7 @@ class Test_FMUModelME1:
 
     @testattr(stddist = True)
     def test_filter(self):
-        model = self.rlc
+        model = load_fmu(Test_FMUModelME1.rlc_circuit)
 
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
@@ -580,10 +556,11 @@ class Test_FMUModelME1:
 
     @testattr(stddist = True)
     def test_get_variable_by_valueref(self):
-        assert "der(v)" == self._bounce.get_variable_by_valueref(3)
-        assert "v" == self._bounce.get_variable_by_valueref(2)
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        assert "der(v)" == bounce.get_variable_by_valueref(3)
+        assert "v" == bounce.get_variable_by_valueref(2)
 
-        nose.tools.assert_raises(FMUException, self._bounce.get_variable_by_valueref,7)
+        nose.tools.assert_raises(FMUException, bounce.get_variable_by_valueref,7)
 
     @testattr(stddist = True)
     def test_multiple_loadings_and_simulations(self):
@@ -605,40 +582,42 @@ class Test_FMUModelME1:
 
     @testattr(stddist = True)
     def test_model_types_platfrom(self):
-        assert self.dep.model_types_platform == "standard32"
+        dep = load_fmu(Test_FMUModelME1.depPar1)
+        assert dep.model_types_platform == "standard32"
 
     @testattr(stddist = True)
     def test_boolean(self):
         """
         This tests the functionality of setting/getting fmiBoolean.
         """
-
-        val = self.dep.get(["b1","b2"])
+        dep = load_fmu(Test_FMUModelME1.depPar1)
+        val = dep.get(["b1","b2"])
 
         assert val[0]
         assert not val[1]
 
-        assert self.dep.get("b1")
-        assert not self.dep.get("b2")
+        assert dep.get("b1")
+        assert not dep.get("b2")
 
-        self.dep.set("b1", False)
-        assert not self.dep.get("b1")
+        dep.set("b1", False)
+        assert not dep.get("b1")
 
-        self.dep.set(["b1","b2"],[True,True])
-        assert self.dep.get("b1")
-        assert self.dep.get("b2")
+        dep.set(["b1","b2"],[True,True])
+        assert dep.get("b1")
+        assert dep.get("b2")
 
     @testattr(stddist = True)
     def test_real(self):
         """
         This tests the functionality of setting/getting fmiReal.
         """
-        const = self._bounce.get_real([3,4])
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        const = bounce.get_real([3,4])
 
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
 
-        const = self._bounce.get(['der(v)','e'])
+        const = bounce.get(['der(v)','e'])
 
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
@@ -648,24 +627,24 @@ class Test_FMUModelME1:
         """
         This tests the functionality of setting/getting fmiInteger.
         """
-
-        val = self.dep.get(["N1","N2"])
+        dep = load_fmu(Test_FMUModelME1.depPar1)
+        val = dep.get(["N1","N2"])
 
         assert val[0] == 1
         assert val[1] == 1
 
-        assert self.dep.get("N1") == 1
-        assert self.dep.get("N2") == 1
+        assert dep.get("N1") == 1
+        assert dep.get("N2") == 1
 
-        self.dep.set("N1", 2)
-        assert self.dep.get("N1") == 2
+        dep.set("N1", 2)
+        assert dep.get("N1") == 2
 
-        self.dep.set(["N1","N2"],[3,2])
-        assert self.dep.get("N1") == 3
-        assert self.dep.get("N2") == 2
+        dep.set(["N1","N2"],[3,2])
+        assert dep.get("N1") == 3
+        assert dep.get("N2") == 2
 
-        self.dep.set("N1", 4.0)
-        assert self.dep.get("N1")==4
+        dep.set("N1", 4.0)
+        assert dep.get("N1")==4
 
     @testattr(stddist = True)
     def test_string(self):
@@ -680,15 +659,18 @@ class Test_FMUModelME1:
         """
         This tests the functionality of setting/getting time.
         """
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        bounce.initialize()
+        assert bounce.time == 0.0
+        
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        dq.initialize()
+        assert dq.time == 0.0
 
-        assert self._bounce.time == 0.0
-        assert self._dq.time == 0.0
+        bounce.time = 1.0
+        assert bounce.time == 1.0
 
-        self._bounce.time = 1.0
-
-        assert self._bounce.time == 1.0
-
-        nose.tools.assert_raises(TypeError, self._bounce._set_time, N.array([1.0,1.0]))
+        nose.tools.assert_raises(TypeError, bounce._set_time, N.array([1.0,1.0]))
 
 
     @testattr(stddist = True)
@@ -696,14 +678,18 @@ class Test_FMUModelME1:
         """
         This tests the property of the continuous_states.
         """
-        nose.tools.assert_raises(FMUException, self._bounce._set_continuous_states,N.array([1.]))
-        nose.tools.assert_raises(FMUException, self._dq._set_continuous_states,N.array([1.0,1.0]))
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        bounce.initialize()
+        
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        nose.tools.assert_raises(FMUException, bounce._set_continuous_states,N.array([1.]))
+        nose.tools.assert_raises(FMUException, dq._set_continuous_states,N.array([1.0,1.0]))
 
         temp = N.array([2.0,1.0])
-        self._bounce.continuous_states = temp
+        bounce.continuous_states = temp
 
-        nose.tools.assert_almost_equal(self._bounce.continuous_states[0],temp[0])
-        nose.tools.assert_almost_equal(self._bounce.continuous_states[1],temp[1])
+        nose.tools.assert_almost_equal(bounce.continuous_states[0],temp[0])
+        nose.tools.assert_almost_equal(bounce.continuous_states[1],temp[1])
 
 
     @testattr(stddist = True)
@@ -712,20 +698,25 @@ class Test_FMUModelME1:
         This tests the method get_derivative.
         """
         #Bounce
-        real_dx = self._bounce.get_derivatives()
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        bounce.initialize()
+        
+        real_dx = bounce.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], 0.00000000)
         nose.tools.assert_almost_equal(real_dx[1], -9.810000000)
 
-        self._bounce.continuous_states = N.array([2.,5.])
-        real_dx = self._bounce.get_derivatives()
+        bounce.continuous_states = N.array([2.,5.])
+        real_dx = bounce.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], 5.000000000)
         nose.tools.assert_almost_equal(real_dx[1], -9.810000000)
 
         #DQ
-        real_dx = self._dq.get_derivatives()
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        dq.initialize()
+        real_dx = dq.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], -1.0000000)
-        self._dq.continuous_states = N.array([5.])
-        real_dx = self._dq.get_derivatives()
+        dq.continuous_states = N.array([5.])
+        real_dx = dq.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], -5.0000000)
 
     @testattr(stddist = True)
@@ -733,12 +724,14 @@ class Test_FMUModelME1:
         """
         This tests the (get)-property of nominal_continuous_states.
         """
-        nominal = self._bounce.nominal_continuous_states
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        nominal = bounce.nominal_continuous_states
 
         assert nominal[0] == 1.0
         assert nominal[1] == 1.0
-
-        nominal = self._dq.nominal_continuous_states
+        
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        nominal = dq.nominal_continuous_states
 
         assert nominal[0] == 1.0
 
@@ -747,29 +740,35 @@ class Test_FMUModelME1:
         """
         This tests the (get)-property of version.
         """
-        assert self._bounce._get_version() == '1.0'
-        assert self._dq._get_version() == '1.0'
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        assert bounce._get_version() == '1.0'
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        assert dq._get_version() == '1.0'
 
     @testattr(stddist = True)
     def test_valid_platforms(self):
         """
         This tests the (get)-property of model_types_platform
         """
-        assert self._bounce.model_types_platform == 'standard32'
-        assert self._dq.model_types_platform == 'standard32'
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        assert bounce.model_types_platform == 'standard32'
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        assert dq.model_types_platform == 'standard32'
 
     @testattr(stddist = True)
     def test_get_tolerances(self):
         """
         This tests the method get_tolerances.
         """
-        [rtol,atol] = self._bounce.get_tolerances()
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        [rtol,atol] = bounce.get_tolerances()
 
         assert rtol == 0.0001
         nose.tools.assert_almost_equal(atol[0],0.0000010)
         nose.tools.assert_almost_equal(atol[1],0.0000010)
-
-        [rtol,atol] = self._dq.get_tolerances()
+        
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        [rtol,atol] = dq.get_tolerances()
 
         assert rtol == 0.0001
         nose.tools.assert_almost_equal(atol[0],0.0000010)
@@ -779,13 +778,17 @@ class Test_FMUModelME1:
         """
         This tests the method get_event_indicators.
         """
-        assert len(self._bounce.get_event_indicators()) == 1
-        assert len(self._dq.get_event_indicators()) == 0
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        bounce.initialize()
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        
+        assert len(bounce.get_event_indicators()) == 1
+        assert len(dq.get_event_indicators()) == 0
 
-        event_ind = self._bounce.get_event_indicators()
+        event_ind = bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],1.0000000000)
-        self._bounce.continuous_states = N.array([5.]*2)
-        event_ind = self._bounce.get_event_indicators()
+        bounce.continuous_states = N.array([5.]*2)
+        event_ind = bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],5.0000000000)
 
     @testattr(stddist = True)
@@ -793,19 +796,21 @@ class Test_FMUModelME1:
         """
         This tests the functionality of the method event_update.
         """
-        self._bounce.continuous_states = N.array([1.0,1.0])
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        bounce.initialize()
+        bounce.continuous_states = N.array([1.0,1.0])
 
-        self._bounce.event_update()
+        bounce.event_update()
 
-        nose.tools.assert_almost_equal(self._bounce.continuous_states[0],1.0000000000)
-        nose.tools.assert_almost_equal(self._bounce.continuous_states[1],-0.7000000000)
+        nose.tools.assert_almost_equal(bounce.continuous_states[0],1.0000000000)
+        nose.tools.assert_almost_equal(bounce.continuous_states[1],-0.7000000000)
 
-        self._bounce.event_update()
+        bounce.event_update()
 
-        nose.tools.assert_almost_equal(self._bounce.continuous_states[0],1.0000000000)
-        nose.tools.assert_almost_equal(self._bounce.continuous_states[1],0.49000000000)
+        nose.tools.assert_almost_equal(bounce.continuous_states[0],1.0000000000)
+        nose.tools.assert_almost_equal(bounce.continuous_states[1],0.49000000000)
 
-        eInfo = self._bounce.get_event_info()
+        eInfo = bounce.get_event_info()
 
         assert eInfo.nextEventTime == 0.0
         assert eInfo.upcomingTimeEvent == False
@@ -817,13 +822,14 @@ class Test_FMUModelME1:
         """
         This tests the functionality of the method get_state_value_references.
         """
-        ref = self._bounce.get_state_value_references()
-
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        
+        ref = bounce.get_state_value_references()
         assert ref[0] == 0
         assert ref[1] == 2
 
-        ref = self._dq.get_state_value_references()
-
+        ref = dq.get_state_value_references()
         assert ref[0] == 0
 
     @testattr(stddist = True)
@@ -831,11 +837,14 @@ class Test_FMUModelME1:
         """
         This tests the functionality of the method ode_get_sizes.
         """
-        [nCont,nEvent] = self._bounce.get_ode_sizes()
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        
+        [nCont,nEvent] = bounce.get_ode_sizes()
         assert nCont == 2
         assert nEvent == 1
 
-        [nCont,nEvent] = self._dq.get_ode_sizes()
+        [nCont,nEvent] = dq.get_ode_sizes()
         assert nCont == 1
         assert nEvent == 0
 
@@ -844,8 +853,11 @@ class Test_FMUModelME1:
         """
         This tests the functionality of the method get_name.
         """
-        assert self._bounce.get_name() == 'bouncingBall'
-        assert self._dq.get_name() == 'dq'
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        dq = load_fmu('dq.fmu',path_to_fmus_me1)
+        
+        assert bounce.get_name() == 'bouncingBall'
+        assert dq.get_name() == 'dq'
 
     @testattr(stddist = True)
     def test_get_fmi_options(self):
@@ -853,7 +865,8 @@ class Test_FMUModelME1:
         Test that simulate_options on an FMU returns the correct options
         class instance.
         """
-        assert isinstance(self._bounce.simulate_options(), ad.AssimuloFMIAlgOptions)
+        bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        assert isinstance(bounce.simulate_options(), ad.AssimuloFMIAlgOptions)
 
     @testattr(stddist = True)
     def test_instantiate_jmu(self):
@@ -873,16 +886,14 @@ class Test_FMI_Compile:
         """
         Sets up the test class.
         """
-        pass
+        fpath = os.path.join(path_to_mofiles,'RLC_Circuit.mo')
+        cls.fmuname = compile_fmu('RLC_Circuit',fpath)
 
     def setUp(self):
         """
         Sets up the test case.
         """
-        fpath = os.path.join(path_to_mofiles,'RLC_Circuit.mo')
-        fmuname = compile_fmu('RLC_Circuit',fpath)
-
-        self._model  = FMUModelME1(fmuname)
+        self._model  = FMUModelME1(Test_FMI_Compile.fmuname)
 
     @testattr(fmi = True)
     def test_get_version(self):
@@ -908,27 +919,26 @@ class TestDependentParameters(object):
     """
     Test that dependent variables are recomputed when an independent varaible is set.
     """
-
-    def __init__(self):
-        self._fpath = os.path.join(get_files_path(), 'Modelica', "DepPar.mo")
-        self._cpath = "DepPar.DepPar1"
-
-    def setUp(self):
+    
+    @classmethod
+    def setUpClass(cls):
         """
         Sets up the test class.
         """
-        self.fmu_name = compile_fmu(self._cpath, self._fpath)
-        self.model = FMUModelME1(self.fmu_name)
+        fpath = os.path.join(get_files_path(), 'Modelica', "DepPar.mo")
+        cpath = "DepPar.DepPar1"
+        cls.fmu_name = compile_fmu(cpath, fpath)
 
     @testattr(stddist = True)
     def test_parameter_eval(self):
        """
        Test that the parameters are evaluated correctly.
        """
-       self.model.set('p1',2.0)
+       model = FMUModelME1(TestDependentParameters.fmu_name)
+       model.set('p1',2.0)
 
-       p2 = self.model.get('p2')
-       p3 = self.model.get('p3')
+       p2 = model.get('p2')
+       p3 = model.get('p3')
 
        nose.tools.assert_almost_equal(p2,4)
        nose.tools.assert_almost_equal(p3,12)
@@ -943,14 +953,14 @@ class Test_Logger:
         """
         Sets up the test class.
         """
-        m =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='e',
+        cls.fmu =  compile_fmu('LoggerTest',os.path.join(path_to_mofiles,'LoggerTest.mo'),compiler_log_level='e',
                 compiler_options={'generate_only_initial_system':True})
 
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.m = load_fmu('LoggerTest.fmu')
+        self.m = load_fmu(Test_Logger.fmu)
         self.m.set_debug_logging(True)
         self.m.set('_log_level',6)
         self.m.set_log_level(5)
@@ -1036,20 +1046,19 @@ class Test_SetDependentParameterError:
         """
         Sets up the test class.
         """
-        m =  compile_fmu('DependentParameterTest2',os.path.join(path_to_mofiles,'DependentParameterTest.mo'))
+        cls.fmu =  compile_fmu('DependentParameterTest2',os.path.join(path_to_mofiles,'DependentParameterTest.mo'))
 
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.m = load_fmu('DependentParameterTest2.fmu')
+        self.m = load_fmu(Test_SetDependentParameterError.fmu)
 
     @testattr(stddist = True)
     def test_dependent_parameter_setting(self):
         """
         Test that expeptions are thrown when dependent parameters are set.
         """
-
         self.m.set('pri',3)
         nose.tools.assert_raises(FMUException,self.m.set, 'prd', 5)
         nose.tools.assert_raises(FMUException,self.m.set, 'cr', 5)
@@ -1113,13 +1122,13 @@ class Test_RaisesIfNonConverge:
         """
         Sets up the test class.
         """
-        m =  compile_fmu('InitTest1',os.path.join(path_to_mofiles,'InitTest.mo'))
+        cls.fmu =  compile_fmu('InitTest1',os.path.join(path_to_mofiles,'InitTest.mo'))
 
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.m = load_fmu('InitTest1.fmu')
+        self.m = load_fmu(Test_RaisesIfNonConverge.fmu)
 
     @testattr(stddist = True)
     def test_get_raises(self):

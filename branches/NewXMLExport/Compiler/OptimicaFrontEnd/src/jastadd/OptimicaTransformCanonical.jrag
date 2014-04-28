@@ -17,6 +17,9 @@
 aspect OptimicaTransformCanonical {
 	
 	public void FOptClass.transformCanonical() {
+        if (doneTransformCanonical)
+            return;
+        doneTransformCanonical = true;
     	beginStep("transformCanonical()");
 		
 		if (root().options.getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
@@ -212,6 +215,8 @@ aspect OptimicaTransformCanonical {
 	
 	public FExp FStartTimeExp.scalarize(Map<String,FExp> indexMap) { return new FStartTimeExp(); } 
 	public FExp FFinalTimeExp.scalarize(Map<String,FExp> indexMap) { return new FFinalTimeExp(); } 
+	
+	eq FOptClass.indexReductionErrorsAsWarnings() = true;
 	
 }
 

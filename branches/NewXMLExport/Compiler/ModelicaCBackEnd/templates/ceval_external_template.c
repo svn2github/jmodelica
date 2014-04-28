@@ -16,72 +16,105 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "jmi.h"
+#include "ModelicaUtilities.h"
 
 $ECE_external_includes$
  
-#define DEBUG 0
-#define DBGP(x) if (DEBUG) { printf(x); fflush(stdout);}
+/* Manual debugging */
+#define JMCEVAL_DEBUG 0
+#define JMCEVAL_DBGP(x) if (JMCEVAL_DEBUG) { printf(x); fflush(stdout);}
 
 /* Format specifier when printing jmi_ad_var_t */
-#define jmi_real_format "%.16f"
-
-/* Char buffer when reading jmi_ad_var_t. This is necessary
-   since "%lf" is not allowed in c89. */
-char buff[32];
+#define JMCEVAL_realFormat "%.16f"
 
 /* Used record definitions */
 $ECE_record_definitions$
 
-/* Dimensions */
-int parseArrayDims(int nd, size_t* d)
-{
-    int i;
-    int ne = 1;
-    for (i = 0; i < nd; i++) {
-        scanf("%d",&d[i]);
-        ne = ne * d[i];
-    }
-    return ne;
-}
- 
-/* Basic types */
-#define parseReal(X) \
-    DBGP("Parse number: "); \
-    scanf("%s",buff); \
-    X = strtod(buff, 0); \
+/* Parses ND dimensions into dimension buffer d*/
+#define JMCEVAL_parseArrayDims(ND) \
+    for (di = 0; di < ND; di++) { scanf("%d",&d[di]); }
 
-#define printReal(X) \
-    printf(jmi_real_format, X); \
+/* Parse/print basic types */
+double JMCEVAL_parseReal() {
+    /* Char buffer when reading jmi_ad_var_t. This is necessary
+       since "%lf" is not allowed in c89. */
+    char buff[32];
+    JMCEVAL_DBGP("Parse number: "); 
+    scanf("%s",buff);
+    return strtod(buff, 0);
+}
+
+void JMCEVAL_printReal(double x) {
+    printf(JMCEVAL_realFormat, x); \
     printf("\n"); \
     fflush(stdout); \
-    
-#define parseString(STR) \
-    parseArrayDims(1,&d); \
-    str = malloc(sizeof(char)*(d[0]+1)); \
-    DBGP("Parse string: "); \
-    for (i = 0; i < d[0]; i++) str[i] = getchar(); \
+}
+
+char* JMCEVAL_parseString() {
+    int d[1];
+    char* str;
+    size_t si,di;
+    JMCEVAL_parseArrayDims(1);
+    getchar();
+    str = ModelicaAllocateString(d[0]);
+    JMCEVAL_DBGP("Parse string: ");
+    for (si = 0; si < d[0]; si++) str[si] = getchar();
     str[d[0]] = '\0';
-    
-#define printString(STR) \
-    printf("%d %s\n", strlen(*str), str); \
-    fflush(stdout); \
+    return str;
+}
 
-#define parseInteger(X) parseReal(X)
-#define parseBoolean(X) parseReal(X)
-#define printInteger(X) printReal(X)
-#define printBoolean(X) printReal(X)
-#define parse(TYPE, X) parse##TYPE(X)
-#define print(TYPE, X) print##TYPE(X)
+void JMCEVAL_printString(const char* str) {
+    printf("%d\n%s\n", strlen(str), str);
+    fflush(stdout);
+}
 
-/* Arrays */
-#define parseArray(TYPE,ARR) for (i = 1; i <= ARR->num_elems; i++) { parse##TYPE(jmi_array_ref_1(ARR,i)); }
-#define printArray(TYPE,ARR) for (i = 1; i <= ARR->num_elems; i++) { print##TYPE(jmi_array_val_1(ARR,i)); }
+#define JMCEVAL_parseInteger()  JMCEVAL_parseReal()
+#define JMCEVAL_parseBoolean()  JMCEVAL_parseInteger()
+#define JMCEVAL_parseEnum()     JMCEVAL_parseInteger()
+#define JMCEVAL_printInteger(X) JMCEVAL_printReal(X)
+#define JMCEVAL_printBoolean(X) JMCEVAL_printInteger(X)
+#define JMCEVAL_printEnum(X)    JMCEVAL_printInteger(X)
+#define JMCEVAL_parse(TYPE, X)  X = JMCEVAL_parse##TYPE()
+#define JMCEVAL_print(TYPE, X)  JMCEVAL_print##TYPE(X)
+#define JMCEVAL_free(X)         free(X)
 
-/* Parse, run, print */
+/* Parse/print arrays */
+#define JMCEVAL_parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_parse(TYPE, jmi_array_ref_1(ARR,vi)); }
+#define JMCEVAL_printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_print(TYPE, jmi_array_val_1(ARR,vi)); }
+#define JMCEVAL_freeArray(ARR)       for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_free(jmi_array_val_1(ARR,vi)); }
+
+/* Used by ModelicaUtilities */
+void jmi_global_log(int warning, const char* name, const char* fmt, const char* value)
+{
+    printf("LOG\n");
+    JMCEVAL_printInteger((double)warning);
+    JMCEVAL_printString(name);
+    JMCEVAL_printString(fmt);
+    JMCEVAL_printString(value);
+}
+
+void* jmi_global_calloc(size_t n, size_t s)
+{
+    return calloc(n, s);
+}
+
+void jmi_throw()
+{
+    exit(1);
+}
+
+
+/* Main */
 int main(int argc, const char* argv[])
 {
-    size_t i;
+    /* Size buffer for reading array dimensions */
+    int d[25];
+    
+    /* Indices for parsing/printing vars, dimensions */
+    size_t vi,di;
+    
     JMI_DYNAMIC_INIT()
     
     $ECE_main$

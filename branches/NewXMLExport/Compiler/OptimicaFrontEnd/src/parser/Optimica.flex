@@ -14,13 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 package $PARSER_PACKAGE$;
 
-import org.jmodelica.util.AbstractModelicaScanner;
-import beaver.Scanner;
-import beaver.Symbol;
 import $PARSER_PACKAGE$.OptimicaParser.Terminals;
+import org.jmodelica.util.AbstractModelicaScanner;
+import org.jmodelica.util.formattedPrint.FormattingItem;
+import beaver.Scanner;
+
 
 %%
 
@@ -29,58 +29,105 @@ import $PARSER_PACKAGE$.OptimicaParser.Terminals;
 %class OptimicaScanner
 %extends AbstractModelicaScanner
 %unicode
-%function nextTokenAll
+%function nextTokenInner
 %type Symbol
 %yylexthrow Scanner.Exception
-%eofval{
-  return newSymbol(Terminals.EOF);
-%eofval}
+/* From JFlex manual: "<<EOF>> rules [...] should not be mixed with the %eofval directive." */
+//%eofval{
+//  return newSymbol(Terminals.EOF);
+//%eofval}
 %line
 %column
 %char
 
 %{
+  /**
+   * Subclass of Symbol that carries extra information. 
+   * Used to give error reporting class for parser access to offset & length 
+   * of tokens. Start, end, offset and length are extracted from scanner variables
+   * in constructors.
+   */
+  public class Symbol extends beaver.Symbol {
+  
+    private int offset;
+    private int length;
+    
+    public Symbol(short id) {
+      this(id, yytext());
+    }
+    
+    public Symbol(short id, Object value) {
+      super(id, yyline + 1, yycolumn + 1, yylength(), value);
+      offset = yychar;
+      length = yylength();
+    }
+    
+    public int getOffset() {
+      return offset;
+    }
+    
+    public int getEndOffset() {
+      return offset + length - 1;
+    }
+    
+    public int getLength() {
+      return length;
+    }
+    
+  }
+  
+  /**
+   * Subclass of Scanner.Exception that carries extra information. 
+   * Used to give error reporting class for parser access to offset of error. 
+   * Offset is extracted from scanner variables in constructors.
+   */
+  public class Exception extends Scanner.Exception {
+    
+    public final int offset;
+    
+    public Exception(String msg) {
+      this(yyline + 1, yycolumn + 1, msg);
+    }
+    
+    public Exception(int line, int column, String msg) {
+      super(line, column, msg);
+      offset = yychar;
+    }
+    
+  }
+
   private Symbol newSymbol(short id) {
-    return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), yytext());
+    return new Symbol(id);
   }
 
   private Symbol newSymbol(short id, Object value) {
-    return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), value);
+    return new Symbol(id, value);
   }
-  
-  
-//  public int offset() {
-//   return yychar;
-//  }
   
   public void reset(java.io.Reader reader) {
     yyreset(reader);
-  }
-  
-  public static final short COMMENT = -1;
-  public static final short WHITESPACE = -2;
-  public static final int EXTRA_TOKENS = 2;
-  
-  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
-    Symbol res;
-    do {
-      res = nextTokenAll();
-    } while (res.getId() < 0);
-    return res;
+    resetFormatting();
   }
 
   protected int matchLine()   { return yyline; }
   protected int matchColumn() { return yycolumn; }
   protected int matchOffset() { return yychar; }
   protected int matchLength() { return yylength(); }
-
+  
+  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
+    Symbol res = null;
+    while (res == null)
+      res = nextTokenInner();
+    return res;
+  }
+  
 %}
+
 
 ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
 NONDIGIT = [a-zA-Z_]
 S_CHAR = [^\"\\]
 Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
-//Q_IDENT = "\'" ( {DIGIT}|{NONDIGIT} ) ( {DIGIT}|{NONDIGIT} )* "\'"
 STRING = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
 Q_CHAR = [^\'\\]
 S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
@@ -122,13 +169,16 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "package"       { return newSymbol(Terminals.PACKAGE); }
   "function"      { return newSymbol(Terminals.FUNCTION); }
   "record"        { return newSymbol(Terminals.RECORD); }
+  "operator"      { return newSymbol(Terminals.OPERATOR); }
   
   "end"           { return newSymbol(Terminals.END); }
   "external"      { return newSymbol(Terminals.EXTERNAL); }
   
   
-  "public"        { return newSymbol(Terminals.PUBLIC); }
-  "protected"     { return newSymbol(Terminals.PROTECTED); }
+  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
+	  				return newSymbol(Terminals.PUBLIC); }
+  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
+	  				return newSymbol(Terminals.PROTECTED); }
   
   "extends"       { return newSymbol(Terminals.EXTENDS); }
   "constrainedby" { return newSymbol(Terminals.CONSTRAINEDBY); }
@@ -145,31 +195,36 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "equation"      { return newSymbol(Terminals.EQUATION); }
   "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
 
-  "initial" {WhiteSpace} "equation"    { addLineBreaks(yytext()); 
-  										 return newSymbol(Terminals.INITIAL_EQUATION); }  
-  "initial" {WhiteSpace} "algorithm"   { addLineBreaks(yytext()); 
-  										 return newSymbol(Terminals.INITIAL_ALGORITHM); }
-  "operator" {WhiteSpace} "record"     { addWhiteSpaces(yytext());
-  										 addLineBreaks(yytext());
-                                         return newSymbol(Terminals.RECORD); }
-  "operator" {WhiteSpace} "function"   { addWhiteSpaces(yytext());
-  										 addLineBreaks(yytext()); 
-                                         return newSymbol(Terminals.FUNCTION); }
-  									
+  "initial" {WhiteSpace} "equation"   { addWhiteSpaces(yytext()); 
+	  									addLineBreaks(yytext()); 
+  	                                    return newSymbol(Terminals.INITIAL_EQUATION); }
+  "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
+  										addLineBreaks(yytext()); 
+                                        return newSymbol(Terminals.INITIAL_ALGORITHM); }
 
-  "end" {WhiteSpace} "for"    { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "for"    { String s = yytext();
+                                addWhiteSpaces(s);
+	  							addLineBreaks(s); 
                                 return newSymbol(Terminals.END_FOR); }
-  "end" {WhiteSpace} "while"  { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "while"  { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_WHILE); }
-  "end" {WhiteSpace} "if"     { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "if"     { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_IF); }
-  "end" {WhiteSpace} "when"   { addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "when"   { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_WHEN); }
   "end" {WhiteSpace} {ID}     { String s = yytext();
-  			                    return newSymbol(Terminals.END_ID, s); }  										 
-  					
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
+                                return newSymbol(Terminals.END_ID, s); }
+ 
   "enumeration"     { return newSymbol(Terminals.ENUMERATION); }
-  										 
+ 
   "each"          { return newSymbol(Terminals.EACH); }
   "final"         { return newSymbol(Terminals.FINAL); }   
   "replaceable"   { return newSymbol(Terminals.REPLACEABLE); }
@@ -214,25 +269,26 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ")"             { return newSymbol(Terminals.RPAREN); }
   "{"             { return newSymbol(Terminals.LBRACE); }
   "}"             { return newSymbol(Terminals.RBRACE); }
-  "["             { return newSymbol(Terminals.LBRACK); }	
-  "]"             { return newSymbol(Terminals.RBRACK); }	
+  "["             { return newSymbol(Terminals.LBRACK); }
+  "]"             { return newSymbol(Terminals.RBRACK); }
   ";"             { return newSymbol(Terminals.SEMICOLON); }
   ":"             { return newSymbol(Terminals.COLON); }
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
-  ".+"            { return newSymbol(Terminals.DOTPLUS); }  
-  ".-"            { return newSymbol(Terminals.DOTMINUS); }
-  ".*"            { return newSymbol(Terminals.DOTMULT); }
-  "./"            { return newSymbol(Terminals.DOTDIV); }
-  ".^"            { return newSymbol(Terminals.DOTPOW); }
 
-  "+"             { return newSymbol(Terminals.PLUS); }  
+  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
+                    return newSymbol(Terminals.PLUS); }  
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
   "/"             { return newSymbol(Terminals.DIV); }
   "="             { return newSymbol(Terminals.EQUALS); }
   ":="            { return newSymbol(Terminals.ASSIGN); }
   "^"             { return newSymbol(Terminals.POW); }
+  ".+"            { return newSymbol(Terminals.DOTPLUS); }  
+  ".-"            { return newSymbol(Terminals.DOTMINUS); }
+  ".*"            { return newSymbol(Terminals.DOTMULT); }
+  "./"            { return newSymbol(Terminals.DOTDIV); }
+  ".^"            { return newSymbol(Terminals.DOTPOW); }
 
   "<"             { return newSymbol(Terminals.LT); }  
   "<="            { return newSymbol(Terminals.LEQ); }
@@ -241,24 +297,32 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "=="            { return newSymbol(Terminals.EQ); }
   "<>"            { return newSymbol(Terminals.NEQ); }
   
-  {STRING}  {  String s = yytext();
-               addLineBreaks(s);
-               s = s.substring(1,s.length()-1);
-               return newSymbol(Terminals.STRING,s); }
+  {STRING}  { String s = yytext();
+              addLineBreaks(s);
+              s = s.substring(1,s.length()-1);
+              return newSymbol(Terminals.STRING,s); }
   {ID}      { String s = yytext();
   			  addLineBreaks(s);
   			  return newSymbol(Terminals.ID, s); }
+  			  
+  {UNSIGNED_INTEGER}       { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
+  {UNSIGNED_NUMBER}        { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {UNSIGNED_INTEGER}  { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
-  {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
-  
-  {Comment}                { addLineBreaks(yytext()); }
-  {NonBreakingWhiteSpace}  { }
-  {LineTerminator} 		   { addLineBreak(); }
+  {Comment}                { int numberOfLineBreaks = addLineBreaks(yytext());
+  							 if (yytext().charAt(1) == '/') {
+  								 numberOfLineBreaks = 0;
+  							 }
+                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); 
+                             return null; }
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); 
+                             return null; }
+  {LineTerminator} 		   { addLineBreak();
+                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); 
+                             return null; }
+                             
   .|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }
 }
 
 <<EOF>>             { return newSymbol(Terminals.EOF); }
-
 
 

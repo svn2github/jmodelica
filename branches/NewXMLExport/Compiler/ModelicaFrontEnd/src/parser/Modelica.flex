@@ -97,7 +97,6 @@ import beaver.Scanner;
   }
 
   private Symbol newSymbol(short id) {
-    //System.out.println(id);
     return new Symbol(id);
   }
 
@@ -186,7 +185,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
   "flow"          { return newSymbol(Terminals.FLOW); }
   "stream"        { return newSymbol(Terminals.STREAM); }
-  
+
   "discrete"      { return newSymbol(Terminals.DISCRETE); }
   "parameter"     { return newSymbol(Terminals.PARAMETER); }
   "constant"      { return newSymbol(Terminals.CONSTANT); }
@@ -195,20 +194,14 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   "equation"      { return newSymbol(Terminals.EQUATION); }
   "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
-  
+
   "initial" {WhiteSpace} "equation"   { addWhiteSpaces(yytext()); 
 	  									addLineBreaks(yytext()); 
   	                                    return newSymbol(Terminals.INITIAL_EQUATION); }
   "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
   										addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
-//  "operator" {WhiteSpace} "record"  { addWhiteSpaces(yytext());
-//  										addLineBreaks(yytext());
-//                                        return newSymbol(Terminals.OPERATOR_RECORD); }
-//  "operator" {WhiteSpace} "function"  { addWhiteSpaces(yytext());
-//  										addLineBreaks(yytext()); 
-//                                        return newSymbol(Terminals.OPERATOR_FUNCTION); }
-                                        
+
   "end" {WhiteSpace} "for"    { String s = yytext();
                                 addWhiteSpaces(s);
 	  							addLineBreaks(s); 
@@ -262,7 +255,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
   "when"          { return newSymbol(Terminals.WHEN); }
   "elsewhen"      { return newSymbol(Terminals.ELSEWHEN); }
-	
+
   "break"         { return newSymbol(Terminals.BREAK); }
   "return"        { return newSymbol(Terminals.RETURN); }
  
@@ -270,7 +263,6 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "time"          { return newSymbol(Terminals.TIME); }
   "der"           { return newSymbol(Terminals.DER); }
  
-  
   
   "("             { return newSymbol(Terminals.LPAREN); }
   ")"             { return newSymbol(Terminals.RPAREN); }
@@ -282,7 +274,6 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ":"             { return newSymbol(Terminals.COLON); }
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
-
 
   "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
                     return newSymbol(Terminals.PLUS); }  

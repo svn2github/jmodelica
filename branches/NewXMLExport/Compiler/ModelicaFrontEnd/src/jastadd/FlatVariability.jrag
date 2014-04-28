@@ -20,16 +20,18 @@ import java.util.Collections;
 
 aspect FlatVariability {
 	
-	syn boolean FTypePrefixVariability.constantVariability() = false;
-	eq FConstant.constantVariability() = true;	
+    syn boolean FTypePrefixVariability.constantVariability() = false;
+    eq FConstant.constantVariability() = true;	
+    syn boolean FTypePrefixVariability.evalParameterVariability() = false;
+    eq FEvalParameter.evalParameterVariability() = true;
     syn boolean FTypePrefixVariability.structParameterVariability() = false;
     eq FStructParameter.structParameterVariability() = true;
-	syn boolean FTypePrefixVariability.parameterVariability() = false;
-	eq FParameter.parameterVariability() = true;	
-	syn boolean FTypePrefixVariability.discreteVariability() = false;
-	eq FDiscrete.discreteVariability() = true;	
-	syn boolean FTypePrefixVariability.continuousVariability() = false;
-	eq FContinuous.continuousVariability() = true;	
+    syn boolean FTypePrefixVariability.parameterVariability() = false;
+    eq FParameter.parameterVariability() = true;	
+    syn boolean FTypePrefixVariability.discreteVariability() = false;
+    eq FDiscrete.discreteVariability() = true;	
+    syn boolean FTypePrefixVariability.continuousVariability() = false;
+    eq FContinuous.continuousVariability() = true;	
 
 	syn boolean TypePrefixVariability.constantVariability() = false;
 	eq Constant.constantVariability() = true;	
@@ -39,47 +41,50 @@ aspect FlatVariability {
 	eq Discrete.discreteVariability() = true;	
 	syn boolean TypePrefixVariability.continuousVariability() = false;
 	eq Continuous.continuousVariability() = true;
-	
-	
+
+
     syn int FTypePrefixVariability.compareTo(FTypePrefixVariability other)
         = variabilityLevel() - other.variabilityLevel();
     syn boolean FTypePrefixVariability.equals(FTypePrefixVariability other)
         = compareTo(other) == 0;
-	
-	/**
-	 * \brief Test if variability is at most the same as <code>other</code>.
-	 * 
-	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
-	 */
+
+    /**
+     * \brief Test if variability is at most the same as <code>other</code>.
+     * 
+     * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
+     */
     syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
             compareTo(other) <= 0;
 	
-	syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
-	syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
-	syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
-	syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
-	
-	/**
-	 * \brief An ordering of the variability types.
-	 * 
-	 * To be used by methods for comparing variabilities. 
-	 * Should <em>never</em> be compared to literals, only to the return value from other 
-	 * FTypePrefixVariability objects. This simplifies adding new variabilities.
-	 *  
-	 * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
-	 */
-	abstract protected int FTypePrefixVariability.variabilityLevel();
-	protected int FConstant.variabilityLevel()        { return VARIABILITY_LEVEL; }
-	protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
-	protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
-	protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
-	protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
-	protected static final int FConstant.VARIABILITY_LEVEL        = 0;
-	protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
-	protected static final int FParameter.VARIABILITY_LEVEL       = 10;
-	protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
-	protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
-	
+    syn boolean FTypePrefixVariability.evalOrLess()       = lessOrEqual(fEvalParameter());
+    syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
+    syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
+    syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
+    syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
+
+    /**
+     * \brief An ordering of the variability types.
+     * 
+     * To be used by methods for comparing variabilities. 
+     * Should <em>never</em> be compared to literals, only to the return value from other 
+     * FTypePrefixVariability objects. This simplifies adding new variabilities.
+     *  
+     * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
+     */
+    abstract protected int FTypePrefixVariability.variabilityLevel();
+    protected int FConstant.variabilityLevel()        { return VARIABILITY_LEVEL; }
+    protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
+    protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
+    protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
+    protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
+    protected static final int FConstant.VARIABILITY_LEVEL        = 0;
+    protected static final int FEvalParameter.VARIABILITY_LEVEL   = 2;
+    protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
+    protected static final int FParameter.VARIABILITY_LEVEL       = 10;
+    protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
+    protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
+
 	/**
 	 * \brief An ordering of the variability types.
 	 * 
@@ -208,15 +213,20 @@ aspect FlatVariability {
             if (circularVariability)
                 return v;
             circularVariability = true;
-            if (isStructuralParam || (annotation().forPath("Evaluate").bool() && canEvaluateAsStructural()))
+            if (annotation().forPath("Evaluate").bool() && canEvaluateAsStructural()) {
+                v = fEvalParameter();
+            } else if (isStructuralParam) {
                 v = fStructParameter();
-            else if (hasBindingFExp() && getBindingFExp().variability().structParameterVariability())
-                v = fStructParameter();
+            } else if (hasBindingFExp()) {
+                FTypePrefixVariability expVariability = getBindingFExp().variability();
+                if (expVariability.structParameterVariability() || expVariability.evalParameterVariability())
+                    v = fStructParameter();
+            }
             circularVariability = false;
         }
         return v;
     }
-	
+
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
 	eq InstEnumLiteral.variability() = fConstant();
 	
@@ -231,17 +241,17 @@ aspect FlatVariability {
 	}
 	eq InstRecord.defaultVariability() {
 		InstComponentDecl rec = this;
-		if (isArray()) {
-			if (getNumInstComponentDecl() == 0)
-				return fConstant();
-			rec = getInstComponentDecl(0);
+		for (int i = 0; i < ndims(); i++) {
+			if (rec.getNumInstComponentDecl() == 0)
+				return fContinuous();
+			rec = rec.getInstComponentDecl(0);
 		}
 		FTypePrefixVariability var = fConstant();
 		for (InstComponentDecl icd : rec.allInstComponentDecls()) 
 			var = var.combine(icd.variability());
 		return var;
 	}
-	
+
 	syn FTypePrefixVariability FType.funcOutputVariability() = fDiscrete();
 	eq FRealType.funcOutputVariability() = fContinuous();
 	eq FRecordType.funcOutputVariability() {
@@ -488,14 +498,15 @@ aspect FlatVariability {
 		return total;
 	}
 
-	eq InstFunctionCall.expVariability() {
-		FTypePrefixVariability total = fConstant();
-		for (InstFunctionArgument arg : getArgs()) 
-			total = total.combine(arg.getFExp().variability());
-		return total;
-	}
-	
-	  
+    eq InstFunctionCall.expVariability() {
+        FTypePrefixVariability total = fConstant();
+        for (InstFunctionArgument arg : getArgs()) 
+            if (arg.isOKArg())
+                total = total.combine(arg.getFExp().variability());
+        return total;
+    }
+
+
 	// TODO: Maybe there should be a special variability for "no return value"
 	eq FConnectionsOp.expVariability() = null;
 	eq FConnBoolOp.expVariability()    = fConstant();
@@ -542,6 +553,7 @@ aspect FlatVariability {
 	
 	eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
 	eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
+	eq FLoadResource.expVariability() = fParameter();
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();
@@ -583,52 +595,57 @@ aspect FlatVariability {
 }
 
 aspect VariabilitySingletons {
-	
-	public static final Continuous Continuous.instance = new Continuous();	
-	public static final Discrete   Discrete.instance   = new Discrete();	
-	public static final Parameter  Parameter.instance  = new Parameter();
-	public static final Constant   Constant.instance   = new Constant();	
-	
-	public static final FContinuous      FContinuous.instance      = new FContinuous();	
-	public static final FDiscrete        FDiscrete.instance        = new FDiscrete();	
-	public static final FParameter       FParameter.instance       = new FParameter();
-	public static final FStructParameter FStructParameter.instance = new FStructParameter();
-	public static final FConstant        FConstant.instance        = new FConstant();	
-	
-	public static Continuous ASTNode.continuous() {
-		return Continuous.instance;
-	}
 
-	public static Discrete ASTNode.discrete() {
-		return Discrete.instance;
-	}	
+    public static final Continuous Continuous.instance = new Continuous();
+    public static final Discrete   Discrete.instance   = new Discrete();
+    public static final Parameter  Parameter.instance  = new Parameter();
+    public static final Constant   Constant.instance   = new Constant();
 
-	public static Parameter ASTNode.parameter() {
-		return Parameter.instance;
-	}
-	
-	public static Constant ASTNode.constant() {
-		return Constant.instance;
-	}
-	
-	public static FContinuous ASTNode.fContinuous() {
-		return FContinuous.instance;
-	}
+    public static final FContinuous      FContinuous.instance      = new FContinuous();
+    public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
+    public static final FParameter       FParameter.instance       = new FParameter();
+    public static final FStructParameter FStructParameter.instance = new FStructParameter();
+    public static final FEvalParameter   FEvalParameter.instance   = new FEvalParameter();
+    public static final FConstant        FConstant.instance        = new FConstant();
 
-	public static FDiscrete ASTNode.fDiscrete() {
-		return FDiscrete.instance;
-	}	
+    public static Continuous ASTNode.continuous() {
+        return Continuous.instance;
+    }
 
-	public static FParameter ASTNode.fParameter() {
-		return FParameter.instance;
-	}
+    public static Discrete ASTNode.discrete() {
+        return Discrete.instance;
+    }
 
-	public static FStructParameter ASTNode.fStructParameter() {
-		return FStructParameter.instance;
-	}
-	
-	public static FConstant ASTNode.fConstant() {
-		return FConstant.instance;
-	}
+    public static Parameter ASTNode.parameter() {
+        return Parameter.instance;
+    }
+
+    public static Constant ASTNode.constant() {
+        return Constant.instance;
+    }
+
+    public static FContinuous ASTNode.fContinuous() {
+        return FContinuous.instance;
+    }
+
+    public static FDiscrete ASTNode.fDiscrete() {
+        return FDiscrete.instance;
+    }
+
+    public static FParameter ASTNode.fParameter() {
+        return FParameter.instance;
+    }
+
+    public static FStructParameter ASTNode.fStructParameter() {
+        return FStructParameter.instance;
+    }
+
+    public static FEvalParameter ASTNode.fEvalParameter() {
+        return FEvalParameter.instance;
+    }
+
+    public static FConstant ASTNode.fConstant() {
+        return FConstant.instance;
+    }
 }
 

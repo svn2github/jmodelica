@@ -18,14 +18,29 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect ContentCheck {
 
-	/**
-	 * \brief Check for code that is not allowed in its current context.
-	 * 
-	 * Examples would be checking that classes follow the requirements of 
-	 * their restriction. 
-	 */
-	public void ASTNode.contentCheck(ErrorCheckType checkType) {}
-	
+    /**
+     * \brief Check for code that is not allowed in its current context.
+     * 
+     * Examples would be checking that classes follow the requirements of 
+     * their restriction. 
+     */
+    public void ASTNode.contentCheck(ErrorCheckType checkType) {}
+
+    public abstract class ErrorChecker {
+        public static class ContentChecker extends ErrorChecker {
+            public ContentChecker() {
+                super("ContentCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.contentCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.CONTENT_CHECKER = addErrorChecker(new ErrorChecker.ContentChecker());
+
 	public void FAbstractEquation.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) 
 			error("Equations are not allowed in functions");
@@ -242,7 +257,7 @@ aspect ContentCheck {
 	}
     
     public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
-        if (getName().hasFArraySubscripts())
+        if (getName().hasFArraySubscripts() && !getName().getFArraySubscripts().isFullSize())
             error("Modifiers of specific array elements are not allowed");
     }
     
@@ -276,14 +291,14 @@ aspect ContentCheck {
 	}
 	
 	syn boolean FIfWhenElseEquation.isBalancedEquations() = true; 
-	eq FIfEquation.isBalancedEquations() = hasElse() && elseIsBalancedEquations();
+	eq FIfEquation.isBalancedEquations() = hasElse() ? elseIsBalancedEquations() : numScalarEquations() == 0;
 	
 	syn boolean FIfWhenEquation.elseIsBalancedEquations() = 
 		numScalarEquations() == getElse().numScalarEquations() && 
 		getElse().isBalancedEquations();
 	
 	syn boolean FIfWhenElseEquation.isBalancedAssignments() = true; 
-	eq FIfEquation.isBalancedAssignments()   = hasElse() && elseIsBalancedAssignments();
+	eq FIfEquation.isBalancedAssignments()   = hasElse() ? elseIsBalancedAssignments() : numScalarEquations() == 0;
 	eq FWhenEquation.isBalancedAssignments() = !hasElse() || elseIsBalancedAssignments();
 	
 	syn boolean FIfWhenEquation.elseIsBalancedAssignments() = 
@@ -339,16 +354,7 @@ aspect ContentCheck {
 		if (!myInstClassDecl().isOkPackage())
 			error("Packages may only contain classes and constants");
 	}
-	
-	/**
-	 * Check that the restriction of this class is fulfilled.
-	 */
-	public void InstClassDecl.checkRestriction(ErrorCheckType checkType) {}
-	
-	public void InstBaseClassDecl.checkRestriction(ErrorCheckType checkType) {
-		getInstRestriction().contentCheck(checkType);
-	}
-	
+
 	/**
 	 * Get the class this restriction is attached to.
 	 */

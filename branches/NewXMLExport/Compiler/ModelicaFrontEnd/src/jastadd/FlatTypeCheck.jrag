@@ -20,9 +20,24 @@ import org.jmodelica.util.Criteria;
 import org.jmodelica.util.ErrorCheckType;
 
 aspect FlatTypeCheck {
-	
+
     public void ASTNode.typeCheck(ErrorCheckType checkType) {}
-    
+
+    public abstract class ErrorChecker {
+        public static class TypeChecker extends ErrorChecker {
+            public TypeChecker() {
+                super("TypeCheck");
+            }
+
+            @Override
+            public void check(ASTNode node, ErrorCheckType checkType) {
+                node.typeCheck(checkType);
+            }
+        }
+    }
+
+    private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
+
     public void InstNode.typeCheck(ErrorCheckType checkType) {
         typeCheckSystemResiduals(checkType);
     }
@@ -164,34 +179,34 @@ aspect FlatTypeCheck {
     public void InstModification.typeCheckAttribute(InstNode owner) {}
 
     public void InstComponentModification.typeCheckAttribute(InstNode owner) {
-    	if (hasInstModification() && getInstModification().hasInstValueMod()) {
-			FExp val_mod = getInstModification().instValueMod();
-			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
-				FType attr_type = owner.attributeType(this);
-				boolean checkSize = !owner.isInRedeclareMod();
-				if (!type().typeCompatible(val_mod.type().scalarType())) {
-					error("The type of the binding expression of the attribute " + name() +
-					  " does not match the declared type of the variable");
-				} else if (checkSize) {
-				    if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
-    					if (val_mod.ndims() == 0) {
-    						warning("Assuming 'each' for the attribute " + name());
-    					} else {
-    						error("Array size mismatch for the attribute " + name() +
-    								", size of declaration is " + attr_type.size() + 
-    								" and size of " + name() + " expression is " + val_mod.size());
-    					}
-    				} else if (getEach()) { 
-    					if (owner.ndims() == 0) {
-    						error("The 'each' keyword cannot be applied to attributes of scalar components");
-    					} else if (val_mod.ndims() > 0) {
-    						error("The attribute " + name() + 
-    								" is declared 'each' and the binding expression is not scalar");
-    					}
-    				}
-				}
-			}
-    	}
+        if (hasInstModification() && getInstModification().hasInstValueMod()) {
+            FExp valMod = getInstModification().instValueMod();
+            if (!type().isUnknown() && !valMod.type().isUnknown()) {
+                Size attrSize = owner.attributeSize(this);
+                boolean checkSize = !owner.isInRedeclareMod();
+                if (!type().typeCompatible(valMod.type().scalarType())) {
+                    error("The type of the binding expression of the attribute " + name() +
+                            " does not match the declared type of the variable");
+                } else if (checkSize) {
+                    if (!getEach() && !attrSize.equivalent(valMod.size(), false)) { 
+                        if (valMod.ndims() == 0) {
+                            warning("Assuming 'each' for the attribute " + name());
+                        } else {
+                            error("Array size mismatch for the attribute " + name() +
+                                    ", size of declaration is " + attrSize + 
+                                    " and size of " + name() + " expression is " + valMod.size());
+                        }
+                    } else if (getEach()) { 
+                        if (owner.ndims() == 0) {
+                            error("The 'each' keyword cannot be applied to attributes of scalar components");
+                        } else if (valMod.ndims() > 0) {
+                            error("The attribute " + name() + 
+                                    " is declared 'each' and the binding expression is not scalar");
+                        }
+                    }
+                }
+            }
+        }
     }
     
     inh boolean InstNode.isInRedeclareMod();
@@ -202,22 +217,21 @@ aspect FlatTypeCheck {
     
     
   public void FEquation.typeCheck(ErrorCheckType checkType) {
-	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
       typeCheckHGTResidual(checkType);
       typeCheckNominal(checkType);
       typeCheckLocalIteration(checkType);
       FType left = getLeft().type();
       FType right = getRight().type();
-	  if (!left.isUnknown() && !right.isUnknown()) {
-		  if (!left.equivalentTo(right)) {
-		      if (left.scalarType().equivalentTo(right.scalarType())) {
-		          if (!lockBranch(checkType))
-		              error("The array sizes of right and left hand side of equation are not compatible");        
-		      } else {
-	              error("The right and left expression types of equation are not compatible");        
-		      }
-		  }
-	  }
+      if (!left.isUnknown() && !right.isUnknown()) {
+          if (!left.equivalentTo(right)) {
+              if (left.scalarType().equivalentTo(right.scalarType())) {
+                  if (!lockBranch(checkType))
+                      error("The array sizes of right and left hand side of equation are not compatible");
+              } else {
+                  error("The right and left expression types of equation are not compatible");
+              }
+          }
+      }
   }
   
   public void FConnectClause.typeCheck(ErrorCheckType checkType) {
@@ -424,11 +438,8 @@ aspect FlatTypeCheck {
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
-	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
-		  if (getFExp().canBeComponentSize())
-			  compliance("Array sizes of Boolean or enumeration type are not supported: " + getFExp());
-		  else if (!type().isUnknown())
-			  error("Array size must be Integer expression: " + getFExp());
+      } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
+          error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array size must be constant or parameter: " + getFExp());
@@ -445,11 +456,10 @@ aspect FlatTypeCheck {
   public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
 	  if (ndims() > 1) { 
 		  error("Array index must be scalar or vector expression: " + getFExp());
-	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
-		  if (type().canBeIndex())
-			  compliance("Array indices of Boolean or enumeration type not supported: " + getFExp());
-		  else if (!type().isUnknown())
-			  error("Array index must be Integer expression: " + getFExp());
+      } else if (!type().isUnknown() && !type().canBeIndex()) {
+          error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
+      } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
+          error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().parameterOrLess()) {
 			  warning("Variable array index in equation can result in slow simulation time");
@@ -468,11 +478,23 @@ aspect FlatTypeCheck {
 	                  }
 	              }
 	          } catch (ConstantEvaluationException e) {
-	              error("Could not evaluate array index expression: " + getFExp());
-	              reportedOutOfBound = true;
 	          }
 		  }
 	  }
+  }
+  
+  syn FType FExpSubscript.myIndexType() = myIndexType(myDim());
+  inh FType FExpSubscript.myIndexType(int i);
+  eq Root.getChild().myIndexType(int i)                                = fUnknownType();
+  eq InstArrayAccess.getFArraySubscripts().myIndexType(int i)          = fUnknownType();
+  eq InstComponentArrayAccess.getFArraySubscripts().myIndexType(int i) = myInstComponentDecl().myIndexType(i);
+  
+  syn FType InstComponentDecl.myIndexType(int dim) {
+    FArraySubscripts fas = getFArraySubscripts();
+    if (fas != null && fas.getNumFSubscript() > dim)
+        return fas.getFSubscript(dim).type().scalarType();
+    else
+        return fUnknownType();
   }
   
   private boolean FExpSubscript.reportedOutOfBound = false;
@@ -522,6 +544,13 @@ aspect FlatTypeCheck {
   eq InstNode.getChild().isInstComponentSize()                          = false;
   eq FlatRoot.getChild().isInstComponentSize()                          = false;
 	
+  syn boolean FArraySubscripts.isFullSize() {
+      for (FSubscript fs : getFSubscripts())
+          if (!fs.isColon())
+              return false;
+      return true;
+  }
+  
   
   public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
@@ -591,7 +620,7 @@ aspect FlatTypeCheck {
 	  if (!getDim().type().isUnknown() && !fIntegerScalarType().typeCompatible(getDim().type()))
 		  error("Dimension argument of cat() is not compatible with Integer: " + getDim());
 	  else if (!getDim().type().isUnknown() && !getDim().variability().lessOrEqual(fParameter()))
-		  error("Dimension argument of cat() does not have constant or parameter variability: " + getDim());
+		  error("Dimension argument of cat() does not have constant variability: " + getDim());
   }
   
   public void FAbstractCat.typeCheckFExps() {}
@@ -696,7 +725,7 @@ aspect FlatTypeCheck {
   eq FAbstractCat.checkTypeAsExpression() = dimensionIsOk();
   
   syn boolean FAbstractCat.dimensionIsOk(); 
-  eq FCatExp.dimensionIsOk()    = getDim().variability().lessOrEqual(fParameter()) && 
+  eq FCatExp.dimensionIsOk()    = getDim().isConstantExp() && 
   								  getDim().type().isInteger() && getDim().type().isScalar();
   eq FMatrix.dimensionIsOk()    = true;
   eq FMatrixRow.dimensionIsOk() = true;

@@ -15,6 +15,7 @@
 import os
 import sys
 import platform
+from pymodelica.compiler_exceptions import JError
 from casadi import *
 from modelicacasadi_wrapper import *
 JVM_SET_UP=False
@@ -72,14 +73,15 @@ def transfer_model(model, class_name, file_name=[],
     """
     _ensure_jvm()
     if isinstance(file_name, basestring):
-        file_vec = [file_name]
+        files = [file_name]
     else: 
-        file_vec = file_name
-    _transfer_modelica(model, class_name, _generate_StringVector(file_vec),
-                       _get_options(compiler_options), compiler_log_level)
+        files = file_name
+    return _transfer_modelica(model, class_name, _generate_StringVector(files),
+                              _get_options(compiler_options), compiler_log_level)
 
 def transfer_optimization_problem(ocp, class_name, file_name=[],
-                                  compiler_options={}, compiler_log_level='warning'):
+                                  compiler_options={}, compiler_log_level='warning',
+                                  accept_model=False):
     """ 
     Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
     
@@ -127,14 +129,18 @@ def transfer_optimization_problem(ocp, class_name, file_name=[],
             'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
             Default: 'warning'
 
+        accept_model --
+            If true, allows to transfer a model. Only the model parts of the
+            OptimizationProblem will be initialized.
+
     """
     _ensure_jvm()
     if isinstance(file_name, basestring):
-        file_vec = [file_name]
+        files = [file_name]
     else: 
-        file_vec = file_name
-    return _transfer_optimica(ocp, class_name, _generate_StringVector(file_vec),
-                              _get_options(compiler_options), compiler_log_level)
+        files = file_name
+    return _transfer_optimica(ocp, class_name, _generate_StringVector(files),
+                                  _get_options(compiler_options), compiler_log_level)       
 
 def _ensure_jvm():
     global JVM_SET_UP
@@ -155,7 +161,6 @@ def _transfer_modelica(model, class_name, files, options, log_level):
 def _transfer_optimica(ocp, class_name, files, options, log_level):
     return modelicacasadi_wrapper.transferXmlOptimization(ocp, class_name, files)
     #return modelicacasadi_wrapper._transferOptimizationProblem(ocp, class_name, files, options, log_level)
-
 
 def _get_options(compiler_options):
     """
@@ -197,24 +202,12 @@ def _get_options(compiler_options):
             options_wrapper.setStringOption(key, _list_to_string(value))
     return options_wrapper
 
-def _which_compiler(files, selection_mode='auto'):
-    # if selection_mode is 'auto' - detect file suffix
-    if selection_mode == 'auto':
-        comp = 'MODELICA'
-        for f in files:
-            basename, ext = os.path.splitext(f)
-            if ext == '.mop':
-                comp = 'OPTIMICA'
-                break
-    else:
-        if selection_mode.lower() == 'modelica':
-            comp = 'MODELICA'
-        elif selection_mode.lower() == 'optimica':
-            comp = 'OPTIMICA'
-        else:
-            print ("Invalid compiler selected: %s using OptimicaCompiler instead." %(selection_mode))
-            comp = 'OPTIMICA'      
-    return comp     
+def has_mop_file(files):
+    for f in files:
+        basename, ext = os.path.splitext(f)
+        if ext == '.mop':
+            return True
+    return False
 
 def _list_to_string(item_list):
     """

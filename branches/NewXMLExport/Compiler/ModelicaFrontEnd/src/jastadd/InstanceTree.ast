@@ -142,12 +142,12 @@ abstract InstScalarAccess : InstNamedAccess ::= /ExpandedSubscripts:FArraySubscr
 InstParseAccess           : InstScalarAccess;
 InstAmbiguousAccess       : InstScalarAccess;
 InstComponentAccess       : InstScalarAccess;
-InstEquationAccess       : InstScalarAccess;
+InstEquationAccess        : InstScalarAccess;
 abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts /ExpandedSubscripts:FArraySubscripts/;
 InstParseArrayAccess      : InstArrayAccess;
 InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;
-InstEquationArrayAccess  : InstArrayAccess;
+InstEquationArrayAccess   : InstArrayAccess;
 InstGlobalAccess          : InstAccess ::= InstAccess;
 
 InstForIndex : CommonForIndex ::= InstPrimitive;

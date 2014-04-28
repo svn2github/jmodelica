@@ -15,6 +15,10 @@
 from tests_jmodelica import testattr
 from modelicacasadi_transfer import *
 
+def MX_equal(x, y):
+    eq = (x == y)
+    return eq.isConstant() and eq.getValue() == 1
+
 @testattr(casadi = True)    
 def test_SharedNode_eq():
     m = Model()
@@ -25,6 +29,11 @@ def test_SharedNode_eq():
     # Test that we can compare a SharedNode to a regular Python object
     assert realVar1 != 1
     assert not (realVar1 == 1)
+    # Test that different proxies to the same SharedNode compare and hash equal
+    realVar1b = realVar1.getModelVariable()    
+    assert realVar1b == realVar1
+    assert realVar1b is not realVar1 # Check that it's a different proxy object
+    assert hash(realVar1b) == hash(realVar1)
 
 @testattr(casadi = True)    
 def test_VariableAlias():
@@ -874,8 +883,8 @@ def test_OptimizationProblemTime():
     final = MX(1)
     opt = OptimizationProblem()
     
-    assert( opt.getStartTime().isNull() )
-    assert( opt.getFinalTime().isNull() )
+    assert( MX_equal(opt.getStartTime(), MX(0)) )
+    assert( MX_equal(opt.getFinalTime(), MX(0)) )
     opt.setStartTime(start)
     opt.setFinalTime(final)
     assert( isEqual(start, opt.getStartTime()) )
@@ -887,14 +896,14 @@ def test_OptimizationProblemLagrangeMayer():
     mayer = MX("mayer")
     opt = OptimizationProblem()
 
-    assert( opt.getLagrangeTerm().isNull() )
-    assert( opt.getMayerTerm().isNull() )
+    assert( MX_equal(opt.getObjectiveIntegrand(), MX(0)) )
+    assert( MX_equal(opt.getObjective(), MX(0)) )
     
-    opt.setMayerTerm(mayer)
-    opt.setLagrangeTerm(lagrange)
+    opt.setObjective(mayer)
+    opt.setObjectiveIntegrand(lagrange)
     
-    assert( isEqual(lagrange, opt.getLagrangeTerm()) )
-    assert( isEqual(mayer, opt.getMayerTerm()) )
+    assert( isEqual(lagrange, opt.getObjectiveIntegrand()) )
+    assert( isEqual(mayer, opt.getObjective()) )
 
 @testattr(casadi = True)    
 def test_OptimizationProblemPathConstraints():
@@ -964,13 +973,14 @@ def test_OptimizationProblemTimedVariables():
 def test_OptimizationProblemPrinting():
     simpleOptProblem = OptimizationProblem()
     expectedPrint = ("Model contained in OptimizationProblem:\n\n" +
-                     "------------------------------- Variables -------------------------------\n\n\n" +
+                     "------------------------------- Variables -------------------------------\n\n" +
+                     "Time variable: 0\n\n" +
                      "---------------------------- Variable types  ----------------------------\n\n\n" +
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "----------------------- Optimization information ------------------------\n\n" +
-                     "Start time = not set\nFinal time = not set\n\n\n" +
-                     "-- Lagrange term --\nnot set\n-- Mayer term --\nnot set")
+                     "Start time = 0\nFinal time = 0\n\n\n" +
+                     "-- Objective integrand term --\n0\n-- Objective term --\n0")
     print simpleOptProblem
     assert( str(simpleOptProblem) == expectedPrint )
 
@@ -994,7 +1004,6 @@ def test_ModelVariableSorting():
             model.addVariable(varVec[i])
 
     #Create different kinds of variables
-    outputVariables = numpy.array([], dtype = object)
     inputRealVariables = numpy.array([], dtype = object)
     inputIntegerVariables = numpy.array([], dtype = object)
     inputBooleanVariables = numpy.array([], dtype = object)
@@ -1019,71 +1028,76 @@ def test_ModelVariableSorting():
     rIn2 = RealVariable(model, var1, Variable.INPUT, Variable.DISCRETE)
     rIn3 = RealVariable(model, var1, Variable.INPUT, Variable.PARAMETER)
     rIn4 = RealVariable(model, var1, Variable.INPUT, Variable.CONSTANT)
-    rOut1 = RealVariable(model, var1, Variable.OUTPUT, Variable.CONTINUOUS)
-    rOut2 = RealVariable(model, var1, Variable.OUTPUT, Variable.DISCRETE)
-    rOut3 = RealVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
-    rOut4 = RealVariable(model, var1, Variable.OUTPUT, Variable.CONSTANT)
     inputRealVariables = numpy.append(inputRealVariables, [rIn1, rIn2, rIn3, rIn4])
-    outputVariables = numpy.append(outputVariables, [rOut1, rOut2, rOut3, rOut4])
 
-    rAlg = RealVariable(model, var1,  Variable.INTERNAL, Variable.CONTINUOUS)
-    algebraicVariables = numpy.append(algebraicVariables, [rAlg])
+    rAlg = RealVariable(model, var1, Variable.INTERNAL, Variable.CONTINUOUS)
+    rAlgOut = RealVariable(model, var1, Variable.OUTPUT, Variable.CONTINUOUS)
+    algebraicVariables = numpy.append(algebraicVariables, [rAlg, rAlgOut])
 
-    rDiff = RealVariable(model, var1,  Variable.INTERNAL, Variable.CONTINUOUS)
-    differentiatedVariables = numpy.append(differentiatedVariables, rDiff)
+    rDiff = RealVariable(model, var1, Variable.INTERNAL, Variable.CONTINUOUS)
+    rDiffOut = RealVariable(model, var1, Variable.OUTPUT, Variable.CONTINUOUS)
+    differentiatedVariables = numpy.append(differentiatedVariables, [rDiff, rDiffOut])
     rDer = DerivativeVariable(model, var1, rDiff)
-    derivativeVariables = numpy.append(derivativeVariables, rDer)
-    rDisc = RealVariable(model, var1,  Variable.INTERNAL, Variable.DISCRETE)
-    discreteRealVariables = numpy.append(discreteRealVariables, rDisc)
-    rConst = RealVariable(model, var1,  Variable.INTERNAL, Variable.CONSTANT)
-    constantRealVariables = numpy.append(constantRealVariables, rConst)
-    rIndep = RealVariable(model, var1,  Variable.INTERNAL, Variable.PARAMETER)
-    indepenentRealParameterVariables = numpy.append(indepenentRealParameterVariables, rIndep)
-    rDep =  RealVariable(model, var1,  Variable.INTERNAL, Variable.PARAMETER)
+    rDer2 = DerivativeVariable(model, var1, rDiffOut)
+    derivativeVariables = numpy.append(derivativeVariables, [rDer, rDer2])
+    rDisc = RealVariable(model, var1, Variable.INTERNAL, Variable.DISCRETE)
+    rDiscOut = RealVariable(model, var1, Variable.OUTPUT, Variable.DISCRETE)
+    discreteRealVariables = numpy.append(discreteRealVariables, [rDisc, rDiscOut])
+    rConst = RealVariable(model, var1, Variable.INTERNAL, Variable.CONSTANT)
+    rConstOut = RealVariable(model, var1, Variable.OUTPUT, Variable.CONSTANT)
+    constantRealVariables = numpy.append(constantRealVariables, [rConst, rConstOut])
+    rIndep = RealVariable(model, var1, Variable.INTERNAL, Variable.PARAMETER)
+    rIndepOut = RealVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
+    indepenentRealParameterVariables = numpy.append(indepenentRealParameterVariables, [rIndep, rIndepOut])
+    rDep = RealVariable(model, var1, Variable.INTERNAL, Variable.PARAMETER)
+    rDepOut = RealVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
     rDep.setAttribute("bindingExpression", var2)
-    depenentRealParameterVariables = numpy.append(depenentRealParameterVariables, rDep)
+    rDepOut.setAttribute("bindingExpression", var2)
+    depenentRealParameterVariables = numpy.append(depenentRealParameterVariables, [rDep, rDepOut])
 
 
     # Integer variables
     iIn1 = IntegerVariable(model, var1, Variable.INPUT, Variable.DISCRETE)
     iIn2 = IntegerVariable(model, var1, Variable.INPUT, Variable.PARAMETER)
     iIn3 = IntegerVariable(model, var1, Variable.INPUT, Variable.CONSTANT)
-    iOut1 = IntegerVariable(model, var1, Variable.OUTPUT, Variable.DISCRETE)
-    iOut2 = IntegerVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
-    iOut3 = IntegerVariable(model, var1, Variable.OUTPUT, Variable.CONSTANT)
     inputIntegerVariables = numpy.append(inputIntegerVariables, [iIn1, iIn2, iIn3])
-    outputVariables = numpy.append(outputVariables, [iOut1, iOut2, iOut3])
 
-    iDisc = IntegerVariable(model, var1,  Variable.INTERNAL, Variable.DISCRETE)
-    discreteIntegerVariables = numpy.append(discreteIntegerVariables, iDisc)
-    iConst = IntegerVariable(model, var1,  Variable.INTERNAL, Variable.CONSTANT)
-    constantIntegerVariables = numpy.append(constantIntegerVariables, iConst)
-    iIndep = IntegerVariable(model, var1,  Variable.INTERNAL, Variable.PARAMETER)
-    indepenentIntegerParameterVariables = numpy.append(indepenentIntegerParameterVariables, iIndep)
-    iDep = IntegerVariable(model, var1,  Variable.INTERNAL, Variable.PARAMETER)
+    iDisc = IntegerVariable(model, var1, Variable.INTERNAL, Variable.DISCRETE)
+    iDiscOut = IntegerVariable(model, var1, Variable.OUTPUT, Variable.DISCRETE)
+    discreteIntegerVariables = numpy.append(discreteIntegerVariables, [iDisc, iDiscOut])
+    iConst = IntegerVariable(model, var1, Variable.INTERNAL, Variable.CONSTANT)
+    iConstOut = IntegerVariable(model, var1, Variable.OUTPUT, Variable.CONSTANT)
+    constantIntegerVariables = numpy.append(constantIntegerVariables, [iConst, iConstOut])
+    iIndep = IntegerVariable(model, var1, Variable.INTERNAL, Variable.PARAMETER)
+    iIndepOut = IntegerVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
+    indepenentIntegerParameterVariables = numpy.append(indepenentIntegerParameterVariables, [iIndep, iIndepOut])
+    iDep = IntegerVariable(model, var1, Variable.INTERNAL, Variable.PARAMETER)
+    iDepOut = IntegerVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
     iDep.setAttribute("bindingExpression", var2)
-    depenentIntegerParameterVariables = numpy.append(depenentIntegerParameterVariables, iDep)
+    iDepOut.setAttribute("bindingExpression", var2)
+    depenentIntegerParameterVariables = numpy.append(depenentIntegerParameterVariables, [iDep, iDepOut])
 
 
     # Boolean variables
     bIn1 = BooleanVariable(model, var1, Variable.INPUT, Variable.DISCRETE)
     bIn2 = BooleanVariable(model, var1, Variable.INPUT, Variable.PARAMETER)
     bIn3 = BooleanVariable(model, var1, Variable.INPUT, Variable.CONSTANT)
-    bOut1 = BooleanVariable(model, var1, Variable.OUTPUT, Variable.DISCRETE)
-    bOut2 = BooleanVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
-    bOut3 = BooleanVariable(model, var1, Variable.OUTPUT, Variable.CONSTANT)
     inputBooleanVariables = numpy.append(inputBooleanVariables, [bIn1, bIn2, bIn3])
-    outputVariables = numpy.append(outputVariables, [bOut1, bOut2, bOut3])
 
-    bDisc = BooleanVariable(model, var1,  Variable.INTERNAL, Variable.DISCRETE)
-    bConst = BooleanVariable(model, var1,  Variable.INTERNAL, Variable.CONSTANT)
-    discreteBooleanVariables = numpy.append(discreteBooleanVariables, bDisc)
-    constantBooleanVariables = numpy.append(constantBooleanVariables, bConst)
-    bIndep = BooleanVariable(model, var1,  Variable.INTERNAL, Variable.PARAMETER)
-    bDep = BooleanVariable(model, var1,  Variable.INTERNAL, Variable.PARAMETER)
-    indepenentBooleanParameterVariables = numpy.append(indepenentBooleanParameterVariables, bIndep)
+    bDisc = BooleanVariable(model, var1, Variable.INTERNAL, Variable.DISCRETE)
+    bDiscOut = BooleanVariable(model, var1, Variable.OUTPUT, Variable.DISCRETE)
+    bConst = BooleanVariable(model, var1, Variable.INTERNAL, Variable.CONSTANT)
+    bConstOut = BooleanVariable(model, var1, Variable.OUTPUT, Variable.CONSTANT)
+    discreteBooleanVariables = numpy.append(discreteBooleanVariables, [bDisc, bDiscOut])
+    constantBooleanVariables = numpy.append(constantBooleanVariables, [bConst, bConstOut])
+    bIndep = BooleanVariable(model, var1, Variable.INTERNAL, Variable.PARAMETER)
+    bIndepOut = BooleanVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
+    bDep = BooleanVariable(model, var1, Variable.INTERNAL, Variable.PARAMETER)
+    bDepOut = BooleanVariable(model, var1, Variable.OUTPUT, Variable.PARAMETER)
+    indepenentBooleanParameterVariables = numpy.append(indepenentBooleanParameterVariables, [bIndep, bIndepOut])
     bDep.setAttribute("bindingExpression", var2)
-    depenentBooleanParameterVariables = numpy.append(depenentBooleanParameterVariables, bDep)
+    bDepOut.setAttribute("bindingExpression", var2)
+    depenentBooleanParameterVariables = numpy.append(depenentBooleanParameterVariables, [bDep, bDepOut])
 
 
 
@@ -1097,7 +1111,6 @@ def test_ModelVariableSorting():
     checkVariablesEqualToInOrder(model.getVariables(Model.DERIVATIVE), derivativeVariables) 
 
     # Add the rest of the variables and check that they are sorted correctly
-    addVariableVectorToModel(outputVariables, model)
     addVariableVectorToModel(inputRealVariables, model)
     addVariableVectorToModel(inputIntegerVariables, model)
     addVariableVectorToModel(inputBooleanVariables, model)
@@ -1114,7 +1127,6 @@ def test_ModelVariableSorting():
     addVariableVectorToModel(depenentRealParameterVariables, model)
     addVariableVectorToModel(depenentIntegerParameterVariables, model)
     addVariableVectorToModel(depenentBooleanParameterVariables, model)
-    checkVariablesEqualToInOrder(model.getVariables(Model.OUTPUT), outputVariables) 
     checkVariablesEqualToInOrder(model.getVariables(Model.REAL_INPUT), inputRealVariables)
     checkVariablesEqualToInOrder(model.getVariables(Model.INTEGER_INPUT), inputIntegerVariables)
     checkVariablesEqualToInOrder(model.getVariables(Model.BOOLEAN_INPUT), inputBooleanVariables)
@@ -1342,6 +1354,7 @@ def test_ModelPrinting():
     model.addDaeEquation(eq1)
     model.addInitialEquation(eq2)
     expectedPrint = ("------------------------------- Variables -------------------------------\n\n" +
+                    "Time variable: 0\n" +
                     "Real node;\n\n" +
                     "---------------------------- Variable types  ----------------------------\n\n" +
                     "Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );\n\n" +

@@ -121,9 +121,9 @@ aspect XMLCodeGenerator {
 			p.print(fv, str, indentOneStep);
 		}
 			
-		for (FVariable fv : getAliasVariables()) {
+		/*for (FVariable fv : getAliasVariables()) {
 			p.print(fv, str, indentOneStep);
-		}
+		}*/
 		
 		// add a newline between sections for clearer XML
 		str.print("\n");
@@ -674,10 +674,14 @@ aspect XMLCodeGenerator {
 	//=========================================================================
 	public void FEquation.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
-		generateOpenTag(str, "equal", indent);
-		p.print(getLeft(), str, indentOneStep);
-		p.print(getRight(), str, indentOneStep);
-		generateCloseTag(str, "equal", indent);
+		if (!getRight().hasAlias()) {
+			generateOpenTag(str, "equal", indent);
+			p.print(getLeft(), str, indentOneStep);
+			p.print(getRight(), str, indentOneStep);
+			generateCloseTag(str, "equal", indent);
+		} else {
+			p.print(getRight(), str, indent);
+		}
 	}
 	
 	public void FFunctionCallEquation.prettyPrintXML(Printer p, CodeStream str, String indent) {
@@ -788,17 +792,24 @@ aspect XMLCodeGenerator {
 		generateCloseTag(str, "algorithm", indent);
 	}
 	
+	syn boolean ASTNode.hasAlias() = false;
+	eq FAssert.hasAlias() = true;
+	
 	public void FAssignStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
 		String indentTwoSteps = p.indent(indentOneStep);
-		generateOpenTag(str, "assign", indent);
-		generateOpenTag(str, "to", indentOneStep);
-		p.print(getLeft(), str, indentTwoSteps);
-		generateCloseTag(str, "to", indentOneStep);
-		generateOpenTag(str, "from", indentOneStep);
-		p.print(getRight(), str, indentTwoSteps);
-		generateCloseTag(str, "from", indentOneStep);
-		generateCloseTag(str, "assign", indent);
+		if (!getRight().hasAlias()) {
+			generateOpenTag(str, "assign", indent);
+			generateOpenTag(str, "to", indentOneStep);
+			p.print(getLeft(), str, indentTwoSteps);
+			generateCloseTag(str, "to", indentOneStep);
+			generateOpenTag(str, "from", indentOneStep);
+			p.print(getRight(), str, indentTwoSteps);
+			generateCloseTag(str, "from", indentOneStep);
+			generateCloseTag(str, "assign", indent);
+		} else {
+			p.print(getRight(), str, indentTwoSteps);
+		}
 	}
 	
 	public void FBreakStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {

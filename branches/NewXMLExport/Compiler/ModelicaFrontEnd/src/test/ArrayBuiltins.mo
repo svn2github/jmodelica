@@ -2093,7 +2093,7 @@ model ArrayCat7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 6721, column 17:
-  Dimension argument of cat() does not have constant or parameter variability: d
+  Dimension argument of cat() does not have constant variability: d
 ")})));
 end ArrayCat7;
 

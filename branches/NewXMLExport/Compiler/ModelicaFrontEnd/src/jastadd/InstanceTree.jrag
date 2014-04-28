@@ -1148,6 +1148,34 @@ aspect InstanceTreeConstruction {
     public InstOperatorFunction    OperatorFunction.newInstRestriction()    { return new InstOperatorFunction(); }
     public InstOperatorRecord      OperatorRecord.newInstRestriction()      { return new InstOperatorRecord(); }
 
+    /**
+     * A connector class inheriting a record class is both connector and record, 
+     * this method finds any inherited restriction that should be kept.
+     */
+    syn InstRestriction InstRestriction.inheritedRestriction()       = null;
+    eq InstMRecord.inheritedRestriction()                            = this;
+    eq InstOperatorRecord.inheritedRestriction()                     = this;
+    inh lazy InstRestriction InstConnector.inheritedRestriction();
+    eq InstBaseClassDecl.getInstRestriction().inheritedRestriction() = inheritedRestriction(false);
+    
+    /**
+     * A connector class inheriting a record class is both connector and record, 
+     * this method finds any inherited restriction that should be kept.
+     */
+    syn InstRestriction InstClassDecl.inheritedRestriction(boolean checkMine) = null;
+    eq InstSimpleShortClassDecl.inheritedRestriction(boolean checkMine)       = 
+        actualInstClass().inheritedRestriction(true);
+    eq InstBaseClassDecl.inheritedRestriction(boolean checkMine) {
+        if (checkMine)
+            return getInstRestriction().inheritedRestriction();
+        for (InstExtends ie : getInstExtendss()) {
+            InstRestriction ir = ie.myInstClass().inheritedRestriction(true);
+            if (ir != null)
+                return ir;
+        }
+        return null;
+    }
+
     // Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
 		InstNormalExtends ie = newEmptyInstExtends();
@@ -1517,22 +1545,36 @@ aspect InstanceAST_API {
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
-    syn String InstComponentDecl.qualifiedName() = getFQName().name();
-    
+    syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
+    eq InstComponentDecl.qualifiedName()    = getFQName().name();
+    eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
     eq InstBaseClassDecl.qualifiedName()    = buildQualifiedName(name());
     eq InstBuiltInClassDecl.qualifiedName() = name();
+    eq InstProgramRoot.qualifiedName()      = "";
     
     syn String InstNode.buildQualifiedName(String last) = combineName(instClassNamePrefix(), last);
     
     inh lazy String InstNode.instClassNamePrefix();
-    eq InstBaseClassDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
+    eq InstBaseClassDecl.getChild().instClassNamePrefix() = qualifiedName();
     eq InstComponentDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
     eq SourceRoot.getChild().instClassNamePrefix()        = "";
     eq FlatRoot.getChild().instClassNamePrefix()          = "";
     eq InstRoot.getChild().instClassNamePrefix()          = "";
-	
-    
+
+    /**
+     * Get the qualified class name of the oldest ancestor in the inheritance structure.
+     * 
+     * For classes inheriting multiple classes, only the first one is considered.
+     * This is useful mostly for classes that only allows inheriting from one other class.
+     */
+    syn String InstNode.baseClassName()                  = 
+        (getNumInstExtends() > 0) ? getInstExtends(0).baseClassName() : qualifiedName();
+    eq InstComponentDecl.baseClassName()                 = myInstClass().baseClassName();
+    eq InstSimpleShortClassDecl.baseClassName()          = actualInstClass().baseClassName();
+    eq InstReplacingSimpleShortClassDecl.baseClassName() = actualInstClass().baseClassName();
+
+
 	syn Iterable<AbstractEquation> InstNode.equations() = Collections.<AbstractEquation>emptyList();
 	eq InstComponentDecl.equations()                    = myInstClass().equations();
 	eq InstExtends.equations()                          = myInstClass().equations();
@@ -1637,26 +1679,27 @@ aspect InstanceAST_API {
     // Overridden in BaseClassDecl by generated API for optional child
     syn boolean ClassDecl.hasReplaceable() = false;
 
-	syn boolean InstNode.extendsPrimitive()        = false;
-	eq InstShortClassDecl.extendsPrimitive()       = 
-		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
-	eq InstFullClassDecl.extendsPrimitive()        = 
-		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
-	eq InstSimpleShortClassDecl.extendsPrimitive() {
-		InstClassDecl icd = actualInstClass();
-		return icd.isPrimitive() || icd.extendsPrimitive();
-	}
-	eq InstExtends.extendsPrimitive() {
-		InstClassDecl icd = myInstClass();
-		return !isRecursive() && icd.isOrExtendsPrimitive();
-	}
-	
+    syn boolean InstNode.extendsPrimitive()        = false;
+    eq InstShortClassDecl.extendsPrimitive()       = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
+    eq InstFullClassDecl.extendsPrimitive()        = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
+    eq InstSimpleShortClassDecl.extendsPrimitive() = actualInstClass().isOrExtendsPrimitive();
+    eq InstExtends.extendsPrimitive() {
+        InstClassDecl icd = myInstClass();
+        return !isRecursive() && icd.isOrExtendsPrimitive();
+    }
+
 	/**
 	 * Check if this node is a class declaration or an extends in one.
 	 */
 	syn boolean InstNode.isClassDecl() = false;
 	eq InstClassDecl.isClassDecl()     = true;
 	eq InstExtends.isClassDecl()       = isInClassDecl();
+    
+    /**
+     * Check if this node is an extends.
+     */
+    syn boolean InstNode.isExtends() = false;
+    eq InstExtends.isExtends()     = true;
 	
 	/**
 	 * Check if this extends is part of a class declaration.
@@ -1764,7 +1807,28 @@ aspect InstanceAST_API {
 	protected Iterator<InstComponentDecl> InstSimpleShortClassDecl.allInstComponentDeclsIterator() {
 		return actualInstClass().allInstComponentDeclsIterator();
 	}
-	
+
+    /**
+     * Iterate over all classes in this node and all InstExtends (recursively).
+     * 
+     * @return  an Iterable over the classes
+     */
+    public Iterable<InstClassDecl> InstNode.allInstClassDecls() {
+        return new Iterable<InstClassDecl>() {
+            public Iterator<InstClassDecl> iterator() {
+                return allInstClassDeclsIterator();
+            }
+        };
+    }
+    
+    protected Iterator<InstClassDecl> InstNode.allInstClassDeclsIterator() {
+        return new InstClassIterator();
+    }
+    
+    protected Iterator<InstClassDecl> InstSimpleShortClassDecl.allInstClassDeclsIterator() {
+        return actualInstClass().allInstClassDeclsIterator();
+    }
+
 	public class InstNode {
 		
 		private class InstComponentIterator implements Iterator<InstComponentDecl> {
@@ -1799,7 +1863,40 @@ aspect InstanceAST_API {
 			}
 			
 		}
-		
+
+        private class InstClassIterator implements Iterator<InstClassDecl> {
+
+            private Iterator<InstClassDecl> current;
+            private Iterator<InstExtends> exts;
+
+            public InstClassIterator() {
+                current = getInstClassDecls().iterator();
+                exts = getInstExtendss().iterator();
+                update();
+            }
+
+            public boolean hasNext() {
+                return current.hasNext();
+            }
+
+            public InstClassDecl next() {
+                InstClassDecl res = current.next();
+                update();
+                return res;
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            private void update() {
+                while (!current.hasNext() && exts.hasNext()) {
+                    current = exts.next().allInstClassDeclsIterator();
+                }
+            }
+            
+        }
+
 	}
 	
 	inh InstNode InstNode.containingInstNode();

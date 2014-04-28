@@ -1250,16 +1250,16 @@ def test_OptimicaFinalTime():
 @testattr(xml = True)
 def test_OptimicaLagrangeTerm():
     optProblem =  load_optimization_problem("atomicLagrangeX1", optproblemsFile)
-    assert str(optProblem.getLagrangeTerm()) == str(x1) 
+    assert str(optProblem.getObjectiveIntegrand()) == str(x1) 
     optProblem =  load_optimization_problem("atomicLagrangeNull", optproblemsFile)
-    assert str(optProblem.getLagrangeTerm()) == str(MX(0))  
+    assert str(optProblem.getObjectiveIntegrand()) == str(MX(0))  
 
 @testattr(xml = True)
 def test_OptimicaMayerTerm():
     optProblem =  load_optimization_problem("atomicMayerFinalTime", optproblemsFile)
-    assert str(optProblem.getMayerTerm()) == str(MX("finalTime")) 
+    assert str(optProblem.getObjective()) == str(MX("finalTime")) 
     optProblem =  load_optimization_problem("atomicMayerNull", optproblemsFile)
-    assert str(optProblem.getMayerTerm()) == str(MX(0))
+    assert str(optProblem.getObjective()) == str(MX(0))
     
 @testattr(xml = True)
 def test_OptimicaFree():

@@ -26,7 +26,7 @@ import itertools
 import time
 import copy
 import types
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
     
 try:
     import casadi
@@ -649,12 +649,6 @@ class MeasurementData(object):
                 
                 Type: rank 2 ndarray
                 Default: None
-        
-        Limitations::
-            
-            Variable names for constrained and eliminated inputs do not take
-            aliases into account; these variables have to be referenced by the
-            name used in CasadiModel.
         """
         # Check dimension of Q
         Q_len = ((0 if constrained is None else len(constrained)) + 
@@ -741,12 +735,78 @@ class FreeElementLengthsData(object):
         self.Q = Q
         self.a = a
 
-class LocalDAECollocator(CasadiCollocator):
+class BlockingFactors(object):
+
+    """
+    Class used to specify blocking factors for CasADi collocators.
+
+    This is used to enforce piecewise constant inputs. The inputs may only
+    change at some element boundaries, specified by the blocking factors.
+
+    This also enables the introduction of bounds and quadratic penalties on the
+    difference of the inputs between element boundaries.
+    """
+
+    def __init__(self, factors, du_bounds={}, du_quad_pen={}):
+        """
+        Parameters::
+            
+            factors --
+                Dictionary with variable names as keys and list of blocking
+                factors as corresponding values.
+
+                The blocking factors should be list of ints. Each element in
+                the list specifies the number of collocation elements for which
+                the input must be constant. For example, if blocking_factors ==
+                [2, 2, 1], then the input will attain 3 different values
+                (number of elements in the list), and it will change values
+                between element number 2 and 3 and number 4 and 5. The sum of
+                all elements in the list must be the same as the number of
+                collocation elements and the length of the list determines the
+                number of separate values that the inputs may attain.
+                
+                Type: {string: [int]}
+            
+            du_bounds --
+                Dictionary with variables names as keys and bounds on the
+                absolute value of the change in the corresponding input between
+                the blocking factors.
+                
+                Type: {string: float}
+                Default: {}
+
+            du_quad_pen --
+                This parameter adds a quadratic penalty on the change in u
+                between blocking factors.
+                
+                The parameter should be a dictionary with variables names as
+                keys. The values are the weights for the penalty term of the
+                corresponding variable.
+
+                Type: {string: float}
+                Default: {}
+        """
+        # Check that factors exist for variables with bounds and penalties
+        for name in du_bounds.keys():
+            if name not in factors.keys():
+                raise ValueError('Bound provided for variable %s' % name +
+                                 'but no factors.')
+        for name in du_quad_pen.keys():
+            if name not in factors.keys():
+                raise ValueError('Penalty weight provided for variable ' +
+                                 '%s but no factors.' % name)
+
+        # Store parameters as attributes
+        self.factors = factors
+        self.du_bounds = du_bounds
+        self.du_quad_pen = du_quad_pen
+
+class LocalDAECollocatorOld(CasadiCollocator):
     
     """Solves an optimal control problem using local collocation."""
     
     def __init__(self, model, options):
-        super(LocalDAECollocator, self).__init__(model)
+        super(LocalDAECollocatorOld, self).__init__(model)
         
         # Check normalization of minimum time problems
         t0 = self.ocp.variable('startTime')
@@ -2908,22 +2968,24 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
                     for var_type in ['x', 'unelim_u', 'w']:
-                        for var in var_vectors[var_type]:
-                            vr = var.getValueReference()
-                            (ind, _) = vr_map[vr]
-                            global_ind = var_indices[i][k][var_type][ind]
-                            xx_i_k = primal_opt[global_ind]
-                            if self.nominal_traj is None:
-                                xx_i_k *= sf[var_type][ind]
-                            else:
-                                sf_index = self._vr_sf_map[vr]
-                                if self._is_variant[vr]:
-                                    xx_i_k *= variant_sf[i][k][sf_index]
+                        if (not self.blocking_factors or
+                            var_type != "unelim_u"):
+                            for var in var_vectors[var_type]:
+                                vr = var.getValueReference()
+                                (ind, _) = vr_map[vr]
+                                global_ind = var_indices[i][k][var_type][ind]
+                                xx_i_k = primal_opt[global_ind]
+                                if self.nominal_traj is None:
+                                    xx_i_k *= sf[var_type][ind]
                                 else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    xx_i_k = d * xx_i_k + e
-                            primal_opt[global_ind] = xx_i_k
+                                    sf_index = self._vr_sf_map[vr]
+                                    if self._is_variant[vr]:
+                                        xx_i_k *= variant_sf[i][k][sf_index]
+                                    else:
+                                        d = invariant_d[sf_index]
+                                        e = invariant_e[sf_index]
+                                        xx_i_k = d * xx_i_k + e
+                                primal_opt[global_ind] = xx_i_k
                     
                     # Treat state derivatives separately
                     if not self.eliminate_der_var:
@@ -2946,6 +3008,30 @@ class LocalDAECollocator(CasadiCollocator):
                                     xx_i_k = d * xx_i_k + e
                             primal_opt[global_ind] = xx_i_k
                         t_index += 1
+
+        # Rescale inputs with blocking factors
+        if (self.variable_scaling and not self.write_scaled_result and
+            self.blocking_factors is not None):
+            var_type = "unelim_u"
+            k = 1
+            for i in N.cumsum(self.blocking_factors): # Only once per factor
+                for var in var_vectors[var_type]:
+                    vr = var.getValueReference()
+                    (ind, _) = vr_map[vr]
+                    global_ind = var_indices[i][k][var_type][ind]
+                    
+                    u_i_k = primal_opt[global_ind]
+                    if self.nominal_traj is None:
+                        u_i_k *= sf[var_type][ind]
+                    else:
+                        sf_index = self._vr_sf_map[vr]
+                        if self._is_variant[vr]:
+                            u_i_k *= variant_sf[i][k][sf_index]
+                        else:
+                            d = invariant_d[sf_index]
+                            e = invariant_e[sf_index]
+                            u_i_k = d * u_i_k + e
+                    primal_opt[global_ind] = u_i_k
         
         # Rescale continuity variables
         if (self.variable_scaling and not self.eliminate_cont_var and
@@ -3162,9 +3248,9 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             return None
 
-class LocalDAECollocator2(CasadiCollocator):
+class LocalDAECollocator(CasadiCollocator):
     
-    """Solves an optimal control problem using local collocation."""
+    """Solves a dynamic optimization problem using local collocation."""
     
     def __init__(self, op, options):
         # Get the options
@@ -3214,7 +3300,8 @@ class LocalDAECollocator2(CasadiCollocator):
         elif self.discr == "LGR":
             self.pol = RadauPol(self.n_cp)
         else:
-            raise ValueError("Unknown discretization scheme %s." % self.discr)
+            raise CasadiCollocatorException("Unknown discretization scheme %s."
+                                            % self.discr)
 
         # Get to work
         self._create_nlp()
@@ -3230,7 +3317,16 @@ class LocalDAECollocator2(CasadiCollocator):
         self._create_nlp_variables()
         self._create_constraints()
         self._create_cost()
+        self._create_blocking_factors_constraints_and_cost()
         self._compute_bounds_and_init()
+        print "Optimization Problem:"
+        print self.n_var
+        print self.n_xx
+        print self.xx.size()
+        print self.c_e.size()
+        print self.c_i.size()
+        print self.dae
+        print self.initial.size()
         self._create_solver()
 
     def _create_model_variable_structures(self):
@@ -3275,8 +3371,9 @@ class LocalDAECollocator2(CasadiCollocator):
                 for name in variable_list.keys():
                     var = op.getVariable(name)
                     if var is None:
-                        raise ValueError("Measured variable %s not " % name +
-                                         "found in model.")
+                        raise CasadiCollocatorException(
+                                "Measured variable %s not " % name +
+                                "found in model.")
                     if var.isAlias():
                         mvar_name = var.getModelVariable().getName()
                         variable_list[mvar_name] = variable_list[name]
@@ -3293,11 +3390,11 @@ class LocalDAECollocator2(CasadiCollocator):
                          for elim_name in elim_names]
             for (i, elim_var) in enumerate(elim_vars):
                 if elim_var is None:
-                    raise jmiVariableNotFoundError(
+                    raise CasadiCollocatorException(
                             "Eliminated input %s is " % elim_names[i] +
                             "not a model variable.")
                 if elim_var.getCausality() != elim_var.INPUT:
-                    raise ValueError(
+                    raise CasadiCollocatorException(
                             "Eliminated input %s is " % elim_var.getName() +
                             "not a model input.")
             elim_var_names = [elim_var.getName() for elim_var in elim_vars]
@@ -3351,8 +3448,8 @@ class LocalDAECollocator2(CasadiCollocator):
                                path_c in op.getPathConstraints()])
         point = casadi.vertcat([point_c.getResidual() for
                                 point_c in op.getPointConstraints()])
-        mterm = op.getMayerTerm()
-        lterm = op.getLagrangeTerm()
+        mterm = op.getObjective()
+        lterm = op.getObjectiveIntegrand()
 
         # Substitute named variables with vector variables in expressions
         if self.named_vars:
@@ -3393,7 +3490,14 @@ class LocalDAECollocator2(CasadiCollocator):
                 name = var.getName()
                 name_map[name] = (i, vt)
                 i = i + 1
-        
+
+        # Create BlockingFactors from self.blocking_factors
+        if isinstance(self.blocking_factors, Iterable):
+            factors = dict(zip(
+                    [var.getName() for var in mvar_vectors['unelim_u']],
+                    n_var['unelim_u'] * [self.blocking_factors]))
+            self.blocking_factors = BlockingFactors(factors)
+
         # Store expressions and variable structures
         self.initial = initial
         self.dae = dae
@@ -3433,11 +3537,27 @@ class LocalDAECollocator2(CasadiCollocator):
         """
         # Scale variables
         if self.variable_scaling and self.nominal_traj is None:
+            # Fetch scaling factors
             sf = {}
             var_kinds = ["dx", "x", "unelim_u", "w", "p_opt"]
             for vk in var_kinds:
                 sf[vk] = N.array([N.abs(self.op.get_attr(v, "nominal")) for
                                   v in self.mvar_vectors[vk]])
+
+                # Check for zero nominal values
+                zero_sf_indices = N.where(sf[vk] == 0.0)[0]
+                if len(zero_sf_indices) > 0:
+                    zero_sf_names = [var.getName() for var
+                                     in self.mvar_vectors[vk][zero_sf_indices]]
+                    names = ""
+                    for name in zero_sf_names[:-1]:
+                        names += name + ", "
+                    names += zero_sf_names[-1]
+                    raise CasadiCollocatorException(
+                            "Nominal value(s) for variable(s) %s is zero." %
+                            names)
+
+            # Compose scaling factors
             sf["time"] = N.array([1.])
             sf["elim_u"] = N.ones(self.n_var["elim_u"])
             self._sf = sf
@@ -3457,7 +3577,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     op_expressions,
                     self.mvar_struct_cat + self.mvar_struct_dx,
                     scaled_vars)
-    
+
     def _define_collocation(self):
         """
         Define collocation variables.
@@ -3497,7 +3617,7 @@ class LocalDAECollocator2(CasadiCollocator):
         collocation['der_vals_k'] = der_vals_k
         collocation['h_i'] = h_i
         self._collocation = collocation
-    
+
     def _create_nlp_variables(self):
         """
         Create the NLP variables and store them in a nested dictionary.
@@ -3509,20 +3629,23 @@ class LocalDAECollocator2(CasadiCollocator):
         if self.blocking_factors is not None:
             n_u = nlp_n_var['unelim_u']
             del nlp_n_var['unelim_u']
+            n_bf_u = len(self.blocking_factors.factors)
+            n_cont_u = n_u - n_bf_u
         if self.eliminate_der_var:
             del nlp_n_var['dx']
         n_popt = nlp_n_var['p_opt']
         del nlp_n_var['p_opt']
         mvar_vectors = self.mvar_vectors
-        
+
         # Count NLP variables
         n_xx = n_popt
         n_xx += (1 + self.n_e * self.n_cp) * N.sum(nlp_n_var.values())
         if self.eliminate_der_var:
             n_xx += nlp_n_var['x'] # dx_1_0
         if self.blocking_factors is not None:
-            self.blocking_factors = list(self.blocking_factors)
-            n_xx += len(self.blocking_factors) * n_u
+            n_xx += (1 + self.n_e * self.n_cp) * n_cont_u
+            for factors in self.blocking_factors.factors.values():
+                n_xx += len(factors)
         if not self.eliminate_cont_var:
             n_xx += (self.n_e - 1) * nlp_n_var['x']
         self.is_gauss = (self.discr == "LG")
@@ -3537,7 +3660,7 @@ class LocalDAECollocator2(CasadiCollocator):
             xx = []
         else:
             xx = casadi.msym("xx", n_xx)
-        
+
         # Create objects for variable indexing
         var_map = {}
         var_indices = {}
@@ -3578,25 +3701,85 @@ class LocalDAECollocator2(CasadiCollocator):
 
         # Index controls separately if blocking_factors is not None
         if self.blocking_factors is not None:
-            element = 1
-            for (factor_i, factor) in enumerate(self.blocking_factors):
-                new_index = index + n_u
-                indices = range(index, new_index)
-                for i in xrange(element, element + factor):
-                    for k in xrange(1, self.n_cp + 1):
-                        var_indices[i][k]['unelim_u'] = indices
-                        if self.named_vars:
-                            new_vars = \
-                                    N.array([casadi.msym(var.getName() +
-                                                         '_%d_' % factor_i) for
-                                             var in mvar_vectors[var_type]])
-                            var_map[i][k]['unelim_u'] = new_vars
-                            xx += list(new_vars)
+            # Index controls without blocking factors
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    new_index = index + n_cont_u
+                    var_indices[i][k]['u_cont'] = range(index, new_index)
+                    index = new_index
+
+            # Create index storage for inputs with blocking factors
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    var_indices[i][k]['u_bf'] = []
+
+            # Index controls with blocking factors
+            for name in self.blocking_factors.factors.keys():
+                element = 1
+                factors = self.blocking_factors.factors[name]
+                for (factor_i, factor) in enumerate(factors):
+                    for i in xrange(element, element + factor):
+                        for k in xrange(1, self.n_cp + 1):
+                            var_indices[i][k]['u_bf'].append(index)
+                    index += 1
+                    element += factor
+
+            # Weave indices for inputs with and without blocking factors
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    # Weaving
+                    i_cont = 0
+                    i_bf = 0
+                    indices = []
+                    for var in self.mvar_vectors['unelim_u']:
+                        if var.getName() in self.blocking_factors.factors:
+                            indices.append(var_indices[i][k]['u_bf'][i_bf])
+                            i_bf += 1
                         else:
-                            var_map[i][k]['unelim_u'] = \
-                                    xx[var_indices[i][k]['unelim_u']]
-                index = new_index
-                element += factor
+                            indices.append(var_indices[i][k]['u_cont'][i_cont])
+                            i_cont += 1
+                    del var_indices[i][k]['u_bf']
+                    del var_indices[i][k]['u_cont']
+                    var_indices[i][k]['unelim_u'] = indices
+
+            # Add inputs to variable map
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    if self.named_vars:
+                        all_vars = []
+                        new_vars = []
+                        for var in self.mvar_vectors['unelim_u']:
+                            name = var.getName()
+                            if name in self.blocking_factors.factors:
+                                factors = self.blocking_factors.factors[name]
+                                blocking_boundaries = \
+                                        [1] + list(1 + N.cumsum(factors)[:-1])
+                                if i in blocking_boundaries and k == 1:
+                                    # Create new NLP variable
+                                    element_i = blocking_boundaries.index(i)
+                                    new_var = casadi.msym('%s_%d' %
+                                                          (name, element_i+1))
+                                    new_vars.append(new_var)
+                                    all_vars.append(new_var)
+                                else:
+                                    # Use old NLP variable
+                                    (idx, _) = self.name_map[name]
+                                    if k == 1:
+                                        old_var = \
+                                            var_map[i-1][k]['unelim_u'][idx]
+                                    else:
+                                        old_var = \
+                                            var_map[i][k-1]['unelim_u'][idx]
+                                    all_vars.append(old_var)
+                            else:
+                                new_var = casadi.msym('%s_%d_%d' % (name,i,k))
+                                new_vars.append(new_var)
+                                all_vars.append(new_var)
+                        var_map[i][k]['unelim_u'] = N.array(all_vars)
+                        xx += list(new_vars)
+                    else:
+                        var_map[i][k]['unelim_u'] = \
+                                xx[var_indices[i][k]['unelim_u']]
 
         # Index state continuity variables
         if self.discr == "LGR":
@@ -3667,8 +3850,8 @@ class LocalDAECollocator2(CasadiCollocator):
                     else:
                         var_map[i][0]['x'] = xx[var_indices[i][0]['x']]
         else:
-            raise ValueError("Unknown discretization scheme %s." %
-                             self.discr)
+            raise CasadiCollocatorException(
+                    "Unknown discretization scheme %s." % self.discr)
 
         # Index variables for final mesh point
         if self.is_gauss:
@@ -3719,15 +3902,46 @@ class LocalDAECollocator2(CasadiCollocator):
 
         # Index initial controls separately if blocking_factors is not None
         if self.blocking_factors is not None:
-            var_indices[1][0]['unelim_u'] = var_indices[1][1]['unelim_u']
+            # Find indices of inputs with blocking factors
+            bf_indices = []
+            cont_indices = []
+            for var in mvar_vectors['unelim_u']:
+                name = var.getName()
+                (idx, _) = self.name_map[name]
+                if name in self.blocking_factors.factors:
+                    bf_indices.append(idx)
+                else:
+                    cont_indices.append(idx)
+            bf_indices = N.array(bf_indices, dtype=int)
+            cont_indices = N.array(cont_indices, dtype=int)
+
+            # Index initial controls with blocking factors
+            var_indices[1][0]['unelim_u'] = N.empty(n_u, dtype=int)
+            var_indices[1][0]['unelim_u'][bf_indices] = \
+                    [var_indices[1][1]['unelim_u'][bf_i] for
+                     bf_i in bf_indices]
+
+            # Index initial controls without blocking factors
+            new_index = index + n_cont_u
+            var_indices[1][0]['unelim_u'][cont_indices] = \
+                    range(index, new_index)
+            var_indices[1][0]['unelim_u'] = list(var_indices[1][0]['unelim_u'])
+            index = new_index
+
+            # Insert initial controls into variable map
             if self.named_vars:
-                new_vars = N.array([casadi.msym(var.getName() + '_1_0') for
-                                    var in mvar_vectors['unelim_u']])
-                var_map[1][0]['unelim_u'] = new_vars
+                all_vars = N.empty(n_u, dtype=object)
+                new_vars = N.array([
+                        casadi.msym(var.getName() + '_1_0') for
+                        var in mvar_vectors['unelim_u'] if
+                        var.getName() not in self.blocking_factors.factors])
+                all_vars[cont_indices] = new_vars
+                all_vars[bf_indices] = var_map[1][1]['unelim_u'][bf_indices]
+                var_map[1][0]['unelim_u'] = all_vars
                 xx += list(new_vars)
             else:
                 var_map[1][0]['unelim_u'] = xx[var_indices[1][0]['unelim_u']]
-            
+
         # Index element lengths
         if self.hs == "free":
             new_index = index + self.n_e
@@ -3740,8 +3954,11 @@ class LocalDAECollocator2(CasadiCollocator):
                 xx += list(new_vars)
             else:
                 self.h = casadi.vertcat([N.nan, xx[var_indices['h'][1:]]])
-        
+
+        # Sanity check
         assert(index == n_xx)
+        if self.named_vars:
+            assert(n_xx == len(xx))
         
         # Save variables and indices as data attributes
         self.xx = xx
@@ -3996,7 +4213,7 @@ class LocalDAECollocator2(CasadiCollocator):
                                 (self.n_e, self.n_cp + 1)
                     else:
                         raise CasadiCollocatorException(
-                                "Constraint point " + `constraint_point` +
+                                "Time point " + `constraint_point` +
                                 " does not coincide with a collocation point.")
                 else:
                     (e, cp) = divmod(tp_index, self.n_cp)
@@ -4108,6 +4325,9 @@ class LocalDAECollocator2(CasadiCollocator):
             self._denorm_t0_nom = t_nom["startTime"]
             self._denorm_tf_nom = t_nom["finalTime"]
 
+        # must be called after time has been denormalized and self._denorm_t0_init etc have been set
+        self._create_initial_trajectories()
+
         # Create nominal trajectories
         if self.variable_scaling and self.nominal_traj is not None:
             nom_traj = {}
@@ -4126,6 +4346,7 @@ class LocalDAECollocator2(CasadiCollocator):
                         print("Warning: Could not find nominal trajectory " +
                               "for variable " + name + ". Using nominal " +
                               "attribute value instead.")
+                        self.nominal_traj_mode[name] = "attribute"
                         abscissae = N.array([0])
                         nom_val = op.get_attr(var, "nominal")
                         constant_sf = N.abs(nom_val)
@@ -4140,11 +4361,11 @@ class LocalDAECollocator2(CasadiCollocator):
             time_points = self.get_time_points()
             n_var = copy.copy(self.n_var)
             is_variant = {}
-            variant_var = []
-            n_variant_x = 0
+            n_variant_var = 0
+            n_invariant_var = 0
             n_variant_dx = 0
+            n_variant_x = 0
             variant_sf = {}
-            invariant_var = []
             invariant_d = []
             invariant_e = []
             variant_timed_var = []
@@ -4211,29 +4432,29 @@ class LocalDAECollocator2(CasadiCollocator):
                                     "Could not do time-variant scaling for " +
                                     "variable %s." % name)
                     else:
-                        raise ValueError("Unknown scaling mode %s " % mode +
-                                         "for variable %s." % name)
+                        raise CasadiCollocatorException(
+                                "Unknown scaling mode %s " % mode +
+                                "for variable %s." % name)
+                    (idx, vt) = name_map[name]
                     if variant:
                         if vt == "x":
                             n_variant_x += 1
+                        if vt == "dx":
+                            n_variant_dx += 1
                         is_variant[name] = True
-                        name_idx_sf_map[name] = len(variant_var)
-                        variant_var.append(var.var())
+                        name_idx_sf_map[name] = n_variant_var
+                        n_variant_var += 1
                         for i in xrange(1, self.n_e + 1):
                             for k in time_points[i]:
                                 variant_sf[i][k].append(N.abs(values[i][k]))
-
-                        for tv in op.getTimedVariables():
-                            if tv.getBaseVariable().getName() == name:
-                                variant_timed_var.append(tv.getVar())
-                                variant_timed_sf.append(N.abs(values[i][k]))
                     else:
                         is_variant[name] = False
                         if mode == "attribute":
                             d = N.abs(op.get_attr(var, "nominal"))
                             if d == 0.0:
-                                raise ValueError("Nominal value for " +
-                                                 "%s is zero." % name)
+                                raise CasadiCollocatorException(
+                                        "Nominal value for " +
+                                        "%s is zero." % name)
                             e = 0.
                         elif mode == "linear":
                             d = max([abs(traj_max), abs(traj_min)])
@@ -4265,24 +4486,20 @@ class LocalDAECollocator2(CasadiCollocator):
                             else:
                                 d = traj_max - traj_min
                                 e = traj_min
-                        name_idx_sf_map[name] = len(invariant_var)
-                        invariant_var.append(var.getVar())
+                        name_idx_sf_map[name] = n_invariant_var
+                        n_invariant_var += 1
                         invariant_d.append(d)
                         invariant_e.append(e)
-                        for tv in op.getTimedVariables():
-                            if tv.getBaseVariable().getName() == name:
-                                invariant_var.append(tv.getVar())
-                                invariant_d.append(d)
-                                invariant_e.append(e)
 
             # Do not scaled eliminated inputs
             for var in mvar_vectors['elim_u']:
                 name = var.getName()
+                (idx, vt) = name_map[name]
                 is_variant[name] = False
                 d = 1.
                 e = 0.
-                name_idx_sf_map[name] = len(invariant_var)
-                invariant_var.append(var.getVar())
+                name_idx_sf_map[name] = n_invariant_var
+                n_invariant_var += 1
                 invariant_d.append(d)
                 invariant_e.append(e)
 
@@ -4311,8 +4528,8 @@ class LocalDAECollocator2(CasadiCollocator):
                         nom_val = op.get_attr(var, "nominal")
                         d = N.abs(nom_val)
                         if d == 0.:
-                            raise ValueError("Nominal value for %s " % name +
-                                             "is zero.")
+                            raise CasadiCollocatorException(
+                                    "Nominal value for %s is zero." % name)
                     else:
                         d = N.abs(data.x[0])
                         if N.allclose(d, 0.):
@@ -4320,8 +4537,8 @@ class LocalDAECollocator2(CasadiCollocator):
                                   "too small. Setting scaling factor to 1.")
                             d = 1.
                     e = 0.
-                name_idx_sf_map[name] = len(invariant_var)
-                invariant_var.append(var.getVar())
+                name_idx_sf_map[name] = n_invariant_var
+                n_invariant_var += 1
                 invariant_d.append(d)
                 invariant_e.append(e)
         
@@ -4389,8 +4606,6 @@ class LocalDAECollocator2(CasadiCollocator):
             raise NotImplementedError("eliminate_der_var not yet supported.")
         if self.eliminate_cont_var:
             raise NotImplementedError("eliminate_cont_var not yet supported.")
-        if self.nominal_traj is not None:
-            raise NotImplementedError("nominal_traj not yet supported.")
 
         # Create collocation and DAE functions
         sym_input = self.mvar_struct_cat
@@ -4403,169 +4618,164 @@ class LocalDAECollocator2(CasadiCollocator):
         coll_der = self._collocation['coll_der']
         if not self.variable_scaling or self.nominal_traj is None:
             self._eliminate_der_var()
-            initial_fcn = casadi.MXFunction(sym_input + sym_input_dx,
+            initial_fcn = self._FXFunction(sym_input + sym_input_dx,
                                             [self.initial])
             if self.eliminate_der_var:
-                dae_fcn = casadi.MXFunction(sym_input + x_i + [der_vals_k,h_i],
-                                            [self.dae])
-                dae_fcn_t0 = casadi.MXFunction(sym_input, [self.dae_t0])
+                dae_fcn = self._FXFunction(sym_input + x_i + [der_vals_k,h_i],
+                                           [self.dae])
+                dae_fcn_t0 = self._FXFunction(sym_input, [self.dae_t0])
                 dae_fcn_t0.setOption("name", "dae_fcn_t0")
                 dae_fcn_t0.init()
             else:
-                coll_eq_fcn = casadi.MXFunction(
+                coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k, [coll_eq])
                 coll_eq_fcn.setOption("name", "coll_eq_fcn")
                 coll_eq_fcn.init()
-                dae_fcn = casadi.MXFunction(sym_input + sym_input_dx,
-                                            [self.dae])
+                dae_fcn = self._FXFunction(sym_input + sym_input_dx,
+                                           [self.dae])
         else:
-            # Scale variables in collocation equations
-            x_i_sf = casadi.msym("x_i_sf", (self.n_cp + 1) * n_variant_x)
-            n_invariant_x = n_var['x'] - n_variant_x
-            variant_x_i = N.ndarray((n_variant_x, 1), dtype=object)
-            invariant_x_i = N.ndarray((n_invariant_x, 1), dtype=object)
-            invariant_x_i_d = N.ndarray((n_invariant_x, 1), dtype=list)
-            invariant_x_i_e = N.ndarray((n_invariant_x, 1), dtype=list)
+            # Compose scaling factors for collocation equations
+            x_i_d = n_var['x'] * [None]
+            x_i_e = n_var['x'] * [None]
+            x_i_sf = casadi.msym("x_i_sf", n_variant_x, self.n_cp + 1)
+            dx_i_k_d = n_var['dx'] * [None]
+            dx_i_k_e = n_var['dx'] * [None]
+            dx_i_k_sf = casadi.msym("x_i_sf", n_variant_dx)
             n_cp_ones = N.ones((1, self.n_cp + 1))
-            inv_x_idx = 0 # Invariant x index
-            var_x_idx = 0 # Variant x index
-            if not self.eliminate_der_var:
-                dx_i_k_sf = casadi.msym("dx_i_k_sf", n_variant_dx)
-                n_invariant_dx = n_var['x'] - n_variant_dx
-                variant_dx_i_k = N.ndarray((n_variant_dx, 1), dtype=object)
-                invariant_dx_i_k = N.ndarray((n_invariant_dx, 1), dtype=object)
-                invariant_dx_i_k_d = N.ndarray((n_invariant_dx, 1), dtype=list)
-                invariant_dx_i_k_e = N.ndarray((n_invariant_dx, 1), dtype=list)
-                inv_dx_idx = 0 # Invariant dx index
-                var_dx_idx = 0 # Variant dx index
+            var_x_idx = 0
+            var_dx_idx = 0
             for var in mvar_vectors['x']:
                 # State
                 x_name = var.getName()
                 (ind, _) = name_map[x_name]
-                if self.named_vars:
-                    x_i_temp = x_i[ind]
-                else:
-                    x_i_temp = x_i[0][ind, :]
                 if is_variant[x_name]:
-                    variant_x_i[var_x_idx, 0] = x_i_temp
+                    x_i_d[ind] = x_i_sf[var_x_idx, :]
+                    x_i_e[ind] = 0. * n_cp_ones
                     var_x_idx += 1
                 else:
-                    invariant_x_i[inv_x_idx, 0] = x_i_temp
                     x_sf_index = name_idx_sf_map[x_name]
-                    invariant_x_i_d[inv_x_idx, 0] = \
-                            invariant_d[x_sf_index] * n_cp_ones
-                    invariant_x_i_e[inv_x_idx, 0] = \
-                            invariant_e[x_sf_index] * n_cp_ones
-                    inv_x_idx += 1
+                    x_i_d[ind] = invariant_d[x_sf_index] * n_cp_ones
+                    x_i_e[ind] = invariant_e[x_sf_index] * n_cp_ones
 
                 # State derivative
-                if not self.eliminate_der_var:
-                    dx_name = var.getMyDerivativeVariable().getName()
-                    if is_variant[dx_name]:
-                        variant_dx_i_k[var_dx_idx, 0] = dx_i_k[0][ind]
-                        var_dx_idx += 1
-                    else:
-                        invariant_dx_i_k[inv_dx_idx, 0] = dx_i_k[0][ind]
-                        dx_sf_index = name_idx_sf_map[dx_name]
-                        invariant_dx_i_k_d[inv_dx_idx, 0] = \
-                                invariant_d[dx_sf_index] * n_cp_ones
-                        invariant_dx_i_k_e[inv_dx_idx, 0] = \
-                                invariant_e[dx_sf_index] * n_cp_ones
-                        inv_dx_idx += 1
+                dx_name = var.getMyDerivativeVariable().getName()
+                (ind, _) = name_map[dx_name]
+                if is_variant[dx_name]:
+                    dx_i_k_d[ind] = dx_i_k_sf[var_dx_idx]
+                    dx_i_k_e[ind] = 0.
+                    var_dx_idx += 1
+                else:
+                    dx_sf_index = name_idx_sf_map[dx_name]
+                    dx_i_k_d[ind] = invariant_d[dx_sf_index]
+                    dx_i_k_e[ind] = invariant_e[dx_sf_index]
 
-            # Scale variant variables
-            if n_variant_x == 0:
-                scaled_var = []
-            else:
-                scaled_var = x_i_sf * variant_x_i
-                scaled_var = list(scaled_var.reshape(-1))
-
-            # Scale invariant variables
-            if n_invariant_x == 0:
-                scaled_inv = []
-            else:
-                scaled_inv = invariant_x_i_d * invariant_x_i + invariant_x_i_e
-                scaled_inv = list(scaled_inv.reshape(-1))
-
-            # Scale variables in collocation expression
-            # Unhandled exception below!
-            # Not possible to use slices as inputs
-            # Need to scale all off x_i at once, by using 1 as scale factor
-            # for variant variables
-            # FIX!!!
+            # Scale collocation equations
+            x_i_d = casadi.vertcat(x_i_d)
+            x_i_e = casadi.vertcat(x_i_e)
+            unscaled_var = list(x_i)
+            scaled_var = [x_i_d * x_i[0] + x_i_e]
             if self.eliminate_der_var:
-                unscaled_var = list(variant_x_i.reshape(-1))
-                unscaled_inv = list(invariant_x_i.reshape(-1))
-
-                coll_der = casadi.substitute(
-                        coll_der, unscaled_var + unscaled_inv,
-                        scaled_var + scaled_inv)
+                coll_der = casadi.substitute(coll_der, unscaled_var,
+                                             scaled_var)
                 self._collocation['coll_der'] = coll_der
                 self._eliminate_der_var()
             else:
-                invariant_dx_i_k_d = N.array(invariant_dx_i_k_d)
-                invariant_dx_i_k_e = N.array(invariant_dx_i_k_e)
-                unscaled_var.append(invariant_dx_i_k)
-                unscaled_var.append(variant_dx_i_k)
-                scaled_var.append(invariant_dx_i_k_d * invariant_dx_i_k +
-                                  invariant_dx_i_k_e)
-                scaled_var.append(dx_i_k_sf * variant_dx_i_k)
+                unscaled_var.append(dx_i_k[0])
+                dx_i_k_d = casadi.vertcat(dx_i_k_d)
+                dx_i_k_e = casadi.vertcat(dx_i_k_e)
+                scaled_var.append(dx_i_k_d * dx_i_k[0] + dx_i_k_e)
                 [coll_eq] = casadi.substitute([coll_eq], unscaled_var,
                                               scaled_var)
-            
-            # Scale variables in expressions
-            sym_sf = casadi.ssym("d_i_k", variant_var.numel())
+
+            # Compose scaling factors for other expressions
+            sym_sf = casadi.msym("d_i_k", n_variant_var)
             self._sym_sf = sym_sf
-            ocp_expressions = [self.initial, self.ode, self.alg, self.path,
-                               self.point, self.mterm, self.lterm]
+            unscaled_var = (self.mvar_struct_cat + self.mvar_struct_dx +
+                            timed_variables)
+            z_d = []
+            z_e = []
+            for vk in self.mvar_struct.keys():
+                if vk == "time":
+                    z_d.append(1.)
+                    z_e.append(0.)
+                else:
+                    for var in self.mvar_vectors[vk]:
+                        name = var.getName()
+                        sf_idx = name_idx_sf_map[name]
+                        if is_variant[name]:
+                            z_d.append(sym_sf[sf_idx])
+                            z_e.append(0.)
+                        else:
+                            z_d.append(invariant_d[sf_idx])
+                            z_e.append(invariant_e[sf_idx])
+
+            # Compose scaling factors for timed variables
+            timed_var_d = []
+            timed_var_e = []
+            for tv in op.getTimedVariables():
+                base_name = tv.getBaseVariable().getName()
+                sf_idx = name_idx_sf_map[base_name]
+                if is_variant[base_name]:
+                    tp = tv.getTimePoint()
+                    if self._normalize_min_time:
+                        cp = self._tp2cp(tp)
+                    else:
+                        cp = self.model.evaluateExpression(tp)
+                    (i, k) = collocation_constraint_points[tp]
+                    timed_var_d.append(self._variant_sf[i][k][sf_idx])
+                    timed_var_e.append(0.)
+                else:
+                    timed_var_d.append(invariant_d[sf_idx])
+                    timed_var_e.append(invariant_e[sf_idx])
+
+            # Scale variables in expressions
+            z_d = casadi.vertcat(z_d)
+            z_e = casadi.vertcat(z_e)
+            unscaled_var = (self.mvar_struct_cat + self.mvar_struct_dx +
+                            timed_variables)
+            scaled_z = z_d * self.mvar_struct_cat[0] + z_e
+            scaled_dx = dx_i_k_d * self.mvar_struct_dx[0] + dx_i_k_e
+            scaled_timed_var = map(
+                    operator.add,
+                    map(operator.mul, timed_var_d, timed_variables),
+                    timed_var_e)
+            scaled_var = [scaled_z, scaled_dx] + scaled_timed_var
+            ocp_expressions = [self.initial, self.dae, self.path, self.point,
+                               self.mterm, self.lterm]
             if self.eliminate_der_var:
                 ocp_expressions += [self.ode_t0, self.alg_t0]
-            unscaled_var = casadi.SXMatrix(0, 1)
-            unscaled_var.append(invariant_var)
-            unscaled_var.append(variant_var)
-            unscaled_var.append(variant_timed_var)
-            scaled_var = casadi.SXMatrix(0, 1)
-            scaled_var.append(N.array(invariant_d) * invariant_var +
-                              N.array(invariant_e))
-            scaled_var.append(sym_sf * variant_var)
-            scaled_var.append(N.array(variant_timed_sf) * variant_timed_var)
+
+            # Scale variables in expressions
             scaled_expressions = casadi.substitute(ocp_expressions,
-                                                   [unscaled_var],
-                                                   [scaled_var])
+                                                   unscaled_var,
+                                                   scaled_var)
             if self.eliminate_der_var:
-                [self.initial, self.ode, self.alg, self.path, self.point,
+                [self.initial, self.dae, self.path, self.point,
                  self.mterm, self.lterm, self.ode_t0, self.alg_t0] = \
                         scaled_expressions
             else:
-                [self.initial, self.ode, self.alg, self.path, self.point,
+                [self.initial, self.dae, self.path, self.point,
                  self.mterm, self.lterm] = scaled_expressions
-            
+
             # Create functions
-            initial_fcn = casadi.SXFunction([sym_input, sym_sf],
-                                            [self.initial])
+            initial_fcn = self._FXFunction(
+                    sym_input + sym_input_dx + [sym_sf], [self.initial])
             if self.eliminate_der_var:
-                ode_fcn = casadi.SXFunction([sym_input_elim_der, x_i,
-                                             der_vals_k, h_i, sym_sf, x_i_sf], 
-                                            [self.ode])
-                alg_fcn = casadi.SXFunction([sym_input_elim_der, x_i,
-                                             der_vals_k, h_i, sym_sf, x_i_sf],
-                                            [self.alg])
-                ode_fcn_t0 = casadi.SXFunction([sym_input, sym_sf],
-                                               [self.ode_t0])
-                alg_fcn_t0 = casadi.SXFunction([sym_input, sym_sf],
-                                               [self.alg_t0])
-                ode_fcn_t0.setOption("name", "ode_fcn_t0")
-                ode_fcn_t0.init()
-                alg_fcn_t0.setOption("name", "alg_fcn_t0")
-                alg_fcn_t0.init()
+                dae_fcn = self._FXFunction(sym_input + x_i +
+                                            [der_vals_k, h_i, sym_sf, x_i_sf], 
+                                            [self.dae])
+                dae_fcn_t0 = self._FXFunction(sym_input + [sym_sf],
+                                               [self.dae_t0])
+                dae_fcn_t0.setOption("name", "dae_fcn_t0")
+                dae_fcn_t0.init()
             else:
-                coll_eq_fcn = casadi.SXFunction(
-                        [x_i, der_vals_k, h_i, dx_i_k, x_i_sf, dx_i_k_sf],
-                        [coll_eq])
+                coll_eq_fcn = self._FXFunction(
+                        x_i + [der_vals_k, h_i] + dx_i_k +
+                        [x_i_sf, dx_i_k_sf], [coll_eq])
                 coll_eq_fcn.setOption("name", "coll_eq_fcn")
                 coll_eq_fcn.init()
-                ode_fcn = casadi.SXFunction([sym_input, sym_sf], [self.ode])                
-                alg_fcn = casadi.SXFunction([sym_input, sym_sf], [self.alg])
+                dae_fcn = self._FXFunction(
+                        sym_input + sym_input_dx + [sym_sf], [self.dae])
         
         # Initialize functions
         initial_fcn.setOption("name", "initial_fcn")
@@ -4586,16 +4796,17 @@ class LocalDAECollocator2(CasadiCollocator):
         
         # Create path constraint functions
         path_constraint_input = []
-        if self.eliminate_der_var: # FIX!!!
-            path_constraint_input += [sym_input_elim_der, x_i, der_vals_k, h_i]
+        if self.eliminate_der_var:
+            path_constraint_input += [sym_input_elim_der, x_i[0], der_vals_k,
+                                      h_i]
         else:
             path_constraint_input += sym_input + sym_input_dx
         path_constraint_input += timed_variables
-        if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+        if self.variable_scaling and self.nominal_traj is not None:
             path_constraint_input.append(sym_sf)
-        g_e_fcn = casadi.MXFunction(path_constraint_input,
+        g_e_fcn = self._FXFunction(path_constraint_input,
                                     [casadi.vertcat(g_e)])
-        g_i_fcn = casadi.MXFunction(path_constraint_input,
+        g_i_fcn = self._FXFunction(path_constraint_input,
                                     [casadi.vertcat(g_i)])
         g_e_fcn.setOption("name", "g_e_fcn")
         g_e_fcn.init()
@@ -4618,11 +4829,9 @@ class LocalDAECollocator2(CasadiCollocator):
         # Note that sym_input is needed as input since the point constraints
         # may depend on free parameters
         point_constraint_input = sym_input + timed_variables
-        if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
-            point_constraint_input.append(sym_sf)
-        G_e_fcn = casadi.MXFunction(point_constraint_input,
+        G_e_fcn = self._FXFunction(point_constraint_input,
                                     [casadi.vertcat(G_e)])
-        G_i_fcn = casadi.MXFunction(point_constraint_input,
+        G_i_fcn = self._FXFunction(point_constraint_input,
                                     [casadi.vertcat(G_i)])
         G_e_fcn.setOption("name", "G_e_fcn")
         G_e_fcn.init()
@@ -4641,7 +4850,6 @@ class LocalDAECollocator2(CasadiCollocator):
             x_list.append(x_i)
         
         # Index collocation equation scale factors
-        # FIX!!!
         if self.variable_scaling and self.nominal_traj is not None:
             coll_sf = {}
             for i in xrange(1, self.n_e + 1):
@@ -4651,36 +4859,39 @@ class LocalDAECollocator2(CasadiCollocator):
                 for k in xrange(1, self.n_cp + 1):
                     coll_sf[i]['dx'][k] = []
             for var in mvar_vectors['x']:
-                x_vr = var.getValueReference()
-                dx_name = convert_casadi_der_name(str(var.der()))
-                dx_vr = self.model.xmldoc.get_value_reference(dx_name)
-                
-                x_sf_index = name_idx_sf_map[x_vr]
-                dx_sf_index = name_idx_sf_map[dx_vr]
+                x_name = var.getName()
+                dx_name = var.getMyDerivativeVariable().getName()
+                x_sf_index = name_idx_sf_map[x_name]
+                dx_sf_index = name_idx_sf_map[dx_name]
                 
                 # States
-                if is_variant[x_vr]:
+                if is_variant[x_name]:
                     # First element
                     i = 1
-                    coll_sf[i]['x'].append(variant_sf[i][0][x_sf_index])
+                    coll_sf[i]['x'].append([])
+                    coll_sf[i]['x'][-1].append(variant_sf[i][0][x_sf_index])
                     for k in xrange(1, self.n_cp + 1):
-                        coll_sf[i]['x'].append(
+                        coll_sf[i]['x'][-1].append(
                                 variant_sf[i][k][x_sf_index])
                     
                     # Suceeding elements
                     for i in xrange(2, self.n_e + 1):
                         k = self.n_cp + self.is_gauss
-                        coll_sf[i]['x'].append(variant_sf[i-1][k][x_sf_index])
+                        coll_sf[i]['x'].append([])
+                        coll_sf[i]['x'][-1].append(
+                                variant_sf[i-1][k][x_sf_index])
                         for k in xrange(1, self.n_cp + 1):
-                            coll_sf[i]['x'].append(
+                            coll_sf[i]['x'][-1].append(
                                     variant_sf[i][k][x_sf_index])
                 
                 # State derivatives
-                if is_variant[dx_vr]:
+                if is_variant[dx_name]:
+                    print(dx_name)
                     for i in xrange(1, self.n_e + 1):
                         for k in xrange(1, self.n_cp + 1):
                             coll_sf[i]['dx'][k].append(
                                     variant_sf[i][k][dx_sf_index])
+
         # Create constraint storage
         c_e = casadi.MX() 
         c_i = casadi.MX()
@@ -4689,12 +4900,11 @@ class LocalDAECollocator2(CasadiCollocator):
         i = 1
         k = 0
         fcn_input = self._get_z(i, k)
-        if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+        if self.variable_scaling and self.nominal_traj is not None:
             fcn_input.append(variant_sf[i][k])
         [initial_constr] = initial_fcn.call(fcn_input)
         c_e.append(initial_constr)
         if self.eliminate_der_var:
-            # FIX!!!
             [dae_t0_constr] = dae_fcn_t0.call(fcn_input)
         else:
             [dae_t0_constr] = dae_fcn.call(fcn_input)
@@ -4717,7 +4927,7 @@ class LocalDAECollocator2(CasadiCollocator):
         for i in xrange(1, self.n_e + 1):
             for k in xrange(1, self.n_cp + 1):
                 # Create function inputs
-                if self.eliminate_der_var: # FIX!!!
+                if self.eliminate_der_var:
                     z = self._get_z_elim_der(i, k)
                     fcn_input = z + x_list[i] + [der_vals[k],
                                                  self.horizon * self.h[i]]
@@ -4730,12 +4940,12 @@ class LocalDAECollocator2(CasadiCollocator):
                         coll_input += list(var_map[i][k]['dx'])
                     else:
                         coll_input += [var_map[i][k]['dx']]
-                if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+                if self.variable_scaling and self.nominal_traj is not None:
                     fcn_input += [variant_sf[i][k]]
                     if self.eliminate_der_var:
-                        fcn_input += [coll_sf[i]['x']]
+                        fcn_input += [casadi.horzcat(coll_sf[i]['x']).T]
                     else:
-                        coll_input += [coll_sf[i]['x']]
+                        coll_input += [casadi.horzcat(coll_sf[i]['x']).T]
                         coll_input += [coll_sf[i]['dx'][k]]
                 
                 # Evaluate collocation constraints
@@ -4825,7 +5035,7 @@ class LocalDAECollocator2(CasadiCollocator):
         for i in xrange(1, self.n_e + 1):
             for k in self.time_points[i].keys():
                 fcn_input = []
-                if self.eliminate_der_var: # FIX!!!
+                if self.eliminate_der_var:
                     z = self._get_z_elim_der(i, k)
                     fcn_input += [z, x_list[i], der_vals[k],
                                   self.horizon * self.h[i]]
@@ -4833,7 +5043,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     z = self._get_z(i, k)
                     fcn_input = list(z)
                 fcn_input += nlp_timed_variables
-                if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+                if self.variable_scaling and self.nominal_traj is not None:
                     fcn_input.append(variant_sf[i][k])
                 [g_e_constr] = g_e_fcn.call(fcn_input)
                 [g_i_constr] = g_i_fcn.call(fcn_input)
@@ -4850,47 +5060,90 @@ class LocalDAECollocator2(CasadiCollocator):
         
         # Equality constraints for constrained inputs
         if self.measurement_data is not None:
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
                     for j in xrange(len(self.measurement_data.constrained)):
                         # Retrieve variable and value
                         name = self.measurement_data.constrained.keys()[j]
-                        (ind, _) = name_map[name]
-                        constr_var = self.var_map[i][k]['unelim_u'][ind]
+                        constr_var = self._get_unscaled_expr(name, i, k)
                         constr_val = self.var_map[i][k]['constr_u'][j]
-                        
-                        # Scale variable
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                constr_var *= sf
-                            else: # FIX!!!
-                                sf_index = name_idx_sf_map[vr]
-                                if is_variant[vr]:
-                                    sf = variant_sf[i][k][sf_index]
-                                    constr_var *= sf
-                                else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    constr_var = d * constr_var + e
-                        
+                                                
                         # Add constraint
                         input_constr = constr_var - constr_val
                         if self.named_vars:
                             input_constr = casadi.vertcat(input_constr)
                         c_e.append(input_constr)
+
+        # Equality constraints for delayed feedback
+        if self.delayed_feedback is not None:
+
+            # Check for unsupported cases
+            if self.blocking_factors is not None: raise CasadiCollocatorException(
+                "Blocking factors are not supported with delayed feedback.")
+            if self._normalize_min_time: raise CasadiCollocatorException(
+                "Free time horizon os not supported with delayed feedback.")
+            if self.hs is not None: raise CasadiCollocatorException(
+                "Non-uniform element lengths are not supported with delayed feedback.")
+            
+            for (u_name, (y_name, delay_n_e)) in self.delayed_feedback.iteritems():
+                u_dae_var = self.op.getVariable(u_name)
+                for i in xrange(1, self.n_e + 1):
+                    for k in xrange(1, self.n_cp + 1):
+                        u_var = self._get_unscaled_expr(u_name, i, k)
+                        if i > delay_n_e:
+                            u_value = self._get_unscaled_expr(y_name, i-delay_n_e, k)
+                        else:
+                            u_value = self._eval_initial(u_dae_var, i, k)
+                                                
+                        # Add constraint
+                        input_constr = u_var - u_value
+                        if self.named_vars:
+                            input_constr = casadi.vertcat(input_constr) # why?
+                        c_e.append(input_constr)
         
         # Store constraints, time and timed variables as data attributes
         self.c_e = c_e
-        if c_i.isNull():
-            self.c_i = casadi.MX(0, 1)
-        else:
-            self.c_i = c_i
+        self.c_i = c_i
         self.time = N.array(time)
         self._timed_variables = timed_variables
         self._nlp_timed_variables = nlp_timed_variables
+
+    def _FXFunction(self, *args):
+        f = casadi.MXFunction(*args)
+        if self.expand_to_SX == 'partial':
+            f.init()
+            f = casadi.SXFunction(f)
+        return f
+
+    def _get_affine_scaling(self, name, i, k):
+        """
+        Get the affine scaling (d, e) of variable name at a collocation point.
+
+            unscaled_value = d*scaled_value + e
+        """
+        
+        if self.variable_scaling:
+            if self.nominal_traj is None:
+                (ind, vt) = self.name_map[name]
+                return (self._sf[vt][ind], 0.0)
+            else:
+                sf_index = self._name_idx_sf_map[name]
+                if self._is_variant[name]:
+                    return (variant_sf[i][k][sf_index], 0.0)
+                else:
+                    return (self._invariant_d[sf_index], self._invariant_e[sf_index])
+        else:
+            return (1.0, 0.0)
+
+    def _get_unscaled_expr(self, name, i, k):
+        """
+        Get an expression for the unscaled value of variable name at a collocation point.
+        """
+        
+        (ind, vt) = self.name_map[name]
+        val = self.var_map[i][k][vt][ind]
+        d, e = self._get_affine_scaling(name, i, k)        
+        return d*val + e
         
     def _create_cost(self):
         """
@@ -4903,9 +5156,16 @@ class LocalDAECollocator2(CasadiCollocator):
             h_i = self._collocation['h_i']
             coll_der = self._collocation['coll_der']
         
-        # Retrieve time-variant scale factors
-        if self.variable_scaling and self.nominal_traj is not None:
-            variant_sf = self._variant_sf
+        # Retrieve scale factors
+        if self.variable_scaling:
+            if self.nominal_traj is None:
+                sfs = self._sf
+            else:
+                variant_sf = self._variant_sf
+                invariant_d = self._invariant_d
+                invariant_e = self._invariant_e
+                is_variant = self._is_variant
+                name_idx_sf_map = self._name_idx_sf_map
         
         # Calculate cost
         self.cost_mayer = 0
@@ -4919,36 +5179,32 @@ class LocalDAECollocator2(CasadiCollocator):
             elif self.discr == "LG":
                 z = self._get_z_elim_der(self.n_e, self.n_cp + 1)
             else:
-                raise ValueError("Unknown discretization scheme %s." %
-                                 self.discr)
+                raise CasadiCollocatorException(
+                        "Unknown discretization scheme %s." % self.discr)
 
             # Create function for evaluation of Mayer term
             mterm_input = self.mvar_struct_cat + self._timed_variables
-            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
-                mterm_input.append(sym_sf)
-            mterm_fcn = casadi.MXFunction(mterm_input, [self.mterm])
+            mterm_fcn = self._FXFunction(mterm_input, [self.mterm])
             mterm_fcn.setOption("name", "mterm_fcn")
             mterm_fcn.init()
 
             # Evaluate Mayer term
             z = self._get_z_elim_der(1, 0) # Needed to get free parameters
             mterm_fcn_input = z + self._nlp_timed_variables
-            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
-                mterm_input.append(sym_sf)
             [self.cost_mayer] = mterm_fcn.call(mterm_fcn_input)
         
         # Lagrange term
         if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
             # Create function for evaluation of Lagrange integrand
-            if self.eliminate_der_var: # FIX!!!
+            if self.eliminate_der_var:
                 fcn_input = self.mvar_struct_cat + [x_i, der_vals_k, h_i]
             else:
                 fcn_input = self.mvar_struct_cat + self.mvar_struct_dx
             fcn_input += self._timed_variables
-            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+            if self.variable_scaling and self.nominal_traj is not None:
                 fcn_input.append(self._sym_sf)
 
-            lterm_fcn = casadi.MXFunction(fcn_input, [self.lterm])
+            lterm_fcn = self._FXFunction(fcn_input, [self.lterm])
             lterm_fcn.setOption("name", "lterm_fcn")
             lterm_fcn.init()
 
@@ -4969,15 +5225,15 @@ class LocalDAECollocator2(CasadiCollocator):
             # Evaluate Lagrange cost
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
-                    if self.eliminate_der_var: # FIX!!!
+                    if self.eliminate_der_var:
                         z = self._get_z_elim_der(i, k)
                         lterm_fcn_input = z + [self.x_list[i], self.der_vals[k],
                                          self.horizon * self.h[i]]
                     else:
                         lterm_fcn_input = self._get_z(i, k)
                     lterm_fcn_input += self._nlp_timed_variables
-                    if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
-                        lterm_fcn_input += variant_sf[i][k]
+                    if self.variable_scaling and self.nominal_traj is not None:
+                        lterm_fcn_input += [variant_sf[i][k]]
                     [lterm_val] = lterm_fcn.call(lterm_fcn_input)
                     # This can be improved! See #3355
                     self.cost_lagrange += ((tf - t0) * self.h[i] *
@@ -4990,13 +5246,6 @@ class LocalDAECollocator2(CasadiCollocator):
         if (self.measurement_data is not None and
             (len(self.measurement_data.unconstrained) +
              len(self.measurement_data.constrained) > 0)):
-            # Retrieve scaling factors
-            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
-                invariant_d = self._invariant_d
-                invariant_e = self._invariant_e
-                is_variant = self._is_variant
-                name_idx_sf_map = self._name_idx_sf_map
-            
             # Create nested dictionary for storage of errors and calculate
             # reference values
             err = {}
@@ -5015,32 +5264,15 @@ class LocalDAECollocator2(CasadiCollocator):
             
             # Calculate errors
             name_map = self.name_map
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
             var_names = (self.measurement_data.constrained.keys() +
                          self.measurement_data.unconstrained.keys())
             for j in xrange(len(var_names)):
                 name = var_names[j]
-                (ind, vt) = name_map[name]
                 for i in range(1, self.n_e + 1):
                     for k in range(1, self.n_cp + 1):
-                        val = self.var_map[i][k][vt][ind]
+                        unscaled_val = self._get_unscaled_expr(name, i, k)
                         ref_val = y_ref[i][k][j]
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                sf = sfs[vt][ind]
-                                err[i][k].append(sf * val - ref_val)
-                            else:
-                                sf_index = name_idx_sf_map[vr]
-                                if is_variant[vr]:
-                                    sf = variant_sf[i][k][sf_index]
-                                    err[i][k].append(sf * val - ref_val)
-                                else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    err[i][k].append(d * val + e - ref_val)
-                        else:
-                            err[i][k].append(val - ref_val)
+                        err[i][k].append(unscaled_val - ref_val)
             
             # Calculate cost contribution from each collocation point
             Q = self.measurement_data.Q
@@ -5050,7 +5282,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     err_i_k = N.array(err[i][k])
                     integrand = N.dot(N.dot(err_i_k, Q), err_i_k)
                     self.cost += (h_i * integrand * self.pol.w[k])
-            
+
         # Add cost term for free element lengths
         if self.hs == "free":
             Q = self.free_element_lengths_data.Q
@@ -5065,7 +5297,130 @@ class LocalDAECollocator2(CasadiCollocator):
                             self.var_map[i][k]['dx'])
                     length_cost += (h_i ** (1 + a) * integrand * self.pol.w[k])
             self.cost += c * length_cost
+
+    def _create_blocking_factors_constraints_and_cost(self):
+        """
+        Add the constraints and penalties from blocking factors.
+        """
+        # Retrieve meta-data
+        if self.variable_scaling:
+            if self.nominal_traj is None:
+                sfs = self._sf
+            else:
+                variant_sf = self._variant_sf
+                invariant_d = self._invariant_d
+                invariant_e = self._invariant_e
+                is_variant = self._is_variant
+                name_idx_sf_map = self._name_idx_sf_map
+        c_i = self.c_i
+
+        # Add constraints and penalties
+        if self.blocking_factors is not None:
+            bf_pen = 0.
+            for var in self.mvar_vectors['unelim_u']:
+                name = var.getName()
+                if name in self.blocking_factors.factors:
+                    # Find scale factors
+                    (idx, _) = self.name_map[name]
+                    if self.variable_scaling:
+                        if self.nominal_traj is None:
+                            d_0 = sfs['unelim_u'][idx]
+                            e_0 = 0.
+                            d_1 = d_0
+                            e_1 = 0.
+                        else:
+                            sf_index = name_idx_sf_map[name]
+                            if is_variant[name]:
+                                d_0 = variant_sf[i][1][sf_index]
+                                e_0 = 0.
+                                d_1 = variant_sf[i+1][1][sf_index]
+                                e_1 = 0.
+                            else:
+                                d_0 = invariant_d[sf_index]
+                                e_0 = invariant_e[sf_index]
+                                d_1 = d_0
+                                e_1 = e_0
+                    else:
+                        d_0 = 1.
+                        e_0 = 0.
+                        d_1 = d_0
+                        e_1 = e_0
+
+                    # Get variable info
+                    factors = self.blocking_factors.factors[name]
+                    if name in self.blocking_factors.du_bounds:
+                        bound = self.blocking_factors.du_bounds[name]
+                    if name in self.blocking_factors.du_quad_pen:
+                        weight = self.blocking_factors.du_quad_pen[name]
+
+                    # Loop over blocking factor boundaries
+                    quad_pen = 0.
+                    for i in N.cumsum(factors)[:-1]:
+                        # Create delta_u
+                        du = (d_0*self.var_map[i][1]['unelim_u'][idx] + e_0 -
+                              d_1*self.var_map[i+1][1]['unelim_u'][idx] - e_1)
+
+                        # Add constraints
+                        if name in self.blocking_factors.du_bounds:
+                            c_i.append(du - bound)
+                            c_i.append(-du - bound)
+
+                        # Add penalty
+                        if name in self.blocking_factors.du_quad_pen:
+                            quad_pen += du ** 2
+
+                    # Add penalty for variable
+                    if name in self.blocking_factors.du_quad_pen:
+                        bf_pen += weight * quad_pen
+            self.cost += bf_pen
+
+        # Check for lack of inequality constraints
+        if c_i.isNull():
+            self.c_i = casadi.MX(0, 1)
     
+
+    def _create_initial_trajectories(self):
+        """
+        Create interpolated initial trajectories and store in self.init_traj_interp
+        """
+
+        if self.init_traj is not None:
+            n = len(self.init_traj.get_data_matrix()[:, 0])
+            self.init_traj_interp = traj = {}
+
+            for vt in ["dx", "x", "w", "unelim_u"]:
+                for var in self.mvar_vectors[vt]:
+                    data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
+                    name = var.getName()
+                    try:
+                        data = self.init_traj.get_variable_data(name)
+                    except VariableNotFoundError:
+                        print("Warning: Could not find initial " +
+                              "trajectory for variable " + name +
+                              ". Using initialGuess attribute value " +
+                              "instead.")
+                        ordinates = N.array([[
+                            self.op.get_attr(var, "initialGuess")]])
+                        abscissae = N.array([0])
+                    else:
+                        abscissae = data.t
+                        ordinates = data.x.reshape([-1, 1])
+                    traj[var] = TrajectoryLinearInterpolation(
+                        abscissae, ordinates)
+
+    def _eval_initial(self, var, i, k):
+        """
+        Evaluate initial value of Variable var at a given collocation point.
+
+        self._create_initial_trajectories() must have been called first.
+        """
+        if self.init_traj is None:
+            return self.op.get_attr(var, "initialGuess")
+        else:
+            time = self.time_points[i][k]
+            if self._normalize_min_time:
+                time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
+            return self.init_traj_interp[var].eval(time)
     def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.
@@ -5086,7 +5441,7 @@ class LocalDAECollocator2(CasadiCollocator):
         if self.variable_scaling:
             if self.nominal_traj is None:
                 sfs = self._sf
-            else: # FIX!!!
+            else:
                 variant_sf = self._variant_sf
                 invariant_d = self._invariant_d
                 invariant_e = self._invariant_e
@@ -5103,7 +5458,7 @@ class LocalDAECollocator2(CasadiCollocator):
             if self.variable_scaling:
                 if self.nominal_traj is None:
                     sf = sfs["p_opt"][var_index]
-                else: # FIX!!!
+                else:
                     sf_index = name_idx_sf_map[name]
                     sf = invariant_d[sf_index]
             else:
@@ -5130,40 +5485,6 @@ class LocalDAECollocator2(CasadiCollocator):
         xx_lb[var_indices['p_opt']] = p_min
         xx_ub[var_indices['p_opt']] = p_max
         xx_init[var_indices['p_opt']] = p_init
-        
-        # Manipulate initial trajectories
-        if self.init_traj is not None:
-            n = len(self.init_traj.get_data_matrix()[:, 0])
-            traj = {}
-
-            for vt in ["dx", "x", "w", "unelim_u"]:
-                traj[vt] = {}
-                for var in mvar_vectors[vt]:
-                    data_matrix = N.empty([n, len(mvar_vectors[vt])])
-                    name = var.getName()
-                    (var_index, _) = name_map[name]
-                    if name == "startTime":
-                        abscissae = N.array([0])
-                        ordinates = N.array([[self._denorm_t0_init]])
-                    elif name == "finalTime":
-                        abscissae = N.array([0])
-                        ordinates = N.array([[self._denorm_tf_init]])
-                    else:
-                        try:
-                            data = self.init_traj.get_variable_data(name)
-                        except VariableNotFoundError:
-                            print("Warning: Could not find initial " +
-                                  "trajectory for variable " + name +
-                                  ". Using initialGuess attribute value " +
-                                  "instead.")
-                            ordinates = N.array([[
-                                    op.get_attr(var, "initialGuess")]])
-                            abscissae = N.array([0])
-                        else:
-                            abscissae = data.t
-                            ordinates = data.x.reshape([-1, 1])
-                        traj[vt][var_index] = TrajectoryLinearInterpolation(
-                                abscissae, ordinates)
 
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
@@ -5179,25 +5500,19 @@ class LocalDAECollocator2(CasadiCollocator):
                 name = var.getName()
                 v_min = op.get_attr(var, "min")
                 v_max = op.get_attr(var, "max")
-                if self.init_traj is None:
-                    v_init = op.get_attr(var, "initialGuess")
                 (var_idx, _) = name_map[name]
                 if self.variable_scaling:
                     if self.nominal_traj is None:
                         d = sfs[vt][var_idx]
                         e = 0.
-                    else: # FIX!!!
+                    else:
                         sf_index = name_idx_sf_map[name]
                         if is_variant[name]:
                             e = 0.
                             for i in xrange(1, self.n_e + 1):
                                 for k in self.time_points[i].keys():
                                     d = variant_sf[i][k][sf_index]
-                                    if self.init_traj is not None:
-                                        time = time_points[i][k]
-                                        if self._normalize_min_time:
-                                            time = t0 + (tf - t0) * time
-                                        v_init = traj[vt][var_idx].eval(time)
+                                    v_init = self._eval_initial(var, i, k)
                                     xx_lb[var_indices[i][k][vt][var_idx]] = \
                                             (v_min - e) / d
                                     xx_ub[var_indices[i][k][vt][var_idx]] = \
@@ -5214,11 +5529,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     or (not is_variant[name])):
                     for i in xrange(1, self.n_e + 1):
                         for k in self.time_points[i].keys():
-                            if self.init_traj is not None:
-                                time = time_points[i][k]
-                                if self._normalize_min_time:
-                                    time = t0 + (tf - t0) * time
-                                v_init = traj[vt][var_idx].eval(time)
+                            v_init = self._eval_initial(var, i, k)
                             xx_lb[var_indices[i][k][vt][var_idx]] = \
                                             (v_min - e) / d
                             xx_ub[var_indices[i][k][vt][var_idx]] = \
@@ -5266,7 +5577,7 @@ class LocalDAECollocator2(CasadiCollocator):
             self.solver = casadi.IpoptSolver(nlp)
 
         # Expand to SX
-        self.solver.setOption("expand", self.expand_to_SX)
+        self.solver.setOption("expand", self.expand_to_SX == True)
     
     def get_equality_constraint(self):
         return self.c_e
@@ -5293,7 +5604,7 @@ class LocalDAECollocator2(CasadiCollocator):
         if self.variable_scaling:
             if self.nominal_traj is None:
                 sf = self._sf
-            else: # FIX!!!
+            else:
                 name_idx_sf_map = self._name_idx_sf_map
                 is_variant = self._is_variant
                 variant_sf = self._variant_sf
@@ -5337,26 +5648,26 @@ class LocalDAECollocator2(CasadiCollocator):
                 t_start = t_opt[-1]
             t_opt = t_opt.reshape([-1, 1])
         else:
-            raise ValueError("Unknown result mode %s." % self.result_mode)
+            raise CasadiCollocatorException("Unknown result mode %s." %
+                                            self.result_mode)
         
         # Create arrays for storage of variable trajectories
         for var_type in var_types + ['elim_u']:
             var_opt[var_type] = N.empty([len(t_opt), n_var[var_type]])
         var_opt['merged_u'] = N.empty([len(t_opt),
                                        n_var['unelim_u'] + n_var['elim_u']])
-        if self.eliminate_der_var: # FIX!!!
+        if self.eliminate_der_var:
             var_opt['dx'] = N.empty([len(t_opt), n_var['x']])
         var_opt['p_opt'] = N.empty(n_var['p_opt'])
         
         # Get optimal parameter values and rescale
-        # FIX!!!
         p_opt = primal_opt[self.get_var_indices()['p_opt']].reshape(-1)
         if self.variable_scaling and not self.write_scaled_result:
             if self.nominal_traj is None:
                 p_opt *= sf['p_opt']
             else:
-                p_opt_sf = N.empty(self.model.get_n_p())
-                for var in self.ocp.pf:
+                p_opt_sf = N.empty(n_var['p_opt'])
+                for var in mvar_vectors['p_opt']:
                     name = var.getName()
                     (ind, _) = name_map[name]
                     sf_index = name_idx_sf_map[name]
@@ -5372,42 +5683,48 @@ class LocalDAECollocator2(CasadiCollocator):
                     for var_type in var_types:
                         for var in mvar_vectors[var_type]:
                             name = var.getName()
-                            (ind, _) = name_map[name]
-                            global_ind = var_indices[i][k][var_type][ind]
-                            xx_i_k = primal_opt[global_ind]
-                            if self.nominal_traj is None:
-                                xx_i_k *= sf[var_type][ind]
-                            else: # FIX!!!
-                                sf_index = self._name_idx_sf_map[name]
-                                if self._is_variant[name]:
-                                    xx_i_k *= variant_sf[i][k][sf_index]
+                            if (var_type != "unelim_u" or
+                                self.blocking_factors is None or
+                                name not in self.blocking_factors.factors):
+                                (ind, _) = name_map[name]
+                                global_ind = var_indices[i][k][var_type][ind]
+                                xx_i_k = primal_opt[global_ind]
+                                if self.nominal_traj is None:
+                                    xx_i_k *= sf[var_type][ind]
                                 else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                                    xx_i_k = d * xx_i_k + e
-                            primal_opt[global_ind] = xx_i_k
+                                    sf_index = self._name_idx_sf_map[name]
+                                    if self._is_variant[name]:
+                                        xx_i_k *= variant_sf[i][k][sf_index]
+                                    else:
+                                        d = invariant_d[sf_index]
+                                        e = invariant_e[sf_index]
+                                        xx_i_k = d * xx_i_k + e
+                                primal_opt[global_ind] = xx_i_k
 
-                    # Not sure if needed? FIX!!!
-                    #~ # Treat state derivatives separately
-                    #~ if not self.eliminate_der_var:
-                        #~ dx_names = self.model.xmldoc.get_dx_variable_names(
-                                #~ False)
-                        #~ name_dict = dict((x[0], x[1]) for x in dx_names)
-                        #~ for name in sorted(name_dict):
-                            #~ (ind, _) = name_map[name]
-                            #~ global_ind = var_indices[i][k]["dx"][ind]
-                            #~ xx_i_k = primal_opt[global_ind]
-                            #~ if self.nominal_traj is None:
-                                #~ xx_i_k *= sf["dx"][ind]
-                            #~ else:
-                                #~ sf_index = self._name_idx_sf_map[name]
-                                #~ if self._is_variant[name]:
-                                    #~ xx_i_k *= variant_sf[i][k][sf_index]
-                                #~ else:
-                                    #~ d = invariant_d[sf_index]
-                                    #~ e = invariant_e[sf_index]
-                                    #~ xx_i_k = d * xx_i_k + e
-                            #~ primal_opt[global_ind] = xx_i_k
+        # Rescale inputs with blocking factors
+        if (self.variable_scaling and not self.write_scaled_result and
+            self.blocking_factors is not None):
+            var_type = "unelim_u"
+            k = 1
+            for var in mvar_vectors[var_type]:
+                name = var.getName()
+                if name in self.blocking_factors.factors:
+                    (ind, _) = name_map[name]
+                    # Rescale once per factor
+                    for i in N.cumsum(self.blocking_factors.factors[name]):
+                        global_ind = var_indices[i][k][var_type][ind]
+                        u_i_k = primal_opt[global_ind]
+                        if self.nominal_traj is None:
+                            u_i_k *= sf[var_type][ind]
+                        else:
+                            sf_index = self._name_idx_sf_map[name]
+                            if self._is_variant[name]:
+                                u_i_k *= variant_sf[i][k][sf_index]
+                            else:
+                                d = invariant_d[sf_index]
+                                e = invariant_e[sf_index]
+                                u_i_k = d * u_i_k + e
+                        primal_opt[global_ind] = u_i_k
 
         # Rescale continuity variables
         if (self.variable_scaling and not self.eliminate_cont_var and
@@ -5416,7 +5733,6 @@ class LocalDAECollocator2(CasadiCollocator):
                 k = self.n_cp + self.is_gauss
                 x_i_k = primal_opt[var_indices[i][k]['x']]
                 primal_opt[var_indices[i + 1][0]['x']] = x_i_k
-        # FIX!!!
         if (self.is_gauss and self.variable_scaling and 
             not self.eliminate_cont_var and not self.write_scaled_result):
             if self.quadrature_constraint:
@@ -5452,7 +5768,7 @@ class LocalDAECollocator2(CasadiCollocator):
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     var_opt['elim_u'][t_index, :] = var_map[i][k]['elim_u']
                     t_index += 1
-            if self.eliminate_der_var: # FIX!!!
+            if self.eliminate_der_var:
                 # dx_1_0
                 t_index = 0
                 i = 1
@@ -5570,7 +5886,8 @@ class LocalDAECollocator2(CasadiCollocator):
                     var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
                     t_index += 1
         else:
-            raise ValueError("Unknown result mode %s." % self.result_mode)
+            raise CasadiCollocatorException("Unknown result mode %s." %
+                                            self.result_mode)
         
         # Merge uneliminated and eliminated inputs
         if self.n_var['u'] > 0:
@@ -5857,8 +6174,14 @@ class LocalDAECollocator2(CasadiCollocator):
             f.init()
             return f.eval(debug_xx)[0]
         else:
-            raise ValueError(
-                    "_debug_eval_expr only works with named variables.")
+            try:
+                debug_xx = self._debug_xx
+            except AttributeError:
+                debug_xx = casadi.ssym("xx", self.n_xx)
+                self._debug_xx = debug_xx
+            f = casadi.MXFunction([self.xx], [expr])
+            f.init()
+            return f.eval([self._debug_xx])[0]
 
 class PseudoSpectral(CasadiCollocator):
     

@@ -4534,42 +4534,47 @@ public
   input Real[:] x1;
   output Real[2, size(x1, 1) + 2] o;
   Real[:,:] temp_1;
-  Integer temp_2;
-  Integer temp_3;
+  Real[:,:] temp_2;
+  Real[:,:] temp_3;
   Real[:,:] temp_4;
   Real[:,:] temp_5;
  algorithm
   size(temp_1) := {2, size(x1, 1) + 1 + 1};
-  size(temp_4) := {1, size(x1, 1)};
+  size(temp_2) := {1, size(x1, 1) + 1 + 1};
+  size(temp_3) := {1, size(x1, 1)};
+  size(temp_4) := {1, 1 + size(x1, 1) + 1};
   size(temp_5) := {1, size(x1, 1)};
-  temp_2 := 0;
-  temp_3 := 0;
-  for i6 in 1:size(x1, 1) loop
-   temp_4[1,i6] := x1[i6];
+  assert(size(x1, 1) + 1 + 1 == 1 + size(x1, 1) + 1, \"Mismatching size in dimension 2 of expression [{x1}, 1, 2; 3, {x1}, 4] in function FunctionTests.ArrayExpInFunc20.f\");
+  for i8 in 1:size(x1, 1) loop
+   temp_3[1,i8] := x1[i8];
   end for;
-  for i3 in 1:1 loop
-   for i4 in 1:size(x1, 1) loop
-    temp_1[temp_2 + i3,temp_3 + i4] := temp_4[i3,i4];
+  for i5 in 1:1 loop
+   for i6 in 1:size(x1, 1) loop
+    temp_2[i5,i6] := temp_3[i5,i6];
    end for;
   end for;
-  temp_3 := temp_3 + size(x1, 1);
-  temp_1[temp_2 + 1,temp_3 + 1] := 1;
-  temp_3 := temp_3 + 1;
-  temp_1[temp_2 + 1,temp_3 + 1] := 2;
-  temp_2 := temp_2 + 1;
-  temp_3 := 0;
-  temp_1[temp_2 + 1,temp_3 + 1] := 3;
-  temp_3 := temp_3 + 1;
-  for i6 in 1:size(x1, 1) loop
-   temp_5[1,i6] := x1[i6];
-  end for;
+  temp_2[1,1 + size(x1, 1)] := 1;
+  temp_2[1,1 + (size(x1, 1) + 1)] := 2;
   for i3 in 1:1 loop
-   for i4 in 1:size(x1, 1) loop
-    temp_1[temp_2 + i3,temp_3 + i4] := temp_5[i3,i4];
+   for i4 in 1:size(x1, 1) + 1 + 1 loop
+    temp_1[i3,i4] := temp_2[i3,i4];
    end for;
   end for;
-  temp_3 := temp_3 + size(x1, 1);
-  temp_1[temp_2 + 1,temp_3 + 1] := 4;
+  temp_4[1,1] := 3;
+  for i8 in 1:size(x1, 1) loop
+   temp_5[1,i8] := x1[i8];
+  end for;
+  for i5 in 1:1 loop
+   for i6 in 1:size(x1, 1) loop
+    temp_4[i5,i6 + 1] := temp_5[i5,i6];
+   end for;
+  end for;
+  temp_4[1,1 + (1 + size(x1, 1))] := 4;
+  for i3 in 1:1 loop
+   for i4 in 1:1 + size(x1, 1) + 1 loop
+    temp_1[i3 + 1,i4] := temp_4[i3,i4];
+   end for;
+  end for;
   for i1 in 1:2 loop
    for i2 in 1:size(x1, 1) + 1 + 1 loop
     o[i1,i2] := temp_1[i1,i2];
@@ -4579,7 +4584,22 @@ public
  end FunctionTests.ArrayExpInFunc20.f;
 
 end FunctionTests.ArrayExpInFunc20;
-			
+"),TransformCanonicalTestCase(
+            name="ArrayExpInFunc20ceval",
+            description="Scalarization of functions: unknown size matrix expression",
+            variability_propagation=true,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc20
+ constant Real ae[1,1] = 1;
+ constant Real ae[1,2] = 2;
+ constant Real ae[1,3] = 1;
+ constant Real ae[1,4] = 2;
+ constant Real ae[2,1] = 3;
+ constant Real ae[2,2] = 1;
+ constant Real ae[2,3] = 2;
+ constant Real ae[2,4] = 4;
+end FunctionTests.ArrayExpInFunc20;
 ")})));
 end ArrayExpInFunc20;
 
@@ -4629,37 +4649,52 @@ public
   input Real[:, :] x3;
   output Real[size(x1, 1) * 2 + size(x3, 1), size(x2, 2) + 1] y;
   Real[:,:] temp_1;
-  Integer temp_2;
-  Integer temp_3;
+  Real[:,:] temp_2;
+  Real[:,:] temp_3;
+  Real[:,:] temp_4;
  algorithm
   size(temp_1) := {size(x1, 1) + size(x2, 1) + size(x3, 1), 1 + size(x2, 2)};
-  temp_2 := 0;
-  temp_3 := 0;
-  for i3 in 1:size(x1, 1) loop
-   temp_1[temp_2 + i3,temp_3 + 1] := x1[i3];
+  size(temp_2) := {size(x1, 1), 1 + size(x2, 2)};
+  size(temp_3) := {size(x2, 1), size(x2, 2) + 1};
+  size(temp_4) := {size(x3, 1), size(x3, 2)};
+  assert(1 + size(x2, 2) == size(x2, 2) + 1, \"Mismatching size in dimension 2 of expression [x1, x2; x2, x1; x3] in function FunctionTests.ArrayExpInFunc21.f\");
+  assert(1 + size(x2, 2) == size(x3, 2), \"Mismatching size in dimension 2 of expression [x1, x2; x2, x1; x3] in function FunctionTests.ArrayExpInFunc21.f\");
+  assert(size(x1, 1) == size(x2, 1), \"Mismatching size in dimension 1 of expression x1, x2 in function FunctionTests.ArrayExpInFunc21.f\");
+  assert(size(x2, 1) == size(x1, 1), \"Mismatching size in dimension 1 of expression x2, x1 in function FunctionTests.ArrayExpInFunc21.f\");
+  for i5 in 1:size(x1, 1) loop
+   temp_2[i5,1] := x1[i5];
   end for;
-  temp_3 := temp_3 + 1;
-  for i3 in 1:size(x2, 1) loop
-   for i4 in 1:size(x2, 2) loop
-    temp_1[temp_2 + i3,temp_3 + i4] := x2[i3,i4];
+  for i5 in 1:size(x2, 1) loop
+   for i6 in 1:size(x2, 2) loop
+    temp_2[i5,i6 + 1] := x2[i5,i6];
    end for;
   end for;
-  temp_2 := temp_2 + size(x2, 1);
-  temp_3 := 0;
-  for i3 in 1:size(x2, 1) loop
-   for i4 in 1:size(x2, 2) loop
-    temp_1[temp_2 + i3,temp_3 + i4] := x2[i3,i4];
+  for i3 in 1:size(x1, 1) loop
+   for i4 in 1:1 + size(x2, 2) loop
+    temp_1[i3,i4] := temp_2[i3,i4];
    end for;
   end for;
-  temp_3 := temp_3 + size(x2, 2);
-  for i3 in 1:size(x1, 1) loop
-   temp_1[temp_2 + i3,temp_3 + 1] := x1[i3];
+  for i5 in 1:size(x2, 1) loop
+   for i6 in 1:size(x2, 2) loop
+    temp_3[i5,i6] := x2[i5,i6];
+   end for;
   end for;
-  temp_2 := temp_2 + size(x1, 1);
-  temp_3 := 0;
+  for i5 in 1:size(x1, 1) loop
+   temp_3[i5,1 + size(x2, 2)] := x1[i5];
+  end for;
+  for i3 in 1:size(x2, 1) loop
+   for i4 in 1:size(x2, 2) + 1 loop
+    temp_1[i3 + size(x1, 1),i4] := temp_3[i3,i4];
+   end for;
+  end for;
+  for i5 in 1:size(x3, 1) loop
+   for i6 in 1:size(x3, 2) loop
+    temp_4[i5,i6] := x3[i5,i6];
+   end for;
+  end for;
   for i3 in 1:size(x3, 1) loop
    for i4 in 1:size(x3, 2) loop
-    temp_1[temp_2 + i3,temp_3 + i4] := x3[i3,i4];
+    temp_1[i3 + (size(x1, 1) + size(x2, 1)),i4] := temp_4[i3,i4];
    end for;
   end for;
   for i1 in 1:size(x1, 1) + size(x2, 1) + size(x3, 1) loop
@@ -4671,7 +4706,6 @@ public
  end FunctionTests.ArrayExpInFunc21.f;
 
 end FunctionTests.ArrayExpInFunc21;
-			
 ")})));
 end ArrayExpInFunc21;
 
@@ -4711,19 +4745,22 @@ public
   input Real[:, :] x;
   output Real[size(a, 1), size(a, 1)] y;
   Real[:,:] temp_1;
-  Integer temp_2;
-  Integer temp_3;
+  Real[:,:] temp_2;
+  Real[:,:] temp_3;
   Real[:,:] temp_4;
-  Integer temp_5;
-  Integer temp_6;
  algorithm
   size(temp_1) := {size(a, 1), size(a, 1)};
+  size(temp_2) := {size(a, 1), size(a, 1)};
+  size(temp_3) := {size(a, 1), size(a, 1)};
   size(temp_4) := {size(a, 1), size(a, 1)};
-  temp_2 := 0;
-  temp_3 := 0;
+  for i5 in 1:size(a, 1) loop
+   for i6 in 1:size(a, 1) loop
+    temp_2[i5,i6] := x[a[i5],a[i6]];
+   end for;
+  end for;
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
-    temp_1[temp_2 + i3,temp_3 + i4] := x[a[i3],a[i4]];
+    temp_1[i3,i4] := temp_2[i3,i4];
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -4731,23 +4768,25 @@ public
     y[i1,i2] := temp_1[i2,i1];
    end for;
   end for;
-  temp_5 := 0;
-  temp_6 := 0;
+  for i5 in 1:size(a, 1) loop
+   for i6 in 1:size(a, 1) loop
+    temp_4[i5,i6] := x[a[i5],b[i6]];
+   end for;
+  end for;
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
-    temp_4[temp_5 + i3,temp_6 + i4] := x[a[i3],b[i4]];
+    temp_3[i3,i4] := temp_4[i3,i4];
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:size(a, 1) loop
-    y[i1,i2] := temp_4[i2,i1];
+    y[i1,i2] := temp_3[i2,i1];
    end for;
   end for;
   return;
  end FunctionTests.ArrayExpInFunc22.f;
 
 end FunctionTests.ArrayExpInFunc22;
-			
 ")})));
 end ArrayExpInFunc22;
 
@@ -5098,6 +5137,370 @@ end FunctionTests.ArrayExpInFunc28;
 			
 ")})));
 end ArrayExpInFunc28;
+
+model ArrayExpInFunc29
+    
+function f
+  input Real[:, :] a;
+  input Real[:, :] b;
+  output Real[size(a, 1) + size(b, 1), size(b, 2)] o = cat(1,a,b);
+   algorithm
+end f;
+    Real y[2,1] = f({{1}},{{1}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc29",
+            description="Scalarization of functions: unknown size cat expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc29
+ Real y[1,1];
+ Real y[2,1];
+equation
+ ({{y[1,1]}, {y[2,1]}}) = FunctionTests.ArrayExpInFunc29.f({{1}}, {{1}});
+
+public
+ function FunctionTests.ArrayExpInFunc29.f
+  input Real[:, :] a;
+  input Real[:, :] b;
+  output Real[size(a, 1) + size(b, 1), size(b, 2)] o;
+  Real[:,:] temp_1;
+ algorithm
+  size(temp_1) := {size(a, 1) + size(b, 1), size(a, 2)};
+  assert(size(a, 2) == size(b, 2), \"Mismatching size in dimension 2 of expression cat(1, a, b) in function FunctionTests.ArrayExpInFunc29.f\");
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(a, 2) loop
+    temp_1[i3,i4] := a[i3,i4];
+   end for;
+  end for;
+  for i3 in 1:size(b, 1) loop
+   for i4 in 1:size(b, 2) loop
+    temp_1[i3 + size(a, 1),i4] := b[i3,i4];
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) + size(b, 1) loop
+   for i2 in 1:size(a, 2) loop
+    o[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc29.f;
+
+end FunctionTests.ArrayExpInFunc29;
+")})));
+end ArrayExpInFunc29;
+
+model ArrayExpInFunc30
+    
+function f
+  input Real[:, :, size(b,3) + size(c,3)] a;
+  input Real[size(a,1), :, :] b;
+  input Real[size(b,1), size(b,2), :] c;
+  output Real[size(a,1), size(a, 2) + size(b, 2), size(a, 3)] o = cat(2,a,cat(3,b,c));
+   algorithm
+end f;
+    Real y[1,3,3] = f({{{0,1,2},{10,11,12}}},{{{3,4}}},{{{5}}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc30",
+            description="Scalarization of functions: unknown size cat expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc30
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,1,3];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[1,2,3];
+ Real y[1,3,1];
+ Real y[1,3,2];
+ Real y[1,3,3];
+equation
+ ({{{y[1,1,1], y[1,1,2], y[1,1,3]}, {y[1,2,1], y[1,2,2], y[1,2,3]}, {y[1,3,1], y[1,3,2], y[1,3,3]}}}) = FunctionTests.ArrayExpInFunc30.f({{{0, 1, 2}, {10, 11, 12}}}, {{{3, 4}}}, {{{5}}});
+
+public
+ function FunctionTests.ArrayExpInFunc30.f
+  input Real[:, :, size(b, 3) + size(c, 3)] a;
+  input Real[size(a, 1), :, :] b;
+  input Real[size(b, 1), size(b, 2), :] c;
+  output Real[size(a, 1), size(a, 2) + size(b, 2), size(a, 3)] o;
+  Real[:,:,:] temp_1;
+  Real[:,:,:] temp_2;
+ algorithm
+  size(temp_1) := {size(a, 1), size(a, 2) + size(b, 2), size(b, 3) + size(c, 3)};
+  size(temp_2) := {size(a, 1), size(b, 2), size(b, 3) + size(c, 3)};
+  for i7 in 1:size(a, 1) loop
+   for i8 in 1:size(b, 2) loop
+    for i9 in 1:size(b, 3) loop
+     temp_2[i7,i8,i9] := b[i7,i8,i9];
+    end for;
+   end for;
+  end for;
+  for i7 in 1:size(b, 1) loop
+   for i8 in 1:size(b, 2) loop
+    for i9 in 1:size(c, 3) loop
+     temp_2[i7,i8,i9 + size(b, 3)] := c[i7,i8,i9];
+    end for;
+   end for;
+  end for;
+  assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(3, b, c) in function FunctionTests.ArrayExpInFunc30.f\");
+  for i4 in 1:size(a, 1) loop
+   for i5 in 1:size(a, 2) loop
+    for i6 in 1:size(b, 3) + size(c, 3) loop
+     temp_1[i4,i5,i6] := a[i4,i5,i6];
+    end for;
+   end for;
+  end for;
+  for i4 in 1:size(a, 1) loop
+   for i5 in 1:size(b, 2) loop
+    for i6 in 1:size(b, 3) + size(c, 3) loop
+     temp_1[i4,i5 + size(a, 2),i6] := temp_2[i4,i5,i6];
+    end for;
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) + size(b, 2) loop
+    for i3 in 1:size(b, 3) + size(c, 3) loop
+     o[i1,i2,i3] := temp_1[i1,i2,i3];
+    end for;
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc30.f;
+
+end FunctionTests.ArrayExpInFunc30;
+"),        TransformCanonicalTestCase(
+            name="ArrayExpInFunc30ceval",
+            description="Scalarization of functions: unknown size cat expression",
+            variability_propagation=true,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc30
+ constant Real y[1,1,1] = 0;
+ constant Real y[1,1,2] = 1;
+ constant Real y[1,1,3] = 2;
+ constant Real y[1,2,1] = 10;
+ constant Real y[1,2,2] = 11;
+ constant Real y[1,2,3] = 12;
+ constant Real y[1,3,1] = 3;
+ constant Real y[1,3,2] = 4;
+ constant Real y[1,3,3] = 5;
+end FunctionTests.ArrayExpInFunc30;
+")})));
+end ArrayExpInFunc30;
+
+model ArrayExpInFunc31
+type E = enumeration(A,B);
+function f
+  input Real[:] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input E[:] d;
+  output Real ao = max(a);
+  output Integer bo = max(b);
+  output Boolean co = max(c);
+  output E do = max(d);
+  algorithm
+end f;
+    Real a;
+    Integer b;
+    Boolean c;
+    E d;
+equation
+    (a,b,c,d) = f({1},{1},{true},{E.A});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc31",
+            description="Scalarization of functions: unknown size max expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc31
+ Real a;
+ discrete Integer b;
+ discrete Boolean c;
+ discrete FunctionTests.ArrayExpInFunc31.E d;
+initial equation 
+ pre(b) = 0;
+ pre(c) = false;
+ pre(d) = FunctionTests.ArrayExpInFunc31.E.A;
+equation
+ (a, b, c, d) = FunctionTests.ArrayExpInFunc31.f({1}, {1}, {true}, {FunctionTests.ArrayExpInFunc31.E.A});
+
+public
+ function FunctionTests.ArrayExpInFunc31.f
+  input Real[:] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input FunctionTests.ArrayExpInFunc31.E[:] d;
+  output Real ao;
+  output Integer bo;
+  output Boolean co;
+  output FunctionTests.ArrayExpInFunc31.E do;
+  Real temp_1;
+  Integer temp_2;
+  Boolean temp_3;
+  FunctionTests.ArrayExpInFunc31.E temp_4;
+ algorithm
+  temp_1 := -1.7976931348623157E308;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := if temp_1 > a[i1] then temp_1 else a[i1];
+  end for;
+  ao := temp_1;
+  temp_2 := -2147483648;
+  for i1 in 1:size(b, 1) loop
+   temp_2 := if temp_2 > b[i1] then temp_2 else b[i1];
+  end for;
+  bo := temp_2;
+  temp_3 := false;
+  for i1 in 1:size(c, 1) loop
+   temp_3 := if temp_3 > c[i1] then temp_3 else c[i1];
+  end for;
+  co := temp_3;
+  temp_4 := FunctionTests.ArrayExpInFunc31.E.A;
+  for i1 in 1:size(d, 1) loop
+   temp_4 := if temp_4 > d[i1] then temp_4 else d[i1];
+  end for;
+  do := temp_4;
+  return;
+ end FunctionTests.ArrayExpInFunc31.f;
+
+ type FunctionTests.ArrayExpInFunc31.E = enumeration(A, B);
+
+end FunctionTests.ArrayExpInFunc31;
+")})));
+end ArrayExpInFunc31;
+
+model ArrayExpInFunc32
+type E = enumeration(A,B);
+function f
+  input Real[:,:] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input E[:] d;
+  output Real ao = min(a);
+  output Integer bo = min(b);
+  output Boolean co = min(c);
+  output E do = min(d);
+  algorithm
+end f;
+    Real a;
+    Integer b;
+    Boolean c;
+    E d;
+equation
+    (a,b,c,d) = f({{1}},{1},{true},{E.A});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc32",
+            description="Scalarization of functions: unknown size min expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc32
+ Real a;
+ discrete Integer b;
+ discrete Boolean c;
+ discrete FunctionTests.ArrayExpInFunc32.E d;
+initial equation 
+ pre(b) = 0;
+ pre(c) = false;
+ pre(d) = FunctionTests.ArrayExpInFunc32.E.A;
+equation
+ (a, b, c, d) = FunctionTests.ArrayExpInFunc32.f({{1}}, {1}, {true}, {FunctionTests.ArrayExpInFunc32.E.A});
+
+public
+ function FunctionTests.ArrayExpInFunc32.f
+  input Real[:, :] a;
+  input Integer[:] b;
+  input Boolean[:] c;
+  input FunctionTests.ArrayExpInFunc32.E[:] d;
+  output Real ao;
+  output Integer bo;
+  output Boolean co;
+  output FunctionTests.ArrayExpInFunc32.E do;
+  Real temp_1;
+  Integer temp_2;
+  Boolean temp_3;
+  FunctionTests.ArrayExpInFunc32.E temp_4;
+ algorithm
+  temp_1 := 1.7976931348623157E308;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    temp_1 := if temp_1 < a[i1,i2] then temp_1 else a[i1,i2];
+   end for;
+  end for;
+  ao := temp_1;
+  temp_2 := 2147483647;
+  for i1 in 1:size(b, 1) loop
+   temp_2 := if temp_2 < b[i1] then temp_2 else b[i1];
+  end for;
+  bo := temp_2;
+  temp_3 := true;
+  for i1 in 1:size(c, 1) loop
+   temp_3 := if temp_3 < c[i1] then temp_3 else c[i1];
+  end for;
+  co := temp_3;
+  temp_4 := FunctionTests.ArrayExpInFunc32.E.B;
+  for i1 in 1:size(d, 1) loop
+   temp_4 := if temp_4 < d[i1] then temp_4 else d[i1];
+  end for;
+  do := temp_4;
+  return;
+ end FunctionTests.ArrayExpInFunc32.f;
+
+ type FunctionTests.ArrayExpInFunc32.E = enumeration(A, B);
+
+end FunctionTests.ArrayExpInFunc32;
+")})));
+end ArrayExpInFunc32;
+
+model ArrayExpInFunc33
+function f
+  input Integer k;
+  output Real ao = max(i for i in 1:k);
+  algorithm
+end f;
+    Real a;
+equation
+    (a) = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc33",
+            description="Scalarization of functions: unknown size max-iter expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc33
+ Real a;
+equation
+ a = FunctionTests.ArrayExpInFunc33.f(1);
+
+public
+ function FunctionTests.ArrayExpInFunc33.f
+  input Integer k;
+  output Real ao;
+  Integer temp_1;
+ algorithm
+  temp_1 := -2147483648;
+  for i1 in 1:k loop
+   temp_1 := if temp_1 > i1 then temp_1 else i1;
+  end for;
+  ao := temp_1;
+  return;
+ end FunctionTests.ArrayExpInFunc33.f;
+
+end FunctionTests.ArrayExpInFunc33;
+")})));
+end ArrayExpInFunc33;
 
 
 model ArrayOutputScalarization1
@@ -8287,18 +8690,18 @@ public
   Real[1, 1] c;
   Real[:,:] temp_1;
   Real[:,:] temp_2;
-  Integer temp_3;
-  Integer temp_4;
-  Real[:] temp_5;
-  Real[:,:] temp_6;
-  Real temp_7;
-  Integer[3, 2] temp_8;
+  Real[:,:] temp_3;
+  Real[:] temp_4;
+  Real[:,:] temp_5;
+  Real temp_6;
+  Integer[3, 2] temp_7;
  algorithm
   size(e) := {n, 3};
   size(temp_1) := {3, size(d, 1)};
   size(temp_2) := {n, 1};
-  size(temp_5) := {n};
-  size(temp_6) := {n, 2};
+  size(temp_3) := {n, 1};
+  size(temp_4) := {n};
+  size(temp_5) := {n, 2};
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   for i4 in 1:size(d, 1) loop
@@ -8316,26 +8719,29 @@ public
    end for;
   end for;
   assert(n == 1, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
-  temp_3 := 0;
-  temp_4 := 0;
-  temp_8[1,1] := 1;
-  temp_8[1,2] := 2;
-  temp_8[2,1] := 3;
-  temp_8[2,2] := 4;
-  temp_8[3,1] := 5;
-  temp_8[3,2] := 6;
+  temp_7[1,1] := 1;
+  temp_7[1,2] := 2;
+  temp_7[2,1] := 3;
+  temp_7[2,2] := 4;
+  temp_7[3,1] := 5;
+  temp_7[3,2] := 6;
   for i1 in 1:n loop
    for i2 in 1:2 loop
-    temp_7 := 0.0;
+    temp_6 := 0.0;
     for i3 in 1:3 loop
-     temp_7 := temp_7 + 3 * e[i1,i3] * 3 * temp_8[i3,i2];
+     temp_6 := temp_6 + 3 * e[i1,i3] * 3 * temp_7[i3,i2];
     end for;
-    temp_6[i1,i2] := temp_7;
+    temp_5[i1,i2] := temp_6;
    end for;
   end for;
-  (temp_5) := FunctionTests.UnknownArray38.f(n, temp_6);
+  (temp_4) := FunctionTests.UnknownArray38.f(n, temp_5);
+  for i5 in 1:n loop
+   temp_3[i5,1] := temp_4[i5];
+  end for;
   for i3 in 1:n loop
-   temp_2[temp_3 + i3,temp_4 + 1] := temp_5[i3];
+   for i4 in 1:1 loop
+    temp_2[i3,i4] := temp_3[i3,i4];
+   end for;
   end for;
   for i1 in 1:n loop
    for i2 in 1:1 loop
@@ -8347,7 +8753,6 @@ public
  end FunctionTests.UnknownArray38.f;
 
 end FunctionTests.UnknownArray38;
-			
 ")})));
 end UnknownArray38;
 
@@ -11533,9 +11938,9 @@ equation
  sa = time;
  sb = time;
  x = time;
- s[5] = if - x >= 0 then sb else s[3];
- s[4] = s[5];
- y = if - x >= 0.0 then (- x) * sb else (- x) * s[3];
+ s[4] = if x >= 0 then s[3] else sb;
+ s[5] = s[4];
+ y = - (if x >= 0.0 then x * s[3] else x * sb);
  s[1] = if x >= 0 then sa else s[3];
  s[2] = s[1];
  y = if x >= 0.0 then x * sa else x * s[3];
@@ -11638,13 +12043,6 @@ fclass FunctionTests.FunctionLike.EventRel.NoEventRecord1
  constant Real x.b = 2;
  constant Real y.a = 1.0;
  constant Real y.b = 2.0;
-
-public
- record FunctionTests.FunctionLike.EventRel.NoEventRecord1.A
-  Real a;
-  Real b;
- end FunctionTests.FunctionLike.EventRel.NoEventRecord1.A;
-
 end FunctionTests.FunctionLike.EventRel.NoEventRecord1;
 ")})));
 end NoEventRecord1;

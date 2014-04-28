@@ -205,8 +205,9 @@ Model::VariableKind Model::classifyInternalVariable(Ref<Variable> var) const {
 
 Model::VariableKind Model::classifyVariable(Ref<Variable> var) const {
     switch(var->getCausality()) {
-        case Variable::OUTPUT: return OUTPUT; break;
+//        case Variable::OUTPUT: return OUTPUT; break;
         case Variable::INPUT:  return classifyInputVariable(var); break;
+        case Variable::OUTPUT: 
         case Variable::INTERNAL: return classifyInternalVariable(var); break;
     }
     std::stringstream errorMessage;

@@ -18,6 +18,11 @@
 */
 
 #include <stdarg.h>
+#ifdef _WIN32
+    #include <win32_dirent.h>
+#else
+    #include <dirent.h>
+#endif
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_global.h"
@@ -923,27 +928,6 @@ int jmi_save_last_successful_values(jmi_t *jmi) {
     return 0;
 }
 
-int jmi_block_completed_integrator_step(jmi_t *jmi) {
-    /*
-    int i;
-    
-    for (i = 0; i < jmi->n_dae_blocks; i++) {
-		jmi_block_residual_t* block = jmi->dae_block_residuals[i];
-        jmi_block_solver_t* block_solver = block->block_solver;
-        
-        if (block_solver->completed_integrator_step) {
-            int ret;
-            
-            ret = block_solver->completed_integrator_step(block_solver);
-            if (ret != 0) {
-                return -1;
-            }
-        }
-    }
-    */
-    return 0;
-}
-
 int jmi_reset_last_successful_values(jmi_t *jmi) {
     jmi_real_t* z;
     jmi_real_t* z_last;
@@ -1507,8 +1491,8 @@ int jmi_get_type_from_value_ref(int vref) {
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
     jmi_real_t h = 0.0001;
     
-    int n_eq;
-    int n_eq_R;
+    int n_eq = 0;
+    int n_eq_R = 0;
     int i;
     int offs;
 
@@ -2215,4 +2199,41 @@ int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {
 		return_status = func(jmi);
     jmi_set_current(NULL);
     return return_status;
+}
+
+int jmi_file_exists(const char* file) {
+    FILE *fp;
+    if (file && (fp = fopen(file,"r")))
+        fclose(fp);
+    else
+        return 0;
+    return 1;
+}
+
+int jmi_dir_exists(const char* dir) {
+    DIR* dh;
+    if(dir && (dh = opendir(dir)))
+        closedir(dh);
+    else
+        return 0;
+    return 1;
+}
+
+void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
+    size_t len;
+    jmi_string_t loc = jmi->resource_location;
+    if (!loc) {
+        jmi_log_node(jmi->log, logError, "Error", "Resource location unavailable.");
+        strcpy(res,file);
+        return;
+    }
+    len = strlen(loc) + strlen(file);
+    strcpy(res, loc);
+    if (len >= JMI_PATH_MAX) {
+        jmi_log_node(jmi->log, logError, "Error", "File path too long <Path:%s><File:%s>", loc, file);
+        return;
+    }
+    strcat(res, file);
+    if (!jmi_file_exists(res))
+        jmi_log_node(jmi->log, logError, "Error", "Could not locate resource <File:%s>", res);
 }

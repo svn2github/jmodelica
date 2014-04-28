@@ -35,18 +35,130 @@ if modelicacasadi_present:
     from modelicacasadi_transfer import transfer_model as _transfer_model
     from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
 
-    def transfer_model(*args, **kwargs):
-        model = modelicacasadi_wrapper.Model() # no wrapper exists for Model yet
-        _transfer_model(model, *args, **kwargs)
-        return model
+def transfer_model(class_name, file_name=[],
+                   compiler_options={}, compiler_log_level='warning'):
+    """ 
+    Compiles and transfers a model to the ModelicaCasADi interface. 
+    
+    A model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be file or library paths.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+        
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries.
+            Default: Empty list.
+                        
+        compiler_options --
+            Options for the compiler.
+            Note that MODELICAPATH is set to the standard for this
+            installation if not given as an option.
+            Default: Empty dict.
+            
+        compiler_log_level --
+            Set the logging for the compiler. Valid options are:
+            'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
+            Default: 'warning'
 
-    def transfer_optimization_problem(*args, **kwargs):
-        model = OptimizationProblem()
-        _transfer_optimization_problem(model, *args, **kwargs)
-        return model
+                  
+    Returns::
+    
+        A Model representing the class given by class_name.
 
-    def transfer_to_casadi_interface(*args, **kwargs):
-        return transfer_optimization_problem(*args, **kwargs)
+"""
+    model = modelicacasadi_wrapper.Model() # no wrapper exists for Model yet
+    _transfer_model(model, class_name=class_name, file_name=file_name,
+                    compiler_options=compiler_options,
+                    compiler_log_level=compiler_log_level)
+    return model
+
+def transfer_optimization_problem(class_name, file_name=[],
+                                  compiler_options={}, compiler_log_level='warning',
+                                  accept_model=False):
+    """ 
+    Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
+    
+    A  model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be file or library paths.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+        
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries.
+            Default: Empty list.
+
+        compiler_options --
+            Options for the compiler.
+            Note that MODELICAPATH is set to the standard for this
+            installation if not given as an option.
+            Default: Empty dict.
+            
+        compiler_log_level --
+            Set the logging for the compiler. Valid options are:
+            'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
+            Default: 'warning'
+
+        accept_model --
+            If true, allows to transfer a model. Only the model parts of the
+            OptimizationProblem will be initialized.
+
+
+    Returns::
+    
+        An OptimizationProblem representing the class given by class_name.
+
+    """
+    model = OptimizationProblem()
+    _transfer_optimization_problem(model, class_name=class_name, file_name=file_name,
+                                   compiler_options=compiler_options,
+                                   compiler_log_level=compiler_log_level,
+                                   accept_model=accept_model)
+    return model
+
+def transfer_to_casadi_interface(*args, **kwargs):
+    return transfer_optimization_problem(*args, **kwargs)
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
@@ -125,7 +237,7 @@ class OptimizationProblem(CI_OP, ModelBase):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
 
-    def optimize_options(self, algorithm='LocalDAECollocationAlg2'):
+    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
         """
         Returns an instance of the optimize options class containing options 
         default values. If called without argument then the options class for 
@@ -203,7 +315,7 @@ class OptimizationProblem(CI_OP, ModelBase):
                                      % (var.getName(), attr))
             return self.model.evaluateExpression(val_expr)
     
-    def optimize(self, algorithm='LocalDAECollocationAlg2', options={}):
+    def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
         """
         Solve an optimization problem.
             
@@ -218,10 +330,10 @@ class OptimizationProblem(CI_OP, ModelBase):
                 custom algorithms and to use them with this function.
 
                 The following algorithms are available:
-                - 'LocalDAECollocationAlg2'. This algorithm is based on direct
+                - 'LocalDAECollocationAlg'. This algorithm is based on direct
                   collocation on finite elements and the algorithm IPOPT is
                   used to obtain a numerical solution to the problem.
-                Default: 'LocalDAECollocationAlg2'
+                Default: 'LocalDAECollocationAlg'
                 
             options -- 
                 The options that should be used in the algorithm. The options
@@ -236,15 +348,15 @@ class OptimizationProblem(CI_OP, ModelBase):
                   values. An empty dict will thus give all options with default
                   values.
                 - An Options object for the corresponding algorithm, e.g.
-                  LocalDAECollocationAlgOptions2 for LocalDAECollocationAlg2.
+                  LocalDAECollocationAlgOptions for LocalDAECollocationAlg.
                 Default: Empty dict
             
         Returns::
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        if algorithm != "LocalDAECollocationAlg2":
-            raise ValueError("LocalDAECollocationAlg2 is the only supported " +
+        if algorithm != "LocalDAECollocationAlg":
+            raise ValueError("LocalDAECollocationAlg is the only supported " +
                              "algorithm.")
         return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
                                     algorithm, options)
@@ -488,7 +600,7 @@ class CasadiModel(ModelBase):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
     
-    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
+    def optimize_options(self, algorithm='LocalDAECollocationAlgOld'):
         """
         Returns an instance of the optimize options class containing options 
         default values. If called without argument then the options class for 
@@ -498,9 +610,9 @@ class CasadiModel(ModelBase):
         
             algorithm --
                 The algorithm for which the options class should be returned. 
-                Possible values are: 'LocalDAECollocationAlg' and
+                Possible values are: 'LocalDAECollocationAlgOld' and
                 'CasadiPseudoSpectralAlg'
-                Default: 'LocalDAECollocationAlg'
+                Default: 'LocalDAECollocationAlgOld'
                 
         Returns::
         
@@ -508,7 +620,7 @@ class CasadiModel(ModelBase):
         """
         return self._default_options(algorithm)    
     
-    def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
+    def optimize(self, algorithm='LocalDAECollocationAlgOld', options={}):
         """
         Solve an optimization problem.
             
@@ -523,11 +635,11 @@ class CasadiModel(ModelBase):
                 custom algorithms and to use them with this function.
 
                 The following algorithms are available:
-                - 'LocalDAECollocationAlg'. This algorithm is based on direct
+                - 'LocalDAECollocationAlgOld'. This algorithm is based on direct
                   collocation on finite elements and the algorithm IPOPT is
                   used to obtain a numerical solution to the problem.
                 - 'CasadiPseudoSpectralAlg'
-                Default: 'LocalDAECollocationAlg'
+                Default: 'LocalDAECollocationAlgOld'
                 
             options -- 
                 The options that should be used in the algorithm. The options
@@ -542,7 +654,7 @@ class CasadiModel(ModelBase):
                   values. An empty dict will thus give all options with default
                   values.
                 - An Options object for the corresponding algorithm, e.g.
-                  LocalDAECollocationAlgOptions for LocalDAECollocationAlg.
+                  LocalDAECollocationAlgOldOptions for LocalDAECollocationAlgOld.
                 Default: Empty dict
             
         Returns::

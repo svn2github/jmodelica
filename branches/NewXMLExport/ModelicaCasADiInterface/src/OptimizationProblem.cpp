@@ -83,18 +83,18 @@ void OptimizationProblem::print(ostream& os) const {
         os << **it << endl;
     }
     
-    os << "\n-- Lagrange term --\n";
-    if (lagrangeTerm.isNull()) {
+    os << "\n-- Objective integrand term --\n";
+    if (objectiveIntegrand.isNull()) {
         os << "not set";
     } else {
-        lagrangeTerm.print(os);
+        objectiveIntegrand.print(os);
     }
     
-    os << "\n-- Mayer term --\n";
-    if (mayerTerm.isNull()) {
+    os << "\n-- Objective term --\n";
+    if (objective.isNull()) {
         os << "not set";
     } else {
-        mayerTerm.print(os);
+        objective.print(os);
     }
 }
 

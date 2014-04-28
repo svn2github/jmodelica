@@ -455,11 +455,12 @@ fclass VariabilityPropagationTests.Der2
  constant Real x = 0;
  Real y;
  Real z;
+ Real _der_z;
 equation
  z = time;
  y = 1;
+ _der_z = 1.0;
 end VariabilityPropagationTests.Der2;
-			
 ")})));
 end Der2;
 
@@ -890,13 +891,6 @@ fclass VariabilityPropagationTests.ConstantRecord1
  constant Real c.a[2] = 2;
  constant Real c.a[3] = 3;
  constant Real c.b = 4;
-
-public
- record VariabilityPropagationTests.ConstantRecord1.A
-  Real a[:];
-  Real b;
- end VariabilityPropagationTests.ConstantRecord1.A;
-
 end VariabilityPropagationTests.ConstantRecord1;
 ")})));
 end ConstantRecord1;

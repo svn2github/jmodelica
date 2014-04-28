@@ -21,6 +21,7 @@ pyjmi.jmi.JMUModel.initialize respectively.
 """
 
 #from abc import ABCMeta, abstractmethod
+import collections
 import logging
 import time
 import numpy as N
@@ -1434,7 +1435,7 @@ class CasadiPseudoSpectralAlgOptions(OptionBase):
 class CasadiPseudoSpectralAlgResult(JMResultBase):
     pass
 
-class LocalDAECollocationAlg(AlgorithmBase):
+class LocalDAECollocationAlgOld(AlgorithmBase):
     
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
@@ -1443,7 +1444,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
     
     def __init__(self, model, options):
         """
-        Create a LocalDAECollocationAlg algorithm.
+        Create a LocalDAECollocationAlgOld algorithm.
         
         Parameters::
               
@@ -1456,17 +1457,17 @@ class LocalDAECollocationAlg(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                model.optimize_options('LocalDAECollocationAlgOptions')
+                model.optimize_options('LocalDAECollocationAlgOldOptions')
                 
                 or look at the docstring with help:
                 
-                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOldOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by LocalDAECollocationAlgOptions. An empty
+                  provided by LocalDAECollocationAlgOldOptions. An empty
                   dict will thus give all options with default values.
-                - A LocalDAECollocationAlgOptions object.
+                - A LocalDAECollocationAlgOldOptions object.
         """
         self._t0 = time.clock()
         self.model = model
@@ -1474,9 +1475,9 @@ class LocalDAECollocationAlg(AlgorithmBase):
         # handle options argument
         if isinstance(options, dict):
             # user has passed dict with options or empty dict = default
-            self.options = LocalDAECollocationAlgOptions(options)
-        elif isinstance(options, LocalDAECollocationAlgOptions):
-            # user has passed LocalDAECollocationAlgOptions instance
+            self.options = LocalDAECollocationAlgOldOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOldOptions):
+            # user has passed LocalDAECollocationAlgOldOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -1488,7 +1489,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = LocalDAECollocator(model, self.options)
+        self.nlp = LocalDAECollocatorOld(model, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -1610,11 +1611,11 @@ class LocalDAECollocationAlg(AlgorithmBase):
         
     def get_result(self):
         """ 
-        Load result data and create a LocalDAECollocationAlgResult object.
+        Load result data and create a LocalDAECollocationAlgOldResult object.
         
         Returns::
         
-            The LocalDAECollocationAlgResult object.
+            The LocalDAECollocationAlgOldResult object.
         """
         resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
@@ -1628,19 +1629,19 @@ class LocalDAECollocationAlg(AlgorithmBase):
         times['tot'] += times['post_processing']
         
         # Create and return result object
-        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
+        return LocalDAECollocationAlgOldResult(self.model, resultfile, self.nlp,
                                             res, self.options, self.times,
                                             h_opt)
     
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the LocalDAECollocationAlg
+        Get an instance of the options class for the LocalDAECollocationAlgOld
         algorithm, prefilled with default values. (Class method.)
         """
-        return LocalDAECollocationAlgOptions()
+        return LocalDAECollocationAlgOldOptions()
     
-class LocalDAECollocationAlgOptions(OptionBase):
+class LocalDAECollocationAlgOldOptions(OptionBase):
     
     """
     Options for optimizing CasADi models using a collocation algorithm. 
@@ -1922,10 +1923,10 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'measurement_data': None,
                 'IPOPT_options': {}}
         
-        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
+        super(LocalDAECollocationAlgOldOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
 
-class LocalDAECollocationAlgResult(JMResultBase):
+class LocalDAECollocationAlgOldResult(JMResultBase):
     
     """
     A JMResultBase object with the additional attributes times and h_opt.
@@ -1961,7 +1962,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(LocalDAECollocationAlgResult, self).__init__(
+        super(LocalDAECollocationAlgOldResult, self).__init__(
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times
@@ -2170,7 +2171,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         else:
             return 1. / sigma_inv
 
-class LocalDAECollocationAlg2(AlgorithmBase):
+class LocalDAECollocationAlg(AlgorithmBase):
     
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
@@ -2179,7 +2180,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
     
     def __init__(self, op, options):
         """
-        Create a LocalDAECollocationAlg2 algorithm.
+        Create a LocalDAECollocationAlg algorithm.
         
         Parameters::
               
@@ -2190,17 +2191,17 @@ class LocalDAECollocationAlg2(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                model.optimize_options('LocalDAECollocationAlg2Options')
+                model.optimize_options('LocalDAECollocationAlgOptions')
                 
                 or look at the docstring with help:
                 
-                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlg2Options)
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by LocalDAECollocationAlg2Options. An empty
+                  provided by LocalDAECollocationAlgOptions. An empty
                   dict will thus give all options with default values.
-                - A LocalDAECollocationAlg2Options object.
+                - A LocalDAECollocationAlgOptions object.
         """
         self._t0 = time.clock()
         self.op = op
@@ -2261,9 +2262,9 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         # handle options argument
         if isinstance(options, dict):
             # user has passed dict with options or empty dict = default
-            self.options = LocalDAECollocationAlg2Options(options)
-        elif isinstance(options, LocalDAECollocationAlg2Options):
-            # user has passed LocalDAECollocationAlg2Options instance
+            self.options = LocalDAECollocationAlgOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOptions):
+            # user has passed LocalDAECollocationAlgOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -2275,7 +2276,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = LocalDAECollocator2(self.op, self.options)
+        self.nlp = LocalDAECollocator(self.op, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -2321,7 +2322,8 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         # Check named_vars
         if self.named_vars:
             print("Warning: Named NLP variables is currently enabled. This " +
-                  "may have significant performance impacts.")
+                  "may have significant performance impacts and will also " +
+                  "disable the solution of the NLP.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and
@@ -2330,33 +2332,75 @@ class LocalDAECollocationAlg2(AlgorithmBase):
                                       "compatible with eliminate_der_var.")
         
         # Check validity of blocking_factors
-        if (self.blocking_factors is not None and 
-            N.sum(self.blocking_factors) != self.n_e):
-            raise ValueError("The sum of all elements in blocking factors " +
-                             "must be the same as the number of elements.")
+        if self.blocking_factors is not None:
+            if isinstance(self.blocking_factors, collections.Iterable):
+                if N.sum(self.blocking_factors) != self.n_e:
+                    raise ValueError(
+                            "The sum of blocking factors does not " +
+                            "match the number of collocation elements.")
+            elif isinstance(self.blocking_factors, BlockingFactors):
+                for (name, facs) in self.blocking_factors.factors.iteritems():
+                    var = self.op.getVariable(name)
+                    if var is None:
+                        raise ValueError('Variable %s not found in ' % name +
+                                         'optimization problem.')
+                    if var not in self.op.getVariables(self.op.REAL_INPUT):
+                        raise ValueError(
+                                "Blocking factors provided for variable " +
+                                "%s, but %s is not a real " % (name, name) +
+                                "input.")
+
+                    # Check that factors correspond to number of elements
+                    if N.sum(facs) != self.n_e:
+                        raise ValueError(
+                                "The sum of blocking factors for variable " +
+                                "%s does not match the number of " % name +
+                                "collocation elements.")
+
+                    # Check if variable is in optimization problem
+                    if var is None:
+                        raise ValueError(
+                                "Blocking factors provided for variable " +
+                                "%s, but variable %s not " % (name, name) +
+                                "found in optimization problem.")
+
+                    # Check bound
+                    if name in self.blocking_factors.du_bounds:
+                        if self.blocking_factors.du_bounds[name] < 0:
+                            raise ValueError("du bound for variable %s "%name+
+                                             "is negative.")
+
+                    # Replace alias variables
+                    if var.isAlias():
+                        mvar = var.getModelVariable()
+                        self.blocking_factors.factors[mvar.getName()] = facs
+                        del self.blocking_factors.factors[name]
+                        if name in self.blocking_factors.du_bounds:
+                            self.blocking_factors.du_bounds[mvar.getName()] = \
+                                    self.blocking_factors.du_bounds[name]
+                            del self.blocking_factors.du_bounds[name]
+                        if name in self.blocking_factors.du_quad_pen:
+                            self.blocking_factors.du_quad_pen[mvar.getName()]=\
+                                    self.blocking_factors.du_quad_pen[name]
+                            del self.blocking_factors.du_quad_pen[name]
+            else:
+                raise ValueError('blocking_factors must either be an ' +
+                                 'iterable or an instance of BlockingFactors.')
         
         # Check validity of nominal_traj_mode
-        #~ var_vectors = self.model._var_vectors
-        #~ ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
-        #~ ocp_names = reduce(list.__add__, ocp_names)
-        #~ ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
-        #~ for name in self.nominal_traj_mode.keys():
-            #~ if name not in ocp_names:
-                #~ if name != "_default_mode":
-                    #~ aliases = self.model.xmldoc.get_aliases_for_variable(name)
-                    #~ found_alias = False
-                    #~ if aliases is not None:
-                        #~ for alias in aliases[0]:
-                            #~ if alias in ocp_names:
-                                #~ self.nominal_traj_mode[alias] = \
-                                        #~ self.nominal_traj_mode[name]
-                                #~ del self.nominal_traj_mode[name]
-                                #~ found_alias = True
-                                #~ break
-                    #~ if not found_alias:
-                        #~ raise XMLException("Could not find variable " + name +
-                                           #~ ", as referenced by " +
-                                           #~ "nominal_traj_mode.")
+        for name in self.nominal_traj_mode.keys():
+            if name != "_default_mode":
+                var = self.op.getVariable(name)
+                if var is None:
+                    raise ValueError(
+                            "Nominal mode provided for variable %s, " % name +
+                            "but variable %s not found in " % name +
+                            "optimization problem.")
+                if var.isAlias():
+                    mvar = var.getModelVariable()
+                    self.nominal_traj_mode[mvar.getName()] = \
+                            self.nominal_traj_mode[name]
+                    del self.nominal_traj_mode[name]
         
         # Solver options
         self.solver_options = self.IPOPT_options
@@ -2396,11 +2440,11 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         
     def get_result(self):
         """ 
-        Load result data and create a LocalDAECollocationAlg2Result object.
+        Load result data and create a LocalDAECollocationAlgResult object.
         
         Returns::
         
-            The LocalDAECollocationAlg2Result object.
+            The LocalDAECollocationAlgResult object.
         """
         if self.named_vars:
             return self.nlp
@@ -2416,19 +2460,19 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         times['tot'] += times['post_processing']
         
         # Create and return result object
-        return LocalDAECollocationAlg2Result(self.model, resultfile, self.nlp,
+        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
                                              res, self.options, self.times,
                                              h_opt)
     
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the LocalDAECollocationAlg2
+        Get an instance of the options class for the LocalDAECollocationAlg
         algorithm, prefilled with default values. (Class method.)
         """
-        return LocalDAECollocationAlg2Options()
+        return LocalDAECollocationAlgOptions()
     
-class LocalDAECollocationAlg2Options(OptionBase):
+class LocalDAECollocationAlgOptions(OptionBase):
     
     """
     Options for optimizing CasADi models using a collocation algorithm. 
@@ -2495,8 +2539,8 @@ class LocalDAECollocationAlg2Options(OptionBase):
 
         named_vars --
             Whether to name the NLP variables according to their corresponding
-            Modelica/Optimica names. This is heavily inefficient and should
-            only be done for investigative purposes.
+            Modelica/Optimica names. This disables the solution of the NLP and
+            should only be done for investigative purposes.
 
             Type: bool
             Default: False
@@ -2562,9 +2606,9 @@ class LocalDAECollocationAlg2Options(OptionBase):
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
-            return the unscaled optimization result. This option is 
-            only applicable when the CasadiModel has been instantiated with
-            scale_variables=True. This option is only intended for debugging.
+            return the unscaled optimization result. This option is only
+            applicable when variable_scaling is enabled and is only intended
+            for debugging.
             
             Type: bool
             Default: False
@@ -2600,17 +2644,30 @@ class LocalDAECollocationAlg2Options(OptionBase):
             Default: 20
         
         blocking_factors --
-            The iterable of blocking factors, where each element corresponds to
-            the number of collocation elements for which all the control
-            profiles should be constant. For example, if blocking_factors ==
-            [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum
-            of all elements in the iterable must be the same as the number of
-            elements.
+            Blocking factors are used to enforce piecewise constant inputs. The
+            inputs may only change values at some of the element boundaries.
+            The option is either None (disabled), given as an instance of
+            pyjmi.optimization.casadi_collocation.BlockingFactors or as a list
+            of blocking factors.
+
+            If the options is a list of blocking factors, then each element in
+            the list specifies the number of collocation elements for which all
+            of the inputs must be constant. For example, if blocking_factors ==
+            [2, 2, 1], then the inputs will attain 3 different values (number
+            of elements in the list), and it will change values between
+            collocation element number 2 and 3 as well as number 4 and 5. The
+            sum of all elements in the list must be the same as the number of
+            collocation elements and the length of the list determines the
+            number of separate values that the inputs may attain.
+
+            See the documentation of the BlockingFactors class for how to use
+            it.
             
             If blocking_factors is None, then the usual collocation polynomials
             are instead used to represent the controls.
             
-            Type: None or iterable of ints
+            Type: None, iterable of ints, or instance of
+                  pyjmi.optimization.casadi_collocation.BlockingFactors
             Default: None
         
         quadrature_constraint --
@@ -2707,12 +2764,13 @@ class LocalDAECollocationAlg2Options(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'measurement_data': None,
+                'delayed_feedback': None,
                 'IPOPT_options': {}}
         
-        super(LocalDAECollocationAlg2Options, self).__init__(_defaults)
+        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
 
-class LocalDAECollocationAlg2Result(JMResultBase):
+class LocalDAECollocationAlgResult(JMResultBase):
     
     """
     A JMResultBase object with the additional attributes times and h_opt.
@@ -2748,7 +2806,7 @@ class LocalDAECollocationAlg2Result(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(LocalDAECollocationAlg2Result, self).__init__(
+        super(LocalDAECollocationAlgResult, self).__init__(
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times

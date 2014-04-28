@@ -274,6 +274,7 @@ model ArrayCellMod_ComplErr
  end A;
  
  A a(b[1] = 1, b[1](start=2));
+ A a2(b[:] = {1,2}, b[:](start={2,3}));
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -603,9 +604,6 @@ end R;
 			errorMessage="
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 684, column 10:
-  Unknown size arg in operator cat() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 647, column 2:
   Record arrays of unknown sizes are not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -650,12 +648,6 @@ Compliance error at line 736, column 7:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 737, column 7:
   Unknown size arg in operator identity() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 739, column 7:
-  Unknown sizes in operator min() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 740, column 7:
-  Unknown sizes in operator max() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 741, column 7:
   Unknown sizes in operator ^ is not supported in functions
@@ -768,5 +760,46 @@ Compliance error at line 0, column 0:
 ")})));
 end WhileStmt;
 
+model FunctionalArgument
+  function func
+    input partialFunctional f;
+    input Real x;
+    output Real y;
+  algorithm
+    y := f(x);
+  end func;
+
+  partial function partialFunctional
+    input Real u;
+    output Real y;
+  end partialFunctional;
+  
+  function functional
+    extends partialFunctional;
+    input Real A;
+  algorithm
+    y := A*u;
+  end functional;
+  
+  Real y = func(function functional(A=3.14), time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionalArgument",
+            description="Test compliance error for functional argument",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Compliance error at line 764, column 3:
+  Using functional input arguments is currently not supported
+Error: in file '...':
+Semantic error at line 769, column 10:
+  Cannot find function declaration for f()
+Error: in file '...':
+Semantic error at line 784, column 17:
+  Calling function functional(): missing argument for required input u
+
+")})));
+end FunctionalArgument;
 
 end ComplianceTests;

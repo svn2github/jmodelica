@@ -26,13 +26,14 @@
 
 <project name="OptimicaCompiler" basedir=".." default="build">
     <include file="build-set.xml"/>
-	
-	<property name="sets" value="${oc_set.sets}"/>
+    
+    <property name="sets" value="${oc_set.sets}"/>
     <property name="sub_package" value="optimica" />
-	
-    <property name="jars" value="OptimicaCompiler,util"/>
+    
+    <property name="jars" value="OptimicaCompiler,util,separateProcess"/>
     <property name="OptimicaCompiler.jar.packages" value="${base_package}"/>
     <property name="util.jar.packages" value="org.jmodelica.util"/>
-	
+    <property name="separateProcess.jar.packages" value="org.jmodelica.util,org.jmodelica.separateProcess"/>
+    
     <import file="../build-base.xml"/>
 </project>

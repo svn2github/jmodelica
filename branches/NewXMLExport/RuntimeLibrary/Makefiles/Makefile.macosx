@@ -138,7 +138,7 @@ MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
 # Libraries necessary to link with jmi
 # Reused parts
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
-LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
+LIB_MINPACK  = -L$(MINPACK_LIB_DIR) ${JMODELICA_HOME}/ThirdParty/Minpack/lib/libcminpack.a
 LIB_LAPACK   = $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a -lgfortran
 LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS) $(LIB_MINPACK)
 LIB_JMIC     = -ljmi -lModelicaExternalC
@@ -150,7 +150,7 @@ LIBS_FMUME10 = -lfmi1_me $(LIB_JMIC) $(LIB_COMMON)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
 LIBS_FMU20   = -lfmi2 $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
 LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
-LIBS_CEVAL = -ljmi
+LIBS_CEVAL   = -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a 
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
@@ -163,7 +163,7 @@ ceval:
 	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE ceval_
 
 ceval_: $(OBJS)
-	mkdir $(BINARY_BASE_DIR)
+	mkdir -p $(BINARY_BASE_DIR)
 	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_CEVAL) -static-libstdc++
 	$(RM) $(OBJS)
 

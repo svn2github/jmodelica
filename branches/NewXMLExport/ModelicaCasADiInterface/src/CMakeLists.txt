@@ -56,8 +56,8 @@ set(MC_CPP
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
-  jcc/JCCEnv.cpp # todo: Pull these straight from JCC!
-  jcc/JObject.cpp
+  ${JCC_SRC_DIR}/JCCEnv.cpp
+  ${JCC_SRC_DIR}/JObject.cpp
   ${JCC_GEN_DIR}/__wrap__.cpp
 )
 # MC_HPP is used by the parent script for SWIG dependencies as well
@@ -92,8 +92,9 @@ set(MC_HPP
   jcc/mxwrap.hpp
   jcc/mxvectorwrap.hpp
   jcc/mxfunctionwrap.hpp
-  jcc/JCCEnv.h # todo: Pull these straight from JCC!
-  jcc/JObject.h
+  ${JCC_SRC_DIR}/JCCEnv.h
+  ${JCC_SRC_DIR}/JObject.h
+  ${JCC_SRC_DIR}/JArray.h
 )
 # Make the paths absolute since they are exported to the parent script
 make_paths_absolute(MC_HPP "${MC_HPP}")

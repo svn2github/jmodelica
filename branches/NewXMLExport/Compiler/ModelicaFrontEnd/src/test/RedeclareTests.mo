@@ -5115,4 +5115,28 @@ end RedeclareTests.RedeclareConditional2;
 end RedeclareConditional2;
 
 
+model RedeclarePrimitive1
+    model A
+        replaceable Real x;
+    end A;
+    
+    type B = Real(unit="V");
+    
+    A a(redeclare B x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrimitive1",
+            description="Subtyping of primitive variables",
+            flatModel="
+fclass RedeclareTests.RedeclarePrimitive1
+ RedeclareTests.RedeclarePrimitive1.B a.x;
+
+public
+ type RedeclareTests.RedeclarePrimitive1.B = Real(unit = \"V\");
+end RedeclareTests.RedeclarePrimitive1;
+")})));
+end RedeclarePrimitive1;
+
+
 end RedeclareTests;

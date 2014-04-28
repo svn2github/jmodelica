@@ -53,6 +53,8 @@ struct jmi_linear_solver_t {
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
     jmi_real_t* factorization;      /**< \brief Matrix for storing the Jacobian factorization */
     jmi_real_t* jacobian;         /**< \brief Matrix for storing the Jacobian */
+    jmi_real_t* jacobian_temp;         /**< \brief Matrix for storing the Jacobian */
+    jmi_real_t* singular_values;  /**< \brief Vector for the singular values of the Jacobian */
     double* rScale;               /**< \brief Row scaling of the Jacobian matrix */
     double* cScale;               /**< \brief Column scaling of the Jacobian matrix */
     char equed;                    /**< \brief If scaling of the Jacobian matrix used ('N' - no scaling, 'R' - rows, 'C' - cols, 'B' - both */

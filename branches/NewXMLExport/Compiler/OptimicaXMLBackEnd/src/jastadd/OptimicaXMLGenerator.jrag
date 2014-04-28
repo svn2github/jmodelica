@@ -31,9 +31,9 @@ aspect OptimicaXMLCodeGenerator {
 			p.print(fv, str, indentOneStep);
 		}
 		
-		for (FVariable fv : getAliasVariables()) {
+		/*for (FVariable fv : getAliasVariables()) {
 			p.print(fv, str, indentOneStep);
-		}
+		}*/
 		
 		/*for (FTimedVariable timedVar : timedRealVariables()) {
 			p.print(timedVar, str, indentOneStep);

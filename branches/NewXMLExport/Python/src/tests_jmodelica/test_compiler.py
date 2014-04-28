@@ -102,35 +102,60 @@ class Test_Compiler:
         os.remove(jmuname)
     
     @testattr(stddist = True)
-    def test_compile_FMU(self):
+    def test_compile_FMUME10(self):
         """
-        Test that it is possible to compile an FMU from a .mo file with 
-        ModelicaCompiler for version 1.0 and 2.0.
+        Test that it is possible to compile an FMU ME version 1.0 from a .mo 
+        file with ModelicaCompiler.
         """ 
         Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '1.0', '.')
-        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+
+    @testattr(stddist = True)
+    def test_compile_FMUCS10(self):
+        """
+        Test that it is possible to compile an FMU CS version 1.0 from a .mo 
+        file with ModelicaCompiler.
+        """ 
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'cs', '1.0', '.')
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
         
-        #FMI 2.0 compiler tests.
+    @testattr(stddist = True)
+    def test_compile_FMUME20(self):
+        """
+        Test that it is possible to compile an FMU ME version 2.0 from a .mo 
+        file with ModelicaCompiler.
+        """ 
         Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '2.0', '.')
-        
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
         
+    @testattr(stddist = True)
+    def test_compile_FMUCS20(self):
+        """
+        Test that it is possible to compile an FMU CS version 2.0 from a .mo 
+        file with ModelicaCompiler.
+        """ 
         Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'cs', '2.0', '.')
-        
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
         
+    @testattr(stddist = True)
+    def test_compile_FMUMECS20(self):
+        """
+        Test that it is possible to compile an FMU MECS version 2.0 from a .mo 
+        file with ModelicaCompiler.
+        """ 
         Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me+cs', '2.0', '.')
-        
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
                fname+'.fmu'+" was not created."

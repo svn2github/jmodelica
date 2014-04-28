@@ -66,19 +66,19 @@ void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelNa
 			}
 		}
 		if (!lagrangeSet) {
-			optProblem->setLagrangeTerm(MX(0));
+			optProblem->setObjectiveIntegrand(MX(0));
 		}
 		if (!mayerSet) {
-			optProblem->setMayerTerm(MX(0));
+			optProblem->setObjective(MX(0));
 		}
 }
 
 void transferObjective(Ref<OptimizationProblem> optProblem, XMLElement* objective) {
-	optProblem->setMayerTerm(expressionToMx(optProblem, objective->FirstChildElement()));
+	optProblem->setObjective(expressionToMx(optProblem, objective->FirstChildElement()));
 }
 
 void transferObjectiveIntegrand(Ref<OptimizationProblem> optProblem, XMLElement* objectiveIntegrand) {
-	optProblem->setLagrangeTerm(expressionToMx(optProblem, objectiveIntegrand->FirstChildElement()));
+	optProblem->setObjectiveIntegrand(expressionToMx(optProblem, objectiveIntegrand->FirstChildElement()));
 }
 
 void transferStartTime(Ref<OptimizationProblem> optProblem, XMLElement* startTime) {

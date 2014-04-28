@@ -4,6 +4,8 @@ project(ModelicaCasADi CXX)
 
 add_definitions(-DMODELICACASADI_WITH_SWIG) # todo: might not always want this...
 
+set(Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 2.4)
+
 
 function(make_paths_absolute DEST_VAR DIRS)  
   set(ABS_DIRS "")
@@ -49,7 +51,20 @@ set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
 set(MC_BUILD $ENV{MC_BUILD})
 set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
-set(JAVA_HOME $ENV{JAVA_HOME})
+
+# locate JCC installation, store in JCC_DIR
+execute_process(
+  COMMAND python -c "import os.path, inspect, jcc; print os.path.dirname(inspect.getfile(jcc)).replace(chr(92),'/');"
+  RESULT_VARIABLE FIND_JCC_RESULT
+  OUTPUT_VARIABLE JCC_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT FIND_JCC_RESULT EQUAL 0)
+  message(SEND_ERROR "Failed to get JCC installation path")
+  set(JCC_DIR "")
+endif()
+set(JCC_SRC_DIR "${JCC_DIR}/sources")
+include_directories(${JCC_SRC_DIR})
 
 # Add library path for libs
 link_directories(${CASADI_BUILD_DIR}/lib) 
@@ -70,25 +85,15 @@ message(STATUS "COMPILERS_DIR=${COMPILERS_DIR}")
 message(STATUS "THIRDPARTY_DIR=${THIRDPARTY_DIR}")
 message(STATUS "BEAVER_JAR=${BEAVER_JAR}")
 
-
-set(JARS_AND_JNI ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
-
-set(CLASSPATH ${JARS_AND_JNI})
-interleave_string_and_list(CLASSPATH_WITH_PREFIX --classpath ${JARS})
-
-if(NOT WIN32)
-  join(CLASSPATH "${SEP}" "${JARS_AND_JNI}")
-endif(NOT WIN32)
-
 find_library(CASADI_DLL
   NAMES libcasadi.so libcasadi.dll
   PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
 
-# todo: Check if we still need this. Why are there include dirs in the classpath?
+interleave_string_and_list(CLASSPATH_WITH_PREFIX --classpath ${JARS})
 if(WIN32)
-  set(CLASSPATH ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
+  set(CLASSPATH ${JARS})
 else(WIN32)
   join(CLASSPATH ":" "${JARS}")
 endif(WIN32)
@@ -100,11 +105,11 @@ link_directories(${IPOPT_HOME}/lib)
 
 include_directories(src src/jcc)
 include_directories(${CASADI_HOME})
+
 #JNI
-include_directories(${JAVA_HOME}/include)
-if(WIN32)
-  include_directories(${JAVA_HOME}/include/win32)
-endif(WIN32)
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+
 #Boost
 include_directories(${BOOST_HOME})
 

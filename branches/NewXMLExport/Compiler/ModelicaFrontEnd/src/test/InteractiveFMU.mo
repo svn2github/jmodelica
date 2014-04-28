@@ -369,6 +369,25 @@ Solution:
             methodResult="
 Alias sets:
 0 variables can be eliminated
+"),TransformCanonicalTestCase(
+            name="EquationName1_3",
+            description="Test of interactive FMU and equation name",
+            equation_sorting=true,
+            interactive_fmu=true,
+            automatic_tearing=true,
+            flatModel="
+fclass InteractiveFMU.EquationName1
+ Real x;
+ input Real y;
+ Real iter_0 \"y\";
+ output Real res_0 \"eq_1\";
+ Real eq_1;
+equation
+ x = abs(y) + time;
+ res_0 = y - (x - 2);
+ iter_0 = y;
+ res_0 = eq_1;
+end InteractiveFMU.EquationName1;
 ")})));
     end EquationName1;
     
@@ -395,7 +414,7 @@ fclass InteractiveFMU.Alias1
  input Real a.a annotation(__Modelon(IterationVariable(enabled=true)));
  Real c;
  Real iter_0 \"a.a\";
- output Real res_0;
+ output Real res_0 \"time = c * a.a\";
 equation
  res_0 = time - c * a.a;
  c + a.a = 1;

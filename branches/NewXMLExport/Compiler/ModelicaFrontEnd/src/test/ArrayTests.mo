@@ -16,7 +16,20 @@
 
 within ;
 package ArrayTests
-
+	
+model Test
+    connector C = Real;
+    C x[3];
+equation
+    for i in 1:3 loop
+        if i < 3 then
+            connect(x[i], x[i+1]);
+        else
+            connect(x[i], x[1]);
+        end if;
+    end for;
+end Test;
+	
 package General
 		
   model ArrayTest1
@@ -928,7 +941,6 @@ end ArrayTests.General.ArrayTest34;
 end ArrayTest34;
 
 
-// TODO: the result is wrong, but tests a fixed crash bug - change when cat + unknown array sizes are supported
 model ArrayTest35
 	function f
 		input Real[:] x;
@@ -944,11 +956,11 @@ model ArrayTest35
 			description="Test adding array sizes that are present as expressions in tree",
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
- constant Real z[1] = {1, 2, 0, 0, 0};
- constant Real z[2] = {1, 2, 0, 0, 0};
- constant Real z[3] = {1, 2, 0, 0, 0};
- constant Real z[4] = {1, 2, 0, 0, 0};
- constant Real z[5] = {1, 2, 0, 0, 0};
+ constant Real z[1] = 1;
+ constant Real z[2] = 2;
+ constant Real z[3] = 0;
+ constant Real z[4] = 0;
+ constant Real z[5] = 0;
 end ArrayTests.General.ArrayTest35;
 ")})));
 end ArrayTest35;
@@ -1351,6 +1363,35 @@ Semantic error at line 1451, column 5:
 end SubscriptExpression8;
 
 
+model SubscriptExpression9
+    connector C = Real;
+    C x[3], y;
+equation
+    for i in 1:3 loop
+        if i < 3 then
+            connect(x[i], x[i+1]);
+        else
+            connect(x[i], y);
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Subscripts_SubscriptExpression9",
+            description="",
+            flatModel="
+fclass ArrayTests.Subscripts.SubscriptExpression9
+ Real x[3];
+ Real y;
+equation
+ x[1] = x[2];
+ x[2] = x[3];
+ x[3] = y;
+end ArrayTests.Subscripts.SubscriptExpression9;
+")})));
+end SubscriptExpression9;
+
+
 
 model NumSubscripts1
  Real x = 1;
@@ -1385,6 +1426,138 @@ Semantic error at line 1945, column 12:
 ")})));
 end NumSubscripts2;
 
+model Enum1
+    type ShirtSizes = enumeration(small, medium, large, xlarge);
+    Real[ShirtSizes] w;
+  equation
+    w[ShirtSizes.small:ShirtSizes.large] = {1,1.5,2};
+  algorithm
+    w[ShirtSizes.xlarge] := 2.28;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_Enum1",
+            description="Test subscripting with enums.",
+            flatModel="
+fclass ArrayTests.Subscripts.Enum1
+ constant Real w[1] = 1;
+ constant Real w[2] = 1.5;
+ constant Real w[3] = 2;
+ Real w[4];
+algorithm
+ w[4] := 2.28;
+
+public
+ type ArrayTests.Subscripts.Enum1.ShirtSizes = enumeration(small, medium, large, xlarge);
+
+end ArrayTests.Subscripts.Enum1;
+")})));
+end Enum1;
+
+model Enum2
+    type ShirtSizes = enumeration(small, medium, large, xlarge);
+    type ShirtSizesAnotherStandard = enumeration(small1, medium2, large3, xlarge4);
+    Real[ShirtSizes] w;
+    Real[1] v;
+  equation
+    w[ShirtSizes.small:ShirtSizes.large] = {1,1.5,2};
+    w[4] = 2.28;
+    v[ShirtSizes.medium] = 1;
+    w[ShirtSizesAnotherStandard.small1] = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_Enum2",
+            description="Check incompatible type index errors for enum.",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Semantic error at line 1422, column 7:
+  Expected array index of type 'ArrayTests.Subscripts.Enum2.ShirtSizes' found 'Integer'
+Error: in file '...':
+Semantic error at line 1423, column 7:
+  Expected array index of type 'Integer' found 'ArrayTests.Subscripts.Enum2.ShirtSizes'
+Error: in file '...':
+Semantic error at line 1424, column 7:
+  Expected array index of type 'ArrayTests.Subscripts.Enum2.ShirtSizes' found 'ArrayTests.Subscripts.Enum2.ShirtSizesAnotherStandard'
+")})));
+end Enum2;
+
+model Bool1
+    Real[Boolean] b2;
+  equation
+    b2[false] = 5;
+  algorithm
+    b2[true] := 10.0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_Bool1",
+            description="Test subscripting with bools.",
+            flatModel="
+fclass ArrayTests.Subscripts.Bool1
+ constant Real b2[1] = 5;
+ Real b2[2];
+algorithm
+ b2[2] := 10.0;
+end ArrayTests.Subscripts.Bool1;
+")})));
+end Bool1;
+
+model Bool2
+    Real[Boolean] b2;
+    Real[1] b3;
+  equation
+    b2[false] = 5;
+    b2[2] = 10.0;
+    b3[true] = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_Bool2",
+            description="Check incompatible type index errors for bool.",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 1466, column 8:
+  Expected array index of type 'Boolean' found 'Integer'
+Error: in file '...':
+Semantic error at line 1467, column 8:
+  Expected array index of type 'Integer' found 'Boolean'
+")})));
+end Bool2;
+
+model MixedTypes1
+    
+    type ShirtSizes  = enumeration(small);
+    type ShirtColors = enumeration(blue, yellow);
+    type SlimFit = Boolean;
+    parameter Integer maxQuality = 1;
+    
+    Integer[ShirtSizes, maxQuality, ShirtColors, SlimFit] stock;
+  equation
+    stock[ShirtSizes.small, 1, ShirtColors.blue:ShirtColors.yellow, false] = {1,2};
+    stock[ShirtSizes.small, 1, ShirtColors.blue:ShirtColors.yellow, true]  = {0,0};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_MixedTypes1",
+            description="Test subscripting with bools.",
+            flatModel="
+fclass ArrayTests.Subscripts.MixedTypes1
+ parameter Integer maxQuality = 1 /* 1 */;
+ constant Integer stock[1,1,1,1] = 1;
+ constant Integer stock[1,1,1,2] = 0;
+ constant Integer stock[1,1,2,1] = 2;
+ constant Integer stock[1,1,2,2] = 0;
+public
+ type ArrayTests.Subscripts.MixedTypes1.ShirtSizes = enumeration(small);
+ type ArrayTests.Subscripts.MixedTypes1.ShirtColors = enumeration(blue, yellow);
+end ArrayTests.Subscripts.MixedTypes1;
+")})));
+    
+end MixedTypes1;
+    
 end Subscripts;
 
 
@@ -6056,6 +6229,82 @@ end ArrayTests.VariableIndex.Algorithm;
 ")})));
 end Algorithm;
 
+model Enum
+    type ABC = enumeration(A,B,C);
+    ABC table[ABC] = {ABC.A, ABC.B, ABC.C};
+    ABC i = if time > 1 then ABC.A else ABC.B;
+    ABC x = table[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Enum",
+            description="Test enum array index with discrete variability",
+            flatModel="
+fclass ArrayTests.VariableIndex.Enum
+ constant ArrayTests.VariableIndex.Enum.ABC table[1] = ArrayTests.VariableIndex.Enum.ABC.A;
+ constant ArrayTests.VariableIndex.Enum.ABC table[2] = ArrayTests.VariableIndex.Enum.ABC.B;
+ constant ArrayTests.VariableIndex.Enum.ABC table[3] = ArrayTests.VariableIndex.Enum.ABC.C;
+ discrete ArrayTests.VariableIndex.Enum.ABC i;
+ discrete ArrayTests.VariableIndex.Enum.ABC x;
+initial equation 
+ pre(i) = ArrayTests.VariableIndex.Enum.ABC.A;
+ pre(x) = ArrayTests.VariableIndex.Enum.ABC.A;
+equation
+ i = if time > 1 then ArrayTests.VariableIndex.Enum.ABC.A else ArrayTests.VariableIndex.Enum.ABC.B;
+ x = temp_1(i, {ArrayTests.VariableIndex.Enum.ABC.A, ArrayTests.VariableIndex.Enum.ABC.B, ArrayTests.VariableIndex.Enum.ABC.C});
+
+public
+ function temp_1
+  input ArrayTests.VariableIndex.Enum.ABC i_0;
+  input ArrayTests.VariableIndex.Enum.ABC[:] x;
+  output ArrayTests.VariableIndex.Enum.ABC y;
+ algorithm
+  y := x[i_0];
+  return;
+ end temp_1;
+
+ type ArrayTests.VariableIndex.Enum.ABC = enumeration(A, B, C);
+
+end ArrayTests.VariableIndex.Enum;
+")})));
+end Enum;
+
+model Bool
+    type ABC = enumeration(A,B,C);
+    Boolean table[Boolean] = {true, false};
+    Boolean i = if time > 1 then false else true;
+    Boolean x = table[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Bool",
+            description="Test bool array index with discrete variability",
+            flatModel="
+fclass ArrayTests.VariableIndex.Bool
+ constant Boolean table[1] = true;
+ constant Boolean table[2] = false;
+ discrete Boolean i;
+ discrete Boolean x;
+initial equation 
+ pre(i) = false;
+ pre(x) = false;
+equation
+ i = if time > 1 then false else true;
+ x = temp_1(i, {true, false});
+
+public
+ function temp_1
+  input Boolean i_0;
+  input Boolean[:] x;
+  output Boolean y;
+ algorithm
+  y := x[i_0];
+  return;
+ end temp_1;
+
+end ArrayTests.VariableIndex.Bool;
+")})));
+end Bool;
 
 end VariableIndex;
 
@@ -6344,7 +6593,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf3",
-			description="",
+			description="Test that array size errors lock if branches if possible",
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf3
  parameter Boolean a = true /* true */;
@@ -6359,6 +6608,36 @@ fclass ArrayTests.Other.ArraySizeInIf3
 end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
+
+
+model ArraySimplify1
+    Real x[2], y[2], z[2];
+equation
+    der(x) = {1, 2} * time;
+    y = 0 * x;
+    z = x * 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySimplify1",
+			description="Correct simplification of array expressions",
+			flatModel="
+fclass ArrayTests.Other.ArraySimplify1
+ Real x[1];
+ Real x[2];
+ constant Real y[1] = 0;
+ constant Real y[2] = 0;
+ constant Real z[1] = 0;
+ constant Real z[2] = 0;
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ der(x[1]) = time;
+ der(x[2]) = 2 * time;
+end ArrayTests.Other.ArraySimplify1;
+")})));
+end ArraySimplify1;
 
 end Other;
 
