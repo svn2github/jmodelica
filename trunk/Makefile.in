@@ -886,11 +886,11 @@ modelicacasadi_wrapper:
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ${CMAKE_EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $${CMAKE_EXTRA_ARGS} ;; \
 	*-mingw*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ${CMAKE_EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $${CMAKE_EXTRA_ARGS} ;; \
 	*) \
-	cmake $(MC_INTERFACE) ${CMAKE_EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) $${CMAKE_EXTRA_ARGS} ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
