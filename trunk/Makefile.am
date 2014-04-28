@@ -120,19 +120,19 @@ PYTHON_INCLUDE=
 
 modelicacasadi_wrapper:
 	if [ "$(PYTHON_LIB)" ] && [ "$(PYTHON_INCLUDE)" ]; then \
-	  EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
+	  CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
 	else \
-	  EXTRA_ARGS=""; \
-	fi
+	  CMAKE_EXTRA_ARGS=""; \
+	fi; \
 	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $(EXTRA_ARGS) ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ${CMAKE_EXTRA_ARGS} ;; \
 	*-mingw*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $(EXTRA_ARGS) ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ${CMAKE_EXTRA_ARGS} ;; \
 	*) \
-	cmake $(MC_INTERFACE) $(EXTRA_ARGS) ;; \
+	cmake $(MC_INTERFACE) ${CMAKE_EXTRA_ARGS} ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
