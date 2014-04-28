@@ -31,7 +31,7 @@ bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile CMAKE_PYTHON_LIBRARY=${PYTHON_LIB} CMAKE_PYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}
+	make -f Makefile CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB) CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)
 
 install_casadi: casadi
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
@@ -120,7 +120,7 @@ PYTHON_INCLUDE=
 
 modelicacasadi_wrapper:
 	if [ "$(PYTHON_LIB)" ] && [ "$(PYTHON_INCLUDE)" ]; then \
-	  EXTRA_ARGS="-DPYTHON_LIBRARY=${PYTHON_LIB} -DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"; \
+	  EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
 	else \
 	  EXTRA_ARGS=""; \
 	fi
@@ -128,11 +128,11 @@ modelicacasadi_wrapper:
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ${EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $(EXTRA_ARGS) ;; \
 	*-mingw*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ${EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $(EXTRA_ARGS) ;; \
 	*) \
-	cmake $(MC_INTERFACE) ${EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) $(EXTRA_ARGS) ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
