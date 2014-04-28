@@ -291,8 +291,8 @@ Solution:
             methodName="printDAEBLT",
             methodResult="
 -------------------------------
-Non-solved block of 1 variables:
-Unknown variables:
+Numerically solved block of 1 variables:
+Computed variable:
   b()
 Equations:
   23 = sin(c * b)
@@ -317,6 +317,52 @@ Solution:
 -------------------------------
 ")})));
     end LocalIteration2;
+    
+    model LocalIteration3
+        Real x;
+    equation
+        time = abs(x) annotation(__Modelon(LocalIteration));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LocalIteration3",
+            description="Test of interactive FMU and local iterations in scalar block",
+            interactive_fmu=true,
+            local_iteration_in_tearing="annotation",
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Numerically solved block of 1 variables:
+Computed variable:
+  x()
+Equations:
+  time = abs(x)
+-------------------------------
+")})));
+    end LocalIteration3;
+    
+    model LocalIteration4
+        Real x;
+    equation
+        time = abs(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LocalIteration4",
+            description="Test of interactive FMU and local iterations in scalar block",
+            interactive_fmu=true,
+            local_iteration_in_tearing="all",
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Numerically solved block of 1 variables:
+Computed variable:
+  x()
+Equations:
+  time = abs(x)
+-------------------------------
+")})));
+    end LocalIteration4;
     
     model EquationName1
         Real x;
