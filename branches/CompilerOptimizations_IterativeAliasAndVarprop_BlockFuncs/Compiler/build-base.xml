@@ -28,7 +28,7 @@
 
     <dirname property="base.dir" file="${ant.file.base}"/>
 
-    <property name="java_version" value="1.7"/>
+    <property name="java_version" value="1.6"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
     <property name="target" value="${user.dir}"/>
@@ -226,7 +226,7 @@
         <mkdir dir="${class_output}" />
         <javac classpath="${beaver-rt_jar}" compiler="${java_compiler}" source="${java_version}" 
                 target="${java_version}" debug="true" destdir="${class_output}" includeantruntime="false"
-                srcdir="${ast_output}:${parser_output}${java_dirs}" /> <!-- java_dirs begins with a : -->
+                srcdir="${java_output}${java_dirs}" /> <!-- java_dirs begins with a : -->
     </target>
 
     <!-- generates ast files with JastAdd -->
@@ -391,12 +391,17 @@
             </sequential>
         </for>
         <!-- clean up intermediate files -->
-        <delete deleteonexit="true">
-            <fileset dir="${parser_output}">
-                <include name="*.parser" />
-                <include name="*.beaver" />
-            </fileset>
-        </delete>
+        <if>
+            <available file="${parser_output}" type="dir" />
+            <then>
+                <delete deleteonexit="true">
+                    <fileset dir="${parser_output}">
+                        <include name="*.parser" />
+                        <include name="*.beaver" />
+                    </fileset>
+                </delete>
+            </then>
+        </if>
     </target>
 
     <!-- generate all scanners -->
@@ -426,11 +431,16 @@
             </sequential>
         </for>
         <!-- clean up intermediate files -->
-        <delete deleteonexit="true">
-            <fileset dir="${parser_output}">
-                 <include name="*.flex" />
-            </fileset>
-        </delete>
+        <if>
+            <available file="${parser_output}" type="dir" />
+            <then>
+                <delete deleteonexit="true">
+                    <fileset dir="${parser_output}">
+                         <include name="*.flex" />
+                    </fileset>
+                </delete>
+            </then>
+        </if>
     </target>
 
     <!-- Generate JUnit test classes for all Modelica test files. -->

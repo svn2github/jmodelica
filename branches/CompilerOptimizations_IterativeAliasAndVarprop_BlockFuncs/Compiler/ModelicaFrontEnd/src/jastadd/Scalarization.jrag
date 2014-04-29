@@ -168,16 +168,8 @@ aspect Scalarization {
 		return !keep;
 	}
 	
-	protected void FClass.evaluateArraySubscripts() {
-		clearFlatNameBinding();
-		getFAbstractEquations().makeSubscriptsLiteral();
-		getFInitialEquations().makeSubscriptsLiteral();
-		getFParameterEquations().makeSubscriptsLiteral();
-	}
-	
 	protected void FClass.scalarizationCleanup() {
 		flush();  // Must flush before traversing
-		evaluateArraySubscripts();
 		enableStreamsRewrite();
 		setDummyVariableList(new List<FVariable>());
 	}
@@ -207,32 +199,6 @@ aspect Scalarization {
         for (FStatement stmt : fromList)
             stmt.scalarizeStmt(vars, toList, indexMap);
     }
-	
-	/**
-	 * \brief Replace all expressions in array subscripts with literals.
-	 * 
-	 * This method enables a rewrite that will be performed after the next flush.
-	 */
-	public void ASTNode.makeSubscriptsLiteral() {
-		for (ASTNode child : this)
-			child.makeSubscriptsLiteral();
-	}
-	
-	public void FExpSubscript.makeSubscriptsLiteral() {
-		rewriteToLiteral = true;
-		is$Final = false;
-	}
-	
-	private boolean FExpSubscript.rewriteToLiteral = false;
-	
-	rewrite FExpSubscript {
-		when (rewriteToLiteral) to FExpSubscript {
-			setFExp(getFExp().ceval().buildLiteral());
-			rewriteToLiteral = false;
-			return this;
-		}
-	}
-	
 	
 	/**
 	 * \brief Scalarize the FVariable and put all scalarized variables in the
@@ -1785,31 +1751,32 @@ aspect Scalarization {
 		stmts.add(stmt);
 	}
 	
-	/**
-	 * \brief Scalarize the function, replacing all array assignments with separate scalar 
-	 *        assignments and scalarize all expressions.
-	 */
-	public FFunctionDecl FFunctionDecl.scalarize() {
-		Map<String,FExp> emptyIndexMap = Collections.emptyMap();
-		List<FFunctionVariable> vars = new List<FFunctionVariable>();
-		List<FStatement> stmts = new List<FStatement>();
+    /**
+     * \brief Scalarize the function, replacing all array assignments with separate scalar 
+     *        assignments and scalarize all expressions.
+     */
+    public FFunctionDecl FFunctionDecl.scalarize() {
+        Map<String,FExp> emptyIndexMap = Collections.emptyMap();
+        List<FFunctionVariable> vars = new List<FFunctionVariable>();
+        List<FStatement> stmts = new List<FStatement>();
 
-		FFunctionDecl fd = createDecl();
-		fd.setFQName(getFQName().fullCopy());
-		fd.setFFunctionVariableList(vars);
-		fd.setFAlgorithm(new FAlgorithm(stmts));
-		if (hasFDerivativeFunction())
-		    fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
-		fd.setSmoothOrder(getSmoothOrder());
-		fd.inlineAnnotation = inlineAnnotation;
-		fd.parent = this;
-		
-		for (FFunctionVariable var : getFFunctionVariables())
-			var.scalarize(vars, stmts, emptyIndexMap);
+        FFunctionDecl fd = createDecl();
+        fd.setFQName(getFQName().fullCopy());
+        fd.setFFunctionVariableList(vars);
+        fd.setFAlgorithm(new FAlgorithm(stmts));
+        for (FAttribute a : getFAttributes()) 
+            fd.addFAttribute(a.scalarize(Index.NULL, Collections.<String,FExp>emptyMap()));
+        if (hasFDerivativeFunction())
+            fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
+        fd.inlineAnnotation = inlineAnnotation;
+        fd.parent = this;
+
+        for (FFunctionVariable var : getFFunctionVariables())
+            var.scalarize(vars, stmts, emptyIndexMap);
         FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, vars, emptyIndexMap);
-		
-		return fd;
-	}
+
+        return fd;
+    }
 	
 	public FFunctionDecl FFunctionDecl.createDecl() {
 		return new FFunctionDecl();
@@ -2416,33 +2383,33 @@ aspect Scalarization {
 	 * FIdUse 'x[2]' needs to be marked as scalarized, and the expression
 	 * scalar(x*A*x) needs to be replaced by a double sum.
 	 */
-	
-	/**
-	 * \brief Create an FArray containing scalarized subexpressions.
-	 */
-	public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
-    	return buildFArray(new ScalarizedBuilder(indexMap, context));
+
+    /**
+     * Create an FArray containing scalarized subexpressions.
+     */
+    public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
+        return buildFArray(new ScalarizedBuilder(indexMap, context));
     }
-    
-	public static class Array {
-	    /**
-	     * Helper object for {@link #buildScalarized(java.util.Map<String,FExp>)}.
-	     */
-	    protected class ScalarizedBuilder implements ElementBuilder {
-	    	private Map<String,FExp> indexMap;
-	    	private FExp context;
-	    	
-	    	public ScalarizedBuilder(Map<String,FExp> indexMap, FExp context) {
-	    		this.indexMap = indexMap;
-	    		this.context = context;
-	    	}
-	    	
-			public FExp build(FExp e) {
-				return context.dynamicFExp(e).scalarize(indexMap);
-			}
-	    }
-	}
-	
+
+    public class Array {
+        /**
+         * Helper object for {@link #buildScalarized(java.util.Map<String,FExp>)}.
+         */
+        protected static class ScalarizedBuilder implements ElementBuilder {
+            private Map<String,FExp> indexMap;
+            private FExp context;
+            
+            public ScalarizedBuilder(Map<String,FExp> indexMap, FExp context) {
+                this.indexMap = indexMap;
+                this.context = context;
+            }
+            
+            public FExp build(FExp e) {
+                return context.dynamicFExp(e).scalarize(indexMap);
+            }
+        }
+    }
+
 	/**
 	 * \brief Flag that signals that this expression should be replaced with a use of a temporary variable.
 	 */
@@ -2716,6 +2683,12 @@ aspect Scalarization {
 	public FExp FBinEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap),getY().scalarize(indexMap)); }
 	
 	public FExp FLitExp.scalarizeExp(Map<String,FExp> indexMap) { return (FLitExp) fullCopy(); }
+	public FExp FEnumLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
+	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
+	}
+	public FExp FBooleanLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
+	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
+    }
 	public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 	public FExp FPreExp.scalarizeExp(Map<String,FExp> indexMap) { return new FPreExp(getFIdUse().scalarize(indexMap)); }
 	

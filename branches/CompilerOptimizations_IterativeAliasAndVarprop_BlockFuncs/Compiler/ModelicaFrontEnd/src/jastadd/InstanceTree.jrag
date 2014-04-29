@@ -1257,7 +1257,7 @@ aspect InstanceTreeConstruction {
 	eq InstReplacingExtendsShortClass.getInstClassModification()     = getInstExtendsShortClass().getInstClassModification();
 
 	syn lazy InstProgramRoot Program.getInstProgramRoot() {
-		return new InstProgramRoot(this);
+		return new InstProgramRoot(this, new Opt());
 	}
 
 	syn lazy InstClassDecl InstClassRedeclare.getInstClassDecl() {
@@ -1461,15 +1461,14 @@ aspect InstaceConstrainingClauses {
     eq InstConstrainingComponent.getConstrainingClause() = getComponentDecl().getConstrainingClause();
     eq InstConstrainingClass.getConstrainingClause() = getBaseClassDecl().getConstrainingClause();
 
-	syn lazy InstNode InstConstraining.getInstNode();
-	eq InstConstrainingComponent.getInstNode() =
-  		getClassName().myInstClassDecl().newInstConstrainingComponentDecl(getComponentDecl(), getConstrainingClause().getAccess());
+    syn lazy InstBaseNode InstConstraining.getInstNode();
+    eq InstConstrainingComponent.getInstNode() =
+        getClassName().myInstClassDecl().newInstConstrainingComponentDecl(getComponentDecl(), getConstrainingClause().getAccess());
+    eq InstConstrainingClass.getInstNode() {
+        ClassDecl classToExpand = getClassName().myInstClassDecl().getClassDecl();
+        return classToExpand.newInstClassDecl();
+    }
 
-	eq InstConstrainingClass.getInstNode() {
-		ClassDecl classToExpand = getClassName().myInstClassDecl().getClassDecl();
-		return classToExpand.newInstClassDecl();
-	}
-	
 	syn lazy FExp InstValueModification.getFExp() = 
 		getValueModification().getExp().instantiate();
 	eq InstRecordModification.getFExp() = getValue().unboundCopy();
@@ -1545,22 +1544,36 @@ aspect InstanceAST_API {
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
-    syn String InstComponentDecl.qualifiedName() = getFQName().name();
-    
+    syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
+    eq InstComponentDecl.qualifiedName()    = getFQName().name();
+    eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
     eq InstBaseClassDecl.qualifiedName()    = buildQualifiedName(name());
     eq InstBuiltInClassDecl.qualifiedName() = name();
+    eq InstProgramRoot.qualifiedName()      = "";
     
     syn String InstNode.buildQualifiedName(String last) = combineName(instClassNamePrefix(), last);
     
     inh lazy String InstNode.instClassNamePrefix();
-    eq InstBaseClassDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
+    eq InstBaseClassDecl.getChild().instClassNamePrefix() = qualifiedName();
     eq InstComponentDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
     eq SourceRoot.getChild().instClassNamePrefix()        = "";
     eq FlatRoot.getChild().instClassNamePrefix()          = "";
     eq InstRoot.getChild().instClassNamePrefix()          = "";
-	
-    
+
+    /**
+     * Get the qualified class name of the oldest ancestor in the inheritance structure.
+     * 
+     * For classes inheriting multiple classes, only the first one is considered.
+     * This is useful mostly for classes that only allows inheriting from one other class.
+     */
+    syn String InstNode.baseClassName()                  = 
+        (getNumInstExtends() > 0) ? getInstExtends(0).baseClassName() : qualifiedName();
+    eq InstComponentDecl.baseClassName()                 = myInstClass().baseClassName();
+    eq InstSimpleShortClassDecl.baseClassName()          = actualInstClass().baseClassName();
+    eq InstReplacingSimpleShortClassDecl.baseClassName() = actualInstClass().baseClassName();
+
+
 	syn Iterable<AbstractEquation> InstNode.equations() = Collections.<AbstractEquation>emptyList();
 	eq InstComponentDecl.equations()                    = myInstClass().equations();
 	eq InstExtends.equations()                          = myInstClass().equations();
@@ -1665,20 +1678,15 @@ aspect InstanceAST_API {
     // Overridden in BaseClassDecl by generated API for optional child
     syn boolean ClassDecl.hasReplaceable() = false;
 
-	syn boolean InstNode.extendsPrimitive()        = false;
-	eq InstShortClassDecl.extendsPrimitive()       = 
-		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
-	eq InstFullClassDecl.extendsPrimitive()        = 
-		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
-	eq InstSimpleShortClassDecl.extendsPrimitive() {
-		InstClassDecl icd = actualInstClass();
-		return icd.isPrimitive() || icd.extendsPrimitive();
-	}
-	eq InstExtends.extendsPrimitive() {
-		InstClassDecl icd = myInstClass();
-		return !isRecursive() && icd.isOrExtendsPrimitive();
-	}
-	
+    syn boolean InstNode.extendsPrimitive()        = false;
+    eq InstShortClassDecl.extendsPrimitive()       = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
+    eq InstFullClassDecl.extendsPrimitive()        = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
+    eq InstSimpleShortClassDecl.extendsPrimitive() = actualInstClass().isOrExtendsPrimitive();
+    eq InstExtends.extendsPrimitive() {
+        InstClassDecl icd = myInstClass();
+        return !isRecursive() && icd.isOrExtendsPrimitive();
+    }
+
 	/**
 	 * Check if this node is a class declaration or an extends in one.
 	 */
@@ -1691,14 +1699,13 @@ aspect InstanceAST_API {
      */
     syn boolean InstNode.isExtends() = false;
     eq InstExtends.isExtends()     = true;
-	
-	/**
-	 * Check if this extends is part of a class declaration.
-	 */
-	inh boolean InstExtends.isInClassDecl();
-    eq InstExtends.getChild().isInClassDecl()   = isInClassDecl();
+
+    /**
+     * Check if this extends is part of a class declaration.
+     */
+    inh boolean InstExtends.isInClassDecl();
     eq InstClassDecl.getChild().isInClassDecl() = true;
-    eq InstNode.getChild().isInClassDecl()      = false;
+    eq InstBaseNode.getChild().isInClassDecl()  = false;
     eq Root.getChild().isInClassDecl()          = false;
     
     /**
@@ -1712,9 +1719,8 @@ aspect InstanceAST_API {
      * Check if this extends is part of a component declaration.
      */
     inh boolean InstExtends.isInComponentDecl();
-    eq InstExtends.getChild().isInComponentDecl()       = isInComponentDecl();
     eq InstComponentDecl.getChild().isInComponentDecl() = true;
-    eq InstNode.getChild().isInComponentDecl()          = false;
+    eq InstBaseNode.getChild().isInComponentDecl()      = false;
     eq Root.getChild().isInComponentDecl()              = false;
 	
 	/**
@@ -1888,13 +1894,14 @@ aspect InstanceAST_API {
             
         }
 
-	}
-	
-	inh InstNode InstNode.containingInstNode();
-	eq InstNode.getChild().containingInstNode() = this;
-	eq InstRoot.getChild().containingInstNode() = null;
+    }
+
+    inh InstNode InstNode.containingInstNode();
+    inh InstNode FExp.containingInstNode();
+    eq InstNode.getChild().containingInstNode() = this;
+    eq InstRoot.getChild().containingInstNode() = null;
     eq Root.getChild().containingInstNode()     = null;
-	
+
 }
 
 aspect SourceAST_API {
@@ -1981,7 +1988,7 @@ aspect InstArrays {
 	 * Find the number of the dimension corresponding to this InstArrayComponentDecl.
 	 */
 	inh int InstArrayComponentDecl.myDimension();
-	eq InstNode.getChild().myDimension()               = 1;
+	eq InstNode.getChild().myDimension()               = 0;
 	eq InstArrayComponentDecl.getChild().myDimension() = myDimension() + 1;
 	
 	/**
@@ -2012,11 +2019,35 @@ aspect InstArrays {
 	eq InstRoot.getChild().dimensionLength(int i)                           = Size.UNKNOWN;
 	eq FlatRoot.getChild().dimensionLength(int i)                           = Size.UNKNOWN;
 
-	inh InstComponentDecl InstArrayComponentDecl.instComponentDecl();
-	eq InstArrayComponentDecl.getChild().instComponentDecl() = instComponentDecl();
-	eq InstComponentDecl.getChild().instComponentDecl()      = this;
-	eq InstRoot.getChild().instComponentDecl()               = null;
-	
+    /**
+     * Get an Index to my cell.
+     * 
+     * Only valid for bottom level in array.
+     */
+    syn Index InstArrayComponentDecl.myIndex() {
+        Index i = parentIndex();
+        i.set(myDimension(), getIndex());
+        return i;
+    }
+
+    /**
+     * Calculate Index of parent.
+     * 
+     * For internal use only - returns an incomplete Index. See {@link #myIndex()}.
+     */
+    inh Index InstArrayComponentDecl.parentIndex();
+    eq InstNode.getChild().parentIndex()               = null;
+    eq InstComponentDecl.getChild().parentIndex()      = new Index(new int[ndims()]);
+    eq InstArrayComponentDecl.getChild().parentIndex() = myIndex();
+
+    /**
+     * The top level component for the array.
+     */
+    inh InstComponentDecl InstArrayComponentDecl.instComponentDecl();
+    eq InstArrayComponentDecl.getChild().instComponentDecl() = instComponentDecl();
+    eq InstComponentDecl.getChild().instComponentDecl()      = this;
+    eq InstRoot.getChild().instComponentDecl()               = null;
+
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
 		getFArraySubscripts().getNumFSubscript()>0;
 	

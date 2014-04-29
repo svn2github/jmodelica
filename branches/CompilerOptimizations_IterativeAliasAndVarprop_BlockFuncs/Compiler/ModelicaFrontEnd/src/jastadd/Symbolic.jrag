@@ -26,7 +26,7 @@ aspect EquationSolve {
 		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
 		if (solvable)
 			return Solvability.ANALYTICALLY_SOLVABLE;
-		else if (duringTearing && canUseLocalIteration())
+		else if (canUseLocalIteration())
 			return Solvability.NUMERICALLY_SOLVABLE;
 		else
 			return Solvability.UNSOLVABLE;
@@ -97,7 +97,7 @@ aspect EquationSolve {
             return Solvability.UNSOLVABLE;
     }
     
-	syn nta FExp FEquation.solution(String name) {
+	syn FExp FEquation.solution(String name) {
 		return solution(name, false);
 	}
 	
@@ -876,10 +876,10 @@ aspect Derivatives {
 	
 }
 
-aspect AlgorithmDifferentiation{
+aspect SmoothOrder{
+
     public static final int ASTNode.SMOOTH_ORDER_ANNOTATION_DEFAULT = -1;
-    
-    
+
     public static int ASTNode.readSmoothOrderAnnotation(AnnotationNode a) {
         AnnotationNode smoothOrder = a.forPath("smoothOrder");
         if (smoothOrder.isIntegerValue())
@@ -888,11 +888,29 @@ aspect AlgorithmDifferentiation{
             return SMOOTH_ORDER_ANNOTATION_DEFAULT;
     }
     
+    public void FFunctionDecl.smoothOrder(int order) {
+        FAttribute attribute = findAttribute("ResidualEquation");
+        if (attribute == null) {
+            attribute = new FInternalAttribute("ResidualEquation");
+            addFAttribute(attribute);
+        }
+        attribute.setValue(new FIntegerLitExp(order));
+    }
+    
+    syn int FFunctionDecl.smoothOrder() {
+        FAttribute attribute = findAttribute("ResidualEquation");
+        if (attribute == null)
+            return SMOOTH_ORDER_ANNOTATION_DEFAULT;
+        return attribute.getValue().ceval().intValue();
+    }
+    
     syn int InstClassDecl.smoothOrder() = readSmoothOrderAnnotation(annotation());
     syn int InstFunctionCall.smoothOrder() = myInstClassDecl().smoothOrder();
-    syn int FFunctionDecl.smoothOrder() = getSmoothOrder();
     syn int FFunctionCall.smoothOrder() = myFFunctionDecl().smoothOrder();
     
+}
+
+aspect AlgorithmDifferentiation{
     syn FFunctionDecl FFunctionDecl.diff(boolean inFunction) {
         int order = order() + 1;
         if (smoothOrder() == 0 && !inFunction)
@@ -928,7 +946,8 @@ aspect AlgorithmDifferentiation{
         variables.addAll(derivatedInputs);
         variables.addAll(outputs);
         variables.addAll(others);
-        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new Opt<FDerivativeFunction>(), Math.max(smoothOrder() - 1, 0));
+        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new Opt<FDerivativeFunction>(), new List<FAttribute>());
+        function.smoothOrder(Math.max(smoothOrder() - 1, 0));
         myFClass().addFFunctionDecl(function);
         setFDerivativeFunction(new FDerivativeFunction(name.createFIdUse(), order, new List<FIdUse>(), new List<FIdUse>()));
         function.setFAlgorithm(getFAlgorithm().diff());

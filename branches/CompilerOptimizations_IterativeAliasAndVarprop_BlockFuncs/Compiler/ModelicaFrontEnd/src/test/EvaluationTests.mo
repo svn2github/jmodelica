@@ -903,6 +903,48 @@ end EvaluationTests.FunctionEval25;
 end FunctionEval25;
 
 
+model FunctionEval26
+    record A
+        Real x;
+        Real y;
+    end A;
+    
+    function f
+        input Real x;
+        output A a(x=x, y=x*x);
+    algorithm
+    end f;
+    
+    constant A a1 = f(2);
+    constant A a2 = a1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval26",
+            description="Evaluation in instance tree of function with modifications on record variable",
+            flatModel="
+fclass EvaluationTests.FunctionEval26
+ constant EvaluationTests.FunctionEval26.A a1 = EvaluationTests.FunctionEval26.f(2);
+ constant EvaluationTests.FunctionEval26.A a2 = EvaluationTests.FunctionEval26.A(2, 4.0);
+
+public
+ function EvaluationTests.FunctionEval26.f
+  input Real x;
+  output EvaluationTests.FunctionEval26.A a;
+ algorithm
+  return;
+ end EvaluationTests.FunctionEval26.f;
+
+ record EvaluationTests.FunctionEval26.A
+  Real x;
+  Real y;
+ end EvaluationTests.FunctionEval26.A;
+
+end EvaluationTests.FunctionEval26;
+")})));
+end FunctionEval26;
+
+
 
 model StringConcat
  Real a = 1;

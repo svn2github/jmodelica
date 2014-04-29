@@ -1485,24 +1485,24 @@ Solved variables:
   u2
   u1
 Iteration variables:
-  i2
   i1
+  i2
   i3
 Solved equations:
   u2 = R2 * i2
   u1 = R1 * i1
 Residual equations:
- Iteration variables: i2
-  u0 = u1 + u2
  Iteration variables: i1
   i1 = i2 + i3
+ Iteration variables: i2
+  u0 = u1 + u2
  Iteration variables: i3
   u2 = R3 * i3
 Jacobian:
-  |1.0, 0.0, (- R2), 0.0, 0.0|
-  |0.0, 1.0, 0.0, (- R1), 0.0|
+  |1.0, 0.0, 0.0, (- R2), 0.0|
+  |0.0, 1.0, (- R1), 0.0, 0.0|
+  |0.0, 0.0, 1.0, - 1.0, - 1.0|
   |- 1.0, - 1.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, - 1.0, 1.0, - 1.0|
   |1.0, 0.0, 0.0, 0.0, (- R3)|
 -------------------------------
 Solved block of 1 variables:
@@ -1567,25 +1567,25 @@ Solved variables:
   u2
   u1
 Iteration variables:
-  i2
   i3
+  i2
   i1
 Solved equations:
   u2 = R3 * i3
   u1 = R1 * i1
 Residual equations:
- Iteration variables: i2
-  u0 = u1 + u2
  Iteration variables: i3
   i1 = i2 + i3
+ Iteration variables: i2
+  u0 = u1 + u2
  Iteration variables: i1
   u2 = R2 * i2
 Jacobian:
-  |1.0, 0.0, 0.0, (- R3), 0.0|
+  |1.0, 0.0, (- R3), 0.0, 0.0|
   |0.0, 1.0, 0.0, 0.0, (- R1)|
-  |- 1.0, - 1.0, 0.0, 0.0, 0.0|
   |0.0, 0.0, - 1.0, - 1.0, 1.0|
-  |1.0, 0.0, (- R2), 0.0, 0.0|
+  |- 1.0, - 1.0, 0.0, 0.0, 0.0|
+  |1.0, 0.0, 0.0, (- R2), 0.0|
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -1881,11 +1881,11 @@ Solved variables:
   a[5]
   b[5]
 Iteration variables:
-  c[5]
-  c[4]
-  c[3]
-  c[2]
   c[1]
+  c[2]
+  c[3]
+  c[4]
+  c[5]
 Solved equations:
   a[1] = c[1] + 1
   a[1] = b[1] + 2
@@ -1898,32 +1898,32 @@ Solved equations:
   a[5] = c[5] + 1
   a[5] = b[5] + 2
 Residual equations:
- Iteration variables: c[5]
-  c[5] = b[5] - 3
- Iteration variables: c[4]
-  c[4] = b[4] - 3
- Iteration variables: c[3]
-  c[3] = b[3] - 3
- Iteration variables: c[2]
-  c[2] = b[2] - 3
  Iteration variables: c[1]
   c[1] = b[1] - 3
+ Iteration variables: c[2]
+  c[2] = b[2] - 3
+ Iteration variables: c[3]
+  c[3] = b[3] - 3
+ Iteration variables: c[4]
+  c[4] = b[4] - 3
+ Iteration variables: c[5]
+  c[5] = b[5] - 3
 Jacobian:
-  |1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0|
+  |1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0|
   |1.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0|
+  |0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0|
   |0.0, 0.0, 1.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0|
   |0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0|
   |0.0, 0.0, 0.0, 0.0, 1.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0|
+  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0|
   |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0|
+  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0|
   |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 1.0, 0.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0|
+  |0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0|
+  |0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0|
   |0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0|
-  |0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0|
-  |0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0|
+  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0|
+  |0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, - 1.0, 0.0, 0.0, 0.0, 0.0, 1.0|
 -------------------------------
 ")})));
 end Vectorized2;
@@ -3462,6 +3462,32 @@ Jacobian:
 -------------------------------
 ")})));
         end Extends2;
+        
+        model Conditional1
+            model A
+                Real a;
+                Real b;
+                Real c;
+            equation
+                a=c + 1;
+                a=b + 2;
+                c=b - 3 annotation(__Modelon(name=res));
+            annotation(__Modelon(tearingPairs={Pair(residualEquation=res,iterationVariable=c)}));
+            end A;
+            
+            A a if 1 == 2;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="SystemPairs_Conditional1",
+                description="Test of hand guided tearing with pairs defined on system level in an conditional false class.",
+                automatic_tearing=false,
+                hand_guided_tearing=true,
+                methodName="printDAEBLT",
+                methodResult="
+-------------------------------
+")})));
+        end Conditional1;
         
         model Error1
             Real x;

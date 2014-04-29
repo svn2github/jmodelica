@@ -680,7 +680,32 @@ aspect Names {
       }
       return null;
   }
-
+  
+  /**
+   * Resolves <code>str</code> to an absolute file path.
+   * Supports file URI, modelica URI, absolute file path and 
+   * relative file path (w.r.t. current working directory)
+   */
+  public String ASTNode.resolve(String str) {
+      try {
+          URI uri = new URI(str);
+          if (uri.getScheme() != null) {
+              if (uri.getScheme().equals("file")) {
+                  return uri.getPath();
+              } else if (uri.getScheme().equals("modelica")) {
+                  String pack = packagePath(uri.getAuthority());
+                  return new File(pack, uri.getPath()).getAbsolutePath();
+              } else {
+                  error(String.format("Unsupported URI scheme '%s'.", uri.getScheme()));
+                  return str;
+              }
+          }
+      } catch (URISyntaxException e) {
+      }
+      
+      File f = new File(str);
+      return f.getAbsolutePath();
+  }
   
   inh InstClassDecl ASTNode.enclosingInstClassDecl();
   eq SourceRoot.getProgram().enclosingInstClassDecl() = null;
@@ -1256,7 +1281,7 @@ aspect FlatNames {
     //syn String FIdUseExp.derName2() = getFIdUse().derName2();
     
     syn String FQName.nameUnderscore()            = "";
-    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[\\[,.]", "_");
+    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[^0-9a-zA-Z_]", "_");
     syn lazy String FQNameFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
@@ -1265,7 +1290,7 @@ aspect FlatNames {
         for (FQNamePart part : getFQNameParts()) {
         	str.append(sep);
         	sep = "_";
-        	str.append(part.getName());
+        	str.append(part.nameUnderscore());
         	if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
         		for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
                     str.append(sep);
@@ -1276,7 +1301,7 @@ aspect FlatNames {
         return str.toString();
     }
 
-    syn String FQNamePart.nameUnderscore() = getName();
+    syn String FQNamePart.nameUnderscore() = getName().replaceAll("[^0-9a-zA-Z_]", "_");
 
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
@@ -1302,11 +1327,20 @@ aspect FlatNames {
     eq FHDummyDerivativeVariable.nameUnderscore() = "der_" + getOrder() + "_" + getFQName().nameUnderscore();
     eq FFunctionVariable.nameUnderscore()   = getFQName().nameUnderscore();
     
-    syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
-    syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
-    syn String FFunctionCall.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
-    syn String FFunctionDecl.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
-    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+    syn String FQName.funcNameUnderscore(String suffix)              = "func_" + nameUnderscore() + "_" + suffix;
+    syn String FIdUse.funcNameUnderscore(String suffix)              = getFQName().funcNameUnderscore(suffix);
+    syn String FFunctionCall.funcNameUnderscore(String suffix)       = getName().funcNameUnderscore(suffix) + functionIndex();
+    syn String FFunctionDecl.funcNameUnderscore(String suffix)       = getFQName().funcNameUnderscore(suffix) + functionIndex();
+    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix) + functionIndex();
+
+    /**
+     * Get the index of this function.
+     */
+    inh int FFunctionDecl.functionIndex();
+    eq FClass.getFFunctionDecl(int i).functionIndex() = i;
+
+    syn int FFunctionCall.functionIndex()       = myFFunctionDecl().functionIndex();
+    syn int FDerivativeFunction.functionIndex() = myFFunctionDecl().functionIndex();
 
     syn int FAbstractVariable.variableIndex() = findVariableIndex();
     eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
@@ -2623,7 +2657,11 @@ aspect ComponentDeclMethods {
      * Find the component that this component inherits input or output from, if any.
      */
     inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
-    eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    eq InstComponentDecl.getChild().inheritsInputOutputFrom() {
+        if (isFunctionalArg())
+            return null;
+        return (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    }
     eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
     eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
     eq Root.getChild().inheritsInputOutputFrom()              = null;
@@ -2729,6 +2767,11 @@ aspect ComponentDeclMethods {
     	return false;
     }
     
+    /**
+     * Check if this component is a functional input argument
+     */
+    syn boolean InstComponentDecl.isFunctionalArg() = false;
+    eq InstComposite.isFunctionalArg() = isInput() && myInstFullClassDecl().isFunction() && myInstClass().isFunction();
 }
 
 aspect ShortClassUtil {
@@ -3215,6 +3258,22 @@ aspect GeneralHelpers {
 	private static final Pattern ASTNode.memPattern = 
 			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
 	
+    /**
+     * Copies a file from src to dst. Destination file is overwritten if it already exisits
+     */
+    public static void ASTNode.copyFile(File src, File dst) throws IOException {
+        if (dst.exists())
+            dst.delete();
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) != -1)
+            out.write(buf, 0, len);
+        in.close();
+        out.close();
+    }
+
 }
 
 aspect DebugHelpers {

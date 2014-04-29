@@ -170,5 +170,32 @@ equation
     realVar = x;
 end StringExpParameter;
 
+model LoadResource
+    function fileLength
+        input String name;
+        output Integer contents;
+        external annotation(Include="
+#include <stdio.h>
+#include <stdlib.h>
+int fileLength(const char* name) {
+    int i = 0;
+    FILE *fp = fopen(name, \"r\");
+    if (!fp) {
+        return -1;
+    } else {
+        while((fgetc(fp)) != EOF)
+            i++;
+    }
+    fclose(fp);
+    return i;
+}
+        ");
+    end fileLength;
+
+    constant  Integer x = fileLength(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    parameter Integer y = fileLength(Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+    discrete  Integer z = fileLength(ModelicaServices.ExternalReferences.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt"));
+     
+end LoadResource;
 
 end OperatorTests;

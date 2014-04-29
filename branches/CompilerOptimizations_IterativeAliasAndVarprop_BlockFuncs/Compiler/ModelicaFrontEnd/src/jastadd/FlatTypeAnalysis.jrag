@@ -131,15 +131,15 @@ aspect FlatTypeAnalysis {
 
     syn FRecordType InstClassDecl.createEmptyFRecordType(Size s) = null;
     eq InstBaseClassDecl.createEmptyFRecordType(Size s)          = 
-        getInstRestriction().createEmptyFRecordType(s, qualifiedName());
+        getInstRestriction().createEmptyFRecordType(s);
 
-    syn FRecordType InstRestriction.createEmptyFRecordType(Size s, String name) = null;
-    eq InstMRecord.createEmptyFRecordType(Size s, String name)                  = 
-        new FRecordType(s, name, new List(), null);
-    eq InstOperatorRecord.createEmptyFRecordType(Size s, String name)           = 
-        new FOperatorRecordType(s, name, new List(), null, operatorMap());
-    eq InstConnector.createEmptyFRecordType(Size s, String name)                = 
-        (inheritedRestriction() != null) ? inheritedRestriction().createEmptyFRecordType(s, name) : super.createEmptyFRecordType(s, name);
+    syn FRecordType InstRestriction.createEmptyFRecordType(Size s) = null;
+    eq InstMRecord.createEmptyFRecordType(Size s)                  = 
+        new FRecordType(s, myInstClassDecl().qualifiedName(), new List(), null);
+    eq InstOperatorRecord.createEmptyFRecordType(Size s)           = 
+        new FOperatorRecordType(s, myInstClassDecl().baseClassName(), new List(), null, operatorMap());
+    eq InstConnector.createEmptyFRecordType(Size s)                = 
+        (inheritedRestriction() != null) ? inheritedRestriction().createEmptyFRecordType(s) : super.createEmptyFRecordType(s);
 
     syn      Map<String,InstClassDecl> InstRestriction.operatorMap() = null;
     syn lazy Map<String,InstClassDecl> InstOperatorRecord.operatorMap() {
@@ -296,23 +296,24 @@ aspect FlatTypeAnalysis {
     syn boolean FRelExp.isStringComparison()  = getRight().type().numericPromotion(getLeft().type()).isString();
 
 
-    public static final String FExp.OP_CON = "'constructor'";
-    public static final String FExp.OP_STR = "'String'";
-    public static final String FExp.OP_ADD = "'+'";
-    public static final String FExp.OP_SUB = "'-'";
-    public static final String FExp.OP_MUL = "'*'";
-    public static final String FExp.OP_DIV = "'/'";
-    public static final String FExp.OP_POW = "'^'";
-    public static final String FExp.OP_EQ  = "'=='";
-    public static final String FExp.OP_NEQ = "'<>'";
-    public static final String FExp.OP_GT  = "'>'";
-    public static final String FExp.OP_LT  = "'<'";
-    public static final String FExp.OP_GEQ = "'>='";
-    public static final String FExp.OP_LEQ = "'<='";
-    public static final String FExp.OP_AND = "'and'";
-    public static final String FExp.OP_OR  = "'or'";
-    public static final String FExp.OP_NEG = "'-'";
-    public static final String FExp.OP_NOT = "'not'";
+    public static final String FExp.OP_CON  = "'constructor'";
+    public static final String FExp.OP_ZERO = "'0'";
+    public static final String FExp.OP_STR  = "'String'";
+    public static final String FExp.OP_ADD  = "'+'";
+    public static final String FExp.OP_SUB  = "'-'";
+    public static final String FExp.OP_MUL  = "'*'";
+    public static final String FExp.OP_DIV  = "'/'";
+    public static final String FExp.OP_POW  = "'^'";
+    public static final String FExp.OP_EQ   = "'=='";
+    public static final String FExp.OP_NEQ  = "'<>'";
+    public static final String FExp.OP_GT   = "'>'";
+    public static final String FExp.OP_LT   = "'<'";
+    public static final String FExp.OP_GEQ  = "'>='";
+    public static final String FExp.OP_LEQ  = "'<='";
+    public static final String FExp.OP_AND  = "'and'";
+    public static final String FExp.OP_OR   = "'or'";
+    public static final String FExp.OP_NEG  = "'-'";
+    public static final String FExp.OP_NOT  = "'not'";
 
     /**
      * The name of the operator to use for expressions of this type containing overloaded operators.
@@ -340,10 +341,11 @@ aspect FlatTypeAnalysis {
     
     syn lazy FType FAbstractArrayExp.type() = super.type();
 
-    eq FUnaryExp.type()   = getFExp().type();
+    eq FUnaryExp.type()   = 
+        shouldUseOverloadedOperator() ? getFExp().type().matchOverloadedOperatorType(null, operatorName()) : getFExp().type();
     eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type(), false, operatorName());
     eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type(), false, operatorName());
-    eq FNegExp.type()     = getFExp().type().hasNeg() ? getFExp().type() : fUnknownType();
+    eq FNegExp.type()     = getFExp().type().hasNeg() ? super.type() : fUnknownType();
 
     eq FDotAddExp.type() {
         FType t = rawType();
@@ -356,60 +358,74 @@ aspect FlatTypeAnalysis {
     eq FUnaryBuiltIn.type() = getFExp().type();
     eq FEdgeExp.type()      = fBooleanType(size());
     eq FChangeExp.type()    = fBooleanType(size());
+    eq FLoadResource.type() = fStringScalarType();
 
-	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
-	
-	eq FDotDivExp.type() {
-		FType t = super.type();
-		if (t.isInteger())
-			t = fRealType(t.size());
-		return t;
-	}
-	
-	eq FDivExp.type() {
-		if (getRight().type().isScalar())
-			return super.type();
-		else
-			return fUnknownType();
-	}
-	
-	eq FMulExp.type() {
-		if (ndims() < 0)
-			return fUnknownType();
-		if (isElementWise())
-			return super.type();
-		Size left = getLeft().size();
-		Size right = getRight().size();
-		if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
-			return fUnknownType();
-		if (left.ndims() > 2 || right.ndims() > 2)
-			return fUnknownType();
-		FType res = getLeft().type().scalarNumericPromotion(getRight().type(), operatorName());
-		if (left.ndims() == 1 && right.ndims() == 1) 
-			return res;
-		else
-			return res.arrayType(size());
-	}
-	
-	eq FDotPowExp.type() {
-		FType t = getLeft().type().looseNumericPromotion(getRight().type());
-		return t.isUnknown() ? t : fRealType(t.size());
-	}
-	
-	eq FPowExp.type() {
-		if (getRight().type().isUnknown() || getRight().ndims() != 0)
-			return fUnknownType();
-		if (getLeft().ndims() == 0)
-			return super.type();
-		// Left operand is not scalar, must be matrix exponentiation
-		if (ndims() != 2 || size().get(0) != size().get(1))
-			return fUnknownType();
-		if (!getRight().type().isInteger() || !getRight().isConstantExp())
-			return fUnknownType();
-		if (getRight().ceval().intValue() < 0)
-			return fUnknownType();
-		return fRealArrayType(size());
-	}
+    eq FDimensionConvert.type() = getFExp().type().sizedType(size());
+
+    eq FDotDivExp.type() {
+        FType t = super.type();
+        if (t.isInteger())
+            t = fRealType(t.size());
+        return t;
+    }
+
+    eq FDivExp.type() {
+        if (getRight().type().isScalar() || shouldUseOverloadedOperator())
+            return super.type();
+        else
+            return fUnknownType();
+    }
+
+    eq FMulExp.type() {
+        FType res = null;
+        if (ndims() < 0)
+            return fUnknownType();
+        if (isElementWise())
+            return super.type();
+        Size left = getLeft().size();
+        Size right = getRight().size();
+        if (shouldUseOverloadedOperator()) {
+            res = getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
+            if (!res.isUnknown())
+                return res;
+        }
+        if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
+            return fUnknownType();
+        if (left.ndims() > 2 || right.ndims() > 2)
+            return fUnknownType();
+        if (left.ndims() == 1 && right.ndims() > 0 && shouldUseOverloadedOperator())
+            return fUnknownType();
+        res = getLeft().type().scalarNumericPromotion(getRight().type(), operatorName());
+        if (left.ndims() == 1 && right.ndims() == 1) 
+            return res;
+        else
+            return res.arrayType(size());
+    }
+
+    eq FDotPowExp.type() {
+        FType t = getLeft().type().looseNumericPromotion(getRight().type());
+        return (t.isUnknown() || shouldUseOverloadedOperator()) ? t : fRealType(t.size());
+    }
+
+    eq FPowExp.type() {
+        if (shouldUseOverloadedOperator()) {
+            FType res = getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
+            if (!res.isUnknown())
+                return res;
+        }
+        if (getRight().type().isUnknown() || getRight().ndims() != 0)
+            return fUnknownType();
+        if (getLeft().ndims() == 0)
+            return super.type();
+        // Left operand is not scalar, must be matrix exponentiation
+        if (ndims() != 2 || size().get(0) != size().get(1))
+            return fUnknownType();
+        if (!getRight().type().isInteger() || !getRight().isConstantExp())
+            return fUnknownType();
+        if (getRight().ceval().intValue() < 0)
+            return fUnknownType();
+        return fRealArrayType(size());
+    }
 
 	eq FEnumIntegerExp.type() = getFExp().type().isEnumScalar() ? fIntegerScalarType() : fUnknownType();
 	eq FStringExp.type()      = fStringScalarType();
@@ -504,28 +520,34 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return fRealArrayType(size());
 	}
-	
-	eq FRelExp.type() {
-		FType left  = getLeft().type();
-		if (left.equivalentTo(getRight().type()) && left.isScalar())
-			return fBooleanScalarType();
-		else
-			return fUnknownType();
-	}
-	eq FEqRelExp.type() {
-		if ((getLeft().type().isReal() || getRight().type().isReal()) && !inFunction())
-			return fUnknownType();
-		return super.type();
-	}
-	eq FLogBinExp.type() {
-		FType left = getLeft().type();
-		if (left.typeCompatible(getRight().type()) && left.isBoolean())
-			return left;
-		else
-			return fUnknownType();
-	}
-	eq FNotExp.type() = getFExp().type().isBoolean() ? getFExp().type() : fUnknownType();
-	
+
+    eq FRelExp.type() {
+        if (shouldUseOverloadedOperator()) 
+            return getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
+        FType left = getLeft().type();
+        if (left.equivalentTo(getRight().type()) && left.isScalar())
+            return fBooleanScalarType();
+        else
+            return fUnknownType();
+    }
+    eq FEqRelExp.type() {
+        if ((getLeft().type().isReal() || getRight().type().isReal()) && !inFunction())
+            return fUnknownType();
+        return super.type();
+    }
+    eq FLogBinExp.type() {
+        if (shouldUseOverloadedOperator()) 
+            return getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
+        FType left = getLeft().type();
+        if (left.typeCompatible(getRight().type()) && left.isBoolean())
+            return left;
+        else
+            return fUnknownType();
+    }
+    eq FNotExp.type() = shouldUseOverloadedOperator() ? 
+            getFExp().type().matchOverloadedOperatorType(null, operatorName()) : 
+            (getFExp().type().isBoolean() ? getFExp().type() : fUnknownType());
+
 	eq FIfExp.type() {
 		FType thenType = getThenExp().type();
 		FType elseType = getElseExp().type();
@@ -686,9 +708,13 @@ aspect FlatTypeAnalysis {
 			InstAssignable ip = (InstAssignable) myInstComponentDecl();
 			FType t = ip.type().scalarType();
 			return isArray() ? t.arrayType(size()) : t;
-		} else {
-			return fUnknownType();
-		}
+        } else if (myInstClassDecl().isEnum()) {
+            return myInstClassDecl().enumType();
+        } else if (myInstClassDecl().isBoolean()) {
+            return myInstClassDecl().fBooleanType(size());
+        } else {
+            return fUnknownType();
+        }
 	}
 	
 	eq FIgnoredBuiltIn.type() = fUnknownType();
@@ -796,6 +822,13 @@ aspect InstBindingType {
     eq Root.getChild().findInheritingNode()                    = null;
     
     /**
+     * Find the surrounding class, if any.
+     */
+    inh InstClassDecl InstNode.surroundingInstClass();
+    eq InstClassDecl.getChild().surroundingInstClass() = this;
+    eq Root.getChild().surroundingInstClass()          = null;
+    
+    /**
      * Is this a member of an array component?
      */
 	inh boolean InstAssignable.inArrayComponent();
@@ -854,7 +887,9 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.typePromotion(FType type, boolean allowUnknown, String operator) {
-        if (isNumeric() || isOperatorRecord() || type.isOperatorRecord())
+        if ((isOperatorRecord() || type.isOperatorRecord()) && operator != null) {
+            return matchOverloadedOperatorType(type, operator, false, allowUnknown);
+        } else if (isNumeric())
             return numericPromotion(type, allowUnknown, operator);
         else if (!equivalentTo(type, allowUnknown))
             return fUnknownType();
@@ -874,7 +909,9 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.looseTypePromotion(FType type, boolean allowUnknown, String operator) {
-        if (looslyDimensionCompatible(type, allowUnknown)) {
+        if ((isOperatorRecord() || type.isOperatorRecord()) && operator != null) {
+            return matchOverloadedOperatorType(type, operator, true, allowUnknown);
+        } else if (looslyDimensionCompatible(type, allowUnknown)) {
             FType scalar = scalarType().typePromotion(type.scalarType(), false, operator);
             return scalar.sizedType(isScalar() ? type.size() : size());
         } else {
@@ -895,7 +932,9 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.numericPromotion(FType type, boolean allowUnknown, String operator) {
-        if (dimensionCompatible(type, allowUnknown)) {
+        if (isOperatorRecord() || type.isOperatorRecord()) {
+            return matchOverloadedOperatorType(type, operator, false, allowUnknown);
+        } else if (dimensionCompatible(type, allowUnknown)) {
             return scalarNumericPromotion(type, operator).arrayType(size());
         } else {
             return fUnknownType();
@@ -915,7 +954,9 @@ aspect TypePromotion {
      * overloading.
      */
     syn FType FType.looseNumericPromotion(FType type, boolean allowUnknown, String operator) {
-        if (looslyDimensionCompatible(type, allowUnknown)) {
+        if (isOperatorRecord() || type.isOperatorRecord()) {
+            return matchOverloadedOperatorType(type, operator, true, allowUnknown);
+        } else if (looslyDimensionCompatible(type, allowUnknown)) {
             return scalarNumericPromotion(type, operator).sizedType(isScalar() ? type.size() : size());
         } else {
             return fUnknownType();
@@ -930,32 +971,49 @@ aspect TypePromotion {
      * If non-<code>null</code>, <code>operator</code> defines what operator 
      * to use in operator overloading.
      */
-    syn FType FType.scalarNumericPromotion(FType type, String operator) = fUnknownType();
-
+    syn FType FType.scalarNumericPromotion(FType type, String operator) = 
+        scalarType().matchOverloadedOperatorType(type.scalarType(), operator, false, false);
     eq FPrimitiveNumericType.scalarNumericPromotion(FType type, String operator) {
-        if (type.isNumeric()) 
+        if (isOperatorRecord() || type.isOperatorRecord()) {
+            return scalarType().matchOverloadedOperatorType(type.scalarType(), operator, false, false);
+        } else if (type.isNumeric()) 
             return isReal() ? scalarType() : type.scalarType();
-        else if (type.isOperatorRecord()) 
-            return type.matchOverloadedOperatorType(this, operator, false);
         else 
-            return fUnknownType();
+            return super.scalarNumericPromotion(type, operator);
     }
-
-    eq FOperatorRecordType.scalarNumericPromotion(FType type, String operator) =
-        matchOverloadedOperatorType(type, operator, true);
 
 
     /**
      * Calculate the type of an operator expression involving operator records.
      * 
-     * @param other     the type of the other side of the expression, <code>null</code> for unary operators
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
      * @param operator  the name of the operator to look for
-     * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
-     *                  must be <code>true</code> for unary operators
+     * @param loose     <code>true</code> if dimensions should be matched loosely
      */
-    syn FType FType.matchOverloadedOperatorType(FType other, String operator, boolean isLeft) = fUnknownType();
-    eq FOperatorRecordType.matchOverloadedOperatorType(FType other, String operator, boolean isLeft) {
-        InstClassDecl func = matchOverloadedOperator(other, operator, isLeft);
+    syn FType FType.matchOverloadedOperatorType(FType right, String operator, boolean loose, boolean allowUnknown) {
+        FType res = matchOverloadedOperatorType(right, operator);
+        if (res.isUnknown() && (isArray() || right.isArray())) {
+            if (loose ? looslyDimensionCompatible(right, allowUnknown) : dimensionCompatible(right, allowUnknown)) {
+                FType scalar = scalarType().matchOverloadedOperatorType(right.scalarType(), operator);
+                res = scalar.sizedType(isScalar() ? right.size() : size());
+            }
+        }
+        return res;
+    }
+
+
+    /**
+     * Calculate the type of an operator expression involving operator records.
+     * 
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn FType FType.matchOverloadedOperatorType(FType right, String operator) {
+        InstClassDecl func = matchOverloadedOperator(right, operator);
         return (func == null) ? fUnknownType() : func.myOutputs().get(0).type();
     }
 
@@ -964,29 +1022,127 @@ aspect TypePromotion {
 aspect OverloadedOperatorBinding {
 
     /**
-     * Calculate the function to use for an operator expression involving operator records.
+     * Check if this expression should use an overloaded operator.
+     * 
+     * Returns <code>true</code> for binary and unary expressions if any FExp child is of operator record type.
+     * Note that this might return <code>true</code> for an expression that has <code>operatorName() == null</code>.
+     */
+    syn boolean FExp.shouldUseOverloadedOperator() = false;
+    eq FBinExp.shouldUseOverloadedOperator()       = getLeft().type().isOperatorRecord() || getRight().type().isOperatorRecord();
+    eq FUnaryExp.shouldUseOverloadedOperator()     = getFExp().type().isOperatorRecord();
+
+    /**
+     * Calculate the function to use for this operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or if this is not an operator record expression.
+     */
+    syn InstClassDecl FExp.overloadedOperator() = null;
+    eq FBinExp.overloadedOperator()   = overloadedOperatorFor(getLeft().type(), getRight().type());
+    eq FUnaryExp.overloadedOperator() = overloadedOperatorFor(getFExp().type(), null);
+
+    /**
+     * Calculate the function to use for this operator expression involving operator records, 
+     * given knowledge on whether array handling should be done by the operator or by the normal rules.
+     * 
+     * Returns null if none or more than one function matches or if this is not an operator record expression.
+     * 
+     * @param useSize  if <code>false</code>, try to match a function with scalar inputs, ignoring operand sizes
+     */
+    syn InstClassDecl FExp.overloadedOperator(boolean useSize) = null;
+    eq FBinExp.overloadedOperator(boolean useSize)   = overloadedOperatorFor(getLeft().type(), getRight().type(), useSize);
+    eq FUnaryExp.overloadedOperator(boolean useSize) = overloadedOperatorFor(getFExp().type(), null, useSize);
+
+    /**
+     * Calculate the function to use for this operator expression involving operator records.
      * 
      * Returns null if none or more than one function matches.
+     * 
+     * @param left   the type of the left operand
+     * @param right  the type of the right operand for binary operators, and <code>null</code> for unary operators
+     */
+    syn InstClassDecl FExp.overloadedOperatorFor(FType left, FType right) {
+        String operator = operatorName();
+        InstClassDecl func = overloadedOperatorFor(left, right, true);
+        if (func == null && (left.isArray() || (right != null && right.isArray())))
+            func = overloadedOperatorFor(left, right, false);
+        return func;
+    }
+
+    /**
+     * Calculate the function to use for this operator expression involving operator records, 
+     * given knowledge on whether array handling should be done by the operator or by the normal rules.
+     * 
+     * Returns null if none or more than one function matches.
+     * 
+     * @param left     the type of the left operand
+     * @param right    the type of the right operand for binary operators, and <code>null</code> for unary operators
+     * @param useSize  if <code>false</code>, try to match a function with scalar inputs, ignoring operand sizes
+     */
+    syn InstClassDecl FExp.overloadedOperatorFor(FType left, FType right, boolean useSize) {
+        String operator = operatorName();
+        if (!useSize) {
+            left = left.scalarType();
+            right = right == null ? null : right.scalarType();
+        }
+        return left.matchOverloadedOperator(right, operator);
+    }
+
+    /**
+     * Calculate the function to use for an operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or expression does not include operator records.
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn InstClassDecl FType.matchOverloadedOperator(FType right, String operator) = 
+        matchOverloadedOperator(right, operator, true);
+
+    /**
+     * Calculate the function to use for an operator expression involving operator records.
+     * 
+     * Returns null if none or more than one function matches or expression does not include operator records.
      * 
      * @param other     the type of the other side of the expression, <code>null</code> for unary operators
      * @param operator  the name of the operator to look for
      * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
      *                  must be <code>true</code> for unary operators
      */
-    syn InstClassDecl FOperatorRecordType.matchOverloadedOperator(FType other, String operator, boolean isLeft) {
+    syn InstClassDecl FType.matchOverloadedOperator(FType other, String operator, boolean isLeft) {
         Collection<InstClassDecl> match = matchOverloadedOperators(other, operator, isLeft);
         return (match.size() == 1) ? match.iterator().next() : null;
     }
 
     /**
-     * Calculate the functions that matches an operator expression involving operator records.
+     * Calculate the functions that match an operator expression involving operator records.
+     * 
+     * If expression does not include operator records, the empty set is returned.
+     * For binary expressions <code>this</code> should be the left hand side.
+     * 
+     * @param right     the type of the right-hand side of the expression, <code>null</code> for unary operators
+     * @param operator  the name of the operator to look for
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedOperators(FType right, String operator) = 
+        matchOverloadedOperators(right, operator, true);
+
+    /**
+     * Calculate the functions that match an operator expression involving operator records.
+     * 
+     * If expression does not include operator records, the empty set is returned.
      * 
      * @param other     the type of the other side of the expression, <code>null</code> for unary operators
      * @param operator  the name of the operator to look for
      * @param isLeft    <code>true</code> if this type was on the left hand side of the expression, 
      *                  must be <code>true</code> for unary operators
      */
-    syn Collection<InstClassDecl> FOperatorRecordType.matchOverloadedOperators(FType other, String operator, boolean isLeft) {
+    syn Collection<InstClassDecl> FType.matchOverloadedOperators(FType other, String operator, boolean isLeft) =
+        (other != null && other.isOperatorRecord()) ? 
+                other.matchOverloadedOperators(this, operator, !isLeft) : 
+                Collections.<InstClassDecl>emptyList();
+    eq FOperatorRecordType.matchOverloadedOperators(FType other, String operator, boolean isLeft) {
+        if (operator == null)
+            return Collections.emptyList();
         OperatorMatches mine = matchOverloadedOperators(operator, this, other, isLeft);
         OperatorMatches others = OperatorMatches.EMPTY;
         if (other instanceof FOperatorRecordType) {
@@ -995,6 +1151,44 @@ aspect OverloadedOperatorBinding {
                 others = other2.matchOverloadedOperators(operator, other, this, !isLeft);
         }
         return mine.combine(others).matches();
+    }
+
+    /**
+     * Find the constructor to use to convert a given type to this type.
+     * 
+     * Returns null if none or more than one constructor matches or this is not a operator record type.
+     * 
+     * @param other     the type to convert
+     */
+    syn InstClassDecl FType.matchOverloadedConstructor(FType other) = null;
+    eq FOperatorRecordType.matchOverloadedConstructor(FType other) {
+        Collection<InstClassDecl> match = matchOverloadedConstructors(other);
+        return (match.size() == 1) ? match.iterator().next() : null;
+    }
+
+    /**
+     * Find the constructors that match for a conversion a given type to this type.
+     * 
+     * If this is not a operator record type, the empty set is returned.
+     * 
+     * @param other     the type to convert
+     */
+    syn Collection<InstClassDecl> FType.matchOverloadedConstructors(FType other) = null;
+    eq FOperatorRecordType.matchOverloadedConstructors(FType other)              = 
+        matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
+
+    /**
+     * Find the zero function for an operator record type.
+     * 
+     * Returns null if none or more than one constructor matches or this is not a operator record type.
+     */
+    syn InstClassDecl FType.matchOverloadedZero() = null;
+    eq FOperatorRecordType.matchOverloadedZero() {
+        InstClassDecl op = getOperators().get(FExp.OP_ZERO);
+        if (op == null) 
+            return null;
+        Collection<InstClassDecl> match = op.operatorFunctions();
+        return (match.size() == 1) ? match.iterator().next() : null;
     }
 
     /**
@@ -1041,6 +1235,19 @@ aspect OverloadedOperatorBinding {
     eq InstConnector.matchOverloadedOperators(FType a, FType b, boolean aIsLeft)                              = 
         (inheritedRestriction() != null) ? inheritedRestriction().matchOverloadedOperators(a, b, aIsLeft) : super.matchOverloadedOperators(a, b, aIsLeft);
 
+    /**
+     * Get a list of all functions in this operator.
+     * 
+     * If this is not an operator or operator function, an empty list is returned.
+     */
+    syn java.util.List<InstClassDecl> InstClassDecl.operatorFunctions() = Collections.emptyList();
+    eq InstBaseClassDecl.operatorFunctions()                            = getInstRestriction().operatorFunctions();
+
+    /**
+     * Get a list of all functions in the operator that has this restriction.
+     * 
+     * If this is not an operator or operator function, an empty list is returned.
+     */
     syn java.util.List<InstClassDecl> InstRestriction.operatorFunctions() = Collections.emptyList();
     eq InstOperatorFunction.operatorFunctions() = Collections.singletonList(myInstClassDecl());
     syn lazy java.util.List<InstClassDecl> InstOperator.operatorFunctions() {
@@ -1073,7 +1280,7 @@ aspect OverloadedOperatorBinding {
         if ((n < 2 || in2.hasBindingFExp()) != (b == null))
             return false;
         for (int i = 2; i < n; i++)
-            if (inputs.get(i).hasBindingFExp())
+            if (!inputs.get(i).hasBindingFExp())
                 return false;
         
         // Unary case
@@ -1085,13 +1292,13 @@ aspect OverloadedOperatorBinding {
             if (bin == null || !bin.type().isOperatorRecord())  // if b isn't an operator record, no indirect match
                 return false;
             // Find constructor matching single argument
-            FOperatorRecordType binType = (FOperatorRecordType) bin.type();
-            return binType.matchOverloadedOperators(FExp.OP_CON, b, null, true).isOK();
+            return ain != null && ain.type().typeCompatible(a, true) &&  // a matches its argument
+                   bin.type().matchOverloadedConstructor(b) != null;     // there is a single matching constructor for b
         }
         
         // Direct binary case
-        return ain != null && ain.type().typeCompatible(a) &&  // a matches its argument
-               bin != null && bin.type().typeCompatible(b);    // b matches its argument
+        return ain != null && ain.type().typeCompatible(a, true) &&  // a matches its argument
+               bin != null && bin.type().typeCompatible(b, true);    // b matches its argument
     }
 
     /**
@@ -1161,6 +1368,8 @@ aspect OverloadedOperatorBinding {
         }
 
     }
+
+    syn Map<String,InstClassDecl> FType.getOperators() = Collections.emptyMap();
 
 }
 
@@ -1474,7 +1683,9 @@ aspect BuiltInFlatTypes {
     eq FNoType.arrayType(Size size)             = this;
 
     /**
-     * \brief Create a literal with the zero value for this type, if applicable.
+     * Create a literal with the zero value for this type, if applicable.
+     * 
+     * For operator records, a function call is created.
      */
     public FExp FType.zeroLiteral()        { return new FNoExp(); }
     public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
@@ -1488,7 +1699,10 @@ aspect BuiltInFlatTypes {
             args.add(t.getFType().zeroLiteral());
         return new FRecordConstructor(new FIdUse(getName()), args); 
     }
-    // TODO: Add for operator record (using '0')
+    public FExp FOperatorRecordType.zeroLiteral() {
+        InstClassDecl func = matchOverloadedZero();
+        return (func != null) ? func.flattenOverloadedFunctionCall(new FQNameEmpty()) : super.zeroLiteral();
+    }
  
     /**
      * \brief Create a literal of the given integer value for this type, if applicable.

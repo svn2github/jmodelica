@@ -142,15 +142,14 @@ aspect InstLookupClasses {
 	syn InstClassDecl InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupLastRedeclareExtendsInstClass(name);
 	eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)   = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
-	
-	/**
-	 * Look up the class being redeclared & extended in the last step of a chain 
-	 * of "redeclare class extends" declarations.
-	 */
-	inh InstClassDecl InstExtends.lookupTopRedeclareExtendsInstClass(String name);
-	eq InstExtends.getChild().lookupTopRedeclareExtendsInstClass(String name)    = lookupTopRedeclareExtendsInstClass(name);
-	eq InstNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
-    eq Root.getChild().lookupTopRedeclareExtendsInstClass(String name)           = null;
+
+    /**
+     * Look up the class being redeclared & extended in the last step of a chain 
+     * of "redeclare class extends" declarations.
+     */
+    inh InstClassDecl InstExtends.lookupTopRedeclareExtendsInstClass(String name);
+    eq InstBaseNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
+    eq Root.getChild().lookupTopRedeclareExtendsInstClass(String name)               = null;
 	
 	/**
 	 * Resolve classes that are just references to other classes.

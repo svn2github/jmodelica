@@ -15,11 +15,12 @@
 */
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 aspect EquationName {
     
-    public abstract class EquationContributer {
-        public static class EquationNameContributer extends EquationContributer {
+    public abstract class AttributeContributer {
+        public static class EquationNameContributer extends AttributeContributer {
             
             public EquationNameContributer() {
                 super("EquationNameContributer");
@@ -38,18 +39,24 @@ aspect EquationName {
                 else
                     dest.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
             }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {}
+
+            @Override
+            protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
         }
     }
     
-    private static EquationContributer AbstractEquation.EQUATION_NAME_CONTRIBUTER =
-            addEquationContributer(new EquationContributer.EquationNameContributer());
+    private static AttributeContributer ASTNode.EQUATION_NAME_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.EquationNameContributer());
     
 }
 
 aspect HGT {
     
-    public abstract class EquationContributer {
-        public static class HGTContributer extends EquationContributer {
+    public abstract class AttributeContributer {
+        public static class HGTContributer extends AttributeContributer {
             
             public HGTContributer() {
                 super("HGTContributer");
@@ -84,11 +91,28 @@ aspect HGT {
                 }
                 dest.setHGTResidual(Integer.MAX_VALUE, enabledFExp, enabledEach, iterationVariableFExp);
             }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {
+                AnnotationNode iterationNode = src.annotation().vendorNode().forPath("IterationVariable");
+                if (iterationNode.exists() && src.root().options.getBooleanOption("hand_guided_tearing")) {
+                    AnnotationNode enabledNode = iterationNode.forPath("enabled");
+                    if (!enabledNode.exists() || enabledNode.exp() == null) {
+                        dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, src.isArray()));
+                    } else {
+                        dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, src.containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(src.getFQNamePrefix()), 
+                                FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEachSet()));
+                    }
+                }
+            }
+
+            @Override
+            protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
         }
     }
     
-    private static EquationContributer AbstractEquation.HGT_CONTRIBUTER =
-            addEquationContributer(new EquationContributer.HGTContributer());
+    private static AttributeContributer ASTNode.HGT_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.HGTContributer());
     
     syn int FAbstractEquation.HGTLevel() {
         FAttribute residual = findAttribute("ResidualEquation");
@@ -216,6 +240,37 @@ aspect HGT {
         setHGTResidual(Integer.MAX_VALUE, new FBooleanLitExpFalse(), false, null);
     }
     
+    private static Pattern Eq.tempPattern = Pattern.compile("(tmp|temp)_[0-9]+");
+    
+    public static Comparator<Eq> Eq.stringComparator() {
+        return new Comparator<Eq>() {
+            @Override
+            public int compare(Eq eqn1, Eq eqn2) {
+                String str1 = tempPattern.matcher(eqn1.getEquation().toString()).replaceAll("!TMP!");
+                String str2 = tempPattern.matcher(eqn2.getEquation().toString()).replaceAll("!TMP!");
+                return str1.compareTo(str2);
+            }
+        };
+    }
+    
+    public static Comparator<Eq> Eq.stringMatchingComparator() {
+        return new Comparator<Eq>() {
+            @Override
+            public int compare(Eq eqn1, Eq eqn2) {
+                return eqn1.getMatching().toString().compareTo(eqn2.getMatching().toString());
+            }
+        };
+    }
+    
+    public static Comparator<Var> Var.stringComparator() {
+        return new Comparator<Var>() {
+            @Override
+            public int compare(Var var1, Var var2) {
+                return var1.getVariable().toString().compareTo(var2.getVariable().toString());
+            }
+        };
+    }
+    
     private static void EquationBlockFactory.tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing, int blockNumber) throws BLTException {
         boolean recalculateMatchings = false;
         Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
@@ -223,8 +278,8 @@ aspect HGT {
             varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
         }
         Iterator<Eq> it = block.iterator();
-        Collection<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
-        Collection<Var> unmatchedHGTVariables = new ArrayList<Var>();
+        java.util.List<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
+        java.util.List<Var> unmatchedHGTVariables = new ArrayList<Var>();
         for (Eq eqn : block) {
             if (eqn.getEquation().isHGTUnpairedResidual())
                 unmatchedHGTEquations.add(eqn);
@@ -234,6 +289,8 @@ aspect HGT {
                 unmatchedHGTVariables.add(var);
         }
         if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
+            Collections.sort(unmatchedHGTEquations, Eq.stringComparator());
+            Collections.sort(unmatchedHGTVariables, Var.stringComparator());
             Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
             Iterator<Var> varIt = unmatchedHGTVariables.iterator();
             while (eqnIt.hasNext() && varIt.hasNext()) {
@@ -254,6 +311,7 @@ aspect HGT {
                 sb.append("    " + var.getName() + "\n");
             throw new BLTException(sb.toString());
         }
+        java.util.List<Eq> HGTEquations = new ArrayList<Eq>();
         while (it.hasNext()) {
             Eq e = it.next();
             FVariable fIterVar = e.getEquation().getHGTIterationVariable();
@@ -264,11 +322,15 @@ aspect HGT {
                     continue;
                 }
                 it.remove();
-                varsInBlock.remove(fIterVar);
+                HGTEquations.add(e);
                 recalculateMatchings = true;
-                ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), iterVar.getVariable().name());
-                eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, iterVar));
             }
+        }
+        Collections.sort(HGTEquations, Eq.stringMatchingComparator());
+        for (Eq hgtEqn : HGTEquations) {
+            Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
+            ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());
+            eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(hgtEqn, iterVar));
         }
         if (recalculateMatchings) {
             BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
@@ -333,7 +395,7 @@ aspect HGT {
     
 }
 
-aspect ResidualPairPropagation{
+aspect ResidualPairs{
     
     public static final int FInternalAttribute.HGTVarLevel_COMPONENT = 1;
     public static final int FInternalAttribute.HGTVarLevel_PAIR = 2;
@@ -390,20 +452,118 @@ aspect ResidualPairPropagation{
     
     protected void FResidualPair.propagate() {
         FAbstractEquation fae = getResidualEquation().myFEquation();
-        if (fae == null) {
-            error("Internal HGT Error, unable to find fae");
-            return;
-        }
+        if (fae == null)
+            throw new UnsupportedOperationException("Internal HGT Error, unable to find equation declaration for tearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!");
         FAbstractVariable fv = getIterationVariable().myFV();
+        if (fv == null)
+            throw new UnsupportedOperationException("Internal HGT Error, unable to find variable declaration for tearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!");
         int otherLevel = fae.HGTLevel();
-        if (otherLevel == getLevel()) {
-            error("Internal HGT Error, same level, decalred twise?");
-            return;
-        }
+        if (otherLevel == getLevel())
+            throw new UnsupportedOperationException("Internal HGT Error, found equation with two (or more) residual pairs declared at the same level. Should not be possible!\nCurrent tearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!\nTearing pair; equation: " + getResidualEquation().name() + ", variable: " + getIterationVariable().name() + ", level: " + getLevel() + "!");
         if (otherLevel > getLevel()) {
             fae.setHGTResidual(getLevel(), getIterationVariable().myFV().createUseExp());
             getIterationVariable().myFV().setHGTAsPair();
         }
     }
+    
+    /**
+     * \brief Find functions, record and enumeration declarations that need to be flattened.
+     */
+    protected void ASTNode.createAndFlattenResidualPairs(FClass fc) {
+        for (ASTNode n : this)
+            n.createAndFlattenResidualPairs(fc);
+    }
+    
+    @Override
+    protected void InstNode.createAndFlattenResidualPairs(FClass fc) {
+        if (!root().options.getBooleanOption("hand_guided_tearing"))
+            return;
+        getInstComponentDecls().createAndFlattenResidualPairs(fc);
+        getInstExtendsList().createAndFlattenResidualPairs(fc);
+        FQName prefix = getFQName();
+        for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
+            if (!pair.name().equals("Pair"))
+                continue;
+            Exp enabledExp = pair.forPath("enabled").exp();
+            if (enabledExp != null && !dynamicFExp(enabledExp.instantiate()).ceval().booleanValue())
+                continue;
+            
+            Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
+            InstAccess via = iterationVariableExp.asAccess().instantiate();
+            FQName iterationVariableName = dynamicFExp(new FInstAccessExp(via)).asInstAccess().flatten(prefix);
+            
+            Exp residualEquationExp = pair.forPath("residualEquation").exp();
+            InstAccess eia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
+            FQName residualEquationName = dynamicFExp(new FInstAccessExp(eia)).asInstAccess().flatten(prefix);
+            
+            fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), 
+                    new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
+        }
+    }
+    
+    @Override
+    protected void InstComponentDecl.createAndFlattenResidualPairs(FClass fc) {
+        if (useInFlattening())
+            super.createAndFlattenResidualPairs(fc);
+    }
+    
+    public void InstNode.typeCheckSystemResiduals(ErrorCheckType checkType) {
+        if (!root().options.getBooleanOption("hand_guided_tearing"))
+            return;
+        for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
+            if (!pair.name().equals("Pair"))
+                continue;
+            Exp enabledExp = pair.forPath("enabled").exp();
+            if (enabledExp != null) {
+                FExp enabledFExp = dynamicFExp(enabledExp.instantiate());
+                enabledFExp.collectErrors(checkType);
+                try {
+                    enabledFExp.ceval().booleanValue();
+                } catch (ConstantEvaluationException e) {
+                    enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
+                }
+            }
+            Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
+            InstAccess iterationVariable = null;
+            if (iterationVariableExp == null) {
+                pair.ast().error("Iteration variable definition is missing from tearing pair.");
+            } else if (!iterationVariableExp.isAccess()) {
+                iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
+            } else {
+                InstAccess ia = iterationVariableExp.asAccess().instantiate();
+                iterationVariable = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
+                iterationVariable.collectErrors(checkType);
+                if (iterationVariable.isUnknown()) {
+                    iterationVariable = null;
+                } else {
+                    FTypePrefixVariability variability = iterationVariable.myInstComponentDecl().variability();
+                    if (!variability.continuousVariability()) {
+                        iterationVariable.error("Iteration variable should have continuous variability, %s has %svariability", iterationVariable.qualifiedName(), variability);
+                        iterationVariable = null;
+                    }
+                }
+            }
+            Exp residualEquationExp = pair.forPath("residualEquation").exp();
+            InstAccess residualEquation = null;
+            if (residualEquationExp == null) {
+                pair.ast().error("Residual equation definition is missing from tearing pair.");
+            } else if (!residualEquationExp.isAccess()) {
+                residualEquationExp.error("Expression \"%s\" is not a legal residual equation reference", residualEquationExp);
+            } else {
+                InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
+                residualEquation = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
+                residualEquation.collectErrors(checkType);
+                if (residualEquation.isUnknown())
+                    residualEquation = null;
+            }
+            if (iterationVariable != null && residualEquation != null) {
+                Size eqnSize = residualEquation.myEquation().totalSize();
+                Size varSize = iterationVariable.myInstComponentDecl().size();
+                if (!eqnSize.equals(varSize))
+                    pair.ast().error("Size of the iteration variable is not the same size as the size of the residual equation, size of variable %s, size of equation %s", varSize, eqnSize);
+            }
+        }
+    }
+
 }
 

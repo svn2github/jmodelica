@@ -320,7 +320,7 @@ equation
 			description="Test empty else",
 			flatModel="
 fclass CheckTests.IfEquationElse1
- Real x;
+ Real x(stateSelect = StateSelect.always);
  discrete Boolean temp_1;
 initial equation 
  x = 0.0;
@@ -336,6 +336,10 @@ equation
    reinit(x, 1);
   end if;
  end if;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end CheckTests.IfEquationElse1;
 ")})));
 end IfEquationElse1;
@@ -358,7 +362,7 @@ equation
 			description="Test no else",
 			flatModel="
 fclass CheckTests.IfEquationElse2
- Real x;
+ Real x(stateSelect = StateSelect.always);
  discrete Boolean temp_1;
 initial equation 
  x = 0.0;
@@ -374,6 +378,10 @@ equation
    reinit(x, 1);
   end if;
  end if;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end CheckTests.IfEquationElse2;
 ")})));
 end IfEquationElse2;

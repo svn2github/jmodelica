@@ -601,13 +601,6 @@ fclass FunctionInlining.RecordInline1
  Real x;
 equation
  x = 10;
-
-public
- record FunctionInlining.RecordInline1.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline1.R;
-
 end FunctionInlining.RecordInline1;
 ")})));
     end RecordInline1;
@@ -647,13 +640,6 @@ equation
  x.a[2] = 2;
  x.a[3] = 3;
  x.b = 2;
-
-public
- record FunctionInlining.RecordInline2.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline2.R;
-
 end FunctionInlining.RecordInline2;
 ")})));
     end RecordInline2;
@@ -688,13 +674,6 @@ fclass FunctionInlining.RecordInline3
  Real x;
 equation
  x = 10;
-
-public
- record FunctionInlining.RecordInline3.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline3.R;
-
 end FunctionInlining.RecordInline3;
 ")})));
     end RecordInline3;
@@ -739,13 +718,6 @@ equation
  y[4] = 4;
  x = temp_1 + (y[1] + y[2] + y[3]);
  temp_1 = if y[4] < pre(temp_1) or y[4] >= pre(temp_1) + 1 or initial() then integer(y[4]) else pre(temp_1);
-
-public
- record FunctionInlining.RecordInline4.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline4.R;
-
 end FunctionInlining.RecordInline4;
 			
 ")})));
@@ -787,13 +759,6 @@ equation
  x.a[2] = 2 * y;
  x.a[3] = 3 * y;
  x.b = 2;
-
-public
- record FunctionInlining.RecordInline5.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline5.R;
-
 end FunctionInlining.RecordInline5;
 ")})));
     end RecordInline5;
@@ -831,13 +796,6 @@ fclass FunctionInlining.RecordInline6
 equation
  y = 1;
  x = y + 2 * y + 3 * y + y * 4;
-
-public
- record FunctionInlining.RecordInline6.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline6.R;
-
 end FunctionInlining.RecordInline6;
 ")})));
     end RecordInline6;
@@ -896,13 +854,6 @@ equation
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
  x.b = 3 + (temp_2 - temp_2);
  temp_2 = if y[4] < pre(temp_2) or y[4] >= pre(temp_2) + 1 or initial() then integer(y[4]) else pre(temp_2);
-
-public
- record FunctionInlining.RecordInline7.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline7.R;
-
 end FunctionInlining.RecordInline7;
 			
 ")})));
@@ -949,13 +900,6 @@ equation
  x.a[2] = 3 + y;
  x.a[3] = 4 * y;
  x.b = noEvent(integer(5 - y));
-
-public
- record FunctionInlining.RecordInline8.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline8.R;
-
 end FunctionInlining.RecordInline8;
 ")})));
     end RecordInline8;
@@ -998,13 +942,6 @@ equation
  x.a[2] = 4;
  x.a[3] = 4;
  x.b = 4;
-
-public
- record FunctionInlining.RecordInline9.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline9.R;
-
 end FunctionInlining.RecordInline9;
 ")})));
     end RecordInline9;
@@ -1050,13 +987,6 @@ fclass FunctionInlining.RecordInline10
 equation
  x = y + 2 * y + 3 * y + noEvent(integer(5 - y));
  y = 1;
-
-public
- record FunctionInlining.RecordInline10.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline10.R;
-
 end FunctionInlining.RecordInline10;
 ")})));
     end RecordInline10;
@@ -1102,13 +1032,6 @@ fclass FunctionInlining.RecordInline11
 equation
  x = y + 2 * y + 3 * y + noEvent(integer(5 - y));
  y = 1;
-
-public
- record FunctionInlining.RecordInline11.R
-  Real a[3];
-  discrete Integer b;
- end FunctionInlining.RecordInline11.R;
-
 end FunctionInlining.RecordInline11;
 ")})));
     end RecordInline11;
@@ -2335,12 +2258,6 @@ equation
  temp_1.p = if time > 0 then 0.0 else time;
  x = if time > 0 then 4 else temp_1.p;
  0.0 = if time > 0 then y - 2 else time - (y + 1);
-
-public
- record FunctionInlining.IfEquationInline7.R
-  Real p;
- end FunctionInlining.IfEquationInline7.R;
-
 end FunctionInlining.IfEquationInline7;
 ")})));
 end IfEquationInline7;
@@ -2531,13 +2448,6 @@ equation
  x.a = if z > 2 then 3 else temp_1.a;
  x.b = if z > 2 then 4 else temp_1.b;
  z = 1;
-
-public
- record FunctionInlining.TrivialInline3.R
-  Real a;
-  Real b;
- end FunctionInlining.TrivialInline3.R;
-
 end FunctionInlining.TrivialInline3;
 ")})));
     end TrivialInline3;
@@ -2586,13 +2496,6 @@ equation
  x.a = if z > 2 then 3 else temp_1.a;
  x.b = if z > 2 then 4 else temp_1.b;
  z = 1;
-
-public
- record FunctionInlining.TrivialInline4.R
-  Real a;
-  Real b;
- end FunctionInlining.TrivialInline4.R;
-
 end FunctionInlining.TrivialInline4;
 ")})));
     end TrivialInline4;
@@ -2868,13 +2771,6 @@ equation
  x.a = 1;
  x.b[1] = 1;
  x.b[2] = 2;
-
-public
- record FunctionInlining.TrivialInline10.R
-  Real a;
-  Real b[2];
- end FunctionInlining.TrivialInline10.R;
-
 end FunctionInlining.TrivialInline10;
 ")})));
 end TrivialInline10;
@@ -3174,12 +3070,6 @@ model BindingExpInRecord
 fclass FunctionInlining.BindingExpInRecord
  parameter Real a.x[1] = 1 /* 1 */;
  parameter Real a.x[2] = -1 /* -1 */;
-
-public
- record FunctionInlining.BindingExpInRecord.A
-  parameter Real x[2];
- end FunctionInlining.BindingExpInRecord.A;
-
 end FunctionInlining.BindingExpInRecord;
 ")})));
 end BindingExpInRecord;

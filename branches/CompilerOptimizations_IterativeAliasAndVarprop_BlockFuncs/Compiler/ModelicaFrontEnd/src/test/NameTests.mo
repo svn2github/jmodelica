@@ -1083,13 +1083,10 @@ model ConstantLookup16
 			name="ConstantLookup16",
 			description="Using constant with bad value as array index",
 			errorMessage="
-4 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 797, column 16:
   Could not evaluate binding expression for constant 'a': 'b[c]'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 797, column 22:
-  Could not evaluate array index expression: c
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 799, column 23:
   Cannot find class or component declaration for d

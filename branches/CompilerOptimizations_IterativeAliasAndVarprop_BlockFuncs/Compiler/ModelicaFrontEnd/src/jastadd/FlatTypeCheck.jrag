@@ -438,11 +438,8 @@ aspect FlatTypeCheck {
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
-	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
-		  if (getFExp().canBeComponentSize())
-			  compliance("Array sizes of Boolean or enumeration type are not supported: " + getFExp());
-		  else if (!type().isUnknown())
-			  error("Array size must be Integer expression: " + getFExp());
+      } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
+          error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array size must be constant or parameter: " + getFExp());
@@ -459,11 +456,10 @@ aspect FlatTypeCheck {
   public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
 	  if (ndims() > 1) { 
 		  error("Array index must be scalar or vector expression: " + getFExp());
-	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
-		  if (type().canBeIndex())
-			  compliance("Array indices of Boolean or enumeration type not supported: " + getFExp());
-		  else if (!type().isUnknown())
-			  error("Array index must be Integer expression: " + getFExp());
+      } else if (!type().isUnknown() && !type().canBeIndex()) {
+          error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
+      } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
+          error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().parameterOrLess()) {
 			  warning("Variable array index in equation can result in slow simulation time");
@@ -482,11 +478,23 @@ aspect FlatTypeCheck {
 	                  }
 	              }
 	          } catch (ConstantEvaluationException e) {
-	              error("Could not evaluate array index expression: " + getFExp());
-	              reportedOutOfBound = true;
 	          }
 		  }
 	  }
+  }
+  
+  syn FType FExpSubscript.myIndexType() = myIndexType(myDim());
+  inh FType FExpSubscript.myIndexType(int i);
+  eq Root.getChild().myIndexType(int i)                                = fUnknownType();
+  eq InstArrayAccess.getFArraySubscripts().myIndexType(int i)          = fUnknownType();
+  eq InstComponentArrayAccess.getFArraySubscripts().myIndexType(int i) = myInstComponentDecl().myIndexType(i);
+  
+  syn FType InstComponentDecl.myIndexType(int dim) {
+    FArraySubscripts fas = getFArraySubscripts();
+    if (fas != null && fas.getNumFSubscript() > dim)
+        return fas.getFSubscript(dim).type().scalarType();
+    else
+        return fUnknownType();
   }
   
   private boolean FExpSubscript.reportedOutOfBound = false;

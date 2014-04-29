@@ -44,7 +44,7 @@ jmi_value_reference is_negated(jmi_value_reference valueref) {
     return negated;
 }
 
-int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
+int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location) {
                        
     jmi_t* jmi_ = jmi;
     int retval;
@@ -64,6 +64,14 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
         jmi_delete(jmi_);
         return -1;
     }
+    
+    /* Check resource location */
+    if (resource_location && !jmi_dir_exists(resource_location)) {
+        jmi_log_node(jmi->log, logError, "Error", "Resource location does not exist <Path:%s>", resource_location);
+        jmi_delete(jmi_);
+        return -1;
+    }
+    jmi_->resource_location = resource_location;
     
     /* set start values*/
     if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
@@ -150,6 +158,9 @@ int jmi_initialize(jmi_t* jmi) {
 
     if(retval != 0) { /* Error check */
         jmi_log_comment(jmi->log, logError, "Initialization failed.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 4){
+            jmi_log_leave(jmi->log, top_node);
+        }
         return -1;
     }
     

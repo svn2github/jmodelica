@@ -39,6 +39,7 @@ aspect Arrays {
 	 */
 	inh boolean FExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
+	eq FAbstractEquation.getChild().inArraySubscripts() = false;
 	eq Root.getChild().inArraySubscripts() = false;
 	
 	/**
@@ -245,24 +246,35 @@ aspect Arrays {
 	eq InstNamedArgument.ndims()         = getFExp().ndims();
 	
 	eq FArgumentExp.ndims() = copiedFExp().ndims();
-	
-	eq FBinExp.ndims() = getLeft().ndims();
-	eq FUnaryExp.ndims() = getFExp().ndims();
-	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getRight().ndims());
-	
-	eq FDivExp.ndims() = getLeft().ndims();
-	eq FPowExp.ndims() = getLeft().ndims();
-	
-	eq FMulExp.ndims() {
-		int left = getLeft().ndims();
-		int right = getRight().ndims();
-		if (isElementWise())
-			return Math.max(left, right);
-		if (left > 2 || right > 2)
-			return -1;
-		return left + right - 2;
-	}
-	
+
+    eq FBinExp.ndims()   = overloadNdims();
+    eq FUnaryExp.ndims() = overloadNdims();
+
+    syn int FExp.overloadNdims() {
+        if (shouldUseOverloadedOperator()) {
+            InstClassDecl oper = overloadedOperator(true);
+            if (oper != null && !oper.myOutputs().isEmpty())
+                return oper.myOutputs().get(0).ndims();
+        }
+        return ndimsBase();
+    }
+
+    syn int FExp.ndimsBase()   = -1;
+    eq FBinExp.ndimsBase()     = getLeft().ndims();
+    eq FUnaryExp.ndimsBase()   = getFExp().ndims();
+    eq FArtmBinExp.ndimsBase() = Math.max(getLeft().ndims(), getRight().ndims());
+    eq FDivExp.ndimsBase()     = getLeft().ndims();
+    eq FPowExp.ndimsBase()     = getLeft().ndims();
+    eq FMulExp.ndims() {
+        int left = getLeft().ndims();
+        int right = getRight().ndims();
+        if (isElementWise())
+            return Math.max(left, right);
+        if (left > 2 || right > 2)
+            return -1;
+        return left + right - 2;
+    }
+
 	eq FIfExp.ndims() = getThenExp().ndims();
 	
 	eq FSmoothExp.ndims() = getFExp().ndims();
@@ -554,12 +566,13 @@ aspect Arrays {
 		Size right = getRight().size();
 		return left.equals(right) ? left : Size.SCALAR;
 	}
-	
-	inh Size FIdDeclAttribute.size();
+
+    inh Size FIdDeclAttribute.size();
     eq FAbstractEquation.getFAttribute().size() = size();
     eq FVariable.getFAttribute().size() = size();
     eq FDerivedType.getFAttribute().size() = getBaseType().size();
-    
+    eq FFunctionDecl.getFAttribute().size() = Size.SCALAR;
+
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
 	
 	inh Size FAbstractEquation.parentTotalSize();
@@ -715,29 +728,42 @@ aspect Arrays {
 	syn Size FExp.size() = Size.SCALAR;
 	syn lazy Size FAbstractArrayExp.size() = super.size();
 	eq FInstAccessExp.size() = getInstAccess().size();
-	
-	eq FBinExp.size() = getLeft().size();
-	eq FUnaryExp.size() = getFExp().size();
-	eq FArtmBinExp.size() = getLeft().isArray() ? getLeft().size() : getRight().size();
 
-	eq FDivExp.size() = getLeft().size();
-	eq FPowExp.size() = getLeft().size();
-	
-	eq FMulExp.size() {
-		if (!getLeft().isArray())
-			return getRight().size();
-		if (!getRight().isArray())
-			return getLeft().size();
-		if (!isArray())
-			return Size.SCALAR;
-		MutableSize s = new MutableSize(ndims());
-		if (getLeft().ndims() == 2)
-			s.append(getLeft().size(), 0);
-		if (getRight().ndims() == 2)
-			s.append(getRight().size(), 1);
-		return s;
-	}
-	
+    eq FBinExp.size()   = overloadSize();
+    eq FUnaryExp.size() = overloadSize();
+
+    syn Size FExp.overloadSize() {
+        if (shouldUseOverloadedOperator()) {
+            InstClassDecl oper = overloadedOperator(true);
+            if (oper != null && !oper.myOutputs().isEmpty())
+                return oper.myOutputs().get(0).size();
+        }
+        return sizeBase();
+    }
+
+    syn Size FExp.sizeBase()  = null;
+    eq FBinExp.sizeBase()     = getLeft().size();
+    eq FUnaryExp.sizeBase()   = getFExp().size();
+    eq FArtmBinExp.sizeBase() = getLeft().isArray() ? getLeft().size() : getRight().size();
+
+    eq FDivExp.sizeBase() = getLeft().size();
+    eq FPowExp.sizeBase() = getLeft().size();
+
+    eq FMulExp.sizeBase() {
+        if (!getLeft().isArray())
+            return getRight().size();
+        if (!getRight().isArray())
+            return getLeft().size();
+        if (!isArray())
+            return Size.SCALAR;
+        MutableSize s = new MutableSize(ndims());
+        if (getLeft().ndims() == 2)
+            s.append(getLeft().size(), 0);
+        if (getRight().ndims() == 2)
+            s.append(getRight().size(), 1);
+        return s;
+    }
+
 	syn boolean FRangeExp.hasStep() = getNumFExp() > 2;
 	
  	eq FRangeExp.size() {
@@ -2637,7 +2663,7 @@ aspect ArrayHelpers {
 		
 		/**
 		 * Return a Size that have the same lengths as this size where they are known, 
-		 * and any that are unknown int this size but known in <code>s</code> is copied from there. 
+		 * and any that are unknown in this size but known in <code>s</code> is copied from there. 
 		 */
 		public Size createKnown(Size s) {
 			Size known = clone();
