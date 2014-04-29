@@ -78,7 +78,7 @@ void* jmi_func_to_voidp(char* (*y)()) {
  
 char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size)) {
     int found;
-    char *resource_dir = "/resources/";
+    char *resource_dir = "/resources";
     char *binary_dir = "binaries";
     char *res;
     char path[JMI_PATH_MAX];

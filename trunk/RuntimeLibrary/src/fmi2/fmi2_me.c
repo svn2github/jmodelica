@@ -701,9 +701,8 @@ int uri_to_path(char *path, const char* uri) {
     
     strcpy(path, &uri[scheme_len]);
     
-    if (path[len-1] != '/' && path[len-1] != '\\') {
-        path[len] = '/';
-        path[len+1] = '\0';
+    if (path[len-1] == '/' && path[len-1] == '\\') {
+        path[len-1] = '\0';
     }
     
     return 0;

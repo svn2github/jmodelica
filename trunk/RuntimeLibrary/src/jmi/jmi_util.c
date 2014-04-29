@@ -2228,11 +2228,11 @@ void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
         return;
     }
     len = strlen(loc) + strlen(file);
-    strcpy(res, loc);
     if (len >= JMI_PATH_MAX) {
         jmi_log_node(jmi->log, logError, "Error", "File path too long <Path:%s><File:%s>", loc, file);
         return;
     }
+    strcpy(res, loc);
     strcat(res, file);
     if (!jmi_file_exists(res))
         jmi_log_node(jmi->log, logError, "Error", "Could not locate resource <File:%s>", res);
