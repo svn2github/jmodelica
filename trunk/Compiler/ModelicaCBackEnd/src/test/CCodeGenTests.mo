@@ -14618,18 +14618,18 @@ $C_DAE_initial_dependent_parameter_assignments$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    jmi_load_resource(jmi, tmp_1, \"0_Examples_readRealParameters.txt\");
+    jmi_load_resource(jmi, tmp_1, \"/0_Examples_readRealParameters.txt\");
     _z_1 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_1);
-    jmi_load_resource(jmi, tmp_2, \"1_String.txt\");
+    jmi_load_resource(jmi, tmp_2, \"/1_String.txt\");
     _rel_2 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_2);
-    jmi_load_resource(jmi, tmp_3, \"2_String.txt\");
+    jmi_load_resource(jmi, tmp_3, \"/2_String.txt\");
     _abs_3 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_3);
-    jmi_load_resource(jmi, tmp_4, \"2_String.txt\");
+    jmi_load_resource(jmi, tmp_4, \"/2_String.txt\");
     _file_4 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4);
 /********* Write back reinits *******/
 
     char tmp_5[JMI_PATH_MAX];
-    jmi_load_resource(jmi, tmp_5, \"0_Examples_readRealParameters.txt\");
+    jmi_load_resource(jmi, tmp_5, \"/0_Examples_readRealParameters.txt\");
     _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_5));
 ")})));
 end LoadResource1;
