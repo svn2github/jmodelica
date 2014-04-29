@@ -324,7 +324,29 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=1.5,options=opts)
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
-    
+        
+    @testattr(stddist = True)
+    def test_cc_with_impliciteuler(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "ImplicitEuler"
+        opts["ImplicitEuler_options"]["rtol"] = 1e-8
+        opts["ImplicitEuler_options"]["atol"] = 1e-8
+        opts["ImplicitEuler_options"]["h"] = 0.001
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-2
+        
+    @testattr(stddist = True)
+    def test_cc_with_expliciteuler(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "ExplicitEuler"
+        opts["ExplicitEuler_options"]["h"] = 0.001
+
+        res = model.simulate(final_time=1.5,options=opts)
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-2
+        
     @testattr(stddist = True)
     def test_no_state1(self):
         """
