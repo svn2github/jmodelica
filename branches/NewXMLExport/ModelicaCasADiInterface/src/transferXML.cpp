@@ -195,7 +195,7 @@ void transferEquations(Ref<Model> m, XMLElement* elem) {
 				}
 			} else {
 				finalLhs = left;
-				finalRhs = right;
+				finalRhs = right.at(0);
 			}
 			m->addDaeEquation(new ModelicaCasADi::Equation (finalLhs, finalRhs));
 		}
@@ -756,7 +756,7 @@ MX functionCallToMx(Ref<Model> m, XMLElement* call) {
 						}
 					}
 				} else if (arg->Attribute("builtin") != NULL) {
-					argVec.push_back(expressionToMx(m, arg->FirstChildElement()));
+					argVec.push_back(expressionToMx(m, arg));
 				}
 			} else {
 				argVec.push_back(expressionToMx(m, arg));
@@ -792,11 +792,17 @@ MX operatorToMx(Ref<Model> m, XMLElement* op) {
 			if (!hasDerivativeVar(m, realVar)) {
 				addDerivativeVar(m, realVar, name);
 			}
+			if (m->getVariable(derCall) != NULL) {
+				return m->getVariable(derCall)->getVar();
+			}
 			return MX(derCall);
 		} else {
 			string derCall = "der(";
 			derCall.append(derChild->Attribute("value"));
 			derCall.append(")");
+			if (m->getVariable(derCall) != NULL) {
+				return m->getVariable(derCall)->getVar();
+			}
 			return MX(derCall);
 		}
 	} else if (!strcmp(op->Attribute("name"), "pre")) {

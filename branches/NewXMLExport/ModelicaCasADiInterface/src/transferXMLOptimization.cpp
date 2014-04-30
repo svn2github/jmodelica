@@ -82,12 +82,12 @@ void transferObjectiveIntegrand(Ref<OptimizationProblem> optProblem, XMLElement*
 }
 
 void transferStartTime(Ref<OptimizationProblem> optProblem, XMLElement* startTime) {
-	MX start = MX(atoi(startTime->FirstChildElement()->Attribute("value")));
+	MX start = MX(atof(startTime->FirstChildElement()->Attribute("value")));
 	optProblem->setStartTime(start);
 }
 
 void transferFinalTime(Ref<OptimizationProblem> optProblem, XMLElement* finalTime) {
-	MX final = MX(atoi(finalTime->FirstChildElement()->Attribute("value")));
+	MX final = MX(atof(finalTime->FirstChildElement()->Attribute("value")));
 	optProblem->setFinalTime(final);
 }
 
@@ -167,11 +167,11 @@ MX timedVarToMx(Ref<OptimizationProblem> optProblem, XMLElement* timedVar) {
 	name += "(";
 	name += timedVarArgsToString(timedName->NextSiblingElement());
 	name += ")";
-	/*std::vector<Ref <TimedVariable> > timedVars = getTimedVariables();
+	/*std::vector<Ref <TimedVariable> > timedVars = optProblem->getTimedVariables();
 	for (int i=0; i < timedVars.size(); i++) {
 		if (!strcmp(timedVars.at(i)->getVar().getBaseVariable().getName(), timedName->Attribute("name"))) {
-			if (!strcmp(timedVars.at(i)->getVar().getTimePoint().getName(), timedVarArgsToString(timedName->))) {
-				return timedVars.at(i);
+			if (!strcmp(timedVars.at(i)->getVar().getTimePoint().getName(), timedVarArgsToString(timedName->NextSiblingElement()))) {
+				return timedVars.at(i)->getVar().getTimePoint();
 			}
 		}
 	}*/
