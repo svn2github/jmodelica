@@ -186,6 +186,11 @@
             <para>Attributes with any name can be set on any type of
             variable.</para>
           </listitem>
+
+          <listitem>
+            <para>The property of whether an optimization problem has free or
+            fixed time horizon cannot be changed after compilation.</para>
+          </listitem>
         </itemizedlist></para>
     </listitem>
   </itemizedlist>
