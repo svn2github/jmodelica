@@ -485,6 +485,19 @@ end TypeTests.IntegerExp2;
 ")})));
 end IntegerExp2;
 
+model IntegerExp3
+  Integer y1 = integer(ceil(floor(3)));
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="IntegerExp3",
+            description="integer() operator: integer arg",
+            flatModel="
+fclass TypeTests.IntegerExp3
+ discrete Integer y1 = integer(ceil(floor(3)));
+end TypeTests.IntegerExp3;
+")})));
+end IntegerExp3;
+
 
 model ConstCmpEq
  constant Boolean a = 1 == 2;

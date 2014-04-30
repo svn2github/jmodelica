@@ -952,8 +952,7 @@ aspect FlatTypeCheck {
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
   eq FSignExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnum();
-  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isReal();
-  eq FBinEventGenExp.getChild().argumentTypeValid(FType type)       = type.isNumeric();
+  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isNumeric();
   eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
   eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
   eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;
