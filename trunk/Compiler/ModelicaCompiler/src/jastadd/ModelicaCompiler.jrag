@@ -855,11 +855,18 @@ public class ModelicaCompiler {
 	 * @param buffer  buffer to use when writing files
 	 */
 	private void zipDir(File dir, ZipOutputStream out, File zipDir, byte[] buffer) {
+        if (dir.listFiles().length == 0) {
+            try {
+                out.putNextEntry(new ZipEntry(zipDir.getPath() + "/"));
+            } catch (IOException e) {
+                // TODO: this should result in an error message about failing to zip file
+                e.printStackTrace();
+            }
+        }
 		for (File f : dir.listFiles()) {
 			File fz = new File(zipDir, f.getName());
             try {
                 if (f.isDirectory()) {
-                    out.putNextEntry(new ZipEntry(fz.getPath() + File.separator));
                     zipDir(f, out, fz, buffer);
                 } else {
                     FileInputStream in = new FileInputStream(f);
@@ -2628,4 +2635,27 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		
 }
 
+}
+
+aspect Version {
+    public class Version {
+        public static String parseVersion() {
+            String version   = "unknown";
+            String jmhome = System.getenv("JMODELICA_HOME");
+            if (jmhome != null) {
+                File versionFile = new File(jmhome, "version.txt");
+                try {
+                    InputStreamReader is = new InputStreamReader(new FileInputStream(versionFile));
+                    version = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(versionFile.getAbsolutePath())));
+                } catch (IOException e) {
+                    
+                }
+            }
+            return version;
+        }
+        
+        public static void main(String args[]) {
+            System.out.println(parseVersion());
+        }
+    }
 }

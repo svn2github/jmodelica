@@ -981,6 +981,23 @@ public class CGenerator extends GenericGenerator {
 			genPrinter.print(fclass.nameUnderscore());
 		}
 	}
+	
+    /**
+     * Generates JM_VERSION.
+     */
+    /**
+     * C: JModelica version
+     */
+    public class DAETag_C_jmodelica_version extends DAETag {
+        
+        public DAETag_C_jmodelica_version(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_jmodelica_version", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(Version.parseVersion());
+        }
+    }
 
 	/**
 	 * Generates GUID.
