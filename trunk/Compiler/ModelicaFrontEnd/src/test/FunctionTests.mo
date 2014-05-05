@@ -10232,7 +10232,7 @@ model VectorizedCall5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall5",
-			description="Vectorization: scalarized record arg",
+			description="Vectorization: vectorised record arg",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -10268,6 +10268,62 @@ public
 end FunctionTests.VectorizedCall5;
 ")})));
 end VectorizedCall5;
+
+
+model VectorizedCall6
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function f
+        input Real x;
+        output R y;
+    algorithm
+        y := R(x, 2*x);
+    end f;
+    
+    Real w[2] = {1, 2};
+    R z[2] = f(w);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VectorizedCall6",
+            description="Vectorization: record return value",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.VectorizedCall6
+ Real w[1];
+ Real w[2];
+ Real z[1].a;
+ Real z[1].b;
+ Real z[2].a;
+ Real z[2].b;
+equation
+ w[1] = 1;
+ w[2] = 2;
+ (FunctionTests.VectorizedCall6.R(z[1].a, z[1].b)) = FunctionTests.VectorizedCall6.f(w[1]);
+ (FunctionTests.VectorizedCall6.R(z[2].a, z[2].b)) = FunctionTests.VectorizedCall6.f(w[2]);
+
+public
+ function FunctionTests.VectorizedCall6.f
+  input Real x;
+  output FunctionTests.VectorizedCall6.R y;
+ algorithm
+  y.a := x;
+  y.b := 2 * x;
+  return;
+ end FunctionTests.VectorizedCall6.f;
+
+ record FunctionTests.VectorizedCall6.R
+  Real a;
+  Real b;
+ end FunctionTests.VectorizedCall6.R;
+
+end FunctionTests.VectorizedCall6;
+")})));
+end VectorizedCall6;
 
 
 model Lapack_dgeqpf

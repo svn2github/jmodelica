@@ -2448,10 +2448,11 @@ aspect FlatFunctionUtils {
      }
      private String FExp.myTempVarName;
      inh String FExp.calcTempVarName();
-     eq InstNode.getChild().calcTempVarName()      = null;
-     eq FFunctionCall.getArray().calcTempVarName() = tempVarName();
-     eq FClass.getChild().calcTempVarName()        = nextTempVarName();
-     eq FFunctionDecl.getChild().calcTempVarName() = nextTempVarName();
+     eq InstNode.getChild().calcTempVarName()            = null;
+     eq FFunctionCall.getArray().calcTempVarName()       = tempVarName();
+     eq FVectorFunctionCall.getArray().calcTempVarName() = calcTempVarName();
+     eq FClass.getChild().calcTempVarName()              = nextTempVarName();
+     eq FFunctionDecl.getChild().calcTempVarName()       = nextTempVarName();
      
      /**
       * Creates expressions based on tempVarName();
