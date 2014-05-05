@@ -2629,3 +2629,30 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 }
 
 }
+
+aspect Version {
+    public class Version {
+        public static String parseVersion() {
+            String version   = "unknown";
+            String jmhome = System.getenv("JMODELICA_HOME");
+            if (jmhome != null) {
+                File versionFile = new File(jmhome, "version.txt");
+                try {
+                    BufferedReader is = new BufferedReader(new InputStreamReader(new FileInputStream(versionFile)));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = is.readLine()) != null)
+                        sb.append(line);
+                    version = sb.toString();
+                } catch (IOException e) {
+                    
+                }
+            }
+            return version;
+        }
+        
+        public static void main(String args[]) {
+            System.out.println(parseVersion());
+        }
+    }
+}
