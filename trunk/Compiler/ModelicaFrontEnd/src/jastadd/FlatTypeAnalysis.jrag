@@ -1175,7 +1175,7 @@ aspect OverloadedOperatorBinding {
      */
     syn Collection<InstClassDecl> FType.matchOverloadedConstructors(FType other) = null;
     eq FOperatorRecordType.matchOverloadedConstructors(FType other)              = 
-        matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
+        isArray() ? Collections.<InstClassDecl>emptyList() : matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
 
     /**
      * Find the zero function for an operator record type.
