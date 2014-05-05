@@ -12035,6 +12035,97 @@ y = semiLinear(x, s[2], sc)
 ")})));
 end SemiLinear6;
 
+model SemiLinear7
+    Real s[2] = {1,2};
+    Real x[2] = {time,time};
+    Real y[2];
+equation
+    y = semiLinear(x,s,s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear7",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear7
+ Real s[1];
+ Real s[2];
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = if x[1] >= 0.0 then x[1] * s[1] else x[1] * s[1];
+ y[2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ s[1] = 1;
+ s[2] = 2;
+ x[1] = time;
+ x[2] = time;
+end FunctionTests.FunctionLike.Special.SemiLinear7;
+")})));
+end SemiLinear7;
+
+model SemiLinear8
+    Real s[2] = {1,2};
+    Real x[2] = {time,time};
+    Real x2 = time;
+    Real y[2,2];
+equation
+    y[1,:] = semiLinear(x,s[2],s);
+    y[2,:] = semiLinear(x2,s,s[1]);
+equation
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear8",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear8
+ Real s[1];
+ Real s[2];
+ Real x[1];
+ Real x[2];
+ Real x2;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ y[1,1] = if x[1] >= 0.0 then x[1] * s[2] else x[1] * s[1];
+ y[1,2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ y[2,1] = if x2 >= 0.0 then x2 * s[1] else x2 * s[1];
+ y[2,2] = if x2 >= 0.0 then x2 * s[2] else x2 * s[1];
+ s[1] = 1;
+ s[2] = 2;
+ x[1] = time;
+ x[2] = time;
+ x2 = time;
+end FunctionTests.FunctionLike.Special.SemiLinear8;
+")})));
+end SemiLinear8;
+
+model SemiLinear9
+    Real s[1] = {1};
+    Real x[2] = {time,time};
+    Real y[2];
+equation
+    y = semiLinear(x,s,s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_SemiLinear9",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 12054, column 9:
+  Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
+")})));
+end SemiLinear9;
+
 end Special;
 
 

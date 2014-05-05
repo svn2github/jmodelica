@@ -654,6 +654,19 @@ aspect FlatTypeCheck {
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
   
+  public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
+      if (isArray()) {
+          Size s = size();
+          for (FExp arg : myArgs()) {
+              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
+                  error("Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes");
+                  break;
+              }
+          }
+      }
+      super.typeCheck(checkType);
+  }
+  
   public void FEnumIntegerExp.typeCheck(ErrorCheckType checkType) {
 	  super.typeCheck(checkType);
 	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
