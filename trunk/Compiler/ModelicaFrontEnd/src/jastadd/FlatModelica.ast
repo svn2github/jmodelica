@@ -1045,9 +1045,14 @@ FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 FIdDecl : BaseNode ::= FQName;
 
 /**
+ * Abstract superclass for accesses in both instance and flat trees.
+ */
+abstract CommonAccess : BaseNode;
+
+/**
  * A qualified identifier.
  */
-FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
+FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 /**
  * A qualifed identifier in an expression.

@@ -2105,28 +2105,30 @@ aspect ConstantEvaluation {
   syn CValue[] FAbstractFunctionCall.cevalFunction() = new CValue[] { ceval() };
   syn lazy CValue[] FFunctionCall.cevalFunction()    = evaluate();
   syn lazy CValue[] InstFunctionCall.cevalFunction() = evaluate();
-  
-  /**
-   * \brief Interface for variable declarations in flat and instance trees.
-   */
-  public interface CommonVariableDecl {
-	  public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
-	  public void readEvaluationValue(Map<CommonVariableDecl, CValue> map);
-	  public void setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map);
-	  public void prepareForFunctionEval();
-	  public CValue evaluationValue();
-	  public String name();
-        
+
+    /**
+     * \brief Interface for variable declarations in flat and instance trees.
+     */
+    public interface CommonVariableDecl {
+        public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
+        public void readEvaluationValue(Map<CommonVariableDecl, CValue> map);
+        public void setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map);
+        public void prepareForFunctionEval();
+        public CValue evaluationValue();
+        public CValue ceval();
+        public String name();
+        public Size size();
+
         // Added for codegeneration when evaluating external functions
         public FType   type();
         public String  name_C();
         public boolean isInput();
         public boolean isOutput();
-  }
-  
-  FAbstractVariable implements CommonVariableDecl;
-  InstComponentDecl implements CommonVariableDecl;
-  
+    }
+
+    FAbstractVariable implements CommonVariableDecl;
+    InstComponentDecl implements CommonVariableDecl;
+
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
   eq FFunctionCall.myFuncInputs()    = myInputs();

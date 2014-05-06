@@ -1912,10 +1912,23 @@ aspect FlatNames {
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
-	public FIdUseExp InstComponentDecl.createUseExp() {
-		 return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
-	}
-	
+    public FIdUseExp InstComponentDecl.createUseExp() {
+        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+   }
+
+    /**
+     * Create an access expression with this access.
+     */
+    abstract public FExp CommonAccess.createFExp();
+
+    public FInstAccessExp InstAccess.createFExp() {
+        return new FInstAccessExp(this);
+    }
+
+    public FIdUseExp FIdUse.createFExp() {
+        return new FIdUseExp(this);
+    }
+
 	/**
 	 * Create a pre() expression for this variable.
 	 */
@@ -3079,30 +3092,32 @@ aspect Sorting {
 }
 
 aspect GeneralHelpers {
-	
-	abstract public FExp FExp.fullCopy();
-	abstract public FQName FQName.fullCopy();
+
+    abstract public FExp FExp.fullCopy();
+    abstract public FQName FQName.fullCopy();
     abstract public Access Access.fullCopy();
-	abstract public InstAccess InstAccess.fullCopy();
-	abstract public InstNamedAccess InstNamedAccess.fullCopy();
-	abstract public InstScalarAccess InstScalarAccess.fullCopy();
-	abstract public InstArrayAccess InstArrayAccess.fullCopy();
+    abstract public CommonAccess CommonAccess.fullCopy();
+    abstract public InstAccess InstAccess.fullCopy();
+    abstract public InstNamedAccess InstNamedAccess.fullCopy();
+    abstract public InstScalarAccess InstScalarAccess.fullCopy();
+    abstract public InstArrayAccess InstArrayAccess.fullCopy();
     abstract public VisibilityType VisibilityType.fullCopy();
-	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
-	abstract public FStatement FStatement.fullCopy();
-	abstract public FEquationType FEquationType.fullCopy();
-	abstract public FType FType.fullCopy();
-	abstract public FVisibilityType FVisibilityType.fullCopy();
-	abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
-	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
-	abstract public FSubscript FSubscript.fullCopy();
+    abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
+    abstract public InstFunctionArgument InstFunctionArgument.fullCopy();
+    abstract public FStatement FStatement.fullCopy();
+    abstract public FEquationType FEquationType.fullCopy();
+    abstract public FType FType.fullCopy();
+    abstract public FVisibilityType FVisibilityType.fullCopy();
+    abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
+    abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
+    abstract public FSubscript FSubscript.fullCopy();
     abstract public CommonForIndex CommonForIndex.fullCopy();
-	
-	abstract public FExp FExp.copy();
-	abstract public InstAccess InstAccess.copy();
-	
-	public FExp FExp.unboundCopy() { return (FExp) super.unboundCopy(); }
-	
+
+    abstract public FExp FExp.copy();
+    abstract public InstAccess InstAccess.copy();
+
+    public FExp FExp.unboundCopy() { return (FExp) super.unboundCopy(); }
+
 	inh boolean ASTNode.isFirst();
 	eq List.getChild(int i).isFirst()    = i == 0;
 	eq ASTNode.getChild(int i).isFirst() = true;

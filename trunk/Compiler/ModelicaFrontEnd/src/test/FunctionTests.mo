@@ -9834,6 +9834,42 @@ end InputAsArraySize10;
 // TODO: Fler som ovan
 
 
+model InputAsArraySize11
+    function f1
+        input Integer n;
+        output Real y[f2(n)];
+    algorithm
+        y := 1:f2(n);
+    end f1;
+    
+    function f2
+        input Integer m;
+        output Integer k;
+    algorithm
+        k := div(m, 2) + 1;
+    end f2;
+    
+    Real[3] x = f1(5);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsArraySize11",
+            description="Declared size of function output that depends on value of other function call",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.InputAsArraySize11
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+end FunctionTests.InputAsArraySize11;
+")})));
+end InputAsArraySize11;
+
+
 
 model VectorizedCall1
     function f
