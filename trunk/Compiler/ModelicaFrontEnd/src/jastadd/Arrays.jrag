@@ -1876,7 +1876,7 @@ aspect Arrays {
 	}
 	
 	eq InstFunctionCall.getArray() {
-	      if (variability().structuralOrLess() && inBindingExp()) {
+	      if (variability().structuralOrLess()) {
 	          Array arr = new Array(indices());
 	          CValueArray carr = (CValueArray) cevalArray(Index.NULL);
 	          for (Index i : arr.indices()) {
