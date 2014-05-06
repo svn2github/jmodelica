@@ -6639,6 +6639,28 @@ end ArrayTests.Other.ArraySimplify1;
 ")})));
 end ArraySimplify1;
 
+package P
+    function f
+        input Real[:,:] x;
+        output Real[size(x,1), size(x,2)] y;
+      algorithm
+        y := x;
+    end f;
+    constant Real[1,1] x = {{2}} * f({{3}});
+end P;
+model FuncCallInPackConstEval
+    constant Real y[1,1] = P.x;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Other_FuncCallInPackConstEval",
+            description="Test getArray for function call in package constant",
+            flatModel="
+fclass ArrayTests.Other.FuncCallInPackConstEval
+ constant Real y[1,1] = 6.0;
+end ArrayTests.Other.FuncCallInPackConstEval;
+")})));
+end FuncCallInPackConstEval;
+
 end Other;
 
 end ArrayTests;
