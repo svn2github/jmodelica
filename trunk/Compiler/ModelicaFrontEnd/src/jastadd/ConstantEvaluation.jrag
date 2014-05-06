@@ -1765,13 +1765,12 @@ aspect ConstantEvaluation {
         if (evaluationValue != null) {
             val = evaluationValue;
         } else if ((isConstant() || isParameter()) && !isForIndex()) {
-            boolean rec = inRecordDecl();
             boolean func = inFunction();
             if (hasBindingFExp()) {
                 FExp bexp = getBindingFExp();
-                if (!bexp.type().isUnknown() && !rec)
+                if (!bexp.type().isUnknown())
                     val = bexp.ceval(func ? i : Index.NULL);
-            } else if (!rec && !func) {
+            } else if (!func && !inRecordDecl()) {
                 val = startAttributeCValue();
             }
             if (!func)
