@@ -857,22 +857,23 @@ public class ModelicaCompiler {
 	private void zipDir(File dir, ZipOutputStream out, File zipDir, byte[] buffer) {
 		for (File f : dir.listFiles()) {
 			File fz = new File(zipDir, f.getName());
-			if (f.isDirectory()) {
-				zipDir(f, out, fz, buffer);
-			} else {
-				try {
-					FileInputStream in = new FileInputStream(f);
-					out.putNextEntry(new ZipEntry(fz.getPath()));
-					for (int n; (n = in.read(buffer, 0, buffer.length)) != -1; ) 
-					   out.write(buffer, 0, n);
-					in.close();
-				} catch (FileNotFoundException e) {
-					// Should only occur in weird cases - ignore and skip this file
-				} catch (IOException e) {
-					// TODO: this should result in an error message about failing to zip file
-					e.printStackTrace();
-				}
-			}
+            try {
+                if (f.isDirectory()) {
+                    out.putNextEntry(new ZipEntry(fz.getPath() + "/"));
+                    zipDir(f, out, fz, buffer);
+                } else {
+                    FileInputStream in = new FileInputStream(f);
+                    out.putNextEntry(new ZipEntry(fz.getPath()));
+                    for (int n; (n = in.read(buffer, 0, buffer.length)) != -1; ) 
+                        out.write(buffer, 0, n);
+                    in.close();
+                }
+            } catch (FileNotFoundException e) {
+                // Should only occur in weird cases - ignore and skip this file
+            } catch (IOException e) {
+                // TODO: this should result in an error message about failing to zip file
+                e.printStackTrace();
+            }
 		}
 	}
 
@@ -2627,4 +2628,31 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		
 }
 
+}
+
+aspect Version {
+    public class Version {
+        public static String parseVersion() {
+            String version   = "unknown";
+            String jmhome = System.getenv("JMODELICA_HOME");
+            if (jmhome != null) {
+                File versionFile = new File(jmhome, "version.txt");
+                try {
+                    BufferedReader is = new BufferedReader(new InputStreamReader(new FileInputStream(versionFile)));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = is.readLine()) != null)
+                        sb.append(line);
+                    version = sb.toString();
+                } catch (IOException e) {
+                    
+                }
+            }
+            return version;
+        }
+        
+        public static void main(String args[]) {
+            System.out.println(parseVersion());
+        }
+    }
 }

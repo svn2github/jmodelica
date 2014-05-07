@@ -1110,7 +1110,7 @@ struct jmi_t {
 
     jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
     
-    jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. May be null. */
+    jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. No trailing separator. May be null. */
 };
 
 /**
@@ -1399,7 +1399,7 @@ int jmi_file_exists(const char* file);
 /**
  * \brief Check if directory exists.
  *
- * @param dir Directory path
+ * @param dir Directory path (without trailing separator)
  * @return Zero if not exist, non-zero otherwise.
  */
 int jmi_dir_exists(const char* dir);

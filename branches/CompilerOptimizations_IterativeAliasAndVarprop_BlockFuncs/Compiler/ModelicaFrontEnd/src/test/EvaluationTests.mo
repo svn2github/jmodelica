@@ -1251,4 +1251,26 @@ end EvaluationTests.ParameterEvalAnnotation3;
 ")})));
 end ParameterEvalAnnotation3;
 
+
+model ConstantInRecord1
+    record A
+        constant Real a = 1;
+        constant Real b = a + 1;
+    end A;
+    
+    constant Real c = A.a;
+    constant Real d = A.b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConstantInRecord1",
+            description="Evaluation of constants in records",
+            flatModel="
+fclass EvaluationTests.ConstantInRecord1
+ constant Real c = 1.0;
+ constant Real d = 2.0;
+end EvaluationTests.ConstantInRecord1;
+")})));
+end ConstantInRecord1;
+
 end EvaluationTests;

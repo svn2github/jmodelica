@@ -654,6 +654,19 @@ aspect FlatTypeCheck {
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
   
+  public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
+      if (isArray()) {
+          Size s = size();
+          for (FExp arg : myArgs()) {
+              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
+                  error("Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes");
+                  break;
+              }
+          }
+      }
+      super.typeCheck(checkType);
+  }
+  
   public void FEnumIntegerExp.typeCheck(ErrorCheckType checkType) {
 	  super.typeCheck(checkType);
 	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
@@ -952,8 +965,7 @@ aspect FlatTypeCheck {
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
   eq FSignExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnum();
-  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isReal();
-  eq FBinEventGenExp.getChild().argumentTypeValid(FType type)       = type.isNumeric();
+  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isNumeric();
   eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
   eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
   eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;

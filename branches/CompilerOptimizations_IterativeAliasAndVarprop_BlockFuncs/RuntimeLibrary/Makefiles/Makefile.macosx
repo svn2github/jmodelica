@@ -150,7 +150,7 @@ LIBS_FMUME10 = -lfmi1_me $(LIB_JMIC) $(LIB_COMMON)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
 LIBS_FMU20   = -lfmi2 $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
 LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
-LIBS_CEVAL   = -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a 
+LIBS_CEVAL   = -ljmi -lModelicaExternalC $(LIB_LAPACK)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)

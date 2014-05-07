@@ -1877,7 +1877,7 @@ aspect CCodeGen {
 	}
 	
     public void FLoadResource.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sjmi_load_resource(jmi, %s, \"%s\");", indent, tempName_C(), resourceName());
+        str.formatln("%sjmi_load_resource(jmi, %s, \"/%s\");", indent, tempName_C(), resourceName());
     }
 	
 	public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {

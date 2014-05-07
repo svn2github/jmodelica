@@ -26,6 +26,7 @@ equation
         TransformCanonicalTestCase(
             name="ExtractFunctionCall",
             description="",
+			enable_block_function_extraction=true,
             flatModel="
 fclass BlockFunctionExtractionTests.ExtractFunctionCall
  Real a;
@@ -59,6 +60,7 @@ equation
         TransformCanonicalTestCase(
             name="ExtractFunctionCall2",
             description="",
+            enable_block_function_extraction=true,
             flatModel="
 fclass BlockFunctionExtractionTests.ExtractFunctionCall2
  Real a;

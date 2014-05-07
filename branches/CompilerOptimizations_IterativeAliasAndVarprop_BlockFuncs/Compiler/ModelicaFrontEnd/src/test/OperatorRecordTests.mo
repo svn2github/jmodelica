@@ -1413,6 +1413,51 @@ end OperatorRecordTests.OperatorOverload28;
     end OperatorOverload28;
 
 
+    model OperatorOverload29
+        Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
+        Real r1 = 1;
+        Cplx[2] c3 = c1 * r1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorOverload29",
+            description="Checks that automatic conversions are only applied for scalar inputs",
+            flatModel="
+fclass OperatorRecordTests.OperatorOverload29
+ OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)};
+ Real r1 = 1;
+ OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx.'*'.mul(c1[1], OperatorRecordTests.Cplx.'constructor'(r1, 0)), OperatorRecordTests.Cplx.'*'.mul(c1[2], OperatorRecordTests.Cplx.'constructor'(r1, 0))};
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'*'.mul
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  return;
+ end OperatorRecordTests.Cplx.'*'.mul;
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorOverload29;
+")})));
+    end OperatorOverload29;
+
+
     model OperatorRecordConnect1
         connector C
             Cplx x;

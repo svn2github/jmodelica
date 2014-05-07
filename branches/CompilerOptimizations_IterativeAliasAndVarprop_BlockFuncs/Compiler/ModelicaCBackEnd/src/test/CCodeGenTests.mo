@@ -8081,6 +8081,8 @@ $C_dae_init_blocks_residual_functions$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8094,13 +8096,19 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = _x_0;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 1 * sizeof(jmi_real_t));
-        residual[0] = (- _temp_1_1);
+        JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+        jmi_array_ref_1(tmp_1, 1) = _time;
+        jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+        residual[0] = (- func_CCodeGenTests_BlockTest9_F_exp0(tmp_1));
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_0 * _temp_1_1 - (0);
+            JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+            jmi_array_ref_1(tmp_2, 1) = _time;
+            jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+            (*res)[0] = _x_0 * func_CCodeGenTests_BlockTest9_F_exp0(tmp_2) - (0);
         }
     }
     return ef;
@@ -8110,6 +8118,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8123,13 +8133,19 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = _x_0;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 1 * sizeof(jmi_real_t));
-        residual[0] = (- _temp_1_1);
+        JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
+        jmi_array_ref_1(tmp_3, 1) = _time;
+        jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+        residual[0] = (- func_CCodeGenTests_BlockTest9_F_exp0(tmp_3));
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_0 * _temp_1_1 - (0);
+            JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+            jmi_array_ref_1(tmp_2, 1) = _time;
+            jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+            (*res)[0] = _x_0 * func_CCodeGenTests_BlockTest9_F_exp0(tmp_2) - (0);
         }
     }
     return ef;
@@ -14602,18 +14618,18 @@ $C_DAE_initial_dependent_parameter_assignments$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    jmi_load_resource(jmi, tmp_1, \"0_Examples_readRealParameters.txt\");
+    jmi_load_resource(jmi, tmp_1, \"/0_Examples_readRealParameters.txt\");
     _z_1 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_1);
-    jmi_load_resource(jmi, tmp_2, \"1_String.txt\");
+    jmi_load_resource(jmi, tmp_2, \"/1_String.txt\");
     _rel_2 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_2);
-    jmi_load_resource(jmi, tmp_3, \"2_String.txt\");
+    jmi_load_resource(jmi, tmp_3, \"/2_String.txt\");
     _abs_3 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_3);
-    jmi_load_resource(jmi, tmp_4, \"2_String.txt\");
+    jmi_load_resource(jmi, tmp_4, \"/2_String.txt\");
     _file_4 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4);
 /********* Write back reinits *******/
 
     char tmp_5[JMI_PATH_MAX];
-    jmi_load_resource(jmi, tmp_5, \"0_Examples_readRealParameters.txt\");
+    jmi_load_resource(jmi, tmp_5, \"/0_Examples_readRealParameters.txt\");
     _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_5));
 ")})));
 end LoadResource1;

@@ -135,7 +135,7 @@ InstInlineExtends     : InstNormalExtends;
 InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExtendsShortClass>;
 
 // Accesses in the instance tree
-abstract InstAccess : BaseNode;
+abstract InstAccess : CommonAccess;
 abstract InstNamedAccess : InstAccess ::= <ID>;
 InstDot : InstAccess ::= InstAccess*;
 

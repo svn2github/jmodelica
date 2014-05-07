@@ -9834,6 +9834,42 @@ end InputAsArraySize10;
 // TODO: Fler som ovan
 
 
+model InputAsArraySize11
+    function f1
+        input Integer n;
+        output Real y[f2(n)];
+    algorithm
+        y := 1:f2(n);
+    end f1;
+    
+    function f2
+        input Integer m;
+        output Integer k;
+    algorithm
+        k := div(m, 2) + 1;
+    end f2;
+    
+    Real[3] x = f1(5);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsArraySize11",
+            description="Declared size of function output that depends on value of other function call",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.InputAsArraySize11
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+end FunctionTests.InputAsArraySize11;
+")})));
+end InputAsArraySize11;
+
+
 
 model VectorizedCall1
     function f
@@ -10232,7 +10268,7 @@ model VectorizedCall5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall5",
-			description="Vectorization: scalarized record arg",
+			description="Vectorization: vectorised record arg",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -10268,6 +10304,62 @@ public
 end FunctionTests.VectorizedCall5;
 ")})));
 end VectorizedCall5;
+
+
+model VectorizedCall6
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function f
+        input Real x;
+        output R y;
+    algorithm
+        y := R(x, 2*x);
+    end f;
+    
+    Real w[2] = {1, 2};
+    R z[2] = f(w);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VectorizedCall6",
+            description="Vectorization: record return value",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.VectorizedCall6
+ Real w[1];
+ Real w[2];
+ Real z[1].a;
+ Real z[1].b;
+ Real z[2].a;
+ Real z[2].b;
+equation
+ w[1] = 1;
+ w[2] = 2;
+ (FunctionTests.VectorizedCall6.R(z[1].a, z[1].b)) = FunctionTests.VectorizedCall6.f(w[1]);
+ (FunctionTests.VectorizedCall6.R(z[2].a, z[2].b)) = FunctionTests.VectorizedCall6.f(w[2]);
+
+public
+ function FunctionTests.VectorizedCall6.f
+  input Real x;
+  output FunctionTests.VectorizedCall6.R y;
+ algorithm
+  y.a := x;
+  y.b := 2 * x;
+  return;
+ end FunctionTests.VectorizedCall6.f;
+
+ record FunctionTests.VectorizedCall6.R
+  Real a;
+  Real b;
+ end FunctionTests.VectorizedCall6.R;
+
+end FunctionTests.VectorizedCall6;
+")})));
+end VectorizedCall6;
 
 
 model Lapack_dgeqpf
@@ -11978,6 +12070,97 @@ y = semiLinear(x, s[2], sc)
 			
 ")})));
 end SemiLinear6;
+
+model SemiLinear7
+    Real s[2] = {1,2};
+    Real x[2] = {time,time};
+    Real y[2];
+equation
+    y = semiLinear(x,s,s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear7",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear7
+ Real s[1];
+ Real s[2];
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = if x[1] >= 0.0 then x[1] * s[1] else x[1] * s[1];
+ y[2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ s[1] = 1;
+ s[2] = 2;
+ x[1] = time;
+ x[2] = time;
+end FunctionTests.FunctionLike.Special.SemiLinear7;
+")})));
+end SemiLinear7;
+
+model SemiLinear8
+    Real s[2] = {1,2};
+    Real x[2] = {time,time};
+    Real x2 = time;
+    Real y[2,2];
+equation
+    y[1,:] = semiLinear(x,s[2],s);
+    y[2,:] = semiLinear(x2,s,s[1]);
+equation
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear8",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear8
+ Real s[1];
+ Real s[2];
+ Real x[1];
+ Real x[2];
+ Real x2;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ y[1,1] = if x[1] >= 0.0 then x[1] * s[2] else x[1] * s[1];
+ y[1,2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ y[2,1] = if x2 >= 0.0 then x2 * s[1] else x2 * s[1];
+ y[2,2] = if x2 >= 0.0 then x2 * s[2] else x2 * s[1];
+ s[1] = 1;
+ s[2] = 2;
+ x[1] = time;
+ x[2] = time;
+ x2 = time;
+end FunctionTests.FunctionLike.Special.SemiLinear8;
+")})));
+end SemiLinear8;
+
+model SemiLinear9
+    Real s[1] = {1};
+    Real x[2] = {time,time};
+    Real y[2];
+equation
+    y = semiLinear(x,s,s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_SemiLinear9",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 12054, column 9:
+  Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
+")})));
+end SemiLinear9;
 
 end Special;
 
