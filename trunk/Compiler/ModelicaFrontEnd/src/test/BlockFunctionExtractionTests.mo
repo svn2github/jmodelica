@@ -25,7 +25,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="ExtractFunctionCall",
-            description="",
+            description="Tests the extraction of functions from blocks.",
 			enable_block_function_extraction=true,
             flatModel="
 fclass BlockFunctionExtractionTests.ExtractFunctionCall
@@ -50,7 +50,7 @@ end BlockFunctionExtractionTests.ExtractFunctionCall;
 ")})));
 end ExtractFunctionCall;
 
-model ExtractFunctionCall2
+model ExtractFunctionCallLexicalDiff
   Real a, b;
 equation
   a + b = f(time+1) + f(1+time);
@@ -58,11 +58,11 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="ExtractFunctionCall2",
-            description="",
+            name="ExtractFunctionCallLexicalDiff",
+            description="Shows that the optimization doesn't recognize that the lexically different function calls are equivalent",
             enable_block_function_extraction=true,
             flatModel="
-fclass BlockFunctionExtractionTests.ExtractFunctionCall2
+fclass BlockFunctionExtractionTests.ExtractFunctionCallLexicalDiff
  Real a;
  Real b;
  Real temp_1;
@@ -82,9 +82,99 @@ public
   return;
  end BlockFunctionExtractionTests.f;
 
-end BlockFunctionExtractionTests.ExtractFunctionCall2;
+end BlockFunctionExtractionTests.ExtractFunctionCallLexicalDiff;
 ")})));
-end ExtractFunctionCall2;
+end ExtractFunctionCallLexicalDiff;
+
+model ExtractHeavyFunctionCall
+  Real u0,u1,u2,u3,uL;
+  Real i0,i1,i2,i3,iL;
+  parameter Real R1 = 1;
+  parameter Real R2 = 1;
+  parameter Real R3 = 1;
+  parameter Real L = 1;
+  parameter Real p = 0;
+  parameter Integer Lcount = 1000000;
+equation
+  u0 = sin(time);
+  u1 = R1*i1;
+  u2 = R2*i2;
+  u3 = R3*i3;
+  uL = L*der(iL);
+  LoopingFunction(u0, Lcount, L, p) = u1 + u3;
+  uL = u1 + u2;
+  u2 = u3;
+  i0 = i1 + iL;
+  i1 = i2 + i3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ExtractHeavyFunctionCall",
+            description="Extract a heavy function call from block (the C-code cannot be optimized).",
+			enable_block_function_extraction=true,
+            flatModel="
+fclass BlockFunctionExtractionTests.ExtractHeavyFunctionCall
+ Real u0;
+ Real u1;
+ Real u2;
+ Real uL;
+ Real i0;
+ Real i1;
+ Real i2;
+ Real i3;
+ Real iL;
+ parameter Real R1 = 1 /* 1 */;
+ parameter Real R2 = 1 /* 1 */;
+ parameter Real R3 = 1 /* 1 */;
+ parameter Real L = 1 /* 1 */;
+ parameter Real p = 0 /* 0 */;
+ parameter Integer Lcount = 1000000 /* 1000000 */;
+ Real temp_1;
+initial equation 
+ iL = 0.0;
+equation
+ u0 = sin(time);
+ u1 = R1 * i1;
+ u2 = R2 * i2;
+ u2 = R3 * i3;
+ uL = L * der(iL);
+ temp_1 = u1 + u2;
+ uL = u1 + u2;
+ i0 = i1 + iL;
+ i1 = i2 + i3;
+ temp_1 = BlockFunctionExtractionTests.LoopingFunction(u0, Lcount, L, p);
+
+public
+ function BlockFunctionExtractionTests.LoopingFunction
+  input Real invar;
+  input Integer count;
+  input Real num;
+  input Real p;
+  output Real fac;
+ algorithm
+  fac := invar;
+  for i in 1:count loop
+   fac := fac * num + i * p;
+  end for;
+  return;
+ end BlockFunctionExtractionTests.LoopingFunction;
+
+end BlockFunctionExtractionTests.ExtractHeavyFunctionCall;
+")})));
+end ExtractHeavyFunctionCall;
+
+function LoopingFunction
+  input Real invar;
+  input Integer count;
+  input Real num;
+  input Real p;
+  output Real fac;
+algorithm
+  fac := invar;
+  for i in 1:count loop
+    fac := fac * num + i * p;
+  end for;
+end LoopingFunction;
 
 function f
   input Real i1;
