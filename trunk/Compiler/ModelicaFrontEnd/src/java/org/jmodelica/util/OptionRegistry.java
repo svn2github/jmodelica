@@ -424,7 +424,8 @@ abstract public class OptionRegistry {
             ("enable_block_function_extraction",
             compiler,
             false,
-            ""),
+            "Looks for function calls in blocks. If a function call in a block doesn't depend on"
+            + "the block in question, it is extracted."),
 		
 		// Runtime options
         /*
