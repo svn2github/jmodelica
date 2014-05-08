@@ -720,26 +720,6 @@ Compliance error at line 0, column 0:
 ")})));
 end UnknownArrayIndex;
 
-model BreakInFor
-	Real[2] x;
-algorithm
-	for i in 1:2 loop
-		break;
-		x[i] := i;
-	end for;
-	
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="BreakInFor",
-			description="Test errors for break statement in scalarized for",
-			errorMessage="
-Error: in file '...':
-Compliance error at line 0, column 0:
-  Break statement in algorithm only supported in while loops
-
-")})));
-end BreakInFor;
-
 model WhileStmt
 	Real x;
 algorithm

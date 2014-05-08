@@ -407,4 +407,24 @@ Semantic error at line 384, column 3:
 ")})));
 end IfEquationElse3;
 
+model BreakWithoutLoop
+    Real[2] x;
+algorithm
+    for i in 1:2 loop
+        break;
+        x[i] := i;
+    end for;
+    break;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BreakWithoutLoop",
+            description="Test errors for break statement without enclosing loop",
+            errorMessage="
+Error: in file '...':
+Semantic error at line 16, column 5:
+  Break statement must be inside while- or for-statement
+")})));
+end BreakWithoutLoop;
+
 end CheckTests;

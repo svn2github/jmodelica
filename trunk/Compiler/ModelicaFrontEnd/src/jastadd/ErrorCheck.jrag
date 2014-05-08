@@ -933,6 +933,11 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
+    public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
+        if (enclosingLoop() == null)
+            error("Break statement must be inside while- or for-statement");
+    }
+	
 	/**
 	 * \brief Check if class has exactly one algorithm section or external function declaration.
 	 */
