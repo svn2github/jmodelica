@@ -216,7 +216,7 @@ aspect FlatVariability {
                 v = fEvalParameter();
             } else if (isStructuralParam) {
                 v = fStructParameter();
-            } else if (hasBindingFExp()) {
+            } else if (hasBindingFExp() && !isExternalObject()) {
                 FTypePrefixVariability expVariability = getBindingFExp().variability();
                 if (expVariability.structParameterVariability() || expVariability.evalParameterVariability())
                     v = fStructParameter();

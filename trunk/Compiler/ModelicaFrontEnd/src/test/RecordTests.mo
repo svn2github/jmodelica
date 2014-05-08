@@ -4563,4 +4563,73 @@ end RecordTests.RecordConnector1;
 end RecordConnector1;
 
 
+model ExternalObjectStructural1
+    class A
+        extends ExternalObject;
+        
+        function constructor
+            input String b;
+            output A a;
+            external;
+        end constructor;
+        
+        function destructor
+            input A a;
+            external;
+        end destructor;
+    end A;
+    
+    function f
+        input A a;
+        output Real b;
+        external;
+    end f;
+    
+    parameter String b = "abc";
+    parameter A a = A(b);
+    parameter Real c = f(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ExternalObjectStructural1",
+            description="Check that external objects do not get converted to structural parameters",
+            flatModel="
+fclass RecordTests.ExternalObjectStructural1
+ parameter String b = \"abc\" /* \"abc\" */;
+ parameter RecordTests.ExternalObjectStructural1.A a = RecordTests.ExternalObjectStructural1.A.constructor(\"abc\") /* (unknown value) */;
+ parameter Real c;
+parameter equation
+ c = RecordTests.ExternalObjectStructural1.f(a);
+
+public
+ function RecordTests.ExternalObjectStructural1.A.destructor
+  input ExternalObject a;
+ algorithm
+  external \"C\" destructor(a);
+  return;
+ end RecordTests.ExternalObjectStructural1.A.destructor;
+
+ function RecordTests.ExternalObjectStructural1.A.constructor
+  input String b;
+  output ExternalObject a;
+ algorithm
+  external \"C\" a = constructor(b);
+  return;
+ end RecordTests.ExternalObjectStructural1.A.constructor;
+
+ function RecordTests.ExternalObjectStructural1.f
+  input ExternalObject a;
+  output Real b;
+ algorithm
+  external \"C\" b = f(a);
+  return;
+ end RecordTests.ExternalObjectStructural1.f;
+
+ type RecordTests.ExternalObjectStructural1.A = ExternalObject;
+end RecordTests.ExternalObjectStructural1;
+")})));
+end ExternalObjectStructural1;
+
+
+
 end RecordTests;
