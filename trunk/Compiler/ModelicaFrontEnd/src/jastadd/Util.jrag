@@ -1912,9 +1912,9 @@ aspect FlatNames {
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
-    public FIdUseExp InstComponentDecl.createUseExp() {
-        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
-   }
+    public FInstAccessExp InstComponentDecl.createUseExp() {
+        return new FInstAccessExp(new InstComponentAccess(name()));
+    }
 
     /**
      * Create an access expression with this access.
