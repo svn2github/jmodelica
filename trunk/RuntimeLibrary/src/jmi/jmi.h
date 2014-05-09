@@ -806,16 +806,9 @@ int jmi_get_scaling_method(jmi_t* jmi);
 
 
 /**
- * \brief Get the name of the model that produced this FMU.
+ * \brief Get the name of the model that produced this FMU/JMU.
  */
 const char *jmi_get_model_identifier();
-
-
-/**
- * \brief Get the version of JModelica.org that produced this FMU.
- */
-
-const char *jmi_get_jmodelica_version();
 
 
 /* @} */

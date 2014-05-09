@@ -24,7 +24,6 @@
 #include <stdarg.h>
 
 #include "jmi_log_impl.h"
-#include "jmi.h" /* for jmi_get_jmodelica_version() */
 
 /*#define INLINE inline */ /* not supported in c89 */
 #define INLINE 
@@ -444,7 +443,7 @@ static void initialize(log_t *log) {
      */
     jmi_log_set_filtering(log, FALSE); /* Allow info message to go through */
     jmi_log_node(log, logInfo, "JMIRuntime",
-                 "<jmodelica_revision:%s>", jmi_get_jmodelica_version());
+                 "<build_date:%s> <build_time:%s>", __DATE__, __TIME__);
     jmi_log_set_filtering(log, TRUE);
 }
 
