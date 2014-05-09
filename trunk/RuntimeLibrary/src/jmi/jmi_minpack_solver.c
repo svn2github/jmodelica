@@ -95,9 +95,11 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
             }
         }
         
-        if((block->callbacks->log_options.log_level >= 6)) {
+        if((block->callbacks->log_options.log_level >= 4)) {
             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "JacobianUpdated", "<block:%d>", block->id);
-            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", fjac, n, n);
+            if((block->callbacks->log_options.log_level >= 6)) {
+                jmi_log_real_matrix(block->log, node, logInfo, "jacobian", fjac, n, n);
+            }
             jmi_log_leave(block->log, node);
         }
     }

@@ -235,9 +235,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         free(jac_fd);
     }
 
-    if((block->callbacks->log_options.log_level >= 6)) {
+    if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "JacobianUpdated", "<block:%d>", block->id);
-        jmi_log_real_matrix(block->log, node, logInfo, "jacobian", J->data, N, N);
+        if (block->callbacks->log_options.log_level >= 6) {
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", J->data, N, N);
+        }
         jmi_log_leave(block->log, node);
     }
     
@@ -343,7 +345,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
          *  This approach gives one printout per iteration
          */
 
-    if ((block->callbacks->log_options.log_level >= 5))
+    if (block->callbacks->log_options.log_level >= 4)
     {
         jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
         jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
@@ -351,18 +353,34 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         
         if ((((strcmp("KINSolInit",function)==0) ||
               (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
+            realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
             long int nniters;
             /* Get the number of iterations */
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
             jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
-            jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            }
             jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
-            {
-                realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+
+            if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
                 for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
                 jmi_log_leave(log, node);
+            }
+            else if (block->n >= 1) {
+                int max_index = 0;
+                realtype max_residual = f[0]*residual_scaling_factors[0];
+                for (i=1;i<block->n;i++) {
+                    realtype res = f[i]*residual_scaling_factors[i];
+                    if (RAbs(res) > RAbs(max_residual)) {
+                        max_residual = res;
+                        max_index = i;
+                    }
+                }
+                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
+                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%d>", max_index);
             }
         }
         
@@ -1033,12 +1051,14 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 scale_ptr[i] = 1/scale_ptr[i];
         }
 
-        if (block->callbacks->log_options.log_level >= 5) {
+        if (block->callbacks->log_options.log_level >= 4) {
             jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%d>", block->id);
-            jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
-            realtype* res = scale_ptr;
-            for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
-            jmi_log_leave(block->log, inner);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
+                realtype* res = scale_ptr;
+                for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
+                jmi_log_leave(block->log, inner);
+            }
             jmi_log_leave(block->log, outer);
         }
     }
