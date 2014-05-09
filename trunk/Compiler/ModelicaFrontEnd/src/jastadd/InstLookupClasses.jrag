@@ -118,30 +118,31 @@ aspect InstLookupClasses {
 	
 	// This equation is necessary since InstAccesses may be present in FExps.
 	eq FlatRoot.getChild().lookupInstClass(String name) = null;
-	
-	/**
-	 * Look up the class being redeclared & extended in a "redeclare class extends" declaration.
-	 */
-	inh InstClassDecl InstNode.lookupRedeclareExtendsInstClass(String name);
-	eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = null;
+
+    /**
+     * Look up the class being redeclared & extended in a "redeclare class extends" declaration.
+     */
+    inh InstClassDecl InstNode.lookupRedeclareExtendsInstClass(String name);
+    eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = null;
     eq Root.getChild().lookupRedeclareExtendsInstClass(String name)                        = null;
-	eq InstExtendClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)         = lookupRedeclareExtendsInstClass(name);
-	eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
-	eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
-	eq InstExtends.getInstClassDecl().lookupRedeclareExtendsInstClass(String name)         = lookupTopRedeclareExtendsInstClass(name);
-	eq InstNode.getRedeclaredInstClassDecl().lookupRedeclareExtendsInstClass(String name)  = lookupNextRedeclareExtendsInstClass(name);
-	eq InstInlineExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)     = 
-		myInstClass().lookupRedeclareExtendsInstClass(name);
-	eq InstExtendsShortClass.getInstExtends().lookupRedeclareExtendsInstClass(String name) = 
-		myInstClass().lookupRedeclareExtendsInstClass(name);
-	eq InstReplacingExtendsShortClass.getInstExtends().lookupRedeclareExtendsInstClass(String name) = 
-		myInstClass().lookupRedeclareExtendsInstClass(name);
-	eq InstComponentDecl.getChild().lookupRedeclareExtendsInstClass(String name)           = 
-		myInstClass().lookupRedeclareExtendsInstClassFromComponent(name);
-	
-	syn InstClassDecl InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupLastRedeclareExtendsInstClass(name);
-	eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)   = lookupRedeclareExtendsInstClass(name);
-	eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
+    eq InstExtendClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)         = lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
+    eq InstExtends.getInstClassDecl().lookupRedeclareExtendsInstClass(String name)         = lookupTopRedeclareExtendsInstClass(name);
+    eq InstExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)           = myInstClass().lookupRedeclareExtendsInstClass(name);
+    eq InstNode.getRedeclaredInstClassDecl().lookupRedeclareExtendsInstClass(String name)  = lookupNextRedeclareExtendsInstClass(name);
+    eq InstInlineExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)     = 
+        myInstClass().lookupRedeclareExtendsInstClass(name);
+    eq InstExtendsShortClass.getInstExtends().lookupRedeclareExtendsInstClass(String name) = 
+        myInstClass().lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingExtendsShortClass.getInstExtends().lookupRedeclareExtendsInstClass(String name) = 
+        myInstClass().lookupRedeclareExtendsInstClass(name);
+    eq InstComponentDecl.getChild().lookupRedeclareExtendsInstClass(String name)           = 
+        myInstClass().lookupRedeclareExtendsInstClassFromComponent(name);
+
+    syn InstClassDecl InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupLastRedeclareExtendsInstClass(name);
+    eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)   = lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
 
     /**
      * Look up the class being redeclared & extended in the last step of a chain 

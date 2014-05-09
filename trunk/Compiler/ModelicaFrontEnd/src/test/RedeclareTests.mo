@@ -3243,6 +3243,39 @@ model RedeclareTest40
 end RedeclareTest40;
 
 
+model RedeclareTest41
+    package A
+        replaceable model B
+            Real x = 1;
+        end B;
+    end A;
+    
+    package C
+        extends A;
+        redeclare model extends B
+            Real y = 2;
+        end B;
+    end C;
+    
+    model D
+        extends C.B;
+    end D;
+    
+    D b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest41",
+            description="",
+            flatModel="
+fclass RedeclareTests.RedeclareTest41
+ Real b.y = 2;
+ Real b.x = 1;
+end RedeclareTests.RedeclareTest41;
+")})));
+end RedeclareTest41;
+
+
 model RedeclareElement1
   model A
     replaceable model B
