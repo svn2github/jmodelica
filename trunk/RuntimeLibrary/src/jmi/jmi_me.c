@@ -194,13 +194,13 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         /* Get index in z vector from value reference. */
         index = get_index_from_value_ref(vr[i]);
 
-        if (index >= jmi->offs_real_pd && index < jmi->offs_integer_ci) {
+        if (index >= (size_t)(jmi->offs_real_pd) && index < (size_t)(jmi->offs_integer_ci)) {
             jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set Real dependent parameter <variable: #r%d#>", vr[i]);
             return -1;
         }
 
-        if (index >= jmi->offs_real_ci && index < jmi->offs_real_pi) {
+        if (index >= (size_t)jmi->offs_real_ci && index < (size_t)jmi->offs_real_pi) {
             jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set Real constant <variable: #r%d#>", vr[i]);
             return -1;

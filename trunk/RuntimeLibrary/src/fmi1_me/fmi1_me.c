@@ -220,7 +220,7 @@ fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
     jmi_real_t* x_cur = jmi_get_real_x(jmi);
-    fmiInteger i;
+    size_t i;
     if (c == NULL) {
 		return fmiFatal;
     }

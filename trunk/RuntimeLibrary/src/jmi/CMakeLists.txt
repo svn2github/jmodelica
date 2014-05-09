@@ -54,12 +54,14 @@ set(JMISources
     jmi_block_solver.h
     jmi_block_solver_impl.h
     jmi_kinsol_solver.h
+    jmi_brent_solver.h
     jmi_minpack_solver.h
     jmi_linear_solver.h
     jmi_simple_newton.h
 
     jmi_block_solver.c
     jmi_kinsol_solver.c
+    jmi_brent_solver.c
     jmi_minpack_solver.c
     jmi_linear_solver.c
     jmi_simple_newton.c

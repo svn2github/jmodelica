@@ -35,7 +35,8 @@ fmi2Status fmi2_set_debug_logging(fmi2Component    c,
                                   const fmi2String categories[]) {
 
     fmi2_me_t* self = (fmi2_me_t*)c;
-    int i, max_log_level, tmp_log_level;
+    size_t i;
+    int max_log_level, tmp_log_level;
     if (c == NULL) {
 		return fmi2Fatal;
     }
@@ -314,7 +315,7 @@ fmi2Status fmi2_reset(fmi2Component c) {
 fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
                          size_t nvr, fmi2Real value[]) {
     fmi2Integer retval;
-    int i;
+    size_t i;
     
     if (c == NULL) {
 		return fmi2Fatal;
@@ -355,7 +356,7 @@ fmi2Status fmi2_get_boolean(fmi2Component c, const fmi2ValueReference vr[],
                             size_t nvr, fmi2Boolean value[]) {
     fmi2Integer retval;
     jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));
-    int i;
+    size_t i;
     
     if (c == NULL) {
 		return fmi2Fatal;
@@ -395,7 +396,7 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
                          size_t nvr, const fmi2Real value[]) {
     fmi2Integer retval;
     fmi2Real* negated_value;
-    int i;
+    size_t i;
     
     if (c == NULL) {
 		return fmi2Fatal;
@@ -439,7 +440,7 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
 fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
                             size_t nvr, const fmi2Boolean value[]) {
     fmi2Integer retval;
-    int i;
+    size_t i;
 
 	jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));;
     

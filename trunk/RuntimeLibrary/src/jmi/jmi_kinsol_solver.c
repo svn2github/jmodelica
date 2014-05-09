@@ -43,41 +43,6 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem);
 
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2);
 
-/* Interface to the residual function that is compatible with Brent search.
-   @param y - input - function argument
-   @param f - output - residual value
-   @param problem_data - solver object propagated as opaques data
-*/
-int brentf(realtype y, realtype* f, void* problem_data) {
-    jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
-    int ret = 0;
-    
-    /* Increment function calls counter */
-    block->nb_fevals++;
-
-    /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", block->id);
-        return -1;
-    }
-
-    /*Evaluate the residual*/
-    ret = block->F(block->problem_data,&y,f,JMI_BLOCK_EVALUATE);
-    if(ret) {
-        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %d>", ret, block->id);
-        return ret;
-    }
-    /* Check that outputs are valid */    
-    {
-        realtype v = *f;
-        if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", "Not a number in output from <block: %d>", block->id);
-            ret = 1;
-        }
-    }
-    return ret;
-}
-
 /*Kinsol function wrapper
     @param yy - Input - function argument
     @param ff - Output - residuals
@@ -1422,7 +1387,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     /* First time scaling is always recomputed - initial guess may be "far away" and give bad scaling 
        TODO: we should probably rescale after event as well.
     */
-    if(block->init || (flag != KIN_SUCCESS)) {
+    if(    (block->options->residual_equation_scaling_mode != jmi_residual_scaling_none ) 
+        && (block->init || (flag != KIN_SUCCESS))) {
         jmi_log_node(log, logInfo, "Rescaling", "Attempting rescaling in <block:%d>", block->id);
         flagNonscaled = flag;
         /* Get & store debug information */
