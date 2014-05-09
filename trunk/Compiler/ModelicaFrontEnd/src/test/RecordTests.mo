@@ -17,7 +17,6 @@
 package RecordTests
 
 
-
 model RecordFlat1
  record A
   Real a;
@@ -4227,6 +4226,77 @@ equation
 end RecordTests.RecordParam7;
 ")})));
 end RecordParam7;
+
+
+model RecordParam8
+    record A
+        parameter Real x = 1;
+        Real y;
+    end A;
+    
+    parameter A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordParam8",
+            description="Check that extra warnings aren't generated about binding expressions for record parameters",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+At line 4233, column 29:
+  The parameter a.y does not have a binding expression
+")})));
+end RecordParam8;
+
+
+model RecordParam9
+    record A
+        parameter Real x;
+        Real y;
+    end A;
+    
+    parameter A a = A(1, 2);
+    parameter Real z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordParam9",
+            description="Check that extra warnings aren't generated about binding expressions for record parameters, record has constuctor binding exp",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+At line 4258, column 28:
+  The parameter z does not have a binding expression
+")})));
+end RecordParam9;
+
+
+model RecordParam10
+    record A
+        parameter Real x;
+        Real y;
+    end A;
+	
+	function f
+		output A a;
+	algorithm
+		a := A(1,2);
+	end f;
+    
+    parameter A a = f();
+    parameter Real z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordParam10",
+            description="Check that extra warnings aren't generated about binding expressions for record parameters, record has function call binding exp",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+At line 4286, column 24:
+  The parameter z does not have a binding expression
+")})));
+end RecordParam10;
 
 
 model RecordMerge1

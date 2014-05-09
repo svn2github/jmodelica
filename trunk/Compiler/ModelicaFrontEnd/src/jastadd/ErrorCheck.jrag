@@ -674,33 +674,34 @@ aspect InstanceErrorCheck {
 		if (failed && !checkType.allowConstantNoValue())
 			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
 	}
-	
-	public void InstAssignable.collectErrors(ErrorCheckType checkType) {
-		//log.debug(toString());
+
+    public void InstAssignable.collectErrors(ErrorCheckType checkType) {
+        //log.debug(toString());
         if (!errorChecked) {
-        	super.collectErrors(checkType);
-    		errorChecked = true;
-	
-			// Check binding expression
-    		FExp bexp = myBindingInstExp();
-    		if (bexp != null) {
-    			String type = isParameter() ? "parameter" : "constant";
-	    		// TODO: Check structural parameters as well
-				// Check if the binding expression of constants can be evaluated
-				if (isConstant()) 
-					bexp.checkConstantExpression(checkType, "constant", qualifiedName());
-				else if (isParameter() && bexp.isCircular())
-					bexp.error("Circularity in binding expression of parameter: %s = %s", 
-							qualifiedName(), bexp);
-				bexp.collectErrors(checkType);
-    		} else {
-				// Warn if constant or parameter does not have a binding expression (start is used)
-				if ((isConstant() || isParameter()) && !isForIndex()) {
-					String type = isParameter() ? "parameter" : "constant";
-					warning("The %s %s does not have a binding expression", type, qualifiedName());
-				}
-    		}
-    		
+            super.collectErrors(checkType);
+            errorChecked = true;
+
+            // Check binding expression
+            FExp bexp = myBindingInstExp();
+            if (bexp != null) {
+                String type = isParameter() ? "parameter" : "constant";
+                // TODO: Check structural parameters as well
+                // Check if the binding expression of constants can be evaluated
+                if (isConstant()) 
+                    bexp.checkConstantExpression(checkType, "constant", qualifiedName());
+                else if (isParameter() && bexp.isCircular())
+                    bexp.error("Circularity in binding expression of parameter: %s = %s", 
+                            qualifiedName(), bexp);
+                bexp.collectErrors(checkType);
+            } else {
+                // Warn if constant or parameter does not have a binding expression (start is used)
+                if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
+                        !hasParentRecordWithBindingExp() && !inFunction()) {
+                    String type = isParameter() ? "parameter" : "constant";
+                    warning("The %s %s does not have a binding expression", type, qualifiedName());
+                }
+            }
+            
             // Mark parameters with Evaluate=true as structural
             if (isParameter() && annotation().forPath("Evaluate").bool()) {
                 if (canEvaluateAsStructural())
@@ -710,16 +711,16 @@ aspect InstanceErrorCheck {
             } else if (variability().structParameterVariability() && hasBindingFExp() && getBindingFExp().canCeval()) {
                 markAsStructuralParameter(checkType);
             }
-			
-			// Check array indices
-			getClassName().collectErrors(checkType);
-			getLocalFArraySubscriptsOpt().collectErrors(checkType);
-			
-			// Check attributes for primitive variables
-			checkAttributes(checkType);
-		}
-	}
-	
+            
+            // Check array indices
+            getClassName().collectErrors(checkType);
+            getLocalFArraySubscriptsOpt().collectErrors(checkType);
+            
+            // Check attributes for primitive variables
+            checkAttributes(checkType);
+        }
+    }
+
     syn boolean InstComponentDecl.canEvaluateAsStructural() = true;
 	eq InstAssignable.canEvaluateAsStructural() {
 	    if (!fixedAttributeCValue().reduceBooleanAnd())
@@ -932,12 +933,12 @@ aspect InstanceErrorCheck {
     		super.collectErrors(checkType);
 		}
 	}
-	
+
     public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
         if (enclosingLoop() == null)
             error("Break statement must be inside while- or for-statement");
     }
-	
+
 	/**
 	 * \brief Check if class has exactly one algorithm section or external function declaration.
 	 */
