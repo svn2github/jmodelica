@@ -66,6 +66,8 @@ aspect IndexReduction {
      * @return  the new graph
      */
     private void FClass.reduceIndex() {
+        log.info("Flat tree before index reduction");
+        log.info(this);
         // Only do index reduction based on real variables and equations
         BiPGraph g = new BiPGraph();
         g.addVariables(this, VAR_TYPES_REAL);

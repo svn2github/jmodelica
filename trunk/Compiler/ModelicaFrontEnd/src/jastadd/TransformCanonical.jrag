@@ -421,7 +421,7 @@ aspect TransformCanonical {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
 
-        log.info("Flat tree before index reduction and BLT:");
+        log.info("Flat tree before matching and BLT:");
         log.info(this);
 
         Eq eqn = null;
@@ -1618,7 +1618,7 @@ aspect TransformCanonical {
 	 */
 	public AliasPair FEquation.aliasVariables() {
 		AliasPair res = null;
-		if (!isHGTResidual()) // This equation should not be alias-removed if it is marked as residual!
+		if (!isHGTResidual() && !canUseLocalIteration()) // This equation should not be alias-removed if it is marked as residual!
 			res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
 		classifiedAsAlias = res != null;
