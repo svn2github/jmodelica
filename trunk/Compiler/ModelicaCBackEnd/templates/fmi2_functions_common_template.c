@@ -16,28 +16,28 @@
 
 /* FMI 2.0 functions common for both ME and CS.*/
 
-FMI_Export const char* fmiGetTypesPlatform() {
+FMI2_Export const char* fmi2GetTypesPlatform() {
     return fmi2_get_types_platform();
 }
 
-FMI_Export const char* fmiGetVersion() {
+FMI2_Export const char* fmi2GetVersion() {
     return fmi2_get_version();
 }
 
-FMI_Export fmiStatus fmiSetDebugLogging(fmiComponent    c,
-                                        fmiBoolean      loggingOn, 
-                                        size_t          nCategories, 
-                                        const fmiString categories[]) {
+FMI2_Export fmi2Status fmi2SetDebugLogging(fmi2Component    c,
+                                           fmi2Boolean      loggingOn, 
+                                           size_t           nCategories, 
+                                           const fmi2String categories[]) {
     return fmi2_set_debug_logging(c, loggingOn, nCategories, categories);
 }
 
-FMI_Export fmiComponent fmiInstantiate(fmiString instanceName,
-                                       fmiType   fmuType, 
-                                       fmiString fmuGUID, 
-                                       fmiString fmuResourceLocation, 
-                                       const fmiCallbackFunctions* functions, 
-                                       fmiBoolean                  visible,
-                                       fmiBoolean                  loggingOn) {
+FMI2_Export fmi2Component fmi2Instantiate(fmi2String instanceName,
+                                          fmi2Type   fmuType,
+                                          fmi2String fmuGUID,
+                                          fmi2String fmuResourceLocation,
+                                          const fmi2CallbackFunctions* functions,
+                                          fmi2Boolean                 visible,
+                                          fmi2Boolean                 loggingOn) {
     if (!can_instantiate(fmuType, instanceName, functions))
         return NULL;
 
@@ -45,108 +45,108 @@ FMI_Export fmiComponent fmiInstantiate(fmiString instanceName,
                             functions, visible, loggingOn);
 }
 
-FMI_Export void fmiFreeInstance(fmiComponent c) {
+FMI2_Export void fmi2FreeInstance(fmi2Component c) {
     fmi2_free_instance(c);
 }
 
-FMI_Export fmiStatus fmiSetupExperiment(fmiComponent c, 
-                                        fmiBoolean   toleranceDefined, 
-                                        fmiReal      tolerance, 
-                                        fmiReal      startTime, 
-                                        fmiBoolean   stopTimeDefined, 
-                                        fmiReal      stopTime) {
+FMI2_Export fmi2Status fmi2SetupExperiment(fmi2Component c, 
+                                           fmi2Boolean   toleranceDefined, 
+                                           fmi2Real      tolerance, 
+                                           fmi2Real      startTime, 
+                                           fmi2Boolean   stopTimeDefined, 
+                                           fmi2Real      stopTime) {
     return fmi2_setup_experiment(c, toleranceDefined, tolerance, startTime,
                                  stopTimeDefined, stopTime);
 }
 
-FMI_Export fmiStatus fmiEnterInitializationMode(fmiComponent c) {
+FMI2_Export fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
     return fmi2_enter_initialization_mode(c);
 }
 
-FMI_Export fmiStatus fmiExitInitializationMode(fmiComponent c) {
+FMI2_Export fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
     return fmi2_exit_initialization_mode(c);
 }
 
-FMI_Export fmiStatus fmiTerminate(fmiComponent c) {
+FMI2_Export fmi2Status fmi2Terminate(fmi2Component c) {
     return fmi2_terminate(c);
 }
 
-FMI_Export fmiStatus fmiReset(fmiComponent c) {
+FMI2_Export fmi2Status fmi2Reset(fmi2Component c) {
     return fmi2_reset(c);
 }
 
-FMI_Export fmiStatus fmiGetReal(fmiComponent c, const fmiValueReference vr[],
-                                size_t nvr, fmiReal value[]) {
+FMI2_Export fmi2Status fmi2GetReal(fmi2Component c, const fmi2ValueReference vr[],
+                                   size_t nvr, fmi2Real value[]) {
     return fmi2_get_real(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiGetInteger(fmiComponent c, const fmiValueReference vr[],
-                                   size_t nvr, fmiInteger value[]) {
+FMI2_Export fmi2Status fmi2GetInteger(fmi2Component c, const fmi2ValueReference vr[],
+                                      size_t nvr, fmi2Integer value[]) {
     return fmi2_get_integer(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiGetBoolean(fmiComponent c, const fmiValueReference vr[],
-                                   size_t nvr, fmiBoolean value[]) {
+FMI2_Export fmi2Status fmi2GetBoolean(fmi2Component c, const fmi2ValueReference vr[],
+                                      size_t nvr, fmi2Boolean value[]) {
     return fmi2_get_boolean(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiGetString(fmiComponent c, const fmiValueReference vr[],
-                                  size_t nvr, fmiString value[]) {
+FMI2_Export fmi2Status fmi2GetString(fmi2Component c, const fmi2ValueReference vr[],
+                                     size_t nvr, fmi2String value[]) {
     return fmi2_get_string(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiSetReal(fmiComponent c, const fmiValueReference vr[],
-                                size_t nvr, const fmiReal value[]) {
+FMI2_Export fmi2Status fmi2SetReal(fmi2Component c, const fmi2ValueReference vr[],
+                                   size_t nvr, const fmi2Real value[]) {
     return fmi2_set_real(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiSetInteger(fmiComponent c, const fmiValueReference vr[],
-                                  size_t nvr, const fmiInteger value[]) {
+FMI2_Export fmi2Status fmi2SetInteger(fmi2Component c, const fmi2ValueReference vr[],
+                                      size_t nvr, const fmi2Integer value[]) {
     return fmi2_set_integer(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiSetBoolean(fmiComponent c, const fmiValueReference vr[],
-                                   size_t nvr, const fmiBoolean value[]) {
+FMI2_Export fmi2Status fmi2SetBoolean(fmi2Component c, const fmi2ValueReference vr[],
+                                      size_t nvr, const fmi2Boolean value[]) {
     return fmi2_set_boolean(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiSetString(fmiComponent c, const fmiValueReference vr[],
-                                  size_t nvr, const fmiString value[]) {
+FMI2_Export fmi2Status fmi2SetString(fmi2Component c, const fmi2ValueReference vr[],
+                                     size_t nvr, const fmi2String value[]) {
     return fmi2_set_string(c, vr, nvr, value);
 }
 
-FMI_Export fmiStatus fmiGetFMUstate(fmiComponent c, fmiFMUstate* FMUstate) {
+FMI2_Export fmi2Status fmi2GetFMUstate(fmi2Component c, fmi2FMUstate* FMUstate) {
     return fmi2_get_fmu_state(c, FMUstate);
 }
 
-FMI_Export fmiStatus fmiSetFMUstate(fmiComponent c, fmiFMUstate FMUstate) {
+FMI2_Export fmi2Status fmi2SetFMUstate(fmi2Component c, fmi2FMUstate FMUstate) {
     return fmi2_set_fmu_state(c, FMUstate);
 }
 
-FMI_Export fmiStatus fmiFreeFMUstate(fmiComponent c, fmiFMUstate* FMUstate) {
+FMI2_Export fmi2Status fmi2FreeFMUstate(fmi2Component c, fmi2FMUstate* FMUstate) {
     return fmi2_free_fmu_state(c, FMUstate);
 }
 
-FMI_Export fmiStatus fmiSerializedFMUstateSize(fmiComponent c, fmiFMUstate FMUstate,
-                                               size_t* size) {
+FMI2_Export fmi2Status fmi2SerializedFMUstateSize(fmi2Component c, fmi2FMUstate FMUstate,
+                                                  size_t* size) {
     return fmi2_serialized_fmu_state_size(c, FMUstate, size);
 }
 
-FMI_Export fmiStatus fmiSerializedFMUstate(fmiComponent c, fmiFMUstate FMUstate,
-                                  fmiByte serializedState[], size_t size) {
+FMI2_Export fmi2Status fmi2SerializedFMUstate(fmi2Component c, fmi2FMUstate FMUstate,
+                                  fmi2Byte serializedState[], size_t size) {
     return fmi2_serialized_fmu_state(c, FMUstate, serializedState, size);
 }
 
-FMI_Export fmiStatus fmiDeSerializedFMUstate(fmiComponent c,
-                                  const fmiByte serializedState[],
-                                  size_t size, fmiFMUstate* FMUstate) {
+FMI2_Export fmi2Status fmi2DeSerializedFMUstate(fmi2Component c,
+                                  const fmi2Byte serializedState[],
+                                  size_t size, fmi2FMUstate* FMUstate) {
     return fmi2_de_serialized_fmu_state(c, serializedState, size, FMUstate);
 }
 
-FMI_Export fmiStatus fmiGetDirectionalDerivative(fmiComponent c,
-                const fmiValueReference vUnknown_ref[], size_t nUnknown,
-                const fmiValueReference vKnown_ref[],   size_t nKnown,
-                const fmiReal dvKnown[], fmiReal dvUnknown[]) {
+FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
+                 const fmi2ValueReference vUnknown_ref[], size_t nUnknown,
+                 const fmi2ValueReference vKnown_ref[],   size_t nKnown,
+                 const fmi2Real dvKnown[], fmi2Real dvUnknown[]) {
 	return fmi2_get_directional_derivative(c, vUnknown_ref, nUnknown,
                                            vKnown_ref, nKnown, dvKnown, dvUnknown);
 }

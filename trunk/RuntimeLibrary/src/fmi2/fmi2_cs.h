@@ -20,7 +20,7 @@
 #ifndef fmi2_cs_h
 #define fmi2_cs_h
 
-#include "fmiFunctions.h"
+#include "fmi2Functions.h"
 #include "fmi2_me.h"
 #include "jmi_ode_problem.h"
 
@@ -35,7 +35,7 @@ typedef struct fmi2_cs_t fmi2_cs_t;      /**< \brief Forward declaration of stru
 struct fmi2_cs_t {
     fmi2_me_t          fmi2_me;          /**< \brief Must be the first one in this struct so that a fmi2_cs_t pointer can be used in place of a fmi2_me_t pointer. */
     jmi_ode_problem_t* ode_problem;      /**< \brief A jmi ode problem pointer. */
-	fmiEventInfo       event_info;       /**< \brief The event information struct. */
+	fmi2EventInfo       event_info;      /**< \brief The event information struct. */
 };
 
 /**
@@ -56,10 +56,10 @@ struct fmi2_cs_t {
  * @param value The value(s) to set.
  * @return Error code.
  */
-fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
-                                          const fmiValueReference vr[],
-                                          size_t nvr, const fmiInteger order[],
-                                          const fmiReal value[]);
+fmi2Status fmi2_set_real_input_derivatives(fmi2Component c, 
+                                           const fmi2ValueReference vr[],
+                                           size_t nvr, const fmi2Integer order[],
+                                           const fmi2Real value[]);
 
 /**
  * \brief Gets the derivative of the outputs
@@ -71,10 +71,10 @@ fmiStatus fmi2_set_real_input_derivatives(fmiComponent c,
  * @param value (Output) The value(s) to get.
  * @return Error code.
  */
-fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
-                                           const fmiValueReference vr[],
-                                           size_t nvr, const fmiInteger order[],
-                                           fmiReal value[]);
+fmi2Status fmi2_get_real_output_derivatives(fmi2Component c,
+                                            const fmi2ValueReference vr[],
+                                            size_t nvr, const fmi2Integer order[],
+                                            fmi2Real value[]);
 
 /**
  * \brief Performs a time-step.
@@ -82,13 +82,13 @@ fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
  * @param c The FMU struct.
  * @param currentCommunicationPoint The current communication point.
  * @param communicationStepSize The length of the step to perform.
- * @param noSetFMUStatePriorToCurrentPoint A fmiBoolean, can be used to 
+ * @param noSetFMUStatePriorToCurrentPoint A fmi2Boolean, can be used to 
  *                                         flush earlier saved FMU states.
  * @return Error code.
  */
-fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
-                       fmiReal    communicationStepSize,
-                       fmiBoolean noSetFMUStatePriorToCurrentPoint);
+fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
+                        fmi2Real    communicationStepSize,
+                        fmi2Boolean noSetFMUStatePriorToCurrentPoint);
 
 /**
  * \brief Can be called in order to stop the current asynchronous execution.
@@ -96,7 +96,7 @@ fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
  * @param c The FMU struct.
  * @return Error code.
  */
-fmiStatus fmi2_cancel_step(fmiComponent c);
+fmi2Status fmi2_cancel_step(fmi2Component c);
 
 /**
  * \brief Retrieve status information from the FMU
@@ -106,8 +106,8 @@ fmiStatus fmi2_cancel_step(fmiComponent c);
  * @param value The output information
  * @return Error code.
  */
-fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
-                          fmiStatus* value);
+fmi2Status fmi2_get_status(fmi2Component c, const fmi2StatusKind s,
+                           fmi2Status* value);
 
 /**
  * \brief Retrieve (real) status information from the FMU
@@ -117,8 +117,8 @@ fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
  * @param value The output information
  * @return Error code.
  */
-fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
-                               fmiReal* value);
+fmi2Status fmi2_get_real_status(fmi2Component c, const fmi2StatusKind s,
+                                fmi2Real* value);
                                
 /**
  * \brief Retrieve (integer) status information from the FMU
@@ -128,8 +128,8 @@ fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
  * @param value The output information
  * @return Error code.
  */
-fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
-                                  fmiInteger* values);
+fmi2Status fmi2_get_integer_status(fmi2Component c, const fmi2StatusKind s,
+                                   fmi2Integer* values);
 
 /**
  * \brief Retrieve (boolean) status information from the FMU
@@ -139,8 +139,8 @@ fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
  * @param value The output information
  * @return Error code.
  */
-fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
-                                  fmiBoolean* value);
+fmi2Status fmi2_get_boolean_status(fmi2Component c, const fmi2StatusKind s,
+                                   fmi2Boolean* value);
 
 /**
  * \brief Retrieve (string) status information from the FMU
@@ -150,8 +150,8 @@ fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
  * @param value The output information
  * @return Error code.
  */
-fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
-                                 fmiString* value);
+fmi2Status fmi2_get_string_status(fmi2Component c, const fmi2StatusKind s,
+                                  fmi2String* value);
 
 
  /* @} */
@@ -167,31 +167,31 @@ fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
  * @param GUID The GUID identifier.
  * @param fmuResourceLocation The location of the resource directory.
  * @param functions Callback functions for logging, allocation and deallocation.
- * @param visible A fmiBoolean, defines the amount of interaction with the user.
- * @param loggingOn Turn of or on logging, fmiBoolean.
+ * @param visible A fmi2Boolean, defines the amount of interaction with the user.
+ * @param loggingOn Turn of or on logging, fmi2Boolean.
  * @return An instance of a model.
  */                 
-fmiStatus fmi2_cs_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn);
+fmi2Status fmi2_cs_instantiate(fmi2Component c,
+                               fmi2String    instanceName,
+                               fmi2Type      fmuType, 
+                               fmi2String    fmuGUID, 
+                               fmi2String    fmuResourceLocation, 
+                               const fmi2CallbackFunctions* functions, 
+                               fmi2Boolean                  visible,
+                               fmi2Boolean                  loggingOn);
 
 /**
  * \brief Dispose of the CS model instance, helper function for fmi2_free_instance.
  * 
  * @param c The FMU struct.
  */
-void fmi2_cs_free_instance(fmiComponent c);
+void fmi2_cs_free_instance(fmi2Component c);
 
 int fmi2_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs);
 
 int fmi2_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *root);
 
-fmiStatus fmi2_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time);
+fmi2Status fmi2_cs_set_input(jmi_ode_problem_t* ode_problem, fmi2Real time);
 
 int fmi2_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event);
 
