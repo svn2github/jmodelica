@@ -709,6 +709,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
+    } else if (intermediate_results) {
+        top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
+                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
     }
 
     /* Iterate */
@@ -822,16 +825,20 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* jmi_block_completed_integrator_step(jmi); */
         
         jmi_log_leave(jmi->log, final_node);
+
+        if (nR > 0) {
+            jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, nR);
+        }
+        jmi_log_leave(jmi->log, top_node);
+
+    } else if (intermediate_results) {
+        jmi_log_leave(jmi->log, top_node);
     }
 
 	/* If everything went well, check if termination of simulation was requested. */
 	event_info->terminate_simulation = jmi->terminate ? TRUE : FALSE;
     
-    if (nR > 0) {
-        jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, nR);
-    }
-    jmi_log_leave(jmi->log, top_node);
-
+    
     return 0;
 }
 

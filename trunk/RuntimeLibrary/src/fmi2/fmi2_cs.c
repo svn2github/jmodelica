@@ -314,8 +314,11 @@ int fmi2_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step
 
 	/* TODO: No support for terminating the Co-Simulation */
 	fmi2Boolean* terminateSimulation = (fmi2Boolean*)calloc(1, sizeof(fmi2Boolean));
-    retval = fmi2_completed_integrator_step(ode_problem->fmix_me, fmi2False, (fmi2Boolean*)step_event, terminateSimulation);
+    fmi2Boolean* tmp_step_event = (fmi2Boolean*)calloc(1, sizeof(fmi2Boolean));
+    retval = fmi2_completed_integrator_step(ode_problem->fmix_me, fmi2False, tmp_step_event, terminateSimulation);
+    step_event[0] = (char) tmp_step_event[0];
 	free(terminateSimulation);
+    free(tmp_step_event);
     if (retval != fmi2OK) {
         return -1;
     }
