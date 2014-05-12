@@ -1275,7 +1275,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 					else if (variable.isInput())
 						e_start = variable.createStartAttributeExp();
 					
-					if (e_start == null || !e_start.isConstantExp()) {
+					if (e_start == null || !e_start.isConstantExp() || (variable.isAlias() && !variable.isNegated())) {
 						initialType = "calculated";
 					} else {
 						startValue = variable.type().convert(e_start.ceval()).xmlValue();
@@ -1362,7 +1362,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				if (realvariable.nominalAttributeSet()) {
 					generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
 				}
-				if (startValue != null && (!variable.isAlias() || variable.isNegated())) {
+				if (startValue != null && (!variable.isAlias() || variable.isNegated()) && !variable.isConstant()) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 				if (realvariable.isDerivativeVariable()) {
