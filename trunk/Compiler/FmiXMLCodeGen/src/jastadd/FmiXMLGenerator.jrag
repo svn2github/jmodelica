@@ -133,7 +133,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		public String[] children() { return new String[] {"annotation"}; }
 		
 		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name", "JModelica,org", genPrinter);
+			generateAttribute("name", "JModelica.org", genPrinter);
 		}
 	}
 	
@@ -153,9 +153,9 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		
 		public void generate(CodeStream genPrinter) {
 			HashSet<String> extLibraries = fclass.externalLibraries();
-			HashSet<String> extIncludes = fclass.externalIncludes();
-			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();
-			HashSet<String> extInclDirs = fclass.externalIncludeDirectories();
+			HashSet<String> extIncludes  = fclass.externalIncludes();
+			HashSet<String> extLibDirs   = fclass.externalLibraryDirectories();
+			HashSet<String> extInclDirs  = fclass.externalIncludeDirectories();
 			
 			name = "Library";
 			for(String lib : extLibraries) {
@@ -180,7 +180,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 		
 		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name", name, genPrinter);
+			generateAttribute("name",  name,                       genPrinter);
             generateAttribute("value", replaceIllegalChars(value), genPrinter);
 		}
 	}
@@ -870,7 +870,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 }
 
 /**
- * A generator class for XML-generation for FMI 1.0 which takes a model described by
+ * A generator class for XML-generation for FMI 2.0 which takes a model described by
  * <FClass> and provides an XML document for the meta-data in the model.
  * 
  * @see AbstractGenerator
@@ -1150,20 +1150,31 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 	 */
 	public class XMLTag_logCategories extends XMLTag {
 		
+        //TODO: make a small class for the log categorie that can be looped over.
 		private String[] categorieNames;
+        private String[] categorieDescriptions;
 		private String currentCategorieName;
+        private String currentCategorieDescription;
 		
 		public XMLTag_logCategories(AbstractGenerator myGenerator, FClass fclass) {
 			super("logCategories", "LogCategories", myGenerator, fclass);
-            categorieNames = new String[] {"logLevel1", "logLevel2", "logLevel3",
-                                           "logLevel4", "logLevel5", "logLevel6"};
+            categorieNames        = new String[] {"logLevel1", "logLevel2", "logLevel3",
+                                                  "logLevel4", "logLevel5", "logLevel6"};
+                                           
+            categorieDescriptions = new String[] { "logLevel1 - fatal errors", 
+                                                   "logLevel2 - errors",
+                                                   "logLevel3 - warnings",
+                                                   "logLevel4 - info",
+                                                   "logLevel5 - verobse",
+                                                   "logLevel6 - debug"};
 		}
-		
+        
 		public String[] children() { return new String[] {"category"}; }
 		
 		public void generateChildren(CodeStream genPrinter) {	
-			for (String name: categorieNames) {
-				currentCategorieName = name;
+			for (int i = 0; i < categorieNames.length; i++) {
+				currentCategorieName        = categorieNames[i];
+                currentCategorieDescription = categorieDescriptions[i];
 				super.generateChildren(genPrinter);
 			}
 		}
@@ -1175,7 +1186,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
 			
 			public void generateAttributes(CodeStream genPrinter) {		
-				generateAttribute("name", currentCategorieName, genPrinter);
+				generateAttribute("name",        currentCategorieName,        genPrinter);
+                generateAttribute("description", currentCategorieDescription, genPrinter);
 			}
 		}
 	}
@@ -1314,9 +1326,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 
 		public class XMLTag_real extends XMLTag {
 
+            FRealVariable realvariable;
+            
 			public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
 				super("real", "Real", myGenerator, fclass);
 			}
+            
+            public String[] attributes() { return new String[] {"reinit"}; }
 			
 			public void generate(CodeStream genPrinter) {
 				if (variable.isReal())
@@ -1324,7 +1340,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			}
 
 			public void generateAttributes(CodeStream genPrinter) {
-				FRealVariable realvariable = (FRealVariable)variable;
+				realvariable = (FRealVariable)variable;
 
 				if (realvariable.quantityAttributeSet()) {
 					generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
@@ -1354,11 +1370,25 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 							variableIndexMap.get(((FDerivativeVariable)realvariable).myDifferentiatedVariable().name()),
 							genPrinter);
 				}
-				if (realvariable.isReinit()) {
-					generateAttribute("reinit", "true", genPrinter);
-				}
+				
+                super.generateAttributes(genPrinter);
 			}
-		}
+            public class XMLTag_reinit extends METag {
+                
+                public XMLTag_reinit(AbstractGenerator myGenerator, FClass fclass) {
+                    super("reinit", "reinit", myGenerator, fclass);
+                }
+                
+                public void generate(CodeStream genPrinter) {
+                    if (realvariable.isReinit()) //Default is false
+                        super.generate(genPrinter);
+                }
+                
+                public Object value() {
+                    return true;
+                }
+            }
+        }
 
 		public class XMLTag_integer extends XMLTag {
 
@@ -1526,7 +1556,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				for (FVariable var : fclass.allVariables()) {
 					if (!var.isPreVariable() && !var.isExternalObject() && !var.isTemporary()) {
 						
-						//Duplicated code for finding if initial != exact.
+						//Duplicated code for finding if initial != exact. TODO: Refactor
 						FExp e_start = null;
 						Boolean isFixed;
 
