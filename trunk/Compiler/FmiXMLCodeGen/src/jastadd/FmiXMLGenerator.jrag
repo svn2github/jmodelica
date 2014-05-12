@@ -1362,7 +1362,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				if (realvariable.nominalAttributeSet()) {
 					generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
 				}
-				if (startValue != null && (!variable.isAlias() || variable.isNegated()) && !variable.isConstant()) {
+				if (startValue != null && ((!variable.isAlias() || variable.isNegated()) || variable.isConstant())) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 				if (realvariable.isDerivativeVariable()) {
