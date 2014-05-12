@@ -1778,6 +1778,96 @@ end ModificationTests.ArrayModifications48;
 end ArrayModifications48;
 
 
+model ArrayModifications49
+    model A
+        Real x = 1;
+    end A;
+    
+    A a[3](x(each min = 1));
+    parameter Real d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications49",
+            description="Test each on attribute of sclar var in array of components",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+At line 1786, column 28:
+  The parameter d does not have a binding expression
+")})));
+end ArrayModifications49;
+
+
+model ArrayModifications50
+    model B
+        Real[2] c;
+    end B;
+
+    B[2] d(each c = {1, 2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications50",
+            description="Test each on array modifier to array in array of components", 
+            flatModel="
+fclass ModificationTests.ArrayModifications50
+ Real d[1].c[2] = {1, 2};
+ Real d[2].c[2] = {1, 2};
+end ModificationTests.ArrayModifications50;
+")})));
+end ArrayModifications50;
+
+
+model ArrayModifications51
+    model A
+        model B
+           Real c;
+        end B;
+
+        B b[3];
+    end A;
+
+    A a(each b(c = 1));
+    parameter Real d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications51",
+            description="Test each on other level of modification",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+At line 1819, column 21:
+  The parameter d does not have a binding expression
+")})));
+end ArrayModifications51;
+
+
+model ArrayModifications52
+    model A
+        model B
+           Real c;
+        end B;
+
+        B b[3];
+    end A;
+
+    A a(each b(c(start = 1)));
+    parameter Real d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications52",
+            description="Test each on other level of modification",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+At line 1856, column 30:
+  The parameter d does not have a binding expression
+")})));
+end ArrayModifications52;
+
 
 /* ========= Modifications on type declarations ========= */
 

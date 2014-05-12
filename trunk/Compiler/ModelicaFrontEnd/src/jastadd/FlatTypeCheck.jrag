@@ -110,59 +110,60 @@ aspect FlatTypeCheck {
             typeCheckSystemResiduals(checkType);
         }
     }
- 
+
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
-    	FExp bexp = myBindingInstExp();
-		boolean func = inFunction();
+        FExp bexp = myBindingInstExp();
+        boolean func = inFunction();
         Size componentSize = size();
         if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
-    		error("Can not infer array size of the variable " + name());
-    	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
-    		if (myBindingExpHasEach() && !inArrayComponent()) {
-    			bexp.error("The 'each' keyword cannot be applied to members of non-array components");
-     		} else {
-				FType expectedBT = bindingType();
-				FType actualBT = bexp.type();
-    			if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
-    				if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
-						bexp.warning("Assuming 'each' for the binding expression to the variable " + name());
-    				} else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-    					bexp.error("The binding expression of the variable " + name() +
-    							" does not match the declared type of the variable");
-    				} else {
-    					bexp.error("Array size mismatch in declaration of " + 
-    							(myBindingExpHasEach() ? "each " : "") + name() +
-    							", size of declaration is " + expectedBT.size() + 
-    							" and size of binding expression is " + actualBT.size());
-     				}
-    			}
-    		}
-	    }
-    	if (hasConditionalAttribute()) {
-    		FExp cond = getConditionalAttribute();
-    		if (!cond.type().isUnknown()) {
-	    		if (!cond.type().isScalar()) 
-	    			error("The guard expression of a conditional component should be a scalar expression");
-	    		if (!cond.type().isBoolean()) 
-	    			error("The guard expression of a conditional component should be a boolean expression");
-	    		if (!cond.variability().lessOrEqual(fParameter())) 
-	    			error("The guard expression of a conditional component should have parameter or constant variability");
-    		}
-    	}
-	
-		if (root().options.getBooleanOption("hand_guided_tearing")) {
-			AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
-			AnnotationNode enabledNode = iterationNode.forPath("enabled");
-			if (enabledNode.exists()) {
-			    FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-			    typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
-			}
-		}
-		
-    	typeCheckAttributes();
-    	super.typeCheck(checkType);
+            error("Can not infer array size of the variable " + name());
+        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
+            if (myBindingExpHasEach() && !inArrayComponent()) {
+                bexp.error("The 'each' keyword cannot be applied to members of non-array components");
+            } else {
+                FType expectedBT = bindingType();
+                FType actualBT = bexp.type();
+                if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
+                    if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
+                        bexp.warning("Assuming 'each' for the binding expression to the variable " + name());
+                    } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                        bexp.error("The binding expression of the variable " + name() +
+                                " does not match the declared type of the variable");
+                    } else {
+                        bexp.error("Array size mismatch in declaration of " + 
+                                (myBindingExpHasEach() ? "each " : "") + name() +
+                                ", size of declaration is " + expectedBT.size() + 
+                                " and size of binding expression is " + actualBT.size());
+                    }
+                }
+            }
+        }
+        
+        if (hasConditionalAttribute()) {
+            FExp cond = getConditionalAttribute();
+            if (!cond.type().isUnknown()) {
+                if (!cond.type().isScalar()) 
+                    error("The guard expression of a conditional component should be a scalar expression");
+                if (!cond.type().isBoolean()) 
+                    error("The guard expression of a conditional component should be a boolean expression");
+                if (!cond.variability().lessOrEqual(fParameter())) 
+                    error("The guard expression of a conditional component should have parameter or constant variability");
+            }
+        }
+        
+        if (root().options.getBooleanOption("hand_guided_tearing")) {
+            AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+            AnnotationNode enabledNode = iterationNode.forPath("enabled");
+            if (enabledNode.exists()) {
+                FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+                typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
+            }
+        }
+        
+        typeCheckAttributes();
+        super.typeCheck(checkType);
     }
-    
+
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
@@ -188,7 +189,7 @@ aspect FlatTypeCheck {
                     error("The type of the binding expression of the attribute " + name() +
                             " does not match the declared type of the variable");
                 } else if (checkSize) {
-                    if (!getEach() && !attrSize.equivalent(valMod.size(), false)) { 
+                    if (!hasEach() && !attrSize.equivalent(valMod.size(), false)) { 
                         if (valMod.ndims() == 0) {
                             warning("Assuming 'each' for the attribute " + name());
                         } else {
@@ -196,8 +197,8 @@ aspect FlatTypeCheck {
                                     ", size of declaration is " + attrSize + 
                                     " and size of " + name() + " expression is " + valMod.size());
                         }
-                    } else if (getEach()) { 
-                        if (owner.ndims() == 0) {
+                    } else if (hasEach()) { 
+                        if (owner.ndims() == 0 && !owner.inArrayComponent()) {
                             error("The 'each' keyword cannot be applied to attributes of scalar components");
                         } else if (valMod.ndims() > 0) {
                             error("The attribute " + name() + 
@@ -208,14 +209,14 @@ aspect FlatTypeCheck {
             }
         }
     }
-    
+
     inh boolean InstNode.isInRedeclareMod();
     eq InstElementRedeclare.getChild().isInRedeclareMod() = true;
     eq InstClassDecl.getChild().isInRedeclareMod()        = false;
     eq InstRoot.getChild().isInRedeclareMod()             = false;
     eq Root.getChild().isInRedeclareMod()                 = false;
-    
-    
+
+
   public void FEquation.typeCheck(ErrorCheckType checkType) {
       typeCheckHGTResidual(checkType);
       typeCheckNominal(checkType);

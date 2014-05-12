@@ -1167,16 +1167,22 @@ aspect Flattening {
 		return null;
 	}
 
-	/**
-	 * \brief Check if this InstValueModification is part of a modification 
-	 *        that is declared "each".
-	 */
-	inh boolean InstValueModification.hasEach();
-	eq InstArgument.getChild().hasEach()          = getEach();
-	eq InstNode.getChild().hasEach()              = false;
-	eq InstArrayModification.getChild().hasEach() = true;
-	syn boolean InstArrayModification.hasEach()   = true;
-	
+    /**
+     * Check if this InstValueModification is part of a modification 
+     * that is declared "each".
+     */
+    syn boolean InstModification.hasEach() = inModWithEach();
+    eq InstArgument.hasEach()              = getEach() || inModWithEach();
+
+    /**
+     * Check if this modification is in another modification that is declared "each".
+     */
+    inh boolean InstModification.inModWithEach();
+    eq InstArgument.getChild().inModWithEach()          = hasEach();
+    eq InstNode.getChild().inModWithEach()              = false;
+    eq InstArrayModification.getChild().inModWithEach() = true;
+    syn boolean InstArrayModification.inModWithEach()   = true;
+
 	/**
 	 * \ingroup aspect_Flattening
 	 * 

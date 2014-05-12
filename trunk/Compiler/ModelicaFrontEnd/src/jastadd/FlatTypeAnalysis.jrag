@@ -831,11 +831,12 @@ aspect InstBindingType {
     /**
      * Is this a member of an array component?
      */
-	inh boolean InstAssignable.inArrayComponent();
-	eq InstClassDecl.getChild().inArrayComponent()          = false;
-	eq InstRoot.getChild().inArrayComponent()               = false;
-	eq FlatRoot.getChild().inArrayComponent()               = false;
-	eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+    inh boolean InstAssignable.inArrayComponent();
+    eq InstClassDecl.getChild().inArrayComponent()          = false;
+    eq InstRoot.getChild().inArrayComponent()               = false;
+    eq FlatRoot.getChild().inArrayComponent()               = false;
+    eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+    syn boolean InstNode.inArrayComponent()                 = false;
 
 }
 
