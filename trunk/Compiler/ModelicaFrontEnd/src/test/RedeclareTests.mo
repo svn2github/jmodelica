@@ -3240,6 +3240,26 @@ model RedeclareTest40
     end C;
     
     C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest40",
+            description="Check that only final redeclared are erro checked",
+            flatModel="
+fclass RedeclareTests.RedeclareTest40
+ Real c.b.a.x = RedeclareTests.RedeclareTest40.f2(time);
+
+public
+ function RedeclareTests.RedeclareTest40.f2
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end RedeclareTests.RedeclareTest40.f2;
+
+end RedeclareTests.RedeclareTest40;
+")})));
 end RedeclareTest40;
 
 
