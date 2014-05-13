@@ -711,7 +711,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         jmi->atEvent = JMI_TRUE;
     } else if (intermediate_results) {
         top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
-                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
+                                 "Continuing global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
     }
 
     /* Iterate */
