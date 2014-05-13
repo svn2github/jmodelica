@@ -1,82 +1,82 @@
 aspect InnerOuterComponents {
-	
-	inh boolean InstNode.inOuter();
-	eq InstRoot.getChild().inOuter()          = false;
-	eq Root.getChild().inOuter()              = false;
-	eq InstComponentDecl.getChild().inOuter() = inOrIsOuter();
-	
-	inh InstComponentDecl InstComponentDecl.surroundingOuterComponentDecl();
-	eq InstRoot.getChild().surroundingOuterComponentDecl()          = null;
-	eq Root.getChild().surroundingOuterComponentDecl()              = null;
-	eq InstComponentDecl.getChild().surroundingOuterComponentDecl() = isOuter() ? this : surroundingOuterComponentDecl();
-			
-	syn boolean InstComponentDecl.inOrIsOuter() = isOuter() || inOuter();	
-			
-	syn lazy InstComponentDecl InstComponentDecl.myInnerInstComponentDecl() {
-		InstComponentDecl res = null;
-		if (isOuter()) 
-			res = lookupInnerInstComponent(name(), true);
-		else if (inOuter())
-			res = lookupInInnerInstComponent(name());
-		return (res == null) ? unknownInstComponentDecl() : res;
-	}
-	
-	inh InstComponentDecl InstNode.lookupInnerInstComponent(String name, boolean firstScope);
-	
-	eq InstRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope)   = null;
+
+    inh boolean InstNode.inOuter();
+    eq InstRoot.getChild().inOuter()          = false;
+    eq Root.getChild().inOuter()              = false;
+    eq InstComponentDecl.getChild().inOuter() = inOrIsOuter();
+
+    inh InstComponentDecl InstComponentDecl.surroundingOuterComponentDecl();
+    eq InstRoot.getChild().surroundingOuterComponentDecl()          = null;
+    eq Root.getChild().surroundingOuterComponentDecl()              = null;
+    eq InstComponentDecl.getChild().surroundingOuterComponentDecl() = isOuter() ? this : surroundingOuterComponentDecl();
+
+    syn boolean InstComponentDecl.inOrIsOuter() = isOuter() || inOuter();   
+
+    syn lazy InstComponentDecl InstComponentDecl.myInnerInstComponentDecl() {
+        InstComponentDecl res = null;
+        if (isOuter()) 
+            res = lookupInnerInstComponent(name(), true);
+        else if (inOuter())
+            res = lookupInInnerInstComponent(name());
+        return (res == null) ? unknownInstComponentDecl() : res;
+    }
+
+    inh InstComponentDecl InstNode.lookupInnerInstComponent(String name, boolean firstScope);
+
+    eq InstRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope)   = null;
     eq Root.getChild().lookupInnerInstComponent(String name, boolean firstScope)       = null;
-	eq SourceRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = null;
-	
-	eq InstNode.getChild().lookupInnerInstComponent(String name, boolean firstScope) {
-		if (!firstScope) {
-			InstComponentDecl icd = genericLookupInstComponent(name);
-			if (icd != null && icd.isInner())
-				return icd;
-		}
-		return lookupInnerInstComponent(name, false);
-	}
-	
-	inh InstComponentDecl InstNode.lookupInInnerInstComponent(String name);
-	eq InstRoot.getChild().lookupInInnerInstComponent(String name)          = null;
+    eq SourceRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = null;
+    
+    eq InstNode.getChild().lookupInnerInstComponent(String name, boolean firstScope) {
+        if (!firstScope) {
+            InstLookupResult<InstComponentDecl> res = genericLookupInstComponent(name);
+            if (res.successful() && res.target().isInner())
+                return res.target();
+        }
+        return lookupInnerInstComponent(name, false);
+    }
+
+    inh InstComponentDecl InstNode.lookupInInnerInstComponent(String name);
+    eq InstRoot.getChild().lookupInInnerInstComponent(String name)          = null;
     eq Root.getChild().lookupInInnerInstComponent(String name)              = null;
-	eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) = myInnerInstComponentDecl().memberInstComponent(name);
-	eq InstClassDecl.getChild().lookupInInnerInstComponent(String name)     = myInnerInstClassDecl().memberInstComponent(name);
-	
+    eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) = myInnerInstComponentDecl().memberInstComponent(name).target();
+    eq InstClassDecl.getChild().lookupInInnerInstComponent(String name)     = myInnerInstClassDecl().memberInstComponent(name).target();
+
 }
 
 aspect InnerOuterClasses {
-	
-	eq InstClassDecl.getChild().inOuter() = isOuter()? true: inOuter();
-			
-	syn boolean InstClassDecl.inOrIsOuter() = isOuter() || inOuter();	
-			
-	syn InstClassDecl InstClassDecl.myInnerInstClassDecl() {
-		InstClassDecl res = null;
-		if (isOuter()) 
-			res = lookupInnerInstClass(name(), true);
-		else if (inOuter())
-			res = lookupInInnerInstClass(name());
-		return res;
-	}
-	
-	inh InstClassDecl InstNode.lookupInnerInstClass(String name, boolean firstScope);
-	
-	eq InstRoot.getChild().lookupInnerInstClass(String name, boolean firstScope)  = null;
-	eq Root.getChild().lookupInnerInstClass(String name, boolean firstScope) = null;
-	
-	eq InstNode.getChild().lookupInnerInstClass(String name, boolean firstScope) {
-		if (!firstScope) {
-			InstClassDecl icd = genericLookupInstClass(name);
-			if (icd != null && icd.isInner())
-				return icd;
-		}
-		return lookupInnerInstClass(name, false);
-	}
-	
-	inh InstClassDecl InstNode.lookupInInnerInstClass(String name);
-	eq InstRoot.getChild().lookupInInnerInstClass(String name)          = null;
-	eq Root.getChild().lookupInInnerInstClass(String name)              = null;
-	eq InstComponentDecl.getChild().lookupInInnerInstClass(String name) = myInnerInstComponentDecl().memberInstClass(name);
-	eq InstClassDecl.getChild().lookupInInnerInstClass(String name)     = myInnerInstClassDecl().memberInstClass(name);
+
+    eq InstClassDecl.getChild().inOuter() = isOuter() ? true : inOuter();
+
+    syn boolean InstClassDecl.inOrIsOuter() = isOuter() || inOuter();
+
+    syn InstClassDecl InstClassDecl.myInnerInstClassDecl() {
+        InstClassDecl res = null;
+        if (isOuter()) 
+            res = lookupInnerInstClass(name(), true);
+        else if (inOuter())
+            res = lookupInInnerInstClass(name());
+        return res;
+    }
+
+    inh InstClassDecl InstNode.lookupInnerInstClass(String name, boolean firstScope);
+
+    eq InstRoot.getChild().lookupInnerInstClass(String name, boolean firstScope) = null;
+    eq Root.getChild().lookupInnerInstClass(String name, boolean firstScope)     = null;
+
+    eq InstNode.getChild().lookupInnerInstClass(String name, boolean firstScope) {
+        if (!firstScope) {
+            InstClassDecl icd = genericLookupInstClass(name).target();
+            if (icd != null && icd.isInner())
+                return icd;
+        }
+        return lookupInnerInstClass(name, false);
+    }
+
+    inh InstClassDecl InstNode.lookupInInnerInstClass(String name);
+    eq InstRoot.getChild().lookupInInnerInstClass(String name)          = null;
+    eq Root.getChild().lookupInInnerInstClass(String name)              = null;
+    eq InstComponentDecl.getChild().lookupInInnerInstClass(String name) = myInnerInstComponentDecl().memberInstClass(name).target();
+    eq InstClassDecl.getChild().lookupInInnerInstClass(String name)     = myInnerInstClassDecl().memberInstClass(name).target();
 
 }

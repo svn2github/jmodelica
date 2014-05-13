@@ -679,12 +679,12 @@ aspect InstanceTreeConstruction {
 		getDynamicInstModList().add(im);
 		return getDynamicInstMod(getNumDynamicInstMod() - 1);
 	}
-	
-	
-	public interface InstLookupRedirectNode {
-		InstClassDecl lookupInstClassRedirect(String name);
-	}
-	
+
+
+    public interface InstLookupRedirectNode {
+        InstLookupResult<InstClassDecl> lookupInstClassRedirect(String name);
+    }
+
 	InstNode implements InstLookupRedirectNode;
 	InstModification implements InstLookupRedirectNode;
 	
@@ -734,21 +734,21 @@ aspect InstanceTreeConstruction {
 	    return new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
 	}
-	
-	syn lazy List InstNode.getInstClassDeclList() {
-		List l = new List();
-		
-		for (ClassDecl cd : classes()) {
-			if (!cd.hasRedeclare()) {
-			    InstNode icd = createInstClassDecl(cd);
-			    if (icd != null)
-			    	l.add(icd);
-			}
-		}				
-		
-		return l;
-	}
-	
+
+    syn lazy List InstNode.getInstClassDeclList() {
+        List l = new List();
+        
+        for (ClassDecl cd : classes()) {
+            if (!cd.hasRedeclare()) {
+                InstClassDecl icd = createInstClassDecl(cd);
+                if (icd != null)
+                    l.add(icd);
+            }
+        }
+        
+        return l;
+    }
+
 	syn lazy List InstNode.getRedeclaredInstClassDeclList() {
 		List l = new List();
 		
@@ -831,24 +831,24 @@ aspect InstanceTreeConstruction {
      rewrite InstCreateForIndexPrimitive {
      	to InstPrimitive (InstPrimitive) getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl());
      }
-        
-	public InstNode InstNode.createInstClassDecl(ClassDecl bcd) {
-    	// Check if the class is redeclared. 
-    	// -> Yes: Create an InstReplacingClass component
-    	// -> No: Create an InstClassDecl
-		InstRedeclareClassNode icr = retrieveReplacingClass(bcd.name());
-    	if (icr!=null) {
-    	    ClassDecl replacingClass = icr.redeclaringClassDecl();
-    		return bcd.newInstReplacingClass(replacingClass, icr);
-    	} else {
-			return bcd.newInstClassDecl();  
-   		}
-	}    
-    
-    public interface InstRedeclareClassNode {
-    	public InstClassDecl lookupInstClass(String name);
-    	public ClassDecl redeclaringClassDecl();
-    }
+
+     public InstClassDecl InstNode.createInstClassDecl(ClassDecl bcd) {
+         // Check if the class is redeclared. 
+         // -> Yes: Create an InstReplacingClass component
+         // -> No: Create an InstClassDecl
+         InstRedeclareClassNode icr = retrieveReplacingClass(bcd.name());
+         if (icr != null) {
+             ClassDecl replacingClass = icr.redeclaringClassDecl();
+             return bcd.newInstReplacingClass(replacingClass, icr);
+         } else {
+             return bcd.newInstClassDecl();
+         }
+     }
+
+     public interface InstRedeclareClassNode {
+         public InstLookupResult<InstClassDecl> lookupInstClass(String name);
+         public ClassDecl redeclaringClassDecl();
+     }
     InstClassDecl implements InstRedeclareClassNode;
     InstClassRedeclare implements InstRedeclareClassNode;
     
@@ -2110,18 +2110,18 @@ aspect InstArrays {
 }
 
 aspect DeferredSubscripts {
-    
-	public FSubscript FSubscript.deferredCopy() {
-	    return fullCopy();
-	}
-	
-	public FSubscript FExpSubscript.deferredCopy() {
+
+    public FSubscript FSubscript.deferredCopy() {
+        return fullCopy();
+    }
+
+    public FSubscript FExpSubscript.deferredCopy() {
         return copyLocationTo(new FDeferExpSubscript(getFExp().fullCopy(), this));
     }
-	
-    inh InstComponentDecl FExpSubscript.lookupInstComponent(String name);  
-	eq FDeferExpSubscript.getFExp().lookupInstComponent(String name) = getDefer().lookupInstComponent(name);
-	
+
+    inh InstLookupResult<InstComponentDecl> FExpSubscript.lookupInstComponent(String name);
+    eq FDeferExpSubscript.getFExp().lookupInstComponent(String name) = getDefer().lookupInstComponent(name);
+
 }
 
 aspect InstanceDumpTree {

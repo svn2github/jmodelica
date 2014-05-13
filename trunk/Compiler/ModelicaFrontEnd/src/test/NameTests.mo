@@ -265,17 +265,15 @@ model NameTest9_Err
   C c(b(y=3));
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest9_Err",
-			description="Test that names are looked up in constraining clauses.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest9_Err",
+            description="Test that names are looked up in constraining clauses.",
+            errorMessage="
 1 errors found:
-
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 196, column 4:
-  Cannot find component declaration for y
-
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 265, column 9:
+  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
   end NameTest9_Err;
 
@@ -305,17 +303,15 @@ model NameTest10_Err
   P.B b;
   
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest10_Err",
-			description="Test that names are looked up in constraining clauses.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest10_Err",
+            description="Test that names are looked up in constraining clauses.",
+            errorMessage="
 1 errors found:
-
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 297, column 4:
-  Cannot find class declaration for B
-
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 303, column 5:
+  Cannot use class B, because it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
 ")})));
   end NameTest10_Err;
   
@@ -790,15 +786,15 @@ model NameTest25_Err
     A a(redeclare replaceable C b);
     Real z = a.b.y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest25_Err",
-			description="Check that member lookup is limited by constraining class when using redeclare replaceable",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest25_Err",
+            description="Check that member lookup is limited by constraining class when using redeclare replaceable",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 771, column 18:
-  Cannot find class or component declaration for y
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 787, column 18:
+  Cannot use component y, because it is not present in constraining type of declaration 'redeclare replaceable C b'
 ")})));
 end NameTest25_Err;
 
@@ -1349,15 +1345,15 @@ model ConstantLookup23
 	
 	Real y = C.x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup23",
-			description="Trying to use member that does not exist in constraining class (but does in actual)",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup23",
+            description="Trying to use member that does not exist in constraining class (but does in actual)",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1062, column 13:
-  Cannot find class or component declaration for x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 1346, column 13:
+  Cannot use component x, because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end ConstantLookup23;
 

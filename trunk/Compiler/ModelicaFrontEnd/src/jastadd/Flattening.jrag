@@ -228,7 +228,7 @@ aspect Flattening {
     }
 
     public void InstNode.flattenStateSelect(FClass fc) {
-        lookupInstClass("StateSelect").flattenEnum(fc);
+        lookupInstClass("StateSelect").target().flattenEnum(fc);
     }
 
 	public void InstAccess.flattenMyRecord(FClass fc) {
@@ -567,16 +567,24 @@ aspect Flattening {
 			temporarilyInFunction = old;
 		}
 	}
-	
-	public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
-		FQName name = getFQName();
-		if (func != null) {
-			InstComponentDecl found = func.memberInstComponent(name.name());
-			if (name.numParts() > 1 || (found != null && found != this))
-				return new FQNameString(func.localTempVarName(this));
-		}
-		return name.fullCopy();
-	}
+
+    public class InstLookupResult<T extends InstNode> {
+        /**
+         * Check if lookup found a target that is not the same as the given one.
+         */
+        public boolean foundOther(T t) {
+            return successful() && target() != t;
+        }
+    }
+
+    public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
+        FQName name = getFQName();
+        if (func != null) {
+            if (name.numParts() > 1 || func.memberInstComponent(name.name()).foundOther(this))
+                return new FQNameString(func.localTempVarName(this));
+        }
+        return name.fullCopy();
+    }
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, override this
@@ -1635,8 +1643,7 @@ aspect FlatExpressions {
         ia.functionConstantList().add(this);
         FQName name = getFQName();
         FQName use = ia.flattenAssignablePart(prefix);
-        InstComponentDecl found = ia.localLookupInstComponent(name.name());
-        if (name.numParts() > 1 || (found != null && found != this)) {
+        if (name.numParts() > 1 || ia.localLookupInstComponent(name.name()).foundOther(this)) {
             // TODO: this should probably be a helper function on FQName
             FQNameFull fullUse = use.asFQNameFull();
             fullUse.getFQNamePart(0).setName(ia.findTempVarName(this));
@@ -1719,7 +1726,7 @@ aspect FlatExpressions {
 		String name;
 		do {
 			name = "temp_" + nextTempVarIndex++;
-		} while (memberInstComponent(name) != null);
+		} while (memberInstComponent(name).successful());
 		tempVarNames.put(var, name);
 		return name;
 	}

@@ -657,9 +657,9 @@ aspect InstFunctionBinding {
                     generated = true;
                 } else {
                     // If not, look for conversion operator with same name as primitive class (if one exists)
-                    InstClassDecl icd = getName().lookupInstClass("!" + target.name());
-                    if (icd != null)
-                        target = icd;
+                    InstLookupResult<InstClassDecl> icd = getName().lookupInstClass("!" + target.name());
+                    if (icd.successful())
+                        target = icd.target();
                 }
             } else if (target.isExternalObject()) {
                 // Use the external object constructor
@@ -810,30 +810,25 @@ aspect InstFunctionBinding {
     		return new FLongArray(getFExps());
     	}
 	}
-	
-	/**
-	 * Extract constructor function for external object class.
-	 */
-	syn InstClassDecl InstClassDecl.myConstructor() {
-		InstClassDecl icd = memberInstClass("constructor");
-		return (icd == null) ? unknownInstClassDecl() : icd;
-	}
-	
-	/**
-	 * Extract constructor function for external object class.
-	 */
-	syn InstClassDecl InstExternalObject.myConstructor() = myInstClass().myConstructor();
-	
-	/**
-	 * Extract destructor function for external object class.
-	 */
-	syn InstClassDecl InstClassDecl.myDestructor() {
-		InstClassDecl icd = memberInstClass("destructor");
-		return (icd == null) ? unknownInstClassDecl() : icd;
-	}
-		
-	/**
-	 * Extract destructor function for external object class.
-	 */
-	syn InstClassDecl InstExternalObject.myDestructor() = myInstClass().myDestructor();
+
+    /**
+     * Extract constructor function for external object class.
+     */
+    syn InstClassDecl InstClassDecl.myConstructor() = memberInstClass("constructor").target(INST_UNKNOWN_CLASS, this);
+
+    /**
+     * Extract constructor function for external object class.
+     */
+    syn InstClassDecl InstExternalObject.myConstructor() = myInstClass().myConstructor();
+
+    /**
+     * Extract destructor function for external object class.
+     */
+    syn InstClassDecl InstClassDecl.myDestructor() = memberInstClass("destructor").target(INST_UNKNOWN_CLASS, this);
+
+    /**
+     * Extract destructor function for external object class.
+     */
+    syn InstClassDecl InstExternalObject.myDestructor() = myInstClass().myDestructor();
+
 }

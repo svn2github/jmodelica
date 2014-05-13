@@ -3318,12 +3318,10 @@ aspect Serialize {
     syn String FIdUseInstAccess.toString_C(CodePrinter p) {
         return getInstAccess().toString_C(p);
     }
-    
-    syn String InstAccess.toString_C(CodePrinter p) {
-        InstComponentDecl d = lookupInstComponent(name());
-        return d.name_C();
-    }
-    
+
+    syn String InstAccess.toString_C(CodePrinter p) =
+        lookupInstComponent(name()).target().name_C();
+
     public String InstComponentDecl.name_C() {
         StringBuilder buf = new StringBuilder();
         buf.append(getFQName().nameUnderscore());

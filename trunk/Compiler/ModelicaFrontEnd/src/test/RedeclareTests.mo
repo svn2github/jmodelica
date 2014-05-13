@@ -2900,15 +2900,15 @@ model RedeclareTest31
 equation
 	a.x = a.y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RedeclareTest31",
-			description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest31",
+            description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 3061, column 10:
-  Cannot find class or component declaration for y
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 2901, column 10:
+  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B a constrainedby A'
 ")})));
 end RedeclareTest31;
 

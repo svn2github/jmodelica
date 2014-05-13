@@ -127,44 +127,44 @@ aspect InstNameClassification {
 }
 
 aspect InstResolveAmbiguousNames {
-	/**
-	 * This rewrite determines whether an InstAmbiguousAccess is a InstTypeAcces or a
-	 * InstComponentAccess by attempting type and component lookups respectively.
-	 */
-	boolean InstAmbiguousAccess.rewritten = false;
-	rewrite InstAmbiguousAccess {
-	    when (!rewritten) 
-	    to InstAccess {
-	  		if (lookupInstComponent(name()) != null) {
-     		    InstComponentAccess c = new InstComponentAccess(name());
-  	 			c.setLocation(this);
-  	 			return c;
-  		    } else if (lookupInstClass(name()) != null) {		
-            	InstClassAccess t = new InstClassAccess(name()); 
-    			t.setLocation(this);
-  	 			return t;
-  			}
-  			rewritten = true;
-  			return this;
-  		}
-  	}
-	boolean InstAmbiguousArrayAccess.rewritten = false;
-	rewrite InstAmbiguousArrayAccess {
-	    when (!rewritten) 
-	    to InstAccess {
-	  		if (lookupInstComponent(name()) != null) {
-     		    InstComponentArrayAccess c = new InstComponentArrayAccess(name(), getFArraySubscripts());
-  	 			c.setLocation(this);
-  	 			return c;
-  		    } else if (lookupInstClass(name()) != null) {		
-            	InstClassAccess t = new InstClassAccess(name()); 
-    			t.setLocation(this);
-  	 			return t;
-  			}
-  			rewritten = true;
-  			return this;
-  		}
-  	}
+
+    /**
+     * This rewrite determines whether an InstAmbiguousAccess is a InstTypeAcces or a
+     * InstComponentAccess by attempting type and component lookups respectively.
+     */
+    boolean InstAmbiguousAccess.rewritten = false;
+    rewrite InstAmbiguousAccess {
+        when (!rewritten) 
+        to InstAccess {
+            if (lookupInstComponent(name()).successful()) {
+                InstComponentAccess c = new InstComponentAccess(name());
+                c.setLocation(this);
+                return c;
+            } else if (lookupInstClass(name()).successful()) {
+                InstClassAccess t = new InstClassAccess(name());
+                t.setLocation(this);
+                return t;
+            }
+            rewritten = true;
+            return this;
+        }
+    }
+    boolean InstAmbiguousArrayAccess.rewritten = false;
+    rewrite InstAmbiguousArrayAccess {
+        when (!rewritten) 
+        to InstAccess {
+            if (lookupInstComponent(name()).successful()) {
+                InstComponentArrayAccess c = new InstComponentArrayAccess(name(), getFArraySubscripts());
+                c.setLocation(this);
+                return c;
+            } else if (lookupInstClass(name()).successful()) {
+                InstClassAccess t = new InstClassAccess(name());
+                t.setLocation(this);
+                return t;
+            }
+            rewritten = true;
+            return this;
+        }
+    }
+
 }
-
-

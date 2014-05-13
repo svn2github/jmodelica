@@ -117,21 +117,28 @@ aspect Library {
 	public LibNode.LibNode(File loc, boolean structured) {
 		this(loc.getPath(), structured ? loc.getName() : fileBaseName(loc), structured);
 	}
-	
+
+    syn ClassDecl LibNode.classDecl() = 
+        (getStoredDefinition().getNumElement() > 0) ? (ClassDecl) getStoredDefinition().getElement(0) : createErrorClass();
+
 	private java.util.List<String> LibClassDecl.order = Collections.emptyList();
 	
 	public void LibClassDecl.setOrder(java.util.List<String> order) {
 		this.order = order;
 	}
-	
-	private StoredDefinition LibNode.createErrorStoredDefinition() {
-		BadClassDecl bcd = new BadClassDecl();
-		bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-		StoredDefinition sd = new StoredDefinition(new Opt(), new List());
-		sd.addElement(bcd);
-		return sd;		        
-	}
-	
+
+    private StoredDefinition LibNode.createErrorStoredDefinition() {
+        StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+        sd.addElement(createErrorClass());
+        return sd;
+    }
+
+    private BadClassDecl LibNode.createErrorClass() {
+        BadClassDecl bcd = new BadClassDecl();
+        bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+        return bcd;
+    }
+
 	public LibNode.LibNode(String fileName, String name, boolean structured) {
 		this(fileName,name,structured,"Unknown");
 		

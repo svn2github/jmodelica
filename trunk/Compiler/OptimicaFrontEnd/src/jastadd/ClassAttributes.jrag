@@ -71,15 +71,15 @@ aspect ClassAttributes {
 			l.add(getInstClassModification());			
 		return l;
 	}
-	
-	eq InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) {
-		for (InstComponentDecl ica : getInstClassAttributes()) {
-			if (ica.matches(name))
-				return ica;
-		}
-		return null;
-	}
-    
+
+    eq InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) {
+        for (InstComponentDecl ica : getInstClassAttributes()) {
+            if (ica.matches(name))
+                return InstLookupResult.found(ica);
+        }
+        return InstLookupResult.notFound();
+    }
+
     rewrite InstPrimitive {
     	when (!(this instanceof InstClassAttribute) && isClassAttribute()) to InstClassAttribute 
     	copyLocationTo(new InstClassAttribute(
@@ -98,19 +98,19 @@ aspect ClassAttributes {
 	
 	eq InstOptClassDecl.getInstClassModification().lookupInstComponent(String name) =
 		memberInstComponent(name);
-	
-	eq InstOptClassDecl.memberInstComponent(String name) {
-		InstComponentDecl icd = super.memberInstComponent(name);
-		if (icd != null)
-			return icd;
-		
-		for (InstComponentDecl ica : getInstClassAttributes()) {
-			if (ica.matches(name))
-				return ica;
-		}
-		
-		return null;
-	}
 
-	
+    eq InstOptClassDecl.memberInstComponent(String name) {
+        InstLookupResult<InstComponentDecl> res = super.memberInstComponent(name);
+        if (res.successful())
+            return res;
+        
+        for (InstComponentDecl ica : getInstClassAttributes()) {
+            if (ica.matches(name))
+                return InstLookupResult.found(ica);
+        }
+        
+        return InstLookupResult.notFound();
+    }
+
+
 }
