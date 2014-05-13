@@ -67,6 +67,7 @@ export IPOPT_HOME
 export CASADI_BUILD_DIR
  
 casadi_interface: casadi install_casadi $(MC_LIB) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
+	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 ifcasadi: casadi
 	mkdir -p $(MC_BUILD)/ifcasadi; \
@@ -227,6 +228,7 @@ endif
 # Both scripts will get the source directory as the first argument and the install directory as the second.
 BUILD_EXTRA=
 INSTALL_EXTRA=
+INSTALL_EXTRA_CASADI=
 
 # Paths for Java build
 JAVA_BUILD_DIR=$(abs_builddir)/java
