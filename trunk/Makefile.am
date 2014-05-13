@@ -281,7 +281,6 @@ endif
   	*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
-	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 if WITH_MINGW
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
@@ -338,6 +337,7 @@ endif
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
+	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 bindistdir: install
 	rm -rf $(bindistdir)
