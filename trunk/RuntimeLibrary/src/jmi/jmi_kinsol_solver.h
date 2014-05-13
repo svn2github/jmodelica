@@ -27,6 +27,7 @@
 #define _JMI_KINSOL_SOLVER_H
 
 #include "jmi_block_solver.h"
+#include "jmi_brent_solver.h"
 
 /*
  *  TODO: Error codes...
@@ -53,6 +54,8 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 const char *jmi_kinsol_flag_to_name(int flag);
 
 struct jmi_kinsol_solver_t {
+    jmi_brent_solver_t externalBrent; /**< Brent solver when run stand-alone. Temporary solution until supported by options. */
+
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
@@ -92,6 +95,7 @@ struct jmi_kinsol_solver_t {
     realtype f_pos_min_1d;
     realtype y_neg_max_1d;
     realtype f_neg_max_1d;
+
 };
 
 

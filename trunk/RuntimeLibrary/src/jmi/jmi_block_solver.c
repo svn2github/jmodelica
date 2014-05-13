@@ -90,6 +90,8 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->cur_time = 0;
     switch(options->solver) {
         case JMI_KINSOL_SOLVER: {
+            /* Cannot do this here since options are not set yet */
+            /*
             if( (n == 1) 
                 && block_solver->options->use_Brent_in_1d_flag
                 &&  (block_solver->options->experimental_mode & jmi_block_solver_experimental_Brent) ) {
@@ -99,7 +101,9 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                 block_solver->solve = jmi_brent_solver_solve;
                 block_solver->delete_solver = jmi_brent_solver_delete;
             }
-            else {
+            else 
+            */
+            {
                 jmi_kinsol_solver_t* solver;
                 jmi_kinsol_solver_new(&solver, block_solver);
                 block_solver->solver = solver;

@@ -369,7 +369,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
                 jmi_log_leave(log, node);
             }
-            else if (block->n >= 1) {
+            if (block->n >= 1) {
                 int max_index = 0;
                 realtype max_residual = f[0]*residual_scaling_factors[0];
                 for (i=1;i<block->n;i++) {
@@ -455,6 +455,12 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     int ef, i;
     double max_nominal;
     struct KINMemRec * kin_mem = solver->kin_mem; 
+
+    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "SolverOptions", "<block:%d>", block->id);
+    jmi_log_fmt(block->log, node,logInfo, "Tolerance <tolerance: %g>",block->options->res_tol);
+    jmi_log_fmt(block->log, node,logInfo, "Max number of iterations <max_iter: %d>",block->options->max_iter);
+    jmi_log_fmt(block->log, node,logInfo, "Experimental <mode: %d>",block->options->experimental_mode);
+    jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
     
@@ -1211,6 +1217,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     KINSetNoInitSetup(solver->kin_mem, 1);    
       
     *solver_ptr = solver;
+
     return flag;
 }
 
@@ -1316,8 +1323,12 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     jmi_log_t *log = block->log;
 
     if(block->n == 1) {
-        solver->f_pos_min_1d = BIG_REAL;
-        solver->f_neg_max_1d = -BIG_REAL;
+       if( block->options->use_Brent_in_1d_flag
+            &&  (block->options->experimental_mode & jmi_block_solver_experimental_Brent) ) {
+                return jmi_brent_solver_solve(block);
+       }
+       solver->f_pos_min_1d = BIG_REAL;
+       solver->f_neg_max_1d = -BIG_REAL;
     }
     
     if(block->init) {
