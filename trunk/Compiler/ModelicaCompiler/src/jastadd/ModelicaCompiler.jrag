@@ -1301,17 +1301,19 @@ public class ModelicaCompiler {
      */
     private void generateFile(String tmpl, AbstractGenerator gen, File dir, String name) 
             throws FileNotFoundException {
-        hookCheckAbort();
-        hookCodeGeneratorCreated(gen);
-        if (tmpl != null && debugSrcIsHome) 
-            tmpl = debugFindTemplateInSrcDir(tmpl);
-        File outFile = new File(dir, name);
-        OutputStream output = new FileOutputStream(outFile);
-        boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
-        if (debugGen)
-            output = new CloneOutputStream(output, System.out).setClose(true, false);
-        gen.generate(tmpl, output, debugGen);
-        log.debug("Generated file '" + output + "'.");
+        if (tmpl != null || gen instanceof GenericXMLGenerator) {
+            hookCheckAbort();
+            hookCodeGeneratorCreated(gen);
+            if (tmpl != null && debugSrcIsHome) 
+                tmpl = debugFindTemplateInSrcDir(tmpl);
+            File outFile = new File(dir, name);
+            OutputStream output = new FileOutputStream(outFile);
+            boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
+            if (debugGen)
+                output = new CloneOutputStream(output, System.out).setClose(true, false);
+            gen.generate(tmpl, output, debugGen);
+            log.debug("Generated file '" + outFile + "'.");
+        }
     }
 
 	private static String debugFindTemplateInSrcDir(String tmpl) {
