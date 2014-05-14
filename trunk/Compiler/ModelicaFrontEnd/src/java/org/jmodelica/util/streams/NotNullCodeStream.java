@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.streams;
 
 import java.io.OutputStream;
 import java.io.PrintStream;

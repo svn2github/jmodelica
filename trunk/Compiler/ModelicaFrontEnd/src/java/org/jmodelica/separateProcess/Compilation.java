@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.jmodelica.util.Criteria;
 import org.jmodelica.util.FilteredIterator;
 import org.jmodelica.util.Problem;
-import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.logging.ObjectStreamLogger;
 
 public final class Compilation {

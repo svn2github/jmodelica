@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.streams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ public class StreamGobbler extends Thread {
     private OutputStream os;
     
     public StreamGobbler(InputStream is) {
-        this(is, new DummyOutputStream());
+        this(is, NullStream.OUPUT);
     }
     
     public StreamGobbler(InputStream is, OutputStream redirect) {

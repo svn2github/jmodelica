@@ -52,7 +52,7 @@ import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
-import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
 import org.jmodelica.util.MemorySpider;
@@ -64,7 +64,7 @@ import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
-import org.jmodelica.util.CloneOutputStream;
+import org.jmodelica.util.streams.CloneOutputStream;
 
 import org.xml.sax.SAXException;
 

@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.Collections;
 
 import org.jmodelica.util.Enumerator;
-import org.jmodelica.util.TruncatedCodeStream;
+import org.jmodelica.util.streams.CStringCodeStream;
 
 aspect CCodeGen {
 
@@ -1331,7 +1331,7 @@ aspect CCodeGen {
         str.print(","); 
         p.print(getRight(),str,indent);
         str.print(",\""); 
-        TruncatedCodeStream tstr = new TruncatedCodeStream(str);
+        CStringCodeStream tstr = new CStringCodeStream(str);
         prettyPrint(tstr, "");
         tstr.close();
         str.print("\")");
@@ -1430,6 +1430,7 @@ aspect CCodeGen {
 	 * The C representation of this string literal.
 	 */
 	syn String FStringLitExp.string_C() {
+	    // TODO: Use CStringCodeStream instead?
 	    StringBuffer buf = new StringBuffer();
 	    for (byte c : stringUtf8()) {
 	        if (c == '\n') {

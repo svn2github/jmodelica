@@ -17,8 +17,8 @@
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 
-import org.jmodelica.util.CodeStream;
-import org.jmodelica.util.NotNullCodeStream;
+import org.jmodelica.util.streams.CodeStream;
+import org.jmodelica.util.streams.NotNullCodeStream;
 
 aspect BasePrinter {
 

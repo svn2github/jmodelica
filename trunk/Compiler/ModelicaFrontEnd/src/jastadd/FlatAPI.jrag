@@ -32,7 +32,7 @@ import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
 
-import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.streams.StreamGobbler;
 
 aspect FlatAPI {
 	
