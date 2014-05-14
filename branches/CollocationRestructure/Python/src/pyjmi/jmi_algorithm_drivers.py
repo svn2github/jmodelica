@@ -2319,10 +2319,10 @@ class LocalDAECollocationAlg(AlgorithmBase):
         elif self.discr != "LG" and self.discr != "LGR":
             raise ValueError("Unknown discretization scheme %s." % self.discr)
 
-        # Check named_vars
-        if self.named_vars:
-            print("Warning: Named NLP variables is currently enabled. This " +
-                  "may have significant performance impacts.")
+        # Check validity of named_vars
+        if self.named_vars and self.reorder_vars:
+            raise NotImplementedError("Named variables does not work with " +
+                                      "reordered variables.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and
@@ -2415,17 +2415,16 @@ class LocalDAECollocationAlg(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        if not self.named_vars:
-            times = {}
-            times['sol'] = self.nlp.ipopt_solve()
-            self._write_result()
-            
-            # Calculate times
-            times['tot'] = time.clock() - self._t0
-            times['init'] = times['tot'] - times['sol']
-            
-            # Store times as data attribute
-            self.times = times
+        times = {}
+        times['sol'] = self.nlp.ipopt_solve()
+        self._write_result()
+        
+        # Calculate times
+        times['tot'] = time.clock() - self._t0
+        times['init'] = times['tot'] - times['sol']
+        
+        # Store times as data attribute
+        self.times = times
         
     def _write_result(self):
         """
@@ -2445,8 +2444,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
         
             The LocalDAECollocationAlgResult object.
         """
-        if self.named_vars:
-            return self.nlp
         resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
         
@@ -2460,8 +2457,8 @@ class LocalDAECollocationAlg(AlgorithmBase):
         
         # Create and return result object
         return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
-                                             res, self.options, self.times,
-                                             h_opt)
+                                            res, self.options, self.times,
+                                            h_opt)
     
     @classmethod
     def get_default_options(cls):
@@ -2537,9 +2534,13 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Default: True
 
         named_vars --
-            Whether to name the NLP variables according to their corresponding
-            Modelica/Optimica names. This disables the solution of the NLP and
-            should only be done for investigative purposes.
+            If enabled, the solver will create a duplicated set of NLP
+            variables which have names corresponding to the Modelica/Optimica
+            variable names. Symbolic expressions of the NLP consisting of the
+            named variables can then be obtained using the get_named_var_expr
+            method of the collocator class.
+
+            This option is only intended for investigative purposes.
 
             Type: bool
             Default: False
@@ -2764,7 +2765,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_cont_var': False,
                 'measurement_data': None,
                 'check_point': False,
-                'reorder_vars': True,
+                'reorder_vars': False,
                 'delayed_feedback': None,
                 'IPOPT_options': {}}
         

@@ -3213,10 +3213,12 @@ opts? # View the help text</programlisting>
 
               <entry>False</entry>
 
-              <entry>Whether to name the NLP variables according to their
-              corresponding Modelica/Optimica names. This disables the
-              solution of the NLP and should only be done for investigative
-              purposes..</entry>
+              <entry>If enabled, the solver will create a duplicated set of
+              NLP variables which have names corresponding to the
+              Modelica/Optimica variable names. Symbolic expressions of the
+              NLP consisting of the named variables can then be obtained using
+              the get_named_var_expr method of the collocator class. This
+              option is only intended for investigative purposes.</entry>
             </row>
 
             <row>
