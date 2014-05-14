@@ -64,6 +64,7 @@ import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.CloneOutputStream;
 
 import org.xml.sax.SAXException;
 
@@ -1288,37 +1289,31 @@ public class ModelicaCompiler {
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
         return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
     }
-	
-	/**
-	 * Generate an output file.
-	 * 
-	 * @param fc    the FClass to generate code for
-	 * @param tmpl  the path to the template
-	 * @param gen   the code generator to use 
-	 * @param dir   the directory to put the output file in
-	 * @param name  the name of the output file
-	 */
-	private void generateFile(String tmpl, AbstractGenerator gen, File dir, String name) 
-			throws FileNotFoundException {
-		if (tmpl != null) {
-		    if (debugSrcIsHome) 
-		        tmpl = debugFindTemplateInSrcDir(tmpl);
-			hookCheckAbort();
-			hookCodeGeneratorCreated(gen);
-			String output = new File(dir, name).getPath();
-			gen.generate(tmpl, output);
-			log.debug("Generated file '" + output + "'.");
-			
-			//XML template == null is valid
-		} else if (gen instanceof GenericXMLGenerator) {
-			hookCheckAbort();
-			hookCodeGeneratorCreated(gen);
-			String output = new File(dir, name).getPath();
-			gen.generate(tmpl, output);
-			log.debug("Generated file '" + output + "'.");
-		}
-	}
-	
+
+    /**
+     * Generate an output file.
+     * 
+     * @param fc    the FClass to generate code for
+     * @param tmpl  the path to the template
+     * @param gen   the code generator to use 
+     * @param dir   the directory to put the output file in
+     * @param name  the name of the output file
+     */
+    private void generateFile(String tmpl, AbstractGenerator gen, File dir, String name) 
+            throws FileNotFoundException {
+        hookCheckAbort();
+        hookCodeGeneratorCreated(gen);
+        if (tmpl != null && debugSrcIsHome) 
+            tmpl = debugFindTemplateInSrcDir(tmpl);
+        File outFile = new File(dir, name);
+        OutputStream output = new FileOutputStream(outFile);
+        boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
+        if (debugGen)
+            output = new CloneOutputStream(output, System.out).setClose(true, false);
+        gen.generate(tmpl, output, debugGen);
+        log.debug("Generated file '" + output + "'.");
+    }
+
 	private static String debugFindTemplateInSrcDir(String tmpl) {
 	    String name = new File(tmpl).getName();
 	    String src = getJModelicaHome();
