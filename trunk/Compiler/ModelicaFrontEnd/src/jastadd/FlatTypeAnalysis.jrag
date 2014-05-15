@@ -512,14 +512,16 @@ aspect FlatTypeAnalysis {
 	eq FEnumType.canBeRange()      = true;
     
     eq FArgumentExp.type() = copiedFExp().type();
-	
-	eq FLinspace.type() {
-		// TODO: check that endpoints are real
-		if ((!getN().variability().lessOrEqual(fParameter()) || getN().ceval().intValue() < 2)
-				&& !inFunction())
-			return fUnknownType();
-		return fRealArrayType(size());
-	}
+
+    eq FLinspace.type() {
+        // TODO: check that endpoints are real
+        try {
+            if ((getN().variability().lessOrEqual(fParameter()) && getN().ceval().intValue() >= 2) || inFunction())
+                return fRealArrayType(size());
+        } catch (ConstantEvaluationException e) {
+        }
+        return fUnknownType();
+    }
 
     eq FRelExp.type() {
         if (shouldUseOverloadedOperator()) 

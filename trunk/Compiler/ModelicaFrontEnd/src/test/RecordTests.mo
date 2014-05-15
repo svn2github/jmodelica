@@ -1334,16 +1334,17 @@ model RecordConstructor4
  
  A x = A(1.0, 2, 3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordConstructor4",
-			description="Record constructors: wrong type of arg",
-			variability_propagation=false,
-			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 775, column 18:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordConstructor4",
+            description="Record constructors: wrong type of arg",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Semantic error at line 1335, column 18:
   Record constructor for A: types of positional argument 3 and input c are not compatible
+    type of '3' is Integer
 ")})));
 end RecordConstructor4;
 

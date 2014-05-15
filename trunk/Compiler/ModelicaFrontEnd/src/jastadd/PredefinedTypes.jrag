@@ -340,8 +340,8 @@ aspect PredefinedTypes {
     		+ "  output Integer n;\n"
     		+ "end ndims;\n"
     		+ "function size\n"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  input Real d = 0;\n"  // Default value not used
+    		+ "  input Real A;\n"         // Type not used
+    		+ "  input Integer d = 0;\n"  // Default value not used
     		+ "  output Integer s;\n"
     		+ "end size;\n"
     		+ "function scalar"

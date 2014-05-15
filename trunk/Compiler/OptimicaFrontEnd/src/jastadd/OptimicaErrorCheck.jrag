@@ -98,23 +98,27 @@ aspect OptimicaErrorCheck {
   				warning("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
   		}
   	}
-  	
-  	public void InstTimedVariable.collectErrors(ErrorCheckType type) {
-  		log.debug("InstTimedVariable.collectErrors: " + getName().name());
-    	super.collectErrors(type);
-    	/* TODO: This check is done somewhere else with a less intuitive message - where?
-    	if (!getArg().variability().lessOrEqual(fParameter())) {
-      		log.debug("InstTimedVariable.collectErrors: " + getName().name() + " hepp");
-    		error("The argument of a timed variable must have variability less than or equal to parameter variability.");
-    	}
-    	*/
-    	if (inEquation()) {
-      		log.debug("InstTimedVariable.collectErrors: " + getName().name() + " hopp");
-    		error("Timed variables are not allowed in equations.");
-    	}
-    
-  	}
-	
+
+    public void InstTimedVariable.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        if (inEquation()) 
+            error("Timed variables are not allowed in equations");
+    }
+
+    public void InstTimedVariable.typeError() {
+        boolean badVar  = !getArg().variability().lessOrEqual(fParameter());
+        boolean badType = !getArg().type().isRealScalar();
+        if (badVar || badType) {
+            String msg = "The argument of a timed variable must be a scalar parameter Real expression";
+            if (badVar)
+                error("%s\n    '%s' is of %s variability", msg, getArg(), getArg().variability().toStringLiteral());
+            else
+                error("%s\n    type of '%s' is %s", msg, getArg(), getArg().type());
+        } else {
+            super.typeError();
+        }
+    }
+
 	  public void FRelationConstraint.typeCheck(ErrorCheckType checkType) {
 		  //log.debug("FEquation.typeCheck(" + checkType + "): " + getLeft().type() + " " + getRight().type());
 		  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {

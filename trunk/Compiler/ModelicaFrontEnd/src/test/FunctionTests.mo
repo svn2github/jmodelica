@@ -1547,16 +1547,17 @@ end FunctionType4;
 model FunctionType5
  Real x = TestFunction2(1, true);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType5",
-			description="Function type checks: Boolean literal arg, Real input",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType5",
+            description="Function type checks: Boolean literal arg, Real input",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1548, column 28:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
+    type of 'true' is Boolean
 ")})));
 end FunctionType5;
 
@@ -1564,16 +1565,17 @@ model FunctionType6
  parameter Boolean a = true;
  Real x = TestFunction2(1, a);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType6",
-			description="Function type checks: Boolean component arg, Real input",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType6",
+            description="Function type checks: Boolean component arg, Real input",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1566, column 28:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
+    type of 'a' is Boolean
 ")})));
 end FunctionType6;
 
@@ -1610,16 +1612,17 @@ model FunctionType8
  parameter Integer a = 1;
  Real x = TestFunction2(TestFunction1(true), TestFunction2(1));
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType8",
-			description="Function type checks: nestled function calls, type mismatch in inner",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType8",
+            description="Function type checks: nestled function calls, type mismatch in inner",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1613, column 39:
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
+    type of 'true' is Boolean
 ")})));
 end FunctionType8;
 
@@ -1659,19 +1662,20 @@ end FunctionType10;
 model FunctionType11
  String x = TestFunctionString(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionType11",
-			description="Function type checks: Integer literal arg, String input",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionType11",
+            description="Function type checks: Integer literal arg, String input",
+            variability_propagation=false,
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 1338, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 1662, column 20:
   String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1340, column 32:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1663, column 32:
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
+    type of '1' is Integer
 ")})));
 end FunctionType11;
 
@@ -1786,16 +1790,18 @@ model FunctionType17
   
  Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType17",
-			description="Function type checks: combining known and unknown types",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType17",
+            description="Function type checks: combining known and unknown types",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1094, column 8:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1784, column 8:
   Type error in expression: x + y
+    type of 'x' is Real[:, :]
+    type of 'y' is Real[2, :]
 ")})));
 end FunctionType17;
 
@@ -1803,32 +1809,34 @@ end FunctionType17;
 model BuiltInCallType1
   Real x = sin(true);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType1",
-			description="Built-in type checks: passing Boolean literal to sin()",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType1",
+            description="Built-in type checks: passing Boolean literal to sin()",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1810, column 16:
   Calling function sin(): types of positional argument 1 and input u are not compatible
+    type of 'true' is Boolean
 ")})));
 end BuiltInCallType1;
 
 model BuiltInCallType2
   Real x = sqrt("test");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType2",
-			description="Built-in type checks: passing String literal to sqrt()",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType2",
+            description="Built-in type checks: passing String literal to sqrt()",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1827, column 17:
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
+    type of '\"test\"' is String
 ")})));
 end BuiltInCallType2;
 
@@ -1899,16 +1907,17 @@ end BuiltInCallType6;
 model BuiltInCallType7
   Real x = atan2(9.0, "test");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType7",
-			description="Built-in type checks: calling atan2() with String literal as second argument",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType7",
+            description="Built-in type checks: calling atan2() with String literal as second argument",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1908, column 23:
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
+    type of '\"test\"' is String
 ")})));
 end BuiltInCallType7;
 

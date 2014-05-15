@@ -226,7 +226,7 @@ Residual equations:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Continuous
+Coefficient variability: continuous-time
 Solved variables:
   b[1]()
   a[1]
@@ -245,7 +245,7 @@ Jacobian:
   |0.0, (- c[1]), (- a[1])|
 -------------------------------
 Torn linear block of 2 iteration variables and 1 solved variables:
-Coefficient variability: Continuous
+Coefficient variability: continuous-time
 Solved variables:
   a[2]
 Iteration variables:

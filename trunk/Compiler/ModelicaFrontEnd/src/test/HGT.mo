@@ -54,7 +54,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -137,7 +137,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -219,7 +219,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -300,7 +300,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   i1
   u1
@@ -383,7 +383,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -465,7 +465,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   i1
   u1
@@ -548,7 +548,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -631,7 +631,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -715,7 +715,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -799,7 +799,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -863,7 +863,7 @@ Solution:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[1]
 Iteration variables:
@@ -878,7 +878,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[2]
 Iteration variables:
@@ -893,7 +893,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[3]
 Iteration variables:
@@ -908,7 +908,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[4]
 Iteration variables:
@@ -944,7 +944,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[1]
 Iteration variables:
@@ -959,7 +959,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[2]
 Iteration variables:
@@ -974,7 +974,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[3]
 Iteration variables:
@@ -989,7 +989,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[4]
 Iteration variables:
@@ -1025,7 +1025,7 @@ Jacobian:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[1]
 Iteration variables:
@@ -1040,7 +1040,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   x[2]
 Iteration variables:
@@ -1399,7 +1399,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -1480,7 +1480,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 3 iteration variables and 2 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -1562,7 +1562,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 3 iteration variables and 2 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   u2
   u1
@@ -1633,7 +1633,7 @@ Solution:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c[1]
   a[1]
@@ -1651,7 +1651,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c[2]
   a[2]
@@ -1669,7 +1669,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c[3]
   a[3]
@@ -1687,7 +1687,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c[4]
   a[4]
@@ -1705,7 +1705,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c[5]
   a[5]
@@ -1750,7 +1750,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[1]
   b[1]
@@ -1768,7 +1768,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[2]
   b[2]
@@ -1786,7 +1786,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[3]
   b[3]
@@ -1804,7 +1804,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[4]
   b[4]
@@ -1822,7 +1822,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[5]
   b[5]
@@ -1868,7 +1868,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 5 iteration variables and 10 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[1]
   b[1]
@@ -1951,7 +1951,7 @@ end Vectorized2;
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[1]
   b[1]
@@ -1969,7 +1969,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[2]
   b[2]
@@ -1987,7 +1987,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[3]
   b[3]
@@ -2005,7 +2005,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[4]
   b[4]
@@ -2023,7 +2023,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[5]
   b[5]
@@ -2062,7 +2062,7 @@ Jacobian:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[1]
 Iteration variables:
@@ -2077,7 +2077,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[2]
 Iteration variables:
@@ -2092,7 +2092,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[3]
 Iteration variables:
@@ -2107,7 +2107,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[4]
 Iteration variables:
@@ -2143,7 +2143,7 @@ Jacobian:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[1]
 Iteration variables:
@@ -2158,7 +2158,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[2]
 Iteration variables:
@@ -2173,7 +2173,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[3]
 Iteration variables:
@@ -2188,7 +2188,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[4]
 Iteration variables:
@@ -2224,7 +2224,7 @@ Jacobian:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[1]
 Iteration variables:
@@ -2239,7 +2239,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y[2]
 Iteration variables:
@@ -2397,7 +2397,7 @@ At line 0, column 0:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   z[1]
 Iteration variables:
@@ -2412,7 +2412,7 @@ Jacobian:
   |- 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   z[2]
 Iteration variables:
@@ -2468,7 +2468,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.y
   b.y
@@ -2530,7 +2530,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c.a.y
   c.b.y
@@ -2577,7 +2577,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[1]
   b[1]
@@ -2595,7 +2595,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[2]
   b[2]
@@ -2613,7 +2613,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[3]
   b[3]
@@ -2631,7 +2631,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[4]
   b[4]
@@ -2649,7 +2649,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[5]
   b[5]
@@ -2695,7 +2695,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[1]
   b[1]
@@ -2713,7 +2713,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[2]
   c[2]
@@ -2731,7 +2731,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[3]
   c[3]
@@ -2749,7 +2749,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   b[4]
   c[4]
@@ -2767,7 +2767,7 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   b[5]
   c[5]
@@ -2818,7 +2818,7 @@ Jacobian:
             methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[1]
   b[1]
@@ -2836,7 +2836,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[2]
   c[2]
@@ -2854,7 +2854,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a[3]
   c[3]
@@ -2872,7 +2872,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   b[4]
   c[4]
@@ -2890,7 +2890,7 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   b[5]
   c[5]
@@ -2942,7 +2942,7 @@ Jacobian:
             methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.a[1]
   a.b[1]
@@ -2960,7 +2960,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.a[2]
   a.b[2]
@@ -2978,7 +2978,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.a[3]
   a.b[3]
@@ -2996,7 +2996,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.a[4]
   a.b[4]
@@ -3014,7 +3014,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.a[5]
   a.b[5]
@@ -3076,7 +3076,7 @@ Jacobian:
             methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c.a.y
   c.b.y
@@ -3140,7 +3140,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.b.x[1]
   a.b.z[1]
@@ -3158,7 +3158,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.b.x[2]
   a.b.y[2]
@@ -3176,7 +3176,7 @@ Jacobian:
   |0.0, - 1.0, 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.b.x[3]
   a.b.z[3]
@@ -3194,7 +3194,7 @@ Jacobian:
   |0.0, 1.0, - 1.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.b.y[4]
   a.b.z[4]
@@ -3212,7 +3212,7 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
 -------------------------------
 Torn linear block of 1 iteration variables and 2 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   a.b.y[5]
   a.b.z[5]
@@ -3274,7 +3274,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c.a.y
   c.b.y
@@ -3339,7 +3339,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c.b.x
   c.a.y
@@ -3385,7 +3385,7 @@ Jacobian:
                     methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   y
 Iteration variables:
@@ -3440,7 +3440,7 @@ Jacobian:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   b.y
   a.y
@@ -3708,7 +3708,7 @@ Semantic error at line 8708, column 53:
                 methodResult="
 -------------------------------
 Torn linear block of 1 iteration variables and 3 solved variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Solved variables:
   c.a.y
   c.b.y

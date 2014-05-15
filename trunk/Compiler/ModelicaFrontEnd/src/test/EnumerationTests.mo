@@ -251,21 +251,24 @@ end EnumerationTests.EnumerationTest10;
 	  parameter Integer ir = Integer(1.0);
 	  parameter Integer ii = Integer(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="EnumerationTest11",
-			description="Using the Integer() operator: wrong type of argument",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="EnumerationTest11",
+            description="Using the Integer() operator: wrong type of argument",
+            errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
-Semantic error at line 219, column 35:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Semantic error at line 250, column 35:
   Calling function Integer(): types of positional argument 1 and input x are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
-Semantic error at line 220, column 35:
+    type of '\"1\"' is String
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Semantic error at line 251, column 35:
   Calling function Integer(): types of positional argument 1 and input x are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
-Semantic error at line 221, column 35:
+    type of '1.0' is Real
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Semantic error at line 252, column 35:
   Calling function Integer(): types of positional argument 1 and input x are not compatible
+    type of '1' is Integer
 ")})));
   end EnumerationTest11;
   

@@ -52,7 +52,7 @@ Solution:
   sin(time)
 -------------------------------
 Torn linear block of 2 iteration variables and 3 solved variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Solved variables:
   i1
   u1
@@ -152,7 +152,7 @@ Solution:
   2 * sin(time)
 -------------------------------
 Torn mixed linear block of 1 iteration variables and 5 solved variables:
-Coefficient variability: Discrete
+Coefficient variability: discrete-time
 Solved variables:
   a
   der(v)

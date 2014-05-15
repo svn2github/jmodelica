@@ -636,35 +636,37 @@ model Error2
   
   Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, 4);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnknownArraySizes_Error2",
-			description="Test that compliance errors are given.",
-			errorMessage="
-9 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 736, column 7:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArraySizes_Error2",
+            description="Test that compliance errors are given.",
+            errorMessage="
+8 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 627, column 7:
   Unknown sizes in operator symmetric() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 737, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 628, column 7:
   Unknown size arg in operator identity() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 741, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 631, column 7:
   Unknown sizes in operator ^ is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 742, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 632, column 7:
   Unknown sizes in operator scalar() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 742, column 14:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Semantic error at line 632, column 14:
   Calling function scalar(): types of positional argument 1 and input A are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 743, column 7:
+    type of 'x' is Real[:, :]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 633, column 7:
   Unknown sizes in operator vector() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 743, column 14:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Semantic error at line 633, column 14:
   Calling function vector(): types of positional argument 1 and input A are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 744, column 7:
+    type of 'x' is Real[:, :]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 634, column 7:
   Unknown sizes in operator matrix() is not supported in functions
 ")})));
 end Error2;

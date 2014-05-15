@@ -429,7 +429,7 @@ Input variables:
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
 Semantic error at line 217, column 10:
-  Timed variables are not allowed in equations.
+  Timed variables are not allowed in equations
 ")})));
   end InstantValueTest3_Err;
 /*

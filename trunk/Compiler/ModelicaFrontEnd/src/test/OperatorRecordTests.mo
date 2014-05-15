@@ -328,8 +328,10 @@ end OperatorRecordTests.OperatorOverload3;
             errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 130, column 19:
+Semantic error at line 322, column 19:
   Type error in expression: c1 - b
+    type of 'c1' is OperatorRecordTests.Cplx
+    type of 'b' is Boolean
 ")})));
     end OperatorOverload4;
 
@@ -539,8 +541,10 @@ end OperatorRecordTests.OperatorOverload8;
             errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 407, column 19:
+Semantic error at line 535, column 17:
   Type error in expression: c1 * c2
+    type of 'c1' is OperatorRecordTests.OperatorOverload9.Op[2]
+    type of 'c2' is OperatorRecordTests.OperatorOverload9.Op[2]
 ")})));
     end OperatorOverload9;
 
@@ -557,8 +561,10 @@ Semantic error at line 407, column 19:
             errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 425, column 22:
+Semantic error at line 555, column 22:
   Type error in expression: c1 * c2
+    type of 'c1' is OperatorRecordTests.Cplx[2]
+    type of 'c2' is OperatorRecordTests.Cplx[2, 2]
 ")})));
     end OperatorOverload10;
 

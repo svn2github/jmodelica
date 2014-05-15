@@ -5173,7 +5173,7 @@ x1 - x2 = z*w;
 			methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Unknown variables:
   x1
   z
@@ -5207,7 +5207,7 @@ x1 - x2 = z;
 			methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Unknown variables:
   x1
   z
@@ -5242,7 +5242,7 @@ x1 - x2 = z*p;
 			methodResult="
 -------------------------------
 Non-solved linear block of 3 variables:
-Coefficient variability: Parameter
+Coefficient variability: parameter
 Unknown variables:
   x1
   z
@@ -5277,7 +5277,7 @@ equation
 			methodResult="
 -------------------------------
 Non-solved mixed linear block of 3 variables:
-Coefficient variability: Discrete
+Coefficient variability: discrete-time
 Unknown continuous variables:
   b
   a
@@ -5312,7 +5312,7 @@ equation
 			methodResult="
 -------------------------------
 Non-solved linear block of 2 variables:
-Coefficient variability: Constant
+Coefficient variability: constant
 Unknown variables:
   y2
   y1
@@ -5430,7 +5430,7 @@ equation
 			methodResult="
 -------------------------------
 Non-solved linear block of 1 variables:
-Coefficient variability: Continuous
+Coefficient variability: continuous-time
 Unknown variables:
   x
 Equations:
@@ -6199,7 +6199,7 @@ Solution:
   time * 42
 -------------------------------
 Torn linear block of 1 iteration variables and 1 solved variables:
-Coefficient variability: Continuous
+Coefficient variability: continuous-time
 Solved variables:
   a2
 Iteration variables:
