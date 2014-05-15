@@ -2520,12 +2520,12 @@ aspect CCodeGen {
             }
         }
     }
-    
-	
+
+
     /**
      * \brief Generate code for blocks of equations 
      */
-    public void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+    public void AbstractEquationBlock.genBlockBase_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         for (FRelExp relExp : inactiveSwitches_C())
             p.printPreSteps(relExp, str, indent);
         for (FRelExp relExp : inactiveInitialSwitches_C())
@@ -2533,12 +2533,23 @@ aspect CCodeGen {
         String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
         str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
     }
-	
+
+    /**
+     * \brief Generate code for blocks of equations 
+     */
+    public void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        genBlockBase_C(p, str, indent, inInitial);
+    }
+
     public void SimpleEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         if (genBlockEnabled())
             equation().genBlock_C(p, str, indent, new HashSet<FAbstractEquation>(), allVariables(), assignedIndices());
     }
-    
+
+    public void NumericallySolvedScalarEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        genBlockBase_C(p, str, indent, inInitial);
+    }
+
     public void MetaEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         ASTNode.printer_C.printPreSteps(equation(), str, indent);
         ASTNode.printer_C.print(equation(), str, indent);
