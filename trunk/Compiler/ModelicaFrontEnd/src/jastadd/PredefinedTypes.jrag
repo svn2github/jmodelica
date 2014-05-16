@@ -44,79 +44,74 @@ aspect PredefinedTypes {
      * which contains a list of predefined PrimitiveClassDef:s.
      */
     syn lazy List Program.getPredefinedTypeList() {
-        //log.debug("Program.getPredefinedTypeList()");
         List l = new List();
 
-        // Build a string with a Modelica class corresponding to Real
-        String builtInDef= "type Real\n"; 
-        builtInDef += "RealType value=0;\n";
-        builtInDef += "parameter StringType quantity=\"\";\n";
-        builtInDef += "parameter StringType unit=\"\";\n";
-        builtInDef += "parameter StringType displayUnit=\"\";\n";
-        builtInDef += "parameter RealType min=-1e20, max=1e20;\n";
-        builtInDef += "parameter RealType start=0;\n";
-        builtInDef += "parameter BooleanType fixed=false;\n";
-        builtInDef += "parameter RealType nominal=0;\n";
-        builtInDef += "parameter EnumType stateSelect=StateSelect.default;\n";
-        builtInDef += "end Real;\n";
-        
-        builtInDef += "type Integer\n"; 
-        builtInDef += "IntegerType value=0;\n";
-        builtInDef += "parameter StringType quantity=\"\";\n";
-        builtInDef += "parameter IntegerType min=-1e20, max=1e20;\n";
-        builtInDef += "parameter IntegerType start=0;\n";
-        builtInDef += "parameter BooleanType fixed=false;\n";
-        builtInDef += "end Integer;\n";
-        
-        builtInDef += "type Boolean\n"; 
-        builtInDef += "BooleanType value=0;\n";
-        builtInDef += "parameter StringType quantity=\"\";\n";
-        builtInDef += "parameter BooleanType start=false;\n";
-        builtInDef += "parameter BooleanType fixed=true;\n";
-        builtInDef += "end Boolean;\n";
-        
-        builtInDef += "type String\n"; 
-        builtInDef += "StringType value=0;\n";
-        builtInDef += "parameter StringType quantity=\"\";\n";
-        builtInDef += "parameter StringType start=\"\";\n";
-        builtInDef += "end String;\n";  
+        String builtInDef = 
+                "type Real\n"
+              + "RealType value=0;\n"
+              + "parameter StringType quantity=\"\";\n"
+              + "parameter StringType unit=\"\";\n"
+              + "parameter StringType displayUnit=\"\";\n"
+              + "parameter RealType min=-1e20, max=1e20;\n"
+              + "parameter RealType start=0;\n"
+              + "parameter BooleanType fixed=false;\n"
+              + "parameter RealType nominal=0;\n"
+              + "parameter EnumType stateSelect=StateSelect.default;\n"
+              + "end Real;\n"
+                
+              + "type Integer\n"
+              + "IntegerType value=0;\n"
+              + "parameter StringType quantity=\"\";\n"
+              + "parameter IntegerType min=-1e20, max=1e20;\n"
+              + "parameter IntegerType start=0;\n"
+              + "parameter BooleanType fixed=false;\n"
+              + "end Integer;\n"
+                
+              + "type Boolean\n"
+              + "BooleanType value=0;\n"
+              + "parameter StringType quantity=\"\";\n"
+              + "parameter BooleanType start=false;\n"
+              + "parameter BooleanType fixed=true;\n"
+              + "end Boolean;\n"
+                
+              + "type String\n"
+              + "StringType value=0;\n"
+              + "parameter StringType quantity=\"\";\n"
+              + "parameter StringType start=\"\";\n"
+              + "end String;\n"
+                
+              + "type StateSelect = enumeration("
+              + " never \"Do not use as state at all.\","
+              + " avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\","
+              + " default \"Use as state if appropriate, but only if variable appears differentiated.\","
+              + " prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \","
+              + " always \"Do use it as a state.\""
+              + ");\n"
+                
+              + "type AssertionLevel = enumeration(error, warning);\n"
+                
+              + "partial model ExternalObject\n"
+              + "end ExternalObject;\n";
 
-        builtInDef += "type StateSelect = enumeration("; 
-        builtInDef += "never \"Do not use as state at all.\","; 
-        builtInDef += " avoid \"Use as state, if it cannot be avoided (but only if variable appears"; 
-        builtInDef += " differentiated and no other potential state with attribute";  
-        builtInDef += " default, prefer, or always can be selected).\","; 
-        builtInDef += " default \"Use as state if appropriate, but only if variable appears"; 
-        builtInDef += " differentiated.\","; 
-        builtInDef += "	prefer \"Prefer it as state over those having the default value";  
-        builtInDef += " (also variables can be selected, which do not appear"; 
-        builtInDef += " differentiated). \","; 
-        builtInDef += " always \"Do use it as a state.\""; 
-        builtInDef += ");\n";
-        
-        builtInDef += "type AssertionLevel = enumeration(error, warning);\n"; 
-        
-        builtInDef += "partial model ExternalObject\n"; 
-        builtInDef += "end ExternalObject;\n"; 
+        PrimitiveClassDecl pcd = null;
 
-        PrimitiveClassDecl pcd=null;
-  
+        ParserHandler ph = new ParserHandler();
+        Program p;
         try {
+            p = ph.parseString(builtInDef, "").getProgram();
+        } catch (Exception e) {
+            return l;
+        }
         
-            ParserHandler ph = new ParserHandler();
-            SourceRoot sr = ph.parseString(builtInDef,"");
-            Program p = sr.getProgram();
+        for (Element elem : p.getUnstructuredEntity(0).getElements()) {
+            FullClassDecl cd = (FullClassDecl) elem;
             
-            for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
-            //log.debug("Program.getPredefinedTypeList(): Hepp!: " + i);
-            FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));   
-       
             if (!cd.name().equals("StateSelect") && !cd.name().equals("AssertionLevel")) {
-            	pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
+                pcd = new PrimitiveClassDecl(cd.getName(),
+                        new PublicVisibilityType(),
                         new Opt(),
                         new Opt(),
                         cd.getRestriction(),
-                        cd.getName(),
                         new Opt(),
                         new Opt(),
                         new Opt(),
@@ -135,13 +130,13 @@ aspect PredefinedTypes {
                         new Opt(),
                         cd.getAnnotationOpt(),
                         cd.getEndDecl());
-            	l.add(pcd); 
+                l.add(pcd); 
             } else {
-            	pcd = new EnumClassDecl(new PublicVisibilityType(),
+                pcd = new EnumClassDecl(cd.getName(),
+                        new PublicVisibilityType(),
                         new Opt(),
                         new Opt(),
                         cd.getRestriction(),
-                        cd.getName(),
                         new Opt(),
                         new Opt(),
                         new Opt(),
@@ -161,17 +156,12 @@ aspect PredefinedTypes {
                         cd.getAnnotationOpt(),
                         cd.getEndDecl(),
                         new Symbol("enumeration"));
-            	pcd.originalComposition = cd.originalComposition;
-            	l.add(pcd); 	
+                pcd.originalComposition = cd.originalComposition;
+                l.add(pcd);
             }
-        }   
-        
-        } catch(Exception e){e.printStackTrace();}
-            
-        //log.debug("Program.getPredefinedTypeList(): "+l.getNumChild());
+        }
         
         return l;
-        
     }
     
     /**
@@ -183,13 +173,14 @@ aspect PredefinedTypes {
 
         // Build a string with a Modelica class corresponding to a basic
     	// enumeration
-        String builtInDef= "type BaseEnum\n"; 
-        builtInDef += "EnumType value;\n";
-        builtInDef += "parameter StringType quantity=\"\";\n";
-        builtInDef += "parameter EnumType min, max;\n";
-        builtInDef += "parameter EnumType start;\n";
-        builtInDef += "parameter BooleanType fixed=false;\n";
-        builtInDef += "end BaseEnum;\n";
+        String builtInDef = 
+                "type BaseEnum\n"
+              + "EnumType value;\n"
+              + "parameter StringType quantity=\"\";\n"
+              + "parameter EnumType min, max;\n"
+              + "parameter EnumType start;\n"
+              + "parameter BooleanType fixed=false;\n"
+              + "end BaseEnum;\n";
         
         EnumClassDecl ecd = null;
   
@@ -201,30 +192,30 @@ aspect PredefinedTypes {
 
             FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));   
             
-            ecd = new EnumClassDecl(new PublicVisibilityType(),
-                                   new Opt(),
-                                   new Opt(),
-                                   cd.getRestriction(),
-                                   cd.getName(),
-                                   new Opt(),
-                                   new Opt(),
-                                   new Opt(),
-                                   new Opt(),
-                                   new Opt(),
-                                   new Opt(),
-                                   new Opt(),
-                                   new Opt(),
-                                   cd.getEquationList(),
-                                   cd.getAlgorithmList(),
-                                   cd.getSuperList(),
-                                   cd.getImportList(),
-                                   cd.getClassDeclList(),
-                                   cd.getComponentDeclList(),
-                                   cd.getElementModificationList(),
-                                   new Opt(),
-                                   cd.getAnnotationOpt(),
-                                   cd.getEndDecl(),
-                                   new Symbol("enumeration"));
+            ecd = new EnumClassDecl(cd.getName(),
+                                    new PublicVisibilityType(),
+                                    new Opt(),
+                                    new Opt(),
+                                    cd.getRestriction(),
+                                    new Opt(),
+                                    new Opt(),
+                                    new Opt(),
+                                    new Opt(),
+                                    new Opt(),
+                                    new Opt(),
+                                    new Opt(),
+                                    new Opt(),
+                                    cd.getEquationList(),
+                                    cd.getAlgorithmList(),
+                                    cd.getSuperList(),
+                                    cd.getImportList(),
+                                    cd.getClassDeclList(),
+                                    cd.getComponentDeclList(),
+                                    cd.getElementModificationList(),
+                                    new Opt(),
+                                    cd.getAnnotationOpt(),
+                                    cd.getEndDecl(),
+                                    new Symbol("enumeration"));
             ecd.originalComposition = cd.originalComposition;
         
         } catch(Exception e){e.printStackTrace();}
@@ -422,9 +413,9 @@ aspect PredefinedTypes {
     		+ "  output Real y[3,3];\n"   // Type not used
     		+ "end skew;\n"
     		+ "function homotopy\n"
-    		+ "  input Real v1;\n"     // Type not used
-    		+ "  input Real v2;\n"     // Type not used
-    		+ "  output Real o;\n"     // Type not used
+            + "  input Real actual;\n"
+            + "  input Real simplified;\n"
+            + "  output Real o;\n"
     		+ "end homotopy;\n"
     		+ "function semiLinear\n"
     		+ "  input Real v1;\n"     // Type not used
@@ -570,52 +561,53 @@ aspect PredefinedTypes {
      * which contains a list of predefined BuiltInType:s.
      */
     syn lazy List Program.getBuiltInTypeList() {
-        List l = new List();        
-        l.add(new BuiltInClassDecl(new IdDecl("RealType")));    
-        l.add(new BuiltInClassDecl(new IdDecl("IntegerType")));         
-        l.add(new BuiltInClassDecl(new IdDecl("BooleanType")));         
-        l.add(new BuiltInClassDecl(new IdDecl("StringType")));              
-        l.add(new BuiltInClassDecl(new IdDecl("EnumType")));              
+        List l = new List();
+        l.add(new BuiltInClassDecl(new IdDecl("RealType")));
+        l.add(new BuiltInClassDecl(new IdDecl("IntegerType")));
+        l.add(new BuiltInClassDecl(new IdDecl("BooleanType")));
+        l.add(new BuiltInClassDecl(new IdDecl("StringType")));
+        l.add(new BuiltInClassDecl(new IdDecl("EnumType")));
         return l;
     }
-    
+
     public ClassDecl SourceRoot.doLookupBuiltInFunction(String name) {
         return unknownClassDecl();
     }
-    
-        
+
+
     inh ClassDecl Exp.lookupBuiltInFunction(String name);
     eq SourceRoot.getProgram().lookupBuiltInFunction(String name) = doLookupBuiltInFunction(name);
     eq Root.getChild().lookupBuiltInFunction(String name) = null;
-    
+
 
     boolean PrimitiveClassDecl.rewritten = false;
     rewrite PrimitiveClassDecl {
         when (getName().getID().equals("Real") && !rewritten)
             to RealClassDecl {
-                RealClassDecl rcd = new RealClassDecl(getVisibilityType(),
-                                                    getEncapsulatedOpt(),
-                                                    getPartialOpt(),
-                                                    getRestriction(),
-                                                    getName(),
-                                                    getRedeclareOpt(),
-                                                    getFinalOpt(),
-                                                    getInnerOpt(),
-                                                    getOuterOpt(),
-                                                    getReplaceableOpt(),
-                                                    getConstrainingClauseOpt(),
-                                                    getConstrainingClauseCommentOpt(),
-                                                    getStringCommentOpt(),
-                                                    getEquationList(),
-                                                    getAlgorithmList(),
-                                                    getSuperList(),
-                                                    getImportList(),
-                                                    getClassDeclList(),
-                                                    getComponentDeclList(),
-                                                    getElementModificationList(),
-                                                    getExternalClauseOpt(),
-                                                    getAnnotationOpt(),
-                                                    getEndDecl());
+                RealClassDecl rcd = new RealClassDecl(
+                        getName(),
+                        getVisibilityType(),
+                        getEncapsulatedOpt(),
+                        getPartialOpt(),
+                        getRestriction(),
+                        getRedeclareOpt(),
+                        getFinalOpt(),
+                        getInnerOpt(),
+                        getOuterOpt(),
+                        getReplaceableOpt(),
+                        getConstrainingClauseOpt(),
+                        getConstrainingClauseCommentOpt(),
+                        getStringCommentOpt(),
+                        getEquationList(),
+                        getAlgorithmList(),
+                        getSuperList(),
+                        getImportList(),
+                        getClassDeclList(),
+                        getComponentDeclList(),
+                        getElementModificationList(),
+                        getExternalClauseOpt(),
+                        getAnnotationOpt(),
+                        getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }
@@ -624,29 +616,30 @@ aspect PredefinedTypes {
     rewrite PrimitiveClassDecl {
         when (getName().getID().equals("Integer") && !rewritten)
             to IntegerClassDecl {
-                IntegerClassDecl rcd = new IntegerClassDecl(getVisibilityType(),
-                                                    getEncapsulatedOpt(),
-                                                    getPartialOpt(),
-                                                    getRestriction(),
-                                                    getName(),
-                                                    getRedeclareOpt(),
-                                                    getFinalOpt(),
-                                                    getInnerOpt(),
-                                                    getOuterOpt(),
-                                                    getReplaceableOpt(),
-                                                    getConstrainingClauseOpt(),
-                                                    getConstrainingClauseCommentOpt(),
-                                                    getStringCommentOpt(),
-                                                    getEquationList(),
-                                                    getAlgorithmList(),
-                                                    getSuperList(),
-                                                    getImportList(),
-                                                    getClassDeclList(),
-                                                    getComponentDeclList(),
-                                                    getElementModificationList(),
-                                                    getExternalClauseOpt(),
-                                                    getAnnotationOpt(),
-                                                    getEndDecl());
+                IntegerClassDecl rcd = new IntegerClassDecl(
+                        getName(),
+                        getVisibilityType(),
+                        getEncapsulatedOpt(),
+                        getPartialOpt(),
+                        getRestriction(),
+                        getRedeclareOpt(),
+                        getFinalOpt(),
+                        getInnerOpt(),
+                        getOuterOpt(),
+                        getReplaceableOpt(),
+                        getConstrainingClauseOpt(),
+                        getConstrainingClauseCommentOpt(),
+                        getStringCommentOpt(),
+                        getEquationList(),
+                        getAlgorithmList(),
+                        getSuperList(),
+                        getImportList(),
+                        getClassDeclList(),
+                        getComponentDeclList(),
+                        getElementModificationList(),
+                        getExternalClauseOpt(),
+                        getAnnotationOpt(),
+                        getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }
@@ -655,29 +648,30 @@ aspect PredefinedTypes {
     rewrite PrimitiveClassDecl {
         when (getName().getID().equals("Boolean") && !rewritten)
             to BooleanClassDecl {
-                BooleanClassDecl rcd = new BooleanClassDecl(getVisibilityType(),
-                                                    getEncapsulatedOpt(),
-                                                    getPartialOpt(),
-                                                    getRestriction(),
-                                                    getName(),
-                                                    getRedeclareOpt(),
-                                                    getFinalOpt(),
-                                                    getInnerOpt(),
-                                                    getOuterOpt(),
-                                                    getReplaceableOpt(),
-                                                    getConstrainingClauseOpt(),
-                                                    getConstrainingClauseCommentOpt(),
-                                                    getStringCommentOpt(),
-                                                    getEquationList(),
-                                                    getAlgorithmList(),
-                                                    getSuperList(),
-                                                    getImportList(),
-                                                    getClassDeclList(),
-                                                    getComponentDeclList(),
-                                                    getElementModificationList(),
-                                                    getExternalClauseOpt(),
-                                                    getAnnotationOpt(),
-                                                    getEndDecl());
+                BooleanClassDecl rcd = new BooleanClassDecl(
+                        getName(),
+                        getVisibilityType(),
+                        getEncapsulatedOpt(),
+                        getPartialOpt(),
+                        getRestriction(),
+                        getRedeclareOpt(),
+                        getFinalOpt(),
+                        getInnerOpt(),
+                        getOuterOpt(),
+                        getReplaceableOpt(),
+                        getConstrainingClauseOpt(),
+                        getConstrainingClauseCommentOpt(),
+                        getStringCommentOpt(),
+                        getEquationList(),
+                        getAlgorithmList(),
+                        getSuperList(),
+                        getImportList(),
+                        getClassDeclList(),
+                        getComponentDeclList(),
+                        getElementModificationList(),
+                        getExternalClauseOpt(),
+                        getAnnotationOpt(),
+                        getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }
@@ -686,29 +680,30 @@ aspect PredefinedTypes {
         rewrite PrimitiveClassDecl {
         when (getName().getID().equals("String") && !rewritten)
             to StringClassDecl {
-                StringClassDecl rcd = new StringClassDecl(getVisibilityType(),
-                                                    getEncapsulatedOpt(),
-                                                    getPartialOpt(),
-                                                    getRestriction(),
-                                                    getName(),
-                                                    getRedeclareOpt(),
-                                                    getFinalOpt(),
-                                                    getInnerOpt(),
-                                                    getOuterOpt(),
-                                                    getReplaceableOpt(),
-                                                    getConstrainingClauseOpt(),
-                                                    getConstrainingClauseCommentOpt(),
-                                                    getStringCommentOpt(),
-                                                    getEquationList(),
-                                                    getAlgorithmList(),
-                                                    getSuperList(),
-                                                    getImportList(),
-                                                    getClassDeclList(),
-                                                    getComponentDeclList(),
-                                                    getElementModificationList(),
-                                                    getExternalClauseOpt(),
-                                                    getAnnotationOpt(),
-                                                    getEndDecl());
+                StringClassDecl rcd = new StringClassDecl(
+                        getName(),
+                        getVisibilityType(),
+                        getEncapsulatedOpt(),
+                        getPartialOpt(),
+                        getRestriction(),
+                        getRedeclareOpt(),
+                        getFinalOpt(),
+                        getInnerOpt(),
+                        getOuterOpt(),
+                        getReplaceableOpt(),
+                        getConstrainingClauseOpt(),
+                        getConstrainingClauseCommentOpt(),
+                        getStringCommentOpt(),
+                        getEquationList(),
+                        getAlgorithmList(),
+                        getSuperList(),
+                        getImportList(),
+                        getClassDeclList(),
+                        getComponentDeclList(),
+                        getElementModificationList(),
+                        getExternalClauseOpt(),
+                        getAnnotationOpt(),
+                        getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
             }

@@ -16,56 +16,52 @@
 
 
 aspect UnknownDeclarations {
-	
-	syn lazy UnknownClassDecl Program.getUnknownClassDecl() {
-		
-		return new UnknownClassDecl(new PublicVisibilityType(),
-		                            new Opt(),
-		                            new Opt(),
-		                            new MClass(),
-		                            new IdDecl("Unknown"),
-		                            new Opt(),
-		                            new Opt(),
-									new Opt(),
-		                            new Opt(),
-		                            new Opt(),
-		                            new Opt(),
-		                            new Opt(),
-		                            new Opt(),
-		                            new List(),
-		                            new List(),
-		                            new List(),
-		                            new List(),
-		                            new List(),
-		                            new List(),
-		                            new List(),
-                                    new Opt(),
-		                            new Opt(),
-		                            new EndDecl("Unknown"));
-	}
 
-	syn lazy UnknownComponentDecl Program.getUnknownComponentDecl() {
+    syn lazy UnknownClassDecl Program.getUnknownClassDecl() =
+        new UnknownClassDecl(new IdDecl("Unknown"),
+                             new PublicVisibilityType(),
+                             new Opt(),
+                             new Opt(),
+                             new MClass(),
+                             new Opt(),
+                             new Opt(),
+                             new Opt(),
+                             new Opt(),
+                             new Opt(),
+                             new Opt(),
+                             new Opt(),
+                             new Opt(),
+                             new List(),
+                             new List(),
+                             new List(),
+                             new List(),
+                             new List(),
+                             new List(),
+                             new List(),
+                             new Opt(),
+                             new Opt(),
+                             new EndDecl("Unknown"));
 
-		return new UnknownComponentDecl(new Opt(),
-										new Opt(),
-										new Opt(),
-										new Opt(),
-										new Opt(),
-										new Opt(),
-										new Opt(),
-										new Opt(),
-										new ClassAccess("Unknown"),
-										new Opt(),
-										new PublicVisibilityType(),
-										new IdDecl("Unknown"),
-										new Opt(),
-										new Opt(),
-										new Opt(),
-										new Comment(),
-										new Opt(),
-										new Comment());
-	}		                            
-	
+    syn lazy UnknownComponentDecl Program.getUnknownComponentDecl() =
+         new UnknownComponentDecl(new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new ClassAccess("Unknown"),
+                                  new Opt(),
+                                  new PublicVisibilityType(),
+                                  new IdDecl("Unknown"),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Opt(),
+                                  new Comment(),
+                                  new Opt(),
+                                  new Comment());
+
 	syn UnknownClassDecl ASTNode.unknownClassDecl() = root().unknownClassDecl();
 	eq SourceRoot.unknownClassDecl()                = getProgram().getUnknownClassDecl();
 	eq UnknownClassDecl.unknownClassDecl()          = this;

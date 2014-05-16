@@ -14,6 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jmodelica.util.ErrorCheckType;
 
 aspect ContentCheck {
@@ -133,12 +136,13 @@ aspect ContentCheck {
 	public void FConnRootedDep.contentCheck(ErrorCheckType checkType) {
 		warning("The rooted() operator has been deprecated in favor of Connections.rooted()");
 	}
-	
-	public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
-		if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
-			getFArraySubscripts().markAsStructuralParameter(checkType);
-	}
-	
+
+    public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
+        if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
+            getFArraySubscripts().markAsStructuralParameter(checkType);
+        checkQuotedIdentifier(getComponentDecl(), getComponentDecl().getName().getID());
+    }
+
     public void InstAssignable.contentCheck(ErrorCheckType checkType) {
         super.contentCheck(checkType);
         if (isDeclaredInput() || isDeclaredOutput()) {
@@ -153,15 +157,16 @@ aspect ContentCheck {
                 inherit.error("Can't declare %s as flow, since it contains a component declared as flow", name());
         }
     }
-	
-	public void InstClassDecl.contentCheck(ErrorCheckType checkType) {
-		if (isExternalObject()) {
-			checkContentsOKInExternalObject();
-			myConstructor().checkConstructor(primitiveScalarType());
-			myDestructor().checkDestructor(primitiveScalarType());
-		}
-	}
-	
+
+    public void InstClassDecl.contentCheck(ErrorCheckType checkType) {
+        if (isExternalObject()) {
+            checkContentsOKInExternalObject();
+            myConstructor().checkConstructor(primitiveScalarType());
+            myDestructor().checkDestructor(primitiveScalarType());
+        }
+        checkQuotedIdentifier(getClassDecl(), getClassDecl().getName().getID());
+    }
+
 	public void InstNode.checkContentsOKInExternalObject() {
 		for (InstExtends ie : getInstExtendss())
 			ie.checkContentsOKInExternalObject();
@@ -219,7 +224,30 @@ aspect ContentCheck {
 		warning("Integer literal \"%s\" is too large to represent as 32-bit Integer, using Real instead.", 
 				getString(), getString(), getValue());
 	}
-	
+
+    private static final String ASTNode.OK_ESCAPES = "'\"?\\abfnrtv";
+
+    public void ASTNode.checkEscapeSequences(ASTNode node, String str, String type) {
+        for (int p = str.indexOf('\\'); p > -1 && p < str.length(); p = str.indexOf('\\', p + 2))
+            if (OK_ESCAPES.indexOf(str.charAt(p + 1)) == -1)
+                node.error("Illegal escape sequence at position %d in %s: '\\%c'", p + 1, type, str.charAt(p + 1));
+    }
+
+    public void ASTNode.checkQuotedIdentifier(ASTNode node, String str) {
+        if (str.charAt(0) == '\'')
+            checkEscapeSequences(node, str, "quoted identifier");
+    }
+
+    public void FStringLitExp.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        checkEscapeSequences(this, getString(), "string");
+    }
+
+    public void InstNamedAccess.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        checkQuotedIdentifier(this, getID());
+    }
+
 	/**
      * Check if this equation is in a place that allows connect clauses.
 	 */

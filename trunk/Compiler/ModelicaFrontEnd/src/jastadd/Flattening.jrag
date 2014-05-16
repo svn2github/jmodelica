@@ -2059,15 +2059,15 @@ aspect FlatExpressions {
 	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
-	public FExp                 FHomotopyExp.flatten(FQName prefix)              {
-		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.ACTUAL) {
-			return getActual().flatten(prefix);
-		}
-		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.SIMPLIFIED) {
-			return getSimplified().flatten(prefix);
-		}
-		return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
-	}
+    public FExp                 FHomotopyExp.flatten(FQName prefix)              {
+        if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.ACTUAL) {
+            return getActual().flatten(prefix);
+        }
+        if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.SIMPLIFIED) {
+            return getSimplified().flatten(prefix);
+        }
+        return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
+    }
 	public FSemiLinearExp       FSemiLinearExp.flatten(FQName prefix)            { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
 	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstFullClassDecl().name() + "." + prefix.name()); }
 	

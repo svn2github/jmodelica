@@ -255,16 +255,16 @@ model UnsupportedBuiltins_WarnErr
  equation
   homotopy(1,1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="UnsupportedBuiltins_WarnErr",
-			description="Compliance error for unsupported builtins",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="UnsupportedBuiltins_WarnErr",
+            description="Compliance error for unsupported builtins",
+            homotopy_type="homotopy",
+            errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 306, column 3:
-  The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.
-
+  The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.
 ")})));
 end UnsupportedBuiltins_WarnErr;
 

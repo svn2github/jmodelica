@@ -23,23 +23,24 @@ BaseClassDecl base_class_decl =
   string_comment? 
   composition 
   annotation_sc?
-  end_decl   {: return new PN_OptClassDecl(new UnknownVisibilityType(),
-                                             encapsulated,
-                                             partial,
-                                             optimization_restriction,
-                                             start,
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             string_comment,
-                                             composition,
-                                             annotation_sc,
-                                             end_decl,
-                                             class_modification); :}
+  end_decl   {: return new PN_OptClassDecl(
+                    start,
+                    new UnknownVisibilityType(),
+                    encapsulated,
+                    partial,
+                    optimization_restriction,
+                    new Opt(),
+                    new Opt(),
+                    new Opt(),
+                    new Opt(),
+                    new Opt(),
+                    new Opt(),
+                    new Opt(),
+                    string_comment,
+                    composition,
+                    annotation_sc,
+                    end_decl,
+                    class_modification); :}
 ;
 
 Clause composition_clause = constraint_clause;

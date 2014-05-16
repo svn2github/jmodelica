@@ -89,18 +89,17 @@ StoredDefinition : SourceBaseNode ::= [Within] Element*;
 
 Within : SourceBaseNode ::= [PackageName:Access];
 
-abstract ClassDecl : Element;
+abstract ClassDecl : Element       ::= Name:IdDecl;
 abstract BaseClassDecl : ClassDecl ::= VisibilityType 
-									   [Encapsulated] 
-	                                   [Partial] 
-	                                   Restriction 
-	                                   Name:IdDecl  
+                                       [Encapsulated] 
+                                       [Partial] 
+                                       Restriction 
                                        [Redeclare]
-	                                   [Final]
-	                                   [Inner]
-	                                   [Outer]
-	                                   [Replaceable]
-	                                   [ConstrainingClause]
+                                       [Final]
+                                       [Inner]
+                                       [Outer]
+                                       [Replaceable]
+                                       [ConstrainingClause]
                                        [ConstrainingClauseComment:Comment];
 
 UnknownClassDecl : FullClassDecl;
@@ -160,7 +159,7 @@ EnumLiteral : SourceBaseNode ::= IdDecl Comment;
 
 EnumLiteralDecl : ComponentDecl;
 
-BuiltInClassDecl : ClassDecl ::= Name:IdDecl;
+BuiltInClassDecl : ClassDecl;
 
 ConstrainingClause : SourceBaseNode ::= Access [ClassModification];
 

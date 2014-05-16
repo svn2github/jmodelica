@@ -3703,4 +3703,58 @@ Semantic error at line 3711, column 10:
 ")})));
 end InheritFlowTest2;
 
+
+model BadEscape1
+	parameter String a = "\qabc\ def\nghi\\xjkl\?mno\#";
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadEscape1",
+            description="Illegal escape sequences in string",
+            errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3708, column 23:
+  Illegal escape sequence at position 1 in string: '\\q'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3708, column 23:
+  Illegal escape sequence at position 27 in string: '\\#'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3708, column 23:
+  Illegal escape sequence at position 6 in string: '\\ '
+")})));
+end BadEscape1;
+
+
+model BadEscape2
+    Real '\qabc\ def\nghi\\xjkl\?mno\#' = 1;
+	Real x = '\qabc\ def\nghi\\xjkl\?mno\#';
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadEscape2",
+            description="Illegal escape sequences in quoted identifier",
+            errorMessage="
+6 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3729, column 16:
+  Illegal escape sequence at position 2 in quoted identifier: '\\q'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3729, column 16:
+  Illegal escape sequence at position 28 in quoted identifier: '\\#'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3729, column 16:
+  Illegal escape sequence at position 7 in quoted identifier: '\\ '
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3731, column 11:
+  Illegal escape sequence at position 2 in quoted identifier: '\\q'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3731, column 11:
+  Illegal escape sequence at position 28 in quoted identifier: '\\#'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3731, column 11:
+  Illegal escape sequence at position 7 in quoted identifier: '\\ '
+")})));
+end BadEscape2;
+
 end NameTests;
