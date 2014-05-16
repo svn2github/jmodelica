@@ -355,10 +355,14 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
               (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
             realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
             long int nniters;
+
+            int max_index = 0;
+            realtype max_residual = 0;
+
             /* Get the number of iterations */
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
-            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
+            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", (int)nniters);
             if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
             }
@@ -370,8 +374,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 jmi_log_leave(log, node);
             }
             if (block->n >= 1) {
-                int max_index = 0;
-                realtype max_residual = f[0]*residual_scaling_factors[0];
+                max_residual = f[0]*residual_scaling_factors[0];
                 for (i=1;i<block->n;i++) {
                     realtype res = f[i]*residual_scaling_factors[i];
                     if (RAbs(res) > RAbs(max_residual)) {
@@ -381,6 +384,19 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 }
                 jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
                 jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%d>", max_index);
+            }
+
+            {
+                /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
+                jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
+                char message[256];
+                long int nfe;
+                KINGetNumFuncEvals(kin_mem, &nfe);
+                sprintf(message, "%d\t%d\t%E\t%E\t%d", (int)nniters, (int)nfe,
+                        kin_mem->kin_fnorm, max_residual, max_index);
+                jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
+                             "jmi_kinsol_solver", block->id, message);
+                jmi_log_leave(log, node);
             }
         }
         
