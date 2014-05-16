@@ -4676,24 +4676,24 @@ aspect StateInitialEquations {
             }
         }
     }
-	
-	public void FClass.addStateInitialEquations() {
-		setFInitialEquationList(new List());
-		
-		for (FRealVariable fv : differentiatedRealVariables()) {
-			FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-			FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
-			if (fv.startAttributeSet())
-			    fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
-			else
-			    fvToAdd.setBindingExp(fv.type().zeroLiteral());
-			addFVariable(fvToAdd);
-			FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
-			addFInitialEquation(eqnToAdd);
-			flushAllRecursive();
-		}
-	}
-	
+
+    public void FClass.addStateInitialEquations() {
+        setFInitialEquationList(new List());
+        
+        for (FRealVariable fv : differentiatedRealVariables()) {
+            FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
+            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
+            if (fv.startAttributeSet())
+                fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
+            else
+                fvToAdd.setBindingExp(fv.type().zeroLiteral());
+            addFVariable(fvToAdd);
+            FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
+            addFInitialEquation(eqnToAdd);
+            flushAllRecursive();
+        }
+    }
+
 }
 
 aspect RuntimeOptions {

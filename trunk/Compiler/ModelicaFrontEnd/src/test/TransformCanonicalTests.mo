@@ -4652,6 +4652,53 @@ end TransformCanonicalTests.StateInitialPars5;
 ")})));
 end StateInitialPars5;
 
+model StateInitialPars6
+    Real x(start = p);
+    parameter Real p = 2;
+equation 
+    der(x) = -x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StateInitialPars6",
+            description="Check that only independent parameters are generated for start values with state_initial_equations",
+            state_initial_equations=true,
+            flatModel="
+fclass TransformCanonicalTests.StateInitialPars6
+ Real x(start = p);
+ parameter Real p = 2 /* 2 */;
+ parameter Real _start_x = 2.0 /* 2.0 */;
+initial equation 
+ x = _start_x;
+equation
+ der(x) = - x;
+end TransformCanonicalTests.StateInitialPars6;
+")})));
+end StateInitialPars6;
+
+model StateInitialPars7
+    function f
+        output Real x;
+        external;
+    end f;
+        Real x(start = f());
+equation 
+    der(x) = -x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="StateInitialPars7",
+            description="Check that unevlauateable start values with state_initial_equations gives error",
+            state_initial_equations=true,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 4684, column 21:
+  Could not evaluate binding expression for attribute 'start': 'f()'
+")})));
+end StateInitialPars7;
+
+
 model DuplicateVariables1
   model A
     Real x(start=1, min=2) = 3;
