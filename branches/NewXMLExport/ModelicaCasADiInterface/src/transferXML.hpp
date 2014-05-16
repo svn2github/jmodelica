@@ -58,20 +58,20 @@ void transferParameters(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::
 
 void transferFunction(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void updateFunctionCall(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* stmt,
-	CasADi::MXVector &expressions, CasADi::MXVector &vars, std::string functionName);
-CasADi::MXVector getInputVector(ModelicaCasADi::Ref<ModelicaCasADi::Model>, tinyxml2::XMLElement* elem);
-CasADi::MXVector getFuncVars(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement *elem);
+	CasADi::MXVector &expressions, CasADi::MXVector &vars, std::string functionName, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
+CasADi::MXVector getInputVector(ModelicaCasADi::Ref<ModelicaCasADi::Model>, tinyxml2::XMLElement* elem, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
+CasADi::MXVector getFuncVars(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement *elem, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
 
 void addRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
 void addIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
 void addBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
 void addDerivativeVar(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar, std::string name);
 
-CasADi::MX expressionToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* expression);
-CasADi::MX functionCallToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* call);
-CasADi::MX operatorToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* op);
-CasADi::MX referenceToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* ref);
-CasADi::MX ifExpToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* expression);
+CasADi::MX expressionToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* expression, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
+CasADi::MX functionCallToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* call, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
+CasADi::MX operatorToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* op, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
+CasADi::MX referenceToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* ref, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
+CasADi::MX ifExpToMx(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* expression, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
 
 ModelicaCasADi::Variable::Causality getCausality(const char* causality);
 ModelicaCasADi::Variable::Variability getVariability(const char* variability);
@@ -84,11 +84,10 @@ ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseType(ModelicaCasADi::R
 ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
 int findIndex(CasADi::MXVector vector, std::string elem);
-void addFunctionHeaders(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
-
-int calculateFlatArrayIndex(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* reference, std::string functionName);
+int calculateFlatArrayIndex(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* reference, 
+	std::string functionName, std::map<std::string, ModelicaCasADi::Variable*> &funcVars);
 std::vector<std::string> getArrayVariables(tinyxml2::XMLElement* elem, std::string functionName);
-//void addFunc(std::string funcName, tinyxml2::XMLElement* elem, ModelicaCasADi::Ref<ModelicaCasADi::Model> m);
+void addFunc(std::string funcName, tinyxml2::XMLElement* elem, ModelicaCasADi::Ref<ModelicaCasADi::Model> m);
 
 };
 

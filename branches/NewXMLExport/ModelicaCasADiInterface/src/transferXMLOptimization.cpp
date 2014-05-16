@@ -32,7 +32,7 @@ void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelNa
 		// transfer model parts first
 		transferXmlModel(optProblem, modelName, modelFiles);
 		optProblem->initializeProblem(modelName, true);
-		optProblem->setTimeVariable(MX("time"));
+		//optProblem->setTimeVariable(MX("time"));
 
 		string fullPath;
 		for (int i=0; i < modelFiles.size(); i++) {
@@ -74,11 +74,13 @@ void transferXmlOptimization(Ref<OptimizationProblem> optProblem, string modelNa
 }
 
 void transferObjective(Ref<OptimizationProblem> optProblem, XMLElement* objective) {
-	optProblem->setObjective(expressionToMx(optProblem, objective->FirstChildElement()));
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
+	optProblem->setObjective(expressionToMx(optProblem, objective->FirstChildElement(), funcVars));
 }
 
 void transferObjectiveIntegrand(Ref<OptimizationProblem> optProblem, XMLElement* objectiveIntegrand) {
-	optProblem->setObjectiveIntegrand(expressionToMx(optProblem, objectiveIntegrand->FirstChildElement()));
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
+	optProblem->setObjectiveIntegrand(expressionToMx(optProblem, objectiveIntegrand->FirstChildElement(), funcVars));
 }
 
 void transferStartTime(Ref<OptimizationProblem> optProblem, XMLElement* startTime) {
@@ -92,6 +94,7 @@ void transferFinalTime(Ref<OptimizationProblem> optProblem, XMLElement* finalTim
 }
 
 void transferConstraints(Ref<OptimizationProblem> optProblem, XMLElement* constraints) {
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
 	std::vector<Ref<Constraint> >* pointConstraints = new std::vector<Ref<Constraint> >();
 	std::vector<Ref<Constraint> >* pathConstraints = new std::vector<Ref<Constraint> >();
 	for (XMLElement* constraint = constraints->FirstChildElement(); constraint != NULL; constraint = constraint->NextSiblingElement()) {
@@ -105,12 +108,12 @@ void transferConstraints(Ref<OptimizationProblem> optProblem, XMLElement* constr
 				if (!strcmp(lhs->Value(), "operator") && !strcmp(lhs->Attribute("name"), "at")) {
 					lhsMx = timedVarToMx(optProblem, lhs);
 				} else {
-					lhsMx = expressionToMx(optProblem, lhs);
+					lhsMx = expressionToMx(optProblem, lhs, funcVars);
 				}
 				if (!strcmp(rhs->Value(), "operator") && !strcmp(rhs->Attribute("name"), "at")) {
 					rhsMx = timedVarToMx(optProblem, rhs);
 				} else {
-					rhsMx = expressionToMx(optProblem, rhs);
+					rhsMx = expressionToMx(optProblem, rhs, funcVars);
 				}
 				pathConstraints->push_back(new Constraint(lhsMx, rhsMx, type));
 			} else {
@@ -119,12 +122,12 @@ void transferConstraints(Ref<OptimizationProblem> optProblem, XMLElement* constr
 				if (!strcmp(lhs->Value(), "operator") && !strcmp(lhs->Attribute("name"), "at")) {
 					lhsMx = timedVarToMx(optProblem, lhs);
 				} else {
-					lhsMx = expressionToMx(optProblem, lhs);
+					lhsMx = expressionToMx(optProblem, lhs, funcVars);
 				}
 				if (!strcmp(rhs->Value(), "operator") && !strcmp(rhs->Attribute("name"), "at")) {
 					rhsMx = timedVarToMx(optProblem, rhs);
 				} else {
-					rhsMx = expressionToMx(optProblem, rhs);
+					rhsMx = expressionToMx(optProblem, rhs, funcVars);
 				}
 				pointConstraints->push_back(new Constraint(lhsMx, rhsMx, type));
 			}
@@ -135,6 +138,7 @@ void transferConstraints(Ref<OptimizationProblem> optProblem, XMLElement* constr
 }
 
 void transferTimedVariable(Ref<OptimizationProblem> optProblem, XMLElement* timedVar) {
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
 	// transfer timedvariables
 	std::vector<Ref<Variable> > allVars = optProblem->getAllVariables();
 	XMLElement* timedName = timedVar->FirstChildElement();
@@ -143,7 +147,7 @@ void transferTimedVariable(Ref<OptimizationProblem> optProblem, XMLElement* time
 	name += timedVarArgsToString(timedName->NextSiblingElement());
 	name += ")";
 	MX timedMXVar = MX(name);
-	MX timedMxTimePoint = MX(expressionToMx(optProblem, timedName->NextSiblingElement()));
+	MX timedMxTimePoint = MX(expressionToMx(optProblem, timedName->NextSiblingElement(), funcVars));
 	if (optProblem->getVariable(timedName->Attribute("name")) != NULL) {
 		optProblem->addTimedVariable(new TimedVariable(optProblem.getNode(), timedMXVar, optProblem->getVariable(timedName->Attribute("name")), timedMxTimePoint));
 	} else {

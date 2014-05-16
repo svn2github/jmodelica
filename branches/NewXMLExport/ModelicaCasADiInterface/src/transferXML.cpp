@@ -30,7 +30,7 @@ using CasADi::MXVector;
 namespace ModelicaCasADi {
 
 // used to keep track of local function variables 
-std::map<string, ModelicaCasADi::Variable*> funcVars;
+//std::map<string, ModelicaCasADi::Variable*> funcVars;
 
 // used for keeping the dimensions of array variables
 std::map<string, std::vector<int> > dimensionMap;
@@ -40,6 +40,7 @@ std::map<string, std::vector<int> > dimensionMap;
  * construct an Model object from the XML and return this Model.
  */
 Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<string> &modelFiles) {
+	m->setTimeVariable(MX("time"));
 	m->initializeModel(modelName);
 	string fullPath;
 	for (int i=0; i < modelFiles.size(); i++) {
@@ -55,7 +56,6 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 	XMLElement* root = doc.FirstChildElement();
 	if (root != NULL) {
 		// add function headers first so all functions can be imported
-		addFunctionHeaders(m, root);
 		for (XMLElement* elem = root->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement()) {
 			if (!strcmp(elem->Value(), "component") || !strcmp(elem->Value(), "classDefinition") 
 				|| !strcmp(elem->Value(), "extends")) {
@@ -121,10 +121,10 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 		XMLElement* child = elem->FirstChildElement();
 		if (!strcmp(child->Value(), "class") && !strcmp(child->Attribute("kind"), "function")) {
 			// function transfers are handled in its own method for clarity
-			/*if (m->getModelFunction(elem->Attribute("name")) == NULL) {
+			if (m->getModelFunction(elem->Attribute("name")) == NULL) {
 				transferFunction(m, elem);
-			}*/
-			transferFunction(m, elem);
+			}
+			//transferFunction(m, elem);
 		} else if (!strcmp(child->Value(), "class") && !strcmp(child->Attribute("kind"), "record")) {
 			// store information about record so that it can be used in import, how?
 		} else if (strcmp(child->Value(), "enumeration")) {
@@ -135,7 +135,8 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 				if (!strcmp(child->Value(), "modifier")) {
 					for (XMLElement* item = child->FirstChildElement(); item != NULL; item = item->NextSiblingElement()) {
 						XMLElement* itemExpression = item->FirstChildElement();
-						userType->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression));
+						std::map<string, ModelicaCasADi::Variable*> funcVars;
+						userType->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression, funcVars));
 					}
 				}
 			}
@@ -159,8 +160,9 @@ void transferInitialEquations (Ref<Model> m, XMLElement* elem) {
 			MX finalRhs = MX();
 			XMLElement* lhs = initEquation->FirstChildElement();
 			XMLElement* rhs = lhs->NextSiblingElement();
-			MX left = expressionToMx(m, lhs);
-			MX right = expressionToMx(m, rhs);
+			std::map<string, ModelicaCasADi::Variable*> funcVars;
+			MX left = expressionToMx(m, lhs, funcVars);
+			MX right = expressionToMx(m, rhs, funcVars);
 			for (int i=0; i < left.size(); i++) {
 				if (left.at(i).getName() != "dummy") {
 					finalLhs.append(left.at(i));
@@ -184,8 +186,9 @@ void transferEquations(Ref<Model> m, XMLElement* elem) {
 			MX finalRhs = MX();
 			XMLElement* lhs = equation->FirstChildElement();
 			XMLElement* rhs = lhs->NextSiblingElement();
-			MX left = expressionToMx(m, lhs);
-			MX right = expressionToMx(m, rhs);
+			std::map<string, ModelicaCasADi::Variable*> funcVars;
+			MX left = expressionToMx(m, lhs, funcVars);
+			MX right = expressionToMx(m, rhs, funcVars);
 			if (left.size() > 1) {
 				for (int i=0; i < left.size(); i++) {
 					if (left.at(i).getName() != "dummy") {
@@ -211,8 +214,9 @@ void transferParameters(Ref<Model> m, XMLElement* elem) {
 		if (!strcmp(parameter->Value(), "equal")) {
 			XMLElement* lhs = parameter->FirstChildElement();
 			XMLElement* rhs = lhs->NextSiblingElement();
-			MX left = expressionToMx(m, lhs);
-			MX right = expressionToMx(m, rhs);
+			std::map<string, ModelicaCasADi::Variable*> funcVars;
+			MX left = expressionToMx(m, lhs, funcVars);
+			MX right = expressionToMx(m, rhs, funcVars);
 			for (int i=0; i< right.size(); i++) {
 				if (left.at(i).getName() != "dummy") {
 					Ref<Variable> var = m->getVariable(left.at(i).getName());
@@ -231,11 +235,12 @@ void transferParameters(Ref<Model> m, XMLElement* elem) {
  * Construct an MXFunction from the XML and adds it to the model
  */
 void transferFunction(Ref<Model> m, XMLElement* elem) {
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
 	string functionName = elem->Attribute("name");
 	XMLElement* child = elem->FirstChildElement();
-	MXVector expressions = getFuncVars(m, child);
-	MXVector vars = getFuncVars(m, child);
-	MXVector inputVars = getInputVector(m, child);
+	MXVector expressions = getFuncVars(m, child, funcVars);
+	MXVector vars = getFuncVars(m, child, funcVars);
+	MXVector inputVars = getInputVector(m, child, funcVars);
 	for (XMLElement* var = child->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
 		if (!strcmp(var->Value(), "algorithm")) {
 			for (XMLElement* stmt = var->FirstChildElement(); stmt != NULL; stmt = stmt->NextSiblingElement()) {
@@ -248,12 +253,12 @@ void transferFunction(Ref<Model> m, XMLElement* elem) {
 					// update function variables to reflect function call
 					if (left != NULL && !strcmp(checkRight->Value(), "call") && !(checkRight->Attribute("builtin") != NULL &&
 						strcmp(checkRight->Attribute("builtin"), "array"))) {
-							updateFunctionCall(m, stmt, expressions, vars, functionName);
+							updateFunctionCall(m, stmt, expressions, vars, functionName, funcVars);
 					} else if (left != NULL) {
 						MXVector lhs = MXVector();
 						MX leftCas;
 						if (!strcmp(left->Value(), "reference")) {
-							int flatIndex = calculateFlatArrayIndex(m, left, functionName);
+							int flatIndex = calculateFlatArrayIndex(m, left, functionName, funcVars);
 							string varName(left->FirstChildElement()->Attribute("name"));
 							std::stringstream ss;
 							ss << flatIndex;
@@ -275,7 +280,7 @@ void transferFunction(Ref<Model> m, XMLElement* elem) {
 						lhs.push_back(leftCas);
 						MXVector rhs = MXVector();
 						XMLElement* right = stmt->FirstChildElement()->NextSiblingElement()->FirstChildElement();
-						MX rightCas = expressionToMx(m, right);
+						MX rightCas = expressionToMx(m, right, funcVars);
 						rhs.push_back(rightCas);
 						MX updated = CasADi::substitute(rhs, vars, expressions).at(0);
 						int index = findIndex(vars, lhs.at(0).getName());
@@ -287,6 +292,7 @@ void transferFunction(Ref<Model> m, XMLElement* elem) {
 	}
 	MXVector outputVars = MXVector();
 	int index=0;
+	// find output variables and add to output vector
 	for (XMLElement* var = child->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
 		if (var->Attribute("causality") != NULL && !strcmp(var->Attribute("causality"), "output")) {
 			XMLElement* outputElem = var->FirstChildElement()->NextSiblingElement();
@@ -329,7 +335,7 @@ void transferFunction(Ref<Model> m, XMLElement* elem) {
  * contains the current MX for all variables in the functions is updated by
  * running the function call and then substitute in the outputs.
  */
-void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, MXVector &vars, string functionName) {
+void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, MXVector &vars, string functionName, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	XMLElement* left = stmt->FirstChildElement()->FirstChildElement();
 	MXVector lhs = MXVector();
 	if (!strcmp(left->Value(), "tuple")) {
@@ -377,10 +383,10 @@ void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, M
 	}
 	XMLElement* right = stmt->FirstChildElement()->NextSiblingElement()->FirstChildElement()->FirstChildElement();
 	string funcName = right->FirstChildElement()->Attribute("name");
-	/*if (m->getModelFunction(funcName) == NULL) {
+	if (m->getModelFunction(funcName) == NULL) {
 		// add function before calling it
 		addFunc(funcName, stmt, m);
-	}*/
+	}
 	CasADi::MXFunction f = m->getModelFunction(funcName)->getMx();
 	MXVector argVec = MXVector();
 	for (XMLElement* arg = right->NextSiblingElement(); arg != NULL; arg = arg->NextSiblingElement()) {
@@ -388,17 +394,17 @@ void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, M
 			if (arg->Attribute("builtin") != NULL && !strcmp(arg->Attribute("builtin"), "array")) {
 				// array constructor
 				for (XMLElement* arr = arg->FirstChildElement(); arr != NULL; arr = arr->NextSiblingElement()) {
-					MX arrCall = expressionToMx(m, arr);
+					MX arrCall = expressionToMx(m, arr, funcVars);
 					for (int i=0; i < arrCall.size(); i++) {
 						argVec.push_back(arrCall.at(i));
 					}
 				}
 			} else if (arg->Attribute("builtin") != NULL) {
 				// builtin function
-				argVec.push_back(expressionToMx(m, arg));
+				argVec.push_back(expressionToMx(m, arg, funcVars));
 			} else {
 				// regular function call
-				MX func = expressionToMx(m, arg);
+				MX func = expressionToMx(m, arg, funcVars);
 				for (int i=0; i < func.size(); i++) {
 					argVec.push_back(func.at(i));
 				}
@@ -412,7 +418,7 @@ void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, M
 					argVec.push_back(arg);
 				}
 			} else {
-				argVec.push_back(expressionToMx(m, arg));
+				argVec.push_back(expressionToMx(m, arg, funcVars));
 			}
 		}
 	}
@@ -429,7 +435,7 @@ void updateFunctionCall(Ref<Model> m, XMLElement* stmt, MXVector &expressions, M
 /**
  * Construct the input vector used in a function and add input variables to the model
  */
-MXVector getInputVector(Ref<Model> m, XMLElement* elem) {
+MXVector getInputVector(Ref<Model> m, XMLElement* elem, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	MXVector inputVars = MXVector();
 	string functionName = elem->Parent()->ToElement()->Attribute("name");
 	for (XMLElement* var = elem->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
@@ -456,26 +462,28 @@ MXVector getInputVector(Ref<Model> m, XMLElement* elem) {
 							varName += "_" + ss.str();
 							MX casVar = MX(varName);
 							inputVars.push_back(casVar);
-							Ref<Variable> input = funcVars.find(varName)->second;
-							if (input == NULL) {
+							std::map<std::string, Variable*>::iterator it = funcVars.find(varName);
+							if (it == funcVars.end()) {
 								// should check types here since it can be other than real
 								Ref<RealVariable> inputVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
 									getVariability(variability), NULL);
 								funcVars.insert(std::pair<string, ModelicaCasADi::Variable*>(inputVar->getName(), inputVar.getNode()));
 							} else {
+								Ref<Variable> input = it->second;
 								input->setVar(casVar);
 							}
 						}
 					} else {
 						MX casVar = MX(var->Attribute("name"));
 						inputVars.push_back(casVar);
-						Ref<Variable> input = funcVars.find(var->Attribute("name"))->second;
-						if (input == NULL) {
+						std::map<std::string, Variable*>::iterator it = funcVars.find(var->Attribute("name"));
+						if (it == funcVars.end()) {
 							// should check types here since it can be other than real
 							Ref<RealVariable> inputVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
 								getVariability(variability), getUserType(m, var->FirstChildElement()));
 							funcVars.insert(std::pair<string, ModelicaCasADi::Variable*>(inputVar->getName(), inputVar.getNode()));
 						} else {
+							Ref<Variable> input = it->second;
 							input->setVar(casVar);
 						}
 					}
@@ -490,7 +498,7 @@ MXVector getInputVector(Ref<Model> m, XMLElement* elem) {
  * Construct vector containing all variables in the function and add non-input variables
  * to the model variable list
  */
-MXVector getFuncVars(Ref<Model> m, XMLElement *elem) {
+MXVector getFuncVars(Ref<Model> m, XMLElement *elem, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	MXVector vars = MXVector();
 	string functionName = elem->Parent()->ToElement()->Attribute("name");
 	for (XMLElement* var = elem->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
@@ -516,26 +524,28 @@ MXVector getFuncVars(Ref<Model> m, XMLElement *elem) {
 					varName += "_" + ss.str();
 					MX casVar = MX(varName);
 					vars.push_back(casVar);
-					Ref<Variable> funcVar = funcVars.find(varName)->second;
-					if (funcVar == NULL) {
+					std::map<std::string, Variable*>::iterator it = funcVars.find(varName);
+					if (it == funcVars.end()) {
 						// should check types here since it can be other than real
 						Ref<RealVariable> globalVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
 							getVariability(variability), NULL);
 						funcVars.insert(std::pair<string, ModelicaCasADi::Variable*>(globalVar->getName(), globalVar.getNode()));
 					} else {
+						Ref<Variable> funcVar = it->second;
 						funcVar->setVar(casVar);
 					}
 				}
 			} else {
 				MX casVar = MX(var->Attribute("name"));
 				vars.push_back(casVar);
-				Ref<Variable> funcVar = funcVars.find(var->Attribute("name"))->second;
-				if(funcVar == NULL) {
+				std::map<std::string, Variable*>::iterator it = funcVars.find(var->Attribute("name"));
+				if(it == funcVars.end()) {
 					// should check types here since it can be other than real
 					Ref<RealVariable> globalVar = new RealVariable(m.getNode(), casVar, getCausality(causality),
 						getVariability(variability), getUserType(m, var->FirstChildElement()));
 					funcVars.insert(std::pair<string, ModelicaCasADi::Variable*>(globalVar->getName(), globalVar.getNode()));
 				} else {
+					Ref<Variable> funcVar = it->second;
 					funcVar->setVar(casVar);
 				}
 			}
@@ -557,14 +567,15 @@ void addRealVariable(Ref<Model> m, XMLElement* variable) {
 	if (comment != NULL) {
 		realVar->setAttribute("comment", CasADi::MX(comment));
 	}
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
 	for (XMLElement* child = variable->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 		if (!strcmp(child->Value(), "bindingExpression")) {
 			XMLElement* expression = child->FirstChildElement();
-			realVar->setAttribute("bindingExpression", expressionToMx(m, expression));
+			realVar->setAttribute("bindingExpression", expressionToMx(m, expression, funcVars));
 		} else if (!strcmp(child->Value(), "modifier")) {
 			for (XMLElement* item = child->FirstChildElement(); item != NULL; item = item->NextSiblingElement()) {
 				XMLElement* itemExpression = item->FirstChildElement();
-				realVar->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression));
+				realVar->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression, funcVars));
 			}
 		}
 	}
@@ -584,14 +595,15 @@ void addIntegerVariable(Ref<Model> m, XMLElement* variable) {
 	if (comment != NULL) {
 		intVar->setAttribute("comment", CasADi::MX(comment));
 	}
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
 	for (XMLElement* child = variable->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 		if (!strcmp(child->Value(), "bindingExpression")) {
 			XMLElement* expression = child->FirstChildElement();
-			intVar->setAttribute("bindingExpression", expressionToMx(m, expression));
+			intVar->setAttribute("bindingExpression", expressionToMx(m, expression, funcVars));
 		} else if (!strcmp(child->Value(), "modifier")) {
 			for (XMLElement* item = child->FirstChildElement(); item != NULL; item = item->NextSiblingElement()) {
 				XMLElement* itemExpression = item->FirstChildElement();
-				intVar->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression));
+				intVar->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression, funcVars));
 			}
 		}
 	}
@@ -611,14 +623,15 @@ void addBooleanVariable(Ref<Model> m, XMLElement* variable) {
 	if (comment != NULL) {
 		boolVar->setAttribute("comment", CasADi::MX(comment));
 	}
+	std::map<string, ModelicaCasADi::Variable*> funcVars;
 	for (XMLElement* child = variable->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 		if (!strcmp(child->Value(), "bindingExpression")) {
 			XMLElement* expression = child->FirstChildElement();
-			boolVar->setAttribute("bindingExpression", expressionToMx(m, expression));
+			boolVar->setAttribute("bindingExpression", expressionToMx(m, expression, funcVars));
 		} else if (!strcmp(child->Value(), "modifier")) {
 			for (XMLElement* item = child->FirstChildElement(); item != NULL; item = item->NextSiblingElement()) {
 				XMLElement* itemExpression = item->FirstChildElement();
-				boolVar->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression));
+				boolVar->setAttribute(item->Attribute("name"), expressionToMx(m, itemExpression, funcVars));
 			}
 		}
 	}
@@ -643,7 +656,7 @@ void addDerivativeVar (Ref<Model> m, Ref<RealVariable> realVar, string name) {
 /**
  * Takes an XML node containing an expression and then returns a corresponding MX expression.
  */
-MX expressionToMx(Ref<Model> m, XMLElement* expression) {
+MX expressionToMx(Ref<Model> m, XMLElement* expression, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	const char* name = expression->Value();
 	if (!strcmp(name, "integer") || !strcmp(name, "real")) {
 		return MX(atof(expression->Attribute("value")));
@@ -661,18 +674,18 @@ MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 				varName += memberElem->Attribute("name");
 			}
 		}
-		if (funcVars.find(varName)->second != NULL) {
-			return funcVars.find(varName)->second->getVar();
+		std::map<std::string, Variable*>::iterator it = funcVars.find(varName);
+		if (it != funcVars.end()) {
+			return it->second->getVar();
 		} else if (m->getVariable(varName) != NULL) {
 			return m->getVariable(varName)->getVar();
 		}
 		return MX(varName);
 	} else if (!strcmp(name, "call")) {
-		return functionCallToMx(m, expression);
+		return functionCallToMx(m, expression, funcVars);
 	} else if (!strcmp(name, "builtin")) {
-		// time variable
 		if (!strcmp(expression->Attribute("name"), "time")) {
-			if (m->getTimeVariable().isNull()) {
+			if (m->getTimeVariable().isNull() || m->getTimeVariable().isConstant()) {
 				MX timeMx = MX(expression->Attribute("name"));
 				m->setTimeVariable(timeMx);
 				return timeMx;
@@ -681,23 +694,23 @@ MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 			}
 		}
 	} else if (!strcmp(name, "operator")) {
-		return operatorToMx(m, expression);
+		return operatorToMx(m, expression, funcVars);
 	} else if (!strcmp(name, "if")) {
-		return ifExpToMx(m, expression);
+		return ifExpToMx(m, expression, funcVars);
 	} else if (!strcmp(name, "tuple")) {
 		MX left = MX();
 		for (XMLElement* child = expression->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 			if (!strcmp(child->Value(), "local")) {
 				left.append(MX(child->Attribute("name")));
 			} else if (!strcmp(child->Value(), "call")) {
-				left.append(expressionToMx(m, child));
+				left.append(expressionToMx(m, child, funcVars));
 			} else {
 				left.append(MX("dummy"));
 			}
 		}
 		return left;
 	} else if (!strcmp(name, "reference")) {
-		return referenceToMx(m, expression);
+		return referenceToMx(m, expression, funcVars);
 	} else if (!strcmp(name, "nothing")) {
 		return MX();
 	} else {
@@ -711,14 +724,14 @@ MX expressionToMx(Ref<Model> m, XMLElement* expression) {
 /**
  * Construct a MX expression from a function call
  */
-MX functionCallToMx(Ref<Model> m, XMLElement* call) {
+MX functionCallToMx(Ref<Model> m, XMLElement* call, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	const char* builtinAttr = call->Attribute("builtin");
 	if (builtinAttr != NULL) {
 		// array constructor, return a stacked mx with variables
 		if (!strcmp(builtinAttr, "array")) {
 			MX stackedArr = MX();
 			for (XMLElement* arr = call->FirstChildElement(); arr != NULL; arr = arr->NextSiblingElement()) {
-				stackedArr.append(expressionToMx(m, arr));
+				stackedArr.append(expressionToMx(m, arr, funcVars));
 			}
 			return stackedArr;
 		}
@@ -726,8 +739,8 @@ MX functionCallToMx(Ref<Model> m, XMLElement* call) {
 		XMLElement* lhs = call->FirstChildElement();
 		XMLElement* rhs = lhs->NextSiblingElement();
 		if (rhs != NULL) { // binary
-			MX lhsExp = expressionToMx(m, lhs);
-			MX rhsExp = expressionToMx(m, rhs);
+			MX lhsExp = expressionToMx(m, lhs, funcVars);
+			MX rhsExp = expressionToMx(m, rhs, funcVars);
 			if (lhsExp.size() > 1) {
 				lhsExp = lhsExp.at(0);
 			}
@@ -736,30 +749,30 @@ MX functionCallToMx(Ref<Model> m, XMLElement* call) {
 			}
 			return builtinBinaryToMx(lhsExp, rhsExp, builtinAttr);
 		} else { // unary
-			return builtinUnaryToMx(expressionToMx(m, lhs), builtinAttr);
+			return builtinUnaryToMx(expressionToMx(m, lhs, funcVars), builtinAttr);
 		}
 	} else {
 		XMLElement* func = call->FirstChildElement();
 		string funcName = func->FirstChildElement()->Attribute("name");
-		/*if (m->getModelFunction(funcName) == NULL) {
+		if (m->getModelFunction(funcName) == NULL) {
 			addFunc(funcName, call, m);
-		}*/
+		}
 		CasADi::MXFunction f = m->getModelFunction(funcName)->getMx();
 		MXVector argVec = MXVector();
 		for (XMLElement* arg = func->NextSiblingElement(); arg != NULL; arg = arg->NextSiblingElement()) {
 			if (!strcmp(arg->Value(), "call")) {
 				if (arg->Attribute("builtin") != NULL && !strcmp(arg->Attribute("builtin"), "array")) {
 					for (XMLElement* arr = arg->FirstChildElement(); arr != NULL; arr = arr->NextSiblingElement()) {
-						MX arrCall = expressionToMx(m, arr);
+						MX arrCall = expressionToMx(m, arr, funcVars);
 						for (int i=0; i < arrCall.size(); i++) {
 							argVec.push_back(arrCall.at(i));
 						}
 					}
 				} else if (arg->Attribute("builtin") != NULL) {
-					argVec.push_back(expressionToMx(m, arg));
+					argVec.push_back(expressionToMx(m, arg, funcVars));
 				}
 			} else {
-				argVec.push_back(expressionToMx(m, arg));
+				argVec.push_back(expressionToMx(m, arg, funcVars));
 			}
 		}
 		MXVector outputs = f.call(argVec);
@@ -776,7 +789,7 @@ MX functionCallToMx(Ref<Model> m, XMLElement* call) {
  * operator to a corresponding MX expression. If the operator is not supported,
  * an error is thrown.
  */
-MX operatorToMx(Ref<Model> m, XMLElement* op) {
+MX operatorToMx(Ref<Model> m, XMLElement* op, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	if (!strcmp(op->Attribute("name"), "der")) {
 		// handle calls to the der operator, lookup if we have introduced a differentiated variable 
 		// for this der call, if we have proceed as with all others functions calls if not continue by
@@ -818,7 +831,7 @@ MX operatorToMx(Ref<Model> m, XMLElement* op) {
 		return MX("time");
 	} else if (!strcmp(op->Attribute("name"), "noevent")) {
 		// ignore noevent
-		return expressionToMx(m, op->FirstChildElement());
+		return expressionToMx(m, op->FirstChildElement(), funcVars);
 	} else {
 		// unsupported operators
 		std::stringstream errorMessage;
@@ -830,7 +843,7 @@ MX operatorToMx(Ref<Model> m, XMLElement* op) {
 /**
  * Takes a reference tag and converts it to a MX expression
  */
-MX referenceToMx(Ref<Model> m, XMLElement* ref) {
+MX referenceToMx(Ref<Model> m, XMLElement* ref, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	// get the name of the function since this is needed to look up array dimensions
 	string functionName = "";
 	for (XMLElement* parent = ref->Parent()->ToElement(); parent != NULL; parent = parent->Parent()->ToElement()) {
@@ -839,26 +852,30 @@ MX referenceToMx(Ref<Model> m, XMLElement* ref) {
 		}
 	}
 	XMLElement* varName = ref->FirstChildElement();
-	int flatIndex = calculateFlatArrayIndex(m, ref, functionName);
+	int flatIndex = calculateFlatArrayIndex(m, ref, functionName, funcVars);
 	string var (varName->Attribute("name"));
 	std::stringstream ss;
 	ss << flatIndex;
 	var += "_" + ss.str();
-	if (funcVars.find(var)->second != NULL) {
-		return funcVars.find(var)->second->getVar();
+	std::map<std::string, Variable*>::iterator it = funcVars.find(var);
+	if (it != funcVars.end()) {
+		return it->second->getVar();
 	}
+	/*if (funcVars.find(var)->second != NULL) {
+		return funcVars.find(var)->second->getVar();
+	}*/
 	return MX(var);
 }
 
 /**
  * Convert if expression to MX
  */
-MX ifExpToMx(Ref<Model> m, XMLElement* expression) {
+MX ifExpToMx(Ref<Model> m, XMLElement* expression, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	XMLElement* branching = expression->FirstChildElement();
 	XMLElement* condition = branching->FirstChildElement();
 	XMLElement* thenBranch = branching->NextSiblingElement()->FirstChildElement();
 	XMLElement* elseBranch = branching->NextSiblingElement()->NextSiblingElement()->FirstChildElement();
-	return CasADi::if_else(expressionToMx(m, condition), expressionToMx(m, thenBranch), expressionToMx(m, elseBranch));
+	return CasADi::if_else(expressionToMx(m, condition, funcVars), expressionToMx(m, thenBranch, funcVars), expressionToMx(m, elseBranch, funcVars));
 }
 
 /**
@@ -1036,71 +1053,16 @@ int findIndex(MXVector vector, string elem) {
 }
 
 /**
- * Method that adds function headers to the model object so that import of
- * functions with function calls to other functions will work properly
- * if the other function is not already imported.
- */
-void addFunctionHeaders(Ref<Model> m, XMLElement* elem) {
-	for (XMLElement* child = elem->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
-		if (!strcmp(child->Value(), "classDefinition")) {
-			string functionName = child->Attribute("name");
-			XMLElement* function = child->FirstChildElement();
-			if (!strcmp(function->Value(), "class") && !strcmp(function->Attribute("kind"), "function")) {
-				MXVector expressions = getFuncVars(m, function);
-				MXVector inputVars = getInputVector(m, function);
-				MXVector outputVars = MXVector();
-				int index=0;
-				for (XMLElement* var = function->FirstChildElement(); var != NULL; var = var->NextSiblingElement()) {
-					if (var->Attribute("causality") != NULL && !strcmp(var->Attribute("causality"), "output")) {
-						XMLElement* outputElem = var->FirstChildElement()->NextSiblingElement();
-						if (outputElem != NULL && !strcmp(outputElem->Value(), "dimension")) {
-							std::vector<int> dimensions = dimensionMap.find((functionName + var->Attribute("name")))->second;
-							int nbrOutputVars = 1;
-							for (int j=0; j < dimensions.size(); j++) {
-								nbrOutputVars *= dimensions.at(j);
-							}
-							for (int j=0; j < nbrOutputVars; j++) {
-								outputVars.push_back(expressions.at(index));
-								index++;
-							}
-						} else {
-							outputVars.push_back(expressions.at(index));
-							index++;
-						}
-					} else {
-						XMLElement* indexElem = var->FirstChildElement()->NextSiblingElement();
-						if (indexElem != NULL && !strcmp(indexElem->Value(), "dimension")) {
-							std::vector<int> dimensions = dimensionMap.find((functionName + var->Attribute("name")))->second;
-							int nbrVars = 1;
-							for (int j=0; j < dimensions.size(); j++) {
-								nbrVars *= dimensions.at(j);
-							}
-							index += nbrVars;
-						} else {
-							index++;
-						}
-					}
-				}
-				CasADi::MXFunction f = CasADi::MXFunction(inputVars, outputVars);
-				f.setOption("name", child->Attribute("name"));
-				f.init();
-				m->setModelFunctionByItsName(new ModelicaCasADi::ModelFunction(f));
-			}
-		}
-	}
-}
-
-/**
  * Takes an XMLElement that contains an arbitrary number of dimensions and 
  * calculate a flat index from these dimensions
  */
-int calculateFlatArrayIndex(Ref<Model> m, XMLElement* reference, string functionName) {
+int calculateFlatArrayIndex(Ref<Model> m, XMLElement* reference, string functionName, std::map<string, ModelicaCasADi::Variable*> &funcVars) {
 	XMLElement* varName = reference->FirstChildElement();
 	std::vector<int> dimensions = dimensionMap.find((functionName + varName->Attribute("name")))->second;
 	std::vector<int> subscripts;
 	for (XMLElement* sub = varName->NextSiblingElement(); sub != NULL; sub = sub->NextSiblingElement()) {
 		if (!strcmp(sub->FirstChildElement()->Value(), "call")) {
-			MX tmp = expressionToMx(m, sub->FirstChildElement());
+			MX tmp = expressionToMx(m, sub->FirstChildElement(), funcVars);
 			subscripts.push_back(tmp.getValue()-1);
 		} else if (!strcmp(sub->FirstChildElement()->Value(), "integer") || !strcmp(sub->FirstChildElement()->Value(), "real")) {
 			subscripts.push_back(atoi(sub->FirstChildElement()->Attribute("value"))-1);
@@ -1147,7 +1109,7 @@ std::vector<string> getArrayVariables(XMLElement* elem, string functionName) {
 /**
  * Finds a specific function in the XML and adds it to the model. Used to 
  * ensure that all functions are added before they are called.
- 
+ */
 void addFunc(string funcName, XMLElement* elem, Ref<Model> m) {
 	// get to rootnode of document and then find the function
 	XMLElement* function;
@@ -1162,6 +1124,6 @@ void addFunc(string funcName, XMLElement* elem, Ref<Model> m) {
 				break;
 		}
 	}
-}*/
+}
 
 }; // end namespace

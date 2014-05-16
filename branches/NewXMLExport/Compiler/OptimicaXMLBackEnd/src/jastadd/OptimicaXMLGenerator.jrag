@@ -35,9 +35,14 @@ aspect OptimicaXMLCodeGenerator {
 			p.print(fv, str, indentOneStep);
 		}*/
 		
-		/*for (FTimedVariable timedVar : timedRealVariables()) {
-			p.print(timedVar, str, indentOneStep);
-		}*/
+		for (FTimedVariable timedVar : timedRealVariables()) {
+			//timedVar.generateDecl(p, str, indentOneStep);
+			//p.print(timedVar, str, indentOneStep);
+			generateOpenTag(str, "timedVariable", indentOneStep);
+			p.print(timedVar.getName(), str, indentTwoSteps);
+			p.print(timedVar.getArg(), str, indentTwoSteps);
+			generateCloseTag(str, "timedVariable", indentOneStep);
+		}
 		
 		// add a newline between sections for clearer XML
 		str.print("\n");
@@ -84,7 +89,7 @@ aspect OptimicaXMLCodeGenerator {
 			}
 		}
 		
-		// tramsfer constraints
+		// transfer constraints
 		if (getNumFConstraint() > 0) {
 			generateOpenTag(str, "constraint", indentOneStep);
 			for (FConstraint c : pathLeqConstraints()) {
@@ -164,10 +169,6 @@ aspect OptimicaXMLCodeGenerator {
 	
 	public void FTimedVariable.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
-		//generateOpenTag(str, "timedVariable", indent);
-		//p.print(getName(), str, indentOneStep);
-		//p.print(getArg(), str, indentOneStep);
-		//generateCloseTag(str, "timedVariable", indent);
 		generateOpenTag(str, "operator", indent, "name", "at");
 		p.print(getName(), str, indentOneStep);
 		p.print(getArg(), str, indentOneStep);
