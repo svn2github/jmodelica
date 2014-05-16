@@ -1586,17 +1586,18 @@ aspect FlatExpressions {
             return var.flattenAccess(prefix, this);
         }
 	}
-	
-	/**
-	 * Flatten an access expression to this component.
-	 */
-	public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
+
+    /**
+     * Flatten an access expression to this component.
+     */
+    public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
+        FQName subscriptsPrefix = prefix;
         if (inOrIsOuter()) {
             prefix = myInnerInstComponentDecl().getFQName();
             prefix = prefix.copyWithoutSuffix(exp.getInstAccess().numParts());
         }
-        return new FIdUseExp(exp.getInstAccess().flatten(prefix));
-	}
+        return new FIdUseExp(exp.getInstAccess().flatten(prefix, subscriptsPrefix));
+    }
 
 	public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
         // If the FInstAccess refers to a constant or string parameter, then inline expression
@@ -1789,64 +1790,68 @@ aspect FlatExpressions {
 	// TODO: this doesn't seem to cover colon subscripts to arrays of unknown size
 	syn boolean FSubscript.isUnknownIndex() = false;
 	eq FExpSubscript.isUnknownIndex()       = !getFExp().canCeval();
-	
-	public FQName InstAccess.flatten(FQName prefix) { 
-		if (myInstComponentDecl().isEnumLiteral())
-			return myInstComponentDecl().getFQName().fullCopy();
-		
-		FQName base = isForIndex() ? new FQNameEmpty() : prefix;
-		int last = allFArraySubscripts().size() - 1;
-		return flattenName(prefix, base, 0, last);
-	}
-	
-	/**
-	 * Flatten part of this name.
-	 * 
-	 * @param prefix  prefix to pass when flattening subscripts
-	 * @param base    prefix to prepend to name
-	 * @param first   first part of name to flatten
-	 * @param last    last part of name to flatten
-	 */
-	public FQName InstAccess.flattenName(FQName prefix, FQName base, int first, int last) {
-		if (first != 0 || last != 0)
-			throw new ArrayIndexOutOfBoundsException(first == 0 ? last : first);
-		FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
-		if (fas == null)
-			return base.copyAndAppend(name());
-		if (!fas.hasNonLiteralSubscripts())
-			return base.copyAndAppend(name() + fas);
-		return base.copyAndAppend(name(), fas.flatten(prefix));
-	}
 
-	public FQName InstDot.flattenName(FQName prefix, FQName base, int first, int last) {
-		java.util.List<FArraySubscripts> fasl = allFArraySubscripts();
-		boolean nonLiteral = false;
-		for (FArraySubscripts fas : fasl)
-			nonLiteral = nonLiteral || fas.hasNonLiteralSubscripts();
-		boolean size = inSizeExp();
-		if (nonLiteral || inFunction()) {
-			FQNameFull res = new FQNameFull();
-			for (int i = first; i <= last; i++) {
-				InstAccess cur = getInstAccess(i);
-				FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
-				res.addFQNamePart(cur.flattenPart(prefix, fas));
-			}
-			return base.copyAndAppend(res);
-		} else {
-			StringBuilder buf = new StringBuilder();
-			for (int i = first; i <= last; i++) {
-				InstAccess cur = getInstAccess(i);
-				FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
-				buf.append(cur.name());
-				if (fas != null)
-					buf.append(fas);
-				if (i < last)
-					buf.append('.');
-			}
-			return prefix.copyAndAppend(buf.toString());
-		}
-	}
-	
+    public FQName InstAccess.flatten(FQName prefix) { 
+        return flatten(prefix, prefix);
+    }
+
+    public FQName InstAccess.flatten(FQName namePrefix, FQName subscriptPrefix) { 
+        if (myInstComponentDecl().isEnumLiteral())
+            return myInstComponentDecl().getFQName().fullCopy();
+        
+        FQName base = isForIndex() ? new FQNameEmpty() : namePrefix;
+        int last = allFArraySubscripts().size() - 1;
+        return flattenName(subscriptPrefix, base, 0, last);
+    }
+
+    /**
+     * Flatten part of this name.
+     * 
+     * @param prefix  prefix to pass when flattening subscripts
+     * @param base    prefix to prepend to name
+     * @param first   first part of name to flatten
+     * @param last    last part of name to flatten
+     */
+    public FQName InstAccess.flattenName(FQName prefix, FQName base, int first, int last) {
+        if (first != 0 || last != 0)
+            throw new ArrayIndexOutOfBoundsException(first == 0 ? last : first);
+        FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
+        if (fas == null)
+            return base.copyAndAppend(name());
+        if (!fas.hasNonLiteralSubscripts())
+            return base.copyAndAppend(name() + fas);
+        return base.copyAndAppend(name(), fas.flatten(prefix));
+    }
+
+    public FQName InstDot.flattenName(FQName prefix, FQName base, int first, int last) {
+        java.util.List<FArraySubscripts> fasl = allFArraySubscripts();
+        boolean nonLiteral = false;
+        for (FArraySubscripts fas : fasl)
+            nonLiteral = nonLiteral || fas.hasNonLiteralSubscripts();
+        boolean size = inSizeExp();
+        if (nonLiteral || inFunction()) {
+            FQNameFull res = new FQNameFull();
+            for (int i = first; i <= last; i++) {
+                InstAccess cur = getInstAccess(i);
+                FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
+                res.addFQNamePart(cur.flattenPart(prefix, fas));
+            }
+            return base.copyAndAppend(res);
+        } else {
+            StringBuilder buf = new StringBuilder();
+            for (int i = first; i <= last; i++) {
+                InstAccess cur = getInstAccess(i);
+                FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
+                buf.append(cur.name());
+                if (fas != null)
+                    buf.append(fas);
+                if (i < last)
+                    buf.append('.');
+            }
+            return base.copyAndAppend(buf.toString());
+        }
+    }
+
 	protected FArraySubscripts InstAccess.filterFASForFlatten(FArraySubscripts fas, boolean last, boolean size) {
 		/* Simplify check later. */
 		if (fas.getNumFSubscript() == 0)

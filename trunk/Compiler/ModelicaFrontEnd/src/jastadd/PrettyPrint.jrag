@@ -793,10 +793,15 @@ aspect PrettyPrint {
 		}
 	}
 
-	public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.print(getID());
-	}
-		
+    public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getID());
+    }
+
+    public void ArrayAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getID());
+        getArraySubscriptsOpt().prettyPrint(p, str, indent);
+    }
+
 	public void Dot.prettyPrint(Printer p, CodeStream str, String indent) {
 		getAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
