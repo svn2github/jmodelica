@@ -214,15 +214,15 @@ equation
 end FunctionTest2;
 
 model IntegerArg1
-	function f
-		input Integer i;
-		input Real a[:];
-		output Real x;
-	algorithm
-		x := a[i];
-	end f;
-	
-	Real x = f(2, {3, 4, 5 + time});
+    function f
+        input Integer i;
+        input Real a[:];
+        output Real x;
+    algorithm
+        x := a[i];
+    end f;
+    
+    Real x = f(2, {3, 4, 5 + time});
 end IntegerArg1;
 
 model FuncTest1
@@ -255,7 +255,7 @@ model TestAssertSize
     function f
         input Integer n;
         input Real[2,2] d;
-		input Real t;
+        input Real t;
         output Real[2,n] c;
     algorithm
         c := d;
@@ -263,6 +263,25 @@ model TestAssertSize
 
     Real[2,3] x = f(3,{{1,2},{3,time}}, time);
 end TestAssertSize;
+
+model TestUnkRecArray
+    record R1
+        R2[2] x;
+    end R1;
+    record R2
+        Real[1] y;
+    end R2;
+    function f
+        input Integer m;
+        output R1[m,m] o;
+    algorithm
+        for i in 1:m loop
+            o[i,:] := {R1({R2({i*j}),R2({-i*j})}) for j in 1:m};
+        end for;
+    end f;
+    
+    R1[3,3] c = f(3);
+end TestUnkRecArray;
 
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;

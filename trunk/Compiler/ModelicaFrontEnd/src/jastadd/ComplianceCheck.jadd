@@ -200,16 +200,6 @@ aspect ComplianceCheck {
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
 	}
 	
-	
-	public void InstAssignStmt.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		boolean left  = getLeft().size().isUnknown();
-		boolean right = getRight().size().isUnknown();
-		if ((left || right) && getLeft().type().isRecord()) {
-			compliance("Record arrays of unknown sizes are not supported");
-		}
-	}
-	
 	public void InstRecordConstructor.complianceCheck(ErrorCheckType checkType) {
 		for (InstFunctionArgument a : getArgs())
 			if (a.getFExp().size().isUnknown())

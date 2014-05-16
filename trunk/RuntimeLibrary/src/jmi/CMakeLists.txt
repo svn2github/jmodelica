@@ -29,7 +29,6 @@ message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
 set(JMISources   
     jmi.h
-    jmi_array_common.h
     jmi_array_none.h
     jmi_block_residual.h
     jmi_me.h

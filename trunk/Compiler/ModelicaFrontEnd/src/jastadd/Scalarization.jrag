@@ -900,7 +900,7 @@ aspect Scalarization {
                 fqn = new FQNameFull(name, createFArraySubscripts());
             else
                 fqn = new FQNameFull(name);
-            return new FIdUseExp(new FIdUse(fqn));
+            return new FIdTempExp(new FIdUse(fqn));
         }
 		/**
 		 * \brief Creates a new ForNames with the top layer copied
@@ -940,12 +940,17 @@ aspect Scalarization {
             names.removeLayer();
         }
         
+        scalarizeAssignment_sub(vars, stmts, indexMap, left, right);
+    }
+    
+    public void FType.scalarizeAssignment_sub(
+            List vars, List<FStatement> stmts, 
+            Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
         if (size().isUnknown() || !isArray()) {
             scalarizeScalarAssignment(vars, stmts, indexMap, left, right);
         } else {
             scalarizeArrayAssignment(vars, stmts, indexMap, left, right);
         }
-        
     }
     
     /**
@@ -970,7 +975,7 @@ aspect Scalarization {
             List vars, List<FStatement> stmts, 
             Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
         for (FRecordComponentType comp : getComponents()) {
-            comp.getFType().scalarizeAssignment(vars, stmts, indexMap,
+            comp.getFType().scalarizeAssignment_sub(vars, stmts, indexMap,
                     (FIdUseExp) left.extractRecordCell(indexMap, comp.getName()),
                     right.extractRecordCell(indexMap, comp.getName()));
         }
@@ -999,21 +1004,40 @@ aspect Scalarization {
         return dynamicFExp(new FIdUseExp(new FIdUse(getFIdUse().getFQName().specify(i, true))));
     }
     public FExp FIdTempExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        return new FIdTempExp(new FIdUse(getFIdUse().getFQName().specify(i, true)));
+        FQName fqn = getFIdUse().getFQName();
+        fqn = fqn.copyAndAddFas(i.createFArraySubscripts());
+        return new FIdTempExp(new FIdUse(fqn));
     }
     public FExp FExp.extractRecordCell(Map<String,FExp> indexMap, String suffix) {
+        if (useTempVar) {
+            FQName fqn;
+            String name = tempVarName();
+            if (indexMap.containsKey(name)) {
+                fqn = ((FIdUseExp)indexMap.get(name)).getFIdUse().getFQName();
+            } else {
+                fqn = new FQNameFull(tempVarName());
+            }
+            fqn = fqn.copyAndAppend(suffix);
+            return dynamicFExp(new FIdUseExp(new FIdUse(fqn)));
+        }
         return dynamicFExp(scalarRecordFExp(indexMap, new FQNameFull(suffix)));
     }
     public FExp FIdUseExp.extractRecordCell(Map<String,FExp> indexMap, String suffix) {
-        return dynamicFExp(new FIdUseExp(new FIdUse(getFIdUse().getFQName().copyAndAppend(suffix))));
+        FQName fqn = getFIdUse().getFQName().scalarize(indexMap);
+        if (indexNames != null)
+            fqn = fqn.copyAndAddFas(indexNames.createFArraySubscripts(ndims()));
+        fqn.append(suffix);
+        return dynamicFExp(new FIdUseExp(new FIdUse(fqn)));
     }
     public FExp FIdTempExp.extractRecordCell(Map<String,FExp> indexMap, String suffix) {
-        return new FIdTempExp(new FIdUse(getFIdUse().getFQName().copyAndAppend(suffix)));
+        FQName fqn = getFIdUse().getFQName().fullCopy();
+        fqn.append(suffix);
+        return dynamicFExp(new FIdTempExp(new FIdUse(fqn)));
     }
     
     syn FExp FIdTempExp.scalarize(Map<String,FExp> indexMap) =
             indexNames == null ?
-                    new FIdUseExp(getFIdUse().scalarize(indexMap)) :
+                    fullCopy() :
                         createUseWithNamedSubscripts(indexNames);
     
     /*
@@ -1062,12 +1086,13 @@ aspect Scalarization {
      * Will this expression be scalarized as an unknown size?
      */
     inh boolean FExp.inUnknownSize();
-    eq Root.getChild().inUnknownSize()          = false;
-    eq FStatement.getChild().inUnknownSize()    = false;
-    eq FEquation.getChild().inUnknownSize()     = false;
-    eq FFunctionCall.getChild().inUnknownSize() = false;
-    eq FAssignStmt.getChild().inUnknownSize()   = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FExp.getChild().inUnknownSize()          = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
+    eq Root.getChild().inUnknownSize()               = false;
+    eq FStatement.getChild().inUnknownSize()         = false;
+    eq FEquation.getChild().inUnknownSize()          = false;
+    eq FFunctionCall.getChild().inUnknownSize()      = false;
+    eq FRecordConstructor.getChild().inUnknownSize() = false;
+    eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
     
     
     /**
@@ -1233,13 +1258,14 @@ aspect Scalarization {
                 names.removeLayer();
                 outer = names.createForLoops(outer, right);
                 outer.addAll(inner);
+                right = ((FIterExp) right).getFExp();
             } else {
                 left.getFArraySubscripts().setFSubscript(new FIntegerSubscript(i+1), 0);
                 outer.addAll(inner);
                 outer = names.createForLoops(outer, right);
             }
             
-            outer.add(new FAssignStmt(left, right.scalarize(indexMap)));
+            type().scalarizeAssignment_sub(vars, outer, indexMap, left, right);
         }
         
         if (!iter)
@@ -1436,10 +1462,12 @@ aspect Scalarization {
      * in <code>indexNames</code> for expressions replaced with temps.
      */
     public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        if (useTempVar && isArray())
-            indexMap.put(tempVarName(), names.createUseWithSubscripts(tempVarName()));
-        else
+        if (useTempVar) {
+            if (isArray())
+                indexMap.put(tempVarName(), names.createUseWithSubscripts(tempVarName()));
+        } else {
             super.addArrayUsesToIndexMap(indexMap, names);
+        }
     }
     
     /**

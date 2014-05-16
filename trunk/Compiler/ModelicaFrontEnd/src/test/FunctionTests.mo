@@ -8765,6 +8765,270 @@ end FunctionTests.UnknownArray38;
 ")})));
 end UnknownArray38;
 
+model UnknownArray39
+    record R
+        Real x;
+    end R;
+    function f
+        input Integer m;
+        output R[m,m] o;
+    algorithm
+        for i in 1:m loop
+            o[i,:] := {R(i*j) for j in 1:m};
+        end for;
+    end f;
+    
+    R[1,1] c = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray39",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray39
+ Real c[1,1].x;
+equation
+ ({{FunctionTests.UnknownArray39.R(c[1,1].x)}}) = FunctionTests.UnknownArray39.f(1);
+
+public
+ function FunctionTests.UnknownArray39.f
+  input Integer m;
+  output FunctionTests.UnknownArray39.R[m, m] o;
+  FunctionTests.UnknownArray39.R[:] temp_1;
+ algorithm
+  size(temp_1) := {m};
+  for i in 1:m loop
+   for i2 in 1:m loop
+    temp_1[i2].x := i * i2;
+   end for;
+   for i1 in 1:m loop
+    o[i,i1].x := temp_1[i1].x;
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray39.f;
+
+ record FunctionTests.UnknownArray39.R
+  Real x;
+ end FunctionTests.UnknownArray39.R;
+
+end FunctionTests.UnknownArray39;
+")})));
+end UnknownArray39;
+
+model UnknownArray40
+    record R
+        Real[2] y;
+    end R;
+    function f
+        input  R[:] i;
+        output R[size(i,1)] o;
+    algorithm
+        o := i;
+        o[:] := i;
+        o := i[:];
+        o[:] := i[:];
+    end f;
+    
+    R[1] r = f({R({2,3})});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray40",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray40
+ Real r[1].y[1];
+ Real r[1].y[2];
+equation
+ ({FunctionTests.UnknownArray40.R({r[1].y[1], r[1].y[2]})}) = FunctionTests.UnknownArray40.f({FunctionTests.UnknownArray40.R({2, 3})});
+
+public
+ function FunctionTests.UnknownArray40.f
+  input FunctionTests.UnknownArray40.R[:] i;
+  output FunctionTests.UnknownArray40.R[size(i, 1)] o;
+ algorithm
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  return;
+ end FunctionTests.UnknownArray40.f;
+
+ record FunctionTests.UnknownArray40.R
+  Real y[2];
+ end FunctionTests.UnknownArray40.R;
+
+end FunctionTests.UnknownArray40;
+")})));
+end UnknownArray40;
+
+model UnknownArray41
+    record R
+        Real x;
+        Real[2] y;
+    end R;
+    function f
+        input Integer m;
+        output R[m,m] o;
+    algorithm
+        for i in 1:m loop
+            o[i,:] := {R(i*j, {i,j}) for j in 1:m};
+        end for;
+    end f;
+    
+    R[1,1] c = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray41",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray41
+ Real c[1,1].x;
+ Real c[1,1].y[1];
+ Real c[1,1].y[2];
+equation
+ ({{FunctionTests.UnknownArray41.R(c[1,1].x, {c[1,1].y[1], c[1,1].y[2]})}}) = FunctionTests.UnknownArray41.f(1);
+
+public
+ function FunctionTests.UnknownArray41.f
+  input Integer m;
+  output FunctionTests.UnknownArray41.R[m, m] o;
+  FunctionTests.UnknownArray41.R[:] temp_1;
+ algorithm
+  size(temp_1) := {m};
+  for i in 1:m loop
+   for i2 in 1:m loop
+    temp_1[i2].x := i * i2;
+    temp_1[i2].y[1] := i;
+    temp_1[i2].y[2] := i2;
+   end for;
+   for i1 in 1:m loop
+    o[i,i1].x := temp_1[i1].x;
+    o[i,i1].y[1] := temp_1[i1].y[1];
+    o[i,i1].y[2] := temp_1[i1].y[2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray41.f;
+
+ record FunctionTests.UnknownArray41.R
+  Real x;
+  Real y[2];
+ end FunctionTests.UnknownArray41.R;
+
+end FunctionTests.UnknownArray41;
+")})));
+end UnknownArray41;
+
+model UnknownArray42
+    record R1
+        R2[1] y;
+        R2 z;
+    end R1;
+    record R2
+        Real[1] p1;
+        Real p2;
+    end R2;
+    function f2
+        input Real x;
+        output R2 y = R2(1:1,x);
+      algorithm
+    end f2;
+    function f
+        input Integer m;
+        output R1[m] o;
+    algorithm
+        o[:] := {R1({f2(j)},f2(j)) for j in 1:m};
+    end f;
+    
+    R1[1] c = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray42",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray42
+ Real c[1].y[1].p1[1];
+ Real c[1].y[1].p2;
+ Real c[1].z.p1[1];
+ Real c[1].z.p2;
+equation
+ ({FunctionTests.UnknownArray42.R1({FunctionTests.UnknownArray42.R2({c[1].y[1].p1[1]}, c[1].y[1].p2)}, FunctionTests.UnknownArray42.R2({c[1].z.p1[1]}, c[1].z.p2))}) = FunctionTests.UnknownArray42.f(1);
+
+public
+ function FunctionTests.UnknownArray42.f
+  input Integer m;
+  output FunctionTests.UnknownArray42.R1[m] o;
+  FunctionTests.UnknownArray42.R1[:] temp_1;
+  FunctionTests.UnknownArray42.R2[:] temp_2;
+  FunctionTests.UnknownArray42.R2[:] temp_3;
+ algorithm
+  size(temp_1) := {m};
+  size(temp_2) := {m};
+  size(temp_3) := {m};
+  for i2 in 1:m loop
+   (temp_2) := FunctionTests.UnknownArray42.f2(i2);
+   (temp_3) := FunctionTests.UnknownArray42.f2(i2);
+   temp_1[i2].y[1].p1[1] := temp_2.p1[1];
+   temp_1[i2].y[1].p2 := temp_2.p2;
+   temp_1[i2].z.p1[1] := temp_3.p1[1];
+   temp_1[i2].z.p2 := temp_3.p2;
+  end for;
+  for i1 in 1:m loop
+   o[i1].y[1].p1[1] := temp_1[i1].y[1].p1[1];
+   o[i1].y[1].p2 := temp_1[i1].y[1].p2;
+   o[i1].z.p1[1] := temp_1[i1].z.p1[1];
+   o[i1].z.p2 := temp_1[i1].z.p2;
+  end for;
+  return;
+ end FunctionTests.UnknownArray42.f;
+
+ function FunctionTests.UnknownArray42.f2
+  input Real x;
+  output FunctionTests.UnknownArray42.R2 y;
+ algorithm
+  y.p1[1] := 1;
+  y.p2 := x;
+  return;
+ end FunctionTests.UnknownArray42.f2;
+
+ record FunctionTests.UnknownArray42.R2
+  Real p1[1];
+  Real p2;
+ end FunctionTests.UnknownArray42.R2;
+
+ record FunctionTests.UnknownArray42.R1
+  FunctionTests.UnknownArray42.R2 y[1];
+  FunctionTests.UnknownArray42.R2 z;
+ end FunctionTests.UnknownArray42.R1;
+
+end FunctionTests.UnknownArray42;
+")})));
+end UnknownArray42;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

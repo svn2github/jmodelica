@@ -604,9 +604,6 @@ end R;
 			errorMessage="
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 647, column 2:
-  Record arrays of unknown sizes are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 648, column 16:
   Unknown sizes in record constructors is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':

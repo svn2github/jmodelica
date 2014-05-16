@@ -31,59 +31,89 @@
 /* Size macro - gives the size of array arr for dimension d */
 #define jmi_array_size(arr, d) ((arr)->size[(int) d])
 
+/* Array decl macro, delegates*/
+#define JMI_ARR(dyn, type, arr, name, ne, nd) \
+    JMI_ARRAY_DECL_##dyn(type, arr, name, ne, nd)
 
-/* Record array initialization macros */
-#define JMI_RECORD_ARRAY_STATIC_INIT_1(type, name, d1) \
-    JMI_ARRAY_STATIC_INIT_1(name, d1)
-#define JMI_RECORD_ARRAY_STATIC_INIT_2(type, name, d1, d2) \
-    JMI_ARRAY_STATIC_INIT_2(name, d1, d2)
-#define JMI_RECORD_ARRAY_STATIC_INIT_3(type, name, d1, d2, d3) \
-    JMI_ARRAY_STATIC_INIT_3(name, d1, d2, d3)
-#define JMI_RECORD_ARRAY_STATIC_INIT_4(type, name, d1, d2, d3, d4) \
-    JMI_ARRAY_STATIC_INIT_4(name, d1, d2, d3, d4)
-#define JMI_RECORD_ARRAY_STATIC_INIT_5(type, name, d1, d2, d3, d4, d5) \
-    JMI_ARRAY_STATIC_INIT_5(name, d1, d2, d3, d4, d5)
-#define JMI_RECORD_ARRAY_STATIC_INIT_6(type, name, d1, d2, d3, d4, d5, d6) \
-    JMI_ARRAY_STATIC_INIT_6(name, d1, d2, d3, d4, d5, d6)
-#define JMI_RECORD_ARRAY_STATIC_INIT_7(type, name, d1, d2, d3, d4, d5, d6, d7) \
-    JMI_ARRAY_STATIC_INIT_7(name, d1, d2, d3, d4, d5, d6, d7)
-#define JMI_RECORD_ARRAY_STATIC_INIT_8(type, name, d1, d2, d3, d4, d5, d6, d7, d8) \
-    JMI_ARRAY_STATIC_INIT_8(name, d1, d2, d3, d4, d5, d6, d7, d8)
-#define JMI_RECORD_ARRAY_STATIC_INIT_9(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9) \
-    JMI_ARRAY_STATIC_INIT_9(name, d1, d2, d3, d4, d5, d6, d7, d8, d9)
-#define JMI_RECORD_ARRAY_STATIC_INIT_10(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10) \
-    JMI_ARRAY_STATIC_INIT_10(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10)
-#define JMI_RECORD_ARRAY_STATIC_INIT_11(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11) \
-    JMI_ARRAY_STATIC_INIT_11(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)
-#define JMI_RECORD_ARRAY_STATIC_INIT_12(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12) \
-    JMI_ARRAY_STATIC_INIT_12(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12)
-#define JMI_RECORD_ARRAY_STATIC_INIT_13(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13) \
-    JMI_ARRAY_STATIC_INIT_13(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13)
-#define JMI_RECORD_ARRAY_STATIC_INIT_14(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14) \
-    JMI_ARRAY_STATIC_INIT_14(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14)
-#define JMI_RECORD_ARRAY_STATIC_INIT_15(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15) \
-    JMI_ARRAY_STATIC_INIT_15(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)
-#define JMI_RECORD_ARRAY_STATIC_INIT_16(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16) \
-    JMI_ARRAY_STATIC_INIT_16(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16)
-#define JMI_RECORD_ARRAY_STATIC_INIT_17(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17) \
-    JMI_ARRAY_STATIC_INIT_17(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17)
-#define JMI_RECORD_ARRAY_STATIC_INIT_18(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18) \
-    JMI_ARRAY_STATIC_INIT_18(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18)
-#define JMI_RECORD_ARRAY_STATIC_INIT_19(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19) \
-    JMI_ARRAY_STATIC_INIT_19(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19)
-#define JMI_RECORD_ARRAY_STATIC_INIT_20(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20) \
-    JMI_ARRAY_STATIC_INIT_20(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20)
-#define JMI_RECORD_ARRAY_STATIC_INIT_21(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21) \
-    JMI_ARRAY_STATIC_INIT_21(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21)
-#define JMI_RECORD_ARRAY_STATIC_INIT_22(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22) \
-    JMI_ARRAY_STATIC_INIT_22(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22)
-#define JMI_RECORD_ARRAY_STATIC_INIT_23(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23) \
-    JMI_ARRAY_STATIC_INIT_23(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23)
-#define JMI_RECORD_ARRAY_STATIC_INIT_24(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24) \
-    JMI_ARRAY_STATIC_INIT_24(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24)
-#define JMI_RECORD_ARRAY_STATIC_INIT_25(type, name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25) \
-    JMI_ARRAY_STATIC_INIT_25(name, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25)
+/* Array init macro, delegates*/
+#define JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
+    JMI_ARRAY_INIT_##dyn(type, arr, name, ne, nd)
 
+#define JMI_ARRAY_INIT_1(dyn, type, arr, name, ne, nd, d1) \
+    JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
+    name->size[0] = (int) (d1);
+#define JMI_ARRAY_INIT_2(dyn, type, arr, name, ne, nd, d1, d2) \
+    JMI_ARRAY_INIT_1(dyn, type, arr, name, ne, nd, d1)\
+    name->size[1] = (int) (d2);
+#define JMI_ARRAY_INIT_3(dyn, type, arr, name, ne, nd, d1, d2, d3) \
+    JMI_ARRAY_INIT_2(dyn, type, arr, name, ne, nd, d1, d2)\
+    name->size[2] = (int) (d3);
+#define JMI_ARRAY_INIT_4(dyn, type, arr, name, ne, nd, d1, d2, d3, d4) \
+    JMI_ARRAY_INIT_3(dyn, type, arr, name, ne, nd, d1, d2, d3)\
+    name->size[3] = (int) (d4);
+#define JMI_ARRAY_INIT_5(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5) \
+    JMI_ARRAY_INIT_4(dyn, type, arr, name, ne, nd, d1, d2, d3, d4)\
+    name->size[4] = (int) (d5);
+#define JMI_ARRAY_INIT_6(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6) \
+    JMI_ARRAY_INIT_5(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5)\
+    name->size[5] = (int) (d6);
+#define JMI_ARRAY_INIT_7(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7) \
+    JMI_ARRAY_INIT_6(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6)\
+    name->size[6] = (int) (d7);
+#define JMI_ARRAY_INIT_8(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8) \
+    JMI_ARRAY_INIT_7(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7)\
+    name->size[7] = (int) (d8);
+#define JMI_ARRAY_INIT_9(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9) \
+    JMI_ARRAY_INIT_8(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8)\
+    name->size[8] = (int) (d9);
+#define JMI_ARRAY_INIT_10(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10) \
+    JMI_ARRAY_INIT_9(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9)\
+    name->size[9] = (int) (d10);
+#define JMI_ARRAY_INIT_11(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11) \
+    JMI_ARRAY_INIT_10(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10)\
+    name->size[10] = (int) (d11);
+#define JMI_ARRAY_INIT_12(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12) \
+    JMI_ARRAY_INIT_11(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)\
+    name->size[11] = (int) (d12);
+#define JMI_ARRAY_INIT_13(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13) \
+    JMI_ARRAY_INIT_12(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12)\
+    name->size[12] = (int) (d13);
+#define JMI_ARRAY_INIT_14(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14) \
+    JMI_ARRAY_INIT_13(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13)\
+    name->size[13] = (int) (d14);
+#define JMI_ARRAY_INIT_15(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15) \
+    JMI_ARRAY_INIT_14(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14)\
+    name->size[14] = (int) (d15);
+#define JMI_ARRAY_INIT_16(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16) \
+    JMI_ARRAY_INIT_15(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)\
+    name->size[15] = (int) (d16);
+#define JMI_ARRAY_INIT_17(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17) \
+    JMI_ARRAY_INIT_16(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16)\
+    name->size[16] = (int) (d17);
+#define JMI_ARRAY_INIT_18(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18) \
+    JMI_ARRAY_INIT_17(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17)\
+    name->size[17] = (int) (d18);
+#define JMI_ARRAY_INIT_19(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19) \
+    JMI_ARRAY_INIT_18(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18)\
+    name->size[18] = (int) (d19);
+#define JMI_ARRAY_INIT_20(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20) \
+    JMI_ARRAY_INIT_19(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19)\
+    name->size[19] = (int) (d20);
+#define JMI_ARRAY_INIT_21(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21) \
+    JMI_ARRAY_INIT_20(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20)\
+    name->size[20] = (int) (d21);
+#define JMI_ARRAY_INIT_22(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22) \
+    JMI_ARRAY_INIT_21(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21)\
+    name->size[21] = (int) (d22);
+#define JMI_ARRAY_INIT_23(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23) \
+    JMI_ARRAY_INIT_22(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22)\
+    name->size[22] = (int) (d23);
+#define JMI_ARRAY_INIT_24(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24) \
+    JMI_ARRAY_INIT_23(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23)\
+    name->size[23] = (int) (d24);
+#define JMI_ARRAY_INIT_25(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25) \
+    JMI_ARRAY_INIT_24(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24)\
+    name->size[24] = (int) (d25);
 
 /* Index macros - only for use in definitions of jmi_array_* functions & macros */
 #define _JMI_ARR_I_1(arr, i1) (i1-1)
