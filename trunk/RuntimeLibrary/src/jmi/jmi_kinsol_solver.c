@@ -387,6 +387,15 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             }
 
             {
+                /* Only print header first time */
+                int user_flags = jmi_log_get_user_flags(log);
+                if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
+                    jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
+                                 "jmi_kinsol_solver", "iter\tnfe\tres_norm\tmax_res\tmax_ind", 1);
+                    jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
+                }
+            }
+            {
                 /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
                 jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
                 char message[256];

@@ -405,7 +405,9 @@ static void init_log(log_t *log, jmi_log_options_t* options, jmi_callbacks_t* jm
     log->outstanding_comma = FALSE;
     push_frame(log, logInfo, "Log", -1);  /* todo: do we need to always have a frame on the stack? */
     
-    log-> jmi_callbacks = jmi_callbacks;
+    log->jmi_callbacks = jmi_callbacks;
+
+    log->user_flags = 0;
 
     log->initialized = FALSE;  /* More initialization to do later */
 }
@@ -882,3 +884,6 @@ void jmi_log_real_matrix(log_t *log, node_t parent, category_t c, const char *na
     }
     jmi_log_leave(log, node);
 }
+
+int  jmi_log_get_user_flags(jmi_log_t *log) { return log->user_flags; }
+void jmi_log_set_user_flags(jmi_log_t *log, int user_flags) { log->user_flags = user_flags; }
