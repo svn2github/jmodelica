@@ -52,6 +52,7 @@ import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
+import org.jmodelica.util.Arguments;
 import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
@@ -1420,28 +1421,9 @@ public class ModelicaCompiler {
 		return 1;
 	}
 	
-	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
-		Hashtable<String, String> programargs = new Hashtable<String,String>();     
-		
-		while(pos < args.length && argumentIsOption(args[pos])) {
-			addOptionToMap(programargs, args[pos]);
-			pos++;
-		}
-		return programargs;
-	}
-
-	private static void addOptionToMap(Hashtable<String, String> programargs, String arg) {
-		String[] parts = arg.trim().substring(1).split("=", 2);
-		programargs.put(parts[0], (parts.length > 1) ? parts[1] : "");
-	}
-
-	private static boolean argumentIsOption(String arg) {
-		return arg.trim().startsWith("-");
-	}
-	
 	private final static Pattern BOOL_PATTERN = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
 
-    private void setOptions(Hashtable<String, String> programarguments) {
+    private void setOptions(Arguments programarguments) {
         String filesep = File.separator;
         String optionsfile = null;
         //look for options.xml in $JMODELICA_HOME/Options/ and program arguments
@@ -1481,27 +1463,11 @@ public class ModelicaCompiler {
         options.addStringOption("MODELICAPATH", modelicapath);
     }
 	
-	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
+	protected void setArguments(Arguments programarguments) 
 		throws JModelicaHomeNotFoundException {
 		// check that JMODELICA_HOME exists
 		if (jmodelicaHome == null) 
 			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
-		
-		if (args.length < 1) {
-			log.error(compilerName + " expects the command line arguments: \n" +
-					"[<options>] <file name> <class name> [<target>] [<version>]\n" +
-					" where options could be: \n" +
-					"  -log=<i or w or e> \n" +
-					"  -modelicapath=<path to modelica libraries> \n" +
-					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
-                    "  -target=<fmume, me ,fmucs, cs, jmu, fmux, parse or check>\n" +
-                    "  -version=<1.0 or 2.0>\n" +
-					"  -dumpmemuse[=<resolution>] -findflatinst \n" + 
-					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
-					" If no target is given, -jmu is assumed." +
-                    " If no version is given in case of targets 'me' or 'cs', -1.0 is assumed");
-			System.exit(1);
-		}
 		
 		int arg = 0;
 		String modelicapath = null;
@@ -1520,20 +1486,6 @@ public class ModelicaCompiler {
 		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
 		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
 		
-		arg = programarguments.size();
-        if (!programarguments.containsKey("target")) {
-            //If no target is set, assume jmu.
-            programarguments.put("target", "jmu");
-        }
-		if (args.length < arg+2 && !programarguments.get("target").equals("parse")) {
-			log.error(compilerName + " expects a file name and a class name as command line arguments.");
-			System.exit(1);
-		}
-		if (programarguments.get("target").equals("parse") && args.length != arg+1) {
-			log.error(compilerName + " -parse expects a list of filenames.");
-			System.exit(1);
-		}
-		
 		if (programarguments.containsKey("debugSrcIsHome")) 
 		    debugSrcIsHome = true;
 		
@@ -1548,28 +1500,27 @@ public class ModelicaCompiler {
 	}
 	
 	public static void main(String[] args) {
-		// TODO: Add a class representing the arguments of the program, with getX methods for arguments.
-		// Get any program options set
-		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
 		// create an empty compiler
 		ModelicaCompiler mc = new ModelicaCompiler();
-		// set arguments
 		try {
-			mc.setArguments("ModelicaCompiler", args, programarguments);
+            // set arguments
+            Arguments arguments = new Arguments("ModelicaCompiler", args);
+            mc.setArguments(arguments);
+            // Compile model
+            mc.compileModelFromCommandLine(args, arguments);
 		} catch(Throwable e) {
 			log.error(e);
 			log.close();
 			System.exit(1);
 		}
-		// Compile model
-		mc.compileModelFromCommandLine(args, programarguments);
 	}
 	
 	/**
 	 * \brief Compile model given on command line options and print any error messages.
 	 */
-	protected void compileModelFromCommandLine(String[] args, Hashtable<String, String> programarguments) {
+	protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
 		// Get files and class
+	    // TODO: move this into arguments class
 		int arg = programarguments.size();
 		String[] name = splitFiles(args[arg]);
 		String cl = (args.length > arg+1) ? args[arg+1] : null;
