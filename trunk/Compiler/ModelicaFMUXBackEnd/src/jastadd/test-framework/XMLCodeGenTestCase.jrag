@@ -16,23 +16,9 @@
 
 
 public class XMLCodeGenTestCase extends CodeGenTestCase {
-    
-	public XMLCodeGenTestCase() {}
-    
-	public XMLCodeGenTestCase(String name, 
-			                  String description,
-			                  String sourceFileName, 
-			                  String className, 
-			                  String result,
-			                  boolean resultOnFile,
-			                  String template,
-			                  boolean templateOnFile) {
-		super(name, description, sourceFileName, className,result,
-				resultOnFile,template,templateOnFile);
-	}
 
-	public AbstractGenerator createGenerator(FClass fc) {
-		return new XMLGenerator(new PrettyPrinter(), '$',fc);		
-	}
-	
+    public AbstractGenerator createGenerator(FClass fc) {
+        return new XMLGenerator(new PrettyPrinter(), '$',fc);
+    }
+
 }

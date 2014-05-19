@@ -1741,4 +1741,20 @@ end OperatorRecordTests.OperatorRecordConnect4;
     end OperatorRecordConnect4;
 
 
+    model OperatorLimitations1
+        operator '*'
+        end '*';
+    end OperatorLimitations1;
+
+
+    model OperatorLimitations2
+        operator record A
+            package B
+                operator '*'
+                end '*';
+            end B;
+        end A;
+    end OperatorLimitations2;
+
+
 end OperatorRecordTests;

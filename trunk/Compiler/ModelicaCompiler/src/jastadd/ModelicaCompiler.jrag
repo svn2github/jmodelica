@@ -111,7 +111,7 @@ aspect ModelicaCompilerMain {
  * 
  * For method (2), the compilation steps are divided into 4 tasks which can be
  * used via the methods:
- * -# parseModel (source code -> attributed source representation)  
+ * -# parseModel (source code -> attributed source representation)
  * -# instantiateModel (source representation -> instance model) 
  * -# flattenModel (instance model -> flattened model) 
  * -# generateCode (flattened model -> c code and XML code)
@@ -690,7 +690,7 @@ public class ModelicaCompiler {
 	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling
 		// First save these options in temp options registry to reset when compiling has finished
-		OptionRegistry tempOptions = options.copy();    
+		OptionRegistry tempOptions = options.copy();
 		
 		//Set options for the target.
 		target.setDefaultOptions(options);
@@ -780,7 +780,7 @@ public class ModelicaCompiler {
 		} finally {
 			// remove files
 			deleteOutDir();
-		}       
+		}
 		hookFmuPacked(unitFile.getAbsoluteFile());
 	}
 	
@@ -956,7 +956,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param name
 	 *            The name of the model file.
-	 *            
+	 *
 	 * @return The root of the source tree.
 	 * 
 	 * @throws beaver.Parser.Exception
@@ -1007,7 +1007,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param names
 	 *            An array of file names.
-	 *            
+	 *
 	 * @return The root of the source tree.
 	 * 
 	 * @throws beaver.Parser.Exception
@@ -1409,7 +1409,7 @@ public class ModelicaCompiler {
 			Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
 			
 			// Eat any output
-			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();            
+			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();
 			new StreamGobbler(proc.getInputStream(), log.infoStream()).start();
 								   
 			// Wait for process to finish and return result
@@ -1420,8 +1420,6 @@ public class ModelicaCompiler {
 		}
 		return 1;
 	}
-	
-	private final static Pattern BOOL_PATTERN = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
 
     private void setOptions(Arguments programarguments) {
         String filesep = File.separator;
@@ -1579,41 +1577,42 @@ public class ModelicaCompiler {
 		return res.toArray(new String[res.size()]);
 	}
 
-	/**
-	 *     Helper function. Returns string describing the platform on which jmodelica 
-	 *     is run. 
-	 *     
-	 *     Possible return values::
-	 *     win32
-	 *     win64
-	 *     darwin32
-	 *     darwin64
-	 *     linux32
-	 *     linux64
-	 */
-	public static String getPlatform() {
-		String platform = "";
-		
-		String sunPltform = System.getProperty("os.name");
-		if (sunPltform.startsWith("Windows")) {
-			platform = "win";
-		} else if (sunPltform.startsWith("Mac")) {
-			platform = "darwin";
-		} else {
-			// assume linux
-			platform ="linux";
-		}
-		
-		String architecture = System.getProperty("os.arch");
-		if (architecture.endsWith("64")) {
-			platform = platform+"64";
-		} else {
-			platform = platform+"32";
-		}
-		
-		return platform;
-	}
-	
+    /**
+     * Helper function. Returns string describing the platform on which jmodelica is run. 
+     * 
+     * Possible return values:
+     * <ul>
+     * <li>win32</li>
+     * <li>win64</li>
+     * <li>darwin32</li>
+     * <li>darwin64</li>
+     * <li>linux32</li>
+     * <li>linux64</li>
+     * </ul>
+     */
+    public static String getPlatform() {
+        String platform = "";
+        
+        String sunPltform = System.getProperty("os.name");
+        if (sunPltform.startsWith("Windows")) {
+            platform = "win";
+        } else if (sunPltform.startsWith("Mac")) {
+            platform = "darwin";
+        } else {
+            // assume linux
+            platform ="linux";
+        }
+        
+        String architecture = System.getProperty("os.arch");
+        if (architecture.endsWith("64")) {
+            platform = platform+"64";
+        } else {
+            platform = platform+"32";
+        }
+        
+        return platform;
+    }
+
     /**
      * Sets <code>platform</code> arch to 32 bit if not in <code>targetPlatforms</code>
      */
@@ -1951,13 +1950,17 @@ public class ModelicaCompiler {
             switch (this) {
                 case FMUME20a:
                 case FMUCS20a:
-                    options.setStringOption("fmi_version", "2.0alpha"); //TODO: Temporary option.
+                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20a);
                     break;
                 case FMUME10:
                 case FMUCS10:
+                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
+                    break;
                 case FMUME20:
                 case FMUCS20:
                 case FMUMECS20:
+                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
+                    break;
                 case JMU:
                 case FMUX:
                     break;
@@ -2398,8 +2401,8 @@ public abstract class CCompilerDelegator {
 				return String.format("%s\\\"%s\\\"", prefix, path);
 			} else {
 				return String.format("%s\"%s\"", prefix, path);
-			}       
-		}   
+			}
+		}
 	}
 	
 	protected static class PlatformDirOperation implements StringOperation {
@@ -2444,7 +2447,7 @@ public abstract class CCompilerDelegator {
 			source = new FileInputStream(sourceFile).getChannel();
 			destination = new FileOutputStream(destFile).getChannel();
 			long count =0;
-			long size = source.size();                
+			long size = source.size();
 			while( (count += destination.transferFrom(source, 0, size-count)) < size);
 		}
 		

@@ -126,6 +126,11 @@ abstract public class OptionRegistry {
         public static final String KINSOL  = "kinsol";
         public static final String MINPACK = "minpack";
     }
+    public interface FMIVersion {
+        public static final String FMI10  = "1.0";
+        public static final String FMI20  = "2.0";
+        public static final String FMI20a = "2.0alpha";
+    }
 
     public enum OptionType { compiler, runtime }
     public static final OptionType compiler = OptionType.compiler;
@@ -281,8 +286,9 @@ abstract public class OptionRegistry {
         FMI_VER 
             ("fmi_version", 
              compiler, 
-             "1.0", 
-             "Version of FMU."),
+             FMIVersion.FMI10, 
+             "Version of the FM1 specification to generate FMU for.", 
+             FMIVersion.FMI10, FMIVersion.FMI20, FMIVersion.FMI20a /* Temporary alpha version for FMI 2.0. TODO: remove */),
         VAR_SCALE 
             ("enable_variable_scaling", 
              compiler, 

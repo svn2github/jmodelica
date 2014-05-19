@@ -272,7 +272,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             					 "implementation"};
         }
 		
-		public void generateAttributes(CodeStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {
             generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
@@ -352,8 +352,6 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
 			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("displayUnit", def, genPrinter);
-				generateAttribute("gain",        "1", genPrinter);
-				generateAttribute("offset",      "0", genPrinter);
 			}
 		}
 	}
@@ -418,7 +416,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("max", enumdecl.numEnumLiterals(), genPrinter);
 			}
 			
-			public void generateChildren(CodeStream genPrinter) {		
+			public void generateChildren(CodeStream genPrinter) {
 				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
 				while (itr.hasNext()) {
 					literal = itr.next();
@@ -460,7 +458,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		public void generateChildren(CodeStream genPrinter) {
 			// get and sort all FVariables
 			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
-			VariableNameComparator comp = new VariableNameComparator();			
+			VariableNameComparator comp = new VariableNameComparator();
 			Collections.sort(variables, comp);
 
 			for (FVariable var : variables) {
@@ -543,7 +541,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				}
 				if(realvariable.displayUnitAttributeSet()) {
 					generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
-				}		
+				}
 				generateAttribute("relativeQuantity", "false", genPrinter);
 
 				if(realvariable.minAttributeSet()) {
@@ -576,7 +574,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				
 				if(integervariable.quantityAttributeSet()) {
 					generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
-				}					
+				}
 				if(integervariable.minAttributeSet()) {
 					generateAttribute("min", integervariable.minAttribute(), genPrinter);
 				}
@@ -638,7 +636,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
 				if(enumvariable.quantityAttributeSet()) {
 					generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
-				}					
+				}
 				if(enumvariable.minAttributeSet()) {
 					generateAttribute("min", enumvariable.minAttribute(), genPrinter);
 				}
@@ -709,7 +707,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
 	
 	
-	/*** TODO: Temporary FMI 2.0 Code Gen ***/	
+	/*** TODO: Temporary FMI 2.0 Code Gen ***/
 	
 	/**
 	 * Internal class used to generate a ModelStructure tag for the temporary 2.0.
@@ -759,7 +757,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				}
 				if (v.isDifferentiatedVariable()) {
 					tmp.append(v.differentiatedRealVariableIndex()+1);
-					tmp.append(" ");					
+					tmp.append(" ");
 				}
 				generateAttribute("stateDependency", tmp, genPrinter);
 				
@@ -792,7 +790,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				}
 				if (v.isDifferentiatedVariable()) {
 					tmp.append(v.differentiatedRealVariableIndex()+1);
-					tmp.append(" ");					
+					tmp.append(" ");
 				}
 				generateAttribute("stateDependency", tmp, genPrinter);
 				
@@ -807,14 +805,14 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("inputDependency", tmp, genPrinter);
 				
 				generateClosedEnd(genPrinter);
-			}	
+			}
 			
 			generateClosing("Outputs", genPrinter);
 			generateClosing(xml, genPrinter);
 		}
 	}
 	
-	/*** XML tags for Co-Simulation ***/	
+	/*** XML tags for Co-Simulation ***/
 	/**
 	 * Internal class used to generate a Implementation tag.
 	 * 
@@ -927,7 +925,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                                   "vendorAnnotations", "modelVariables", "modelStructure"};
         }
 		
-		public void generateAttributes(CodeStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {
             generateAttribute("fmiVersion",               "2.0",                         genPrinter);
             generateAttribute("modelName",                fclass.name(),                 genPrinter);
             generateAttribute("guid",                     fclass.guid(),                 genPrinter);
@@ -957,7 +955,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			super("modelExchange", "ModelExchange", myGenerator, fclass);
 		}
 		
-		public void generateAttributes(CodeStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {
 			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
 			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
@@ -981,7 +979,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			super("coSimulation", "CoSimulation", myGenerator, fclass);
 		}
 		
-		public void generateAttributes(CodeStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {
 			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                     false,                   genPrinter);
 			generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
@@ -1117,7 +1115,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public String[] children() { return new String[] {"item"}; }
 			
-			public void generateChildren(CodeStream genPrinter) {		
+			public void generateChildren(CodeStream genPrinter) {
 				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
 				itemIndex = 0;
 				while (itr.hasNext()) {
@@ -1171,7 +1169,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         
 		public String[] children() { return new String[] {"category"}; }
 		
-		public void generateChildren(CodeStream genPrinter) {	
+		public void generateChildren(CodeStream genPrinter) {
 			for (int i = 0; i < categorieNames.length; i++) {
 				currentCategorieName        = categorieNames[i];
                 currentCategorieDescription = categorieDescriptions[i];
@@ -1185,7 +1183,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("category", "Category", myGenerator, fclass);
             }
 			
-			public void generateAttributes(CodeStream genPrinter) {		
+			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("name",        currentCategorieName,        genPrinter);
                 generateAttribute("description", currentCategorieDescription, genPrinter);
 			}
@@ -1211,7 +1209,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		public void generateChildren(CodeStream genPrinter) {
 			// get and sort all FVariables
 			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
-			VariableNameComparator comp = new VariableNameComparator();			
+			VariableNameComparator comp = new VariableNameComparator();
 			Collections.sort(variables, comp);
 			
 			//Create map for the indices of the scalar variables.
@@ -1285,7 +1283,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 							initialType = "approx";
 						}
 					}
-				} else {			
+				} else {
 					startValue = variable.startAttributeCValue().toString();
 					initialType = "exact";
 				}
@@ -1350,7 +1348,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				}
 				if (realvariable.displayUnitAttributeSet()) {
 					generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
-				}		
+				}
 				generateAttribute("relativeQuantity", "false", genPrinter);
 
 				if (realvariable.minAttributeSet()) {
@@ -1406,7 +1404,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				
 				if(integervariable.quantityAttributeSet()) {
 					generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
-				}					
+				}
 				if(integervariable.minAttributeSet()) {
 					generateAttribute("min", integervariable.minAttribute(), genPrinter);
 				}
@@ -1473,7 +1471,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 
 				if(enumvariable.quantityAttributeSet()) {
 					generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
-				}					
+				}
 				if(enumvariable.minAttributeSet()) {
 					generateAttribute("min", enumvariable.minAttribute(), genPrinter);
 				}
@@ -1581,13 +1579,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				}
 				
 				//Sort the initial unknowns.
-				VariableNameComparator comp = new VariableNameComparator();			
+				VariableNameComparator comp = new VariableNameComparator();
 				Collections.sort(initialUnknowns, comp);
 			}
 			
 			public String[] children() { return new String[] {"unknown"}; }
 			
-			public void generate(CodeStream genPrinter) {	
+			public void generate(CodeStream genPrinter) {
 				if (!initialUnknowns.isEmpty())
 					super.generate(genPrinter);
 			}
@@ -1611,7 +1609,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("index", variableIndexMap.get(variable.name()), genPrinter);
 				
 				//Find the dependencies.
-				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();				
+				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
 				if (variable.isDifferentiatedVariable()) {
 					dependencyIndex.add(variableIndexMap.get(variable.name()));
 				}

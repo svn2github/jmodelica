@@ -18,32 +18,8 @@ import java.util.Collection;
 import java.lang.reflect.Method;
 
 public class FClassMethodTestCase extends TestCase {
-	private String output = "";
-    private String methodName = "";
-	    
-	public FClassMethodTestCase() {}
-    
-	/**
-	 * @param name
-	 * @param description
-	 * @param sourceFileName
-	 * @param className
-	 * @param output
-	 * @oaram methodName
-	 * @param outputFileName
-	 * @param resultOnFile
-	 */
-	public FClassMethodTestCase(String name, 
-			                  String description,
-			                  String sourceFileName, 
-			                  String className, 
-			                  String result,
-			                  String methodName) {
-		super(name, description, sourceFileName, className);
-		this.methodName = methodName;
-		this.output = result;
-		
-	}
+    private String output = null;
+    private String methodName = null;
 
 	/**
 	 * \brief Perform tests on flat class after transform canonical step.

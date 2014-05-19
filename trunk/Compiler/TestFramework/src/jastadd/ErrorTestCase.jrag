@@ -20,20 +20,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collection;
 
-/**
- * @author jakesson
- *
- */
 public class ErrorTestCase extends TestCase {
 
-	String errorMessage="";
-	
-	public ErrorTestCase() {}
-	
-	public ErrorTestCase(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
-	
+    protected String errorMessage;
+
 	/**
 	 * \brief Perform tests on a set of semantic problems.
 	 * 
