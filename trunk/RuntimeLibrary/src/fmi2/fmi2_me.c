@@ -17,7 +17,9 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include "fmi2_me.h"
 #include "fmi2_cs.h"
 
@@ -682,9 +684,11 @@ fmi2Status fmi2_get_nominals_of_continuous_states(fmi2Component c,
 /* Local helper for fmi2_me_instantiate. */
 int uri_to_path(char *path, const char* uri) {
     char* scheme   = "file://";
+    char buf[3]    = "00";
     int scheme_len = strlen(scheme);
     int uri_len    = strlen(uri);
-    int len;
+    int i;
+    int j;
     
     if (strncmp(uri, scheme, scheme_len))
         return 1;
@@ -696,15 +700,27 @@ int uri_to_path(char *path, const char* uri) {
     scheme_len++;
 #endif
     
-    len = uri_len - scheme_len;
-    if (len <= 0)
+    if (uri_len <= scheme_len)
         return 1;
     
-    strcpy(path, &uri[scheme_len]);
-    
-    if (path[len-1] == '/' && path[len-1] == '\\') {
-        path[len-1] = '\0';
+    for (i = scheme_len, j = 0; i < uri_len; i++, j++) {
+        if (uri[i] == '%') {
+            if (i < uri_len - 2 && isxdigit(uri[i + 1]) && isxdigit(uri[i + 2])) {
+                strncpy(buf, uri + i + 1, 2);
+                path[j] = (unsigned char) strtol(buf, NULL, 16);
+                i += 2;
+            } else {
+                return 1;
+            }
+        } else {
+            path[j] = uri[i];
+        }
     }
+    
+    if (path[j-1] == '/' || path[j-1] == '\\') {
+        j--;
+    }
+    path[j] = '\0';
     
     return 0;
 }
