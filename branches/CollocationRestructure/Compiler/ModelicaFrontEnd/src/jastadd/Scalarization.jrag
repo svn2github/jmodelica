@@ -168,16 +168,8 @@ aspect Scalarization {
 		return !keep;
 	}
 	
-	protected void FClass.evaluateArraySubscripts() {
-		clearFlatNameBinding();
-		getFAbstractEquations().makeSubscriptsLiteral();
-		getFInitialEquations().makeSubscriptsLiteral();
-		getFParameterEquations().makeSubscriptsLiteral();
-	}
-	
 	protected void FClass.scalarizationCleanup() {
 		flush();  // Must flush before traversing
-		evaluateArraySubscripts();
 		enableStreamsRewrite();
 		setDummyVariableList(new List<FVariable>());
 	}
@@ -207,32 +199,6 @@ aspect Scalarization {
         for (FStatement stmt : fromList)
             stmt.scalarizeStmt(vars, toList, indexMap);
     }
-	
-	/**
-	 * \brief Replace all expressions in array subscripts with literals.
-	 * 
-	 * This method enables a rewrite that will be performed after the next flush.
-	 */
-	public void ASTNode.makeSubscriptsLiteral() {
-		for (ASTNode child : this)
-			child.makeSubscriptsLiteral();
-	}
-	
-	public void FExpSubscript.makeSubscriptsLiteral() {
-		rewriteToLiteral = true;
-		is$Final = false;
-	}
-	
-	private boolean FExpSubscript.rewriteToLiteral = false;
-	
-	rewrite FExpSubscript {
-		when (rewriteToLiteral) to FExpSubscript {
-			setFExp(getFExp().ceval().buildLiteral());
-			rewriteToLiteral = false;
-			return this;
-		}
-	}
-	
 	
 	/**
 	 * \brief Scalarize the FVariable and put all scalarized variables in the
@@ -2717,6 +2683,12 @@ aspect Scalarization {
 	public FExp FBinEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap),getY().scalarize(indexMap)); }
 	
 	public FExp FLitExp.scalarizeExp(Map<String,FExp> indexMap) { return (FLitExp) fullCopy(); }
+	public FExp FEnumLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
+	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
+	}
+	public FExp FBooleanLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
+	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
+    }
 	public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 	public FExp FPreExp.scalarizeExp(Map<String,FExp> indexMap) { return new FPreExp(getFIdUse().scalarize(indexMap)); }
 	

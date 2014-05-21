@@ -457,14 +457,18 @@ aspect InstFunctionBinding {
 	/**
 	 * Change access to point to <code>this</code> class instead of <code>orig</code>.
 	 * 
-	 * <code>orig</code> must be ancestor of <code>this</code>. Creates new access if necessary.
+	 * Creates new access if necessary.
 	 */
     public InstAccess InstClassDecl.retargetFrom(InstClassDecl orig, InstAccess access) {
         if (this == orig)
             return access;
-        access = surroundingInstClass().retargetFrom(orig, access);
+        InstAccess part = new InstClassAccess(name());
+        InstClassDecl parent = surroundingInstClass();
+        if (parent == null)
+            return part;
+        access = parent.retargetFrom(orig, access);
         InstDot dot = (access instanceof InstDot) ? (InstDot) access : new InstDot(new List(access));
-        dot.addInstAccess(new InstClassAccess(name()));
+        dot.addInstAccess(part);
         return dot;
     }
 
@@ -473,12 +477,14 @@ aspect InstFunctionBinding {
         private InstFunctionArgument[] bound;
         private ArrayList<InstFunctionArgument> unbindable;
         private ArrayList<InstComponentDecl> inputs;
+        private InstClassDecl target;
         private InstFunctionCall source;
         private boolean ok = true;
 
         public ArgumentBinding(InstClassDecl target, InstFunctionCall source, boolean infArgs) {
             inputs = target.myCallInputs();
             unbindable = new ArrayList<InstFunctionArgument>();
+            this.target = target;
             this.source = source;
             if (infArgs) 
                 bindInfArgs();
@@ -491,6 +497,13 @@ aspect InstFunctionBinding {
          */
         public boolean isOK() {
             return ok;
+        }
+
+        /**
+         * Get the target function.
+         */
+        public InstClassDecl target() {
+            return target;
         }
 
         /**
@@ -583,6 +596,31 @@ aspect InstFunctionBinding {
     }
 
     /**
+     * Select the function in the given operator for the given type that best fits this call, and 
+     * create an argument binding for it.
+     * 
+     * Returns null if the type does not have any functions for that operator.
+     */
+    public ArgumentBinding InstFunctionCall.matchOverloadedFunctionCall(FType type, String operator) {
+        ArgumentBinding binding = null;
+        InstClassDecl op = type.getOperators().get(operator);
+        if (op != null) {
+            int score = Integer.MAX_VALUE;
+            for (InstClassDecl func : op.operatorFunctions()) {
+                ArgumentBinding binding2 = new ArgumentBinding(func, this, false);
+                int score2 = binding2.typeMatchScore();
+                if (score2 < score) {
+                    score = score2;
+                    binding = binding2;
+                }
+            }
+            if (binding != null)
+                binding.updateBoundInputs();
+        }
+        return binding;
+    }
+
+    /**
      * Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
      * for built-in functions.
      * 
@@ -608,10 +646,21 @@ aspect InstFunctionBinding {
 
             // Handle special cases
             if (target.isPrimitive()) {
-                // Look for conversion operator with same name as primitive class (if one exists)
-                InstClassDecl icd = getName().lookupInstClass("!" + target.name());
-                if (icd != null)
-                    target = icd;
+                // Check if this is an overloaded version of String()
+                // TODO: Error if several perfect matches
+                // TODO: Make toString() match original decl
+                if (target.name().equals("String") && getNumArg() > 0) 
+                    binding = matchOverloadedFunctionCall(getArg(0).getFExp().type(), FExp.OP_STR);
+                if (binding != null) {
+                    target = binding.target();
+                    name = target.qualifiedName();
+                    generated = true;
+                } else {
+                    // If not, look for conversion operator with same name as primitive class (if one exists)
+                    InstClassDecl icd = getName().lookupInstClass("!" + target.name());
+                    if (icd != null)
+                        target = icd;
+                }
             } else if (target.isExternalObject()) {
                 // Use the external object constructor
                 InstClassDecl icd = target.myConstructor();
@@ -623,19 +672,9 @@ aspect InstFunctionBinding {
                 // TODO: Error if several perfect matches
                 // TODO: Make toString() match original decl
                 // TODO: handle vectorized constructors
-                InstClassDecl op = target.recordType().getOperators().get(FExp.OP_CON);
-                if (op != null) {
-                    int score = Integer.MAX_VALUE;
-                    for (InstClassDecl func : op.operatorFunctions()) {
-                        ArgumentBinding binding2 = new ArgumentBinding(func, this, false);
-                        int score2 = binding2.typeMatchScore();
-                        if (score2 < score) {
-                            score = score2;
-                            binding = binding2;
-                            target = func;
-                        }
-                    }
-                    binding.updateBoundInputs();
+                binding = matchOverloadedFunctionCall(target.recordType(), FExp.OP_CON);
+                if (binding != null) {
+                    target = binding.target();
                     generated = true;
                 }
             }

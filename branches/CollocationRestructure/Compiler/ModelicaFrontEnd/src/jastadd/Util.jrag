@@ -2657,7 +2657,11 @@ aspect ComponentDeclMethods {
      * Find the component that this component inherits input or output from, if any.
      */
     inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
-    eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    eq InstComponentDecl.getChild().inheritsInputOutputFrom() {
+        if (isFunctionalArg())
+            return null;
+        return (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    }
     eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
     eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
     eq Root.getChild().inheritsInputOutputFrom()              = null;
@@ -2763,6 +2767,11 @@ aspect ComponentDeclMethods {
     	return false;
     }
     
+    /**
+     * Check if this component is a functional input argument
+     */
+    syn boolean InstComponentDecl.isFunctionalArg() = false;
+    eq InstComposite.isFunctionalArg() = isInput() && myInstFullClassDecl().isFunction() && myInstClass().isFunction();
 }
 
 aspect ShortClassUtil {
@@ -3249,6 +3258,22 @@ aspect GeneralHelpers {
 	private static final Pattern ASTNode.memPattern = 
 			Pattern.compile("([0-9]+(\\.[0-9]*)?)(([kKmMgGtTpPeE])?[bB]?)?");
 	
+    /**
+     * Copies a file from src to dst. Destination file is overwritten if it already exisits
+     */
+    public static void ASTNode.copyFile(File src, File dst) throws IOException {
+        if (dst.exists())
+            dst.delete();
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) != -1)
+            out.write(buf, 0, len);
+        in.close();
+        out.close();
+    }
+
 }
 
 aspect DebugHelpers {

@@ -322,4 +322,8 @@ aspect ComplianceCheck {
 		}
 	}
 	
+    public void InstComposite.complianceCheck(ErrorCheckType checkType) {
+        if (isFunctionalArg())
+            compliance("Using functional input arguments is currently not supported");
+    }
 }

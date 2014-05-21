@@ -807,11 +807,23 @@ aspect FormattedPrint {
 		return addedIndentation;
 	}
 
-	@Override
-	protected boolean ExpandableConnector.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
-		insideFormatting = new DefaultFormattingItem(" ");
-		return false;
-	}
+    @Override
+    protected boolean ExpandableConnector.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+        insideFormatting = new DefaultFormattingItem(" ");
+        return false;
+    }
+
+    @Override
+    protected boolean OperatorRecord.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+        insideFormatting = new DefaultFormattingItem(" ");
+        return false;
+    }
+
+    @Override
+    protected boolean OperatorFunction.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {
+        insideFormatting = new DefaultFormattingItem(" ");
+        return false;
+    }
 
 	@Override
 	protected boolean IfExp.setDefaultFormattingHelper(DefaultFormattingIndentation indentation) {

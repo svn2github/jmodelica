@@ -2195,4 +2195,185 @@ Semantic error at line 2220, column 9:
 ")})));
     end NestedExpandableError2;
 
+model ArrayIndexationType1
+    type E = enumeration(a,b,c);
+
+    expandable connector EC
+        Real x[3];
+        Real y[Boolean];
+        Real z[E];
+    end EC;
+        
+    connector A = Real;
+    
+    EC ec;
+    A a[3];
+equation
+    connect(a[1], ec.x[1]);
+    connect(a[2], ec.y[true]);
+    connect(a[3], ec.z[E.a]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayIndexationType1",
+            description="Indexing with enums and bools in expandable connector, declared.",
+            flatModel="
+fclass ExpandableConnectors.ArrayIndexationType1
+ Real ec.x[3];
+ Real ec.y[2];
+ Real ec.z[3];
+ Real a[3];
+equation
+ a[1] = ec.x[1];
+ a[2] = ec.y[true];
+ a[3] = ec.z[ExpandableConnectors.ArrayIndexationType1.E.a];
+ ec.x[2] = 0;
+ ec.x[3] = 0;
+ ec.y[1] = 0;
+ ec.y[2] = 0;
+ ec.z[1] = 0;
+ ec.z[2] = 0;
+ ec.z[3] = 0;
+
+public
+ type ExpandableConnectors.ArrayIndexationType1.E = enumeration(a, b, c);
+
+end ExpandableConnectors.ArrayIndexationType1;
+")})));
+end ArrayIndexationType1;
+
+model ArrayIndexationType2
+    type E = enumeration(a,b,c);
+
+    expandable connector EC
+        Real x[3];
+        Real y[Boolean];
+        Real z[E];
+    end EC;
+        
+    connector A = Real;
+    
+    EC ec;
+    A a[6];
+equation
+    connect(a[1], ec.x[E.a]);
+    connect(a[2], ec.x[true]);
+    connect(a[3], ec.y[E.a]);
+    connect(a[4], ec.y[1]);
+    connect(a[5], ec.z[1]);
+    connect(a[6], ec.z[true]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ArrayIndexationType2",
+            description="Indexing with enums and bools in expandable connector, declared.",
+            errorMessage="
+6 errors found:
+Error: in file '...':
+Semantic error at line 2259, column 24:
+  Expected array index of type 'Integer' found 'ExpandableConnectors.ArrayIndexationType2.E'
+Error: in file '...':
+Semantic error at line 2260, column 24:
+  Expected array index of type 'Integer' found 'Boolean'
+Error: in file '...':
+Semantic error at line 2261, column 24:
+  Expected array index of type 'Boolean' found 'ExpandableConnectors.ArrayIndexationType2.E'
+Error: in file '...':
+Semantic error at line 2262, column 24:
+  Expected array index of type 'Boolean' found 'Integer'
+Error: in file '...':
+Semantic error at line 2263, column 24:
+  Expected array index of type 'ExpandableConnectors.ArrayIndexationType2.E' found 'Integer'
+Error: in file '...':
+Semantic error at line 2264, column 24:
+  Expected array index of type 'ExpandableConnectors.ArrayIndexationType2.E' found 'Boolean'
+
+")})));
+end ArrayIndexationType2;
+
+model ArrayIndexationType3
+    type E = enumeration(a,b,c);
+
+    expandable connector EC
+    end EC;
+        
+    connector A = Real;
+    
+    EC ec;
+    A a[6];
+equation
+    connect(a[1], ec.x[1]);
+    connect(a[2], ec.y[true]);
+    connect(a[3], ec.z[E.a]);
+    connect(a[4], ec.x[3]);
+    connect(a[5], ec.y[false]);
+    connect(a[6], ec.z[E.b]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayIndexationType3",
+            description="Indexing with enums and bools in expandable connector, undeclared.",
+            flatModel="
+fclass ExpandableConnectors.ArrayIndexationType3
+ Real ec.x[3];
+ Real ec.y[2];
+ Real ec.z[2];
+ Real a[6];
+equation
+ a[1] = ec.x[1];
+ a[2] = ec.y[true];
+ a[3] = ec.z[ExpandableConnectors.ArrayIndexationType3.E.a];
+ a[4] = ec.x[3];
+ a[5] = ec.y[false];
+ a[6] = ec.z[ExpandableConnectors.ArrayIndexationType3.E.b];
+ ec.x[2] = 0;
+ ec.y[1] = 0;
+ ec.y[2] = 0;
+ ec.z[1] = 0;
+ ec.z[2] = 0;
+
+public
+ type ExpandableConnectors.ArrayIndexationType3.E = enumeration(a, b, c);
+
+end ExpandableConnectors.ArrayIndexationType3;
+")})));
+end ArrayIndexationType3;
+
+model ArrayIndexationType4
+    type E = enumeration(a,b,c);
+
+    expandable connector EC
+    end EC;
+        
+    connector A = Real;
+    
+    EC ec;
+    A a[6];
+equation
+    connect(a[1], ec.x[E.a]);
+    connect(a[2], ec.x[true]);
+    connect(a[3], ec.y[E.a]);
+    connect(a[4], ec.y[1]);
+    connect(a[5], ec.z[1]);
+    connect(a[6], ec.z[true]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ArrayIndexationType4",
+            description="Indexing with enums and bools in expandable connector, undeclared.",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Semantic error at line 2354, column 5:
+  Array index type of component introduced to external connector does not match other connections to same name in connection set
+Error: in file '...':
+Semantic error at line 2356, column 5:
+  Array index type of component introduced to external connector does not match other connections to same name in connection set
+Error: in file '...':
+Semantic error at line 2358, column 5:
+  Array index type of component introduced to external connector does not match other connections to same name in connection set
+
+")})));
+end ArrayIndexationType4;
+
 end ExpandableConnectors;

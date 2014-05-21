@@ -760,5 +760,46 @@ Compliance error at line 0, column 0:
 ")})));
 end WhileStmt;
 
+model FunctionalArgument
+  function func
+    input partialFunctional f;
+    input Real x;
+    output Real y;
+  algorithm
+    y := f(x);
+  end func;
+
+  partial function partialFunctional
+    input Real u;
+    output Real y;
+  end partialFunctional;
+  
+  function functional
+    extends partialFunctional;
+    input Real A;
+  algorithm
+    y := A*u;
+  end functional;
+  
+  Real y = func(function functional(A=3.14), time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionalArgument",
+            description="Test compliance error for functional argument",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Compliance error at line 764, column 3:
+  Using functional input arguments is currently not supported
+Error: in file '...':
+Semantic error at line 769, column 10:
+  Cannot find function declaration for f()
+Error: in file '...':
+Semantic error at line 784, column 17:
+  Calling function functional(): missing argument for required input u
+
+")})));
+end FunctionalArgument;
 
 end ComplianceTests;
