@@ -142,13 +142,15 @@ static const char *category_to_fmi2Category(jmi_log_category_t c) {
     }
 }
 
-void fmi2_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message) {
+void fmi2_me_emit_log(jmi_callbacks_t*   jmi_callbacks,     jmi_log_category_t category,
+                      jmi_log_category_t severest_category, char*              message) {
 
     fmi2_me_t* c = (fmi2_me_t*)(jmi_callbacks->model_data);
     
     if(c){
         if(c->fmi_functions->logger)
-            c->fmi_functions->logger(c,jmi_callbacks->instance_name, 
+            c->fmi_functions->logger(c->fmi_functions->componentEnvironment,
+                                     jmi_callbacks->instance_name, 
                                      category_to_fmi2Status(category),
                                      category_to_fmi2Category(severest_category),
                                      "%s", message); /* prevent interpretation of message as format string */
