@@ -134,6 +134,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
+    if((block->callbacks->log_options.log_level >= 4)) {
+        jmi_log_node(block->log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                     "jmi_kinsol_solver", block->id, "Updating Jacobian");
+    }
+
     if (!block->dF || block->options->block_jacobian_check) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
@@ -391,7 +396,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 int user_flags = jmi_log_get_user_flags(log);
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
-                                 "jmi_kinsol_solver", "iter\tnfe\tres_norm\tmax_res\tmax_ind", 1);
+                                 "jmi_kinsol_solver", "iter\tnfe\tnje\tres_norm\tmax_res\tmax_ind", 1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
             }
@@ -399,9 +404,8 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
                 jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
                 char message[256];
-                long int nfe;
-                KINGetNumFuncEvals(kin_mem, &nfe);
-                sprintf(message, "%d\t%d\t%E\t%E\t%d", (int)nniters, (int)nfe,
+                sprintf(message, "%d\t%d\t%d\t%E\t%E\t%d", (int)nniters,
+                        (int)(block->nb_fevals), (int)(block->nb_jevals),
                         kin_mem->kin_fnorm, max_residual, max_index);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
                              "jmi_kinsol_solver", block->id, message);
