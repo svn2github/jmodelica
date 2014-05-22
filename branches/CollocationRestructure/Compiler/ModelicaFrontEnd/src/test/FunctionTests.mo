@@ -1547,16 +1547,17 @@ end FunctionType4;
 model FunctionType5
  Real x = TestFunction2(1, true);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType5",
-			description="Function type checks: Boolean literal arg, Real input",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType5",
+            description="Function type checks: Boolean literal arg, Real input",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1548, column 28:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
+    type of 'true' is Boolean
 ")})));
 end FunctionType5;
 
@@ -1564,16 +1565,17 @@ model FunctionType6
  parameter Boolean a = true;
  Real x = TestFunction2(1, a);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType6",
-			description="Function type checks: Boolean component arg, Real input",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType6",
+            description="Function type checks: Boolean component arg, Real input",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1566, column 28:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
+    type of 'a' is Boolean
 ")})));
 end FunctionType6;
 
@@ -1610,16 +1612,17 @@ model FunctionType8
  parameter Integer a = 1;
  Real x = TestFunction2(TestFunction1(true), TestFunction2(1));
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType8",
-			description="Function type checks: nestled function calls, type mismatch in inner",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType8",
+            description="Function type checks: nestled function calls, type mismatch in inner",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1613, column 39:
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
+    type of 'true' is Boolean
 ")})));
 end FunctionType8;
 
@@ -1659,19 +1662,20 @@ end FunctionType10;
 model FunctionType11
  String x = TestFunctionString(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionType11",
-			description="Function type checks: Integer literal arg, String input",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionType11",
+            description="Function type checks: Integer literal arg, String input",
+            variability_propagation=false,
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 1338, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 1662, column 20:
   String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1340, column 32:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1663, column 32:
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
+    type of '1' is Integer
 ")})));
 end FunctionType11;
 
@@ -1786,16 +1790,18 @@ model FunctionType17
   
  Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType17",
-			description="Function type checks: combining known and unknown types",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType17",
+            description="Function type checks: combining known and unknown types",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1094, column 8:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1784, column 8:
   Type error in expression: x + y
+    type of 'x' is Real[:, :]
+    type of 'y' is Real[2, :]
 ")})));
 end FunctionType17;
 
@@ -1803,32 +1809,34 @@ end FunctionType17;
 model BuiltInCallType1
   Real x = sin(true);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType1",
-			description="Built-in type checks: passing Boolean literal to sin()",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType1",
+            description="Built-in type checks: passing Boolean literal to sin()",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1810, column 16:
   Calling function sin(): types of positional argument 1 and input u are not compatible
+    type of 'true' is Boolean
 ")})));
 end BuiltInCallType1;
 
 model BuiltInCallType2
   Real x = sqrt("test");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType2",
-			description="Built-in type checks: passing String literal to sqrt()",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType2",
+            description="Built-in type checks: passing String literal to sqrt()",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1827, column 17:
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
+    type of '\"test\"' is String
 ")})));
 end BuiltInCallType2;
 
@@ -1899,16 +1907,17 @@ end BuiltInCallType6;
 model BuiltInCallType7
   Real x = atan2(9.0, "test");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType7",
-			description="Built-in type checks: calling atan2() with String literal as second argument",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType7",
+            description="Built-in type checks: calling atan2() with String literal as second argument",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1908, column 23:
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
+    type of '\"test\"' is String
 ")})));
 end BuiltInCallType7;
 
@@ -8756,6 +8765,270 @@ end FunctionTests.UnknownArray38;
 ")})));
 end UnknownArray38;
 
+model UnknownArray39
+    record R
+        Real x;
+    end R;
+    function f
+        input Integer m;
+        output R[m,m] o;
+    algorithm
+        for i in 1:m loop
+            o[i,:] := {R(i*j) for j in 1:m};
+        end for;
+    end f;
+    
+    R[1,1] c = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray39",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray39
+ Real c[1,1].x;
+equation
+ ({{FunctionTests.UnknownArray39.R(c[1,1].x)}}) = FunctionTests.UnknownArray39.f(1);
+
+public
+ function FunctionTests.UnknownArray39.f
+  input Integer m;
+  output FunctionTests.UnknownArray39.R[m, m] o;
+  FunctionTests.UnknownArray39.R[:] temp_1;
+ algorithm
+  size(temp_1) := {m};
+  for i in 1:m loop
+   for i2 in 1:m loop
+    temp_1[i2].x := i * i2;
+   end for;
+   for i1 in 1:m loop
+    o[i,i1].x := temp_1[i1].x;
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray39.f;
+
+ record FunctionTests.UnknownArray39.R
+  Real x;
+ end FunctionTests.UnknownArray39.R;
+
+end FunctionTests.UnknownArray39;
+")})));
+end UnknownArray39;
+
+model UnknownArray40
+    record R
+        Real[2] y;
+    end R;
+    function f
+        input  R[:] i;
+        output R[size(i,1)] o;
+    algorithm
+        o := i;
+        o[:] := i;
+        o := i[:];
+        o[:] := i[:];
+    end f;
+    
+    R[1] r = f({R({2,3})});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray40",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray40
+ Real r[1].y[1];
+ Real r[1].y[2];
+equation
+ ({FunctionTests.UnknownArray40.R({r[1].y[1], r[1].y[2]})}) = FunctionTests.UnknownArray40.f({FunctionTests.UnknownArray40.R({2, 3})});
+
+public
+ function FunctionTests.UnknownArray40.f
+  input FunctionTests.UnknownArray40.R[:] i;
+  output FunctionTests.UnknownArray40.R[size(i, 1)] o;
+ algorithm
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  for i1 in 1:size(i, 1) loop
+   o[i1].y[1] := i[i1].y[1];
+   o[i1].y[2] := i[i1].y[2];
+  end for;
+  return;
+ end FunctionTests.UnknownArray40.f;
+
+ record FunctionTests.UnknownArray40.R
+  Real y[2];
+ end FunctionTests.UnknownArray40.R;
+
+end FunctionTests.UnknownArray40;
+")})));
+end UnknownArray40;
+
+model UnknownArray41
+    record R
+        Real x;
+        Real[2] y;
+    end R;
+    function f
+        input Integer m;
+        output R[m,m] o;
+    algorithm
+        for i in 1:m loop
+            o[i,:] := {R(i*j, {i,j}) for j in 1:m};
+        end for;
+    end f;
+    
+    R[1,1] c = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray41",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray41
+ Real c[1,1].x;
+ Real c[1,1].y[1];
+ Real c[1,1].y[2];
+equation
+ ({{FunctionTests.UnknownArray41.R(c[1,1].x, {c[1,1].y[1], c[1,1].y[2]})}}) = FunctionTests.UnknownArray41.f(1);
+
+public
+ function FunctionTests.UnknownArray41.f
+  input Integer m;
+  output FunctionTests.UnknownArray41.R[m, m] o;
+  FunctionTests.UnknownArray41.R[:] temp_1;
+ algorithm
+  size(temp_1) := {m};
+  for i in 1:m loop
+   for i2 in 1:m loop
+    temp_1[i2].x := i * i2;
+    temp_1[i2].y[1] := i;
+    temp_1[i2].y[2] := i2;
+   end for;
+   for i1 in 1:m loop
+    o[i,i1].x := temp_1[i1].x;
+    o[i,i1].y[1] := temp_1[i1].y[1];
+    o[i,i1].y[2] := temp_1[i1].y[2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray41.f;
+
+ record FunctionTests.UnknownArray41.R
+  Real x;
+  Real y[2];
+ end FunctionTests.UnknownArray41.R;
+
+end FunctionTests.UnknownArray41;
+")})));
+end UnknownArray41;
+
+model UnknownArray42
+    record R1
+        R2[1] y;
+        R2 z;
+    end R1;
+    record R2
+        Real[1] p1;
+        Real p2;
+    end R2;
+    function f2
+        input Real x;
+        output R2 y = R2(1:1,x);
+      algorithm
+    end f2;
+    function f
+        input Integer m;
+        output R1[m] o;
+    algorithm
+        o[:] := {R1({f2(j)},f2(j)) for j in 1:m};
+    end f;
+    
+    R1[1] c = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray42",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray42
+ Real c[1].y[1].p1[1];
+ Real c[1].y[1].p2;
+ Real c[1].z.p1[1];
+ Real c[1].z.p2;
+equation
+ ({FunctionTests.UnknownArray42.R1({FunctionTests.UnknownArray42.R2({c[1].y[1].p1[1]}, c[1].y[1].p2)}, FunctionTests.UnknownArray42.R2({c[1].z.p1[1]}, c[1].z.p2))}) = FunctionTests.UnknownArray42.f(1);
+
+public
+ function FunctionTests.UnknownArray42.f
+  input Integer m;
+  output FunctionTests.UnknownArray42.R1[m] o;
+  FunctionTests.UnknownArray42.R1[:] temp_1;
+  FunctionTests.UnknownArray42.R2[:] temp_2;
+  FunctionTests.UnknownArray42.R2[:] temp_3;
+ algorithm
+  size(temp_1) := {m};
+  size(temp_2) := {m};
+  size(temp_3) := {m};
+  for i2 in 1:m loop
+   (temp_2) := FunctionTests.UnknownArray42.f2(i2);
+   (temp_3) := FunctionTests.UnknownArray42.f2(i2);
+   temp_1[i2].y[1].p1[1] := temp_2.p1[1];
+   temp_1[i2].y[1].p2 := temp_2.p2;
+   temp_1[i2].z.p1[1] := temp_3.p1[1];
+   temp_1[i2].z.p2 := temp_3.p2;
+  end for;
+  for i1 in 1:m loop
+   o[i1].y[1].p1[1] := temp_1[i1].y[1].p1[1];
+   o[i1].y[1].p2 := temp_1[i1].y[1].p2;
+   o[i1].z.p1[1] := temp_1[i1].z.p1[1];
+   o[i1].z.p2 := temp_1[i1].z.p2;
+  end for;
+  return;
+ end FunctionTests.UnknownArray42.f;
+
+ function FunctionTests.UnknownArray42.f2
+  input Real x;
+  output FunctionTests.UnknownArray42.R2 y;
+ algorithm
+  y.p1[1] := 1;
+  y.p2 := x;
+  return;
+ end FunctionTests.UnknownArray42.f2;
+
+ record FunctionTests.UnknownArray42.R2
+  Real p1[1];
+  Real p2;
+ end FunctionTests.UnknownArray42.R2;
+
+ record FunctionTests.UnknownArray42.R1
+  FunctionTests.UnknownArray42.R2 y[1];
+  FunctionTests.UnknownArray42.R2 z;
+ end FunctionTests.UnknownArray42.R1;
+
+end FunctionTests.UnknownArray42;
+")})));
+end UnknownArray42;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
@@ -9834,6 +10107,42 @@ end InputAsArraySize10;
 // TODO: Fler som ovan
 
 
+model InputAsArraySize11
+    function f1
+        input Integer n;
+        output Real y[f2(n)];
+    algorithm
+        y := 1:f2(n);
+    end f1;
+    
+    function f2
+        input Integer m;
+        output Integer k;
+    algorithm
+        k := div(m, 2) + 1;
+    end f2;
+    
+    Real[3] x = f1(5);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsArraySize11",
+            description="Declared size of function output that depends on value of other function call",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.InputAsArraySize11
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+end FunctionTests.InputAsArraySize11;
+")})));
+end InputAsArraySize11;
+
+
 
 model VectorizedCall1
     function f
@@ -10232,7 +10541,7 @@ model VectorizedCall5
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="VectorizedCall5",
-			description="Vectorization: scalarized record arg",
+			description="Vectorization: vectorised record arg",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -10268,6 +10577,62 @@ public
 end FunctionTests.VectorizedCall5;
 ")})));
 end VectorizedCall5;
+
+
+model VectorizedCall6
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function f
+        input Real x;
+        output R y;
+    algorithm
+        y := R(x, 2*x);
+    end f;
+    
+    Real w[2] = {1, 2};
+    R z[2] = f(w);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VectorizedCall6",
+            description="Vectorization: record return value",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.VectorizedCall6
+ Real w[1];
+ Real w[2];
+ Real z[1].a;
+ Real z[1].b;
+ Real z[2].a;
+ Real z[2].b;
+equation
+ w[1] = 1;
+ w[2] = 2;
+ (FunctionTests.VectorizedCall6.R(z[1].a, z[1].b)) = FunctionTests.VectorizedCall6.f(w[1]);
+ (FunctionTests.VectorizedCall6.R(z[2].a, z[2].b)) = FunctionTests.VectorizedCall6.f(w[2]);
+
+public
+ function FunctionTests.VectorizedCall6.f
+  input Real x;
+  output FunctionTests.VectorizedCall6.R y;
+ algorithm
+  y.a := x;
+  y.b := 2 * x;
+  return;
+ end FunctionTests.VectorizedCall6.f;
+
+ record FunctionTests.VectorizedCall6.R
+  Real a;
+  Real b;
+ end FunctionTests.VectorizedCall6.R;
+
+end FunctionTests.VectorizedCall6;
+")})));
+end VectorizedCall6;
 
 
 model Lapack_dgeqpf
@@ -11978,6 +12343,97 @@ y = semiLinear(x, s[2], sc)
 			
 ")})));
 end SemiLinear6;
+
+model SemiLinear7
+    Real s[2] = {1,2};
+    Real x[2] = {time,time};
+    Real y[2];
+equation
+    y = semiLinear(x,s,s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear7",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear7
+ Real s[1];
+ Real s[2];
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = if x[1] >= 0.0 then x[1] * s[1] else x[1] * s[1];
+ y[2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ s[1] = 1;
+ s[2] = 2;
+ x[1] = time;
+ x[2] = time;
+end FunctionTests.FunctionLike.Special.SemiLinear7;
+")})));
+end SemiLinear7;
+
+model SemiLinear8
+    Real s[2] = {1,2};
+    Real x[2] = {time,time};
+    Real x2 = time;
+    Real y[2,2];
+equation
+    y[1,:] = semiLinear(x,s[2],s);
+    y[2,:] = semiLinear(x2,s,s[1]);
+equation
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear8",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear8
+ Real s[1];
+ Real s[2];
+ Real x[1];
+ Real x[2];
+ Real x2;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ y[1,1] = if x[1] >= 0.0 then x[1] * s[2] else x[1] * s[1];
+ y[1,2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ y[2,1] = if x2 >= 0.0 then x2 * s[1] else x2 * s[1];
+ y[2,2] = if x2 >= 0.0 then x2 * s[2] else x2 * s[1];
+ s[1] = 1;
+ s[2] = 2;
+ x[1] = time;
+ x[2] = time;
+ x2 = time;
+end FunctionTests.FunctionLike.Special.SemiLinear8;
+")})));
+end SemiLinear8;
+
+model SemiLinear9
+    Real s[1] = {1};
+    Real x[2] = {time,time};
+    Real y[2];
+equation
+    y = semiLinear(x,s,s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_SemiLinear9",
+            description="Test of the semiLinear() operator. Vectorization.",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 12054, column 9:
+  Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
+")})));
+end SemiLinear9;
 
 end Special;
 

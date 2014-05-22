@@ -17,7 +17,6 @@
 package RecordTests
 
 
-
 model RecordFlat1
  record A
   Real a;
@@ -1157,6 +1156,84 @@ end RecordTests.RecordArray6;
 end RecordArray6;
 
 
+// TODO: entire record is here turned into a structural parameter, but should only be n
+model RecordArray7
+    record A
+        parameter Integer n;
+        Real x[n];
+    end A;
+    
+    parameter Integer m = 2;
+    parameter A a = A(m, 1:m);
+    Real y[m] = a.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray7",
+            description="Parameter in record controlling size of array in same record: record constructor",
+            flatModel="
+fclass RecordTests.RecordArray7
+ parameter Integer m = 2 /* 2 */;
+ parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ Real y[2] = {1.0, 2.0};
+
+public
+ record RecordTests.RecordArray7.A
+  parameter Integer n;
+  Real x[n];
+ end RecordTests.RecordArray7.A;
+
+end RecordTests.RecordArray7;
+")})));
+end RecordArray7;
+
+
+model RecordArray8
+    record A
+        parameter Integer n;
+        Real x[n];
+    end A;
+    
+    function f
+        input Integer n;
+        output A a(n=n);
+    algorithm
+        a.x := 1:n;
+    end f;
+    
+    parameter Integer m = 2;
+    parameter A a = f(m);
+    Real y[m] = a.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray8",
+            description="Flattening of model with record that gets array size of member from function call that returns entire record",
+            flatModel="
+fclass RecordTests.RecordArray8
+ parameter Integer m = 2 /* 2 */;
+ parameter RecordTests.RecordArray8.A a = RecordTests.RecordArray8.f(2);
+ Real y[2] = a.x[1:2];
+
+public
+ function RecordTests.RecordArray8.f
+  input Integer n;
+  output RecordTests.RecordArray8.A a;
+ algorithm
+  a.x := 1:n;
+  return;
+ end RecordTests.RecordArray8.f;
+
+ record RecordTests.RecordArray8.A
+  parameter Integer n;
+  Real x[n];
+ end RecordTests.RecordArray8.A;
+
+end RecordTests.RecordArray8;
+")})));
+end RecordArray8;
+
+
 
 model RecordConstructor1
  record A
@@ -1257,16 +1334,17 @@ model RecordConstructor4
  
  A x = A(1.0, 2, 3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordConstructor4",
-			description="Record constructors: wrong type of arg",
-			variability_propagation=false,
-			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 775, column 18:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordConstructor4",
+            description="Record constructors: wrong type of arg",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Semantic error at line 1335, column 18:
   Record constructor for A: types of positional argument 3 and input c are not compatible
+    type of '3' is Integer
 ")})));
 end RecordConstructor4;
 
@@ -4151,6 +4229,77 @@ end RecordTests.RecordParam7;
 end RecordParam7;
 
 
+model RecordParam8
+    record A
+        parameter Real x = 1;
+        Real y;
+    end A;
+    
+    parameter A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordParam8",
+            description="Check that extra warnings aren't generated about binding expressions for record parameters",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+At line 4233, column 29:
+  The parameter a.y does not have a binding expression
+")})));
+end RecordParam8;
+
+
+model RecordParam9
+    record A
+        parameter Real x;
+        Real y;
+    end A;
+    
+    parameter A a = A(1, 2);
+    parameter Real z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordParam9",
+            description="Check that extra warnings aren't generated about binding expressions for record parameters, record has constuctor binding exp",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+At line 4258, column 28:
+  The parameter z does not have a binding expression
+")})));
+end RecordParam9;
+
+
+model RecordParam10
+    record A
+        parameter Real x;
+        Real y;
+    end A;
+	
+	function f
+		output A a;
+	algorithm
+		a := A(1,2);
+	end f;
+    
+    parameter A a = f();
+    parameter Real z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordParam10",
+            description="Check that extra warnings aren't generated about binding expressions for record parameters, record has function call binding exp",
+            errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+At line 4286, column 24:
+  The parameter z does not have a binding expression
+")})));
+end RecordParam10;
+
+
 model RecordMerge1
     record R1
         Real x;
@@ -4483,6 +4632,75 @@ public
 end RecordTests.RecordConnector1;
 ")})));
 end RecordConnector1;
+
+
+model ExternalObjectStructural1
+    class A
+        extends ExternalObject;
+        
+        function constructor
+            input String b;
+            output A a;
+            external;
+        end constructor;
+        
+        function destructor
+            input A a;
+            external;
+        end destructor;
+    end A;
+    
+    function f
+        input A a;
+        output Real b;
+        external;
+    end f;
+    
+    parameter String b = "abc";
+    parameter A a = A(b);
+    parameter Real c = f(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ExternalObjectStructural1",
+            description="Check that external objects do not get converted to structural parameters",
+            flatModel="
+fclass RecordTests.ExternalObjectStructural1
+ parameter String b = \"abc\" /* \"abc\" */;
+ parameter RecordTests.ExternalObjectStructural1.A a = RecordTests.ExternalObjectStructural1.A.constructor(\"abc\") /* (unknown value) */;
+ parameter Real c;
+parameter equation
+ c = RecordTests.ExternalObjectStructural1.f(a);
+
+public
+ function RecordTests.ExternalObjectStructural1.A.destructor
+  input ExternalObject a;
+ algorithm
+  external \"C\" destructor(a);
+  return;
+ end RecordTests.ExternalObjectStructural1.A.destructor;
+
+ function RecordTests.ExternalObjectStructural1.A.constructor
+  input String b;
+  output ExternalObject a;
+ algorithm
+  external \"C\" a = constructor(b);
+  return;
+ end RecordTests.ExternalObjectStructural1.A.constructor;
+
+ function RecordTests.ExternalObjectStructural1.f
+  input ExternalObject a;
+  output Real b;
+ algorithm
+  external \"C\" b = f(a);
+  return;
+ end RecordTests.ExternalObjectStructural1.f;
+
+ type RecordTests.ExternalObjectStructural1.A = ExternalObject;
+end RecordTests.ExternalObjectStructural1;
+")})));
+end ExternalObjectStructural1;
+
 
 
 end RecordTests;

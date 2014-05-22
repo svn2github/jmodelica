@@ -16,15 +16,9 @@
 
 public class TimeTestCase extends TestCase {
 
-	private long maxTime = 0;
-	private String failMsg = null;
-	
-	public TimeTestCase() {}
-	
-	public TimeTestCase(double maxTime) {
-		this.maxTime = (long) (maxTime * 1000.0);
-	}
-	
+    private long maxTime = 0;
+    private String failMsg = null;
+
 	/**
 	 * @return the maximum time
 	 */

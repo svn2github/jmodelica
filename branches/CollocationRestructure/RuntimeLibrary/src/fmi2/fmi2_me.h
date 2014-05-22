@@ -20,7 +20,7 @@
 #ifndef fmi2_me_h
 #define fmi2_me_h
 
-#include "fmiFunctions.h"
+#include "fmi2Functions.h"
 #include "jmi_util.h"
 #include "jmi.h"
 #include "jmi_me.h"
@@ -41,17 +41,17 @@ typedef enum {
     instantiatedMode,
 	slaveInitialized,
 	terminated
-} fmi_mode_t;
+} fmi2_mode_t;
 
 typedef struct fmi2_me_t fmi2_me_t;  /**< \brief Forward declaration of struct. */
 
 struct fmi2_me_t {
     jmi_t jmi;                  /* should be the first one so that jmi* and fmi1_me* point at the same address */
-    fmi_mode_t fmi_mode;
-    fmiType fmu_type;
-    fmiString fmi_instance_name;
-    fmiEventInfo event_info;
-    const fmiCallbackFunctions* fmi_functions;
+    fmi2_mode_t fmi_mode;
+    fmi2Type fmu_type;
+    fmi2String fmi_instance_name;
+    fmi2EventInfo event_info;
+    const fmi2CallbackFunctions* fmi_functions;
 };
 
 /**
@@ -65,7 +65,7 @@ struct fmi2_me_t {
 /**
  * \brief Returns the platform types compiled for.
  *
- * This methods returns the string to uniquely identify the "fmiTypesPlatform.h"
+ * This methods returns the string to uniquely identify the "fmi2TypesPlatform.h"
  * header file for which the FMU was compiled for.
  * 
  * @return The identifier of platform types compiled for.
@@ -83,15 +83,15 @@ const char* fmi2_get_version();
  * \brief Sets the logging settings.
  * 
  * @param c The FMU struct.
- * @param loggingOn A fmiBoolean, sets logging on or off.
+ * @param loggingOn A fmi2Boolean, sets logging on or off.
  * @param nCategories Number of categories.
  * @param categories The categories to be logging for.
  * @return Error code.
  */
-fmiStatus fmi2_set_debug_logging(fmiComponent    c,
-                                 fmiBoolean      loggingOn, 
-                                 size_t          nCategories, 
-                                 const fmiString categories[]);
+fmi2Status fmi2_set_debug_logging(fmi2Component    c,
+                                  fmi2Boolean      loggingOn, 
+                                  size_t           nCategories, 
+                                  const fmi2String categories[]);
 
 /**
  * \brief Instantiates the FMU.
@@ -101,69 +101,69 @@ fmiStatus fmi2_set_debug_logging(fmiComponent    c,
  * @param GUID The GUID identifier.
  * @param fmuResourceLocation The location of the resource directory.
  * @param functions Callback functions for logging, allocation and deallocation.
- * @param visible A fmiBoolean, defines the amount of interaction with the user.
- * @param loggingOn Turn of or on logging, fmiBoolean.
+ * @param visible A fmi2Boolean, defines the amount of interaction with the user.
+ * @param loggingOn Turn of or on logging, fmi2Boolean.
  * @return An instance of a model.
  */
-fmiComponent fmi2_instantiate(fmiString instanceName,
-                              fmiType   fmuType, 
-                              fmiString fmuGUID, 
-                              fmiString fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn);
+fmi2Component fmi2_instantiate(fmi2String instanceName,
+                               fmi2Type   fmuType, 
+                               fmi2String fmuGUID, 
+                               fmi2String fmuResourceLocation, 
+                               const fmi2CallbackFunctions* functions, 
+                               fmi2Boolean                  visible,
+                               fmi2Boolean                  loggingOn);
 
 /**
  * \brief Dispose of the model instance.
  * 
  * @param c The FMU struct.
  */
-void fmi2_free_instance(fmiComponent c);
+void fmi2_free_instance(fmi2Component c);
 
 /**
  * \brief Informs the FMU to setup the experiment
  * 
  * @param c The FMU struct.
- * @param toleranceDefined A fmiBoolean, states if the tolerance argument is valid.
+ * @param toleranceDefined A fmi2Boolean, states if the tolerance argument is valid.
  * @param tolerance The tolerance to use for the setup.
  * @param startTime The starting time of initializaton.
- * @param stopTimeDefined A fmiBoolean, states if the stopTime argument is valid.
+ * @param stopTimeDefined A fmi2Boolean, states if the stopTime argument is valid.
  * @param stopTime The stop time of the simulation.
  */
-fmiStatus fmi2_setup_experiment(fmiComponent c, 
-                                fmiBoolean   toleranceDefined, 
-                                fmiReal      tolerance, 
-                                fmiReal      startTime, 
-                                fmiBoolean   stopTimeDefined, 
-                                fmiReal      stopTime);
+fmi2Status fmi2_setup_experiment(fmi2Component c, 
+                                 fmi2Boolean   toleranceDefined, 
+                                 fmi2Real      tolerance, 
+                                 fmi2Real      startTime, 
+                                 fmi2Boolean   stopTimeDefined, 
+                                 fmi2Real      stopTime);
 
 /**
  * \brief Makes the FMU go into Initialization Mode.
  * 
  * @param c The FMU struct.
  */
-fmiStatus fmi2_enter_initialization_mode(fmiComponent c);
+fmi2Status fmi2_enter_initialization_mode(fmi2Component c);
 
 /**
  * \brief Makes the FMU exit Initialization Mode.
  * 
  * @param c The FMU struct.
  */
-fmiStatus fmi2_exit_initialization_mode(fmiComponent c);
+fmi2Status fmi2_exit_initialization_mode(fmi2Component c);
 
 /**
  * \brief Terminates the simulation run of the FMU.
  * 
  * @param c The FMU struct.
  */
-fmiStatus fmi2_terminate(fmiComponent c);
+fmi2Status fmi2_terminate(fmi2Component c);
 
 /**
  * \brief Resets the FMU after a simulation run.
  * 
  * @param c The FMU struct.
  */
-fmiStatus fmi2_reset(fmiComponent c);
+fmi2Status fmi2_reset(fmi2Component c);
 
 /**
  * \brief Get Real values.
@@ -174,8 +174,8 @@ fmiStatus fmi2_reset(fmiComponent c);
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
-                        size_t nvr, fmiReal value[]);
+fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
+                         size_t nvr, fmi2Real value[]);
 
 /**
  * \brief Get Integer values.
@@ -186,8 +186,8 @@ fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_get_integer(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, fmiInteger value[]);
+fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, fmi2Integer value[]);
 
 /**
  * \brief Get Boolean values.
@@ -198,8 +198,8 @@ fmiStatus fmi2_get_integer(fmiComponent c, const fmiValueReference vr[],
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_get_boolean(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, fmiBoolean value[]);
+fmi2Status fmi2_get_boolean(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, fmi2Boolean value[]);
 
 /**
  * \brief Get String values.
@@ -210,8 +210,8 @@ fmiStatus fmi2_get_boolean(fmiComponent c, const fmiValueReference vr[],
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_get_string(fmiComponent c, const fmiValueReference vr[],
-                          size_t nvr, fmiString value[]);
+fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
+                           size_t nvr, fmi2String value[]);
 
 /**
  * \brief Set Real values.
@@ -222,8 +222,8 @@ fmiStatus fmi2_get_string(fmiComponent c, const fmiValueReference vr[],
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
-                        size_t nvr, const fmiReal value[]);
+fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
+                         size_t nvr, const fmi2Real value[]);
 
 /**
  * \brief Set Integer values.
@@ -234,8 +234,8 @@ fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_set_integer(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, const fmiInteger value[]);
+fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, const fmi2Integer value[]);
 
 /**
  * \brief Set Boolean values.
@@ -246,8 +246,8 @@ fmiStatus fmi2_set_integer(fmiComponent c, const fmiValueReference vr[],
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_set_boolean(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, const fmiBoolean value[]);
+fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, const fmi2Boolean value[]);
 
 /**
  * \brief Set String values.
@@ -258,8 +258,8 @@ fmiStatus fmi2_set_boolean(fmiComponent c, const fmiValueReference vr[],
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi2_set_string(fmiComponent c, const fmiValueReference vr[],
-                          size_t nvr, const fmiString value[]);
+fmi2Status fmi2_set_string(fmi2Component c, const fmi2ValueReference vr[],
+                          size_t nvr, const fmi2String value[]);
 
 
 /**
@@ -269,7 +269,7 @@ fmiStatus fmi2_set_string(fmiComponent c, const fmiValueReference vr[],
  * @param FMUstate (Output) A pointer to the FMU state.
  * @return Error code.
  */
-fmiStatus fmi2_get_fmu_state(fmiComponent c, fmiFMUstate* FMUstate);
+fmi2Status fmi2_get_fmu_state(fmi2Component c, fmi2FMUstate* FMUstate);
 
 /**
  * \brief Set the FMU state.
@@ -278,7 +278,7 @@ fmiStatus fmi2_get_fmu_state(fmiComponent c, fmiFMUstate* FMUstate);
  * @param FMUstate The FMU state.
  * @return Error code.
  */
-fmiStatus fmi2_set_fmu_state(fmiComponent c, fmiFMUstate FMUstate);
+fmi2Status fmi2_set_fmu_state(fmi2Component c, fmi2FMUstate FMUstate);
 
 /**
  * \brief Free a FMU state.
@@ -287,7 +287,7 @@ fmiStatus fmi2_set_fmu_state(fmiComponent c, fmiFMUstate FMUstate);
  * @param FMUstate A pointer to a FMU state.
  * @return Error code.
  */
-fmiStatus fmi2_free_fmu_state(fmiComponent c, fmiFMUstate* FMUstate);
+fmi2Status fmi2_free_fmu_state(fmi2Component c, fmi2FMUstate* FMUstate);
 
 /**
  * \brief Get the size of a byte vector needed for storing the FMU state.
@@ -297,8 +297,8 @@ fmiStatus fmi2_free_fmu_state(fmiComponent c, fmiFMUstate* FMUstate);
  * @param size (Output) The size of the FMU state. 
  * @return Error code.
  */
-fmiStatus fmi2_serialized_fmu_state_size(fmiComponent c, fmiFMUstate FMUstate,
-                                         size_t* size);
+fmi2Status fmi2_serialized_fmu_state_size(fmi2Component c, fmi2FMUstate FMUstate,
+                                          size_t* size);
 
 /**
  * \brief Serialize a FMU state into a byte vector.
@@ -309,8 +309,8 @@ fmiStatus fmi2_serialized_fmu_state_size(fmiComponent c, fmiFMUstate FMUstate,
  * @param size The size of the FMU state. 
  * @return Error code.
  */
-fmiStatus fmi2_serialized_fmu_state(fmiComponent c, fmiFMUstate FMUstate,
-                                    fmiByte serializedState[], size_t size);
+fmi2Status fmi2_serialized_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
+                                     fmi2Byte serializedState[], size_t size);
 
 /**
  * \brief Deserialize a byte vector into a FMU state.
@@ -321,9 +321,9 @@ fmiStatus fmi2_serialized_fmu_state(fmiComponent c, fmiFMUstate FMUstate,
  * @param FMUstate (Output) A FMU state.
  * @return Error code.
  */
-fmiStatus fmi2_de_serialized_fmu_state(fmiComponent c,
-                                       const fmiByte serializedState[],
-                                       size_t size, fmiFMUstate* FMUstate);
+fmi2Status fmi2_de_serialized_fmu_state(fmi2Component c,
+                                        const fmi2Byte serializedState[],
+                                        size_t size, fmi2FMUstate* FMUstate);
 
 /**
  * \brief Evaluate directional derivative of ODE.
@@ -341,10 +341,10 @@ fmiStatus fmi2_de_serialized_fmu_state(fmiComponent c,
  * @param dvUnknown Output argument containing the directional derivative vector.
  * @return Error code.
  */
-fmiStatus fmi2_get_directional_derivative(fmiComponent c,
-                const fmiValueReference vUnknown_ref[], size_t nUnknown,
-                const fmiValueReference vKnown_ref[],   size_t nKnown,
-                const fmiReal dvKnown[], fmiReal dvUnknown[]);
+fmi2Status fmi2_get_directional_derivative(fmi2Component c,
+                const fmi2ValueReference vUnknown_ref[], size_t nUnknown,
+                const fmi2ValueReference vKnown_ref[],   size_t nKnown,
+                const fmi2Real dvKnown[], fmi2Real dvUnknown[]);
 
  /* @} */
 
@@ -363,17 +363,17 @@ fmiStatus fmi2_get_directional_derivative(fmiComponent c,
  * @param c The FMU struct.
  * @return Error code.
  */
-fmiStatus fmi2_enter_event_mode(fmiComponent c);
+fmi2Status fmi2_enter_event_mode(fmi2Component c);
 
 /**
  * \brief Updates the FMU after an event. Does one event iteration.
  * 
  * @param c The FMU struct.
- * @param eventInfo (Output) An fmiEventInfo struct.
+ * @param eventInfo (Output) An fmi2EventInfo struct.
  * @return Error code.
  */
-fmiStatus fmi2_new_discrete_state(fmiComponent  c,
-                                  fmiEventInfo* fmiEventInfo);
+fmi2Status fmi2_new_discrete_state(fmi2Component  c,
+                                   fmi2EventInfo* fmiEventInfo);
 
 /**
  * \brief Makes the simulation go into continuous time mode.
@@ -381,22 +381,22 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c,
  * @param c The FMU struct.
  * @return Error code.
  */
-fmiStatus fmi2_enter_continuous_time_mode(fmiComponent c);
+fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c);
 
 /**
  * \brief Checks for step-events, can flush old FMU states and can terminate the simulation.
  * 
  * @param c The FMU struct.
- * @param noSetFMUStatePriorToCurrentPoint A fmiBoolean, can be used to 
+ * @param noSetFMUStatePriorToCurrentPoint A fmi2Boolean, can be used to 
  *                                         flush earlier saved FMU states.
- * @param enterEventMode (Output) A fmiBoolean.
- * @param terminateSimulation (Output) A fmiBoolean.
+ * @param enterEventMode (Output) A fmi2Boolean.
+ * @param terminateSimulation (Output) A fmi2Boolean.
  * @return Error code.
  */
-fmiStatus fmi2_completed_integrator_step(fmiComponent c,
-                                         fmiBoolean   noSetFMUStatePriorToCurrentPoint, 
-                                         fmiBoolean*  enterEventMode, 
-                                         fmiBoolean*  terminateSimulation);
+fmi2Status fmi2_completed_integrator_step(fmi2Component c,
+                                          fmi2Boolean   noSetFMUStatePriorToCurrentPoint, 
+                                          fmi2Boolean*  enterEventMode, 
+                                          fmi2Boolean*  terminateSimulation);
 
 /**
  * \brief Set the current time.
@@ -405,7 +405,7 @@ fmiStatus fmi2_completed_integrator_step(fmiComponent c,
  * @param time The current time.
  * @return Error code.
  */
-fmiStatus fmi2_set_time(fmiComponent c, fmiReal time);
+fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time);
 
 /**
  * \brief Set the current states.
@@ -415,8 +415,8 @@ fmiStatus fmi2_set_time(fmiComponent c, fmiReal time);
  * @param nx Number of states.
  * @return Error code.
  */
-fmiStatus fmi2_set_continuous_states(fmiComponent c, const fmiReal x[],
-                                     size_t nx);
+fmi2Status fmi2_set_continuous_states(fmi2Component c, const fmi2Real x[],
+                                      size_t nx);
 
 /**
  * \brief Calculates the derivatives.
@@ -426,7 +426,7 @@ fmiStatus fmi2_set_continuous_states(fmiComponent c, const fmiReal x[],
  * @param nx Number of derivatives.
  * @return Error code.
  */
-fmiStatus fmi2_get_derivatives(fmiComponent c, fmiReal derivatives[], size_t nx);
+fmi2Status fmi2_get_derivatives(fmi2Component c, fmi2Real derivatives[], size_t nx);
 
 /**
  * \brief Get the event indicators (for state-events)
@@ -436,8 +436,8 @@ fmiStatus fmi2_get_derivatives(fmiComponent c, fmiReal derivatives[], size_t nx)
  * @param ni Number of event indicators.
  * @return Error code.
  */
-fmiStatus fmi2_get_event_indicators(fmiComponent c, 
-                                    fmiReal eventIndicators[], size_t ni);
+fmi2Status fmi2_get_event_indicators(fmi2Component c, 
+                                     fmi2Real eventIndicators[], size_t ni);
 /**
  * \brief Get the current states.
  * 
@@ -446,7 +446,7 @@ fmiStatus fmi2_get_event_indicators(fmiComponent c,
  * @param nx Number of states.
  * @return Error code.
  */
-fmiStatus fmi2_get_continuous_states(fmiComponent c, fmiReal x[], size_t nx);
+fmi2Status fmi2_get_continuous_states(fmi2Component c, fmi2Real x[], size_t nx);
 
 /**
  * \brief Get the nominal values of the states.
@@ -456,9 +456,9 @@ fmiStatus fmi2_get_continuous_states(fmiComponent c, fmiReal x[], size_t nx);
  * @param nx Number of nominal values.
  * @return Error code.
  */
-fmiStatus fmi2_get_nominals_of_continuous_states(fmiComponent c, 
-                                                 fmiReal x_nominal[], 
-                                                 size_t nx);
+fmi2Status fmi2_get_nominals_of_continuous_states(fmi2Component c, 
+                                                  fmi2Real x_nominal[], 
+                                                  size_t nx);
 
  /* @} */
 
@@ -476,24 +476,24 @@ extern const char *C_GUID;
  * @param GUID The GUID identifier.
  * @param fmuResourceLocation The location of the resource directory.
  * @param functions Callback functions for logging, allocation and deallocation.
- * @param visible A fmiBoolean, defines the amount of interaction with the user.
- * @param loggingOn Turn of or on logging, fmiBoolean.
+ * @param visible A fmi2Boolean, defines the amount of interaction with the user.
+ * @param loggingOn Turn of or on logging, fmi2Boolean.
  * @return An instance of a model.
  */                                                 
-fmiStatus fmi2_me_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn);
+fmi2Status fmi2_me_instantiate(fmi2Component c,
+                               fmi2String    instanceName,
+                               fmi2Type      fmuType, 
+                               fmi2String    fmuGUID, 
+                               fmi2String    fmuResourceLocation, 
+                               const fmi2CallbackFunctions* functions, 
+                               fmi2Boolean                  visible,
+                               fmi2Boolean                  loggingOn);
 
 /**
  * \brief Dispose of the ME model instance, helper function for fmi2_free_instance.
  * 
  * @param c The FMU struct.
  */
-void fmi2_me_free_instance(fmiComponent c);
+void fmi2_me_free_instance(fmi2Component c);
 
 #endif

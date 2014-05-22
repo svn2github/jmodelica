@@ -255,16 +255,16 @@ model UnsupportedBuiltins_WarnErr
  equation
   homotopy(1,1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="UnsupportedBuiltins_WarnErr",
-			description="Compliance error for unsupported builtins",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="UnsupportedBuiltins_WarnErr",
+            description="Compliance error for unsupported builtins",
+            homotopy_type="homotopy",
+            errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 306, column 3:
-  The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.
-
+  The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.
 ")})));
 end UnsupportedBuiltins_WarnErr;
 
@@ -604,9 +604,6 @@ end R;
 			errorMessage="
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 647, column 2:
-  Record arrays of unknown sizes are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 648, column 16:
   Unknown sizes in record constructors is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -636,35 +633,37 @@ model Error2
   
   Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, 4);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnknownArraySizes_Error2",
-			description="Test that compliance errors are given.",
-			errorMessage="
-9 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 736, column 7:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArraySizes_Error2",
+            description="Test that compliance errors are given.",
+            errorMessage="
+8 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 627, column 7:
   Unknown sizes in operator symmetric() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 737, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 628, column 7:
   Unknown size arg in operator identity() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 741, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 631, column 7:
   Unknown sizes in operator ^ is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 742, column 7:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 632, column 7:
   Unknown sizes in operator scalar() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 742, column 14:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Semantic error at line 632, column 14:
   Calling function scalar(): types of positional argument 1 and input A are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 743, column 7:
+    type of 'x' is Real[:, :]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 633, column 7:
   Unknown sizes in operator vector() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 743, column 14:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Semantic error at line 633, column 14:
   Calling function vector(): types of positional argument 1 and input A are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 744, column 7:
+    type of 'x' is Real[:, :]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Compliance error at line 634, column 7:
   Unknown sizes in operator matrix() is not supported in functions
 ")})));
 end Error2;
@@ -719,26 +718,6 @@ Compliance error at line 0, column 0:
 			
 ")})));
 end UnknownArrayIndex;
-
-model BreakInFor
-	Real[2] x;
-algorithm
-	for i in 1:2 loop
-		break;
-		x[i] := i;
-	end for;
-	
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="BreakInFor",
-			description="Test errors for break statement in scalarized for",
-			errorMessage="
-Error: in file '...':
-Compliance error at line 0, column 0:
-  Break statement in algorithm only supported in while loops
-
-")})));
-end BreakInFor;
 
 model WhileStmt
 	Real x;

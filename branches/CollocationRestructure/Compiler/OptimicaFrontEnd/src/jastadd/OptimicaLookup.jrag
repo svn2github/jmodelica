@@ -32,13 +32,13 @@ aspect OptimicaFlatNameBinding {
 }
 
 aspect OptimicaInstLookupComponents {
-	
-	inh lazy InstComponentDecl InstForClauseC.lookupInstComponent(String name);
-	eq InstForClauseC.getChild().lookupInstComponent(String name) {
-		for (InstForIndex ifi : getInstForIndexs()) 
-			if (ifi.matches(name))
-				return ifi.getInstPrimitive();
-		return lookupInstComponent(name);
-	}
-	
+
+    inh lazy InstLookupResult<InstComponentDecl> InstForClauseC.lookupInstComponent(String name);
+    eq InstForClauseC.getChild().lookupInstComponent(String name) {
+        for (InstForIndex ifi : getInstForIndexs()) 
+            if (ifi.matches(name))
+                return InstLookupResult.<InstComponentDecl>found(ifi.getInstPrimitive());
+        return lookupInstComponent(name);
+    }
+
 }

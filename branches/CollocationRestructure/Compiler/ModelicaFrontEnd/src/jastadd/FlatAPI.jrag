@@ -32,7 +32,7 @@ import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
 
-import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.streams.StreamGobbler;
 
 aspect FlatAPI {
 	
@@ -972,7 +972,8 @@ aspect FlatAPI {
      */
     syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
             inEventGeneratingLocation() && hasEventGeneratingType() &&
-            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters));
+            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters)) &&
+            root().options.getBooleanOption("generate_event_switches");
     
     /**
      * Check if an expression will generate an event.

@@ -22,11 +22,13 @@ def update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, node):
     type = node.type
     if type == 'JacobianUpdated':
         block = node.block
-        jacs[block] = node.jacobian
+        if 'jacobian' in node:
+            jacs[block] = node.jacobian
         jacs_updated[block] = True
     elif type == 'ResidualScalingUpdated':
         block = node.block
-        scalings[block] = node.scaling
+        if 'scaling' in node:
+            scalings[block] = node.scaling
         scalings_updated[block] = True
 
 def gather_solves(log):
@@ -53,8 +55,9 @@ def gather_solves(log):
 
                 block_index = block_solve.block
 
-                if block_index in scalings:
-                    block_solve['initial_residual_scaling'] = scalings[block_index]
+                if block_index in scalings_updated:
+                    if block_index in scalings:
+                        block_solve['initial_residual_scaling'] = scalings[block_index]
                     block_solve['initial_residual_scaling_updated'] = scalings_updated[block_index]
                 scalings_updated[block_index] = False
 
@@ -63,12 +66,14 @@ def gather_solves(log):
                         if 'iteration_index' in it_node:
                             iteration = it_node
 
-                            if block_index in jacs:
-                                iteration['jacobian'] = jacs[block_index]
+                            if block_index in jacs_updated:
+                                if block_index in jacs:
+                                    iteration['jacobian'] = jacs[block_index]
                                 iteration['jacobian_updated'] = jacs_updated[block_index]
                                 jacs_updated[block_index] = False
-                            if block_index in scalings:
-                                iteration['residual_scaling'] = scalings[block_index]
+                            if block_index in scalings_updated:
+                                if block_index in scalings:
+                                    iteration['residual_scaling'] = scalings[block_index]
                                 iteration['residual_scaling_updated'] = scalings_updated[block_index]
                             scalings_updated[block_index] = False
                             

@@ -512,14 +512,16 @@ aspect FlatTypeAnalysis {
 	eq FEnumType.canBeRange()      = true;
     
     eq FArgumentExp.type() = copiedFExp().type();
-	
-	eq FLinspace.type() {
-		// TODO: check that endpoints are real
-		if ((!getN().variability().lessOrEqual(fParameter()) || getN().ceval().intValue() < 2)
-				&& !inFunction())
-			return fUnknownType();
-		return fRealArrayType(size());
-	}
+
+    eq FLinspace.type() {
+        // TODO: check that endpoints are real
+        try {
+            if ((getN().variability().lessOrEqual(fParameter()) && getN().ceval().intValue() >= 2) || inFunction())
+                return fRealArrayType(size());
+        } catch (ConstantEvaluationException e) {
+        }
+        return fUnknownType();
+    }
 
     eq FRelExp.type() {
         if (shouldUseOverloadedOperator()) 
@@ -831,11 +833,12 @@ aspect InstBindingType {
     /**
      * Is this a member of an array component?
      */
-	inh boolean InstAssignable.inArrayComponent();
-	eq InstClassDecl.getChild().inArrayComponent()          = false;
-	eq InstRoot.getChild().inArrayComponent()               = false;
-	eq FlatRoot.getChild().inArrayComponent()               = false;
-	eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+    inh boolean InstAssignable.inArrayComponent();
+    eq InstClassDecl.getChild().inArrayComponent()          = false;
+    eq InstRoot.getChild().inArrayComponent()               = false;
+    eq FlatRoot.getChild().inArrayComponent()               = false;
+    eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+    syn boolean InstNode.inArrayComponent()                 = false;
 
 }
 
@@ -1175,7 +1178,7 @@ aspect OverloadedOperatorBinding {
      */
     syn Collection<InstClassDecl> FType.matchOverloadedConstructors(FType other) = null;
     eq FOperatorRecordType.matchOverloadedConstructors(FType other)              = 
-        matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
+        isArray() ? Collections.<InstClassDecl>emptyList() : matchOverloadedOperators(FExp.OP_CON, other, null, true).matches();
 
     /**
      * Find the zero function for an operator record type.

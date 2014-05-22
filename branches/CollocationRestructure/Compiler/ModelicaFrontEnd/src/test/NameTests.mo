@@ -265,17 +265,15 @@ model NameTest9_Err
   C c(b(y=3));
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest9_Err",
-			description="Test that names are looked up in constraining clauses.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest9_Err",
+            description="Test that names are looked up in constraining clauses.",
+            errorMessage="
 1 errors found:
-
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 196, column 4:
-  Cannot find component declaration for y
-
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 265, column 9:
+  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
   end NameTest9_Err;
 
@@ -305,17 +303,15 @@ model NameTest10_Err
   P.B b;
   
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest10_Err",
-			description="Test that names are looked up in constraining clauses.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest10_Err",
+            description="Test that names are looked up in constraining clauses.",
+            errorMessage="
 1 errors found:
-
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 297, column 4:
-  Cannot find class declaration for B
-
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 303, column 5:
+  Cannot use class B, because it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
 ")})));
   end NameTest10_Err;
   
@@ -790,15 +786,15 @@ model NameTest25_Err
     A a(redeclare replaceable C b);
     Real z = a.b.y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest25_Err",
-			description="Check that member lookup is limited by constraining class when using redeclare replaceable",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest25_Err",
+            description="Check that member lookup is limited by constraining class when using redeclare replaceable",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 771, column 18:
-  Cannot find class or component declaration for y
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 787, column 18:
+  Cannot use component y, because it is not present in constraining type of declaration 'redeclare replaceable C b'
 ")})));
 end NameTest25_Err;
 
@@ -1083,13 +1079,10 @@ model ConstantLookup16
 			name="ConstantLookup16",
 			description="Using constant with bad value as array index",
 			errorMessage="
-4 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 797, column 16:
   Could not evaluate binding expression for constant 'a': 'b[c]'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 797, column 22:
-  Could not evaluate array index expression: c
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 799, column 23:
   Cannot find class or component declaration for d
@@ -1352,15 +1345,15 @@ model ConstantLookup23
 	
 	Real y = C.x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup23",
-			description="Trying to use member that does not exist in constraining class (but does in actual)",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup23",
+            description="Trying to use member that does not exist in constraining class (but does in actual)",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1062, column 13:
-  Cannot find class or component declaration for x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 1346, column 13:
+  Cannot use component x, because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end ConstantLookup23;
 
@@ -3709,5 +3702,59 @@ Semantic error at line 3711, column 10:
   Can't declare x as flow, since it contains a component declared as flow
 ")})));
 end InheritFlowTest2;
+
+
+model BadEscape1
+	parameter String a = "\qabc\ def\nghi\\xjkl\?mno\#";
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadEscape1",
+            description="Illegal escape sequences in string",
+            errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3708, column 23:
+  Illegal escape sequence at position 1 in string: '\\q'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3708, column 23:
+  Illegal escape sequence at position 27 in string: '\\#'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3708, column 23:
+  Illegal escape sequence at position 6 in string: '\\ '
+")})));
+end BadEscape1;
+
+
+model BadEscape2
+    Real '\qabc\ def\nghi\\xjkl\?mno\#' = 1;
+	Real x = '\qabc\ def\nghi\\xjkl\?mno\#';
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadEscape2",
+            description="Illegal escape sequences in quoted identifier",
+            errorMessage="
+6 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3729, column 16:
+  Illegal escape sequence at position 2 in quoted identifier: '\\q'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3729, column 16:
+  Illegal escape sequence at position 28 in quoted identifier: '\\#'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3729, column 16:
+  Illegal escape sequence at position 7 in quoted identifier: '\\ '
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3731, column 11:
+  Illegal escape sequence at position 2 in quoted identifier: '\\q'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3731, column 11:
+  Illegal escape sequence at position 28 in quoted identifier: '\\#'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3731, column 11:
+  Illegal escape sequence at position 7 in quoted identifier: '\\ '
+")})));
+end BadEscape2;
 
 end NameTests;

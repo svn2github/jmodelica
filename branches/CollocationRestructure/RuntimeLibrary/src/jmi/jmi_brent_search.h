@@ -12,12 +12,6 @@
 
 typedef int (*jmi_brent_func_t)(realtype u, realtype* f, void* data);
 
-typedef enum {
-    JMI_BRENT_BAD_PARAM = -10    
-
-    
-} JMI_BRENT_CODES;
-
 /* 
     \brief Solve scalar equation f(u) = 0 in a very reliable and efficient way 
         (u_min < u_max; f(u_min) and f(u_max) must have different signs).
@@ -31,115 +25,33 @@ typedef enum {
     @param u_out    Solution or best guess
     @param f_out    Residual at u_out
     @param data    user data propagated to the function
-    @return Error flag (forwarded from the call to f())    
+    @return Error flag (may be forwarded from the call to f() or one of jmi_brent_exit_codes_t)
  */
-int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtype f_min, realtype f_max, realtype tolerance, realtype* u_out, realtype* f_out,void *data) {
-    realtype a=u_min; /* left point */
-    realtype fa = f_min;
-    realtype b=u_max; /* right point */
-    realtype fb = f_max;
-    realtype c = u_min; /* Intermediate point a <= c <= b */
-    realtype fc = f_min;
-    realtype e= u_max - u_min;
-    realtype d=e;
-    realtype m;
-    realtype s;
-    realtype p;
-    realtype q;
-    realtype r;
-    realtype tol; /* absolute tolerance for the current "b" */
-    int flag;
-#ifdef DEBUG
-    if(fa*fb > 0) {
-        return JMI_BRENT_BAD_PARAM;
-    }
-#endif
-    while(1) {
-        if(RAbs(fc) < RAbs(fb)) {
-            a = b;
-            b = c;
-            c = a;
-            fa = fb;
-            fb = fc;
-            fc = fa;
-        }
-        tol = 2*UNIT_ROUNDOFF*RAbs(b) + tolerance;
-        m = (c - b)/2;
-        
-        if((RAbs(m) <= tol) || (fb == 0.0)) {
-            /* root found (interval is small enough) */
-            if(RAbs(fb) < RAbs(fc)) {
-                *u_out = b;
-                *f_out = fb;
-            }
-            else {
-                *u_out = c;
-                *f_out = fc;
-            }
-            return 0;
-        }
-        /* Find the new point: */
-        /* Determine if a bisection is needed */
-        if((RAbs(e) < tol) || ( RAbs(fa) <= RAbs(fb))) {
-            e = m;
-            d = e;
-        }
-        else {
-            s = fb/fa;
-            if(a == c) {
-                /* linear interpolation */
-                p = 2*m*s;
-                q = 1 - s;
-            }
-            else {
-                /* inverse quadratic interpolation */
-                q = fa/fc;
-                r = fb/fc;
-                p = s*(2*m*q*(q - r) - (b - a)*(r - 1));
-                q = (q - 1)*(r - 1)*(s - 1);
-            }
-            if(p > 0) 
-                q = -q;
-            else
-                p = -p;
-            s = e;
-            e = d;
-            
-            if(( 2*p < 3*m*q - RAbs(tol*q)) && (p < RAbs(0.5*s*q)))
-                /* interpolation successful */
-                d = p/q;
-            else {
-                /* use bi-section */
-                e = m;
-                d = e;
-            }
-        }
-        
-        
-        /* Best guess value is saved into "a" */
-        a = b;
-        fa = fb;
-        b = b + ((RAbs(d) > tol) ? d : ((m > 0) ? tol: -tol));
-        flag = f(b, &fb, data);
-        if(flag) {
-             if(RAbs(fa) < RAbs(fc)) {
-                *u_out = a;
-                *f_out = fa;
-            }
-            else {
-                *u_out = c;
-                *f_out = fc;
-            }
-            return flag;
-        }
+int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtype f_min, realtype f_max, realtype tolerance, realtype* u_out, realtype* f_out,void *data);
 
-        if(fb * fc  > 0) {
-            /* initialize variables */
-            c = a;
-            fc = fa;
-            e = b - a;
-            d = e;
-        }
-    }
+#include <kinsol/kinsol.h>
+
+/**< \brief Convert Brent return flag to readable name */
+const char *jmi_brent_flag_to_name(int flag);
+
+/**< \brief Error codes used by the Brent solver */
+typedef enum {
+    JMI_BRENT_SUCCESS = KIN_SUCCESS,
+    JMI_BRENT_ILL_INPUT = KIN_ILL_INPUT,
+    JMI_BRENT_MEM_FAIL = KIN_MEM_FAIL,
+    JMI_BRENT_SYSFUNC_FAIL = KIN_SYSFUNC_FAIL,
+    JMI_BRENT_FIRST_SYSFUNC_ERR = KIN_FIRST_SYSFUNC_ERR,
+    JMI_BRENT_REPTD_SYSFUNC_ERR = KIN_REPTD_SYSFUNC_ERR,
+    JMI_BRENT_ROOT_BRACKETING_FAILED = -16,
+    JMI_BRENT_FAILED = -17
 }
+jmi_brent_exit_codes_t;
+
+/* Interface to the residual function that is compatible with Brent search.
+   @param y - input - function argument
+   @param f - output - residual value
+   @param problem_data - solver object propagated as opaques data
+*/
+int brentf(realtype y, realtype* f, void* problem_data);
+
 #endif /* JMI_BRENT_SEARCH_H */

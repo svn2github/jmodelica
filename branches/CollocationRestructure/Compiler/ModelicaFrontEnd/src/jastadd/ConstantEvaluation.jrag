@@ -1586,7 +1586,7 @@ aspect ConstantEvaluation {
           }
           
           if (shouldCevalThroughParent(var)) {
-              res = cevalRecordMember(getID());
+              res = cevalRecordMember(this);
               if (i != Index.NULL)
                   res = res.array().getCell(i);
               return res;
@@ -1604,23 +1604,49 @@ aspect ConstantEvaluation {
     }
 
     /**
-     * \brief Check if constant evaluation should go through surrounding record.
+     * Check if constant evaluation should go through surrounding record.
      */
-    protected boolean InstNamedAccess.shouldCevalThroughParent(InstAssignable var) {
-        if (!var.inRecord() || !var.inFunction() || 
-              containingInstComponent() == var.containingInstComponent())
-          return false;
+    protected boolean InstNamedAccess.shouldCevalThroughParent(InstComponentDecl var) {
+        if (!var.inRecord())
+            return false;
+        if (!var.inFunction()) 
+            return !var.hasBindingFExp() && var.hasParentRecordWithBindingExp();
+        if (containingInstComponent() == var.containingInstComponent())
+            return false;
         InstAccess first = getTopInstAccess().getFirstInstAccess();
         return !first.myInstComponentDecl().evaluationValue().isUnknown();
     }
 
     /**
-     * \brief Perform constant evaluation of an access to a record member.
+     * Check if there is a parent record that has a binding expression.
      */
-    inh CValue InstAccess.cevalRecordMember(String id);
-    eq BaseNode.getChild().cevalRecordMember(String id)          = CValue.UNKNOWN;
-    eq InstDot.getInstAccess(int i).cevalRecordMember(String id) = 
-        (i == 0) ? cevalRecordMember(id) : getInstAccess(i - 1).ceval().record().getMember(id);
+    inh boolean InstComponentDecl.hasParentRecordWithBindingExp();
+    eq Root.getChild().hasParentRecordWithBindingExp()           = false;
+    eq InstBaseNode.getChild().hasParentRecordWithBindingExp()   = false;
+    eq InstAssignable.getChild().hasParentRecordWithBindingExp() = 
+        isRecord() && (hasBindingFExp() || hasParentRecordWithBindingExp());
+
+    /**
+     * Perform constant evaluation of an access to a record member.
+     */
+    inh CValue InstAccess.cevalRecordMember(InstNamedAccess access);
+    eq BaseNode.getChild().cevalRecordMember(InstNamedAccess access)          = 
+        access.myInstComponentDecl().cevalParentRecord().record().getMember(access.getID());
+    eq InstDot.getInstAccess(int i).cevalRecordMember(InstNamedAccess access) = 
+        (i == 0) ? cevalRecordMember(access) : getInstAccess(i - 1).ceval().record().getMember(access.getID());
+
+    /**
+     * Perform constant evaluation of a record member.
+     */
+    inh CValue InstComponentDecl.cevalParentRecord();
+    eq Root.getChild().cevalParentRecord()         = CValue.UNKNOWN;
+    eq InstBaseNode.getChild().cevalParentRecord() = CValue.UNKNOWN;
+    eq InstRecord.getChild().cevalParentRecord()   = 
+        hasParentRecordWithBindingExp() ? cevalParentRecord().record().getMember(name()) : ceval();
+    eq InstArrayComponentDecl.getChild().cevalParentRecord() {
+        CValue v = cevalParentRecord();
+        return isArray() ? v : v.array().getCell(myIndex());
+    }
 
     // TODO: if caching, use cevalFunction() instead
     eq FFunctionCall.cevalCalc()    = evaluate()[0];
@@ -1646,11 +1672,11 @@ aspect ConstantEvaluation {
     // TODO: support format args
     syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
 
-    syn String FStringExp.formatWidth() = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
-    syn String FStringExp.formatFlags() = leftJustified() && minimumLength() > 0 ? "-" : "";
+    syn String FStringExp.formatWidth()     = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
+    syn String FStringExp.formatFlags()     = leftJustified() && minimumLength() > 0 ? "-" : "";
     syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";
     syn String FStringExp.formatSpecifier() = getValue().type().formatSpecifier();
-    syn int FStringExp.minimumLength() = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
+    syn int FStringExp.minimumLength()     = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
     syn boolean FStringExp.leftJustified() = hasLeftJustified() ? getLeftJustified().ceval().booleanValue() : true;
     syn int FStringExp.significantDigits() = hasSignificantDigits() ? getSignificantDigits().ceval().intValue() : DEFAULT_PRECISION;
     syn String FType.formatSpecifier() {
@@ -1714,45 +1740,45 @@ aspect ConstantEvaluation {
 	eq InstAssignable.ceval() = ceval(Index.NULL);
 	
 
-	/**
-	 * \brief Evaluation of a assignable instance node located in the instance
-	 * AST. Evaluates a specific cell if this assignable is an array.
-	 * 
-	 * If assignable is not an array, <code>i</code> should be Index.NULL.
-	 *  
-	 * In some situations, expressions are evaluated in the instance AST. 
-	 * Such expressions are then instantiated, but not yet flattened. As a
-	 * consequence, identifiers in expressions refers to InstAssignable nodes,
-	 * and accordingly, it it necessary to compute the constant value 
-	 * corresponding to an InstAssignable node. If the assignable is a
-	 * constant or a parameter, and if it has a binding expression, then
-	 * a corresponding CValue object is returned, otherwise, CValueUnknown
-	 * is returned. If the variable has <code>evaluationValue</code> set, 
-	 * then that value is always returned.
-	 * 
-	 * Outside of functions, the calculated value is cached.
-	 * 
-	 * @return The constant value.
-	 */
-	syn CValue InstAssignable.ceval(Index i) {
-    	CValue val = CValue.UNKNOWN;
-		if (evaluationValue != null) {
-			val = evaluationValue;
-		} else if ((isConstant() || isParameter()) && !isForIndex()) {
-		    boolean func = inFunction();
-	    	if (hasBindingFExp()) {
-		    	FExp bexp = getBindingFExp();
-	    		if (!bexp.type().isUnknown())
-	    			val = bexp.ceval(func ? i : Index.NULL);
-	    	} else {
-	    		val = startAttributeCValue();
-	    	}
-	    	if (!func)
-	    	    evaluationValue = val;
-		}
-		return val;
-	}
-	
+    /**
+     * \brief Evaluation of a assignable instance node located in the instance
+     * AST. Evaluates a specific cell if this assignable is an array.
+     * 
+     * If assignable is not an array, <code>i</code> should be Index.NULL.
+     *  
+     * In some situations, expressions are evaluated in the instance AST. 
+     * Such expressions are then instantiated, but not yet flattened. As a
+     * consequence, identifiers in expressions refers to InstAssignable nodes,
+     * and accordingly, it it necessary to compute the constant value 
+     * corresponding to an InstAssignable node. If the assignable is a
+     * constant or a parameter, and if it has a binding expression, then
+     * a corresponding CValue object is returned, otherwise, CValueUnknown
+     * is returned. If the variable has <code>evaluationValue</code> set, 
+     * then that value is always returned.
+     * 
+     * Outside of functions, the calculated value is cached.
+     * 
+     * @return The constant value.
+     */
+    syn CValue InstAssignable.ceval(Index i) {
+        CValue val = CValue.UNKNOWN;
+        if (evaluationValue != null) {
+            val = evaluationValue;
+        } else if ((isConstant() || isParameter()) && !isForIndex()) {
+            boolean func = inFunction();
+            if (hasBindingFExp()) {
+                FExp bexp = getBindingFExp();
+                if (!bexp.type().isUnknown())
+                    val = bexp.ceval(func ? i : Index.NULL);
+            } else if (!func && !inRecordDecl()) {
+                val = startAttributeCValue();
+            }
+            if (!func)
+                evaluationValue = val;
+        }
+        return val;
+    }
+
 	// Can never be an array - assume i == Index.NULL
 	eq InstEnumLiteral.ceval(Index i) = new CValueEnum(type(), myIndex());
 	
@@ -2078,28 +2104,30 @@ aspect ConstantEvaluation {
   syn CValue[] FAbstractFunctionCall.cevalFunction() = new CValue[] { ceval() };
   syn lazy CValue[] FFunctionCall.cevalFunction()    = evaluate();
   syn lazy CValue[] InstFunctionCall.cevalFunction() = evaluate();
-  
-  /**
-   * \brief Interface for variable declarations in flat and instance trees.
-   */
-  public interface CommonVariableDecl {
-	  public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
-	  public void readEvaluationValue(Map<CommonVariableDecl, CValue> map);
-	  public void setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map);
-	  public void prepareForFunctionEval();
-	  public CValue evaluationValue();
-	  public String name();
-        
+
+    /**
+     * \brief Interface for variable declarations in flat and instance trees.
+     */
+    public interface CommonVariableDecl {
+        public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
+        public void readEvaluationValue(Map<CommonVariableDecl, CValue> map);
+        public void setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map);
+        public void prepareForFunctionEval();
+        public CValue evaluationValue();
+        public CValue ceval();
+        public String name();
+        public Size size();
+
         // Added for codegeneration when evaluating external functions
         public FType   type();
         public String  name_C();
         public boolean isInput();
         public boolean isOutput();
-  }
-  
-  FAbstractVariable implements CommonVariableDecl;
-  InstComponentDecl implements CommonVariableDecl;
-  
+    }
+
+    FAbstractVariable implements CommonVariableDecl;
+    InstComponentDecl implements CommonVariableDecl;
+
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
   eq FFunctionCall.myFuncInputs()    = myInputs();
@@ -2301,89 +2329,130 @@ aspect ConstantEvaluation {
     }
     private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
 
-  /**
-   * \brief Save current function evaluation value to map.
-   */
-  public void FAbstractVariable.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-	  map.put(this, evaluationValue);
-  }
-  
-  /**
-   * \brief Save current function evaluation value to map.
-   */
-  public void InstComponentDecl.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-	  map.put(this, evaluationValue);
-  }
-  
-  /**
-   * \brief Read current function evaluation value from map.
-   * 
-   * If this variable isn't in the map, set to value of binding expression.
-   */
-  public void FAbstractVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-	  evaluationValue = map.get(this);
-  }
-  
-  public void FFunctionVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-	  CValue val = map.get(this);
-	  if (val == null) {
-		  evaluationValue = hasBindingExp() ? getBindingExp().ceval() : CValue.UNKNOWN;
-		  map.put(this, evaluationValue);
-	  } else {
-		  evaluationValue = val;
-	  }
-  }
-  
-  /**
-   * \brief Read current function evaluation value from map.
-   * 
-   * If this variable isn't in the map, set to value of binding expression.
-   */
-  public void InstComponentDecl.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-	  CValue val = map.get(this);
-	  if (val == null) {
-		  evaluationValue = cevalBindingExp();
-		  map.put(this, evaluationValue);
-	  } else {
-		  evaluationValue = val;
-	  }
-  }
-  
-  protected CValue InstComponentDecl.cevalBindingExp() {
-	  return CValue.UNKNOWN;
-  }
-  
-  protected CValue InstAssignable.cevalBindingExp() {
-	  return hasBindingFExp() ? myBindingInstExp().ceval() : CValue.UNKNOWN;
-  }
-  
-  /**
-   * Set the current evaluation value.
-   */
-  public void FAbstractVariable.setEvaluationValue(CValue val) {
-	  evaluationValue = val;
-  }
-  
-  /**
-   * Set the current evaluation value.
-   */
-  public void InstComponentDecl.setEvaluationValue(CValue val) {
-	  evaluationValue = val;
-  }
-  
-  /**
-   * Set the current evaluation value.
-   */
-  public abstract void CommonForIndex.setEvaluationValue(CValue val);
-  
-  public void FForIndex.setEvaluationValue(CValue val) {
-	  getFVariable().setEvaluationValue(val);
-  }
-  
-  public void InstForIndex.setEvaluationValue(CValue val) {
-	  getInstPrimitive().setEvaluationValue(val);
-  }
-  
+    /**
+     * \brief Save current function evaluation value to map.
+     */
+    public void FAbstractVariable.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        map.put(this, evaluationValue);
+    }
+
+    /**
+     * \brief Save current function evaluation value to map.
+     */
+    public void InstComponentDecl.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        map.put(this, evaluationValue);
+    }
+
+    /**
+     * \brief Read current function evaluation value from map.
+     * 
+     * If this variable isn't in the map, set to value of binding expression.
+     */
+    public void FAbstractVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        evaluationValue = map.get(this);
+    }
+
+    public void FFunctionVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        CValue val = map.get(this);
+        if (val == null) {
+            evaluationValue = cevalBindingExp();
+            map.put(this, evaluationValue);
+        } else {
+            evaluationValue = val;
+        }
+    }
+
+    /**
+     * \brief Read current function evaluation value from map.
+     * 
+     * If this variable isn't in the map, set to value of binding expression.
+     */
+    public void InstComponentDecl.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        CValue val = map.get(this);
+        if (val == null) {
+            evaluationValue = cevalBindingExp();
+            map.put(this, evaluationValue);
+        } else {
+            evaluationValue = val;
+        }
+    }
+
+    protected CValue FFunctionVariable.cevalBindingExp() {
+        return hasBindingExp() ? getBindingExp().ceval() : CValue.UNKNOWN;
+    }
+
+    protected CValue InstComponentDecl.cevalBindingExp() {
+        return CValue.UNKNOWN;
+    }
+
+    protected CValue InstAssignable.cevalBindingExp() {
+        return hasBindingFExp() ? myBindingInstExp().ceval() : CValue.UNKNOWN;
+    }
+
+    protected CValue InstRecord.cevalBindingExp() {
+        if (hasBindingFExp())
+            return myBindingInstExp().ceval();
+        FRecordType type = (FRecordType) type().scalarType();
+        if (isArray()) {
+            CValueArray res = new CValueArray(size());
+            int ndims = ndims();
+            for (InstComponentDecl ch : getInstComponentDecls())
+                ch.cevalBindingExpForRecordArray(type, res, ndims);
+            return res;
+        } else {
+            return cevalBindingExpForRecord(type);
+        }
+    }
+
+    protected void InstComponentDecl.cevalBindingExpForRecordArray(FRecordType type, CValueArray arr, int ndims) {
+        throw new UnsupportedOperationException("Only valid for InstArrayComponentDecls.");
+    }
+
+    protected void InstArrayComponentDecl.cevalBindingExpForRecordArray(FRecordType type, CValueArray arr, int ndims) {
+        ndims--;
+        if (ndims > 0) {
+            for (InstComponentDecl ch : getInstComponentDecls())
+                ch.cevalBindingExpForRecordArray(type, arr, ndims);
+        } else {
+            arr.addCell(cevalBindingExpForRecord(type));
+        }
+    }
+
+    protected CValue InstComponentDecl.cevalBindingExpForRecord(FRecordType type) {
+        CValueRecord res = new CValueRecord(type);
+        evaluationValue = res;
+        for (InstComponentDecl ch : allInstComponentDecls())
+            res.setMember(ch.name(), ch.cevalBindingExp());
+        return res;
+    }
+
+    /**
+     * Set the current evaluation value.
+     */
+    public void FAbstractVariable.setEvaluationValue(CValue val) {
+        evaluationValue = val;
+    }
+
+    /**
+     * Set the current evaluation value.
+     */
+    public void InstComponentDecl.setEvaluationValue(CValue val) {
+        evaluationValue = val;
+    }
+
+    /**
+     * Set the current evaluation value.
+     */
+    public abstract void CommonForIndex.setEvaluationValue(CValue val);
+
+    public void FForIndex.setEvaluationValue(CValue val) {
+        getFVariable().setEvaluationValue(val);
+    }
+
+    public void InstForIndex.setEvaluationValue(CValue val) {
+        getInstPrimitive().setEvaluationValue(val);
+    }
+
   /**
    * Get the current evaluation value.
    */

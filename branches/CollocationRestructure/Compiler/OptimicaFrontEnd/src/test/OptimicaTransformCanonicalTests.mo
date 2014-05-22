@@ -364,15 +364,16 @@ optimization TimedArrayTest3 (objective=y(finalTime),startTime=0,finalTime=2)
 constraint
  y <= x("0") * {2,3};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TimedArrayTest3",
-			description="Type checking timed variables: string arg",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TimedArrayTest3",
+            description="Type checking timed variables: string arg",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
-Semantic error at line 347, column 7:
-  Type error in expression: x(\"0\")
+Error: in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
+Semantic error at line 365, column 7:
+  The argument of a timed variable must be a scalar parameter Real expression
+    type of '\"0\"' is String
 ")})));
 end TimedArrayTest3;
 
@@ -383,15 +384,16 @@ optimization TimedArrayTest4 (objective=y(finalTime),startTime=0,finalTime=2)
 constraint
  y <= x(y) * {2,3};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TimedArrayTest4",
-			description="Type checking timed variables: continuous arg",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TimedArrayTest4",
+            description="Type checking timed variables: continuous arg",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
-Semantic error at line 366, column 7:
-  Type error in expression: x(y)
+Error: in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
+Semantic error at line 385, column 7:
+  The argument of a timed variable must be a scalar parameter Real expression
+    'y' is of continuous-time variability
 ")})));
 end TimedArrayTest4;
 

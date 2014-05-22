@@ -24,117 +24,45 @@ import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 
 public abstract class CodeGenTestCase extends TestCase {
-	private String genCode = "";
-    private String genCodeFileName = "";
-    private boolean resultOnFile = false;
-	private String template = "";
-    private String templateFileName = "";
-    private boolean templateOnFile = false;
-    
-	public CodeGenTestCase() {}
-    
-	public CodeGenTestCase(String name, 
-			                  String description,
-			                  String sourceFileName, 
-			                  String className, 
-			                  String result,
-			                  boolean resultOnFile,
-			                  String template,
-			                  boolean templateOnFile) {
-		super(name, description, sourceFileName, className);
-		this.resultOnFile = resultOnFile;		
-		if (!resultOnFile) {
-			this.genCode = result;
-		} else {
-			this.genCodeFileName = result;
-		}
-		this.templateOnFile = resultOnFile;		
-		if (!resultOnFile) {
-			this.template = result;
-		} else {
-			this.templateFileName = result;
-		}
-	}
+    private String genCode = null;
+    private String template = null;
 
-	public abstract AbstractGenerator createGenerator(FClass fc);
+    public abstract AbstractGenerator createGenerator(FClass fc);
 
-	/**
-	 * \brief Perform tests on flat class after transform canonical step.
-	 * 
-	 * @return  <code>true</code> if test case shoule stop after this method
-	 */
-	protected boolean testTransformed(FClass fc) {
-   	  	ByteArrayOutputStream os = new ByteArrayOutputStream();
-  	    AbstractGenerator generator = createGenerator(fc);
-	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
-	    		           new NotNullCodeStream(os));
-	    String test = os.toString();
-	    String correct = filter(getGenCode());
-	    if (!removeWhitespace(test).equals(removeWhitespace(correct)))
-	    	assertEquals("Generated code does not match expected.", correct, test);
-	    return true;
-	}
-	
-	public String getGenCode() {
-		return genCode;
-	}
-	
-	public void setGenCode(String genCode) {
-		this.genCode = genCode;
-		this.genCodeFileName = "";
-		this.resultOnFile = false;
-	}
-	
-	public void setGeneratedCode(String genCode) {
-		setGenCode(genCode);
-	}
+    /**
+     * \brief Perform tests on flat class after transform canonical step.
+     * 
+     * @return  <code>true</code> if test case shoule stop after this method
+     */
+    protected boolean testTransformed(FClass fc) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        AbstractGenerator generator = createGenerator(fc);
+        generator.generate(createTemplateReader(), new NotNullCodeStream(os));
+        String test = os.toString();
+        String correct = filter(getGeneratedCode());
+        if (!removeWhitespace(test).equals(removeWhitespace(correct)))
+            assertEquals("Generated code does not match expected.", correct, test);
+        return true;
+    }
 
-	public String getGenCodeFileName() {
-		return genCodeFileName;
-	}
-	
-	public void setGenCodeFileName(String flatModelFileName) {
-		this.genCodeFileName = flatModelFileName;
-		this.genCode = "";
-		this.resultOnFile = true;
-	}
-	
-	public boolean isResultOnFile() {
-		return resultOnFile;
-	}
-	
-	public void setResultOnFile(boolean resultOnFile) {
-		this.resultOnFile = resultOnFile;
-	}
+    public String getGeneratedCode() {
+        return genCode;
+    }
 
-	public String getTemplate() {
-		return template;
-	}
-	
-	public void setTemplate(String template) {
-		this.template = template;
-		this.templateFileName = "";
-		this.templateOnFile = false;
-	}
+    public void setGeneratedCode(String genCode) {
+        this.genCode = genCode;
+    }
 
-	public String templateFileName() {
-		return templateFileName;
-	}
-	
-	public void templateFileName(String templateFileName) {
-		this.templateFileName = templateFileName;
-		this.template = "";
-		this.resultOnFile = true;
-	}
-	
-	public boolean isTemplateOnFile() {
-		return templateOnFile;
-	}
-	
-	public void setTemplateOnFile(boolean templateOnFile) {
-		this.templateOnFile = templateOnFile;
-	}
+    public String getTemplate() {
+        return template;
+    }
 
-	
-	
+    public void setTemplate(String template) {
+        this.template = template;
+    }
+
+    public Reader createTemplateReader() {
+        return (template == null) ? null : new BufferedReader(new StringReader(getTemplate()));
+    }
+
 }

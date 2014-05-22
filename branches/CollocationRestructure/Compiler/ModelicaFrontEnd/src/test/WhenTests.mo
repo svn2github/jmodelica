@@ -339,7 +339,7 @@ equation
 			description="Basic test of a when clause with reinit()",
 			flatModel="
 fclass WhenTests.ReinitTest1
- Real x;
+ Real x(stateSelect = StateSelect.always);
  discrete Boolean temp_1;
 initial equation 
  x = 0.0;
@@ -350,8 +350,11 @@ equation
  if temp_1 and not pre(temp_1) then
   reinit(x, 1);
  end if;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
 end WhenTests.ReinitTest1;
-			
 ")})));
 end ReinitTest1;
 
@@ -370,8 +373,8 @@ equation
 			description="reinit() with array args",
 			flatModel="
 fclass WhenTests.ReinitTest2
- Real x[1];
- Real x[2];
+ Real x[1](stateSelect = StateSelect.always);
+ Real x[2](stateSelect = StateSelect.always);
  discrete Boolean temp_1;
 initial equation 
  x[1] = 0.0;
@@ -385,7 +388,11 @@ equation
   reinit(x[1], 1);
   reinit(x[2], 1);
  end if;
-end WhenTests.ReinitTest2;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ end WhenTests.ReinitTest2;
 ")})));
 end ReinitTest2;
 

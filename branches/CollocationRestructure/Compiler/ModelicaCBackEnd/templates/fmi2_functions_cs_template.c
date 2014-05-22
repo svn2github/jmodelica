@@ -16,53 +16,53 @@
 
 /* FMI 2.0 functions specific for CS.*/
 
-FMI_Export fmiStatus fmiSetRealInputDerivatives(fmiComponent c, 
-                                                const fmiValueReference vr[],
-                                                size_t nvr, const fmiInteger order[],
-                                                const fmiReal value[]) {
+FMI2_Export fmi2Status fmi2SetRealInputDerivatives(fmi2Component c, 
+                                                   const fmi2ValueReference vr[],
+                                                   size_t nvr, const fmi2Integer order[],
+                                                   const fmi2Real value[]) {
 	return fmi2_set_real_input_derivatives(c, vr, nvr, order, value);
 }
 
-FMI_Export fmiStatus fmiGetRealOutputDerivatives(fmiComponent c,
-                                                 const fmiValueReference vr[],
-                                                 size_t nvr, const fmiInteger order[],
-                                                 fmiReal value[]) {
+FMI2_Export fmi2Status fmi2GetRealOutputDerivatives(fmi2Component c,
+                                                    const fmi2ValueReference vr[],
+                                                    size_t nvr, const fmi2Integer order[],
+                                                    fmi2Real value[]) {
 	return fmi2_get_real_output_derivatives(c, vr, nvr, order, value);
 }
 
-FMI_Export fmiStatus fmiDoStep(fmiComponent c, fmiReal currentCommunicationPoint,
-                               fmiReal    communicationStepSize,
-                               fmiBoolean noSetFMUStatePriorToCurrentPoint) {
+FMI2_Export fmi2Status fmi2DoStep(fmi2Component c, fmi2Real currentCommunicationPoint,
+                                  fmi2Real    communicationStepSize,
+                                  fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
 	return fmi2_do_step(c, currentCommunicationPoint, communicationStepSize,
                         noSetFMUStatePriorToCurrentPoint);
 }
 
-FMI_Export fmiStatus fmiCancelStep(fmiComponent c) {
+FMI2_Export fmi2Status fmi2CancelStep(fmi2Component c) {
 	return fmi2_cancel_step(c);
 }
 
-FMI_Export fmiStatus fmiGetStatus(fmiComponent c, const fmiStatusKind s,
-                                  fmiStatus* value) {
+FMI2_Export fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s,
+                                     fmi2Status* value) {
 	return fmi2_get_status(c, s, value);
 }
 
-FMI_Export fmiStatus fmiGetRealStatus(fmiComponent c, const fmiStatusKind s,
-                                      fmiReal* value) {
+FMI2_Export fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s,
+                                         fmi2Real* value) {
 	return fmi2_get_real_status(c, s, value);
 }
 
-FMI_Export fmiStatus fmiGetIntegerStatus(fmiComponent c, const fmiStatusKind s,
-                                         fmiInteger* values) {
+FMI2_Export fmi2Status fmi2GetIntegerStatus(fmi2Component c, const fmi2StatusKind s,
+                                            fmi2Integer* values) {
 	return fmi2_get_integer_status(c, s, values);
 }
 
-FMI_Export fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s,
-                                         fmiBoolean* value) {
+FMI2_Export fmi2Status fmi2GetBooleanStatus(fmi2Component c, const fmi2StatusKind s,
+                                            fmi2Boolean* value) {
 	return fmi2_get_boolean_status(c, s, value);
 }
 
-FMI_Export fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s,
-                                        fmiString* value) {
+FMI2_Export fmi2Status fmi2GetStringStatus(fmi2Component c, const fmi2StatusKind s,
+                                           fmi2String* value) {
 	return fmi2_get_string_status(c, s, value);
 	
 }

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jmodelica.util.NullStream;
+import org.jmodelica.util.streams.NullStream;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.exceptions.CompilerException;
 

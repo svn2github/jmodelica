@@ -26,9 +26,9 @@
 
 #include "fmi2_me.h"
 #include "fmi2_cs.h"
-#include "fmiFunctions.h"
-#include "fmiFunctionTypes.h"
-#include "fmiTypesPlatform.h"
+#include "fmi2Functions.h"
+#include "fmi2FunctionTypes.h"
+#include "fmi2TypesPlatform.h"
 
 /* Generated code. */
 $INCLUDE: fmi_code_gen_template.c$
@@ -43,16 +43,16 @@ $INCLUDE: fmi2_functions_cs_template.c$
 #endif
 
 /* Helper function for instantiating the FMU. */
-int can_instantiate(fmiType fmuType, fmiString instanceName,
-                    const fmiCallbackFunctions* functions) {
-    if (fmuType == fmiCoSimulation) {
+int can_instantiate(fmi2Type fmuType, fmi2String instanceName,
+                    const fmi2CallbackFunctions* functions) {
+    if (fmuType == fmi2CoSimulation) {
 #ifndef FMUCS20
-        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Co-Simulation FMU.");
+        functions->logger(0, instanceName, fmi2Error, "ERROR", "The model is not compiled as a Co-Simulation FMU.");
         return 0;
 #endif
-    } else if (fmuType == fmiModelExchange) {
+    } else if (fmuType == fmi2ModelExchange) {
 #ifndef FMUME20
-        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Model Exchange FMU.");
+        functions->logger(0, instanceName, fmi2Error, "ERROR", "The model is not compiled as a Model Exchange FMU.");
         return 0;
 #endif
     }

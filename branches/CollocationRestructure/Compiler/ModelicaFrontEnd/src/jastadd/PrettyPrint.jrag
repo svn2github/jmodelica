@@ -17,8 +17,8 @@
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 
-import org.jmodelica.util.CodeStream;
-import org.jmodelica.util.NotNullCodeStream;
+import org.jmodelica.util.streams.CodeStream;
+import org.jmodelica.util.streams.NotNullCodeStream;
 
 aspect BasePrinter {
 
@@ -793,10 +793,15 @@ aspect PrettyPrint {
 		}
 	}
 
-	public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.print(getID());
-	}
-		
+    public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getID());
+    }
+
+    public void ArrayAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getID());
+        getArraySubscriptsOpt().prettyPrint(p, str, indent);
+    }
+
 	public void Dot.prettyPrint(Printer p, CodeStream str, String indent) {
 		getAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
@@ -1897,10 +1902,10 @@ aspect FlatPrettyPrint {
 	eq FContinuous.toString() = "";	
 	
 	syn String FTypePrefixVariability.toStringLiteral();
-	eq FParameter.toStringLiteral()  = "Parameter";
-	eq FDiscrete.toStringLiteral()   = "Discrete";
-	eq FConstant.toStringLiteral()   = "Constant";
-	eq FContinuous.toStringLiteral() = "Continuous";
+	eq FParameter.toStringLiteral()  = "parameter";
+	eq FDiscrete.toStringLiteral()   = "discrete-time";
+	eq FConstant.toStringLiteral()   = "constant";
+	eq FContinuous.toStringLiteral() = "continuous-time";
 	
 	syn String Restriction.toString();
 	eq Model.toString()     = "model";

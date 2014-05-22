@@ -130,10 +130,10 @@ S_CHAR = [^\"\\]
 Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
 STRING = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
 Q_CHAR = [^\'\\]
-S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+S_ESCAPE = "\\" .
 DIGIT = [0-9]
 UNSIGNED_INTEGER = {DIGIT} {DIGIT}*
-UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
+UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( ("e"|"E") ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
 
 
 LineTerminator = \r|\n|\r\n
@@ -170,16 +170,16 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "function"      { return newSymbol(Terminals.FUNCTION); }
   "record"        { return newSymbol(Terminals.RECORD); }
   "operator"      { return newSymbol(Terminals.OPERATOR); }
-  
+
   "end"           { return newSymbol(Terminals.END); }
   "external"      { return newSymbol(Terminals.EXTERNAL); }
-  
-  
+
+
   "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
-	  				return newSymbol(Terminals.PUBLIC); }
+                    return newSymbol(Terminals.PUBLIC); }
   "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
-	  				return newSymbol(Terminals.PROTECTED); }
-  
+                    return newSymbol(Terminals.PROTECTED); }
+
   "extends"       { return newSymbol(Terminals.EXTENDS); }
   "constrainedby" { return newSymbol(Terminals.CONSTRAINEDBY); }
 
@@ -191,20 +191,20 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "constant"      { return newSymbol(Terminals.CONSTANT); }
   "input"         { return newSymbol(Terminals.INPUT); }
   "output"        { return newSymbol(Terminals.OUTPUT); }
-  
+
   "equation"      { return newSymbol(Terminals.EQUATION); }
   "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
 
   "initial" {WhiteSpace} "equation"   { addWhiteSpaces(yytext()); 
-	  									addLineBreaks(yytext()); 
-  	                                    return newSymbol(Terminals.INITIAL_EQUATION); }
+                                        addLineBreaks(yytext()); 
+                                        return newSymbol(Terminals.INITIAL_EQUATION); }
   "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
-  										addLineBreaks(yytext()); 
+                                        addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
 
   "end" {WhiteSpace} "for"    { String s = yytext();
                                 addWhiteSpaces(s);
-	  							addLineBreaks(s); 
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_FOR); }
   "end" {WhiteSpace} "while"  { String s = yytext();
                                 addWhiteSpaces(s);
@@ -222,9 +222,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
                                 addWhiteSpaces(s);
                                 addLineBreaks(s); 
                                 return newSymbol(Terminals.END_ID, s); }
- 
+
   "enumeration"     { return newSymbol(Terminals.ENUMERATION); }
- 
+
   "each"          { return newSymbol(Terminals.EACH); }
   "final"         { return newSymbol(Terminals.FINAL); }   
   "replaceable"   { return newSymbol(Terminals.REPLACEABLE); }
@@ -235,22 +235,22 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "partial"       { return newSymbol(Terminals.PARTIAL); }
   "inner"         { return newSymbol(Terminals.INNER); }
   "outer"         { return newSymbol(Terminals.OUTER); }
-  
+
   "and"           { return newSymbol(Terminals.AND); }
   "or"            { return newSymbol(Terminals.OR); }
   "not"           { return newSymbol(Terminals.NOT); }
   "true"          { return newSymbol(Terminals.TRUE); }
   "false"         { return newSymbol(Terminals.FALSE); }
-  
+
   "if"            { return newSymbol(Terminals.IF); }
   "then"          { return newSymbol(Terminals.THEN); }
   "else"          { return newSymbol(Terminals.ELSE); }
   "elseif"        { return newSymbol(Terminals.ELSEIF); }
-  
+
   "for"           { return newSymbol(Terminals.FOR); }
   "loop"          { return newSymbol(Terminals.LOOP); }
   "in"            { return newSymbol(Terminals.IN); }
-  
+
   "while"         { return newSymbol(Terminals.WHILE); }
 
   "when"          { return newSymbol(Terminals.WHEN); }
@@ -258,12 +258,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
   "break"         { return newSymbol(Terminals.BREAK); }
   "return"        { return newSymbol(Terminals.RETURN); }
- 
+
   "connect"       { return newSymbol(Terminals.CONNECT); }
   "time"          { return newSymbol(Terminals.TIME); }
   "der"           { return newSymbol(Terminals.DER); }
- 
-  
+
+
   "("             { return newSymbol(Terminals.LPAREN); }
   ")"             { return newSymbol(Terminals.RPAREN); }
   "{"             { return newSymbol(Terminals.LBRACE); }
@@ -295,33 +295,31 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ">="            { return newSymbol(Terminals.GEQ); }
   "=="            { return newSymbol(Terminals.EQ); }
   "<>"            { return newSymbol(Terminals.NEQ); }
-  
+
   {STRING}  { String s = yytext();
               addLineBreaks(s);
               s = s.substring(1,s.length()-1);
               return newSymbol(Terminals.STRING,s); }
   {ID}      { String s = yytext();
-  			  addLineBreaks(s);
-  			  return newSymbol(Terminals.ID, s); }
-  			  
+              addLineBreaks(s);
+              return newSymbol(Terminals.ID, s); }
+
   {UNSIGNED_INTEGER}       { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}        { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
-  
+
   {Comment}                { int numberOfLineBreaks = addLineBreaks(yytext());
-  							 if (yytext().charAt(1) == '/') {
-  								 numberOfLineBreaks = 0;
-  							 }
+                             if (yytext().charAt(1) == '/') {
+                                 numberOfLineBreaks = 0;
+                             }
                              addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); 
                              return null; }
   {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); 
                              return null; }
-  {LineTerminator} 		   { addLineBreak();
+  {LineTerminator}         { addLineBreak();
                              addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); 
                              return null; }
                              
-  .|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }
+  .|\n                     { throw new Exception("Character '" + yytext() + "' is not legal in this context"); }
 }
 
-<<EOF>>             { return newSymbol(Terminals.EOF); }
-
-
+<<EOF>>                    { return newSymbol(Terminals.EOF); }

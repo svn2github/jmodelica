@@ -15,22 +15,16 @@
 */
 
 public class ComplianceErrorTestCase extends ErrorTestCase {
-	
-	public ComplianceErrorTestCase() {}
-	
-	public ComplianceErrorTestCase(String errorMessage) {
-		super(errorMessage);
-	}
-	
-	/**
-	 * \brief Filters out any uninteresting problems from a set of semantic problems.
-	 * 
-	 * This implementation removes any warnings.
-	 */
-	protected void filterProblems(Collection<Problem> problems) {
-		for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
-			if (it.next().severity() != Problem.Severity.ERROR)
-				it.remove();
-	}
-	
+
+    /**
+     * \brief Filters out any uninteresting problems from a set of semantic problems.
+     * 
+     * This implementation removes any warnings.
+     */
+    protected void filterProblems(Collection<Problem> problems) {
+        for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
+            if (it.next().severity() != Problem.Severity.ERROR)
+                it.remove();
+    }
+
 }

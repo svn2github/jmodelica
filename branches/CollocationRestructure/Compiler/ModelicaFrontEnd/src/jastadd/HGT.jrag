@@ -15,6 +15,7 @@
 */
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 aspect EquationName {
     
@@ -239,11 +240,24 @@ aspect HGT {
         setHGTResidual(Integer.MAX_VALUE, new FBooleanLitExpFalse(), false, null);
     }
     
+    private static Pattern Eq.tempPattern = Pattern.compile("(tmp|temp)_[0-9]+");
+    
     public static Comparator<Eq> Eq.stringComparator() {
         return new Comparator<Eq>() {
             @Override
             public int compare(Eq eqn1, Eq eqn2) {
-                return eqn1.getEquation().toString().compareTo(eqn2.getEquation().toString());
+                String str1 = tempPattern.matcher(eqn1.getEquation().toString()).replaceAll("!TMP!");
+                String str2 = tempPattern.matcher(eqn2.getEquation().toString()).replaceAll("!TMP!");
+                return str1.compareTo(str2);
+            }
+        };
+    }
+    
+    public static Comparator<Eq> Eq.stringMatchingComparator() {
+        return new Comparator<Eq>() {
+            @Override
+            public int compare(Eq eqn1, Eq eqn2) {
+                return eqn1.getMatching().toString().compareTo(eqn2.getMatching().toString());
             }
         };
     }
@@ -312,7 +326,7 @@ aspect HGT {
                 recalculateMatchings = true;
             }
         }
-        Collections.sort(HGTEquations, Eq.stringComparator());
+        Collections.sort(HGTEquations, Eq.stringMatchingComparator());
         for (Eq hgtEqn : HGTEquations) {
             Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
             ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());

@@ -2900,15 +2900,15 @@ model RedeclareTest31
 equation
 	a.x = a.y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RedeclareTest31",
-			description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest31",
+            description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 3061, column 10:
-  Cannot find class or component declaration for y
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 2901, column 10:
+  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B a constrainedby A'
 ")})));
 end RedeclareTest31;
 
@@ -3240,7 +3240,60 @@ model RedeclareTest40
     end C;
     
     C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest40",
+            description="Check that only final redeclared are erro checked",
+            flatModel="
+fclass RedeclareTests.RedeclareTest40
+ Real c.b.a.x = RedeclareTests.RedeclareTest40.f2(time);
+
+public
+ function RedeclareTests.RedeclareTest40.f2
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end RedeclareTests.RedeclareTest40.f2;
+
+end RedeclareTests.RedeclareTest40;
+")})));
 end RedeclareTest40;
+
+
+model RedeclareTest41
+    package A
+        replaceable model B
+            Real x = 1;
+        end B;
+    end A;
+    
+    package C
+        extends A;
+        redeclare model extends B
+            Real y = 2;
+        end B;
+    end C;
+    
+    model D
+        extends C.B;
+    end D;
+    
+    D b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest41",
+            description="",
+            flatModel="
+fclass RedeclareTests.RedeclareTest41
+ Real b.y = 2;
+ Real b.x = 1;
+end RedeclareTests.RedeclareTest41;
+")})));
+end RedeclareTest41;
 
 
 model RedeclareElement1

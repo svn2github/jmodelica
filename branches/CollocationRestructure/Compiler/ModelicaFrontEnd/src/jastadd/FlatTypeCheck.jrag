@@ -110,59 +110,60 @@ aspect FlatTypeCheck {
             typeCheckSystemResiduals(checkType);
         }
     }
- 
+
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
-    	FExp bexp = myBindingInstExp();
-		boolean func = inFunction();
+        FExp bexp = myBindingInstExp();
+        boolean func = inFunction();
         Size componentSize = size();
         if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
-    		error("Can not infer array size of the variable " + name());
-    	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
-    		if (myBindingExpHasEach() && !inArrayComponent()) {
-    			bexp.error("The 'each' keyword cannot be applied to members of non-array components");
-     		} else {
-				FType expectedBT = bindingType();
-				FType actualBT = bexp.type();
-    			if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
-    				if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
-						bexp.warning("Assuming 'each' for the binding expression to the variable " + name());
-    				} else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-    					bexp.error("The binding expression of the variable " + name() +
-    							" does not match the declared type of the variable");
-    				} else {
-    					bexp.error("Array size mismatch in declaration of " + 
-    							(myBindingExpHasEach() ? "each " : "") + name() +
-    							", size of declaration is " + expectedBT.size() + 
-    							" and size of binding expression is " + actualBT.size());
-     				}
-    			}
-    		}
-	    }
-    	if (hasConditionalAttribute()) {
-    		FExp cond = getConditionalAttribute();
-    		if (!cond.type().isUnknown()) {
-	    		if (!cond.type().isScalar()) 
-	    			error("The guard expression of a conditional component should be a scalar expression");
-	    		if (!cond.type().isBoolean()) 
-	    			error("The guard expression of a conditional component should be a boolean expression");
-	    		if (!cond.variability().lessOrEqual(fParameter())) 
-	    			error("The guard expression of a conditional component should have parameter or constant variability");
-    		}
-    	}
-	
-		if (root().options.getBooleanOption("hand_guided_tearing")) {
-			AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
-			AnnotationNode enabledNode = iterationNode.forPath("enabled");
-			if (enabledNode.exists()) {
-			    FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-			    typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
-			}
-		}
-		
-    	typeCheckAttributes();
-    	super.typeCheck(checkType);
+            error("Can not infer array size of the variable " + name());
+        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
+            if (myBindingExpHasEach() && !inArrayComponent()) {
+                bexp.error("The 'each' keyword cannot be applied to members of non-array components");
+            } else {
+                FType expectedBT = bindingType();
+                FType actualBT = bexp.type();
+                if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
+                    if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
+                        bexp.warning("Assuming 'each' for the binding expression to the variable " + name());
+                    } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                        bexp.error("The binding expression of the variable " + name() +
+                                " does not match the declared type of the variable");
+                    } else {
+                        bexp.error("Array size mismatch in declaration of " + 
+                                (myBindingExpHasEach() ? "each " : "") + name() +
+                                ", size of declaration is " + expectedBT.size() + 
+                                " and size of binding expression is " + actualBT.size());
+                    }
+                }
+            }
+        }
+        
+        if (hasConditionalAttribute()) {
+            FExp cond = getConditionalAttribute();
+            if (!cond.type().isUnknown()) {
+                if (!cond.type().isScalar()) 
+                    error("The guard expression of a conditional component should be a scalar expression");
+                if (!cond.type().isBoolean()) 
+                    error("The guard expression of a conditional component should be a boolean expression");
+                if (!cond.variability().lessOrEqual(fParameter())) 
+                    error("The guard expression of a conditional component should have parameter or constant variability");
+            }
+        }
+        
+        if (root().options.getBooleanOption("hand_guided_tearing")) {
+            AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+            AnnotationNode enabledNode = iterationNode.forPath("enabled");
+            if (enabledNode.exists()) {
+                FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+                typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
+            }
+        }
+        
+        typeCheckAttributes();
+        super.typeCheck(checkType);
     }
-    
+
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
@@ -188,7 +189,7 @@ aspect FlatTypeCheck {
                     error("The type of the binding expression of the attribute " + name() +
                             " does not match the declared type of the variable");
                 } else if (checkSize) {
-                    if (!getEach() && !attrSize.equivalent(valMod.size(), false)) { 
+                    if (!hasEach() && !attrSize.equivalent(valMod.size(), false)) { 
                         if (valMod.ndims() == 0) {
                             warning("Assuming 'each' for the attribute " + name());
                         } else {
@@ -196,8 +197,8 @@ aspect FlatTypeCheck {
                                     ", size of declaration is " + attrSize + 
                                     " and size of " + name() + " expression is " + valMod.size());
                         }
-                    } else if (getEach()) { 
-                        if (owner.ndims() == 0) {
+                    } else if (hasEach()) { 
+                        if (owner.ndims() == 0 && !owner.inArrayComponent()) {
                             error("The 'each' keyword cannot be applied to attributes of scalar components");
                         } else if (valMod.ndims() > 0) {
                             error("The attribute " + name() + 
@@ -208,14 +209,14 @@ aspect FlatTypeCheck {
             }
         }
     }
-    
+
     inh boolean InstNode.isInRedeclareMod();
     eq InstElementRedeclare.getChild().isInRedeclareMod() = true;
     eq InstClassDecl.getChild().isInRedeclareMod()        = false;
     eq InstRoot.getChild().isInRedeclareMod()             = false;
     eq Root.getChild().isInRedeclareMod()                 = false;
-    
-    
+
+
   public void FEquation.typeCheck(ErrorCheckType checkType) {
       typeCheckHGTResidual(checkType);
       typeCheckNominal(checkType);
@@ -274,17 +275,93 @@ aspect FlatTypeCheck {
   protected static boolean FExp.isUnknownFExp(ASTNode n) {
 	  return n instanceof FExp && ((FExp) n).type().isUnknown();
   }
-  
-  // TODO: Add specialized typeError() methods that gives better error messages
-  
-  public void FExp.typeError() {
-	  error("Type error in expression: " + this);	  
-  }
 
-  public void FInstAccessExp.typeError() {
-	  getInstAccess().typeError();
-  }
-  
+    // TODO: Add specialized typeError() methods that gives better error messages
+
+    public void FExp.typeError() {
+        StringBuilder buf = new StringBuilder(typeErrorMessage());
+        buf.append(": ");
+        buf.append(this);
+        for (FExp exp : childFExps()) {
+            buf.append("\n    type of '");
+            buf.append(exp);
+            buf.append("' is ");
+            buf.append(exp.type());
+        }
+        error(buf.toString());
+    }
+
+    /**
+     * The message to use in default type error.
+     */
+    syn String FExp.typeErrorMessage() = "Type error in expression";
+    eq FEqRelExp.typeErrorMessage()    = 
+        ((getLeft().type().isRealScalar() || getRight().type().isRealScalar()) && !inFunction()) ? 
+                "Equality comparisons do not allow real operands" : super.typeErrorMessage();
+
+    public void FLinspace.typeCheck(ErrorCheckType checkType) {
+        getN().markAsStructuralParameter(checkType);
+        super.typeCheck(checkType);
+    }
+
+    public void FLinspace.typeError() {
+        boolean badVar = !getN().variability().lessOrEqual(fParameter());
+        boolean canCeval = getN().canCeval();
+        boolean badVal = canCeval && getN().ceval().intValue() < 2;
+        if (badVar || !canCeval || badVal) {
+            String msg = "Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1";
+            if (badVar)
+                error("%s\n    '%s' is of %s variability", msg, getN(), getN().variability().toStringLiteral());
+            else if (canCeval)
+                error("%s\n    '%s' evaluates to %d", msg, getN(), getN().ceval().intValue());
+        } else {
+            super.typeError();
+        }
+    }
+
+    public void FIdentity.typeCheck(ErrorCheckType checkType) {
+        getFExp().markAsStructuralParameter(checkType);
+        super.typeCheck(checkType);
+    }
+
+    public void FIdentity.typeError() {
+        if (!getFExp().variability().lessOrEqual(fParameter())) 
+            error("Argument of identity() must be a scalar parameter Integer expression\n    '%s' is of %s variability", 
+                    getFExp(), getFExp().variability().toStringLiteral());
+        else 
+            super.typeError();
+    }
+
+    public void FSizeExp.typeCheck(ErrorCheckType checkType) {
+        if (hasDim())
+            getDim().markAsStructuralParameter(checkType);
+        super.typeCheck(checkType);
+    }
+
+    public void FSizeExp.typeError() {
+        if (hasDim()) {
+            if (!getDim().type().isIntegerScalar())
+                return;  // Error is reported for argument in this case
+            boolean badVar = !getDim().variability().lessOrEqual(fParameter());
+            boolean canCeval = getDim().canCeval();
+            int dimVal = canCeval ? getDim().ceval().intValue() : 1;
+            int ndims = getFExp().ndims();
+            if (badVar || !canCeval || dimVal < 1 || dimVal > ndims) {
+                String msg = "Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument";
+                if (badVar)
+                    error("%s\n    '%s' is of %s variability", msg, getDim(), getDim().variability().toStringLiteral());
+                else if (canCeval)
+                    error("%s\n    '%s' evaluates to %d, and '%s' has %d dimensions", msg, getDim(), dimVal, getFExp(), ndims);
+                return;
+            }
+        }
+        super.typeError();
+    }
+
+    public void FInstAccessExp.typeError() {
+        getInstAccess().typeError();
+    }
+
   public void InstAccess.typeError() {
 	  typeError(this);
   }
@@ -478,8 +555,6 @@ aspect FlatTypeCheck {
 	                  }
 	              }
 	          } catch (ConstantEvaluationException e) {
-	              error("Could not evaluate array index expression: " + getFExp());
-	              reportedOutOfBound = true;
 	          }
 		  }
 	  }
@@ -656,6 +731,19 @@ aspect FlatTypeCheck {
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
   
+  public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
+      if (isArray()) {
+          Size s = size();
+          for (FExp arg : myArgs()) {
+              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
+                  error("Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes");
+                  break;
+              }
+          }
+      }
+      super.typeCheck(checkType);
+  }
+  
   public void FEnumIntegerExp.typeCheck(ErrorCheckType checkType) {
 	  super.typeCheck(checkType);
 	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
@@ -770,38 +858,38 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().functionCallDecription() = functionCallDecription();
   eq FFunctionCallEquation.getChild().functionCallDecription() = getCall().functionCallDecription();
   eq FFunctionCallStmt.getChild().functionCallDecription()     = getCall().functionCallDecription();
-  
-  public void InstFunctionArgument.typeCheck(ErrorCheckType checkType) {
-	  boolean typeOk = true;
-	  FType type = getFExp().type();
-	  if (!type.isUnknown()) {
-		  if (argumentDefinedTypeValid()) {
-			  FType boundType = getBoundInput().type();
-			  if (!boundType.isUnknown()) {
-				  if (isVectorized()) 
-					  boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
-				  else if (isDestructorArgument())
-					  boundType = boundType.sizedType(type.size());
-				  typeOk = boundType.typeCompatible(type, true);
-			  }
-		  } else {
-			  typeOk = argumentTypeValid(type);
-		  }
-	  }
-	  if (!typeOk) {
-		  if (getBoundInput() == null) {
-			  error(nonBoundArgumentTypeError());
-		  } else {
-		      String msg = argumentTypeError();
-		      if (msg != null)
-		          error(msg);
-		      else
-    			  error(functionCallDecription() + ": types of " + argumentDesc() + 
-    					  " and input " + getBoundInput().name() + " are not compatible");
-		  }
-	  }
-  }
-  
+
+    public void InstFunctionArgument.typeCheck(ErrorCheckType checkType) {
+        boolean typeOk = true;
+        FType type = getFExp().type();
+        if (!type.isUnknown()) {
+            if (argumentDefinedTypeValid()) {
+                FType boundType = getBoundInput().type();
+                if (!boundType.isUnknown()) {
+                    if (isVectorized()) 
+                        boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
+                    else if (isDestructorArgument())
+                        boundType = boundType.sizedType(type.size());
+                    typeOk = boundType.typeCompatible(type, true);
+                }
+            } else {
+                typeOk = argumentTypeValid(type);
+            }
+        }
+        if (!typeOk) {
+            if (getBoundInput() == null) {
+                error(nonBoundArgumentTypeError());
+            } else {
+                String msg = argumentTypeError();
+                if (msg != null)
+                    error(msg);
+                else
+                    error("%s: types of %s and input %s are not compatible\n    type of '%s' is %s", 
+                            functionCallDecription(), argumentDesc(), getBoundInput().name(), getFExp(), getFExp().type());
+            }
+        }
+    }
+
   public void InstMissingArgument.typeCheck(ErrorCheckType checkType) {
 	  if (!isDestructorArgument())
 		  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
@@ -906,69 +994,67 @@ aspect FlatTypeCheck {
 		  top.error("Can not access " + type + ": " + top.name());
 	  }
   }
-  
-  /**
-   * \brief Check if the type defined for this argument in the built-in function list 
-   *        is valid.
-   */
-  inh boolean InstFunctionArgument.argumentDefinedTypeValid();
-  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()           = true;
-  eq FTranspose.getOriginalArg().argumentDefinedTypeValid()                = false;
-  eq FSymmetric.getOriginalArg().argumentDefinedTypeValid()                = false;
-  eq FMinMaxExp.getOriginalArg().argumentDefinedTypeValid()                = false;
-  eq FReductionExp.getOriginalArg().argumentDefinedTypeValid()             = false;
-  eq FHomotopyExp.getOriginalArg().argumentDefinedTypeValid()              = false;
-  eq FSemiLinearExp.getOriginalArg().argumentDefinedTypeValid()            = false;
-  eq FNdimsExp.getOriginalArg().argumentDefinedTypeValid()                 = false;
-  eq FInfArgsFunctionCall.getOriginalArg().argumentDefinedTypeValid()      = false;
-  eq FEnumIntegerExp.getOriginalArg().argumentDefinedTypeValid()           = false;
-  eq FVectUnaryBuiltIn.getOriginalArg().argumentDefinedTypeValid()         = false;
-  eq FDimensionConvert.getOriginalArg().argumentDefinedTypeValid()         = false;
-  eq FEventGenExp.getOriginalArg().argumentDefinedTypeValid()              = false;
-  eq FCardinality.getOriginalArg().argumentDefinedTypeValid()              = false;
-  eq FMathematicalFunctionCall.getOriginalArg().argumentDefinedTypeValid() = false;
-  eq FConnectionsOp.getOriginalArg().argumentDefinedTypeValid()            = false;
-  eq FStringExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i > 0;
-  eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
-  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
-  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
-  eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
-  eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
-  eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
-  eq FReinit.getOriginalArg().argumentDefinedTypeValid()                   = false;
 
-  /**
-   * \brief Check if the type supplied is valid for this argument.
-   * 
-   * Only used if argumentDefinedTypeValid() returns <code>false</code>.
-   */
-  inh boolean InstFunctionArgument.argumentTypeValid(FType type);
-  eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type) = type.isPrimitive();
-  eq FTranspose.getChild().argumentTypeValid(FType type)            = type.ndims() >= 2 && type.isPrimitive();
-  eq FSymmetric.getChild().argumentTypeValid(FType type)            = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
-  eq FReductionExp.getChild().argumentTypeValid(FType type)         = type.ndims() > 0 && type.hasAdd();
-  eq FHomotopyExp.getChild().argumentTypeValid(FType type)          = true;
-  eq FSemiLinearExp.getChild().argumentTypeValid(FType type)        = type.isNumeric();
-  eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
-  eq FSizeExp.getChild().argumentTypeValid(FType type)              = true;
-  eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
-  eq FSignExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
-  eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnum();
-  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isReal();
-  eq FBinEventGenExp.getChild().argumentTypeValid(FType type)       = type.isNumeric();
-  eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
-  eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
-  eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;
-  eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
-	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
-  eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
-  eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
-  eq FCardinality.getChild().argumentTypeValid(FType type)          = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
-  eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
-          getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
-  eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
-  eq FReinit.getChild().argumentTypeValid(FType type)               = true;  // Type checked in Reinit.typeCheck()
-  
+    /**
+     * \brief Check if the type defined for this argument in the built-in function list 
+     *        is valid.
+     */
+    inh boolean InstFunctionArgument.argumentDefinedTypeValid();
+    eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()           = true;
+    eq FTranspose.getOriginalArg().argumentDefinedTypeValid()                = false;
+    eq FSymmetric.getOriginalArg().argumentDefinedTypeValid()                = false;
+    eq FMinMaxExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+    eq FReductionExp.getOriginalArg().argumentDefinedTypeValid()             = false;
+    eq FHomotopyExp.getOriginalArg().argumentDefinedTypeValid()              = false;
+    eq FSemiLinearExp.getOriginalArg().argumentDefinedTypeValid()            = false;
+    eq FNdimsExp.getOriginalArg().argumentDefinedTypeValid()                 = false;
+    eq FInfArgsFunctionCall.getOriginalArg().argumentDefinedTypeValid()      = false;
+    eq FEnumIntegerExp.getOriginalArg().argumentDefinedTypeValid()           = false;
+    eq FVectUnaryBuiltIn.getOriginalArg().argumentDefinedTypeValid()         = false;
+    eq FDimensionConvert.getOriginalArg().argumentDefinedTypeValid()         = false;
+    eq FEventGenExp.getOriginalArg().argumentDefinedTypeValid()              = false;
+    eq FCardinality.getOriginalArg().argumentDefinedTypeValid()              = false;
+    eq FMathematicalFunctionCall.getOriginalArg().argumentDefinedTypeValid() = false;
+    eq FConnectionsOp.getOriginalArg().argumentDefinedTypeValid()            = false;
+    eq FStringExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i > 0;
+    eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
+    eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
+    eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
+    eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+    eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
+    eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+    eq FReinit.getOriginalArg().argumentDefinedTypeValid()                   = false;
+
+    /**
+     * \brief Check if the type supplied is valid for this argument.
+     * 
+     * Only used if argumentDefinedTypeValid() returns <code>false</code>.
+     */
+    inh boolean InstFunctionArgument.argumentTypeValid(FType type);
+    eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type)     = type.isPrimitive();
+    eq FTranspose.getChild().argumentTypeValid(FType type)                = type.ndims() >= 2 && type.isPrimitive();
+    eq FSymmetric.getChild().argumentTypeValid(FType type)                = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
+    eq FReductionExp.getChild().argumentTypeValid(FType type)             = type.ndims() > 0 && type.hasAdd();
+    eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = true;
+    eq FSemiLinearExp.getChild().argumentTypeValid(FType type)            = type.isNumeric();
+    eq FNoEventExp.getChild().argumentTypeValid(FType type)               = true;
+    eq FSizeExp.getChild().argumentTypeValid(FType type)                  = true;
+    eq FAbsExp.getChild().argumentTypeValid(FType type)                   = type.isNumeric();
+    eq FSignExp.getChild().argumentTypeValid(FType type)                  = type.isNumeric();
+    eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)           = type.isEnum();
+    eq FEventGenExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
+    eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
+    eq FArrayDimAsArgsExp.getChild().argumentTypeValid(FType type)        = true;
+    eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type)     = 
+	    hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
+    eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
+    eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
+    eq FCardinality.getChild().argumentTypeValid(FType type)              = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
+            getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FStringExp.getChild().argumentTypeValid(FType type)                = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
+    eq FReinit.getChild().argumentTypeValid(FType type)                   = true;  // Type checked in Reinit.typeCheck()
+
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
   };

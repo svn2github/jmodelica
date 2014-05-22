@@ -421,7 +421,7 @@ aspect TransformCanonical {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
 
-        log.info("Flat tree before index reduction and BLT:");
+        log.info("Flat tree before matching and BLT:");
         log.info(this);
 
         Eq eqn = null;
@@ -449,6 +449,9 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
 				daeBLT = g.computeBLT(root().options, duringInteractiveFMU);
+				if (blockFunctionExtraction(daeBLT, g)) {
+				    daeBLT = g.computeBLT(root().options, duringInteractiveFMU);
+				}
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
@@ -558,6 +561,9 @@ aspect TransformCanonical {
 			g.tarjanReset();
 			try {
 				daeInitBLT = g.computeBLT(root().options, duringInteractiveFMU);
+                if (blockFunctionExtraction(daeInitBLT, g)) {
+                    daeInitBLT = g.computeBLT(root().options, duringInteractiveFMU);
+                }
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
@@ -1612,7 +1618,7 @@ aspect TransformCanonical {
 	 */
 	public AliasPair FEquation.aliasVariables() {
 		AliasPair res = null;
-		if (!isHGTResidual()) // This equation should not be alias-removed if it is marked as residual!
+		if (!isHGTResidual() && !canUseLocalIteration()) // This equation should not be alias-removed if it is marked as residual!
 			res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
 		classifiedAsAlias = res != null;
@@ -4670,24 +4676,24 @@ aspect StateInitialEquations {
             }
         }
     }
-	
-	public void FClass.addStateInitialEquations() {
-		setFInitialEquationList(new List());
-		
-		for (FRealVariable fv : differentiatedRealVariables()) {
-			FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-			FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
-			if (fv.startAttributeSet())
-			    fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
-			else
-			    fvToAdd.setBindingExp(fv.type().zeroLiteral());
-			addFVariable(fvToAdd);
-			FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
-			addFInitialEquation(eqnToAdd);
-			flushAllRecursive();
-		}
-	}
-	
+
+    public void FClass.addStateInitialEquations() {
+        setFInitialEquationList(new List());
+        
+        for (FRealVariable fv : differentiatedRealVariables()) {
+            FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
+            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
+            if (fv.startAttributeSet())
+                fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
+            else
+                fvToAdd.setBindingExp(fv.type().zeroLiteral());
+            addFVariable(fvToAdd);
+            FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
+            addFInitialEquation(eqnToAdd);
+            flushAllRecursive();
+        }
+    }
+
 }
 
 aspect RuntimeOptions {
@@ -5227,6 +5233,7 @@ aspect ReinitStates {
     }
     
     public void FIfWhenEquation.makeReinitedVarsStates() {
+        super.makeReinitedVarsStates();
         if (hasElse())
             getElse().makeReinitedVarsStates();
     }

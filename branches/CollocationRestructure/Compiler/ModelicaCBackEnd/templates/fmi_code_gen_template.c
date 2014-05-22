@@ -309,3 +309,5 @@ $C_set_start_values$
 const char *jmi_get_model_identifier() {
     return "$C_model_id$";
 }
+
+const char *jmi_get_jmodelica_version() { return "$C_jmodelica_version$"; }

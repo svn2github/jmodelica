@@ -30,9 +30,9 @@ message(STATUS STANDARD_HEADER_SRC=${STANDARD_HEADER_SRC})
 
 set(FMISources
     
-    ${STANDARD_HEADER_SRC}/fmiFunctionTypes.h
-    ${STANDARD_HEADER_SRC}/fmiTypesPlatform.h
-    ${STANDARD_HEADER_SRC}/fmiFunctions.h
+    ${STANDARD_HEADER_SRC}/fmi2FunctionTypes.h
+    ${STANDARD_HEADER_SRC}/fmi2TypesPlatform.h
+    ${STANDARD_HEADER_SRC}/fmi2Functions.h
     
     fmi2_me.h
     fmi2_cs.h

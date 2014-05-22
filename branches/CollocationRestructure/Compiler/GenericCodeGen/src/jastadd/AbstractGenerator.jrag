@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.io.*;
 import java.lang.reflect.Constructor;
 
-import org.jmodelica.util.NotNullCodeStream;
+import org.jmodelica.util.streams.NotNullCodeStream;
 
 /**
  * Abstract base class for code generation classes. 
@@ -157,48 +157,62 @@ public abstract class AbstractGenerator {
 		}
 	}
 
-	/**
-	 * \brief Method for performing code generation. 
-	 * 
-	 * The method performs the following steps:
-	 *  
-	 *   1. Load the template file
-	 *   2. If the file starts with the string returned by startOfBlurb(), 
-	 *      skip all characters until the string returned by endOfBlurb() is 
-	 *      encountered, and all whitespace immediately following it
-	 *   3. Read a character, 'c', from the template
-	 *   4. If 'c' is not the escape character 
-	 *   4a.  Write 'c' to the output file
-	 *   4b.  Else continue to read characters until the escape character is
-	 *        encountered. Build the tag name from the read characters.
-	 *   4c.  Retrieve the corresponding tag
-	 *   4d.  Invoke the code generation method for the tag
-	 *   5.   Repeat 3 until EOF 
-	 *   
-	 * 
-	 * @param templateFile A file containing the code generation template
-	 * @param outputFile The name of the output file
-	 * @throws FileNotFoundException An exception is thrown if the template
-	 * file is not found.
-	 */
-	public void generate(String templateFile, String outputFile) 
-	  throws FileNotFoundException {
-		try {
-			CodeStream output = new NotNullCodeStream(new PrintStream(new File(outputFile), "UTF-8"));
-			if (templateFile == null) {
-                generate(null, output, null);
-			} else {
-    		    File tFile = new File(templateFile);
-    			Reader template = openTemplate(tFile);
-    			generate(template, output, tFile.getParentFile());
-    			template.close();
-			}
-			output.close();
-		} catch (IOException e) { // TODO: introduce specific exception type
-			throw new RuntimeException("File I/O problem during code generation", e);
-		}
-	}
-	
+    /**
+     * Method for performing code generation. 
+     * 
+     * The method performs the following steps:
+     *  
+     *   1. Load the template file
+     *   2. If the file starts with the string returned by startOfBlurb(), 
+     *      skip all characters until the string returned by endOfBlurb() is 
+     *      encountered, and all whitespace immediately following it
+     *   3. Read a character, 'c', from the template
+     *   4. If 'c' is not the escape character 
+     *   4a.  Write 'c' to the output file
+     *   4b.  Else continue to read characters until the escape character is
+     *        encountered. Build the tag name from the read characters.
+     *   4c.  Retrieve the corresponding tag
+     *   4d.  Invoke the code generation method for the tag
+     *   5.   Repeat 3 until EOF 
+     *   
+     * 
+     * @param templateFile A file containing the code generation template
+     * @param outputFile The name of the output file
+     * @throws FileNotFoundException An exception is thrown if the template
+     * file is not found.
+     */
+    public void generate(String templateFile, String outputFile) {
+        try {
+            generate(templateFile, new FileOutputStream(outputFile), false);
+        } catch (IOException e) { // TODO: introduce specific exception type
+            throw new RuntimeException("File I/O problem during code generation", e);
+        }
+    }
+
+    /**
+     * See generate(String templateFile, String outputFile).
+     * 
+     * @param templateFile  a file containing the code generation template
+     * @param outputFile    the stream to write output to
+     * @param autoFlush     automatically flush output steam on each newline
+     */
+    public void generate(String templateFile, OutputStream output, boolean autoFlush) {
+        try {
+            CodeStream outStream = new NotNullCodeStream(new PrintStream(output, autoFlush, "UTF-8"));
+            if (templateFile == null) {
+                generate(null, outStream, null);
+            } else {
+                File tFile = new File(templateFile);
+                Reader template = openTemplate(tFile);
+                generate(template, outStream, tFile.getParentFile());
+                template.close();
+            }
+            outStream.close();
+        } catch (IOException e) { // TODO: introduce specific exception type
+            throw new RuntimeException("File I/O problem during code generation", e);
+        }
+    }
+
 	/**
 	 * Opens a new Reader for a template file.
 	 */

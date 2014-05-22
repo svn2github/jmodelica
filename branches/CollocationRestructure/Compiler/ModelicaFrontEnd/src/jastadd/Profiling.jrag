@@ -28,7 +28,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.jmodelica.util.Criteria;
-import org.jmodelica.util.NullStream;
+import org.jmodelica.util.streams.NullStream;
 
 aspect LightProfiling {
 	

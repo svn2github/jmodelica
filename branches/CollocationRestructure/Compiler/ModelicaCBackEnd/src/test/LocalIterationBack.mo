@@ -95,6 +95,50 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
     end CGenTest1;
 
+    model CGenTest2
+        parameter Real x_start = 1.5;
+        parameter Real y_start =  1.0;
+        Real x(start=x_start);
+        Real y(start=y_start);
+        parameter Real alpha = 1.3;
+        parameter Real beta = 5;
+    equation
+        exp(-1/(x-alpha)^2) - exp(-beta^2) = y-y annotation(__Modelon(LocalIteration));
+        (y-1)*(y^2+(y+1)*(x-5/4)) = 0 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CGenTest2",
+            description="Check that numerically solved blocks generate initialization code",
+            local_iteration_in_tearing="annotation",
+            merge_blt_blocks=true,
+            hand_guided_tearing=true,
+            automatic_tearing=true,
+            interactive_fmu=true,
+            template="
+$C_ode_initialization$
+$C_ode_derivatives$
+",
+            generatedCode="
+    model_ode_guards(jmi);
+    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+    _res_0_7 = (_y_3 - 1) * ((1.0 * (_y_3) * (_y_3)) + (_y_3 + 1) * (_x_2 - 1.25));
+    _iter_0_6 = _y_3;
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    _res_0_7 = (_y_3 - 1) * ((1.0 * (_y_3) * (_y_3)) + (_y_3 + 1) * (_x_2 - 1.25));
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _iter_0_6 = _y_3;
+/********* Write back reinits *******/
+")})));
+    end CGenTest2;
+
+
+
     model CADGenTest1
         Real a, b, c;
     equation

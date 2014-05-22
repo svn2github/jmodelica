@@ -1014,7 +1014,7 @@ FStringLitExp : FLitExp ::= <String>;
  * Enumeration literal expression.
  * 
  * All accesses to enumeration literals should be replaced by FEnumLitExps in flat tree.
- * Note that Type may be <code>null</code> in the flat tree - use type().
+ * Note that Type may be unset in the flat tree - use type().
  */
 FEnumLitExp : FLitExp ::= <Enum> <Value> [Type:FEnumType];
 
@@ -1045,9 +1045,14 @@ FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 FIdDecl : BaseNode ::= FQName;
 
 /**
+ * Abstract superclass for accesses in both instance and flat trees.
+ */
+abstract CommonAccess : BaseNode;
+
+/**
  * A qualified identifier.
  */
-FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
+FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 /**
  * A qualifed identifier in an expression.

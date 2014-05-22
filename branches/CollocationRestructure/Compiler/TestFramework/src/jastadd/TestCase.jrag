@@ -36,40 +36,18 @@ aspect TestCases {
  */
 abstract public class TestCase {
 
-	private String name;
-	private String description;
-	private String sourceFileName;
-	private String className;
-	
-	private boolean filter = false;
-	private boolean checkAll = false;
-	private ErrorCheckType checkType = ErrorCheckType.COMPILE;
-	
-	private OptionRegistry options;
-	private Exception exception;
+    private String name = null;
+    private String description = null;
+    private String sourceFileName = null;
+    private String className = null;
 
-	public TestCase() {
-		options = createOptionsRegistry();
-		exception = null;
-	}
-	
-	/**
-	 * @param name
-	 * @param description
-	 * @param sourceFileName
-	 * @param className
-	 */
-	public TestCase(String name, 
-			        String description, 
-			        String sourceFileName,
-			        String className) {
-		this();
-		this.name = name;
-		this.description = description;
-		this.sourceFileName = sourceFileName;
-		this.className = className;
-	}
-	
+    private boolean filter = false;
+    private boolean checkAll = false;
+    private ErrorCheckType checkType = ErrorCheckType.COMPILE;
+
+    protected OptionRegistry options = createOptionsRegistry();
+    private Exception exception = null;
+
 	/**
 	 * \brief Create the OptionsRegistry to be used during compilation.
 	 * 

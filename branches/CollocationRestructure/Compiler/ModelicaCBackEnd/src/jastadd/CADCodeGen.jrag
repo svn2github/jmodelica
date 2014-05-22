@@ -49,7 +49,15 @@ aspect CADCodeGen {
         public void printPreSteps(ASTNode node, CodeStream str, String indent) {
             node.genTempVars_CAD(this, str, indent);
         }
-	}
+        
+        public TypePrinter_C createDeclPrinter(CodeStream str, String indent) {
+            return new DeclPrinter_CAD(this, str, indent);
+        }
+        
+        public TypePrinter_C createInitPrinter(CodeStream str, String indent) {
+            return new InitPrinter_CAD(this, str, indent);
+        }
+    }
 	
 	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
 	
@@ -1843,10 +1851,44 @@ aspect CADCodeGen {
 			genVarDecls_C(p, str, indent);
 		} else if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
-			printDeclOrInit_C(p, str, indent, varName_CAD() + suffix, true, true);
-			printDeclOrInit_C(p, str, indent, derName_CAD() + suffix, true, false);
+            TypePrinter_C dp = p.createDeclPrinter(str, indent);
+            dp.setSubDecls(true);
+            print(dp, varName_CAD() + suffix);
+            dp.setSubDecls(false);
+            print(dp, derName_CAD() + suffix);
 		}
 	}
+	
+    protected void FExp.printDecls_CAD(CodePrinter p, CodeStream str, String indent, String varName, String derName) {
+        TypePrinter_C dp = p.createDeclPrinter(str, indent);
+        dp.reset(varName, this, size().isUnknown(), false);
+        dp.setSubDecls(true);
+        type().print(dp);
+        dp.reset(derName, this, size().isUnknown(), false);
+        dp.setSubDecls(false);
+        type().print(dp);
+    }
+    
+    class DeclPrinter_CAD extends DeclPrinter_C {
+        public DeclPrinter_CAD(CodePrinter p, CodeStream str, String indent) {
+            super(p, str, indent);
+        }
+        public void printArray(FType type) {
+            if (subDecls)
+                type.size().genVarDecls_C(p, str, indent(), src);
+            super.printArray(type);
+        }
+    }
+    class InitPrinter_CAD extends InitPrinter_C {
+        public InitPrinter_CAD(CodePrinter p, CodeStream str, String indent) {
+            super(p, str, indent);
+        }
+        public void printArray(FType type) {
+            type.size().genTempVars_C(p, str, indent(), src);
+            super.printArray(type);
+        }
+    }
+    
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
@@ -1875,8 +1917,7 @@ aspect CADCodeGen {
 	 */
 	public void FExp.genTempOutputDecls_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
-			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
+            printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
 		}
 	}
 	
@@ -1890,8 +1931,7 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void FArray.genTempOutputDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-		type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-		type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
+        printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
 	}
 	
 	
@@ -1907,8 +1947,7 @@ aspect CADCodeGen {
 	public void FExp.genTempInputDecls_CAD(CodePrinter p, CodeStream str, String indent) {
 		genVarDecls_CAD(p, str, indent);
 		if (isComposite() && !keepAsArray()) {
-			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
+            printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
 		}
 	}
 	
@@ -2579,25 +2618,26 @@ aspect CADCodeGen {
 	
 	public void FFunctionArray.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (!isOutput()) {
-			printDeclOrInit_C(p, str, indent, varName_CAD(), false, true);
-			printDeclOrInit_C(p, str, indent, derName_CAD(), false, false);
+            TypePrinter_C ip = p.createInitPrinter(str, indent);
+            print(ip, varName_CAD());
+            print(ip, derName_CAD());
 		}
 	}
 	
 	public void FFunctionVariable.printNullOutputReplacement_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite()) {
+		    String next = p.indent(indent);
+            TypePrinter_C ip = p.createInitPrinter(str, next);
 			String name_var_CAD = varName_CAD();
 			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
-			String next = p.indent(indent);
 			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_var_r, false, true);
+            print(ip, name_var_r);
 			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
 			str.print(indent + "}\n");
-			
 			String name_der_CAD = derName_CAD();
 			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
 			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_der_r, false, false);
+            print(ip, name_der_r);
 			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
 			str.print(indent + "}\n");
 		}

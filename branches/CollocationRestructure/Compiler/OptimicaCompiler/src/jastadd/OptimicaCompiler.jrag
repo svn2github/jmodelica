@@ -118,28 +118,21 @@ public class OptimicaCompiler extends ModelicaCompiler {
 			return new CADGenerator(new PrettyPrinter(), '$', fc);
 		}
 	}
-
-	@Override
-	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
-	        throws JModelicaHomeNotFoundException {
-		super.setArguments(compilerName, args, programarguments);
-		int arg = programarguments.size();
-	}
 	
 	public static void main(String args[]) {
-		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
 		// create an empty compiler
 		OptimicaCompiler oc = new OptimicaCompiler();
-		// set arguments
 		try {
-			oc.setArguments("OptimicaCompiler", args, programarguments);
+            // set arguments
+            Arguments arguments = new Arguments("OptimicaCompiler", args);
+            oc.setArguments(arguments);
+            // Compile model
+            oc.compileModelFromCommandLine(args, arguments);
 		} catch(Throwable t) {
 			log.error(t);
 			log.close();
 			System.exit(1);
 		}
-		// Compile model
-		oc.compileModelFromCommandLine(args, programarguments);
 	}	
 }
 

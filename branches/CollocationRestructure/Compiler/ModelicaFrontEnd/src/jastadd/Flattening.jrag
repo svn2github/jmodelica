@@ -222,7 +222,15 @@ aspect Flattening {
 		if (myInstClassDecl().extendsEnum())
 			myInstClassDecl().flattenEnum(fc);
 	}
-	
+
+    public void FReinit.flattenUsedFuncsAndEnums(FClass fc) {
+        containingInstNode().flattenStateSelect(fc);
+    }
+
+    public void InstNode.flattenStateSelect(FClass fc) {
+        lookupInstClass("StateSelect").target().flattenEnum(fc);
+    }
+
 	public void InstAccess.flattenMyRecord(FClass fc) {
 		myInstClassDecl().flattenRecord(fc);
 	}
@@ -559,16 +567,24 @@ aspect Flattening {
 			temporarilyInFunction = old;
 		}
 	}
-	
-	public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
-		FQName name = getFQName();
-		if (func != null) {
-			InstComponentDecl found = func.memberInstComponent(name.name());
-			if (name.numParts() > 1 || (found != null && found != this))
-				return new FQNameString(func.localTempVarName(this));
-		}
-		return name.fullCopy();
-	}
+
+    public class InstLookupResult<T extends InstNode> {
+        /**
+         * Check if lookup found a target that is not the same as the given one.
+         */
+        public boolean foundOther(T t) {
+            return successful() && target() != t;
+        }
+    }
+
+    public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
+        FQName name = getFQName();
+        if (func != null) {
+            if (name.numParts() > 1 || func.memberInstComponent(name.name()).foundOther(this))
+                return new FQNameString(func.localTempVarName(this));
+        }
+        return name.fullCopy();
+    }
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, override this
@@ -1159,16 +1175,22 @@ aspect Flattening {
 		return null;
 	}
 
-	/**
-	 * \brief Check if this InstValueModification is part of a modification 
-	 *        that is declared "each".
-	 */
-	inh boolean InstValueModification.hasEach();
-	eq InstArgument.getChild().hasEach()          = getEach();
-	eq InstNode.getChild().hasEach()              = false;
-	eq InstArrayModification.getChild().hasEach() = true;
-	syn boolean InstArrayModification.hasEach()   = true;
-	
+    /**
+     * Check if this InstValueModification is part of a modification 
+     * that is declared "each".
+     */
+    syn boolean InstModification.hasEach() = inModWithEach();
+    eq InstArgument.hasEach()              = getEach() || inModWithEach();
+
+    /**
+     * Check if this modification is in another modification that is declared "each".
+     */
+    inh boolean InstModification.inModWithEach();
+    eq InstArgument.getChild().inModWithEach()          = hasEach();
+    eq InstNode.getChild().inModWithEach()              = false;
+    eq InstArrayModification.getChild().inModWithEach() = true;
+    syn boolean InstArrayModification.inModWithEach()   = true;
+
 	/**
 	 * \ingroup aspect_Flattening
 	 * 
@@ -1564,17 +1586,18 @@ aspect FlatExpressions {
             return var.flattenAccess(prefix, this);
         }
 	}
-	
-	/**
-	 * Flatten an access expression to this component.
-	 */
-	public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
+
+    /**
+     * Flatten an access expression to this component.
+     */
+    public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
+        FQName subscriptsPrefix = prefix;
         if (inOrIsOuter()) {
             prefix = myInnerInstComponentDecl().getFQName();
             prefix = prefix.copyWithoutSuffix(exp.getInstAccess().numParts());
         }
-        return new FIdUseExp(exp.getInstAccess().flatten(prefix));
-	}
+        return new FIdUseExp(exp.getInstAccess().flatten(prefix, subscriptsPrefix));
+    }
 
 	public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
         // If the FInstAccess refers to a constant or string parameter, then inline expression
@@ -1621,8 +1644,7 @@ aspect FlatExpressions {
         ia.functionConstantList().add(this);
         FQName name = getFQName();
         FQName use = ia.flattenAssignablePart(prefix);
-        InstComponentDecl found = ia.localLookupInstComponent(name.name());
-        if (name.numParts() > 1 || (found != null && found != this)) {
+        if (name.numParts() > 1 || ia.localLookupInstComponent(name.name()).foundOther(this)) {
             // TODO: this should probably be a helper function on FQName
             FQNameFull fullUse = use.asFQNameFull();
             fullUse.getFQNamePart(0).setName(ia.findTempVarName(this));
@@ -1705,7 +1727,7 @@ aspect FlatExpressions {
 		String name;
 		do {
 			name = "temp_" + nextTempVarIndex++;
-		} while (memberInstComponent(name) != null);
+		} while (memberInstComponent(name).successful());
 		tempVarNames.put(var, name);
 		return name;
 	}
@@ -1768,64 +1790,68 @@ aspect FlatExpressions {
 	// TODO: this doesn't seem to cover colon subscripts to arrays of unknown size
 	syn boolean FSubscript.isUnknownIndex() = false;
 	eq FExpSubscript.isUnknownIndex()       = !getFExp().canCeval();
-	
-	public FQName InstAccess.flatten(FQName prefix) { 
-		if (myInstComponentDecl().isEnumLiteral())
-			return myInstComponentDecl().getFQName().fullCopy();
-		
-		FQName base = isForIndex() ? new FQNameEmpty() : prefix;
-		int last = allFArraySubscripts().size() - 1;
-		return flattenName(prefix, base, 0, last);
-	}
-	
-	/**
-	 * Flatten part of this name.
-	 * 
-	 * @param prefix  prefix to pass when flattening subscripts
-	 * @param base    prefix to prepend to name
-	 * @param first   first part of name to flatten
-	 * @param last    last part of name to flatten
-	 */
-	public FQName InstAccess.flattenName(FQName prefix, FQName base, int first, int last) {
-		if (first != 0 || last != 0)
-			throw new ArrayIndexOutOfBoundsException(first == 0 ? last : first);
-		FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
-		if (fas == null)
-			return base.copyAndAppend(name());
-		if (!fas.hasNonLiteralSubscripts())
-			return base.copyAndAppend(name() + fas);
-		return base.copyAndAppend(name(), fas.flatten(prefix));
-	}
 
-	public FQName InstDot.flattenName(FQName prefix, FQName base, int first, int last) {
-		java.util.List<FArraySubscripts> fasl = allFArraySubscripts();
-		boolean nonLiteral = false;
-		for (FArraySubscripts fas : fasl)
-			nonLiteral = nonLiteral || fas.hasNonLiteralSubscripts();
-		boolean size = inSizeExp();
-		if (nonLiteral || inFunction()) {
-			FQNameFull res = new FQNameFull();
-			for (int i = first; i <= last; i++) {
-				InstAccess cur = getInstAccess(i);
-				FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
-				res.addFQNamePart(cur.flattenPart(prefix, fas));
-			}
-			return base.copyAndAppend(res);
-		} else {
-			StringBuilder buf = new StringBuilder();
-			for (int i = first; i <= last; i++) {
-				InstAccess cur = getInstAccess(i);
-				FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
-				buf.append(cur.name());
-				if (fas != null)
-					buf.append(fas);
-				if (i < last)
-					buf.append('.');
-			}
-			return prefix.copyAndAppend(buf.toString());
-		}
-	}
-	
+    public FQName InstAccess.flatten(FQName prefix) { 
+        return flatten(prefix, prefix);
+    }
+
+    public FQName InstAccess.flatten(FQName namePrefix, FQName subscriptPrefix) { 
+        if (myInstComponentDecl().isEnumLiteral())
+            return myInstComponentDecl().getFQName().fullCopy();
+        
+        FQName base = isForIndex() ? new FQNameEmpty() : namePrefix;
+        int last = allFArraySubscripts().size() - 1;
+        return flattenName(subscriptPrefix, base, 0, last);
+    }
+
+    /**
+     * Flatten part of this name.
+     * 
+     * @param prefix  prefix to pass when flattening subscripts
+     * @param base    prefix to prepend to name
+     * @param first   first part of name to flatten
+     * @param last    last part of name to flatten
+     */
+    public FQName InstAccess.flattenName(FQName prefix, FQName base, int first, int last) {
+        if (first != 0 || last != 0)
+            throw new ArrayIndexOutOfBoundsException(first == 0 ? last : first);
+        FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
+        if (fas == null)
+            return base.copyAndAppend(name());
+        if (!fas.hasNonLiteralSubscripts())
+            return base.copyAndAppend(name() + fas);
+        return base.copyAndAppend(name(), fas.flatten(prefix));
+    }
+
+    public FQName InstDot.flattenName(FQName prefix, FQName base, int first, int last) {
+        java.util.List<FArraySubscripts> fasl = allFArraySubscripts();
+        boolean nonLiteral = false;
+        for (FArraySubscripts fas : fasl)
+            nonLiteral = nonLiteral || fas.hasNonLiteralSubscripts();
+        boolean size = inSizeExp();
+        if (nonLiteral || inFunction()) {
+            FQNameFull res = new FQNameFull();
+            for (int i = first; i <= last; i++) {
+                InstAccess cur = getInstAccess(i);
+                FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
+                res.addFQNamePart(cur.flattenPart(prefix, fas));
+            }
+            return base.copyAndAppend(res);
+        } else {
+            StringBuilder buf = new StringBuilder();
+            for (int i = first; i <= last; i++) {
+                InstAccess cur = getInstAccess(i);
+                FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
+                buf.append(cur.name());
+                if (fas != null)
+                    buf.append(fas);
+                if (i < last)
+                    buf.append('.');
+            }
+            return base.copyAndAppend(buf.toString());
+        }
+    }
+
 	protected FArraySubscripts InstAccess.filterFASForFlatten(FArraySubscripts fas, boolean last, boolean size) {
 		/* Simplify check later. */
 		if (fas.getNumFSubscript() == 0)
@@ -2038,15 +2064,15 @@ aspect FlatExpressions {
 	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
-	public FExp                 FHomotopyExp.flatten(FQName prefix)              {
-		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.ACTUAL) {
-			return getActual().flatten(prefix);
-		}
-		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.SIMPLIFIED) {
-			return getSimplified().flatten(prefix);
-		}
-		return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
-	}
+    public FExp                 FHomotopyExp.flatten(FQName prefix)              {
+        if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.ACTUAL) {
+            return getActual().flatten(prefix);
+        }
+        if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.SIMPLIFIED) {
+            return getSimplified().flatten(prefix);
+        }
+        return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
+    }
 	public FSemiLinearExp       FSemiLinearExp.flatten(FQName prefix)            { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
 	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstFullClassDecl().name() + "." + prefix.name()); }
 	

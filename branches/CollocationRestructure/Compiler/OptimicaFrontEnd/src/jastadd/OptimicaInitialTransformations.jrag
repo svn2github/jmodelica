@@ -16,43 +16,42 @@
 
 aspect OptimicaInitialTransformations {
 
-   	rewrite PN_OptClassDecl {
- 	  	to OptClassDecl { 
- 	   		
- 	     	OptClassDecl fc = new OptClassDecl(visibility(),
-                      getEncapsulatedOpt(),
-                      getPartialOpt(),
-                      getRestriction(),
-                      getName(),
-                      getRedeclareOpt(),
-                      getFinalOpt(),
-                      getInnerOpt(),
-                      getOuterOpt(),
-                      getReplaceableOpt(),
-                      getConstrainingClauseOpt(),
-                      getConstrainingClauseCommentOpt(),
-                      getStringCommentOpt(),
-                      new List(),
-                      new List(),
-                      new List(),
-                      new List(),
-                      new List(),
-                      new List(),
-                      new List(),
-                      new Opt(),
-                      new Opt(),
-                      getEndDecl(),
-                      getClassModificationOpt(),
-                      new List());
-  			
+    rewrite PN_OptClassDecl {
+        to OptClassDecl { 
+            OptClassDecl fc = new OptClassDecl(
+                    getName(),
+                    visibility(),
+                    getEncapsulatedOpt(),
+                    getPartialOpt(),
+                    getRestriction(),
+                    getRedeclareOpt(),
+                    getFinalOpt(),
+                    getInnerOpt(),
+                    getOuterOpt(),
+                    getReplaceableOpt(),
+                    getConstrainingClauseOpt(),
+                    getConstrainingClauseCommentOpt(),
+                    getStringCommentOpt(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new Opt(),
+                    new Opt(),
+                    getEndDecl(),
+                    getClassModificationOpt(),
+                    new List());
             if (hasAnnotation())
-            	fc.setAnnotation(getAnnotation());
+                fc.setAnnotation(getAnnotation());
             getComposition().extractElementsTo(fc);
- 	     	fc.setLocationNoTree(getRestriction(), this);
- 	     	return fc;
- 	  	}
-   	}
-    
+            fc.setLocationNoTree(getRestriction(), this);
+            return fc;
+        }
+    }
+
     public void ConstraintClause.addToFullClassDecl(FullClassDecl fcd) {
     	OptClassDecl ocd = (OptClassDecl) fcd;
         for (Constraint con : getConstraints()) 

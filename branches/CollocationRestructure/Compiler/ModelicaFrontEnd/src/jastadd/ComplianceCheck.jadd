@@ -97,12 +97,6 @@ aspect ComplianceCheck {
 		compliance("Unsupported expression type");
 	}
 
-	
-	public void FBreakStmt.complianceCheck(ErrorCheckType checkType) {
-		if (!inFunction() && enclosingLoop() instanceof InstForStmt)
-			compliance("Break statement in algorithm only supported in while loops");
-	}
-	
 	public void FUnsupportedBuiltIn.complianceCheck(ErrorCheckType checkType) {
 		compliance("The " + getName() + "() function-like operator is not supported");
 	}
@@ -132,9 +126,9 @@ aspect ComplianceCheck {
 	}
 	
 	public void FHomotopyExp.complianceCheck(ErrorCheckType checkType) {
-		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.HOMOTOPY) {
-			warning("The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.");
-			root().options.setStringOption("homotopy", OptionRegistry.Homotopy.ACTUAL);
+		if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.HOMOTOPY) {
+			warning("The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.");
+			root().options.setStringOption("homotopy_type", OptionRegistry.Homotopy.ACTUAL);
 			
 		}
 	}
@@ -204,16 +198,6 @@ aspect ComplianceCheck {
 	}
 	
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
-	}
-	
-	
-	public void InstAssignStmt.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		boolean left  = getLeft().size().isUnknown();
-		boolean right = getRight().size().isUnknown();
-		if ((left || right) && getLeft().type().isRecord()) {
-			compliance("Record arrays of unknown sizes are not supported");
-		}
 	}
 	
 	public void InstRecordConstructor.complianceCheck(ErrorCheckType checkType) {

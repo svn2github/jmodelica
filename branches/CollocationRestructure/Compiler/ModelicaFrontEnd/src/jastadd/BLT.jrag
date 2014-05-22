@@ -111,11 +111,10 @@ aspect BLT{
         public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean useTearing, boolean useHGT, int blockNumber) {
             
             SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
-            if (seb != null) {
+            if (seb != null && seb.isSolvable()) {
                 if (useHGT && seb.equation().isHGTPairedResidual())
-                    seb.equation().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getHGTIterationVariable().name() + ". Equation: " + seb.equation());
-                if (seb.isSolvable())
-                    return seb;
+                    seb.equation().warning("Can not use hand guided tearing pair, equation resides in solved block. Variable: " + seb.equation().getHGTIterationVariable().name() + ". Equation: " + seb.equation());
+                return seb;
             }
             
             Collection<Eq> realEquations = new ArrayList<Eq>();

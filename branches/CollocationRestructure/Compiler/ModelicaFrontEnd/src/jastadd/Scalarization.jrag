@@ -192,14 +192,7 @@ aspect Scalarization {
 		for (FAbstractEquation ae : fromList) 
 			ae.scalarize(toList, vars, indexMap);
 	}
-	
-    public static void FStatement.scalarizeStmtList(
-            List<FStatement> fromList, List<FStatement> toList, 
-            List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
-        for (FStatement stmt : fromList)
-            stmt.scalarizeStmt(vars, toList, indexMap);
-    }
-	
+		
 	/**
 	 * \brief Scalarize the FVariable and put all scalarized variables in the
 	 * list vars.
@@ -907,7 +900,7 @@ aspect Scalarization {
                 fqn = new FQNameFull(name, createFArraySubscripts());
             else
                 fqn = new FQNameFull(name);
-            return new FIdUseExp(new FIdUse(fqn));
+            return new FIdTempExp(new FIdUse(fqn));
         }
 		/**
 		 * \brief Creates a new ForNames with the top layer copied
@@ -926,7 +919,7 @@ aspect Scalarization {
      * \brief Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(
-            List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
+            List vars, List<FStatement> stmts, 
             Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
         
         FExp expInAst = right.getParent() != null ? right : left;
@@ -947,19 +940,24 @@ aspect Scalarization {
             names.removeLayer();
         }
         
+        scalarizeAssignment_sub(vars, stmts, indexMap, left, right);
+    }
+    
+    public void FType.scalarizeAssignment_sub(
+            List vars, List<FStatement> stmts, 
+            Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
         if (size().isUnknown() || !isArray()) {
             scalarizeScalarAssignment(vars, stmts, indexMap, left, right);
         } else {
             scalarizeArrayAssignment(vars, stmts, indexMap, left, right);
         }
-        
     }
     
     /**
      * Scalarize an array assignment of known size.
      */
     public void FType.scalarizeArrayAssignment(
-        List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
+        List vars, List<FStatement> stmts, 
         Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
         
         Indices ind = size().isUnknown() ? right.indices() : indices();
@@ -974,10 +972,10 @@ aspect Scalarization {
      * Scalarize an assignment of record type.
      */
     protected void FRecordType.scalarizeScalarAssignment(
-            List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
+            List vars, List<FStatement> stmts, 
             Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
         for (FRecordComponentType comp : getComponents()) {
-            comp.getFType().scalarizeAssignment(vars, stmts, indexMap,
+            comp.getFType().scalarizeAssignment_sub(vars, stmts, indexMap,
                     (FIdUseExp) left.extractRecordCell(indexMap, comp.getName()),
                     right.extractRecordCell(indexMap, comp.getName()));
         }
@@ -987,7 +985,7 @@ aspect Scalarization {
      * Scalarize a scalar assignment
      */
     protected void FType.scalarizeScalarAssignment(
-        List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
+        List vars, List<FStatement> stmts, 
         Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
     
         left = (FIdUseExp) left.scalarize(indexMap);
@@ -1006,21 +1004,40 @@ aspect Scalarization {
         return dynamicFExp(new FIdUseExp(new FIdUse(getFIdUse().getFQName().specify(i, true))));
     }
     public FExp FIdTempExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        return new FIdTempExp(new FIdUse(getFIdUse().getFQName().specify(i, true)));
+        FQName fqn = getFIdUse().getFQName();
+        fqn = fqn.copyAndAddFas(i.createFArraySubscripts());
+        return new FIdTempExp(new FIdUse(fqn));
     }
     public FExp FExp.extractRecordCell(Map<String,FExp> indexMap, String suffix) {
+        if (useTempVar) {
+            FQName fqn;
+            String name = tempVarName();
+            if (indexMap.containsKey(name)) {
+                fqn = ((FIdUseExp)indexMap.get(name)).getFIdUse().getFQName();
+            } else {
+                fqn = new FQNameFull(tempVarName());
+            }
+            fqn = fqn.copyAndAppend(suffix);
+            return dynamicFExp(new FIdUseExp(new FIdUse(fqn)));
+        }
         return dynamicFExp(scalarRecordFExp(indexMap, new FQNameFull(suffix)));
     }
     public FExp FIdUseExp.extractRecordCell(Map<String,FExp> indexMap, String suffix) {
-        return dynamicFExp(new FIdUseExp(new FIdUse(getFIdUse().getFQName().copyAndAppend(suffix))));
+        FQName fqn = getFIdUse().getFQName().scalarize(indexMap);
+        if (indexNames != null)
+            fqn = fqn.copyAndAddFas(indexNames.createFArraySubscripts(ndims()));
+        fqn.append(suffix);
+        return dynamicFExp(new FIdUseExp(new FIdUse(fqn)));
     }
     public FExp FIdTempExp.extractRecordCell(Map<String,FExp> indexMap, String suffix) {
-        return new FIdTempExp(new FIdUse(getFIdUse().getFQName().copyAndAppend(suffix)));
+        FQName fqn = getFIdUse().getFQName().fullCopy();
+        fqn.append(suffix);
+        return dynamicFExp(new FIdTempExp(new FIdUse(fqn)));
     }
     
     syn FExp FIdTempExp.scalarize(Map<String,FExp> indexMap) =
             indexNames == null ?
-                    new FIdUseExp(getFIdUse().scalarize(indexMap)) :
+                    fullCopy() :
                         createUseWithNamedSubscripts(indexNames);
     
     /*
@@ -1069,12 +1086,13 @@ aspect Scalarization {
      * Will this expression be scalarized as an unknown size?
      */
     inh boolean FExp.inUnknownSize();
-    eq Root.getChild().inUnknownSize()          = false;
-    eq FStatement.getChild().inUnknownSize()    = false;
-    eq FEquation.getChild().inUnknownSize()     = false;
-    eq FFunctionCall.getChild().inUnknownSize() = false;
-    eq FAssignStmt.getChild().inUnknownSize()   = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FExp.getChild().inUnknownSize()          = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
+    eq Root.getChild().inUnknownSize()               = false;
+    eq FStatement.getChild().inUnknownSize()         = false;
+    eq FEquation.getChild().inUnknownSize()          = false;
+    eq FFunctionCall.getChild().inUnknownSize()      = false;
+    eq FRecordConstructor.getChild().inUnknownSize() = false;
+    eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
     
     
     /**
@@ -1240,13 +1258,14 @@ aspect Scalarization {
                 names.removeLayer();
                 outer = names.createForLoops(outer, right);
                 outer.addAll(inner);
+                right = ((FIterExp) right).getFExp();
             } else {
                 left.getFArraySubscripts().setFSubscript(new FIntegerSubscript(i+1), 0);
                 outer.addAll(inner);
                 outer = names.createForLoops(outer, right);
             }
             
-            outer.add(new FAssignStmt(left, right.scalarize(indexMap)));
+            type().scalarizeAssignment_sub(vars, outer, indexMap, left, right);
         }
         
         if (!iter)
@@ -1443,10 +1462,12 @@ aspect Scalarization {
      * in <code>indexNames</code> for expressions replaced with temps.
      */
     public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        if (useTempVar && isArray())
-            indexMap.put(tempVarName(), names.createUseWithSubscripts(tempVarName()));
-        else
+        if (useTempVar) {
+            if (isArray())
+                indexMap.put(tempVarName(), names.createUseWithSubscripts(tempVarName()));
+        } else {
             super.addArrayUsesToIndexMap(indexMap, names);
+        }
     }
     
     /**
@@ -1524,11 +1545,10 @@ aspect Scalarization {
     /**
      * TODO: comment
      */
-	public void FStatement.scalarizeStmt(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+	public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 		int n1 = stmts.getNumChild();
         addSizeAsserts(stmts);
-		scalarize(vars, stmts, indexMap);
+        boolean breaker = scalarize(vars, stmts, indexMap);
 		if (shouldBeSorted) {
 			int n2 = stmts.getNumChild();
 			for (int i = n1; i < n2; i++) 
@@ -1543,6 +1563,7 @@ aspect Scalarization {
                 }
             }
 		}
+		return breaker;
 	}
 	
     /**
@@ -1644,32 +1665,47 @@ aspect Scalarization {
 	/**
 	 * \brief Scalarize the statement and put all resulting statements in the
 	 *        list of statements.
+	 *        
+	 * @return FExp 
 	 */
-	public void FStatement.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+	public boolean FStatement.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 		stmts.add((FStatement) fullCopy());
+		return false;
 	}
 	
-	public void FAssignStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+    public static boolean FStatement.scalarizeStmtList(
+            List<FStatement> fromList, List<FStatement> toList, 
+            List vars, Map<String,FExp> indexMap) {
+        boolean res = false;
+        boolean breaker = false;
+        for (FStatement stmt : fromList) {
+            if (breaker)
+                toList = FStatement.breakBlock(toList, stmt.createBreakCond());
+            breaker = stmt.scalarizeStmt(vars, toList, indexMap);
+            res = res || breaker;
+        }
+        return res;
+    }
+	
+	public boolean FAssignStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
         indexMap = new HashMap<String, FExp>(indexMap);
         
         FIdUseExp left = getLeft();
         FExp right = getRight();
         
         if (left.type().isComposite() && !left.isSlice() && right.inFunction() && right instanceof FFunctionCall) {
+            // Special case, Function call stmt
             FFunctionCall call = (FFunctionCall) right;
             call.getArgs().createArrayTemporaries(stmts, vars, indexMap);
             call.createFunctionCallClause(stmts, indexMap, left);
-            return; // Special case, Function call stmt
+        } else {
+            FType t = left.size().isUnknown() ? left.type() : right.type();
+            t.scalarizeAssignment(vars, stmts, indexMap, left, right);
         }
-        
-        FType t = left.size().isUnknown() ? left.type() : right.type();
-        t.scalarizeAssignment(vars, stmts, indexMap, left, right);
+        return false;
     }
 	
-	public void FFunctionCallStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+	public boolean FFunctionCallStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 	    indexMap = new HashMap<String, FExp>(indexMap);
         getCall().createArrayTemporaries(stmts, vars, indexMap);
         FFunctionCallStmt stmt = new FFunctionCallStmt();
@@ -1678,44 +1714,46 @@ aspect Scalarization {
         for (FFunctionCallLeft left : getLefts())
             stmt.addLeft(left.scalarize(indexMap));
         stmt.setCall((FAbstractFunctionCall) getCall().scalarizeExp(indexMap));
+        return false;
 	}
 	
-	public void FIfWhenStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+	public boolean FIfWhenStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+	    boolean breaker = false;
 	    indexMap = new HashMap<String, FExp>(indexMap);
 		for (FIfWhenClause cl : getFIfWhenClauses())
 			cl.getTest().createArrayTemporaries(stmts, vars, indexMap);
 		FIfWhenStmt stmt = createEmptyNode();
-		for (FIfWhenClause cl : getFIfWhenClauses())
-			stmt.addFIfWhenClause(cl.scalarize(vars, indexMap));
-		scalarizeElse(vars, stmt, indexMap);
+        for (FIfWhenClause cl : getFIfWhenClauses()) {
+            breaker = breaker || cl.scalarize(vars, stmt.getFIfWhenClauses(), indexMap);
+        }
+        breaker = breaker || scalarizeElse(vars, stmt, indexMap);
 		stmts.add(stmt);
+		return breaker;
 	}
 	
 	/**
 	 * \brief Scalarize the else part of an if statement. Does nothing for when statements.
 	 */
-	public void FIfWhenStmt.scalarizeElse(List<? extends FAbstractVariable> vars, FIfWhenStmt stmt, 
-			Map<String,FExp> indexMap) {}
-	
-	public void FIfStmt.scalarizeElse(List<? extends FAbstractVariable> vars, FIfWhenStmt stmt, 
-			Map<String,FExp> indexMap) {
-		FIfStmt ifstmt = (FIfStmt) stmt;
-		FStatement.scalarizeStmtList(getElseStmts(), ifstmt.getElseStmtList(), vars, indexMap);
-	}
-	
-	/**
-	 * \brief Scalarize the if or when clause.
-	 */
-	public FIfWhenClause FIfWhenClause.scalarize(List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
-		FExp test = getTest().scalarize(indexMap);
-		List<FStatement> stmts = new List<FStatement>();
-		FStatement.scalarizeStmtList(getFStatements(), stmts, vars, indexMap);
-		return createNode(test, stmts);
-	}
-	
-	public void FForStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+    public boolean FIfWhenStmt.scalarizeElse(List vars, FIfWhenStmt stmt, Map<String,FExp> indexMap) { 
+        return false; 
+    }
+    
+    public boolean FIfStmt.scalarizeElse(List vars, FIfWhenStmt stmt, Map<String,FExp> indexMap) {
+        FIfStmt ifstmt = (FIfStmt) stmt;
+        return FStatement.scalarizeStmtList(getElseStmts(), ifstmt.getElseStmtList(), vars, indexMap);
+    }
+    
+    /**
+     * \brief Scalarize the if or when clause.
+     */
+    public boolean FIfWhenClause.scalarize(List vars, List<FIfWhenClause> clauses, Map<String,FExp> indexMap) {
+        FExp test = getTest().scalarize(indexMap);
+        List<FStatement> stmts = new List<FStatement>();
+        clauses.add(createNode(test, stmts));
+        return FStatement.scalarizeStmtList(getFStatements(), stmts, vars, indexMap);
+    }
+    
+	public boolean FForStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 		if (inFunction()) {
 		    indexMap = new HashMap<String, FExp>(indexMap);
 			getIndex().createArrayTemporaries(stmts, vars, indexMap);
@@ -1724,24 +1762,32 @@ aspect Scalarization {
 			FStatement.scalarizeStmtList(getForStmts(), stmt.getForStmtList(), vars, indexMap);
 			stmts.add(stmt);
 		} else {
+            List<FStatement> inner = stmts;
+            boolean hasBreak = getForStmts().containsBreakStmt();
+            if (hasBreak) {
+                vars.add(myBreakVar());
+                stmts.add(new FAssignStmt(myBreakVar().createUseExp(), new FBooleanLitExpTrue()));
+            }
 			ArrayList<FForIndex> indexList = new ArrayList();
 			indexList.add(getIndex());
 			Indices indices = Indices.create(indexList);
 			Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
 			myIndexMap.putAll(indexMap);
 			for (Index i : indices) {
-				indices.fillIndexMap(myIndexMap, i, indexList);
-				FStatement.scalarizeStmtList(getForStmts(), stmts, vars, myIndexMap);
+			    if (hasBreak)
+			        inner = FStatement.breakBlock(stmts, myBreakVar().createUseExp());
+                indices.fillIndexMap(myIndexMap, i, indexList);
+                FStatement.scalarizeStmtList(getForStmts(), inner, vars, myIndexMap);
 				getForStmts().flushAllRecursive(); // Throw calculated sizes/arrays
 				getForStmts().flushTempVarNames();
 			}
 			for (FForIndex fi : indexList) 
 				fi.setEvaluationValue(null);
 		}
+		return false;
 	}
 	
-	public void FWhileStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
-			Map<String,FExp> indexMap) {
+    public boolean FWhileStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 	    indexMap = new HashMap<String, FExp>(indexMap);
 		getTest().createArrayTemporaries(stmts, vars, indexMap);
 		FWhileStmt stmt = new FWhileStmt();
@@ -1749,8 +1795,58 @@ aspect Scalarization {
 		FStatement.scalarizeStmtList(getWhileStmts(), stmt.getWhileStmtList(), vars, indexMap);
 		getTest().createArrayTemporaries(stmt.getWhileStmtList(), null, indexMap);
 		stmts.add(stmt);
+        return false;
 	}
 	
+    public boolean FBreakStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+        FStatement loop = enclosingLoop();
+        if (!inFunction() && loop instanceof FForStmt) {
+            stmts.add(new FAssignStmt(createBreakCond(), new FBooleanLitExpFalse()));
+            return true;
+        } else {
+            return super.scalarize(vars, stmts, indexMap);
+        }
+    }
+    
+    public static List<FStatement> FStatement.breakBlock(List<FStatement> stmts, FExp breakCond) {
+        FIfStmt ifStmt = new FIfStmt();
+        FIfClause clause = new FIfClause();
+        clause.setTest(breakCond.fullCopy());
+        ifStmt.addFIfWhenClause(clause);
+        stmts.add(ifStmt);
+        return clause.getFStatements();
+    }
+    
+    private FVariable FForStmt.breakVar = null;
+    private FVariable FForStmt.myBreakVar(){
+        if (breakVar == null) {
+            FQName fqn = new FQNameString(getIndex().getFExp().calcTempVarName());
+            FVariable fv = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(), fqn);
+            breakVar = fv;
+        }
+        return breakVar;
+    }
+    
+    inh FIdUseExp FStatement.createBreakCond();
+    eq Root.getChild().createBreakCond() = null;
+    eq FForStmt.getChild().createBreakCond() = myBreakVar().createUseExp();
+    
+    syn boolean ASTNode.containsBreakStmt() {
+        for (ASTNode n : this)
+            if (n.containsBreakStmt())
+                return true;
+        return false;
+    }
+    eq FForStmt.containsBreakStmt() {
+        return false;
+    }
+    eq FWhileStmt.containsBreakStmt() {
+        return false;
+    }
+    eq FBreakStmt.containsBreakStmt() {
+        return true;
+    }
+    
     /**
      * \brief Scalarize the function, replacing all array assignments with separate scalar 
      *        assignments and scalarize all expressions.

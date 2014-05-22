@@ -55,15 +55,17 @@ Semantic error at line 35, column 4:
 	  Boolean y = true;
       Real z = x + y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest3",
-			description="Basic expression type test.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TypeTest3",
+            description="Basic expression type test.",
+            errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/TypeTests.mo':
-Semantic error at line 51, column 16:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 56, column 16:
   Type error in expression: x + y
+    type of 'x' is Real
+    type of 'y' is Boolean
 ")})));
 	end TypeTest3;
 
@@ -73,15 +75,17 @@ Semantic error at line 51, column 16:
 	equation
 	  x+y=3;  
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest4",
-			description="Basic expression type test.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TypeTest4",
+            description="Basic expression type test.",
+            errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/TypeTests.mo':
-Semantic error at line 66, column 4:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 76, column 4:
   Type error in expression: x + y
+    type of 'x' is Real
+    type of 'y' is Boolean
 ")})));
 	end TypeTest4;
 
@@ -91,15 +95,17 @@ Semantic error at line 66, column 4:
 	initial equation
 	  x+y=3;  
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeTest5",
-			description="Basic expression type test.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TypeTest5",
+            description="Basic expression type test.",
+            errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/TypeTests.mo':
-Semantic error at line 66, column 4:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 96, column 4:
   Type error in expression: x + y
+    type of 'x' is Real
+    type of 'y' is Boolean
 ")})));
 	end TypeTest5;
 
@@ -241,30 +247,42 @@ model TypeRel5
  Boolean lt = {1.0} <  {2.0};
  Boolean le = {1.0} <= {2.0};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeRel5",
-			description="Type checks of relational operators: Real[1]/Real[1]",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TypeRel5",
+            description="Type checks of relational operators: Real[1]/Real[1]",
+            errorMessage="
 6 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 222, column 15:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 243, column 15:
   Type error in expression: {1.0} == {2.0}
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 223, column 15:
+    type of '{1.0}' is Real[1]
+    type of '{2.0}' is Real[1]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 244, column 15:
   Type error in expression: {1.0} <> {2.0}
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 224, column 15:
+    type of '{1.0}' is Real[1]
+    type of '{2.0}' is Real[1]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 245, column 15:
   Type error in expression: {1.0} > {2.0}
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 225, column 15:
+    type of '{1.0}' is Real[1]
+    type of '{2.0}' is Real[1]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 246, column 15:
   Type error in expression: {1.0} >= {2.0}
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 226, column 15:
+    type of '{1.0}' is Real[1]
+    type of '{2.0}' is Real[1]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 247, column 15:
   Type error in expression: {1.0} < {2.0}
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 227, column 15:
+    type of '{1.0}' is Real[1]
+    type of '{2.0}' is Real[1]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 248, column 15:
   Type error in expression: {1.0} <= {2.0}
+    type of '{1.0}' is Real[1]
+    type of '{2.0}' is Real[1]
 ")})));
 end TypeRel5;
 
@@ -277,30 +295,42 @@ model TypeRel6
  Boolean lt = 1.0 <  "2.0";
  Boolean le = 1.0 <= "2.0";
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TypeRel6",
-			description="Type checks of relational operators: Real/String",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TypeRel6",
+            description="Type checks of relational operators: Real/String",
+            errorMessage="
 6 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 258, column 15:
-  Type error in expression: 1.0 == \"2.0\"
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 259, column 15:
-  Type error in expression: 1.0 <> \"2.0\"
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 260, column 15:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 291, column 15:
+  Equality comparisons do not allow real operands: 1.0 == \"2.0\"
+    type of '1.0' is Real
+    type of '\"2.0\"' is String
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 292, column 15:
+  Equality comparisons do not allow real operands: 1.0 <> \"2.0\"
+    type of '1.0' is Real
+    type of '\"2.0\"' is String
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 293, column 15:
   Type error in expression: 1.0 > \"2.0\"
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 261, column 15:
+    type of '1.0' is Real
+    type of '\"2.0\"' is String
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 294, column 15:
   Type error in expression: 1.0 >= \"2.0\"
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 262, column 15:
+    type of '1.0' is Real
+    type of '\"2.0\"' is String
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 295, column 15:
   Type error in expression: 1.0 < \"2.0\"
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 263, column 15:
+    type of '1.0' is Real
+    type of '\"2.0\"' is String
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 296, column 15:
   Type error in expression: 1.0 <= \"2.0\"
+    type of '1.0' is Real
+    type of '\"2.0\"' is String
 ")})));
 end TypeRel6;
 
@@ -385,15 +415,16 @@ end AbsType4;
 model AbsType5
  parameter String x = abs("-1");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AbsType5",
-			description="abs() operator: String arg",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AbsType5",
+            description="abs() operator: String arg",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 338, column 17:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 416, column 27:
   Calling function abs(): types of positional argument 1 and input v are not compatible
+    type of '\"-1\"' is String
 ")})));
 end AbsType5;
 
@@ -484,6 +515,19 @@ end TypeTests.IntegerExp2;
 			
 ")})));
 end IntegerExp2;
+
+model IntegerExp3
+  Integer y1 = integer(ceil(floor(3)));
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="IntegerExp3",
+            description="integer() operator: integer arg",
+            flatModel="
+fclass TypeTests.IntegerExp3
+ discrete Integer y1 = integer(ceil(floor(3)));
+end TypeTests.IntegerExp3;
+")})));
+end IntegerExp3;
 
 
 model ConstCmpEq
@@ -632,15 +676,17 @@ end ConstCmpGt;
 model RealEq1
  Boolean a = 1.0 == 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RealEq1",
-			description="Equality comparisons for reals: == outside function",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RealEq1",
+            description="Equality comparisons for reals: == outside function",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 672, column 14:
-  Type error in expression: 1.0 == 2
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 677, column 14:
+  Equality comparisons do not allow real operands: 1.0 == 2
+    type of '1.0' is Real
+    type of '2' is Integer
 ")})));
 end RealEq1;
 
@@ -648,15 +694,17 @@ end RealEq1;
 model RealEq2
  Boolean a = 1.0 <> 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RealEq2",
-			description="Equality comparisons for reals: <> outside function",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RealEq2",
+            description="Equality comparisons for reals: <> outside function",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 688, column 14:
-  Type error in expression: 1.0 <> 2
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 695, column 14:
+  Equality comparisons do not allow real operands: 1.0 <> 2
+    type of '1.0' is Real
+    type of '2' is Integer
 ")})));
 end RealEq2;
 
@@ -1101,18 +1149,20 @@ end DivTest1;
 model DivTest2
   Real x    = div(1.,true) + div("hej",2.);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="DivTest2",
-			description="Testing wrong input types of the div operator.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DivTest2",
+            description="Testing wrong input types of the div operator.",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1107, column 22:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1150, column 22:
   Calling function div(): types of positional argument 2 and input x2 are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1107, column 34:
+    type of 'true' is Boolean
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1150, column 34:
   Calling function div(): types of positional argument 1 and input x1 are not compatible
+    type of '\"hej\"' is String
 ")})));
 end DivTest2;
 
@@ -1153,18 +1203,20 @@ end ModTest1;
 model ModTest2
   Real x    = mod(1.,true) + mod("hej",2.);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ModTest2",
-			description="Testing wrong input types of the mod operator.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ModTest2",
+            description="Testing wrong input types of the mod operator.",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1141, column 22:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1167, column 22:
   Calling function mod(): types of positional argument 2 and input x2 are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1141, column 34:
+    type of 'true' is Boolean
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1167, column 34:
   Calling function mod(): types of positional argument 1 and input x1 are not compatible
+    type of '\"hej\"' is String
 ")})));
 end ModTest2;
 
@@ -1202,18 +1254,20 @@ end RemTest1;
 model RemTest2
   Real x    = rem(1.,true) + rem("hej",2.);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RemTest2",
-			description="Testing wrong input types of the rem operator.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RemTest2",
+            description="Testing wrong input types of the rem operator.",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1175, column 22:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1255, column 22:
   Calling function rem(): types of positional argument 2 and input x2 are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1175, column 34:
+    type of 'true' is Boolean
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1255, column 34:
   Calling function rem(): types of positional argument 1 and input x1 are not compatible
+    type of '\"hej\"' is String
 ")})));
 end RemTest2;
 
@@ -1580,7 +1634,7 @@ Semantic error at line 0, column 0:
 
 Error: in file '...':
 Semantic error at line 0, column 0:
-  Nominal expression should have parameter variability or less, pValues has Continuousv ariability
+  Nominal expression should have parameter variability or less, pValues has continuous-time variability
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -1748,18 +1802,20 @@ model StringExpType1
 	parameter String a = String({1,2});
 	parameter String b = String("a");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="StringExpType1",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="StringExpType1",
+            description="",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1439, column 30:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1802, column 30:
   Calling function String(): types of positional argument 1 and input x are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1440, column 30:
+    type of '{1, 2}' is Integer[2]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 1803, column 30:
   Calling function String(): types of positional argument 1 and input x are not compatible
+    type of '\"a\"' is String
 ")})));
 end StringExpType1;
 

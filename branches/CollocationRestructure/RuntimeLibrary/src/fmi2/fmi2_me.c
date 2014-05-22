@@ -17,27 +17,30 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include "fmi2_me.h"
 #include "fmi2_cs.h"
 
 const char* fmi2_get_types_platform() {
-    return fmiTypesPlatform;
+    return fmi2TypesPlatform;
 }
 
 const char* fmi2_get_version() {
-    return fmiVersion;
+    return fmi2Version;
 }
 
-fmiStatus fmi2_set_debug_logging(fmiComponent    c,
-                                 fmiBoolean      loggingOn, 
-                                 size_t          nCategories, 
-                                 const fmiString categories[]) {
+fmi2Status fmi2_set_debug_logging(fmi2Component    c,
+                                  fmi2Boolean      loggingOn, 
+                                  size_t          nCategories, 
+                                  const fmi2String categories[]) {
 
     fmi2_me_t* self = (fmi2_me_t*)c;
-    int i, max_log_level, tmp_log_level;
+    size_t i;
+    int max_log_level, tmp_log_level;
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     max_log_level = 0;
@@ -56,7 +59,7 @@ fmiStatus fmi2_set_debug_logging(fmiComponent    c,
             tmp_log_level = 6;
         } else {
             jmi_log_node(self->jmi.log, logError, "Error", "The log category '%s' is not allowed", categories[i]);
-            return fmiError;
+            return fmi2Error;
         }
 
         if (tmp_log_level > max_log_level) {
@@ -66,71 +69,71 @@ fmiStatus fmi2_set_debug_logging(fmiComponent    c,
     
     self->jmi.jmi_callbacks.log_options.logging_on_flag = loggingOn;
     self->jmi.jmi_callbacks.log_options.log_level = max_log_level;
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiComponent fmi2_instantiate(fmiString instanceName,
-                              fmiType   fmuType, 
-                              fmiString fmuGUID, 
-                              fmiString fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn) {
+fmi2Component fmi2_instantiate(fmi2String instanceName,
+                               fmi2Type   fmuType, 
+                               fmi2String fmuGUID, 
+                               fmi2String fmuResourceLocation, 
+                               const fmi2CallbackFunctions* functions, 
+                               fmi2Boolean                  visible,
+                               fmi2Boolean                  loggingOn) {
     
-    fmiComponent component;
-    fmiInteger   retval;
+    fmi2Component component;
+    fmi2Integer   retval;
     
     if(!functions->allocateMemory || !functions->freeMemory || !functions->logger) {
          if(functions->logger) {
              /* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
-             functions->logger(0, instanceName, fmiError, "ERROR", "Memory management functions allocateMemory/freeMemory are required.");
+             functions->logger(0, instanceName, fmi2Error, "ERROR", "Memory management functions allocateMemory/freeMemory are required.");
          }
          return NULL;
     }
     
     /*Allocate memory for the correct struct. */
-    if (fmuType == fmiModelExchange) {
-        component = (fmiComponent)functions->allocateMemory(1, sizeof(fmi2_me_t));
+    if (fmuType == fmi2ModelExchange) {
+        component = (fmi2Component)functions->allocateMemory(1, sizeof(fmi2_me_t));
         if(!component) return NULL;
 
         retval = fmi2_me_instantiate(component, instanceName, fmuType, fmuGUID, 
                                      fmuResourceLocation, functions, visible,
                                      loggingOn);
-        if (retval != fmiOK) {
+        if (retval != fmi2OK) {
             functions->freeMemory(component);
             return NULL;
         }
 
-    } else if (fmuType == fmiCoSimulation) {
-        component = (fmiComponent)functions->allocateMemory(1, sizeof(fmi2_cs_t));
+    } else if (fmuType == fmi2CoSimulation) {
+        component = (fmi2Component)functions->allocateMemory(1, sizeof(fmi2_cs_t));
         if(!component) return NULL;
 
         retval = fmi2_cs_instantiate(component, instanceName, fmuType, fmuGUID, 
                                      fmuResourceLocation, functions, visible,
                                      loggingOn);
-        if (retval != fmiOK) {
+        if (retval != fmi2OK) {
             functions->freeMemory(component);
             return NULL;
 		}
     } else {
 		/* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
-        functions->logger(0, instanceName, fmiError, "ERROR", "Valid choises for fmuType are fmiModelExchange and fmiCoSimulation");
+        functions->logger(0, instanceName, fmi2Error, "ERROR", "Valid choises for fmuType are fmi2ModelExchange and fmi2CoSimulation");
         component = NULL;
 	}
     
     return component;
 }
 
-static fmiStatus category_to_fmiStatus(jmi_log_category_t c) {
+static fmi2Status category_to_fmi2Status(jmi_log_category_t c) {
     switch (c) {
-    case logError:   return fmiError;
-    case logWarning: return fmiWarning;
-    case logInfo:    return fmiOK;
-    default:         return fmiError;
+    case logError:   return fmi2Error;
+    case logWarning: return fmi2Warning;
+    case logInfo:    return fmi2OK;
+    default:         return fmi2Error;
     }
 }
 
-static const char *category_to_fmiCategory(jmi_log_category_t c) {
+static const char *category_to_fmi2Category(jmi_log_category_t c) {
     switch (c) {
     case logError:   return "ERROR";
     case logWarning: return "WARNING";
@@ -139,15 +142,17 @@ static const char *category_to_fmiCategory(jmi_log_category_t c) {
     }
 }
 
-void fmi2_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message) {
+void fmi2_me_emit_log(jmi_callbacks_t*   jmi_callbacks,     jmi_log_category_t category,
+                      jmi_log_category_t severest_category, char*              message) {
 
     fmi2_me_t* c = (fmi2_me_t*)(jmi_callbacks->model_data);
     
     if(c){
         if(c->fmi_functions->logger)
-            c->fmi_functions->logger(c,jmi_callbacks->instance_name, 
-                                     category_to_fmiStatus(category),
-                                     category_to_fmiCategory(severest_category),
+            c->fmi_functions->logger(c->fmi_functions->componentEnvironment,
+                                     jmi_callbacks->instance_name, 
+                                     category_to_fmi2Status(category),
+                                     category_to_fmi2Category(severest_category),
                                      "%s", message); /* prevent interpretation of message as format string */
     } else {
         switch (category) {
@@ -180,41 +185,41 @@ BOOL fmi2_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t cat
     return TRUE;
 }
 
-void fmi2_free_instance(fmiComponent c)  {
+void fmi2_free_instance(fmi2Component c)  {
     /* Dispose the given model instance and deallocated all the allocated memory and other resources 
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
-    fmiCallbackFreeMemory fmi_free;
+    fmi2CallbackFreeMemory fmi_free;
     
     if (c) {
         fmi_free = ((fmi2_me_t*)c)->fmi_functions->freeMemory;
         
-        if (((fmi2_me_t*)c)->fmu_type == fmiModelExchange) {
+        if (((fmi2_me_t*)c)->fmu_type == fmi2ModelExchange) {
             fmi2_me_free_instance(c);
             fmi_free(((fmi2_me_t*)c));
-        } else if (((fmi2_me_t*)c)->fmu_type == fmiCoSimulation) {
+        } else if (((fmi2_me_t*)c)->fmu_type == fmi2CoSimulation) {
             fmi2_cs_free_instance(c);
             fmi_free(((fmi2_cs_t*)c));
         }
     }
 }
 
-fmiStatus fmi2_setup_experiment(fmiComponent c, 
-                                fmiBoolean   toleranceDefined, 
-                                fmiReal      tolerance, 
-                                fmiReal      startTime, 
-                                fmiBoolean   stopTimeDefined, 
-                                fmiReal      stopTime) {
-    fmiStatus retval;
-
+fmi2Status fmi2_setup_experiment(fmi2Component c, 
+                                 fmi2Boolean   toleranceDefined, 
+                                 fmi2Real      tolerance, 
+                                 fmi2Real      startTime, 
+                                 fmi2Boolean   stopTimeDefined, 
+                                 fmi2Real      stopTime) {
+    fmi2Status retval;
+    
 	if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     jmi_setup_experiment(&((fmi2_me_t*)c)->jmi, toleranceDefined, tolerance);
     
     retval = fmi2_set_time(c, startTime);
     
-    if (((fmi2_me_t*)c)->fmu_type == fmiCoSimulation) {
+    if (((fmi2_me_t*)c)->fmu_type == fmi2CoSimulation) {
         jmi_init_ode_problem(((fmi2_cs_t*)c)->ode_problem, startTime, fmi2_cs_rhs_fcn,
                              fmi2_cs_root_fcn, fmi2_cs_completed_integrator_step);
     }
@@ -222,8 +227,8 @@ fmiStatus fmi2_setup_experiment(fmiComponent c,
     return retval;
 }
 
-fmiStatus fmi2_enter_initialization_mode(fmiComponent c) {
-    fmiInteger retval;
+fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
+    fmi2Integer retval;
     jmi_ode_problem_t* ode_problem;
     jmi_t* jmi;
     jmi_ode_method_t ode_method;
@@ -231,23 +236,23 @@ fmiStatus fmi2_enter_initialization_mode(fmiComponent c) {
     jmi_real_t ode_rel_tol;
 
 	if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     if (((fmi2_me_t *)c)->fmi_mode != instantiatedMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter initialization mode after instantiating the model.");
-        return fmiError;
+        return fmi2Error;
     }
     jmi = &((fmi2_me_t*)c)->jmi;
     
     retval = jmi_initialize(jmi);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
     ((fmi2_me_t *)c) -> fmi_mode = initializationMode;
     
-    if (((fmi2_me_t *)c) -> fmu_type == fmiCoSimulation) {
+    if (((fmi2_me_t *)c) -> fmu_type == fmi2CoSimulation) {
         ode_problem = ((fmi2_cs_t *)c) -> ode_problem; 
         /*Get the states, event indicators and the nominals for the ODE problem. Initialization. */
         fmi2_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
@@ -263,66 +268,66 @@ fmiStatus fmi2_enter_initialization_mode(fmiComponent c) {
         
         /* Create solver */
         retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol);
-        if (retval != fmiOK) { 
-            return fmiError;
+        if (retval != fmi2OK) { 
+            return fmi2Error;
         }
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_exit_initialization_mode(fmiComponent c) {
+fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
 	if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmi_mode != initializationMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only exit initialization mode when being in initialization mode.");
-        return fmiError;
+        return fmi2Error;
     }
-    if (((fmi2_me_t *)c)->fmu_type == fmiModelExchange) {
+    if (((fmi2_me_t *)c)->fmu_type == fmi2ModelExchange) {
         ((fmi2_me_t *)c)->fmi_mode = eventMode;
-    } else if (((fmi2_me_t *)c)->fmu_type == fmiCoSimulation) {
+    } else if (((fmi2_me_t *)c)->fmu_type == fmi2CoSimulation) {
         ((fmi2_me_t *)c)->fmi_mode = slaveInitialized;
-		((fmi2_cs_t *)c)->event_info.newDiscreteStatesNeeded = fmiTrue; /* To start event iteration after initialization. */
+		((fmi2_cs_t *)c)->event_info.newDiscreteStatesNeeded = fmi2True; /* To start event iteration after initialization. */
     }
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_terminate(fmiComponent c) {
+fmi2Status fmi2_terminate(fmi2Component c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     jmi_terminate(&((fmi2_me_t *)c)->jmi);
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_reset(fmiComponent c) {
+fmi2Status fmi2_reset(fmi2Component c) {
 	/* Resets the FMU by deleting the jmi struct. */
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     jmi_delete(&((fmi2_me_t*)c)->jmi);
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
-                        size_t nvr, fmiReal value[]) {
-    fmiInteger retval;
-    int i;
+fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
+                         size_t nvr, fmi2Real value[]) {
+    fmi2Integer retval;
+    size_t i;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_real(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
     /* Negate the values of the retrieved "negate alias" variables. */
@@ -332,38 +337,38 @@ fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
         }
     }
 
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_integer(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, fmiInteger value[]) {
-    fmiInteger retval;
+fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, fmi2Integer value[]) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
 
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_boolean(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, fmiBoolean value[]) {
-    fmiInteger retval;
+fmi2Status fmi2_get_boolean(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, fmi2Boolean value[]) {
+    fmi2Integer retval;
     jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));
-    int i;
+    size_t i;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
     for (i = 0; i < nvr; i++) {
@@ -371,38 +376,38 @@ fmiStatus fmi2_get_boolean(fmiComponent c, const fmiValueReference vr[],
     }
     free(jmi_boolean_values);
 
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_string(fmiComponent c, const fmiValueReference vr[],
-                          size_t nvr, fmiString value[]) {
-    fmiInteger retval;
+fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
+                           size_t nvr, fmi2String value[]) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     retval = jmi_get_string(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
 
     /* Strings not yet supported. */
-    return fmiWarning;
+    return fmi2Warning;
 }
 
-fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
-                        size_t nvr, const fmiReal value[]) {
-    fmiInteger retval;
-    fmiReal* negated_value;
-    int i;
+fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
+                         size_t nvr, const fmi2Real value[]) {
+    fmi2Integer retval;
+    fmi2Real* negated_value;
+    size_t i;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     /* Negate the values before setting the "negate alias" variables. */
-    negated_value = (fmiReal*)calloc(nvr, sizeof(fmiReal));
+    negated_value = (fmi2Real*)calloc(nvr, sizeof(fmi2Real));
     for (i = 0; i < nvr; i++) {
         if (is_negated(vr[i])) {
             negated_value[i] = -value[i];
@@ -414,37 +419,37 @@ fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, negated_value);
     free(negated_value);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_set_integer(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, const fmiInteger value[]) {
-    fmiInteger retval;
+fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, const fmi2Integer value[]) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_set_boolean(fmiComponent c, const fmiValueReference vr[],
-                           size_t nvr, const fmiBoolean value[]) {
-    fmiInteger retval;
-    int i;
+fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
+                            size_t nvr, const fmi2Boolean value[]) {
+    fmi2Integer retval;
+    size_t i;
 
 	jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     for (i = 0; i < nvr; i++) {
@@ -453,98 +458,98 @@ fmiStatus fmi2_set_boolean(fmiComponent c, const fmiValueReference vr[],
     
     retval = jmi_set_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
 
 	free(jmi_boolean_values);
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_set_string(fmiComponent c, const fmiValueReference vr[],
-                          size_t nvr, const fmiString value[]) {
-    fmiInteger retval;
+fmi2Status fmi2_set_string(fmi2Component c, const fmi2ValueReference vr[],
+                           size_t nvr, const fmi2String value[]) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_set_string(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
     /* Strings not yet supported. */
-    return fmiWarning;
+    return fmi2Warning;
 }
 
-fmiStatus fmi2_get_fmu_state(fmiComponent c, fmiFMUstate* FMUstate) {
-    return fmiError;
+fmi2Status fmi2_get_fmu_state(fmi2Component c, fmi2FMUstate* FMUstate) {
+    return fmi2Error;
 }
 
-fmiStatus fmi2_set_fmu_state(fmiComponent c, fmiFMUstate FMUstate) {
-    return fmiError;
+fmi2Status fmi2_set_fmu_state(fmi2Component c, fmi2FMUstate FMUstate) {
+    return fmi2Error;
 }
 
-fmiStatus fmi2_free_fmu_state(fmiComponent c, fmiFMUstate* FMUstate) {
-    return fmiError;
+fmi2Status fmi2_free_fmu_state(fmi2Component c, fmi2FMUstate* FMUstate) {
+    return fmi2Error;
 }
 
-fmiStatus fmi2_serialized_fmu_state_size(fmiComponent c, fmiFMUstate FMUstate,
-                                         size_t* size) {
-    return fmiError;
+fmi2Status fmi2_serialized_fmu_state_size(fmi2Component c, fmi2FMUstate FMUstate,
+                                          size_t* size) {
+    return fmi2Error;
 }
 
-fmiStatus fmi2_serialized_fmu_state(fmiComponent c, fmiFMUstate FMUstate,
-                                    fmiByte serializedState[], size_t size) {
-    return fmiError;
+fmi2Status fmi2_serialized_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
+                                     fmi2Byte serializedState[], size_t size) {
+    return fmi2Error;
 }
 
-fmiStatus fmi2_de_serialized_fmu_state(fmiComponent c,
-                                       const fmiByte serializedState[],
-                                       size_t size, fmiFMUstate* FMUstate) {
-    return fmiError;
+fmi2Status fmi2_de_serialized_fmu_state(fmi2Component c,
+                                        const fmi2Byte serializedState[],
+                                        size_t size, fmi2FMUstate* FMUstate) {
+    return fmi2Error;
 }
 
-fmiStatus fmi2_get_directional_derivative(fmiComponent c,
-                const fmiValueReference vUnknown_ref[], size_t nUnknown,
-                const fmiValueReference vKnown_ref[],   size_t nKnown,
-                const fmiReal dvKnown[], fmiReal dvUnknown[]) {
-    fmiInteger retval;
+fmi2Status fmi2_get_directional_derivative(fmi2Component c,
+                const fmi2ValueReference vUnknown_ref[], size_t nUnknown,
+                const fmi2ValueReference vKnown_ref[],   size_t nKnown,
+                const fmi2Real dvKnown[], fmi2Real dvUnknown[]) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_directional_derivative(&((fmi2_me_t *)c)->jmi, vUnknown_ref,
                     nUnknown, vKnown_ref, nKnown, dvKnown, dvUnknown);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_enter_event_mode(fmiComponent c) {
+fmi2Status fmi2_enter_event_mode(fmi2Component c) {
 	if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmi_mode != continuousTimeMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter event mode from continuous time mode.");
-        return fmiError;
+        return fmi2Error;
     }
     
     ((fmi2_me_t *)c) -> fmi_mode = eventMode;
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
-    fmiInteger retval;
+fmi2Status fmi2_new_discrete_state(fmi2Component  c, fmi2EventInfo* fmiEventInfo) {
+    fmi2Integer retval;
     jmi_event_info_t* event_info;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
@@ -558,7 +563,7 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
     
     retval = jmi_event_iteration(&((fmi2_me_t *)c)->jmi, TRUE, event_info);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
     fmiEventInfo->newDiscreteStatesNeeded           = !event_info->iteration_converged;
@@ -570,120 +575,122 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
     
     free(event_info);
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_enter_continuous_time_mode(fmiComponent c) {
+fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
 	if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmi_mode != eventMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter continuous time mode from event mode.");
-        return fmiError;
+        return fmi2Error;
     }
     
     ((fmi2_me_t *)c) -> fmi_mode = continuousTimeMode;
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_completed_integrator_step(fmiComponent c,
-                                         fmiBoolean   noSetFMUStatePriorToCurrentPoint, 
-                                         fmiBoolean*  enterEventMode, 
-                                         fmiBoolean*  terminateSimulation) {
+fmi2Status fmi2_completed_integrator_step(fmi2Component c,
+                                          fmi2Boolean   noSetFMUStatePriorToCurrentPoint, 
+                                          fmi2Boolean*  enterEventMode, 
+                                          fmi2Boolean*  terminateSimulation) {
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
-    *enterEventMode = fmiFalse;
-    *terminateSimulation = fmiFalse; /* TODO: Should be able to use the stopTime to determine if the simulations should stop? */
-    return fmiOK;
+    *enterEventMode = fmi2False;
+    *terminateSimulation = fmi2False; /* TODO: Should be able to use the stopTime to determine if the simulations should stop? */
+    return fmi2OK;
 }
 
-fmiStatus fmi2_set_time(fmiComponent c, fmiReal time) {
+fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     *(jmi_get_t(&((fmi2_me_t *)c)->jmi)) = time;
     ((fmi2_me_t *)c)->jmi.recomputeVariables = 1;
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_set_continuous_states(fmiComponent c, const fmiReal x[],
-                                     size_t nx) {
+fmi2Status fmi2_set_continuous_states(fmi2Component c, const fmi2Real x[],
+                                      size_t nx) {
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
-    memcpy (jmi_get_real_x(&((fmi2_me_t *)c)->jmi), x, nx*sizeof(fmiReal));
+    memcpy (jmi_get_real_x(&((fmi2_me_t *)c)->jmi), x, nx*sizeof(fmi2Real));
     ((fmi2_me_t *)c)->jmi.recomputeVariables = 1;
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_derivatives(fmiComponent c, fmiReal derivatives[], size_t nx) {
-    fmiInteger retval;
+fmi2Status fmi2_get_derivatives(fmi2Component c, fmi2Real derivatives[], size_t nx) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_derivatives(&((fmi2_me_t *)c)->jmi, derivatives, nx);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_event_indicators(fmiComponent c, 
-                                    fmiReal eventIndicators[], size_t ni) {
-    fmiInteger retval;
+fmi2Status fmi2_get_event_indicators(fmi2Component c, 
+                                     fmi2Real eventIndicators[], size_t ni) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_event_indicators(&((fmi2_me_t *)c)->jmi, eventIndicators, ni);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_continuous_states(fmiComponent c, fmiReal x[], size_t nx) {
+fmi2Status fmi2_get_continuous_states(fmi2Component c, fmi2Real x[], size_t nx) {
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
-    memcpy (x, jmi_get_real_x(&((fmi2_me_t *)c)->jmi), nx*sizeof(fmiReal));
-    return fmiOK;
+    memcpy (x, jmi_get_real_x(&((fmi2_me_t *)c)->jmi), nx*sizeof(fmi2Real));
+    return fmi2OK;
 }
 
-fmiStatus fmi2_get_nominals_of_continuous_states(fmiComponent c, 
-                                                 fmiReal x_nominal[], 
-                                                 size_t nx) {
-    fmiInteger retval;
+fmi2Status fmi2_get_nominals_of_continuous_states(fmi2Component c, 
+                                                  fmi2Real x_nominal[], 
+                                                  size_t nx) {
+    fmi2Integer retval;
     
     if (c == NULL) {
-		return fmiFatal;
+		return fmi2Fatal;
     }
     
     retval = jmi_get_nominal_continuous_states(&((fmi2_me_t *)c)->jmi, x_nominal, nx);
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
 /* Local helper for fmi2_me_instantiate. */
 int uri_to_path(char *path, const char* uri) {
     char* scheme   = "file://";
+    char buf[3]    = "00";
     int scheme_len = strlen(scheme);
     int uri_len    = strlen(uri);
-    int len;
+    int i;
+    int j;
     
     if (strncmp(uri, scheme, scheme_len))
         return 1;
@@ -695,30 +702,41 @@ int uri_to_path(char *path, const char* uri) {
     scheme_len++;
 #endif
     
-    len = uri_len - scheme_len;
-    if (len <= 0)
+    if (uri_len <= scheme_len)
         return 1;
     
-    strcpy(path, &uri[scheme_len]);
-    
-    if (path[len-1] != '/' && path[len-1] != '\\') {
-        path[len] = '/';
-        path[len+1] = '\0';
+    for (i = scheme_len, j = 0; i < uri_len; i++, j++) {
+        if (uri[i] == '%') {
+            if (i < uri_len - 2 && isxdigit(uri[i + 1]) && isxdigit(uri[i + 2])) {
+                strncpy(buf, uri + i + 1, 2);
+                path[j] = (unsigned char) strtol(buf, NULL, 16);
+                i += 2;
+            } else {
+                return 1;
+            }
+        } else {
+            path[j] = uri[i];
+        }
     }
+    
+    if (path[j-1] == '/' || path[j-1] == '\\') {
+        j--;
+    }
+    path[j] = '\0';
     
     return 0;
 }
 
 /* Helper method for fmi2_instatiate. */
-fmiStatus fmi2_me_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn) {
-    fmiInteger retval;
+fmi2Status fmi2_me_instantiate(fmi2Component c,
+                               fmi2String    instanceName,
+                               fmi2Type      fmuType, 
+                               fmi2String    fmuGUID, 
+                               fmi2String    fmuResourceLocation, 
+                               const fmi2CallbackFunctions* functions, 
+                               fmi2Boolean                  visible,
+                               fmi2Boolean                  loggingOn) {
+    fmi2Integer retval;
     char* tmpname;
     char* resource_location;
     size_t inst_name_len;
@@ -743,9 +761,9 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
     resource_location = (char*)(fmi2_me_t *)functions->allocateMemory(strlen(fmuResourceLocation), sizeof(char));
     retval = uri_to_path(resource_location, fmuResourceLocation);
     if (retval) {
-        functions->logger(0, instanceName, fmiError, "ERROR", "Invalid fmuResourceLocation <URI:%s>. Expected format: 'file:///absolute/path/resources'", fmuResourceLocation);
+        functions->logger(0, instanceName, fmi2Error, "ERROR", "Invalid fmuResourceLocation <URI:%s>. Expected format: 'file:///absolute/path/resources'", fmuResourceLocation);
         functions->freeMemory(resource_location);
-        return fmiError;
+        return fmi2Error;
     }
     
     fmi2_me->fmi_instance_name = tmpname;
@@ -756,16 +774,16 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
     retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID, resource_location);
           
     if (retval != 0) {
-        return fmiError;
+        return fmi2Error;
     }
     
-    return fmiOK;
+    return fmi2OK;
 }
 
 /* Helper method for fmi2_free_instance. */
-void fmi2_me_free_instance(fmiComponent c) {
+void fmi2_me_free_instance(fmi2Component c) {
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
-    fmiCallbackFreeMemory fmi_free = fmi2_me->fmi_functions->freeMemory;
+    fmi2CallbackFreeMemory fmi_free = fmi2_me->fmi_functions->freeMemory;
 
     fmi_free(fmi2_me->jmi.resource_location);
     jmi_delete(&fmi2_me->jmi);

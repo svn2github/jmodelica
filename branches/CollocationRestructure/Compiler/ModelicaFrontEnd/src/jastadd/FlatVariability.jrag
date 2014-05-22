@@ -186,10 +186,9 @@ aspect FlatVariability {
     }
     
     inh TypePrefixVariability InstNode.overrideVariability(TypePrefixVariability var);
-    eq InstNode.getChild().overrideVariability(TypePrefixVariability var)      = var;
+    eq InstBaseNode.getChild().overrideVariability(TypePrefixVariability var)  = var;
     eq Root.getChild().overrideVariability(TypePrefixVariability var)          = var;
     eq InstPrimitive.getChild().overrideVariability(TypePrefixVariability var) = var;
-    eq InstExtends.getChild().overrideVariability(TypePrefixVariability var)   = overrideVariability(var);
     eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
         	var.combineDown(definedVariability());
     eq InstComponentDecl.getInstExtends().overrideVariability(TypePrefixVariability var) =
@@ -217,7 +216,7 @@ aspect FlatVariability {
                 v = fEvalParameter();
             } else if (isStructuralParam) {
                 v = fStructParameter();
-            } else if (hasBindingFExp()) {
+            } else if (hasBindingFExp() && !isExternalObject()) {
                 FTypePrefixVariability expVariability = getBindingFExp().variability();
                 if (expVariability.structParameterVariability() || expVariability.evalParameterVariability())
                     v = fStructParameter();

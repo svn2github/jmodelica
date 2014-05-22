@@ -31,7 +31,7 @@ bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile
+	make -f Makefile CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB) CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)
 
 install_casadi: casadi
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
@@ -67,6 +67,7 @@ export IPOPT_HOME
 export CASADI_BUILD_DIR
  
 casadi_interface: casadi install_casadi $(MC_LIB) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
+	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 ifcasadi: casadi
 	mkdir -p $(MC_BUILD)/ifcasadi; \
@@ -114,16 +115,25 @@ $(OC_SRC)/bin/separateProcess.jar:  mc_optimica
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
+# Hook for using a specific Python installation
+PYTHON_LIB=
+PYTHON_INCLUDE=
+
 modelicacasadi_wrapper:
+	if [ "$(PYTHON_LIB)" ] && [ "$(PYTHON_INCLUDE)" ]; then \
+	  CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
+	else \
+	  CMAKE_EXTRA_ARGS=""; \
+	fi; \
 	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $${CMAKE_EXTRA_ARGS} ;; \
 	*-mingw*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $${CMAKE_EXTRA_ARGS} ;; \
 	*) \
-	cmake $(MC_INTERFACE) ;; \
+	cmake $(MC_INTERFACE) $${CMAKE_EXTRA_ARGS} ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
@@ -218,6 +228,7 @@ endif
 # Both scripts will get the source directory as the first argument and the install directory as the second.
 BUILD_EXTRA=
 INSTALL_EXTRA=
+INSTALL_EXTRA_CASADI=
 
 # Paths for Java build
 JAVA_BUILD_DIR=$(abs_builddir)/java
@@ -272,7 +283,6 @@ endif
   	*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
-	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 if WITH_MINGW
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
@@ -288,10 +298,12 @@ endif
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
+	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
@@ -327,6 +339,7 @@ endif
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
+	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 bindistdir: install
 	rm -rf $(bindistdir)

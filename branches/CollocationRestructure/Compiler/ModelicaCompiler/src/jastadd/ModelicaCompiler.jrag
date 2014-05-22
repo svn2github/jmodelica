@@ -52,7 +52,8 @@ import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
-import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.Arguments;
+import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
 import org.jmodelica.util.MemorySpider;
@@ -64,6 +65,7 @@ import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.streams.CloneOutputStream;
 
 import org.xml.sax.SAXException;
 
@@ -109,7 +111,7 @@ aspect ModelicaCompilerMain {
  * 
  * For method (2), the compilation steps are divided into 4 tasks which can be
  * used via the methods:
- * -# parseModel (source code -> attributed source representation)  
+ * -# parseModel (source code -> attributed source representation)
  * -# instantiateModel (source representation -> instance model) 
  * -# flattenModel (instance model -> flattened model) 
  * -# generateCode (flattened model -> c code and XML code)
@@ -688,7 +690,7 @@ public class ModelicaCompiler {
 	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling
 		// First save these options in temp options registry to reset when compiling has finished
-		OptionRegistry tempOptions = options.copy();    
+		OptionRegistry tempOptions = options.copy();
 		
 		//Set options for the target.
 		target.setDefaultOptions(options);
@@ -778,7 +780,7 @@ public class ModelicaCompiler {
 		} finally {
 			// remove files
 			deleteOutDir();
-		}       
+		}
 		hookFmuPacked(unitFile.getAbsoluteFile());
 	}
 	
@@ -857,22 +859,23 @@ public class ModelicaCompiler {
 	private void zipDir(File dir, ZipOutputStream out, File zipDir, byte[] buffer) {
 		for (File f : dir.listFiles()) {
 			File fz = new File(zipDir, f.getName());
-			if (f.isDirectory()) {
-				zipDir(f, out, fz, buffer);
-			} else {
-				try {
-					FileInputStream in = new FileInputStream(f);
-					out.putNextEntry(new ZipEntry(fz.getPath()));
-					for (int n; (n = in.read(buffer, 0, buffer.length)) != -1; ) 
-					   out.write(buffer, 0, n);
-					in.close();
-				} catch (FileNotFoundException e) {
-					// Should only occur in weird cases - ignore and skip this file
-				} catch (IOException e) {
-					// TODO: this should result in an error message about failing to zip file
-					e.printStackTrace();
-				}
-			}
+            try {
+                if (f.isDirectory()) {
+                    out.putNextEntry(new ZipEntry(fz.getPath() + "/"));
+                    zipDir(f, out, fz, buffer);
+                } else {
+                    FileInputStream in = new FileInputStream(f);
+                    out.putNextEntry(new ZipEntry(fz.getPath()));
+                    for (int n; (n = in.read(buffer, 0, buffer.length)) != -1; ) 
+                        out.write(buffer, 0, n);
+                    in.close();
+                }
+            } catch (FileNotFoundException e) {
+                // Should only occur in weird cases - ignore and skip this file
+            } catch (IOException e) {
+                // TODO: this should result in an error message about failing to zip file
+                e.printStackTrace();
+            }
 		}
 	}
 
@@ -953,7 +956,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param name
 	 *            The name of the model file.
-	 *            
+	 *
 	 * @return The root of the source tree.
 	 * 
 	 * @throws beaver.Parser.Exception
@@ -1004,7 +1007,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param names
 	 *            An array of file names.
-	 *            
+	 *
 	 * @return The root of the source tree.
 	 * 
 	 * @throws beaver.Parser.Exception
@@ -1287,37 +1290,33 @@ public class ModelicaCompiler {
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
         return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
     }
-	
-	/**
-	 * Generate an output file.
-	 * 
-	 * @param fc    the FClass to generate code for
-	 * @param tmpl  the path to the template
-	 * @param gen   the code generator to use 
-	 * @param dir   the directory to put the output file in
-	 * @param name  the name of the output file
-	 */
-	private void generateFile(String tmpl, AbstractGenerator gen, File dir, String name) 
-			throws FileNotFoundException {
-		if (tmpl != null) {
-		    if (debugSrcIsHome) 
-		        tmpl = debugFindTemplateInSrcDir(tmpl);
-			hookCheckAbort();
-			hookCodeGeneratorCreated(gen);
-			String output = new File(dir, name).getPath();
-			gen.generate(tmpl, output);
-			log.debug("Generated file '" + output + "'.");
-			
-			//XML template == null is valid
-		} else if (gen instanceof GenericXMLGenerator) {
-			hookCheckAbort();
-			hookCodeGeneratorCreated(gen);
-			String output = new File(dir, name).getPath();
-			gen.generate(tmpl, output);
-			log.debug("Generated file '" + output + "'.");
-		}
-	}
-	
+
+    /**
+     * Generate an output file.
+     * 
+     * @param fc    the FClass to generate code for
+     * @param tmpl  the path to the template
+     * @param gen   the code generator to use 
+     * @param dir   the directory to put the output file in
+     * @param name  the name of the output file
+     */
+    private void generateFile(String tmpl, AbstractGenerator gen, File dir, String name) 
+            throws FileNotFoundException {
+        if (tmpl != null || gen instanceof GenericXMLGenerator) {
+            hookCheckAbort();
+            hookCodeGeneratorCreated(gen);
+            if (tmpl != null && debugSrcIsHome) 
+                tmpl = debugFindTemplateInSrcDir(tmpl);
+            File outFile = new File(dir, name);
+            OutputStream output = new FileOutputStream(outFile);
+            boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
+            if (debugGen)
+                output = new CloneOutputStream(output, System.out).setClose(true, false);
+            gen.generate(tmpl, output, debugGen);
+            log.debug("Generated file '" + outFile + "'.");
+        }
+    }
+
 	private static String debugFindTemplateInSrcDir(String tmpl) {
 	    String name = new File(tmpl).getName();
 	    String src = getJModelicaHome();
@@ -1410,7 +1409,7 @@ public class ModelicaCompiler {
 			Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
 			
 			// Eat any output
-			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();            
+			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();
 			new StreamGobbler(proc.getInputStream(), log.infoStream()).start();
 								   
 			// Wait for process to finish and return result
@@ -1421,29 +1420,8 @@ public class ModelicaCompiler {
 		}
 		return 1;
 	}
-	
-	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
-		Hashtable<String, String> programargs = new Hashtable<String,String>();     
-		
-		while(pos < args.length && argumentIsOption(args[pos])) {
-			addOptionToMap(programargs, args[pos]);
-			pos++;
-		}
-		return programargs;
-	}
 
-	private static void addOptionToMap(Hashtable<String, String> programargs, String arg) {
-		String[] parts = arg.trim().substring(1).split("=", 2);
-		programargs.put(parts[0], (parts.length > 1) ? parts[1] : "");
-	}
-
-	private static boolean argumentIsOption(String arg) {
-		return arg.trim().startsWith("-");
-	}
-	
-	private final static Pattern BOOL_PATTERN = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
-
-    private void setOptions(Hashtable<String, String> programarguments) {
+    private void setOptions(Arguments programarguments) {
         String filesep = File.separator;
         String optionsfile = null;
         //look for options.xml in $JMODELICA_HOME/Options/ and program arguments
@@ -1483,27 +1461,11 @@ public class ModelicaCompiler {
         options.addStringOption("MODELICAPATH", modelicapath);
     }
 	
-	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
+	protected void setArguments(Arguments programarguments) 
 		throws JModelicaHomeNotFoundException {
 		// check that JMODELICA_HOME exists
 		if (jmodelicaHome == null) 
 			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
-		
-		if (args.length < 1) {
-			log.error(compilerName + " expects the command line arguments: \n" +
-					"[<options>] <file name> <class name> [<target>] [<version>]\n" +
-					" where options could be: \n" +
-					"  -log=<i or w or e> \n" +
-					"  -modelicapath=<path to modelica libraries> \n" +
-					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
-                    "  -target=<fmume, me ,fmucs, cs, jmu, fmux, parse or check>\n" +
-                    "  -version=<1.0 or 2.0>\n" +
-					"  -dumpmemuse[=<resolution>] -findflatinst \n" + 
-					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
-					" If no target is given, -jmu is assumed." +
-                    " If no version is given in case of targets 'me' or 'cs', -1.0 is assumed");
-			System.exit(1);
-		}
 		
 		int arg = 0;
 		String modelicapath = null;
@@ -1522,20 +1484,6 @@ public class ModelicaCompiler {
 		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
 		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
 		
-		arg = programarguments.size();
-        if (!programarguments.containsKey("target")) {
-            //If no target is set, assume jmu.
-            programarguments.put("target", "jmu");
-        }
-		if (args.length < arg+2 && !programarguments.get("target").equals("parse")) {
-			log.error(compilerName + " expects a file name and a class name as command line arguments.");
-			System.exit(1);
-		}
-		if (programarguments.get("target").equals("parse") && args.length != arg+1) {
-			log.error(compilerName + " -parse expects a list of filenames.");
-			System.exit(1);
-		}
-		
 		if (programarguments.containsKey("debugSrcIsHome")) 
 		    debugSrcIsHome = true;
 		
@@ -1550,28 +1498,27 @@ public class ModelicaCompiler {
 	}
 	
 	public static void main(String[] args) {
-		// TODO: Add a class representing the arguments of the program, with getX methods for arguments.
-		// Get any program options set
-		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
 		// create an empty compiler
 		ModelicaCompiler mc = new ModelicaCompiler();
-		// set arguments
 		try {
-			mc.setArguments("ModelicaCompiler", args, programarguments);
+            // set arguments
+            Arguments arguments = new Arguments("ModelicaCompiler", args);
+            mc.setArguments(arguments);
+            // Compile model
+            mc.compileModelFromCommandLine(args, arguments);
 		} catch(Throwable e) {
 			log.error(e);
 			log.close();
 			System.exit(1);
 		}
-		// Compile model
-		mc.compileModelFromCommandLine(args, programarguments);
 	}
 	
 	/**
 	 * \brief Compile model given on command line options and print any error messages.
 	 */
-	protected void compileModelFromCommandLine(String[] args, Hashtable<String, String> programarguments) {
+	protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
 		// Get files and class
+	    // TODO: move this into arguments class
 		int arg = programarguments.size();
 		String[] name = splitFiles(args[arg]);
 		String cl = (args.length > arg+1) ? args[arg+1] : null;
@@ -1630,41 +1577,42 @@ public class ModelicaCompiler {
 		return res.toArray(new String[res.size()]);
 	}
 
-	/**
-	 *     Helper function. Returns string describing the platform on which jmodelica 
-	 *     is run. 
-	 *     
-	 *     Possible return values::
-	 *     win32
-	 *     win64
-	 *     darwin32
-	 *     darwin64
-	 *     linux32
-	 *     linux64
-	 */
-	public static String getPlatform() {
-		String platform = "";
-		
-		String sunPltform = System.getProperty("os.name");
-		if (sunPltform.startsWith("Windows")) {
-			platform = "win";
-		} else if (sunPltform.startsWith("Mac")) {
-			platform = "darwin";
-		} else {
-			// assume linux
-			platform ="linux";
-		}
-		
-		String architecture = System.getProperty("os.arch");
-		if (architecture.endsWith("64")) {
-			platform = platform+"64";
-		} else {
-			platform = platform+"32";
-		}
-		
-		return platform;
-	}
-	
+    /**
+     * Helper function. Returns string describing the platform on which jmodelica is run. 
+     * 
+     * Possible return values:
+     * <ul>
+     * <li>win32</li>
+     * <li>win64</li>
+     * <li>darwin32</li>
+     * <li>darwin64</li>
+     * <li>linux32</li>
+     * <li>linux64</li>
+     * </ul>
+     */
+    public static String getPlatform() {
+        String platform = "";
+        
+        String sunPltform = System.getProperty("os.name");
+        if (sunPltform.startsWith("Windows")) {
+            platform = "win";
+        } else if (sunPltform.startsWith("Mac")) {
+            platform = "darwin";
+        } else {
+            // assume linux
+            platform ="linux";
+        }
+        
+        String architecture = System.getProperty("os.arch");
+        if (architecture.endsWith("64")) {
+            platform = platform+"64";
+        } else {
+            platform = platform+"32";
+        }
+        
+        return platform;
+    }
+
     /**
      * Sets <code>platform</code> arch to 32 bit if not in <code>targetPlatforms</code>
      */
@@ -2002,13 +1950,17 @@ public class ModelicaCompiler {
             switch (this) {
                 case FMUME20a:
                 case FMUCS20a:
-                    options.setStringOption("fmi_version", "2.0alpha"); //TODO: Temporary option.
+                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20a);
                     break;
                 case FMUME10:
                 case FMUCS10:
+                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
+                    break;
                 case FMUME20:
                 case FMUCS20:
                 case FMUMECS20:
+                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
+                    break;
                 case JMU:
                 case FMUX:
                     break;
@@ -2449,8 +2401,8 @@ public abstract class CCompilerDelegator {
 				return String.format("%s\\\"%s\\\"", prefix, path);
 			} else {
 				return String.format("%s\"%s\"", prefix, path);
-			}       
-		}   
+			}
+		}
 	}
 	
 	protected static class PlatformDirOperation implements StringOperation {
@@ -2495,7 +2447,7 @@ public abstract class CCompilerDelegator {
 			source = new FileInputStream(sourceFile).getChannel();
 			destination = new FileOutputStream(destFile).getChannel();
 			long count =0;
-			long size = source.size();                
+			long size = source.size();
 			while( (count += destination.transferFrom(source, 0, size-count)) < size);
 		}
 		
@@ -2627,4 +2579,31 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		
 }
 
+}
+
+aspect Version {
+    public class Version {
+        public static String parseVersion() {
+            String version   = "unknown";
+            String jmhome = System.getenv("JMODELICA_HOME");
+            if (jmhome != null) {
+                File versionFile = new File(jmhome, "version.txt");
+                try {
+                    BufferedReader is = new BufferedReader(new InputStreamReader(new FileInputStream(versionFile)));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = is.readLine()) != null)
+                        sb.append(line);
+                    version = sb.toString();
+                } catch (IOException e) {
+                    
+                }
+            }
+            return version;
+        }
+        
+        public static void main(String args[]) {
+            System.out.println(parseVersion());
+        }
+    }
 }

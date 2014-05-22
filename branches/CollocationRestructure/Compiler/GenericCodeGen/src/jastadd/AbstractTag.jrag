@@ -63,7 +63,7 @@ public abstract class AbstractTag {
 	 * Method for implementing the code generation corresponding to the tag.
 	 * 
 	 * This method should not be called directly, 
-	 * see {@link #generateTag(org.jmodelica.util.CodeStream))} instead.
+	 * see {@link #generateTag(org.jmodelica.util.streams.CodeStream))} instead.
 	 * 
 	 * @param printer A CodeStream object for output of the generated code.
 	 */

@@ -21,85 +21,29 @@ import java.util.Collection;
  *
  */
 public class TransformCanonicalTestCase extends TestCase {
-	private String flatModel = "";
-    private String flatModelFileName = "";
+    private String flatModel = null;
     private boolean resultOnFile = false;
-	    
-	public TransformCanonicalTestCase() {}
-    
-	/**
-	 * @param name
-	 * @param description
-	 * @param sourceFileName
-	 * @param className
-	 * @param flatModel
-	 * @param flatModelFileName
-	 * @param resultOnFile
-	 */
-	public TransformCanonicalTestCase(String name, 
-			                  String description,
-			                  String sourceFileName, 
-			                  String className, 
-			                  String result,
-			                  boolean resultOnFile) {
-		super(name, description, sourceFileName, className);
-		this.resultOnFile = resultOnFile;		
-		if (!resultOnFile) {
-			this.flatModel = result;
-		} else {
-			this.flatModelFileName = result;
-		}
-		
-	}
-	
-	/**
-	 * \brief Perform tests on flat class after transform canonical step.
-	 */
-	protected boolean testTransformed(FClass fc) {
-		testPrettyPrint(fc, getFlatModel());
-		return true;
-	}
-	
-	/**
-	 * @return the flatModel
-	 */
-	public String getFlatModel() {
-		return flatModel;
-	}
-	/**
-	 * @param flatModel the flatModel to set
-	 */
-	public void setFlatModel(String flatModel) {
-		this.flatModel = flatModel;
-		this.flatModelFileName = "";
-		this.resultOnFile = false;
-	}
-	/**
-	 * @return the flatModelFileName
-	 */
-	public String getFlatModelFileName() {
-		return flatModelFileName;
-	}
-	/**
-	 * @param flatModelFileName the flatModelFileName to set
-	 */
-	public void setFlatModelFileName(String flatModelFileName) {
-		this.flatModelFileName = flatModelFileName;
-		this.flatModel = "";
-		this.resultOnFile = true;
-	}
-	/**
-	 * @return the resultOnFile
-	 */
-	public boolean isResultOnFile() {
-		return resultOnFile;
-	}
-	
-	/**
-	 * @param resultOnFile the resultOnFile to set
-	 */
-	public void setResultOnFile(boolean resultOnFile) {
-		this.resultOnFile = resultOnFile;
-	}
-    
+
+    /**
+     * \brief Perform tests on flat class after transform canonical step.
+     */
+    protected boolean testTransformed(FClass fc) {
+        testPrettyPrint(fc, getFlatModel());
+        return true;
+    }
+
+    /**
+     * @return the flatModel
+     */
+    public String getFlatModel() {
+        return flatModel;
+    }
+
+    /**
+     * @param flatModel the flatModel to set
+     */
+    public void setFlatModel(String flatModel) {
+        this.flatModel = flatModel;
+    }
+
 }

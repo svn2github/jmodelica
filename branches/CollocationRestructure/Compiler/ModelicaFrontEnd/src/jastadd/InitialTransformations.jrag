@@ -54,29 +54,30 @@
      */
     rewrite PN_FullClassDecl {
         to FullClassDecl { 
-            FullClassDecl fc = new FullClassDecl(visibility(),
-                                          getEncapsulatedOpt(),
-                                          getPartialOpt(),
-                                          getRestriction(),
-                                          getName(),
-                                          getRedeclareOpt(),
-                                          getFinalOpt(),
-                                          getInnerOpt(),
-                                          getOuterOpt(),
-                                          getReplaceableOpt(),
-                                          getConstrainingClauseOpt(),
-                                          getConstrainingClauseCommentOpt(),
-                                          getStringCommentOpt(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new Opt(),
-                                          new Opt(),
-                                          getEndDecl());
+            FullClassDecl fc = new FullClassDecl(
+                    getName(),
+                    visibility(),
+                    getEncapsulatedOpt(),
+                    getPartialOpt(),
+                    getRestriction(),
+                    getRedeclareOpt(),
+                    getFinalOpt(),
+                    getInnerOpt(),
+                    getOuterOpt(),
+                    getReplaceableOpt(),
+                    getConstrainingClauseOpt(),
+                    getConstrainingClauseCommentOpt(),
+                    getStringCommentOpt(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new Opt(),
+                    new Opt(),
+                    getEndDecl());
             
             if (hasAnnotation())
             	fc.setAnnotation(getAnnotation());
@@ -107,29 +108,30 @@
      */
     rewrite PN_ExtendClassDecl {
         to ExtendClassDecl { 
-            ExtendClassDecl ec = new ExtendClassDecl(visibility(),
-                                          getEncapsulatedOpt(),
-                                          getPartialOpt(),
-                                          getRestriction(),
-                                          getName(),
-                                          getRedeclareOpt(),
-                                          getFinalOpt(),
-                                          getInnerOpt(),
-                                          getOuterOpt(),
-                                          getReplaceableOpt(),
-                                          getConstrainingClauseOpt(),
-                                          getConstrainingClauseCommentOpt(),
-                                          getStringCommentOpt(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new List(),
-                                          new Opt(),
-                                          new Opt(),
-                                          getEndDecl());
+            ExtendClassDecl ec = new ExtendClassDecl(
+                    getName(),
+                    visibility(),
+                    getEncapsulatedOpt(),
+                    getPartialOpt(),
+                    getRestriction(),
+                    getRedeclareOpt(),
+                    getFinalOpt(),
+                    getInnerOpt(),
+                    getOuterOpt(),
+                    getReplaceableOpt(),
+                    getConstrainingClauseOpt(),
+                    getConstrainingClauseCommentOpt(),
+                    getStringCommentOpt(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new List(),
+                    new Opt(),
+                    new Opt(),
+                    getEndDecl());
             
             ClassAccess ca = new ClassAccess(getName().getID());
             InlineExtendsClause iec = new InlineExtendsClause(
@@ -461,20 +463,20 @@
                                       getArraySubscriptsOpt(),
                                       getComment());
             ecsc.setLocationNoTree(this);
-            ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
-                                      getEncapsulatedOpt(), 
-                                      getPartialOpt(), 
-                                      getRestriction(), 
-                                      getName(),  
-                                      getRedeclareOpt(),
-                                      getFinalOpt(),
-                                      getInnerOpt(),
-                                      getOuterOpt(),
-                                      getReplaceableOpt(),
-                                      getConstrainingClauseOpt(),
-                                      getConstrainingClauseCommentOpt(),
-                                      ecsc); 
-                                      
+            ShortClassDecl scd = new ShortClassDecl(
+                    getName(),
+                    (VisibilityType) ecsc.getVisibilityType().fullCopy(),
+                    getEncapsulatedOpt(),
+                    getPartialOpt(),
+                    getRestriction(),
+                    getRedeclareOpt(),
+                    getFinalOpt(),
+                    getInnerOpt(),
+                    getOuterOpt(),
+                    getReplaceableOpt(),
+                    getConstrainingClauseOpt(),
+                    getConstrainingClauseCommentOpt(),
+                    ecsc); 
            scd.setLocationNoTree(this);
            return scd;
         }

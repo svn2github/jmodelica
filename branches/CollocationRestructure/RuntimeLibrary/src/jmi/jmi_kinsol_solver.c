@@ -43,41 +43,6 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem);
 
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2);
 
-/* Interface to the residual function that is compatible with Brent search.
-   @param y - input - function argument
-   @param f - output - residual value
-   @param problem_data - solver object propagated as opaques data
-*/
-int brentf(realtype y, realtype* f, void* problem_data) {
-    jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
-    int ret = 0;
-    
-    /* Increment function calls counter */
-    block->nb_fevals++;
-
-    /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", block->id);
-        return -1;
-    }
-
-    /*Evaluate the residual*/
-    ret = block->F(block->problem_data,&y,f,JMI_BLOCK_EVALUATE);
-    if(ret) {
-        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %d>", ret, block->id);
-        return ret;
-    }
-    /* Check that outputs are valid */    
-    {
-        realtype v = *f;
-        if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", "Not a number in output from <block: %d>", block->id);
-            ret = 1;
-        }
-    }
-    return ret;
-}
-
 /*Kinsol function wrapper
     @param yy - Input - function argument
     @param ff - Output - residuals
@@ -169,6 +134,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
+    if((block->callbacks->log_options.log_level >= 4)) {
+        jmi_log_node(block->log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                     "jmi_kinsol_solver", block->id, "Updating Jacobian");
+    }
+
     if (!block->dF || block->options->block_jacobian_check) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
@@ -270,9 +240,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         free(jac_fd);
     }
 
-    if((block->callbacks->log_options.log_level >= 6)) {
+    if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "JacobianUpdated", "<block:%d>", block->id);
-        jmi_log_real_matrix(block->log, node, logInfo, "jacobian", J->data, N, N);
+        if (block->callbacks->log_options.log_level >= 6) {
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", J->data, N, N);
+        }
         jmi_log_leave(block->log, node);
     }
     
@@ -378,7 +350,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
          *  This approach gives one printout per iteration
          */
 
-    if ((block->callbacks->log_options.log_level >= 5))
+    if (block->callbacks->log_options.log_level >= 4)
     {
         jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
         jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
@@ -386,17 +358,69 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         
         if ((((strcmp("KINSolInit",function)==0) ||
               (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
+            realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
             long int nniters;
+
+            int max_index = 0;
+            realtype max_residual = 0;
+
             /* Get the number of iterations */
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
-            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
-            jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", (int)nniters);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            }
             jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
-            {
-                realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+
+            if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
                 for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
+                jmi_log_leave(log, node);
+            }
+            if (block->n >= 1) {
+                max_residual = f[0]*residual_scaling_factors[0];
+                for (i=1;i<block->n;i++) {
+                    realtype res = f[i]*residual_scaling_factors[i];
+                    if (RAbs(res) > RAbs(max_residual)) {
+                        max_residual = res;
+                        max_index = i;
+                    }
+                }
+                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
+                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%d>", max_index);
+            }
+
+            {
+                /* Only print header first time */
+                int user_flags = jmi_log_get_user_flags(log);
+                if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
+                    jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
+                                 "jmi_kinsol_solver", "iter\tnfe\tnje\tres_norm\tmax_res\tmax_ind\tlambda_max\tbounding_ind\tlambda", 1);
+                    jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
+                }
+            }
+            {
+                /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
+                jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
+                char message[256];
+                realtype lambda_max;
+                realtype lambda, steplength;
+
+                if (nniters>0) {
+                    lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
+                    KINGetStepLength(kin_mem, &steplength);
+                    lambda = steplength/solver->last_xnorm;
+                }
+                else {
+                    lambda_max = lambda = 0;
+                }
+
+                sprintf(message, "%d\t%d\t%d\t%E\t%E\t%d\t%E\t%d\t%E", (int)nniters,
+                        (int)(block->nb_fevals), (int)(block->nb_jevals),
+                        kin_mem->kin_fnorm, max_residual, max_index, lambda_max, solver->last_bounding_index, lambda);
+                jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
+                             "jmi_kinsol_solver", block->id, message);
                 jmi_log_leave(log, node);
             }
         }
@@ -472,6 +496,12 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     int ef, i;
     double max_nominal;
     struct KINMemRec * kin_mem = solver->kin_mem; 
+
+    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "SolverOptions", "<block:%d>", block->id);
+    jmi_log_fmt(block->log, node,logInfo, "Tolerance <tolerance: %g>",block->options->res_tol);
+    jmi_log_fmt(block->log, node,logInfo, "Max number of iterations <max_iter: %d>",block->options->max_iter);
+    jmi_log_fmt(block->log, node,logInfo, "Experimental <mode: %d>",block->options->experimental_mode);
+    jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
     
@@ -567,7 +597,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 #define MAX_NETON_STEP_RATIO 10.0
 
     xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
-    
+    solver->last_xnorm = xnorm;
+    solver->last_bounding_index = -1;
+
     if((solver->num_bounds == 0) || (xnorm == 0.0)) 
     {
         /* make sure full newton step can be taken */
@@ -615,8 +647,13 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             /* distance to the bound */
             solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; */
         }
-        else
-            max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
+        else {
+            if (max_step_ratio > step_ratio_i) {
+                /* reduce the step */
+                max_step_ratio = step_ratio_i;
+                solver->last_bounding_index = index;
+            }
+        }
     }
 
     /* log the bounds that limit the step */
@@ -1068,12 +1105,14 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 scale_ptr[i] = 1/scale_ptr[i];
         }
 
-        if (block->callbacks->log_options.log_level >= 5) {
+        if (block->callbacks->log_options.log_level >= 4) {
             jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%d>", block->id);
-            jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
-            realtype* res = scale_ptr;
-            for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
-            jmi_log_leave(block->log, inner);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
+                realtype* res = scale_ptr;
+                for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
+                jmi_log_leave(block->log, inner);
+            }
             jmi_log_leave(block->log, outer);
         }
     }
@@ -1226,6 +1265,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     KINSetNoInitSetup(solver->kin_mem, 1);    
       
     *solver_ptr = solver;
+
     return flag;
 }
 
@@ -1331,8 +1371,12 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     jmi_log_t *log = block->log;
 
     if(block->n == 1) {
-        solver->f_pos_min_1d = BIG_REAL;
-        solver->f_neg_max_1d = -BIG_REAL;
+       if( block->options->use_Brent_in_1d_flag
+            &&  (block->options->experimental_mode & jmi_block_solver_experimental_Brent) ) {
+                return jmi_brent_solver_solve(block);
+       }
+       solver->f_pos_min_1d = BIG_REAL;
+       solver->f_neg_max_1d = -BIG_REAL;
     }
     
     if(block->init) {
@@ -1422,7 +1466,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     /* First time scaling is always recomputed - initial guess may be "far away" and give bad scaling 
        TODO: we should probably rescale after event as well.
     */
-    if(block->init || (flag != KIN_SUCCESS)) {
+    if(    (block->options->residual_equation_scaling_mode != jmi_residual_scaling_none ) 
+        && (block->init || (flag != KIN_SUCCESS))) {
         jmi_log_node(log, logInfo, "Rescaling", "Attempting rescaling in <block:%d>", block->id);
         flagNonscaled = flag;
         /* Get & store debug information */

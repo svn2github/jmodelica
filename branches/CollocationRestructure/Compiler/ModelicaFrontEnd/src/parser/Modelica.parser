@@ -217,11 +217,11 @@ BaseClassDecl base_class_decl
     annotation_sc?
     end_decl   {:   
         return new PN_FullClassDecl(
+            start,
             new UnknownVisibilityType(),
             encapsulated,
             partial,
             restriction,
-            start,
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
             string_comment,
             composition,
@@ -241,11 +241,11 @@ BaseClassDecl base_class_decl
     class_modification?
     comment {:
         return new PN_ShortClassDecl(
+            class_name, 
             new UnknownVisibilityType(),
             encapsulated, 
             partial, 
             restriction, 
-            class_name, 
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
             type_prefix_flow, 
             type_prefix_variability, 
@@ -267,11 +267,11 @@ BaseClassDecl base_class_decl
     annotation_sc?
     end_decl {:
         return new PN_ExtendClassDecl(
+            start,
             new UnknownVisibilityType(),
             encapsulated,
             partial,
             restriction,
-            start,
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
             string_comment,
             composition,
@@ -287,11 +287,11 @@ BaseClassDecl base_class_decl
     ENUMERATION LPAREN enum_specification RPAREN
     comment {:
     return new PN_EnumDecl(
+            enum_name,
             new UnknownVisibilityType(),
             encapsulated,
             partial,
             restriction,
-            enum_name,
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
             ENUMERATION,
             enum_specification,

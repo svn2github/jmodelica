@@ -61,27 +61,16 @@ class Test_FMUModelME1Extended:
         """
         Sets up the test class.
         """
-        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
-        rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
-        no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"))
-        simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"))
-        simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"))
-        input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"))
-
-    def setUp(self):
-        """
-        Sets up the test case.
-        """
-        self.rlc  = FMUModelME1Extended('RLC_Circuit.fmu')
-        self.rlc_square  = FMUModelME1Extended('RLC_Circuit_Square.fmu')
-        self.no_state3 = FMUModelME1Extended("NoState_Example3.fmu")
-        self.simple_input = FMUModelME1Extended("Inputs_SimpleInput.fmu")
-        self.simple_input2 = FMUModelME1Extended("Inputs_SimpleInput2.fmu")
-        self.input_discontinuity = FMUModelME1Extended("Inputs_InputDiscontinuity.fmu")
+        cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
+        cls.rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
+        cls.no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"))
+        cls.simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"))
+        cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"))
+        cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"))
 
     @testattr(stddist = True)
     def test_custom_result_handler(self):
-        model = self.rlc
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
 
         class A:
             pass
@@ -101,7 +90,7 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_filter(self):
-        model = self.rlc
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
 
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
@@ -127,14 +116,14 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_simulation_no_state(self):
-        model = self.no_state3
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.no_state3)
 
         res = model.simulate(final_time=1.0)
         nose.tools.assert_almost_equal(res.final("x"),1.0)
 
     @testattr(stddist = True)
     def test_input_derivatives(self):
-        model = self.simple_input
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input)
 
         model.initialize()
 
@@ -153,7 +142,7 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_input_derivatives2(self):
-        model = self.simple_input2
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input2)
 
         model.initialize()
 
@@ -174,7 +163,7 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_input_derivatives3(self):
-        model = self.simple_input
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input)
 
         model.initialize()
         model.set_input_derivatives("u",1.0, 1)
@@ -187,7 +176,7 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_input_derivatives4(self):
-        model = self.simple_input
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input)
 
         model.initialize()
         model.set_input_derivatives("u",1.0, 1)
@@ -202,7 +191,7 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_zero_step_size(self):
-        model = self.input_discontinuity
+        model = FMUModelME1Extended(Test_FMUModelME1Extended.input_discontinuity)
 
         model.initialize()
         model.do_step(0, 1)
@@ -213,30 +202,34 @@ class Test_FMUModelME1Extended:
 
     @testattr(stddist = True)
     def test_version(self):
-        assert self.rlc._get_version() == '1.0'
+        rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
+        assert rlc._get_version() == '1.0'
 
     @testattr(stddist = True)
     def test_valid_platforms(self):
-        assert self.rlc._get_types_platform() == 'standard32'
+        rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
+        assert rlc._get_types_platform() == 'standard32'
 
     @testattr(stddist = True)
     def test_simulation_with_reset_cs_2(self):
-        res1 = self.rlc.simulate(final_time=30)
+        rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
+        res1 = rlc.simulate(final_time=30)
         resistor_v = res1['resistor.v']
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
-        self.rlc.reset()
-        res2 = self.rlc.simulate(final_time=30)
+        rlc.reset()
+        res2 = rlc.simulate(final_time=30)
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
 
     @testattr(stddist = True)
     def test_simulation_with_reset_cs_3(self):
-        res1 = self.rlc_square.simulate()
+        rlc_square  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit_square)
+        res1 = rlc_square.simulate()
         resistor_v = res1['resistor.v']
         print resistor_v[-1]
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
-        self.rlc_square.reset()
-        res2 = self.rlc_square.simulate()
+        rlc_square.reset()
+        res2 = rlc_square.simulate()
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
 
@@ -307,8 +300,7 @@ class Test_FMUModelME1Extended:
     @testattr(stddist = True)
     def test_result_name_file(self):
 
-        rlc = FMUModelME1Extended("RLC_Circuit.fmu")
-
+        rlc = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
         res = rlc.simulate()
 
         #Default name

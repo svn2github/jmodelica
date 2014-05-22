@@ -130,10 +130,10 @@ S_CHAR = [^\"\\]
 Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
 STRING = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
 Q_CHAR = [^\'\\]
-S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+S_ESCAPE = "\\" .
 DIGIT = [0-9]
 UNSIGNED_INTEGER = {DIGIT} {DIGIT}*
-UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
+UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( ("e"|"E") ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
 
 
 LineTerminator = \r|\n|\r\n

@@ -15,18 +15,12 @@
 */
 
 public class WarningTestCase extends ErrorTestCase {
-	
-	public WarningTestCase() {}
-	
-	public WarningTestCase(String errorMessage) {
-		super(errorMessage);
-	}
-	
-	/**
-	 * \brief Filters out any uninteresting problems from a set of semantic problems.
-	 * 
-	 * This implementation keeps all problems.
-	 */
-	protected void filterProblems(Collection<Problem> problems) {}
+
+    /**
+     * \brief Filters out any uninteresting problems from a set of semantic problems.
+     * 
+     * This implementation keeps all problems.
+     */
+    protected void filterProblems(Collection<Problem> problems) {}
 
 }

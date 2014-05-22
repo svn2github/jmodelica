@@ -16,23 +16,9 @@
 
 
 public class CADCodeGenTestCase extends CodeGenTestCase {
-    
-	public CADCodeGenTestCase() {}
-    
-	public CADCodeGenTestCase(String name, 
-			                  String description,
-			                  String sourceFileName, 
-			                  String className, 
-			                  String result,
-			                  boolean resultOnFile,
-			                  String template,
-			                  boolean templateOnFile) {
-		super(name, description, sourceFileName, className,result,
-				resultOnFile,template,templateOnFile);
-	}
 
-	public AbstractGenerator createGenerator(FClass fc) {
-		return new CADGenerator(new PrettyPrinter(), '$',fc);		
-	}
-	
+    public AbstractGenerator createGenerator(FClass fc) {
+        return new CADGenerator(new PrettyPrinter(), '$',fc);
+    }
+
 }

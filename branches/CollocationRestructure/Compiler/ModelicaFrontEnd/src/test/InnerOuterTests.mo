@@ -446,4 +446,29 @@ end InnerOuterTests.InnerOuterTest15;
 ")})));
 end InnerOuterTest15;
 
+
+model InnerOuterTest16
+    inner Real x[3] = {1, 2, 3} * time;
+    
+    model A
+        outer Real x[3];
+        parameter Integer y = 2;
+        Real z = x[y];
+    end A;
+    
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest16",
+            description="Flattening of accesses to outer array with array subscripts",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest16
+ Real x[3] = {1, 2, 3} * time;
+ parameter Integer a.y = 2 /* 2 */;
+ Real a.z = x[a.y];
+end InnerOuterTests.InnerOuterTest16;
+")})));
+end InnerOuterTest16;
+
 end InnerOuterTests;

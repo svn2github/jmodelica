@@ -18,31 +18,8 @@ import java.util.Collection;
 import java.lang.reflect.Method;
 
 public class EvalTestCase extends TestCase {
-	private String[] values = new String[0];
+    private String[] values = new String[0];
     private String[] variables = new String[0];
-	    
-	public EvalTestCase() {}
-    
-	/**
-	 * @param name
-	 * @param description
-	 * @param sourceFileName
-	 * @param className
-	 * @param output
-	 * @oaram methodName
-	 * @param outputFileName
-	 * @param resultOnFile
-	 */
-	public EvalTestCase(String name, 
-			                  String description,
-			                  String sourceFileName, 
-			                  String className, 
-			                  String variables,
-			                  String result) {
-		super(name, description, sourceFileName, className);
-		setValues(result);
-		setVariables(variables);
-	}
 
 	/**
 	 * \brief Perform tests on flat class after transform canonical step.
