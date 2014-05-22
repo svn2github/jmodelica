@@ -1070,48 +1070,6 @@ class Test_SetDependentParameterError:
         nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)
 
 
-class Test_load_fmu2:
-    """
-    This test the functionality of load_fmu method.
-    """
-
-    @testattr(windows = True)
-    def test_raise_exception(self):
-        """
-        This method tests the error-handling of load_fmu
-        """
-        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_fmu.txt', path_to_fmus)          #loading non-fmu file
-        nose.tools.assert_raises(FMUException, load_fmu, 'not_existing_file.fmu', path_to_fmus_me2)  #loading non-existing file
-        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_.fmu', path_to_fmus)             #loading a non-real fmu
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='Teo') #loading fmu with wrong argument
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME1, path=path_to_fmus_me1, kind='CS')  #loading ME1-model as a CS-model
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS1, path=path_to_fmus_cs1, kind='ME')  #loading CS1-model as ME-model
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='CS')  #loading ME2-model as a CS-model
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS2, path=path_to_fmus_cs2, kind='ME')  #loading CS2-model as ME-model
-
-    @testattr(windows = True)
-    def test_correct_loading(self):
-        """
-        This method tests the correct loading of FMUs
-        """
-        model = load_fmu(fmu = ME1, path = path_to_fmus_me1, kind = 'auto') #loading ME1-model correct
-        assert isinstance(model, FMUModelME1)
-        model = load_fmu(fmu = ME1, path = path_to_fmus_me1, kind = 'ME')   #loading ME1-model correct
-        assert isinstance(model, FMUModelME1)
-        model = load_fmu(fmu = CS1, path = path_to_fmus_cs1, kind = 'auto') #loading CS1-model correct
-        assert isinstance(model, FMUModelCS1)
-        model = load_fmu(fmu = CS1, path = path_to_fmus_cs1, kind = 'CS')   #loading CS1-model correct
-        assert isinstance(model, FMUModelCS1)
-
-        model = load_fmu(fmu = ME2, path = path_to_fmus_me2, kind = 'Auto') #loading ME2-model correct
-        assert isinstance(model, FMUModelME2)
-        model = load_fmu(fmu = ME2, path = path_to_fmus_me2, kind = 'me')   #loading ME2-model correct
-        assert isinstance(model, FMUModelME2)
-        model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'AUTO') #loading CS2-model correct
-        assert isinstance(model, FMUModelCS2)
-        model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'cs')   #loading CS2-model correct
-        assert isinstance(model, FMUModelCS2)
-
 class Test_RaisesIfNonConverge:
     """
     Test that exception is raised if NLE solver does not converge
