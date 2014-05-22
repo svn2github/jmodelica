@@ -396,7 +396,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 int user_flags = jmi_log_get_user_flags(log);
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
-                                 "jmi_kinsol_solver", "iter\tnfe\tnje\tres_norm\tmax_res\tmax_ind", 1);
+                                 "jmi_kinsol_solver", "iter\tnfe\tnje\tres_norm\tmax_res\tmax_ind\tlambda_max\tbounding_ind\tlambda", 1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
             }
@@ -404,9 +404,21 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
                 jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
                 char message[256];
-                sprintf(message, "%d\t%d\t%d\t%E\t%E\t%d", (int)nniters,
+                realtype lambda_max;
+                realtype lambda, steplength;
+
+                if (nniters>0) {
+                    lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
+                    KINGetStepLength(kin_mem, &steplength);
+                    lambda = steplength/solver->last_xnorm;
+                }
+                else {
+                    lambda_max = lambda = 0;
+                }
+
+                sprintf(message, "%d\t%d\t%d\t%E\t%E\t%d\t%E\t%d\t%E", (int)nniters,
                         (int)(block->nb_fevals), (int)(block->nb_jevals),
-                        kin_mem->kin_fnorm, max_residual, max_index);
+                        kin_mem->kin_fnorm, max_residual, max_index, lambda_max, solver->last_bounding_index, lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
                              "jmi_kinsol_solver", block->id, message);
                 jmi_log_leave(log, node);
@@ -585,7 +597,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 #define MAX_NETON_STEP_RATIO 10.0
 
     xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
-    
+    solver->last_xnorm = xnorm;
+    solver->last_bounding_index = -1;
+
     if((solver->num_bounds == 0) || (xnorm == 0.0)) 
     {
         /* make sure full newton step can be taken */
@@ -633,8 +647,13 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             /* distance to the bound */
             solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; */
         }
-        else
-            max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
+        else {
+            if (max_step_ratio > step_ratio_i) {
+                /* reduce the step */
+                max_step_ratio = step_ratio_i;
+                solver->last_bounding_index = index;
+            }
+        }
     }
 
     /* log the bounds that limit the step */
