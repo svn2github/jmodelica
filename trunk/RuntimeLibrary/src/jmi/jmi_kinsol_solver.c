@@ -1453,6 +1453,10 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     if((block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent) &&
         (flag != KIN_SUCCESS)) {
         /* try to solve with steepest descent instead */
+
+        jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                     "jmi_kinsol_solver", block->id, "Attempting steepest descent iterations");        
+
         solver->use_steepest_descent_flag = 1;
         KINSetNoResMon(solver->kin_mem,0);
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
@@ -1469,6 +1473,10 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     if(    (block->options->residual_equation_scaling_mode != jmi_residual_scaling_none ) 
         && (block->init || (flag != KIN_SUCCESS))) {
         jmi_log_node(log, logInfo, "Rescaling", "Attempting rescaling in <block:%d>", block->id);
+
+        jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                     "jmi_kinsol_solver", block->id, "Attempting rescaling");
+
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);

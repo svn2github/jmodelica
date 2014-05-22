@@ -356,6 +356,14 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Local iteration <iter:%d> at <t:%E>",
                                           iter, cur_time);
+
+            {
+                char message[256];
+                sprintf(message, "Local iteration %d", iter);
+                jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                             "jmi_block_solver", block_solver->id, message);
+            }
+
             /* Solve block */
             ef = block_solver->solve(block_solver); 
             if(block_solver->init) {
@@ -399,6 +407,9 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             int non_reals_not_changed_flag;
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
                 "Starting enhanced block iteration at <t:%E>", cur_time);
+
+            jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                         "jmi_block_solver", block_solver->id, "Starting enhanced block iterations");
             
             x_new = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));
             x = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));            
@@ -420,6 +431,13 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 jmi_log_node_t iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", 
                     "Enhanced block iteration <iter:%d> at <t:%g>",
                     iter, cur_time);
+
+                {
+                    char message[256];
+                    sprintf(message, "Enhanced block iteration %d", iter);
+                    jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
+                                 "jmi_block_solver", block_solver->id, message);
+                }
 
                 iter += 1;
                 
