@@ -6807,6 +6807,49 @@ class LocalDAECollocator(CasadiCollocator):
             if self._normalize_min_time:
                 time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
             return self.init_traj_interp[var].eval(time)
+
+    def _create_initial_trajectories(self):
+        """
+        Create interpolated initial trajectories and store in self.init_traj_interp
+        """
+
+        if self.init_traj is not None:
+            n = len(self.init_traj.get_data_matrix()[:, 0])
+            self.init_traj_interp = traj = {}
+
+            for vt in ["dx", "x", "w", "unelim_u"]:
+                for var in self.mvar_vectors[vt]:
+                    data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
+                    name = var.getName()
+                    try:
+                        data = self.init_traj.get_variable_data(name)
+                    except VariableNotFoundError:
+                        print("Warning: Could not find initial " +
+                              "trajectory for variable " + name +
+                              ". Using initialGuess attribute value " +
+                              "instead.")
+                        ordinates = N.array([[
+                            self.op.get_attr(var, "initialGuess")]])
+                        abscissae = N.array([0])
+                    else:
+                        abscissae = data.t
+                        ordinates = data.x.reshape([-1, 1])
+                    traj[var] = TrajectoryLinearInterpolation(
+                        abscissae, ordinates)
+
+    def _eval_initial(self, var, i, k):
+        """
+        Evaluate initial value of Variable var at a given collocation point.
+
+        self._create_initial_trajectories() must have been called first.
+        """
+        if self.init_traj is None:
+            return self.op.get_attr(var, "initialGuess")
+        else:
+            time = self.time_points[i][k]
+            if self._normalize_min_time:
+                time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
+            return self.init_traj_interp[var].eval(time)
     def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.

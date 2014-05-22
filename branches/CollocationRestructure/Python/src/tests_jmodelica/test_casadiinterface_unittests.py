@@ -29,6 +29,11 @@ def test_SharedNode_eq():
     # Test that we can compare a SharedNode to a regular Python object
     assert realVar1 != 1
     assert not (realVar1 == 1)
+    # Test that different proxies to the same SharedNode compare and hash equal
+    realVar1b = realVar1.getModelVariable()    
+    assert realVar1b == realVar1
+    assert realVar1b is not realVar1 # Check that it's a different proxy object
+    assert hash(realVar1b) == hash(realVar1)
 
 @testattr(casadi = True)    
 def test_VariableAlias():
