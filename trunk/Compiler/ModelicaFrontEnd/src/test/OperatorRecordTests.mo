@@ -627,9 +627,9 @@ end OperatorRecordTests.OperatorOverload11;
             description="Constant eval of overloaded operator expression: scalars",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload12
- constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
- constant OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
- constant OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(4, 3));
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(2, 1);
+ constant OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx(4, 3);
+ constant OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx(6.0, 4.0);
  constant OperatorRecordTests.Cplx c4 = OperatorRecordTests.Cplx(6.0, 4.0);
 
 public
@@ -675,9 +675,9 @@ end OperatorRecordTests.OperatorOverload12;
             description="Constant eval of overloaded operator expression: arrays",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload13
- constant OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx.'constructor'(1, 2), OperatorRecordTests.Cplx.'constructor'(3, 4)};
- constant OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx.'constructor'(5, 6), OperatorRecordTests.Cplx.'constructor'(7, 8)};
- constant OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(6, 5)), OperatorRecordTests.Cplx.'+'(OperatorRecordTests.Cplx(4, 3), OperatorRecordTests.Cplx(8, 7))};
+ constant OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(4, 3)};
+ constant OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx(6, 5), OperatorRecordTests.Cplx(8, 7)};
+ constant OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx(8.0, 6.0), OperatorRecordTests.Cplx(12.0, 10.0)};
  constant OperatorRecordTests.Cplx c4[2] = {OperatorRecordTests.Cplx(8.0, 6.0), OperatorRecordTests.Cplx(12.0, 10.0)};
 
 public
@@ -852,8 +852,8 @@ end OperatorRecordTests.OperatorOverload15;
             description="Overloading of String()",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload16
- constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
- constant String s1 = OperatorRecordTests.Cplx.'String'(OperatorRecordTests.Cplx(2, 1));
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(2, 1);
+ constant String s1 = \"1.00000 + 2.00000j\";
  constant String s2 = \"1.00000 + 2.00000j\";
 
 public

@@ -221,7 +221,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * An external object variable.
  */
-FExternalObjectVariable : FVariable ::= [DestructorCall:FFunctionCallStmt];
+FExternalObjectVariable : FVariable ::= TypeName:FQName [DestructorCall:FFunctionCallStmt];
 
 /**
  * Pre FVariable of type Real.
@@ -308,6 +308,11 @@ abstract FType : BaseNode ::= <Size:Size>;
 FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 
 /**
+ * Class representing the external object type.
+ */
+FExternalObjectType : FType ::= <Name>;
+
+/**
  * An operator record type. 
  *
  * Only used in instance tree.
@@ -371,11 +376,6 @@ FEnumLiteralType : FPrimitiveType ::= <Name>;
  * Used to represent type errors. 
  */
 FUnknownType : FType;
-
-/**
- * Class representing the external object type.
- */
-FExternalObjectType : FPrimitiveType;
 
 /**
  * A qualified name supporting array subscripts.

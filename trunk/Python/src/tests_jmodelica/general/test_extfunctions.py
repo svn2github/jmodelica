@@ -541,7 +541,8 @@ class TestAdvanced:
     '''
     @classmethod
     def setUpClass(self):
-        self.fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
+        self.dir   = build_ext('ext_objects', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
     
     @testattr(stddist = True)
     def testDGELSX(self):
@@ -562,6 +563,18 @@ class TestAdvanced:
             nose.tools.assert_almost_equals(resSim.final(x), resConst.final(x), places=13)
         nose.tools.assert_equals(resSim.final('a'), resConst.final('a'))
         nose.tools.assert_equals(resSim.final('b'), resConst.final('b'))
+        
+    @testattr(stddist = True)
+    def testEXTOBJ(self):
+        '''
+        A test using the external fortran function dgelsx from lapack.
+        Compares simulation results with constant evaluation results.
+        '''
+        cpath = "ExtFunctionTests.CEval.Advanced.ExtObj1Test"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        resConst = model.simulate()
+        nose.tools.assert_equals(resConst.final('x'), 3.13)
     
 class TestUtilities:
     '''

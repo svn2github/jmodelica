@@ -153,9 +153,9 @@ equation
 fclass OverconstrainedConnection.OverconstrainedCorrect3
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
- constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root1 = false;
  constant Boolean c1Root2 = false;
- constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root1 = true;
  constant Boolean c2Root2 = true;
 equation
  c1.t[1:2] = c2.t[1:2];
@@ -189,9 +189,9 @@ equation
 fclass OverconstrainedConnection.OverconstrainedCorrect4
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
- constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root1 = false;
  constant Boolean c1Root2 = false;
- constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root1 = true;
  constant Boolean c2Root2 = true;
 equation
  c1.t[1:2] = c2.t[1:2];
@@ -226,9 +226,9 @@ equation
 fclass OverconstrainedConnection.OverconstrainedCorrect5
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
- constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root1 = true;
  constant Boolean c1Root2 = true;
- constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root1 = false;
  constant Boolean c2Root2 = false;
 equation
  c1.t[1:2] = c2.t[1:2];
@@ -285,9 +285,9 @@ equation
 fclass OverconstrainedConnection.OverconstrainedCorrect7
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
- constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root1 = true;
  constant Boolean c1Root2 = true;
- constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root1 = false;
  constant Boolean c2Root2 = false;
 equation
  c1.t[1:2] = c2.t[1:2];
@@ -324,9 +324,9 @@ fclass OverconstrainedConnection.OverconstrainedCorrect8
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
  OverconstrainedConnection.T1 c3.t[2];
- constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root1 = false;
  constant Boolean c1Root2 = false;
- constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root1 = true;
  constant Boolean c2Root2 = true;
 equation
  c1.t[1:2] = c2.t[1:2];

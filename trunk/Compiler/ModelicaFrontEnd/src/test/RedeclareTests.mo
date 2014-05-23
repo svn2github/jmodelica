@@ -3738,7 +3738,7 @@ model RedeclareElement12
 			description="Class modification containing reference to element of the extends it is attached to",
 			flatModel="
 fclass RedeclareTests.RedeclareElement12
- constant Real a = 3.0;
+ constant Real a = 3;
  parameter Real b = 3.0 /* 3.0 */;
 end RedeclareTests.RedeclareElement12;
 ")})));
@@ -3775,7 +3775,7 @@ model RedeclareElement13
 			description="Class modification containing reference to element of the extends it is attached to",
 			flatModel="
 fclass RedeclareTests.RedeclareElement13
- constant Real a = 1.0;
+ constant Real a = 1;
  parameter Real c = 1.0 /* 1.0 */;
 end RedeclareTests.RedeclareElement13;
 ")})));

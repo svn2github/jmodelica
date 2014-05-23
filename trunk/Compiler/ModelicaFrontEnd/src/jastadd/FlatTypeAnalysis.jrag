@@ -32,7 +32,7 @@ aspect FlatTypeAnalysis {
 	eq FDerivativeVariable.type() 		= fRealScalarType();
 	eq FFunctionVariable.type()   		= getType();
 	eq UnknownFVariable.type()    		= fUnknownType();
-	eq FExternalObjectVariable.type()	= fExternalObjectType(size());
+	eq FExternalObjectVariable.type()	= getType();
 	
 	syn FType FRealVariable.stateSelectType() = myFClass().stateSelectType();
 	syn lazy FType FClass.stateSelectType() {
@@ -60,6 +60,8 @@ aspect FlatTypeAnalysis {
 	
 	syn FType FEnumVariable.getType() = myFEnumDecl().type().sizedType(size());
 	
+	syn nta FType FExternalObjectVariable.getType() = myFConstructorDecl().myOutputs().get(0).type().sizedType(size());
+	
 	syn FType InstComponentModification.type() {
 		if (getName().myInstComponentDecl().isAssignable()) {
 			InstAssignable ip = ((InstAssignable)getName().myInstComponentDecl());
@@ -75,6 +77,7 @@ aspect FlatTypeAnalysis {
 		FType scalar = primitiveScalarType();
 		return isArray() ? scalar.arrayType(size()) : scalar;
 	}
+	eq InstExternalObject.type() = getType();
 	
 	/**
 	 * The scalar type of this class or component, if it is a primitive type, otherwise the unknown type.
@@ -89,12 +92,40 @@ aspect FlatTypeAnalysis {
 		else if (isString()) 
 			return fStringScalarType();
 		else if (isExternalObject())
-			return fExternalObjectScalarType();
+		    return fExternalObjectScalarType();
 		return fUnknownType();
 	}
 	eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
 	eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
 	
+    syn nta FType InstExternalObject.getType() = new FExternalObjectType(size(), getClassName().name());
+    
+    public FExternalStmt FAlgorithm.getFExternalStmt() {
+        for (FStatement stmt : getFStatements())
+            if (stmt instanceof FExternalStmt)
+                return (FExternalStmt) stmt;
+        return null;
+    }
+    
+    inh CommonVariableDecl FExternalStmt.myConstructorOutput();
+    eq Root.getChild().myConstructorOutput() = null;
+    eq FFunctionDecl.getChild().myConstructorOutput()     = myOutputs().get(0);
+    eq InstFullClassDecl.getChild().myConstructorOutput() = myOutputs().get(0);
+    
+    public ArrayList<FExp> FExternalStmt.myConstructorArgs() {
+        ArrayList<FExp> res = new ArrayList<FExp>();
+        for (FExp arg : getArgs()) {
+            if (arg.isConstructorTypeArg()) {
+                res.add(arg);
+            }
+        }
+        return res;
+    }
+    
+    syn boolean FExp.isConstructorTypeArg() = false;
+    eq FIdUseExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
+    eq FSizeExp.isConstructorTypeArg()      = true;
+    
 	// TODO: Reduce code duplication here
 	syn lazy FRecordType FRecordDecl.type() {
 		FRecordType type = new FRecordType(Size.SCALAR, name(), new List(), myFClass());
@@ -1501,7 +1532,7 @@ aspect BuiltInFlatTypes {
 	public static final FBooleanType FBooleanType.SCALAR 				= new FBooleanType(Size.SCALAR);
 	public static final FStringType  FStringType.SCALAR  				= new FStringType(Size.SCALAR);
 	public static final FUnknownType FUnknownType.SCALAR 				= new FUnknownType(Size.SCALAR);
-	public static final FExternalObjectType FExternalObjectType.SCALAR 	= new FExternalObjectType(Size.SCALAR);
+    public static final FExternalObjectType FExternalObjectType.PRIM_SCALAR = new FExternalObjectType(Size.SCALAR, "ExternalObject");
     public static final FNoType      FNoType.SCALAR                     = new FNoType(Size.SCALAR);
 
 	syn boolean FType.isReal()    				= false;
@@ -1644,7 +1675,6 @@ aspect BuiltInFlatTypes {
     eq FIntegerType.scalarType()        = FIntegerType.SCALAR;
     eq FBooleanType.scalarType()        = FBooleanType.SCALAR;
     eq FStringType.scalarType()         = FStringType.SCALAR;
-    eq FExternalObjectType.scalarType() = FExternalObjectType.SCALAR;
 
     syn boolean FType.isUnknown() = false;
     eq FUnknownType.isUnknown()   = true;
@@ -1656,13 +1686,12 @@ aspect BuiltInFlatTypes {
     syn FPrimitiveType ASTNode.fIntegerScalarType()         = FIntegerType.SCALAR;
     syn FPrimitiveType ASTNode.fBooleanScalarType()         = FBooleanType.SCALAR;
     syn FPrimitiveType ASTNode.fStringScalarType()          = FStringType.SCALAR;
-    syn FPrimitiveType ASTNode.fExternalObjectScalarType()  = FExternalObjectType.SCALAR;
+    syn FType ASTNode.fExternalObjectScalarType()  = FExternalObjectType.PRIM_SCALAR;
 
     syn FPrimitiveType ASTNode.fRealArrayType(Size size)            = new FRealType(size);
     syn FPrimitiveType ASTNode.fIntegerArrayType(Size size)         = new FIntegerType(size);
     syn FPrimitiveType ASTNode.fBooleanArrayType(Size size)         = new FBooleanType(size);
     syn FPrimitiveType ASTNode.fStringArrayType(Size size)          = new FStringType(size);
-    syn FPrimitiveType ASTNode.fExternalObjectArrayType(Size size)  = new FExternalObjectType(size);
 
     syn FPrimitiveType ASTNode.fRealType(Size size) = 
         (size == Size.SCALAR) ? fRealScalarType() : fRealArrayType(size);
@@ -1672,8 +1701,6 @@ aspect BuiltInFlatTypes {
         (size == Size.SCALAR) ? fBooleanScalarType() : fBooleanArrayType(size);
     syn FPrimitiveType ASTNode.fStringType(Size size) = 
         (size == Size.SCALAR) ? fStringScalarType() : fStringArrayType(size);
-    syn FPrimitiveType ASTNode.fExternalObjectType(Size size) = 
-        (size == Size.SCALAR) ? fExternalObjectScalarType() : fExternalObjectArrayType(size);
 
     syn FType FType.arrayType(Size size) {
         if (size == size())

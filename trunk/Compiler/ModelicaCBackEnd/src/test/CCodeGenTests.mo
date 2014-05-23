@@ -3408,10 +3408,14 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_ad_var_t m_v, R1_1_ra* o_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, R1_1_r, R1_1_ra, o_an, -1, 2)
     jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_1_max;
     jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_2_max;
     JMI_ARR(DYNA, R1_1_r, R1_1_ra, temp_1_a, -1, 1)
     jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_3_max;
     jmi_ad_var_t tmp_4;
+    jmi_ad_var_t tmp_4_max;
     jmi_ad_var_t i_0i;
     jmi_ad_var_t i_0ie;
     jmi_ad_var_t i2_1i;
@@ -3420,18 +3424,22 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_ad_var_t m_v, R1_1_ra* o_a) {
     jmi_ad_var_t i1_2ie;
     if (o_a == NULL) {
         JMI_ARRAY_INIT_2(DYNA, R1_1_r, R1_1_ra, o_an, m_v * m_v, 2, m_v, m_v)
-        for (tmp_1 = 1; tmp_1 < m_v * m_v + 1; tmp_1++) {
+        tmp_1_max = m_v * m_v + 1;
+        for (tmp_1 = 1; tmp_1 < tmp_1_max; tmp_1++) {
             JMI_ARRAY_INIT_1(DYNA, R2_0_r, R2_0_ra, jmi_array_rec_1(o_an, tmp_1)->x, 1, 1, 1)
-            for (tmp_2 = 1; tmp_2 < 1 + 1; tmp_2++) {
+            tmp_2_max = 1 + 1;
+            for (tmp_2 = 1; tmp_2 < tmp_2_max; tmp_2++) {
                 JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, jmi_array_rec_1(jmi_array_rec_1(o_an, tmp_1)->x, tmp_2)->y, 1, 1, 1)
             }
         }
         o_a = o_an;
     }
     JMI_ARRAY_INIT_1(DYNA, R1_1_r, R1_1_ra, temp_1_a, m_v, 1, m_v)
-    for (tmp_3 = 1; tmp_3 < m_v + 1; tmp_3++) {
+    tmp_3_max = m_v + 1;
+    for (tmp_3 = 1; tmp_3 < tmp_3_max; tmp_3++) {
         JMI_ARRAY_INIT_1(DYNA, R2_0_r, R2_0_ra, jmi_array_rec_1(temp_1_a, tmp_3)->x, 1, 1, 1)
-        for (tmp_4 = 1; tmp_4 < 1 + 1; tmp_4++) {
+        tmp_4_max = 1 + 1;
+        for (tmp_4 = 1; tmp_4 < tmp_4_max; tmp_4++) {
             JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, jmi_array_rec_1(jmi_array_rec_1(temp_1_a, tmp_3)->x, tmp_4)->y, 1, 1, 1)
         }
     }
@@ -3449,7 +3457,6 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_ad_var_t m_v, R1_1_ra* o_a) {
     JMI_DYNAMIC_FREE()
     return;
 }
-
 ")})));
 end CUnknownArray7;
 
@@ -12663,12 +12670,12 @@ class ExtObjectwInput
     
     function constructor
 		input Real i;
-        output ExtObject eo;
+        output ExtObjectwInput eo;
         external "C" eo = init_myEO(i);
     end constructor;
     
     function destructor
-        input ExtObject eo;
+        input ExtObjectwInput eo;
         external "C" close_myEO(eo);
     end destructor;
 end ExtObjectwInput;

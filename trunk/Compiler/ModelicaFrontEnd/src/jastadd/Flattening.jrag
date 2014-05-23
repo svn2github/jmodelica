@@ -837,6 +837,7 @@ aspect Flattening {
 		
 	public FVariable InstExternalObject.createEmptyFVariable() {
 		FExternalObjectVariable exo = new FExternalObjectVariable();
+		exo.setTypeName(new FQNameString(myInstClass().qualifiedName()));
 		exo.setDestructorCall(getDestructorCall().flatten(getFQNamePrefix()));
 		return exo;
 	}
@@ -978,8 +979,15 @@ aspect Flattening {
 	
 	public FExp InstAssignable.flattenBindingFExp() {
 		if (hasInstValueMod()) {
-			InstValueModification im = myInstValueMod();
-			return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
+            InstValueModification im = myInstValueMod();
+            try {
+                if (variability().constantVariability()) {
+                    return getBindingFExp().ceval().buildLiteral();
+                }
+            } catch (ConstantEvaluationException e) {
+                
+            }
+            return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
 		}
 		return null;
 	}

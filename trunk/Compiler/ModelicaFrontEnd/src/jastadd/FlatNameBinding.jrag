@@ -468,9 +468,11 @@ aspect FlatFunctionBinding {
 	
 	syn FFunctionDecl FFunctionCall.myFFunctionDecl() = lookupFFunctionDecl(getName().name());
 	syn FFunctionDecl FDerivativeFunction.myFFunctionDecl() = lookupFFunctionDecl(getName().name());
+	syn FFunctionDecl FExternalObjectVariable.myFConstructorDecl() = lookupFFunctionDecl(getTypeName().name() + ".constructor");
 	
 	inh FFunctionDecl FFunctionCall.lookupFFunctionDecl(String name);
 	inh FFunctionDecl FDerivativeFunction.lookupFFunctionDecl(String name);
+	inh FFunctionDecl FExternalObjectVariable.lookupFFunctionDecl(String name);
 	eq Root.getChild().lookupFFunctionDecl(String name)   = null;
 	eq FClass.getChild().lookupFFunctionDecl(String name) = lookupFunc(name);
 	
@@ -569,6 +571,20 @@ aspect FlatEnumBinding {
 		return res;
 	}
 	*/
+}
+
+aspect FlatExternalObjectBinding {
+    
+    syn FExternalStmt FExternalObjectType.myConstructorStmt()     = lookupConstructorStmt(getName());
+    syn FExternalStmt FExternalObjectVariable.myConstructorStmt() = lookupConstructorStmt(getTypeName().name());
+    
+    inh FExternalStmt FExternalObjectType.lookupConstructorStmt(String name);
+    inh FExternalStmt FExternalObjectVariable.lookupConstructorStmt(String name);
+    eq Root.getChild().lookupConstructorStmt(String name) = null;
+    eq FClass.getChild().lookupConstructorStmt(String name) = lookupFunc(name + ".constructor").getFAlgorithm().getFExternalStmt();
+    eq InstClassDecl.getChild().lookupConstructorStmt(String name) = 
+            ((InstFullClassDecl)lookupInstClassQualified(name + ".constructor")).getInstExternal().getFAlgorithm().getFExternalStmt();
+    
 }
 
 aspect FlatPreBinding {

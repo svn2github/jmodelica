@@ -1392,9 +1392,9 @@ model ConstantLookup25
 			description="Slice over array of components, declared with : size",
 			flatModel="
 fclass NameTests.ConstantLookup25
- constant NameTests.ConstantLookup25.A x[2] = {NameTests.ConstantLookup25.A(1),NameTests.ConstantLookup25.A(2)};
- constant Real y[2] = {1.0,2.0};
- Real z[2] = {1.0,2.0};
+ constant NameTests.ConstantLookup25.A x[2] = {NameTests.ConstantLookup25.A(1), NameTests.ConstantLookup25.A(2)};
+ constant Real y[2] = {1, 2};
+ Real z[2] = {1.0, 2.0};
 
 public
  record NameTests.ConstantLookup25.A
@@ -1452,9 +1452,8 @@ model ConstantLookup26
 			description="Constant lookup in complex data structure",
 			flatModel="
 fclass NameTests.ConstantLookup26
- constant Real x[2] = {1.0,2.0};
- Real y[2] = {1.0,2.0};
-
+ constant Real x[2] = {1, 2};
+ Real y[2] = {1.0, 2.0};
 end NameTests.ConstantLookup26;
 ")})));
 end ConstantLookup26;
@@ -1486,8 +1485,8 @@ model ConstantLookup27
 			flatModel="
 fclass NameTests.ConstantLookup27
  constant NameTests.ConstantLookup27.A c = NameTests.ConstantLookup27.A(1, 2);
- constant Real e[2] = {1.0,2.0};
- Real f[2] = {1.0,2.0};
+ constant Real e[2] = {1, 2};
+ Real f[2] = {1.0, 2.0};
 
 public
  record NameTests.ConstantLookup27.A

@@ -182,10 +182,10 @@ end EnumerationTests.EnumerationTest7;
 			description="Range expressions with Booleans and enumerations",
 			flatModel="
 fclass EnumerationTests.EnumerationTest8
- constant Boolean a[2] = false:true;
- parameter Boolean b[2] = {false,true} /* { false, true } */;
- constant EnumerationTests.EnumerationTest8.A c[3] = EnumerationTests.EnumerationTest8.A.b:EnumerationTests.EnumerationTest8.A.d;
- parameter EnumerationTests.EnumerationTest8.A d[3] = {EnumerationTests.EnumerationTest8.A.b,EnumerationTests.EnumerationTest8.A.c,EnumerationTests.EnumerationTest8.A.d} /* { EnumerationTests.EnumerationTest8.A.b, EnumerationTests.EnumerationTest8.A.c, EnumerationTests.EnumerationTest8.A.d } */;
+ constant Boolean a[2] = {false, true};
+ parameter Boolean b[2] = {false, true} /* { false, true } */;
+ constant EnumerationTests.EnumerationTest8.A c[3] = {EnumerationTests.EnumerationTest8.A.b, EnumerationTests.EnumerationTest8.A.c, EnumerationTests.EnumerationTest8.A.d};
+ parameter EnumerationTests.EnumerationTest8.A d[3] = {EnumerationTests.EnumerationTest8.A.b, EnumerationTests.EnumerationTest8.A.c, EnumerationTests.EnumerationTest8.A.d} /* { EnumerationTests.EnumerationTest8.A.b, EnumerationTests.EnumerationTest8.A.c, EnumerationTests.EnumerationTest8.A.d } */;
 
 public
  type EnumerationTests.EnumerationTest8.A = enumeration(a, b, c, d, e);
@@ -213,8 +213,8 @@ end EnumerationTests.EnumerationTest8;
 			description="Relational operators with enumerations",
 			flatModel="
 fclass EnumerationTests.EnumerationTest9
- constant Boolean x[6,3] = {{EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.d}};
- parameter Boolean y[6,3] = {{false,false,true},{false,true,true},{true,false,false},{true,true,false},{false,true,false},{true,false,true}} /* { { false, false, true }, { false, true, true }, { true, false, false }, { true, true, false }, { false, true, false }, { true, false, true } } */;
+ constant Boolean x[6,3] = {{false, false, true}, {false, true, true}, {true, false, false}, {true, true, false}, {false, true, false}, {true, false, true}};
+ parameter Boolean y[6,3] = {{false, false, true}, {false, true, true}, {true, false, false}, {true, true, false}, {false, true, false}, {true, false, true}} /* { { false, false, true }, { false, true, true }, { true, false, false }, { true, true, false }, { false, true, false }, { true, false, true } } */;
 
 public
  type EnumerationTests.EnumerationTest9.A = enumeration(a, b, c, d, e);
@@ -235,8 +235,8 @@ end EnumerationTests.EnumerationTest9;
 			description="Using the Integer() operator: basic test",
 			flatModel="
 fclass EnumerationTests.EnumerationTest10
- constant Integer i[3] = {Integer(EnumerationTests.EnumerationTest10.A.a),Integer(EnumerationTests.EnumerationTest10.A.c),Integer(EnumerationTests.EnumerationTest10.A.e)};
- parameter Integer j[3] = {1,3,5} /* { 1, 3, 5 } */;
+ constant Integer i[3] = {1, 3, 5};
+ parameter Integer j[3] = {1, 3, 5} /* { 1, 3, 5 } */;
 
 public
  type EnumerationTests.EnumerationTest10.A = enumeration(a, b, c, d, e);

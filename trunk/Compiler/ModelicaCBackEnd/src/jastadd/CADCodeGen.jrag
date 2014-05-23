@@ -50,12 +50,12 @@ aspect CADCodeGen {
             node.genTempVars_CAD(this, str, indent);
         }
         
-        public TypePrinter_C createDeclPrinter(CodeStream str, String indent) {
-            return new DeclPrinter_CAD(this, str, indent);
+        public TypePrinter_C createDeclPrinter(CodeStream str) {
+            return new DeclPrinter_CAD(this, str);
         }
         
-        public TypePrinter_C createInitPrinter(CodeStream str, String indent) {
-            return new InitPrinter_CAD(this, str, indent);
+        public TypePrinter_C createInitPrinter(CodeStream str) {
+            return new InitPrinter_CAD(this, str);
         }
     }
 	
@@ -1851,27 +1851,27 @@ aspect CADCodeGen {
 			genVarDecls_C(p, str, indent);
 		} else if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
-            TypePrinter_C dp = p.createDeclPrinter(str, indent);
+            TypePrinter_C dp = p.createDeclPrinter(str);
             dp.setSubDecls(true);
-            print(dp, varName_CAD() + suffix);
+            print(dp, varName_CAD() + suffix, indent);
             dp.setSubDecls(false);
-            print(dp, derName_CAD() + suffix);
+            print(dp, derName_CAD() + suffix, indent);
 		}
 	}
 	
     protected void FExp.printDecls_CAD(CodePrinter p, CodeStream str, String indent, String varName, String derName) {
-        TypePrinter_C dp = p.createDeclPrinter(str, indent);
-        dp.reset(varName, this, size().isUnknown(), false);
+        TypePrinter_C dp = p.createDeclPrinter(str);
+        dp.reset(varName, this, size().isUnknown(), false, indent);
         dp.setSubDecls(true);
         type().print(dp);
-        dp.reset(derName, this, size().isUnknown(), false);
+        dp.reset(derName, this, size().isUnknown(), false, indent);
         dp.setSubDecls(false);
         type().print(dp);
     }
     
-    class DeclPrinter_CAD extends DeclPrinter_C {
-        public DeclPrinter_CAD(CodePrinter p, CodeStream str, String indent) {
-            super(p, str, indent);
+    public class DeclPrinter_CAD extends DeclPrinter_C {
+        public DeclPrinter_CAD(CodePrinter p, CodeStream str) {
+            super(p, str);
         }
         public void printArray(FType type) {
             if (subDecls)
@@ -1879,9 +1879,9 @@ aspect CADCodeGen {
             super.printArray(type);
         }
     }
-    class InitPrinter_CAD extends InitPrinter_C {
-        public InitPrinter_CAD(CodePrinter p, CodeStream str, String indent) {
-            super(p, str, indent);
+    public class InitPrinter_CAD extends InitPrinter_C {
+        public InitPrinter_CAD(CodePrinter p, CodeStream str) {
+            super(p, str);
         }
         public void printArray(FType type) {
             type.size().genTempVars_C(p, str, indent(), src);
@@ -2618,26 +2618,26 @@ aspect CADCodeGen {
 	
 	public void FFunctionArray.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (!isOutput()) {
-            TypePrinter_C ip = p.createInitPrinter(str, indent);
-            print(ip, varName_CAD());
-            print(ip, derName_CAD());
+            TypePrinter_C ip = p.createInitPrinter(str);
+            print(ip, varName_CAD(), indent);
+            print(ip, derName_CAD(), indent);
 		}
 	}
 	
 	public void FFunctionVariable.printNullOutputReplacement_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite()) {
 		    String next = p.indent(indent);
-            TypePrinter_C ip = p.createInitPrinter(str, next);
+            TypePrinter_C ip = p.createInitPrinter(str);
 			String name_var_CAD = varName_CAD();
 			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
 			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
-            print(ip, name_var_r);
+            print(ip, name_var_r, next);
 			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
 			str.print(indent + "}\n");
 			String name_der_CAD = derName_CAD();
 			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
 			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
-            print(ip, name_der_r);
+            print(ip, name_der_r, next);
 			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
 			str.print(indent + "}\n");
 		}

@@ -1018,6 +1018,26 @@ aspect ConstantEvaluation {
     	
     }
     
+    public class CValueExternalObject extends CValue {
+        protected CValue[] values;
+        public CValueExternalObject(CValue[] values) {
+            this.values = values;
+        }
+        
+        public String toString() {
+            StringBuilder buf = new StringBuilder();
+            buf.append('{');
+            String sep = "";
+            for (CValue val : values) {
+                buf.append(sep);
+                buf.append(val == null ? UNKNOWN : val);
+                sep = ", ";
+            }
+            buf.append('}');
+            return buf.toString();
+        }
+    }
+    
     /**
      * \brief Constant value for enumeration literal.
      */
@@ -3465,7 +3485,7 @@ aspect ExternalCEval {
         if (root().options.getIntegerOption("external_constant_evaluation") == 0)
             return false;
         for (CommonVariableDecl cvd : varsToSerialize()) {
-            if (cvd.type().isExternalObject() || cvd.type().isRecord()) {
+            if (cvd.type().isRecord()) {
                 return false;
             }
         }
@@ -3500,10 +3520,28 @@ aspect ExternalCEval {
         return fab;
     }
     
+    public int FExternalStmt.evaluateConstructor(Map<CommonVariableDecl, CValue> values) {
+        ArrayList<FExp> args = myConstructorArgs();
+        CValue[] vals = new CValue[args.size()];
+        for (int i = 0; i < args.size(); i++)
+            vals[i] = args.get(i).ceval();
+        values.put(myConstructorOutput(), new CValueExternalObject(vals));
+        return EVAL_CONT;
+    }
+    
+    inh boolean FExternalStmt.isConstructorStmt();
+    eq Root.getChild().isConstructorStmt() = false;
+    eq FFunctionDecl.getChild().isConstructorStmt() = isConstructor();
+    eq InstClassDecl.getChild().isConstructorStmt() = isConstructor();
+    
     /**
      * Evaluate this external statement.
      */
     public int FExternalStmt.evaluateExternal(Map<CommonVariableDecl, CValue> values) {
+        
+        if (isConstructorStmt()) {
+            return evaluateConstructor(values);
+        }
         
         Process proc = createExternCEvalProc(this);
         
@@ -3732,6 +3770,10 @@ aspect ExternalCEval {
     public void CValueEnum.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         buff.write(Integer.toString(intValue()));
         buff.write("\n");
+    }
+    public void CValueExternalObject.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
+        for (CValue v : values)
+            v.serialize(buff, type, allowUninitialized);
     }
     
     public CValue FType.uninitialized() { return zeroCValue(); }

@@ -438,7 +438,7 @@ model MinExp1
 			description="Min operator: 2 scalar args",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp1
- constant Real x = min(1 + 2, 3 + 4);
+ constant Real x = 3;
  constant Real y = 3.0;
 end ArrayBuiltins.Min.MinExp1;
 ")})));
@@ -455,7 +455,7 @@ model MinExp2
 			description="Min operator: 1 array arg",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp2
- constant Real x = min(min(min(1, 2), 3), 4);
+ constant Real x = 1;
  constant Real y = 1.0;
 end ArrayBuiltins.Min.MinExp2;
 ")})));
@@ -472,8 +472,8 @@ model MinExp3
 			description="Min operator: strings",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp3
- constant String x = min(\"foo\", \"bar\");
- parameter String y = \"bar\";
+ constant String x = \"bar\";
+ parameter String y = \"bar\" /* \"bar\" */;
 end ArrayBuiltins.Min.MinExp3;
 ")})));
 end MinExp3;
@@ -489,7 +489,7 @@ model MinExp4
 			description="Min operator: booleans",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp4
- constant Boolean x = min(true, false);
+ constant Boolean x = false;
  constant Boolean y = false;
 end ArrayBuiltins.Min.MinExp4;
 ")})));
@@ -562,7 +562,7 @@ model MinExp8
 			description="Reduction-expression with min(): constant expression",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp8
- constant Real x = min(min(min(min(min(min(min(min(min(min(min(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
+ constant Real x = 1.0;
  constant Real y = 1.0;
 end ArrayBuiltins.Min.MinExp8;
 ")})));
@@ -650,7 +650,7 @@ model MaxExp1
 			description="Max operator: 2 scalar args",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp1
- constant Real x = max(1 + 2, 3 + 4);
+ constant Real x = 7;
  constant Real y = 7.0;
 end ArrayBuiltins.Max.MaxExp1;
 ")})));
@@ -667,7 +667,7 @@ model MaxExp2
 			description="Max operator: 1 array arg",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp2
- constant Real x = max(max(max(1, 2), 3), 4);
+ constant Real x = 4;
  constant Real y = 4.0;
 end ArrayBuiltins.Max.MaxExp2;
 ")})));
@@ -684,8 +684,8 @@ model MaxExp3
 			description="Max operator: strings",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
- constant String x = max(\"foo\", \"bar\");
- parameter String y = \"foo\";
+ constant String x = \"foo\";
+ parameter String y = \"foo\" /* \"foo\" */;
 end ArrayBuiltins.Max.MaxExp3;
 ")})));
 end MaxExp3;
@@ -701,7 +701,7 @@ model MaxExp4
 			description="Max operator: booleans",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp4
- constant Boolean x = max(true, false);
+ constant Boolean x = true;
  constant Boolean y = true;
 end ArrayBuiltins.Max.MaxExp4;
 ")})));
@@ -789,7 +789,7 @@ model MaxExp9
 			description="Reduction-expression with max(): basic test",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp9
- constant Real x = max(max(max(max(max(max(max(max(max(max(max(2, 2 * 2), 3 * 2), 4 * 2), 3), 2 * 3), 3 * 3), 4 * 3), 5), 2 * 5), 3 * 5), 4 * 5);
+ constant Real x = 20;
  constant Real y = 20.0;
 end ArrayBuiltins.Max.MaxExp9;
 ")})));
@@ -851,7 +851,7 @@ model SumExp1
 			description="sum() expressions: basic test",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp1
- constant Real x = 1 + 2 + 3 + 4;
+ constant Real x = 10;
  constant Real y = 10.0;
 end ArrayBuiltins.Sum.SumExp1;
 ")})));
@@ -868,7 +868,7 @@ model SumExp2
 			description="sum() expressions: reduction-expression",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp2
- constant Real x = 1 + 2 + 3 + 2 + 2 * 2 + 3 * 2 + 3 + 2 * 3 + 3 * 3;
+ constant Real x = 36;
  constant Real y = 36.0;
 end ArrayBuiltins.Sum.SumExp2;
 ")})));
@@ -885,8 +885,8 @@ model SumExp3
 			description="sum() expressions: reduction-expression over array",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp3
- constant Real x[1] = 1 + 2 + 3 + 1 + 2 + 3 + 1 + 2 + 3;
- constant Real x[2] = 2 + 2 + 2 + 3 + 3 + 3 + 4 + 4 + 4;
+ constant Real x[1] = 18;
+ constant Real x[2] = 27;
  constant Real y[1] = 18.0;
  constant Real y[2] = 27.0;
 end ArrayBuiltins.Sum.SumExp3;
@@ -904,7 +904,7 @@ model SumExp4
 			description="sum() expressions: over array constructor with iterators",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp4
- constant Real x = 1 + 2 + 2 + 2 + 3 + 2 + 1 + 3 + 2 + 3 + 3 + 3 + 1 + 4 + 2 + 4 + 3 + 4;
+ constant Real x = 45;
  constant Real y = 45.0;
 end ArrayBuiltins.Sum.SumExp4;
 ")})));
@@ -999,7 +999,7 @@ model ProductExp1
 			description="product() expressions: basic test",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp1
- constant Real x = 2 * 3 * 4;
+ constant Real x = 24;
  constant Real y = 24.0;
 end ArrayBuiltins.Product.ProductExp1;
 ")})));
@@ -1015,7 +1015,7 @@ model ProductExp2
 			description="product() expressions: reduction-expression",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp2
- constant Real x = 2 * 3 * 2 * (2 * 2) * (3 * 2) * 3 * (2 * 3) * (3 * 3);
+ constant Real x = 46656;
  constant Real y = 46656.0;
 end ArrayBuiltins.Product.ProductExp2;
 ")})));
@@ -1031,8 +1031,8 @@ model ProductExp3
 			description="product() expressions: reduction-expression over array",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp3
- constant Real x[1] = 2 * 3 * 2 * 3 * 2 * 3;
- constant Real x[2] = 2 * 2 * 2 * 3 * 3 * 3 * 4 * 4 * 4;
+ constant Real x[1] = 216;
+ constant Real x[2] = 13824;
  constant Real y[1] = 216.0;
  constant Real y[2] = 13824.0;
 end ArrayBuiltins.Product.ProductExp3;
@@ -1049,7 +1049,7 @@ model ProductExp4
 			description="product() expressions: over array constructor with iterators",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp4
- constant Real x = 2 * 2 * 2 * 3 * 2 * 3 * 2 * 3 * 3 * 3 * 4 * 2 * 4 * 3 * 4;
+ constant Real x = 2985984;
  constant Real y = 2985984.0;
 end ArrayBuiltins.Product.ProductExp4;
 ")})));

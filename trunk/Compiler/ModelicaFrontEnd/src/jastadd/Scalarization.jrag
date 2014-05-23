@@ -259,6 +259,7 @@ aspect Scalarization {
 			scalarCall.setArg(call.getArg(0).getArray().get(i).scalarize(EMPTY), 0);
 		if (hasConstructorCall(i))
 		    fex.setDestructorCall(new FFunctionCallStmt(new List(), scalarCall));
+		fex.setTypeName(getTypeName().fullCopy());
 		return fex;
 	}
 	

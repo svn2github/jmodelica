@@ -365,8 +365,8 @@ model AbsType2
 			description="abs() operator: Real constant",
 			flatModel="
 fclass TypeTests.AbsType2
- constant Real x1 = abs(- 2.0);
- constant Real x2 = abs(2.0);
+ constant Real x1 = 2.0;
+ constant Real x2 = 2.0;
  Real y1 = 2.0;
  Real y2 = 2.0;
 end TypeTests.AbsType2;
@@ -403,8 +403,8 @@ model AbsType4
 			description="abs() operator: Integer constant",
 			flatModel="
 fclass TypeTests.AbsType4
- constant Integer x1 = abs(- 2);
- constant Integer x2 = abs(2);
+ constant Integer x1 = 2;
+ constant Integer x2 = 2;
  discrete Integer y1 = 2;
  discrete Integer y2 = 2;
 end TypeTests.AbsType4;
@@ -487,7 +487,7 @@ model IntegerExp1
 			description="integer() operator: constant",
 			flatModel="
 fclass TypeTests.IntegerExp1
- constant Integer x = integer(1.8);
+ constant Integer x = 1;
  constant Integer y = 1;
 end TypeTests.IntegerExp1;
 ")})));
@@ -542,8 +542,8 @@ model ConstCmpEq
 			description="Constant evaluation of comparisons: equals",
 			flatModel="
 fclass TypeTests.ConstCmpEq
- constant Boolean a = 1 == 2;
- constant Boolean b = 1 == 1;
+ constant Boolean a = false;
+ constant Boolean b = true;
  constant Boolean x = false;
  constant Boolean y = true;
 end TypeTests.ConstCmpEq;
@@ -563,8 +563,8 @@ model ConstCmpNeq
 			description="Constant evaluation of comparisons: not equal",
 			flatModel="
 fclass TypeTests.ConstCmpNeq
- constant Boolean a = 1 <> 2;
- constant Boolean b = 1 <> 1;
+ constant Boolean a = true;
+ constant Boolean b = false;
  constant Boolean x = true;
  constant Boolean y = false;
 end TypeTests.ConstCmpNeq;
@@ -586,9 +586,9 @@ model ConstCmpLeq
 			description="Constant evaluation of comparisons: less or equal",
 			flatModel="
 fclass TypeTests.ConstCmpLeq
- constant Boolean a = 1 <= 2;
- constant Boolean b = 1 <= 1;
- constant Boolean c = 2 <= 1;
+ constant Boolean a = true;
+ constant Boolean b = true;
+ constant Boolean c = false;
  constant Boolean x = true;
  constant Boolean y = true;
  constant Boolean z = false;
@@ -611,9 +611,9 @@ model ConstCmpLt
 			description="Constant evaluation of comparisons: less than",
 			flatModel="
 fclass TypeTests.ConstCmpLt
- constant Boolean a = 1 < 2;
- constant Boolean b = 1 < 1;
- constant Boolean c = 2 < 1;
+ constant Boolean a = true;
+ constant Boolean b = false;
+ constant Boolean c = false;
  constant Boolean x = true;
  constant Boolean y = false;
  constant Boolean z = false;
@@ -636,9 +636,9 @@ model ConstCmpGeq
 			description="Constant evaluation of comparisons: greater or equal",
 			flatModel="
 fclass TypeTests.ConstCmpGeq
- constant Boolean a = 1 >= 2;
- constant Boolean b = 1 >= 1;
- constant Boolean c = 2 >= 1;
+ constant Boolean a = false;
+ constant Boolean b = true;
+ constant Boolean c = true;
  constant Boolean x = false;
  constant Boolean y = true;
  constant Boolean z = true;
@@ -661,9 +661,9 @@ model ConstCmpGt
 			description="Constant evaluation of comparisons:greater than",
 			flatModel="
 fclass TypeTests.ConstCmpGt
- constant Boolean a = 1 > 2;
- constant Boolean b = 1 > 1;
- constant Boolean c = 2 > 1;
+ constant Boolean a = false;
+ constant Boolean b = false;
+ constant Boolean c = true;
  constant Boolean x = false;
  constant Boolean y = false;
  constant Boolean z = true;

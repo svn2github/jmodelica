@@ -308,7 +308,7 @@ model FunctionEval10
 			description="Constant evaluation of functions: while loops (instance tree)",
 			flatModel="
 fclass EvaluationTests.FunctionEval10
- constant Real x = EvaluationTests.FunctionEval10.f(5);
+ constant Real x = 120.0;
  Real y = 120.0;
 
 public
@@ -389,7 +389,7 @@ model FunctionEval12
 			description="Constant evaluation of functions: records",
 			flatModel="
 fclass EvaluationTests.FunctionEval12
- constant Real x = EvaluationTests.FunctionEval12.f2(EvaluationTests.FunctionEval12.f1(2));
+ constant Real x = 6.0;
  Real y = 6.0;
 
 public
@@ -441,7 +441,7 @@ model FunctionEval13
 			description="Constant evaluation of functions: records",
 			flatModel="
 fclass EvaluationTests.FunctionEval13
- constant EvaluationTests.FunctionEval13.R x = EvaluationTests.FunctionEval13.f(2);
+ constant EvaluationTests.FunctionEval13.R x = EvaluationTests.FunctionEval13.R(2, 4.0);
  EvaluationTests.FunctionEval13.R y = EvaluationTests.FunctionEval13.R(2, 4.0);
 
 public
@@ -485,7 +485,7 @@ model FunctionEval14
 			description="Constant evaluation of functions: records",
 			flatModel="
 fclass EvaluationTests.FunctionEval14
- constant Real x = EvaluationTests.FunctionEval14.f(EvaluationTests.FunctionEval14.R(1, 2));
+ constant Real x = 3.0;
  Real y = 3.0;
 
 public
@@ -547,7 +547,7 @@ model FunctionEval15
 			description="",
 			flatModel="
 fclass EvaluationTests.FunctionEval15
- constant Real x = EvaluationTests.FunctionEval15.f1(EvaluationTests.FunctionEval15.f2());
+ constant Real x = 50.0;
  Real y = 50.0;
 
 public
@@ -565,7 +565,7 @@ public
   x[1:2].a[1:2].a := ones(2, 2, 2);
   for i in 1:2 loop
    for j in 1:2 loop
-    x[i].a[j].b := {1,1,1};
+    x[i].a[j].b := {1, 1, 1};
     x[i].b[1:3].a[j] := x[i].a[j].b;
    end for;
   end for;
@@ -924,7 +924,7 @@ model FunctionEval26
             description="Evaluation in instance tree of function with modifications on record variable",
             flatModel="
 fclass EvaluationTests.FunctionEval26
- constant EvaluationTests.FunctionEval26.A a1 = EvaluationTests.FunctionEval26.f(2);
+ constant EvaluationTests.FunctionEval26.A a1 = EvaluationTests.FunctionEval26.A(2, 4.0);
  constant EvaluationTests.FunctionEval26.A a2 = EvaluationTests.FunctionEval26.A(2, 4.0);
 
 public
@@ -1144,15 +1144,15 @@ model SignEval1
 			description="Test constant evaluation of sign()",
 			flatModel="
 fclass EvaluationTests.SignEval1
- constant Integer a1 = sign(- 1.0);
+ constant Integer a1 = -1;
  constant Integer a2 = -1;
- constant Integer b1 = sign(- 0.5);
+ constant Integer b1 = -1;
  constant Integer b2 = -1;
- constant Integer c1 = sign(0.0);
+ constant Integer c1 = 0;
  constant Integer c2 = 0;
- constant Integer d1 = sign(0.5);
+ constant Integer d1 = 1;
  constant Integer d2 = 1;
- constant Integer e1 = sign(1.0);
+ constant Integer e1 = 1;
  constant Integer e2 = 1;
 end EvaluationTests.SignEval1;
 ")})));
@@ -1267,7 +1267,7 @@ model ConstantInRecord1
             description="Evaluation of constants in records",
             flatModel="
 fclass EvaluationTests.ConstantInRecord1
- constant Real c = 1.0;
+ constant Real c = 1;
  constant Real d = 2.0;
 end EvaluationTests.ConstantInRecord1;
 ")})));

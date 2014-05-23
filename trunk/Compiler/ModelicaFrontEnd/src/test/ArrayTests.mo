@@ -4846,9 +4846,9 @@ model ArrayAnd9
 			description="Scalarization of logical and: constant evaluation",
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd9
- constant Boolean y[1] = true and true;
- constant Boolean y[2] = false and true;
- constant Boolean y[3] = false and false;
+ constant Boolean y[1] = true;
+ constant Boolean y[2] = false;
+ constant Boolean y[3] = false;
  constant Boolean x[1] = true;
  constant Boolean x[2] = false;
  constant Boolean x[3] = false;
@@ -5017,9 +5017,9 @@ model ArrayOr9
 			description="Scalarization of logical or: constant evaluation",
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr9
- constant Boolean y[1] = true or true;
- constant Boolean y[2] = true or false;
- constant Boolean y[3] = false or false;
+ constant Boolean y[1] = true;
+ constant Boolean y[2] = true;
+ constant Boolean y[3] = false;
  constant Boolean x[1] = true;
  constant Boolean x[2] = true;
  constant Boolean x[3] = false;
@@ -5080,8 +5080,8 @@ model ArrayNot3
 fclass ArrayTests.Logical.Not.ArrayNot3
  constant Boolean x[1] = false;
  constant Boolean x[2] = true;
- constant Boolean y[1] = not true;
- constant Boolean y[2] = not false;
+ constant Boolean y[1] = false;
+ constant Boolean y[2] = true;
 end ArrayTests.Logical.Not.ArrayNot3;
 ")})));
 end ArrayNot3;
@@ -6792,7 +6792,7 @@ model FuncCallInPackConstEval
             description="Test getArray for function call in package constant",
             flatModel="
 fclass ArrayTests.Other.FuncCallInPackConstEval
- constant Real y[1,1] = 6.0;
+ constant Real y[1,1] = 6;
 end ArrayTests.Other.FuncCallInPackConstEval;
 ")})));
 end FuncCallInPackConstEval;

@@ -606,20 +606,10 @@ model FunctionFlatten12
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionFlatten12
- constant Real z = FunctionTests.FunctionFlatten12.f({1, 2, 3});
+ constant Real z = 3;
  Real w;
 equation
  w = 3.0;
-
-public
- function FunctionTests.FunctionFlatten12.f
-  input Real[:] x;
-  output Real y;
- algorithm
-  y := size(x, 1);
-  return;
- end FunctionTests.FunctionFlatten12.f;
-
 end FunctionTests.FunctionFlatten12;
 ")})));
 end FunctionFlatten12;
@@ -10248,15 +10238,15 @@ model VectorizedCall3
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall3
- constant Real v[1,1] = - 1;
- constant Real v[1,2] = (- 1) * 2;
- constant Real v[1,3] = (- 1) * 3;
- constant Real v[2,1] = (- 1) * 4;
- constant Real v[2,2] = (- 1) * 5;
- constant Real v[2,3] = (- 1) * 6;
- constant Real v[3,1] = (- 1) * 7;
- constant Real v[3,2] = (- 1) * 8;
- constant Real v[3,3] = (- 1) * 9;
+ constant Real v[1,1] = -1;
+ constant Real v[1,2] = -2;
+ constant Real v[1,3] = -3;
+ constant Real v[2,1] = -4;
+ constant Real v[2,2] = -5;
+ constant Real v[2,3] = -6;
+ constant Real v[3,1] = -7;
+ constant Real v[3,2] = -8;
+ constant Real v[3,3] = -9;
  constant Real w[1,1] = 1;
  constant Real w[1,2] = 2;
  constant Real w[1,3] = 3;
@@ -10306,7 +10296,6 @@ public
  end FunctionTests.VectorizedCall3.f;
 
 end FunctionTests.VectorizedCall3;
-			
 ")})));
 end VectorizedCall3;
 
@@ -11252,14 +11241,14 @@ model Abs2
 			description="Test of vectorized abs()",
 			flatModel="
 fclass FunctionTests.FunctionLike.NumericConversion.Abs2
- constant Real c[1,1] = - 1;
+ constant Real c[1,1] = -1;
  constant Real c[1,2] = 2;
  constant Real c[2,1] = 3;
- constant Real c[2,2] = - 4;
- constant Real d[1,1] = abs(-1.0);
- constant Real d[1,2] = abs(2.0);
- constant Real d[2,1] = abs(3.0);
- constant Real d[2,2] = abs(-4.0);
+ constant Real c[2,2] = -4;
+ constant Real d[1,1] = 1.0;
+ constant Real d[1,2] = 2.0;
+ constant Real d[2,1] = 3.0;
+ constant Real d[2,2] = 4.0;
  constant Real x[1,1] = -1.0;
  constant Real x[1,2] = 2.0;
  constant Real x[2,1] = 3.0;
@@ -11334,14 +11323,14 @@ model Sign2
 			description="Test of vectorized sign()",
 			flatModel="
 fclass FunctionTests.FunctionLike.NumericConversion.Sign2
- constant Real c[1,1] = - 1;
+ constant Real c[1,1] = -1;
  constant Real c[1,2] = 2;
  constant Real c[2,1] = 3;
- constant Real c[2,2] = - 4;
- constant Real d[1,1] = sign(-1.0);
- constant Real d[1,2] = sign(2.0);
- constant Real d[2,1] = sign(3.0);
- constant Real d[2,2] = sign(-4.0);
+ constant Real c[2,2] = -4;
+ constant Real d[1,1] = -1;
+ constant Real d[1,2] = 1;
+ constant Real d[2,1] = 1;
+ constant Real d[2,2] = -1;
  constant Real x[1,1] = -1.0;
  constant Real x[1,2] = 2.0;
  constant Real x[2,1] = 3.0;
