@@ -1080,7 +1080,7 @@ class TestLocalDAECollocator:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
 
-    @testattr(casadi_new = True)
+    @testattr(casadi = True)
     def test_named_vars(self):
         """
         Test variable renaming.
@@ -1099,6 +1099,7 @@ class TestLocalDAECollocator:
 
         # Without naming
         opts['named_vars'] = False
+        opts['reorder_vars'] = False
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
@@ -1107,12 +1108,17 @@ class TestLocalDAECollocator:
         res_renaming = op.optimize(self.algorithm, opts)
         assert_results(res_renaming, cost_ref, u_norm_ref)
 
-        assert(repr(res_renaming.solver.get_equality_constraint()[10]) ==
-                "Matrix<SX>((der_x1_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
-                "-x2_1_1)+u_1_1)))")
-        assert(repr(res_renaming.solver.get_equality_constraint()[20]) ==
-                "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
-                "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der_x2_1_3)))")
+        # Compare tenth and twentieth equality constraints
+        c_e_10 = res_renaming.solver.get_equality_constraint()[10]
+        c_e_20 = res_renaming.solver.get_equality_constraint()[20]
+        N.testing.assert_string_equal(
+            repr(res_renaming.solver.get_named_var_expr(c_e_10)),
+                 "Matrix<SX>((der(x1)_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
+                 "-x2_1_1)+u_1_1)))")
+        N.testing.assert_string_equal(
+            repr(res_renaming.solver.get_named_var_expr(c_e_20)),
+            "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
+            "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))")
 
     @testattr(casadi = True)
     def test_scaling(self):
