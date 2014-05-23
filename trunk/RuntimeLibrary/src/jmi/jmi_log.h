@@ -87,6 +87,9 @@ void jmi_log_leave(jmi_log_t *log, jmi_log_node_t node);
 /** \brief Leave log nodes until `node` is left. Use only upon abrupt return. */
 void jmi_log_unwind(jmi_log_t *log, jmi_log_node_t node);
 
+/** \brief Leave all open log nodes. Use only upon abrupt return from outermost log node. */
+void jmi_log_leave_all(jmi_log_t *log);
+
 /** \brief Create a new log node with contents given by invoking jmi_log_fmt. */
 void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const char* fmt, ...);
 

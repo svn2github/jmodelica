@@ -693,6 +693,8 @@ void jmi_log_leave_(log_t *log, node_t node) { leave_(log, node); }
 /** \brief Like jmi_log_leave, but doesn't need to take innermost node. */
 void jmi_log_unwind(log_t *log, node_t node) { _leave_(log, node); emit(log); }
 
+void jmi_log_leave_all(log_t *log) { leave_all(log); }
+
 
 static BOOL contains(const char *chars, char c) {
     while (*chars) if (*(chars++) == c) return TRUE;
