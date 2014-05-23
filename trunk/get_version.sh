@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="$(svn info $1 | sed -n 's_URL: https://svn.jmodelica.org/\(.*\)$_\1_p')"
+DIR="$(svn info $1 | sed -n 's_URL: '$2'/\(.*\)$_\1_p')"
 TYPE="$(echo ${DIR} | cut -d/ -f1)"
 case ${TYPE} in
     branches|tags)
