@@ -1303,15 +1303,17 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
 
 void jmi_kinsol_solver_print_solve_start(jmi_block_solver_t * block,
                                          jmi_log_node_t *destnode) {
-    if((block->callbacks->log_options.log_level >= 5)) {
+    if ((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_t *log = block->log;
         *destnode = jmi_log_enter_fmt(log, logInfo, "NewtonSolve", 
                                       "Newton solver invoked for <block:%d>", block->id);
-        jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
-        jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
-        jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
-        jmi_log_reals(log, *destnode, logInfo, "nominal", block->nominal, block->n);
-        jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->x, block->n);        
+        if ((block->callbacks->log_options.log_level >= 5)) {
+            jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
+            jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
+            jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
+            jmi_log_reals(log, *destnode, logInfo, "nominal", block->nominal, block->n);
+            jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->x, block->n);
+        }
     }
 }
 
@@ -1350,7 +1352,7 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
 
     /* NB: must match the condition in jmi_kinsol_solver_print_solve_start exactly! */
-    if((block->callbacks->log_options.log_level >= 5)) {
+    if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_t *log = block->log;
         const char *flagname = jmi_kinsol_flag_to_name(flag);
         if (flagname != NULL) jmi_log_fmt(log, *node, logInfo, "Newton solver finished with <kinsol_exit_flag:%s>", flagname);

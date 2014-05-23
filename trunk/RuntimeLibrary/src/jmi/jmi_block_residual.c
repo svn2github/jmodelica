@@ -30,6 +30,8 @@
 #include "jmi_log.h"
 #include "jmi_me.h"
 
+#include "jmi_block_solver_impl.h"
+
 #define nbr_allocated_iterations 30
 
 
@@ -300,9 +302,15 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         free(sw_index_tmp);
     }
 
-    ef = jmi_block_solver_solve(block->block_solver,jmi_get_t(jmi)[0],
-        (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) &&
-        (jmi->block_level == 1) && (block->n_nr > 0 || block->n_sw > 0));
+    {
+        jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, "IntegratedSolverSolve",
+                                  "Starting integrated solver at <t:%E> in <block:%d> with <nvars:%d> variables",
+                                  jmi_get_t(jmi)[0], block->block_solver->id, block->block_solver->n);
+        ef = jmi_block_solver_solve(block->block_solver,jmi_get_t(jmi)[0],
+                 (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) &&
+                 (jmi->block_level == 1) && (block->n_nr > 0 || block->n_sw > 0));
+        jmi_log_leave(jmi->log, node);
+    }
 
     jmi->block_level--;
 
