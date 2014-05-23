@@ -396,7 +396,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 int user_flags = jmi_log_get_user_flags(log);
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
-                                 "jmi_kinsol_solver", "iter\tnfe\tnje\tres_norm\tmax_res\tmax_ind\tlambda_max\tbounding_ind\tlambda", 1);
+                                 "jmi_kinsol_solver",
+                                 "iter  nfe  nje    res_norm      max_res: ind   lambda_max: ind       lambda",
+                                 1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
             }
@@ -416,7 +418,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     lambda_max = lambda = 0;
                 }
 
-                sprintf(message, "%d\t%d\t%d\t%E\t%E\t%d\t%E\t%d\t%E", (int)nniters,
+                sprintf(message, "%4d %4d %4d %11.4e  %11.4e:%4d  %11.4e:%4d  %11.4e", (int)nniters,
                         (int)(block->nb_fevals), (int)(block->nb_jevals),
                         kin_mem->kin_fnorm, max_residual, max_index, lambda_max, solver->last_bounding_index, lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
