@@ -524,6 +524,40 @@ make install
         the user directory and the installation directory of choice for
         Ipopt.</para>
       </section>
+
+      <section>
+        <title>Installing JModelica.org with WORHP (optional)</title>
+
+        <para>As an alternative to IPOPT for optimization, the CasADi
+        framework in JModelica.org also has support for the solver WORHP. Note
+        that WORHP is closed source, but offers free personal academic
+        licenses. To compile JModelica.org with support for WORHP, first
+        obtain the WORHP binaries and a license file from <link
+        xlink:href="http://www.worhp.de">http://www.worhp.de</link>. Set the
+        environment variables <literal>$WORHP</literal> to your directory
+        containing the binaries and <literal>$WORHP_LICENSE_FILE</literal> to
+        your license file.</para>
+
+        <para>Normally, this would be sufficient, but for now the following
+        additional measures are needed. Find the following six lines in
+        <literal>$JMODELICA_SRC/ThirdParty/CasADi/CasADi/interface/worhp/worhp_internal.cpp</literal>
+        and remove them:</para>
+
+        <programlisting>addOption("CutLength",OT_REAL,worhp_p_.CutLength,"Scaling factor for Cut recovery strategy");
+addOption("Ma57PivotThresh",OT_REAL,worhp_p_.Ma57PivotThresh,"Pivoting tolerance for MA57 = CNTL(1)");
+if (hasSetOption("CutLength")) worhp_p_.CutLength = getOption("CutLength");
+if (hasSetOption("Ma57PivotThresh")) worhp_p_.Ma57PivotThresh = getOption("Ma57PivotThresh");
+setOption("CutLength",worhp_p_.CutLength);
+setOption("Ma57PivotThresh",worhp_p_.Ma57PivotThresh);</programlisting>
+
+        <para>Find the line</para>
+
+        <programlisting>option(WITH_WORHP "Compile the WORHP interface" OFF)</programlisting>
+
+        <para>in
+        <literal>$JMODELICA_SRC/ThirdParty/CasADi/CasADi/CMakeLists.txt</literal>
+        and change OFF to ON.</para>
+      </section>
     </section>
 
     <section>
