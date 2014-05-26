@@ -354,7 +354,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             iter += 1;
 
-            iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Local iteration <iter:%d> at <t:%E>",
+            iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Event iteration <iter:%d> at <t:%E>",
                                           iter, cur_time);
 
             {
