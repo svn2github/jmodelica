@@ -149,16 +149,16 @@ class CasadiCollocator(object):
         """
         return casadi.SXMatrix()
 
-    def set_ipopt_option(self, k, v):
+    def set_solver_option(self, k, v):
         """
-        Sets IPOPT options.
+        Sets nonlinear programming solver options.
 
             Parameters::
 
                 k - Name of the option
                 v - Value of the option (int, double, string)
         """
-        self.solver.setOption(k,v)
+        self.solver_object.setOption(k,v)
 
     def _get_xml_variable_by_name(self, name):
         """
@@ -501,14 +501,14 @@ class CasadiCollocator(object):
             x += self._xi[i - 1, k, :] * self.pol.eval_basis(k + 1, tau, False)
         return x
 
-    def get_ipopt_statistics(self):
+    def get_solver_statistics(self):
         """ 
-        Get statistics from the last optimization.
+        Get nonlinear programming solver statistics.
 
         Returns::
 
             return_status -- 
-                Return status from IPOPT.
+                Return status from nonlinear programming solver.
 
             nbr_iter -- 
                 Number of iterations.
@@ -517,34 +517,34 @@ class CasadiCollocator(object):
                 Final value of objective function.
 
             total_exec_time -- 
-                IPOPT execution time.
+                Nonlinear programming solver execution time.
         """
-        stats = self.solver.getStats()
+        stats = self.solver_object.getStats()
         return_status = stats['return_status']
         nbr_iter = stats['iter_count']
-        objective = float(self.solver.output(casadi.NLP_SOLVER_F))
+        objective = float(self.solver_object.output(casadi.NLP_SOLVER_F))
         total_exec_time = stats['t_mainloop']
         return (return_status, nbr_iter, objective, total_exec_time)
 
-    def ipopt_solve(self):
+    def solve_nlp(self):
         """
-        Solves the NLP using IPOPT.
+        Calls the nonlinear programming solver.
 
         Returns::
 
             sol_time --
-                Duration (seconds) of call to IPOPT.
+                Duration (seconds) of call to nonlinear programming solver.
                 Type: float
         """
         # Initialize solver
-        self.solver.init()
+        self.solver_object.init()
 
         # Initial condition
-        self.solver.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
+        self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
 
         # Bounds on x
-        self.solver.setInput(self.get_xx_lb(), casadi.NLP_SOLVER_LBX)
-        self.solver.setInput(self.get_xx_ub(), casadi.NLP_SOLVER_UBX)
+        self.solver_object.setInput(self.get_xx_lb(), casadi.NLP_SOLVER_LBX)
+        self.solver_object.setInput(self.get_xx_ub(), casadi.NLP_SOLVER_UBX)
 
         # Bounds on the constraints
         n_h = self.get_equality_constraint().numel()
@@ -555,17 +555,17 @@ class CasadiCollocator(object):
         self.glub = hublb + gub
         self.gllb = hublb + glb
 
-        self.solver.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
-        self.solver.setInput(self.glub, casadi.NLP_SOLVER_UBG)
+        self.solver_object.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
+        self.solver_object.setInput(self.glub, casadi.NLP_SOLVER_UBG)
 
         # Solve the problem
         t0 = time.clock()
-        self.solver.solve()
+        self.solver_object.solve()
 
         # Get the result
-        primal_opt = N.array(self.solver.output(casadi.NLP_SOLVER_X))
+        primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
         self.primal_opt = primal_opt.reshape(-1)
-        dual_opt = N.array(self.solver.output(casadi.NLP_SOLVER_LAM_G))
+        dual_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
         self.dual_opt = dual_opt.reshape(-1)
         sol_time = time.clock() - t0
         return sol_time
@@ -2872,8 +2872,8 @@ class LocalDAECollocatorOld(CasadiCollocator):
         else:
             raise ValueError("Unknown CasADi graph %s." % graph)
 
-        # Create solver object        
-        self.solver = casadi.IpoptSolver(nlp)
+        # Create solver object
+        self.solver_object = casadi.IpoptSolver(nlp)
 
     def get_equality_constraint(self):
         return self.c_e
@@ -7032,11 +7032,17 @@ class LocalDAECollocator(CasadiCollocator):
         # Create solver object
         nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx),
                                 casadi.nlpOut(f=self.cost, g=constraints))
-        self.solver = casadi.IpoptSolver(nlp)
+        if self.solver == "IPOPT":
+            self.solver_object = casadi.IpoptSolver(nlp)
+        elif self.solver == "WORHP":
+            self.solver_object = casadi.WorhpSolver(nlp)
+        else:
+            raise CasadiCollocatorException(
+                    "Unknown nonlinear programming solver %s." % self.solver)
 
         # Expand to SX
-        #self.solver.setOption("expand",True)
-        self.solver.setOption("expand",self.expand_to_SX == True)
+        self.solver_object.setOption("expand", self.expand_to_SX == True)
+
     def get_equality_constraint(self):
         return self.c_e
 
@@ -7853,7 +7859,7 @@ class PseudoSpectral(CasadiCollocator):
         self.c_fcn.init()
 
         # Create solver
-        self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+        self.solver_object = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
 
         self._modify_init()
 

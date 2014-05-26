@@ -184,10 +184,9 @@ def run_demo(with_plots=True):
     T_res = res['cstr.T']
     Tc_res = res['cstr.Tc']
     time_res = res['time']
-
-    c_ref = res.final('c_ref') # extract constant value as last element
-    T_ref = res.final('T_ref')
-    Tc_ref = res.final('Tc_ref')
+    c_ref = res['c_ref']
+    T_ref = res['T_ref']
+    Tc_ref = res['Tc_ref']
     
     # Verify solution for testing purposes
     try:
@@ -195,7 +194,7 @@ def run_demo(with_plots=True):
     except:
         pass
     else:
-        cost = float(res.solver.solver.output(casadi.NLP_SOLVER_F))
+        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
         assert(N.abs(cost/1.e3 - 1.86162353098) < 1e-3)
 
     # Plot the results
@@ -205,20 +204,20 @@ def run_demo(with_plots=True):
         plt.hold(True)
         plt.subplot(3, 1, 1)
         plt.plot(time_res, c_res)
-        plt.plot([time_res[0], time_res[-1]], [c_ref, c_ref], '--')
+        plt.plot(time_res, c_ref, '--')
         plt.grid()
         plt.ylabel('Concentration')
         plt.title('Optimized trajectories')
 
-        plt.subplot(312)
-        plt.plot(time_res,T_res)
-        plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref],'--')
+        plt.subplot(3, 1, 2)
+        plt.plot(time_res, T_res)
+        plt.plot(time_res, T_ref, '--')
         plt.grid()
         plt.ylabel('Temperature')
 
-        plt.subplot(313)
-        plt.plot(time_res,Tc_res)
-        plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref],'--')
+        plt.subplot(3, 1, 3)
+        plt.plot(time_res, Tc_res)
+        plt.plot(time_res, Tc_ref, '--')
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')

@@ -148,7 +148,7 @@ def run_demo(with_plots=True):
     except:
         pass
     else:
-        cost = float(opt_res.solver.solver.output(casadi.NLP_SOLVER_F))
+        cost = float(opt_res.solver.solver_object.output(casadi.NLP_SOLVER_F))
         N.testing.assert_allclose(cost, 17492.465548193624, rtol=1e-5)
 
     ### 3. Simulate to verify the optimal solution

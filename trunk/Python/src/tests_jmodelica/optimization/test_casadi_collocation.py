@@ -50,7 +50,7 @@ path_to_data = os.path.join(get_files_path(), 'Data')
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
     """Helper function for asserting optimization results."""
-    cost = float(res.solver.solver.output(casadi.NLP_SOLVER_F))
+    cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
     u = res[input_name]
     u_norm = N.linalg.norm(u) / N.sqrt(len(u))
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
@@ -1552,7 +1552,7 @@ class TestLocalDAECollocator:
         
         res = op.optimize()
         (return_status, nbr_iter, objective, total_exec_time) = \
-                res.solver.get_ipopt_statistics()
+                res.solver.get_solver_statistics()
         N.testing.assert_string_equal(return_status, "Solve_Succeeded")
         N.testing.assert_array_less([nbr_iter, -nbr_iter], [100, -5])
         N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
@@ -1636,7 +1636,7 @@ class TestLocalDAECollocator:
     @testattr(casadi = True)
     def test_vdp_function(self):
         """
-        Test a VDP model containing a function
+        Test a VDP model containing a function.
         """
         op = self.vdp_function_op
 
@@ -1658,5 +1658,28 @@ class TestLocalDAECollocator:
 
         # Test without SX expansion
         opts['expand_to_SX'] = False
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+    @testattr(worhp = True)
+    def test_worhp(self):
+        """
+        Test using WORHP instead of IPOPT.
+        """
+        op = self.vdp_bounds_lagrange_op
+        opts = op.optimize_options()
+
+        # Reference values
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
+
+        # Test with IPOPT
+        opts['solver'] = 'IPOPT'
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+        # Test with WORHP
+        opts['solver'] = 'WORHP'
+        opts['WORHP_options']['NLPprint'] = -1
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)

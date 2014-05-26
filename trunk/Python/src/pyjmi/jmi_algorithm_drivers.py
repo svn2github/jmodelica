@@ -1259,13 +1259,13 @@ class CasadiPseudoSpectralAlg(AlgorithmBase):
         Helper function that sets options for the solver.
         """
         for k, v in self.solver_options.iteritems():
-            self.nlp.set_ipopt_option(k, v)
+            self.nlp.set_solver_option(k, v)
             
     def solve(self):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        self.nlp.ipopt_solve()
+        self.nlp.solve_nlp()
         self._write_result()
         
     def _write_result(self):
@@ -1582,14 +1582,14 @@ class LocalDAECollocationAlgOld(AlgorithmBase):
         Helper function that sets options for the solver.
         """
         for (k, v) in self.solver_options.iteritems():
-            self.nlp.set_ipopt_option(k, v)
+            self.nlp.set_solver_option(k, v)
             
     def solve(self):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
         times = {}
-        times['sol'] = self.nlp.ipopt_solve()
+        times['sol'] = self.nlp.solve_nlp()
         self._write_result()
         
         # Calculate times
@@ -2014,7 +2014,7 @@ class LocalDAECollocationAlgOldResult(JMResultBase):
             matrix --
                 Matrix value
         """
-        J_fcn = self.solver.solver.jacG()
+        J_fcn = self.solver.solver_object.jacG()
         if point == "fcn":
             return J_fcn
         elif point == "init":
@@ -2061,7 +2061,7 @@ class LocalDAECollocationAlgOldResult(JMResultBase):
             dual --
                 Symbolic dual variables. Only returned if point is "sym".
         """
-        H_fcn = self.solver.solver.hessLag()
+        H_fcn = self.solver.solver_object.hessLag()
         if point == "fcn":
             return H_fcn
         elif point == "init":
@@ -2160,7 +2160,7 @@ class LocalDAECollocationAlgOldResult(JMResultBase):
         """
         Computes the objective scaling factor sigma.
         """
-        grad_fcn = self.solver.solver.gradF()
+        grad_fcn = self.solver.solver_object.gradF()
         grad_fcn.setInput(self.solver.xx_init, 0)
         grad_fcn.setInput([], 1)
         grad_fcn.evaluate()
@@ -2402,21 +2402,27 @@ class LocalDAECollocationAlg(AlgorithmBase):
                     del self.nominal_traj_mode[name]
         
         # Solver options
-        self.solver_options = self.IPOPT_options
+        if self.solver == "IPOPT":
+            self.solver_options = self.IPOPT_options
+        elif self.solver == "WORHP":
+            self.solver_options = self.WORHP_options
+        else:
+            raise ValueError('Unknown nonlinear programming solver %s.' %
+                             self.solver)
         
     def _set_solver_options(self):
         """ 
         Helper function that sets options for the solver.
         """
         for (k, v) in self.solver_options.iteritems():
-            self.nlp.set_ipopt_option(k, v)
+            self.nlp.set_solver_option(k, v)
             
     def solve(self):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
         times = {}
-        times['sol'] = self.nlp.ipopt_solve()
+        times['sol'] = self.nlp.solve_nlp()
         self._write_result()
         
         # Calculate times
@@ -2459,7 +2465,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
         return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
                                             res, self.options, self.times,
                                             h_opt)
-    
+
     @classmethod
     def get_default_options(cls):
         """ 
@@ -2722,20 +2728,21 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or
             pyjmi.optimization.casadi_collocation.MeasurementData
             Default: None
+
+        solver --
+            Specifies the nonlinear programming solver to be used. Possible
+            choices are 'IPOPT' and 'WORHP'.
+
+            Type: String
+            Default: 'IPOPT'
     
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
         >>> opts['n_e'] = 100
     
-    IPOPT options can be provided in the option IPOPT_options. Since CasADi's
-    IPOPT interface is used for this algorithm, which includes more options
-    than just the original IPOPT options, please see the documentation for
-    CasADi's IpoptSolver class for a complete list of the available IPOPT
-    options, which is available at
-    http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html
-    
-    IPOPT options are set using the syntax for dictionaries::
+    Options for the nonlinear programming solver can be provided in the option
+    <solver name>_options, using the syntax for dictionaries::
         
         >>> opts['IPOPT_options']['max_iter'] = 500
     """
@@ -2767,7 +2774,9 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'check_point': False,
                 'reorder_vars': False,
                 'delayed_feedback': None,
-                'IPOPT_options': {}}
+                'solver': 'IPOPT',
+                'IPOPT_options': {},
+                'WORHP_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
@@ -2817,7 +2826,8 @@ class LocalDAECollocationAlgResult(JMResultBase):
         print("\nTotal time: %.2f seconds" % times['tot'])
         print("Initialization time: %.2f seconds" % times['init'])
         print("Solution time: %.2f seconds" % times['sol'])
-        print("Post-processing time: %.2f seconds" % times['post_processing'])
+        print("Post-processing time: %.2f seconds\n" %
+              times['post_processing'])
 
         # Print condition numbers
         if self.options['print_condition_numbers']:
@@ -2860,7 +2870,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             matrix --
                 Matrix value
         """
-        J_fcn = self.solver.solver.jacG()
+        J_fcn = self.solver.solver_object.jacG()
         if point == "fcn":
             return J_fcn
         elif point == "init":
@@ -2907,7 +2917,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             dual --
                 Symbolic dual variables. Only returned if point is "sym".
         """
-        H_fcn = self.solver.solver.hessLag()
+        H_fcn = self.solver.solver_object.hessLag()
         if point == "fcn":
             return H_fcn
         elif point == "init":
@@ -3006,7 +3016,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         """
         Computes the objective scaling factor sigma.
         """
-        grad_fcn = self.solver.solver.gradF()
+        grad_fcn = self.solver.solver_object.gradF()
         grad_fcn.setInput(self.solver.xx_init, 0)
         grad_fcn.setInput([], 1)
         grad_fcn.evaluate()

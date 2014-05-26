@@ -176,12 +176,12 @@ plt.show()
         <para><emphasis role="bold">Dynamic optimization of DAEs using direct
         collocation with CasADi.</emphasis> This algorithm solves optimal
         control and parameter estimation problems. It is implemented in
-        Python, uses CasADi for computing function derivatives and IPOPT for
-        solving the resulting NLP. In terms of functionality, this algorithm
-        is very similar to the default JMU-based algorithm, but offers
-        significant performance improvements in several regards. It is however
-        still in a state of development, and is not as mature as the default
-        algorithm.</para>
+        Python, uses CasADi for computing function derivatives and IPOPT or
+        WORHP for solving the resulting NLP. In terms of functionality, this
+        algorithm is very similar to the default JMU-based algorithm, but
+        offers significant performance improvements in several regards. It is
+        however still in a state of development, and is not as mature as the
+        default algorithm.</para>
       </listitem>
 
       <listitem>
@@ -3075,11 +3075,12 @@ print "a4: " + str(sens_res.final('a4')) + ", standard deviation: " + str(sigma_
       estimation of DAEs based on the same collocation scheme that has proven
       successful in the default algorithm has been initiated. The new
       algorithm is based on the CasADi package for evaluation of first and
-      second order derivatives, and for integration with the IPOPT algorithm.
-      The two main benefits of using CasADi, through its Python interface, is
-      increased flexibility and extensibility of the implementation improved
-      performance. The goal is for the CasADi-based algorithm to replace the
-      C-based algorithm, once it has sufficiently matured.</para>
+      second order derivatives, and for integration with the IPOPT and WORHP
+      algorithms. The two main benefits of using CasADi, through its Python
+      interface, is increased flexibility and extensibility of the
+      implementation improved performance. The goal is for the CasADi-based
+      algorithm to replace the C-based algorithm, once it has sufficiently
+      matured.</para>
 
       <para>The direct collocation method can be used to solve dynamic
       optimization problems, including optimal control problems and parameter
@@ -3094,18 +3095,12 @@ print "a4: " + str(sens_res.final('a4')) + ", standard deviation: " + str(sigma_
       Accordingly, the mesh needs to be fine-grained enough to ensure
       sufficiently accurate approximation of the differential constraint. For
       an overview of simultaneous optimization algorithms, see [2]. The
-      algorithm <link
-      xlink:href="https://projects.coin-or.org/Ipopt">IPOPT</link> is used to
-      solve the non-linear program resulting from collocation.</para>
+      nonlinear programming solvers IPOPT and WORHP can be used to solve the
+      nonlinear program resulting from collocation.</para>
 
       <para>The collocation method requires that the model to be optimized
       does not contain discontinuities such as if equations, when clauses or
       integer variables.</para>
-
-      <para>The mathematical formulation of the algorithm can be found in the
-      <link
-      xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
-      API documentation</link>.</para>
 
       <para>Optimization models are represented using the class
       <literal>OptimizationProblem</literal>. An object containing all the
@@ -3409,12 +3404,30 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry>solver</entry>
+
+              <entry>'IPOPT'</entry>
+
+              <entry>Specifies the nonlinear programming solver to be used.
+              Possible choices are 'IPOPT' and 'WORHP'.</entry>
+            </row>
+
+            <row>
               <entry><literal>IPOPT_options</literal></entry>
 
               <entry>IPOPT defaults</entry>
 
-              <entry>IPOPT options for solution of NLP. See documentation of
-              CasADi's IPOPT interface for available options.</entry>
+              <entry>IPOPT options for solution of NLP. See IPOPT's
+              documentation for available options.</entry>
+            </row>
+
+            <row>
+              <entry><literal>WORHP_options</literal></entry>
+
+              <entry>WORHP defaults</entry>
+
+              <entry>WORHP options for solution of NLP. See WORHP's
+              documentation for available options.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -3423,15 +3436,11 @@ opts? # View the help text</programlisting>
       <para>A few of the options are experimental, so changing default values
       should be done with some care.</para>
 
-      <para>The last option, <literal>IPOPT_options</literal>, serves as an
-      interface for setting options in IPOPT. Note that this option utilizes
-      CasADi's IPOPT interface, which includes more options than just the
-      original IPOPT options. Thus, please see the documentation for CasADi's
-      IpoptSolver class for a complete list of the available IPOPT options,
-      which is available at
-      http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html.
-      To exemplify the usage of this algorithm option, the maximum number of
-      iterations in IPOPT can be set using the following syntax:</para>
+      <para>The last options, <literal>IPOPT_options</literal> and
+      <literal>WORHP_options</literal>, serve as interface for setting options
+      in IPOPT and WORHP. To exemplify the usage of these algorithm options,
+      the maximum number of iterations in IPOPT can be set using the following
+      syntax:</para>
 
       <programlisting>opts = model.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
@@ -3454,22 +3463,22 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       initialization of models. It is recommended to use PyFMI for these
       purposes instead.</para>
 
-      <para>Some statistics from IPOPT can be obtained by issuing the
+      <para>Some statistics from the NLP solver can be obtained by issuing the
       command</para>
 
-      <programlisting>res_opt.solver.get_ipopt_statistics()
+      <programlisting>res_opt.solver.get_solver_statistics()
 </programlisting>
 
       <para>The return argument of this function can be found by using the
       interactive help:</para>
 
-      <programlisting>help(res.solver.opt_get_ipopt_statistics)
-Get statistics from the last optimization run.
+      <programlisting>help(res.solver.opt_get_solver_statistics)
+Get nonlinear programming solver statistics.
     
 Returns::
     
     return_status -- 
-        Return status from IPOPT.
+        Return status from nonlinear programming solver.
             
     nbr_iter -- 
         Number of iterations.
@@ -4225,11 +4234,11 @@ res = op.optimize(options=opt_opts)
             elements in the mesh from 50 to 100. This is done by setting the
             corresponding option and provide it as an argument to the
             <literal>optimize</literal> method. We also lower the tolerance of
-            Ipopt to get a more accurate result. You should see the output of
-            Ipopt in the Python shell as the algorithm iterates to find the
-            optimal solution. Ipopt should terminate with a message like
-            'Optimal solution found' or 'Solved to an acceptable level' in
-            order for an optimum to be found. The optimization result object
+            IPOPT to get a more accurate result. You should see the output of
+            IPOPT in the Python shell as the algorithm iterates to find the
+            optimal solution. IPOPT should terminate with a message like
+            'Optimal solution found' or 'Solved to acceptable level' in order
+            for an optimum to have been found. The optimization result object
             is returned and the optimization data are stored in
             <literal>res</literal>.</para>
 
@@ -4241,10 +4250,9 @@ c_res = res['cstr.c']
 T_res = res['cstr.T']
 Tc_res = res['cstr.Tc']
 time_res = res['time']
-
-c_ref = res.final('c_ref') # extract constant value as last element
-T_ref = res.final('T_ref')
-Tc_ref = res.final('Tc_ref')
+c_ref = res['c_ref']
+T_ref = res['T_ref']
+Tc_ref = res['Tc_ref']
 </programlisting>
 
             <para>Finally, we plot the result using the functions available in
@@ -4256,29 +4264,28 @@ plt.figure(2)
 plt.hold(True)
 plt.subplot(3, 1, 1)
 plt.plot(time_res, c_res)
-plt.plot([time_res[0], time_res[-1]], [c_ref, c_ref], '--')
+plt.plot(time_res, c_ref, '--')
 plt.grid()
 plt.ylabel('Concentration')
 plt.title('Optimized trajectories')
 
-plt.subplot(312)
-plt.plot(time_res,T_res)
-plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref],'--')
+plt.subplot(3, 1, 2)
+plt.plot(time_res, T_res)
+plt.plot(time_res, T_ref, '--')
 plt.grid()
 plt.ylabel('Temperature')
 
-plt.subplot(313)
-plt.plot(time_res,Tc_res)
-plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref],'--')
+plt.subplot(3, 1, 3)
+plt.plot(time_res, Tc_res)
+plt.plot(time_res, Tc_ref, '--')
 plt.grid()
 plt.ylabel('Cooling temperature')
 plt.xlabel('time')
 plt.show()
+
 </programlisting>
 
-            <para>Notice that parameters are returned as scalar values whereas
-            variables are returned as vectors and that this must be taken into
-            account when plotting. You should now see the plot shown in <xref
+            <para>You should now see the plot shown in <xref
             linkend="opt-fig-cstr-casadi-opt1"/>.</para>
 
             <figure xml:id="opt-fig-cstr-casadi-opt1">

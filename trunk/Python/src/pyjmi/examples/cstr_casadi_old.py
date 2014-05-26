@@ -198,7 +198,7 @@ def run_demo(with_plots=True):
     except:
         pass
     else:
-        cost = float(res.solver.solver.output(casadi.NLP_SOLVER_F))
+        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
         assert(N.abs(cost/1.e3 - 1.8585429) < 1e-3)
     
     # Plot the results
