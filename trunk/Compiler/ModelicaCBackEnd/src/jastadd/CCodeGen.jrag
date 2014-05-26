@@ -3349,7 +3349,7 @@ aspect Serialize {
             this.tempMap = tempMap;
         }
         protected String acquireTemp(String key) {
-            String s = "tmp_" + tempNbr++;
+            String s = "ECEtmp_" + tempNbr++;
             tempMap.put(key, s);
             return s;
         }
@@ -3357,10 +3357,13 @@ aspect Serialize {
             printComposite(type);
         }
         protected void printComps(FType type) {
-            if (type.isExternalObject())
-                printComps((FExternalObjectType) type);
-            else
+            if (type.isExternalObject()) {
+                FExternalObjectType t = (FExternalObjectType) type;
+                t.myConstructorStmt().genVarDecls_C(p, str, indent());
+                printComps(t);
+            } else {
                 super.printComps(type);
+            }
         }
     }
     

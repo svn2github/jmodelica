@@ -98,7 +98,7 @@ aspect FlatTypeAnalysis {
 	eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
 	eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
 	
-    syn nta FType InstExternalObject.getType() = new FExternalObjectType(size(), getClassName().name());
+    syn nta FType InstExternalObject.getType() = new FExternalObjectType(size(), getClassName().myInstClassDecl().qualifiedName());
     
     public FExternalStmt FAlgorithm.getFExternalStmt() {
         for (FStatement stmt : getFStatements())

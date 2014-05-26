@@ -485,31 +485,84 @@ package CEval
       (out,a,b) = dgelsx({{1,2},{3,4}, {5,6}},{{7,8,9},{10,11,12}, {13,14,15}});
       
     end DgelsxTest;
-    model ExtObj1Test
-        model Obj2
-            extends ExternalObject;
-            function constructor
-                input  Real x;
-                input  String s;
-                output Obj2 o2;
-                external "C" my_constructor2(x,o2,s)
-                    annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-            end constructor;
-            function destructor
-                input Obj2 o2;
-                external;
-            end destructor;
-        end Obj2;
-        
-        function use
+    package Os
+    model Obj1
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            input Integer y;
+            input Boolean b;
+            input String s;
+            output Obj1 o1;
+            external "C" o1 = my_constructor1(x,y,b,s);
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input Obj1 o1;
+            external "C"
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end Obj1;
+    end Os;
+    model Obj2
+        extends ExternalObject;
+        function constructor
+            input Real[:] x;
+            input Integer[2] y;
+            input Boolean[2] b;
+            input String[:] s;
+            output Obj2 o2;
+            external "C" my_constructor2(x,y,o2,b,s);
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input Obj2 o2;
+            external "C"
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end Obj2;
+    model Obj3
+        extends ExternalObject;
+        function constructor
+            input Obj2[:] o2;
+            output Obj3 o3;
+            external "C" my_constructor3(o2,o3);
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input Obj3 o3;
+            external "C"
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end Obj3;
+    model ExtObjTest1
+        function use1
+            input  Os.Obj1 o1;
+            output Real x;
+            external annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use1;
+        Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
+        Real x = use1(o1); 
+    end ExtObjTest1;
+    model ExtObjTest2
+        function use2
             input  Obj2 o2;
             output Real x;
             external annotation(Library="extObjects", Include="#include \"extObjects.h\"");
-        end use;
-    
-        Obj2 o2 = Obj2(3.13, "HEJ");
-        constant Real x = use(o2); 
-    end ExtObj1Test;
+        end use2;
+        Obj2 o2 = Obj2({3.13,3.14}, {3,4}, {false, true}, {"A message 1", "A message 2"});
+        constant Real x = use2(o2); 
+    end ExtObjTest2;
+    model ExtObjTest3
+        function use3
+            input  Obj3 o3;
+            output Real x;
+            external annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use3;
+        Obj2 o2 = Obj2({3.13,3.14}, {3,4}, {false, true}, {"A message 1", "A message 2"});
+        Obj3 o3 = Obj3({o2,o2});
+        constant Real x = use3(o3); 
+    end ExtObjTest3;
   end Advanced;
 end CEval;
 

@@ -199,7 +199,7 @@ aspect ContentCheck {
 	}
 	
 	syn boolean FType.extObjCompatible(InstClassDecl icd) = false;
-	eq FExternalObjectType.extObjCompatible(InstClassDecl icd) = getName().equals(icd.name());
+	eq FExternalObjectType.extObjCompatible(InstClassDecl icd) = getName().equals(icd.qualifiedName());
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck(ErrorCheckType checkType) {

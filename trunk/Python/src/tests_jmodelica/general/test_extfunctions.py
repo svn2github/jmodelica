@@ -565,16 +565,38 @@ class TestAdvanced:
         nose.tools.assert_equals(resSim.final('b'), resConst.final('b'))
         
     @testattr(stddist = True)
-    def testEXTOBJ(self):
+    def testExtObjScalar(self):
         '''
-        A test using the external fortran function dgelsx from lapack.
-        Compares simulation results with constant evaluation results.
+        Test constant evaluation of a simple external object.
         '''
-        cpath = "ExtFunctionTests.CEval.Advanced.ExtObj1Test"
+        cpath = "ExtFunctionTests.CEval.Advanced.ExtObjTest1"
         fmu_name = compile_fmu(cpath, self.fpath)
         model = load_fmu(fmu_name)
         resConst = model.simulate()
-        nose.tools.assert_equals(resConst.final('x'), 3.13)
+        nose.tools.assert_equals(resConst.final('x'), 6.13)
+        
+    @testattr(stddist = True)
+    def testExtObjArrays(self):
+        '''
+        Test constant evaluation of arrays of external objects.
+        '''
+        cpath = "ExtFunctionTests.CEval.Advanced.ExtObjTest2"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        resConst = model.simulate()
+        nose.tools.assert_equals(resConst.final('x'), 13.27)
+        
+    @testattr(stddist = True)
+    def testExtObjRecursive(self):
+        '''
+        Test constant evaluation of external object encapsulating 
+        external objects.
+        '''
+        cpath = "ExtFunctionTests.CEval.Advanced.ExtObjTest3"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        resConst = model.simulate()
+        nose.tools.assert_equals(resConst.final('x'), 26.54)
     
 class TestUtilities:
     '''

@@ -541,6 +541,12 @@ aspect Scalarization {
 		fv.setEnum(getEnum().fullCopy());
 		return fv;
 	}
+    
+    public FExternalObjectVariable FExternalObjectVariable.copyForName(FQName name) {
+        FExternalObjectVariable fv = (FExternalObjectVariable) super.copyForName(name);
+        fv.setTypeName(getTypeName().fullCopy());
+        return fv;
+    }
 
 	/**
 	 * Create a copy of the attibute with dimensions removed from all array expressions according 
