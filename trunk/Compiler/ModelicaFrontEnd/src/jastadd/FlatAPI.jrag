@@ -2946,7 +2946,8 @@ aspect FlatExternalFunctionAPI {
         HashSet<String> res = new HashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.library() != null)
-                res.addAll(ext.library());
+                for (String lib : ext.library())
+                    res.add(lib);
         return res;
     }
     
@@ -2974,18 +2975,18 @@ aspect FlatExternalFunctionAPI {
         return res;
     }
 	
-	syn ArrayList<String> FExternalStmt.library() = library;
+	syn String[] FExternalStmt.library() = library;
 	syn String FExternalStmt.include()            = include;
 	syn String FExternalStmt.libraryDirectory()   = libraryDir;
 	syn String FExternalStmt.includeDirectory()   = includeDir;
 
-	private ArrayList<String> FExternalStmt.library;
+	private String[] FExternalStmt.library;
 	private String FExternalStmt.include;
 	private String FExternalStmt.libraryDir;
 	private String FExternalStmt.includeDir;
 	
 	public void FExternalStmt.extractLibrary(InstExternal n) {
-		library = n.annotation("Library").asStringList();
+		library = n.annotation("Library").asStringVector();
 		include = n.annotation("Include").string();
 		libraryDir = n.annotation("LibraryDirectory").string();
 		includeDir = n.annotation("IncludeDirectory").string();

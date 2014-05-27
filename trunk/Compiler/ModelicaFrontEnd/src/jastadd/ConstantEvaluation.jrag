@@ -150,6 +150,24 @@ aspect ConstantEvaluation {
 	    	throw new ConstantEvaluationException(this, "get real value of "); 
 	    }
 	    
+        /**
+         * \brief Convert to a vector of double, default implementation.
+         * 
+         * @return Value converted to double vector.
+         */
+        public double[] realVector() { 
+            throw new ConstantEvaluationException(this, "get real vector of "); 
+        }
+        
+        /**
+         * \brief Convert to a matrix of doubles, default implementation.
+         * 
+         * @return Value converted to double matrix.
+         */
+        public double[][] realMatrix() { 
+            throw new ConstantEvaluationException(this, "get real matrix of "); 
+        }
+        
 	    /**
 	     * \brief Convert to boolean, default implementation.
 	     * 
@@ -162,12 +180,21 @@ aspect ConstantEvaluation {
 	    /**
 	     * \brief Convert to string, default implementation.
 	     * 
-	     * @return Value converted to string.	     
+	     * @return Value converted to string.
 	     */
 	    public String stringValue() { 
 	    	throw new ConstantEvaluationException(this, "get string value of "); 
 	    }
 	    
+        /**
+         * \brief Convert to a vector of strings, default implementation.
+         * 
+         * @return Value converted to string vector.
+         */
+        public String[] stringVector() { 
+            throw new ConstantEvaluationException(this, "get string vector of "); 
+        }
+        
 	    /**
 	     * \brief Create a literal AST node from constant, default 
 	     *  implementation.
@@ -206,6 +233,56 @@ aspect ConstantEvaluation {
 	    	return new CValueString(stringValue());
 	    }
 
+        /**
+         * Returns true if the constant value is of integer type or array that
+         * only contain integer types.
+         * 
+         * @return True if the constant is an integer value.
+         */
+        public boolean isInteger() {
+            return false;
+        }
+
+        /**
+         * Returns true if the constant value is of real type or array that
+         * only contain real types.
+         * 
+         * @return True if the constant is a real value.
+         */
+        public boolean isReal() {
+            return false;
+        }
+
+        /**
+         * Returns true if the constant value is of boolean type or array that
+         * only contain boolean types.
+         * 
+         * @return True if the constant is a boolean value.
+         */
+        public boolean isBoolean() {
+            return false;
+        }
+
+        /**
+         * Returns true if the constant value is of string type or array that
+         * only contain string types.
+         * 
+         * @return True if the constant is a string value.
+         */
+        public boolean isString() {
+            return false;
+        }
+
+        /**
+         * Returns true if the constant value is of enum type or array that
+         * only contain enum types.
+         * 
+         * @return True if the constant is a enum value.
+         */
+        public boolean isEnum() {
+            return false;
+        }
+
 	    /**
 	     * \brief Returns true if the constant value is of numeric type.
 	     * 
@@ -243,12 +320,61 @@ aspect ConstantEvaluation {
         }
 	   
         /**
-         * \brief Check if this is an array.
+         * 
+         * Returns true if the constant value represents a scalar value.
+         * @return True if constant is a scalar
+         */
+        public final boolean isScalar() {
+            return !isArray();
+        }
+
+        /**
+         * Returns true if the constant value represents an array.
+         * ,
+         * @return True if constant is an array.
          */
         public boolean isArray() {
         	return false;
         }
         
+        /**
+         * Returns true if the constant value is a vector.
+         * 
+         * @return True if the constant is a vector
+         */
+        public final boolean isVector() {
+            return isArray(-1);
+        }
+
+        /**
+         * Returns true if the constant value is a matrix.
+         * 
+         * @return True if the constant is a matrix
+         */
+        public final boolean isMatrix() {
+            return isArray(-1, -1);
+        }
+
+        /**
+         * Returns true if the constant value is an array with the given
+         * dimention sizes.
+         * It is possible to allow dimention of unknown size by providing a
+         * negative number for that dimention.
+         * 
+         * @param int[] Sizes of each dimention. 
+         * @return True if the constant is an array with given dimention sizes.
+         */
+        public final boolean isArray(int ... dims) {
+            return isArray(0, dims);
+        }
+
+        /**
+         * Internal method for doing array dimention size check.
+         */
+        protected boolean isArray(int pos, int[] dims) {
+            return false;
+        }
+
         /**
          * \brief Convenience method for accessing an array CValue as CValueArray.
          * 
@@ -408,6 +534,16 @@ aspect ConstantEvaluation {
         	return new FIntegerLitExp(value); 
         }
 
+        @Override
+        public boolean isInteger() {
+            return true;
+        }
+        
+        @Override
+        public boolean isReal() {
+            return true;
+        }
+        
 	    /**
 	     * \brief Returns true if the constant value is of numeric type.
 	     * 
@@ -478,6 +614,11 @@ aspect ConstantEvaluation {
         	return new FRealLitExp(value); 
         }
 
+        @Override
+        public boolean isReal() {
+            return true;
+        }
+        
 	    /**
 	     * \brief Returns true if the constant value is of numeric type.
 	     * 
@@ -555,6 +696,11 @@ aspect ConstantEvaluation {
       	  return FBooleanLitExp.create(value); 
       	  }
 
+        @Override
+        public boolean isBoolean() {
+            return true;
+        }
+        
       }
       
 	/**
@@ -596,7 +742,12 @@ aspect ConstantEvaluation {
 	    public String toString() {
 	    	return '"' + value + '"';
 	    }
-                
+
+        @Override
+        public boolean isString() {
+            return true;
+        }
+        
       }
     
 	/**
@@ -685,6 +836,84 @@ aspect ConstantEvaluation {
     		return true;
     	}
         
+        @Override
+        public boolean isReal() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isReal();
+            return res;
+        }
+
+        @Override
+        public boolean isInteger() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isInteger();
+            return res;
+        }
+
+        @Override
+        public boolean isString() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isString();
+            return res;
+        }
+
+        @Override
+        public boolean isBoolean() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isBoolean();
+            return res;
+        }
+
+        @Override
+        public boolean isEnum() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isEnum();
+            return res;
+        }
+
+        @Override
+        public boolean isArray(int pos, int[] dims) {
+            if (dims[pos] >= 0 && dims[pos] != values.length)
+                return false;
+            boolean res = true;
+            for (CValue cvalue : values) {
+                if (pos + 1 == dims.length)
+                    res &= cvalue.isScalar();
+                else
+                    res &= cvalue.isArray(pos + 1, dims);
+            }
+            return res;
+        }
+
+        @Override
+        public double[] realVector() {
+            double[] vector = new double[values.length];
+            for (int i = 0; i < values.length; i++)
+                vector[i] = values[i].realValue();
+            return vector;
+        }
+
+        @Override
+        public double[][] realMatrix() { 
+            double[][] matrix = new double[values.length][];
+            for (int i = 0; i < values.length; i++)
+                matrix[i] = values[i].realVector();
+            return matrix;
+        }
+
+        @Override
+        public String[] stringVector() { 
+            String[] vector = new String[values.length];
+            for (int i = 0; i < values.length; i++)
+                vector[i] = values[i].stringValue();
+            return vector;
+        }
+
         /**
          * \brief Convenience method for accessing an array CValue as CValueArray.
          * 
@@ -3812,4 +4041,38 @@ aspect ExternalCEval {
     public CValue FEnumType.deserializeScalar(ProcessCommunicator com) throws IOException {
         return new CValueEnum(this, (int) com.deserializeReal());
     }
+}
+
+aspect SourceCeval {
+    syn CValue Exp.ceval()        = CValue.UNKNOWN;
+    eq StringLitExp.ceval()       = new CValueString(unEscape());
+    eq AccessExp.ceval()          = new CValueString(getAccess().name());
+    eq BooleanLitExpTrue.ceval()  = CValueBoolean.TRUE;
+    eq BooleanLitExpFalse.ceval() = CValueBoolean.FALSE;
+    eq IntegerLitExp.ceval()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
+    eq RealLitExp.ceval()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
+    eq ArrayConstructor.ceval() {
+        CValueArray arrayValue = new CValueArray(new Size(getFunctionArguments().getNumExp()));
+        for (Exp exp : getFunctionArguments().getExps())
+            arrayValue.addCell(exp.ceval());
+        return arrayValue;
+    }
+    eq NegExp.ceval() {
+        CValue value = getExp().ceval();
+        if (value.isInteger())
+            return new CValueInteger(-value.intValue());
+        else if (value.isReal())
+            return new CValueReal(-value.realValue());
+        else
+            return CValue.UNKNOWN;
+    }
+    
+}
+
+aspect ConstantEvaluable {
+    public interface ConstantEvaluable {
+        public CValue ceval();
+    }
+    Exp implements ConstantEvaluable;
+    FExp implements ConstantEvaluable;
 }

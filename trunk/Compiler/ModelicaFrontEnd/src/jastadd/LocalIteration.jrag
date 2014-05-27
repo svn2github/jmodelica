@@ -17,7 +17,7 @@ aspect LocalIteration{
                 AnnotationNode enabledAnnotation = localIterationNode.forPath("enabled");
                 Exp enabledExp = enabledAnnotation.exp();
                 if (enabledExp != null)
-                    localIterationAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
+                    localIterationAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEach()));
             }
 
             @Override

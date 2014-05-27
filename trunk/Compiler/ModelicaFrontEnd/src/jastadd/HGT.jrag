@@ -77,7 +77,7 @@ aspect HGT {
                 Exp enabledExp = enabledAnnotation.exp();
                 if (enabledExp != null) {
                     enabledFExp = enabledExp.instantiate();
-                    enabledEach = enabledAnnotation.isEachSet();
+                    enabledEach = enabledAnnotation.isEach();
                 }
                 AnnotationNode iterationVariableAnnotation = residualNode.forPath("iterationVariable");
                 Exp iterationVariableExp = iterationVariableAnnotation.exp();
@@ -101,7 +101,7 @@ aspect HGT {
                         dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, src.isArray()));
                     } else {
                         dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, src.containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(src.getFQNamePrefix()), 
-                                FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEachSet()));
+                                FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEach()));
                     }
                 }
             }
@@ -162,12 +162,12 @@ aspect HGT {
         if (residualAttr == null)
             return;
         FAttribute enabledAttr = residualAttr.findAttribute("enabled");
-        if (enabledAttr != null) {
+        if (enabledAttr != null && enabledAttr.hasValue()) {
             FExp enabledExp = enabledAttr.getValue();
             typeCheckHGTEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
         }
         FAttribute iterVarAttr = residualAttr.findAttribute("iterationVariable");
-        if (iterVarAttr != null && !iterVarAttr.getValue().asInstAccess().isUnknown()) {
+        if (iterVarAttr != null && iterVarAttr.hasValue() && !iterVarAttr.getValue().asInstAccess().isUnknown()) {
             FExp var = iterVarAttr.getValue();
             FTypePrefixVariability variability = var.variability();
             if (!variability.continuousVariability())

@@ -1645,7 +1645,8 @@ public class ModelicaCompiler {
             Set<String> libDirs = new HashSet<String>();
             Set<String> incDirs = new HashSet<String>();
             if (ext.library() != null)
-                libs.addAll(ext.library());
+                for (String lib : ext.library())
+                    libs.add(lib);
             if (ext.libraryDirectory() != null)
                 libDirs.add(ext.libraryDirectory());
             if (ext.includeDirectory() != null)

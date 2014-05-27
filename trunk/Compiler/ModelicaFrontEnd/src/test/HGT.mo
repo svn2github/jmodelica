@@ -533,7 +533,7 @@ Solution:
 
         annotation(__JModelica(UnitTesting(tests={
             FClassMethodTestCase(
-                name="Unpaired_Enabled",
+                name="Unpaired_Enabled5",
                 methodName="printDAEBLT",
                 equation_sorting=true,
                 automatic_tearing=true,

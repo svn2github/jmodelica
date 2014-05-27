@@ -39,7 +39,7 @@ aspect EquationNominal{
                 AnnotationNode enabledAnnotation = nominalNode.forPath("enabled");
                 Exp enabledExp = enabledAnnotation.exp();
                 if (enabledExp != null)
-                    nominalAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEachSet()));
+                    nominalAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEach()));
             }
 
             @Override

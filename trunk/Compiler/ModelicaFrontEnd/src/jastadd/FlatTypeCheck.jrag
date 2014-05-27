@@ -156,7 +156,7 @@ aspect FlatTypeCheck {
             AnnotationNode enabledNode = iterationNode.forPath("enabled");
             if (enabledNode.exists()) {
                 FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-                typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
+                typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEach());
             }
         }
         

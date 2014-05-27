@@ -772,6 +772,15 @@ aspect Constructors {
                 true, level, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
+    /**
+     * \brief Create an FInternalAttribute with only the children that are 
+     *        valid for them.
+     */
+    public FAnnotationAttribute.FAnnotationAttribute(String name) {
+        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+                true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
+    }
+    
     public FIdDeclAttribute.FIdDeclAttribute(String name, String decl) {
         this(new FIdUse("*"), new FIdDecl(name), new Opt<FExp>(), 
                 true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>(), new FIdDecl(decl));

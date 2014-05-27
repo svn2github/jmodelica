@@ -447,6 +447,11 @@ FAttribute : BaseNode ::= Type:FIdUse
 FInternalAttribute : FAttribute;
 
 /**
+ * Represents and attribute that was generated from an annotation.
+ */
+FAnnotationAttribute : FAttribute;
+
+/**
  * An internal attribute for representing declaration of equation names.
  */
 FIdDeclAttribute : FInternalAttribute ::= FIdDecl;
