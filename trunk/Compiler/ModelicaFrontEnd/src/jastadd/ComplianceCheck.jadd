@@ -200,12 +200,6 @@ aspect ComplianceCheck {
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
 	}
 	
-	public void InstRecordConstructor.complianceCheck(ErrorCheckType checkType) {
-		for (InstFunctionArgument a : getArgs())
-			if (a.getFExp().size().isUnknown())
-				compliance("Unknown sizes in record constructors is not supported");
-	}
-	
 	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (inFunction() && !getFExp().canCeval()) {

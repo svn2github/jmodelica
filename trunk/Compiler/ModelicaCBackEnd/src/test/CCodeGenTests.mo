@@ -3390,7 +3390,7 @@ model CUnknownArray7
         output R1[m,m] o;
     algorithm
         for i in 1:m loop
-            o[i,:] := {R1({R2(i*j)}) for j in 1:m};
+            o[i,:] := {R1({R2({i*j})}) for j in 1:m};
         end for;
     end f;
     

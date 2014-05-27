@@ -472,14 +472,7 @@ aspect FlatTypeAnalysis {
 	eq FBinEventGenExp.argType() = getX().type().numericPromotion(getY().type());
 	
 	eq FRecordConstructor.type() = getType();
-	syn FType FRecordConstructor.getType() {
-		FRecordType res = getRecord().recordType().fullCopy();
-		int n = getNumArg();
-		for (int i = 0; i < n; i++)
-		    if (getArg(i).size().isUnknown())
-		        res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
-		return res;
-	}
+	syn FType FRecordConstructor.getType() = getRecord().recordType().fullCopy();
     
     eq InstRecordConstructor.type() = getRecord().recordType();
 	

@@ -1126,6 +1126,26 @@ aspect Scalarization {
         }
     }
     
+    public void FFunctionCall.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // No names available as a function call arg.
+        boolean b = !extractTemp();
+        if (b)
+            names.addLayer(0);
+        super.createArrayTemporaries(clauses, vars, indexMap, names);
+        if (b)
+            names.removeLayer();
+    }
+    
+    public void FRecordConstructor.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // No names available as record con arg.
+        boolean b = !extractTemp();
+        if (b)
+            names.addLayer(0);
+        super.createArrayTemporaries(clauses, vars, indexMap, names);
+        if (b)
+            names.removeLayer();
+    }
+    
     /**
      * TODO: this could probably be handled in a better way
      */
@@ -1544,6 +1564,19 @@ aspect Scalarization {
     }
     
     /**
+     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
+     */
+    public void FRecordConstructor.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+        // No names available as record con arg.
+        boolean b = !extractTemp();
+        if (b)
+            names.addLayer(0);
+        super.addArrayUsesToIndexMap(indexMap, names);
+        if (b)
+            names.removeLayer();
+    }
+    
+    /**
      * TODO: comment
      */
 	public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
@@ -1593,10 +1626,12 @@ aspect Scalarization {
             with addAll root FFunctionDecl;
     FAssignStmt contributes sizeAsserts()
         to FStatement.sizeAssertsColl() for this;
-    FFunctionCall contributes sizeAsserts() 
-        to FStatement.sizeAssertsColl() for myFStatement();
     FFunctionCallLeft contributes sizeAsserts() when hasFExp()
         to FStatement.sizeAssertsColl() for getFExp().myFStatement();
+    FFunctionCall contributes myFFunctionDecl().sizeAsserts(this) 
+        to FStatement.sizeAssertsColl() for myFStatement();
+    FRecordConstructor contributes getRecord().myFRecordDecl().sizeAsserts(this)
+        to FStatement.sizeAssertsColl() for myFStatement();
     FAbstractCat contributes sizeAsserts() when extractTemp()
         to FStatement.sizeAssertsColl() for myFStatement();
                 
@@ -1615,10 +1650,19 @@ aspect Scalarization {
         }
         return a;
     }
-    syn ArrayList<FAssert> FFunctionCall.sizeAsserts() {
+    syn ArrayList<FAssert> FFunctionDecl.sizeAsserts(FFunctionCall fc) {
         ArrayList<FAssert> a = new ArrayList<FAssert>();
-        for (FExp arg : getArgs()) {
-            arg.myCorrespondingInput().size().sizeAsserts(a, arg.size(), arg);
+        for (int i = 0; i < fc.getNumArg(); i++) {
+            FExp arg = fc.getArg(i);
+            myInput(i).size().sizeAsserts(a, arg.size(), arg);
+        }
+        return a;
+    }
+    syn ArrayList<FAssert> FRecordDecl.sizeAsserts(FRecordConstructor frc) {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        for (FRecordComponentType comp : type().getComponents()) {
+            FExp arg = extractArg(frc, comp.getName());
+            comp.getFType().size().sizeAsserts(a, arg.size(), arg);
         }
         return a;
     }
@@ -1636,7 +1680,7 @@ aspect Scalarization {
                         FExp re = arg.size().has(i) ? arg.size().createFExp(i) : new FIntegerLitExp(1);
                         String rs = re.prettyPrint("");
                         if (!ls.equals(rs)) {
-                            res.add(new FAssert(new FEqExp(le.unboundCopy(), re), 
+                            res.add(new FAssert(orNotIfExpConds(new FEqExp(le.unboundCopy(), re)), 
                                     new FStringLitExp(
                                             String.format("Mismatching size in dimension %d of expression %s in function %s", i+1, prettyPrint(""), containingFFunctionDecl().name())), new Opt<FExp>()));
                         }
@@ -1656,13 +1700,31 @@ aspect Scalarization {
         for (int i = 0; i < l.size.length; i++) {
             if (l.size[i] != UNKNOWN && other.size[i] == UNKNOWN) {
                 FAssert a = new FAssert(
-                        new FEqExp(other.createFExp(i), l.createFExp(i)),
+                        context.orNotIfExpConds(new FEqExp(other.createFExp(i), l.createFExp(i))),
                         new FStringLitExp("Mismatching sizes in " + context.containingFFunctionDecl().name()), new Opt<FExp>());
                 asserts.add(a);
             }
         }
     }
-	
+    
+    public FExp FExp.orNotIfExpConds(FExp e1) {
+        FExp e2 = enclosingIfExpCond();
+        if (e2 != null)
+            e1 = new FOrExp(e1, new FNotExp(e2));
+        return e1;
+    }
+    
+    inh FExp FExp.enclosingIfExpCond();
+    eq Root.getChild().enclosingIfExpCond() = null;
+    eq FStatement.getChild().enclosingIfExpCond() = null;
+    eq FIfExp.getThenExp().enclosingIfExpCond() = andIfExpConds(getIfExp().fullCopy());
+    eq FIfExp.getElseExp().enclosingIfExpCond() = andIfExpConds(new FNotExp(getIfExp().fullCopy()));
+    private FExp FIfExp.andIfExpConds(FExp e1) {
+        FExp e2 = enclosingIfExpCond();
+        if (e2 != null)
+            e1 = new FAndExp(e2,e1);
+        return e1;
+    }
 	/**
 	 * \brief Scalarize the statement and put all resulting statements in the
 	 *        list of statements.

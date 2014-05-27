@@ -9019,6 +9019,146 @@ end FunctionTests.UnknownArray42;
 ")})));
 end UnknownArray42;
 
+model UnknownArray43
+    record R1
+        Real[2] x;
+    end R1;
+    function f
+        input Real[:] x;
+        output R1 r;
+      algorithm
+        r := R1(x);
+    end f;
+    R1 r = f({3,4});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray43",
+            description="Unknown size array in record constructor",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray43
+ Real r.x[1];
+ Real r.x[2];
+equation
+ (FunctionTests.UnknownArray43.R1({r.x[1], r.x[2]})) = FunctionTests.UnknownArray43.f({3, 4});
+
+public
+ function FunctionTests.UnknownArray43.f
+  input Real[:] x;
+  output FunctionTests.UnknownArray43.R1 r;
+ algorithm
+  assert(size(x, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray43.f\");
+  r.x[1] := x[1];
+  r.x[2] := x[2];
+  return;
+ end FunctionTests.UnknownArray43.f;
+
+ record FunctionTests.UnknownArray43.R1
+  Real x[2];
+ end FunctionTests.UnknownArray43.R1;
+
+end FunctionTests.UnknownArray43;
+")})));
+end UnknownArray43;
+
+model UnknownArray44
+    record R1
+        Real[1] x;
+    end R1;
+    record R2
+        R1[1] y;
+    end R1;
+    function f
+        input R1[:] r1;
+        output R2 r2;
+      algorithm
+        r2 := R2(r1);
+    end f;
+    R2 r = f({R1({3}),R1({4})});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray44",
+            description="Unknown size record array in record constructor",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray44
+ Real r.y[1].x[1];
+equation
+ (FunctionTests.UnknownArray44.R2({FunctionTests.UnknownArray44.R1({r.y[1].x[1]})})) = FunctionTests.UnknownArray44.f({FunctionTests.UnknownArray44.R1({3}), FunctionTests.UnknownArray44.R1({4})});
+
+public
+ function FunctionTests.UnknownArray44.f
+  input FunctionTests.UnknownArray44.R1[:] r1;
+  output FunctionTests.UnknownArray44.R2 r2;
+ algorithm
+  assert(size(r1, 1) == 1, \"Mismatching sizes in FunctionTests.UnknownArray44.f\");
+  r2.y[1].x[1] := r1[1].x[1];
+  return;
+ end FunctionTests.UnknownArray44.f;
+
+ record FunctionTests.UnknownArray44.R1
+  Real x[1];
+ end FunctionTests.UnknownArray44.R1;
+
+ record FunctionTests.UnknownArray44.R2
+  FunctionTests.UnknownArray44.R1 y[1];
+ end FunctionTests.UnknownArray44.R2;
+
+end FunctionTests.UnknownArray44;
+")})));
+end UnknownArray44;
+
+model UnknownArray45
+    record R1
+        Real[2] x;
+    end R1;
+    function f
+        input Real[:] x;
+        input Real[:] y;
+        output R1 r;
+      algorithm
+        r := if size(x,1) == 2 then R1(x) else if not size(y,1) == 2 then R1({1,2}) else R1(y);
+    end f;
+    R1 r = f({3,4},{5,6});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray45",
+            description="Unknown size array in record constructor in if expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray45
+ Real r.x[1];
+ Real r.x[2];
+equation
+ (FunctionTests.UnknownArray45.R1({r.x[1], r.x[2]})) = FunctionTests.UnknownArray45.f({3, 4}, {5, 6});
+
+public
+ function FunctionTests.UnknownArray45.f
+  input Real[:] x;
+  input Real[:] y;
+  output FunctionTests.UnknownArray45.R1 r;
+ algorithm
+  assert(size(x, 1) == 2 or not size(x, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray45.f\");
+  assert(size(y, 1) == 2 or not (not size(x, 1) == 2 and not not size(y, 1) == 2), \"Mismatching sizes in FunctionTests.UnknownArray45.f\");
+  r.x[1] := if size(x, 1) == 2 then FunctionTests.UnknownArray45.R1(x) elseif not size(y, 1) == 2 then FunctionTests.UnknownArray45.R1({1, 2}) else FunctionTests.UnknownArray45.R1(y);
+  r.x[2] := if size(x, 1) == 2 then FunctionTests.UnknownArray45.R1(x) elseif not size(y, 1) == 2 then FunctionTests.UnknownArray45.R1({1, 2}) else FunctionTests.UnknownArray45.R1(y);
+  return;
+ end FunctionTests.UnknownArray45.f;
+
+ record FunctionTests.UnknownArray45.R1
+  Real x[2];
+ end FunctionTests.UnknownArray45.R1;
+
+end FunctionTests.UnknownArray45;
+")})));
+end UnknownArray45;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
