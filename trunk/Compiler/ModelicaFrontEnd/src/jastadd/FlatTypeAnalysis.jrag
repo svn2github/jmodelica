@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.TreeSet;
+import java.util.Set;
+import java.util.HashSet;
 
 aspect FlatTypeAnalysis {
 
@@ -176,12 +178,24 @@ aspect FlatTypeAnalysis {
     syn lazy Map<String,InstClassDecl> InstOperatorRecord.operatorMap() {
         Map<String,InstClassDecl> res = new HashMap<String,InstClassDecl>();
         for (InstClassDecl icd : myInstClassDecl().allInstClassDecls())
-            if (icd.isOperator())
-                res.put(icd.name(), icd);
+            icd.addOperatorsToMap(res);
         return res;
     }
     eq InstConnector.operatorMap() = 
         (inheritedRestriction() != null) ? inheritedRestriction().operatorMap() : super.operatorMap();
+
+    /**
+     * Add operators to operator map. Operators add themselves and packages add any contained operators.
+     */
+    public void InstClassDecl.addOperatorsToMap(Map<String,InstClassDecl> map) {
+        if (isOperator()) {
+            // TODO: error if already in map? see https://trac.modelica.org/Modelica/ticket/1459
+            map.put(name(), this);
+        } else if (isPackage()) {
+            for (InstClassDecl icd : allInstClassDecls())
+                icd.addOperatorsToMap(map);
+        }
+    }
 
 	public class FRecordComponentType implements Comparable<FRecordComponentType> {
 		public int compareTo(FRecordComponentType other) {
@@ -345,6 +359,20 @@ aspect FlatTypeAnalysis {
     public static final String FExp.OP_OR   = "'or'";
     public static final String FExp.OP_NEG  = "'-'";
     public static final String FExp.OP_NOT  = "'not'";
+
+    public static final Set<String> FExp.OPERATORS = new HashSet<String>(Arrays.asList(
+            OP_CON, OP_ZERO, 
+            OP_STR, 
+            OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_POW, OP_EQ, OP_NEQ, OP_GT, OP_LT, OP_GEQ, OP_LEQ, OP_AND, OP_OR, 
+            OP_NEG, OP_NOT));
+    public static final Set<String> FExp.CONSTRUCTOR_OPERATORS = new HashSet<String>(Arrays.asList(
+            OP_CON, OP_ZERO));
+    public static final Set<String> FExp.CONVERSION_OPERATORS = new HashSet<String>(Arrays.asList(
+            OP_STR));
+    public static final Set<String> FExp.BINARY_OPERATORS = new HashSet<String>(Arrays.asList(
+            OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_POW, OP_EQ, OP_NEQ, OP_GT, OP_LT, OP_GEQ, OP_LEQ, OP_AND, OP_OR));
+    public static final Set<String> FExp.UNARY_OPERATORS = new HashSet<String>(Arrays.asList(
+            OP_NEG, OP_NOT));
 
     /**
      * The name of the operator to use for expressions of this type containing overloaded operators.
@@ -1740,8 +1768,85 @@ aspect BuiltInFlatTypes {
     }
 
 }
- 
+
+
+aspect ClassRestriction {
+
+    /**
+     * Is this class partial?
+     */
+    syn boolean ClassDecl.isPartial() = false;
+    eq BaseClassDecl.isPartial()      = hasPartial();
+
+    /**
+     * Is this class encapsulated?
+     */
+    syn boolean ClassDecl.isEncapsulated() = false;
+    eq BaseClassDecl.isEncapsulated()      = hasEncapsulated();
+
+    /**
+     * Is this class a model?
+     */
+    syn boolean ClassDecl.isModel() = false;
+    eq BaseClassDecl.isModel()      = getRestriction().isModel();
+
+    /**
+     * Is this restriction "model"?
+     */
+    syn boolean Restriction.isModel() = false;
+    eq Model.isModel()                = true;
+
+    /**
+     * Is this class a block?
+     */
+    syn boolean ClassDecl.isBlock() = false;
+    eq BaseClassDecl.isBlock()      = getRestriction().isBlock();
+
+    /**
+     * Is this restriction "block"?
+     */
+    syn boolean Restriction.isBlock() = false;
+    eq Block.isBlock()                = true;
+
+    /**
+     * Is this class a class?
+     */
+    syn boolean ClassDecl.isClass() = false;
+    eq BaseClassDecl.isClass()      = getRestriction().isClass();
+
+    /**
+     * Is this restriction "class"?
+     */
+    syn boolean Restriction.isClass() = false;
+    eq MClass.isClass()               = true;
+
+    /**
+     * Is this class a package?
+     */
+    syn boolean ClassDecl.isPackage() = false;
+    eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
+    eq UnknownClassDecl.isPackage()   = false;
+
+    /**
+     * Is this restriction "package"?
+     */
+    syn boolean Restriction.isPackage() = false;
+    eq MPackage.isPackage()             = true;
+
+}
+
+
 aspect InstClassRestriction {
+
+    /**
+     * Is this class partial?
+     */
+    syn boolean InstClassDecl.isPartial() = getClassDecl().isPartial();
+
+    /**
+     * Is this class encapsulated?
+     */
+    syn boolean InstClassDecl.isEncapsulated() = getClassDecl().isEncapsulated();
 
 	/**
 	 * Is this class a connector?
@@ -1858,32 +1963,84 @@ aspect InstClassRestriction {
     eq InstConnector.isCallable()            = 
         (inheritedRestriction() != null) ? inheritedRestriction().isCallable() : super.isCallable();
 
-	/**
-	 * \brief Is this class a package?
-	 */
-	syn boolean InstClassDecl.isPackage() = false;
-	eq InstBaseClassDecl.isPackage()      = getInstRestriction().isPackage();
-	eq UnknownInstClassDecl.isPackage()   = false;
-	
-	/**
-	 * \brief Is this restriction "package"?
-	 */
-	syn boolean InstRestriction.isPackage() = false;
-	eq InstMPackage.isPackage()             = true;
+    /**
+     * Is this class a package?
+     */
+    syn boolean InstClassDecl.isPackage() = false;
+    eq InstBaseClassDecl.isPackage()      = getInstRestriction().isPackage();
+    eq UnknownInstClassDecl.isPackage()   = false;
 
-	/**
-	 * \brief Is this class an external object?
-	 */
-	syn boolean InstClassDecl.isExternalObject() {
-		for (InstExtends ie : getInstExtendss()) {
-			String name = ie.getClassName().name();
-			if (name.equals("ExternalObject"))
-				return true;
-		}
-		return false;	
-	}
-	eq InstSimpleShortClassDecl.isExternalObject() = false;
-	
+    /**
+     * Is this restriction "package"?
+     */
+    syn boolean InstRestriction.isPackage() = false;
+    eq InstMPackage.isPackage()             = true;
+
+    /**
+     * Is this class a model?
+     */
+    syn boolean InstClassDecl.isModel() = false;
+    eq InstBaseClassDecl.isModel()      = getInstRestriction().isModel();
+    eq UnknownInstClassDecl.isModel()   = false;
+
+    /**
+     * Is this restriction "model"?
+     */
+    syn boolean InstRestriction.isModel() = false;
+    eq InstModel.isModel()                = true;
+
+    /**
+     * Is this class a block?
+     */
+    syn boolean InstClassDecl.isBlock() = false;
+    eq InstBaseClassDecl.isBlock()      = getInstRestriction().isBlock();
+    eq UnknownInstClassDecl.isBlock()   = false;
+
+    /**
+     * Is this restriction "block"?
+     */
+    syn boolean InstRestriction.isBlock() = false;
+    eq InstBlock.isBlock()                = true;
+
+    /**
+     * Is this class a class?
+     */
+    syn boolean InstClassDecl.isClass() = false;
+    eq InstBaseClassDecl.isClass()      = getInstRestriction().isClass();
+    eq UnknownInstClassDecl.isClass()   = false;
+
+    /**
+     * Is this restriction "class"?
+     */
+    syn boolean InstRestriction.isClass() = false;
+    eq InstMClass.isClass()               = true;
+
+    /**
+     * Is this class an external object?
+     */
+    syn boolean InstClassDecl.isExternalObject() {
+        for (InstExtends ie : getInstExtendss()) {
+            String name = ie.getClassName().name();
+            if (name.equals("ExternalObject"))
+                return true;
+        }
+        return false;
+    }
+    eq InstSimpleShortClassDecl.isExternalObject() = false;
+
+    /**
+     * Check if this class has a restriction.
+     */
+    syn boolean InstClassDecl.hasInstRestriction() = false;
+    eq InstBaseClassDecl.hasInstRestriction()      = true;
+
+    /**
+     * Get the restriction of this class.
+     */
+    public InstRestriction InstClassDecl.getInstRestriction() {
+        throw new UnsupportedOperationException();
+    }
+
 }
 
 aspect ExternalObjectTypes {

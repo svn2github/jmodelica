@@ -462,7 +462,17 @@ aspect FlatTypeCheck {
   eq InstNode.getChild().iterExpMustBeScalar()   = false;
   eq FMinMaxExp.getChild().iterExpMustBeScalar() = true;
   // TODO: Add product() when it is implemented
-  
+
+    public void FMulExp.typeCheck(ErrorCheckType checkType) {
+        if (type().isOperatorRecord() && !isElementWise()) {
+            int left = getLeft().size().get(1);
+            int inner = (left == Size.UNKNOWN) ? getRight().size().get(0) : left;
+            if ((inner == 0 || inner == Size.UNKNOWN) && type().matchOverloadedZero() == null) 
+                error("Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined");
+        }
+        super.typeCheck(checkType);
+    }
+
   public void FIterExp.typeCheck(ErrorCheckType checkType) {
 	  super.typeCheck(checkType);
 	  if (iterExpMustBeScalar() && !getFExp().type().isUnknown() && getFExp().ndims() != 0)

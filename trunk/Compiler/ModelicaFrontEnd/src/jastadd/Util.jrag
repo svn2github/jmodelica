@@ -3170,44 +3170,7 @@ aspect GeneralHelpers {
 		for (T n : this)
 			col.add(n);
 	}
-	
-	/**
-	 * Is this class partial?
-	 */
-	syn boolean ClassDecl.isPartial() = false;
-	eq BaseClassDecl.isPartial()      = hasPartial();
-	
-	syn boolean Restriction.isModel() = false;
-	eq Model.isModel() = true;
-	syn boolean ClassDecl.isModel() = false;
-	eq BaseClassDecl.isModel() = getRestriction().isModel();
-	syn boolean InstClassDecl.isModel() = getClassDecl().isModel();
 
-	syn boolean Restriction.isBlock() = false;
-	eq Block.isBlock() = true;
-	syn boolean ClassDecl.isBlock() = false;
-	eq BaseClassDecl.isBlock() = getRestriction().isBlock();
-	syn boolean InstClassDecl.isBlock() = getClassDecl().isBlock();
-
-	syn boolean Restriction.isClass() = false;
-	eq MClass.isClass() = true;
-	syn boolean ClassDecl.isClass() = false;
-	eq BaseClassDecl.isClass() = getRestriction().isClass();
-	syn boolean InstClassDecl.isClass() = getClassDecl().isClass();
-	
-	/**
-	 * \brief Is this class a package?
-	 */
-	syn boolean ClassDecl.isPackage() = false;
-	eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
-	eq UnknownClassDecl.isPackage()   = false;
-	
-	/**
-	 * \brief Is this restriction "package"?
-	 */
-	syn boolean Restriction.isPackage() = false;
-	eq MPackage.isPackage()             = true;
-	
 	/**
      * Check if this when equation is the else part of another when equation.
      */

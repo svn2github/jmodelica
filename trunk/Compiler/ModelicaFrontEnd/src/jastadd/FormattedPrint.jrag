@@ -1657,10 +1657,6 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 
-    eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
-    eq OperatorRecord.toString()      = "operator"   + insideFormatting + "record";
-    eq OperatorFunction.toString()    = "operator"   + insideFormatting + "function";
-	
 	void FunctionCall.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("(");

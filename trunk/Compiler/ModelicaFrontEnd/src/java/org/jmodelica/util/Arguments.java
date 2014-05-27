@@ -106,6 +106,7 @@ public class Arguments {
         m.add("findflatinst");
         m.add("platform");
         m.add("out");
+        m.add("debugSrcIsHome");
         for (String given : programargs.keySet()) {
             if (!m.contains(given)) {
                 argError(String.format("Invalid argument '%s'\n", given));

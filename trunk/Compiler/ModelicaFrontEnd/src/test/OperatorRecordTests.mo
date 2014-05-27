@@ -21,7 +21,7 @@ package OperatorRecordTests
         Real re;
         Real im;
 
-        operator function 'constructor'
+        encapsulated operator function 'constructor'
             input Real re;
             input Real im = 0;
             output Cplx c;
@@ -30,13 +30,13 @@ package OperatorRecordTests
             c.im := im;
         end 'constructor';
 
-        operator function '0'
+        encapsulated operator function '0'
             output Cplx c;
         algorithm
             c := Cplx(0);
         end '0';
 
-        operator function '+'
+        encapsulated operator function '+'
             input Cplx a;
             input Cplx b;
             output Cplx c;
@@ -44,7 +44,7 @@ package OperatorRecordTests
             c := Cplx(a.re + b.re, a.im + b.im);
         end '+';
 
-        operator '-'
+        encapsulated operator '-'
             function sub
                 input Cplx a;
                 input Cplx b;
@@ -61,7 +61,7 @@ package OperatorRecordTests
             end neg;
         end '-';
 
-        operator '*'
+        encapsulated operator '*'
             function mul
                 input Cplx a;
                 input Cplx b;
@@ -82,7 +82,7 @@ package OperatorRecordTests
             end prod;
         end '*';
 
-        operator function 'String'
+        encapsulated operator function 'String'
             input Cplx a;
             output String b;
         algorithm
@@ -95,7 +95,7 @@ package OperatorRecordTests
             end if;
         end 'String';
 
-        operator function '/' // Dummy implementation for simplicity
+        encapsulated operator function '/' // Dummy implementation for simplicity
             input Cplx a;
             input Cplx b;
             output Cplx c;
@@ -103,7 +103,7 @@ package OperatorRecordTests
             c := Cplx(a.re / b.re, a.im / b.im);
         end '/';
 
-        operator function '^' // Dummy implementation for simplicity
+        encapsulated operator function '^' // Dummy implementation for simplicity
             input Cplx a;
             input Cplx b;
             output Cplx c;
@@ -111,7 +111,7 @@ package OperatorRecordTests
             c := Cplx(a.re ^ b.re, a.im ^ b.im);
         end '^';
 
-        operator function '=='
+        encapsulated operator function '=='
             input Cplx a;
             input Cplx b;
             output Boolean c;
@@ -119,7 +119,7 @@ package OperatorRecordTests
             c := a.re == b.re and a.im == b.im;
         end '==';
 
-        operator function '<>'
+        encapsulated operator function '<>'
             input Cplx a;
             input Cplx b;
             output Boolean c;
@@ -127,7 +127,7 @@ package OperatorRecordTests
             c := a.re <> b.re or a.im <> b.im;
         end '<>';
 
-        operator function '>'
+        encapsulated operator function '>'
             input Cplx a;
             input Cplx b;
             output Boolean c;
@@ -135,7 +135,7 @@ package OperatorRecordTests
             c := a.re ^ 2 + a.im ^ 2 > b.re ^ 2 + b.im ^ 2;
         end '>';
 
-        operator function '<'
+        encapsulated operator function '<'
             input Cplx a;
             input Cplx b;
             output Boolean c;
@@ -143,7 +143,7 @@ package OperatorRecordTests
             c := a.re ^ 2 + a.im ^ 2 < b.re ^ 2 + b.im ^ 2;
         end '<';
 
-        operator function '>='
+        encapsulated operator function '>='
             input Cplx a;
             input Cplx b;
             output Boolean c;
@@ -151,7 +151,7 @@ package OperatorRecordTests
             c := a.re ^ 2 + a.im ^ 2 >= b.re ^ 2 + b.im ^ 2;
         end '>=';
 
-        operator function '<='
+        encapsulated operator function '<='
             input Cplx a;
             input Cplx b;
             output Boolean c;
@@ -159,7 +159,7 @@ package OperatorRecordTests
             c := a.re ^ 2 + a.im ^ 2 <= b.re ^ 2 + b.im ^ 2;
         end '<=';
 
-        operator function 'and' // Dummy implementation for testing
+        encapsulated operator function 'and' // Dummy implementation for testing
             input Cplx a;
             input Cplx b;
             output Cplx c;
@@ -167,7 +167,7 @@ package OperatorRecordTests
             c := Cplx(a.re + b.re, a.im + b.im);
         end 'and';
 
-        operator function 'or' // Dummy implementation for testing
+        encapsulated operator function 'or' // Dummy implementation for testing
             input Cplx a;
             input Cplx b;
             output Cplx c;
@@ -175,7 +175,7 @@ package OperatorRecordTests
             c := Cplx(a.re - b.re, a.im - b.im);
         end 'or';
 
-        operator function 'not' // Dummy implementation for testing (conjugate)
+        encapsulated operator function 'not' // Dummy implementation for testing (conjugate)
             input Cplx a;
             output Cplx c;
         algorithm
@@ -517,20 +517,20 @@ end OperatorRecordTests.OperatorOverload8;
 
 
     model OperatorOverload9
-		operator record Op
-			Real x;
-			Real y;
-			
-			operator function '*'
-				input Op a;
-				input Op b;
-				output Op c;
-			algorithm
-				c := Op(a.x * b.x, a.y * b.y);
-			end '*';
-		end Op;
-		
-        Op[2] c1 = { Op(1, 2), Op(3, 4) };
+        operator record Op
+            Real x;
+            Real y;
+            
+            encapsulated operator function '*'
+                input Op a;
+                input Op b;
+                output Op c;
+            algorithm
+                c := Op(a.x * b.x, a.y * b.y);
+            end '*';
+        end Op;
+        
+	        Op[2] c1 = { Op(1, 2), Op(3, 4) };
         Op[2] c2 = { Op(5, 6), Op(7, 8) };
         Op c3 = c1 * c2;
 
@@ -1742,19 +1742,1323 @@ end OperatorRecordTests.OperatorRecordConnect4;
 
 
     model OperatorLimitations1
-        operator '*'
+        encapsulated operator function '*'
+            input Real x;
+            input Real y;
+            output Real z;
+        algorithm
+            z := x * y;
         end '*';
+        
+        Real x = '*'(1, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations1",
+            description="Check that operators are not allowed outside operator records",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1745, column 9:
+  Operator classes are only allowed in operator records and packages in operator records
+")})));
     end OperatorLimitations1;
 
 
     model OperatorLimitations2
         operator record A
+            Real x;
+            
             package B
-                operator '*'
+                encapsulated operator function '*'
+                    input A x;
+                    input A y;
+                    output Real z;
+                algorithm
+                    z := x.x * y.x;
                 end '*';
             end B;
         end A;
+        
+        Real x = A.B.'*'(A(1), A(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations2",
+            description="Check that operators are allowed inside packages inside operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations2
+ Real x = OperatorRecordTests.OperatorLimitations2.A.B.'*'(OperatorRecordTests.OperatorLimitations2.A(1), OperatorRecordTests.OperatorLimitations2.A(time));
+
+public
+ function OperatorRecordTests.OperatorLimitations2.A.B.'*'
+  input OperatorRecordTests.OperatorLimitations2.A x;
+  input OperatorRecordTests.OperatorLimitations2.A y;
+  output Real z;
+ algorithm
+  z := x.x * y.x;
+  return;
+ end OperatorRecordTests.OperatorLimitations2.A.B.'*';
+
+ record OperatorRecordTests.OperatorLimitations2.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations2.A;
+
+end OperatorRecordTests.OperatorLimitations2;
+")})));
     end OperatorLimitations2;
+
+
+    model OperatorLimitations3
+        model A
+            encapsulated operator function '*'
+                input Real x;
+                input Real y;
+                output Real z;
+            algorithm
+                z := x * y;
+            end '*';
+            
+            Real x = '*'(1, time);
+        end A;
+        
+        model B
+            extends A;
+        end B;
+        
+        A a;
+        B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations3",
+            description="Check that operators are not allowed outside operator records",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1814, column 13:
+  Operator classes are only allowed in operator records and packages in operator records
+")})));
+    end OperatorLimitations3;
+
+
+    model OperatorLimitations4
+        operator record A
+            Real x;
+            
+            encapsulated operator ':'
+                function f
+                    input A x;
+                    input A y;
+                    output A z;
+                algorithm
+                   z := A(x.x * y.x);
+                end f;
+            end ':';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations4",
+            description="Check that only the operators listed in the spec are legal to overload",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1848, column 13:
+  Invalid name for operator class: ':'
+")})));
+    end OperatorLimitations4;
+
+
+    model OperatorLimitations5
+        operator record A
+            Real x;
+            
+            encapsulated operator function f
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+               z := x * y;
+            end f;
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations5",
+            description="Check that only the operators listed in the spec are legal to overload",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1878, column 13:
+  Invalid name for operator class: f
+")})));
+    end OperatorLimitations5;
+
+
+    model OperatorLimitations6
+        operator record A
+            Real x;
+            
+            encapsulated operator function '-'
+                input Real x;
+                input Real y;
+                output A z;
+            algorithm
+               z := A(x - y);
+            end '-';
+            
+            encapsulated operator function 'String'
+                input Real x;
+                input Real y;
+                output String z;
+            algorithm
+               z := "test";
+            end 'String';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations6",
+            description="Check that operator functions for non-constructors must have an argument of the record type",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1915, column 13:
+  Operator functions must have at least one argument that is of the type of the operator record the function belongs to
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1923, column 13:
+  First argument of conversion operator functions must be of the type of the operator record the function belongs to
+")})));
+    end OperatorLimitations6;
+
+
+    model OperatorLimitations7
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'constructor'
+                input Real x;
+                output Real z;
+            algorithm
+               z := x;
+            end 'constructor';
+            
+            encapsulated operator function '0'
+                output Real z;
+            algorithm
+               z := 0;
+            end '0';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations7",
+            description="Check that operator functions for constructors must have a single output of the record type",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1955, column 29:
+  Output of operator record constructor must be of the type of the operator record the constructor belongs to
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1961, column 46:
+  Output of operator record constructor must be of the type of the operator record the constructor belongs to
+")})));
+    end OperatorLimitations7;
+
+
+    model OperatorLimitations8
+        operator record A
+            Real x;
+            
+            encapsulated operator function '*'
+                input A x;
+                input A y;
+            algorithm
+            end '*';
+            
+            encapsulated operator function '-'
+                input A x;
+                input A y;
+                output A z1;
+                output A z2;
+            algorithm
+               z1 := A(x - y);
+               z2 := A(x + y);
+            end '-';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations8",
+            description="Check that operator functions must have a single output",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1990, column 13:
+  Operator functions must have exactly one output, but '*' has 0
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 1996, column 13:
+  Operator functions must have exactly one output, but '-' has 2
+")})));
+    end OperatorLimitations8;
+
+
+    model OperatorLimitations9
+        operator record A
+            Real x;
+            
+            operator '*'
+                function f
+                    input A x;
+                    input A y;
+                    output A z;
+                algorithm
+                   z := A(x.x * y.x);
+                end f;
+            end '*';
+            
+            operator function '-'
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+               z := A(x.x - y.x);
+            end '-';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations9",
+            description="Check that operators must be encapsulated",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2032, column 13:
+  Operator classes must be encapsulated
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2042, column 13:
+  Operator classes must be encapsulated
+")})));
+    end OperatorLimitations9;
+
+
+    model OperatorLimitations10
+        operator record A
+            Real x;
+            
+            encapsulated package B
+                function f
+                    input Real x;
+                    output Real y;
+                algorithm
+                    y := x + 1;
+                end f;
+            end B;
+            
+        end A;
+        
+        A a = A(A.B.f(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations10",
+            description="Check that loose functions and packages are allowed in operator records",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations10
+ OperatorRecordTests.OperatorLimitations10.A a = OperatorRecordTests.OperatorLimitations10.A(OperatorRecordTests.OperatorLimitations10.A.B.f(time));
+
+public
+ function OperatorRecordTests.OperatorLimitations10.A.B.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end OperatorRecordTests.OperatorLimitations10.A.B.f;
+
+ record OperatorRecordTests.OperatorLimitations10.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations10.A;
+
+end OperatorRecordTests.OperatorLimitations10;
+")})));
+    end OperatorLimitations10;
+
+
+    model OperatorLimitations11
+        operator record A
+            Real x;
+            
+            encapsulated package B
+                constant Real d = 1;
+                
+                model C
+                    Real x = time + 1;
+                end C;
+            end B;
+            
+            model D
+                Real y = time + 2;
+            end D;
+            
+        end A;
+        
+        A a = A(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations11",
+            description="Check for content that is not allowed in operator records",
+            errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2092, column 34:
+  Components are not allowed in packages in operator records
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2095, column 17:
+  Classes other than operators, operator functions, functions and packages are not allowed in operator record classes
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2100, column 13:
+  Classes other than operators, operator functions, functions and packages are not allowed in operator record classes
+")})));
+    end OperatorLimitations11;
+
+
+    model OperatorLimitations12
+        operator record Cplx2
+            extends Cplx;
+        end Cplx2;
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations12",
+            description="Extending operator record is only allowed in short class decl",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2153, column 13:
+  Extending operator records is only allowed as a short class declaration
+")})));
+    end OperatorLimitations12;
+
+
+    model OperatorLimitations13
+        operator record Cplx2 = Cplx(re = 1);
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations13",
+            description="Short class decl of operator record may only modify attributes",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2162, column 37:
+  Short class declarations extending an operator record may only modify attributes of members of the record
+")})));
+    end OperatorLimitations13;
+
+
+    model OperatorLimitations14
+        operator record A
+            Real x;
+            
+            encapsulated operator '+'
+                replaceable function f
+                    input A x;
+                    input A y;
+                    output A z;
+                algorithm
+                   z := A(x.x + y.x);
+               end f;
+            end '+';
+        end A;
+        
+        function g
+            input B x;
+            input B y;
+            output B z;
+        algorithm
+           z := B(x.x - y.x);
+        end g;
+        
+        operator record B = A('+'(redeclare function f = g));
+        
+        B b = B(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations14",
+            description="Short class decl of operator record may only modify attributes",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2192, column 35:
+  Short class declarations extending an operator record may only modify attributes of members of the record
+")})));
+    end OperatorLimitations14;
+
+
+    model OperatorLimitations15
+        operator record Cplx2 = Cplx(re(min=1), im(max=5, nominal=2));
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations15",
+            description="Short class decl of operator record may modify attributes of record members",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations15
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorLimitations15.Cplx2 c2(re(min = 1),im(max = 5,nominal = 2)) = OperatorRecordTests.OperatorLimitations15.Cplx2.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.OperatorLimitations15.Cplx2.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.OperatorLimitations15.Cplx2.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+ record OperatorRecordTests.OperatorLimitations15.Cplx2
+  Real re(min = 1);
+  Real im(max = 5,nominal = 2);
+ end OperatorRecordTests.OperatorLimitations15.Cplx2;
+
+end OperatorRecordTests.OperatorLimitations15;
+")})));
+    end OperatorLimitations15;
+
+
+    model OperatorLimitations16
+        operator record Cplx2 = Cplx('+'(a(re(min = 1))));
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations16",
+            description="Short class decl of operator record may only modify attributes of record members in the record declaration (i.e. not in functions)",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2229, column 46:
+  Short class declarations extending an operator record may only modify attributes of members of the record
+")})));
+    end OperatorLimitations16;
+
+
+    model OperatorLimitations17
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'constructor'
+                input B x;
+                output A z;
+            algorithm
+               z.x := x.x;
+            end 'constructor';
+        end A;
+
+        operator record B
+            Real x;
+            
+            encapsulated operator function 'constructor'
+                input A x;
+                output B z;
+            algorithm
+               z.x := x.x;
+            end 'constructor';
+        end B;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations17",
+            description="Circular overloaded conversion operators",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2315, column 26:
+  Ambiguous overloaded constructors in OperatorRecordTests.OperatorLimitations17.A and OperatorRecordTests.OperatorLimitations17.B
+")})));
+    end OperatorLimitations17;
+
+
+    model OperatorLimitations18
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'constructor'
+                input B x;
+                output A z;
+            algorithm
+               z.x := x.x;
+            end 'constructor';
+        end A;
+
+        operator record B
+            Real x;
+            
+            encapsulated operator function 'constructor'
+                input Real x;
+                output B z;
+            algorithm
+               z.x := x;
+            end 'constructor';
+        end B;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations18",
+            description="Non-circular overloaded conversion operators",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations18
+ OperatorRecordTests.OperatorLimitations18.A a;
+
+public
+ record OperatorRecordTests.OperatorLimitations18.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations18.A;
+
+end OperatorRecordTests.OperatorLimitations18;
+")})));
+    end OperatorLimitations18;
+
+
+    model OperatorLimitations19
+        operator record A
+            Real x;
+            
+            encapsulated operator function '0'
+                input Real x;
+                output A z;
+            algorithm
+               z.x := x;
+            end '0';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations19",
+            description="Zero constructor with input",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2396, column 13:
+  The '0' operator record constructor may not have any inputs, but has 1
+")})));
+    end OperatorLimitations19;
+
+
+    model OperatorLimitations20
+        operator record A
+            Real x;
+            
+            encapsulated operator '0'
+                function a
+                    output A z;
+                algorithm
+                   z.x := 0;
+                end a;
+                
+                function b
+                    output A z;
+                algorithm
+                   z.x := 0;
+                end b;
+            end '0';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations20",
+            description="More than one zero constructor",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2423, column 13:
+  The '0' operator may not contain more than one function, but has 2
+")})));
+    end OperatorLimitations20;
+
+
+    model OperatorLimitations21
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'String'
+                input A x;
+                output Real z;
+            algorithm
+               z := x.x;
+            end 'String';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations21",
+            description="'String' operator returning Real",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2457, column 13:
+  'String' operator functions must have one output of type String, but returns Real
+")})));
+    end OperatorLimitations21;
+
+
+    model OperatorLimitations22
+        operator record A
+            Real x;
+            
+            encapsulated operator 'String'
+                function a
+                    input A x;
+                    output String[1] z;
+                algorithm
+                   z := { String(x.x) };
+                end a;
+            end 'String';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations22",
+            description="'String' operator returning array",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2484, column 13:
+  'String' operator functions must have one output of type String, but a returns String[1]
+")})));
+    end OperatorLimitations22;
+
+
+    model OperatorLimitations23
+        operator record A
+            Real x;
+            
+            encapsulated operator function '*'
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+               z := A(x.x * y.x);
+            end '*';
+        end A;
+        
+        parameter Integer n = 0;
+        A a[2, n] = fill(A(time), 2, n);
+        A b[n, 2] = fill(A(time + 1), n, 2);
+        A c[2, 2] = a * b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations23",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2525, column 21:
+  Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined
+")})));
+    end OperatorLimitations23;
+
+
+    model OperatorLimitations24
+        operator record A
+            Real x;
+            
+            encapsulated operator function '*'
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+               z := A(x.x * y.x);
+            end '*';
+        end A;
+        
+        parameter Integer n = 2;
+        A a[2, n] = fill(A(time), 2, n);
+        A b[n, 2] = fill(A(time + 1), n, 2);
+        A c[2, 2] = a * b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations24",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations24
+ parameter Integer n = 2 /* 2 */;
+ OperatorRecordTests.OperatorLimitations24.A a[2,2] = fill(OperatorRecordTests.OperatorLimitations24.A(time), 2, 2);
+ OperatorRecordTests.OperatorLimitations24.A b[2,2] = fill(OperatorRecordTests.OperatorLimitations24.A(time + 1), 2, 2);
+ OperatorRecordTests.OperatorLimitations24.A c[2,2] = {{OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,1]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,2]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,2])}, {OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,1]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,2]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,2])}};
+
+public
+ function OperatorRecordTests.OperatorLimitations24.A.'*'
+  input OperatorRecordTests.OperatorLimitations24.A x;
+  input OperatorRecordTests.OperatorLimitations24.A y;
+  output OperatorRecordTests.OperatorLimitations24.A z;
+ algorithm
+  z := OperatorRecordTests.OperatorLimitations24.A(x.x * y.x);
+  return;
+ end OperatorRecordTests.OperatorLimitations24.A.'*';
+
+ record OperatorRecordTests.OperatorLimitations24.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations24.A;
+
+end OperatorRecordTests.OperatorLimitations24;
+")})));
+    end OperatorLimitations24;
+
+
+    model OperatorLimitations25
+        operator record A
+            Real x;
+            
+            encapsulated operator function '*'
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+               z := A(x.x * y.x);
+            end '*';
+            
+            encapsulated operator function '0'
+                output A z;
+            algorithm
+               z := A(0);
+            end '0';
+        end A;
+        
+        parameter Integer n = 0;
+        A a[2, n] = fill(A(time), 2, n);
+        A b[n, 2] = fill(A(time + 1), n, 2);
+        A c[2, 2] = a * b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations25",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations25
+ parameter Integer n = 0 /* 0 */;
+ OperatorRecordTests.OperatorLimitations25.A a[2,0] = fill(OperatorRecordTests.OperatorLimitations25.A(time), 2, 0);
+ OperatorRecordTests.OperatorLimitations25.A b[0,2] = fill(OperatorRecordTests.OperatorLimitations25.A(time + 1), 0, 2);
+ OperatorRecordTests.OperatorLimitations25.A c[2,2] = {{OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}, {OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}};
+
+public
+ function OperatorRecordTests.OperatorLimitations25.A.'*'
+  input OperatorRecordTests.OperatorLimitations25.A x;
+  input OperatorRecordTests.OperatorLimitations25.A y;
+  output OperatorRecordTests.OperatorLimitations25.A z;
+ algorithm
+  z := OperatorRecordTests.OperatorLimitations25.A(x.x * y.x);
+  return;
+ end OperatorRecordTests.OperatorLimitations25.A.'*';
+
+ record OperatorRecordTests.OperatorLimitations25.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations25.A;
+
+end OperatorRecordTests.OperatorLimitations25;
+")})));
+    end OperatorLimitations25;
+
+
+    model OperatorLimitations26
+        operator record A
+            Real x;
+            
+            encapsulated operator function '*'
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+               z := A(x.x * y.x);
+            end '*';
+        end A;
+        
+        function f
+            input A a[2, :];
+            input A b[size(a,2), 2];
+            output A c[2, 2];
+        algorithm
+            c := a * b;
+        end f;
+        
+        parameter Integer n = 2;
+        A a[2, n] = fill(A(time), 2, n);
+        A b[n, 2] = fill(A(time + 1), n, 2);
+        A c[2, 2] = f(a, b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations26",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2649, column 18:
+  Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined
+")})));
+    end OperatorLimitations26;
+
+
+    model OperatorLimitations27
+        operator record A
+            Real x;
+            
+            encapsulated operator function '+'
+                input A x;
+                output A z;
+            algorithm
+                z := A(x.x + 1);
+            end '+';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations27",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2686, column 13:
+  Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 1
+")})));
+    end OperatorLimitations27;
+
+
+    model OperatorLimitations28
+        operator record A
+            Real x;
+            
+            encapsulated operator function '+'
+                input A x;
+                input A y;
+                input A w;
+                output A z;
+            algorithm
+                z := A(x.x + y.x + w.x);
+            end '+';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations28",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2713, column 13:
+  Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 3
+")})));
+    end OperatorLimitations28;
+
+
+    model OperatorLimitations29
+        operator record A
+            Real x;
+            
+            encapsulated operator function '+'
+                input A x;
+                input A y = A(1);
+                output A z;
+            algorithm
+                z := A(x.x + y.x);
+            end '+';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations29",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2742, column 13:
+  Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 1
+")})));
+    end OperatorLimitations29;
+
+
+    model OperatorLimitations30
+        operator record A
+            Real x;
+            
+            encapsulated operator function '+'
+                input A x;
+                input A y = A(1);
+                input A w;
+                output A z;
+            algorithm
+                z := A(x.x + y.x + w.x);
+            end '+';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations30",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2770, column 13:
+  All inputs without default value in operator function must be before all inputs with default value
+")})));
+    end OperatorLimitations30;
+
+
+    model OperatorLimitations31
+        operator record A
+            Real x;
+            
+            encapsulated operator function '+'
+                input A x;
+                input A y;
+                input A w = A(1);
+                output A z;
+            algorithm
+                z := A(x.x + y.x + w.x);
+            end '+';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations31",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations31
+ OperatorRecordTests.OperatorLimitations31.A a;
+
+public
+ record OperatorRecordTests.OperatorLimitations31.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations31.A;
+
+end OperatorRecordTests.OperatorLimitations31;
+")})));
+    end OperatorLimitations31;
+
+
+    model OperatorLimitations32
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'not'
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+                z := A(x.x * y.x);
+            end 'not';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations32",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2833, column 13:
+  Operator functions for unary operators must have exactly 1 input without default value, but 'not' has 2
+")})));
+    end OperatorLimitations32;
+
+
+    model OperatorLimitations33
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'not'
+                input A x = A(1);
+                output A z;
+            algorithm
+                z := A(x.x * y.x);
+            end 'not';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations33",
+            description="",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2850, column 13:
+  Operator functions for unary operators must have exactly 1 input without default value, but 'not' has 0
+")})));
+    end OperatorLimitations33;
+
+
+    model OperatorLimitations34
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'not'
+                input A x = A(1);
+                input A y;
+                output A z;
+            algorithm
+                z := A(x.x * y.x);
+            end 'not';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations34",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2866, column 13:
+  All inputs without default value in operator function must be before all inputs with default value
+")})));
+    end OperatorLimitations34;
+
+
+    model OperatorLimitations35
+        operator record A
+            Real x;
+            
+            encapsulated operator function 'not'
+                input A x;
+                input A y = A(1);
+                output A z;
+            algorithm
+                z := A(x.x * y.x);
+            end 'not';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations35",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations35
+ OperatorRecordTests.OperatorLimitations35.A a;
+
+public
+ record OperatorRecordTests.OperatorLimitations35.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations35.A;
+
+end OperatorRecordTests.OperatorLimitations35;
+")})));
+    end OperatorLimitations35;
+
+
+    model OperatorLimitations36
+        operator record A
+            Real x;
+            
+            encapsulated operator function '-'
+                input A x;
+                input A y;
+                input A w;
+                output A z;
+            algorithm
+                z := A(x.x - y.x - w.x);
+            end '-';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations36",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2916, column 13:
+  Operator functions for operators that are both unary and binary must have exactly 1 or 2 inputs without default value, but '-' has 3
+")})));
+    end OperatorLimitations36;
+
+
+    model OperatorLimitations37
+        operator record A
+            Real x;
+            
+            encapsulated operator function '-'
+                input A x;
+                input A y = A(1);
+                input A w;
+                output A z;
+            algorithm
+                z := A(x.x - y.x - w.x);
+            end '-';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations37",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2934, column 13:
+  All inputs without default value in operator function must be before all inputs with default value
+")})));
+    end OperatorLimitations37;
+
+
+    model OperatorLimitations38
+        operator record A
+            Real x;
+            
+            encapsulated operator function '-'
+                input A x = A(1);
+                input A y;
+                output A z;
+            algorithm
+                z := A(x.x - y.x);
+            end '-';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations38",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2963, column 13:
+  All inputs without default value in operator function must be before all inputs with default value
+")})));
+    end OperatorLimitations38;
+
+
+    model OperatorLimitations39
+        operator record A
+            Real x;
+            
+            encapsulated operator '-'
+                function a
+                    input A x;
+                    input A y = A(1);
+                    output A z;
+                algorithm
+                    z := A(x.x - y.x);
+                end a;
+                
+                function b
+                    input A x;
+                    input A y;
+                    input A w = A(1);
+                    output A z;
+                algorithm
+                    z := A(x.x - y.x - w.x);
+                end b;
+            end '-';
+        end A;
+        
+        A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations39",
+            description="",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations39
+ OperatorRecordTests.OperatorLimitations39.A a;
+
+public
+ record OperatorRecordTests.OperatorLimitations39.A
+  Real x;
+ end OperatorRecordTests.OperatorLimitations39.A;
+
+end OperatorRecordTests.OperatorLimitations39;
+")})));
+    end OperatorLimitations39;
+
 
 
 end OperatorRecordTests;

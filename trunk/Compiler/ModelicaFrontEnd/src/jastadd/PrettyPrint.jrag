@@ -1937,17 +1937,20 @@ aspect FlatPrettyPrint {
 	eq FDiscrete.toStringLiteral()   = "discrete-time";
 	eq FConstant.toStringLiteral()   = "constant";
 	eq FContinuous.toStringLiteral() = "continuous-time";
-	
-	syn String Restriction.toString();
-	eq Model.toString()     = "model";
-	eq Block.toString()     = "block";
-	eq MClass.toString()    = "class";
-    eq Connector.toString() = "connector";
-	eq MType.toString()     = "type";
-	eq MPackage.toString()  = "package";
-	eq Function.toString()  = "function";
-    eq Record.toString()    = "record";
-    eq Operator.toString()  = "operator";
+
+    syn String Restriction.toString();
+    eq Model.toString()               = "model";
+    eq Block.toString()               = "block";
+    eq MClass.toString()              = "class";
+    eq Connector.toString()           = "connector";
+    eq ExpandableConnector.toString() = "expandable connector";
+    eq MType.toString()               = "type";
+    eq MPackage.toString()            = "package";
+    eq Function.toString()            = "function";
+    eq Record.toString()              = "record";
+    eq Operator.toString()            = "operator";
+    eq OperatorRecord.toString()      = "operator record";
+    eq OperatorFunction.toString()    = "operator function";
 
     syn String ComponentDecl.toString() = prettyPrint("");
     syn String Access.toString()        = prettyPrint("");

@@ -119,12 +119,81 @@ aspect ContentCheck {
 			error("The change() operator may not be used inside functions");
 		}
 	}
-	
-	public void InstExtends.contentCheck(ErrorCheckType checkType) {
-		if (myInstClass().isExternalObject())
-			error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
-	}
-	
+
+    public void InstExtends.contentCheck(ErrorCheckType checkType) {
+        if (myInstClass().isExternalObject())
+            error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
+        if (myInstClass().isOperatorRecord())
+            contentCheckExtendsOperatorRecord(checkType);
+    }
+
+    /**
+     * Check if this is a valid extends of an operator record.
+     */
+    public void InstExtends.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        error("Extending operator records is only allowed as a short class declaration");
+    }
+
+    public void InstExtendsShortClass.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        if (hasInstClassModification())
+            getInstClassModification().contentCheckExtendsOperatorRecord(checkType);
+    }
+
+    public void InstReplacingExtendsShortClass.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        if (hasInstClassModification())
+            getInstClassModification().contentCheckExtendsOperatorRecord(checkType);
+    }
+
+    /**
+     * Check if this is a valid modification on a short class declaration extending an operator record.
+     * 
+     * Will only generate one error message, iven if there are several problems.
+     */
+    public boolean InstModification.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        return true;
+    }
+
+    public boolean InstCompleteModification.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        return getInstClassModification().contentCheckExtendsOperatorRecord(checkType) && 
+                (!hasInstValueModification() || getInstValueModification().contentCheckExtendsOperatorRecord(checkType));
+    }
+
+    public boolean InstClassModification.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        for (InstArgument arg : getInstArguments())
+            if (!arg.contentCheckExtendsOperatorRecord(checkType))
+                return false;
+        return true;
+    }
+
+    public boolean InstElementModification.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        return !hasInstModification() || getInstModification().contentCheckExtendsOperatorRecord(checkType);
+    }
+
+    public boolean InstElementRedeclare.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        error("Short class declarations extending an operator record may only modify attributes of members of the record");
+        return false;
+    }
+
+    public boolean InstComponentModification.contentCheckExtendsOperatorRecord(ErrorCheckType checkType) {
+        if (!hasValue() || isForAttributeOnOperatorRecordDeclarationMember()) {
+            return super.contentCheckExtendsOperatorRecord(checkType);
+        } else {
+            error("Short class declarations extending an operator record may only modify attributes of members of the record");
+            return false;
+        }
+    }
+
+    inh boolean InstModification.isForAttributeOnOperatorRecordDeclarationMember();
+    eq InstNode.getChild().isForAttributeOnOperatorRecordDeclarationMember()                                 = false;
+    eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = 
+        isForAttributeOnOperatorRecordDeclarationMember();
+    eq InstComponentModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()     =
+        getName().myInstComponentDecl().isOperatorRecordDeclarationMember();
+
+    inh boolean InstComponentDecl.isOperatorRecordDeclarationMember();
+    eq InstClassDecl.getChild().isOperatorRecordDeclarationMember() = isOperatorRecord();
+    eq Root.getChild().isOperatorRecordDeclarationMember()          = false;
+
 	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
 		if (!generated) {
 			InstClassDecl target = getName().myInstClassDecl();
@@ -379,30 +448,162 @@ aspect ContentCheck {
 				return true;
 		return false;
 	}
-	
-	
-	public void InstMPackage.contentCheck(ErrorCheckType checkType) {
-		if (!myInstClassDecl().isOkPackage())
-			error("Packages may only contain classes and constants");
-	}
 
-	/**
-	 * Get the class this restriction is attached to.
-	 */
-	inh InstClassDecl InstRestriction.myInstClassDecl();
-	eq InstBaseClassDecl.getInstRestriction().myInstClassDecl() = this;
-	
-	/**
-	 * Check if this class fulfills the requirements of a package.
-	 */
-	syn boolean InstClassDecl.isOkPackage() {
-		for (InstComponentDecl icd : getInstComponentDecls())
-			if (!icd.isConstant())
-				return false;
-		return getNumFAbstractEquation() == 0;
-	}
-	eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
-	
+
+    public void InstMPackage.contentCheck(ErrorCheckType checkType) {
+        if (!myInstClassDecl().isOkPackage())
+            error("Packages may only contain classes and constants");
+        super.contentCheck(checkType);
+    }
+
+    public void InstOperatorRecord.contentCheck(ErrorCheckType checkType) {
+        for (InstClassDecl op : operatorMap().values())
+            op.checkRestriction(checkType);
+        for (InstClassDecl cls : myInstClassDecl().allInstClassDecls())
+            if (cls.hasInstRestriction())
+                cls.getInstRestriction().checkIfAllowedInOperator(checkType);
+        super.contentCheck(checkType);
+    }
+
+    public void InstRestriction.checkIfAllowedInOperator(ErrorCheckType checkType) {
+        error("Classes other than operators, operator functions, functions and packages are not allowed in operator record classes");
+    }
+
+    public void InstMPackage.checkIfAllowedInOperator(ErrorCheckType checkType) {
+        for (InstClassDecl cls : myInstClassDecl().allInstClassDecls())
+            if (cls.hasInstRestriction())
+                cls.getInstRestriction().checkIfAllowedInOperator(checkType);
+        for (InstComponentDecl comp : myInstClassDecl().allInstComponentDecls())
+            comp.error("Components are not allowed in packages in operator records");
+    }
+
+    public void InstOperator.checkIfAllowedInOperator(ErrorCheckType checkType) {}
+    public void InstFunction.checkIfAllowedInOperator(ErrorCheckType checkType) {}
+
+    /**
+     * Perform content checks that are common to 'operator' and 'operator function'.
+     * 
+     * @param checkType  the kind of error checking being done
+     */
+    public void InstRestriction.contentCheckAsOperator(ErrorCheckType checkType) {
+        InstClassDecl rec = myInstClassDecl().myOperatorRecord();
+        String name = myInstClassDecl().name();
+        if (rec == null)
+            error("Operator classes are only allowed in operator records and packages in operator records");
+        else
+            for (InstClassDecl f : operatorFunctions())
+                f.contentCheckAsOperatorFunction(checkType, rec.recordType(), name);
+        if (name.equals(FExp.OP_ZERO) && operatorFunctions().size() > 1)
+            error("The '0' operator may not contain more than one function, but has %d", operatorFunctions().size());
+        if (!FExp.OPERATORS.contains(name))
+            error("Invalid name for operator class: %s", name);
+        if (!myInstClassDecl().isEncapsulated())
+            error("Operator classes must be encapsulated");
+    }
+
+    /**
+     * Perform content checks that are common to functions in operators and operator functions.
+     * 
+     * @param checkType  the kind of error checking being done
+     */
+    public void InstClassDecl.contentCheckAsOperatorFunction(ErrorCheckType checkType, FType type, String name) {
+        boolean constr = FExp.CONSTRUCTOR_OPERATORS.contains(name);
+        boolean conv   = FExp.CONVERSION_OPERATORS.contains(name);
+        boolean binary = FExp.BINARY_OPERATORS.contains(name);
+        boolean unary  = FExp.UNARY_OPERATORS.contains(name);
+        int mandatory = 0;
+        for (InstComponentDecl input : myInputs()) 
+            if (!input.hasBindingFExp())
+                mandatory++;
+        
+        String funcName = isOperator() ? "" : (name() + " ");
+        if (myOutputs().size() != 1)
+            error("Operator functions must have exactly one output, but %s has %d", name(), myOutputs().size());
+        else if (constr && !myOutputs().get(0).type().equivalentTo(type))
+            myOutputs().get(0).error("Output of operator record constructor must be of the type of the operator record the constructor belongs to");
+        else if (conv) {
+            FType expected = null;
+            if (name.equals(FExp.OP_STR))
+                expected = fStringScalarType();
+            if (expected != null && !myOutputs().get(0).type().equivalentTo(expected))
+                error("%s operator functions must have one output of type %s, but %sreturns %s", name, expected, funcName, myOutputs().get(0).type());
+        }
+        if (constr) {
+            if (name.equals(FExp.OP_ZERO)) {
+                if (!myInputs().isEmpty())
+                    error("The '0' operator record constructor may not have any inputs, but %shas %d", funcName, myOutputs().size());
+            } else if (mandatory == 1) {
+                FType otherType = myInputs().get(0).type();
+                if (otherType.matchOverloadedConstructor(type) != null) 
+                    error("Ambiguous overloaded constructors in %s and %s", type, otherType);
+            }
+        } else {
+            boolean typeOk = false;
+            boolean orderOk = true;
+            for (int i = 0, n = myInputs().size(); i < n; i++) { 
+                InstComponentDecl inp = myInputs().get(i);
+                if ((!conv || i == 0) && inp.type().scalarType().equivalentTo(type))
+                    typeOk = true;
+                if (inp.hasBindingFExp() && mandatory > i)
+                    orderOk = false;
+            }
+            if (!typeOk)
+                error((conv ? "First argument of conversion operator functions must be" : "Operator functions must have at least one argument that is") + 
+                        " of the type of the operator record the function belongs to");
+            if (!orderOk)
+                error("All inputs without default value in operator function must be before all inputs with default value");
+        }
+        if (binary && unary) {
+            if (mandatory < 1 || mandatory > 2)
+                error("Operator functions for operators that are both unary and binary must have exactly 1 or 2 inputs without default value, but %s has %d", 
+                        name(), mandatory);
+        } else if (binary) {
+            if (mandatory != 2)
+                error("Operator functions for binary operators must have exactly 2 inputs without default value, but %s has %d", 
+                        name(), mandatory);
+        } else if (unary) {
+            if (mandatory != 1)
+                error("Operator functions for unary operators must have exactly 1 input without default value, but %s has %d", 
+                        name(), mandatory);
+        }
+    }
+
+    public void InstOperator.contentCheck(ErrorCheckType checkType) {
+        contentCheckAsOperator(checkType);
+        super.contentCheck(checkType);
+    }
+
+    public void InstOperatorFunction.contentCheck(ErrorCheckType checkType) {
+        contentCheckAsOperator(checkType);
+        super.contentCheck(checkType);
+    }
+
+    /**
+     * Get the class this restriction is attached to.
+     */
+    inh InstClassDecl InstRestriction.myInstClassDecl();
+    eq InstBaseClassDecl.getInstRestriction().myInstClassDecl() = this;
+
+    /**
+     * Check if this class fulfills the requirements of a package.
+     */
+    syn boolean InstClassDecl.isOkPackage() {
+        for (InstComponentDecl icd : getInstComponentDecls())
+            if (!icd.isConstant())
+                return false;
+        return getNumFAbstractEquation() == 0;
+    }
+    eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
+
+    /**
+     * If this class is in an operator record or in a package in an operator record, find that operator record.
+     */
+    inh InstClassDecl InstClassDecl.myOperatorRecord();
+    eq InstClassDecl.getChild().myOperatorRecord()     = isOperatorRecord() ? this : (isPackage() ? myOperatorRecord() : null);
+    eq InstComponentDecl.getChild().myOperatorRecord() = null;
+    eq InstRoot.getChild().myOperatorRecord()          = null;
+    eq Root.getChild().myOperatorRecord()              = null;
+
 }
 
 aspect StructuralParams {
