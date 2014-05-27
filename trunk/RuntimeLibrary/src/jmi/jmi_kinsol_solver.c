@@ -399,7 +399,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
                                  "jmi_kinsol_solver",
-                                 "iter  nfe    res_norm      max_res: ind   lambda_max: ind       lambda",
+                                 "iter  nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind       lambda",
                                  1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
@@ -410,19 +410,30 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 char message[256];
                 realtype lambda_max;
                 realtype lambda, steplength;
+                int n_limiting = 0, n_active = 0;
 
                 if (nniters>0) {
                     lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
                     KINGetStepLength(kin_mem, &steplength);
                     lambda = steplength/solver->last_xnorm;
+
+                    for (i=0; i < solver->num_bounds; i++) {
+                        int index = solver->bound_vindex[i]; /* variable index */
+                        if (solver->bound_limiting[i]) {
+                            n_limiting++;
+                            if (solver->active_bounds[index] != 0) n_active++;
+                        }
+                    }
                 }
                 else {
                     lambda_max = lambda = 0;
                 }
 
-                sprintf(message, "%4d %4d %11.4e  %11.4e:%4d  %11.4e:%4d  %11.4e", (int)nniters,
+                sprintf(message, "%4d %4d %11.4e  %11.4e:%4d  %4d %4d  %11.4e:%4d  %11.4e", (int)nniters,
                         (int)(block->nb_fevals),
-                        kin_mem->kin_fnorm, max_residual, max_index, lambda_max, solver->last_bounding_index, lambda);
+                        kin_mem->kin_fnorm, max_residual, max_index,
+                        n_limiting, n_active,
+                        lambda_max, solver->last_bounding_index, lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
                              "jmi_kinsol_solver", block->id, message);
                 jmi_log_leave(log, node);
