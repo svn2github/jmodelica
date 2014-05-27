@@ -4829,10 +4829,14 @@ class LocalDAECollocator(CasadiCollocator):
                         elif mode == "linear":
                             d = max([abs(traj_max), abs(traj_min)])
                             if d == 0.0:
-                                d = 1.
+                                d = N.abs(self.op.get_attr(var, "nominal"))
                                 print("Warning: Nominal trajectory for " +
                                       "variable %s is identically " % name + 
-                                      "zero.")
+                                      "zero. Using nominal attribute instead.")
+                                if d == 0.0:
+                                    raise CasadiCollocatorException(
+                                        "Nominal value for " +
+                                        "%s is zero." % name)
                             e = 0.
                         elif mode in ["affine", "time-variant"]:
                             if N.allclose(traj_max, traj_min):
@@ -4845,11 +4849,17 @@ class LocalDAECollocator(CasadiCollocator):
                                     raise CasadiCollocatorException(
                                         "Could not do affine scaling " +
                                         "for variable %s." % name)
-                                if traj_max == 0.:
+                                d = max([abs(traj_max), abs(traj_min)])
+                                if d == 0.:
                                     print("Warning: Nominal trajectory for " +
                                           "variable %s is " % name + 
-                                          "identically zero.")
-                                    d = 1.
+                                          "identically zero. Using nominal " +
+                                          "attribute instead.")
+                                    d = N.abs(self.op.get_attr(var, "nominal"))
+                                    if d == 0.:
+                                        raise CasadiCollocatorException(
+                                            "Nominal value for " +
+                                            "%s is zero." % name)
                                 else:
                                     d = max([abs(traj_max), abs(traj_min)])
                                 e = 0.
