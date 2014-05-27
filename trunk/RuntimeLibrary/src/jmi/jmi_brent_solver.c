@@ -72,7 +72,7 @@ solver->kin_stol = block->options->min_tol;
 
 int jmi_brent_solver_new(jmi_brent_solver_t** solver_ptr, jmi_block_solver_t* block) {
     jmi_brent_solver_t* solver;
-    int flag;
+    int flag = 0;
     
     solver = (jmi_brent_solver_t*)calloc(1,sizeof(jmi_brent_solver_t));
     if(!solver ) return -1;
@@ -256,7 +256,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 ) {
                 /* widen the interval */
                 tmp = lower - lstep;  
-                if( tmp < block->min[0]) { /* make sure we're inside bounds */
+                if( (tmp < block->min[0]) || (tmp != tmp)) { /* make sure we're inside bounds and not NAN*/
                          tmp = block->min[0];
                 }
                 lstep = lower -  tmp; 
@@ -285,7 +285,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             }
             else if (upper < block->max[0]) { /* upper might work otherwize */
                 tmp = upper + ustep;
-                if(tmp > block->max[0]) {
+                if((tmp > block->max[0]) || (tmp != tmp)) {
                     tmp = block->max[0];
                 }
                 ustep = tmp - upper;

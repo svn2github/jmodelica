@@ -746,7 +746,11 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     /* The maximum newton step leads to the bound  
     -> store the "x" and set maximum step to be L2 norm of x */
     N_VScale(1.0, b, x);
-    kin_mem->kin_mxnewtstep =  N_VWL2Norm(x, kin_mem->kin_uscale)*(1 - UNIT_ROUNDOFF);
+
+    xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
+    solver->last_xnorm = xnorm*(1 - UNIT_ROUNDOFF);
+
+    kin_mem->kin_mxnewtstep =  solver->last_xnorm;
 }
 
 /* Form regualrized matrix Transpose(J).J */
