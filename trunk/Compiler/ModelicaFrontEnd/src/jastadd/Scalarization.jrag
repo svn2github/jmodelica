@@ -576,12 +576,6 @@ aspect Scalarization {
 		return res;
 	}
 	
-	/**
-	 * \brief Check if this is an internal generated attribute.
-	 */
-	syn boolean FAttribute.isInternal() = false;
-	eq FInternalAttribute.isInternal()  = true;
-	
     /**
      * \brief Scalarize the attribute, picking out the specific element from an array 
      *        expression or removing "each".

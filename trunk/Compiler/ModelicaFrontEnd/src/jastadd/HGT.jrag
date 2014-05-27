@@ -98,9 +98,9 @@ aspect HGT {
                 if (iterationNode.exists() && src.root().options.getBooleanOption("hand_guided_tearing")) {
                     AnnotationNode enabledNode = iterationNode.forPath("enabled");
                     if (!enabledNode.exists() || enabledNode.exp() == null) {
-                        dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, src.isArray()));
+                        dest.addFAttribute(new FAnnotationAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, src.isArray()));
                     } else {
-                        dest.addFAttribute(new FInternalAttribute(FAttribute.HGT, src.containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(src.getFQNamePrefix()), 
+                        dest.addFAttribute(new FAnnotationAttribute(FAttribute.HGT, src.containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(src.getFQNamePrefix()), 
                                 FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEach()));
                     }
                 }
@@ -400,7 +400,7 @@ aspect ResidualPairs{
     public static final int FInternalAttribute.HGTVarLevel_COMPONENT = 1;
     public static final int FInternalAttribute.HGTVarLevel_PAIR = 2;
     
-    public static final String FAttribute.HGT         = "hgt()";
+    public static final String FAttribute.HGT         = "IterationVariable";
     
     syn CValue FVariable.HGTVarCValue() {
         FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
@@ -428,11 +428,21 @@ aspect ResidualPairs{
         throw new UnsupportedOperationException();
     }
     public void FVariable.setHGTAsPair() {
-        setAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_PAIR);
+        setAnnotationAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_PAIR);
     }
     
+    public void FVariable.setAnnotationAttribute(String name, String type, FExp exp, int level) {
+        FAttribute attr = findMatching(getFAttributes(), name);
+        if (attr == null) {
+            attr = new FAnnotationAttribute(name, exp, level, false);
+            addFAttribute(attr);
+        } else {
+            attr.setValue(exp);
+            attr.setLevel(level);
+        }
+    }
     public void FVariable.unsetHGT() {
-        setAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpFalse());
+        setAnnotationAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpFalse(), 0);
     }
     
     public class FClass {

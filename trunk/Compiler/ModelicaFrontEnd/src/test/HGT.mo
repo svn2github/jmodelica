@@ -1072,7 +1072,7 @@ Jacobian:
                 flatModel="
 fclass HGT.Unpaired.Enabled12
  constant Integer n = 4;
- Real x[4] annotation(__Modelon(IterationVariable(enabled={ true, true, true, true })));
+ Real x[4] annotation(IterationVariable = fill(true, 4));
  Real y[4];
 equation
  x[1:4] = y[1:4] .+ 3;
@@ -3771,6 +3771,82 @@ Semantic error at line 0, column 0:
 
         end Error1;
 
+        model Error2
+            Real u0,u1,uL;
+            Real u2 annotation(__Modelon(IterationVariable));
+            Real u3 annotation(__Modelon(IterationVariable));
+            Real i0,i1,i2(start=1),i3,iL;
+            parameter Real R1 = 1;
+            parameter Real R2 = 1;
+            parameter Real R3 = 1;
+            parameter Real L = 1;
+        equation
+            u0 = sin(time);
+            u1 = R1*i1;
+            u2 = R2*i2;
+            u3 = R3*i3;
+            uL = L*der(iL);
+            u0 = u1 + u3 annotation(__Modelon(ResidualEquation));
+            uL = u1 + u2;
+            u2 = u3;
+            i0 = i1 + iL;
+            i1 = i2 + i3;
+
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+                name="Generic_Error2",
+                description="Test for alias eliminated hand guided tearing variable error",
+                equation_sorting=true,
+                automatic_tearing=true,
+                hand_guided_tearing=true,
+                errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
+    Real u2 annotation(IterationVariable = true)
+")})));
+        end Error2;
+
+        model Error3
+            Real u0,u1,uL;
+            Real u2 annotation(__Modelon(IterationVariable));
+            Real u3 annotation(__Modelon(IterationVariable));
+            Real i0,i1,i2(start=1),i3,iL;
+            parameter Real R1 = 1;
+            parameter Real R2 = 1;
+            parameter Real R3 = 1;
+            parameter Real L = 1;
+        equation
+            u0 = sin(time);
+            u1 = R1*i1;
+            u2 = R2*i2;
+            u3 = R3*i3;
+            uL = L*der(iL);
+            u0 = u1 + u3 annotation(__Modelon(ResidualEquation));
+            uL = u1 + u2;
+            u2 = u3;
+            i0 = i1 + iL;
+            i1 = i2 + i3;
+
+        annotation(__JModelica(UnitTesting(tests={ 
+            ErrorTestCase(
+                name="Generic_Error3",
+                description="Test so error is given for variables that has been alias eliminated",
+                equation_sorting=true,
+                automatic_tearing=true,
+                hand_guided_tearing=true,
+                errorMessage="
+1 warnings found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
+    Real u2 annotation(IterationVariable = true)
+")})));
+        end Error3;
+
         model Warning1
             Real x(start=1), y(start=2), z, w;
         equation
@@ -3795,5 +3871,61 @@ At line 0, column 0:
 ")})));
         end Warning1;
         
+        model Generic_VariabilityPropagation
+            Real u0,u1,u2,u3,uL;
+            Real i0,i2,i3,iL;
+            Real i1 = 1;
+            parameter Real R1 = 1;
+            parameter Real R2 = 1;
+            parameter Real R3 = 1;
+            parameter Real L = 1;
+        equation
+            u0 = sin(time);
+            u1 = R1*i1 annotation(__Modelon(ResidualEquation(iterationVariable=i3)));
+            u2 = R2*i2;
+            u3 = R3*i3;
+            uL = L*der(iL);
+            u0 = u1 + u3;
+            uL = u1 + u2;
+            u2 = u3;
+            i0 = i1 + iL;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Generic_VariabilityPropagation",
+                description="This tests that we do not propagate variability to tearing variables.",
+                equation_sorting=true,
+                automatic_tearing=true,
+                hand_guided_tearing=true,
+                flatModel="
+fclass HGT.Generic.Generic_VariabilityPropagation
+ Real u0;
+ Real u1;
+ Real u2;
+ Real uL;
+ Real i0;
+ Real i2;
+ Real i3 annotation(IterationVariable = true);
+ Real iL;
+ constant Real i1 = 1;
+ parameter Real R1 = 1 /* 1 */;
+ parameter Real R2 = 1 /* 1 */;
+ parameter Real R3 = 1 /* 1 */;
+ parameter Real L = 1 /* 1 */;
+initial equation 
+ iL = 0.0;
+equation
+ u0 = sin(time);
+ u1 = R1;
+ u2 = R2 * i2;
+ u2 = R3 * i3;
+ uL = L * der(iL);
+ u0 = u1 + u2;
+ uL = u1 + u2;
+ i0 = 1.0 + iL;
+end HGT.Generic.Generic_VariabilityPropagation;
+")})));
+        end Generic_VariabilityPropagation;
+
     end Generic;
 end HGT;

@@ -457,7 +457,7 @@ end InteractiveFMU.EquationName1;
             hand_guided_tearing=true,
             flatModel="
 fclass InteractiveFMU.Alias1
- input Real a.a annotation(__Modelon(IterationVariable(enabled=true)));
+ input Real a.a annotation(IterationVariable = true);
  Real c;
  Real iter_0 \"a.a\";
  output Real res_0 \"time = c * a.a\";

@@ -63,6 +63,21 @@ aspect BasePrinter {
   		
   		public String op(FBinExp e) { return e.op(); }
   		
+        /**
+         * Method that returns the printer that should be used when
+         * annotations are PrettyPrinted in the flat tree.
+         */
+        public PrettyPrinter annotationPrinter() {
+            return ASTNode.AnnotationPrettyPrinter;
+        }
+
+        /**
+         * Method returns true if the supplied attribute should be printed.
+         * Checked by PrettyPrinting of FAttributes
+         */
+        public boolean inAnnotation() {
+            return false;
+        }
 	}
 }
 
@@ -996,7 +1011,7 @@ aspect FlatPrettyPrint {
 		str.print(" ");
 		str.print(displayName());
 	
-		getFAttributeList().prettyPrintFAttributeList(str,p);
+		getFAttributeList().prettyPrintFAttributeList(str, p);
 		
 		if (hasBindingExp()) {
 			str.print(" = ");
@@ -1007,9 +1022,7 @@ aspect FlatPrettyPrint {
 		
 		p.print(getFStringCommentOpt(),str,indent);
 		
-		CValue hgt = HGTVarCValue();
-		if (hgt != null)
-			str.format(" annotation(__Modelon(IterationVariable(enabled=%s)))", hgt);
+		getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
 
 		if (isIndependentParameter() && hasBindingExp()) {
 			str.print(" /* ");
@@ -1036,24 +1049,39 @@ aspect FlatPrettyPrint {
 		}
 	}
 	
-	syn boolean FAttribute.shouldPrettyPrint() = !name().equals(HGT);
+    public void List.prettyPrintFAttributeList(CodeStream str, Printer p) {
+        prettyPrintFAttributeList(str, p, "", "");
+    }
 
-	public void List.prettyPrintFAttributeList(CodeStream str, Printer p) {
-	    boolean firstAttr = true;
-	    for (ASTNode astNode : this) {
-	        FAttribute attr = (FAttribute)astNode;
-	        if (attr.getAttributeSet() && attr.shouldPrettyPrint()) {
-	            if (!firstAttr)	
-	                str.print(",");
-	            else
-	                str.print("(");
-	            firstAttr = false;
-	            p.print(attr, str, "");
-	        }
-	    }
-	    if (!firstAttr)
-	        str.print(")");
-	}
+    public void List.prettyPrintFAnnotationAttributeList(CodeStream str, Printer p) {
+        prettyPrintFAnnotationAttributeList(str, p, "");
+    }
+
+    public void List.prettyPrintFAnnotationAttributeList(CodeStream str, Printer p, String extraEnd) {
+        prettyPrintFAnnotationAttributeList(str, p, " ", extraEnd);
+    }
+    
+    public void List.prettyPrintFAnnotationAttributeList(CodeStream str, Printer p, String extraStart, String extraEnd) {
+        prettyPrintFAttributeList(str, p.annotationPrinter(), extraStart + "annotation", extraEnd);
+    }
+    
+    public void List.prettyPrintFAttributeList(CodeStream str, Printer p, String extraStart, String extraEnd) {
+        boolean firstAttr = true;
+        for (ASTNode astNode : this) {
+            FAttribute attr = (FAttribute)astNode;
+            if (attr.getAttributeSet() && (p.inAnnotation() && attr.isAnnotation() ||
+                    !p.inAnnotation() && (attr.isModification() || attr.isInternal()))) {
+                if (!firstAttr)	
+                    str.print(",");
+                else
+                    str.print(extraStart + "(");
+                firstAttr = false;
+                p.print(attr, str, "");
+            }
+        }
+        if (!firstAttr)
+            str.print(")" + extraEnd);
+    }
 	
     public void FAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
 			
@@ -1073,6 +1101,7 @@ aspect FlatPrettyPrint {
     	str.print(indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
     	p.print(getFAlgorithm(), str, indent);
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
     	str.print(indent + "end " + name() + ";\n\n");
     }
 
@@ -1214,6 +1243,7 @@ aspect FlatPrettyPrint {
     	p.print(getLeft(),str,indent);
    		str.print(" = ");
    		p.print(getRight(),str,indent);
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
 	}
 
 
@@ -1272,6 +1302,7 @@ aspect FlatPrettyPrint {
 	   		str.print(") = ");
 		}
    		p.print(getCall(), str, indent);
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
 	}
 	
 	public void FAlgorithm.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -2083,5 +2114,26 @@ aspect PrettyPrint_MC {
 		str.print(getFIdUse().nameUnderscore());
 		str.print(")");
 	}
+
+}
+
+aspect AnnotationPrettyPrinting {
+    /**
+     * Used when prettyprinting FAttribute annotation nodes
+     */
+    public class AnnotationPrettyPrinter extends PrettyPrinter {
+
+        @Override
+        public PrettyPrinter annotationPrinter() {
+            return this;
+        }
+
+        @Override
+        public boolean inAnnotation() {
+            return true;
+        }
+    }
+    
+    public static PrettyPrinter ASTNode.AnnotationPrettyPrinter = new AnnotationPrettyPrinter();
 
 }

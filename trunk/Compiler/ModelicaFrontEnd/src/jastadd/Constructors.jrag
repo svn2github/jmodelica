@@ -781,6 +781,15 @@ aspect Constructors {
                 true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
+    /**
+     * \brief Create an FInternalAttribute with only the children that are 
+     *        valid for them.
+     */
+    public FAnnotationAttribute.FAnnotationAttribute(String name, FExp exp, int level, boolean eachKey) {
+        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+                true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
+    }
+    
     public FIdDeclAttribute.FIdDeclAttribute(String name, String decl) {
         this(new FIdUse("*"), new FIdDecl(name), new Opt<FExp>(), 
                 true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>(), new FIdDecl(decl));
@@ -1334,9 +1343,10 @@ aspect InheritedFactoryMethods {
 	public FRecordVariable  FRecordVariable.createEmptyNode()  					{ return new FRecordVariable(); }
 	public FExternalObjectVariable FExternalObjectVariable.createEmptyNode()	{ return new FExternalObjectVariable(); }
 
-	public FAttribute         FAttribute.createEmptyNode()         { return new FAttribute(); }
-	public FInternalAttribute FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
-	public FIdDeclAttribute   FIdDeclAttribute.createEmptyNode()   { return new FIdDeclAttribute(); }
+	public FAttribute           FAttribute.createEmptyNode()         { return new FAttribute(); }
+	public FInternalAttribute   FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
+    public FAnnotationAttribute FAnnotationAttribute.createEmptyNode() { return new FAnnotationAttribute(); }
+	public FIdDeclAttribute     FIdDeclAttribute.createEmptyNode()   { return new FIdDeclAttribute(); }
 	
 	
     /**
