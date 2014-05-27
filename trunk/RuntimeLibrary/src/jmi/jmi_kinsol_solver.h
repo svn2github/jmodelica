@@ -98,6 +98,8 @@ struct jmi_kinsol_solver_t {
 
     realtype last_xnorm;           /**< \brief Last norm of Newton step before limiting */
     int last_bounding_index;       /**< \brief Index of the variable that most limited Newton step, or -1 if none */
+    int last_num_limiting_bounds;  /**< \brief Number of limiting bounds at last jmi_kinsol_limit_step */
+    int last_num_active_bounds;    /**< \brief Number of active bounds at last jmi_kinsol_limit_step */
 };
 
 

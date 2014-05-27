@@ -410,20 +410,11 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 char message[256];
                 realtype lambda_max;
                 realtype lambda, steplength;
-                int n_limiting = 0, n_active = 0;
 
                 if (nniters>0) {
                     lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
                     KINGetStepLength(kin_mem, &steplength);
                     lambda = steplength/solver->last_xnorm;
-
-                    for (i=0; i < solver->num_bounds; i++) {
-                        int index = solver->bound_vindex[i]; /* variable index */
-                        if (solver->bound_limiting[i]) {
-                            n_limiting++;
-                            if (solver->active_bounds[index] != 0) n_active++;
-                        }
-                    }
                 }
                 else {
                     lambda_max = lambda = 0;
@@ -432,7 +423,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 sprintf(message, "%4d %4d %11.4e  %11.4e:%4d  %4d %4d  %11.4e:%4d  %11.4e", (int)nniters,
                         (int)(block->nb_fevals),
                         kin_mem->kin_fnorm, max_residual, max_index,
-                        n_limiting, n_active,
+                        solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                         lambda_max, solver->last_bounding_index, lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
                              "jmi_kinsol_solver", block->id, message);
@@ -614,6 +605,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
     solver->last_xnorm = xnorm;
     solver->last_bounding_index = -1;
+    solver->last_num_limiting_bounds = 0;
+    solver->last_num_active_bounds = 0;
 
     if((solver->num_bounds == 0) || (xnorm == 0.0)) 
     {
@@ -654,10 +647,12 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 
         solver->bound_limiting[i] = 1 ;
         limitingBounds = TRUE ;
+        solver->last_num_limiting_bounds++;
         step_ratio_i =pbi/pi;   /* step ration to bound */
         if(step_ratio_i < min_step_ratio) {
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
+            solver->last_num_active_bounds++;
             xxd[index] = 0;
             /* distance to the bound */
             solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; */
