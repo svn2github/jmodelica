@@ -961,11 +961,6 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             i = 1;
             dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
             solver->force_new_J_flag = 1;
-
-            if((block->callbacks->log_options.log_level >= 6)) {
-                jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->JTJ->data, N, N);
-                jmi_log_leave(block->log, node);
-            }
         }
         else {
             xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
@@ -1005,10 +1000,13 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         
         if((block->callbacks->log_options.log_level >= 6)) {
             jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
-            jmi_log_leave(block->log, node);
         }
     }
-    
+
+    if((block->callbacks->log_options.log_level >= 6)) {
+        jmi_log_leave(block->log, node);
+    }
+
     if(ret) return ret; /* Break out on error */
     
     if((solver->equed == 'C') || (solver->equed == 'B')) {
