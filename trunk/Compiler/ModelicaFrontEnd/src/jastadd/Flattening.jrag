@@ -294,10 +294,14 @@ aspect Flattening {
         
         flattenComponentsInFunction(ffd, fc, new HashSet<String>());
         
-        FAlgorithm fab = findFunctionAlgorithm();
-        fab = (fab == null) ? new FAlgorithm(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
-        if (ie != null)
+        FAlgorithm fab;
+        if (ie != null) {
+            fab = new FAlgorithm(new List());
             flattenExternal(fab, ie);
+        } else {
+            fab = findFunctionAlgorithm().flattenEqn(new FQNameEmpty(), fc);
+        }
+            
         fab.ensureReturn();
         ffd.setFAlgorithm(fab);
         fc.addFFunctionDecl(ffd);

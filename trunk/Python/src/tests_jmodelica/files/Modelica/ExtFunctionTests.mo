@@ -311,6 +311,20 @@ package CEval
       constant E[2] xArray         = fEnumArray({E.E2,E.E1});
       constant E[2] xArrayUnknown  = fEnumArrayUnknown({E.E1,E.E2});
     end EnumTest;
+    
+    model ShortClass
+        function f1
+            input Real x;
+            output Real y;
+          external y = fRealScalar(x) annotation(
+            Library="externalFunctionsC",
+            Include="#include \"externalFunctionsC.h\"");
+        end f1;
+        function f2 = f1(x(min=1));
+        function f3 = f2;
+        function f4 = f3(x(max=2));
+        constant Real a1 = f1(1) + f2(2) + f3(3) + f4(4);
+    end ShortClass;
   end C;
   
   package Fortran

@@ -9455,9 +9455,12 @@ model ExternalFunc7
 			description="External functions: simple func, language \"C++\"",
 			variability_propagation=false,
 			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4508, column 2:
+2 errors found:
+Error: in file '...':
+Semantic error at line 9444, column 2:
+  The external language specification \"C++\" is not supported
+Error: in file '...':
+Semantic error at line 9447, column 2:
   The external language specification \"C++\" is not supported
 ")})));
 end ExternalFunc7;

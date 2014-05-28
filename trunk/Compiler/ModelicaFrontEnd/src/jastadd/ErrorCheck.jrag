@@ -942,9 +942,9 @@ aspect InstanceErrorCheck {
 	/**
 	 * \brief Check if class has exactly one algorithm section or external function declaration.
 	 */
-	public boolean InstClassDecl.isCompleteFunction() {
-		return (numFAlgorithm() == 1) != (numInstExternal() == 1);
-	}
+    public boolean InstClassDecl.isCompleteFunction() {
+        return (numFAlgorithm() == 1);
+    }
 	
 	syn boolean InstClassDecl.hasInstExternal() = false;
 	

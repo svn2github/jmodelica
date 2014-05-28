@@ -1482,6 +1482,9 @@ aspect InstaceConstrainingClauses {
 	    for (Algorithm a : algorithms()) {
 	    	l.add(a.instantiate());
 	    }
+	    for (FAlgorithm a : fAlgorithms()) {
+	        l.add(a.fullCopy());
+	    }
 	    return l;
 	}
 	
@@ -1584,6 +1587,20 @@ aspect InstanceAST_API {
 	eq InstExtends.algorithms()                   = myInstClass().algorithms();
 	eq InstFullClassDecl.algorithms()             = getBaseClassDecl().algorithms();	
 	
+    syn Iterable<FAlgorithm> InstNode.fAlgorithms() = Collections.<FAlgorithm>emptyList();
+    eq InstComponentDecl.fAlgorithms()              = myInstClass().fAlgorithms();
+    eq InstExtends.fAlgorithms()                    = myInstClass().fAlgorithms();
+    eq InstFullClassDecl.fAlgorithms() {
+        InstExternal ie = getInstExternal();
+        if (ie != null) {
+            ArrayList<FAlgorithm> l = new ArrayList<FAlgorithm>();
+            l.add(ie.getFAlgorithm());
+            return l;
+        } else {
+            return super.fAlgorithms();
+        }
+    }
+    
 	syn Iterable<ComponentDecl> InstNode.components() = Collections.<ComponentDecl>emptyList();
 	eq InstComponentDecl.components()                 = myInstClass().components();
 	eq InstArrayComponentDecl.components()            = instComponentDecl().components();

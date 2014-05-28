@@ -470,6 +470,17 @@ class TestCBasic:
         nose.tools.assert_equals(model.get('xArray[2]'), 2)
         nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 1)
         
+    @testattr(stddist = True)
+    def testCEvalShortClass(self):
+        '''
+        Constant evaluation of function modified by short class decl
+        '''
+        cpath = "ExtFunctionTests.CEval.C.ShortClass"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        resConst = model.simulate()
+        nose.tools.assert_almost_equal(resConst.final('a1'), 10*3.14)
+        
 class TestFortranBasic:
     '''
     Test basic external fortran functions.
