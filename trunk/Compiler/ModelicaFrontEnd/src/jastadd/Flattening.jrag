@@ -2082,11 +2082,11 @@ aspect FlatExpressions {
         return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
     }
 	public FSemiLinearExp       FSemiLinearExp.flatten(FQName prefix)            { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
-	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstFullClassDecl().name() + "." + prefix.name()); }
+	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstBaseClassDecl().name() + "." + prefix.name()); }
 	
-	inh InstFullClassDecl ASTNode.myInstFullClassDecl();
-	eq Root.getChild().myInstFullClassDecl() = null;
-	eq InstFullClassDecl.getChild().myInstFullClassDecl() = this;
+	inh InstFullClassDecl ASTNode.myInstBaseClassDecl();
+	eq Root.getChild().myInstBaseClassDecl() = null;
+	eq InstFullClassDecl.getChild().myInstBaseClassDecl() = this;
 	
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	

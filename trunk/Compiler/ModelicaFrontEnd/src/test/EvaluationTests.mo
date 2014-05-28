@@ -945,6 +945,78 @@ end EvaluationTests.FunctionEval26;
 end FunctionEval26;
 
 
+model FunctionEval27
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 2;
+        y := x * y;
+    end f;
+    
+    function f2 = f;
+    
+    constant Real a1 = f2(2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval27",
+            description="Evaluation of function defined in short class decl",
+            flatModel="
+fclass EvaluationTests.FunctionEval27
+ constant Real a1 = 8.0;
+
+public
+ function EvaluationTests.FunctionEval27.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 2;
+  y := x * y;
+  return;
+ end EvaluationTests.FunctionEval27.f;
+
+end EvaluationTests.FunctionEval27;
+")})));
+end FunctionEval27;
+
+
+model FunctionEval28
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 2;
+        y := x * y;
+    end f;
+    
+    function f2 = f(x(min=1));
+    
+    constant Real a1 = f2(2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval28",
+            description="Evaluation of function defined in short class decl",
+            flatModel="
+fclass EvaluationTests.FunctionEval28
+ constant Real a1 = 8.0;
+
+public
+ function EvaluationTests.FunctionEval28.f2
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 2;
+  y := x * y;
+  return;
+ end EvaluationTests.FunctionEval28.f2;
+
+end EvaluationTests.FunctionEval28;
+")})));
+end FunctionEval28;
+
+
 
 model StringConcat
  Real a = 1;

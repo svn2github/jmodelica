@@ -2338,7 +2338,7 @@ aspect ConstantEvaluation {
   inh boolean FExp.duringFunctionEval();
   inh boolean InstNamedAccess.duringFunctionEval();
   eq FFunctionDecl.getChild().duringFunctionEval()     = currentEvaluationValues != null;
-  eq InstFullClassDecl.getChild().duringFunctionEval() = currentEvaluationValues != null;
+  eq InstBaseClassDecl.getChild().duringFunctionEval() = currentEvaluationValues != null;
   eq InstNode.getChild().duringFunctionEval() = false;
   eq FClass.getChild().duringFunctionEval()   = false;
   eq Root.getChild().duringFunctionEval()     = false;
@@ -2541,18 +2541,22 @@ aspect ConstantEvaluation {
         values.clear(); // Make sure evaluation returns CValue.UNKNOWN
     }
 
-    public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
-        // We assume this class is a function
+    public void InstSimpleShortClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
+       actualInstClass().evaluate(values);
+    }
+
+    public void InstBaseClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
+        // We assume that this class is a function
         
-          FAlgorithm fab = findFunctionAlgorithm();
-          if (fab == null) {
-              if (hasInstExternal()) {
-                  fab = getInstExternal().getFAlgorithm();
-              } else {
-                  values.clear();
-                  return;
-              }
-          }
+        FAlgorithm fab = findFunctionAlgorithm();
+        if (fab == null) {
+            InstExternal ie = findFunctionExternal();
+            if (ie == null) {
+                values.clear();
+                return;
+            }
+            fab = ie.getFAlgorithm();
+        }
         
         Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
         currentEvaluationValues = values;
@@ -2576,7 +2580,7 @@ aspect ConstantEvaluation {
           currentEvaluationValues = oldVal;
         }
     }
-    private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
+    private Map<CommonVariableDecl, CValue> InstBaseClassDecl.currentEvaluationValues = null;
 
     /**
      * \brief Save current function evaluation value to map.
@@ -3745,7 +3749,7 @@ aspect ExternalCEval {
      */
     syn nta FAlgorithm InstExternal.getFAlgorithm() {
         FAlgorithm fab = new FAlgorithm(new List());
-        fab.addFStatement(createStmt(myInstFullClassDecl(), new FQNameFull(""), false));
+        fab.addFStatement(createStmt(myInstBaseClassDecl(), new FQNameFull(""), false));
         return fab;
     }
     
