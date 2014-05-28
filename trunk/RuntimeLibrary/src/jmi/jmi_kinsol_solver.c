@@ -422,9 +422,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
                 sprintf(message, "%4d %4d %11.4e  %11.4e:%4d  %4d %4d  %11.4e:%4d  %11.4e", (int)nniters,
                         (int)(block->nb_fevals),
-                        kin_mem->kin_fnorm, max_residual, max_index,
+                        kin_mem->kin_fnorm, max_residual, max_index+1,
                         solver->last_num_limiting_bounds, solver->last_num_active_bounds,
-                        lambda_max, solver->last_bounding_index, lambda);
+                        lambda_max, solver->last_bounding_index+1, lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
                              "jmi_kinsol_solver", block->id, message);
                 jmi_log_leave(log, node);
