@@ -314,11 +314,16 @@ endif
 	if [ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ]; then \
 	  echo "Installing in dist directory, don't copy MSL"; \
 	else \
-	  mkdir -p "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	  mkdir -p "$(DESTDIR)$(prefix)/ThirdParty/MSL/Modelica"; \
+	  mkdir -p "$(DESTDIR)$(prefix)/ThirdParty/MSL/ModelicaServices"; \
 	  cd "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
 	  find . -depth -print0 | while read -d $$'\0' -r f ; do if [ ! -e "$(abs_top_srcdir)/ThirdParty/MSL/$${f}" ]; then rm -rf "$${f}"; fi; done; \
+	  cd "$(abs_top_srcdir)/ThirdParty/MSL/Modelica"; \
+	  find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)$(prefix)/ThirdParty/MSL/Modelica"; \
+	  cd "$(abs_top_srcdir)/ThirdParty/MSL/ModelicaServices"; \
+	  find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)$(prefix)/ThirdParty/MSL/ModelicaServices"; \
 	  cd "$(abs_top_srcdir)/ThirdParty/MSL"; \
-	  $(CP) Modelica ModelicaServices Complex.mo "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	  $(CP) Complex.mo "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
 	fi
 	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
