@@ -79,38 +79,7 @@ aspect TransformCanonical {
      *  done by both the Modelica and the Optimica compilers.
      */
     public void FClass.transformCanonicalBase() {
-        Transformation[] transformations = new Transformation[] {
-            new enableIfEquationElimination(),
-            new addStateInitialEquationsIfSet(),
-            new enableArrayAccessRewrite(),
-            new genAlgorithmFunctionsIfSet(),
-            new genBindingEquations(),
-            new scalarize(),
-            new MakeReinitedVarsStates(),
-            new enableIfEquationElimination(),
-            new extractEventGeneratingExps(),
-            new transformAlgorithms(),
-            new enableWhenClauseRewrite(),
-            new propagateResidualPairs(),
-            new genInitArrayStatements(),
-            new functionInliningIfSet(),
-            setFDerivativeVariables,
-            new addFPreVariables(),
-            new enableIfEquationRewrite(),
-            aliasElimination,
-            new variabilityPropagationIfSet(),
-            aliasElimination,
-            new evaluateAsserts(),
-            new enableSemiLinearRewrite(),
-            new eliminateEqualSwitches(),
-            new genInitialEquations(),
-            new setFDerivativeVariablesPreBLT(),
-            new propagateNonFixedParameters(),
-            new sortDependentParameters(),
-            new addRuntimeOptionParameters(),
-            new indexReduction()
-        };
-        for (Transformation t : transformations)
+        for (Transformation t : getTransformations())
             t.apply();
     }
 
@@ -120,9 +89,84 @@ aspect TransformCanonical {
         for (FRecordDecl rec : getFRecordDecls())
             rec.clearBindingEquations();
     }
-
+    
     public class FClass {
         
+        /**
+         * List that contains all transformations that has been registered.
+         * This list is initialized by setupTransformations()
+         */
+        private java.util.List<Transformation> transformations;
+        
+        /**
+         * Method that initializes the transformations list. This method should
+         * called before each operation on the list. Internal check prevents
+         * multiple initializations.
+         */
+        private void setupTransformations() {
+            if (transformations != null)
+                return;
+            transformations = new ArrayList<Transformation>();
+            transformations.add(new enableIfEquationElimination());
+            transformations.add(new addStateInitialEquationsIfSet());
+            transformations.add(new enableArrayAccessRewrite());
+            transformations.add(new genAlgorithmFunctionsIfSet());
+            transformations.add(new genBindingEquations());
+            transformations.add(new scalarize());
+            transformations.add(new MakeReinitedVarsStates());
+            transformations.add(new enableIfEquationElimination());
+            transformations.add(new extractEventGeneratingExps());
+            transformations.add(new transformAlgorithms());
+            transformations.add(new enableWhenClauseRewrite());
+            transformations.add(new propagateResidualPairs());
+            transformations.add(new genInitArrayStatements());
+            transformations.add(new functionInliningIfSet());
+            transformations.add(setFDerivativeVariables);
+            transformations.add(new addFPreVariables());
+            transformations.add(new enableIfEquationRewrite());
+            transformations.add(aliasElimination);
+            transformations.add(new variabilityPropagationIfSet());
+            transformations.add(aliasElimination);
+            transformations.add(new evaluateAsserts());
+            transformations.add(new enableSemiLinearRewrite());
+            transformations.add(new eliminateEqualSwitches());
+            transformations.add(new genInitialEquations());
+            transformations.add(new setFDerivativeVariablesPreBLT());
+            transformations.add(new propagateNonFixedParameters());
+            transformations.add(new sortDependentParameters());
+            transformations.add(new addRuntimeOptionParameters());
+            transformations.add(new indexReduction());
+            transformations.add(new computeMatchingsAndBLT());
+            transformations.add(new interactiveFMU());
+        }
+
+        /**
+         * This method returns the list of transformations. This method should
+         * be used when retreiving the list of transformations since it ensures
+         * that the list is initialized.
+         */
+        private Collection<Transformation> getTransformations() {
+            setupTransformations();
+            return transformations;
+        }
+
+        /**
+         * Adds a transformation to the list of transformations. The
+         * transformation is added after each occurance of <code>after<code>.
+         * The transformation is not added if no occurances of 
+         * <code>after<code> is found.
+         */
+        private <T extends Transformation> T addTransformationAfter(T transformation, String after) {
+            setupTransformations();
+            ListIterator<Transformation> it = transformations.listIterator();
+            while (it.hasNext()) {
+                Transformation other = it.next();
+                if (other.name().equals(after))
+                    it.add(transformation);
+            }
+            return transformation;
+        }
+
         /**
          * Base class for transformations on the flat tree.
          */
@@ -238,8 +282,6 @@ aspect TransformCanonical {
 
         transformCanonicalBase();
         
-        new computeMatchingsAndBLT().apply();
-        new interactiveFMU().apply();
 
         root().flushAllRecursive();	
         transformCanonicalCleanup();
@@ -323,6 +365,8 @@ aspect TransformCanonical {
         return daeInitBLT;
     }
 
+    syn boolean FClass.shouldPerformMatchingsAndBLT() = true;
+
     public class FClass {
         /**
          * Run matchings and BLT.
@@ -331,7 +375,13 @@ aspect TransformCanonical {
             public computeMatchingsAndBLT() {
                 super("automatic_add_initial_equations");
             }
-            
+
+            @Override
+            public boolean active() {
+                return super.active() && shouldPerformMatchingsAndBLT();
+            }
+
+            @Override
             public void perform() {
                 computeMatchingsAndBLT(false);
                 daeBLT.complianceCheck(ErrorCheckType.COMPILE);

@@ -127,6 +127,8 @@ aspect OptimicaTransformCanonical {
     	endStep("transformCanonical()");
 	}
 	
+	eq FOptClass.shouldPerformMatchingsAndBLT() = false;
+	
 	private FRealVariable FOptClass.addExperimentTimeParameter(
 			String name, FAttribute attr, double defaultValue) {
 		FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), fParameter(), new FQNameString(name));
