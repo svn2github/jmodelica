@@ -121,12 +121,12 @@ aspect TransformCanonical {
             transformations.add(new propagateResidualPairs());
             transformations.add(new genInitArrayStatements());
             transformations.add(new functionInliningIfSet());
-            transformations.add(setFDerivativeVariables);
+            transformations.add(new setFDerivativeVariables());
             transformations.add(new addFPreVariables());
             transformations.add(new enableIfEquationRewrite());
-            transformations.add(aliasElimination);
+            transformations.add(new aliasEliminationIfSet());
             transformations.add(new variabilityPropagationIfSet());
-            transformations.add(aliasElimination);
+            transformations.add(new aliasEliminationIfSet());
             transformations.add(new evaluateAsserts());
             transformations.add(new enableSemiLinearRewrite());
             transformations.add(new eliminateEqualSwitches());
@@ -137,7 +137,6 @@ aspect TransformCanonical {
             transformations.add(new addRuntimeOptionParameters());
             transformations.add(new indexReduction());
             transformations.add(new computeMatchingsAndBLT());
-            transformations.add(new interactiveFMU());
         }
 
         /**
@@ -383,7 +382,7 @@ aspect TransformCanonical {
 
             @Override
             public void perform() {
-                computeMatchingsAndBLT(false);
+                computeMatchingsAndBLT();
                 daeBLT.complianceCheck(ErrorCheckType.COMPILE);
                 breakOnErrors();
             }
@@ -467,7 +466,7 @@ aspect TransformCanonical {
      *  - Finally, the BLT algorithm is applied to the resulting perfect
      *    matchibng for the DAE initialization system.
      */
-    private void FClass.computeMatchingsAndBLT(boolean duringInteractiveFMU) {
+    private void FClass.computeMatchingsAndBLT() {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
 
