@@ -18,8 +18,8 @@ package OperatorRecordTests
 
 
     operator record Cplx
-        Real re;
-        Real im;
+        replaceable Real re;
+        replaceable Real im;
 
         encapsulated operator function 'constructor'
             input Real re;
@@ -2217,6 +2217,40 @@ Semantic error at line 2192, column 35:
     end OperatorLimitations14;
 
 
+    model OperatorLimitations14b
+        type T = Real(max=5, nominal=2);
+
+        operator record A
+            Real x;
+            
+            encapsulated operator '+'
+                function f
+                    input A x;
+                    replaceable input Real y;
+                    output A z;
+                algorithm
+                   z := A(x.x + y);
+               end f;
+            end '+';
+        end A;
+        
+        operator record B = A('+'(f(redeclare input T y)));
+        
+        B b = B(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OperatorLimitations14b",
+            description="Short class decl of operator record may only modify attributes of record member",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Semantic error at line 2237, column 37:
+  Short class declarations extending an operator record may only modify attributes of members of the record
+")})));
+    end OperatorLimitations14b;
+
+
     model OperatorLimitations15
         operator record Cplx2 = Cplx(re(min=1), im(max=5, nominal=2));
         Cplx c1 = Cplx(1, 2);
@@ -2276,6 +2310,69 @@ public
 end OperatorRecordTests.OperatorLimitations15;
 ")})));
     end OperatorLimitations15;
+
+
+    model OperatorLimitations15b
+        type T = Real(max=5, nominal=2);
+        operator record Cplx2 = Cplx(redeclare T re, redeclare T im);
+        Cplx c1 = Cplx(1, 2);
+        Cplx2 c2 = Cplx2(3, 4);
+        Cplx c3 = c1 + c2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorLimitations15b",
+            description="Short class decl of operator record may modify attributes of record members through redeclare on primitive",
+            flatModel="
+fclass OperatorRecordTests.OperatorLimitations15b
+ OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorLimitations15b.Cplx2 c2 = OperatorRecordTests.OperatorLimitations15b.Cplx2.'constructor'(3, 4);
+ OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.OperatorLimitations15b.Cplx2.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.OperatorLimitations15b.Cplx2.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+ record OperatorRecordTests.OperatorLimitations15b.Cplx2
+  OperatorRecordTests.OperatorLimitations15b.T re;
+  OperatorRecordTests.OperatorLimitations15b.T im;
+ end OperatorRecordTests.OperatorLimitations15b.Cplx2;
+
+ type OperatorRecordTests.OperatorLimitations15b.T = Real(max = 5,nominal = 2);
+end OperatorRecordTests.OperatorLimitations15b;
+")})));
+    end OperatorLimitations15b;
 
 
     model OperatorLimitations16
