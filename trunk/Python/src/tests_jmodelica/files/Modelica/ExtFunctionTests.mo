@@ -524,9 +524,10 @@ package CEval
     model Obj3
         extends ExternalObject;
         function constructor
+            input Os.Obj1 o1;
             input Obj2[:] o2;
             output Obj3 o3;
-            external "C" my_constructor3(o2,o3);
+            external "C" my_constructor3(o1,o2,o3);
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -559,8 +560,9 @@ package CEval
             output Real x;
             external annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end use3;
+        Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
         Obj2 o2 = Obj2({3.13,3.14}, {3,4}, {false, true}, {"A message 1", "A message 2"});
-        Obj3 o3 = Obj3({o2,o2});
+        Obj3 o3 = Obj3(o1,{o2,o2});
         constant Real x = use3(o3); 
     end ExtObjTest3;
   end Advanced;

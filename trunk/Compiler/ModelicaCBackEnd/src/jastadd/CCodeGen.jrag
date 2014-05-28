@@ -2072,18 +2072,32 @@ aspect CCodeGen {
 	syn lazy String FExp.tempName_C() = "tmp_" + nextTempNbr_C();
 	syn lazy String FAlgorithm.tempName_C() = "tmp_" + nextTempNbr_C();
 	
-	private int FClass.nextTempNbr_C        = 1;
-	private int FFunctionDecl.nextTempNbr_C = 1;
-	
+    public class CodeGenContext {
+        private int nextTempNbr_C = 1;
+        public int nextTempNbr_C() {
+            return nextTempNbr_C++;
+        }
+    }
+    private CodeGenContext FClass.codeGenContext = new CodeGenContext();
+    private CodeGenContext FFunctionDecl.codeGenContext = new CodeGenContext();
+    private CodeGenContext InstFunction.codeGenContext = null;
+    private CodeGenContext FExternalStmt.codeGenContext = null;
+    public void FExternalStmt.setCodeGenContext(CodeGenContext cgc) { codeGenContext = cgc; }
+    
 	inh int FExp.nextTempNbr_C();
 	inh int FAlgorithm.nextTempNbr_C();
+	inh int FExternalStmt.nextTempNbr_C();
 	eq InstNode.getChild().nextTempNbr_C()      = 0;
-	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
-	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
+	eq FClass.getChild().nextTempNbr_C()        = codeGenContext.nextTempNbr_C();
+	eq FFunctionDecl.getChild().nextTempNbr_C() = codeGenContext.nextTempNbr_C();
 	eq InstFullClassDecl.getChild().nextTempNbr_C() = getInstRestriction().nextTempNbr_C();
-	private int InstFunction.nextTempNbr_C = 1;
 	syn int InstRestriction.nextTempNbr_C() = 0;
-	syn int InstFunction.nextTempNbr_C()    = nextTempNbr_C++;
+    syn int InstFunction.nextTempNbr_C() {
+        if (codeGenContext == null)
+            codeGenContext = new CodeGenContext();
+        return codeGenContext.nextTempNbr_C();
+    }
+	eq FExternalStmt.getChild().nextTempNbr_C() = codeGenContext == null ? nextTempNbr_C() : codeGenContext.nextTempNbr_C();
 	
 	public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
@@ -3342,14 +3356,15 @@ aspect CCodeGen {
 
 aspect Serialize {
     public class DeclPrinter_ECE extends DeclPrinter_C {
-        private int tempNbr = 0;
+        private CodeGenContext cgc;
         private Map<String,String> tempMap;
-        public DeclPrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap) {
+        public DeclPrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap, CodeGenContext cgc) {
             super(p, str);
             this.tempMap = tempMap;
+            this.cgc = cgc;
         }
         protected String acquireTemp(String key) {
-            String s = "ECEtmp_" + tempNbr++;
+            String s = "tmp_" + cgc.nextTempNbr_C();
             tempMap.put(key, s);
             return s;
         }
@@ -3359,8 +3374,11 @@ aspect Serialize {
         protected void printComps(FType type) {
             if (type.isExternalObject()) {
                 FExternalObjectType t = (FExternalObjectType) type;
-                t.myConstructorStmt().genVarDecls_C(p, str, indent());
+                FExternalStmt stmt = t.myConstructorStmt();
+                stmt.setCodeGenContext(cgc);
+                stmt.genVarDecls_C(p, str, indent());
                 printComps(t);
+                stmt.setCodeGenContext(null);
             } else {
                 super.printComps(type);
             }
@@ -3368,10 +3386,12 @@ aspect Serialize {
     }
     
     public class InitPrinter_ECE extends InitPrinter_C {
+        private CodeGenContext cgc;
         private Map<String,String> tempMap;
-        public InitPrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap) {
+        public InitPrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap, CodeGenContext cgc) {
             super(p, str);
             this.tempMap = tempMap;
+            this.cgc = cgc;
         }
         protected String acquireTemp(String key) {
             return tempMap.get(key);
@@ -3422,7 +3442,9 @@ aspect Serialize {
                 aliases.put(arg.prettyPrint_C(""), name + "_arg" + i);
                 i++;
             }
+            stmt.setCodeGenContext(cgc);
             stmt.prettyPrint_C(p, str, indent(), aliases);
+            stmt.setCodeGenContext(null);
         }
     }
     
@@ -3431,8 +3453,9 @@ aspect Serialize {
         ArrayList<CommonVariableDecl> vars  = varsToSerialize();
         Map<String,String> tempMap = new HashMap<String,String>();
         indent = ASTNode.printer_C.indent(indent);
+        codeGenContext = new CodeGenContext();
         str.println("/* Declarations */");
-        TypePrinter_C dp = new DeclPrinter_ECE(ASTNode.printer_C, str, tempMap);
+        TypePrinter_C dp = new DeclPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
         for (CommonVariableDecl cvd : vars) {
              dp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
              cvd.type().print(dp);
@@ -3443,7 +3466,7 @@ aspect Serialize {
         str.println("printf(\"START\\n\"); fflush(stdout);");
         
         str.println("/* Parse */");
-        TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap);
+        TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
         for (CommonVariableDecl cvd : vars) {
              ip.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
              cvd.type().print(ip);
@@ -3467,6 +3490,7 @@ aspect Serialize {
         str.println();
         
         str.println("printf(\"END\\n\"); fflush(stdout);");
+        codeGenContext = null;
     }
     
     /**

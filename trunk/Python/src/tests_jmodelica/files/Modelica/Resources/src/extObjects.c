@@ -59,14 +59,16 @@ double use2(void* o2) {
 }
 
 typedef struct {
+    Obj1_t* o1;
     Obj2_t** o2;
 } Obj3_t;
-void my_constructor3(void** o2, void** o3) {
+void my_constructor3(void* o1, void** o2, void** o3) {
     Obj3_t* res = malloc(sizeof(Obj3_t));
+    res->o1 = (Obj1_t*)o1;
     res->o2 = (Obj2_t**)o2;
     *o3 = res;
 }
 double use3(void* o3) {
     Obj3_t* o = (Obj3_t*) o3;
-    return use2((void*)o->o2[0]) + use2((void*)o->o2[1]);
+    return use1((void*)o->o1) + use2((void*)o->o2[0]) + use2((void*)o->o2[1]);
 }

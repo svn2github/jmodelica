@@ -596,7 +596,7 @@ class TestAdvanced:
         fmu_name = compile_fmu(cpath, self.fpath)
         model = load_fmu(fmu_name)
         resConst = model.simulate()
-        nose.tools.assert_equals(resConst.final('x'), 26.54)
+        nose.tools.assert_equals(resConst.final('x'), 32.67)
     
 class TestUtilities:
     '''

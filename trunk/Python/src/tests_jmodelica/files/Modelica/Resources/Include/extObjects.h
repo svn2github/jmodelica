@@ -29,7 +29,7 @@ typedef struct {
     Obj1_t* o1;
     Obj2_t** o2;
 } Obj3_t;
-void my_constructor3(void** o2, void** o3);
+void my_constructor3(void* o1, void** o2, void** o3);
 void my_destructor2(void* o3);
 double use3(void* o3);
 
