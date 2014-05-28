@@ -48,8 +48,16 @@ aspect InteractiveFMU{
 		// Eliminate aliases
 		aliasElimination.apply();
 		
+		// Save old options
+		boolean mergeBLTOpt = root().options.getBooleanOption("merge_blt_blocks");
+		boolean HGTOpt = root().options.getBooleanOption("hand_guided_tearing");
+		
 		// Redo BLT
 		computeMatchingsAndBLT(true);
+		
+		// Restore old options
+		root().options.setBooleanOption("merge_blt_blocks", mergeBLTOpt);
+		root().options.setBooleanOption("hand_guided_tearing", HGTOpt);
 		
 		// Check for unsolved blocks
 		boolean allSolved = true;

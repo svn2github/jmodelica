@@ -179,6 +179,9 @@ aspect HGT {
         }
     }
     
+//    if (useHGT && seb.equation().isHGTPairedResidual())
+//        seb.equation().warning("Can not use hand guided tearing pair, equation resides in solved block. Variable: " + seb.equation().getHGTIterationVariable().name() + ". Equation: " + seb.equation());
+    
     protected static void ASTNode.typeCheckHGTEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
         enabledExp.collectErrors(checkType);
         if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
@@ -271,128 +274,146 @@ aspect HGT {
         };
     }
     
-    private static void EquationBlockFactory.tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing, int blockNumber) throws BLTException {
-        boolean recalculateMatchings = false;
-        Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
-        for (Eq e : block) {
-            varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
-        }
-        Iterator<Eq> it = block.iterator();
-        java.util.List<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
-        java.util.List<Var> unmatchedHGTVariables = new ArrayList<Var>();
-        for (Eq eqn : block) {
-            if (eqn.getEquation().isHGTUnpairedResidual())
-                unmatchedHGTEquations.add(eqn);
-        }
-        for (Var var : varsInBlock.values()) {
-            if (var.getVariable().isHGTVarComponent())
-                unmatchedHGTVariables.add(var);
-        }
-        if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
-            Collections.sort(unmatchedHGTEquations, Eq.stringComparator());
-            Collections.sort(unmatchedHGTVariables, Var.stringComparator());
-            Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
-            Iterator<Var> varIt = unmatchedHGTVariables.iterator();
-            while (eqnIt.hasNext() && varIt.hasNext()) {
-                Eq eqn = eqnIt.next();
-                Var var = varIt.next();
-                eqn.getEquation().setHGTResidual(var.getVariable());
-                var.getVariable().setHGTAsPair();
+    public class EquationBlockFactory{
+        
+        private static HandGuidedTearingAlgorithm HAND_GUIDED_TEARING = addTearingAlgorithm(new HandGuidedTearingAlgorithm());
+
+        public static class HandGuidedTearingAlgorithm extends TearingAlgorithm {
+
+            public HandGuidedTearingAlgorithm() {
+                super(2, "hand_guided_tearing");
             }
-        } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unable to apply hand-guided tearing selections on block " + blockNumber + ". The number of unmatched hand guided equations and variables are not equal.\n");
-            sb.append("  Unmatched hand guided equations(" + unmatchedHGTEquations.size() + "):\n");
-            for (Eq eqn : unmatchedHGTEquations)
-                sb.append("    " + eqn.getEquation() + "\n");
-            sb.append("\n");
-            sb.append("  Unmatched hand guided variables(" + unmatchedHGTVariables.size() + "):\n");
-            for (Var var : unmatchedHGTVariables)
-                sb.append("    " + var.getName() + "\n");
-            throw new BLTException(sb.toString());
-        }
-        java.util.List<Eq> HGTEquations = new ArrayList<Eq>();
-        while (it.hasNext()) {
-            Eq e = it.next();
-            FVariable fIterVar = e.getEquation().getHGTIterationVariable();
-            if (fIterVar != null) {
-                Var iterVar = varsInBlock.get(fIterVar);
-                if (iterVar == null) {
-                    e.getEquation().warning("Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: " + fIterVar.name() + ". Equation: " + e.getEquation());
-                    continue;
-                }
-                it.remove();
-                HGTEquations.add(e);
-                recalculateMatchings = true;
+
+            @Override
+            public TornEquationBlock tear(Collection<Eq> block, OptionRegistry options) {
+                TornEquationBlock teb = new TornEquationBlock();
+                tearHandGuided(block, teb, options.getBooleanOption("automatic_tearing"));
+                return teb;
             }
-        }
-        Collections.sort(HGTEquations, Eq.stringMatchingComparator());
-        for (Eq hgtEqn : HGTEquations) {
-            Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
-            ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());
-            eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(hgtEqn, iterVar));
-        }
-        if (recalculateMatchings) {
-            BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
-            newGraph.maximumMatching(true);
-            Collection<Eq> unmatchedEquations = newGraph.getUnmatchedEquations();
-            Collection<Var> unmatchedVariables = newGraph.getUnmatchedVariables();
-            if (unmatchedEquations.size() > 0 || unmatchedVariables.size() > 0) {
-                ASTNode.log.info("Unmatched equations and variables in block after hand guided, adding them as tearing pairs!");
-                Iterator<Eq> eIt = unmatchedEquations.iterator();
-                Iterator<Var> vIt = unmatchedVariables.iterator();
-                while (eIt.hasNext() && vIt.hasNext()) {
-                    Eq e = eIt.next();
-                    Var v = vIt.next();
-                    ASTNode.log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
-                    newGraph.removeEquation(e);
-                    newGraph.removeVariable(v);
-                    eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
+            
+            private void tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing) {
+                boolean recalculateMatchings = false;
+                Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
+                for (Eq e : block) {
+                    varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
                 }
-                if (eIt.hasNext() || vIt.hasNext()) {
+                Iterator<Eq> it = block.iterator();
+                java.util.List<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
+                java.util.List<Var> unmatchedHGTVariables = new ArrayList<Var>();
+                for (Eq eqn : block) {
+                    if (eqn.getEquation().isHGTUnpairedResidual())
+                        unmatchedHGTEquations.add(eqn);
+                }
+                for (Var var : varsInBlock.values()) {
+                    if (var.getVariable().isHGTVarComponent())
+                        unmatchedHGTVariables.add(var);
+                }
+                if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
+                    Collections.sort(unmatchedHGTEquations, Eq.stringComparator());
+                    Collections.sort(unmatchedHGTVariables, Var.stringComparator());
+                    Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
+                    Iterator<Var> varIt = unmatchedHGTVariables.iterator();
+                    while (eqnIt.hasNext() && varIt.hasNext()) {
+                        Eq eqn = eqnIt.next();
+                        Var var = varIt.next();
+                        eqn.getEquation().setHGTResidual(var.getVariable());
+                        var.getVariable().setHGTAsPair();
+                    }
+                } else {
                     StringBuilder sb = new StringBuilder();
-                    sb.append("Hand guided tearing selections in block " + blockNumber + " results in a structurally singular block.\n");
-                    if (eIt.hasNext()) {
-                        sb.append("  The follwowing equation(s) could not be matched to any variable:\n");
-                            while (eIt.hasNext())
-                                sb.append("    " + eIt.next().getEquation());
-                    }
-                    if (vIt.hasNext()) {
-                        sb.append("  The following varible(s) could not be matched to any equation:\n");
-                        while (vIt.hasNext())
-                            sb.append("    " + vIt.next().getVariable().name());
-                    }
+                    sb.append("Unable to apply hand-guided tearing selections. The number of unmatched hand guided equations and variables are not equal.\n");
+                    sb.append("  Unmatched hand guided equations(" + unmatchedHGTEquations.size() + "):\n");
+                    for (Eq eqn : unmatchedHGTEquations)
+                        sb.append("    " + eqn.getEquation() + "\n");
+                    sb.append("\n");
+                    sb.append("  Unmatched hand guided variables(" + unmatchedHGTVariables.size() + "):\n");
+                    for (Var var : unmatchedHGTVariables)
+                        sb.append("    " + var.getName() + "\n");
                     throw new BLTException(sb.toString());
                 }
-            }
-            Collection<Collection<Eq>> innerBLT = newGraph.tarjan(false);
-            boolean allInnerAreSolved = true;
-            Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-            for (Collection<Eq> innerBlock : innerBLT) {
-                SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
-                if (seb != null && seb.isSolvable()) {
-                    solvedBlocks.add(seb);
-                } else {
-                    allInnerAreSolved = false;
-                    break;
+                java.util.List<Eq> HGTEquations = new ArrayList<Eq>();
+                while (it.hasNext()) {
+                    Eq e = it.next();
+                    FVariable fIterVar = e.getEquation().getHGTIterationVariable();
+                    if (fIterVar != null) {
+                        Var iterVar = varsInBlock.get(fIterVar);
+                        if (iterVar == null) {
+                            e.getEquation().warning("Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: " + fIterVar.name() + ". Equation: " + e.getEquation());
+                            continue;
+                        }
+                        it.remove();
+                        HGTEquations.add(e);
+                        recalculateMatchings = true;
+                    }
                 }
+                Collections.sort(HGTEquations, Eq.stringMatchingComparator());
+                for (Eq hgtEqn : HGTEquations) {
+                    Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
+                    ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());
+                    eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(hgtEqn, iterVar));
+                }
+                if (recalculateMatchings) {
+                    BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
+                    newGraph.maximumMatching(true);
+                    Collection<Eq> unmatchedEquations = newGraph.getUnmatchedEquations();
+                    Collection<Var> unmatchedVariables = newGraph.getUnmatchedVariables();
+                    if (unmatchedEquations.size() > 0 || unmatchedVariables.size() > 0) {
+                        ASTNode.log.info("Unmatched equations and variables in block after hand guided, adding them as tearing pairs!");
+                        Iterator<Eq> eIt = unmatchedEquations.iterator();
+                        Iterator<Var> vIt = unmatchedVariables.iterator();
+                        while (eIt.hasNext() && vIt.hasNext()) {
+                            Eq e = eIt.next();
+                            Var v = vIt.next();
+                            ASTNode.log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
+                            newGraph.removeEquation(e);
+                            newGraph.removeVariable(v);
+                            eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
+                        }
+                        if (eIt.hasNext() || vIt.hasNext()) {
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Hand guided tearing results in a structurally singular block.\n");
+                            if (eIt.hasNext()) {
+                                sb.append("  The follwowing equation(s) could not be matched to any variable:\n");
+                                    while (eIt.hasNext())
+                                        sb.append("    " + eIt.next().getEquation());
+                            }
+                            if (vIt.hasNext()) {
+                                sb.append("  The following varible(s) could not be matched to any equation:\n");
+                                while (vIt.hasNext())
+                                    sb.append("    " + vIt.next().getVariable().name());
+                            }
+                            throw new BLTException(sb.toString());
+                        }
+                    }
+                    Collection<Collection<Eq>> innerBLT = newGraph.tarjan(false);
+                    boolean allInnerAreSolved = true;
+                    Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+                    for (Collection<Eq> innerBlock : innerBLT) {
+                        SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
+                        if (seb != null && seb.isSolvable()) {
+                            solvedBlocks.add(seb);
+                        } else {
+                            allInnerAreSolved = false;
+                            break;
+                        }
+                    }
+                    if (allInnerAreSolved) {
+                        ASTNode.log.info("Remaining system is solvable.");
+                        for (SimpleEquationBlock seb : solvedBlocks)
+                            eb.addSolvedBlock(seb);
+                        return;
+                    }
+                    block = new ArrayList<Eq>();
+                    block.addAll(newGraph.getEquations());
+                    ASTNode.log.info("Additional tearing is needed, continuing with automatic tearing.");
+                }
+                if (!useTearing)
+                    throw new BLTException("Hand guided tearing selections does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
+                else
+                    AUTOMATIC_TEARING.tear(block, eb);
             }
-            if (allInnerAreSolved) {
-                ASTNode.log.info("Remaining system is solvable.");
-                for (SimpleEquationBlock seb : solvedBlocks)
-                    eb.addSolvedBlock(seb);
-                return;
-            }
-            block = new ArrayList<Eq>();
-            block.addAll(newGraph.getEquations());
-            ASTNode.log.info("Additional tearing is needed, continuing with automatic tearing.");
         }
-        if (!useTearing)
-            throw new BLTException("Hand guided tearing selections in block " + blockNumber + " does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
-        else
-            tear(block, eb);
     }
-    
 }
 
 aspect ResidualPairs{

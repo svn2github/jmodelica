@@ -1313,7 +1313,7 @@ At line 0, column 0:
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 0, column 0:
-  Unable to apply hand-guided tearing selections on block 2. The number of unmatched hand guided equations and variables are not equal.
+  Unable to apply hand-guided tearing selections. The number of unmatched hand guided equations and variables are not equal.
   Unmatched hand guided equations(1):
     u1 = R1 * i1
 
@@ -3766,7 +3766,7 @@ Jacobian:
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 0, column 0:
-  Hand guided tearing selections in block 2 does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.
+  Hand guided tearing selections does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.
 ")})));
 
         end Error1;

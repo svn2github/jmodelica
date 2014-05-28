@@ -108,14 +108,11 @@ aspect BLT{
          * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
          * a real or mixed equation block is created.
          */
-        public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean useTearing, boolean useHGT, int blockNumber) {
+        public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean allowTearing, OptionRegistry options) {
             
             SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
-            if (seb != null && seb.isSolvable()) {
-                if (useHGT && seb.equation().isHGTPairedResidual())
-                    seb.equation().warning("Can not use hand guided tearing pair, equation resides in solved block. Variable: " + seb.equation().getHGTIterationVariable().name() + ". Equation: " + seb.equation());
+            if (seb != null && seb.isSolvable())
                 return seb;
-            }
             
             Collection<Eq> realEquations = new ArrayList<Eq>();
             Collection<Eq> nonRealEquations = new ArrayList<Eq>();
@@ -137,9 +134,9 @@ aspect BLT{
             }
             
             EquationBlock block = null;
-            if ((useTearing || useHGT) && realEquations.size() > 1) {
-                TornEquationBlock tornBlock = tear(component, useTearing, useHGT, blockNumber);
-                if (!tornBlock.solvedRealBlocks().isEmpty())
+            if (allowTearing && realEquations.size() > 1) {
+                TornEquationBlock tornBlock = tear(component, options);
+                if (tornBlock != null && !tornBlock.solvedRealBlocks().isEmpty())
                     block = tornBlock;
             }
             if (block == null) {
@@ -158,181 +155,6 @@ aspect BLT{
 			for (Collection<Eq> e : eqs)
 				blocks.add(createSimpleEquationBlock(e, false));
 			return blocks;
-		}
-		
-		public static TornEquationBlock tear(Collection<Eq> block, boolean useTearing, boolean useHGT, int blockNumber) {
-			TornEquationBlock eb = new TornEquationBlock();
-			if (useHGT)
-				tearHandGuided(block, eb, useTearing, blockNumber);
-			else
-				tear(block, eb);
-			return eb;
-		}
-		
-		private static void tear(Collection<Eq> block, TornEquationBlock eb) {
-			SolvingBiPGraph g = new SolvingBiPGraph(block);
-			
-			// Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
-			Collection<Eq> SUME = g.greedyMatching();
-			Iterator<Eq> itr = SUME.iterator();
-			while (itr.hasNext()) {
-				Eq e = itr.next();
-				if (g.augmentPath(e)) {
-					itr.remove();
-				} else {
-					e.isRes(true);
-				}
-				g.lightReset();
-			}
-
-			// Now we have a Maximum Solvable Matching
-
-			if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
-									//     proceed with recursive tearing of block
-				SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
-				if (tearBlock != null && tearBlock.isSolvable()) {
-					eb.addSolvedBlock(tearBlock);
-				} else {
-					tearInner(g, eb);
-				}
-			} else {
-				// Else: Start out by trying to insert residuals that contain
-				// 		 few variables. 
-				java.util.List<Eq> residuals = new ArrayList<Eq>();
-				for (Eq e : SUME) {
-					Eq bestRes = e;
-					for (Var v : e.getSolvableVariables()) {
-						Eq ee = v.getMatching();
-						if (ee.compareTo(bestRes) > 0)
-							bestRes = ee;
-					}
-					if (bestRes != e) {
-						bestRes.isRes(true);
-						g.match(e, bestRes.getMatching());
-						e.isRes(false);
-						residuals.add(bestRes);
-					} else {
-						residuals.add(e);
-					}
-				}
-
-				// Compute inner BLT and see if tearings can be changed 
-				Set<Var> SUMV = new LinkedHashSet<Var>(g.getUnmatchedVariables());
-				Collection<Collection<Eq>> innerBlocks = g.tarjan(false);
-				java.util.List<Var> tearings = new ArrayList<Var>();
-
-				for (Collection<Eq> bInner : innerBlocks) {
-					SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, true, true);
-					if (tearBlock != null && tearBlock.isSolvable()) {
-						eb.addSolvedBlock(tearBlock);
-						// If the equation contains a Var in SUMV, that Var cannot be
-						// reinserted and must be used as a iteration variable.
-						for (Eq e : bInner) {
-							for (Var vv : e.getVariables()) {
-								if (SUMV.remove(vv))
-									tearings.add(vv);
-							}
-						}
-					} else {
-						// Build Inner Graph and add info about iteration variables
-						SolvingBiPGraph gInner = new SolvingBiPGraph(bInner);
-						// Build block-graph and look for interchangeable variables in SUMV
-						java.util.List<Eq> eqs = new ArrayList<Eq>();
-						boolean graphHasTear = false;
-						for (Eq e : bInner) {
-							Eq gInnerEq = gInner.getEquation(e.getName());
-							for (Var v : e.getVariables()) {
-								Var gInnerVar = gInner.getVariable(v.getName());
-								if (gInnerVar != null) {
-									if (gInner.canMatch(gInnerEq, gInnerVar) && gInnerVar.isIter() && !eqs.contains(gInnerEq)) {
-										eqs.add(gInnerEq);
-									}
-								} else if (SUMV.contains(v)) {
-									gInnerVar = gInner.addVariable(v.getName(), v.getVariable());
-									gInnerVar.isIter(true);
-									SUMV.remove(v);
-									tearings.add(v);
-									graphHasTear = true;
-									gInner.addInsidence(gInnerEq, gInnerVar);
-									if (gInner.canMatch(gInnerEq, gInnerVar) && !eqs.contains(gInnerEq)) {
-										eqs.add(gInnerEq);
-									}
-								}
-							}
-						}
-						// Go through equations that might get a new matching
-						boolean isChanged = false;
-						for (Eq e : eqs) {
-							Var bestMatch = e.getMatching();
-							for (Var v : e.getSolvableVariables()) {
-								if (v.isIter() && v.compareTo(bestMatch) < 0)
-									bestMatch = v;
-							}
-							if (bestMatch != e.getMatching()) {
-								Var tmp = e.getMatching();
-								tmp.isIter(true);
-								bestMatch.isIter(false);
-								tearings.add(tmp);
-								tearings.remove(bestMatch);
-								gInner.match(e, bestMatch);
-								isChanged = true;
-							}
-						}
-
-						if (graphHasTear) {
-							if (isChanged) {
-								Collection<Collection<Eq>> newBlocks = gInner.tarjan(false);
-								for (Collection<Eq> bInnerInner : newBlocks) {
-									tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, true, true);
-									if (tearBlock != null && tearBlock.isSolvable()) {
-										eb.addSolvedBlock(tearBlock);
-									} else {
-										tearInner(new SolvingBiPGraph(bInnerInner), eb);
-									}
-								}
-							} else {
-								tearInner(new SolvingBiPGraph(bInner), eb);
-							}
-						} else {
-							// Reuse the already constructed graph
-							tearInner(gInner, eb);
-						}
-					}
-				}
-				for (Var v : SUMV) {
-					//SUMV ought to be empty, but there might exist variables that hasn't 
-					// been altered before. 
-					tearings.add(v);
-				}
-				for (int i = 0; i < tearings.size(); i++) {
-					ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
-					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i)));
-				}
-			}
-		}	
-
-		
-		private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
-			Var bestIter = null;
-			for (Eq e : g.getEquations()) {
-				Var v = e.getMatching();
-				if (bestIter == null || v.compareTo(bestIter) > 0)
-					bestIter = v;
-			}
-			Eq res = bestIter.getMatching();
-			bestIter.isIter(true);
-			res.isRes(true);
-			ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
-			eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter));
-			Collection<Collection<Eq>> blt = g.tarjan(false);
-			for (Collection<Eq> block : blt) {
-				SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
-				if (tearBlock != null && tearBlock.isSolvable()) {
-					eb.addSolvedBlock(tearBlock);
-				} else {
-					tearInner(new SolvingBiPGraph(block), eb);
-				}
-			}
 		}
 		
 	}
@@ -397,20 +219,18 @@ aspect BLT{
 	
 	public class BiPGraph{}
 	
-	public BLT BiPGraph.computeBLT(OptionRegistry options, boolean duringInteractiveFMU) {
-		return computeBLT(options.getBooleanOption("merge_blt_blocks") && !duringInteractiveFMU,
-				options.getBooleanOption("automatic_tearing"),
-				options.getBooleanOption("hand_guided_tearing") && !duringInteractiveFMU);
-	}
-	
-	public BLT BiPGraph.computeBLT(boolean mergeBLT, boolean useTearing, boolean useHGT) {
+    public BLT BiPGraph.computeBLT(OptionRegistry options) {
+        return computeBLT(options, true);
+    }
+
+	public BLT BiPGraph.computeBLT(OptionRegistry options, boolean allowTearing) {
 		ASTNode.beginStep("computeBLT()");
 		try {
-			Collection<Collection<Eq>> components = tarjan(mergeBLT);
+			Collection<Collection<Eq>> components = tarjan(options.getBooleanOption("merge_blt_blocks"));
 			BLT blt = new BLT();
 			int blockNumber = 1;
 			for (Collection<Eq> bl : components)
-				blt.add(EquationBlockFactory.createEquationBlock(bl, useTearing, useHGT, blockNumber++));
+				blt.add(EquationBlockFactory.createEquationBlock(bl, allowTearing, options));
 			return blt;
 		} finally {
 			ASTNode.endStep("computeBLT()");
@@ -2004,4 +1824,239 @@ aspect BLT{
 
     }
     
+}
+
+aspect Tearing {
+    public class EquationBlockFactory{
+        
+        private static Collection<TearingAlgorithm> tearingAlgorithms;
+        
+        private static <T extends TearingAlgorithm> T addTearingAlgorithm(T algorithm) {
+            if (tearingAlgorithms == null)
+                tearingAlgorithms = new PriorityQueue();
+            tearingAlgorithms.add(algorithm);
+            return algorithm;
+        }
+        
+        public abstract static class TearingAlgorithm implements Comparable<TearingAlgorithm> {
+            private final int priority;
+            private final String option;
+
+            public TearingAlgorithm(int priority) {
+                this.priority = priority;
+                this.option = null;
+            }
+
+            public TearingAlgorithm(int priority, String option) {
+                this.priority = priority;
+                this.option = option;
+            }
+
+            public boolean active(OptionRegistry options) {
+                return options.getBooleanOption(option);
+            }
+
+            public final int compareTo(TearingAlgorithm other) {
+                return other.priority - priority;
+            }
+
+            public abstract TornEquationBlock tear(Collection<Eq> block, OptionRegistry options);
+        }
+        
+        public static TornEquationBlock tear(Collection<Eq> block, OptionRegistry options) {
+            for (TearingAlgorithm algorithm : tearingAlgorithms)
+                if (algorithm.active(options))
+                    return algorithm.tear(block, options);
+            return null;
+        }
+        
+        
+    }
+}
+
+aspect AutomaticTearing {
+
+    public class EquationBlockFactory{
+        
+        private static AutomaticTearingAlgorithm AUTOMATIC_TEARING = addTearingAlgorithm(new AutomaticTearingAlgorithm());
+
+        public static class AutomaticTearingAlgorithm extends TearingAlgorithm {
+
+            public AutomaticTearingAlgorithm() {
+                super(1, "automatic_tearing");
+            }
+
+            @Override
+            public TornEquationBlock tear(Collection<Eq> block, OptionRegistry options) {
+                TornEquationBlock teb = new TornEquationBlock();
+                tear(block, teb);
+                return teb;
+            }
+            
+            private void tear(Collection<Eq> block, TornEquationBlock eb) {
+                SolvingBiPGraph g = new SolvingBiPGraph(block);
+                
+                // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
+                Collection<Eq> SUME = g.greedyMatching();
+                Iterator<Eq> itr = SUME.iterator();
+                while (itr.hasNext()) {
+                    Eq e = itr.next();
+                    if (g.augmentPath(e)) {
+                        itr.remove();
+                    } else {
+                        e.isRes(true);
+                    }
+                    g.lightReset();
+                }
+
+                // Now we have a Maximum Solvable Matching
+
+                if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
+                                        //     proceed with recursive tearing of block
+                    SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
+                    if (tearBlock != null && tearBlock.isSolvable()) {
+                        eb.addSolvedBlock(tearBlock);
+                    } else {
+                        tearInner(g, eb);
+                    }
+                } else {
+                    // Else: Start out by trying to insert residuals that contain
+                    //       few variables. 
+                    java.util.List<Eq> residuals = new ArrayList<Eq>();
+                    for (Eq e : SUME) {
+                        Eq bestRes = e;
+                        for (Var v : e.getSolvableVariables()) {
+                            Eq ee = v.getMatching();
+                            if (ee.compareTo(bestRes) > 0)
+                                bestRes = ee;
+                        }
+                        if (bestRes != e) {
+                            bestRes.isRes(true);
+                            g.match(e, bestRes.getMatching());
+                            e.isRes(false);
+                            residuals.add(bestRes);
+                        } else {
+                            residuals.add(e);
+                        }
+                    }
+
+                    // Compute inner BLT and see if tearings can be changed 
+                    Set<Var> SUMV = new LinkedHashSet<Var>(g.getUnmatchedVariables());
+                    Collection<Collection<Eq>> innerBlocks = g.tarjan(false);
+                    java.util.List<Var> tearings = new ArrayList<Var>();
+
+                    for (Collection<Eq> bInner : innerBlocks) {
+                        SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, true, true);
+                        if (tearBlock != null && tearBlock.isSolvable()) {
+                            eb.addSolvedBlock(tearBlock);
+                            // If the equation contains a Var in SUMV, that Var cannot be
+                            // reinserted and must be used as a iteration variable.
+                            for (Eq e : bInner) {
+                                for (Var vv : e.getVariables()) {
+                                    if (SUMV.remove(vv))
+                                        tearings.add(vv);
+                                }
+                            }
+                        } else {
+                            // Build Inner Graph and add info about iteration variables
+                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner);
+                            // Build block-graph and look for interchangeable variables in SUMV
+                            java.util.List<Eq> eqs = new ArrayList<Eq>();
+                            boolean graphHasTear = false;
+                            for (Eq e : bInner) {
+                                Eq gInnerEq = gInner.getEquation(e.getName());
+                                for (Var v : e.getVariables()) {
+                                    Var gInnerVar = gInner.getVariable(v.getName());
+                                    if (gInnerVar != null) {
+                                        if (gInner.canMatch(gInnerEq, gInnerVar) && gInnerVar.isIter() && !eqs.contains(gInnerEq)) {
+                                            eqs.add(gInnerEq);
+                                        }
+                                    } else if (SUMV.contains(v)) {
+                                        gInnerVar = gInner.addVariable(v.getName(), v.getVariable());
+                                        gInnerVar.isIter(true);
+                                        SUMV.remove(v);
+                                        tearings.add(v);
+                                        graphHasTear = true;
+                                        gInner.addInsidence(gInnerEq, gInnerVar);
+                                        if (gInner.canMatch(gInnerEq, gInnerVar) && !eqs.contains(gInnerEq)) {
+                                            eqs.add(gInnerEq);
+                                        }
+                                    }
+                                }
+                            }
+                            // Go through equations that might get a new matching
+                            boolean isChanged = false;
+                            for (Eq e : eqs) {
+                                Var bestMatch = e.getMatching();
+                                for (Var v : e.getSolvableVariables()) {
+                                    if (v.isIter() && v.compareTo(bestMatch) < 0)
+                                        bestMatch = v;
+                                }
+                                if (bestMatch != e.getMatching()) {
+                                    Var tmp = e.getMatching();
+                                    tmp.isIter(true);
+                                    bestMatch.isIter(false);
+                                    tearings.add(tmp);
+                                    tearings.remove(bestMatch);
+                                    gInner.match(e, bestMatch);
+                                    isChanged = true;
+                                }
+                            }
+
+                            if (graphHasTear) {
+                                if (isChanged) {
+                                    Collection<Collection<Eq>> newBlocks = gInner.tarjan(false);
+                                    for (Collection<Eq> bInnerInner : newBlocks) {
+                                        tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, true, true);
+                                        if (tearBlock != null && tearBlock.isSolvable()) {
+                                            eb.addSolvedBlock(tearBlock);
+                                        } else {
+                                            tearInner(new SolvingBiPGraph(bInnerInner), eb);
+                                        }
+                                    }
+                                } else {
+                                    tearInner(new SolvingBiPGraph(bInner), eb);
+                                }
+                            } else {
+                                // Reuse the already constructed graph
+                                tearInner(gInner, eb);
+                            }
+                        }
+                    }
+                    for (Var v : SUMV) {
+                        //SUMV ought to be empty, but there might exist variables that hasn't 
+                        // been altered before. 
+                        tearings.add(v);
+                    }
+                    for (int i = 0; i < tearings.size(); i++) {
+                        ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
+                        eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i)));
+                    }
+                }
+            }
+            
+            private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
+                Var bestIter = null;
+                for (Eq e : g.getEquations()) {
+                    Var v = e.getMatching();
+                    if (bestIter == null || v.compareTo(bestIter) > 0)
+                        bestIter = v;
+                }
+                Eq res = bestIter.getMatching();
+                bestIter.isIter(true);
+                res.isRes(true);
+                ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
+                eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter));
+                Collection<Collection<Eq>> blt = g.tarjan(false);
+                for (Collection<Eq> block : blt) {
+                    SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
+                    if (tearBlock != null && tearBlock.isSolvable()) {
+                        eb.addSolvedBlock(tearBlock);
+                    } else {
+                        tearInner(new SolvingBiPGraph(block), eb);
+                    }
+                }
+            }
+        }
+    }
 }

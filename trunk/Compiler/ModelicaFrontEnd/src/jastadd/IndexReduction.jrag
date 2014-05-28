@@ -473,7 +473,7 @@ aspect IndexReduction {
             This will be done when the final algorithm have been settled.
         */
         
-        BLT blt = computeBLT(false, false, false);
+        BLT blt = computeBLT(fclass.root().options, false);
     
         ASTNode.log.info(blt);
 
