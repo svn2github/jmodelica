@@ -52,6 +52,10 @@ aspect InteractiveFMU{
 		boolean mergeBLTOpt = root().options.getBooleanOption("merge_blt_blocks");
 		boolean HGTOpt = root().options.getBooleanOption("hand_guided_tearing");
 		
+		// Disable options
+		root().options.setBooleanOption("merge_blt_blocks", false);
+		root().options.setBooleanOption("hand_guided_tearing", false);
+		
 		// Redo BLT
 		computeMatchingsAndBLT(true);
 		
