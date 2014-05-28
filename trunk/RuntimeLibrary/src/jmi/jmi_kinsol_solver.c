@@ -410,6 +410,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 char message[256];
                 realtype lambda_max;
                 realtype lambda, steplength;
+                int nwritten;
 
                 if (nniters>0) {
                     lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
@@ -420,11 +421,24 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     lambda_max = lambda = 0;
                 }
 
-                sprintf(message, "%4d %4d %11.4e  %11.4e:%4d  %4d %4d  %11.4e:%4d  %11.4e", (int)nniters,
-                        (int)(block->nb_fevals),
-                        kin_mem->kin_fnorm, max_residual, max_index+1,
-                        solver->last_num_limiting_bounds, solver->last_num_active_bounds,
-                        lambda_max, solver->last_bounding_index+1, lambda);
+                nwritten = sprintf(message, "%4d %4d %11.4e  %11.4e:%4d",
+                                   (int)nniters, (int)(block->nb_fevals),
+                                   kin_mem->kin_fnorm, max_residual, max_index+1);
+                if (nniters > 0 && nwritten >= 0) {
+                    char *buffer = message + nwritten;
+                    if (solver->last_bounding_index >= 0) {
+                        sprintf(buffer, "%4d %4d  %11.4e:%4d  %11.4e",
+                                solver->last_num_limiting_bounds, solver->last_num_active_bounds,
+                                lambda_max, solver->last_bounding_index+1, lambda);
+                    }
+                    else {
+                        sprintf(buffer, "%4d %4d  %11.4e      %11.4e",
+                                solver->last_num_limiting_bounds, solver->last_num_active_bounds,
+                                lambda_max, lambda);
+                    }
+                }
+
+
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%d><message:%s>",
                              "jmi_kinsol_solver", block->id, message);
                 jmi_log_leave(log, node);
