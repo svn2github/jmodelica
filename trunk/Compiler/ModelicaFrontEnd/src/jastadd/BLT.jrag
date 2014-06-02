@@ -141,7 +141,7 @@ aspect BLT{
             }
             if (block == null) {
                 BiPGraph g = new BiPGraph(nonRealEquations);
-                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks();
+                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(options);
                 block = new EquationBlock(nonRealBlocks, createSimpleBlocks(groupComponent(realEquations)));
             }
             
@@ -226,7 +226,7 @@ aspect BLT{
 	public BLT BiPGraph.computeBLT(OptionRegistry options, boolean allowTearing) {
 		ASTNode.beginStep("computeBLT()");
 		try {
-			Collection<Collection<Eq>> components = tarjan(options.getBooleanOption("merge_blt_blocks"));
+			Collection<Collection<Eq>> components = tarjan(options);
 			BLT blt = new BLT();
 			int blockNumber = 1;
 			for (Collection<Eq> bl : components)
@@ -237,8 +237,8 @@ aspect BLT{
 		}
 	}
 	
-    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks() {
-        Collection<Collection<Eq>> components = tarjan(false);
+    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks(OptionRegistry options) {
+        Collection<Collection<Eq>> components = tarjan(options);
         Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
         for (Collection<Eq> component : components) {
             SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, true);
@@ -1942,7 +1942,7 @@ aspect AutomaticTearing {
 
                     // Compute inner BLT and see if tearings can be changed 
                     Set<Var> SUMV = new LinkedHashSet<Var>(g.getUnmatchedVariables());
-                    Collection<Collection<Eq>> innerBlocks = g.tarjan(false);
+                    Collection<Collection<Eq>> innerBlocks = g.tarjan();
                     java.util.List<Var> tearings = new ArrayList<Var>();
 
                     for (Collection<Eq> bInner : innerBlocks) {
@@ -2005,7 +2005,7 @@ aspect AutomaticTearing {
 
                             if (graphHasTear) {
                                 if (isChanged) {
-                                    Collection<Collection<Eq>> newBlocks = gInner.tarjan(false);
+                                    Collection<Collection<Eq>> newBlocks = gInner.tarjan();
                                     for (Collection<Eq> bInnerInner : newBlocks) {
                                         tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, true, true);
                                         if (tearBlock != null && tearBlock.isSolvable()) {
@@ -2047,7 +2047,7 @@ aspect AutomaticTearing {
                 res.isRes(true);
                 ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter));
-                Collection<Collection<Eq>> blt = g.tarjan(false);
+                Collection<Collection<Eq>> blt = g.tarjan();
                 for (Collection<Eq> block : blt) {
                     SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
                     if (tearBlock != null && tearBlock.isSolvable()) {

@@ -17,6 +17,7 @@
 package org.jmodelica.util;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -576,78 +577,203 @@ public class BiPGraph {
 		}
 		return l;
 	}
+	
+    private static Collection<SCCContributer> SCCContributers;
 
-	public Collection<Collection<Eq>> tarjan(boolean merge_blt_blocks) {
-		Enumerator indexer = new Enumerator();
-		Stack<Eq> stack = new Stack<Eq>();
-		Collection<Collection<Eq>> components = new ArrayList<Collection<Eq>>();
-		tarjanReset();
-		
-		Set<Eq> keepTogether = new LinkedHashSet<Eq>();
-		if (merge_blt_blocks) {
-			for (Eq e : getEquations()) {
-				if (e.markedAsResidualEquation() || e.getMatching().markedAsIterationVariable()) {
-					keepTogether.add(e);
-				}
-				if (e.getEquation().getHGTIterationVariable() != null) {
-					FVariable fVar = e.getEquation().getHGTIterationVariable();
-					Var var = getVariable(fVar.name());
-					if (var != null) {
-						keepTogether.add(var.getMatching());
-					}
-				}
-			}
-		}
-		
-		for (Eq e : getEquations()) {
-			if (!e.isVisited() && !e.isRes())
-				tarjan(indexer, stack, components, keepTogether, e);
-		}
-		
-		return components;
-	}
-	
-	public void tarjan(Enumerator indexer, Stack<Eq> stack, Collection<Collection<Eq>> components, Set<Eq> keepTogether,  Eq e) {
-		stack.add(e);
-		int index = indexer.next();
-		e.setTarjanNbr(index);
-		e.setTarjanLowLink(index);
-		e.setVisited(true);
-		Collection<Eq> eqToVisit = new ArrayList<Eq>();
-		if (keepTogether.contains(e)) {
-			for (Eq ee : keepTogether) {
-				if (ee != e && !ee.isRes())
-					eqToVisit.add(ee);
-			}
-		}
-		for (Var v : e.getVariables()) {
-			Eq ee = v.getMatching();
-			if (!v.isIter() && ee != null && e != ee)
-				eqToVisit.add(ee);
- 		}
-		for (Eq ee : e.getGroupMembers()) {
-			if (!ee.isRes() && ee != null && e != ee)
-				eqToVisit.add(ee);
-		}
-		for (Eq ee : eqToVisit) {
-			if (!ee.isVisited()) {
-				tarjan(indexer, stack, components, keepTogether, ee);
-				e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanLowLink()));
-			} else if (stack.contains(ee)) { //TODO: should not be stack.contains, it's slow...
-				e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
-			}
-		}
-		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
-			Collection<Eq> component = new ArrayList<Eq>();
-			Eq ee;
-			do {
-				ee = stack.pop();
-				component.add(ee);
-			} while (ee != e);
-			components.add(component);
-		}
-	}
-	
+    /**
+     * Adds a new strongly connected component contributer to the list of
+     * contributers.
+     */
+    private static <T extends SCCContributer> T addSCCContributer(T contributer) {
+        if (SCCContributers == null)
+            SCCContributers = new ArrayList<SCCContributer>();
+        SCCContributers.add(contributer);
+        return contributer;
+    }
+
+    /**
+     * Retrevies the list of strongly connected component contributers.
+     * This method should always be used since it ensures that the list is
+     * initialized propperly.
+     */
+    public static Collection<SCCContributer> getSCCContributers() {
+        if (SCCContributers == null)
+            SCCContributers = new ArrayList<SCCContributer>();
+        return SCCContributers;
+    }
+    
+    /**
+     * Abstract class for describing arc contributers to Tarjan's strongly
+     * connected components algorithm.
+     */
+    private static abstract class SCCContributer {
+        private final String option;
+        
+        private SCCContributer() {
+            option = null;
+        }
+
+        private SCCContributer(String option) {
+            this.option = option;
+        }
+
+        public boolean isActive(OptionRegistry options) {
+            return option == null || options != null && options.getBooleanOption(option);
+        }
+
+        /**
+         * This method returns a list of equations that the supplied equation
+         * depend on. This method is implemented by the overriding class.
+         */
+        public abstract Collection<Eq> members(Eq equation);
+
+        /**
+         * This method returns a list of string identifiers. All equations that
+         * return the same string identifier are kept in the same block.
+         */
+        public abstract Collection<String> memberSets(Eq equation);
+    }
+    
+    private static final GroupMemberContributer GROUP_MEMBER_CNTRIBUTER = addSCCContributer(new GroupMemberContributer());
+    
+    /**
+     * Contributer that describes the relationship between BiPGrah equations
+     * that link to the same AST equation, for example FFunctionCallEquations.
+     */
+    private static class GroupMemberContributer extends SCCContributer {
+        
+        public Collection<Eq> members(Eq equation) {
+            return equation.getGroupMembers();
+        }
+        
+        public Collection<String> memberSets(Eq equation) {
+            return Collections.emptyList();
+        }
+    }
+
+    public Collection<Collection<Eq>> tarjan() {
+        return tarjan(null);
+    }
+    
+
+    public Collection<Collection<Eq>> tarjan(OptionRegistry options) {
+        Enumerator indexer = new Enumerator();
+        Stack<Eq> stack = new Stack<Eq>();
+        Collection<Collection<Eq>> components = new ArrayList<Collection<Eq>>();
+        tarjanReset();
+
+        Collection<SCCContributer> contributers = new ArrayList<SCCContributer>();
+        Map<String, Collection<Eq>> memberSetsMap = new HashMap<String, Collection<Eq>>();
+        Map<Eq, Collection<Collection<Eq>>> keepTogetherMap = new HashMap<Eq, Collection<Collection<Eq>>>();
+
+        for (SCCContributer contributer : getSCCContributers()) {
+            if (!contributer.isActive(options))
+                continue;
+            contributers.add(contributer);
+            for (Eq equation : getEquations()) {
+                Collection<Collection<Eq>> keepTogetherLists = null;
+                for (String setName : contributer.memberSets(equation)) {
+                    Collection<Eq> memberSet = memberSetsMap.get(setName);
+                    if (memberSet == null) {
+                        memberSet = new ArrayList<Eq>();
+                        memberSetsMap.put(setName, memberSet);
+                    }
+                    if (keepTogetherLists == null) {
+                        keepTogetherLists = new ArrayList<Collection<Eq>>();
+                        keepTogetherMap.put(equation, keepTogetherLists);
+                    }
+                    memberSet.add(equation);
+                    keepTogetherLists.add(memberSet);
+                }
+            }
+        }
+
+        if (options != null && options.getBooleanOption("merge_blt_blocks")) {
+            for (Eq e : getEquations()) {
+                if (e.markedAsResidualEquation() || e.getMatching().markedAsIterationVariable()) {
+                    Collection<Eq> memberSet = memberSetsMap.get("mergeBLT");
+                    if (memberSet == null) {
+                        memberSet = new ArrayList<Eq>();
+                        memberSetsMap.put("mergeBLT", memberSet);
+                    }
+                    Collection<Collection<Eq>> keepTogetherLists = keepTogetherMap.get(e);
+                    if (keepTogetherLists == null) {
+                        keepTogetherLists = new ArrayList<Collection<Eq>>();
+                        keepTogetherMap.put(e, keepTogetherLists);
+                    }
+                    memberSet.add(e);
+                    keepTogetherLists.add(memberSet);
+                }
+                if (e.getEquation().getHGTIterationVariable() != null) {
+                    FVariable fVar = e.getEquation().getHGTIterationVariable();
+                    Var var = getVariable(fVar.name());
+                    if (var != null) {
+                        Collection<Eq> memberSet = memberSetsMap.get("mergeBLT");
+                        if (memberSet == null) {
+                            memberSet = new ArrayList<Eq>();
+                            memberSetsMap.put("mergeBLT", memberSet);
+                        }
+                        Collection<Collection<Eq>> keepTogetherLists = keepTogetherMap.get(var.getMatching());
+                        if (keepTogetherLists == null) {
+                            keepTogetherLists = new ArrayList<Collection<Eq>>();
+                            keepTogetherMap.put(var.getMatching(), keepTogetherLists);
+                        }
+                        memberSet.add(var.getMatching());
+                        keepTogetherLists.add(memberSet);
+                    }
+                }
+            }
+        }
+
+        for (Eq e : getEquations()) {
+            if (!e.isVisited() && !e.isRes())
+                tarjan(indexer, stack, components, contributers, keepTogetherMap, e);
+        }
+
+        return components;
+    }
+
+    public void tarjan(Enumerator indexer, Stack<Eq> stack, Collection<Collection<Eq>> components, Collection<SCCContributer> contributers, Map<Eq, Collection<Collection<Eq>>> keepTogetherMap,  Eq e) {
+        stack.add(e);
+        int index = indexer.next();
+        e.setTarjanNbr(index);
+        e.setTarjanLowLink(index);
+        e.setVisited(true);
+        Collection<Eq> eqToVisit = new ArrayList<Eq>();
+        Collection<Collection<Eq>> keepTogetherLists = keepTogetherMap.get(e);
+        if (keepTogetherLists != null)
+            for (Collection<Eq> keepTogether : keepTogetherLists)
+                for (Eq ee : keepTogether)
+                    if (ee != e && !ee.isRes())
+                        eqToVisit.add(ee);
+        for (Var v : e.getVariables()) {
+            Eq ee = v.getMatching();
+            if (!v.isIter() && ee != null && e != ee)
+                eqToVisit.add(ee);
+        }
+        for (SCCContributer contributer : contributers)
+            for (Eq ee : contributer.members(e))
+                if (!ee.isRes() && e != ee)
+                    eqToVisit.add(ee);
+        for (Eq ee : eqToVisit) {
+            if (!ee.isVisited()) {
+                tarjan(indexer, stack, components, contributers, keepTogetherMap, ee);
+                e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanLowLink()));
+            } else if (stack.contains(ee)) { //TODO: should not be stack.contains, it's slow...
+                e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
+            }
+        }
+        if (e.getTarjanNbr()==e.getTarjanLowLink()) {
+            Collection<Eq> component = new ArrayList<Eq>();
+            Eq ee;
+            do {
+                ee = stack.pop();
+                component.add(ee);
+            } while (ee != e);
+            components.add(component);
+        }
+    }
+
 	public void reset() {
 		for (Eq e : getEquations()) {
 			e.reset();

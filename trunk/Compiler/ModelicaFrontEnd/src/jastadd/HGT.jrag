@@ -385,7 +385,7 @@ aspect HGT {
                             throw new BLTException(sb.toString());
                         }
                     }
-                    Collection<Collection<Eq>> innerBLT = newGraph.tarjan(false);
+                    Collection<Collection<Eq>> innerBLT = newGraph.tarjan();
                     boolean allInnerAreSolved = true;
                     Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
                     for (Collection<Eq> innerBlock : innerBLT) {
