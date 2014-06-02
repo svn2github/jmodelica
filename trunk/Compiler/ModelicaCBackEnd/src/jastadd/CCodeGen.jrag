@@ -834,15 +834,22 @@ aspect CCodeGen {
         
         protected void printSizesAsArgs(FType type) {
             printNumElements(type);
-            str.print(", " + type.ndims());
+            str.print(", ");
+            str.print(type.ndims());
             printDimensions(type);
         }
         protected void printNumElements(FType type) {
-            type.size().printNumElements_C(p, str, indent(), src);
+            if (external && dynamic())
+                type.size().printNumElements_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C("")));
+            else
+                type.size().printNumElements_C(p, str, indent(), src);
         }
         protected void printDimensions(FType type) {
             str.print(", ");
-            type.size().printDimensions_C(p, str, indent(), src);
+            if (external && dynamic())
+                type.size().printDimensions_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C("")));
+            else
+                type.size().printDimensions_C(p, str, indent(), src);
         }
     }
     
@@ -852,7 +859,7 @@ aspect CCodeGen {
             super(p, str);
         }
         protected String acquireTemp(String key) {
-            String tmp = String.format("tmp_%d", src.nextTempNbr_C());
+            String tmp = src.nextTempName_C();
             src.recordChildTempNames().put(key, tmp);
             return tmp;
         }
@@ -1002,6 +1009,34 @@ aspect CCodeGen {
 		}
 	}
 	
+    public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, String name) {
+        printDimsWithSep_C(p, str, indent, name, " * ");
+    }
+    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, String name) {
+        printDimsWithSep_C(p, str, indent, name, ", ");
+    }
+    private void Size.printDimsWithSep_C(CodePrinter p, CodeStream str, String indent, String name, String sep) {
+        printSize_C(p, str, indent, name, 0);
+        for (int i = 1; i < ndims(); i++) {
+            str.print(sep);
+            printSize_C(p, str, indent, name, i);
+        }
+    }
+    public void Size.printSize_C(CodePrinter p, CodeStream str, String indent, String name, int dim) {
+        str.print("jmi_array_size(");
+        str.print(name);
+        str.print(", ");
+        str.print(dim);
+        str.print(")");
+    }
+    public void Size.printSize_C(CodePrinter p, CodeStream str, String indent, FExp e, int dim) {
+        str.print("jmi_array_size(");
+        p.print(e, str, indent);
+        str.print(", ");
+        str.print(dim);
+        str.print(")");
+    }
+    
     public void Size.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
 
     @Override
@@ -1360,15 +1395,11 @@ aspect CCodeGen {
 	}
 	
 	public void FSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		getFExp().prettyPrintSize_C(p, str, indent, dimension());
+        size().printSize_C(p, str, indent, getFExp(), dimension());
 	}
 	
 	public void FUnknownSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		str.print("jmi_array_size(");
-        str.print(getVariable().name_C());
-		str.print(", ");
-		str.print(getDim());
-		str.print(")");
+        size().printSize_C(p, str, indent, getVariable().name_C(), getDim());
 	}
 	
 	public void FTerminate.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -1466,17 +1497,6 @@ aspect CCodeGen {
     }
     eq FExp.containsReinit()    = false;
     eq FReinit.containsReinit() = true;
-
-	
-	public void FExp.prettyPrintSize_C(CodePrinter p, CodeStream str, String indent, int dim) {}
-	
-	public void FIdUseExp.prettyPrintSize_C(CodePrinter p, CodeStream str, String indent, int dim) {
-		str.print("jmi_array_size(");
-		p.print(getFIdUse(), str, indent);
-		str.print(", ");
-		str.print(dim);
-		str.print(")");
-	}
 	
 	syn String FBinExp.op_C() = op();
 	eq FDotAddExp.op_C() = " + ";
@@ -1869,31 +1889,23 @@ aspect CCodeGen {
 		str.print("JMI_FALSE");
 	}
 	
-	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrint_C(p, str, indent, null);
-	}
-	
-	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases) {		
+	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
 		// Generate temp arrays for all array inputs and outputs
 		// and transpose array for if array is input (Fortran 77 only)
-		getFExternalLanguage().prepExternalArg(p, str, indent, aliases, this, false);
+		getFExternalLanguage().prepExternalArg(p, str, indent, this, false);
 		
+		str.print(indent);
 		// return variable?
 		if(hasReturnVar()) {
-			String ret = getReturnVar().name_C();
-            if (aliases != null)
-                ret = aliases.get(ret);
-			str.print(indent);
-			str.print(ret+" = ");
-		} else {
-			str.print(indent);
+            str.print(getCodeGenContext().alias(getReturnVar().name_C()));
+            str.print(" = ");
 		}
 		
 		// print function call
-		getFExternalLanguage().genFuncCall(p, str, indent, aliases, this);
+		getFExternalLanguage().genFuncCall(p, str, indent, this);
 		
 		// If there are any output arrays, transpose these before returning (Fortran 77 only)
-		getFExternalLanguage().prepExternalArg(p, str, indent, aliases, this, true);
+		getFExternalLanguage().prepExternalArg(p, str, indent, this, true);
 	}
 			
 	public class MatrixOp {
@@ -1918,17 +1930,15 @@ aspect CCodeGen {
 		}
 	}
 	
-    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalStmt stmt, boolean writeback){
+    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback){
         for (FExp arg : stmt.getArgs())
             if (extShouldArgConvert(arg))
-                arg.prepExternalArg(p, str, indent, aliases, this, writeback);
+                arg.prepExternalArg(p, str, indent, this, writeback);
     }
     
-    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalLanguage lang, boolean writeback) {
+    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         String tempName = tempName_C();
-        String src = prettyPrint_C(indent);
-        if (aliases != null)
-            src = aliases.get(src);
+        String src = myCodeGenContext().alias(prettyPrint_C(indent));
         useTempVar = true;
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);
@@ -1944,85 +1954,76 @@ aspect CCodeGen {
         }
     }
     
-    public void FIdUseExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalLanguage lang, boolean writeback) {
+    public void FIdUseExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         if (!writeback || myCommonVarDecl().isOutput()) {
             if (isArray() && !writeback)
                 type().printExternInit_C(p, str, indent, tempName_C(), this);
-            super.prepExternalArg(p, str, indent, aliases, lang, writeback);
+            super.prepExternalArg(p, str, indent, lang, writeback);
         }
     }
     
-    public void FLitExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalLanguage lang, boolean writeback) {
+    public void FLitExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         if (!writeback)
-            super.prepExternalArg(p, str, indent, aliases, lang, writeback);
+            super.prepExternalArg(p, str, indent, lang, writeback);
     }
 	
-	public void FExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalStmt stmt) {}
+	public void FExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
 	
-	public void FCExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalStmt stmt) {
+	public void FCExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
 		str.print(stmt.getName()+"(");
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			arg.genExternalCFuncArgs(p, str, indent, aliases);
+			arg.genExternalCFuncArgs(p, str, indent);
 			prefix = ", ";
 		}
 		str.print(");\n");
 	}
 	
-	public void FFortran77ExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases, FExternalStmt stmt) {
+	public void FFortran77ExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
 		str.print(stmt.getName()+"_(");
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			arg.genExternalFortranFuncArgs(p, str, indent, aliases);
+			arg.genExternalFortranFuncArgs(p, str, indent);
 			prefix = ", ";
 		}
 		str.print(");\n");		
 	}
 	
-	public void FExp.genExternalFortranFuncArgs(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases) {
+	public void FExp.genExternalFortranFuncArgs(CodePrinter p, CodeStream str, String indent) {
 		if (!isArray()) {
 			str.print("&");
 		}
         if (useTempVar) {
 			str.print(tempName_C());
         } else {
-            String s = prettyPrint_C("");
-            if (aliases != null)
-                s = aliases.get(s);
-            str.print(s);
+            str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
         }
 		if (isArray()) {
 			str.print("->var");
 		}
 	}
 	
-	public void FExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases) {
+	public void FExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
         p.print(this, str, indent);
 	}
 	
-	public void FIdUseExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases) {
+	public void FIdUseExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
 		if (myCommonVarDecl().isOutput() && !isArray())
 			str.print("&");
         if (useTempVar) {
             str.print(tempName_C());
         } else {
-            String s = prettyPrint_C("");
-            if (aliases != null)
-                s = aliases.get(s);
-            str.print(s);
+            str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
         }
 		if (isArray()) {
 			str.print("->var");
 		}	
 	}
 	
-    public void FSizeExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent, HashMap<String,String> aliases) {
-        String s = prettyPrint_C("");
-        if (aliases != null)
-            s = aliases.get(s);
-        str.print(s);
+    public void FSizeExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
+        str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
     }
 	
 	public void FExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
@@ -2078,36 +2079,59 @@ aspect CCodeGen {
 			getFExp().genTempOutput_C(p, str, indent);
 	}
 	
-	syn lazy String FExp.tempName_C() = "tmp_" + nextTempNbr_C();
-	syn lazy String FAlgorithm.tempName_C() = "tmp_" + nextTempNbr_C();
-	
+    syn lazy String FExp.tempName_C()       = nextTempName_C();
+    syn lazy String FAlgorithm.tempName_C() = nextTempName_C();
+    
+    syn String FExp.nextTempName_C()       = myCodeGenContext().nextTempName_C();
+    syn String FAlgorithm.nextTempName_C() = myCodeGenContext().nextTempName_C();
+    
     public class CodeGenContext {
         private int nextTempNbr_C = 1;
-        public int nextTempNbr_C() {
-            return nextTempNbr_C++;
+        
+        public String nextTempName_C() {
+            return "tmp_" + nextTempNbr_C++;
+        }
+        public void setAlias(String key, String val) {
+            throw new UnsupportedOperationException();
+        }
+        public String alias(String key) {
+            return key;
+        }
+        public CodeGenContext createProxy() {
+            return new CodeGenContextProxy(this);
+        }
+        private class CodeGenContextProxy extends CodeGenContext {
+            private CodeGenContext redirect;
+            private Map<String,String> aliases = new HashMap<String,String>();
+            public CodeGenContextProxy(CodeGenContext redirect) {
+                this.redirect = redirect;
+            }
+            public String nextTempName_C() {
+                return redirect.nextTempName_C();
+            }
+            public void setAlias(String key, String val) {
+                aliases.put(key,val);
+            }
+            public String alias(String key) {
+                return aliases.get(key);
+            }
         }
     }
     private CodeGenContext FClass.codeGenContext = new CodeGenContext();
     private CodeGenContext FFunctionDecl.codeGenContext = new CodeGenContext();
-    private CodeGenContext InstFunction.codeGenContext = null;
     private CodeGenContext FExternalStmt.codeGenContext = null;
     public void FExternalStmt.setCodeGenContext(CodeGenContext cgc) { codeGenContext = cgc; }
+    public CodeGenContext FExternalStmt.getCodeGenContext() { return codeGenContext == null ? myCodeGenContext() : codeGenContext; }
     
-	inh int FExp.nextTempNbr_C();
-	inh int FAlgorithm.nextTempNbr_C();
-	inh int FExternalStmt.nextTempNbr_C();
-	eq InstNode.getChild().nextTempNbr_C()      = 0;
-	eq FClass.getChild().nextTempNbr_C()        = codeGenContext.nextTempNbr_C();
-	eq FFunctionDecl.getChild().nextTempNbr_C() = codeGenContext.nextTempNbr_C();
-	eq InstFullClassDecl.getChild().nextTempNbr_C() = getInstRestriction().nextTempNbr_C();
-	syn int InstRestriction.nextTempNbr_C() = 0;
-    syn int InstFunction.nextTempNbr_C() {
-        if (codeGenContext == null)
-            codeGenContext = new CodeGenContext();
-        return codeGenContext.nextTempNbr_C();
-    }
-	eq FExternalStmt.getChild().nextTempNbr_C() = codeGenContext == null ? nextTempNbr_C() : codeGenContext.nextTempNbr_C();
-	
+    inh CodeGenContext FExp.myCodeGenContext();
+    inh CodeGenContext FAlgorithm.myCodeGenContext();
+    inh CodeGenContext FExternalStmt.myCodeGenContext();
+    eq Root.getChild().myCodeGenContext() = null;
+    eq FClass.getChild().myCodeGenContext() = codeGenContext;
+    eq FFunctionDecl.getChild().myCodeGenContext() = codeGenContext;
+    eq FExternalStmt.getChild().myCodeGenContext() = getCodeGenContext();
+    
+    
 	public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
 			String name = tempName_C();
@@ -3373,7 +3397,7 @@ aspect Serialize {
             this.cgc = cgc;
         }
         protected String acquireTemp(String key) {
-            String s = "tmp_" + cgc.nextTempNbr_C();
+            String s = cgc.nextTempName_C();
             tempMap.put(key, s);
             return s;
         }
@@ -3384,10 +3408,9 @@ aspect Serialize {
             if (type.isExternalObject()) {
                 FExternalObjectType t = (FExternalObjectType) type;
                 FExternalStmt stmt = t.myConstructorStmt();
-                stmt.setCodeGenContext(cgc);
+                stmt.setCodeGenContext(cgc.createProxy());
                 stmt.genVarDecls_C(p, str, indent());
                 printComps(t);
-                stmt.setCodeGenContext(null);
             } else {
                 super.printComps(type);
             }
@@ -3444,15 +3467,11 @@ aspect Serialize {
             FExternalStmt stmt = ((FExternalObjectType)type).myConstructorStmt();
             ArrayList<FExp> args = stmt.myConstructorArgs();
             CommonVariableDecl out = stmt.myConstructorOutput();
-            HashMap<String,String> aliases = new HashMap<String,String>();
-            aliases.put(out.name_C(), name());
             String name = acquireTemp(name());
-            for (FExp arg : args) {
-                aliases.put(arg.prettyPrint_C(""), name + "_arg" + i);
-                i++;
-            }
-            stmt.setCodeGenContext(cgc);
-            stmt.prettyPrint_C(p, str, indent(), aliases);
+            stmt.getCodeGenContext().setAlias(out.name_C(), name());
+            for (FExp arg : args)
+                stmt.getCodeGenContext().setAlias(arg.prettyPrint_C(""), name + "_arg" + i++);
+            stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
     }
@@ -3463,7 +3482,7 @@ aspect Serialize {
         Map<String,String> tempMap = new HashMap<String,String>();
         indent = ASTNode.printer_C.indent(indent);
         codeGenContext = new CodeGenContext();
-        str.println("/* Declarations */");
+        str.println(indent + "/* Declarations */");
         TypePrinter_C dp = new DeclPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
         for (CommonVariableDecl cvd : vars) {
              dp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
@@ -3472,9 +3491,9 @@ aspect Serialize {
         genVarDecls_C(ASTNode.printer_C, str, indent);
         str.println();
         
-        str.println("printf(\"START\\n\"); fflush(stdout);");
+        str.println(indent + "printf(\"START\\n\"); fflush(stdout);");
         
-        str.println("/* Parse */");
+        str.println(indent + "/* Parse */");
         TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
         for (CommonVariableDecl cvd : vars) {
              ip.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
@@ -3482,23 +3501,23 @@ aspect Serialize {
         }
         str.println();
         
-        str.println("/* Call the function */");
-        str.println("printf(\"CALC\\n\"); fflush(stdout);");
+        str.println(indent + "/* Call the function */");
+        str.println(indent + "printf(\"CALC\\n\"); fflush(stdout);");
         prettyPrint_C(ASTNode.printer_C, str, indent);
-        str.println("printf(\"DONE\\n\"); fflush(stdout);");
+        str.println(indent + "printf(\"DONE\\n\"); fflush(stdout);");
         str.println();
         
-        str.println("/* Print */");
+        str.println(indent + "/* Print */");
         for (CommonVariableDecl cvd : varsToDeserialize())
             cvd.type().genSerialize_C(str, indent, cvd.name_C(), false);
         str.println();
         
-        str.println("/* Free strings */");
+        str.println(indent + "/* Free strings */");
         for (CommonVariableDecl cvd : vars)
             cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
         str.println();
         
-        str.println("printf(\"END\\n\"); fflush(stdout);");
+        str.println(indent + "printf(\"END\\n\"); fflush(stdout);");
         codeGenContext = null;
     }
     
@@ -3620,13 +3639,5 @@ aspect Serialize {
         buf.append('_');
         buf.append(type().isArray() ? C_SUFFIX_ARRAY : C_SUFFIX_VARIABLE);
         return buf.toString();
-    }
-    
-    public void FInstAccessExp.prettyPrintSize_C(CodePrinter p, CodeStream str, String indent, int dim) {
-        str.print("jmi_array_size(");
-        p.print(getInstAccess(), str, indent);
-        str.print(", ");
-        str.print(dim);
-        str.print(")");
     }
 }

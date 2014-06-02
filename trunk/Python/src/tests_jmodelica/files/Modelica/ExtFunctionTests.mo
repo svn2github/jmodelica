@@ -523,7 +523,7 @@ package CEval
         function constructor
             input Real[:] x;
             input Integer[2] y;
-            input Boolean[2] b;
+            input Boolean[:] b;
             input String[:] s;
             output Obj2 o2;
             external "C" my_constructor2(x,y,o2,b,s);
