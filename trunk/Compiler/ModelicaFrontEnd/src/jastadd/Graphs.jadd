@@ -698,43 +698,6 @@ public class BiPGraph {
             }
         }
 
-        if (options != null && options.getBooleanOption("merge_blt_blocks")) {
-            for (Eq e : getEquations()) {
-                if (e.markedAsResidualEquation() || e.getMatching().markedAsIterationVariable()) {
-                    Collection<Eq> memberSet = memberSetsMap.get("mergeBLT");
-                    if (memberSet == null) {
-                        memberSet = new ArrayList<Eq>();
-                        memberSetsMap.put("mergeBLT", memberSet);
-                    }
-                    Collection<Collection<Eq>> keepTogetherLists = keepTogetherMap.get(e);
-                    if (keepTogetherLists == null) {
-                        keepTogetherLists = new ArrayList<Collection<Eq>>();
-                        keepTogetherMap.put(e, keepTogetherLists);
-                    }
-                    memberSet.add(e);
-                    keepTogetherLists.add(memberSet);
-                }
-                if (e.getEquation().getHGTIterationVariable() != null) {
-                    FVariable fVar = e.getEquation().getHGTIterationVariable();
-                    Var var = getVariable(fVar.name());
-                    if (var != null) {
-                        Collection<Eq> memberSet = memberSetsMap.get("mergeBLT");
-                        if (memberSet == null) {
-                            memberSet = new ArrayList<Eq>();
-                            memberSetsMap.put("mergeBLT", memberSet);
-                        }
-                        Collection<Collection<Eq>> keepTogetherLists = keepTogetherMap.get(var.getMatching());
-                        if (keepTogetherLists == null) {
-                            keepTogetherLists = new ArrayList<Collection<Eq>>();
-                            keepTogetherMap.put(var.getMatching(), keepTogetherLists);
-                        }
-                        memberSet.add(var.getMatching());
-                        keepTogetherLists.add(memberSet);
-                    }
-                }
-            }
-        }
-
         for (Eq e : getEquations()) {
             if (!e.isVisited() && !e.isRes())
                 tarjan(indexer, stack, components, contributors, keepTogetherMap, e);
