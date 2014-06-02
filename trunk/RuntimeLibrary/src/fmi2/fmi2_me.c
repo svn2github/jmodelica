@@ -214,6 +214,11 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
 	if (c == NULL) {
 		return fmi2Fatal;
     }
+
+    if (((fmi2_me_t*)c)->fmu_mode != instantiatedMode) {
+        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only set up an experiment right after the model is instantiated or has been reset.");
+        return fmi2Error;
+    }
     
     jmi_setup_experiment(&((fmi2_me_t*)c)->jmi, toleranceDefined, tolerance);
     
