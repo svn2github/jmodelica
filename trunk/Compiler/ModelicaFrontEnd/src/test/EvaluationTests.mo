@@ -1017,6 +1017,59 @@ end EvaluationTests.FunctionEval28;
 end FunctionEval28;
 
 
+model FunctionEval29
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 2;
+        y := x * y;
+    end f;
+    
+    function f2
+        input Real x;
+        output Real y;
+    end f2;
+
+    model A
+        replaceable function f3 = f2;
+    end A;
+
+    model B
+        extends A(redeclare function f3 = f(x = 2));
+    end B;
+    
+    model C
+        outer B b;
+        constant Real x = b.f3(1);
+    end B;
+    
+    inner B b;
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval29",
+            description="",
+            flatModel="
+fclass EvaluationTests.FunctionEval29
+ constant Real c.x = 3.0;
+
+public
+ function EvaluationTests.FunctionEval29.b.f3
+  input Real x := 2;
+  output Real y;
+ algorithm
+  y := x + 2;
+  y := x * y;
+  return;
+ end EvaluationTests.FunctionEval29.b.f3;
+
+end EvaluationTests.FunctionEval29;
+")})));
+end FunctionEval29;
+
+
 
 model StringConcat
  Real a = 1;

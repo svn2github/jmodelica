@@ -1832,9 +1832,11 @@ aspect ConstantEvaluation {
         if (myInstComponentDecl().isAssignable()) {
           Index iHere = Index.NULL;
           InstAssignable var = (InstAssignable) myInstComponentDecl();
-          InstComponentDecl inner = var.myInnerInstComponentDecl();
-          if (!inner.isUnknown())
-              var = (InstAssignable) inner;
+          if (!var.inFunction()) {
+              InstComponentDecl inner = var.myInnerInstComponentDecl();
+              if (!inner.isUnknown())
+                  var = (InstAssignable) inner;
+          }
           
           if (hasFArraySubscripts()) {
               FArraySubscripts fas = getFArraySubscripts();
@@ -3798,6 +3800,7 @@ aspect ExternalCEval {
             com.accept("START");
             for (CommonVariableDecl cvd : varsToSerialize())
                 com.put(values.get(cvd), cvd.type(), !cvd.isInput());
+            com.log();
             com.accept("CALC");
             com.log();
             com.accept("DONE");

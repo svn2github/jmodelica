@@ -46,7 +46,7 @@ aspect InnerOuterComponents {
 
 aspect InnerOuterClasses {
 
-    eq InstClassDecl.getChild().inOuter() = isOuter() ? true : inOuter();
+    eq InstClassDecl.getChild().inOuter() = inOrIsOuter();
 
     syn boolean InstClassDecl.inOrIsOuter() = isOuter() || inOuter();
 
