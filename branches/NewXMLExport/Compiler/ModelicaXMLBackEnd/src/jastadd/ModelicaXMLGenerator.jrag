@@ -540,11 +540,7 @@ aspect XMLCodeGenerator {
 		String indentTwoSteps = p.indent(indentOneStep);
 		generateOpenTag(str, "call", indent);
 		generateOpenTag(str, "function", indentOneStep);
-		//if (getName().getFQName().isScalarized()) {
-			generateClosedTag(str, "local", indentTwoSteps, "name", name());
-		/*} else {
-			p.print(getName().getFQName(), str, indentTwoSteps);
-		}*/
+		generateClosedTag(str, "local", indentTwoSteps, "name", name());
 		generateCloseTag(str, "function", indentOneStep);
 		for (FExp arg : getArgs()) {
 			p.print(arg, str, indentOneStep);
