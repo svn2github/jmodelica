@@ -2008,6 +2008,101 @@ jmi_ad_var_t func_CCodeGenTests_CForLoop2_f_exp0() {
 end CForLoop2;
 
 
+model CForLoop3
+ function f
+  output Real o = 1.0;
+  protected Real x = 0;
+  algorithm
+  for i in 3:-1:1 loop
+   x := x + i;
+  end for;
+ end f;
+ 
+ Real x = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CForLoop3",
+            description="C code generation for for loops: decreasing range exp",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CForLoop3_f_def0(jmi_ad_var_t* o_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t o_v;
+    jmi_ad_var_t x_v;
+    jmi_ad_var_t i_0i;
+    jmi_ad_var_t i_0ie;
+    o_v = 1.0;
+    x_v = 0;
+    i_0ie = 1 + - 1 / 2.0;
+    for (i_0i = 3; i_0i > i_0ie; i_0i += - 1) {
+        x_v = x_v + i_0i;
+    }
+    if (o_o != NULL) *o_o = o_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CForLoop3_f_exp0() {
+    jmi_ad_var_t o_v;
+    func_CCodeGenTests_CForLoop3_f_def0(&o_v);
+    return o_v;
+}
+
+")})));
+end CForLoop3;
+
+
+model CForLoop4
+ function f
+  input Real i;
+  output Real o = 1.0;
+  protected Real x = 0;
+  algorithm
+  for i in 3:i:1 loop
+   x := x + i;
+  end for;
+ end f;
+ 
+ Real x = f(-1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CForLoop4",
+            description="C code generation for for loops: range exp, unknown if increasing or decreasing",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CForLoop4_f_def0(jmi_ad_var_t i_v, jmi_ad_var_t* o_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t o_v;
+    jmi_ad_var_t x_v;
+    jmi_ad_var_t i_0i;
+    jmi_ad_var_t i_0ie;
+    o_v = 1.0;
+    x_v = 0;
+    i_0ie = 1 + i_0i / 2.0;
+    for (i_0i = 3; i_0i * i_0i < i_0ie * i_0i; i_0i += i_0i) {
+        x_v = x_v + i_0i;
+    }
+    if (o_o != NULL) *o_o = o_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CForLoop4_f_exp0(jmi_ad_var_t i_v) {
+    jmi_ad_var_t o_v;
+    func_CCodeGenTests_CForLoop4_f_def0(i_v, &o_v);
+    return o_v;
+}
+
+")})));
+end CForLoop4;
+
+
 
 model CArrayInput1
  function f

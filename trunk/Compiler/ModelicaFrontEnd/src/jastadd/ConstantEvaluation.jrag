@@ -309,7 +309,14 @@ aspect ConstantEvaluation {
     	public boolean isUnsupported() {
     		return false;
     	}
-        
+
+        /**
+         * Returns true if the constant value is of scalar numeric type and has a negative value.
+         */
+        public boolean isNegative() {
+            return false;
+        }
+
         /**
          * Overloading of the toString() method.
          * 
@@ -543,15 +550,16 @@ aspect ConstantEvaluation {
         public boolean isReal() {
             return true;
         }
-        
-	    /**
-	     * \brief Returns true if the constant value is of numeric type.
-	     * 
-	     * @return True.
-	     */
-	    public boolean isNumeric() {
-	    	return true;
-	    }
+
+        @Override
+        public boolean isNumeric() {
+            return true;
+        }
+
+        @Override
+        public boolean isNegative() {
+            return value < 0;
+        }
 
     }
     
@@ -618,16 +626,16 @@ aspect ConstantEvaluation {
         public boolean isReal() {
             return true;
         }
-        
-	    /**
-	     * \brief Returns true if the constant value is of numeric type.
-	     * 
-	     * @return True.
-	     */
-	    public boolean isNumeric() {
-	    	return true;
-	    }
-        
+
+        @Override
+        public boolean isNumeric() {
+            return true;
+        }
+
+        @Override
+        public boolean isNegative() {
+            return value < 0;
+        }
       }
     
 	/**

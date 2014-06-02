@@ -1324,14 +1324,23 @@ aspect CCodeGen {
 		printForStep_C(p, str, indent);
 		str.print(" / 2.0");
 	}
-	
-	public void FRangeExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
-		str.format("%s = ", name);
-		p.print(getFExp(0), str, indent);
-		str.format("; %s < %se; %s += ", name, name, name);
-		printForStep_C(p, str, indent);
-	}
-	
+
+    public void FRangeExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
+        str.format("%s = ", name);
+        p.print(getFExp(0), str, indent);
+        if (hasStep() && !getFExp(1).variability().structuralOrLess()) {
+            str.format("; %s * ", name);
+            p.print(getFExp(1), str, indent);
+            str.format(" < %se * ", name);
+            p.print(getFExp(1), str, indent);
+            str.format("; %s += ", name);
+        } else {
+            String cmp = (hasStep() && getFExp(1).ceval().isNegative()) ? ">" : "<";
+            str.format("; %s %s %se; %s += ", name, cmp, name, name);
+        }
+        printForStep_C(p, str, indent);
+    }
+
 	protected void FRangeExp.printForStep_C(CodePrinter p, CodeStream str, String indent) {
 		if (hasStep()) 
 			p.print(getFExp(1), str, indent);
