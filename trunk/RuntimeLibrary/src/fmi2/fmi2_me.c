@@ -33,7 +33,7 @@ const char* fmi2_get_version() {
 
 fmi2Status fmi2_set_debug_logging(fmi2Component    c,
                                   fmi2Boolean      loggingOn, 
-                                  size_t          nCategories, 
+                                  size_t           nCategories, 
                                   const fmi2String categories[]) {
 
     fmi2_me_t* self = (fmi2_me_t*)c;
@@ -239,7 +239,7 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
 		return fmi2Fatal;
     }
     
-    if (((fmi2_me_t *)c)->fmi_mode != instantiatedMode) {
+    if (((fmi2_me_t *)c)->fmu_mode != instantiatedMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter initialization mode after instantiating the model.");
         return fmi2Error;
     }
@@ -250,7 +250,7 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
         return fmi2Error;
     }
     
-    ((fmi2_me_t *)c) -> fmi_mode = initializationMode;
+    ((fmi2_me_t *)c) -> fmu_mode = initializationMode;
     
     if (((fmi2_me_t *)c) -> fmu_type == fmi2CoSimulation) {
         ode_problem = ((fmi2_cs_t *)c) -> ode_problem; 
@@ -281,14 +281,14 @@ fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
 		return fmi2Fatal;
     }
 
-    if (((fmi2_me_t *)c)->fmi_mode != initializationMode) {
+    if (((fmi2_me_t *)c)->fmu_mode != initializationMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only exit initialization mode when being in initialization mode.");
         return fmi2Error;
     }
     if (((fmi2_me_t *)c)->fmu_type == fmi2ModelExchange) {
-        ((fmi2_me_t *)c)->fmi_mode = eventMode;
+        ((fmi2_me_t *)c)->fmu_mode = eventMode;
     } else if (((fmi2_me_t *)c)->fmu_type == fmi2CoSimulation) {
-        ((fmi2_me_t *)c)->fmi_mode = slaveInitialized;
+        ((fmi2_me_t *)c)->fmu_mode = slaveInitialized;
 		((fmi2_cs_t *)c)->event_info.newDiscreteStatesNeeded = fmi2True; /* To start event iteration after initialization. */
     }
     return fmi2OK;
@@ -300,18 +300,45 @@ fmi2Status fmi2_terminate(fmi2Component c) {
 		return fmi2Fatal;
     }
     
-    jmi_terminate(&((fmi2_me_t *)c)->jmi);
-    
+    jmi_terminate(&((fmi2_me_t*)c)->jmi);
     return fmi2OK;
 }
 
 fmi2Status fmi2_reset(fmi2Component c) {
-	/* Resets the FMU by deleting the jmi struct. */
+    jmi_t* jmi;
+    fmi2_me_t* fmi2_me;
+    jmi_callbacks_t* cb;
+    char*  tmp_resource_location;
+	
     if (c == NULL) {
 		return fmi2Fatal;
     }
-
-    jmi_delete(&((fmi2_me_t*)c)->jmi);
+    
+    fmi2_me = (fmi2_me_t*)c;
+    jmi = &fmi2_me->jmi;
+    
+    /* Save some information from the jmi struct */
+    cb = &jmi->jmi_callbacks;
+    tmp_resource_location = jmi->resource_location; /* jmi_delete do not free resource_location */
+    
+    /* Clear the jmi struct */
+    jmi_terminate(jmi);
+    jmi_delete(jmi);
+    
+    /* Reset default logging options */
+    cb->log_options.logging_on_flag = (char)fmi2_me->initial_logging_on;
+    cb->log_options.log_level = 5; /* must be high to let the messages during initialization go through */
+    
+    /* Reinstantiate the jmi struct */
+    jmi_me_init(cb, &fmi2_me->jmi, fmi2_me->fmu_GUID, tmp_resource_location);
+    
+    /* Clear the ode_solver in case of CoSimulation */
+    if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
+        jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
+    }
+    
+    /* The FMU is reset */
+    fmi2_me->fmu_mode = instantiatedMode;
     
     return fmi2OK;
 }
@@ -535,12 +562,12 @@ fmi2Status fmi2_enter_event_mode(fmi2Component c) {
 		return fmi2Fatal;
     }
 
-    if (((fmi2_me_t *)c)->fmi_mode != continuousTimeMode) {
+    if (((fmi2_me_t *)c)->fmu_mode != continuousTimeMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter event mode from continuous time mode.");
         return fmi2Error;
     }
     
-    ((fmi2_me_t *)c) -> fmi_mode = eventMode;
+    ((fmi2_me_t *)c) -> fmu_mode = eventMode;
     return fmi2OK;
 }
 
@@ -583,12 +610,12 @@ fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
 		return fmi2Fatal;
     }
 
-    if (((fmi2_me_t *)c)->fmi_mode != eventMode) {
+    if (((fmi2_me_t *)c)->fmu_mode != eventMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter continuous time mode from event mode.");
         return fmi2Error;
     }
     
-    ((fmi2_me_t *)c) -> fmi_mode = continuousTimeMode;
+    ((fmi2_me_t *)c) -> fmu_mode = continuousTimeMode;
     return fmi2OK;
 }
 
@@ -738,8 +765,10 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
                                fmi2Boolean                  loggingOn) {
     fmi2Integer retval;
     char* tmpname;
+    char* tmpGUID;
     char* resource_location;
     size_t inst_name_len;
+    size_t inst_GUID_len;
     
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
 	jmi_callbacks_t* cb = &fmi2_me->jmi.jmi_callbacks;
@@ -747,10 +776,14 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
 	inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
+    
+    inst_GUID_len = strlen(fmuGUID)+1;
+    tmpGUID = (char*)(fmi2_me_t *)functions->allocateMemory(inst_GUID_len, sizeof(char));
+    strncpy(tmpGUID, fmuGUID, inst_GUID_len);
 
     cb->emit_log                    = fmi2_me_emit_log;
     cb->is_log_category_emitted     = fmi2_me_is_log_category_emitted;
-    cb->log_options.logging_on_flag = loggingOn;
+    cb->log_options.logging_on_flag = (char)loggingOn;
     cb->log_options.log_level       = 5; /* must be high to let the messages during initialization go through */
     cb->allocate_memory             = functions->allocateMemory;
     cb->free_memory                 = functions->freeMemory;
@@ -766,10 +799,12 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
         return fmi2Error;
     }
     
-    fmi2_me->fmi_instance_name = tmpname;
-    fmi2_me->fmi_functions     = functions;
-    fmi2_me->fmu_type          = fmuType;
-    fmi2_me->fmi_mode          = instantiatedMode;
+    fmi2_me->fmu_instance_name  = tmpname;
+    fmi2_me->fmu_GUID           = tmpGUID;
+    fmi2_me->fmi_functions      = functions;
+    fmi2_me->fmu_type           = fmuType;
+    fmi2_me->fmu_mode           = instantiatedMode;
+    fmi2_me->initial_logging_on = loggingOn;
     
     retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID, resource_location);
           
@@ -784,8 +819,9 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
 void fmi2_me_free_instance(fmi2Component c) {
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
     fmi2CallbackFreeMemory fmi_free = fmi2_me->fmi_functions->freeMemory;
-
+    
+    fmi_free((void*)fmi2_me->fmu_instance_name);
+    fmi_free((void*)fmi2_me->fmu_GUID);
     fmi_free(fmi2_me->jmi.resource_location);
     jmi_delete(&fmi2_me->jmi);
-    fmi_free((void*)fmi2_me -> fmi_instance_name);
 }

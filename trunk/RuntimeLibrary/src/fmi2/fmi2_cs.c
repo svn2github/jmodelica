@@ -70,7 +70,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
 		return fmi2Fatal;
     }
 
-	if (((fmi2_me_t*)c)->fmi_mode != slaveInitialized) {
+	if (((fmi2_me_t*)c)->fmu_mode != slaveInitialized) {
 		jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only do a step if the model is an initialized slave.");
         return fmi2Error;
 	}

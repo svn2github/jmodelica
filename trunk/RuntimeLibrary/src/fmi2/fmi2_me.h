@@ -46,12 +46,13 @@ typedef enum {
 typedef struct fmi2_me_t fmi2_me_t;  /**< \brief Forward declaration of struct. */
 
 struct fmi2_me_t {
-    jmi_t jmi;                  /* should be the first one so that jmi* and fmi1_me* point at the same address */
-    fmi2_mode_t fmi_mode;
-    fmi2Type fmu_type;
-    fmi2String fmi_instance_name;
-    fmi2EventInfo event_info;
-    const fmi2CallbackFunctions* fmi_functions;
+    jmi_t                        jmi;                   /**< \brief Must be the first one in this struct so that a fmi2_me_t pointer can be used in place of a jmi_t pointer. */
+    fmi2_mode_t                  fmu_mode;              /**< \brief The FMUs mode it's currently in. */
+    fmi2Type                     fmu_type;              /**< \brief The FMUs type selected at instantiation */
+    fmi2String                   fmu_instance_name;     /**< \brief The FMUs instance name. */
+    fmi2String                   fmu_GUID;              /**< \brief The FMUs GUID. */
+    fmi2Boolean                  initial_logging_on;    /**< \brief The initial option for loggingOn at instantiation. */
+    const fmi2CallbackFunctions* fmi_functions;         /**< \brief The fmi callback functions provided by the environment at instantiaton. */
 };
 
 /**
