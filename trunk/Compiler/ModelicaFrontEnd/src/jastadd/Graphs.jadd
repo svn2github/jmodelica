@@ -672,7 +672,7 @@ public class BiPGraph {
 
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
         Map<Object, Collection<Eq>> memberSetsMap = new HashMap<Object, Collection<Eq>>();
-        Map<Eq, Collection<Collection<Eq>>> keepTogetherMap = new HashMap<Eq, Collection<Collection<Eq>>>();
+        Map<Eq, Collection<Collection<Eq>>> keepTogetherMap = new LinkedHashMap<Eq, Collection<Collection<Eq>>>();
 
         for (SCCContributor contributor : getSCCContributors()) {
             if (!contributor.isActive(options))
