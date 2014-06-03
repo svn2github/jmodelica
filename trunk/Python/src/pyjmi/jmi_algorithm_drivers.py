@@ -2767,7 +2767,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'discr': "LGR",
-                'expand_to_sx': "no",
+                'expand_to_sx': "NLP",
                 'named_vars': False,
                 'init_traj': None,
                 'variable_scaling': True,
