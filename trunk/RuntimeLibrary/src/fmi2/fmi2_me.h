@@ -52,6 +52,7 @@ struct fmi2_me_t {
     fmi2String                   fmu_instance_name;     /**< \brief The FMUs instance name. */
     fmi2String                   fmu_GUID;              /**< \brief The FMUs GUID. */
     fmi2Boolean                  initial_logging_on;    /**< \brief The initial option for loggingOn at instantiation. */
+    fmi2Real                     stopTime;              /**< \brief The stop time when simulating the FMU. */
     const fmi2CallbackFunctions* fmi_functions;         /**< \brief The fmi callback functions provided by the environment at instantiaton. */
 };
 

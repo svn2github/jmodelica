@@ -210,21 +210,27 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
                                  fmi2Boolean   stopTimeDefined, 
                                  fmi2Real      stopTime) {
     fmi2Status retval;
+    fmi2_me_t* fmi2_me; 
     
 	if (c == NULL) {
 		return fmi2Fatal;
     }
 
-    if (((fmi2_me_t*)c)->fmu_mode != instantiatedMode) {
-        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only set up an experiment right after the model is instantiated or has been reset.");
+    fmi2_me = (fmi2_me_t*)c;
+
+    if (fmi2_me->fmu_mode != instantiatedMode) {
+        jmi_log_comment(fmi2_me->jmi.log, logError, "Can only set up an experiment right after the model is instantiated or has been reset.");
         return fmi2Error;
     }
     
-    jmi_setup_experiment(&((fmi2_me_t*)c)->jmi, toleranceDefined, tolerance);
+    jmi_setup_experiment(&fmi2_me->jmi, toleranceDefined, tolerance);
     
+    if (stopTimeDefined) {
+        fmi2_me->stopTime = stopTime;
+    }
     retval = fmi2_set_time(c, startTime);
     
-    if (((fmi2_me_t*)c)->fmu_type == fmi2CoSimulation) {
+    if (fmi2_me->fmu_type == fmi2CoSimulation) {
         jmi_init_ode_problem(((fmi2_cs_t*)c)->ode_problem, startTime, fmi2_cs_rhs_fcn,
                              fmi2_cs_root_fcn, fmi2_cs_completed_integrator_step);
     }
@@ -330,9 +336,10 @@ fmi2Status fmi2_reset(fmi2Component c) {
     jmi_terminate(jmi);
     jmi_delete(jmi);
     
-    /* Reset default logging options */
+    /* Reset default options */
     cb->log_options.logging_on_flag = (char)fmi2_me->initial_logging_on;
-    cb->log_options.log_level = 5; /* must be high to let the messages during initialization go through */
+    cb->log_options.log_level       = 5;       /* must be high to let the messages during initialization go through */
+    fmi2_me->stopTime               = JMI_INF; /* Default if not set in setup_experiment */
     
     /* Reinstantiate the jmi struct */
     jmi_me_init(cb, &fmi2_me->jmi, fmi2_me->fmu_GUID, tmp_resource_location);
@@ -641,6 +648,11 @@ fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
     if (c == NULL) {
 		return fmi2Fatal;
     }
+
+    if (((fmi2_me_t*)c)->stopTime < time) {
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot set a time past the stop time: %d.", ((fmi2_me_t*)c)->stopTime);
+        return fmi2Error;
+    }
     
     *(jmi_get_t(&((fmi2_me_t *)c)->jmi)) = time;
     ((fmi2_me_t *)c)->jmi.recomputeVariables = 1;
@@ -810,6 +822,7 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
     fmi2_me->fmu_type           = fmuType;
     fmi2_me->fmu_mode           = instantiatedMode;
     fmi2_me->initial_logging_on = loggingOn;
+    fmi2_me->stopTime           = JMI_INF; /* Default if not set in setup_experiment */
     
     retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID, resource_location);
           

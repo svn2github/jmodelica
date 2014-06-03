@@ -74,7 +74,12 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
 		jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only do a step if the model is an initialized slave.");
         return fmi2Error;
 	}
-    
+
+    if (((fmi2_me_t*)c)->stopTime < time_final) {
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot take a step past the stop time: %d.", ((fmi2_me_t*)c)->stopTime);
+        return fmi2Error;
+    }
+
     fmi2_cs = (fmi2_cs_t*)c;
     ode_problem = fmi2_cs -> ode_problem;
     
