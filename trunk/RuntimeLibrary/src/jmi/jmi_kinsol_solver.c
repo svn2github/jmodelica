@@ -399,7 +399,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
                                  "jmi_kinsol_solver",
-                                 "iter  nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind       lambda",
+                                 "iter   nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind       lambda",
                                  1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
@@ -421,7 +421,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     lambda_max = lambda = 0;
                 }
 
-                nwritten = sprintf(message, "%4d %4d %11.4e  %11.4e:%4d",
+                nwritten = sprintf(message, "%4d %5d %11.4e  %11.4e:%4d",
                                    (int)nniters, (int)(block->nb_fevals),
                                    kin_mem->kin_fnorm, max_residual, max_index+1);
                 if (nniters > 0 && nwritten >= 0) {
