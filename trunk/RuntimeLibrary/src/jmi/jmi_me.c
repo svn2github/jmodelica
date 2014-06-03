@@ -487,23 +487,29 @@ int jmi_get_directional_derivative(jmi_t* jmi,
                 const jmi_value_reference vKnown_ref[],   size_t nKnown,
                 const jmi_real_t dvKnown[], jmi_real_t dvUnknown[]) {
     
-    jmi_real_t** dz = jmi->dz;
-    jmi_real_t** dv = jmi->dz;
-    int i;
+    jmi_real_t* store_dz = jmi->dz[0];
+    int i, ef;
+    
+    jmi->dz[0]                  = jmi->dz_active_variables_buf[jmi->dz_active_index];
+    jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+
     for (i = 0; i < jmi->n_v; i++) {
-        (*dv)[i] = 0.;
+        jmi->dz_active_variables[0][i] = 0;
     }
-    
-    for (i = 0;i < nKnown; i++) {
-        (*dv)[get_index_from_value_ref(vKnown_ref[i])] = dvKnown[i];
+
+    for (i = 0; i < nKnown; i++) {
+        jmi->dz_active_variables[0][get_index_from_value_ref(vKnown_ref[i])-jmi->offs_real_dx] = dvKnown[i];
     }
-    
-    jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
+
+    ef = jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
     for (i = 0; i < nUnknown; i++) {
-        dvUnknown[i] = (*dz)[get_index_from_value_ref(vUnknown_ref[i])];
+        dvUnknown[i] = jmi->dz_active_variables[0][get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
     }
-    
-    return 0;
+
+    jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+    jmi->dz[0] = store_dz;
+
+    return ef;
 }
 
 int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {

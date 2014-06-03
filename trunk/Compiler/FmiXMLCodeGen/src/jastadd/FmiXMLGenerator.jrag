@@ -956,6 +956,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public void generateAttributes(CodeStream genPrinter) {
+            Boolean supportDirDer = fclass.root().options.getBooleanOption("generate_ode_jacobian");
+            
 			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
 			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
@@ -963,10 +965,10 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
 			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
 			generateAttribute("canSerializeFMUstate",                false,                   genPrinter);
-			generateAttribute("providesDirectionalDerivative",       true,                    genPrinter);
+			generateAttribute("providesDirectionalDerivative",       supportDirDer,           genPrinter);
         }
 	}
-	
+
 	/**
 	 * Internal class used to generate a CoSimulation tag.
 	 * 
