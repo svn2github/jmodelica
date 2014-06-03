@@ -242,7 +242,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 
     /* bracket the root */
     if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
-        double x = block->x[0], tmp;
+        double x = block->x[0], tmp, f_tmp;
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
         double lstep = block->nominal[0], ustep = lstep;
@@ -261,15 +261,15 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 }
                 lstep = lower - tmp;
 
-                flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_lower);
+                flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_tmp);
 
                  /* modify the step for the next time */
                 if (flag < 0) { 
                     /* there was an error - reduce the step */
-                    lstep /= 2;
+                    lstep *= 0.5;
                     jmi_log_node(log, logInfo, "Info", 
                         "Reducing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
-                    if (lstep < UNIT_ROUNDOFF * block->nominal[0]) {
+                    if (lstep <= UNIT_ROUNDOFF * block->nominal[0]) {
                         jmi_log_node(log, logInfo, "Info", 
                             "Too small bracketing step - modifying lower <bound: %g> on the iteration variable in <block: %d>", lower, block->id);
                         block->min[0] = lower; /* we cannot step further without breaking the function -> update the bound */
@@ -281,6 +281,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                         "Increasing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
                     lstep *= 2;
                     lower = tmp;
+                    f_lower = f_tmp;
                 }
             }
             else if (upper < block->max[0]) { /* upper might work otherwise */
@@ -290,16 +291,16 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 }
                 ustep = tmp - upper;
 
-                flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_upper);
+                flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_tmp);
 
                  /* modify the step for the next time */
                 if (flag < 0) { 
                     /* there was an error - reduce the step */
-                    ustep /= 2;
+                    ustep *= 0.5;
                     jmi_log_node(log, logInfo, "Info", 
                         "Reducing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
 
-                    if (ustep < UNIT_ROUNDOFF * block->nominal[0]) {
+                    if (ustep <= UNIT_ROUNDOFF * block->nominal[0]) {
                         jmi_log_node(log, logInfo, "Info", 
                             "Too small bracketing step - modifying upper <bound: %g> on the iteration variable in <block: %d>", upper, block->id);
                         block->max[0] = upper; /* we cannot step further without breaking the function -> update the bound */
@@ -311,6 +312,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                         "Increasing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
                     ustep *= 2;
                     upper = tmp;
+                    f_upper = f_tmp;
                 }
             }
             else {
