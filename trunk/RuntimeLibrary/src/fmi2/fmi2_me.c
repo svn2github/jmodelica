@@ -344,9 +344,17 @@ fmi2Status fmi2_reset(fmi2Component c) {
     /* Reinstantiate the jmi struct */
     jmi_me_init(cb, &fmi2_me->jmi, fmi2_me->fmu_GUID, tmp_resource_location);
     
-    /* Clear the ode_solver in case of CoSimulation */
+    /* Clear the ode_solver and instantiate the ode_problem in case of CoSimulation */
     if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
+        jmi_ode_problem_t* ode_problem = 0;
+        fmi2_cs_t* fmi2_cs;
+
         jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
+
+        fmi2_cs = (fmi2_cs_t*)c;
+        jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
+                            jmi->n_sw, jmi->n_real_u, jmi->log);
+        fmi2_cs -> ode_problem = ode_problem;
     }
     
     /* The FMU is reset */
