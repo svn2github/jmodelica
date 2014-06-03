@@ -5991,7 +5991,7 @@ class LocalDAECollocator(CasadiCollocator):
 
     def _FXFunction(self, *args):
         f = casadi.MXFunction(*args)
-        if self.expand_to_SX == 'partial':
+        if self.expand_to_sx == 'DAE':
             f.init()
             f = casadi.SXFunction(f)
         return f
@@ -7004,7 +7004,7 @@ class LocalDAECollocator(CasadiCollocator):
                     "Unknown nonlinear programming solver %s." % self.solver)
 
         # Expand to SX
-        self.solver_object.setOption("expand", self.expand_to_SX == True)
+        self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
 
     def get_equality_constraint(self):
         return self.c_e

@@ -3195,12 +3195,20 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>expand_to_SX</literal></entry>
+              <entry><literal>expand_to_sx</literal></entry>
 
-              <entry>True</entry>
+              <entry>"NLP"</entry>
 
-              <entry>Whether to expand the CasADi MX graphs to SX
-              graphs.</entry>
+              <entry>Whether to expand the CasADi MX graphs to SX graphs.
+              Possible values: "NLP", "DAE", "no". "NLP": The entire NLP graph
+              is expanded into SX. This will lead to high evaluation speed and
+              high memory consumption. "DAE": The DAE, objective and
+              constraint graphs for the dynamic optimization problem
+              expressions are expanded into SX, but the full NLP graph is an
+              MX graph. This will lead to moderate evaluation speed and
+              moderate memory consumption. "no": All constructed graphs are MX
+              graphs. This will lead to low evaluation speed and low memory
+              consumption.</entry>
             </row>
 
             <row>

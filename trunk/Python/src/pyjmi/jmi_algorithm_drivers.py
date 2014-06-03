@@ -2533,11 +2533,23 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: str
             Default: "LGR"
         
-        expand_to_SX --
-            Whether to expand the CasADi MX graphs to SX graphs.
+        expand_to_sx --
+            Whether to expand the CasADi MX graphs to SX graphs. Possible
+            values: "NLP", "DAE", "no".
+
+            "NLP": The entire NLP graph is expanded into SX. This will lead to
+            high evaluation speed and high memory consumption.
+
+            "DAE": The DAE, objective and constraint graphs for the dynamic
+            optimization problem expressions are expanded into SX, but the full
+            NLP graph is an MX graph. This will lead to moderate evaluation
+            speed and moderate memory consumption.
+
+            "no": All constructed graphs are MX graphs. This will lead to low
+            evaluation speed and low memory consumption.
             
-            Type: bool
-            Default: True
+            Type: str
+            Default: "NLP"
 
         named_vars --
             If enabled, the solver will create a duplicated set of NLP
@@ -2755,7 +2767,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'discr': "LGR",
-                'expand_to_SX': True,
+                'expand_to_sx': "no",
                 'named_vars': False,
                 'init_traj': None,
                 'variable_scaling': True,

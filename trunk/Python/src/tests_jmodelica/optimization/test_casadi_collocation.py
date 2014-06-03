@@ -1634,6 +1634,33 @@ class TestLocalDAECollocator:
         res.get_KKT("fcn")
 
     @testattr(casadi = True)
+    def test_expand_to_sx(self):
+        """
+        Test the different levels of SX expansion.
+        """
+        op = self.vdp_bounds_lagrange_op
+
+        # Reference values
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
+        opts = op.optimize_options()
+
+        # Test NLP expansion
+        opts['expand_to_sx'] = "NLP"
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test DAE expansion
+        opts['expand_to_sx'] = "DAE"
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+        # Test without expansion
+        opts['expand_to_sx'] = "no"
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+    @testattr(casadi = True)
     def test_vdp_function(self):
         """
         Test a VDP model containing a function.
@@ -1646,18 +1673,13 @@ class TestLocalDAECollocator:
 
         opts = op.optimize_options()
 
-        # Test with partial SX expansion
-        opts['expand_to_SX'] = 'partial'
-        res = op.optimize(options=opts)
-        assert_results(res, cost_ref, u_norm_ref)
-
-        # Test with SX expansion
-        opts['expand_to_SX'] = True
+        # Test with full SX expansion
+        opts['expand_to_sx'] = "NLP"
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)
 
         # Test without SX expansion
-        opts['expand_to_SX'] = False
+        opts['expand_to_sx'] = "no"
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)
 
