@@ -3267,15 +3267,13 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Store model and op objects
         self.op = op
-        model = op.model
-        self.model = model
 
         # Evaluate dependent parameters
-        model.calculateValuesForDependentParameters()
+        op.calculateValuesForDependentParameters()
 
         # Check if minimum time normalization has occured
-        t0 = model.getVariable('startTime')
-        tf = model.getVariable('finalTime')
+        t0 = op.getVariable('startTime')
+        tf = op.getVariable('finalTime')
         if op.get_attr(t0, "free") or op.get_attr(tf, "free"):
             if not op.getNormalizedTimeFlag():
                 # Change this once #3438 has been fixed
@@ -3336,23 +3334,22 @@ class LocalDAECollocator(CasadiCollocator):
         Create vectorized model variables unless named_vars is enabled.
         """
         # Get model variable vectors
-        model = self.model
         op = self.op
-        var_kinds = {'dx': model.DERIVATIVE,
-                     'x': model.DIFFERENTIATED,
-                     'u': model.REAL_INPUT,
-                     'w': model.REAL_ALGEBRAIC}
+        var_kinds = {'dx': op.DERIVATIVE,
+                     'x': op.DIFFERENTIATED,
+                     'u': op.REAL_INPUT,
+                     'w': op.REAL_ALGEBRAIC}
         mvar_vectors = {'dx': N.array([var for var in
-                                       model.getVariables(var_kinds['dx'])
+                                       op.getVariables(var_kinds['dx'])
                                        if not var.isAlias()]),
                         'x': N.array([var for var in
-                                      model.getVariables(var_kinds['x'])
+                                      op.getVariables(var_kinds['x'])
                                       if not var.isAlias()]),
                         'u': N.array([var for var in
-                                      model.getVariables(var_kinds['u'])
+                                      op.getVariables(var_kinds['u'])
                                       if not var.isAlias()]),
                         'w': N.array([var for var in
-                                      model.getVariables(var_kinds['w'])
+                                      op.getVariables(var_kinds['w'])
                                       if not var.isAlias()])}
 
         # Count variables (uneliminated inputs and free parameters are counted
@@ -3386,7 +3383,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             input_names = [u.getName() for u in mvar_vectors['u']]
             elim_names = self.measurement_data.eliminated.keys()
-            elim_vars = [model.getModelVariable(elim_name)
+            elim_vars = [op.getModelVariable(elim_name)
                          for elim_name in elim_names]
             for (i, elim_var) in enumerate(elim_vars):
                 if elim_var is None:
@@ -3411,16 +3408,16 @@ class LocalDAECollocator(CasadiCollocator):
         # print n_var
 
         # Sort parameters
-        par_kinds = [model.BOOLEAN_CONSTANT,
-                     model.BOOLEAN_PARAMETER_DEPENDENT,
-                     model.BOOLEAN_PARAMETER_INDEPENDENT,
-                     model.INTEGER_CONSTANT,
-                     model.INTEGER_PARAMETER_DEPENDENT,
-                     model.INTEGER_PARAMETER_INDEPENDENT,
-                     model.REAL_CONSTANT,
-                     model.REAL_PARAMETER_INDEPENDENT,
-                     model.REAL_PARAMETER_DEPENDENT]
-        pars = reduce(list.__add__, [list(model.getVariables(par_kind)) for
+        par_kinds = [op.BOOLEAN_CONSTANT,
+                     op.BOOLEAN_PARAMETER_DEPENDENT,
+                     op.BOOLEAN_PARAMETER_INDEPENDENT,
+                     op.INTEGER_CONSTANT,
+                     op.INTEGER_PARAMETER_DEPENDENT,
+                     op.INTEGER_PARAMETER_INDEPENDENT,
+                     op.REAL_CONSTANT,
+                     op.REAL_PARAMETER_INDEPENDENT,
+                     op.REAL_PARAMETER_DEPENDENT]
+        pars = reduce(list.__add__, [list(op.getVariables(par_kind)) for
                                      par_kind in par_kinds])
         mvar_vectors['p_fixed'] = [par for par in pars
                                    if not op.get_attr(par, "free")]
@@ -3430,7 +3427,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Create named symbolic variable structure
         named_mvar_struct = OrderedDict()
-        named_mvar_struct["time"] = [model.getTimeVariable()]
+        named_mvar_struct["time"] = [op.getTimeVariable()]
         named_mvar_struct["x"] = [mvar.getVar() for mvar in mvar_vectors['x']]
         named_mvar_struct["unelim_u"] = \
             [mvar.getVar() for mvar in
@@ -3444,8 +3441,8 @@ class LocalDAECollocator(CasadiCollocator):
         named_mvar_struct_dx = [mvar.getVar() for mvar in mvar_vectors['dx']]
 
         # Get optimization and model expressions
-        initial = model.getInitialResidual()
-        dae = model.getDaeResidual()
+        initial = op.getInitialResidual()
+        dae = op.getDaeResidual()
         path = casadi.vertcat([path_c.getResidual() for
                                path_c in op.getPathConstraints()])
         point = casadi.vertcat([point_c.getResidual() for
@@ -4509,7 +4506,7 @@ class LocalDAECollocator(CasadiCollocator):
             constraint_points = cnstr_points_f.output().toArray().reshape(-1)
             constraint_points = sorted(set(constraint_points))
         else:
-            constraint_points = sorted(set([self.model.evaluateExpression(expr)
+            constraint_points = sorted(set([self.op.evaluateExpression(expr)
                                             for expr in cnstr_points_expr]))
 
         collocation_constraint_points = {}
@@ -4574,7 +4571,7 @@ class LocalDAECollocator(CasadiCollocator):
                 if self._normalize_min_time:
                     cp = self._tp2cp(tp)
                 else:
-                    cp = self.model.evaluateExpression(tp)
+                    cp = self.op.evaluateExpression(tp)
                 (i, k) = collocation_constraint_points[cp]
                 name = tv.getBaseVariable().getName()
                 (index, vt) = self.name_map[name]
@@ -4611,7 +4608,7 @@ class LocalDAECollocator(CasadiCollocator):
             if self.nominal_traj is not None:
                 nomtraj_gvd = self.nominal_traj.get_variable_data
             for t_name in ['startTime', 'finalTime']:
-                t_var = self.model.getVariable(t_name)
+                t_var = self.op.getVariable(t_name)
                 if self.op.get_attr(t_var, "free"):
                     if self.init_traj is None:
                         t_init[t_name] = self.op.get_attr(t_var, "initialGuess")
@@ -4981,7 +4978,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Check that constrained and eliminated inputs satisfy their bounds
             for var_name in (self.measurement_data.eliminated.keys() +
                              self.measurement_data.constrained.keys()):
-                var = self.model.getVariable(var_name)
+                var = self.op.getVariable(var_name)
                 var_min = self.op.get_attr(var, "min")
                 var_max = self.op.get_attr(var, "max")
                 if traj_min[name] < var_min:
@@ -5160,7 +5157,7 @@ class LocalDAECollocator(CasadiCollocator):
                     if self._normalize_min_time:
                         cp = self._tp2cp(tp)
                     else:
-                        cp = self.model.evaluateExpression(tp)
+                        cp = self.op.evaluateExpression(tp)
                     (i, k) = collocation_constraint_points[tp]
                     timed_var_d.append(self._variant_sf[i][k][sf_idx])
                     timed_var_e.append(0.)
@@ -5956,8 +5953,8 @@ class LocalDAECollocator(CasadiCollocator):
 
         if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
             # Get start and final time
-            t0_var = self.model.getVariable('startTime')
-            tf_var = self.model.getVariable('finalTime')
+            t0_var = self.op.getVariable('startTime')
+            tf_var = self.op.getVariable('finalTime')
             if self.op.get_attr(t0_var, "free"):
                 (ind, _) = self.name_map["startTime"]
                 t0 = self.var_map['p_opt'][ind]
@@ -6421,8 +6418,8 @@ class LocalDAECollocator(CasadiCollocator):
 
         if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
             # Get start and final time
-            t0_var = self.model.getVariable('startTime')
-            tf_var = self.model.getVariable('finalTime')
+            t0_var = self.op.getVariable('startTime')
+            tf_var = self.op.getVariable('finalTime')
             if self.op.get_attr(t0_var, "free"):
                 (ind, _) = self.name_map["startTime"]
                 t0 = self.var_map['p_opt'][ind]
@@ -6774,7 +6771,6 @@ class LocalDAECollocator(CasadiCollocator):
         if c_i.isNull():
             self.c_i = casadi.MX(0, 1)
 
-
     def _create_initial_trajectories(self):
         """
         Create interpolated initial trajectories and store in self.init_traj_interp
@@ -6818,48 +6814,6 @@ class LocalDAECollocator(CasadiCollocator):
                 time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
             return self.init_traj_interp[var].eval(time)
 
-    def _create_initial_trajectories(self):
-        """
-        Create interpolated initial trajectories and store in self.init_traj_interp
-        """
-
-        if self.init_traj is not None:
-            n = len(self.init_traj.get_data_matrix()[:, 0])
-            self.init_traj_interp = traj = {}
-
-            for vt in ["dx", "x", "w", "unelim_u"]:
-                for var in self.mvar_vectors[vt]:
-                    data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
-                    name = var.getName()
-                    try:
-                        data = self.init_traj.get_variable_data(name)
-                    except VariableNotFoundError:
-                        print("Warning: Could not find initial " +
-                              "trajectory for variable " + name +
-                              ". Using initialGuess attribute value " +
-                              "instead.")
-                        ordinates = N.array([[
-                            self.op.get_attr(var, "initialGuess")]])
-                        abscissae = N.array([0])
-                    else:
-                        abscissae = data.t
-                        ordinates = data.x.reshape([-1, 1])
-                    traj[var] = TrajectoryLinearInterpolation(
-                        abscissae, ordinates)
-
-    def _eval_initial(self, var, i, k):
-        """
-        Evaluate initial value of Variable var at a given collocation point.
-
-        self._create_initial_trajectories() must have been called first.
-        """
-        if self.init_traj is None:
-            return self.op.get_attr(var, "initialGuess")
-        else:
-            time = self.time_points[i][k]
-            if self._normalize_min_time:
-                time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
-            return self.init_traj_interp[var].eval(time)
     def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.
@@ -6872,7 +6826,6 @@ class LocalDAECollocator(CasadiCollocator):
         # Retrieve model data
         var_indices = self.get_var_indices()
         op = self.op
-        model = self.model
         var_types = ['x', 'unelim_u', 'w', 'p_opt']
         name_map = self.name_map
         mvar_vectors = self.mvar_vectors
@@ -7452,7 +7405,6 @@ class LocalDAECollocator(CasadiCollocator):
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
 
         if (format=='txt'):
-            model = self.model
             op = self.op
             name_map = self.name_map
             mvar_vectors = self.mvar_vectors
@@ -7465,12 +7417,12 @@ class LocalDAECollocator(CasadiCollocator):
             alias_map = {}
             for var in variable_list:
                 alias_map[var.getName()] = []
-            for alias_var in model.getAliases():
+            for alias_var in op.getAliases():
                 alias = alias_var.getModelVariable()
                 alias_map[alias.getName()].append(alias_var)
 
             # Set up sections
-            num_vars = len(model.getAllVariables()) + 1
+            num_vars = len(op.getAllVariables()) + 1
             name_section = []
             description_section = []
             data_info_section = []
@@ -7554,7 +7506,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Open file
             if file_name == '':
-                file_name = self.model.getIdentifier() + '_result.txt'
+                file_name = self.op.getIdentifier() + '_result.txt'
             f = codecs.open(file_name, 'w', 'utf-8')
 
             # Write header

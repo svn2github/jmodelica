@@ -215,16 +215,6 @@ class OptimizationProblem(CI_OP, ModelBase):
     """
     Python wrapper for the CasADi interface class OptimizationProblem.
     """
-
-    def __init__(self):
-        """
-        Parameters::
-
-            optimization_problem --
-                OptimizationProblem from CasADiInterface
-        """
-        CI_OP.__init__(self)
-        self.model = self
         
     def _default_options(self, algorithm):
         """ 
@@ -302,7 +292,7 @@ class OptimizationProblem(CI_OP, ModelBase):
             if var.isDerivative():
                 var = var.getMyDifferentiatedVariable()
             val_expr = var.getAttribute(attr)
-            return self.model.evaluateExpression(val_expr)
+            return self.evaluateExpression(val_expr)
         else:
             val_expr = var.getAttribute(attr)
             if val_expr is None:
@@ -313,7 +303,7 @@ class OptimizationProblem(CI_OP, ModelBase):
                 else:
                     raise ValueError("Variable %s does not have attribute %s."
                                      % (var.getName(), attr))
-            return self.model.evaluateExpression(val_expr)
+            return self.evaluateExpression(val_expr)
     
     def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
         """
