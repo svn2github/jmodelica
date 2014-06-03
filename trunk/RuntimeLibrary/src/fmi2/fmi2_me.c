@@ -635,12 +635,28 @@ fmi2Status fmi2_completed_integrator_step(fmi2Component c,
                                           fmi2Boolean   noSetFMUStatePriorToCurrentPoint, 
                                           fmi2Boolean*  enterEventMode, 
                                           fmi2Boolean*  terminateSimulation) {
+    
+    fmi2_me_t* self;
+    jmi_t* jmi;
+    fmi2Real triggered_event;
+
     if (c == NULL) {
 		return fmi2Fatal;
     }
     
-    *enterEventMode = fmi2False;
-    *terminateSimulation = fmi2False; /* TODO: Should be able to use the stopTime to determine if the simulations should stop? */
+    self = (fmi2_me_t*)c;
+    jmi = &self->jmi;
+    if (jmi_completed_integrator_step(jmi, &triggered_event)) {
+        return fmi2Error;
+    }
+    
+    if (triggered_event == 1.0){
+        *enterEventMode = fmi2True;
+    }else{
+        *enterEventMode = fmi2False;
+    }
+    
+    *terminateSimulation = fmi2False;
     return fmi2OK;
 }
 
