@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 
 public class ObjectStreamLogger extends PipeLogger {
@@ -53,7 +54,11 @@ public class ObjectStreamLogger extends PipeLogger {
     protected void do_write(Problem problem) throws IOException {
         getStream().writeObject(problem);
     }
-    
+
+    protected void do_write(CompiledUnit unit) throws IOException {
+        getStream().writeObject(unit);
+    }
+
     private static ObjectOutputStream createStream(OutputStream stream) throws IOException {
         stream.write(START_BYTES);
         return new ObjectOutputStream(stream);

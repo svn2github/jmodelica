@@ -16,42 +16,30 @@
 
 aspect ClassAttributes {
 
-	syn lazy List OptClassDecl.getClassAttributeList() {
-
-		//log.debug("Program.getPredefinedTypeList()");
-		List l = new List();
-
-	    // Build a string with a Modelica class corresponding to Real
-		String builtInDef = "model ClassAttributes\n";
-		builtInDef += "Real objective = 1;\n"; 
-		builtInDef += "Real objectiveIntegrand = 1;\n"; 
-		builtInDef += "parameter Real startTime=0;\n";
-		builtInDef += "parameter Real finalTime(initialGuess=1)=1;\n";
-		builtInDef += "parameter Boolean static=false;\n";
-		builtInDef += "end ClassAttributes;\n";
-   
-   		//java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
- 	  	//ModelicaParser parser = new ModelicaParser();
-  		PrimitiveClassDecl pcd=null;
-  
-   		try {
-   		
-   			ParserHandler ph = new ParserHandler();
-   			SourceRoot sr = ph.parseString(builtInDef,"");
- 			Program p = sr.getProgram();
-   			   			
-  			FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));	
-
-			for (int i=0;i<cd.getNumComponentDecl();i++) { 		
- 				l.add(cd.getComponentDecl(i));	
-			}	
- 		
- 		} catch(Exception e){e.printStackTrace(); System.exit(0);}
-			
-		//log.debug("Program.getPredefinedTypeList(): "+l.getNumChild());
-		
-		return l;
-	}
+    syn lazy List OptClassDecl.getClassAttributeList() {
+        List l = new List();
+        
+        // Build a string with a Modelica class corresponding to Real
+        String builtInDef = "model ClassAttributes\n";
+        builtInDef += "Real objective = 1;\n"; 
+        builtInDef += "Real objectiveIntegrand = 1;\n"; 
+        builtInDef += "parameter Real startTime=0;\n";
+        builtInDef += "parameter Real finalTime(initialGuess=1)=1;\n";
+        builtInDef += "parameter Boolean static=false;\n";
+        builtInDef += "end ClassAttributes;\n";
+        
+        PrimitiveClassDecl pcd = null;
+        try {
+            SourceRoot sr = ParserHandler.parseString(builtInDef, "");
+            Program p = sr.getProgram();
+            FullClassDecl cd = (FullClassDecl) (p.getUnstructuredEntity(0).getElement(0));
+            for (ComponentDecl comp : cd.getComponentDecls()) 
+                l.add(comp);
+        } catch(Exception e) {
+            // TODO: Do something constuctive here, and change catch from Exception to only the ones we have to
+        }
+        return l;
+    }
 
 	eq InstTimedVariable.getName().kind() = Kind.COMPONENT_ACCESS;
 	

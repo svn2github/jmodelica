@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 
 public abstract class PipeLogger extends ModelicaLogger {
@@ -59,68 +60,81 @@ public abstract class PipeLogger extends ModelicaLogger {
         super.finalize();
     }
 
-    @Override
-    protected final void write(Level level, String logMessage) {
+    /**
+     * Check if a message on given level should be written.
+     */
+    private boolean shouldWrite(Level level) {
         if (!getLevel().shouldLog(level))
-            return;
+            return false;
         if (state == State.EXCEPTION)
-            return;
+            return false;
         if (state == State.CLOSED) {
             System.err.println("Compiler is writing to closed logger!");
             state = State.EXCEPTION;
-            return;
+            return false;
         }
+        return true;
+    }
+
+    /**
+     * Called for exceptions caught while writing to pipe.
+     */
+    private void exceptionOnWrite(Exception e) {
+        state = State.EXCEPTION;
+        System.err.println("Compiler logger failed to write." + e.getMessage() != null ? " " + e.getMessage() : "");
+    }
+
+    @Override
+    protected final void write(Level level, String logMessage) {
+        if (!shouldWrite(level))
+            return;
         try {
             do_write(logMessage);
         } catch (IOException e) {
-            state = State.EXCEPTION;
-            System.err.println("Compiler logger failed to write." + e.getMessage() != null ? " " + e.getMessage() : "");
+            exceptionOnWrite(e);
         }
     }
 
-    protected abstract void do_write(String logMessage) throws IOException;;
+    protected abstract void do_write(String logMessage) throws IOException;
 
     @Override
     protected final void write(Level level, Throwable throwable) {
-        if (!getLevel().shouldLog(level))
+        if (!shouldWrite(level))
             return;
-        if (state == State.EXCEPTION)
-            return;
-        if (state == State.CLOSED) {
-            System.err.println("Compiler is writing to closed logger!");
-            state = State.EXCEPTION;
-            return;
-        }
         try {
             do_write(throwable);
         } catch (IOException e) {
-            state = State.EXCEPTION;
-            System.err.println("Compiler logger failed to write." + e.getMessage() != null ? " " + e.getMessage() : "");
+            exceptionOnWrite(e);
         }
     }
 
-    protected abstract void do_write(Throwable throwable) throws IOException;;
+    protected abstract void do_write(Throwable throwable) throws IOException;
 
     @Override
     protected final void write(Level level, Problem problem) {
-        if (!getLevel().shouldLog(level))
+        if (!shouldWrite(level))
             return;
-        if (state == State.EXCEPTION)
-            return;
-        if (state == State.CLOSED) {
-            System.err.println("Compiler is writing to closed logger!");
-            state = State.EXCEPTION;
-            return;
-        }
         try {
             do_write(problem);
         } catch (IOException e) {
-            state = State.EXCEPTION;
-            System.err.println("Compiler logger failed to write." + e.getMessage() != null ? " " + e.getMessage() : "");
+            exceptionOnWrite(e);
         }
     }
 
-    protected abstract void do_write(Problem problem) throws IOException;;
+    protected abstract void do_write(Problem problem) throws IOException;
+
+    @Override
+    protected final void write(Level level, CompiledUnit unit) {
+        if (!shouldWrite(level))
+            return;
+        try {
+            do_write(unit);
+        } catch (IOException e) {
+            exceptionOnWrite(e);
+        }
+    }
+
+    protected abstract void do_write(CompiledUnit unit) throws IOException;
 
     private static enum State {
         ACTIVE, CLOSED, EXCEPTION,

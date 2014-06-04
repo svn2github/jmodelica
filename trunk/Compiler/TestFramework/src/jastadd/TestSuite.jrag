@@ -22,35 +22,36 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
+import org.jmodelica.util.CompiledUnit;
+
 public class TestSuite {
-	String name;
-	private ArrayList<TestCase> l;
+    String name;
+    private ArrayList<TestCase> l;
 
-	public TestSuite() {
-		l = new ArrayList<TestCase>();
-	}
+    public TestSuite() {
+        l = new ArrayList<TestCase>();
+    }
 
-	public TestSuite(String fileName, String className, TestCase.Assert asserter) {
-		name = className;
-		l = new ArrayList<TestCase>();
-		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = null;
-		try {
-			sr = ph.parseFile(fileName);
-		} catch (Exception e) {
-			asserter.fail("Error when parsing file: " + fileName + "\n" + e);
-		}
-		
-		OptionRegistry or = ModelicaCompiler.createOptions();
-		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
-				"ThirdParty" + File.separator + "MSL";
-		or.addStringOption("MODELICAPATH", modelica_path);
-		sr.options = or;
-		ASTNode.log = new SysErrLogger();
+    public TestSuite(String fileName, String className, TestCase.Assert asserter) {
+        name = className;
+        l = new ArrayList<TestCase>();
+        SourceRoot sr = null;
+        try {
+            sr = ParserHandler.parseFile(fileName);
+        } catch (Exception e) {
+            asserter.fail("Error when parsing file: " + fileName + "\n" + e);
+        }
+        
+        OptionRegistry or = ModelicaCompiler.createOptions();
+        String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
+                "ThirdParty" + File.separator + "MSL";
+        or.addStringOption("MODELICAPATH", modelica_path);
+        sr.options = or;
+        ASTNode.log = new SysErrLogger();
+        
+        sr.collectTestCases(this,className);
+    }
 
-		sr.collectTestCases(this,className);
-	}
-	
 	public File dumpJunit(String testFile, String dir) {
 		SourceRoot sr = new SourceRoot();
 		String lang = sr.language().toLowerCase();
@@ -150,10 +151,15 @@ public class TestSuite {
 			write(level, throwable.toString());
 		}
 
-		@Override
-		protected void write(Level level, Problem problem) {
-			write(level, problem.toString());
-		}
+        @Override
+        protected void write(Level level, Problem problem) {
+            write(level, problem.toString());
+        }
+
+        @Override
+        protected void write(Level level, CompiledUnit unit) {
+            write(level, unit.toString());
+        }
 	}
 	
 }

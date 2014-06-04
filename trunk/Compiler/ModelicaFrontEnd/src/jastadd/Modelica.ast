@@ -64,14 +64,12 @@ abstract BaseNode;
 
 abstract Root : BaseNode;
 
-ParserHandler : BaseNode;
-
 abstract SourceBaseNode : BaseNode;
 
 /**
  * A class representing the root node of a source AST.
  */
-SourceRoot : Root ::= Program ;
+SourceRoot : Root ::= Program;
  
 
 Program : SourceBaseNode ::= 
@@ -83,6 +81,7 @@ Program : SourceBaseNode ::=
             /BuiltInType:ClassDecl*/   
             /BuiltInFunction:BaseClassDecl*/
             /LibNode*/
+            /AnonymousClass:BaseClassDecl*/
             /InstProgramRoot/;
 
 StoredDefinition : SourceBaseNode ::= [Within] Element*;

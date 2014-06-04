@@ -30,20 +30,18 @@ class LogErrorParser(xml.sax.ContentHandler):
     warnings and errors in the provided xml stream.
     
     parameters::
-        errors --
-            A list that all errors can be written to
-        warnings --
-            A list that all warnings can be written to
+        result --
+            A _CompilerResultHolder that stores the result
     """
-    def __init__(self, problems):
+    def __init__(self, result):
         xml.sax.ContentHandler.__init__(self)
-        self.problems = problems
+        self.result = result
         self.node = None
         self.state = None
         self.attribute = None
     def startElement(self, name, attrs):
         if self.state == 'error' or self.state == 'warning' or \
-                self.state == 'exception':
+                self.state == 'exception' or self.state == 'unit':
             if name == 'value':
                 self.attribute = attrs['name'].encode('utf-8')
                 self.node[self.attribute] = '';
@@ -57,13 +55,20 @@ class LogErrorParser(xml.sax.ContentHandler):
             elif name == "Exception":
                 self.state = 'exception'
                 self.node = {'type':'exception'}
+            elif name == "CompilationUnit":
+                self.state = 'unit'
+                self.node = {'type':'unit', 'file':None}
 
     def endElement(self, name):
         if self.state == 'error' and name == "Error" or \
                 self.state == 'warning' and name == "Warning" or \
                 self.state == 'exception' and name == "Exception":
             problem = self._construct_problem_node(self.node)
-            self.problems.append(problem)
+            self.result.problems.append(problem)
+            self.state = None
+            self.node = None
+        elif self.state == 'unit' and name == "CompilationUnit":
+            self.result.name = self.node['file']
             self.state = None
             self.node = None
         elif name == 'value':
@@ -87,7 +92,7 @@ class KeepLastStream():
     """
     Internal class that records the last contents sent to the SAX parser.
     It is necessary so that we can recover from SAX parser errors that is
-    thrown when the compiler fail to start propperly. For example when the
+    thrown when the compiler fail to start properly. For example when the
     JVM is unable to allocate enough memory.
     """
     def __init__(self, stream):
@@ -191,23 +196,31 @@ class LogHandlerThread(Thread):
         """
         Thread.__init__(self)
         self.stream = KeepLastStream(stream)
-        self.problems = [];
+        self.result = _CompilerResultHolder()
 
     def run(self):
         """
         The thread.run() method that delegates to a SAX parser. 
         """
         try:
-            xml.sax.parse(self.stream, LogErrorParser(self.problems))
+            xml.sax.parse(self.stream, LogErrorParser(self.result))
         except xml.sax.SAXParseException, e:
             self.stream.discardRemaining()
-            self.problems.append(CompilationException('xml.sax.SAXParseException', self.stream.genErrorMsg(e),""))
+            self.result.problems.append(CompilationException('xml.sax.SAXParseException', self.stream.genErrorMsg(e),""))
+
+class _CompilerResultHolder:
+    """
+    Holds the result of the compilation while log is read.
+    """
+    def __init__(self):
+        self.problems = []
+        self.name = None
 
 class CompilerLogHandler:
     def __init__(self):
         """
         Create a compiler log handler. It will parse the xml stream that is
-        outputted by the JModelica.org compiler.
+        output by the JModelica.org compiler.
         
         Normal call flow is as follows:
         stream = <<<an output stream from the compiler>>>
@@ -223,7 +236,7 @@ class CompilerLogHandler:
     
     def _create_log_handler_thread(self, stream):
         """
-        An internal util method for creating the log handeling thread.
+        An internal util method for creating the log handling thread.
         
         Returns::
         
@@ -249,7 +262,7 @@ class CompilerLogHandler:
         End the current logging session. It is important that the log stream
         has been closed before calling this method. Otherwise this method will
         block indefinitely. The reason for this is that this method will wait
-        for the the log parser thread to finnish. It only does so when the log
+        for the the log parser thread to finish. It only does so when the log
         stream is closed.
         
         This method will proccess the errors and warnings that are given in the
@@ -259,7 +272,8 @@ class CompilerLogHandler:
         if (self.loggerThread is None):
             print "Invalid call order!"
         self.loggerThread.join()
-        problems = self.loggerThread.problems
+        problems = self.loggerThread.result.problems
+        name = self.loggerThread.result.name
         self.loggerThread = None
         
         exceptions = []
@@ -275,7 +289,8 @@ class CompilerLogHandler:
                 warnings.append(problem)
         if not exceptions:
             if not errors:
-                return warnings
+                from compiler import CompilerResult
+                return CompilerResult(name, warnings)
             else:
                 raise CompilerError(errors, warnings)
         

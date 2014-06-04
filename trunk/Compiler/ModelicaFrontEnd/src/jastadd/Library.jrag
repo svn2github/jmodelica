@@ -25,28 +25,25 @@ import java.util.Collections;
 import org.jmodelica.util.OptionRegistry;
 
 aspect Library {
-	
-	syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
-	
-	public static final String LibNode.PACKAGE_FILE = "package.mo";
-	public static final String LibNode.PACKAGE_ORDER_FILE = "package.order";
-	
-	syn lazy StoredDefinition LibNode.getStoredDefinition() {
-		
-		/* If structured
-		 		a. Read all files
-		 		b. Check for package.mo
-		 		c. Parse package.mo
-		 		d. Read all .mo files
-		 		e. Add LibNodes to the LibClassDecl
-		 		f. Return the LibClassDecl
-		   If unstructured
-		   		a. Parse the .mo file
-		   		b. Return the resulting FullClassDecl  	 
-		*/
-	
-		//log.debug("LibNode.getStoredDefinition: "+ getName() + " enter");
-	    
+
+    syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
+
+    public static final String LibNode.PACKAGE_FILE = "package.mo";
+    public static final String LibNode.PACKAGE_ORDER_FILE = "package.order";
+
+    syn lazy StoredDefinition LibNode.getStoredDefinition() {
+        /* If structured
+                a. Read all files
+                b. Check for package.mo
+                c. Parse package.mo
+                d. Read all .mo files
+                e. Add LibNodes to the LibClassDecl
+                f. Return the LibClassDecl
+           If unstructured
+                a. Parse the .mo file
+                b. Return the resulting FullClassDecl
+        */
+        
         String fileName = getFileName();
         String dirName = null;
         File baseDir = null;
@@ -58,14 +55,13 @@ aspect Library {
         }
         try {
             log.info("Reading file: " + fileName);
-            ParserHandler ph = new ParserHandler();
-            SourceRoot sr = ph.parseFile(fileName);
+            SourceRoot sr = ParserHandler.parseFile(fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
             entity.setFileName(fileName);
             if (isStructured) {
                 FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
                 LibClassDecl lcd = new LibClassDecl(fcd);
-
+                
                 LibraryList ll = new LibraryList();
                 ll.add(dirName, true);
                 lcd.setLibNodeList(ll.createLibNodeList());
@@ -84,11 +80,10 @@ aspect Library {
             }
             return entity;
         } catch (ParserException e) {
-            e.getProblem().setFileName(getFileName());
             problem(e.getProblem());
             return createErrorStoredDefinition();
         } catch (Exception e) {
-            String msg = "Error when parsing file: '" + getFileName() + "':\n" + 
+            String msg = "Error when parsing file: '" + fileName + "':\n" + 
                     "   " + e.getClass().getName() + "\n";
             if (e.getMessage() != null)
                 msg = msg + "   " + e.getMessage();
@@ -96,8 +91,8 @@ aspect Library {
             log.debug(e);
             return createErrorStoredDefinition();
         } 
-	}
-	
+    }
+
 	/**
 	 * Gets the name of the file, without file extension.
 	 */

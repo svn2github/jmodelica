@@ -1,5 +1,6 @@
 package org.jmodelica.util.logging;
 
+import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 
 /**
@@ -49,5 +50,10 @@ public class TeeLogger extends ModelicaLogger {
 		for (ModelicaLogger logger : loggers)
 			logger.write(level, problem);
 	}
-	
+
+    protected void write(Level level, CompiledUnit unit) {
+        for (ModelicaLogger logger : loggers)
+            logger.write(level, unit);
+    }
+
 }

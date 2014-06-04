@@ -619,7 +619,56 @@ aspect Environments {
 }
 
 aspect InstanceTreeConstruction {
-	
+
+    syn lazy List Program.getAnonymousClassList() = new List();
+
+    private Map<String,ClassDecl> Program.anonymousClassMap = null;
+
+    syn ClassDecl Program.anonymousClass(String code, Restriction restriction, String targetName) {
+        if (anonymousClassMap == null)
+            anonymousClassMap = new HashMap<String,ClassDecl>();
+        ClassDecl res = anonymousClassMap.get(code);
+        if (res == null) {
+            try {
+                addAnonymousClass(ParserHandler.parseAnonymousClassString(code, restriction, targetName));
+                res = getAnonymousClass(getNumAnonymousClass() - 1);
+                anonymousClassMap.put(code, res);
+            } catch (IOException e) {
+                // Can't normally happen when reading from a string, but just in case
+                throw new RuntimeException("Reading from string failed", e);
+            } catch (beaver.Parser.Exception e) {
+                // Parser crashed - just handle this higher up
+                throw new RuntimeException("Parser crashed", e);
+            } catch (ParserException e) {
+                CompilerException ce = new CompilerException();
+                ce.addProblem(e.getProblem());
+                throw ce;
+            }
+        }
+        return res;
+    }
+
+    syn lazy List InstProgramRoot.getInstAnonymousClassList() = new List();
+
+    syn lazy InstClassDecl InstProgramRoot.instantiateModel(String className) {
+        int p = className.indexOf('(');
+        if (p >= 0) {
+            String targetName = className.substring(0, p);
+            InstClassDecl icd = lookupInstClassQualified(targetName);
+            if (!icd.isUnknown()) {
+                Restriction restriction = ((BaseClassDecl) icd.getClassDecl()).getRestriction();
+                ClassDecl cl = sourceRoot().getProgram().anonymousClass(className, restriction, targetName);
+                if (cl != null) {
+                    addInstAnonymousClass(createInstClassDecl(cl));
+                    return getInstAnonymousClass(getNumInstAnonymousClass() - 1);
+                }
+            }
+            return unknownInstClassDecl();
+        } else {
+            return lookupInstClassQualified(className);
+        }
+    }
+
 	syn nta Opt InstNode.getDynamicFExpOpt() = new DynamicOpt();
 	syn nta Opt FExp.getDynamicFExpOpt()     = new DynamicOpt();
 	syn lazy Opt FAbstractEquation.getDynamicFAbstractEquationOpt() = new DynamicOpt();	

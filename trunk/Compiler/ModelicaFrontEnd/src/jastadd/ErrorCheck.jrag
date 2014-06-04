@@ -466,15 +466,23 @@ aspect InstanceErrorCheck {
 
  // Error checking in instance tree
 
-	// We don't want to error check an entire model, just the classes
-	//   that are used. 
-	public void InstProgramRoot.checkErrorsInInstClass(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException{
-		InstClassDecl icd = lookupInstClassQualified(className);
-		if (icd.isUnknown()) 
-			throw new ModelicaClassNotFoundException(className);
-		else
-			icd.errorCheck(checkType);
-	}
+    // We don't want to error check an entire model, just the classes
+    //   that are used. 
+    public void InstProgramRoot.checkErrorsInInstClass(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
+        InstClassDecl icd = lookupInstClassQualified(className);
+        if (icd.isUnknown()) 
+            throw new ModelicaClassNotFoundException(className);
+        else
+            icd.errorCheck(checkType);
+    }
+
+    public void InstClassDecl.checkErrorsInModelInstance(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
+        errorCheck(checkType);
+    }
+
+    public void UnknownInstClassDecl.checkErrorsInModelInstance(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
+        throw new ModelicaClassNotFoundException(className);
+    }
 
 	protected boolean BaseNode.errorChecked = false;
 

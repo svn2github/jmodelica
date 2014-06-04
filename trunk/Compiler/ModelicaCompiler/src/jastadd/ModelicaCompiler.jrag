@@ -610,180 +610,189 @@ public class ModelicaCompiler {
 	public TargetObject createTargetObject(String target, String version) {
 		return TargetObject.getTarget(target, version);
 	}
-    
-    /**
-	 * Compiles a model and creates an FMU, convenience method for compileUnit that uses default version.
-	 * 
-	 * Compiles a model (parsing, instantiating, flattening, code generation and 
-	 * binary file compilation) and packs the result in a FMU.
-	 * 
-	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file or library paths.
-	 * @param target The compiler target. Valid options are 'me' or 'cs'.
-	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
-	 */
-	public void compileFMU(String className, String fileName[], String target, String compileTo) 
-	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileUnit(className, fileName, target, "1.0" , compileTo);
-	}
-    
-    /**
-	 * Compiles a model and creates an FMUX, convenience method for compileUnit.
-	 * 
-	 * Compiles a model (parsing, instantiating, flattening and XML code 
-	 * generation) and packs the result in a FMUX.
-	 * 
-	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file or library paths.
-	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
-	 */
-	public void compileFMUX(String className, String fileName[], String compileTo) 
-	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileUnit(className, fileName, "fmux", null , compileTo);
-	}
-	
-	/**
-	 * Compiles a model and creates a JMU, convenience method for compileUnit.
-	 * 
-	 * Compiles a model (parsing, instantiating, flattening, code generation and 
-	 * binary file compilation) and packs the result in a JMU.
-	 * 
-	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file or library paths.
-	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
-	 */
-	public void compileJMU(String className, String fileName[], String compileTo) 
-	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileUnit(className, fileName, "jmu", null, compileTo);
-	}
 
-	/**
-	 * Compiles a JMU, FMU or FMUX. Is a wrapper.
-	 * 
-	 * Compiles a model (parsing, instantiating, flattening, code generation and 
-	 * binary file compilation) and packs the result in a FMU/JMU/FMUX.
-	 * 
-	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file or library paths.
-	 * @param target The compiler target. Valid options are 'me' or 'cs'.
-	 * @param version The FMI version. Valid options are '1.0' or '2.0'.
-	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
-	 */
-	public void compileUnit(String className, String fileName[], String target, String version, String compileTo) 
-	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		//Create the target object.
-		TargetObject targetObject = TargetObject.getTarget(target, version);
-		
-		//Compile.
-		compileUnit(className, fileName, targetObject, compileTo);
-	}
+    /**
+     * Compiles a model and creates an FMU, convenience method for compileUnit that uses default version.
+     * 
+     * Compiles a model (parsing, instantiating, flattening, code generation and 
+     * binary file compilation) and packs the result in a FMU.
+     * 
+     * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     * @param target The compiler target. Valid options are 'me' or 'cs'.
+     * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+     * @return the path to the compiled FMU, if successful 
+     */
+    public String compileFMU(String className, String fileName[], String target, String compileTo) 
+            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        return compileUnit(className, fileName, target, "1.0" , compileTo);
+    }
 
-	/**
-	 * Compiles a JMU, FMU or FMUX.
-	 * 
-	 * @param className Name of model class in the model file to compile.
+    /**
+     * Compiles a model and creates an FMUX, convenience method for compileUnit.
+     * 
+     * Compiles a model (parsing, instantiating, flattening and XML code 
+     * generation) and packs the result in a FMUX.
+     * 
+     * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
+     * @return the path to the compiled FMUX, if successful 
+     */
+    public String compileFMUX(String className, String fileName[], String compileTo) 
+            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        return compileUnit(className, fileName, "fmux", null , compileTo);
+    }
+
+    /**
+     * Compiles a model and creates a JMU, convenience method for compileUnit.
+     * 
+     * Compiles a model (parsing, instantiating, flattening, code generation and 
+     * binary file compilation) and packs the result in a JMU.
+     * 
+     * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
+     * @return the path to the compiled JMU, if successful 
+     */
+    public String compileJMU(String className, String fileName[], String compileTo) 
+            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        return compileUnit(className, fileName, "jmu", null, compileTo);
+    }
+
+    /**
+     * Compiles a JMU, FMU or FMUX. Is a wrapper.
+     * 
+     * Compiles a model (parsing, instantiating, flattening, code generation and 
+     * binary file compilation) and packs the result in a FMU/JMU/FMUX.
+     * 
+     * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     * @param target The compiler target. Valid options are 'me' or 'cs'.
+     * @param version The FMI version. Valid options are '1.0' or '2.0'.
+     * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+     * @return the path to the compiled unit, if successful 
+     */
+    public String compileUnit(String className, String fileName[], String target, String version, String compileTo) 
+            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        //Create the target object.
+        TargetObject targetObject = TargetObject.getTarget(target, version);
+        
+        //Compile.
+        return compileUnit(className, fileName, targetObject, compileTo);
+    }
+
+    /**
+     * Compiles a JMU, FMU or FMUX.
+     * 
+     * @param className Name of model class in the model file to compile.
      * @param fileName Array of model file or library paths.
      * @param target Target object, contains information about the target, its unit suffix for example.
      * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist..
-	 */
-	protected void compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
-	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		// Always set certain options when compiling
-		// First save these options in temp options registry to reset when compiling has finished
-		OptionRegistry tempOptions = options.copy();
-		
-		//Set options for the target.
-		target.setDefaultOptions(options);
-		
-		try {
-			// set invokegc if set
-			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
-			
-			// Set output dir
-			if (outDir == null)
-				setRandomOutDir();
-			
-			
+     * @return the path to the compiled unit, if successful 
+     */
+    protected String compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
+            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        // Always set certain options when compiling
+        // First save these options in temp options registry to reset when compiling has finished
+        OptionRegistry tempOptions = options.copy();
+        //Set options for the target.
+        target.setDefaultOptions(options);
+        
+        String unitFile = null;
+        try {
+            // set invokegc if set
+            StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
+            
+            // Set output dir
+            if (outDir == null)
+                setRandomOutDir();
+            
             if (target.getMakeFileFlag() != null) {
                 // Might be used by constant evaluation
                 CCompilerDelegator ccompiler = getCCompiler();
                 ccompiler.setTargetPlatforms(targetPlatforms);
             }
-			
-			// compile mo-file + generate code for all templates that are not null
-			FClass fc = compileModel(fileName, className, target);
-			
-			if (!target.getCodeGenFlag()) {
-				//No code have been generated.
-				options.copyAllOptions(tempOptions);
-				return;
-			}
-			
-			// compile c code if Makefile flag is not null
-			hookCheckAbort();
-			if (target.getMakeFileFlag() != null) {
-				ASTNode.beginStep("compileCCode()");
-				String cFileName = FClass.convertClassNameToUnderscore(className);
-				CCompilerDelegator ccompiler = getCCompiler();
-				ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
-				ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
-				ASTNode.endStep("compileCCode()");
-			}
-			hookCodeCompiled();
-			
-			// package JMU
-			ASTNode.beginStep("packUnit()");
-			packUnit(className, compileTo, target);
-			deleteOutDir();
-			ASTNode.endStep("packUnit()");
-		} finally {
-			log.debug("Time useage and memory usage change during compilation steps:");
-			ASTNode.getStepInfo().logReport();
-			if (options.getBooleanOption("debug_csv_step_info"))
-				ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
-		}
-		// set back all options
-		options.copyAllOptions(tempOptions);
-	}
-	
-	/**
-	 * \brief Packs either a JMU or FMU (helper function for compileUnit).
-	 * 
-	 * @param className Name of model class that was compiled (will determine file names).
-	 * @param path Location on file system where the packed file should be saved (created if does not exist).
-	 * @param targetObject Target object, contains information about the target, its unit suffix for example.
-	 */
-	protected void packUnit(String className, String path, TargetObject target) throws PackingFailedException {
-		File unitFile = new File(path);
-		if (unitFile.isDirectory()) { 
-			String mMangledName = FClass.convertClassNameToUnderscore(className);
-			unitFile = new File(unitFile, mMangledName + "." + target.getUnitSuffix());
-		} else {
-			File dirPath = unitFile.getParentFile();
-			if (dirPath != null && !dirPath.isDirectory())
-				unitFile.getParentFile().mkdirs();
-		}
-		
-		// Create the new archive
-		int BUFFER_SIZE = 2048;
-		try {
-			hookCheckAbort();
-			FileOutputStream dest = new FileOutputStream(unitFile);
-			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-			out.setMethod(ZipOutputStream.DEFLATED);
-			zipDir(outDir, out);
-			out.close();
-		} catch (CompilationAbortedException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new PackingFailedException(String.format("Could not write to '%s'", unitFile));
-		} finally {
-			// remove files
-			deleteOutDir();
-		}
-		hookFmuPacked(unitFile.getAbsoluteFile());
-	}
-	
+            
+            // compile mo-file + generate code for all templates that are not null
+            FClass fc = compileModel(fileName, className, target);
+            
+            if (!target.getCodeGenFlag()) {
+                //No code have been generated.
+                options.copyAllOptions(tempOptions);
+                return null;
+            }
+            
+            // compile c code if Makefile flag is not null
+            hookCheckAbort();
+            if (target.getMakeFileFlag() != null) {
+                ASTNode.beginStep("compileCCode()");
+                String cFileName = FClass.convertClassNameToUnderscore(className);
+                CCompilerDelegator ccompiler = getCCompiler();
+                ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+                ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
+                ASTNode.endStep("compileCCode()");
+            }
+            hookCodeCompiled();
+            
+            // package unit
+            ASTNode.beginStep("packUnit()");
+            unitFile = packUnit(className, compileTo, target).getPath();
+            deleteOutDir();
+            ASTNode.endStep("packUnit()");
+        } finally {
+            log.debug("Time useage and memory usage change during compilation steps:");
+            ASTNode.getStepInfo().logReport();
+            if (options.getBooleanOption("debug_csv_step_info"))
+                ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
+        }
+        // set back all options
+        options.copyAllOptions(tempOptions);
+        
+        return unitFile;
+    }
+
+    /**
+     * \brief Packs either a JMU or FMU (helper function for compileUnit).
+     * 
+     * @param className Name of model class that was compiled (will determine file names).
+     * @param path Location on file system where the packed file should be saved (created if does not exist).
+     * @param targetObject Target object, contains information about the target, its unit suffix for example.
+     * @return the path to the packed unit 
+     */
+    protected File packUnit(String className, String path, TargetObject target) throws PackingFailedException {
+        File unitFile = new File(path);
+        if (unitFile.isDirectory()) { 
+            String mMangledName = FClass.convertClassNameToUnderscore(className);
+            unitFile = new File(unitFile, mMangledName + "." + target.getUnitSuffix());
+        } else {
+            File dirPath = unitFile.getParentFile();
+            if (dirPath != null && !dirPath.isDirectory())
+                unitFile.getParentFile().mkdirs();
+        }
+        
+        // Create the new archive
+        int BUFFER_SIZE = 2048;
+        try {
+            hookCheckAbort();
+            FileOutputStream dest = new FileOutputStream(unitFile);
+            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+            out.setMethod(ZipOutputStream.DEFLATED);
+            zipDir(outDir, out);
+            out.close();
+        } catch (CompilationAbortedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PackingFailedException(String.format("Could not write to '%s'", unitFile));
+        } finally {
+            // remove files
+            deleteOutDir();
+        }
+        log.logCompiledUnit(unitFile);
+        hookFmuPacked(unitFile.getAbsoluteFile());
+        return unitFile;
+    }
+
 	protected void parseFiles(String[] paths) {
 		StepInfo.TimeItem time = new StepInfo.TimeItem();
 		time.begin();
@@ -948,56 +957,46 @@ public class ModelicaCompiler {
 		return fc;
 	}
 
-	/**
-	 * 
-	 * Parses a model and returns a reference to the root of the source tree.
-	 * Options related to the compilation are also loaded here and added to the
-	 * source tree representation.
-	 * 
-	 * @param name
-	 *            The name of the model file.
-	 *
-	 * @return The root of the source tree.
-	 * 
-	 * @throws beaver.Parser.Exception
-	 *             If there was an Beaver parsing exception.
-	 * @throws CompilerException
-	 *             If errors have been found during the parsing.
-	 * @throws FileNotFoundException
-	 *             If the model file can not be found.
-	 * @throws IOException
-	 *             If there was an error reading the model file. (Beaver exception.)
-	 */
-	private SourceRoot parseModel(String name) 
-	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-	/*
-		if (report.hasErrors()) {
-			CompilerException ce = new CompilerException();
-			for (Problem p : report.getErrors()) {
-				ce.addProblem(p);
-			}
-			throw ce;
-		}
-		*/
-		ParserHandler ph = new ParserHandler();
-		log.info("Parsing " + name + "...");
-		SourceRoot sr;
-		try {
-			sr = ph.parseFile(name);
-			if (errorHandler != null)
-				sr.setErrorHandler(errorHandler);
-		} catch (ParserException e) {
-			e.getProblem().setFileName(name);
-			CompilerException ce = new CompilerException();
-			ce.addProblem(e.getProblem());
-			throw ce;
-		}
-		//loadOptions(sr);
-		for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-			sd.setFileName(name);
-		}
-		return sr;
-	}
+
+    /**
+     * 
+     * Parses a model and returns a reference to the root of the source tree.
+     * Options related to the compilation are also loaded here and added to the
+     * source tree representation.
+     * 
+     * @param name
+     *            The name of the model file.
+     *
+     * @return The root of the source tree.
+     * 
+     * @throws beaver.Parser.Exception
+     *             If there was an Beaver parsing exception.
+     * @throws CompilerException
+     *             If errors have been found during the parsing.
+     * @throws FileNotFoundException
+     *             If the model file can not be found.
+     * @throws IOException
+     *             If there was an error reading the model file. (Beaver exception.)
+     */
+    private SourceRoot parseModel(String name) 
+      throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+        log.info("Parsing " + name + "...");
+        SourceRoot sr;
+        try {
+            sr = ParserHandler.parseFile(name);
+            if (errorHandler != null)
+                sr.setErrorHandler(errorHandler);
+        } catch (ParserException e) {
+            CompilerException ce = new CompilerException();
+            ce.addProblem(e.getProblem());
+            throw ce;
+        }
+        //loadOptions(sr);
+        for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+            sd.setFileName(name);
+        }
+        return sr;
+    }
 
 	/**
 	 * 
@@ -1098,49 +1097,48 @@ public class ModelicaCompiler {
 		
 		return icl;
 	}
-	
-	/**
-	 * Computes a model instance tree from a source tree. Some error checks such
-	 * as type checking is performed during the computation.
-	 * 
-	 * @param sr
-	 *            The reference to the model source root.
-	 * @param cl
-	 *            The name of the class in the model file to compile.
+
+    /**
+     * Computes a model instance tree from a source tree. Some error checks such
+     * as type checking is performed during the computation.
+     * 
+     * @param sr
+     *            The reference to the model source root.
+     * @param cl
+     *            The name of the class in the model file to compile.
      * @param target
      *            The model represenation type the model should be compiled to.
-	 * 
-	 * @return The instance node corresponding to the instantiated model.
-	 * 
-	 * @throws CompilerException
-	 *             If errors have been found during the instantiation.
-	 * @throws ModelicaClassNotFoundException
-	 *             If the Modelica class to instantiate is not found.
-	 */
-	public InstClassDecl instantiateModel(SourceRoot sr, String cl, TargetObject target) 
-		throws ModelicaClassNotFoundException, CompilerException {
-		hookCheckAbort();
-		ASTNode.beginStep("instantiateModel()");
-		
-		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		ipr.options = sr.options.copy();
-		ipr.setCompiler(this);
-		
-		if (sr.options.getBooleanOption("compliance_as_warning"))
-			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
-		
-		log.info("Checking for errors...");
-		ipr.checkErrorsInInstClass(cl, target.getCheckType());
-		handleCompilerWarnings(sr.collectWarnings());
-		
-		InstClassDecl icd = ipr.lookupInstClassQualified(cl);
-		
-		hookModelInstantiatied(icd);
-		ASTNode.endStep("instantiateModel()");
-		
-		return icd;
-	}
-	
+     * 
+     * @return The instance node corresponding to the instantiated model.
+     * 
+     * @throws CompilerException
+     *             If errors have been found during the instantiation.
+     * @throws ModelicaClassNotFoundException
+     *             If the Modelica class to instantiate is not found.
+     */
+    public InstClassDecl instantiateModel(SourceRoot sr, String cl, TargetObject target) 
+        throws ModelicaClassNotFoundException, CompilerException {
+        hookCheckAbort();
+        ASTNode.beginStep("instantiateModel()");
+        
+        InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+        ipr.options = sr.options.copy();
+        ipr.setCompiler(this);
+        
+        if (sr.options.getBooleanOption("compliance_as_warning"))
+            sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
+        
+        log.info("Checking for errors...");
+        InstClassDecl icd = ipr.instantiateModel(cl);
+        icd.checkErrorsInModelInstance(cl, target.getCheckType());
+        handleCompilerWarnings(sr.collectWarnings());
+        
+        hookModelInstantiatied(icd);
+        ASTNode.endStep("instantiateModel()");
+        
+        return icd;
+    }
+
 	protected void handleCompilerWarnings(Collection<Problem> warnings) throws CompilerException {
 		if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
 			getDiagnosticsGenerator().writeProblems(warnings);

@@ -608,6 +608,25 @@ class TestDiode(SimulationTest):
         self.assert_all_trajectories(['s','i0','i2'],rel_tol=1e-4, abs_tol=1e-4)
 
 
+class TestDiodeModified(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Diode.mo',
+            'Diode(R1=2, R2=3)')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10,time_step=0.05,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'Diode_modified_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['s','i0','i2'],rel_tol=1e-4, abs_tol=1e-4)
+
+
 class TestFriction(SimulationTest):
     
     @classmethod

@@ -312,29 +312,28 @@ aspect ModelicaIconsEditing {
 		}
 		return false;
 	}
-	
-	
-	protected void Element.setParameterValue(Stack<String> path, String value) {
-		StringBuilder sb = new StringBuilder(path.pop());
-		for (String part : path) {
-			sb.append('/');
-			sb.append(part);
-		}
-		ParserHandler ph = new ParserHandler();
-		try {
-			AnnotationNode node = modificationAnnotation();
-			Exp e = ph.parseExpString(value);
-			node.forPath(sb.toString()).setValue(e);
-		} catch (ParserException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (beaver.Parser.Exception e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+
+
+    protected void Element.setParameterValue(Stack<String> path, String value) {
+        StringBuilder sb = new StringBuilder(path.pop());
+        for (String part : path) {
+            sb.append('/');
+            sb.append(part);
+        }
+        try {
+            AnnotationNode node = modificationAnnotation();
+            Exp e = ParserHandler.parseExpString(value);
+            node.forPath(sb.toString()).setValue(e);
+        } catch (ParserException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (beaver.Parser.Exception e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 	/*-------------------------------------------------------------------------
 	 *                          Misc Sync methods

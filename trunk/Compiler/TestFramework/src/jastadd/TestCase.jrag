@@ -302,19 +302,17 @@ abstract public class TestCase {
 			fail(e);
 		}
 	}
-	
-	public void performTest() throws ParserException, beaver.Parser.Exception, 
-				IOException, ModelicaClassNotFoundException {
-		if (exception != null)
-			fail(exception);
-		
-		// Parse
-		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = ph.parseFile(getSourceFileName());
-		sr.options = options;
-		sr.setFileName(getSourceFileName());
-		
-		
+
+    public void performTest() throws ParserException, beaver.Parser.Exception, 
+                IOException, ModelicaClassNotFoundException {
+        if (exception != null)
+            fail(exception);
+        
+        // Parse
+        SourceRoot sr = ParserHandler.parseFile(getSourceFileName());
+        sr.options = options;
+        sr.setFileName(getSourceFileName());
+        
         // Instantiate and check for errors
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
         Collection<Problem> problems = null;

@@ -21,7 +21,7 @@ import java.io.PrintStream;
 
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.logging.Level;
-import org.jmodelica.util.logging.ModelicaLogger;
+import org.jmodelica.util.logging.StreamingLogger;
 
 aspect DebugCompiler {
     
@@ -144,52 +144,42 @@ public class DebugCompiler extends javax.swing.JFrame {
             }
             out.info("*** Compilation sucessful. ***");
         }
-	    
-	}
-	
-	public class OutputHandler extends ModelicaLogger {
-		
-		private javax.swing.JTextArea target;
+        
+    }
 
-		public OutputHandler(javax.swing.JTextArea target, Level level) {
-			super(level);
-			this.target = target;
-		}
+    public class OutputHandler extends StreamingLogger {
+        
+        private javax.swing.JTextArea target;
 
-		public void reset() {
-			target.setText("");
-		}
+        public OutputHandler(javax.swing.JTextArea target, Level level) {
+            super(level, (OutputStream) null);
+            this.target = target;
+        }
 
-		@Override
-		protected void write(Level level, String message) {
-			target.append(message + "\n");
-		}
+        public void reset() {
+            target.setText("");
+        }
 
-		@Override
-		protected void write(Level level, Throwable throwable) {
-			write(level, throwable.toString());
-		}
+        @Override
+        protected void do_write(String message) throws IOException {
+            target.append(message + "\n");
+        }
 
         protected void writeException(Exception ex) {
-            if (ex instanceof CompilerException) {
-                write(Level.ERROR, ex);
-            } else {
-                ByteArrayOutputStream buf = new ByteArrayOutputStream(512);
-                ex.printStackTrace(new PrintStream(buf));
-                write(Level.ERROR, buf.toString());
+            try {
+                if (ex instanceof CompilerException) {
+                    do_write(ex.toString());
+                } else {
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream(512);
+                    ex.printStackTrace(new PrintStream(buf));
+                    do_write(buf.toString());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Could not write to text area.", e);
             }
         }
 
-		@Override
-		protected void write(Level level, Problem problem) {
-			write(level, problem.toString());
-		}
-
-		@Override
-		public void close() {
-		}
-
-	}
+    }
 
 }
 

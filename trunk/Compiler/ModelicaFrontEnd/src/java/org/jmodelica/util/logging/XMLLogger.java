@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.XMLUtil;
 
@@ -49,35 +50,48 @@ public final class XMLLogger extends PipeLogger {
         StringWriter str = new StringWriter();
         PrintWriter print = new PrintWriter(str);
         throwable.printStackTrace(print);
-        write_raw(String.format(
-                "<Exception>\n" +
-                "    <value name=\"kind\">%s</value>\n" +
-                "    <value name=\"message\">%s</value>\n" +
-                "    <value name=\"stacktrace\">\n%s</value>\n" +
-                "</Exception>",
-                XMLUtil.escape(throwable.getClass().getName()),
-                XMLUtil.escape(throwable.getMessage() == null ? "" : throwable.getMessage()),
-                XMLUtil.escape(str.toString())
-        ));
+        write_node("Exception", 
+                   "kind",       throwable.getClass().getName(),
+                   "message",    throwable.getMessage() == null ? "" : throwable.getMessage(), 
+                   "stacktrace", str.toString());
     }
 
     @Override
     protected void do_write(Problem problem) throws IOException {
-        write_raw(String.format(
-                "<%s>\n" +
-                "    <value name=\"kind\">%s</value>\n" +
-                "    <value name=\"file\">%s</value>\n" +
-                "    <value name=\"line\">%d</value>\n" +
-                "    <value name=\"column\">%d</value>\n" +
-                "    <value name=\"message\">%s</value>\n" +
-                "</%1$s>",
-                XMLUtil.escape(Problem.capitalize(problem.severity())),
-                XMLUtil.escape(problem.kind().toString().toLowerCase()),
-                XMLUtil.escape(problem.fileName()), problem.beginLine(),
-                problem.beginColumn(), XMLUtil.escape(problem.message())
-        ));
+        write_node(Problem.capitalize(problem.severity()), 
+                   "kind",    problem.kind().toString().toLowerCase(),
+                   "file",    problem.fileName(),
+                   "line",    problem.beginLine(),
+                   "column",  problem.beginColumn(),
+                   "message", problem.message());
     }
-    
+
+    protected void do_write(CompiledUnit unit) throws IOException {
+        write_node("CompilationUnit", 
+                   "file", unit.toString());
+    }
+
+    private void write_node(String name, Object... values) throws IOException {
+        StringBuffer buf = new StringBuffer();
+        buf.append('<');
+        buf.append(name);
+        buf.append(">\n");
+        for (int i = 0; i < values.length; i += 2) {
+            buf.append("    <value name=\"");
+            buf.append(values[i]);
+            buf.append("\">");
+            if (values[i + 1] instanceof String)
+                buf.append(XMLUtil.escape((String) values[i + 1]));
+            else
+                buf.append(values[i + 1]);
+            buf.append("</value>\n");
+        }
+        buf.append("</");
+        buf.append(name);
+        buf.append(">\n");
+        write_raw(buf.toString());
+    }
+
     protected void write_raw(String logMessage) throws IOException {
         if (!started) {
             started = true;

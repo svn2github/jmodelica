@@ -213,7 +213,15 @@ class Test_Compiler:
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_Unit, cl, [path], 'jmu', None, '.')
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path, separate_process=True)
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path, separate_process=True)
-        
+    
+    @testattr(stddist = True)
+    def test_compiler_modification_error(self):
+        """ Test that a CompilerError is raised if compilation errors are found in the modification on the classname."""
+        path = os.path.join(get_files_path(), 'Modelica','Diode.mo')
+        err = pym.compiler_exceptions.CompilerError
+        nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(wrong_name=2)', path)
+        nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(===)', path)
+    
     @testattr(stddist = True)
     def test_compile_fmu_illegal_target_error(self):
         """Test that an exception is raised when an incorrect target is given to compile_fmu"""

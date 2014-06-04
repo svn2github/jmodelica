@@ -511,78 +511,71 @@ aspect Constructors {
         }
     }
 
-	/**
-	 * \brief Constructs an FRecordConstructor for a record with the given name and no arguments.
-	 */
-	public FRecordConstructor.FRecordConstructor(String name) {
-		this(new FIdUse(name), new List());
-	}
-	
-	public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
+    /**
+     * \brief Constructs an FRecordConstructor for a record with the given name and no arguments.
+     */
+    public FRecordConstructor.FRecordConstructor(String name) {
+        this(new FIdUse(name), new List());
+    }
 
-		this(new Opt(),
-                new Opt(),
-                new Opt(),
-                new Opt(),
-                new Opt(),
-                new Opt(),
-                new Opt(new Constant()),      
-                new Opt(),
-                new ClassAccess("EnumType"),
-                new Opt(),
-                new PublicVisibilityType(),
-                new IdDecl(name.getID()),
-                new Opt(),
-                new Opt(),        
-                new Opt(),
-                (Comment)comment.fullCopy(),
-                new Opt(),
-                new Comment(new Opt(),new Opt()));
-		this.setLocation(name);
-		
-	}
-	
-	public ComponentDecl.ComponentDecl(boolean isParameter,
-	                                   String type,
-	                                   String name,
-	                                   String bexp) {
+    public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
+        this(new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(new Constant()),
+             new Opt(),
+             new ClassAccess("EnumType"),
+             new Opt(),
+             new PublicVisibilityType(),
+             new IdDecl(name.getID()),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             (Comment)comment.fullCopy(),
+             new Opt(),
+             new Comment(new Opt(),new Opt()));
+        this.setLocation(name);
+        
+    }
 
-		this(new Opt(),
-		                         new Opt(),
-		                         new Opt(),
-		                         new Opt(),
-		                         new Opt(),
-		                         new Opt(),
-	                             isParameter? new Opt(new Parameter()): new Opt(),      
-                                 new Opt(),
-                                 new ClassAccess(type),
-                                 new Opt(),
-                                 new PublicVisibilityType(),
-                                 new IdDecl(name),
-                                 new Opt(),
-                        		 new Opt(),        
-                                 new Opt(),
-                                 new Comment(new Opt(),new Opt()),
-                                 new Opt(),
-                                 new Comment(new Opt(),new Opt()));
-		
-		Exp bexp_ast=null;
-		
-		if (!bexp.equals("")) {
-		    //ModelicaParser mp = new ModelicaParser();
-			//bexp_ast = mp.parseExpString(bexp);
-			ParserHandler ph = new ParserHandler();
-			try {
-				bexp_ast = ph.parseExpString(bexp);
-			} catch (Exception e) {	
-				log.error("Error when parsing string");	
-			}
-			//log.debug("ComponentDecl.ComponentDecl");
-			//bexp_ast.dumpTreeBasic("");	
-		    this.setModification(new ValueModification(bexp_ast));
-        }                     	
-	}
-	
+    public ComponentDecl.ComponentDecl(boolean isParameter,
+                                       String type,
+                                       String name,
+                                       String bexp) {
+        this(new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             isParameter? new Opt(new Parameter()): new Opt(),
+             new Opt(),
+             new ClassAccess(type),
+             new Opt(),
+             new PublicVisibilityType(),
+             new IdDecl(name),
+             new Opt(),
+             new Opt(),
+             new Opt(),
+             new Comment(new Opt(),new Opt()),
+             new Opt(),
+             new Comment(new Opt(),new Opt()));
+        
+        Exp bexp_ast=null;
+        
+        if (!bexp.equals("")) {
+            try {
+                bexp_ast = ParserHandler.parseExpString(bexp);
+            } catch (Exception e) { 
+                log.error("Error when parsing string"); 
+            }
+            this.setModification(new ValueModification(bexp_ast));
+        }
+    }
+
 	/**
 	 * Create a real variable with only the required children.
 	 */

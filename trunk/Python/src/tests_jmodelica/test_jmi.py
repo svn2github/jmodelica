@@ -30,7 +30,7 @@ import logging
 from tests_jmodelica import testattr, get_files_path
 
 import pyjmi.jmi as jmi
-from pymodelica.compiler import compile_jmu, get_jmu_name
+from pymodelica.compiler import compile_jmu
 from pyjmi.jmi import JMUModel, JMIException
 import pyjmi.jmi_algorithm_drivers as ad
 
@@ -1346,7 +1346,7 @@ class TestNegativeNominalScaling(object):
         """
         jmu_name = compile_jmu(self._cpath, self._fpath, 
             compiler_options={'enable_variable_scaling':True})
-        self._model = JMUModel(get_jmu_name(self._cpath))
+        self._model = JMUModel(jmu_name)
 
     @testattr(stddist = True)
     def test_scaling_factors(self):
@@ -1436,18 +1436,6 @@ class Test_JMU_methods:
     This class tests the methods jmu_name, package_jmu and 
     simulate/initialize/optimize_options.
     """
-    
-    @testattr(stddist = True)
-    def test_jmu_name(self):
-        """
-        Test the method jmu_name.
-        """
-        name = get_jmu_name('VDP_pack.VDP')
-        assert name == 'VDP_pack_VDP.jmu'
-        name = get_jmu_name('VDP')
-        assert name == 'VDP.jmu'
-        name = get_jmu_name('VDP_pack')
-        assert name == 'VDP_pack.jmu'
     
     @testattr(stddist = True)
     def test_package_jmu(self):
@@ -1542,7 +1530,7 @@ class TestInitializeModelFromData(object):
         """
         if not hasattr(self, "res"):
             jmu_name = compile_jmu(self._cpath, self._fpath)
-            self.model = JMUModel(get_jmu_name(self._cpath))
+            self.model = JMUModel(jmu_name)
             self.res = self.model.simulate(0,10)
 
     @testattr(ipopt = True)
@@ -1612,7 +1600,7 @@ class TestEmptyModelException(object):
        """
        Test that an exception is raised.
        """
-       nose.tools.assert_raises(JMIException,JMUModel,get_jmu_name(self._cpath))
+       nose.tools.assert_raises(JMIException,JMUModel,self.jmu_name)
 
 class TestOutputVrefs:
     """Test that output value references are generate correctly.

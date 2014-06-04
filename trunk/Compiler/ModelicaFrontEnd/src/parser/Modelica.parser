@@ -15,6 +15,7 @@
 */
 
 %goal source_root;
+%goal anonymous_short_class;
 %goal exp;
 
 %header {:
@@ -29,140 +30,150 @@
 
 %embed {:
 
-	/**
-	 * Error reporting class that creates an error message and delegates reporting the 
-	 * message to a subclass.
-	 */
-	public abstract static class Report extends Parser.Events {
+    /**
+     * Error reporting class that creates an error message and delegates reporting the 
+     * message to a subclass.
+     */
+    public abstract static class Report extends Parser.Events {
 
-		/**
-		 * Report an error with error message <code>msg</code>.
-		 */
-		protected abstract void report(Problem P);
+        /**
+         * Report an error with error message <code>msg</code>.
+         */
+        protected abstract void report(Problem P);
 
-		/**
-		 * Creates an error message for when <code>token</code> is found unexpectedly. 
-		 * Passes the error message to {@link #report(String)}.
-		 * @param token		the unexpected symbol.
-		 */
-		public void syntaxError(Symbol token) {
-			
-			StringBuilder s = new StringBuilder();
-			//s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
-			if (token.value != null) {
-				s.append("   Unexpected token: \"" + token.value + "\"");
-			} else if (token.getId()<Terminals.NAMES.length)
-				s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
-			else 
-				s.append("  *** Syntactic error");
-			Problem p = new Problem("", s.toString(), Problem.Severity.ERROR, Problem.Kind.SYNTACTIC, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()));
-			
-			report(p);
-		}
+        /**
+         * Creates an error message for when <code>token</code> is found unexpectedly. 
+         * Passes the error message to {@link #report(String)}.
+         * @param token     the unexpected symbol.
+         */
+        public void syntaxError(Symbol token) {
+            
+            StringBuilder s = new StringBuilder();
+            //s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
+            if (token.value != null) {
+                s.append("   Unexpected token: \"" + token.value + "\"");
+            } else if (token.getId()<Terminals.NAMES.length)
+                s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
+            else 
+                s.append("  Syntactic error");
+            Problem p = new Problem(fileName, s.toString(), Problem.Severity.ERROR, Problem.Kind.SYNTACTIC, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()));
+            
+            report(p);
+        }
 
-		/**
-		 * Creates an error message for when the scanner throws an exception.
-		 * Passes the error message to {@link #report(String)}.
-		 * @param e		the exception.
-		 */
-		public void scannerError(Scanner.Exception e) {
-			/*
-			StringBuilder s = new StringBuilder(e.getMessage());
-			s.append(" at line ");
-			s.append(e.line);
-			s.append(", column ");
-			s.append(e.column);
-			*/
-			Problem p = new Problem("", e.getMessage(), Problem.Severity.ERROR, Problem.Kind.LEXICAL, e.line, e.column);
-			
-			report(p);
-		}
-		
-	}
-	
-	/**
-	 * Error reporting class that throws a {@link CompilerException} on an error.
-	 * Uses error message created by {@link Report}.
-	 */
-	public class AbortingReport extends Report {
+        /**
+         * Creates an error message for when the scanner throws an exception.
+         * Passes the error message to {@link #report(String)}.
+         * @param e     the exception.
+         */
+        public void scannerError(Scanner.Exception e) {
+            /*
+            StringBuilder s = new StringBuilder(e.getMessage());
+            s.append(" at line ");
+            s.append(e.line);
+            s.append(", column ");
+            s.append(e.column);
+            */
+            Problem p = new Problem(fileName, e.getMessage(), Problem.Severity.ERROR, Problem.Kind.LEXICAL, e.line, e.column);
+            
+            report(p);
+        }
 
-		/**
-		 * Throws a <code>ParserException</code> with <code>msg</code> as the message.
-		 */
-		@Override
-		protected void report(Problem p) {
-		  throw new ParserException(p);
-		}
-		
-		
-	}
-	
-	/**
-	 * Error reporting class that collects error messages for later retrieval.
-	 * Uses error message created by {@link Report}.
-	 */
-	public static class CollectingReport extends Report {
+        private String fileName = "";
 
-		private ArrayList<Problem> errors = new ArrayList<Problem>();
+        public void setFileName(String fn) {
+            fileName = fn;
+        }
 
-		/**
-		 * Adds error message <code>msg</code> to list.
-		 */ 
-		@Override
-		protected void report(Problem p) {
-			errors.add(p);			
-		}
-		
-		/**
-		 * Get the list of errors. Returns a reference to the internal list, not a copy.
-		 * @return a {@link java.util.Collection} with the reported error messages.
-		 */
-		public Collection<Problem> getErrors() {
-			return errors;
-		}
-		
-		/**
-		 * Reset the list of errors.
-		 */
-		public void resetErrors() {
-			errors = new ArrayList<Problem>();
-		}
-		
-		/**
-		 * Checks if any errors has been reported.
-		 * @return <code>true</code> if the list contains any errors.
-		 */
-		public boolean hasErrors() {
-			return !errors.isEmpty();
-		}
+    }
+    
+    /**
+     * Error reporting class that throws a {@link CompilerException} on an error.
+     * Uses error message created by {@link Report}.
+     */
+    public class AbortingReport extends Report {
 
-	}
+        /**
+         * Throws a <code>ParserException</code> with <code>msg</code> as the message.
+         */
+        @Override
+        protected void report(Problem p) {
+          throw new ParserException(p);
+        }
 
-	{ report = new AbortingReport(); }  // As default, throw exception on errors.
-	
-	/**
-	 * Set the error reporting class to use.
-	 * @param report	a subclass of {@link Parser.Events} to use for reporting errors.
-	 */
-	public void setReport(Parser.Events report) {
-		this.report = report;
-	}
-	
-	public Parser.Events getReport() {
-		return report;
-	}
-	
-	private int[] lineBreakMap;
-	
-	public void setLineBreakMap(int[] map) {
-	    lineBreakMap = map;
-	}
+    }
 
-	private FormattingInfo formatting;
-	
-	public void setFormattingInfo(FormattingInfo formatting) {
-		this.formatting = formatting;
-	}
+    /**
+     * Error reporting class that collects error messages for later retrieval.
+     * Uses error message created by {@link Report}.
+     */
+    public static class CollectingReport extends Report {
+
+        private ArrayList<Problem> errors = new ArrayList<Problem>();
+
+        /**
+         * Adds error message <code>msg</code> to list.
+         */ 
+        @Override
+        protected void report(Problem p) {
+            errors.add(p);          
+        }
+
+        /**
+         * Get the list of errors. Returns a reference to the internal list, not a copy.
+         * @return a {@link java.util.Collection} with the reported error messages.
+         */
+        public Collection<Problem> getErrors() {
+            return errors;
+        }
+
+        /**
+         * Reset the list of errors.
+         */
+        public void resetErrors() {
+            errors = new ArrayList<Problem>();
+        }
+
+        /**
+         * Checks if any errors has been reported.
+         * @return <code>true</code> if the list contains any errors.
+         */
+        public boolean hasErrors() {
+            return !errors.isEmpty();
+        }
+
+    }
+
+    { report = new AbortingReport(); }  // As default, throw exception on errors.
+
+    /**
+     * Set the error reporting class to use.
+     * @param report    a subclass of {@link Parser.Events} to use for reporting errors.
+     */
+    public void setReport(Parser.Events report) {
+        this.report = report;
+    }
+
+    public Parser.Events getReport() {
+        return report;
+    }
+
+    private int[] lineBreakMap;
+
+    public void setLineBreakMap(int[] map) {
+        lineBreakMap = map;
+    }
+
+    private FormattingInfo formatting;
+
+    public void setFormattingInfo(FormattingInfo formatting) {
+        this.formatting = formatting;
+    }
+
+    public void setFileName(String fn) {
+        if (report instanceof Report)
+            ((Report) report).setFileName(fn);
+    }
 
 :};
  
@@ -205,6 +216,20 @@ List base_class_decl_list
         base_class_decl_list.add(base_class_decl);
         return base_class_decl_list; 
     :};
+
+BaseClassDecl anonymous_short_class = class_access class_modification?
+        {: return new PN_ShortClassDecl(
+                   new IdDecl("'Anonymous Class'"),
+                   new UnknownVisibilityType(),
+                   new Opt(), new Opt(), 
+                   new MClass(), 
+                   new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
+                   new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
+                   class_access,
+                   new Opt(), 
+                   class_modification, 
+                   new Comment()); 
+        :};
 
 BaseClassDecl base_class_decl 
     =               
