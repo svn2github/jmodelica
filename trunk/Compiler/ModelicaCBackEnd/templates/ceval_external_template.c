@@ -19,6 +19,7 @@
 #include <string.h>
 #include "jmi.h"
 #include "ModelicaUtilities.h"
+#include <fcntl.h>
 
 $ECE_external_includes$
  
@@ -105,6 +106,12 @@ void jmi_throw()
     exit(1);
 }
 
+void JMCEVAL_setup() {
+#ifdef _WIN32
+    /* Prevent win from translating \n to \r\n */
+    _setmode(fileno(stdout), _O_BINARY);
+#endif
+}
 
 /* Main */
 int main(int argc, const char* argv[])

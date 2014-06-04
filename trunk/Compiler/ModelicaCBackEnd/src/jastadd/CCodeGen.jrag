@@ -3513,6 +3513,7 @@ aspect Serialize {
         genVarDecls_C(ASTNode.printer_C, str, indent);
         str.println();
         
+        str.println(indent + "JMCEVAL_setup();");
         genCheckPoint(str, indent, "START");
         
         str.println(indent + "/* Parse */");
