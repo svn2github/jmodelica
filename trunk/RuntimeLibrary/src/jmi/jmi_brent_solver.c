@@ -258,8 +258,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 tmp = lower - lstep;  
                 if ((tmp < block->min[0]) || (tmp != tmp)) { /* make sure we're inside bounds and not NAN*/
                     tmp = block->min[0];
+                    /* This update can increase roundoff that prevents lstep from decreasing.
+                       Ok if we hit the bound anyway. */
+                    lstep = lower - tmp;
                 }
-                lstep = lower - tmp;
 
                 flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_tmp);
 
@@ -269,7 +271,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     lstep *= 0.5;
                     jmi_log_node(log, logInfo, "Info", 
                         "Reducing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
-                    if (lstep <= UNIT_ROUNDOFF * block->nominal[0]) {
+                    if ((lstep <= UNIT_ROUNDOFF * block->nominal[0]) || (lower - lstep == lower)) {
                         jmi_log_node(log, logInfo, "Info", 
                             "Too small bracketing step - modifying lower <bound: %g> on the iteration variable in <block: %d>", lower, block->id);
                         block->min[0] = lower; /* we cannot step further without breaking the function -> update the bound */
@@ -288,8 +290,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 tmp = upper + ustep;
                 if ((tmp > block->max[0]) || (tmp != tmp)) {
                     tmp = block->max[0];
+                    /* This update can increase roundoff that prevents lstep from decreasing.
+                       Ok if we hit the bound anyway. */
+                    ustep = tmp - upper;
                 }
-                ustep = tmp - upper;
 
                 flag = jmi_brent_improve_bracket(block, &x, &f, &tmp, &f_tmp);
 
@@ -300,7 +304,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     jmi_log_node(log, logInfo, "Info", 
                         "Reducing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
 
-                    if (ustep <= UNIT_ROUNDOFF * block->nominal[0]) {
+                    if ((ustep <= UNIT_ROUNDOFF * block->nominal[0]) ||  (upper + ustep == upper)) {
                         jmi_log_node(log, logInfo, "Info", 
                             "Too small bracketing step - modifying upper <bound: %g> on the iteration variable in <block: %d>", upper, block->id);
                         block->max[0] = upper; /* we cannot step further without breaking the function -> update the bound */

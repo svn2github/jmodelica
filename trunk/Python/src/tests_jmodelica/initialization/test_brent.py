@@ -20,21 +20,25 @@
 import os.path
 
 import numpy as N
-import nose.tools
+from nose.tools import assert_raises
 
 from pyfmi import load_fmu
 from pymodelica import compile_fmu
+from pyfmi.fmi import FMUException
 from tests_jmodelica import testattr, get_files_path
 
 fpath = os.path.join(get_files_path(), 'Modelica', 'TestBrent.mo')
 
-@testattr(fmi = True)
-def test_cubic():
+def load_model(classname):
     options = {'block_solver_experimental_mode':4, 'use_Brent_in_1d':True,
                'generate_only_initial_system': True}
-    name = compile_fmu('TestBrent.Cubic', fpath, compiler_options=options)
+    name = compile_fmu(classname, fpath, compiler_options=options)
 
-    model = load_fmu(name)
+    return load_fmu(name)
+
+@testattr(fmi = True)
+def test_cubic():
+    model = load_model('TestBrent.Cubic')
     for t in N.linspace(0,1,101):
         model.reset()        
         model.time = t
@@ -44,5 +48,63 @@ def test_cubic():
         y = model.get('y')
         assert abs(y - (-2+4*t)) < 1e-6
         yy = x*(x-1)*(x+1)
+        relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
+        assert abs(relativeDiff) < 1e-6
+
+@testattr(fmi = True)
+def test_logarithmic():
+    model = load_model('TestBrent.Logarithmic')
+    for t in N.linspace(0,1,101):
+        model.reset()        
+        model.time = t
+        model.initialize()
+            
+        x = model.get('x')
+        y = model.get('y')
+        assert abs(y - (-2+4*t)) < 1e-6
+        yy = N.log(1+x)
+        relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
+        assert abs(relativeDiff) < 1e-6
+        print (x, y)
+
+@testattr(fmi = True)
+def test_xlogx():
+    model = load_model('TestBrent.XLogX')
+
+    for t in N.linspace(0,1,101):
+        model.reset()        
+        model.time = t
+
+        if (-2+4*t) <= -0.36:
+            assert_raises(FMUException, model.initialize)
+            continue
+        
+        model.initialize()
+            
+        x = model.get('x')
+        y = model.get('y')
+        assert abs(y - (-2+4*t)) < 1e-6
+        yy = (1+x)*N.log(1+x)
+        relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
+        assert abs(relativeDiff) < 1e-6
+
+@testattr(fmi = True)
+def test_xlogx_neg():
+    model = load_model('TestBrent.XLogXNeg')
+
+    for t in N.linspace(0,1,101):
+        model.reset()        
+        model.time = t
+
+        if (-2+4*t) <= -0.36:
+            assert_raises(FMUException, model.initialize)
+            continue
+        
+        model.initialize()
+            
+        x = model.get('x')
+        y = model.get('y')
+        assert abs(y - (-2+4*t)) < 1e-6
+        yy = (1-x)*N.log(1-x)
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6

@@ -17,17 +17,39 @@
 within ;
 model TestBrent
 
-  model Cubic
+  partial model Sweep
     parameter Real y0 = -2;
     parameter Real y1 = 2;
 
     Real y;
-    output Real x( start = 0, min = -10, max = 10, nominal=0.1);
+    output Real x(start = 0, min = -10, max = 10, nominal=0.1);
   equation
     y = y0 * (1-time) + y1*time;
-    
+  end Sweep;
+
+  model Cubic
+    extends Sweep;
+  equation
     (x - 1) * x * (x+1) = y;
   end Cubic;
+
+  model Logarithmic
+    extends Sweep;
+  equation
+    log(1 + x) = y;
+  end Logarithmic;
+
+  model XLogX
+    extends Sweep;
+  equation
+    (1 + x)*log(1 + x) = y;
+  end XLogX;
+
+  model XLogXNeg
+    extends Sweep;
+  equation
+    (1 - x)*log(1 - x) = y;
+  end XLogXNeg;
     
   annotation (uses(Modelica(version="3.2.1")));
 end TestBrent;
