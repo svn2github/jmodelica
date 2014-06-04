@@ -592,7 +592,7 @@ aspect Flattening {
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, override this
-		FType type = (FType) type().fullCopy();
+		FType type = type().flatten(new FQNameEmpty());
 		FFunctionVariable ffv;
 		if (isArray())
 			ffv = new FFunctionArray(new Opt(), type, eo, fqn);
@@ -601,6 +601,13 @@ aspect Flattening {
 		type.flattenSize(new FQNameEmpty(), ffv);
 		return ffv;
 	}
+	
+    public FType FType.flatten(FQName prefix) {
+        return fullCopy();
+    }
+    public FType FExternalObjectType.flatten(FQName prefix) {
+        return new FExternalObjectType(getSize(), getName(), getConstructor().flatten(prefix), getDestructor().flatten(prefix));
+    }
 	
 	// TODO: perhaps we should duplicate the instance tree algorithm for calculating the size 
 	//       of function calls in the flat tree instead of all this (all down to "TODO: end of remove")
@@ -841,7 +848,7 @@ aspect Flattening {
 		
 	public FVariable InstExternalObject.createEmptyFVariable() {
 		FExternalObjectVariable exo = new FExternalObjectVariable();
-		exo.setTypeName(new FQNameString(myInstClass().qualifiedName()));
+		exo.setConstructor(new FIdUse(myConstructor().qualifiedName()));
 		exo.setDestructorCall(getDestructorCall().flatten(getFQNamePrefix()));
 		return exo;
 	}

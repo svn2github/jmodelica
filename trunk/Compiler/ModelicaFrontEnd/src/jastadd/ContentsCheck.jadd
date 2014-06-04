@@ -267,19 +267,21 @@ aspect ContentCheck {
 	public void InstClassDecl.checkDestructor(InstClassDecl parent) {
 		if (isUnknown())
 			return;
-		if (myOutputs().size() != 0 || myInputs().size() != 1 || !myInputs().get(0).type().extObjCompatible(parent))
+		if (myOutputs().size() != 0 || myInputs().size() != 1 || !myInputs().get(0).type().compatibleDestructor(parent))
 			error("An external object destructor must have exactly one input of the same type as the constructor, and no outputs");
 	}
 	
 	public void InstClassDecl.checkConstructor(InstClassDecl parent) {
 		if (isUnknown())
 			return;
-		if (myOutputs().size() != 1 || !myOutputs().get(0).type().extObjCompatible(parent))
+		if (myOutputs().size() != 1 || !myOutputs().get(0).type().compatibleConstructor(parent))
 			error("An external object constructor must have exactly one output of the same type as the constructor");
 	}
 	
-	syn boolean FType.extObjCompatible(InstClassDecl icd) = false;
-	eq FExternalObjectType.extObjCompatible(InstClassDecl icd) = getName().equals(icd.qualifiedName());
+    syn boolean FType.compatibleConstructor(InstClassDecl icd) = false;
+    eq FExternalObjectType.compatibleConstructor(InstClassDecl icd) = getConstructor().name().equals(icd.qualifiedName() + ".constructor");
+    syn boolean FType.compatibleDestructor(InstClassDecl icd) = false;
+    eq FExternalObjectType.compatibleDestructor(InstClassDecl icd) = getDestructor().name().equals(icd.qualifiedName() + ".destructor");
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck(ErrorCheckType checkType) {

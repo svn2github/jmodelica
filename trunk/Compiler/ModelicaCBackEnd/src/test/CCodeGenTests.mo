@@ -14579,6 +14579,159 @@ printf(\"END\\n\"); fflush(stdout);
 ")})));
 end Array;
 
+package Os
+    model Obj1
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            input Integer y;
+            input Boolean b;
+            input String s;
+            output Obj1 o1;
+            external "C" o1 = my_constructor1(x,y,b,s);
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input Obj1 o1;
+            external "C"
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end Obj1;
+    end Os;
+model ExtObj
+    model Obj2
+        extends ExternalObject;
+        function constructor
+            input Real[:] x;
+            input Integer[2] y;
+            input Boolean[:] b;
+            input String[:] s;
+            output Obj2 o2;
+            external "C" my_constructor2(x,y,o2,b,s);
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input Obj2 o2;
+            external "C"
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end Obj2;
+    model Obj3
+        extends ExternalObject;
+        function constructor
+            input Os.Obj1 o1;
+            input Obj2[:] o2;
+            output Obj3 o3;
+            external "C" my_constructor3(o1,o2,o3);
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        function destructor
+            input Obj3 o3;
+            external "C"
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor;
+    end Obj3;
+    
+    function use3
+        input  Obj3 o3;
+        output Real x;
+        external annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end use3;
+    Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
+    Obj2 o2 = Obj2({3.13,3.14}, {3,4}, {false, true}, {"A message 1", "A message 2"});
+    Obj3 o3 = Obj3(o1,{o2,o2});
+    Real x = use3(o3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ExternalFunction_CEval_ExtObj",
+            description="Test code gen for external C functions evaluation. External objects.",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+            generatedCode="
+#include \"extObjects.h\"
+
+    /* Declarations */
+    jmi_ad_var_t x_v;
+    jmi_extobj_t o3_v;
+    jmi_extobj_t tmp_1_arg0;
+    jmi_int_t tmp_2;
+    jmi_int_t tmp_3;
+    jmi_ad_var_t tmp_4_arg0;
+    jmi_ad_var_t tmp_4_arg1;
+    jmi_ad_var_t tmp_4_arg2;
+    jmi_string_t tmp_4_arg3;
+    JMI_ARR(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_1_arg1, -1, 1)
+    jmi_ad_var_t tmp_5;
+    jmi_ad_var_t tmp_5_max;
+    JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_6, 2, 1)
+    JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_7, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_8_arg0, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg1, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg2, -1, 1)
+    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_8_arg3, -1, 1)
+
+    printf(\"START\\n\"); fflush(stdout);
+    /* Parse */
+    JMCEVAL_parse(Real, x_v);
+    JMCEVAL_parse(Real, tmp_4_arg0);
+    JMCEVAL_parse(Integer, tmp_4_arg1);
+    JMCEVAL_parse(Boolean, tmp_4_arg2);
+    JMCEVAL_parse(String, tmp_4_arg3);
+    tmp_2 = (int)tmp_4_arg1;
+    tmp_3 = (int)tmp_4_arg2;
+    tmp_1_arg0 = my_constructor1(tmp_4_arg0, tmp_2, tmp_3, tmp_4_arg3);
+    JMCEVAL_parseArrayDims(1);
+    JMI_ARRAY_INIT_1(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_1_arg1, d[0], 1, d[0])
+    tmp_5_max = d[0] + 1;
+    for (tmp_5 = 1; tmp_5 < tmp_5_max; tmp_5++) {
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_8_arg0, d[0], 1, d[0])
+        JMCEVAL_parseArray(Real, tmp_8_arg0);
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg1, d[0], 1, d[0])
+        JMCEVAL_parseArray(Integer, tmp_8_arg1);
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg2, d[0], 1, d[0])
+        JMCEVAL_parseArray(Boolean, tmp_8_arg2);
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_8_arg3, d[0], 1, d[0])
+        JMCEVAL_parseArray(String, tmp_8_arg3);
+        JMI_ARRAY_INIT_1(STAT, jmi_int_t, jmi_int_array_t, tmp_6, 2, 1, 2)
+        jmi_copy_matrix_to_int(tmp_8_arg1, tmp_8_arg1->var, tmp_6->var);
+        JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_7, jmi_array_size(tmp_8_arg2, 0), 1, jmi_array_size(tmp_8_arg2, 0))
+        jmi_copy_matrix_to_int(tmp_8_arg2, tmp_8_arg2->var, tmp_7->var);
+        my_constructor2(tmp_8_arg0->var, tmp_6->var, &jmi_array_ref_1(tmp_1_arg1, tmp_5), tmp_7->var, tmp_8_arg3->var);
+    }
+    my_constructor3(tmp_1_arg0, tmp_1_arg1->var, &o3_v);
+
+    /* Call the function */
+    printf(\"CALC\\n\"); fflush(stdout);
+    x_v = use3(o3_v);
+    printf(\"DONE\\n\"); fflush(stdout);
+
+    /* Print */
+    JMCEVAL_print(Real, x_v);
+
+    /* Free strings */
+    JMCEVAL_free(tmp_4_arg3);
+    destructor(tmp_1_arg0);
+    tmp_5_max = d[0] + 1;
+    for (tmp_5 = 1; tmp_5 < tmp_5_max; tmp_5++) {
+        JMCEVAL_freeArray(tmp_8_arg3);
+        destructor(jmi_array_ref_1(tmp_1_arg1, tmp_5));
+    }
+    destructor(o3_v);
+
+    printf(\"END\\n\"); fflush(stdout);
+")})));
+end ExtObj;
+
 model Dgelsx
     function dgelsx
       "Computes the minimum-norm solution to a real linear least squares problem with rank deficient A"

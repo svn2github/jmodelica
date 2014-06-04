@@ -3777,6 +3777,11 @@ aspect ExternalCEval {
     eq FFunctionDecl.getChild().isConstructorStmt() = isConstructor();
     eq InstClassDecl.getChild().isConstructorStmt() = isConstructor();
     
+    inh boolean FExternalStmt.isDestructorStmt();
+    eq Root.getChild().isDestructorStmt() = false;
+    eq FFunctionDecl.getChild().isDestructorStmt() = isDestructor();
+    eq InstClassDecl.getChild().isDestructorStmt() = isDestructor();
+    
     /**
      * Evaluate this external statement.
      */
@@ -3800,9 +3805,7 @@ aspect ExternalCEval {
             com.accept("START");
             for (CommonVariableDecl cvd : varsToSerialize())
                 com.put(values.get(cvd), cvd.type(), !cvd.isInput());
-            com.log();
             com.accept("CALC");
-            com.log();
             com.accept("DONE");
             for (CommonVariableDecl cvd : varsToDeserialize())
                 values.put(cvd, com.get(cvd.type()));
@@ -3888,6 +3891,7 @@ aspect ExternalCEval {
          * Read a line. Check equals to <code>s</code>.
          */
         public void accept(String s) throws IOException {
+            log();
             String line = getLine();
             if (line == null || !line.equals(s)) {
                 ModelicaCompiler.log.debug(String.format("ProcessCommunicator did not receive expected line\n\t'%s' != '%s'", s, (line == null ? "null" : line)));
@@ -3895,7 +3899,7 @@ aspect ExternalCEval {
             }
         }
         
-        public void log() throws IOException {
+        private void log() throws IOException {
             String line = getLine();
             while (line.equals("LOG")) {
                 double warning = deserializeReal();

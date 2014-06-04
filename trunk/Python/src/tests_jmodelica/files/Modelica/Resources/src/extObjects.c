@@ -66,6 +66,7 @@ void my_constructor3(void* o1, void** o2, void** o3) {
     Obj3_t* res = malloc(sizeof(Obj3_t));
     res->o1 = (Obj1_t*)o1;
     res->o2 = (Obj2_t**)o2;
+    ModelicaFormatMessage("%s", "O3 constructed");
     *o3 = res;
 }
 double use3(void* o3) {

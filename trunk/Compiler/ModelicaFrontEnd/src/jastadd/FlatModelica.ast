@@ -221,7 +221,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * An external object variable.
  */
-FExternalObjectVariable : FVariable ::= TypeName:FQName [DestructorCall:FFunctionCallStmt];
+FExternalObjectVariable : FVariable ::= Constructor:FIdUse [DestructorCall:FFunctionCallStmt];
 
 /**
  * Pre FVariable of type Real.
@@ -310,7 +310,7 @@ FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 /**
  * Class representing the external object type.
  */
-FExternalObjectType : FType ::= <Name>;
+FExternalObjectType : FType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
 
 /**
  * An operator record type. 

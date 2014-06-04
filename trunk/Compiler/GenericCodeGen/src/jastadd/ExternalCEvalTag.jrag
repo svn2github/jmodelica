@@ -44,11 +44,14 @@ public abstract class ExternalCEvalTag extends AbstractTag {
     }
     
     public void generate(CodeStream genPrinter) {
-        if (ext == null)
-            for (FExternalStmt ext : fClass.myExternals())
-                generate(genPrinter, ext);
-        else
+        if (ext == null) {
+            for (FExternalStmt ext : fClass.myExternals()) {
+                if (ext.canEvaluate() && !ext.isConstructorStmt() && !ext.isDestructorStmt())
+                    generate(genPrinter, ext);
+            }
+        } else {
             generate(genPrinter, ext);
+        }
     }
     
     public abstract void generate(CodeStream genPrinter, FExternalStmt ext);

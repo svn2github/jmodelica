@@ -3410,6 +3410,7 @@ aspect Serialize {
                 FExternalStmt stmt = t.myConstructorStmt();
                 stmt.setCodeGenContext(cgc.createProxy());
                 stmt.genVarDecls_C(p, str, indent());
+                stmt.setCodeGenContext(null);
                 printComps(t);
             } else {
                 super.printComps(type);
@@ -3418,7 +3419,7 @@ aspect Serialize {
     }
     
     public class InitPrinter_ECE extends InitPrinter_C {
-        private CodeGenContext cgc;
+        protected CodeGenContext cgc;
         private Map<String,String> tempMap;
         public InitPrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap, CodeGenContext cgc) {
             super(p, str);
@@ -3463,14 +3464,35 @@ aspect Serialize {
         
         protected void printComps(FExternalObjectType type) {
             super.printComps(type);
+            printComps_sub(type);
+        }
+        
+        protected void printComps_sub(FExternalObjectType type) {
             int i = 0;
             FExternalStmt stmt = ((FExternalObjectType)type).myConstructorStmt();
+            stmt.setCodeGenContext(cgc.createProxy());
             ArrayList<FExp> args = stmt.myConstructorArgs();
             CommonVariableDecl out = stmt.myConstructorOutput();
             String name = acquireTemp(name());
             stmt.getCodeGenContext().setAlias(out.name_C(), name());
             for (FExp arg : args)
                 stmt.getCodeGenContext().setAlias(arg.prettyPrint_C(""), name + "_arg" + i++);
+            stmt.prettyPrint_C(p, str, indent());
+            stmt.setCodeGenContext(null);
+        }
+    }
+    public class FreePrinter_ECE extends InitPrinter_ECE {
+        public FreePrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap, CodeGenContext cgc) {
+            super(p, str, tempMap, cgc);
+        }
+        public void print(FType type) {
+            type.genFreeStrings_C(str, indent(), name());
+        }
+        protected void printComps_sub(FExternalObjectType type) {
+            FExternalStmt stmt = type.myDestructorStmt();
+            ArrayList<FExp> args = stmt.myConstructorArgs();
+            stmt.setCodeGenContext(cgc.createProxy());
+            stmt.getCodeGenContext().setAlias(args.get(0).prettyPrint_C(""), name());
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
@@ -3491,7 +3513,7 @@ aspect Serialize {
         genVarDecls_C(ASTNode.printer_C, str, indent);
         str.println();
         
-        str.println(indent + "printf(\"START\\n\"); fflush(stdout);");
+        genCheckPoint(str, indent, "START");
         
         str.println(indent + "/* Parse */");
         TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
@@ -3502,9 +3524,9 @@ aspect Serialize {
         str.println();
         
         str.println(indent + "/* Call the function */");
-        str.println(indent + "printf(\"CALC\\n\"); fflush(stdout);");
+        genCheckPoint(str, indent, "CALC");
         prettyPrint_C(ASTNode.printer_C, str, indent);
-        str.println(indent + "printf(\"DONE\\n\"); fflush(stdout);");
+        genCheckPoint(str, indent, "DONE");
         str.println();
         
         str.println(indent + "/* Print */");
@@ -3513,12 +3535,19 @@ aspect Serialize {
         str.println();
         
         str.println(indent + "/* Free strings */");
-        for (CommonVariableDecl cvd : vars)
-            cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
+        TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
+        for (CommonVariableDecl cvd : vars) {
+             fp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             cvd.type().print(fp);
+        }
         str.println();
         
-        str.println(indent + "printf(\"END\\n\"); fflush(stdout);");
+        genCheckPoint(str, indent, "END");
         codeGenContext = null;
+    }
+    
+    public void FExternalStmt.genCheckPoint(CodeStream str, String indent, String token) {
+        str.println(indent + "printf(\"" + token + "\\n\"); fflush(stdout);");
     }
     
     /**
@@ -3534,25 +3563,12 @@ aspect Serialize {
                 name);
     }
     
-    public void FRecordType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
-        for (FRecordComponentType t : getComponents()) {
-            String n = name + "." + t.getName();
-            t.getFType().genSerialize_C(str, indent, n, parse);
-        }
-    }
-    
     /**
      * Generate code to free strings
      */
     public void FType.genFreeStrings_C(CodeStream str, String indent, String name) {
         if (isString()) {
-            str.formatln("JMCEVAL_free%s(%s);", isArray() ? "Array" : "", name);
-        }
-    }
-    public void FRecordType.genFreeStrings_C(CodeStream str, String indent, String name) {
-        for (FRecordComponentType t : getComponents()) {
-            String n = name + "." + t.getName();
-            t.getFType().genFreeStrings_C(str, indent, n);
+            str.formatln("%sJMCEVAL_free%s(%s);", indent, isArray() ? "Array" : "", name);
         }
     }
     
