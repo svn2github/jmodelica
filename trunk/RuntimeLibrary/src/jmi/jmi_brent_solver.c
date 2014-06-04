@@ -277,11 +277,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 }
                 else {
                     /* increase the step */
-                    jmi_log_node(log, logInfo, "Info", 
-                        "Increasing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
                     lstep *= 2;
                     lower = tmp;
                     f_lower = f_tmp;
+                    jmi_log_node(log, logInfo, "Info", 
+                        "Increasing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
                 }
             }
             else if (upper < block->max[0]) { /* upper might work otherwise */
@@ -308,11 +308,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 }
                 else {
                     /* increase the step */
-                    jmi_log_node(log, logInfo, "Info", 
-                        "Increasing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
                     ustep *= 2;
                     upper = tmp;
                     f_upper = f_tmp;
+                    jmi_log_node(log, logInfo, "Info", 
+                        "Increasing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
                 }
             }
             else {
