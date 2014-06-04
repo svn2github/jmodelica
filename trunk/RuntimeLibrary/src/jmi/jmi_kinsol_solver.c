@@ -399,7 +399,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
                                  "jmi_kinsol_solver",
-                                 "iter   nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind       lambda",
+                                 "iter   nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
                                  1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
@@ -412,7 +412,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 realtype lambda, steplength;
                 int nwritten;
 
-                if (nniters>0) {
+                if (nniters > 0 && solver->last_xnorm > 0) {
                     lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
                     KINGetStepLength(kin_mem, &steplength);
                     lambda = steplength/solver->last_xnorm;
@@ -427,12 +427,12 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if (nniters > 0 && nwritten >= 0) {
                     char *buffer = message + nwritten;
                     if (solver->last_bounding_index >= 0) {
-                        sprintf(buffer, "%4d %4d  %11.4e:%4d  %11.4e",
+                        sprintf(buffer, "  %4d %4d  %11.4e:%4d %11.4e",
                                 solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                                 lambda_max, solver->last_bounding_index+1, lambda);
                     }
                     else {
-                        sprintf(buffer, "%4d %4d  %11.4e      %11.4e",
+                        sprintf(buffer, "  %4d %4d  %11.4e      %11.4e",
                                 solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                                 lambda_max, lambda);
                     }

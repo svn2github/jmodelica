@@ -333,7 +333,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     if (handle_discrete_changes) {
         int iter, non_reals_changed_flag;
         jmi_log_node_t top_node = jmi_log_enter_fmt(log, logInfo, "BlockEventIterations",
-                                      "Starting block (local) event iteration at <t:%E> in <block:%d>",
+                                      "Starting block (local) switch iteration at <t:%E> in <block:%d>",
                                       cur_time, block_solver->id);
        
         jmi_log_reals(log, top_node, logInfo, "ivs", block_solver->x, block_solver->n);
@@ -354,12 +354,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             iter += 1;
 
-            iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Event iteration <iter:%d> at <t:%E>",
+            iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Switch iteration <iter:%d> at <t:%E>",
                                           iter, cur_time);
 
             {
                 char message[256];
-                sprintf(message, "Local iteration %d", iter);
+                sprintf(message, "Switch iteration %d", iter);
                 jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
                              "jmi_block_solver", block_solver->id, message);
             }
@@ -406,10 +406,10 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             int non_reals_changed_flag;
             int non_reals_not_changed_flag;
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
-                "Starting enhanced block iteration at <t:%E>", cur_time);
+                "Starting enhanced switch iteration at <t:%E>", cur_time);
 
             jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
-                         "jmi_block_solver", block_solver->id, "Starting enhanced block iterations");
+                         "jmi_block_solver", block_solver->id, "Starting enhanced switch iterations");
             
             x_new = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));
             x = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));            
@@ -434,7 +434,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 {
                     char message[256];
-                    sprintf(message, "Enhanced block iteration %d", iter);
+                    sprintf(message, "Enhanced switch iteration %d", iter);
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
                                  "jmi_block_solver", block_solver->id, message);
                 }
@@ -518,7 +518,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         if(converged==0){
-            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration in <block:%d, iter:%d> at <t:%E>",
+            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in switch iteration in <block:%d, iter:%d> at <t:%E>",
                  block_solver->id, iter, cur_time);
             ef = 1; /* Return flag */
         }
