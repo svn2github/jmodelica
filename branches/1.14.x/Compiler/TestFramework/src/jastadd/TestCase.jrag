@@ -1,0 +1,454 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.Collection;
+import java.util.Arrays;
+
+import org.jmodelica.util.ErrorCheckType;
+
+aspect TestCases {
+
+/**
+ * \brief base class for test cases.
+ * 
+ * Note that for each attribute (e.g. "attributeName") in the test case 
+ * annotation, there must be a corresponding method (e.g. "setAttributeName()") 
+ * in that subclass of TestCase. Any attribute in the test case annotation with 
+ * a name containing an underscore ("_"), is instead interpreted as a compiler
+ * option, and is set with setXXXOption().
+ * 
+ * @author jakesson
+ */
+abstract public class TestCase {
+
+    private String name = null;
+    private String description = null;
+    private String sourceFileName = null;
+    private String className = null;
+
+    private boolean filter = false;
+    private boolean checkAll = false;
+    private ErrorCheckType checkType = ErrorCheckType.COMPILE;
+
+    protected OptionRegistry options = createOptionsRegistry();
+    private Exception exception = null;
+
+	/**
+	 * \brief Create the OptionsRegistry to be used during compilation.
+	 * 
+	 * Options may be further changed by test annotation.
+	 */
+	protected OptionRegistry createOptionsRegistry() {
+		OptionRegistry or = ModelicaCompiler.createOptions();
+		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
+				"ThirdParty" + File.separator + "MSL";
+		or.addStringOption("MODELICAPATH", modelica_path);
+		or.setBooleanOption("generate_runtime_option_parameters", false);
+		return or;
+	}
+	
+	/**
+	 * \brief Set a string option to be used during compilation.
+	 */
+	public void setStringOption(String key, String value) {
+		try {
+			options.setStringOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
+	
+	/**
+	 * \brief Set a boolean option to be used during compilation.
+	 */
+	public void setBooleanOption(String key, boolean value) {
+		try {
+			options.setBooleanOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
+	
+	/**
+	 * \brief Set an integer option to be used during compilation.
+	 */
+	public void setIntegerOption(String key, int value) {
+		try {
+			options.setIntegerOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
+	
+	/**
+	 * \brief Set a real option to be used during compilation.
+	 */
+	public void setRealOption(String key, double value) {
+		try {
+			options.setRealOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
+	}
+		
+	public void dumpJunit(StringBuilder str, int index) {
+		str.append("  @Test public void " + getName() + "() {\n");
+		str.append("    ts.get("+index+").testMe(asserter);\n");
+	    str.append("  }\n\n");
+	}
+	
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	/**
+	 * @return the sourceFileName
+	 */
+	public String getSourceFileName() {
+		return sourceFileName;
+	}
+
+	/**
+	 * @param sourceFileName the sourceFileName to set
+	 */
+	public void setSourceFileName(String sourceFileName) {
+		this.sourceFileName = sourceFileName;
+	}
+
+	/**
+	 * @return the className
+	 */
+	public String getClassName() {
+		return className;
+	}
+
+	/**
+	 * @param className the className to set
+	 */
+	public void setClassName(String className) {
+		this.className = className;
+	}
+	
+	/**
+	 * \brief Activate or deactivate filtering (see {@link #filter(String)}).
+	 */
+	public void setFilter(boolean val) {
+		filter = val;
+	}
+	
+	/**
+	 * \brief Activate or deactivate incusion of warnings and compliance errors 
+	 *        in error check (see {@link #filterProblems(Collection<Problem>)}).
+	 */
+	public void setCheckAll(boolean val) {
+		checkAll = val;
+	}
+    
+    /**
+     * Set type of error checking to be performed.
+     * 
+     * Available for all test types, but only logical to change for error/warning/compliance tests.
+     */
+    public void setCheckType(String val) {
+        checkType = ErrorCheckType.valueOf(ErrorCheckType.class, val.toUpperCase());
+    }
+    
+    /**
+     * Get type of error checking being performed.
+     */
+    public ErrorCheckType getCheckType() {
+        return checkType;
+    }
+	
+	/**
+	 * \brief Perform filtering on string, if activated.
+	 */
+	protected String filter(String str) {
+		if (filter) {
+			// TODO: Add more filters
+			str = str.replace("%dir%", testFileDirectory());
+			str = str.replace("%msl%", mslDirectory());
+		}
+		return str;
+	}
+	
+	/**
+	 * Get the path to the directory containing the test file.
+	 */
+	protected String testFileDirectory() {
+		return getSourceFileName().replaceFirst("[\\\\/][^\\\\/]*$", "");
+	}
+	
+	/**
+	 * Get the path to the directory containing the MSL.
+	 */
+	protected String mslDirectory() {
+		for (String path : options.getStringOption("MODELICAPATH").split(File.pathSeparator)) {
+			File f = new File(path, "Modelica");
+			if (f.isDirectory())
+				return f.getAbsolutePath();
+		}
+		return null;
+	}
+	
+	/**
+	 * Remove all whitespace.
+	 */
+	public String removeWhitespace(String str) {
+		// TODO: this can mask errors, we need a better filtering
+		return str.replaceAll("\\s+", "");
+	}
+	
+	/**
+	 * \brief Interface for proxy class used to remove dependency on junit from TestCase.
+	 */
+	public static interface Assert {
+		public void fail(String msg);
+		
+		public void assertEquals(String msg, String expected, String actual);
+	}
+	
+	private Assert asserter;
+	
+	/**
+	 * Perform an assertion that two strings are equal.
+	 * 
+	 * @param msg       a message describing what went wrong
+	 * @param expected  the expected value
+	 * @param actual    the actual value
+	 */
+	protected void assertEquals(String msg, String expected, String actual) {
+		expected = expected.replaceAll("\\r\\n|\\r", "\n");
+		expected = expected.replaceFirst("^([ \\t]*[\\n])+", "");
+		expected = expected.replaceAll("[ \\t]*$", "");
+		actual = actual.replaceFirst("^([ \\t]*[\\n\\r])+", "");
+		msg = getDescription() + "\n" + getClass().getSimpleName() + ": " + msg;
+		asserter.assertEquals(msg, expected, actual);
+	}
+	
+	/**
+	 * \brief Signal that the test failed.
+	 * 
+	 * @param msg  a message describing what went wrong
+	 */
+	protected void fail(String msg) {
+		asserter.fail(getDescription() + "\n" + getClass().getSimpleName() + ": " + msg);
+	}
+	
+	/**
+	 * \brief Signal that the test failed.
+	 * 
+	 * @param e  the exception that caused the failure
+	 */
+	protected void fail(Exception e) {
+		if (e instanceof ModelicaException) 
+			fail(e.getMessage());
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		e.printStackTrace(new PrintStream(out));
+		fail("Exception caught in test case: " + out.toString());
+	}
+	
+	public void testMe(Assert a) {
+		try {
+			asserter = a;
+			performTest();
+		} catch (ParserException e) {
+			fail(e);
+		} catch (ModelicaClassNotFoundException e) {
+			fail(e);
+		} catch (beaver.Parser.Exception e) {
+			fail(e);
+		} catch (IOException e) {
+			fail(e);
+		}
+	}
+	
+	public void performTest() throws ParserException, beaver.Parser.Exception, 
+				IOException, ModelicaClassNotFoundException {
+		if (exception != null)
+			fail(exception);
+		
+		// Parse
+		ParserHandler ph = new ParserHandler();
+		SourceRoot sr = ph.parseFile(getSourceFileName());
+		sr.options = options;
+		sr.setFileName(getSourceFileName());
+		
+		
+        // Instantiate and check for errors
+        InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+        Collection<Problem> problems = null;
+        try {
+            ipr.checkErrorsInInstClass(className, checkType);
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+            if (testSemanticProblems(problems)) return;
+        }
+        
+        
+        // Flatten class and check errors reported during flattening
+        InstClassDecl icd = ipr.lookupInstClassQualified(getClassName());
+        FClass fc = FClass.create(icd, getSourceFileName(), null);
+        try {
+            icd.flattenInstClassDecl(fc);
+            problems = sr.collectWarnings();
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+        }
+        if (testSemanticProblems(problems)) return;
+        
+        
+        // Test flattened class
+        if (testFlattened(fc)) return;
+        
+        
+        // Transform canonical and check for errors again
+        try {
+            fc.transformCanonical();
+            fc.errorCheck(checkType);
+            problems = fc.collectWarnings();
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+        }
+        if (testTransformedProblems(problems)) return;
+		
+		
+		// Test transformed class
+	    testTransformed(fc);
+	}
+
+	/**
+	 * \brief Perform tests on the set of semantic problems found in the instance tree.
+	 * 
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testSemanticProblems(Collection<Problem> problems) {
+		return testProblems(problems);
+	}
+	
+	/**
+	 * \brief Perform tests on flattened class.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testFlattened(FClass fc) {
+		return false;
+	}
+
+	/**
+	 * \brief Perform tests on flat class after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testTransformed(FClass fc) {
+		return false;
+	}
+
+	/**
+	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
+	 * 
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testTransformedProblems(Collection<Problem> problems) {
+		return testProblems(problems);
+	}
+	
+	/**
+	 * \brief Perform tests on a set of semantic problems.
+	 * 
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case should stop after this method
+	 */
+	protected boolean testProblems(Collection<Problem> problems) {
+		filterProblems(problems);
+		if (problems.size() > 0)
+			fail(new CompilerException(problems));
+		return false;
+	}
+	
+	/**
+	 * \brief Filters out any uninteresting problems from a set of semantic problems.
+	 * 
+	 * Default implementation removes any warnings and any COMPLIANCE errors.
+	 */
+	protected void filterProblems(Collection<Problem> problems) {
+		for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
+			if (!it.next().isTestError(checkAll))
+				it.remove();
+	}
+	
+	/**
+	 * \brief Compare a flat class to a pretty-printed correct model and fail if different.
+	 */
+	protected void testPrettyPrint(FClass fc, String correct) {
+		TokenTester tt = new TokenTester();
+		String test = fc.prettyPrint("");
+		if (!tt.test(test, correct)) {
+			String diff = tt.firstDiff();
+			String err = "Flat class does not match expected.";
+			assertEquals(err, correct, test);
+		}
+	}
+	
+	/**
+	 * \brief Sort lines in string alphabetically.
+	 */
+	protected String sortLines(String str) {
+		String[] lines = str.split("\n|\r|\r\n");
+		Arrays.sort(lines);
+		StringBuilder buf = new StringBuilder();
+		for (String line : lines) {
+			buf.append(line);
+			buf.append('\n');
+		}
+		return buf.toString();
+	}
+
+}
+
+}

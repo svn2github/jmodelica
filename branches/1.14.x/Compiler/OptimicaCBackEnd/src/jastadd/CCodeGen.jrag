@@ -1,0 +1,64 @@
+import java.io.PrintStream;
+
+/*
+Copyright (C) 2009 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect OptimicaCCodeGen {
+	
+	@Override
+	public void FTimedVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+		if (getName().myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+			str.print("(");
+			str.print(getName().name_C()+"_p_(" + 
+					myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
+			str.print("*sf(");
+			str.print(getName().myFV().valueReference());
+			str.print("))");
+		} else {
+			str.print(getName().name_C()+"_p_(" + 
+					myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
+		}		
+	}
+
+	public void FConstraintEq.genResidual_C(int i, String indent, CodeStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(" - (");
+		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}
+
+	public void FConstraintLeq.genResidual_C(int i, String indent, CodeStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getLeft().prettyPrint_C(str,"");
+		str.print(" - (");
+		getRight().prettyPrint_C(str,"");
+		str.print(");\n");
+	}
+
+	public void FConstraintGeq.genResidual_C(int i, String indent, CodeStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(" - (");
+		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}
+	
+	eq FTimed.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
+	eq FOptParameter.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
+}
+
+
