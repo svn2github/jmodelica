@@ -512,7 +512,7 @@ aspect TransformCanonical {
 			}
 			for (FAbstractEquation e : equations())
 				if (e.numScalarEquations() == 0)
-					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE));
+					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER));
 			daeStructuredBLT = new StructuredBLT(this, daeBLT);
 			daeStructuredBLT.errorCheck();
 			log.info(daeStructuredBLT);

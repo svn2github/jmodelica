@@ -59,7 +59,6 @@ aspect IndexReduction {
         return !g.isComplete() && continuousEquations().size() > 0 && derivativeVariables().size() > 0;
     }
     
-    
     /**
      * Perform index reduction on model.
      * 
@@ -286,6 +285,28 @@ aspect IndexReduction {
         return skip;
     }
     
+    public class EquationBlockFactory {
+        public static final BlockProducer INDEX_REDUCTION_BLOCK_PRODUCER = new IndexReductionBlockProducer();
+
+        private final static class IndexReductionBlockProducer extends BlockProducer {
+            @Override
+            public boolean useTearing() {
+                return false;
+            }
+
+            @Override
+            public boolean duringTearing() {
+                return false;
+            }
+
+            @Override
+            public String symbol() {
+                return "I";
+            }
+        }
+    }
+    
+    
     public IndexReductionResult BiPGraph.reduceIndex(boolean resetMatching) {
         IndexReductionResult result = new IndexReductionResult();
         if (resetMatching) {
@@ -473,7 +494,7 @@ aspect IndexReduction {
             This will be done when the final algorithm have been settled.
         */
         
-        BLT blt = computeBLT(fclass.root().options, false);
+        BLT blt = computeBLT(fclass.root().options, EquationBlockFactory.INDEX_REDUCTION_BLOCK_PRODUCER);
     
         ASTNode.log.info(blt);
 

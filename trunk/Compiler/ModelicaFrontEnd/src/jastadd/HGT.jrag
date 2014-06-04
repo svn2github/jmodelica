@@ -275,7 +275,25 @@ aspect HGT {
     }
     
     public class EquationBlockFactory{
-        
+        public static final BlockProducer HAND_GUIDED_TEARING_BLOCK_PRODUCER = new HandGuidedTearingBlockProducer();
+
+        private final static class HandGuidedTearingBlockProducer extends BlockProducer {
+            @Override
+            public boolean useTearing() {
+                return true;
+            }
+
+            @Override
+            public boolean duringTearing() {
+                return true;
+            }
+
+            @Override
+            public String symbol() {
+                return "M";
+            }
+        }
+
         private static HandGuidedTearingAlgorithm HAND_GUIDED_TEARING = addTearingAlgorithm(new HandGuidedTearingAlgorithm());
 
         public static class HandGuidedTearingAlgorithm extends TearingAlgorithm {
@@ -285,8 +303,8 @@ aspect HGT {
             }
 
             @Override
-            public TornEquationBlock tear(Collection<Eq> block, OptionRegistry options) {
-                TornEquationBlock teb = new TornEquationBlock();
+            public TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options) {
+                TornEquationBlock teb = new TornEquationBlock(producer);
                 tearHandGuided(block, teb, options.getBooleanOption("automatic_tearing"));
                 return teb;
             }
@@ -350,7 +368,7 @@ aspect HGT {
                 for (Eq hgtEqn : HGTEquations) {
                     Var iterVar = varsInBlock.remove(hgtEqn.getEquation().getHGTIterationVariable());
                     ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", hgtEqn.getEquation(), iterVar.getVariable().name());
-                    eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(hgtEqn, iterVar));
+                    eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(hgtEqn, iterVar, HAND_GUIDED_TEARING_BLOCK_PRODUCER));
                 }
                 if (recalculateMatchings) {
                     BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
@@ -367,7 +385,7 @@ aspect HGT {
                             ASTNode.log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
                             newGraph.removeEquation(e);
                             newGraph.removeVariable(v);
-                            eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
+                            eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v, HAND_GUIDED_TEARING_BLOCK_PRODUCER));
                         }
                         if (eIt.hasNext() || vIt.hasNext()) {
                             StringBuilder sb = new StringBuilder();
@@ -389,7 +407,7 @@ aspect HGT {
                     boolean allInnerAreSolved = true;
                     Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
                     for (Collection<Eq> innerBlock : innerBLT) {
-                        SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
+                        SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, HAND_GUIDED_TEARING_BLOCK_PRODUCER, true);
                         if (seb != null && seb.isSolvable()) {
                             solvedBlocks.add(seb);
                         } else {

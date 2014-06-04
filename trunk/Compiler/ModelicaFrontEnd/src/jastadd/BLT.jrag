@@ -43,49 +43,37 @@ aspect BLT{
 		    return groups.values();
 		}
 
-		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation eqn, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve) {
-			return createSimpleEquationBlock(eqn, fvs, assignedIndices, solve, false);
-		}
-
-		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve, boolean duringTearing) {
+		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, BlockProducer producer, boolean solve) {
 			// Check if equation is solvable for all active variables (only if we want a solved block)
 			Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
 			for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
-				solvability = Solvability.least(solvability, e.isSolved(it.next().name(), duringTearing));
+				solvability = Solvability.least(solvability, e.isSolved(it.next().name(), producer.duringTearing()));
 			
-			return e.createSimpleEquationBlock(fvs, assignedIndices, solvability);
+			return e.createSimpleEquationBlock(fvs, assignedIndices, solvability, producer);
 		}
 		
 		/**
 		 * This method takes an equation and a variable and constructs an equation block.
 		 * If <code>solve</code> is true the equation will be solved for the variable. 
 		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, boolean solve) {
-			return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), solve);
+		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, BlockProducer producer, boolean solve) {
+			return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), producer, solve);
 		}
 
-		/**
-		 * This method takes a list of Eq objects and create equation blocks
-		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
-		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
-			return createSimpleEquationBlock(component, solve, false);
-		}
-		
 		/**
 		 * This method takes an equation <code>eqn</code> and variable
 		 * <code>var</code> and produces an unsolved block of types
 		 * ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
 		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var) {
-			return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), false);
+		public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var, BlockProducer producer) {
+			return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), producer, false);
 		}
 		
 		/**
 		 * This method takes a list of Eq objects and create equation blocks
 		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
 		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, boolean solve, boolean duringTearing) {
+		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, BlockProducer producer, boolean solve) {
 			Collection<FVariable> fvs = new ArrayList<FVariable>();
 			Collection<Integer> assignedIndices = new ArrayList<Integer>();
 			
@@ -97,7 +85,7 @@ aspect BLT{
 				assignedIndices.add(eqn.groupNumber());
 			} 
 
-			return createSimpleEquationBlock(e, fvs, assignedIndices, solve, duringTearing);
+			return createSimpleEquationBlock(e, fvs, assignedIndices, producer, solve);
 			
 		}
 
@@ -108,9 +96,9 @@ aspect BLT{
          * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
          * a real or mixed equation block is created.
          */
-        public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean allowTearing, OptionRegistry options) {
+        public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, BlockProducer producer, OptionRegistry options) {
             
-            SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
+            SimpleEquationBlock seb = createSimpleEquationBlock(component, producer, true);
             if (seb != null && seb.isSolvable())
                 return seb;
             
@@ -134,15 +122,15 @@ aspect BLT{
             }
             
             EquationBlock block = null;
-            if (allowTearing && realEquations.size() > 1) {
-                TornEquationBlock tornBlock = tear(component, options);
+            if (producer.useTearing() && realEquations.size() > 1) {
+                TornEquationBlock tornBlock = tear(component, producer, options);
                 if (tornBlock != null && !tornBlock.solvedRealBlocks().isEmpty())
                     block = tornBlock;
             }
             if (block == null) {
                 BiPGraph g = new BiPGraph(nonRealEquations);
-                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(options);
-                block = new EquationBlock(nonRealBlocks, createSimpleBlocks(groupComponent(realEquations)));
+                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(producer, options);
+                block = new EquationBlock(producer, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
             }
             
             if (linear)
@@ -150,69 +138,96 @@ aspect BLT{
             return block;
         }
 		
-		public static Collection<SimpleEquationBlock> createSimpleBlocks(Collection<Collection<Eq>> eqs) {
+		public static Collection<SimpleEquationBlock> createSimpleBlocks(Collection<Collection<Eq>> eqs, BlockProducer producer) {
 			Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
 			for (Collection<Eq> e : eqs)
-				blocks.add(createSimpleEquationBlock(e, false));
+				blocks.add(createSimpleEquationBlock(e, producer, false));
 			return blocks;
 		}
 		
-	}
+        public static abstract class BlockProducer {
+            public abstract boolean useTearing();
+            public abstract boolean duringTearing();
+            public abstract String symbol();
+        }
+        public static final BlockProducer DEFAULT_BLOCK_PRODUCER = new DefaultBlockProducer();
+        private final static class DefaultBlockProducer extends BlockProducer {
+            @Override
+            public boolean useTearing() {
+                return true;
+            }
 
+            @Override
+            public boolean duringTearing() {
+                return false;
+            }
+
+            @Override
+            public String symbol() {
+                return "D";
+            }
+        }
+        
+	}
+	
 	/**
 	 * Create a simple equation block from a single equation. 
 	 */
-	public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
+	public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer) {
 		throw new UnsupportedOperationException("Unable to construct equation block from equation type " + getClass().getSimpleName());
 	}
 
-	public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+	@Override
+	public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer) { 
 		FVariable fv = fvs.iterator().next();
 		if (solvability.isAnalyticallySolvable()) { // Solved scalar equation
-			return new SolvedScalarEquationBlock(this, fv);
+			return new SolvedScalarEquationBlock(producer, this, fv);
 		} else if(solvability.isSolvable()) { // Numerically solvable scalar equation
-			return new NumericallySolvedScalarEquationBlock(this, fv);
+			return new NumericallySolvedScalarEquationBlock(producer, this, fv);
 		} else { // Unsolved scalar equation
-			return new UnsolvedScalarEquationBlock(this, fv);
+			return new UnsolvedScalarEquationBlock(producer, this, fv);
 		}
 	}
 
-	public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+    @Override
+	public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer) { 
 		if (numScalarEquations() == 0)
-			return new MetaEquationBlock(this);
+			return new MetaEquationBlock(producer, this);
 		for (Integer assignedIndex : assignedIndices)
 			if (assignedIndex == null)
 				throw new IllegalArgumentException("FAlgorithm, AssignedIndex must be set for this class type! equation: " + this);
 		if (solvability.isAnalyticallySolvable()) {
-			return new SolvedAlgorithmBlock(this, fvs, assignedIndices);
+			return new SolvedAlgorithmBlock(producer, this, fvs, assignedIndices);
 		} else {
-			return new UnsolvedAlgorithmBlock(this, fvs, assignedIndices);
+			return new UnsolvedAlgorithmBlock(producer, this, fvs, assignedIndices);
 		}
 	}
 
-	public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
+    @Override
+	public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer) {
 		if (numScalarEquations() == 0)
-			return new MetaEquationBlock(this);
+			return new MetaEquationBlock(producer, this);
 		for (Integer assignedIndex : assignedIndices)
 			if (assignedIndex == null)
 				throw new IllegalArgumentException("FFunctionCallEquation, AssignedIndex must be set for this class type! equation: " + this);
 		if (solvability.isAnalyticallySolvable()) {
-			return new SolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
+			return new SolvedFunctionCallEquationBlock(producer, this, fvs, assignedIndices);
 		} else {
-			return new UnsolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
+			return new UnsolvedFunctionCallEquationBlock(producer, this, fvs, assignedIndices);
 		}
 	}
 	
-    public SimpleEquationBlock FIfEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+    @Override
+    public SimpleEquationBlock FIfEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer) { 
         if (numScalarEquations() == 0)
-            return new MetaEquationBlock(this);
+            return new MetaEquationBlock(producer, this);
         for (Integer assignedIndex : assignedIndices)
             if (assignedIndex == null)
                 throw new IllegalArgumentException("FIfEquation, AssignedIndex must be set for this class type! equation: " + this);
         if (solvability.isAnalyticallySolvable()) {
-            return new SolvedIfEquationBlock(this, fvs, assignedIndices);
+            return new SolvedIfEquationBlock(producer, this, fvs, assignedIndices);
         } else {
-            return new UnsolvedIfEquationBlock(this, fvs, assignedIndices);
+            return new UnsolvedIfEquationBlock(producer, this, fvs, assignedIndices);
         }
     }
 
@@ -220,28 +235,28 @@ aspect BLT{
 	public class BiPGraph{}
 	
     public BLT BiPGraph.computeBLT(OptionRegistry options) {
-        return computeBLT(options, true);
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER);
     }
 
-	public BLT BiPGraph.computeBLT(OptionRegistry options, boolean allowTearing) {
+	public BLT BiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer) {
 		ASTNode.beginStep("computeBLT()");
 		try {
 			Collection<Collection<Eq>> components = tarjan(options);
 			BLT blt = new BLT();
 			int blockNumber = 1;
 			for (Collection<Eq> bl : components)
-				blt.add(EquationBlockFactory.createEquationBlock(bl, allowTearing, options));
+				blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
 			return blt;
 		} finally {
 			ASTNode.endStep("computeBLT()");
 		}
 	}
 	
-    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks(OptionRegistry options) {
+    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
         Collection<Collection<Eq>> components = tarjan(options);
         Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
         for (Collection<Eq> component : components) {
-            SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, true);
+            SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, producer, true);
             if (block == null) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("Non-real equations contains an algebraic loop:");
@@ -256,7 +271,7 @@ aspect BLT{
                 sb.append("Unable to solve variable '" + e.getMatching().getName() + "' from equation:\n");
                 sb.append(e.getEquation());
                 throw new BLTException(sb.toString());
-        }
+            }
             blocks.add(block);
         }
         return blocks;
@@ -304,14 +319,6 @@ aspect BLT{
 			CodeStream out = new CodeStream(file);
 			for (AbstractEquationBlock block : this)
 				block.printIterationVariables(out);
-			out.close();
-		}
-		
-		public void writeTearingPairsToFile(File file) throws FileNotFoundException {
-			CodeStream out = new CodeStream(file);
-			int count = 0;
-			for (AbstractEquationBlock block : this)
-				block.printTearingPairs(out, count++);
 			out.close();
 		}
 		
@@ -601,18 +608,23 @@ aspect BLT{
 		}
 	}
 
-	/**
-	 * Abstract class for equation blocks resulting from the BLT transformation
-	 */
-	public abstract class AbstractEquationBlock {
-	
-		private Set<AbstractEquationBlock> allPredecessors = null;
-		private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
-		private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
-		private Set<FVariable> dependsOnVariables = null; 
-		private boolean visited = false;
-		private boolean predecessorsSet = false;
-	
+    /**
+     * Abstract class for equation blocks resulting from the BLT transformation
+     */
+    public abstract class AbstractEquationBlock {
+
+        private Set<AbstractEquationBlock> allPredecessors = null;
+        private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
+        private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
+        private Set<FVariable> dependsOnVariables = null; 
+        private boolean visited = false;
+        private boolean predecessorsSet = false;
+        private final EquationBlockFactory.BlockProducer producer;
+
+        public AbstractEquationBlock(EquationBlockFactory.BlockProducer producer) {
+            this.producer = producer;
+        }
+
         /**
          * Returns all equations in this block.
          * 
@@ -808,8 +820,6 @@ aspect BLT{
 		
 		protected void printIterationVariables(CodeStream str) {}
 		
-		protected void printTearingPairs(CodeStream str, int blockNumber) {}
-		
         protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
             FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
             int row = 0;
@@ -874,6 +884,11 @@ aspect BLT{
                     l.addAll(sb.allEquations());
             return l;
         }
+        
+        public EquationBlockFactory.BlockProducer producer() {
+            return producer;
+        }
+        
     }
 
     /**
@@ -890,9 +905,12 @@ aspect BLT{
         private FExp[][] jacobian = null;
         private FTypePrefixVariability variability = FContinuous.instance;
 
-        protected EquationBlock() {}
+        protected EquationBlock(EquationBlockFactory.BlockProducer producer) {
+            super(producer);
+        }
         
-        public EquationBlock(Collection<SimpleEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
+        public EquationBlock(EquationBlockFactory.BlockProducer producer, Collection<SimpleEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
+            super(producer);
             this.solvedBlocks.addAll(solvedBlocks);
             this.unsolvedBlocks.addAll(unsolvedBlocks);
         }
@@ -1222,7 +1240,9 @@ aspect BLT{
      */
     public class TornEquationBlock extends EquationBlock {
 
-        public TornEquationBlock() {}
+        public TornEquationBlock(EquationBlockFactory.BlockProducer producer) {
+            super(producer);
+        }
 
         protected void prettyPrint_typeStr(CodeStream str) {
             str.print("Torn");
@@ -1271,32 +1291,6 @@ aspect BLT{
                 str.println(var.name());
         }
 
-        @Override
-        protected void printTearingPairs(CodeStream str, int blockNumber) {
-            int counter = 0;
-            str.println("In block #" + blockNumber);
-            for (SimpleEquationBlock block : unsolvedBlocks()) {
-                boolean equationHasHGT = block.equation().isHGTResidual();
-                FVariable iterVar = block.equation().getHGTIterationVariable();
-                for (FVariable var : block.allVariables()) {
-                    boolean variableHasHGT = var.isHGTVarComponent() || var == iterVar;
-                    str.print(" (");
-                    str.print(variableHasHGT ? 'M' : 'A');
-                    str.print(") " + (counter++) + " " + var.name() + " (");
-                    var.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
-                    str.println(")");
-                    str.print("   (");
-                    str.print(equationHasHGT ? 'M' : 'A');
-                    str.print(") " + block.equation().toString()); 
-                    if (block.equation().hasNominal())
-                        str.print("    (Nominal=" + block.equation().getNominal() + ")");
-                    str.println();
-                }
-                str.println();
-            }
-            str.println();
-        }
-
     }
 
 	/**
@@ -1306,7 +1300,8 @@ aspect BLT{
 	public abstract class SimpleEquationBlock extends AbstractEquationBlock {
 		private FAbstractEquation equation;
 		
-		public SimpleEquationBlock(FAbstractEquation equation) {
+		public SimpleEquationBlock(EquationBlockFactory.BlockProducer producer, FAbstractEquation equation) {
+		    super(producer);
 			this.equation = equation;
 		}
 		
@@ -1433,8 +1428,8 @@ aspect BLT{
 	 */
 	public class MetaEquationBlock extends SimpleEquationBlock {
 
-		public MetaEquationBlock(FAbstractEquation equation) {
-			super(equation);
+		public MetaEquationBlock(EquationBlockFactory.BlockProducer producer, FAbstractEquation equation) {
+			super(producer, equation);
 		}
 
 		@Override
@@ -1463,8 +1458,8 @@ aspect BLT{
 	public abstract class ScalarEquationBlock extends SimpleEquationBlock {
 		protected FVariable fv;
 		
-		public ScalarEquationBlock(FEquation eqn, FVariable fv) {
-			super(eqn);
+		public ScalarEquationBlock(EquationBlockFactory.BlockProducer producer, FEquation eqn, FVariable fv) {
+			super(producer, eqn);
 			this.fv = fv;
 		}
 
@@ -1485,8 +1480,8 @@ aspect BLT{
 	 */
 	public class SolvedScalarEquationBlock extends ScalarEquationBlock {
 
-		public SolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
-			super(eqn, fv);
+		public SolvedScalarEquationBlock(EquationBlockFactory.BlockProducer producer, FEquation eqn, FVariable fv) {
+			super(producer, eqn, fv);
 		}
 
 		@Override
@@ -1514,8 +1509,8 @@ aspect BLT{
 	 */
 	public class UnsolvedScalarEquationBlock extends ScalarEquationBlock {
 		
-		public UnsolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
-			super(eqn, fv);
+		public UnsolvedScalarEquationBlock(EquationBlockFactory.BlockProducer producer, FEquation eqn, FVariable fv) {
+			super(producer, eqn, fv);
 		}
 
 		@Override
@@ -1544,8 +1539,8 @@ aspect BLT{
 	 */
 	public class NumericallySolvedScalarEquationBlock extends ScalarEquationBlock {
 		
-		public NumericallySolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
-			super(eqn, fv);
+		public NumericallySolvedScalarEquationBlock(EquationBlockFactory.BlockProducer producer, FEquation eqn, FVariable fv) {
+			super(producer, eqn, fv);
 		}
 
 		@Override
@@ -1597,8 +1592,8 @@ aspect BLT{
 		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
 		protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
 		
-		public FunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVars, Collection<Integer> assignedIndices) {
-			super(eqn);
+		public FunctionCallEquationBlock(EquationBlockFactory.BlockProducer producer, FFunctionCallEquation eqn, Collection<FVariable> activeVars, Collection<Integer> assignedIndices) {
+			super(producer, eqn);
 			this.activeVars.addAll(activeVars);
 			this.assignedIndices.addAll(assignedIndices);
 		}
@@ -1635,8 +1630,8 @@ aspect BLT{
 	 */
 	public class SolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
 		
-		public SolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-			super(eqn, activeVariables, assignedIndices);
+		public SolvedFunctionCallEquationBlock(EquationBlockFactory.BlockProducer producer, FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(producer, eqn, activeVariables, assignedIndices);
 		}
 
 		@Override
@@ -1651,8 +1646,8 @@ aspect BLT{
 	 */
 	public class UnsolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
 		
-		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-			super(eqn, activeVariables, assignedIndices);
+		public UnsolvedFunctionCallEquationBlock(EquationBlockFactory.BlockProducer producer, FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(producer, eqn, activeVariables, assignedIndices);
 		}
 
 		@Override
@@ -1676,8 +1671,8 @@ aspect BLT{
 		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
 		protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
 		
-		public AlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-			super(alg);
+		public AlgorithmBlock(EquationBlockFactory.BlockProducer producer, FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(producer, alg);
 			this.activeVars.addAll(activeVariables);
 			this.assignedIndices.addAll(assignedIndices);
 		}
@@ -1719,8 +1714,8 @@ aspect BLT{
 	 */
 	public class SolvedAlgorithmBlock extends AlgorithmBlock {
 		
-		public SolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-			super(alg, activeVariables, assignedIndices);
+		public SolvedAlgorithmBlock(EquationBlockFactory.BlockProducer producer, FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(producer, alg, activeVariables, assignedIndices);
 		}
 
         @Override
@@ -1735,8 +1730,8 @@ aspect BLT{
 	 */
 	public class UnsolvedAlgorithmBlock extends AlgorithmBlock {
 		
-		public UnsolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-			super(alg, activeVariables, assignedIndices);
+		public UnsolvedAlgorithmBlock(EquationBlockFactory.BlockProducer producer, FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(producer, alg, activeVariables, assignedIndices);
 		}
 
         @Override
@@ -1754,8 +1749,8 @@ aspect BLT{
         protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
         protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
 
-        public IfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-            super(equation);
+        public IfEquationBlock(EquationBlockFactory.BlockProducer producer, FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(producer, equation);
             this.activeVars.addAll(activeVariables);
             this.assignedIndices.addAll(assignedIndices);
         }
@@ -1797,8 +1792,8 @@ aspect BLT{
      */
     public class SolvedIfEquationBlock extends IfEquationBlock {
 
-        public SolvedIfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-            super(equation, activeVariables, assignedIndices);
+        public SolvedIfEquationBlock(EquationBlockFactory.BlockProducer producer, FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(producer, equation, activeVariables, assignedIndices);
         }
 
         @Override
@@ -1813,8 +1808,8 @@ aspect BLT{
      */
     public class UnsolvedIfEquationBlock extends IfEquationBlock {
         
-        public UnsolvedIfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
-            super(equation, activeVariables, assignedIndices);
+        public UnsolvedIfEquationBlock(EquationBlockFactory.BlockProducer producer, FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(producer, equation, activeVariables, assignedIndices);
         }
 
         @Override
@@ -1860,13 +1855,13 @@ aspect Tearing {
                 return other.priority - priority;
             }
 
-            public abstract TornEquationBlock tear(Collection<Eq> block, OptionRegistry options);
+            public abstract TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options);
         }
         
-        public static TornEquationBlock tear(Collection<Eq> block, OptionRegistry options) {
+        public static TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options) {
             for (TearingAlgorithm algorithm : tearingAlgorithms)
                 if (algorithm.active(options))
-                    return algorithm.tear(block, options);
+                    return algorithm.tear(block, producer, options);
             return null;
         }
         
@@ -1878,8 +1873,26 @@ aspect AutomaticTearing {
 
     public class EquationBlockFactory{
         
-        private static AutomaticTearingAlgorithm AUTOMATIC_TEARING = addTearingAlgorithm(new AutomaticTearingAlgorithm());
+        public static final BlockProducer AUTOMATIC_TEARING_BLOCK_PRODUCER = new AutomaticTearingBlockProducer();
+        private final static class AutomaticTearingBlockProducer extends BlockProducer {
+            @Override
+            public boolean useTearing() {
+                return true;
+            }
 
+            @Override
+            public boolean duringTearing() {
+                return true;
+            }
+
+            @Override
+            public String symbol() {
+                return "A";
+            }
+        }
+        
+        private static AutomaticTearingAlgorithm AUTOMATIC_TEARING = addTearingAlgorithm(new AutomaticTearingAlgorithm());
+        
         public static class AutomaticTearingAlgorithm extends TearingAlgorithm {
 
             public AutomaticTearingAlgorithm() {
@@ -1887,8 +1900,8 @@ aspect AutomaticTearing {
             }
 
             @Override
-            public TornEquationBlock tear(Collection<Eq> block, OptionRegistry options) {
-                TornEquationBlock teb = new TornEquationBlock();
+            public TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options) {
+                TornEquationBlock teb = new TornEquationBlock(producer);
                 tear(block, teb);
                 return teb;
             }
@@ -1913,7 +1926,7 @@ aspect AutomaticTearing {
 
                 if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
                                         //     proceed with recursive tearing of block
-                    SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
+                    SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
@@ -1946,7 +1959,7 @@ aspect AutomaticTearing {
                     java.util.List<Var> tearings = new ArrayList<Var>();
 
                     for (Collection<Eq> bInner : innerBlocks) {
-                        SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, true, true);
+                        SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                         if (tearBlock != null && tearBlock.isSolvable()) {
                             eb.addSolvedBlock(tearBlock);
                             // If the equation contains a Var in SUMV, that Var cannot be
@@ -2007,7 +2020,7 @@ aspect AutomaticTearing {
                                 if (isChanged) {
                                     Collection<Collection<Eq>> newBlocks = gInner.tarjan();
                                     for (Collection<Eq> bInnerInner : newBlocks) {
-                                        tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, true, true);
+                                        tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                                         if (tearBlock != null && tearBlock.isSolvable()) {
                                             eb.addSolvedBlock(tearBlock);
                                         } else {
@@ -2030,7 +2043,7 @@ aspect AutomaticTearing {
                     }
                     for (int i = 0; i < tearings.size(); i++) {
                         ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
-                        eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i)));
+                        eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i), AUTOMATIC_TEARING_BLOCK_PRODUCER));
                     }
                 }
             }
@@ -2046,10 +2059,10 @@ aspect AutomaticTearing {
                 bestIter.isIter(true);
                 res.isRes(true);
                 ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
-                eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter));
+                eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
                 Collection<Collection<Eq>> blt = g.tarjan();
                 for (Collection<Eq> block : blt) {
-                    SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
+                    SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
@@ -2058,5 +2071,40 @@ aspect AutomaticTearing {
                 }
             }
         }
+    }
+}
+
+aspect TearingPrinting {
+    public void BLT.writeTearingPairsToFile(File file) throws FileNotFoundException {
+        CodeStream out = new CodeStream(file);
+        int count = 0;
+        for (AbstractEquationBlock block : this)
+            block.printTearingPairs(out, count++);
+        out.close();
+    }
+    
+    protected void AbstractEquationBlock.printTearingPairs(CodeStream str, int blockNumber) {}
+    
+    @Override
+    protected void TornEquationBlock.printTearingPairs(CodeStream str, int blockNumber) {
+        int counter = 0;
+        str.println("In block #" + blockNumber);
+        for (SimpleEquationBlock block : unsolvedBlocks()) {
+            for (FVariable var : block.allVariables()) {
+                str.print(" (");
+                str.print(block.producer().symbol());
+                str.print(") " + (counter++) + " " + var.name() + " (");
+                var.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
+                str.println(")");
+                str.print("   (");
+                str.print(block.producer().symbol());
+                str.print(") " + block.equation().toString()); 
+                if (block.equation().hasNominal())
+                    str.print("    (Nominal=" + block.equation().getNominal() + ")");
+                str.println();
+            }
+            str.println();
+        }
+        str.println();
     }
 }
