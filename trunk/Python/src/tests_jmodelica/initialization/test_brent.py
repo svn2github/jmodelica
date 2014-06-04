@@ -65,7 +65,6 @@ def test_logarithmic():
         yy = N.log(1+x)
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
-        print (x, y)
 
 @testattr(fmi = True)
 def test_xlogx():
