@@ -80,7 +80,6 @@ aspect Flattening {
 		root().breakOnErrors();
 		flatten(fc, false);
 		fc.removeUniqueFVariableSet();
-		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
 		fc.updateVariablilityForVariablesInWhen();
@@ -726,6 +725,7 @@ aspect Flattening {
 		   ae.flatten(name, fc);
 		getInstComponentDeclList().flatten(fc, excludeBinding);
 		getInstExtendsList().flatten(fc, excludeBinding);
+        contribute(fc);
 	}
 	
 	/**
@@ -2794,6 +2794,8 @@ aspect AttributeContributer {
 
         protected abstract void contribute(InstBaseClassDecl src, FFunctionDecl dest);
 
+        protected abstract void contribute(InstNode src, FClass dest);
+
         @Override
         public String toString() {
             return name;
@@ -2846,6 +2848,14 @@ aspect AttributeContributer {
             for (AttributeContributer contributer : attributeContributers())
                 contributer.contribute(this, function);
             return function;
+        }
+    }
+    
+    public class InstNode {
+        public FClass contribute(FClass fClass) {
+            for (AttributeContributer contributer : attributeContributers())
+                contributer.contribute(this, fClass);
+            return fClass;
         }
     }
     

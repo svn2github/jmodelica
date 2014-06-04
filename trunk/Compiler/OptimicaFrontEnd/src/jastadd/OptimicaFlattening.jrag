@@ -64,6 +64,7 @@ aspect OptimicaFlattening {
            c.flatten(name, fc);
 		getInstComponentDeclList().flatten(fc, excludeBinding);
 		getInstExtendsList().flatten(fc, excludeBinding);
+        contribute(fc);
 	}
 	
 	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {

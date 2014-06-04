@@ -45,6 +45,9 @@ aspect EquationName {
 
             @Override
             protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
+
+            @Override
+            protected void contribute(InstNode src, FClass dest) {}
         }
     }
     
@@ -108,6 +111,11 @@ aspect HGT {
 
             @Override
             protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
+
+            @Override
+            protected void contribute(InstNode src, FClass dest) {
+                src.createAndFlattenResidualPairs(dest);
+            }
         }
     }
     
@@ -518,17 +526,9 @@ aspect ResidualPairs{
     /**
      * \brief Find functions, record and enumeration declarations that need to be flattened.
      */
-    protected void ASTNode.createAndFlattenResidualPairs(FClass fc) {
-        for (ASTNode n : this)
-            n.createAndFlattenResidualPairs(fc);
-    }
-    
-    @Override
     protected void InstNode.createAndFlattenResidualPairs(FClass fc) {
         if (!root().options.getBooleanOption("hand_guided_tearing"))
             return;
-        getInstComponentDecls().createAndFlattenResidualPairs(fc);
-        getInstExtendsList().createAndFlattenResidualPairs(fc);
         FQName prefix = getFQName();
         for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
             if (!pair.name().equals("Pair"))
