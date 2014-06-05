@@ -463,7 +463,7 @@ def _gen_log_level(log_string):
         raise IllegalLogStringError("Piping compiler log to stderr is not allowed in separate process.")
     if len(log_string) == 0:
         log_string = 'w'
-    log_string += ",i|xml|stderr"
+    log_string += ",w|xml|stderr"
     return log_string
     
 def _get_separate_JVM():

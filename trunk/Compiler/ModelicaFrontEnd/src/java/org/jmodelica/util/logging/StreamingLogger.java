@@ -82,8 +82,6 @@ public class StreamingLogger extends PipeLogger {
         do_write(problem.toString());
     }
 
-    protected void do_write(CompiledUnit unit) throws IOException {
-        do_write("Model compiled to " + unit);
-    }
+    protected void do_write(CompiledUnit unit) throws IOException {}
 
 }

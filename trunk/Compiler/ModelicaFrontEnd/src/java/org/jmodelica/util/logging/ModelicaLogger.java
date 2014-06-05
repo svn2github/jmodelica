@@ -150,7 +150,7 @@ public abstract class ModelicaLogger {
      * Log the compiled unit (e.g. FMU file).
      */
     public void logCompiledUnit(CompiledUnit unit) {
-        write(Level.INFO, unit);
+        write(Level.ERROR, unit);
     }
 
     /**
