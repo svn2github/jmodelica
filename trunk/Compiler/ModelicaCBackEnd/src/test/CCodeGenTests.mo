@@ -14722,14 +14722,6 @@ $ECE_main$
     JMCEVAL_print(Real, x_v);
 
     /* Free strings */
-    JMCEVAL_free(tmp_4_arg3);
-    destructor(tmp_1_arg0);
-    tmp_5_max = d[0] + 1;
-    for (tmp_5 = 1; tmp_5 < tmp_5_max; tmp_5++) {
-        JMCEVAL_freeArray(tmp_8_arg3);
-        destructor(jmi_array_ref_1(tmp_1_arg1, tmp_5));
-    }
-    destructor(o3_v);
 
     printf(\"END\\n\"); fflush(stdout);
 ")})));
