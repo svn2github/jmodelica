@@ -980,6 +980,8 @@ aspect FlatPrettyPrint {
 	    	p.print(getFDerivedTypes(), str, nextInd);
   		}
     	
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
+
   		str.print(indent);
   		str.print("end ");
   		str.print(name());

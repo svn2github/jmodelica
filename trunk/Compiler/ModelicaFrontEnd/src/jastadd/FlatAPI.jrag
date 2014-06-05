@@ -1898,6 +1898,7 @@ aspect Attributes {
     eq FDerivedType.getChild().isInFV()      = false;
     eq FAbstractEquation.getChild().isInFV() = false;
     eq FFunctionDecl.getChild().isInFV()     = false;
+    eq FClass.getChild().isInFV()            = false;
 
     /**
      * Check if this attribute is in a specific FVariable.
@@ -1907,6 +1908,7 @@ aspect Attributes {
     eq FDerivedType.getChild().isInFV(FVariable fv)      = false;
     eq FAbstractEquation.getChild().isInFV(FVariable fv) = false;
     eq FFunctionDecl.getChild().isInFV(FVariable fv)     = false;
+    eq FClass.getChild().isInFV(FVariable fv)            = false;
 
     /**
      * Check if this attribute is in an FDerivedType.
@@ -1916,6 +1918,7 @@ aspect Attributes {
     eq FDerivedType.getChild().isInDerivedType()      = true;
     eq FAbstractEquation.getChild().isInDerivedType() = false;
     eq FFunctionDecl.getChild().isInDerivedType()     = false;
+    eq FClass.getChild().isInDerivedType()            = false;
 
     /**
      * Check if this attribute is in a specific FDerivedType.
@@ -1925,6 +1928,7 @@ aspect Attributes {
     eq FDerivedType.getChild().isInDerivedType(FDerivedType t)      = t == this;
     eq FAbstractEquation.getChild().isInDerivedType(FDerivedType t) = false;
     eq FFunctionDecl.getChild().isInDerivedType(FDerivedType t)     = false;
+    eq FClass.getChild().isInDerivedType(FDerivedType t)            = false;
 
     syn boolean FAttribute.isDecl() = false;
     eq FIdDeclAttribute.isDecl()    = true;

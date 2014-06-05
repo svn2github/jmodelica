@@ -628,7 +628,7 @@ aspect AnnotationAPI {
         
         @Override
         protected AnnotationNode lookup(String path) {
-            return realNode == null ? super.lookup(path) : realNode.lookup(path);
+            return realNode == null ? null : realNode.lookup(path);
         }
 
         @Override

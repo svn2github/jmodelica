@@ -569,9 +569,10 @@ aspect Arrays {
 
     inh Size FIdDeclAttribute.size();
     eq FAbstractEquation.getFAttribute().size() = size();
-    eq FVariable.getFAttribute().size() = size();
-    eq FDerivedType.getFAttribute().size() = getBaseType().size();
-    eq FFunctionDecl.getFAttribute().size() = Size.SCALAR;
+    eq FVariable.getFAttribute().size()         = size();
+    eq FDerivedType.getFAttribute().size()      = getBaseType().size();
+    eq FFunctionDecl.getFAttribute().size()     = Size.SCALAR;
+    eq FClass.getFAttribute().size()            = Size.SCALAR;
 
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
 	
