@@ -1399,9 +1399,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     jmi_log_t *log = block->log;
 
     if(block->n == 1) {
-       if( block->options->use_Brent_in_1d_flag
-            &&  (block->options->experimental_mode & jmi_block_solver_experimental_Brent) ) {
-                return jmi_brent_solver_solve(block);
+       if (block->options->use_Brent_in_1d_flag) {
+           return jmi_brent_solver_solve(block);
        }
        solver->f_pos_min_1d = BIG_REAL;
        solver->f_neg_max_1d = -BIG_REAL;
