@@ -50,6 +50,12 @@ model TestBrent
   equation
     (1 - x)*log(1 - x) = y;
   end XLogXNeg;
+
+  model Arcsin
+    extends Sweep;
+  equation
+    asin(x) = y;
+  end Arcsin;
     
   annotation (uses(Modelica(version="3.2.1")));
 end TestBrent;

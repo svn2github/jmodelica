@@ -107,3 +107,25 @@ def test_xlogx_neg():
         yy = (1-x)*N.log(1-x)
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
+
+@testattr(fmi = True)
+def test_arcsin():
+    model = load_model('TestBrent.Arcsin')
+
+    for t in N.linspace(0,1,101):
+        model.reset()        
+        model.time = t
+
+        if abs(-2+4*t) > N.pi/2:
+            assert_raises(FMUException, model.initialize)
+            continue
+        
+        model.initialize()
+            
+        x = model.get('x')
+        y = model.get('y')
+        assert abs(y - (-2+4*t)) < 1e-6
+        yy = N.arcsin(x)
+        relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
+        assert abs(relativeDiff) < 1e-6
+
