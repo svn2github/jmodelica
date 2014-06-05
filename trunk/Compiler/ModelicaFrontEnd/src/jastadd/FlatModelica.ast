@@ -39,6 +39,7 @@ FClass : BaseNode ::= FQName
                       FDerivedType*
                       /UnknownFVariable/
                       FResidualPair*
+                      FAttribute*
                       DummyVariable:FVariable*;
 
 /**

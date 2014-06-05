@@ -68,6 +68,7 @@ aspect AnnotationAPI {
     eq FFunctionDecl.annotation()     = new FAttributeListAnnotationNode(getFAttributes());
     eq FVariable.annotation()         = new FAttributeListAnnotationNode(getFAttributes());
     eq FAbstractEquation.annotation() = new FAttributeListAnnotationNode(getFAttributes());
+    eq FClass.annotation()            = new FAttributeListAnnotationNode(getFAttributes());
 
     syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
 
