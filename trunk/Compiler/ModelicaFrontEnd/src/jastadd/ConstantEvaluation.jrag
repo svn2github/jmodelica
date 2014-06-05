@@ -3747,13 +3747,6 @@ aspect ExternalCEval {
     }
     
     /**
-     * Make sure we dont try evaluation again.
-     */
-    public void FExternalStmt.invalidateExternal() {
-        myCompiler().invalidateExternal(this);
-    }
-    
-    /**
      * External functions does not have a FAlgorithm in the instance tree
      * so we have to generate one.
      */
@@ -3818,7 +3811,6 @@ aspect ExternalCEval {
         com.destroy();
         
         if (res != 0) {
-            invalidateExternal();
             values.clear();
             ModelicaCompiler.log.debug("Could not evaluate external function " + getName() + ", error code: " + res);
             return EVAL_RETURN;

@@ -636,7 +636,7 @@ class TestUtilities:
                 count = count + 1
         logfile.close()
         os.remove(logfile.name);
-        nose.tools.assert_equals(count, 2)
+        assert(count >= 2)
         
 def build_ext(target, mofile):
     """
