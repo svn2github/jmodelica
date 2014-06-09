@@ -19545,7 +19545,7 @@ fi
 subdirs="$subdirs ThirdParty/Sundials/sundials-2.5.0"
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh RuntimeLibrary/Makefile jm_tests"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -20791,6 +20791,7 @@ do
     "docbook/UsersGuide/Makefile") CONFIG_FILES="$CONFIG_FILES docbook/UsersGuide/Makefile" ;;
     "Python/jm_ipython.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_ipython.sh" ;;
     "Python/jm_python.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_python.sh" ;;
+    "Python/src/tests_jmodelica/files/Modelica/Resources/Makefile") CONFIG_FILES="$CONFIG_FILES Python/src/tests_jmodelica/files/Modelica/Resources/Makefile" ;;
     "RuntimeLibrary/Makefile") CONFIG_FILES="$CONFIG_FILES RuntimeLibrary/Makefile" ;;
     "jm_tests") CONFIG_FILES="$CONFIG_FILES jm_tests" ;;
 

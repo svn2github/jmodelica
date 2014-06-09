@@ -20,7 +20,7 @@ ACLOCAL_AMFLAGS = -I m4
 # EXTRA_DIST =
 
 # SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
-SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary
+SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python/src/tests_jmodelica/files/Modelica/Resources
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -219,6 +219,10 @@ endif
 	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
+	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
+	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
+	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
