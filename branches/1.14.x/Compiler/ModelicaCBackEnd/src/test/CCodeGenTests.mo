@@ -14416,6 +14416,7 @@ jmi_int_t tmp_4;
 jmi_int_t tmp_5;
 jmi_int_t tmp_6;
 
+    JMCEVAL_setup();
 printf(\"START\\n\"); fflush(stdout);
 /* Parse */
 JMCEVAL_parse(Real, a1_v);
@@ -14511,6 +14512,7 @@ JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_4, -1, 1)
 JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_5, -1, 1)
 JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_6, -1, 1)
 
+    JMCEVAL_setup();
 printf(\"START\\n\"); fflush(stdout);
 /* Parse */
 JMCEVAL_parseArrayDims(1);
@@ -14676,6 +14678,7 @@ $ECE_main$
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg2, -1, 1)
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_8_arg3, -1, 1)
 
+    JMCEVAL_setup();
     printf(\"START\\n\"); fflush(stdout);
     /* Parse */
     JMCEVAL_parse(Real, x_v);
@@ -14719,14 +14722,6 @@ $ECE_main$
     JMCEVAL_print(Real, x_v);
 
     /* Free strings */
-    JMCEVAL_free(tmp_4_arg3);
-    destructor(tmp_1_arg0);
-    tmp_5_max = d[0] + 1;
-    for (tmp_5 = 1; tmp_5 < tmp_5_max; tmp_5++) {
-        JMCEVAL_freeArray(tmp_8_arg3);
-        destructor(jmi_array_ref_1(tmp_1_arg1, tmp_5));
-    }
-    destructor(o3_v);
 
     printf(\"END\\n\"); fflush(stdout);
 ")})));
@@ -14815,6 +14810,7 @@ jmi_int_t tmp_10;
 jmi_int_t tmp_11;
 extern void dgelsx_(jmi_int_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
 
+    JMCEVAL_setup();
 printf(\"START\\n\"); fflush(stdout);
 /* Parse */
 JMCEVAL_parse(Integer, nrow_v);
