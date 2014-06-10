@@ -1407,7 +1407,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     }
     
     if(block->init) {
-        jmi_kinsol_init(block);
+        flag = jmi_kinsol_init(block);
+        if(flag) return flag;
     }
     else {
         /* Read initial values for iteration variables from variable vector.
