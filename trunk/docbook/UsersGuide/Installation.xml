@@ -13,7 +13,7 @@
   <section xml:id="inst_sec_supported_platforms">
     <title>Supported platforms</title>
 
-    <para>JModelica.org is supported on Linux and Windows (XP, Vista, 7) with
+    <para>JModelica.org is supported on Linux and Windows (Vista, 7) with
     32-bit or 64-bit architectures.</para>
   </section>
 

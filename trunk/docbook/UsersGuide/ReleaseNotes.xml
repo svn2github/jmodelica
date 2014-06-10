@@ -11,6 +11,62 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.14</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Check of all packages in the Modelica Standard Library,
+            except Modelica.Fluid and components using operator delay() or
+            function pointers.</para>
+          </listitem>
+
+          <listitem>
+            <para>FMI export supporting FMI 2.0RC2</para>
+          </listitem>
+
+          <listitem>
+            <para>FMI import supporting FMI 2.0RC2 with PyFMI</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved error messages from compiler</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>Compliance</title>
+
+        <para/>
+      </section>
+
+      <section>
+        <title>FMI 2.0 RC2 export</title>
+
+        <para/>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para/>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.13</title>
 
     <section>
@@ -2054,12 +2110,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
