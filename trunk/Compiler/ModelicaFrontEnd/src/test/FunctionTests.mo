@@ -9159,6 +9159,61 @@ end FunctionTests.UnknownArray45;
 ")})));
 end UnknownArray45;
 
+model UnknownArray46
+    function f2
+        input Real[:] x;
+        output Real[:] y;
+      algorithm
+        y := x;
+    end f2;
+    function f1
+        input Real[:] x;
+        output Real[:] y;
+      algorithm
+        y := f2(if size(x,1) > 1 then x else x);
+    end f1;
+    Real[1] y = f1({1});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray46",
+            description="Unknown size if exp as function call arg",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray46
+ Real y[1];
+equation
+ ({y[1]}) = FunctionTests.UnknownArray46.f1({1});
+
+public
+ function FunctionTests.UnknownArray46.f1
+  input Real[:] x;
+  output Real[:] y;
+  Real[:] temp_1;
+ algorithm
+  size(temp_1) := {size(x, 1)};
+  for i1 in 1:size(x, 1) loop
+   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1];
+  end for;
+  (y) := FunctionTests.UnknownArray46.f2(temp_1);
+  return;
+ end FunctionTests.UnknownArray46.f1;
+
+ function FunctionTests.UnknownArray46.f2
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray46.f2;
+
+end FunctionTests.UnknownArray46;
+")})));
+end UnknownArray46;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

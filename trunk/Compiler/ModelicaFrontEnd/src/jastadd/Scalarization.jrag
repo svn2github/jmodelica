@@ -1237,7 +1237,7 @@ aspect Scalarization {
             right = left;
             left  = (FIdUseExp) fc.dynamicFExp(this);
         } else {
-            right = (FIdUseExp) fc.dynamicFExp(this);
+            right = fc.dynamicFExp(this);
         }
         
         type().scalarizeAssignment(vars, clauses, indexMap, left, right);
