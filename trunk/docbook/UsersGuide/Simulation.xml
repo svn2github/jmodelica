@@ -144,7 +144,7 @@ plt.show()
     <para><literal>FMUModelME* / FMUModelCS*</literal> also supports compiled
     models from other simulation/modelling tools that follow the FMI standard
     (extension .fmu) (either Model exchange FMUs or Co-Simulation FMUs). The
-    support is both for FMI version 1 and FMI version 2 (beta4). For more
+    support is both for FMI version 1.0 and FMI version 2.0 RC2. For more
     information about compiling a model in JModelica.org see <xref
     linkend="ch_models"/>.</para>
 
@@ -1047,7 +1047,7 @@ P.show()</programlisting>
 </programlisting>
 
       <para>Simulate the model again and look at the result and the impact of
-      the input. </para>
+      the input.</para>
 
       <para>Large models contain an enormous amount of variables and by
       default, all of these variables are stored in the result. Storing the
