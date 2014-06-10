@@ -2773,9 +2773,9 @@ aspect ConstantEvaluation {
 	  getFIdUse().setEvaluationValue(val, map);
   }
   
-  public void FInstAccessExp.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-	  getInstAccess().myInstComponentDecl().setEvaluationValue(val, map);
-  }
+    public void FInstAccessExp.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
+        getInstAccess().assignToInFuncEval(map, val);
+    }
   
   /**
    * \brief Set the current function evaluation value of referenced variable.
@@ -2787,9 +2787,9 @@ aspect ConstantEvaluation {
 		  ((FFunctionVariable) myFV()).setEvaluationValue(val, map);
   }
   
-  public void FIdUseInstAccess.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-	  getInstAccess().myInstComponentDecl().setEvaluationValue(val, map);
-  }
+    public void FIdUseInstAccess.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
+        getInstAccess().assignToInFuncEval(map, val);
+    }
   
   /**
    * Check if this variable has a current function evaluation value.

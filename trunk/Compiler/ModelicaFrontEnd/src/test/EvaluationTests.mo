@@ -1069,6 +1069,37 @@ end EvaluationTests.FunctionEval29;
 ")})));
 end FunctionEval29;
 
+model FunctionEval30
+    record R
+        Real x;
+    end R;
+    function f2
+        input Real  x;
+        output Real y;
+      algorithm
+        y := x;
+    end f2;
+    function f1
+        input Real x;
+        output Real z;
+      protected
+        R y;
+      algorithm
+        (y.x) := f2(x);
+        z := y.x;
+    end f1;
+    constant Real x = f1(3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="FunctionEval30",
+            description="Constant evaluation of vector multiplication",
+            variables="x",
+            values="
+3.0"
+ )})));
+end FunctionEval30;
+
 
 
 model StringConcat
