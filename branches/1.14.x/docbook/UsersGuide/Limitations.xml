@@ -25,17 +25,8 @@
 
       <itemizedlist>
         <listitem>
-          <para>Discrete variables are only supported in FMUs.</para>
-        </listitem>
-
-        <listitem>
           <para>The support for String variables and parameters is
           limited.</para>
-        </listitem>
-
-        <listitem>
-          <para>Arrays indexed with enumerations or Booleans are not
-          supported.</para>
         </listitem>
 
         <listitem>
@@ -108,11 +99,6 @@
         </listitem>
 
         <listitem>
-          <para>Overloaded operators and the Complex type are not supported
-          (Modelica Language Specification, chapter 14).</para>
-        </listitem>
-
-        <listitem>
           <para>Stream connections with more than two connectors are not
           supported.</para>
         </listitem>
@@ -147,6 +133,10 @@
         <listitem>
           <para>The interface for interacting with JMUs does not comply with
           FMI specification.</para>
+        </listitem>
+
+        <listitem>
+          <para>Discrete variables are not supported in JMUs.</para>
         </listitem>
       </itemizedlist>
     </listitem>

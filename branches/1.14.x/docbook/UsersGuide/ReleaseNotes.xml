@@ -18,9 +18,9 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Check of all packages in the Modelica Standard Library,
-            except Modelica.Fluid and components using operator delay() or
-            function pointers.</para>
+            <para>All models in the Modelica Standard Library, except
+            Modelica.Fluid and those using operator delay() or function
+            pointers, pass error check</para>
           </listitem>
 
           <listitem>
@@ -32,7 +32,12 @@
           </listitem>
 
           <listitem>
-            <para>Improved error messages from compiler</para>
+            <para>Improved error messages from the compiler</para>
+          </listitem>
+
+          <listitem>
+            <para>Various improvements and extensions to the CasADi-based
+            optimization toolchain</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -43,26 +48,96 @@
       <section>
         <title>Compliance</title>
 
-        <para/>
+        <para>A lot of work with compliance has resulted in that almost all
+        models in the Modelica Standard Library now pass error check.
+        Exceptions are models in Modelica.Fluid and those using the operator
+        delay() or function pointers. In particular, the following
+        improvements have been made:</para>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Support for arrays indexed with enumerations or
+              Booleans</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for overloaded operators and the Complex
+              type</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved error messages</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for structural parameters depending on external
+              C/Fortran code</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for index reduction of optimization classes</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved modularization and extension points in the
+              compiler</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for index reduction of optimization classes</para>
+            </listitem>
+
+            <listitem>
+              <para>Many bug fixes to improve Modelica compliance</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>New compiler API</title>
+
+        <para>A new Java API for calling the compiler through a separate
+        process has been added.</para>
       </section>
 
       <section>
         <title>FMI 2.0 RC2 export</title>
 
-        <para/>
+        <para>Support for export of FMUs that are compliant with FMI 2.0 RC2
+        has been added.</para>
       </section>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <para>Support for import and simulation of 2.0 RC2 FMUs with the Python
+      package PyFMI. </para>
     </section>
 
     <section>
       <title>Optimization</title>
 
-      <para/>
+      <para>The following improvements have been made to the CasADi-based
+      collocation algorithm:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>More efficient memory usage and code generation for function
+          evaluations</para>
+        </listitem>
+
+        <listitem>
+          <para>Interface added to WORHP, which serves as an alternative to
+          IPOPT</para>
+        </listitem>
+
+        <listitem>
+          <para>More general treatment of blocking factors. In particular it
+          is now possible to penalize and constrain the discontinuity
+          jumps.</para>
+        </listitem>
+      </itemizedlist>
     </section>
   </section>
 
