@@ -14281,6 +14281,114 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 ")})));
 end ActiveSwitches2;
 
+model ActiveSwitches3
+    Real x;
+    parameter Real p(fixed=false);
+initial equation
+    p = x * 6.28;
+equation
+    x = if p > 3.14 then p - 42 else p + time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ActiveSwitches3",
+            description="Test code gen fixed=false parameters with switch indicators.",
+            template="
+C_dae_init_blocks_residual_functions
+$C_dae_init_blocks_residual_functions$
+C_dae_init_add_blocks_residual_functions
+$C_dae_init_add_blocks_residual_functions$
+C_ode_derivatives
+$C_ode_derivatives$
+C_ode_initialization
+$C_ode_initialization$
+C_DAE_event_indicator_residuals
+$C_DAE_event_indicator_residuals$
+C_DAE_initial_event_indicator_residuals
+$C_DAE_initial_event_indicator_residuals$
+static const int N_sw = $n_switches$;
+static const int N_sw_init = $n_initial_switches$;
+",
+            generatedCode="
+C_dae_init_blocks_residual_functions
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw_init + 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _p_1;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t Q1[1] = {0};
+        jmi_real_t Q2[1] = {0};
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw_init(0) = jmi_turn_switch(_p_1 - (AD_WRAP_LITERAL(3.14)), _sw_init(0), jmi->events_epsilon, JMI_REL_GT);
+        }
+        Q1[0] = - COND_EXP_EQ(_sw_init(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(1.0));
+        for (i = 0; i < 1; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = (- 6.28);
+        memset(Q3, 0, 1 * sizeof(jmi_real_t));
+        Q3[0] = 1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _p_1 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw_init(0) = jmi_turn_switch(_p_1 - (AD_WRAP_LITERAL(3.14)), _sw_init(0), jmi->events_epsilon, JMI_REL_GT);
+        }
+        _x_0 = COND_EXP_EQ(_sw_init(0), JMI_TRUE, _p_1 - AD_WRAP_LITERAL(42), _p_1 + _time);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _x_0 * 6.28 - (_p_1);
+        }
+    }
+    return ef;
+}
+
+
+C_dae_init_add_blocks_residual_functions
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 0, 1, JMI_PARAMETER_VARIABILITY, JMI_LINEAR_SOLVER, 0);
+
+C_ode_derivatives
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = COND_EXP_EQ(COND_EXP_GT(_p_1, AD_WRAP_LITERAL(3.14), JMI_TRUE, JMI_FALSE), JMI_TRUE, _p_1 - AD_WRAP_LITERAL(42), _p_1 + _time);
+/********* Write back reinits *******/
+
+C_ode_initialization
+    model_ode_guards(jmi);
+    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+
+C_DAE_event_indicator_residuals
+
+C_DAE_initial_event_indicator_residuals
+    (*res)[0] = _p_1 - (AD_WRAP_LITERAL(3.14));
+
+static const int N_sw = 0;
+static const int N_sw_init = 1;
+")})));
+end ActiveSwitches3;
+
 model SwitchesAsNoEvent1
     Boolean x = time > 0.5;
     Real y = abs(time + 0.5);

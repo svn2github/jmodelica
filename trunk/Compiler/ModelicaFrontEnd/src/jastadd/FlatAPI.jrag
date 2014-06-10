@@ -988,25 +988,27 @@ aspect FlatAPI {
     eq FRelExp.hasEventGeneratingType() = isRealComparison();
     eq FEventGenExp.hasEventGeneratingType() = argType().isReal();
 
+    syn boolean FRelExp.generatesEventInDAE() = inEquationSection() && originalFRelExp==null && generatesEvent(false);
+    syn boolean FRelExp.generatesEventInInitDAE() =
+            (inInitialEquationSection() || inEquationSection() && containsNonFixedParameter())
+            && originalFRelExp==null && generatesEvent(true);
+    
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
 	coll ArrayList<FRelExp> FClass.relExpInEquations() 
 	  [new ArrayList<FRelExp>()] with add root FlatRoot;
-	FRelExp contributes
- 		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
+	FRelExp contributes this when generatesEventInDAE() 
 	to FClass.relExpInEquations() for myFClass();
 	
 	coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
 		[new ArrayList<FRelExp>()] with add root FAbstractEquation;
-	FRelExp contributes
-		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
+	FRelExp contributes this when generatesEventInDAE() 
 	to FAbstractEquation.relExpInEquation() for myFEquation();
 	
 	coll ArrayList<FRelExp> FStatement.relExpInStmt() 
 		[new ArrayList<FRelExp>()] with add root FStatement;
-	FRelExp contributes
-		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
+	FRelExp contributes this when generatesEventInDAE() 
 	to FStatement.relExpInStmt() for myFStatement();
 			
 	inh FStatement FExp.myFStatement();
@@ -1051,14 +1053,12 @@ aspect FlatAPI {
         relExpInInitialEquations().size();
     coll ArrayList<FRelExp> FClass.relExpInInitialEquations()
         [new ArrayList<FRelExp>()] with add root FlatRoot;
-    FRelExp contributes
-        this when inInitialEquationSection() && originalFRelExp==null && generatesEvent()
+    FRelExp contributes this when generatesEventInInitDAE()
     to FClass.relExpInInitialEquations() for myFClass();
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInInitialEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes
-        this when inInitialEquationSection() && originalFRelExp==null && generatesEvent() 
+    FRelExp contributes this when generatesEventInInitDAE() 
     to FAbstractEquation.relExpInInitialEquation() for myFEquation();
 
 	public int FRelExp.relExpInInitialEquationsIndex() {

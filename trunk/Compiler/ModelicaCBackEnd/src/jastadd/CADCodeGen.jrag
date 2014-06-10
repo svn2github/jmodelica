@@ -35,6 +35,21 @@ aspect CADCodeGen {
 
     public class CADPrettyPrinter extends CodePrinter {
 
+        private static CADPrettyPrinter INITIAL_SYSTEM_PRINTER = new CADPrettyPrinter(true);
+
+        public CADPrettyPrinter() {
+            this(false);
+        }
+
+        private CADPrettyPrinter(boolean inInitialSystem) {
+            super(inInitialSystem);
+        }
+
+        @Override
+        protected CodePrinter getInitialSystemPrinter() {
+            return INITIAL_SYSTEM_PRINTER;
+        }
+
         @Override
         public void print(ASTNode node, CodeStream str, String indent) {
             node.prettyPrint_CAD(this, str, indent); 

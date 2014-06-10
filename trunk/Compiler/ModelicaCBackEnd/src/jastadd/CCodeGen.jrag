@@ -28,9 +28,12 @@ import org.jmodelica.util.streams.CStringCodeStream;
 aspect CCodeGen {
 
     public abstract class CodePrinter extends Printer {
+        
+        private final boolean inInitialSystem;
 
-        public CodePrinter() {
+        public CodePrinter(boolean inInitialSystem) {
             super("    ");
+            this.inInitialSystem = inInitialSystem;
         }
 
         @Override
@@ -43,6 +46,19 @@ aspect CCodeGen {
         public boolean insideBlock() {
             return false;
         }
+        
+        public final CodePrinter initialSystemPrinter() {
+            if (inInitialSystem())
+                return this;
+            else
+                return getInitialSystemPrinter();
+        }
+        
+        protected abstract CodePrinter getInitialSystemPrinter();
+        
+        public boolean inInitialSystem() {
+            return inInitialSystem;
+        }
 
         @Override
         public String op(FBinExp e) { return e.op_C(); }
@@ -52,6 +68,21 @@ aspect CCodeGen {
     }
     
     public class CPrettyPrinter extends CodePrinter {
+
+        private static CPrettyPrinter INITIAL_SYSTEM_PRINTER = new CPrettyPrinter(true);
+
+        public CPrettyPrinter() {
+            this(false);
+        }
+
+        protected CPrettyPrinter(boolean inInitialSystem) {
+            super(inInitialSystem);
+        }
+
+        @Override
+        protected CodePrinter getInitialSystemPrinter() {
+            return INITIAL_SYSTEM_PRINTER;
+        }
 
         @Override
         public void print(ASTNode node, CodeStream str, String indent) { 
@@ -81,6 +112,21 @@ aspect CCodeGen {
      * Just like CPrettyPrinter but it is used inside of blocks
      */
     public class CBlockPrettyPrinter extends CPrettyPrinter {
+
+        private static CBlockPrettyPrinter INITIAL_SYSTEM_PRINTER = new CBlockPrettyPrinter(true);
+
+        public CBlockPrettyPrinter() {
+            this(false);
+        }
+
+        private CBlockPrettyPrinter(boolean inInitialSystem) {
+            super(inInitialSystem);
+        }
+
+        @Override
+        protected CodePrinter getInitialSystemPrinter() {
+            return INITIAL_SYSTEM_PRINTER;
+        }
 
         @Override
         public boolean insideBlock() {
@@ -1794,7 +1840,7 @@ aspect CCodeGen {
 			str.print(")");
 			str.print(op_C());
 			str.print("0");
-		} else if (!generatesEvent()) {
+		} else if (!generatesEvent(p.inInitialSystem())) {
 			str.print(macro_C()+"(");
 			p.print(getLeft(), str, indent);
 			str.print(", ");
@@ -1806,11 +1852,17 @@ aspect CCodeGen {
 	}
 	
     private void FRelExp.printSwitchMacro_C(CodePrinter p, CodeStream str, String indent) {
-        if (inEquationSection()) {
-            str.format("_sw(%d)", relExpInEquationsIndex());
-        } else {
-            str.format("_sw_init(%d)", relExpInInitialEquationsIndex());
+        int index = relExpInEquationsIndex();
+        if (index >= 0) {
+            str.format("_sw(%d)", index);
+            return;
         }
+        index = relExpInInitialEquationsIndex();
+        if (index >= 0) {
+            str.format("_sw_init(%d)", index);
+            return;
+        }
+        throw new UnsupportedOperationException("Unable to generate switch macro for relational operator, not in list of switches!");
     }
 
     syn String FRelExp.op_C() = op();
@@ -1821,7 +1873,7 @@ aspect CCodeGen {
         super.genTempVars_C(p, str, outerIndent);
         if (root().options.getBooleanOption("generate_dae"))
             return;
-        if (generatesEvent()) {
+        if (generatesEvent(p.inInitialSystem())) {
             if (p.insideBlock())
                 str.formatln("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {", outerIndent);
             else
@@ -2330,10 +2382,17 @@ aspect CCodeGen {
      * Prints the position for the switch in the z-vector
      */
     public void FRelExp.genBlockResidualFunction_printSwitchIndex_C(CodePrinter p, CodeStream str, String nextIndent, Enumerator enumerator) {
-        if (inEquationSection())
-            str.format("%sx[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), relExpInEquationsIndex());
-        else
-            str.format("%sx[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
+        int index = relExpInEquationsIndex();
+        if (index >= 0) {
+            str.format("%sx[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), index);
+            return;
+        }
+        index = relExpInInitialEquationsIndex();
+        if (index >= 0) {
+            str.format("%sx[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), index);
+            return;
+        }
+        throw new UnsupportedOperationException("Unable to generate switch index for relational operator, not in list of switches!");
     }
 
     /**
