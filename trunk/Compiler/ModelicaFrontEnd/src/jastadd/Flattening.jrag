@@ -1547,16 +1547,6 @@ aspect FlatExpressions {
         return flat;
     }
     
-    @Override
-    public FIdDeclAttribute FIdDeclAttribute.flatten(FQName prefix) {
-        FIdDeclAttribute flat = (FIdDeclAttribute)super.flatten(prefix);
-        if (size().ndims() > 0)
-            flat.setFIdDecl(new FIdDecl(prefix.copyAndAppend(getFIdDecl().name(), size().createExpandedFArraySubscripts())));
-        else
-            flat.setFIdDecl(new FIdDecl(prefix.copyAndAppend(getFIdDecl().name())));
-        return flat;
-    }
-	
 	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
 		List l = new List();
 		for (int i=0;i<getNumFSubscript();i++)

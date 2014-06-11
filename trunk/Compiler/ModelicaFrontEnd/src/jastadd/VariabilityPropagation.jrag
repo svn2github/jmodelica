@@ -29,9 +29,9 @@ aspect VariabilityPropagation {
 	eq FIfWhenElseEquation.getChild().canPropagate() = false;
 	
 	syn boolean FEquation.canPropagate() =
-			super.canPropagate() && variables().size() == 1 && !isHGTResidual();
+			super.canPropagate() && variables().size() == 1 && !containsAnnotationAttributes();
 	syn boolean FFunctionCallEquation.canPropagate() =
-			super.canPropagate() && variables().size() > 0 && variables().size() == numScalarEquations() && !isHGTResidual();
+			super.canPropagate() && variables().size() > 0 && variables().size() == numScalarEquations() && !containsAnnotationAttributes();
 	
 	/**
 	 * Checks if left hand side variable(s) is eligible for var. prop.
@@ -59,7 +59,7 @@ aspect VariabilityPropagation {
 		return myFV().canPropagate();
 	}
 	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput() && !isHGTVar();
+	eq FVariable.canPropagate() = !isOutput() && !containsAnnotationAttributes();
 	eq FDerivativeVariable.canPropagate() = false;
 	
 	// Hook for checks that are needed in optimica

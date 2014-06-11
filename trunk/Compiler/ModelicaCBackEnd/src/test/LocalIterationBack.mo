@@ -30,7 +30,6 @@ package LocalIterationBack
             generate_ode=true,
             equation_sorting=true,
             automatic_tearing=true,
-            hand_guided_tearing=true,
             local_iteration_in_tearing="all",
             template="
 $C_dae_blocks_residual_functions$
@@ -112,7 +111,6 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             generate_ode=true,
             equation_sorting=true,
             automatic_tearing=true,
-            hand_guided_tearing=true,
             local_iteration_in_tearing="all",
             generate_block_jacobian=true,
             template="

@@ -72,7 +72,7 @@ aspect EquationNominal{
         FAttribute enabledAttr = nominalAttr.findAttribute("enabled");
         if (enabledAttr != null) {
             FExp enabledExp = enabledAttr.getValue();
-            typeCheckHGTEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
+            typeCheckEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
         }
     }
     
