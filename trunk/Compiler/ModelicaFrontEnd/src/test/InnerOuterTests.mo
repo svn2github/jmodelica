@@ -471,4 +471,68 @@ end InnerOuterTests.InnerOuterTest16;
 ")})));
 end InnerOuterTest16;
 
+
+model InnerOuterTest17
+    model A
+        parameter Real x;
+    end A;
+    
+    model B
+        outer A a;
+    end B;
+    
+    model C
+        B b;
+        parameter Real y = b.a.x;
+    end C;
+    
+    inner A a;
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest17",
+            description="",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest17
+ parameter Real a.x;
+ parameter Real c.y = a.x;
+end InnerOuterTests.InnerOuterTest17;
+")})));
+end InnerOuterTest17;
+
+
+model InnerOuterTest18
+    model A
+        parameter Real x;
+    end A;
+    
+    model B
+        outer A a;
+    end B;
+    
+    model D
+        model C
+            B b;
+            parameter Real y = b.a.x;
+        end C;
+        
+        inner A a;
+        C c;
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest18",
+            description="",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest18
+ parameter Real d.a.x;
+ parameter Real d.c.y = d.a.x;
+end InnerOuterTests.InnerOuterTest18;
+")})));
+end InnerOuterTest18;
+
 end InnerOuterTests;

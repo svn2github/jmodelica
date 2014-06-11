@@ -1610,12 +1610,11 @@ aspect FlatExpressions {
      * Flatten an access expression to this component.
      */
     public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
-        FQName subscriptsPrefix = prefix;
-        if (inOrIsOuter()) {
-            prefix = myInnerInstComponentDecl().getFQName();
-            prefix = prefix.copyWithoutSuffix(exp.getInstAccess().numParts());
-        }
-        return new FIdUseExp(exp.getInstAccess().flatten(prefix, subscriptsPrefix));
+        if (isEnumLiteral())
+            return new FIdUseExp(getFQName().fullCopy());
+        InstAccess ia = exp.getInstAccess();
+        FQName fqn = inOrIsOuter() ? ia.flattenOuterAccess(prefix) : ia.flatten(prefix);
+        return new FIdUseExp(fqn);
     }
 
 	public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
@@ -1811,16 +1810,40 @@ aspect FlatExpressions {
 	eq FExpSubscript.isUnknownIndex()       = !getFExp().canCeval();
 
     public FQName InstAccess.flatten(FQName prefix) { 
-        return flatten(prefix, prefix);
-    }
-
-    public FQName InstAccess.flatten(FQName namePrefix, FQName subscriptPrefix) { 
         if (myInstComponentDecl().isEnumLiteral())
             return myInstComponentDecl().getFQName().fullCopy();
         
-        FQName base = isForIndex() ? new FQNameEmpty() : namePrefix;
+        FQName base = isForIndex() ? new FQNameEmpty() : prefix;
         int last = allFArraySubscripts().size() - 1;
-        return flattenName(subscriptPrefix, base, 0, last);
+        return flattenName(prefix, base, 0, last);
+    }
+
+    public FQName InstAccess.flattenOuterAccess(FQName subscriptPrefix) { 
+        FQName name = myInstComponentDecl().myInnerInstComponentDecl().getFQName().fullCopy();
+        FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
+        if (fas != null)
+            name = name.copyAndAddFas(fas.flatten(subscriptPrefix));
+        return name;
+    }
+
+    public FQName InstDot.flattenOuterAccess(FQName subscriptPrefix) {
+        int o;
+        int n = getNumInstAccess();
+        for (o = n - 1; o >= 0 && !getInstAccess(o).myInstComponentDecl().isOuter(); o--);
+        InstComponentDecl inner = (o >= 0) ? getInstAccess(o).myInstComponentDecl().myInnerInstComponentDecl() : null;
+        FQName base;
+        if (inner == null) {
+            base = myInstComponentDecl().myInnerInstComponentDecl().getFQNamePrefix();
+        } else {
+            base = inner.getFQName();
+            FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(o), o < n - 1, inSizeExp());
+            if (fas != null)
+                base = base.copyAndAddFas(fas.flatten(subscriptPrefix));
+        }
+        if (o < n - 1)
+            return flattenName(subscriptPrefix, base, o + 1, n - 1);
+        else
+            return (FQName) base.unboundCopy();
     }
 
     /**
