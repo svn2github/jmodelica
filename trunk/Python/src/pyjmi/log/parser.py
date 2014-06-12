@@ -198,7 +198,7 @@ def extract_jmi_log(destfilename, filename, modulename = 'Model'):
             filter_jmi_log(destfile.write, sourcefile, modulename)
 
 def filter_jmi_log(write, sourcefile, modulename = 'Model'):
-    write('<?xml version="1.0" encoding="UTF-8"?>\n<JMILog>\n')
+    write('<?xml version="1.0" encoding="UTF-8"?>\n<JMILog category="info">\n')
 
     pre_re = r'FMIL: module = ' + modulename + r', log level = ([0-9]+): \[([^]]+)\]\[FMU status:([^]]+)\] '
     pre_pattern = re.compile(pre_re)

@@ -199,13 +199,21 @@ static void buffer_element_name(buf_t *buf, const char *type) {
  *         If `name_end` is not `NULL`, it points one char past the end of the name.
 */
 static void buffer_starttag(buf_t *buf, const char *type,
-                            const char *name, const char *name_end, int flags) {
+                            const char *name, const char *name_end, 
+                            category_t c, category_t parent_c, int flags) {
     buffer_char(buf, '<');
     buffer_element_name(buf, type);
     if (name != NULL) {
         buffer(buf, " name=\"");
         buffer_attribute_be(buf, name, name_end);
         buffer_char(buf, '"');
+    }
+    if (c != parent_c) {
+        buffer(buf, " category=\"");
+        if (c == logInfo) buffer(buf, "info");
+        else if (c == logWarning) buffer(buf, "warning");
+        else if (c == logError) buffer(buf, "error");
+        buffer_char(buf, '"');        
     }
     if ((flags & logFlagIndex) != 0) buffer(buf, " flags=\"index\"");
     buffer_char(buf, '>');
@@ -404,7 +412,7 @@ static void init_log(log_t *log, jmi_log_options_t* options, jmi_callbacks_t* jm
     log->id_counter = 0;
 
     log->outstanding_comma = FALSE;
-    push_frame(log, logInfo, "Log", -1);  /* todo: do we need to always have a frame on the stack? */
+    push_frame(log, logInfo, "JMILog", -1);
     
     log->jmi_callbacks = jmi_callbacks;
 
@@ -428,7 +436,7 @@ static void create_log_file_if_needed(log_t *log) {
            Not an issue if create_log_file_if_needed is only called once.*/
         log->log_file = fopen(filename, "w");
 
-        fprintf(log->log_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<JMILog>\n");
+        fprintf(log->log_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<JMILog category=\"info\">\n");
     }
 }
 
@@ -535,12 +543,14 @@ static void close_leaf(log_t *log) {
 /** \brief Enter a frame for a node. */
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
                      const char *name, const char *name_end, int flags) {
+    category_t pc;
     close_leaf(log);
     log->next_name = NULL;
 
+    pc = topof(log)->c;
+
     if (name != NULL) {
         /* A named node may be no more severe than its parent */
-        category_t pc = topof(log)->c;
         if (c < pc) {
             c = pc; /* Smaller = more severe */
             logging_error(log, "A named node may be no more severe than its parent.");
@@ -549,7 +559,7 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
 
     if (emitted_category(log, c)) {
         set_category(log, c);
-        buffer_starttag(bufof(log), type, name, name_end, flags);
+        buffer_starttag(bufof(log), type, name, name_end, c, pc, flags);
     }
     cancel_commas(log);
 
