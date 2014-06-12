@@ -52,7 +52,7 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
         /* Log the progression of the solver */
         jmi_log_node_t topnode = jmi_log_enter(block->log, logInfo, "MinpackInfo");
 
-        jmi_log_fmt(block->log, topnode, logInfo, "<iteration_index:%d>", ++block->nb_iters);
+        jmi_log_fmt(block->log, topnode, logInfo, "<iteration_index:%I>", ++block->nb_iters);
         jmi_log_reals(block->log, topnode, logInfo, "ivs", y, block->n);
         jmi_log_reals(block->log, topnode, logInfo, "residual", fvec, block->n);
 
@@ -117,7 +117,7 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
             /* Recoverable error*/
             if (v- v != 0) {
                 jmi_log_node(block->log, logWarning, "Warning", 
-                             "Not a number in <output: %d> from <block: %d>", i, block->id);
+                             "Not a number in <output: %I> from <block: %d>", i, block->id);
                 ret = 1;
             }
         }

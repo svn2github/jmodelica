@@ -137,7 +137,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     /* Evaluate switches and non-reals */
     ef = block->F(jmi, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
     if (ef) {
-        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%d> at <t:%E>",
+        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%I> at <t:%E>",
              block->index, iter, cur_time);
         return jmi_block_solver_status_err_f_eval;
     }
@@ -146,7 +146,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     jmi_block_get_sw_nr(block, switches, non_reals);
 
     if(iter >= nbr_allocated_iterations) {
-        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%d> at <t:%E>",block->index, iter, cur_time);
+        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%I> at <t:%E>",block->index, iter, cur_time);
         block->event_iter = 0;
         return jmi_block_solver_status_event_non_converge;
     }
@@ -162,7 +162,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         } else {
             /* Check for infinite loop */
             if(jmi_check_infinite_loop(block->sw_old, switches, block->n_sw, iter) && jmi_check_infinite_loop(block->nr_old, non_reals, block->n_nr, iter)) {
-                jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%d, iter:%d> at <t:%E>",block->index, iter, cur_time);
+                jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%d, iter:%I> at <t:%E>",block->index, iter, cur_time);
                 block->event_iter = 0;
                 return jmi_block_solver_status_inf_event_loop;
             }

@@ -199,7 +199,7 @@ static void buffer_element_name(buf_t *buf, const char *type) {
  *         If `name_end` is not `NULL`, it points one char past the end of the name.
 */
 static void buffer_starttag(buf_t *buf, const char *type,
-                            const char *name, const char *name_end) {
+                            const char *name, const char *name_end, int flags) {
     buffer_char(buf, '<');
     buffer_element_name(buf, type);
     if (name != NULL) {
@@ -207,6 +207,7 @@ static void buffer_starttag(buf_t *buf, const char *type,
         buffer_attribute_be(buf, name, name_end);
         buffer_char(buf, '"');
     }
+    if ((flags & logFlagIndex) != 0) buffer(buf, " flags=\"index\"");
     buffer_char(buf, '>');
 }
 
@@ -229,7 +230,7 @@ static void initialize(log_t *log); /* extra initialization */
 /* logging primitives */
 static void emit(log_t *log);
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim, 
-                     const char *name, const char *name_end);
+                     const char *name, const char *name_end, int flags);
 static void leave_(log_t *log, node_t node);
 static void leave_all(log_t *log);
 static void log_value_(log_t *log, const char *value);
@@ -533,7 +534,7 @@ static void close_leaf(log_t *log) {
 
 /** \brief Enter a frame for a node. */
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
-                     const char *name, const char *name_end) {
+                     const char *name, const char *name_end, int flags) {
     close_leaf(log);
     log->next_name = NULL;
 
@@ -548,7 +549,7 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
 
     if (emitted_category(log, c)) {
         set_category(log, c);
-        buffer_starttag(bufof(log), type, name, name_end);
+        buffer_starttag(bufof(log), type, name, name_end, flags);
     }
     cancel_commas(log);
 
@@ -657,13 +658,13 @@ node_t jmi_log_enter(log_t *log, category_t c, const char *type) {
 }
 node_t jmi_log_enter_(log_t *log, category_t c, const char *type) {
     /* todo: check that type is not "vector" etc? */
-    return enter_(log, c, type, -1, log->next_name, NULL);
+    return enter_(log, c, type, -1, log->next_name, NULL, 0);
 }
 
 static node_t enter_value_(log_t *log, node_t node, category_t c, 
-                            const char *name, const char *name_end) {
+                           const char *name, const char *name_end, int flags) {
     if (!ok_label_parent(log, node)) { name = name_end = NULL; }
-    return enter_(log, c, "value", 0, name, name_end);
+    return enter_(log, c, "value", 0, name, name_end, flags);
 }
 /* could be exported */
 /* Un-used function */
@@ -677,13 +678,13 @@ static node_t jmi_log_enter_value_(log_t *log, node_t node, category_t c,
 node_t jmi_log_enter_vector_(log_t *log, node_t node, category_t c, 
                              const char *name) {
     if (!ok_label_parent(log, node)) { name = NULL; }
-    return enter_(log, c, "vector", 1, name, NULL);
+    return enter_(log, c, "vector", 1, name, NULL, 0);
 }
 /* could be exported if we also export an interface to begin a new row. */
 static node_t jmi_log_enter_matrix_(log_t *log, node_t node, category_t c, 
                                     const char *name) {
     if (!ok_label_parent(log, node)) { name = NULL; }
-    return enter_(log, c, "matrix", 2, name, NULL);
+    return enter_(log, c, "matrix", 2, name, NULL, 0);
 }
 
 /** \brief Leave node, then emit. */
@@ -736,12 +737,13 @@ static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, v
                 ch = *(fmt++);
                 if (ch == '%') {
                     char f = *(fmt++);
-                    if (!contains("diueEfFgGs", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
+                    int flags = (f == 'I' ? logFlagIndex : 0);
+                    if (!contains("diueEfFgGsI", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
                     
-                    node = enter_value_(log, parent, c, name_start, name_end);
+                    node = enter_value_(log, parent, c, name_start, name_end, flags);
                     
                     /* todo: consider: what if jmi_real_t is not double? */
-                    if      (contains("diu", f))    jmi_log_int_(   log, va_arg(ap, int));
+                    if      (contains("diuI", f))   jmi_log_int_(   log, va_arg(ap, int));
                     else if (contains("eEfFgG", f)) jmi_log_real_(  log, va_arg(ap, double));
                     else if (f == 's')              jmi_log_string_(log, va_arg(ap, const char *));
                     else { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
@@ -755,7 +757,7 @@ static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, v
                     if (*(fmt++) != 'd') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
                     if (*(fmt++) != '#') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
                     
-                    node = enter_value_(log, parent, c, name_start, name_end);
+                    node = enter_value_(log, parent, c, name_start, name_end, 0);
                     jmi_log_vref_(log, t, va_arg(ap, int));
                     leave_(log, node);
                 }

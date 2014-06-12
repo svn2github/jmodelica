@@ -101,7 +101,8 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *  * Scalar attributes between angle brackets, in the form `<` *name* `:%` *format* `>` (e.g. `<t:%e>`, where
  *      * *name* is an identifier and
  *      * *format* is one of the printf format characters
- *          `diu` for `int`, 
+ *          `diu` for `int`,
+ *          `I` for `int`; mark it as an index (to be converted from 0- to 1-based by recepient if needed)
  *          `eEfFgG` for `jmi_real_t`, or
  *          `s` for `char *`.
  *        No format specifiers beyond the single character are supported;

@@ -206,7 +206,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     
     if(info) {
         /* can only be "bad param" -> internal error */
-        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d> with error code %d", block->id, info);
+        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d> with <error_code: %d>", block->id, info);
         return -1;
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {

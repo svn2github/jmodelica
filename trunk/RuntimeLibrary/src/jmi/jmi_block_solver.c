@@ -354,12 +354,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             iter += 1;
 
-            iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Event iteration <iter:%d> at <t:%E>",
+            iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Event iteration <iter:%I> at <t:%E>",
                                           iter, cur_time);
 
             {
                 char message[256];
-                sprintf(message, "Switch iteration %d", iter);
+                sprintf(message, "Switch iteration %d", iter+1);
                 jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
                              "jmi_block_solver", block_solver->id, message);
             }
@@ -384,13 +384,13 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             if(ef != 0) { 
                 jmi_log_node(log, logInfo, "Info", "Error in discrete variables update"
-                            "<block:%d, iter:%d> at <t:%E>", block_solver->id, iter, cur_time);
+                            "<block:%d, iter:%I> at <t:%E>", block_solver->id, iter, cur_time);
                 jmi_log_leave(log, iter_node); 
                 break; 
             }
             
             if(!non_reals_changed_flag) {
-                jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using fixed point iteration in <block:%d, iter:%I> at <t:%E>",
                             block_solver->id, iter, cur_time);
 
                 converged = 1;
@@ -429,12 +429,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             while (1 && ef==0){
 
                 jmi_log_node_t iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", 
-                    "Enhanced block iteration <iter:%d> at <t:%g>",
+                    "Enhanced block iteration <iter:%I> at <t:%g>",
                     iter, cur_time);
 
                 {
                     char message[256];
-                    sprintf(message, "Enhanced switch iteration %d", iter);
+                    sprintf(message, "Enhanced switch iteration %d", iter+1);
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
                                  "jmi_block_solver", block_solver->id, message);
                 }
@@ -449,7 +449,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
                 if (non_reals_changed_flag == 0){
-                    jmi_log_node(log, logError, "Error", "Error updating discrete variables with the new x <block:%d, iter:%d> at <t:%E>",
+                    jmi_log_node(log, logError, "Error", "Error updating discrete variables with the new x <block:%d, iter:%I> at <t:%E>",
                         block_solver->id, iter, cur_time);
                     jmi_log_leave(log, iter_node);
                     break;
@@ -458,19 +458,19 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 if(ef != 0) { 
                     switch(ef) {
                     case jmi_block_solver_status_err_event_eval:
-                        jmi_log_node(log, logError, "Error", "Error evaluating switches <block:%d, iter:%d> at <t:%E>",
+                        jmi_log_node(log, logError, "Error", "Error evaluating switches <block:%d, iter:%I> at <t:%E>",
                             block_solver->id, iter, cur_time);
                         break;
                     case jmi_block_solver_status_err_f_eval:
-                        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%d> at <t:%E>",
+                        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%I> at <t:%E>",
                             block_solver->id, iter, cur_time);
                         break;
                     case jmi_block_solver_status_inf_event_loop:
-                        jmi_log_node(log, logError, "Error", "Detected infinite loop in enhanced fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                        jmi_log_node(log, logError, "Error", "Detected infinite loop in enhanced fixed point iteration in <block:%d, iter:%I> at <t:%E>",
                             block_solver->id, iter, cur_time);
                         break;
                     case jmi_block_solver_status_event_non_converge:
-                        jmi_log_node(log, logError, "Error", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%d> at <t:%E>",
+                        jmi_log_node(log, logError, "Error", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%I> at <t:%E>",
                             block_solver->id, iter, cur_time);
                         break;
                     default:
@@ -501,7 +501,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 /* Check for consistency */
                 if (non_reals_not_changed_flag){
-                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration in <block:%d, iter:%I> at <t:%E>",
                         block_solver->id, iter, cur_time);
                     converged = 1;
                     jmi_log_leave(log, iter_node);
@@ -518,7 +518,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         if(converged==0){
-            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration in <block:%d, iter:%d> at <t:%E>",
+            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration in <block:%d, iter:%I> at <t:%E>",
                  block_solver->id, iter, cur_time);
             ef = 1; /* Return flag */
         }

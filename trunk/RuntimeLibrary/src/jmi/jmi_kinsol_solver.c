@@ -85,7 +85,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         /* Recoverable error*/
         if (v- v != 0) {
             jmi_log_node(block->log, logWarning, "Warning", 
-                         "Not a number in <output: %d> from <block: %d>", i, block->id);
+                         "Not a number in <output: %I> from <block: %d>", i, block->id);
             ret = 1;
 #if 0           
             block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
@@ -369,7 +369,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             /* Get the number of iterations */
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
-            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", (int)nniters);
+            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%I>", (int)nniters);
             if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
             }
@@ -390,7 +390,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     }
                 }
                 jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
-                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%d>", max_index);
+                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
             }
 
             {
@@ -422,7 +422,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 }
 
                 nwritten = sprintf(message, "%4d %5d %11.4e  %11.4e:%4d",
-                                   (int)nniters, (int)(block->nb_fevals),
+                                   (int)nniters+1, (int)(block->nb_fevals),
                                    kin_mem->kin_fnorm, max_residual, max_index+1);
                 if (nniters > 0 && nwritten >= 0) {
                     char *buffer = message + nwritten;
@@ -1119,13 +1119,13 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 scale_ptr[i] = 1/tol; /* Singular Jacobian? */
                 solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
                 jmi_log_node(block->log, logWarning, "Warning", "Using maximum scaling factor in <block: %d>, "
-                             "<equation: %d> Consider rescaling in the model or tighter tolerance.", block->id, i);
+                             "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->id, i);
             }
             else if(scale_ptr[i] > 1/tol) {
                 scale_ptr[i] = tol;
                 solver->using_max_min_scaling_flag = 1; /* Using minimum scaling */
                 jmi_log_node(block->log, logWarning, "Warning", "Using minimal scaling factor in <block: %d>, "
-                             "<equation: %d> Consider rescaling in the model or tighter tolerance.", block->id, i);
+                             "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->id, i);
             }
             else
                 scale_ptr[i] = 1/scale_ptr[i];

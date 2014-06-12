@@ -659,7 +659,7 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx) {
     if (nx != jmi->n_real_x) {
         jmi_log_node(jmi->log, logError, "Error",
-            "Wrong size of array when getting nominal values: size is <t:%d>, should be <t:%d>", nx, jmi->n_real_x);
+            "Wrong size of array when getting nominal values: size is <given_nx:%d>, should be <actual_nx:%d>", nx, jmi->n_real_x);
     	return 1;
     }
     
@@ -727,7 +727,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         jmi->nbr_event_iter += 1;
         
         iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalIteration", 
-                                      "Global iteration <iter:%d>, at <t:%E>", jmi->nbr_event_iter, jmi_get_t(jmi)[0]);
+                                      "Global iteration <iter:%I>, at <t:%E>", jmi->nbr_event_iter, jmi_get_t(jmi)[0]);
         
         /* Copy current values to pre values */
         jmi_copy_pre_values(jmi);

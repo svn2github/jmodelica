@@ -26,6 +26,11 @@
 
 #include "jmi_log.h"
 
+typedef enum log_flag_t {
+    logFlagIndex = 1
+} log_flag_t;
+
+
 /* convenience typedefs */
 typedef jmi_log_node_t node_t;
 typedef jmi_log_category_t category_t;
