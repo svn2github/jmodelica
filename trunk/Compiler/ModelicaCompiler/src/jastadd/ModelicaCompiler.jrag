@@ -1220,6 +1220,9 @@ public class ModelicaCompiler {
 		
 		fc.transformCanonical();
 		
+        /* Temporary fix to problems with long compilation times due to later evaluations */
+        fc.root().options.setIntegerOption("external_constant_evaluation", 0);
+		
 		hookModelTransformed(fc);
 		hookCheckAbort();
 		
