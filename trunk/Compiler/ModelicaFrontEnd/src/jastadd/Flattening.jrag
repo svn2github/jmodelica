@@ -1547,16 +1547,6 @@ aspect FlatExpressions {
         return flat;
     }
     
-    @Override
-    public FIdDeclAttribute FIdDeclAttribute.flatten(FQName prefix) {
-        FIdDeclAttribute flat = (FIdDeclAttribute)super.flatten(prefix);
-        if (size().ndims() > 0)
-            flat.setFIdDecl(new FIdDecl(prefix.copyAndAppend(getFIdDecl().name(), size().createExpandedFArraySubscripts())));
-        else
-            flat.setFIdDecl(new FIdDecl(prefix.copyAndAppend(getFIdDecl().name())));
-        return flat;
-    }
-	
 	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
 		List l = new List();
 		for (int i=0;i<getNumFSubscript();i++)
@@ -2811,13 +2801,58 @@ aspect AttributeContributer {
             this.name = name;
         }
 
+        /**
+         * This method is called during instantiation when an equation is
+         * created.
+         * Instance accesses are expected if component references are made.
+         */
         protected abstract void contribute(AbstractEquation src, FAbstractEquation dest);
 
+        /**
+         * This method is called during flattening of components. All
+         * expressions that are added must be flattened.
+         */
         protected abstract void contribute(InstAssignable src, FVariable dest);
 
+        /**
+         * This method is called during flattening of functions. All
+         * expressions that are added must be flattened.
+         */
         protected abstract void contribute(InstBaseClassDecl src, FFunctionDecl dest);
 
+        /**
+         * This method is called during flattening of the model. All
+         * expressions that are added must be flattened.
+         */
         protected abstract void contribute(InstNode src, FClass dest);
+
+        /**
+         * This method is called in order to determine if an attribute should
+         * be considered as active. Return true if the attributes that was
+         * added earlier alters the models behaviour.
+         */
+        protected abstract boolean containsActiveAttributes(FAbstractEquation equation);
+
+        /**
+         * This method is called in order to determine if an attribute should
+         * be considered as active. Return true if the attributes that was
+         * added earlier alters the models behaviour.
+         */
+        protected abstract boolean containsActiveAttributes(FVariable variable);
+
+        /**
+         * This method is called in order to determine if an attribute should
+         * be considered as active. Return true if the attributes that was
+         * added earlier alters the models behaviour.
+         */
+        protected abstract boolean containsActiveAttributes(FFunctionDecl function);
+
+        /**
+         * This method is called in order to determine if an attribute should
+         * be considered as active. Return true if the attributes that was
+         * added earlier alters the models behaviour.
+         */
+        protected abstract boolean containsActiveAttributes(FClass fClass);
 
         @Override
         public String toString() {

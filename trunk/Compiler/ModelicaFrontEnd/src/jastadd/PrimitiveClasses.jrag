@@ -120,7 +120,6 @@ aspect UnknownDeclarations {
 	eq InstComponentAccess.isUnknown() = myInstComponentDecl().isUnknown();
 	eq InstComponentArrayAccess.isUnknown() = myInstComponentDecl().isUnknown();
 	eq InstClassAccess.isUnknown() = myInstClassDecl().isUnknown();
-	eq InstEquationAccess.isUnknown() = myEquation() == null;
 		                    
 	syn boolean FIdUse.isUnknown()  = myFV().isUnknown();
 	eq FIdUseInstAccess.isUnknown() = getInstAccess().isUnknown();

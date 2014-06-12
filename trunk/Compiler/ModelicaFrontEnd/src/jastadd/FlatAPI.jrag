@@ -1930,11 +1930,6 @@ aspect Attributes {
     eq FFunctionDecl.getChild().isInDerivedType(FDerivedType t)     = false;
     eq FClass.getChild().isInDerivedType(FDerivedType t)            = false;
 
-    syn boolean FAttribute.isDecl() = false;
-    eq FIdDeclAttribute.isDecl()    = true;
-
-    syn FIdDecl FAttribute.getFIdDecl() = null;
-
 }
 
 aspect FVariableUses {

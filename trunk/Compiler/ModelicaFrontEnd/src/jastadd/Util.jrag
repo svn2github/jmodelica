@@ -3371,17 +3371,65 @@ aspect AttributeUtil {
     syn boolean FAttribute.isModification()  = true;
     eq FInternalAttribute.isModification()   = false;
     eq FAnnotationAttribute.isModification() = false;
-    
+
     /**
      * Check if this is an internal generated attribute.
      */
     syn boolean FAttribute.isInternal() = false;
     eq FInternalAttribute.isInternal()  = true;
-    
+
     /**
      * Check if this is attribute is genereated from an annotation.
      */
     syn boolean FAttribute.isAnnotation()  = false;
     eq FAnnotationAttribute.isAnnotation() = true;
-    
+
+    /**
+     * Check if this FClass contains any active annotation attributes.
+     */
+    syn boolean FClass.containsActiveAnnotations() {
+        if (getNumFAttribute() == 0)
+            return false;
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
+                return true;
+        return false;
+    }
+
+    /**
+     * Check if this FVariable contains any active annotation attributes.
+     */
+    syn boolean FVariable.containsActiveAnnotations() {
+        if (getNumFAttribute() == 0)
+            return false;
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
+                return true;
+        return false;
+    }
+
+    /**
+     * Check if this FAbstractEquation contains any active annotation attributes.
+     */
+    syn boolean FAbstractEquation.containsActiveAnnotations() {
+        if (getNumFAttribute() == 0)
+            return false;
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
+                return true;
+        return false;
+    }
+
+    /**
+     * Check if this FFunctionDecl contains any active annotation attributes.
+     */
+    syn boolean FFunctionDecl.containsActiveAnnotations() {
+        if (getNumFAttribute() == 0)
+            return false;
+        for (AttributeContributer contributer : attributeContributers())
+            if (contributer.containsActiveAttributes(this))
+                return true;
+        return false;
+    }
+
 }

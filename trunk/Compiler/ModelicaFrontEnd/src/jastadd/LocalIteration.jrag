@@ -28,6 +28,26 @@ aspect LocalIteration{
 
             @Override
             protected void contribute(InstNode src, FClass dest) {}
+
+            @Override
+            protected boolean containsActiveAttributes(FAbstractEquation equation) {
+                return equation.hasLocalIteration();
+            }
+
+            @Override
+            protected boolean containsActiveAttributes(FVariable variable) {
+                return false;
+            }
+
+            @Override
+            protected boolean containsActiveAttributes(FFunctionDecl function) {
+                return false;
+            }
+
+            @Override
+            protected boolean containsActiveAttributes(FClass fClass) {
+                return false;
+            }
         }
     }
     
@@ -51,7 +71,7 @@ aspect LocalIteration{
         FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
         if (enabledAttr != null) {
             FExp enabledExp = enabledAttr.getValue();
-            typeCheckHGTEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
+            typeCheckEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
         }
     }
     

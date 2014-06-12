@@ -623,21 +623,3 @@ aspect UnknownFVariables {
 	   
 }
 
-aspect FlatFEquationBinding {
-	inh FAbstractEquation FIdUse.lookupFEquation(FQName name);
-	syn FAbstractEquation FIdUse.myFEquation() = lookupFEquation(getFQName());
-	
-	eq FClass.getChild().lookupFEquation(FQName name) = equationMap().get(name.name());
-	eq Root.getChild().lookupFEquation(FQName name)   = null;
-	
-	syn lazy Map<String, FAbstractEquation> FClass.equationMap() {
-		Map<String, FAbstractEquation> equationMap = new HashMap<String, FAbstractEquation>();
-		for (FAbstractEquation fae : getFAbstractEquations()) {
-		    String name = fae.name();
-			if (name != null)
-				equationMap.put(name, fae);
-		}
-		return equationMap;
-	}
-	
-}

@@ -162,7 +162,7 @@ aspect OptimicaTransformCanonical {
 	protected void FOptClass.scalarizeClassAttributes() {
 		List<FAttribute> al = new List<FAttribute>();
 		for (FAttribute a : getFAttributes()) 
-			al.add(a.scalarize(Index.NULL, Collections.<String,FExp>emptyMap()));
+			a.scalarize(al, Index.NULL, Collections.<String,FExp>emptyMap());
 		setFAttributeList(al);
 	}
 	

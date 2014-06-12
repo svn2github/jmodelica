@@ -1141,9 +1141,6 @@ public class Eq implements Comparable<Eq> {
 	    int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
 	    if (diff != 0)
 	        return diff;
-		diff = (markedAsResidualEquation() ? 1 : 0) - (other.markedAsResidualEquation() ? 1 : 0);
-		if (diff != 0)
-			return diff;
 		diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
 		if (diff != 0)
 			return diff;
@@ -1304,10 +1301,6 @@ public class Var implements Comparable<Var> {
 		return this.isIter;
 	}
 	
-	public boolean markedAsIterationVariable() {
-		return getVariable().isHGTVarComponent();
-	}
-	
 	/**
 	 * Returns integer greather than zero if this variable sutes better as iteration
 	 * variable than the <code>other</code> variable. Zero is returned if they are equal
@@ -1319,9 +1312,6 @@ public class Var implements Comparable<Var> {
         if (diff != 0)
             return diff;
 		diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
-		if (diff != 0)
-			return diff;
-		diff = (markedAsIterationVariable() ? 1 : 0) - (other.markedAsIterationVariable() ? 1 : 0);
 		if (diff != 0)
 			return diff;
 		diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
