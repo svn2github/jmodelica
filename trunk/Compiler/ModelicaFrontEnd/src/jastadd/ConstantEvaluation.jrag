@@ -194,6 +194,26 @@ aspect ConstantEvaluation {
         public String[] stringVector() { 
             throw new ConstantEvaluationException(this, "get string vector of "); 
         }
+
+        /**
+         * Calculate the min value of this constant value.
+         * Works for integer, real and array CValues.
+         * 
+         * @return The smallest value that this CValue represent
+         */
+        public double minValue() {
+            throw new ConstantEvaluationException(this, "get min value of "); 
+        }
+
+        /**
+         * Calculate the max value of this constant value.
+         * Works for integer, real and array CValues.
+         * 
+         * @return The largest value that this CValue represent
+         */
+        public double maxValue() {
+            throw new ConstantEvaluationException(this, "get max value of "); 
+        }
         
 	    /**
 	     * \brief Create a literal AST node from constant, default 
@@ -515,7 +535,17 @@ aspect ConstantEvaluation {
         public double realValue() { 
         	return value; 
         }
-	    
+
+        @Override
+        public double minValue() {
+            return value;
+        }
+
+        @Override
+        public double maxValue() {
+            return value;
+        }
+
 	    /**
 	     * \brief Convert to CValueInteger.
 	     */
@@ -595,6 +625,16 @@ aspect ConstantEvaluation {
 	     */
         public double realValue() { 
         	return value; 
+        }
+
+        @Override
+        public double minValue() {
+            return value;
+        }
+
+        @Override
+        public double maxValue() {
+            return value;
         }
 	    
 	    /**
@@ -920,6 +960,22 @@ aspect ConstantEvaluation {
             for (int i = 0; i < values.length; i++)
                 vector[i] = values[i].stringValue();
             return vector;
+        }
+
+        @Override
+        public double minValue() {
+            double min = Double.MAX_VALUE;
+            for (CValue value : values)
+                min = Math.min(value.minValue(), min);
+            return min;
+        }
+
+        @Override
+        public double maxValue() {
+            double max = Double.MIN_VALUE;
+            for (CValue value : values)
+                max = Math.max(value.minValue(), max);
+            return max;
         }
 
         /**
