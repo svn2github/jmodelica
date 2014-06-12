@@ -836,9 +836,9 @@ aspect AliasVariables {
         if (isReal()) 
             score += stateSelectAttribute().ordinal();
         
-        // Annotations
+        // HGT
         score *= 10;
-        if (containsAnnotationAttributes())
+        if (isHGTVar())
             score += 1;
         
         // Fixed attribute == true

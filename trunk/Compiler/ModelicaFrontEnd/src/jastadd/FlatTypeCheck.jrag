@@ -38,6 +38,10 @@ aspect FlatTypeCheck {
 
     private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
 
+    public void InstNode.typeCheck(ErrorCheckType checkType) {
+        typeCheckSystemResiduals(checkType);
+    }
+    
     public void InstComposite.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
         // Note that modifiers (including redeclarations) in a constraining clause
@@ -103,6 +107,7 @@ aspect FlatTypeCheck {
                 if (declaredSubType.hasInstConstraining()) 
                     superType = constrainingSubType;
             }
+            typeCheckSystemResiduals(checkType);
         }
     }
 
@@ -143,6 +148,15 @@ aspect FlatTypeCheck {
                     error("The guard expression of a conditional component should be a boolean expression");
                 if (!cond.variability().lessOrEqual(fParameter())) 
                     error("The guard expression of a conditional component should have parameter or constant variability");
+            }
+        }
+        
+        if (root().options.getBooleanOption("hand_guided_tearing")) {
+            AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+            AnnotationNode enabledNode = iterationNode.forPath("enabled");
+            if (enabledNode.exists()) {
+                FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+                typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEach());
             }
         }
         
@@ -204,6 +218,7 @@ aspect FlatTypeCheck {
 
 
   public void FEquation.typeCheck(ErrorCheckType checkType) {
+      typeCheckHGTResidual(checkType);
       typeCheckNominal(checkType);
       typeCheckLocalIteration(checkType);
       FType left = getLeft().type();
@@ -583,6 +598,8 @@ aspect FlatTypeCheck {
   eq FIdUse.getChild().inUnknownAccess()                  = myFV().isUnknown();
   eq InstScalarAccess.getChild().inUnknownAccess()        = myInstComponentDecl().isUnknown();
   eq InstArrayAccess.getChild().inUnknownAccess()         = myInstComponentDecl().isUnknown();
+  eq InstEquationAccess.getChild().inUnknownAccess()      = myEquation() == null;
+  eq InstEquationArrayAccess.getChild().inUnknownAccess() = myEquation() == null;
   eq FlatRoot.getChild().inUnknownAccess()                = false;
   eq InstRoot.getChild().inUnknownAccess()                = false;
   
@@ -1079,27 +1096,6 @@ aspect FlatTypeCheck {
 	  return true;
   }
 	
-  protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
-      enabledExp.collectErrors(checkType);
-      if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
-          enabledExp.error("The type of the enabled expression is not boolean");
-      } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
-          if (enabledExp.ndims() == 0) {
-              enabledExp.warning("Assuming 'each' for enabled expression");
-          } else {
-              enabledExp.error("Array size mismatch for the enabled attribute" +
-                      ", size of component declaration is " + parentType.size() + 
-                      " and size of expression is " + enabledExp.size());
-          }
-      } else if (eachSet) { 
-          if (parentType.ndims() == 0) {
-              enabledExp.error("The 'each' keyword cannot be applied to attributes of scalar components");
-          } else if (enabledExp.ndims() > 0) {
-              enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
-          }
-      }
-  }
-  
 }
 
 aspect FlatVariabilityCheck {

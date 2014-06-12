@@ -164,6 +164,12 @@ abstract public class OptionRegistry {
              compiler, 
              true, 
              "If this option is set to true (default is true), automatic tearing of equation systems is performed."),
+        HAND_GUIDED_TEARING 
+            ("hand_guided_tearing", 
+             compiler, 
+             false, 
+             "If this option is set to true (default is false), hand guided tearing annotations are parsed and " +
+             "hand guided of equation system is performed"),
         CONV_FREE_DEP_PAR_TO_ALGS
             ("convert_free_dependent_parameters_to_algebraics", 
              compiler, 

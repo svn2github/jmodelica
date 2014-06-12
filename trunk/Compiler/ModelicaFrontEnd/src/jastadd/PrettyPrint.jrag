@@ -155,14 +155,6 @@ aspect PrettyPrint {
  		prettyPrint(prettyPrinter,str,indent);
 	}
 	
-    /**
-     * Overrides default behaviour since we should use AnnotationPrettyPrinter
-     * when printing annotation nodes.
-     */
-    @Override
-    public void FAnnotationAttribute.prettyPrint(CodeStream str, String indent) {
-        prettyPrint(AnnotationPrettyPrinter, str, indent);
-    }
 	
 	public void ASTNode.prettyPrint(Printer p, CodeStream str, String indent) {
   		for (ASTNode n : this)
@@ -1079,7 +1071,8 @@ aspect FlatPrettyPrint {
         boolean firstAttr = true;
         for (ASTNode astNode : this) {
             FAttribute attr = (FAttribute)astNode;
-            if (attr.shouldPrettyPrint(p)) {
+            if (attr.getAttributeSet() && (p.inAnnotation() && attr.isAnnotation() ||
+                    !p.inAnnotation() && (attr.isModification() || attr.isInternal()))) {
                 if (!firstAttr)	
                     str.print(",");
                 else
@@ -1090,13 +1083,6 @@ aspect FlatPrettyPrint {
         }
         if (!firstAttr)
             str.print(")" + extraEnd);
-    }
-    
-    public boolean FAttribute.shouldPrettyPrint(Printer p) {
-        if (p.inAnnotation())
-            return  isAnnotation();
-        return getAttributeSet() && (isModification() || isInternal());
-
     }
 	
     public void FAttribute.prettyPrint(Printer p, CodeStream str, String indent) {

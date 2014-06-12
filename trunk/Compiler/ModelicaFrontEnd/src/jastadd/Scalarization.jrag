@@ -49,7 +49,6 @@ aspect Scalarization {
                 replaceScalarizedVars(vars, alias_vars);
                 scalarizeFuncs();
                 scalarizeTypes();
-                scalarizeAttributes();
                 getConnectionSetManager().scalarize();
                 scalarized = true;
                 scalarizationCleanup();
@@ -70,6 +69,33 @@ aspect Scalarization {
 	
 	protected void FClass.scalarizeAllVarDependent(List<FVariable> vars) {
 		scalarizeEquations(vars);
+		scalarizeResidualPairs();
+	}
+	
+	protected void FClass.scalarizeResidualPairs() {
+		List<FResidualPair> newPairs = new List<FResidualPair>();
+		for (FResidualPair pair : getFResidualPairs()) {
+			pair.scalarize(newPairs);
+		}
+		setFResidualPairList(newPairs);
+	}
+	
+	protected void FResidualPair.scalarize(List<FResidualPair> pairs) {
+		if (!getResidualEquation().size().equals(getIterationVariable().size())) {
+			throw new UnsupportedOperationException("Residual equation and iteration variable have different sizes.");
+		}
+		if (getResidualEquation().ndims() > 0) {
+			Iterator<Index> resIt = getResidualEquation().indices().iterator();
+			Iterator<Index> iterIt = getIterationVariable().indices().iterator();
+			while (resIt.hasNext() && iterIt.hasNext()) {
+				pairs.addChild(new FResidualPair(getResidualEquation().specify(resIt.next(), true), getIterationVariable().specify(iterIt.next(), true), getLevel()));
+			}
+			if (resIt.hasNext() || iterIt.hasNext())
+				throw new UnsupportedOperationException("Residual equation and iteration variable have different sizes.");
+		} else {
+			Map<String,FExp> emptyMap = Collections.emptyMap();
+			pairs.addChild(new FResidualPair(getResidualEquation().scalarize(emptyMap), getIterationVariable().scalarize(emptyMap), getLevel()));
+		}
 	}
 	
 	protected void FClass.scalarizeEquations(List<FVariable> vars) {
@@ -93,16 +119,6 @@ aspect Scalarization {
 		setFFunctionDeclList(funcs);
 		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
 	}
-	
-    /**
-     * Handles scalarization of the FAttributes that are declared in the FClass
-     */
-    private void FClass.scalarizeAttributes() {
-        List<FAttribute> attrs = new List<FAttribute>();
-        for (FAttribute a : getFAttributes())
-            a.scalarize(attrs, Index.NULL, Collections.<String,FExp>emptyMap());
-        setFAttributeList(attrs);
-    }
 	
 	/**
 	 * Scalarize type declarations by removing array-valued attributes. 
@@ -220,7 +236,7 @@ aspect Scalarization {
 		
 		// Iterate over all attributes and scalarize.
 		for (FAttribute a : getFAttributes()) 
-			a.scalarize(fv.getFAttributes(), i, Collections.<String,FExp>emptyMap());
+			fv.addFAttribute(a.scalarize(i, Collections.<String,FExp>emptyMap()));
 		fv.setDerivedType(getDerivedType());
 		fv.addArrayAttributesFromType(i, myFDerivedType());
 		
@@ -560,17 +576,14 @@ aspect Scalarization {
 		return res;
 	}
 	
-    public FAttribute FAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
-        return scalarizeInternal(attrs, i, indexMap);
-    }
     /**
      * \brief Scalarize the attribute, picking out the specific element from an array 
      *        expression or removing "each".
      */
-    public FAttribute FAttribute.scalarizeInternal(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
+    public FAttribute FAttribute.scalarize(Index i, Map<String,FExp> indexMap) {
         FAttribute attr = createEmptyNode();
         for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
-            a.scalarize(attr.getFAttributes(), i, indexMap);            // TODO: really send i here?
+            attr.addFAttribute(a.scalarize(i, indexMap));            // TODO: really send i here?
         attr.setType(getType().fullCopy());
         attr.setName(getName().fullCopy());
         attr.setAttributeSet(getAttributeSet());
@@ -578,46 +591,9 @@ aspect Scalarization {
         attr.setFFinalOpt(getFFinalOpt().fullCopy());
         if (hasValue()) 
             attr.setValue(scalarizeValue(i, indexMap));
-        attrs.add(attr);
         return attr;
     }
 	
-    @Override
-    public FAttribute FAnnotationAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
-        if (i.ndims() == 0)
-            scalarize(attrs, indexMap);
-        else
-            scalarizeInternal(attrs, i, indexMap);
-        return null;
-    }
-    /**
-     * Scalarize the attribute and create multiple instances for non-scalar
-     * attributes.
-     * An attribute is scalarized if it has no value and all its child
-     * attributes have value and are of the same size.
-     */
-    public void FAttribute.scalarize(List<FAttribute> attrs, Map<String,FExp> indexMap) {
-        if (hasValue()) {
-            scalarizeInternal(attrs, Index.NULL, indexMap);
-        } else {
-            Size size = null;
-            boolean keepScalar = false;
-            for (FAttribute attr : getFAttributes()) {
-                if (!attr.hasValue())
-                    keepScalar = true;
-                else if (size == null)
-                    size = attr.getValue().size();
-                else if (!attr.hasFEach() && !attr.getValue().size().equals(size))
-                    keepScalar = true;
-            }
-            if (size == null || keepScalar)
-                size = Size.SCALAR;
-            for (Index i : Indices.create(size)) {
-                scalarizeInternal(attrs, i, indexMap);
-            }
-        }
-    }
-    
 	/**
 	 * Scalarize the value of this attribute, picking out the specific element from an array 
 	 * expression.
@@ -635,6 +611,23 @@ aspect Scalarization {
 		return v.scalarize(indexMap);
 	}
 	
+    @Override
+    public FIdDeclAttribute FIdDeclAttribute.scalarize(Index i, Map<String,FExp> indexMap) {
+        FIdDeclAttribute attr = (FIdDeclAttribute) super.scalarize(i, indexMap);
+        if (i == Index.NULL) {
+            FQName name = getFIdDecl().getFQName();
+            if (!name.hasFArraySubscripts()) {
+                List<FSubscript> list = extendedNameSubscript();
+                name = name.copyAndAddFas(new FArraySubscripts(list));
+                setFIdDecl(new FIdDecl(name));
+            }
+            name = name.scalarize(indexMap);
+            attr.setFIdDecl(new FIdDecl(name));
+        } else {
+            attr.setFIdDecl(new FIdDecl(getFIdDecl().getFQName().specify(i, true)));
+        }
+        return attr;
+    }
 	/**
 	 * \brief Scalarize the function variable.
 	 * 
@@ -1931,7 +1924,7 @@ aspect Scalarization {
         fd.setFFunctionVariableList(vars);
         fd.setFAlgorithm(new FAlgorithm(stmts));
         for (FAttribute a : getFAttributes()) 
-            a.scalarize(fd.getFAttributes(), Index.NULL, Collections.<String,FExp>emptyMap());
+            fd.addFAttribute(a.scalarize(Index.NULL, Collections.<String,FExp>emptyMap()));
         if (hasFDerivativeFunction())
             fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
         fd.inlineAnnotation = inlineAnnotation;
@@ -1972,7 +1965,7 @@ aspect Scalarization {
     public List<FAttribute> FAbstractEquation.scalarizeAttributeList(Index i, Map<String,FExp> indexMap) {
         List<FAttribute> scalarized = new List<FAttribute>();
         for (FAttribute a : getFAttributes()) 
-            a.scalarize(scalarized, i, indexMap);
+            scalarized.add(a.scalarize(i, indexMap));
         return scalarized;
     }
 	
@@ -2010,6 +2003,17 @@ aspect Scalarization {
 					this + "' returned " + ndims()); 
 		}
 	}
+	
+	inh List<FSubscript> FIdDeclAttribute.extendedNameSubscript();
+    inh List<FSubscript> FAbstractEquation.extendedNameSubscript();
+	eq FForClauseE.getChild().extendedNameSubscript() {
+		List<FSubscript> list = extendedNameSubscript();
+		for (FForIndex fi : getFForIndexs()) 
+			list.addChild(new FExpSubscript(new FIdUseExp(fi.getFVariable().name())));
+		return list;
+	}
+	eq FlatRoot.getChild().extendedNameSubscript() = new List<FSubscript>();
+	eq InstRoot.getChild().extendedNameSubscript() = new List<FSubscript>();
 	
 	public void FAlgorithm.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {

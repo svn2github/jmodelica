@@ -1147,11 +1147,6 @@ aspect AnnotationAPI {
         }
 
         @Override
-        public Iterator<AnnotationNode> iterator() {
-            return fExp() == null ? new AnnotationIterator(attr.getFAttributes()) : super.iterator();
-        }
-
-        @Override
         protected AnnotationNode lookup(String path) {
             for (FAttribute attr : this.attr.getFAttributes())
                 if (attr.matches(path))

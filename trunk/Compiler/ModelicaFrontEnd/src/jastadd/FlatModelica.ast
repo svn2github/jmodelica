@@ -453,6 +453,11 @@ FInternalAttribute : FAttribute;
 FAnnotationAttribute : FAttribute;
 
 /**
+ * An internal attribute for representing declaration of equation names.
+ */
+FIdDeclAttribute : FInternalAttribute ::= FIdDecl;
+
+/**
  * An internal attribute for representing references to equations.
  */
 //FEqnRefAttribute : FInternalAttribute;

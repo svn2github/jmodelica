@@ -424,6 +424,7 @@ aspect Arrays {
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
 	syn FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
+	eq InstEquationAccess.getExpandedSubscripts() = myEquation().expandedSubscripts();
 	syn FArraySubscripts InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
 	
 //	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
@@ -566,6 +567,13 @@ aspect Arrays {
 		return left.equals(right) ? left : Size.SCALAR;
 	}
 
+    inh Size FIdDeclAttribute.size();
+    eq FAbstractEquation.getFAttribute().size() = size();
+    eq FVariable.getFAttribute().size()         = size();
+    eq FDerivedType.getFAttribute().size()      = getBaseType().size();
+    eq FFunctionDecl.getFAttribute().size()     = Size.SCALAR;
+    eq FClass.getFAttribute().size()            = Size.SCALAR;
+
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
 	
 	inh Size FAbstractEquation.parentTotalSize();
@@ -696,8 +704,11 @@ aspect Arrays {
 	eq FIdUse.getChild().mySize()                       = myFV().size();
 	eq FIdUseInstAccess.getChild().mySize()             = getInstAccess().size();
 	eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+	eq InstEquationAccess.getExpandedSubscripts().mySize() = myEquation().totalSize();
 	eq InstArrayAccess.getFArraySubscripts().mySize()   = myInstComponentDecl().size();
 	eq InstArrayAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+	eq InstEquationArrayAccess.getFArraySubscripts().mySize()   = myEquation().totalSize();
+	eq InstEquationArrayAccess.getExpandedSubscripts().mySize() = myEquation().totalSize();
 	eq FSubscriptedExp.getFArraySubscripts().mySize()   = getFExp().size();
 	eq FExpSubscript.getFExp().mySize()                 = mySize();
 	eq FlatRoot.getChild().mySize()                     = Size.SCALAR;
@@ -1088,12 +1099,12 @@ aspect Arrays {
 		
 	eq FIdUseExp.size() = getFIdUse().size();
 	
-    /**
-     * \brief Get the array sizes. 
-     */
-    syn Size InstAccess.size()   = Size.SCALAR;
-    eq InstScalarAccess.size()   = myInstComponentDecl().size();
-    eq InstArrayAccess.size()    = getFArraySubscripts().accessSize();
+	/**
+	 * \brief Get the array sizes. 
+	 */
+	syn Size InstAccess.size() = Size.SCALAR;
+	eq InstScalarAccess.size() = myInstComponentDecl().size();
+	eq InstArrayAccess.size() = getFArraySubscripts().accessSize();
 			
 	/**
 	 * \brief Get the array sizes. 
@@ -2262,6 +2273,7 @@ aspect Arrays {
 	eq InstParseAccess.getArrayCopy(FArraySubscripts fas) = new InstParseArrayAccess(getID(), fas);
 	eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = new InstAmbiguousArrayAccess(getID(), fas);
 	eq InstComponentAccess.getArrayCopy(FArraySubscripts fas) = new InstComponentArrayAccess(getID(), fas);
+	eq InstEquationAccess.getArrayCopy(FArraySubscripts fas) = new InstEquationArrayAccess(getID(), fas);
 
 	protected InstNamedAccess InstArrayAccess.specifyEach(Index i, int[] dim) {
 		InstArrayAccess res = fullCopy();

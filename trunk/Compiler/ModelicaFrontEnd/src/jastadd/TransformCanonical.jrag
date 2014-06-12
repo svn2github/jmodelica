@@ -118,6 +118,7 @@ aspect TransformCanonical {
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
             transformations.add(new enableWhenClauseRewrite());
+            transformations.add(new propagateResidualPairs());
             transformations.add(new genInitArrayStatements());
             transformations.add(new functionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
@@ -1624,6 +1625,7 @@ aspect TransformCanonical {
             public void perform() {
                 genAlias();
                 eliminateAliasVariables();
+                checkForEliminatedHGTVars();
                 removeUnusedTemporaries();
                 mergeEquivalentRecords();
                 insertTempsInLHS();
@@ -1665,7 +1667,7 @@ aspect TransformCanonical {
 	 */
 	public AliasPair FEquation.aliasVariables() {
 		AliasPair res = null;
-		if (!containsAnnotationAttributes()) // This equation should not be alias-removed if it is marked as residual!
+		if (!isHGTResidual() && !canUseLocalIteration()) // This equation should not be alias-removed if it is marked as residual!
 			res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
 		classifiedAsAlias = res != null;
@@ -1851,6 +1853,13 @@ aspect TransformCanonical {
      */
     syn boolean FVariable.aliasSortKeep() = !isPreVariable() || !myNonPreVariable().isAlias();
     
+	
+	public void FClass.checkForEliminatedHGTVars() {
+		for (FVariable var : getAliasVariables()) {
+			if (var.isHGTVar())
+				var.error("Hand guided tearing variable '%s' has been alias eliminated. Selected model variable is:\n    %s", var.name(), var.alias());
+		}
+	}
 	
 	public void ASTNode.enableAliasRewrite() {
 		for (ASTNode n : this)
@@ -3270,7 +3279,6 @@ aspect TransformCanonicalErrorCheck {
 		checkDuplicateVariables();
 		checkFClassDimensions();
 		checkStructure();
-		allChecks(checkType);
 	}
 }
 

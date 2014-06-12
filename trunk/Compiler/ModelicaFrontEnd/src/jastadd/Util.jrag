@@ -3371,47 +3371,17 @@ aspect AttributeUtil {
     syn boolean FAttribute.isModification()  = true;
     eq FInternalAttribute.isModification()   = false;
     eq FAnnotationAttribute.isModification() = false;
-
+    
     /**
      * Check if this is an internal generated attribute.
      */
     syn boolean FAttribute.isInternal() = false;
     eq FInternalAttribute.isInternal()  = true;
-
+    
     /**
      * Check if this is attribute is genereated from an annotation.
      */
     syn boolean FAttribute.isAnnotation()  = false;
     eq FAnnotationAttribute.isAnnotation() = true;
-
-    syn boolean FAttribute.containsAnnotationAttributes() {
-        if (isAnnotation())
-            return true;
-        for (FAttribute attribute : getFAttributes())
-            if (attribute.containsAnnotationAttributes())
-                return true;
-        return false;
-    }
-
-    syn boolean FVariable.containsAnnotationAttributes() {
-        for (FAttribute attribute : getFAttributes())
-            if (attribute.containsAnnotationAttributes())
-                return true;
-        return false;
-    }
-
-    syn boolean FAbstractEquation.containsAnnotationAttributes() {
-        for (FAttribute attribute : getFAttributes())
-            if (attribute.containsAnnotationAttributes())
-                return true;
-        return false;
-    }
-
-    syn boolean FFunctionDecl.containsAnnotationAttributes() {
-        for (FAttribute attribute : getFAttributes())
-            if (attribute.containsAnnotationAttributes())
-                return true;
-        return false;
-    }
-
+    
 }

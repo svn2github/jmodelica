@@ -86,6 +86,11 @@ aspect InstanceNameCheck {
         }
     }
 
+    public void InstEquationAccess.nameCheck(ErrorCheckType checkType) {
+        if (myEquation() == null)
+            error("Cannot find equation declaration for " + qualifiedName());
+    }
+
 
     inh boolean InstAccess.isExpandableConnectorMemberInConnect();
     eq InstDot.getInstAccess(int i).isExpandableConnectorMemberInConnect() = 
