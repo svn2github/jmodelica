@@ -156,20 +156,38 @@ public class ModelicaCompiler {
 	
 	protected String[] targetPlatforms = null;
 	protected Collection<Problem> warnings = new ArrayList<Problem>();
-	
-	public static OptionRegistry createOptions() {
-	    return new OptionRegistry() {};
-	}
-    
-    public static OptionRegistry createOptions(String file) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
-        return new OptionRegistry(file) {};
+
+    /**
+     * Exports default options to XML.
+     */
+    public static class OptionExporter extends OptionRegistry {
+        /**
+         * Exports default options to XML.
+         * 
+         * If given an argument, XML is saved in a file with that path.
+         */
+        public static void main(String[] args) {
+            try {
+                OptionRegistry or = new OptionExporter();
+                if (args.length < 1) 
+                    or.exportXML(System.out);
+                else 
+                    or.exportXML(args[0]);
+            } catch (FileNotFoundException e) {
+                System.err.println("Could not open file for writing: " + e.getMessage());
+            }
+        }
     }
-	
-	public ModelicaCompiler(OptionRegistry options) {
-		this.options = options;
-	}
-	
-	protected ModelicaCompiler() {}
+
+    public static OptionRegistry createOptions() {
+        return new OptionRegistry() {};
+    }
+
+    public ModelicaCompiler(OptionRegistry options) {
+        this.options = options;
+    }
+
+    protected ModelicaCompiler() {}
 
 	/**
 	 * Sets the directory new temporary files are created in. 
@@ -1423,22 +1441,8 @@ public class ModelicaCompiler {
 	}
 
     private void setOptions(Arguments programarguments) {
-        String filesep = File.separator;
-        String optionsfile = null;
-        //look for options.xml in $JMODELICA_HOME/Options/ and program arguments
-        if (programarguments.get("optfile") != null)
-            optionsfile = programarguments.get("optfile");
-        else
-            optionsfile = jmodelicaHome+filesep+"Options"+filesep+"options.xml";
-        
-        try {
-            options = createOptions(optionsfile);
-        } catch(Exception e) {
-            log.warning("The options XML file could not be loaded, using defaults.");
-            log.debug(e);
-            options = createOptions();
-        }
-        
+        // Create option registry
+        options = createOptions();
         String opts = programarguments.get("opt");
         if (opts != null) {
             for (String opt : opts.split(",")) {
@@ -1455,9 +1459,9 @@ public class ModelicaCompiler {
         if (modelicapath == null) {
             //modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
             if (System.getenv("MODELICAPATH") != null) 
-                modelicapath=System.getenv("MODELICAPATH");
+                modelicapath = System.getenv("MODELICAPATH");
             else
-                modelicapath=jmodelicaHome+filesep+"ThirdParty"+filesep+"MSL";
+                modelicapath = String.format("%s%sThirdParty%sMSL", jmodelicaHome, File.separator, File.separator);
         }
         options.addStringOption("MODELICAPATH", modelicapath);
     }

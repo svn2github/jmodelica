@@ -16,7 +16,6 @@
 
 package org.jmodelica.util;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,11 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
 
 /**
  * OptionRegistry contains all options for the compiler. Options
@@ -632,69 +626,6 @@ abstract public class OptionRegistry {
         return res;
     }
 
-    public OptionRegistry(String filepath) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
-        this();
-        loadOptions(filepath);
-    }
-
-    protected void loadOptions(String filepath) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-        //logger.info("Loading options...");
-        org.w3c.dom.Document doc = parseAndGetDOM(filepath);
-
-        javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
-        javax.xml.xpath.XPath xpath = factory.newXPath();
-
-        javax.xml.xpath.XPathExpression expr;
-
-        //set other options if there are any
-        expr = xpath.compile("OptionsRegistry/Options");
-        org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
-        if (options !=null && options.hasChildNodes()) {
-            expr = xpath.compile("OptionsRegistry/Options/Option");
-            org.w3c.dom.NodeList theOptions = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-            expr = xpath.compile("OptionsRegistry/Options/Option/*");
-            org.w3c.dom.NodeList theAttributes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-
-            for (int i=0; i<theOptions.getLength();i++) {
-                org.w3c.dom.Node n = theOptions.item(i);
-                org.w3c.dom.NamedNodeMap attributes = n.getAttributes();
-
-                org.w3c.dom.Node a = theAttributes.item(i);
-                attributes = a.getAttributes();
-                String key = attributes.getNamedItem("key").getTextContent();
-                String value = attributes.getNamedItem("value").getTextContent();
-
-                setOption(key, value);
-            }
-        }
-    }
-
-    /**
-     * Parses an XML file and returns the DOM document instance.
-     * 
-     * @param xmlfile
-     *            The XML file to be parsed.
-     * 
-     * @return The DOM document object.
-     * 
-     * @throws ParserConfigurationException
-     *             If a parser configuration error has occured.
-     * @throws IOException
-     *             If an IO error occurs.
-     * @throws SAXException
-     *             If an error with the parsing occurs.
-     */
-    private org.w3c.dom.Document parseAndGetDOM(String xmlfile) 
-        throws javax.xml.parsers.ParserConfigurationException, IOException, org.xml.sax.SAXException{
-        javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
-        factory.setIgnoringComments(true);
-        factory.setIgnoringElementContentWhitespace(true);
-        factory.setNamespaceAware(true);
-        javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();
-        org.w3c.dom.Document doc = builder.parse(new File(xmlfile));
-        return doc;
-    }
-
     private static final String INDENT = "    ";
 
     /**
@@ -728,23 +659,6 @@ abstract public class OptionRegistry {
         try {
             out.close();
         } catch (IOException e) {
-        }
-    }
-
-    /**
-     * \brief Main method. Exports default options to XML.
-     * 
-     * If given an argument, XML is saved in file with that path.
-     */
-    public static void main(String[] args) {
-        try {
-            OptionRegistry or = new OptionRegistry() {};
-            if (args.length < 1) 
-                or.exportXML(System.out);
-            else 
-                or.exportXML(args[0]);
-        } catch (FileNotFoundException e) {
-            System.err.println("Could not open file for writing: " + e.getMessage());
         }
     }
 

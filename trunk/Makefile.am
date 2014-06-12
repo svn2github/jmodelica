@@ -247,10 +247,9 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 	cd $(JAVA_BUILD_DIR); \
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
+	java -cp "$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter "$(abs_builddir)/DefaultOptions.xml"
 endif
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
-	mkdir -p $(abs_builddir)/Options
-	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 install-exec-local: install-python-packages
@@ -267,16 +266,6 @@ endif
 	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/include/
 	mkdir -p $(DESTDIR)$(prefix)/Makefiles
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
-#	case $(build) in \
-#	*-cygwin*) \
-#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
-#  	*-mingw*) \
-#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-#  	*-apple*) \
-#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-#  	*) \
-#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-#	esac
 	case $(build) in \
 	*-cygwin*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
@@ -295,8 +284,7 @@ if WITH_MINGW
 	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
 endif
 
-	mkdir -p $(DESTDIR)$(prefix)/Options
-	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
+	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
@@ -356,9 +344,9 @@ bindistdir: install
 	cp $(DESTDIR)$(prefix)/LICENSE $(bindistdir)
 	cp $(DESTDIR)$(prefix)/startup.py $(bindistdir)
 	cp $(DESTDIR)$(prefix)/version.txt $(bindistdir)
+	cp $(DESTDIR)$(prefix)/DefaultOptions.xml $(bindistdir)
 	cp -r $(DESTDIR)$(prefix)/CodeGenTemplates $(bindistdir)
 	cp -r $(DESTDIR)$(prefix)/Makefiles $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/Options $(bindistdir)
 	cp -r $(DESTDIR)$(prefix)/Python $(bindistdir)
 	cp -r $(DESTDIR)$(prefix)/ThirdParty $(bindistdir)
 	cp -r $(DESTDIR)$(prefix)/XML $(bindistdir)
