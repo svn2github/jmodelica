@@ -389,6 +389,11 @@ aspect EquationSolve {
 		return res;
 	}
 	
+    public FStatement FStatement.copySymbolic() {
+        FStatement res = fullCopy();
+        res.traverseSymbolic(this);
+        return res;
+    }
 }
 
 

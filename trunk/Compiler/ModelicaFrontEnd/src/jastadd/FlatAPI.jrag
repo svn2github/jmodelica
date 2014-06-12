@@ -1242,7 +1242,7 @@ aspect FlatAPI {
 			Set<FVariable> fvSet, Set<FVariable> fvUse) {
 		
 		defSet(fvSet, fvUse);
-		stmts.add(fullCopy());
+		stmts.add(copySymbolic());
 	}
 	public void FIfStmt.addAsInitial(ArrayList<FStatement> stmts, Set<FIdUseExp> usesLHS, 
 			Set<FVariable> fvSet, Set<FVariable> fvUse) {
@@ -1257,7 +1257,7 @@ aspect FlatAPI {
 			if (c.getTest().isInitialGuard() && first) {
 				for (FStatement s : c.getFStatements()) {
 					s.defSet(fvSet, fvUse);
-					stmts.add(s.fullCopy());
+					stmts.add(s.copySymbolic());
 				}
 				first = false;
 			} else {
