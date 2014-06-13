@@ -160,7 +160,7 @@ public class ModelicaCompiler {
     /**
      * Exports default options to XML.
      */
-    public static class OptionExporter extends OptionRegistry {
+    public static class OptionExporter {
         /**
          * Exports default options to XML.
          * 
@@ -168,7 +168,7 @@ public class ModelicaCompiler {
          */
         public static void main(String[] args) {
             try {
-                OptionRegistry or = new OptionExporter();
+                OptionRegistry or = createOptions();
                 if (args.length < 1) 
                     or.exportXML(System.out);
                 else 
