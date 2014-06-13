@@ -429,6 +429,36 @@ class TestLocalDAECollocator:
         opts['discr'] = "LGR"
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
+        
+    @testattr(casadi = True)
+    def test_cstr_checkpoint(self):
+        """
+        Test optimizing the CSTR with check point.
+        
+        Tests both a Mayer cost with Gauss collocation and a Lagrange cost with
+        Radau collocation.
+        """
+        mayer_op = self.cstr_mayer_op
+        lagrange_op = self.cstr_lagrange_op
+        
+        # References values
+        cost_ref = 1.8576873858261e3
+        u_norm_ref = 3.050971000653911e2
+        
+        # Mayer
+        opts = mayer_op.optimize_options(self.algorithm)
+        opts['discr'] = "LG"
+        opts['reorder_vars'] = True
+        opts['checkpoint'] = True
+        res = mayer_op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Lagrange
+        opts['discr'] = "LGR"
+        opts['reorder_vars'] = True
+        opts['checkpoint'] = True
+        res = lagrange_op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)    
 
     @testattr(casadi = True)
     def test_parameter_estimation(self):

@@ -2401,6 +2401,22 @@ class LocalDAECollocationAlg(AlgorithmBase):
                             self.nominal_traj_mode[name]
                     del self.nominal_traj_mode[name]
         
+        # Check validity of reoderer variables
+        if self.reorder_vars and self.eliminate_cont_var:
+            raise NotImplementedError("reordered variables does not work with " +
+                                      "eliminated continuity variables.")
+        # Check validity of reoderer variables
+        if self.reorder_vars and self.eliminate_der_var:
+            raise NotImplementedError("reordered variables does not work with " +
+                                      "eliminated derivative variables.")
+        # Check validity of check point
+        if not self.reorder_vars and self.checkpoint:
+            raise NotImplementedError("Check point does not work without " +
+                                      "reordered variables.")
+        # Check validity of check point
+        if self.checkpoint and self.blocking_factors is not None:
+            raise NotImplementedError("Check point does not work with " +
+                                      "blocking factors.")
         # Solver options
         if self.solver == "IPOPT":
             self.solver_options = self.IPOPT_options
@@ -2702,6 +2718,25 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: True
+            
+        checkpoint --
+            checkpoint is used to build the transcribed NLP with packed MX
+            functions. Instead of calling the dae residual function, the 
+            collocation equation function, and the lagrange term function 
+            n_e\cdotn_cp times, the check point scheme builds an MXFunction 
+            evaluating n_cp collocation points at the same time, so that the
+            packed MXFunction is called only n_e times. This approach improves
+            the code generation and it is expected to reduce the memory
+            usage for constructing and solving the NLP.
+            
+            True: LocalDAECollocator builds the NLP with packed functions that
+            are called for every element.
+            
+            False: LocalDAECollocator builds the NLP with common CasADi functions
+            that are called for every collocation point in each element.
+            
+            Type: bool
+            Default: False
         
         eliminate_der_var --
             True: The variables representing the derivatives are eliminated
@@ -2783,7 +2818,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'measurement_data': None,
-                'check_point': False,
+                'checkpoint': False,
                 'reorder_vars': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
