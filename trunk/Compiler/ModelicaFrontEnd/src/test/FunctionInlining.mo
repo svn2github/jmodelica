@@ -1989,6 +1989,100 @@ end FunctionInlining.MultipleOutputsInline3;
 ")})));
     end MultipleOutputsInline3;
     
+model MultipleOutputsInline4
+    type E = enumeration(E1);
+    record R
+        Real x;
+        String  v1;
+        Integer v2;
+        Boolean v3;
+        E v4;
+    end R;
+    function f3
+        input Real x;
+        output R o;
+        String  v1 = "string";
+        Integer v2 = 2;
+        Boolean v3 = true;
+        E v4 = E.E1;
+      algorithm
+        o := R(x,v1,v2,v3,v4);
+    end f3;
+    function f2
+        input R r;
+        output Real o;
+      algorithm
+        o := r.x;
+    end f2;
+    function f1
+        input Real x;
+        output Real y;
+      algorithm
+        y := f2(f3(x));
+        annotation (Inline=true);
+    end f1;
+    Real x,y;
+  equation
+    y = f1(x);
+    x = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MultipleOutputsInline4",
+            description="Inline function function call stmt with unused discrete return values",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.MultipleOutputsInline4
+ Real x;
+ Real y;
+ discrete String temp_4;
+ discrete Integer temp_5;
+ discrete Boolean temp_6;
+ discrete FunctionInlining.MultipleOutputsInline4.E temp_7;
+initial equation 
+ pre(temp_4) = \"\";
+ pre(temp_5) = 0;
+ pre(temp_6) = false;
+ pre(temp_7) = FunctionInlining.MultipleOutputsInline4.E.E1;
+equation
+ x = 1;
+ (FunctionInlining.MultipleOutputsInline4.R(y, temp_4, temp_5, temp_6, temp_7)) = FunctionInlining.MultipleOutputsInline4.f3(x);
+
+public
+ function FunctionInlining.MultipleOutputsInline4.f3
+  input Real x;
+  output FunctionInlining.MultipleOutputsInline4.R o;
+  String v1;
+  Integer v2;
+  Boolean v3;
+  FunctionInlining.MultipleOutputsInline4.E v4;
+ algorithm
+  v1 := \"string\";
+  v2 := 2;
+  v3 := true;
+  v4 := FunctionInlining.MultipleOutputsInline4.E.E1;
+  o.x := x;
+  o.v1 := v1;
+  o.v2 := v2;
+  o.v3 := v3;
+  o.v4 := v4;
+  return;
+ end FunctionInlining.MultipleOutputsInline4.f3;
+
+ record FunctionInlining.MultipleOutputsInline4.R
+  Real x;
+  discrete String v1;
+  discrete Integer v2;
+  discrete Boolean v3;
+  discrete FunctionInlining.MultipleOutputsInline4.E v4;
+ end FunctionInlining.MultipleOutputsInline4.R;
+
+ type FunctionInlining.MultipleOutputsInline4.E = enumeration(E1);
+
+end FunctionInlining.MultipleOutputsInline4;
+")})));
+end MultipleOutputsInline4;
+    
     
     model IfEquationInline1
         function f

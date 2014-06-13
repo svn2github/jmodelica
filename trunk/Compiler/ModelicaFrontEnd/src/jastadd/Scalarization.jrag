@@ -2509,17 +2509,17 @@ aspect Scalarization {
 	
 	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, 
 			FTypePrefixVariability variability) {
-		return new FIntegerVariable(fvt, variability, name);
+		return new FIntegerVariable(fvt, variability.combineDown(fDiscrete()), name);
 	}	
 	
 	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, 
 			FTypePrefixVariability variability) {
-		return new FBooleanVariable(fvt, variability, name);
+		return new FBooleanVariable(fvt, variability.combineDown(fDiscrete()), name);
 	}	
 	
 	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
 			FTypePrefixVariability variability) {
-		return new FStringVariable(fvt, variability, name);
+		return new FStringVariable(fvt, variability.combineDown(fDiscrete()), name);
 	}	
 	
 	public FVariable FRecordType.createFVariable(FVisibilityType fvt, FQName name, 
@@ -2529,7 +2529,7 @@ aspect Scalarization {
 	
 	public FVariable FEnumType.createFVariable(FVisibilityType fvt, FQName name, 
 			FTypePrefixVariability variability) {
-		return new FEnumVariable(fvt, variability, name, new FQNameString(getName()));
+		return new FEnumVariable(fvt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
 	}	
 	
 	
