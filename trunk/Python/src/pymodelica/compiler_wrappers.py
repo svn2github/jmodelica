@@ -34,16 +34,13 @@ class ModelicaCompiler(object):
     
     jm_home = pym.environ['JMODELICA_HOME']
 
-    options_file_path = os.path.join(jm_home, 'Options','options.xml')
-
-
     def __init__(self):
         """ 
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
         """
         try:
-            options = ModelicaCompilerInterface.createOptions(self.options_file_path)
+            options = ModelicaCompilerInterface.createOptions()
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
@@ -613,7 +610,7 @@ class OptimicaCompiler(ModelicaCompiler):
         times.
         """
         try:
-            options = OptimicaCompilerInterface.createOptions(self.options_file_path)
+            options = OptimicaCompilerInterface.createOptions()
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
