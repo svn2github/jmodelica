@@ -247,7 +247,7 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 	cd $(JAVA_BUILD_DIR); \
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
-	java -cp "$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter "$(abs_builddir)/DefaultOptions.xml"
+	java -cp "$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter "$(abs_builddir)/DefaultOptions.xml"
 endif
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
