@@ -8588,6 +8588,404 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 ")})));
 end BlockTest11;
 
+model BlockTest12
+    function f
+        input Real x;
+        output Integer y1 = 1;
+        output Real y2 = x;
+      algorithm
+    end f;
+    
+    Integer t;
+    Real y,x;
+  equation
+    (t,y) = f(x);
+    x = y + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest12",
+            description="Mixed function call in block",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_2 = x[0];
+        }
+        func_CCodeGenTests_BlockTest12_f_def0(_x_2, &tmp_1, &tmp_2);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _t_0 = (tmp_1);
+        }
+        _y_1 = (tmp_2);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _y_1 + 1 - (_x_2);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest12;
+
+model BlockTest13
+    function f
+        input Real x;
+        output Integer y1 = 1;
+        output Real y2 = x;
+      algorithm
+    end f;
+    
+    Integer t;
+    Real y,x;
+  equation
+    (t,y) = f(x);
+    y = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest13",
+            description="Mixed function call in block",
+            inline_functions="none",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_2 = x[0];
+        }
+        func_CCodeGenTests_BlockTest13_f_def0(_x_2, &tmp_1, &tmp_2);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _t_0 = (tmp_1);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = tmp_2 - (_y_1);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest13;
+
+model BlockTest14
+    Integer t;
+    Real y,x;
+  algorithm
+    t := 1;
+    y := x;
+  equation
+    x = y + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest14",
+            description="Mixed algorithm in block",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_1 = x[0];
+        }
+        _x_2 = _y_1 + 1;
+        tmp_2 = _t_0;
+        tmp_3 = _y_1;
+        _t_0 = 1;
+        _y_1 = _x_2;
+        tmp_1 = _t_0;
+        _t_0 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_3;
+        tmp_3 = tmp_1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _t_0 = (tmp_2);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = tmp_3 - (_y_1);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest14;
+
+model BlockTest15
+    Integer t;
+    Real y,x;
+  algorithm
+    t := 1;
+    y := x;
+  equation
+    y = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest15",
+            description="Mixed algorithm in block",
+            inline_functions="none",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_2 = x[0];
+        }
+        tmp_2 = _t_0;
+        tmp_3 = _y_1;
+        _t_0 = 1;
+        _y_1 = _x_2;
+        tmp_1 = _t_0;
+        _t_0 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_3;
+        tmp_3 = tmp_1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _t_0 = (tmp_2);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = tmp_3 - (_y_1);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest15;
+
+model BlockTest16
+    function f
+        input Real x;
+        output Integer y1 = 1;
+        output Real y2 = x;
+      algorithm
+    end f;
+    Integer t;
+    Real y,x;
+  equation
+    if x < y then
+        (t,y) = f(x);
+    else
+        (t,y) = f(x);
+    end if;
+    x = y + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest16",
+            description="Mixed if equation in block",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+        x[1] = jmi->offs_sw + 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_1 = x[0];
+        }
+        _x_2 = _y_1 + 1;
+        if (_sw(0)) {
+            func_CCodeGenTests_BlockTest16_f_def0(_x_2, &tmp_1, &tmp_2);
+        } else {
+            func_CCodeGenTests_BlockTest16_f_def0(_x_2, &tmp_3, &tmp_4);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (_sw(0)) {
+                _t_0 = (tmp_1);
+            } else {
+                _t_0 = (tmp_3);
+            }
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            if (_sw(0)) {
+                (*res)[0] = tmp_2 - (_y_1);
+            } else {
+                (*res)[0] = tmp_4 - (_y_1);
+            }
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest16;
+
+model BlockTest17
+    function f
+        input Real x;
+        output Integer y1 = 1;
+        output Real y2 = x;
+      algorithm
+    end f;
+    Integer t;
+    Real y,x;
+  equation
+    if x < y then
+        (t,y) = f(x);
+    else
+        (t,y) = f(x);
+    end if;
+    y = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest17",
+            description="Mixed if equation in block",
+            inline_functions="none",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+        x[1] = jmi->offs_sw + 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_2 = x[0];
+        }
+        if (_sw(0)) {
+            func_CCodeGenTests_BlockTest17_f_def0(_x_2, &tmp_1, &tmp_2);
+        } else {
+            func_CCodeGenTests_BlockTest17_f_def0(_x_2, &tmp_3, &tmp_4);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (_sw(0)) {
+                _t_0 = (tmp_1);
+            } else {
+                _t_0 = (tmp_3);
+            }
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            if (_sw(0)) {
+                (*res)[0] = tmp_2 - (_y_1);
+            } else {
+                (*res)[0] = tmp_4 - (_y_1);
+            }
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest17;
+
+
+
 model Algorithm1
  Real x;
  Real y;

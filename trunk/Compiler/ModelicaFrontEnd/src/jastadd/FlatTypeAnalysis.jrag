@@ -246,99 +246,44 @@ aspect FlatTypeAnalysis {
 	eq FFunctionCallStmt.type()      = getCall().type();
 	eq FInitArrayStmt.type()         = getFIdUseExp().type();
 	
-	// TODO: Role of attribute is unclear - used to find blocks that contain equations 
-	//       over *any* reals. Probably needs refactoring.
-	syn boolean FAbstractEquation.isReal()    = type().isReal();
-	syn boolean FAbstractEquation.isInteger() = type().isInteger();
-	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
-	syn boolean FAbstractEquation.isString()  = type().isString();
-
-	eq FFunctionCallEquation.isReal() {
-		for (FFunctionCallLeft l : getLefts()) {
-			if (l.hasFExp()) {
-				if (!l.getFExp().type().onlyContainsReal()) {
-					return false;
-				}
-			}	
-		}	
-		return true;
-	}
-
-	eq FFunctionCallEquation.isInteger() {
-		for (FFunctionCallLeft l : getLefts()) {
-			if (l.hasFExp()) {
-				if (!l.getFExp().type().isInteger()) {
-					return false;
-				}
-			}	
-		}	
-		return true;
-	}
-
-	eq FFunctionCallEquation.isBoolean() {
-		for (FFunctionCallLeft l : getLefts()) {
-			if (l.hasFExp()) {
-				if (!l.getFExp().type().isBoolean()) {
-					return false;
-				}
-			}	
-		}	
-		return true;
-	}
-
-	eq FFunctionCallEquation.isString() {
-		for (FFunctionCallLeft l : getLefts()) {
-			if (l.hasFExp()) {
-				if (!l.getFExp().type().isString()) {
-					return false;
-				}
-			}	
-		}	
-		return true;
-	}
-	
-	eq FIfWhenElseEquation.isReal() {
-		for (FAbstractEquation equation : getFAbstractEquations())
-			if (!equation.isReal())
-				return false;
-		return true;
-	}
-	eq FIfEquation.isReal() {
-		return super.isReal() && (!hasElse() || getElse().isReal());
-	}
-	// TODO: isInteger(), etc. for if equation
-	
-	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
-	// TODO: isInteger(), etc. for algorithm
-	
-	syn boolean FStatement.assignsOnlyReals() = true;
-	eq FAssignStmt.assignsOnlyReals()         = getLeft().type().onlyContainsReal();
-	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
-	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
-	eq FIfStmt.assignsOnlyReals()             = 
-		super.assignsOnlyReals() && statementsAssignsOnlyReals(getElseStmts());
-	eq FIfWhenStmt.assignsOnlyReals() {
-		for (FIfWhenClause s : getFIfWhenClauses())
-			if (!s.assignsOnlyReals())
-				return false;
-		return true;
-	}
-	eq FFunctionCallStmt.assignsOnlyReals() {
-		for (FFunctionCallLeft l : getLefts()) 
-			if (l.hasFExp()) 
-				if (!l.getFExp().type().onlyContainsReal()) 
-					return false;
-		return true;
-	}
-	
-	syn boolean FIfWhenClause.assignsOnlyReals() = FStatement.statementsAssignsOnlyReals(getFStatements());
-	
-	public static boolean FStatement.statementsAssignsOnlyReals(Iterable<? extends FStatement> stmts) {
-		for (FStatement s : stmts)
-			if (!s.assignsOnlyReals())
-				return false;
-		return true;
-	}
+    /**
+     * True if this equation exclusively equates real types.
+     */
+    syn boolean FAbstractEquation.isReal() = isReal(true);
+    
+    /**
+     * True if this equation exclusively equates non-real types.
+     */
+    syn boolean FAbstractEquation.isNonReal() = !isReal(false);
+    
+    /**
+     * True if this equation equates at least one real type and one non real type.
+     */
+    syn boolean FAbstractEquation.isMixed() {
+        return !isReal(true) && isReal(false);
+    }
+    
+    syn boolean FAbstractEquation.isReal(boolean exclusive) {
+        boolean res = exclusive;
+        for (FVariable fv : referencedFVariablesInLHS()) {
+            boolean fvRes = fv.isReal();
+            res = exclusive ? res && fvRes : res || fvRes;
+        }
+        return res;
+    }
+    eq FEquation.isReal(boolean exclusive) = type().isReal();
+    
+    eq FIfWhenElseEquation.isReal(boolean exclusive) {
+        boolean res = exclusive;
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            boolean fvRes = equation.isReal(exclusive);
+            res = exclusive ? res && fvRes : res || fvRes;
+        }
+        return res;
+    }
+    eq FIfEquation.isReal(boolean exclusive) {
+        return super.isReal(exclusive) && (!exclusive || (!hasElse() || getElse().isReal()));
+    }
 
     syn boolean FRelExp.isRealComparison()    = getRight().type().numericPromotion(getLeft().type()).isReal();
     syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();

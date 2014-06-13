@@ -2443,12 +2443,17 @@ aspect CCodeGen {
     public void SimpleEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p, CodeStream str,
             String indent, boolean inInitial, Set<FAbstractEquation> visited) {
         if (genBlockEnabled()) {
+            Collection<FVariable> forVariables = allVariables();
+            Collection<Integer> forIndices = assignedIndices();
             if (!isReal()) {
+                if (equation().isMixed()) {
+                    equation().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
+                }
                 str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
-                equation().genBlock_C(p, str, p.indent(indent), visited, allVariables(), assignedIndices());
+                equation().genBlock_C(p, str, p.indent(indent), visited, forVariables, forIndices);
                 str.format("%s}\n", indent);
             } else {
-                equation().genBlock_C(p, str, indent, visited, allVariables(), assignedIndices());
+                equation().genBlock_C(p, str, indent, visited, forVariables, forIndices);
             }
         }
     }
@@ -2854,6 +2859,9 @@ aspect CCodeGen {
     public void FAbstractEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {}
     
+    public void FAbstractEquation.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {}
+    
     public void FEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         FVariable fv = forVariables.iterator().next();
@@ -2866,19 +2874,35 @@ aspect CCodeGen {
     
     public void FFunctionCallEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
-        boolean firstVisit = visited == null ? true : visited.add(this);
         if (!getCall().isIgnored()) {
-            if (firstVisit) {
-                p.printPreSteps(this, str, indent);
-                p.print(getCall(), str, indent);
-            }
+            genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
             for (FFunctionCallLeft l : getLefts()) {
                 l.genWriteBackAssignment_C(str, indent, forVariables);
             }
         }
     }
     
+   public void FFunctionCallEquation.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        boolean firstVisit = visited == null || visited.add(this);
+        if (!getCall().isIgnored()) {
+            if (firstVisit) {
+                p.printPreSteps(this, str, indent);
+                p.print(getCall(), str, indent);
+            }
+        }
+   }
+    
     public void FAlgorithm.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        boolean sideEffect = forVariables.size() == uniqueFIdUseExpsInLHS().size();
+        genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
+        if (!sideEffect)
+            for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+                use.genWriteBackAssignment_C(str, indent, use.tempName_C(), forVariables);
+    }
+    
+    public void FAlgorithm.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         boolean firstVisit = visited == null ? true : visited.add(this);
         boolean sideEffect = forVariables.size() == uniqueFIdUseExpsInLHS().size();
@@ -2889,11 +2913,7 @@ aspect CCodeGen {
             else
                 prettyPrintNoSideEffect_C(str, indent);
         }
-        
-        if (!sideEffect)
-            for (FIdUseExp use : uniqueFIdUseExpsInLHS())
-                use.genWriteBackAssignment_C(str, indent, use.tempName_C(), forVariables);
-    }
+   }
     
     public void FIfWhenElseEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
@@ -2924,6 +2944,37 @@ aspect CCodeGen {
             getElse().genBlock_C(p, str, indent, visited, forVariables, forIndices);
         genIfEnd_C(p, str, indent);
     }
+    
+    public void FIfWhenElseEquation.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        genIfStart_C(p, str, indent);
+        Iterator<FVariable> fvIt = forVariables.iterator();
+        Iterator<Integer> fiIt = forIndices.iterator();
+        int i = 0;
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            Collection<Integer> fis   = new ArrayList<Integer>();
+            Collection<FVariable> fvs = new ArrayList<FVariable>();
+            while (n >= i && n < i + equation.numScalarEquations()) {
+                    fis.add(n - i);
+                    fvs.add(fvIt.next());
+                    n = fiIt.hasNext() ? fiIt.next() : -1;
+            }
+            if (forIndices.size() == 0 || fis.size() > 0) {
+                equation.genBlockEval_C(p, str, p.indent(indent), visited, fvs, fis);
+            }
+            i += equation.numScalarEquations();
+        }
+    }
+    
+    public void FIfEquation.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        super.genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
+        if (hasElse())
+            getElse().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
+        genIfEnd_C(p, str, indent);
+    }
+    
     
     
     /**

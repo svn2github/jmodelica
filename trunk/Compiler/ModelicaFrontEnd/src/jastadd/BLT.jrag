@@ -113,7 +113,7 @@ aspect BLT{
             
             boolean linear = true;
             for (Eq e : component) {
-                if (e.getEquation().isReal()) {
+                if (e.getMatching().getVariable().isReal()) {
                     realEquations.add(e);
                     linear = linear && e.getEquation().checkLinearity(activeVariables);
                 } else {
@@ -1309,9 +1309,12 @@ aspect BLT{
 			return equation;
 		}
 		
-		public boolean isReal() {
-		    return equation().isReal();
-		}
+        public boolean isReal() {
+            for (FVariable fv : allVariables())
+                if (!fv.isReal())
+                    return false;
+            return true;
+        }
 
 		@Override
 		public Collection<FAbstractEquation> allEquations() {
