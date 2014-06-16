@@ -21,7 +21,7 @@ algorithm
 		x := -1;
 	end if;
 	when a < x then
-		while a < x loop
+        while noEvent(a < x) loop
 			a := a + 0.01;
 		end while;
 	end when;

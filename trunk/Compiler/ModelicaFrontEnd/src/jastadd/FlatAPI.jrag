@@ -982,7 +982,7 @@ aspect FlatAPI {
     syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
             !variability().lessOrEqual(fParameter()) || (checkNonFixedParameters && containsNonFixedParameter());
 
-    syn boolean FExp.inEventGeneratingLocation() = !inDiscreteLocation() && !inNoEventExp() && !inSmoothExp(1);
+    syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
 
     syn boolean FExp.hasEventGeneratingType() = false;
     eq FRelExp.hasEventGeneratingType() = isRealComparison();
