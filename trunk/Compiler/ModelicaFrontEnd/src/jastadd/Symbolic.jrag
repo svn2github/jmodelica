@@ -383,15 +383,17 @@ aspect EquationSolve {
 		super.traverseSymbolic(e);
 	}
 	
-    public ASTNode ASTNode.copySymbolic() {
-		ASTNode res = fullCopy();
+	public FExp FExp.copySymbolic() {
+		FExp res = fullCopy();
 		res.traverseSymbolic(this);
 		return res;
 	}
 	
-    public FExp FExp.copySymbolic() { return (FExp) super.copySymbolic(); }
-    public FStatement FStatement.copySymbolic() { return (FStatement) super.copySymbolic(); }
-    public FAbstractEquation FAbstractEquation.copySymbolic() { return (FAbstractEquation) super.copySymbolic(); }
+    public FStatement FStatement.copySymbolic() {
+        FStatement res = fullCopy();
+        res.traverseSymbolic(this);
+        return res;
+    }
 }
 
 

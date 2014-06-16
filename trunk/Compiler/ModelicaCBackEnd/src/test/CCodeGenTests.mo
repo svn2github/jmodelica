@@ -13907,8 +13907,8 @@ $C_DAE_relations$
 			generatedCode="
 static const int N_initial_relations = 1;
 static const int DAE_initial_relations[] = { JMI_REL_GEQ };
-static const int N_relations = 5;
-static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
+static const int N_relations = 3;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
 ")})));
 end TestRelationalOp4;
 

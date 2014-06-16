@@ -6052,19 +6052,17 @@ equation
 fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses1
  discrete Real x;
  discrete Integer temp_1;
- discrete Real temp_2;
- discrete Boolean temp_3;
+ discrete Boolean temp_2;
 initial equation 
  pre(temp_1) = 0;
- pre(temp_2) = 0.0;
  pre(x) = 0.0;
- pre(temp_3) = false;
+ pre(temp_2) = false;
 equation
- temp_3 = temp_1 + noEvent(integer(time * 3)) > 1;
- x = if temp_3 and not pre(temp_3) then temp_2 else pre(x);
+ temp_2 = temp_1 + noEvent(integer(time * 3)) > 1;
+ x = if temp_2 and not pre(temp_2) then floor(time * 0.3 + 4.2) else pre(x);
  temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
- temp_2 = if time * 0.3 + 4.2 < pre(temp_2) or time * 0.3 + 4.2 >= pre(temp_2) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
 end TransformCanonicalTests.EventGeneratingExps.InWhenClauses1;
+			
 ")})));
 end InWhenClauses1;
 
@@ -6082,22 +6080,20 @@ algorithm
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses2
  discrete Real x;
- discrete Real temp_1;
- discrete Integer temp_2;
- discrete Boolean temp_3;
+ discrete Integer temp_1;
+ discrete Boolean temp_2;
 initial equation 
- pre(temp_1) = 0.0;
- pre(temp_2) = 0;
+ pre(temp_1) = 0;
  pre(x) = 0.0;
- pre(temp_3) = false;
+ pre(temp_2) = false;
 algorithm
- temp_2 := if time * 3 < pre(temp_2) or time * 3 >= pre(temp_2) + 1 or initial() then integer(time * 3) else pre(temp_2);
- temp_3 := temp_2 + noEvent(integer(time * 3)) > 1;
- if temp_3 and not pre(temp_3) then
-  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
-  x := temp_1;
+ temp_1 := if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
+ temp_2 := temp_1 + noEvent(integer(time * 3)) > 1;
+ if temp_2 and not pre(temp_2) then
+  x := floor(time * 0.3 + 4.2);
  end if;
 end TransformCanonicalTests.EventGeneratingExps.InWhenClauses2;
+			
 ")})));
 end InWhenClauses2;
 
@@ -6117,19 +6113,17 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm
  discrete Integer x;
- discrete Integer temp_1;
- discrete Boolean temp_2;
+ discrete Boolean temp_1;
 initial equation 
  algorithm
   x := integer(time);
 ;
- pre(temp_1) = 0;
- pre(temp_2) = false;
+ pre(temp_1) = false;
 equation
- temp_2 = time >= 1;
- x = if temp_2 and not pre(temp_2) then temp_1 else pre(x);
- temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+ temp_1 = time >= 1;
+ x = if temp_1 and not pre(temp_1) then integer(time) else pre(x);
 end TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm;
+			
 ")})));
 end InInitialAlgorithm;
 
@@ -6149,17 +6143,15 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InInitialEquation
  discrete Real x;
- discrete Integer temp_1;
- discrete Boolean temp_2;
+ discrete Boolean temp_1;
 initial equation 
  x = integer(time);
- pre(temp_1) = 0;
- pre(temp_2) = false;
+ pre(temp_1) = false;
 equation
- temp_2 = time >= 1;
- x = if temp_2 and not pre(temp_2) then temp_1 else pre(x);
- temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+ temp_1 = time >= 1;
+ x = if temp_1 and not pre(temp_1) then integer(time) else pre(x);
 end TransformCanonicalTests.EventGeneratingExps.InInitialEquation;
+			
 ")})));
 end InInitialEquation;
 
