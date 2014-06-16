@@ -511,10 +511,10 @@ aspect IndexReduction {
         // Collect all blocks that contain differentiated equations
         for (AbstractEquationBlock eb : blt) {
             boolean add = false;
-            if (!eb.differentiatedEquations().isEmpty()) {
+            if (!eb.localDifferentiatedEquations().isEmpty()) {
                 add = true;
             } else {
-                for (FVariable var : eb.allVariables()) {
+                for (FVariable var : eb.allLocalVariables()) {
                     if (var.isDerivativeVariable()) {
                         add = true;
                         break;
@@ -527,11 +527,11 @@ aspect IndexReduction {
                 
                 // Step 1: Initialize, add all equations in blocks
                 // having differentiated equations
-                g.addAll(eb.allEquations());
+                g.addAll(eb.allLocalEquations());
                 
                 // Step 2: Extract all active variables, i.e., highest order 
                 // derivatives for each variable
-                for (FVariable fv : eb.allVariables())
+                for (FVariable fv : eb.allLocalVariables())
                     z.add(fv);
             }
         }

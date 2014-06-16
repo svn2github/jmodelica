@@ -124,7 +124,7 @@ aspect BLT{
             EquationBlock block = null;
             if (producer.useTearing() && realEquations.size() > 1) {
                 TornEquationBlock tornBlock = tear(component, producer, options);
-                if (tornBlock != null && !tornBlock.solvedRealBlocks().isEmpty())
+                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty())
                     block = tornBlock;
             }
             if (block == null) {
@@ -133,8 +133,12 @@ aspect BLT{
                 block = new EquationBlock(producer, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
             }
             
-            if (linear)
-                block.computeJacobian();
+            if (linear) {
+                if (block.canComputeJacobian())
+                    block.computeJacobian();
+//                else
+//                   Give warning?
+            }
             return block;
         }
 		
@@ -638,28 +642,88 @@ aspect BLT{
         }
 
         /**
-         * Returns all equations in this block that are of type real.
+         * Returns all local equations in this block.
+         * 
+         * Local equations are equations that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FAbstractEquation> all local equations
+         */
+        public Collection<FAbstractEquation> allLocalEquations() {
+            Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+            l.addAll(localRealEquations());
+            l.addAll(localNonRealEquations());
+            return l;
+        }
+
+        /**
+         * Returns all equations in this block that are of type real
          * 
          * @return Collection<FAbstractEquation> all real equations
          */
         public abstract Collection<FAbstractEquation> realEquations();
 
         /**
-         * Returns all equations in this block that are not of type real.
+         * Returns all local equations in this block that are of type real
+         * 
+         * Local equations are equations that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FAbstractEquation> all local real equations
+         */
+        public abstract Collection<FAbstractEquation> localRealEquations();
+
+        /**
+         * Returns all equations in this block that are not of type real
          * 
          * @return Collection<FAbstractEquation> all non-real equations
          */
         public abstract Collection<FAbstractEquation> nonRealEquations();
 
         /**
-         * Returns all equations in this block that are of type real and is unsolved.
+         * Returns all local equations in this block that are not of type real
+         * 
+         * Local equations are equations that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FAbstractEquation> all local non-real equations
+         */
+        public abstract Collection<FAbstractEquation> localNonRealEquations();
+
+        /**
+         * Returns all equations in this block that are of type real and is unsolved
          * 
          * @return Collection<FAbstractEquation> all unsolved real equations
          */
         public abstract Collection<FAbstractEquation> unsolvedEquations();
 
         /**
-         * Returns all variables in this block.
+         * Returns all local equations in this block that are of type real and is unsolved
+         * 
+         * Local equations are equations that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FAbstractEquation> all local unsolved real equations
+         */
+        public abstract Collection<FAbstractEquation> localUnsolvedEquations();
+
+        /**
+         * Returns a list of all local equations that has been differentiated.
+         * 
+         * @return Collection<FAbstractEquation> all local differentiated equations
+         */
+        public Collection<FAbstractEquation> localDifferentiatedEquations() {
+            java.util.List<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+            for (FAbstractEquation e : allLocalEquations()) {
+                if (e.getMeIntegrated() != null) {
+                    diffedEq.add(e);
+                }
+            }
+            return diffedEq;
+        }
+
+        /**
+         * Returns all variables in this block
          * 
          * @return Collection<FVariable> all variables
          */
@@ -667,6 +731,21 @@ aspect BLT{
             Collection<FVariable> l = new ArrayList<FVariable>();
             l.addAll(realVariables());
             l.addAll(nonRealVariables());
+            return l;
+        }
+        
+        /**
+         * Returns all local variables in this block
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local variables
+         */
+        public Collection<FVariable> allLocalVariables() {
+            Collection<FVariable> l = new ArrayList<FVariable>();
+            l.addAll(localRealVariables());
+            l.addAll(localNonRealVariables());
             return l;
         }
 
@@ -678,6 +757,16 @@ aspect BLT{
         public abstract Collection<FVariable> realVariables();
 
         /**
+         * Returns all local variables in this block that are of type real.
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local real variables
+         */
+        public abstract Collection<FVariable> localRealVariables();
+
+        /**
          * Returns all variables in this block that are not of type real.
          * 
          * @return Collection<FVariable> all non-real variables
@@ -685,11 +774,31 @@ aspect BLT{
         public abstract Collection<FVariable> nonRealVariables();
 
         /**
+         * Returns all local variables in this block that are not of type real.
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local non-real variables
+         */
+        public abstract Collection<FVariable> localNonRealVariables();
+
+        /**
          * Returns all variables in this block that are of type real and is unsolved.
          * 
          * @return Collection<FVariable> all unsolved real variables
          */
         public abstract Collection<FVariable> unsolvedVariables();
+
+        /**
+         * Returns all local variables in this block that are of type real and is unsolved.
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local unsolved real variables
+         */
+        public abstract Collection<FVariable> localUnsolvedVariables();
 
 		public FTypePrefixVariability variability() {
 			return FContinuous.instance;
@@ -743,16 +852,6 @@ aspect BLT{
 			return dependsOnVariables;
 		}
 
-		public Collection<FAbstractEquation> differentiatedEquations() {
-			java.util.List<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation e : allEquations()) {
-				if (e.getMeIntegrated() != null) {
-					diffedEq.add(e);
-				}
-			}
-			return diffedEq;
-		}
-
 		public Collection<AbstractEquationBlock> getAllPredecessors() {
 			if (allPredecessors == null) {
 				allPredecessors = new LinkedHashSet<AbstractEquationBlock>(); 
@@ -802,6 +901,10 @@ aspect BLT{
 		public boolean isSimple() {
 			return false;
 		}
+		
+        public SimpleEquationBlock asSimple() {
+            throw new UnsupportedOperationException("Unable to convert block of type '" + getClass().getSimpleName() + "' to 'SimpleEquationBlock'!");
+        }
 		
 		public final String toString() {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -869,19 +972,19 @@ aspect BLT{
             return blockVariability;
         }
 
-        protected final static Collection<FVariable> collectVariables(Collection<? extends AbstractEquationBlock> ... blockss) {
+        protected final static Collection<FVariable> collectLocalVariables(Collection<? extends SimpleEquationBlock> ... blockss) {
             Collection<FVariable> l = new ArrayList<FVariable>();
             for (Collection<? extends AbstractEquationBlock> blocks : blockss)
                 for (AbstractEquationBlock sb : blocks)
-                    l.addAll(sb.allVariables());
+                    l.addAll(sb.allLocalVariables());
             return l;
         }
 
-        protected final static Collection<FAbstractEquation> collectEquations(Collection<? extends AbstractEquationBlock> ... blockss) {
+        protected final static Collection<FAbstractEquation> collectLocalEquations(Collection<? extends SimpleEquationBlock> ... blockss) {
             Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
             for (Collection<? extends AbstractEquationBlock> blocks : blockss)
                 for (AbstractEquationBlock sb : blocks)
-                    l.addAll(sb.allEquations());
+                    l.addAll(sb.allLocalEquations());
             return l;
         }
         
@@ -898,10 +1001,11 @@ aspect BLT{
     public class EquationBlock extends AbstractEquationBlock {
 
         private Collection<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
-        private Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-        private Collection<SimpleEquationBlock> realBlocks_cache = null;
-        private Collection<SimpleEquationBlock> nonRealBlocks_cache = null;
-        private Collection<SimpleEquationBlock> solvedRealBlocks_cache = null;
+        private Collection<AbstractEquationBlock> solvedBlocks = new ArrayList<AbstractEquationBlock>();
+        private Collection<SimpleEquationBlock> localRealBlocks_cache = null;
+        private Collection<SimpleEquationBlock> localSolvedBlocks_cache = null;
+        private Collection<SimpleEquationBlock> localNonRealBlocks_cache = null;
+        private Collection<SimpleEquationBlock> localSolvedRealBlocks_cache = null;
         private FExp[][] jacobian = null;
         private FTypePrefixVariability variability = FContinuous.instance;
 
@@ -916,9 +1020,10 @@ aspect BLT{
         }
         
         private void resetCache() {
-            realBlocks_cache = null;
-            nonRealBlocks_cache = null;
-            solvedRealBlocks_cache = null;
+            localRealBlocks_cache = null;
+            localSolvedBlocks_cache = null;
+            localNonRealBlocks_cache = null;
+            localSolvedRealBlocks_cache = null;
         }
         
         /**
@@ -926,7 +1031,7 @@ aspect BLT{
          * 
          * @param block Block to add to the list of solved blocks
          */
-        public void addSolvedBlock(SimpleEquationBlock block) {
+        public void addSolvedBlock(AbstractEquationBlock block) {
             solvedBlocks.add(block);
             resetCache();
         }
@@ -955,7 +1060,7 @@ aspect BLT{
          * 
          * @return Collection<FAbstractEquation> all solved blocks
          */
-        public Collection<SimpleEquationBlock> solvedBlocks() {
+        public Collection<AbstractEquationBlock> solvedBlocks() {
             return solvedBlocks;
         }
 
@@ -964,35 +1069,50 @@ aspect BLT{
          * 
          * @return Collection<FAbstractEquation> all real blocks
          */
-        public Collection<SimpleEquationBlock> realBlocks() {
-            if (realBlocks_cache == null) {
-                realBlocks_cache = new ArrayList<SimpleEquationBlock>();
-                for (SimpleEquationBlock block : solvedBlocks())
-                    if (block.isReal())
-                        realBlocks_cache.add(block);
+        public Collection<SimpleEquationBlock> localRealBlocks() {
+            if (localRealBlocks_cache == null) {
+                localRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (block.isSimple() && block.asSimple().isReal())
+                        localRealBlocks_cache.add(block.asSimple());
                 for (SimpleEquationBlock block : unsolvedBlocks())
                     if (block.isReal())
-                        realBlocks_cache.add(block);
+                        localRealBlocks_cache.add(block);
             }
-            return realBlocks_cache;
+            return localRealBlocks_cache;
         }
 
+        /**
+         * Returns all local solved blocks in this block.
+         * 
+         * @return Collection<FAbstractEquation> all local solved blocks
+         */
+        public Collection<SimpleEquationBlock> localSolvedBlocks() {
+            if (localSolvedBlocks_cache == null) {
+                localSolvedBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (block.isSimple())
+                        localSolvedBlocks_cache.add(block.asSimple());
+            }
+            return localSolvedBlocks_cache;
+        }
+        
         /**
          * Returns all non-real blocks in this block.
          * 
          * @return Collection<FAbstractEquation> all non-real blocks
          */
-        public Collection<SimpleEquationBlock> nonRealBlocks() {
-            if (nonRealBlocks_cache == null) {
-                nonRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
-                for (SimpleEquationBlock block : solvedBlocks())
-                    if (!block.isReal())
-                        nonRealBlocks_cache.add(block);
+        public Collection<SimpleEquationBlock> localNonRealBlocks() {
+            if (localNonRealBlocks_cache == null) {
+                localNonRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (block.isSimple() && !block.asSimple().isReal())
+                        localNonRealBlocks_cache.add(block.asSimple());
                 for (SimpleEquationBlock block : unsolvedBlocks())
                     if (!block.isReal())
-                        nonRealBlocks_cache.add(block);
+                        localNonRealBlocks_cache.add(block);
             }
-            return nonRealBlocks_cache;
+            return localNonRealBlocks_cache;
         }
 
         /**
@@ -1000,14 +1120,14 @@ aspect BLT{
          * 
          * @return Collection<FAbstractEquation> all solved real blocks
          */
-        public Collection<SimpleEquationBlock> solvedRealBlocks() {
-            if (solvedRealBlocks_cache == null) {
-                solvedRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
-                for (SimpleEquationBlock block : solvedBlocks())
-                    if (block.isReal())
-                        solvedRealBlocks_cache.add(block);
+        public Collection<SimpleEquationBlock> localSolvedRealBlocks() {
+            if (localSolvedRealBlocks_cache == null) {
+                localSolvedRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (block.isSimple() && block.asSimple().isReal())
+                        localSolvedRealBlocks_cache.add(block.asSimple());
             }
-            return solvedRealBlocks_cache;
+            return localSolvedRealBlocks_cache;
         }
 
         /**
@@ -1019,14 +1139,24 @@ aspect BLT{
             return jacobian;
         }
 
+        public boolean canComputeJacobian() {
+            boolean res = true;
+            for (AbstractEquationBlock block : solvedBlocks())
+                res &= block.isSimple();
+            return res;
+        }
+
         /**
          * Computes the jacobian for the unsolved part of this block and store
          * the result. This method should only be called if the block is linear.
          * This method also computes the variability of the resulting jacobian.
          */
-        public void computeJacobian() {
-            jacobian = computeJacobian(realEquations(), realVariables());
+        public boolean computeJacobian() {
+            if (!canComputeJacobian())
+                return false;
+            jacobian = computeJacobian(localRealEquations(), localRealVariables());
             variability = computeVariability(jacobian);
+            return true;
         }
 
         /**
@@ -1044,98 +1174,119 @@ aspect BLT{
          * @return boolean True if contains non-real blocks
          */
         public boolean isMixed() {
-            return !nonRealBlocks().isEmpty();
+            return !localNonRealBlocks().isEmpty();
         }
 
-        /**
-         * Returns the variability for this block.
-         * 
-         * @return FTypePrefixVariability variability of block
-         */
         @Override
         public FTypePrefixVariability variability() {
             return variability;
         }
 
-        /**
-         * Returns all variables in this block that are of type real.
-         * 
-         * @return Collection<FVariable> all real variables
-         */
-        @Override
-        public Collection<FVariable> realVariables() {
-            return collectVariables(realBlocks());
-        }
-
-        /**
-         * Returns all variables in this block that are not of type real.
-         * 
-         * @return Collection<FVariable> all non-real variables
-         */
-        @Override
-        public Collection<FVariable> nonRealVariables() {
-            return collectVariables(nonRealBlocks());
-        }
-
-        /**
-         * Returns all variables in this block that are solved.
-         * 
-         * @return Collection<FVariable> all solved variables
-         */
-        public Collection<FVariable> solvedVariables() {
-            return collectVariables(solvedBlocks());
-        }
-
-        /**
-         * Returns all variables in this block that are of type real and is unsolved.
-         * 
-         * @return Collection<FVariable> all unsolved real variables
-         */
-        @Override
-        public Collection<FVariable> unsolvedVariables() {
-            return collectVariables(unsolvedBlocks());
-        }
-
-        /**
-         * Returns all equations in this block that are of type real.
-         * 
-         * @return Collection<FAbstractEquation> all real equations
-         */
         @Override
         public Collection<FAbstractEquation> realEquations() {
-            return collectEquations(realBlocks());
+            Collection<FAbstractEquation> equations = new ArrayList<FAbstractEquation>();
+            for (AbstractEquationBlock block : solvedBlocks())
+                equations.addAll(block.realEquations());
+            for (SimpleEquationBlock block : unsolvedBlocks())
+                equations.addAll(block.realEquations());
+            return equations;
+        }
+
+        @Override
+        public Collection<FAbstractEquation> localRealEquations() {
+            return collectLocalEquations(localRealBlocks());
+        }
+
+        @Override
+        public Collection<FAbstractEquation> nonRealEquations() {
+            Collection<FAbstractEquation> equations = new ArrayList<FAbstractEquation>();
+            for (AbstractEquationBlock block : solvedBlocks())
+                equations.addAll(block.nonRealEquations());
+            for (SimpleEquationBlock block : unsolvedBlocks())
+                equations.addAll(block.nonRealEquations());
+            return equations;
+        }
+
+        @Override
+        public Collection<FAbstractEquation> localNonRealEquations() {
+            return collectLocalEquations(localNonRealBlocks());
         }
 
         /**
-         * Returns all equations in this block that are not of type real.
-         * 
-         * @return Collection<FAbstractEquation> all non-real equations
-         */
-        @Override
-        public Collection<FAbstractEquation> nonRealEquations() {
-            return collectEquations(nonRealBlocks());
-        }
-        /**
-         * Returns all equations in this block that are solved.
+         * Returns all equations in this block that are localy solved.
          * 
          * @return Collection<FAbstractEquation> all solved equations
          */
-        public Collection<FAbstractEquation> solvedEquations() {
-            return collectEquations(solvedBlocks());
+        public Collection<FAbstractEquation> localSolvedEquations() {
+            return collectLocalEquations(localSolvedBlocks());
         }
 
-
-        /**
-         * Returns all equations in this block that are of type real and is unsolved.
-         * 
-         * @return Collection<FAbstractEquation> all unsolved real equations
-         */
         @Override
         public Collection<FAbstractEquation> unsolvedEquations() {
-            return collectEquations(unsolvedBlocks());
+            Collection<FAbstractEquation> equations = new ArrayList<FAbstractEquation>();
+            for (SimpleEquationBlock block : unsolvedBlocks())
+                equations.addAll(block.unsolvedEquations());
+            return equations;
         }
 
         @Override
+        public Collection<FAbstractEquation> localUnsolvedEquations() {
+            return collectLocalEquations(unsolvedBlocks());
+        }
+
+        @Override
+        public Collection<FVariable> realVariables() {
+            Collection<FVariable> variables = new ArrayList<FVariable>();
+            for (AbstractEquationBlock block : solvedBlocks())
+                variables.addAll(block.realVariables());
+            for (SimpleEquationBlock block : unsolvedBlocks())
+                variables.addAll(block.realVariables());
+            return variables;
+        }
+
+        @Override
+        public Collection<FVariable> localRealVariables() {
+            return collectLocalVariables(localRealBlocks());
+        }
+
+        @Override
+        public Collection<FVariable> nonRealVariables() {
+            Collection<FVariable> variables = new ArrayList<FVariable>();
+            for (AbstractEquationBlock block : solvedBlocks())
+                variables.addAll(block.nonRealVariables());
+            for (SimpleEquationBlock block : unsolvedBlocks())
+                variables.addAll(block.nonRealVariables());
+            return variables;
+        }
+
+        @Override
+        public Collection<FVariable> localNonRealVariables() {
+            return collectLocalVariables(localNonRealBlocks());
+        }
+
+        /**
+         * Returns all variables in this block that are localy solved.
+         * 
+         * @return Collection<FVariable> all solved variables
+         */
+        public Collection<FVariable> localSolvedVariables() {
+            return collectLocalVariables(localSolvedBlocks());
+        }
+
+        @Override
+        public Collection<FVariable> unsolvedVariables() {
+            Collection<FVariable> variables = new ArrayList<FVariable>();
+            for (SimpleEquationBlock block : unsolvedBlocks())
+                variables.addAll(block.unsolvedVariables());
+            return variables;
+        }
+
+        @Override
+        public Collection<FVariable> localUnsolvedVariables() {
+            return collectLocalVariables(unsolvedBlocks());
+        }
+
+         @Override
         public boolean isSolvable() {
             return false;
         }
@@ -1147,7 +1298,7 @@ aspect BLT{
                     seb.equation().error("Non-real equation used as residual:\n" + seb.equation());
             if (isLinear())
                 return;
-            for (SimpleEquationBlock seb : solvedBlocks()) // Local iterations.
+            for (AbstractEquationBlock seb : solvedBlocks())
                 seb.errorCheck();
             for (SimpleEquationBlock seb : unsolvedBlocks)
                 seb.errorCheck();
@@ -1169,7 +1320,7 @@ aspect BLT{
                 seb.prettyPrintActiveVariables(str, !isLinear());
             if (isMixed()) {
                 str.println("Solved discrete variables:");
-                for (SimpleEquationBlock seb : nonRealBlocks())
+                for (SimpleEquationBlock seb : localNonRealBlocks())
                     seb.prettyPrintActiveVariables(str);
             }
             prettyPrint_beforeEquationsStr(str);
@@ -1178,7 +1329,7 @@ aspect BLT{
                 prettyPrint_unsolvedVar(str, seb);
             if (isMixed()) {
                 str.println("Discrete equations:");
-                for (SimpleEquationBlock seb : nonRealBlocks())
+                for (SimpleEquationBlock seb : localNonRealBlocks())
                     seb.prettyPrintEquation(str);
             }
             if (isLinear()) {
@@ -1251,14 +1402,14 @@ aspect BLT{
         @Override
         protected void prettyPrint_beforeVariablesStr(CodeStream str) {
             str.println("Solved variables:");
-            for (SimpleEquationBlock seb : solvedRealBlocks())
+            for (SimpleEquationBlock seb : localSolvedRealBlocks())
                 seb.prettyPrintActiveVariables(str);
         }
 
         @Override
         protected void prettyPrint_beforeEquationsStr(CodeStream str) {
             str.println("Solved equations:");
-            for (SimpleEquationBlock seb : solvedRealBlocks()) {
+            for (SimpleEquationBlock seb : localSolvedRealBlocks()) {
                 seb.prettyPrintIterationVariables(str);
                 seb.prettyPrintEquation(str);
            }
@@ -1266,7 +1417,7 @@ aspect BLT{
 
         @Override
         protected void prettyPrint_numVarStr(CodeStream str) {
-            str.print(unsolvedVariables().size() + " iteration variables and " + solvedVariables().size() + " solved variables");
+            str.print(localUnsolvedVariables().size() + " iteration variables and " + localSolvedVariables().size() + " solved variables");
         }
 
         @Override
@@ -1287,28 +1438,28 @@ aspect BLT{
 
         @Override
         protected void printIterationVariables(CodeStream str) {
-            for (FVariable var : unsolvedVariables())
+            for (FVariable var : localUnsolvedVariables())
                 str.println(var.name());
         }
 
     }
 
-	/**
-	 * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
-	 * AlgorithmBLock and IfEquationBlock.
-	 */
-	public abstract class SimpleEquationBlock extends AbstractEquationBlock {
-		private FAbstractEquation equation;
-		
-		public SimpleEquationBlock(EquationBlockFactory.BlockProducer producer, FAbstractEquation equation) {
-		    super(producer);
-			this.equation = equation;
-		}
-		
-		public FAbstractEquation equation() {
-			return equation;
-		}
-		
+    /**
+     * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
+     * AlgorithmBLock and IfEquationBlock.
+     */
+    public abstract class SimpleEquationBlock extends AbstractEquationBlock {
+        private FAbstractEquation equation;
+
+        public SimpleEquationBlock(EquationBlockFactory.BlockProducer producer, FAbstractEquation equation) {
+            super(producer);
+            this.equation = equation;
+        }
+
+        public FAbstractEquation equation() {
+            return equation;
+        }
+
         public boolean isReal() {
             for (FVariable fv : allVariables())
                 if (!fv.isReal())
@@ -1316,57 +1467,100 @@ aspect BLT{
             return true;
         }
 
-		@Override
-		public Collection<FAbstractEquation> allEquations() {
-			return Arrays.asList(equation());
-		}
+        @Override
+        public Collection<FAbstractEquation> allEquations() {
+            return allLocalEquations();
+        }
+
+        @Override
+        public Collection<FAbstractEquation> allLocalEquations() {
+            return Arrays.asList(equation());
+        }
 
         @Override
         public Collection<FAbstractEquation> realEquations() {
+            return localRealEquations();
+        }
+
+        @Override
+        public Collection<FAbstractEquation> localRealEquations() {
             if (isReal())
-                return allEquations();
+                return allLocalEquations();
             else
                 return Collections.emptyList();
         }
 
         @Override
         public Collection<FAbstractEquation> nonRealEquations() {
+            return localNonRealEquations();
+        }
+
+        @Override
+        public Collection<FAbstractEquation> localNonRealEquations() {
             if (isReal())
                 return Collections.emptyList();
             else
-                return allEquations();
+                return allLocalEquations();
         }
 
         @Override
         public Collection<FAbstractEquation> unsolvedEquations() {
-            if (isSolvable())
-                return Collections.emptyList();
-            else
-                return allEquations();
+            return localUnsolvedEquations();
         }
 
         @Override
+        public Collection<FAbstractEquation> localUnsolvedEquations() {
+            if (isSolvable())
+                return Collections.emptyList();
+            else
+                return allLocalEquations();
+        }
+
+        @Override
+        public Collection<FVariable> allVariables() {
+            return allLocalVariables();
+        }
+
+        @Override
+        public abstract Collection<FVariable> allLocalVariables();
+
+        @Override
         public Collection<FVariable> realVariables() {
+            return localRealVariables();
+        }
+
+        @Override
+        public Collection<FVariable> localRealVariables() {
             if (isReal())
-                return allVariables();
+                return allLocalVariables();
             else
                 return Collections.emptyList();
         }
 
         @Override
         public Collection<FVariable> nonRealVariables() {
+            return localNonRealVariables();
+        }
+
+        @Override
+        public Collection<FVariable> localNonRealVariables() {
             if (isReal())
                 return Collections.emptyList();
             else
-                return allVariables();
+                return allLocalVariables();
         }
 
         @Override
         public Collection<FVariable> unsolvedVariables() {
+            return localUnsolvedVariables();
+        }
+
+        @Override
+        public Collection<FVariable> localUnsolvedVariables() {
             if (isSolvable())
                 return Collections.emptyList();
             else
-                return allVariables();
+                return allLocalVariables();
         }
 
         public void prettyPrintActiveVariables(CodeStream str) {
@@ -1378,51 +1572,55 @@ aspect BLT{
         }
 
         @Override
-		public void errorCheck() {}
+        public void errorCheck() {}
 
-		public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
-			for (FVariable fv : allVariables()) {
-				str.print("  " + fv.name());
-				if (printAttributes) {
-					str.print("(");
-					fv.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
-					str.print(")");
-				}
-				str.println();
-			}
-		}
-		
-		public void prettyPrintEquation(CodeStream str) {
-			str.print("  " + equation());
-			if (equation().hasNominal())
-				str.print("    (Nominal=" + equation().getNominal() + ")");
-			str.println();
-		}
-		
-		
-		public void prettyPrintIterationVariables(CodeStream str) {
-			if (!isSolvable())
-				doPrettyPrintIterationVariables(str);
-		}
-		
-		public void doPrettyPrintIterationVariables(CodeStream str) {
-			boolean first = true;
-			for (FVariable var : allVariables()) {
-				if (first)
-					str.print(" Iteration variables: ");
-				else
-					str.print("                      ");
-				first = false;
-				str.println(var.name());
-			}
-		}
+        public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
+            for (FVariable fv : allLocalVariables()) {
+                str.print("  " + fv.name());
+                if (printAttributes) {
+                    str.print("(");
+                    fv.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
+                    str.print(")");
+                }
+                str.println();
+            }
+        }
+
+        public void prettyPrintEquation(CodeStream str) {
+            str.print("  " + equation());
+            if (equation().hasNominal())
+                str.print("    (Nominal=" + equation().getNominal() + ")");
+            str.println();
+        }
+
+        public void prettyPrintIterationVariables(CodeStream str) {
+            if (!isSolvable())
+                doPrettyPrintIterationVariables(str);
+        }
+
+        public void doPrettyPrintIterationVariables(CodeStream str) {
+            boolean first = true;
+            for (FVariable var : allLocalVariables()) {
+                if (first)
+                    str.print(" Iteration variables: ");
+                else
+                    str.print("                      ");
+                first = false;
+                str.println(var.name());
+            }
+        }
 
         @Override
         public boolean isSimple() {
             return true;
         }
 
-	}
+        @Override
+        public SimpleEquationBlock asSimple() {
+            return this;
+        }
+
+    }
 	
 	/**
 	 * An equation that does not affect the values of any variables. 
@@ -1436,7 +1634,7 @@ aspect BLT{
 		}
 
 		@Override
-		public Collection<FVariable> allVariables() {
+		public Collection<FVariable> allLocalVariables() {
 			return Collections.<FVariable>emptyList();
 		}
 
@@ -1472,7 +1670,7 @@ aspect BLT{
 		}
 
 		@Override
-		public Collection<FVariable> allVariables() {
+		public Collection<FVariable> allLocalVariables() {
 			return Arrays.asList(fv);
 		}
 		
@@ -1557,13 +1755,13 @@ aspect BLT{
 		}
 
         @Override
-        public Collection<FAbstractEquation> unsolvedEquations() {
-            return allEquations();
+        public Collection<FAbstractEquation> localUnsolvedEquations() {
+            return allLocalEquations();
         }
         
         @Override
-        public Collection<FVariable> unsolvedVariables() {
-            return allVariables();
+        public Collection<FVariable> localUnsolvedVariables() {
+            return allLocalVariables();
         }
 		@Override
 		public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
@@ -1607,7 +1805,7 @@ aspect BLT{
         }
 
         @Override
-        public Collection<FVariable> allVariables() {
+        public Collection<FVariable> allLocalVariables() {
             return new ArrayList<FVariable>(activeVars);
         }
 
@@ -1619,7 +1817,7 @@ aspect BLT{
         @Override
         public void prettyPrint(CodeStream str) {
             str.print(isSolvable() ? "Solved" : "Non-solved");
-            str.println(" block of " + allVariables().size() + " variables:");
+            str.println(" block of " + allLocalVariables().size() + " variables:");
             str.println("Unknown variables:");
             prettyPrintActiveVariables(str);
             str.println("Equations:");
@@ -1686,7 +1884,7 @@ aspect BLT{
         }
 
         @Override
-        public Collection<FVariable> allVariables() {
+        public Collection<FVariable> allLocalVariables() {
             return activeVars;
         }
 
@@ -1696,14 +1894,14 @@ aspect BLT{
         }
 
         @Override
-        public Collection<FAbstractEquation> differentiatedEquations() {
+        public Collection<FAbstractEquation> localDifferentiatedEquations() {
             return new ArrayList<FAbstractEquation>();
         }
 
         @Override
         public void prettyPrint(CodeStream str) {
             String prefix = isSolvable() ? "Solved" : "Non-solved";
-            str.format("%s algorithm block of %d variables:\n", prefix, allVariables().size());
+            str.format("%s algorithm block of %d variables:\n", prefix, allLocalVariables().size());
             str.println("Unknown variables:");
             prettyPrintActiveVariables(str);
             str.println("Algorithm:");
@@ -1764,7 +1962,7 @@ aspect BLT{
         }
 
         @Override
-        public Collection<FVariable> allVariables() {
+        public Collection<FVariable> allLocalVariables() {
             return activeVars;
         }   
 
@@ -1774,14 +1972,14 @@ aspect BLT{
         }
 
         @Override
-        public Collection<FAbstractEquation> differentiatedEquations() {
+        public Collection<FAbstractEquation> localDifferentiatedEquations() {
             return new ArrayList<FAbstractEquation>();
         }
 
         @Override
         public void prettyPrint(CodeStream str) {
             String prefix = isSolvable() ? "Solved" : "Non-solved";
-            str.format("%s if equation block of %d variables:\n", prefix, allVariables().size());
+            str.format("%s if equation block of %d variables:\n", prefix, allLocalVariables().size());
             str.println("Unknown variables:");
             prettyPrintActiveVariables(str);
             str.println("If Equation:");
@@ -2093,7 +2291,7 @@ aspect TearingPrinting {
         int counter = 0;
         str.println("In block #" + blockNumber);
         for (SimpleEquationBlock block : unsolvedBlocks()) {
-            for (FVariable var : block.allVariables()) {
+            for (FVariable var : block.allLocalVariables()) {
                 str.print(" (");
                 str.print(block.producer().symbol());
                 str.print(") " + (counter++) + " " + var.name() + " (");

@@ -872,15 +872,15 @@ public class DiagnosticsGenerator {
 	
 	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		int startL = tm.getYPos();
-		int endL = startL + allVariables().size() - unsolvedVariables().size() - 1;
+		int endL = startL + allVariables().size() - localUnsolvedVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startL, startL, endL, endL, "1px solid black", "#F0E4E4"));
 		int startJ = endL + 1;
 		int endJ = startL + allVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startJ, startJ, endJ, endJ, "1px solid black", "#F0C0C0"));
-		java.util.List<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+		java.util.List<AbstractEquationBlock> blocks = new ArrayList<AbstractEquationBlock>();
 		blocks.addAll(solvedBlocks());
 		blocks.addAll(unsolvedBlocks());
-		for (SimpleEquationBlock seb : blocks) {
+		for (AbstractEquationBlock seb : blocks) {
 			seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
 		}
 		tm.popStyleRule();

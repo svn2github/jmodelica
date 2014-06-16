@@ -1022,7 +1022,7 @@ aspect CADCodeGen {
 		
 		int i = 0;//TODO: This should be done in genVarDecls_CAD().
 		Set<ASTNode> visited = new HashSet<ASTNode>();
-		for (FAbstractEquation e : allEquations()){
+		for (FAbstractEquation e : allLocalEquations()){
 			e.genTempForFunc_CAD(i, indent, str, visited);
 			i += e.numScalarEquations();
 		}
@@ -1042,7 +1042,7 @@ aspect CADCodeGen {
 		str.println("if (evaluation_mode == JMI_BLOCK_INITIALIZE) {");
 		int var_counter = 0;
 		// Loop over all unsolved variables and write their value to x	
-		for (FVariable fv : unsolvedVariables()) {
+		for (FVariable fv : localUnsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("x["+var_counter+"] = " + fv.name_C() + ";");
 			var_counter++;
@@ -1058,7 +1058,7 @@ aspect CADCodeGen {
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		// Iteration is over the unsolved variables. 
-		for (FVariable fv : unsolvedVariables()) {
+		for (FVariable fv : localUnsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];");
 			str.print(innerIndent);
@@ -1080,7 +1080,7 @@ aspect CADCodeGen {
 		// Code that stores the evaluated dz
 		// dz entries for the solved variables are updated below as well
 		var_counter = 0;
-		for (FVariable fv : unsolvedVariables()) {
+		for (FVariable fv : localUnsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];");
 			var_counter++;
@@ -1104,7 +1104,7 @@ aspect CADCodeGen {
 		
 		// Reset all variables. global dz is updated elsewhere and dz_active should
 		// always be reset so as not to cause incorrect seeds
-		for (FVariable fv : unsolvedVariables()) {
+		for (FVariable fv : localUnsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;");
 		}
@@ -1141,7 +1141,7 @@ aspect CADCodeGen {
      * @see FAbstractEquation#genBlock_CAD(String, CodeStream, Set<FAbstractEquation>, Set<FVariable>).
      */
     public void SimpleEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, CodeStream str){
-        equation().genBlock_CAD(indent, str, null, allVariables(), assignedIndices());
+        equation().genBlock_CAD(indent, str, null, allLocalVariables(), assignedIndices());
     }
 
 	/**
@@ -1188,7 +1188,7 @@ aspect CADCodeGen {
      */
     public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         if (genBlockEnabled())
-            equation().genBlock_CAD(indent, str, visited, allVariables(), assignedIndices());
+            equation().genBlock_CAD(indent, str, visited, allLocalVariables(), assignedIndices());
     }
 	
 	/**
@@ -1557,7 +1557,7 @@ aspect CADCodeGen {
 		}
 		for (AbstractEquationBlock eb : getAllBlocks()){
 			if(eb.isSolvable()){
-				for (FAbstractEquation e : eb.allEquations()){
+				for (FAbstractEquation e : eb.allLocalEquations()){
 					e.genTempForFunc_CAD(i, indent, str, null);
 					i += e.numScalarEquations();
 				}
@@ -1565,26 +1565,26 @@ aspect CADCodeGen {
 		}
 	}
 	
-	/**
-	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
-	 * 
-	 * Generates variable declarations and temporary variables for 
-	 * all blocks in this BLT. 
-	 * @param CodeStream str, the c-code is written to this stream
-	 * @param String indent,  used to get a consistently formated c-code
-	 */
-	public void BLT.genVarDecls_CAD(CodeStream str, String indent) {
-		int i = 0;
-		for (AbstractEquationBlock eb : getAllBlocks()){
-			eb.genVarDecls_CAD(str, indent, null);
-		}
-		for (AbstractEquationBlock eb : getAllBlocks()){
-			for (FAbstractEquation e : eb.allEquations()){
-				e.genTempForFunc_CAD(i, indent, str,null);
-				i += e.numScalarEquations();
-			}
-		}
-	}
+//	/**
+//	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+//	 * 
+//	 * Generates variable declarations and temporary variables for 
+//	 * all blocks in this BLT. 
+//	 * @param CodeStream str, the c-code is written to this stream
+//	 * @param String indent,  used to get a consistently formated c-code
+//	 */
+//	public void BLT.genVarDecls_CAD(CodeStream str, String indent) {
+//		int i = 0;
+//		for (AbstractEquationBlock eb : getAllBlocks()){
+//			eb.genVarDecls_CAD(str, indent, null);
+//		}
+//		for (AbstractEquationBlock eb : getAllBlocks()){
+//			for (FAbstractEquation e : eb.allEquations()){
+//				e.genTempForFunc_CAD(i, indent, str,null);
+//				i += e.numScalarEquations();
+//			}
+//		}
+//	}
 	
 	/**
 	 * Generates AD code for this block. If a block needs iteration then
