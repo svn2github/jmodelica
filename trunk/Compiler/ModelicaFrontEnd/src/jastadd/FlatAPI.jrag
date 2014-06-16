@@ -1167,7 +1167,7 @@ aspect FlatAPI {
 	syn List<FAbstractEquation> FAbstractEquation.getInitialEquationList() {
 		List<FAbstractEquation> l = new List<FAbstractEquation>();
 		if (replacedAtInitialization()) {
-			l.add((FAbstractEquation) fullCopy());
+			l.add((FAbstractEquation) copySymbolic());
 		}
 		return l;
 	}
@@ -1176,9 +1176,14 @@ aspect FlatAPI {
 		return createInitialEquationList();
 	}
 	
-	syn List<FAbstractEquation> FIfWhenElseEquation.createInitialEquationList() {
-		return getFAbstractEquations().fullCopy();
-	}
+    syn List<FAbstractEquation> FIfWhenElseEquation.createInitialEquationList() {
+        List<FAbstractEquation> l = new List<FAbstractEquation>();
+        for (FAbstractEquation e : getFAbstractEquations()) {
+            l.add(e.copySymbolic());
+        }
+        return l;
+    }
+    
 	eq FIfWhenEquation.createInitialEquationList() {
 		if (getTest().isInitialGuard())
 			return super.createInitialEquationList();
