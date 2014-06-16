@@ -3356,6 +3356,8 @@ aspect CCodeGen {
 	}
 
 	public void FRelExp.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
+        getLeft().genTempVars_C(p, str, indent);
+        getRight().genTempVars_C(p, str, indent);
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
 		printIndicator_C(p, str, indent);
 		str.print(";\n");

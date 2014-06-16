@@ -14064,6 +14064,56 @@ $C_DAE_equation_residuals$
 
 end TestRelationalOp6;
 
+model TestRelationalOp7
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+      algorithm
+    end f;
+    
+    Real y1,y2;
+  initial equation
+    y1 = integer(f({y1}));
+    y2 = integer(f({y2}));
+  equation
+    when time > f({pre(y1)}) then
+        y1 = 1;
+    end when;
+    when time > f({pre(y2)}) then
+        y2 = 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp7",
+            description="Test generation of temps in relational operators.",
+            
+            template="
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+            generatedCode="
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1, 1)
+    jmi_array_ref_1(tmp_1, 1) = pre_y1_0;
+    (*res)[0] = _time - (func_CCodeGenTests_TestRelationalOp7_f_exp0(tmp_1));
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_ref_1(tmp_2, 1) = pre_y2_1;
+    (*res)[1] = _time - (func_CCodeGenTests_TestRelationalOp7_f_exp0(tmp_2));
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1, 1)
+    jmi_array_ref_1(tmp_1, 1) = pre_y1_0;
+    (*res)[0] = _time - (func_CCodeGenTests_TestRelationalOp7_f_exp0(tmp_1));
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_ref_1(tmp_2, 1) = pre_y2_1;
+    (*res)[1] = _time - (func_CCodeGenTests_TestRelationalOp7_f_exp0(tmp_2));
+")})));
+
+end TestRelationalOp7;
+
 model StringOperations1
 	type E = enumeration(a, bb, ccc);
 	
