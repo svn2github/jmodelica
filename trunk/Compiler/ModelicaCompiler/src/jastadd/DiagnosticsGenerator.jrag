@@ -197,45 +197,55 @@ public class DiagnosticsGenerator {
 			out = new CodeStream(new PrintStream(bltAbsFileName,"UTF-8"));
 			out.print(html_header);
 			if (fc.root().options.getBooleanOption("equation_sorting")) {
-				int ind = 0;
-				int unSInd = 0;
 				out.print("<h2>BLT for initialization system </h2>\n");
 				for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
 					out.print("<pre>\n");
-					out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + ind + "\">Block " + ind + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + "</a> ---\n");
+					if (eb.getLabel() == null)
+					    out.print("--- Solved equation ---\n");
+					else
+					    out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
-					ind++;
 				}
-				ind = 0;
-				unSInd = 0;
 				out.print("<h2>BLT for DAE system </h2>\n");
 				out.print("<h3> ODE blocks </h3>\n");	
 				// Loop over all derivatives
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+                    if (eb.getLabel() == null)
+                        out.print("--- Solved equation ---\n");
+                    else
+                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Real output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+                    if (eb.getLabel() == null)
+                        out.print("--- Solved equation ---\n");
+                    else
+                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Integer and boolean output blocks </h3>\n");	
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+                    if (eb.getLabel() == null)
+                        out.print("--- Solved equation ---\n");
+                    else
+                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Other output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
 					out.print("<pre>\n");
-					out.print("--- Block " + ind++ + (eb.isSolvable() ? "" : (" (Unsolved block " + unSInd++ +")")) + " ---\n");
+                    if (eb.getLabel() == null)
+                        out.print("--- Solved equation ---\n");
+                    else
+                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}		

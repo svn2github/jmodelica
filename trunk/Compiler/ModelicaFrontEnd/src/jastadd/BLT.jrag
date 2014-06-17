@@ -250,6 +250,7 @@ aspect BLT{
 			int blockNumber = 1;
 			for (Collection<Eq> bl : components)
 				blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
+			blt.setLabels();
 			return blt;
 		} finally {
 			ASTNode.endStep("computeBLT()");
@@ -282,6 +283,8 @@ aspect BLT{
     }
     
 	public class BLT extends ArrayList<AbstractEquationBlock> {
+	    
+	    private int numLabledBlocks = 0;
 		
 		public ArrayList<Integer> unsolvedBlockSizes() {
 			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
@@ -318,6 +321,18 @@ aspect BLT{
 			}
 			return str.toString();
 		}
+		
+        public void setLabels() {
+            Enumerator nestedEnum = new Enumerator(1);
+            Enumerator seqEnum = new Enumerator(0);
+            for (AbstractEquationBlock eb : this)
+                eb.setLabel(nestedEnum, seqEnum);
+            numLabledBlocks = seqEnum.peek();
+        }
+        
+        public int getNumLabledBlocks() {
+            return numLabledBlocks;
+        }
 		
 		public void writeIterationVariablesToFile(File file) throws FileNotFoundException {
 			CodeStream out = new CodeStream(file);
@@ -624,6 +639,8 @@ aspect BLT{
         private boolean visited = false;
         private boolean predecessorsSet = false;
         private final EquationBlockFactory.BlockProducer producer;
+        private String label;
+        private int sequenceNumber = -1;
 
         public AbstractEquationBlock(EquationBlockFactory.BlockProducer producer) {
             this.producer = producer;
@@ -905,7 +922,33 @@ aspect BLT{
         public SimpleEquationBlock asSimple() {
             throw new UnsupportedOperationException("Unable to convert block of type '" + getClass().getSimpleName() + "' to 'SimpleEquationBlock'!");
         }
-		
+
+        public final String getLabel() {
+            return label;
+//            return label == null ? "(unenumerated)" : label;
+        }
+
+        public final int getSequenceNumber() {
+            return sequenceNumber;
+//            return label == null ? "(unenumerated)" : label;
+        }
+
+        protected abstract boolean needLabel(boolean inSubBlock);
+
+        public final void setLabel(Enumerator nestedEnum, Enumerator seqEnum) {
+            setLabel(null, nestedEnum, seqEnum);
+        }
+
+        protected void setLabel(String prefix, Enumerator nestedEnum, Enumerator seqEnum) {
+            if (!needLabel(prefix != null))
+                return;
+            sequenceNumber = seqEnum.next();
+            if (prefix == null)
+                label = String.valueOf(nestedEnum.next());
+            else
+                label = prefix + '.' + nestedEnum.next();
+        }
+
 		public final String toString() {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			prettyPrint(new NotNullCodeStream(os));
@@ -1304,6 +1347,21 @@ aspect BLT{
                 seb.errorCheck();
         }
 
+        protected boolean needLabel(boolean inSubBlock) {
+            return true;
+        }
+
+        @Override
+        protected void setLabel(String prefix, Enumerator nestedEnum, Enumerator seqEnum) {
+            super.setLabel(prefix, nestedEnum, seqEnum);
+            Enumerator subNestedEnum = new Enumerator(1);
+            String label = getLabel();
+            for (AbstractEquationBlock eb : solvedBlocks())
+                eb.setLabel(label, subNestedEnum, seqEnum);
+            for (SimpleEquationBlock eb : unsolvedBlocks())
+                eb.setLabel(label, subNestedEnum, seqEnum);
+        }
+
         @Override
         public void prettyPrint(CodeStream str) {
             prettyPrint_typeStr(str);
@@ -1574,6 +1632,10 @@ aspect BLT{
         @Override
         public void errorCheck() {}
 
+        protected boolean needLabel(boolean inSubBlock) {
+            return !inSubBlock && !isSolvable();
+        }
+
         public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
             for (FVariable fv : allLocalVariables()) {
                 str.print("  " + fv.name());
@@ -1753,6 +1815,11 @@ aspect BLT{
 		public boolean isSolvable() {
 			return true;
 		}
+
+        @Override
+        protected boolean needLabel(boolean inSubBlock) {
+            return true;
+        }
 
         @Override
         public Collection<FAbstractEquation> localUnsolvedEquations() {

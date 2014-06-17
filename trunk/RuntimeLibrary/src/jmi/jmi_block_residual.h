@@ -124,7 +124,8 @@ struct jmi_block_residual_t {
 
     jmi_real_t* dx;                 /**< \brief Work vector for the seed vector */
     jmi_real_t* dv;                 /**< \brief Work vector for (dF/dv)*dv */
-    int index ;
+    int index;
+    jmi_string_t label;
 
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
     jmi_real_t* dres;              /**< \brief Work vector for the directional derivative that corresponds to dx */
@@ -178,7 +179,7 @@ struct jmi_block_residual_t {
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index, char* label);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -194,7 +195,7 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index, char* label);
 
 
 /**
@@ -212,7 +213,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
  * @return Error code.
  */
 int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver_kind_t solver,
-                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, int index);
+                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, int index, char* label);
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 

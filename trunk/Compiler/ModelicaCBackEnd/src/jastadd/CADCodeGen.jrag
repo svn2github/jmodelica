@@ -1009,17 +1009,18 @@ aspect CADCodeGen {
 	 * @param CodeStream Output stream
 	 */
 	public void AbstractEquationBlock.genBlockResidualFunction_CAD(boolean inInitial, String outerIndent, CodeStream str) {
-		if (!genRequiresBlockResidualFunction_C())
+        if (getLabel() == null)
 			return;
 		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
 			subBlock.genBlockResidualFunction_CAD(inInitial, outerIndent, str);
 		
 		str.format("%sstatic int dae_%sblock_dir_der_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n",
-				outerIndent, (inInitial ? "init_" : ""), residualBlockNumber_C());
+				outerIndent, (inInitial ? "init_" : ""), getSequenceNumber());
 		
 		String indent = ASTNode.printer_CAD.indent(outerIndent);
 		String innerIndent = ASTNode.printer_CAD.indent(indent);
 		
+		str.format("%s/***** %s: %s *****/\n", indent, inInitial ? "Init block" : "Block", getLabel());
 		int i = 0;//TODO: This should be done in genVarDecls_CAD().
 		Set<ASTNode> visited = new HashSet<ASTNode>();
 		for (FAbstractEquation e : allLocalEquations()){
@@ -1211,7 +1212,7 @@ aspect CADCodeGen {
 	@Override
 	public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%sef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+		str.format("%sef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, getSequenceNumber());
 	}
 	
 	/**

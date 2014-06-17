@@ -35,18 +35,18 @@
 #define nbr_allocated_iterations 30
 
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_sw, int jacobian_variability, jmi_block_solver_kind_t solver, int index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_sw, int jacobian_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_sw, jacobian_variability, index);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_sw, jacobian_variability, index, label);
     jmi->dae_block_residuals[index] = b;
     return flag;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_sw, int jacobian_variability, jmi_block_solver_kind_t solver, int index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_sw, int jacobian_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_sw, jacobian_variability, index);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_sw, jacobian_variability, index, label);
     jmi->dae_init_block_residuals[index] = b;
     return flag;
 }
@@ -187,7 +187,7 @@ int jmi_block_get_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_r
     return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_sw, int jacobian_variability, int index){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_sw, int jacobian_variability, int index, jmi_string_t label){
     jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
     int flag = 0;
     if(!b) return -1;
@@ -201,7 +201,9 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->n = n;
     b->n_nr = n_nr;
     b->n_sw = n_sw;
-    b->index = index ;
+    b->index = index;
+    b->label = (jmi_string_t) calloc(strlen(label) + 1, sizeof(char));
+    strcpy(b->label, label);
     b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     /*
         b->x_nr - doesn't seem to be used anywhere
@@ -396,6 +398,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->dv);
     free(b->res);
     free(b->dres);
+    free(b->label);
     free(b->sw_old);
     free(b->nr_old);
     free(b->sw_index);

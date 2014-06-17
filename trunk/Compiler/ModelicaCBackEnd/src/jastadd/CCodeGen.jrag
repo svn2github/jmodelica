@@ -2251,36 +2251,36 @@ aspect CCodeGen {
 		type().printInit_C(p, str, indent, tempName_C(), this);
 	}
 	
-    public boolean AbstractEquationBlock.genRequiresBlockResidualFunction_C()           { return true; }
-    public boolean SolvedScalarEquationBlock.genRequiresBlockResidualFunction_C()       { return false; }
-    public boolean SolvedFunctionCallEquationBlock.genRequiresBlockResidualFunction_C() { return false; }
-    public boolean SolvedAlgorithmBlock.genRequiresBlockResidualFunction_C()            { return false; }
-    public boolean MetaEquationBlock.genRequiresBlockResidualFunction_C()               { return false; }
-    public boolean SolvedIfEquationBlock.genRequiresBlockResidualFunction_C()           { return false; }
-	
-	private int AbstractEquationBlock.residualBlockNumber_C = -1;
-	public void AbstractEquationBlock.genEnumerateResidualBlocks_C(Enumerator enumerator) {
-		if (residualBlockNumber_C != -1 || !genRequiresBlockResidualFunction_C())
-			return;
-		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
-			subBlock.genEnumerateResidualBlocks_C(enumerator);
-		residualBlockNumber_C = enumerator.next();
-	}
-	
-	public int AbstractEquationBlock.residualBlockNumber_C() {
-		if (residualBlockNumber_C == -1)
-			throw new UnsupportedOperationException("Trying to get residual block number of a block type that do not generate block");
-		return residualBlockNumber_C;
-	}
-	
-	public void BLT.genEnumerateResidualBlocks_C() {
-		Enumerator enumerator = new Enumerator();
-		for (AbstractEquationBlock block : getAllBlocks())
-			block.genEnumerateResidualBlocks_C(enumerator);
-	}
+//    public boolean AbstractEquationBlock.genRequiresBlockResidualFunction_C()           { return true; }
+//    public boolean SolvedScalarEquationBlock.genRequiresBlockResidualFunction_C()       { return false; }
+//    public boolean SolvedFunctionCallEquationBlock.genRequiresBlockResidualFunction_C() { return false; }
+//    public boolean SolvedAlgorithmBlock.genRequiresBlockResidualFunction_C()            { return false; }
+//    public boolean MetaEquationBlock.genRequiresBlockResidualFunction_C()               { return false; }
+//    public boolean SolvedIfEquationBlock.genRequiresBlockResidualFunction_C()           { return false; }
+//	
+//	private int AbstractEquationBlock.residualBlockNumber_C = -1;
+//	public void AbstractEquationBlock.genEnumerateResidualBlocks_C(Enumerator enumerator) {
+//		if (residualBlockNumber_C != -1 || !genRequiresBlockResidualFunction_C())
+//			return;
+//		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
+//			subBlock.genEnumerateResidualBlocks_C(enumerator);
+//		residualBlockNumber_C = enumerator.next();
+//	}
+//	
+//	public int AbstractEquationBlock.residualBlockNumber_C() {
+//		if (residualBlockNumber_C == -1)
+//			throw new UnsupportedOperationException("Trying to get residual block number of a block type that do not generate block");
+//		return residualBlockNumber_C;
+//	}
+//	
+//	public void BLT.genEnumerateResidualBlocks_C() {
+//		Enumerator enumerator = new Enumerator();
+//		for (AbstractEquationBlock block : getAllBlocks())
+//			block.genEnumerateResidualBlocks_C(enumerator);
+//	}
 	
     public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
-        if (!genRequiresBlockResidualFunction_C())
+        if (getLabel() == null)
             return;
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
             subBlock.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
@@ -2293,7 +2293,8 @@ aspect CCodeGen {
         String indent = p.indent(outerIndent);
         String nextIndent = p.indent(indent);
         str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
-                outerIndent, (inInitial? "init_": ""), residualBlockNumber_C());
+                outerIndent, (inInitial? "init_": ""), getSequenceNumber());
+        str.format("%s/***** %s: %s *****/\n", indent, inInitial ? "Init block" : "Block", getLabel());
         str.print(indent + "jmi_real_t** res = &residual;\n");
         str.print(indent + "int ef = 0;\n");
         genVarDecls_C(p, str, indent, null);
@@ -2447,7 +2448,7 @@ aspect CCodeGen {
     public void EquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
             CodeStream str, String indent, boolean inInitial, Set<FAbstractEquation> visited) {
         String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
     }
     
     @Override
@@ -2473,7 +2474,7 @@ aspect CCodeGen {
     public void NumericallySolvedScalarEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
             CodeStream str, String indent, boolean inInitial, Set<FAbstractEquation> visited) {
         String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
     }
     
 	public void FVariable.genBlockResidualAttribute_C(CodePrinter p, CodeStream str, String indent,
@@ -2711,16 +2712,16 @@ aspect CCodeGen {
     }
     
 	public void AbstractEquationBlock.genBlockAddCall_C(boolean dirDer, boolean inInit, String indent, CodeStream str, String nleSolver) {
-		if (!genRequiresBlockResidualFunction_C())
+		if (getLabel() == null)
 			return;
 		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
 			subBlock.genBlockAddCall_C(dirDer, inInit, indent, str, nleSolver);
 		
 		str.print(indent);
 		str.print("jmi_dae_" + (inInit ? "init_" : "") + "add_equation_block(");
-		str.print("*jmi, dae_" + (inInit ? "init_" : "") + "block_" + residualBlockNumber_C() + ", ");
+		str.print("*jmi, dae_" + (inInit ? "init_" : "") + "block_" + getSequenceNumber() + ", ");
 		if (dirDer)
-			str.print("dae_" + (inInit ? "init_" : "") + "block_dir_der_" + residualBlockNumber_C() + ", ");
+			str.print("dae_" + (inInit ? "init_" : "") + "block_dir_der_" + getSequenceNumber() + ", ");
 		else
 			str.print("NULL, ");
 		str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
@@ -2728,7 +2729,8 @@ aspect CCodeGen {
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
 		str.print(genJMISolverConstant_C(nleSolver) + ", ");
-		str.print(residualBlockNumber_C() + ");\n");
+		str.print(getSequenceNumber() + ", \"");
+		str.print(getLabel() + "\");\n");
 	}
 	
 	syn String FTypePrefixVariability.genJMIVariabilityConstant_C();
@@ -2831,7 +2833,7 @@ aspect CCodeGen {
         for (FRelExp relExp : inactiveInitialSwitches_C())
             p.printPreSteps(relExp, str, indent);
         String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
     }
 
     /**
@@ -3466,7 +3468,6 @@ aspect CCodeGen {
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(CodeStream str) {
-		genEnumerateResidualBlocks_C();
 		for (AbstractEquationBlock block : this) {
 			block.genBlock_C(ASTNode.printer_C, str, ASTNode.printer_C.indent(""), false); 
 		}
@@ -3486,7 +3487,6 @@ aspect CCodeGen {
 	public void StructuredBLT.genOdeDerivativeBlocks(CodeStream str) {
 	    CodePrinter p = ASTNode.printer_C;
 	    String indent = p.indent("");
-		genEnumerateResidualBlocks_C();
 		str.print("/************* ODE section *********/\n");
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
