@@ -2251,34 +2251,7 @@ aspect CCodeGen {
 		type().printInit_C(p, str, indent, tempName_C(), this);
 	}
 	
-//    public boolean AbstractEquationBlock.genRequiresBlockResidualFunction_C()           { return true; }
-//    public boolean SolvedScalarEquationBlock.genRequiresBlockResidualFunction_C()       { return false; }
-//    public boolean SolvedFunctionCallEquationBlock.genRequiresBlockResidualFunction_C() { return false; }
-//    public boolean SolvedAlgorithmBlock.genRequiresBlockResidualFunction_C()            { return false; }
-//    public boolean MetaEquationBlock.genRequiresBlockResidualFunction_C()               { return false; }
-//    public boolean SolvedIfEquationBlock.genRequiresBlockResidualFunction_C()           { return false; }
-//	
-//	private int AbstractEquationBlock.residualBlockNumber_C = -1;
-//	public void AbstractEquationBlock.genEnumerateResidualBlocks_C(Enumerator enumerator) {
-//		if (residualBlockNumber_C != -1 || !genRequiresBlockResidualFunction_C())
-//			return;
-//		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
-//			subBlock.genEnumerateResidualBlocks_C(enumerator);
-//		residualBlockNumber_C = enumerator.next();
-//	}
-//	
-//	public int AbstractEquationBlock.residualBlockNumber_C() {
-//		if (residualBlockNumber_C == -1)
-//			throw new UnsupportedOperationException("Trying to get residual block number of a block type that do not generate block");
-//		return residualBlockNumber_C;
-//	}
-//	
-//	public void BLT.genEnumerateResidualBlocks_C() {
-//		Enumerator enumerator = new Enumerator();
-//		for (AbstractEquationBlock block : getAllBlocks())
-//			block.genEnumerateResidualBlocks_C(enumerator);
-//	}
-	
+
     public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
         if (getLabel() == null)
             return;

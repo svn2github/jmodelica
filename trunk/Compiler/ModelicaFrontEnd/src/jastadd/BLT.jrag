@@ -925,12 +925,10 @@ aspect BLT{
 
         public final String getLabel() {
             return label;
-//            return label == null ? "(unenumerated)" : label;
         }
 
         public final int getSequenceNumber() {
             return sequenceNumber;
-//            return label == null ? "(unenumerated)" : label;
         }
 
         protected abstract boolean needLabel(boolean inSubBlock);
