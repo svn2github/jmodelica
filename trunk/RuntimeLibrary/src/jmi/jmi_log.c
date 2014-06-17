@@ -730,7 +730,10 @@ static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, v
         }
         else {  /* !incomment */
             if      (ch == '>') { ++fmt; incomment = TRUE; }
-            else if (isspace(ch) || ch == ',') ++fmt;
+            else if (isspace(ch) || ch == ',') {
+                buffer_text_char(buf, ch);
+                ++fmt;
+            }
             else if (is_name_char(ch)) {
                 /* Try to log an attribute */
                 node_t node;

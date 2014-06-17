@@ -107,8 +107,11 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *          `s` for `char *`.
  *        No format specifiers beyond the single character are supported;
  *        a default format is used for all reals, etc.
+ *      * Whitespace is allowed before and after the `:` and is ignored.
  *  * Scalar attributes with a variable reference as value, in the form `<` *name* `:#` *type* `%d#>`
  *    (e.g. `<var:#r%d#>`), where `<type>` is one of the characters `ribs`.
+ *  * Several scalar attributes can be listed within the same angle brackets, e.g. `<value:%g, index:%d>`
+ *      * Commas and whitespace between attributes are passed through verbatim.
  * 
  *  The values for consecutive attributes should be supplied as additional arguments, just like for `printf`.
  */

@@ -383,7 +383,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
             if(ef != 0) { 
-                jmi_log_node(log, logInfo, "Info", "Error in discrete variables update"
+                jmi_log_node(log, logInfo, "Info", "Error in discrete variables update: "
                             "<block:%d, iter:%I> at <t:%E>", block_solver->id, iter, cur_time);
                 jmi_log_leave(log, iter_node); 
                 break; 

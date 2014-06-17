@@ -2229,7 +2229,7 @@ void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
     }
     len = strlen(loc) + strlen(file);
     if (len >= JMI_PATH_MAX) {
-        jmi_log_node(jmi->log, logError, "Error", "File path too long <Path:%s><File:%s>", loc, file);
+        jmi_log_node(jmi->log, logError, "Error", "File path too long: <Path:%s, File:%s>", loc, file);
         return;
     }
     strcpy(res, loc);

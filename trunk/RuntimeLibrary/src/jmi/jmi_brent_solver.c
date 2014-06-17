@@ -216,7 +216,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     flag =  brentf(block->x[0], &f, block);
 
     if (flag) {
-        jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for"
+        jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
                      "<block: %d>", block->id);
         return JMI_BRENT_FIRST_SYSFUNC_ERR;
     }

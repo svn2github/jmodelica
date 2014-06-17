@@ -580,14 +580,14 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     /* evaluate the function at initial */
     ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
     if(ef) {
-        jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for"
+        jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
                      "<block: %d>", block->id);
     }
     kin_mem->kin_uscale = solver->kin_y_scale;
     /* evaluate Jacobian at initial */
     if(jmi_kin_lsetup(kin_mem)) {
         ef = 1;
-        jmi_log_node(block->log, logError, "Error", "Jacobian evaluation failed at initial point for"
+        jmi_log_node(block->log, logError, "Error", "Jacobian evaluation failed at initial point for "
                      "<block: %d>", block->id);
     }
     return ef;
