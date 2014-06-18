@@ -138,9 +138,8 @@ int main() {
                           0, /* no dF*/
                           0, /* no check discrete vars */
                           update_discrete_variables,
-                          0, /* can be NULL, only needed during restructuring for regression testing */
                           0, /* can be NULL, only needed after a regularization. */
-                          1,                            
+                           1,                            
                            &options,
                            &sw);
     jmi_block_solver_solve(block_solver, 0, 1);
