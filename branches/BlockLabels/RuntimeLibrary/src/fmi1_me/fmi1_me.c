@@ -1153,8 +1153,8 @@ fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
         if (nniters > 0) {
             /* Output to logger */
             jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "initialization");
-            jmi_log_fmt(jmi->log, node, logInfo, "<block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d>", 
-                        block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
+            jmi_log_fmt(jmi->log, node, logInfo, "<block: %s, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d>", 
+                        block->label, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
             jmi_log_fmt(jmi->log, node, logInfo, "<time_spent: %f>", block->time_spent);
             jmi_log_leave(jmi->log, node);
         }
@@ -1170,8 +1170,8 @@ fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
             /* Output to logger */
             /* NB: Exactly the same code as above. Todo: factor out? */
             jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "dae_blocks");
-            jmi_log_fmt(jmi->log, node, logInfo, "<block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d>", 
-                        block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
+            jmi_log_fmt(jmi->log, node, logInfo, "<block: %s, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d>", 
+                        block->label, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
             jmi_log_fmt(jmi->log, node, logInfo, "<time_spent: %f>", block->time_spent);
             jmi_log_leave(jmi->log, node);            
         }

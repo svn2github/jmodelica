@@ -61,7 +61,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->callbacks = cb;
     block_solver->options = options;
     block_solver->log = log;
-    block_solver->id = options->id;
+    block_solver->label = options->label;
 
     block_solver->n = n;                         /**< \brief The number of iteration variables */
     block_solver->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));                 /**< \brief Work vector for the real iteration variables */
@@ -284,8 +284,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             } else if((nomi > maxi) || (nomi < mini)) { /* nominal outside min-max */
                 jmi_log_node(block_solver->log, logWarning, "Warning",
                              "Nominal value <nominal: %g> is not between <min: %g> and <max: %g> "
-                             "for the iteration variable <iv: #r%d#> in <block: %d>.",
-                             nomi, mini, maxi, block_solver->value_references[i], block_solver->id);
+                             "for the iteration variable <iv: #r%d#> in <block: %s>.",
+                             nomi, mini, maxi, block_solver->value_references[i], block_solver->label);
             }
             
             if(!nominalOk) {
@@ -334,8 +334,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     if (handle_discrete_changes) {
         int iter, non_reals_changed_flag;
         jmi_log_node_t top_node = jmi_log_enter_fmt(log, logInfo, "BlockEventIterations",
-                                      "Starting block (local) event iteration at <t:%E> in <block:%d>",
-                                      cur_time, block_solver->id);
+                                      "Starting block (local) event iteration at <t:%E> in <block:%s>",
+                                      cur_time, block_solver->label);
        
         jmi_log_reals(log, top_node, logInfo, "ivs", block_solver->x, block_solver->n);
 
@@ -361,8 +361,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             {
                 char message[256];
                 sprintf(message, "Switch iteration %d", iter+1);
-                jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
-                             "jmi_block_solver", block_solver->id, message);
+                jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
+                             "jmi_block_solver", block_solver->label, message);
             }
 
             /* Solve block */
@@ -385,14 +385,14 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             if(ef != 0) { 
                 jmi_log_node(log, logInfo, "Info", "Error in discrete variables update: "
-                            "<block:%d, iter:%I> at <t:%E>", block_solver->id, iter, cur_time);
+                            "<block:%s, iter:%I> at <t:%E>", block_solver->label, iter, cur_time);
                 jmi_log_leave(log, iter_node); 
                 break; 
             }
             
             if(!non_reals_changed_flag) {
-                jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using fixed point iteration in <block:%d, iter:%I> at <t:%E>",
-                            block_solver->id, iter, cur_time);
+                jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using fixed point iteration in <block:%s, iter:%I> at <t:%E>",
+                            block_solver->label, iter, cur_time);
 
                 converged = 1;
                 jmi_log_leave(log, iter_node);
@@ -409,8 +409,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
                 "Starting enhanced event iteration at <t:%E>", cur_time);
 
-            jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
-                         "jmi_block_solver", block_solver->id, "Starting enhanced switch iterations");
+            jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
+                         "jmi_block_solver", block_solver->label, "Starting enhanced switch iterations");
             
             x_new = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));
             x = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));            
@@ -436,8 +436,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 {
                     char message[256];
                     sprintf(message, "Enhanced switch iteration %d", iter+1);
-                    jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%d><message:%s>",
-                                 "jmi_block_solver", block_solver->id, message);
+                    jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
+                                 "jmi_block_solver", block_solver->label, message);
                 }
 
                 iter += 1;
@@ -450,8 +450,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
                 if (non_reals_changed_flag == 0){
-                    jmi_log_node(log, logError, "Error", "Error updating discrete variables with the new x <block:%d, iter:%I> at <t:%E>",
-                        block_solver->id, iter, cur_time);
+                    jmi_log_node(log, logError, "Error", "Error updating discrete variables with the new x <block:%s, iter:%I> at <t:%E>",
+                        block_solver->label, iter, cur_time);
                     jmi_log_leave(log, iter_node);
                     break;
                 }
@@ -459,20 +459,20 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 if(ef != 0) { 
                     switch(ef) {
                     case jmi_block_solver_status_err_event_eval:
-                        jmi_log_node(log, logError, "Error", "Error evaluating switches <block:%d, iter:%I> at <t:%E>",
-                            block_solver->id, iter, cur_time);
+                        jmi_log_node(log, logError, "Error", "Error evaluating switches <block:%s, iter:%I> at <t:%E>",
+                            block_solver->label, iter, cur_time);
                         break;
                     case jmi_block_solver_status_err_f_eval:
-                        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%I> at <t:%E>",
-                            block_solver->id, iter, cur_time);
+                        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%s, iter:%I> at <t:%E>",
+                            block_solver->label, iter, cur_time);
                         break;
                     case jmi_block_solver_status_inf_event_loop:
-                        jmi_log_node(log, logError, "Error", "Detected infinite loop in enhanced fixed point iteration in <block:%d, iter:%I> at <t:%E>",
-                            block_solver->id, iter, cur_time);
+                        jmi_log_node(log, logError, "Error", "Detected infinite loop in enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>",
+                            block_solver->label, iter, cur_time);
                         break;
                     case jmi_block_solver_status_event_non_converge:
-                        jmi_log_node(log, logError, "Error", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%I> at <t:%E>",
-                            block_solver->id, iter, cur_time);
+                        jmi_log_node(log, logError, "Error", "Failed to converge during switches iteration due to too many iterations in <block:%s, iter:%I> at <t:%E>",
+                            block_solver->label, iter, cur_time);
                         break;
                     default:
                         break;
@@ -502,8 +502,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 /* Check for consistency */
                 if (non_reals_not_changed_flag){
-                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration in <block:%d, iter:%I> at <t:%E>",
-                        block_solver->id, iter, cur_time);
+                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>",
+                        block_solver->label, iter, cur_time);
                     converged = 1;
                     jmi_log_leave(log, iter_node);
                     break;
@@ -519,8 +519,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         if(converged==0){
-            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration in <block:%d, iter:%I> at <t:%E>",
-                 block_solver->id, iter, cur_time);
+            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration in <block:%s, iter:%I> at <t:%E>",
+                 block_solver->label, iter, cur_time);
             ef = 1; /* Return flag */
         }
         jmi_log_leave(log, top_node);
@@ -568,5 +568,5 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->experimental_mode = 0;
     bsop->solver = JMI_KINSOL_SOLVER;
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
-    bsop->id = 0;
+    bsop->label = "";
 }

@@ -216,7 +216,7 @@ struct jmi_block_solver_options_t {
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
     jmi_block_solver_jac_variability_t jacobian_variability; /**< brief Jac variability for linear block solver */
-    int id;                          /** id of this block solver (used for logging) */
+    jmi_string_t label;                          /** label of this block solver (used for logging) */
 
 };
 
