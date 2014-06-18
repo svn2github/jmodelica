@@ -283,8 +283,9 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 nominalOk = FALSE; /* no nominal set and heuristics is activated */
             } else if((nomi > maxi) || (nomi < mini)) { /* nominal outside min-max */
                 jmi_log_node(block_solver->log, logWarning, "Warning",
-                    "Nominal value is outside min-max range for the iteration variable."
-                    , block_solver->id, i);
+                             "Nominal value <nominal: %g> is not between <min: %g> and <max: %g> "
+                             "for the iteration variable <iv: #r%d#> in <block: %d>.",
+                             nomi, mini, maxi, block_solver->value_references[i], block_solver->id);
             }
             
             if(!nominalOk) {

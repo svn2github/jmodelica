@@ -63,8 +63,8 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     for (i=0;i<n;i++) {
         /* Unrecoverable error*/
         if (Ith(yy,i)- Ith(yy,i) != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", 
-                         block->id);
+            jmi_log_node(block->log, logWarning, "Warning", "Not a number in <input: #r%d#> to <block: %d>", 
+                         block->value_references[i], block->id);
             return -1;
         }
     }
