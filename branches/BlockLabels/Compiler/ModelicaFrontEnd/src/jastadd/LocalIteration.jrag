@@ -1,0 +1,86 @@
+aspect LocalIteration{
+    public abstract class AttributeContributer {
+        public static class LocalIterationContributer extends AttributeContributer {
+            
+            public LocalIterationContributer() {
+                super("LocalIterationContributer");
+            }
+            
+            @Override
+            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+                AnnotationNode localIterationNode = src.annotation().vendorNode().forPath("LocalIteration");
+                if (!localIterationNode.exists())
+                    return;
+                FAttribute localIterationAttr = new FInternalAttribute("LocalIteration");
+                dest.addFAttribute(localIterationAttr);
+                
+                AnnotationNode enabledAnnotation = localIterationNode.forPath("enabled");
+                Exp enabledExp = enabledAnnotation.exp();
+                if (enabledExp != null)
+                    localIterationAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEach()));
+            }
+
+            @Override
+            protected void contribute(InstAssignable src, FVariable dest) {}
+
+            @Override
+            protected void contribute(InstBaseClassDecl src, FFunctionDecl dest) {}
+
+            @Override
+            protected void contribute(InstNode src, FClass dest) {}
+
+            @Override
+            protected boolean containsActiveAttributes(FAbstractEquation equation) {
+                return equation.hasLocalIteration();
+            }
+
+            @Override
+            protected boolean containsActiveAttributes(FVariable variable) {
+                return false;
+            }
+
+            @Override
+            protected boolean containsActiveAttributes(FFunctionDecl function) {
+                return false;
+            }
+
+            @Override
+            protected boolean containsActiveAttributes(FClass fClass) {
+                return false;
+            }
+        }
+    }
+    
+    private static AttributeContributer ASTNode.LOCAL_ITERATION_CONTRIBUTER =
+            addAttributeContributer(new AttributeContributer.LocalIterationContributer());
+    
+    syn boolean FAbstractEquation.canUseLocalIteration() {
+        String option = root().options.getStringOption("local_iteration_in_tearing");
+        if (option == OptionRegistry.LocalIteration.OFF)
+            return false;
+        else if (option == OptionRegistry.LocalIteration.ANNOTATION)
+            return hasLocalIteration();
+        else
+            return true;
+    }
+    
+    protected void FAbstractEquation.typeCheckLocalIteration(ErrorCheckType checkType) {
+        FAttribute localIterationAttr = findAttribute("LocalIteration");
+        if (localIterationAttr == null)
+            return;
+        FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
+        if (enabledAttr != null) {
+            FExp enabledExp = enabledAttr.getValue();
+            typeCheckEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
+        }
+    }
+    
+    syn boolean FAbstractEquation.hasLocalIteration() {
+        FAttribute localIterationAttr = findAttribute("LocalIteration");
+        if (localIterationAttr == null)
+            return false;
+        FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
+        return enabledAttr == null || !enabledAttr.hasValue() || enabledAttr.getValue().ceval().booleanValue();
+    }
+    
+}
