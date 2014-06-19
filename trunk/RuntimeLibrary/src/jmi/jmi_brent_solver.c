@@ -41,7 +41,7 @@ int brentf(realtype y, realtype* f, void* problem_data) {
 
     /* Check that arguments are valid */
     if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", block->id);
+        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %d>", block->id);
         return -1;
     }
 
@@ -55,7 +55,7 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     {
         realtype v = *f;
         if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", "Not a number in output from <block: %d>", block->id);
+            jmi_log_node(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %d>", block->id);
             ret = 1;
         }
     }
@@ -301,7 +301,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 }
             }
             else {
-                jmi_log_node(log, logError, "Error", "Could not bracket the root in <block: %d>", block->id);
+                jmi_log_node(log, logError, "BracketFailed", "Could not bracket the root in <block: %d>", block->id);
                 return JMI_BRENT_ROOT_BRACKETING_FAILED;
             }
             if (flag > 0) { 

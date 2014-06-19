@@ -43,8 +43,8 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
     for (i=0;i<n;i++) {
         /* Unrecoverable error*/
         if (y[i]-y[i] != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", 
-                         block->id);
+            jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in <input: #r%d#> to <block: %d>", 
+                         block->value_references[i], block->id);
             return -1;
         }
     }
@@ -116,7 +116,7 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
             double v = fvec[i];
             /* Recoverable error*/
             if (v- v != 0) {
-                jmi_log_node(block->log, logWarning, "Warning", 
+                jmi_log_node(block->log, logWarning, "NANOutput", 
                              "Not a number in <output: %I> from <block: %d>", i, block->id);
                 ret = 1;
             }

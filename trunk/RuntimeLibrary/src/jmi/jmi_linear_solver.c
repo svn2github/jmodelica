@@ -120,11 +120,11 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         dgetrf_(&n_x, &n_x, solver->factorization, &n_x, solver->ipiv, &info);
         if(info) {
             if(block->init) {
-                jmi_log_node(block->log, logError, "Error", "Singular Jacobian detected for <block: %d>", 
+                jmi_log_node(block->log, logError, "SingularJacobianError", "Singular Jacobian detected for <block: %d>", 
                              block->id);
             }
             else {
-                jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected for <block: %d> at <t: %f>", 
+                jmi_log_node(block->log, logWarning, "SingularJacobian", "Singular Jacobian detected for <block: %d> at <t: %f>", 
                              block->id, block->cur_time);
             }
             /* return -1; */

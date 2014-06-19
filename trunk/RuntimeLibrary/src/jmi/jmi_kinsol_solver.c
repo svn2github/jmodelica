@@ -63,7 +63,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     for (i=0;i<n;i++) {
         /* Unrecoverable error*/
         if (Ith(yy,i)- Ith(yy,i) != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", "Not a number in <input: #r%d#> to <block: %d>", 
+            jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in <input: #r%d#> to <block: %d>", 
                          block->value_references[i], block->id);
             return -1;
         }
@@ -84,7 +84,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         double v = Ith(ff,i);
         /* Recoverable error*/
         if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "Warning", 
+            jmi_log_node(block->log, logWarning, "NaNOutput", 
                          "Not a number in <output: %I> from <block: %d>", i, block->id);
             ret = 1;
 #if 0           
@@ -1178,7 +1178,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
         if(info > 0) {
             jmi_log_node(block->log, logWarning, "SingularJacobian",
-                         "Singular Jacobian detected when checking condition number in <block:%d> Solver may fail to converge.", block->id);
+                         "Singular Jacobian detected when checking condition number in <block:%d>. Solver may fail to converge.", block->id);
         }
         else {
             dgecon_(&norm, &N, solver->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
