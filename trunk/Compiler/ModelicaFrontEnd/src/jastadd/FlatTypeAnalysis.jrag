@@ -142,28 +142,22 @@ aspect FlatTypeAnalysis {
 	}
 
     eq InstRecord.type() {
-        TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
         InstComponentDecl root = this;
         for (int i = 0; i < ndims(); i++) {
             if (root.getNumInstComponentDecl() == 0)
                 return myInstClass().recordType().sizedType(size());
             root = root.getInstComponentDecl(0);
         }
-        for (InstComponentDecl icd : root.allInstComponentDecls()) 
-            comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         FRecordType type = myInstClass().createEmptyFRecordType(size());
-        for (FRecordComponentType comp : comps)
-            type.addComponent(comp);
+        for (InstComponentDecl icd : root.allInstComponentDecls()) 
+            type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         return type;
     }
 
     syn lazy FRecordType InstClassDecl.recordType() {
-        TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
-        for (InstComponentDecl icd : allInstComponentDecls()) 
-            comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         FRecordType type = createEmptyFRecordType(Size.SCALAR);
-        for (FRecordComponentType comp : comps)
-            type.addComponent(comp);
+        for (InstComponentDecl icd : allInstComponentDecls()) 
+            type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         return type;
     }
 
@@ -1408,14 +1402,22 @@ aspect FTypeCompatibility {
 			return true;
 		if (getNumComponent() != rec.getNumComponent())
 			return false;
-		for (int i = 0; i < getNumComponent(); i++) {
-			FRecordComponentType c1 = getComponent(i);
-			FRecordComponentType c2 = rec.getComponent(i);
-			if (!c1.getName().equals(c2.getName()) || 
-					!c1.getFType().typeMatches(c2.getFType(), compatible, allowUnknown))
-				return false;
-		}
-		return true;
+        TreeSet<FRecordComponentType> comps1 = new TreeSet<FRecordComponentType>();
+        TreeSet<FRecordComponentType> comps2 = new TreeSet<FRecordComponentType>();
+        for (FRecordComponentType t : getComponents())
+            comps1.add(t);
+        for (FRecordComponentType t : rec.getComponents())
+            comps2.add(t);
+        Iterator<FRecordComponentType> i1 = comps1.iterator();
+        Iterator<FRecordComponentType> i2 = comps2.iterator();
+        while (i1.hasNext()) {
+            FRecordComponentType c1 = i1.next();
+            FRecordComponentType c2 = i2.next();
+            if (!c1.getName().equals(c2.getName()) || 
+                    !c1.getFType().typeMatches(c2.getFType(), compatible, allowUnknown))
+                return false;
+        }
+        return true;
 	}
 	eq FEnumType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
 		if (!dimensionCompatible(type, allowUnknown) || !type.isEnum())

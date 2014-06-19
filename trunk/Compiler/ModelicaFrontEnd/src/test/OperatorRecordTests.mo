@@ -614,7 +614,6 @@ end OperatorRecordTests.OperatorOverload11;
     end OperatorOverload11;
 
 
-// Note: this test gives wrong result due to the bug in #2779
     model OperatorOverload12
         constant Cplx c1 = Cplx(1, 2);
         constant Cplx c2 = Cplx(3, 4);
@@ -627,10 +626,10 @@ end OperatorRecordTests.OperatorOverload11;
             description="Constant eval of overloaded operator expression: scalars",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload12
- constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(2, 1);
- constant OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx(4, 3);
- constant OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx(6.0, 4.0);
- constant OperatorRecordTests.Cplx c4 = OperatorRecordTests.Cplx(6.0, 4.0);
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
+ constant OperatorRecordTests.Cplx c2 = OperatorRecordTests.Cplx(3, 4);
+ constant OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx(4.0, 6.0);
+ constant OperatorRecordTests.Cplx c4 = OperatorRecordTests.Cplx(4.0, 6.0);
 
 public
  function OperatorRecordTests.Cplx.'constructor'
@@ -662,7 +661,6 @@ end OperatorRecordTests.OperatorOverload12;
     end OperatorOverload12;
 
 
-// Note: this test gives wrong result due to the bug in #2779
     model OperatorOverload13
         constant Cplx[2] c1 = { Cplx(1, 2), Cplx(3, 4) };
         constant Cplx[2] c2 = { Cplx(5, 6), Cplx(7, 8) };
@@ -675,10 +673,10 @@ end OperatorRecordTests.OperatorOverload12;
             description="Constant eval of overloaded operator expression: arrays",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload13
- constant OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx(2, 1), OperatorRecordTests.Cplx(4, 3)};
- constant OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx(6, 5), OperatorRecordTests.Cplx(8, 7)};
- constant OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx(8.0, 6.0), OperatorRecordTests.Cplx(12.0, 10.0)};
- constant OperatorRecordTests.Cplx c4[2] = {OperatorRecordTests.Cplx(8.0, 6.0), OperatorRecordTests.Cplx(12.0, 10.0)};
+ constant OperatorRecordTests.Cplx c1[2] = {OperatorRecordTests.Cplx(1, 2), OperatorRecordTests.Cplx(3, 4)};
+ constant OperatorRecordTests.Cplx c2[2] = {OperatorRecordTests.Cplx(5, 6), OperatorRecordTests.Cplx(7, 8)};
+ constant OperatorRecordTests.Cplx c3[2] = {OperatorRecordTests.Cplx(6.0, 8.0), OperatorRecordTests.Cplx(10.0, 12.0)};
+ constant OperatorRecordTests.Cplx c4[2] = {OperatorRecordTests.Cplx(6.0, 8.0), OperatorRecordTests.Cplx(10.0, 12.0)};
 
 public
  function OperatorRecordTests.Cplx.'constructor'
@@ -840,7 +838,6 @@ end OperatorRecordTests.OperatorOverload15;
     end OperatorOverload15;
 
 
-// Note: this test gives wrong result due to the bug in #2779
     model OperatorOverload16
         constant Cplx c1 = Cplx(1, 2);
         constant String s1 = String(c1);
@@ -852,7 +849,7 @@ end OperatorRecordTests.OperatorOverload15;
             description="Overloading of String()",
             flatModel="
 fclass OperatorRecordTests.OperatorOverload16
- constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(2, 1);
+ constant OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx(1, 2);
  constant String s1 = \"1.00000 + 2.00000j\";
  constant String s2 = \"1.00000 + 2.00000j\";
 
