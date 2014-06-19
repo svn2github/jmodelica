@@ -73,7 +73,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
 
-        /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->id);*/
+        /*printf("** Computing factorization in jmi_linear_solver_solve for block %s\n",block->label);*/
           /*
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
@@ -82,12 +82,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         memcpy(solver->factorization, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
         if(info) {
             if(block->init) {
-                jmi_log_node(block->log, logError, "Error", "Failed in Jacobian calculation for <block: %d>", 
-                             block->id);
+                jmi_log_node(block->log, logError, "Error", "Failed in Jacobian calculation for <block: %s>", 
+                             block->label);
             }
             else {
-                jmi_log_node(block->log, logWarning, "Warning", "Failed in Jacobian calculation for <block: %d>", 
-                             block->id);
+                jmi_log_node(block->log, logWarning, "Warning", "Failed in Jacobian calculation for <block: %s>", 
+                             block->label);
             }
             return -1;
         }
@@ -107,7 +107,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
 	/* Log the jacobian.*/
 	if((block->callbacks->log_options.log_level >= 5)) {
 		destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
-                                     "Linear solver invoked for <block:%d>", block->id);
+                                     "Linear solver invoked for <block:%s>", block->label);
 		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->jacobian, block->n, block->n);
 	}
 
@@ -120,12 +120,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         dgetrf_(&n_x, &n_x, solver->factorization, &n_x, solver->ipiv, &info);
         if(info) {
             if(block->init) {
-                jmi_log_node(block->log, logError, "SingularJacobianError", "Singular Jacobian detected for <block: %d>", 
-                             block->id);
+                jmi_log_node(block->log, logError, "SingularJacobianErrorrror", "Singular Jacobian detected for <block: %s>", 
+                             block->label);
             }
             else {
-                jmi_log_node(block->log, logWarning, "SingularJacobian", "Singular Jacobian detected for <block: %d> at <t: %f>", 
-                             block->id, block->cur_time);
+                jmi_log_node(block->log, logWarning, "SingularJacobian", "Singular Jacobian detected for <block: %s> at <t: %f>", 
+                             block->label, block->cur_time);
             }
             /* return -1; */
             solver->singular_jacobian = 1;
@@ -148,10 +148,10 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
 		if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
 
         if(block->init) {
-            jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->id);
+            jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %s>", block->label);
         }
         else {
-            jmi_log_node(block->log, logWarning, "Warning", "Failed to evaluate equations in <block: %d>", block->id);
+            jmi_log_node(block->log, logWarning, "Warning", "Failed to evaluate equations in <block: %s>", block->label);
         }
         return -1;
     }
@@ -187,12 +187,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         dgelss_(&n_x, &n_x, &i, solver->jacobian_temp, &n_x, block->res, &n_x ,solver->singular_values, &rcond, &rank, solver->rwork, &iwork, &info);
         
         if(info != 0) {
-            jmi_log_node(block->log, logError, "Error", "DGELSS failed to solve the linear system in <block: %d> with error code <error: %d>", block->id, info);
+            jmi_log_node(block->log, logError, "Error", "DGELSS failed to solve the linear system in <block: %d> with error code <error: %s>", block->label, info);
             return -1;
         }
         
         if(block->callbacks->log_options.log_level >= 5){
-            jmi_log_node(block->log, logInfo, "Info", "Successfully calculated the minimum norm solution to the linear system in <block: %d>", block->id);
+            jmi_log_node(block->log, logInfo, "Info", "Successfully calculated the minimum norm solution to the linear system in <block: %s>", block->label);
         }
     }else{
         /*
@@ -206,7 +206,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     
     if(info) {
         /* can only be "bad param" -> internal error */
-        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d> with <error_code: %d>", block->id, info);
+        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d> with <error_code: %s>", block->label, info);
         return -1;
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {

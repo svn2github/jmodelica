@@ -34,7 +34,7 @@ struct jmi_block_solver_t {
     jmi_block_solver_options_t* options;
     jmi_callbacks_t* callbacks;
     jmi_log_t* log;
-    int id ;
+    jmi_string_t label;
 
     int n;                         /**< \brief The number of iteration variables */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */

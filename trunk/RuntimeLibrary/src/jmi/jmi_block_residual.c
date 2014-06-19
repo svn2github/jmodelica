@@ -137,8 +137,8 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     /* Evaluate switches and non-reals */
     ef = block->F(jmi, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
     if (ef) {
-        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%I> at <t:%E>",
-             block->index, iter, cur_time);
+        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%s, iter:%I> at <t:%E>",
+             block->label, iter, cur_time);
         return jmi_block_solver_status_err_f_eval;
     }
 
@@ -146,7 +146,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     jmi_block_get_sw_nr(block, switches, non_reals);
 
     if(iter >= nbr_allocated_iterations) {
-        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%I> at <t:%E>",block->index, iter, cur_time);
+        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
         block->event_iter = 0;
         return jmi_block_solver_status_event_non_converge;
     }
@@ -162,7 +162,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         } else {
             /* Check for infinite loop */
             if(jmi_check_infinite_loop(block->sw_old, switches, block->n_sw, iter) && jmi_check_infinite_loop(block->nr_old, non_reals, block->n_nr, iter)) {
-                jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%d, iter:%I> at <t:%E>",block->index, iter, cur_time);
+                jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
                 block->event_iter = 0;
                 return jmi_block_solver_status_inf_event_loop;
             }
@@ -232,7 +232,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->value_references = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));
     b->message_buffer = (char*)calloc(n*500+2000,sizeof(char));
 
-    b->options->id = index;
+    b->options->label = label;
     b->options->solver = solver;
     b->options->jacobian_variability = (jmi_block_solver_jac_variability_t)jacobian_variability;
 
@@ -306,8 +306,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 
     {
         jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, "IntegratedSolverSolve",
-                                  "Starting integrated solver at <t:%E> in <block:%d> with <nvars:%d> variables",
-                                  jmi_get_t(jmi)[0], block->block_solver->id, block->block_solver->n);
+                                  "Starting integrated solver at <t:%E> in <block:%s> with <nvars:%d> variables",
+                                  jmi_get_t(jmi)[0], block->block_solver->label, block->block_solver->n);
         ef = jmi_block_solver_solve(block->block_solver,jmi_get_t(jmi)[0],
                  (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) &&
                  (jmi->block_level == 1) && (block->n_nr > 0 || block->n_sw > 0));

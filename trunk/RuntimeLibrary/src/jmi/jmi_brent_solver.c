@@ -41,21 +41,21 @@ int brentf(realtype y, realtype* f, void* problem_data) {
 
     /* Check that arguments are valid */
     if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %d>", block->id);
+        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %s>", block->label);
         return -1;
     }
 
     /*Evaluate the residual*/
     ret = block->F(block->problem_data,&y,f,JMI_BLOCK_EVALUATE);
     if (ret) {
-        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %d>", ret, block->id);
+        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %s>", ret, block->label);
         return ret;
     }
     /* Check that outputs are valid */    
     {
         realtype v = *f;
         if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %d>", block->id);
+            jmi_log_node(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
             ret = 1;
         }
     }
@@ -94,7 +94,7 @@ void jmi_brent_solver_print_solve_start(jmi_block_solver_t * block,
     if ((block->callbacks->log_options.log_level >= 5)) {
         jmi_log_t *log = block->log;
         *destnode = jmi_log_enter_fmt(log, logInfo, "BrentSolve", 
-                                      "Brent solver invoked for <block:%d>", block->id);
+                                      "Brent solver invoked for <block:%s>", block->label);
         jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
         jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
         jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
@@ -174,7 +174,7 @@ static int jmi_brent_try_bracket(jmi_block_solver_t * block,
     }
     else {
         block->x[0] = x_bracket;
-        jmi_log_node(log, logInfo, "Info", "Got zero residual while bracketing in <block: %d>", block->id);
+        jmi_log_node(log, logInfo, "Info", "Got zero residual while bracketing in <block: %s>", block->label);
         return 2;
     }
     return 0; /* will need more bracketing */
@@ -205,8 +205,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         block->F(block->problem_data,block->max,block->res,JMI_BLOCK_MAX);
 
         if (flag) {        
-            jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %d> "
-                         "when reading initial guess.", flag, block->id);
+            jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %s> "
+                         "when reading initial guess.", flag, block->label);
             return flag;
         }
     }
@@ -217,7 +217,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 
     if (flag) {
         jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
-                     "<block: %d>", block->id);
+                     "<block: %s>", block->label);
         return JMI_BRENT_FIRST_SYSFUNC_ERR;
     }
 
@@ -251,10 +251,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     /* there was an error - reduce the step */
                     lstep *= 0.5;
                     jmi_log_node(log, logInfo, "Info", 
-                        "Reducing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
+                        "Reducing bracketing step in negative direction to <lstep: %g> in <block: %s>", lstep, block->label);
                     if ((lstep <= UNIT_ROUNDOFF * block->nominal[0]) || (lower - lstep == lower)) {
                         jmi_log_node(log, logInfo, "Info", 
-                            "Too small bracketing step - modifying lower <bound: %g> on the iteration variable in <block: %d>", lower, block->id);
+                            "Too small bracketing step - modifying lower <bound: %g> on the iteration variable in <block: %s>", lower, block->label);
                         block->min[0] = lower; /* we cannot step further without breaking the function -> update the bound */
                     }
                 }
@@ -264,7 +264,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     lower = tmp;
                     f_lower = f_tmp;
                     jmi_log_node(log, logInfo, "Info", 
-                        "Increasing bracketing step in negative direction to <lstep: %g> in <block: %d>", lstep, block->id);
+                        "Increasing bracketing step in negative direction to <lstep: %g> in <block: %s>", lstep, block->label);
                 }
             }
             else if (upper < block->max[0]) { /* upper might work otherwise */
@@ -283,11 +283,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     /* there was an error - reduce the step */
                     ustep *= 0.5;
                     jmi_log_node(log, logInfo, "Info", 
-                        "Reducing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
+                        "Reducing bracketing step in positive direction to <ustep: %g> in <block: %s>", ustep, block->label);
 
                     if ((ustep <= UNIT_ROUNDOFF * block->nominal[0]) ||  (upper + ustep == upper)) {
                         jmi_log_node(log, logInfo, "Info", 
-                            "Too small bracketing step - modifying upper <bound: %g> on the iteration variable in <block: %d>", upper, block->id);
+                            "Too small bracketing step - modifying upper <bound: %g> on the iteration variable in <block: %s>", upper, block->label);
                         block->max[0] = upper; /* we cannot step further without breaking the function -> update the bound */
                     }
                 }
@@ -297,11 +297,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     upper = tmp;
                     f_upper = f_tmp;
                     jmi_log_node(log, logInfo, "Info", 
-                        "Increasing bracketing step in positive direction to <ustep: %g> in <block: %d>", ustep, block->id);
+                        "Increasing bracketing step in positive direction to <ustep: %g> in <block: %s>", ustep, block->label);
                 }
             }
             else {
-                jmi_log_node(log, logError, "BracketFailed", "Could not bracket the root in <block: %d>", block->id);
+                jmi_log_node(log, logError, "BracketFailed", "Could not bracket the root in <block: %s>", block->label);
                 return JMI_BRENT_ROOT_BRACKETING_FAILED;
             }
             if (flag > 0) { 
@@ -314,7 +314,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         }
     }
     else {
-        jmi_log_node(log, logInfo, "Info", "Initial guess has zero residual in <block: %d>", block->id);
+        jmi_log_node(log, logInfo, "Info", "Initial guess has zero residual in <block: %s>", block->label);
         return JMI_BRENT_SUCCESS;
     }
     if (block->callbacks->log_options.log_level > 4) {
@@ -330,7 +330,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         block->x[0] = u;
         
         if (flag) {
-            jmi_log_node(log, logError, "Error", "Function evaluation failed while iterating in <block: %d>", block->id);
+            jmi_log_node(log, logError, "Error", "Function evaluation failed while iterating in <block: %s>", block->label);
             return JMI_BRENT_SYSFUNC_FAIL;
         }
     }   
