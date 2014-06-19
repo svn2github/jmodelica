@@ -97,28 +97,35 @@ aspect AliasVariables {
 			return (alias.isNegated() != iav.isNegated());
 		}
 	}
-	
-	/**
-	 * Set each attribute of this variable to the most relevant version from the 
-	 * variables of the alias set.
-	 * 
-	 * What is most relevant depends on the attribute, see respective subclass of 
-	 * AliasManager.AttributePropagator.
-	 */
-	public void FVariable.propagateAttributesFromAlias() {
-		AliasManager.AliasSet aliasSet = aliasSet();
-		if (aliasSet != null) {
-			AliasManager.AliasVariable myAv = aliasSet.getIterationVariable();
-			if (myAv.getFVariable() == this) {
-				AliasManager.AttributePropagatorMap map = new AliasManager.AttributePropagatorMap(myAv);
-				for (AliasManager.AliasVariable av : aliasSet) 
-					if (av.getFVariable() != this) 
-						map.addAlias(av);
-				map.propagate();
-			}
-		}
-	}
-		
+
+    /**
+     * Set each attribute of this variable to the most relevant version from the 
+     * variables of the alias set.
+     * 
+     * What is most relevant depends on the attribute, see respective subclass of 
+     * AliasManager.AttributePropagator.
+     */
+    public void FVariable.propagateAttributesFromAlias() {
+        AliasManager.AliasSet aliasSet = aliasSet();
+        if (aliasSet != null) {
+            AliasManager.AliasVariable myAv = aliasSet.getIterationVariable();
+            if (myAv.getFVariable() == this && shouldPropagateAttributesForAlias()) {
+                AliasManager.AttributePropagatorMap map = new AliasManager.AttributePropagatorMap(myAv);
+                for (AliasManager.AliasVariable av : aliasSet) 
+                    if (av.getFVariable() != this) 
+                        map.addAlias(av);
+                map.propagate();
+            }
+        }
+    }
+
+    /**
+     * Should attribute propatation be done for alias sets keeping this variable?
+     * 
+     * Intended to allow extensions to deactivate alias propagation for some variables.
+     */
+    syn boolean FVariable.shouldPropagateAttributesForAlias() = true;
+
 	/**
 	 * \brief An FClass has an alias manager.
 	 */
