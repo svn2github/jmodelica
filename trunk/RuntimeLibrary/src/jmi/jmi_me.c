@@ -650,6 +650,7 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
     }
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        jmi_log_reals(jmi->log, node, logInfo, "Event Indicators", eventIndicators, ni);
         jmi_log_leave(jmi->log, node);
     }
     
