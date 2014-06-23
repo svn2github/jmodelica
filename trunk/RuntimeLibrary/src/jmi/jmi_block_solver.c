@@ -269,7 +269,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         
-        /* if the nominal is outside min-max -> fix it! */
+        /* if the nominal or initial is outside min-max -> fix it! */
         for(i=0; i < block_solver->n; ++i) {
             realtype maxi = block_solver->max[i];
             realtype mini = block_solver->min[i];
@@ -323,6 +323,17 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                     /* take 1.0 as default*/
                     block_solver->nominal[i] = 1.0;
             }
+
+            if ((initi > maxi) || (initi < mini)) {
+                realtype old_initi = initi;
+                initi = initi > maxi ? maxi : mini;
+                block_solver->initial[i] = initi;
+                jmi_log_node(block_solver->log, logWarning, "StartOutOfBounds",
+                             "Start value <start: %g> is not between <min: %g> and <max: %g> "
+                             "for the iteration variable <iv: #r%d#> in <block: %s>. Clamping to <clamped_start: %g>.",
+                             old_initi, mini, maxi, block_solver->value_references[i], block_solver->label, initi);
+            }
+
             if(block_solver->nominal[i] < 0) /* according to spec negative nominal is fine but solver expects positive.*/
                 block_solver->nominal[i] = -block_solver->nominal[i];
             block_solver->x[i] = initi;
