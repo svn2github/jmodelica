@@ -115,22 +115,27 @@ aspect BLT{
             for (Eq e : component) {
                 if (e.getMatching().getVariable().isReal()) {
                     realEquations.add(e);
-                    linear = linear && e.getEquation().checkLinearity(activeVariables);
+                    linear &= e.getEquation().checkLinearity(activeVariables);
                 } else {
                     nonRealEquations.add(e);
                 }
             }
+            boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
             
-            EquationBlock block = null;
+            AbstractEquationBlock block = null;
             if (producer.useTearing() && realEquations.size() > 1) {
                 TornEquationBlock tornBlock = tear(component, producer, options);
                 if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty())
                     block = tornBlock;
             }
             if (block == null) {
-                BiPGraph g = new BiPGraph(nonRealEquations);
-                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(producer, options);
-                block = new EquationBlock(producer, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                if (seb != null && !mixed) {
+                    block = seb;
+                } else {
+                    BiPGraph g = new BiPGraph(nonRealEquations);
+                    Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(producer, options);
+                    block = new EquationBlock(producer, nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                }
             }
             
             if (linear) {
@@ -638,6 +643,8 @@ aspect BLT{
         private Set<FVariable> dependsOnVariables = null; 
         private boolean visited = false;
         private boolean predecessorsSet = false;
+        private FExp[][] jacobian = null;
+        private FTypePrefixVariability variability = FContinuous.instance;
         private final EquationBlockFactory.BlockProducer producer;
         private String label;
         private int sequenceNumber = -1;
@@ -817,10 +824,6 @@ aspect BLT{
          */
         public abstract Collection<FVariable> localUnsolvedVariables();
 
-		public FTypePrefixVariability variability() {
-			return FContinuous.instance;
-		}
-		
 		public Collection<FVariable> inactiveVariables() {
 			java.util.List<FVariable> s = new ArrayList<FVariable>();
 			for (FAbstractEquation e : allEquations()) {
@@ -921,6 +924,43 @@ aspect BLT{
 		
         public SimpleEquationBlock asSimple() {
             throw new UnsupportedOperationException("Unable to convert block of type '" + getClass().getSimpleName() + "' to 'SimpleEquationBlock'!");
+        }
+
+        /**
+         * Returns the jacobian for this block if it has been computed, else null.
+         * 
+         * @return FExp[][] jacobian for this block
+         */
+        public FExp[][] jacobian() {
+            return jacobian;
+        }
+
+        public abstract boolean canComputeJacobian();
+
+        /**
+         * Computes the jacobian for the unsolved part of this block and store
+         * the result. This method should only be called if the block is linear.
+         * This method also computes the variability of the resulting jacobian.
+         */
+        public boolean computeJacobian() {
+            if (!canComputeJacobian())
+                return false;
+            jacobian = computeJacobian(localRealEquations(), localRealVariables());
+            variability = computeVariability(jacobian);
+            return true;
+        }
+
+        /**
+         * Returns true if the block is linear.
+         * 
+         * @return boolean True if linear
+         */
+        public boolean isLinear() {
+            return jacobian != null;
+        }
+
+        public FTypePrefixVariability variability() {
+            return variability;
         }
 
         public final String getLabel() {
@@ -1046,9 +1086,8 @@ aspect BLT{
         private Collection<SimpleEquationBlock> localRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedBlocks_cache = null;
         private Collection<SimpleEquationBlock> localNonRealBlocks_cache = null;
+        private Collection<AbstractEquationBlock> solvedRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedRealBlocks_cache = null;
-        private FExp[][] jacobian = null;
-        private FTypePrefixVariability variability = FContinuous.instance;
 
         protected EquationBlock(EquationBlockFactory.BlockProducer producer) {
             super(producer);
@@ -1064,6 +1103,7 @@ aspect BLT{
             localRealBlocks_cache = null;
             localSolvedBlocks_cache = null;
             localNonRealBlocks_cache = null;
+            solvedRealBlocks_cache = null;
             localSolvedRealBlocks_cache = null;
         }
         
@@ -1090,7 +1130,7 @@ aspect BLT{
         /**
          * Returns all unsolved blocks in this block.
          * 
-         * @return Collection<FAbstractEquation> all sunolved blocks
+         * @return Collection<SimpleEquationBlock> all sunolved blocks
          */
         public Collection<SimpleEquationBlock> unsolvedBlocks() {
             return unsolvedBlocks;
@@ -1099,7 +1139,7 @@ aspect BLT{
         /**
          * Returns all solved blocks in this block.
          * 
-         * @return Collection<FAbstractEquation> all solved blocks
+         * @return Collection<AbstractEquationBlock> all solved blocks
          */
         public Collection<AbstractEquationBlock> solvedBlocks() {
             return solvedBlocks;
@@ -1108,7 +1148,7 @@ aspect BLT{
         /**
          * Returns all real blocks in this block.
          * 
-         * @return Collection<FAbstractEquation> all real blocks
+         * @return Collection<SimpleEquationBlock> all real blocks
          */
         public Collection<SimpleEquationBlock> localRealBlocks() {
             if (localRealBlocks_cache == null) {
@@ -1126,7 +1166,7 @@ aspect BLT{
         /**
          * Returns all local solved blocks in this block.
          * 
-         * @return Collection<FAbstractEquation> all local solved blocks
+         * @return Collection<SimpleEquationBlock> all local solved blocks
          */
         public Collection<SimpleEquationBlock> localSolvedBlocks() {
             if (localSolvedBlocks_cache == null) {
@@ -1139,9 +1179,9 @@ aspect BLT{
         }
         
         /**
-         * Returns all non-real blocks in this block.
+         * Returns all local non-real blocks in this block.
          * 
-         * @return Collection<FAbstractEquation> all non-real blocks
+         * @return Collection<SimpleEquationBlock> all local non-real blocks
          */
         public Collection<SimpleEquationBlock> localNonRealBlocks() {
             if (localNonRealBlocks_cache == null) {
@@ -1159,7 +1199,22 @@ aspect BLT{
         /**
          * Returns all solved real blocks in this block.
          * 
-         * @return Collection<FAbstractEquation> all solved real blocks
+         * @return Collection<AbstractEquationBlock> all solved real blocks
+         */
+        public Collection<AbstractEquationBlock> solvedRealBlocks() {
+            if (solvedRealBlocks_cache == null) {
+                solvedRealBlocks_cache = new ArrayList<AbstractEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (!block.isSimple() || block.asSimple().isReal())
+                        solvedRealBlocks_cache.add(block);
+            }
+            return solvedRealBlocks_cache;
+        }
+
+        /**
+         * Returns all local solved real blocks in this block.
+         * 
+         * @return Collection<SimpleEquationBlock> all solved real blocks
          */
         public Collection<SimpleEquationBlock> localSolvedRealBlocks() {
             if (localSolvedRealBlocks_cache == null) {
@@ -1171,42 +1226,12 @@ aspect BLT{
             return localSolvedRealBlocks_cache;
         }
 
-        /**
-         * Returns the jacobian for this block if it has been computed, else null.
-         * 
-         * @return FExp[][] jacobian for this block
-         */
-        public FExp[][] jacobian() {
-            return jacobian;
-        }
-
+        @Override
         public boolean canComputeJacobian() {
             boolean res = true;
             for (AbstractEquationBlock block : solvedBlocks())
                 res &= block.isSimple();
             return res;
-        }
-
-        /**
-         * Computes the jacobian for the unsolved part of this block and store
-         * the result. This method should only be called if the block is linear.
-         * This method also computes the variability of the resulting jacobian.
-         */
-        public boolean computeJacobian() {
-            if (!canComputeJacobian())
-                return false;
-            jacobian = computeJacobian(localRealEquations(), localRealVariables());
-            variability = computeVariability(jacobian);
-            return true;
-        }
-
-        /**
-         * Returns true if the block is linear.
-         * 
-         * @return boolean True if linear
-         */
-        public boolean isLinear() {
-            return jacobian != null;
         }
 
         /**
@@ -1216,11 +1241,6 @@ aspect BLT{
          */
         public boolean isMixed() {
             return !localNonRealBlocks().isEmpty();
-        }
-
-        @Override
-        public FTypePrefixVariability variability() {
-            return variability;
         }
 
         @Override
@@ -1390,6 +1410,7 @@ aspect BLT{
             }
             if (isLinear()) {
                 str.println("Jacobian:");
+                FExp[][] jacobian = jacobian();
                 for (int col = 0; col < jacobian.length; col++) {
                     str.print("  |");
                     for (int row = 0; row < jacobian.length; row++) {
@@ -1625,6 +1646,10 @@ aspect BLT{
 
         public Collection<Integer> assignedIndices() {
             return null;
+        }
+
+        public boolean canComputeJacobian() {
+            return true;
         }
 
         @Override

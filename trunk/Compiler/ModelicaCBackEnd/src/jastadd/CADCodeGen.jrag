@@ -1142,7 +1142,14 @@ aspect CADCodeGen {
      * @see FAbstractEquation#genBlock_CAD(String, CodeStream, Set<FAbstractEquation>, Set<FVariable>).
      */
     public void SimpleEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, CodeStream str){
-        equation().genBlock_CAD(indent, str, null, allLocalVariables(), assignedIndices());
+        if (getSequenceNumber() >= 0) {
+            String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+            str.format("%sjmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, getSequenceNumber());
+        } else if (genBlockEnabled()) {
+            equation().genBlock_CAD(indent, str, null, allLocalVariables(), assignedIndices());
+        } else {
+            throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName() + " in residual function");
+        }
     }
 
 	/**

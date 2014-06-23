@@ -4929,13 +4929,13 @@ Solution:
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  y()
+  y
 Equations:
   2 / y = x + 3
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  z()
+  z
 Equations:
   x / z = x - y
 -------------------------------
@@ -5053,15 +5053,15 @@ Solution:
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  r.x()
-  r.y()
+  r.x
+  r.y
 Equations:
   (TransformCanonicalTests.BlockTest1.R(r.x, r.y)) = TransformCanonicalTests.BlockTest1.f1(x + r.x)
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  y1()
-  y2()
+  y1
+  y2
 Equations:
   (y1, y2) = TransformCanonicalTests.BlockTest1.f2(x + y1)
 -------------------------------
@@ -5132,23 +5132,23 @@ Solution:
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  r.x()
-  r.y()
+  r.x
+  r.y
 Equations:
   (TransformCanonicalTests.BlockTest2.R(r.x, r.y)) = TransformCanonicalTests.BlockTest2.f1(x + r.x)
 -------------------------------
 Non-solved block of 3 variables:
 Unknown variables:
-  r2.r.x()
-  r2.x()
-  r2.r.y()
+  r2.r.x
+  r2.x
+  r2.r.y
 Equations:
   (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  y1()
-  y2()
+  y1
+  y2
 Equations:
   (y1, y2) = TransformCanonicalTests.BlockTest2.f2(x + y1)
 -------------------------------
@@ -5476,14 +5476,11 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Non-solved linear block of 1 variables:
-Coefficient variability: continuous-time
+Non-solved block of 1 variables:
 Unknown variables:
   x
 Equations:
   12 = if x < 0.5 then 0.5 else x * time
-Jacobian:
-  |- (if x < 0.5 then 0.0 else time)|
 -------------------------------
 ")})));
 end BlockTest11;
