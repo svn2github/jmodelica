@@ -242,7 +242,8 @@ aspect TransformCanonical {
      * Generate a .mof file with the current flat tree.
      */
     public void FClass.generateStepMof(String stepName) {
-        if (root().options.getBooleanOption("log_transformation_steps")) {
+        String value = root().options.getStringOption("debug_transformation_steps");
+        if ("full".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
             String fileName = String.format("%02d_%s.mof", completedTransformationSteps, stepName);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
@@ -250,6 +251,19 @@ aspect TransformCanonical {
             try {
                 CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
+                out.close();
+            } catch (FileNotFoundException e) {
+                log.warning("Failed to write step info to file " + file);
+            }
+        }
+        if ("full".equals(value) || "diag".equals(value)) {
+            TRANSFORMATION_STEP_DIR.mkdir();
+            String fileName = String.format("%02d_%s.txt", completedTransformationSteps, stepName);
+            File file = new File(TRANSFORMATION_STEP_DIR, fileName);
+            log.debug("Writing diag after step " + stepName + " to " + fileName);
+            try {
+                CodeStream out = new CodeStream(file);
+                out.print(modelDiagnostics());
                 out.close();
             } catch (FileNotFoundException e) {
                 log.warning("Failed to write step info to file " + file);

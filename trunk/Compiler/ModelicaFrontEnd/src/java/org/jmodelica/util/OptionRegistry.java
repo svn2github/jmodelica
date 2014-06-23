@@ -355,6 +355,14 @@ abstract public class OptionRegistry {
              compiler, 
              false,
              "Debug option, duplicates generated files to stdout. Default is false."),
+         DEBUG_TRANSFORM_STEPS
+             ("debug_transformation_steps",
+              compiler,
+              "none",
+              "Options for debugging the different transformation steps. If enabled, diagnostics files are written" +
+              " after each transformation step. Allowed values are 'none' (default), 'diag' (only model diagnostics)," +
+              " 'full' (write diagnostics and flat tree).",
+              "none", "diag", "full"),
         RUNTIME_PARAM
             ("generate_runtime_option_parameters",
              compiler,
@@ -379,11 +387,6 @@ abstract public class OptionRegistry {
              "If the option is set to true (default is false), two text files containing tearing pairs" +
              " is written to disk. The files contains the tearing pairs for the DAE and the" +
              "DAE initialization system respectively. The files are outputed to the working directory"),
-        TRANSFORM_STEPS
-            ("log_transformation_steps",
-             compiler,
-             false,
-             "Write flat tree after each transformation step to separate files."),
         CHECK_INACTIVE
             ("check_inactive_contitionals",
              compiler,
