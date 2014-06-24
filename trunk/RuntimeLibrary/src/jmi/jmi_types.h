@@ -45,6 +45,10 @@ typedef int BOOL;
 #define TRUE  1
 #define FALSE 0
 
+#define JMI_REAL    0x00000000
+#define JMI_INTEGER 0x10000000
+#define JMI_BOOLEAN 0x20000000
+
 typedef char jmi_boolean;
 typedef const char* jmi_string;
 

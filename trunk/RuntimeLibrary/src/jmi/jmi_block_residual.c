@@ -133,6 +133,17 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     jmi_real_t* non_reals = &block->nr_old[iter*block->n_nr];
 
     *non_reals_changed_flag = 1;
+    
+    if (iter == 0) {
+        /* Use part of the old vector as temporary storage */
+        pre_switches  = &block->sw_old[(iter + 1)*block->n_sw];
+        pre_non_reals = &block->nr_old[(iter + 1)*block->n_nr];
+        
+        jmi_block_get_sw_nr(block, pre_switches, pre_non_reals);
+    } else {
+        pre_switches  = &block->sw_old[(iter - 1)*block->n_sw];
+        pre_non_reals = &block->nr_old[(iter - 1)*block->n_nr];
+    }
 
     /* Evaluate switches and non-reals */
     ef = block->F(jmi, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
@@ -144,6 +155,36 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
 
     /* Save the current values of the switches and non-reals */
     jmi_block_get_sw_nr(block, switches, non_reals);
+    
+    
+    /* Log updates, NOTE this should in the future also contain which expressions changed! */
+    if (jmi->jmi_callbacks.log_options.log_level >= 5 && (block->n_sw > 0 || block->n_nr > 0)){
+        int i;
+        jmi_log_node_t node;
+        jmi_value_reference type;
+    
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "BlockUpdateOfDiscreteVariables", 
+                            "Block updating of discrete variables");
+        for (i=0;i<block->n_sw; i++) {
+            if (pre_switches[i] != switches[i]) {
+                jmi_log_node(jmi->log, logInfo, "Info", " <switch: %I> <value: %d> ", block->sw_index[i]-jmi->offs_sw, (jmi_int_t)switches[i]);
+            }
+        }
+        for (i=0;i<block->n_nr; i++) {
+            if (pre_non_reals[i] != non_reals[i]) {
+                type = jmi_get_type_from_value_ref(block->nr_vref[i]);
+                
+                if (type == JMI_INTEGER) {
+                        jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <value: %d> ", block->nr_vref[i], (jmi_int_t)non_reals[i]);
+                } else if (type == JMI_BOOLEAN) {
+                        jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <value: %d> ", block->nr_vref[i], (jmi_int_t)non_reals[i]);
+                } else if (type == JMI_REAL) {
+                        jmi_log_node(jmi->log, logInfo, "Info", " <real: #r%d#> <value: %E> ", block->nr_vref[i], non_reals[i]);
+                }
+            }
+        }
+        jmi_log_leave(jmi->log, node);
+    }
 
     if(iter >= nbr_allocated_iterations) {
         jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
@@ -153,8 +194,6 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
 
     /* If it is not the initial update of switches and non-reals, compare switches and non-reals with their previous values */
     if (iter != 0) {
-        pre_switches  = &block->sw_old[(iter - 1)*block->n_sw];
-        pre_non_reals = &block->nr_old[(iter - 1)*block->n_nr];
 
         /* Check for consistency */
         if (jmi_compare_switches(pre_switches, switches, block->n_sw) && jmi_compare_switches(pre_non_reals, non_reals, block->n_nr)) {

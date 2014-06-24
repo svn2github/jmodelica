@@ -679,6 +679,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_real_t* switches;
     jmi_log_node_t top_node;
     jmi_log_node_t iter_node;
+    jmi_log_node_t discrete_node;
 
     /* Used for logging */
     jmi_dae_get_sizes(jmi, &nF, &nR);
@@ -746,10 +747,32 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
          * event_info->iteration_converged to false. */
         event_info->iteration_converged = TRUE; /* Assume the iteration converged */
         
+        /* Log updates, NOTE this should in the future also contain which expressions changed! */
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            discrete_node =jmi_log_enter_fmt(jmi->log, logInfo, "GlobalUpdateOfDiscreteVariables", 
+                                "Global updating of discrete variables");
+        }
+        
         for (i = jmi->offs_real_d; i < jmi->offs_pre_real_dx; i++) {
             if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
                 event_info->iteration_converged = FALSE;
+                
+                /* Extra logging of the discrete variables that has been changed) */
+                if (jmi->jmi_callbacks.log_options.log_level >= 5){
+                    if (i < jmi->offs_boolean_d) {
+                        jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <value: %d> ", jmi_get_value_ref_from_index(i, JMI_INTEGER), (jmi_int_t)z[i]);
+                    } else if (i < jmi->offs_sw) {
+                        jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <value: %d> ", jmi_get_value_ref_from_index(i, JMI_BOOLEAN), (jmi_int_t)z[i]);
+                    } else if (i < jmi->offs_guards) {
+                        jmi_log_node(jmi->log, logInfo, "Info", " <switch: %I> <value: %d> ", i-jmi->offs_sw, (jmi_int_t)z[i]);
+                    }
+                }
             }
+        }
+        
+        /* Close the log node for the discrete variables update */
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            jmi_log_leave(jmi->log, discrete_node);
         }
 
         if (jmi->jmi_callbacks.log_options.log_level >= 5) {

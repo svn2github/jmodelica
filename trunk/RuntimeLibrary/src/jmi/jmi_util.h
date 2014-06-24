@@ -117,8 +117,11 @@ typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief
 
 
 /* Masks for maping vref to indices. */               
-#define VREF_INDEX_MASK 0x0FFFFFFF
-#define VREF_TYPE_MASK 0xF0000000
+#define VREF_INDEX_MASK  0x0FFFFFFF
+#define VREF_TYPE_MASK   0xF0000000
+#define REAL_TYPE_MASK   0x00000000
+#define INT_TYPE_MASK    0x10000000
+#define BOOL_TYPE_MASK   0x20000000
 
 /* These are a temporary remnants of CppAD*/            
 #define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
@@ -1223,6 +1226,15 @@ int jmi_get_index_from_value_ref(int vref);
  * @return Type.
  */
 int jmi_get_type_from_value_ref(int vref);
+
+/**
+ * \brief Translates an index together with a type to a value reference
+ * 
+ * @param index An index in the z-vector
+ * @param type An variable type (JMI_REAL, JMI_INT, ...)
+ * @return Value Reference
+ */
+int jmi_get_value_ref_from_index(int index, jmi_int_t type);
 
 /**
  * \brief Evaluates the directional derivative with the Finite Difference method.

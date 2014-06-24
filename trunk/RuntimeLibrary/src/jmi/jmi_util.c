@@ -1487,6 +1487,21 @@ int jmi_get_type_from_value_ref(int vref) {
     return vref & VREF_TYPE_MASK;
 }
 
+int jmi_get_value_ref_from_index(int index, jmi_int_t type) {
+    /* Translates an index together with a type to a value reference */
+    int valueref = -1;
+    
+    if (type == JMI_REAL) {
+        valueref = REAL_TYPE_MASK+index;
+    }else if (type == JMI_INTEGER) {
+        valueref = INT_TYPE_MASK+index;
+    }else if (type == JMI_BOOLEAN) {
+        valueref = BOOL_TYPE_MASK+index;
+    }
+    
+    return valueref;
+}
+
 /*This function has been used during debugging*/
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
     jmi_real_t h = 0.0001;
