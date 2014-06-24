@@ -2203,8 +2203,8 @@ aspect ConstantEvaluation {
      */
     syn CValue InstComponentDecl.attributeCValueDefault(String name) = CValue.UNKNOWN;
     eq InstPrimitive.attributeCValueDefault(String name) {
-        if (name.equals(FAttribute.FIXED) && !isString())
-            return new CValueBoolean(isConstant() || isParameter());
+        if (name.equals(FAttribute.FIXED))
+            return new CValueBoolean(isConstant() || isParameter() || isString());
         CValue res = attributeCValueDefaultMap().get(name);
         return (res == null) ? CValue.UNKNOWN : res;
     }

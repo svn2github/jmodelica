@@ -730,13 +730,14 @@ aspect InstanceErrorCheck {
     }
 
     syn boolean InstComponentDecl.canEvaluateAsStructural() = true;
-	eq InstAssignable.canEvaluateAsStructural() {
-	    if (!fixedAttributeCValue().reduceBooleanAnd())
-	        return false;
-	    if (hasBindingFExp() && !getBindingFExp().canEvaluateAsStructural())
-	        return false;
-	    return true;
-	}
+    eq InstAssignable.canEvaluateAsStructural() {
+        // TODO: hierarchical check for records?
+        if (isPrimitive() && !fixedAttributeCValue().reduceBooleanAnd())
+            return false;
+        if (hasBindingFExp() && !getBindingFExp().canEvaluateAsStructural())
+            return false;
+        return true;
+    }
     syn boolean FExp.canEvaluateAsStructural() {
         for (FExp n : childFExps())
             if (!n.canEvaluateAsStructural())

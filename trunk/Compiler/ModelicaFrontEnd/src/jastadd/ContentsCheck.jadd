@@ -677,7 +677,8 @@ aspect StructuralParams {
     public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
         if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
             return;
-        if (indices().numElements() > 0 && isPrimitive() && !isString() && !fixedAttributeCValue().reduceBooleanOr()) {
+        // TODO: hierarchical check for records?
+        if (indices().numElements() > 0 && isPrimitive() && !fixedAttributeCValue().reduceBooleanOr()) {
             compliance("Parameters with fixed=false can not be used as structural parameters");
             return;
         }
