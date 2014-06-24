@@ -364,8 +364,6 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         while (1){
             jmi_log_node_t iter_node;
 
-            iter += 1;
-
             iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", "Event iteration <iter:%I> at <t:%E>",
                                           iter, cur_time);
 
@@ -411,6 +409,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             }
 
             jmi_log_leave(log, iter_node);
+            iter += 1;
         }
         
         /* ENHANCED FIXED POINT ITERATION */
@@ -451,8 +450,6 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                                  "jmi_block_solver", block_solver->label, message);
                 }
 
-                iter += 1;
-                
                 h = compute_minimal_step(block_solver, x, x_new, 1e-4);
                 compute_reduced_step(h,x_new,x,x,block_solver->n);
                 jmi_log_reals(log, iter_node, logInfo, "step", &h, 1);
@@ -521,6 +518,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 }
 
                 jmi_log_leave(log, iter_node);
+                iter += 1;                
             }
 
             free(x_new);
