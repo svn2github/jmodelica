@@ -297,7 +297,7 @@ aspect Connections {
             for (ConnectionSetEntry e : this) {
                 if (e.isOutside()) {
                     FExp left = e.createFIdUseExp();
-                    FExp right = createInStreamExp(e);
+                    FExp right = createInStreamExp(e, null);
                     if (right == null) 
                         right = new FIntegerLitExp(0);
                     eqns.add(new FEquation(left, right));
@@ -312,7 +312,7 @@ aspect Connections {
          */
         public FExp createInStreamExp(String name) {
             ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            FExp exp = createInStreamExp(e);
+            FExp exp = createInStreamExp(e, name);
             if (exp == null)
                 exp = new FIdUseExp(name);
             exp.enableStreamsRewrite();
@@ -324,8 +324,12 @@ aspect Connections {
          * 
          * Used for inStream() for inside entries and for additional equations for outside entries.
          * Returns null if there are no contributors, since this is handled differently in the two cases.
+         * 
+         * @param cse   the entry to generate the expression for
+         * @param name  the name of the scalar var to generate the stream access for, 
+         *              of null for the entire array (in scalar case they are equivalent)
          */
-        private FExp createInStreamExp(ConnectionSetEntry cse) {
+        private FExp createInStreamExp(ConnectionSetEntry cse, String name) {
             FExp stream = null;
             FExp sum = null;
             FExp div = null;
@@ -335,7 +339,7 @@ aspect Connections {
                 if (cse != e && (ignoreMinMax || e.contributesToStream())) {
                     numContributors++;
                     FExp flow = e.createFlowFIdUseExp();
-                    stream = e.createFIdUseExp();
+                    stream = (name == null) ? e.createFIdUseExp() : e.createFIdUseExp(name, cse);
                     if (e.isOutside()) 
                         stream = new FInStream(stream);
                     else
