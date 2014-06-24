@@ -2086,12 +2086,41 @@ aspect ConstantEvaluation {
                 if (!bexp.type().isUnknown())
                     val = bexp.ceval(func ? i : Index.NULL);
             } else if (!func && !inRecordDecl()) {
-                val = startAttributeCValue();
+                val = cevalNoBExp();
             }
             if (!func)
                 evaluationValue = val;
         }
         return val;
+    }
+    
+    
+    syn CValue InstComponentDecl.cevalNoBExp() {
+        if (isArray()) {
+            CValueArray a = new CValueArray(new Size(myDimensionLength()));
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                a.addCell(icd.cevalNoBExp());
+            }
+            return a;
+        } else {
+            return cevalNoBExpScalar();
+        }
+    }
+    syn CValue InstComponentDecl.cevalNoBExpScalar() = CValue.UNKNOWN;
+    eq InstPrimitive.cevalNoBExpScalar() = startAttributeCValue();
+    eq InstRecord.cevalNoBExpScalar()  = cevalNoBExpCell(allInstComponentDecls());
+    eq InstArrayComponentDecl.cevalNoBExpScalar() = instComponentDecl().cevalNoBExpCell(allInstComponentDecls());
+    
+    syn CValue InstComponentDecl.cevalNoBExpCell(Iterable<InstComponentDecl> icds) 
+        = CValue.UNKNOWN;
+    eq InstPrimitive.cevalNoBExpCell(Iterable<InstComponentDecl> icds) 
+        = icds.iterator().next().ceval();
+    eq InstRecord.cevalNoBExpCell(Iterable<InstComponentDecl> icds) {
+        CValueRecord rec = new CValueRecord(myInstClass().recordType());
+        for (InstComponentDecl icd : icds) {
+            rec.setMember(icd.name(), icd.ceval());
+        }
+        return rec;
     }
 
 	// Can never be an array - assume i == Index.NULL

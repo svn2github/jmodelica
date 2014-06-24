@@ -2067,7 +2067,8 @@ aspect InstArrays {
 	/**
 	 * \brief Find the length of the dimension corresponding to this InstArrayComponentDecl.
 	 */
-	syn int InstArrayComponentDecl.myDimensionLength() = dimensionLength(0);
+	syn int InstComponentDecl.myDimensionLength() = size().get(0);
+	eq InstArrayComponentDecl.myDimensionLength() = dimensionLength(0);
 	
 	/**
 	 * \brief Find the length of the dimension corresponding to the level under 

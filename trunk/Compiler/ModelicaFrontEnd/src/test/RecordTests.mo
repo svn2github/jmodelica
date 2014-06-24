@@ -270,6 +270,104 @@ end RecordTests.RecordFlat7;
 ")})));
 end RecordFlat7;
 
+model RecordFlat8
+  record R
+    Integer x;
+  end R;
+
+  constant R r(x=12);
+  R r2 = r;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat8",
+            description="Flattening records with modifiers.",
+            flatModel="
+fclass RecordTests.RecordFlat8
+ constant RecordTests.RecordFlat8.R r(x=12) = RecordTests.RecordFlat8.R(12);
+ discrete RecordTests.RecordFlat8.R r2 = RecordTests.RecordFlat8.R(12);
+
+public
+ record RecordTests.RecordFlat8.R
+  discrete Integer x;
+ end RecordTests.RecordFlat8.R;
+
+end RecordTests.RecordFlat8;
+")})));
+end RecordFlat8;
+
+model RecordFlat9
+    record A
+      Real x;
+    end A;
+    
+    record B
+      extends A;
+      Real y;
+    end B;
+    
+    constant B b(y=2);
+    B b2 = b;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat9",
+            description="Flattening records with modifiers.",
+            flatModel="
+fclass RecordTests.RecordFlat9
+ constant RecordTests.RecordFlat9.B b(y=2) = RecordTests.RecordFlat9.B(2, 0.0);
+ RecordTests.RecordFlat9.B b2 = RecordTests.RecordFlat9.B(2, 0.0);
+
+public
+ record RecordTests.RecordFlat9.B
+  Real x;
+  Real y;
+ end RecordTests.RecordFlat9.B;
+
+end RecordTests.RecordFlat9;
+")})));
+end RecordFlat9;
+
+model RecordFlat10
+    model R1
+        function f
+            input R2 r2;
+            output Real x = r2.xx;
+          algorithm
+        end f;
+        parameter R2 r2;
+        final parameter Real x = f(r2) annotation(Evaluate=true);
+    end R1;
+    record R2
+        Real x;
+        Real xx = x;
+    end R2;
+    parameter R1 r(r2(x=3));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat10",
+            description="Flattening records with modifiers.",
+            flatModel="
+fclass RecordTests.RecordFlat10
+ parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ parameter Real r.x = 3 /* 3 */;
+
+public
+ function RecordTests.RecordFlat10.r.f
+  input RecordTests.RecordFlat10.R2 r2;
+  output Real x := r2.xx;
+ algorithm
+  return;
+ end RecordTests.RecordFlat10.r.f;
+
+ record RecordTests.RecordFlat10.R2
+  Real x;
+  Real xx = x;
+ end RecordTests.RecordFlat10.R2;
+
+end RecordTests.RecordFlat10;
+")})));
+end RecordFlat10;
 
 
 model RecordType1
@@ -1141,7 +1239,7 @@ model RecordArray6
 			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordArray6
- constant RecordTests.RecordArray6.A b[2,2];
+ constant RecordTests.RecordArray6.A b[2,2] = {{RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}, {RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}};
  constant RecordTests.RecordArray6.A c[2,2] = {{RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}, {RecordTests.RecordArray6.A(0.0, 0.0, 0.0), RecordTests.RecordArray6.A(0.0, 0.0, 0.0)}};
 
 public
@@ -1174,7 +1272,7 @@ model RecordArray7
             flatModel="
 fclass RecordTests.RecordArray7
  parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, {1, 2}) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
  Real y[2] = {1.0, 2.0};
 
 public

@@ -335,8 +335,7 @@ end ArrayTests.General.ArrayTest95;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest10
- parameter Integer n;
-
+ parameter Integer n = 0 /* 0 */;
 end ArrayTests.General.ArrayTest10;
 ")})));
    end ArrayTest10;

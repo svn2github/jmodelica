@@ -883,7 +883,7 @@ model FunctionEval25
 			flatModel="
 fclass EvaluationTests.FunctionEval25
  Real x = EvaluationTests.FunctionEval25.f(ones(3));
- parameter Integer n = EvaluationTests.FunctionEval25.f(ones(4)) /* 6 */;
+ parameter Integer n = 6 /* 6 */;
  Real z[6];
 
 public
@@ -1262,8 +1262,8 @@ model EvalColonSizeCell
             flatModel="
 fclass EvaluationTests.EvalColonSizeCell
  parameter Real a[1] = {1} /* { 1 } */;
- parameter Real b[2] = EvaluationTests.EvalColonSizeCell.f({1.0});
- parameter Real c[1] = if 0.5 > 0.1 then {1} else {0} /* { 1 } */;
+ parameter Real b[2] = {0.5, 1.5} /* { 0.5, 1.5 } */;
+ parameter Real c[1] = {1} /* { 1 } */;
 
 public
  function EvaluationTests.EvalColonSizeCell.f
@@ -1398,11 +1398,11 @@ fclass EvaluationTests.ParameterEvalAnnotation3
  constant Real c[1] = 1;
  constant Real c[2] = 2;
  parameter Real x[1] = 3 /* 3 */;
- parameter Real x[2] = 6.0 /* 6.0 */;
- parameter Real y[1] = 7.0 /* 7.0 */;
- parameter Real y[2] = 14.0 /* 14.0 */;
- parameter Real z[1] = 14.0 /* 14.0 */;
- parameter Real z[2] = 28.0 /* 28.0 */;
+ parameter Real x[2] = 6 /* 6 */;
+ parameter Real y[1] = 7 /* 7 */;
+ parameter Real y[2] = 14 /* 14 */;
+ parameter Real z[1] = 14 /* 14 */;
+ parameter Real z[2] = 28 /* 28 */;
 end EvaluationTests.ParameterEvalAnnotation3;
 ")})));
 end ParameterEvalAnnotation3;

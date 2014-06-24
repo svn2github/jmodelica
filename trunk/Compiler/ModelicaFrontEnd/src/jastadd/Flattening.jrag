@@ -989,18 +989,18 @@ aspect Flattening {
 	}
 	
 	public FExp InstAssignable.flattenBindingFExp() {
-		if (hasInstValueMod()) {
-            InstValueModification im = myInstValueMod();
-            try {
-                if (variability().constantVariability()) {
-                    return getBindingFExp().ceval().buildLiteral();
-                }
-            } catch (ConstantEvaluationException e) {
-                
+        try {
+            if (variability().structuralOrLess()) {
+                return ceval().buildLiteral();
             }
+        } catch (ConstantEvaluationException e) {
+            
+        }
+        if (hasInstValueMod()) {
+            InstValueModification im = myInstValueMod();
             return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
-		}
-		return null;
+        }
+        return null;
 	}
 		
 	

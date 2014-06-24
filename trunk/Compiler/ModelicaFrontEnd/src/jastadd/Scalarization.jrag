@@ -379,7 +379,7 @@ aspect Scalarization {
 			FExp nbexp = null;
 			Index nbi = Index.NULL;
 			if (bexp != null) {
-				nbexp = bexp.scalarRecordFExp(emptyIndexMap, new FQNameString(comp.name()));
+				nbexp = bexp.extractRecordCell(emptyIndexMap, comp.name());
 			} else {
 				ArrayList<BindingExpSource> foundAttr = new ArrayList<BindingExpSource>();
 				String cName = comp.name();

@@ -2036,7 +2036,7 @@ end ArrayCat2;
 
 
 model ArrayCat3
- parameter String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
+ String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -2044,7 +2044,7 @@ model ArrayCat3
 			description="cat() operator: using strings",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat3
- parameter String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
+ discrete String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
 
 end ArrayBuiltins.Cat.ArrayCat3;
 ")})));
@@ -2753,7 +2753,7 @@ model NdimsStructural1
 fclass ArrayBuiltins.NdimsStructural1
  Real x[1,1];
  Real y = 1 + p2[1:1] * p3[1:1];
- parameter Integer p1 = ndims(p3[1:1]) /* 1 */;
+ parameter Integer p1 = 1 /* 1 */;
  parameter Real p2[1] = {1} /* { 1 } */;
  parameter Real p3[1] = {2} /* { 2 } */;
 end ArrayBuiltins.NdimsStructural1;

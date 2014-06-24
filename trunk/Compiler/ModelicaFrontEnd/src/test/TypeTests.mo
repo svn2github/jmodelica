@@ -776,7 +776,7 @@ model ParameterStart1
 			description="Constant without binding expression: start set",
 			flatModel="
 fclass TypeTests.ParameterStart1
- constant Real p(start = 2);
+ constant Real p(start = 2) = 2;
  constant Real y = 2.0;
 end TypeTests.ParameterStart1;
 ")})));
@@ -793,7 +793,7 @@ model ParameterStart2
 			description="Constant without binding expression: start not set",
 			flatModel="
 fclass TypeTests.ParameterStart2
- constant Real p;
+ constant Real p = 0.0;
  constant Real y = 0.0;
 end TypeTests.ParameterStart2;
 ")})));
