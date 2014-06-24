@@ -1095,15 +1095,6 @@ aspect FlatNames {
     eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
     /**
-     * Gets the last name part. Considers FQNameString as having one part for each '.'-separated substring.
-     */
-    syn String FQName.firstActualPartName() = partName(0);
-    eq FQNameString.firstActualPartName() {
-        int pos = getName().indexOf('.');
-        return pos == -1 ? getName() : getName().substring(0, pos);
-    }
-
-    /**
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */
     syn String FQName.prefixActualPartName();
@@ -1585,19 +1576,32 @@ aspect FlatNames {
     /**
      * Create a copy of the name, with a prefix added to the first name part.
      */
-    public abstract FQName FQName.copyAndAddPrefix(String prefix);
+    public FQName FQName.copyAndAddPrefix(String prefix) {
+        return copyAndAddPrefix(prefix, false);
+    }
     
-    public FQNameString FQNameEmpty.copyAndAddPrefix(String prefix) {
+    
+    public abstract FQName FQName.copyAndAddPrefix(String prefix, boolean removeUnderscore);
+    
+    public FQNameString FQNameEmpty.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
         throw new UnsupportedOperationException();
     }
     
-    public FQNameString FQNameString.copyAndAddPrefix(String prefix) {
-        return new FQNameString(prefix + getName());
+    public FQNameString FQNameString.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
+        String name = getName();
+        if (removeUnderscore && name.startsWith("_")) {
+            name = name.substring(1);
+        }
+        return new FQNameString(prefix + name);
     }
     
-    public FQNameFull FQNameFull.copyAndAddPrefix(String prefix) {
+    public FQNameFull FQNameFull.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
     	FQNameFull res = fullCopy();
-    	res.getFQNamePart(0).setName(prefix + res.getFQNamePart(0).getName());
+    	String name = res.getFQNamePart(0).getName();
+        if (removeUnderscore && name.startsWith("_")) {
+            name = name.substring(1);
+        }
+    	res.getFQNamePart(0).setName(prefix + name);
         return res;
     }
     

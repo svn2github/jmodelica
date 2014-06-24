@@ -211,17 +211,8 @@ aspect IndexReduction {
      * part. This function is used in functions, instead of createDerPrefixedName(int).
      */
     public FQName FQName.createDerPrefixedFunctionName(int order) {
-        FQName suf = copySuffix();
-        String name = firstActualPartName();
-        if (name.startsWith("_"))
-            name = name.substring(1);
-        name = createDerPrefixString(order) + name;
-        FQName der = suf.copyAndPrepend(name);
-        if (hasFArraySubscripts())
-            der = der.copyAndAddFas(getFArraySubscripts().fullCopy());
-        der = der.asFQNameFull();
-        der.scalarized = true;
-        return der;
+        String prefix = createDerPrefixString(order);
+        return copyAndAddPrefix(prefix, true);
     }
     
     public static final int BiPGraph.MAX_N_EQ_DIFFS = 5;

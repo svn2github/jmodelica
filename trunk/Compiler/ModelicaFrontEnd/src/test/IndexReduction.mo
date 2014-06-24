@@ -3318,6 +3318,63 @@ end IndexReduction.AlgorithmDifferentiation.InitArray;
 ")})));
 end InitArray;
 
+model RecordArray
+    record R
+        Real x;
+    end R;
+    function F
+        input R[1] x;
+        output R[1] y;
+    algorithm
+        y := x;
+        annotation(Inline=false, smoothOrder=3);
+    end F;
+    function e
+        input R[:] r;
+        output Real y = r[1].x;
+        algorithm
+    end e;
+    Real x1;
+    Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + e(F({R(x2)})) = 1;
+            
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="AlgorithmDifferentiation_RecordArray",
+            description="Test code gen of differentiated function with array of records #3611",
+            template="$C_functions$",
+            generatedCode="
+void func_IndexReduction_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 1, 1, 1)
+        y_a = y_an;
+    }
+    jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_IndexReduction_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_ra* x_a, R_0_ra* _der_x_a, R_0_ra* _der_y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
+    JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
+    if (_der_y_a == NULL) {
+        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
+        _der_y_a = _der_y_an;
+    }
+    jmi_array_rec_1(_der_y_a, 1)->x = jmi_array_rec_1(_der_x_a, 1)->x;
+    jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end RecordArray;
+
 model While
   function F
     input Real x;
