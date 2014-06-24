@@ -298,7 +298,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         for (i = 0; i < block->n_nr; i++) {
             block->nr_vref[i] =  (jmi_int_t)nr_vref_tmp[i];
             /* Get index for non-reals from their valuereference */
-            block->nr_index[i] = get_index_from_value_ref(block->nr_index[i]);
+            block->nr_index[i] = get_index_from_value_ref(block->nr_vref[i]);
         }
         free(nr_vref_tmp);
         free(sw_index_tmp);
