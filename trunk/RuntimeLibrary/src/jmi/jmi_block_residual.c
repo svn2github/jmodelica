@@ -305,8 +305,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     }
 
     {
-        jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, "IntegratedSolverSolve",
-                                  "Starting integrated solver at <t:%E> in <block:%s> with <nvars:%d> variables",
+        jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, "SolverInvocation",
+                                  "Starting solver at <t:%E> in <block:%s> with <nvars:%d> variables",
                                   jmi_get_t(jmi)[0], block->block_solver->label, block->block_solver->n);
         ef = jmi_block_solver_solve(block->block_solver,jmi_get_t(jmi)[0],
                  (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) &&
