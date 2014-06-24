@@ -552,6 +552,9 @@ aspect FlatTypeAnalysis {
 		if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims())
 			return fUnknownType();
 
+        if (thenType.equivalentTo(elseType))
+            return thenType.typePromotion(elseType);
+
 		if (isParameterIf()) {
 			try {
 				FExp sel = cevalSelectExp();
