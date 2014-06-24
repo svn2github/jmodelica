@@ -2085,27 +2085,27 @@ end ConnectorTest;
 
 
 model StreamTest1
-	connector A
-		Real a;
-		flow Real b;
-		stream Real c;
-		stream Real d;
-	end A;
-	
-	model B
-		A e;
-		A f;
-	equation
-		connect(e,f);
-	end B;
-	
-	B g;
+    connector A
+        Real a;
+        flow Real b;
+        stream Real c;
+        stream Real d;
+    end A;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="StreamTest1",
-			description="Stream variables: basic test",
-			flatModel="
+    model B
+        A e;
+        A f;
+    equation
+        connect(e,f);
+    end B;
+    
+    B g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="StreamTest1",
+            description="Stream variables: basic test",
+            flatModel="
 fclass ConnectTests.StreamTest1
  Real g.e.a;
  Real g.e.b;
@@ -2118,6 +2118,10 @@ fclass ConnectTests.StreamTest1
 equation
  g.e.a = g.f.a;
  - g.e.b - g.f.b = 0;
+ g.e.c = inStream(g.f.c);
+ g.f.c = inStream(g.e.c);
+ g.e.d = inStream(g.f.d);
+ g.f.d = inStream(g.e.d);
  g.e.b = 0;
  g.f.b = 0;
 end ConnectTests.StreamTest1;
@@ -2126,32 +2130,32 @@ end StreamTest1;
 
 
 model StreamTest2
-	connector A
-		Real a;
-		flow Real b;
-		stream Real c;
-		stream Real d;
-	end A;
-	
-	model B
-		A e;
-		A f;
-		Real x;
-		Real y;
+    connector A
+        Real a;
+        flow Real b;
+        stream Real c;
+        stream Real d;
+    end A;
 
-	equation
-         	x = inStream(e.c);
-	        y = actualStream(e.c);
-		connect(e,f);
-	end B;
-	
-	B g;
+    model B
+        A e;
+        A f;
+        Real x;
+        Real y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="StreamTest2",
-			description="Basic test of inStream() and actualStream()",
-			flatModel="
+    equation
+        x = inStream(e.c);
+        y = actualStream(e.c);
+        connect(e,f);
+    end B;
+    
+    B g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="StreamTest2",
+            description="Basic test of inStream() and actualStream()",
+            flatModel="
 fclass ConnectTests.StreamTest2
  Real g.e.a;
  Real g.e.b;
@@ -2168,6 +2172,10 @@ equation
  g.y = actualStream(g.e.c);
  g.e.a = g.f.a;
  - g.e.b - g.f.b = 0;
+ g.e.c = inStream(g.f.c);
+ g.f.c = inStream(g.e.c);
+ g.e.d = inStream(g.f.d);
+ g.f.d = inStream(g.e.d);
  g.e.b = 0;
  g.f.b = 0;
 end ConnectTests.StreamTest2;

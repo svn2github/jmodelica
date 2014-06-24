@@ -673,23 +673,23 @@ aspect StructuralParams {
 	public void InstComponentDecl.markAsStructuralParameter(ErrorCheckType checkType) {
 		// TODO: should probably do something constructive here?
 	}
-	
-	public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
-		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
-			return;
-		if (indices().numElements() > 0 && !fixedAttributeCValue().reduceBooleanOr()) {
-		    compliance("Parameters with fixed=false can not be marked as structural parameter");
-		    return;
-		}
-		isStructuralParam = true;
-		// Flush cache for variability()
-		variability_computed = false;
-		if (hasBindingFExp()) {
-			FExp e = getBindingFExp();
-			if (!checkType.allowConstantNoValue() && !e.canCeval())
-				compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
-			e.markUsesAsStructuralParameter(checkType);
-		}
-	}
-	
+
+    public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
+        if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
+            return;
+        if (indices().numElements() > 0 && isPrimitive() && !isString() && !fixedAttributeCValue().reduceBooleanOr()) {
+            compliance("Parameters with fixed=false can not be used as structural parameters");
+            return;
+        }
+        isStructuralParam = true;
+        // Flush cache for variability()
+        variability_computed = false;
+        if (hasBindingFExp()) {
+            FExp e = getBindingFExp();
+            if (!checkType.allowConstantNoValue() && !e.canCeval())
+                compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
+            e.markUsesAsStructuralParameter(checkType);
+        }
+    }
+
 }

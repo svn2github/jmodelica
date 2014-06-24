@@ -259,69 +259,6 @@ end StreamTests.StreamTest6;
   end StreamTest7;
 
 
-// This is actually a compliance error but is kept here in order to avoid copying dependent classes.
-model StreamComplErr1
-Reservoir r1;
-Reservoir r2;
-Reservoir r3;
-
-LinearResistance res1;
-LinearResistance res2;
-LinearResistance res3;
-
-equation 
-connect(r1.fluidPort,res1.port_a);
-connect(res1.port_b,res2.port_a);
-connect(res1.port_b,res3.port_a);
-connect(res2.port_b,r2.fluidPort);
-connect(res3.port_b,r3.fluidPort);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="StreamComplErr1",
-			description="Compliance error for stream connections with more than two connectors",
-			errorMessage="
-Error: in file 'StreamTests.StreamComplErr1.mof':
-Compliance error at line 0, column 0:
-  Stream connections with more than two connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
-")})));
-end StreamComplErr1;
-
-
-model StreamComplErr2
-	model A
-		FluidPort p(h_outflow(start = 1));
-		Real x, y, z;
-	equation
-		x = y + 1 - z;
-		y = x + inStream(p.h_outflow) + 1;
-		x = 1*y + z;
-		p.p = time;
-		inStream(p.h_outflow) = p.p + 3;
-	end A;
-	
-	FluidPort p1, p2;
-	A a;
-equation
-	connect(p1, p2);
-	connect(p1, a.p);
-	p1.h_outflow = 1 / time;
-	p2.h_outflow = 1 - 1/time;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="StreamComplErr2",
-			description="Too many stream connectors in set, with inStream() used in linear equation system",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/StreamTests.mo':
-Compliance error at line 0, column 0:
-  Stream connections with more than two connectors are not supported: Connection set (stream): {a.p.h_outflow (i), p1.h_outflow (o), p2.h_outflow (o)}
-
-")})));
-end StreamComplErr2;
-
-    
 model StreamMinMax1
     Reservoir r[3](fluidPort(m_flow(min={-1,0,1})));
     LinearResistance l[3];
@@ -509,5 +446,907 @@ end StreamTests.StreamMinMax2;
 ")})));
 end StreamMinMax2;
 
+
+
+connector StreamConnector
+    Real p;
+    flow Real f;
+    stream Real s;
+end StreamConnector;
+
+
+model StreamN1M0
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a(c(s=1, p=2));
+	Real x = inStream(a.c.s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN1M0",
+            description="Test stream connectors connected N=1, M=0",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN1M0
+ Real a.c.p;
+ Real a.c.f;
+ Real a.c.s;
+ Real x;
+equation
+ a.c.f = 0;
+ a.c.p = 2;
+ a.c.s = 1;
+ x = a.c.s;
+end StreamTests.StreamN1M0;
+")})));
+end StreamN1M0;
+
+
+model StreamN2M0
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=2));
+    A a2(c(s=3, f=time - 1));
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+equation
+	connect(a1.c, a2.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN2M0",
+            description="Test stream connectors connected N=2, M=0",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN2M0
+ Real a1.c.p;
+ Real a1.c.f;
+ Real a1.c.s;
+ Real a2.c.p;
+ Real a2.c.f;
+ Real a2.c.s;
+ Real x1;
+ Real x2;
+equation
+ a1.c.f + a2.c.f = 0;
+ a1.c.p = a2.c.p;
+ a1.c.p = 2;
+ a1.c.s = 1;
+ a2.c.f = time - 1;
+ a2.c.s = 3;
+ x1 = a2.c.s;
+ x2 = a1.c.s;
+end StreamTests.StreamN2M0;
+")})));
+end StreamN2M0;
+
+
+model StreamN1M1
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a(c(s=1, p=2));
+    StreamConnector c;
+    Real x1 = inStream(a.c.s);
+    Real x2 = inStream(c.s);
+equation
+    connect(a.c, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN1M1",
+            description="Test stream connectors connected N=1, M=1",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN1M1
+ Real a.c.p;
+ Real a.c.f;
+ Real a.c.s;
+ Real c.p;
+ Real c.f;
+ Real c.s;
+ Real x1;
+ Real x2;
+equation
+ a.c.f - c.f = 0;
+ a.c.p = c.p;
+ c.s = a.c.s;
+ c.f = 0;
+ a.c.p = 2;
+ a.c.s = 1;
+ x1 = c.s;
+ x2 = c.s;
+end StreamTests.StreamN1M1;
+")})));
+end StreamN1M1;
+
+
+model StreamN0M2
+    model A
+        StreamConnector c1;
+        StreamConnector c2;
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+    equation
+        connect(c1, c2);
+    end A;
+    
+    model B
+        StreamConnector c3(p = 5, f = 6, s = 3);
+        StreamConnector c4(s = 4);
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c3);
+    connect(a.c2, b.c4);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN0M2",
+            description="Test stream connectors connected N=0, M=2",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN0M2
+ Real a.c1.p;
+ Real a.c1.f;
+ Real a.c1.s;
+ Real a.c2.p;
+ Real a.c2.f;
+ Real a.c2.s;
+ Real a.x1;
+ Real a.x2;
+ Real b.c3.p;
+ Real b.c3.f;
+ Real b.c3.s;
+ Real b.c4.p;
+ Real b.c4.f;
+ Real b.c4.s;
+equation
+ a.c1.f + b.c3.f = 0;
+ a.c1.p = b.c3.p;
+ a.c2.f + b.c4.f = 0;
+ a.c2.p = b.c4.p;
+ - a.c1.f - a.c2.f = 0;
+ a.c1.p = a.c2.p;
+ a.c1.s = b.c4.s;
+ a.c2.s = b.c3.s;
+ a.x1 = b.c3.s;
+ a.x2 = b.c4.s;
+ b.c3.p = 5;
+ b.c3.f = 6;
+ b.c3.s = 3;
+ b.c4.s = 4;
+end StreamTests.StreamN0M2;
+")})));
+end StreamN0M2;
+
+
+model StreamN3M0
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=4, f=time));
+    A a2(c(s=2, f=time-1));
+    A a3(c(s=3));
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+    Real x3 = inStream(a3.c.s);
+equation
+    connect(a1.c, a2.c);
+    connect(a1.c, a3.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN3M0",
+            description="Test stream connectors connected N=3, M=0",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN3M0
+ Real a1.c.p;
+ Real a1.c.f;
+ Real a1.c.s;
+ Real a2.c.p;
+ Real a2.c.f;
+ Real a2.c.s;
+ Real a3.c.p;
+ Real a3.c.f;
+ Real a3.c.s;
+ Real x1;
+ Real x2;
+ Real x3;
+equation
+ a1.c.f + a2.c.f + a3.c.f = 0;
+ a1.c.p = a2.c.p;
+ a2.c.p = a3.c.p;
+ a1.c.p = 4;
+ a1.c.f = time;
+ a1.c.s = 1;
+ a2.c.f = time - 1;
+ a2.c.s = 2;
+ a3.c.s = 3;
+ x1 = (max(- a2.c.f, 1.0E-8) * a2.c.s + max(- a3.c.f, 1.0E-8) * a3.c.s) / (max(- a2.c.f, 1.0E-8) + max(- a3.c.f, 1.0E-8));
+ x2 = (max(- a1.c.f, 1.0E-8) * a1.c.s + max(- a3.c.f, 1.0E-8) * a3.c.s) / (max(- a1.c.f, 1.0E-8) + max(- a3.c.f, 1.0E-8));
+ x3 = (max(- a1.c.f, 1.0E-8) * a1.c.s + max(- a2.c.f, 1.0E-8) * a2.c.s) / (max(- a1.c.f, 1.0E-8) + max(- a2.c.f, 1.0E-8));
+end StreamTests.StreamN3M0;
+")})));
+end StreamN3M0;
+
+
+model StreamN2M1
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=4));
+    A a2(c(s=2));
+    StreamConnector c;
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+    Real x3 = inStream(c.s);
+equation
+    connect(a1.c, a2.c);
+    connect(a1.c, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="StreamN2M1",
+            description="Test stream connectors connected N=2, M=1",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN2M1
+ Real a1.c.p = 4;
+ Real a1.c.f;
+ Real a1.c.s = 1;
+ Real a2.c.p;
+ Real a2.c.f;
+ Real a2.c.s = 2;
+ Real c.p;
+ Real c.f;
+ Real c.s;
+ Real x1 = inStream(a1.c.s);
+ Real x2 = inStream(a2.c.s);
+ Real x3 = inStream(c.s);
+equation
+ a1.c.f + a2.c.f - c.f = 0;
+ a1.c.p = a2.c.p;
+ a2.c.p = c.p;
+ c.s = (max(- a1.c.f, 1.0E-8) * a1.c.s + max(- a2.c.f, 1.0E-8) * a2.c.s) / (max(- a1.c.f, 1.0E-8) + max(- a2.c.f, 1.0E-8));
+ c.f = 0;
+end StreamTests.StreamN2M1;
+")})));
+end StreamN2M1;
+
+
+model StreamN1M2
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a(c(s=1, p=2));
+    StreamConnector c1;
+    StreamConnector c2;
+    Real x1 = inStream(a.c.s);
+    Real x2 = inStream(c1.s);
+    Real x3 = inStream(c2.s);
+equation
+    connect(a.c, c1);
+    connect(a.c, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="StreamN1M2",
+            description="Test stream connectors connected N=1, M=2",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN1M2
+ Real a.c.p = 2;
+ Real a.c.f;
+ Real a.c.s = 1;
+ Real c1.p;
+ Real c1.f;
+ Real c1.s;
+ Real c2.p;
+ Real c2.f;
+ Real c2.s;
+ Real x1 = inStream(a.c.s);
+ Real x2 = inStream(c1.s);
+ Real x3 = inStream(c2.s);
+equation
+ a.c.f - c1.f - c2.f = 0;
+ a.c.p = c1.p;
+ c1.p = c2.p;
+ c1.s = (max(- a.c.f, 1.0E-8) * a.c.s + max(c2.f, 1.0E-8) * inStream(c2.s)) / (max(- a.c.f, 1.0E-8) + max(c2.f, 1.0E-8));
+ c2.s = (max(- a.c.f, 1.0E-8) * a.c.s + max(c1.f, 1.0E-8) * inStream(c1.s)) / (max(- a.c.f, 1.0E-8) + max(c1.f, 1.0E-8));
+ c1.f = 0;
+ c2.f = 0;
+end StreamTests.StreamN1M2;
+")})));
+end StreamN1M2;
+
+
+model StreamN0M3
+    model A
+        StreamConnector c1;
+        StreamConnector c2;
+        StreamConnector c3;
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    equation
+        connect(c1, c2);
+        connect(c1, c3);
+    end A;
+    
+    model B
+        StreamConnector c4(p = 7, f = 8, s = 4);
+        StreamConnector c5(s = 5);
+        StreamConnector c6(s = 6, f = 9);
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c4);
+    connect(a.c2, b.c5);
+    connect(a.c3, b.c6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN0M3",
+            description="Test stream connectors connected N=0, M=3",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN0M3
+ Real a.c1.p;
+ Real a.c1.f;
+ Real a.c1.s;
+ Real a.c2.p;
+ Real a.c2.f;
+ Real a.c2.s;
+ Real a.c3.p;
+ Real a.c3.f;
+ Real a.c3.s;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real b.c4.p;
+ Real b.c4.f;
+ Real b.c4.s;
+ Real b.c5.p;
+ Real b.c5.f;
+ Real b.c5.s;
+ Real b.c6.p;
+ Real b.c6.f;
+ Real b.c6.s;
+equation
+ a.c1.f + b.c4.f = 0;
+ a.c1.p = b.c4.p;
+ a.c2.f + b.c5.f = 0;
+ a.c2.p = b.c5.p;
+ a.c3.f + b.c6.f = 0;
+ a.c3.p = b.c6.p;
+ - a.c1.f - a.c2.f - a.c3.f = 0;
+ a.c1.p = a.c2.p;
+ a.c2.p = a.c3.p;
+ a.c1.s = (max(a.c2.f, 1.0E-8) * b.c5.s + max(a.c3.f, 1.0E-8) * b.c6.s) / (max(a.c2.f, 1.0E-8) + max(a.c3.f, 1.0E-8));
+ a.c2.s = (max(a.c1.f, 1.0E-8) * b.c4.s + max(a.c3.f, 1.0E-8) * b.c6.s) / (max(a.c1.f, 1.0E-8) + max(a.c3.f, 1.0E-8));
+ a.c3.s = (max(a.c1.f, 1.0E-8) * b.c4.s + max(a.c2.f, 1.0E-8) * b.c5.s) / (max(a.c1.f, 1.0E-8) + max(a.c2.f, 1.0E-8));
+ a.x1 = b.c4.s;
+ a.x2 = b.c5.s;
+ a.x3 = b.c6.s;
+ b.c4.p = 7;
+ b.c4.f = 8;
+ b.c4.s = 4;
+ b.c5.s = 5;
+ b.c6.f = 9;
+ b.c6.s = 6;
+end StreamTests.StreamN0M3;
+")})));
+end StreamN0M3;
+
+
+model StreamN2M2
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=4, f=time));
+    A a2(c(s=2));
+    StreamConnector c1;
+    StreamConnector c2;
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+    Real x3 = inStream(c1.s);
+    Real x4 = inStream(c2.s);
+equation
+    connect(a1.c, a2.c);
+    connect(a1.c, c1);
+    connect(a1.c, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamN2M2",
+            description="Test stream connectors connected N=2, M=2",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamN2M2
+ Real a1.c.p;
+ Real a1.c.f;
+ Real a1.c.s;
+ Real a2.c.p;
+ Real a2.c.f;
+ Real a2.c.s;
+ Real c1.p;
+ Real c1.f;
+ Real c1.s;
+ Real c2.p;
+ Real c2.f;
+ Real c2.s;
+ Real x1;
+ Real x2;
+ Real x3;
+ Real x4;
+equation
+ a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.p = a2.c.p;
+ a2.c.p = c1.p;
+ c1.p = c2.p;
+ c1.s = (max(- a1.c.f, 1.0E-8) * a1.c.s + max(- a2.c.f, 1.0E-8) * a2.c.s + max(c2.f, 1.0E-8) * c2.s) / (max(- a1.c.f, 1.0E-8) + max(- a2.c.f, 1.0E-8) + max(c2.f, 1.0E-8));
+ c2.s = (max(- a1.c.f, 1.0E-8) * a1.c.s + max(- a2.c.f, 1.0E-8) * a2.c.s + max(c1.f, 1.0E-8) * c1.s) / (max(- a1.c.f, 1.0E-8) + max(- a2.c.f, 1.0E-8) + max(c1.f, 1.0E-8));
+ c1.f = 0;
+ c2.f = 0;
+ a1.c.p = 4;
+ a1.c.f = time;
+ a1.c.s = 1;
+ a2.c.s = 2;
+ x1 = (max(- a2.c.f, 1.0E-8) * a2.c.s + max(c1.f, 1.0E-8) * c1.s + max(c2.f, 1.0E-8) * c2.s) / (max(- a2.c.f, 1.0E-8) + max(c1.f, 1.0E-8) + max(c2.f, 1.0E-8));
+ x2 = (max(- a1.c.f, 1.0E-8) * a1.c.s + max(c1.f, 1.0E-8) * c1.s + max(c2.f, 1.0E-8) * c2.s) / (max(- a1.c.f, 1.0E-8) + max(c1.f, 1.0E-8) + max(c2.f, 1.0E-8));
+ x3 = c1.s;
+ x4 = c2.s;
+end StreamTests.StreamN2M2;
+")})));
+end StreamN2M2;
+
+
+model StreamMinMax3
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=4, f(min=1) = time+1));
+    A a2(c(s=2, f(min=-1)));
+    StreamConnector c1(f(max=-1));
+    StreamConnector c2(f(max=1));
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+equation
+    connect(a1.c, a2.c);
+    connect(a1.c, c1);
+    connect(a1.c, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamMinMax3",
+            description="Test stream connectors connected N=2, M=2, with min/max limiting which connectors contribute",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamMinMax3
+ Real a1.c.p;
+ Real a1.c.f(min = 1);
+ Real a1.c.s;
+ Real a2.c.p;
+ Real a2.c.f(min = - 1);
+ Real a2.c.s;
+ Real c1.p;
+ Real c1.f(max = - 1);
+ Real c1.s;
+ Real c2.p;
+ Real c2.f(max = 1);
+ Real c2.s;
+ Real x1;
+ Real x2;
+equation
+ a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.p = a2.c.p;
+ a2.c.p = c1.p;
+ c1.p = c2.p;
+ c1.s = (max(- a2.c.f, 1.0E-8) * a2.c.s + max(c2.f, 1.0E-8) * c2.s) / (max(- a2.c.f, 1.0E-8) + max(c2.f, 1.0E-8));
+ c2.s = a2.c.s;
+ c1.f = 0;
+ c2.f = 0;
+ a1.c.p = 4;
+ a1.c.f = time + 1;
+ a1.c.s = 1;
+ a2.c.s = 2;
+ x1 = (max(- a2.c.f, 1.0E-8) * a2.c.s + max(c2.f, 1.0E-8) * c2.s) / (max(- a2.c.f, 1.0E-8) + max(c2.f, 1.0E-8));
+ x2 = c2.s;
+end StreamTests.StreamMinMax3;
+")})));
+end StreamMinMax3;
+
+
+model StreamMinMax4
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=4, f(min=1) = time+1));
+    A a2(c(s=2, f(min=-1)));
+    StreamConnector c1(f(max=-1));
+    StreamConnector c2(f(max=-1));
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+equation
+    connect(a1.c, a2.c);
+    connect(a1.c, c1);
+    connect(a1.c, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamMinMax4",
+            description="Test stream connectors connected N=2, M=2, with min/max limiting which connectors contribute",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamMinMax4
+ Real a1.c.p;
+ Real a1.c.f(min = 1);
+ Real a1.c.s;
+ Real a2.c.p;
+ Real a2.c.f(min = - 1);
+ Real a2.c.s;
+ Real c1.p;
+ Real c1.f(max = - 1);
+ Real c1.s;
+ Real c2.p;
+ Real c2.f(max = - 1);
+ Real c2.s;
+ Real x1;
+ Real x2;
+equation
+ a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.p = a2.c.p;
+ a2.c.p = c1.p;
+ c1.p = c2.p;
+ c1.s = a2.c.s;
+ c2.s = a2.c.s;
+ c1.f = 0;
+ c2.f = 0;
+ a1.c.p = 4;
+ a1.c.f = time + 1;
+ a1.c.s = 1;
+ a2.c.s = 2;
+ x1 = a2.c.s;
+ x2 = a2.c.s;
+end StreamTests.StreamMinMax4;
+")})));
+end StreamMinMax4;
+
+
+model StreamMinMax5
+    model A
+        StreamConnector c;
+    end A;
+    
+    A a1(c(s=1, p=4, f(min=1) = time+1));
+    A a2(c(s=2, f(min=1)));
+    StreamConnector c1(f(max=-1));
+    StreamConnector c2(f(max=1));
+    Real x1 = inStream(a1.c.s);
+    Real x2 = inStream(a2.c.s);
+equation
+    connect(a1.c, a2.c);
+    connect(a1.c, c1);
+    connect(a1.c, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamMinMax5",
+            description="Test stream connectors connected N=2, M=2, with min/max limiting which connectors contribute",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamMinMax5
+ Real a1.c.p;
+ Real a1.c.f(min = 1);
+ Real a1.c.s;
+ Real a2.c.p;
+ Real a2.c.f(min = 1);
+ Real a2.c.s;
+ Real c1.p;
+ Real c1.f(max = - 1);
+ Real c1.s;
+ Real c2.p;
+ Real c2.f(max = 1);
+ Real c2.s;
+ Real x1;
+ Real x2;
+equation
+ a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.p = a2.c.p;
+ a2.c.p = c1.p;
+ c1.p = c2.p;
+ c1.s = c2.s;
+ c2.s = 0;
+ c1.f = 0;
+ c2.f = 0;
+ a1.c.p = 4;
+ a1.c.f = time + 1;
+ a1.c.s = 1;
+ a2.c.s = 2;
+ x1 = c2.s;
+ x2 = c2.s;
+end StreamTests.StreamMinMax5;
+")})));
+end StreamMinMax5;
+
+
+model StreamNominal1
+    model A
+        StreamConnector c1(f(nominal=0.1));
+        StreamConnector c2;
+        StreamConnector c3(f(nominal=2));
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    equation
+        connect(c1, c2);
+        connect(c1, c3);
+    end A;
+    
+    model B
+        StreamConnector c4(p = 7, f = 8, s = 4);
+        StreamConnector c5(s = 5);
+        StreamConnector c6(s = 6, f = 9);
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c4);
+    connect(a.c2, b.c5);
+    connect(a.c3, b.c6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamNominal1",
+            description="Test affect on inStream() from nomainals on flow vars",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamNominal1
+ Real a.c1.p;
+ Real a.c1.f(nominal = 0.1);
+ Real a.c1.s;
+ Real a.c2.p;
+ Real a.c2.f;
+ Real a.c2.s;
+ Real a.c3.p;
+ Real a.c3.f(nominal = 2);
+ Real a.c3.s;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real b.c4.p;
+ Real b.c4.f;
+ Real b.c4.s;
+ Real b.c5.p;
+ Real b.c5.f;
+ Real b.c5.s;
+ Real b.c6.p;
+ Real b.c6.f;
+ Real b.c6.s;
+equation
+ a.c1.f + b.c4.f = 0;
+ a.c1.p = b.c4.p;
+ a.c2.f + b.c5.f = 0;
+ a.c2.p = b.c5.p;
+ a.c3.f + b.c6.f = 0;
+ a.c3.p = b.c6.p;
+ - a.c1.f - a.c2.f - a.c3.f = 0;
+ a.c1.p = a.c2.p;
+ a.c2.p = a.c3.p;
+ a.c1.s = (max(a.c2.f, 1.0E-9) * b.c5.s + max(a.c3.f, 1.0E-9) * b.c6.s) / (max(a.c2.f, 1.0E-9) + max(a.c3.f, 1.0E-9));
+ a.c2.s = (max(a.c1.f, 1.0E-9) * b.c4.s + max(a.c3.f, 1.0E-9) * b.c6.s) / (max(a.c1.f, 1.0E-9) + max(a.c3.f, 1.0E-9));
+ a.c3.s = (max(a.c1.f, 1.0E-9) * b.c4.s + max(a.c2.f, 1.0E-9) * b.c5.s) / (max(a.c1.f, 1.0E-9) + max(a.c2.f, 1.0E-9));
+ a.x1 = b.c4.s;
+ a.x2 = b.c5.s;
+ a.x3 = b.c6.s;
+ b.c4.p = 7;
+ b.c4.f = 8;
+ b.c4.s = 4;
+ b.c5.s = 5;
+ b.c6.f = 9;
+ b.c6.s = 6;
+end StreamTests.StreamNominal1;
+")})));
+end StreamNominal1;
+
+
+model StreamNominal2
+    model A
+        StreamConnector c1(f(nominal=10));
+        StreamConnector c2(f(nominal=10));
+        StreamConnector c3(f(nominal=2));
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    equation
+        connect(c1, c2);
+        connect(c1, c3);
+    end A;
+    
+    model B
+        StreamConnector c4(p = 7, f = 8, s = 4);
+        StreamConnector c5(s = 5);
+        StreamConnector c6(s = 6, f = 9);
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c4);
+    connect(a.c2, b.c5);
+    connect(a.c3, b.c6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamNominal2",
+            description="Test affect on inStream() from nomainals on flow vars",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamNominal2
+ Real a.c1.p;
+ Real a.c1.f(nominal = 10);
+ Real a.c1.s;
+ Real a.c2.p;
+ Real a.c2.f(nominal = 10);
+ Real a.c2.s;
+ Real a.c3.p;
+ Real a.c3.f(nominal = 2);
+ Real a.c3.s;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real b.c4.p;
+ Real b.c4.f;
+ Real b.c4.s;
+ Real b.c5.p;
+ Real b.c5.f;
+ Real b.c5.s;
+ Real b.c6.p;
+ Real b.c6.f;
+ Real b.c6.s;
+equation
+ a.c1.f + b.c4.f = 0;
+ a.c1.p = b.c4.p;
+ a.c2.f + b.c5.f = 0;
+ a.c2.p = b.c5.p;
+ a.c3.f + b.c6.f = 0;
+ a.c3.p = b.c6.p;
+ - a.c1.f - a.c2.f - a.c3.f = 0;
+ a.c1.p = a.c2.p;
+ a.c2.p = a.c3.p;
+ a.c1.s = (max(a.c2.f, 2.0E-8) * b.c5.s + max(a.c3.f, 2.0E-8) * b.c6.s) / (max(a.c2.f, 2.0E-8) + max(a.c3.f, 2.0E-8));
+ a.c2.s = (max(a.c1.f, 2.0E-8) * b.c4.s + max(a.c3.f, 2.0E-8) * b.c6.s) / (max(a.c1.f, 2.0E-8) + max(a.c3.f, 2.0E-8));
+ a.c3.s = (max(a.c1.f, 2.0E-8) * b.c4.s + max(a.c2.f, 2.0E-8) * b.c5.s) / (max(a.c1.f, 2.0E-8) + max(a.c2.f, 2.0E-8));
+ a.x1 = b.c4.s;
+ a.x2 = b.c5.s;
+ a.x3 = b.c6.s;
+ b.c4.p = 7;
+ b.c4.f = 8;
+ b.c4.s = 4;
+ b.c5.s = 5;
+ b.c6.f = 9;
+ b.c6.s = 6;
+end StreamTests.StreamNominal2;
+")})));
+end StreamNominal2;
+
+
+model StreamAttributesOnType
+    connector StreamConnector2 = StreamConnector(f(nominal=2,max=-1));
+
+    model A
+        StreamConnector c1(f(nominal=10));
+        StreamConnector c2(f(nominal=10));
+        StreamConnector2 c3;
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    equation
+        connect(c1, c2);
+        connect(c1, c3);
+    end A;
+    
+    model B
+        StreamConnector c4(p = 7, f = 8, s = 4);
+        StreamConnector c5(s = 5);
+        StreamConnector c6(s = 6, f = 9);
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c4);
+    connect(a.c2, b.c5);
+    connect(a.c3, b.c6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamAttributesOnType",
+            description="Test that attributes on types affect generation of stream equations",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.StreamAttributesOnType
+ Real a.c1.p;
+ Real a.c1.f(nominal = 10);
+ Real a.c1.s;
+ Real a.c2.p;
+ Real a.c2.f(nominal = 10);
+ Real a.c2.s;
+ Real a.c3.p;
+ Real a.c3.f(nominal = 2,max = - 1);
+ Real a.c3.s;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real b.c4.p;
+ Real b.c4.f;
+ Real b.c4.s;
+ Real b.c5.p;
+ Real b.c5.f;
+ Real b.c5.s;
+ Real b.c6.p;
+ Real b.c6.f;
+ Real b.c6.s;
+equation
+ a.c1.f + b.c4.f = 0;
+ a.c1.p = b.c4.p;
+ a.c2.f + b.c5.f = 0;
+ a.c2.p = b.c5.p;
+ a.c3.f + b.c6.f = 0;
+ a.c3.p = b.c6.p;
+ - a.c1.f - a.c2.f - a.c3.f = 0;
+ a.c1.p = a.c2.p;
+ a.c2.p = a.c3.p;
+ a.c1.s = b.c5.s;
+ a.c2.s = b.c4.s;
+ a.c3.s = (max(a.c1.f, 2.0E-8) * b.c4.s + max(a.c2.f, 2.0E-8) * b.c5.s) / (max(a.c1.f, 2.0E-8) + max(a.c2.f, 2.0E-8));
+ a.x1 = b.c4.s;
+ a.x2 = b.c5.s;
+ a.x3 = b.c6.s;
+ b.c4.p = 7;
+ b.c4.f = 8;
+ b.c4.s = 4;
+ b.c5.s = 5;
+ b.c6.f = 9;
+ b.c6.s = 6;
+end StreamTests.StreamAttributesOnType;
+")})));
+end StreamAttributesOnType;
+
+
+// TODO: Add error tests (e.g. stream connector without flow)
 
 end StreamTests;

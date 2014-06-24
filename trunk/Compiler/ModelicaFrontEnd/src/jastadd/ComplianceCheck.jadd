@@ -289,17 +289,8 @@ aspect ComplianceCheck {
 			warning("The variable " + name + " is declared multiple times and can not " +
 			        "be verified to be identical to other declaration(s) with the same name.");
 		}
+	}
 
-	}
-	
-	public void FClass.checkUnsupportedStreamConnections() {
-		for (ConnectionSet cse : getConnectionSetManager().getConnectionSetList()) {
-			if (cse.numStreamVariables() > 2) {
-				compliance("Stream connections with more than two connectors are not supported: " + cse);
-			}
-		}
-	}
-	
     public void InstComposite.complianceCheck(ErrorCheckType checkType) {
         if (isFunctionalArg())
             compliance("Using functional input arguments is currently not supported");

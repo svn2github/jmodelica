@@ -54,43 +54,27 @@ aspect Connections {
 		for (ASTNode n : this)
 			n.enableStreamsRewrite();
 	}
-    
-    public void FClass.enableStreamsRewrite() {
-        checkUnsupportedStreamConnections();
-        super.enableStreamsRewrite();
-    }
-	
-	public void FStreamBuiltIn.enableStreamsRewrite() {
-		super.enableStreamsRewrite();
-		rewriteStreams = true;
-		is$Final = false;
-	}
-	
-	protected boolean FStreamBuiltIn.rewriteStreams = false;
 
-	
-	/**
-	 * \brief Rewrite the inSteam operator to equations. 
-	 */
-	rewrite FInStream {
-		when (rewriteStreams) to FExp {
-			// Always look for an inside occurrance of the stream variable.
-			// If the variable is in an inside-inside connection, then
-			// rewrite to an access. If it occurs in an inside-outside connection
-			// rewrite to a new inStream operator operating on the outside
-			// stream variable in the same connection set.
-			String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
-			ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
-			if (cs.canCreateInStreamExp()) {
-				return cs.createInStreamExp(name);
-			} else {
-			    // An error has been generated for this case
-				this.rewriteStreams = false;
-				return this;
-			}
-		}
-	}
-	
+    public void FStreamBuiltIn.enableStreamsRewrite() {
+        super.enableStreamsRewrite();
+        rewriteStreams = true;
+        is$Final = false;
+    }
+
+    protected boolean FStreamBuiltIn.rewriteStreams = false;
+
+    /**
+     * \brief Rewrite the inSteam operator to equations. 
+     */
+    rewrite FInStream {
+        when (rewriteStreams) to FExp {
+            // Always create expression from the connection set where the variable is an inside connector. 
+            String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
+            ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
+            return cs.createInStreamExp(name);
+        }
+    }
+
 	/**
 	 * Check if this expression is multiplied with the given variable.
 	 */
@@ -293,63 +277,110 @@ aspect Connections {
         }
 
 	}
-	
-	public class StreamConnectionSet extends ConnectionSet {
-		
-		public StreamConnectionSet(ConnectionSetEntry e) {
-			super(e);
-		}
-		
-		public String typeString() {
-			return "stream";
-		}
 
-		public void generateEquations(List<FAbstractEquation> eqns) {
-			// If the connection set has two member one being inside
-			// and one being outside an additional equation should
-			// be generated.
-			if (size() == 2 && first().isOutside() != last().isOutside()) {
-				FExp e1 = first().createFIdUseExp();
-				FExp e2 = last().createFIdUseExp();
-				eqns.add(new FEquation(e1, e2));
-			}
-		}
-		
-		/**
-		 * Check if a rewrite expression can be generated for an inStream() on a variable in this set.
-		 */
-		public boolean canCreateInStreamExp() {
-			return size() <= 2 && getNumInside() >= 1;
-		}
-		
-		/**
-		 * Create rewrite expression for an inStream() on a variable in this set.
-		 * 
-		 * @param name  the name of the variable to generate name for
-		 */
-		public FExp createInStreamExp(String name) {
-			int N = getNumInside(); // # of inside
-			if (size() == 1)
-				return new FIdUseExp(name);
-			boolean inFirst = first().equals(name, false);
-			ConnectionSetEntry containing = inFirst ? first() : last();
-			ConnectionSetEntry select;
-			int nOutside = getNumOutside();
-			if (nOutside == 1)
-				select = first().isOutside() ? first() : last();
-			else
-				select = inFirst ? last() : first();
-			FExp res = select.createFIdUseExp(name, containing);
-			if (nOutside == 1) {
-				FInStream fis = new FInStream(res);
-				fis.rewriteStreams = true;
-				res = fis;
-			}
-			return res;
-		}
-		
-	}
-	
+    public class StreamConnectionSet extends ConnectionSet {
+
+        private double eps = Double.MAX_VALUE;
+
+        public StreamConnectionSet(ConnectionSetEntry e) {
+            super(e);
+        }
+
+        public String typeString() {
+            return "stream";
+        }
+
+        public void generateEquations(List<FAbstractEquation> eqns) {
+            for (ConnectionSetEntry e : this)
+                eps = Math.min(e.flowEps(), eps);
+            
+            for (ConnectionSetEntry e : this) {
+                if (e.isOutside()) {
+                    FExp left = e.createFIdUseExp();
+                    FExp right = createInStreamExp(e);
+                    if (right == null) 
+                        right = new FIntegerLitExp(0);
+                    eqns.add(new FEquation(left, right));
+                }
+            }
+        }
+
+        /**
+         * Create rewrite expression for an inStream() on a variable in this set.
+         * 
+         * @param name  the name of the variable to generate name for
+         */
+        public FExp createInStreamExp(String name) {
+            ConnectionSetEntry e = getConnectionSetEntry(name, false);
+            FExp exp = createInStreamExp(e);
+            if (exp == null)
+                exp = new FIdUseExp(name);
+            exp.enableStreamsRewrite();
+            return exp;
+        }
+
+        /**
+         * Create an expression for the inStream() of the given entry.
+         * 
+         * Used for inStream() for inside entries and for additional equations for outside entries.
+         * Returns null if there are no contributors, since this is handled differently in the two cases.
+         */
+        private FExp createInStreamExp(ConnectionSetEntry cse) {
+            FExp stream = null;
+            FExp sum = null;
+            FExp div = null;
+            int numContributors = 0;
+            final boolean ignoreMinMax = size() == 2;
+            for (ConnectionSetEntry e : this) {
+                if (cse != e && (ignoreMinMax || e.contributesToStream())) {
+                    numContributors++;
+                    FExp flow = e.createFlowFIdUseExp();
+                    stream = e.createFIdUseExp();
+                    if (e.isOutside()) 
+                        stream = new FInStream(stream);
+                    else
+                        flow = new FNegExp(flow);
+                    FExp divP = new FMaxExp(flow, new Opt(new FRealLitExp(eps)));
+                    FExp sumP = new FMulExp(divP.fullCopy(), stream);
+                    if (sum == null) {
+                        sum = sumP;
+                        div = divP;
+                    } else {
+                        sum = new FAddExp(sum, sumP);
+                        div = new FAddExp(div, divP);
+                    }
+                }
+            }
+            
+            if (numContributors < 2) 
+                return stream;
+            else 
+                return new FDivExp(sum, div);
+        }
+
+    }
+
+    /**
+     * Find the flow variable corresponding to this stream variable.
+     * 
+     * Only valid for stream variables.
+     */
+    inh InstComponentDecl InstComponentDecl.myFlowVar();
+    eq InstComponentDecl.getChild().myFlowVar() = isConnector() ? findFlowVar() : null;
+    eq InstClassDecl.getChild().myFlowVar()     = isConnector() ? findFlowVar() : null;
+    eq InstRoot.getChild().myFlowVar()          = null;
+    eq Root.getChild().myFlowVar()              = null;
+
+    /**
+     * Find the first flow variable in this node, if any.
+     */
+    syn InstComponentDecl InstNode.findFlowVar() {
+        for (InstComponentDecl icd : allInstComponentDecls())
+            if (icd.isFlow())
+                return icd;
+        return null;
+    }
+
 	public class PotentialConnectionSet extends ConnectionSet {
 		
 		public PotentialConnectionSet(ConnectionSetEntry e) {
@@ -422,16 +453,16 @@ aspect Connections {
             }
         }
 
-		public void addInsideFlowVar(InstComponentDecl var, FQName name) {
-			addVar(new ConnectionSetEntry(var, false, name));
-		}
-		
-		public void addExpandableArrayMember(InstComponentDecl var, FQName name) {
-		    // If var is present as inner, don't add it as outer
-		    if (getConnectionSet(new ConnectionSetEntry(var, false, name)) == null)
-		        addVar(new ConnectionSetEntry(var, true, name));
-		}
-		
+        public void addInsideFlowVar(InstComponentDecl var, FQName name) {
+            addVar(ConnectionSetEntry.create(var, false, name));
+        }
+
+        public void addExpandableArrayMember(InstComponentDecl var, FQName name) {
+            // If var is present as inner, don't add it as outer
+            if (getConnectionSet(ConnectionSetEntry.create(var, false, name)) == null)
+                addVar(ConnectionSetEntry.create(var, true, name));
+        }
+
 		/**
 		 * Add vars to connection sets.
 		 * 
@@ -550,106 +581,110 @@ aspect Connections {
 		}
 	}
 
-	
-	public class ConnectionSetEntry implements Comparable<ConnectionSetEntry> {
-	
-		private InstComponentDecl cd;
-		private boolean outside;
-		private boolean stream;
-		private boolean flow;
-		private FQName fqName;
-		private String prefix;
-		private String str;
-		private String[] scalarNames;
-		
-		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
-			//log.debug("Created ConnectionSetEntry: " + cd.name());
-		    if (cd.inOrIsOuter()) {
-		        cd = cd.myInnerInstComponentDecl();
-		        fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
-		    }
-			this.cd = cd;
-			this.outside = outside;
-			this.fqName = fqName;
-			prefix = null;
-			flow = cd.isFlow();
-			stream = cd.isStream();
-		}
-		
-		public void disconnectFromInstanceTree() {
-			cd = null;
-		}
-	
-		public boolean isOutside() {
-			return outside;
-		}
 
-		public boolean isInside() {
-			return !outside;
-		}
+    public class ConnectionSetEntry implements Comparable<ConnectionSetEntry> {
 
-		public InstComponentDecl getVar() {
-			return cd;
-		}
-		
-		public boolean isFlow() {
-			return flow;
-		}
+        private InstComponentDecl cd;
+        private boolean outside;
+        private FQName fqName;
+        private String prefix;
+        private String str;
+        private String[] scalarNames;
 
-		public boolean isStream() {
-			return stream;
-		}
-		
-		public String name() {
-		   return fqName.name();
-		}
-		
-		public String prefix() {
-			if (prefix == null) 
-				prefix = fqName.copyPrefix().name();
-			return prefix;
-		}
-		
-		public boolean equals(String name, boolean outside) {
-			if (outside != this.outside)
-				return false;
-			if (scalarNames != null) {
-				for (String scalarName : scalarNames)
-					if (name.equals(scalarName))
-						return true;
-				return false;
-			} else {
-				return name.equals(name());
-			}
-		}
-		
-		public String toString() {
-			if (str == null)
-				str = fqName + (outside ? " (o)" : " (i)");
-			return str;
-		}
-		
-		public FQName getFQName() {
-			return fqName;
-		}
+        public static ConnectionSetEntry create(InstComponentDecl cd, boolean outside, FQName fqName) {
+            if (cd.isFlow()) 
+                return new FlowConnectionSetEntry(cd, outside, fqName);
+            if (cd.isStream()) 
+                return new StreamConnectionSetEntry(cd, outside, fqName);
+            return new ConnectionSetEntry(cd, outside, fqName);
+        }
 
-		public FExp createFIdUseExp() {
-			return fqName.createFIdUseExp();
-		}
+        private ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
+            //log.debug("Created ConnectionSetEntry: " + cd.name());
+            if (cd.inOrIsOuter()) {
+                cd = cd.myInnerInstComponentDecl();
+                fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
+            }
+            this.cd = cd;
+            this.outside = outside;
+            this.fqName = fqName;
+            prefix = null;
+        }
 
-		/**
-		 * Create an FIdUseExp that is an access to a variable in this entry, that is connected to 
-		 * the variable named <code>name</code> in <code>other</code>.
-		 */
-		public FExp createFIdUseExp(String name, ConnectionSetEntry other) {
-			if (other == this)
-				return new FIdUseExp(name); 
-			if (scalarNames == null || other.scalarNames == null)
-				return createFIdUseExp();
-			int i;
-			for (i = 0; i < other.scalarNames.length && !other.scalarNames[i].equals(name); i++);
-			return (i < scalarNames.length) ? new FIdUseExp(scalarNames[i]) : createFIdUseExp();
-		}
+        public void disconnectFromInstanceTree() {
+            cd = null;
+        }
+
+        public boolean isOutside() {
+            return outside;
+        }
+
+        public boolean isInside() {
+            return !outside;
+        }
+
+        public InstComponentDecl getVar() {
+            return cd;
+        }
+
+        public boolean isFlow() {
+            return false;
+        }
+
+        public boolean isStream() {
+            return false;
+        }
+
+        public String name() {
+           return fqName.name();
+        }
+
+        public String prefix() {
+            if (prefix == null) 
+                prefix = fqName.copyPrefix().name();
+            return prefix;
+        }
+
+        public boolean equals(String name, boolean outside) {
+            if (outside != this.outside)
+                return false;
+            if (scalarNames != null) {
+                for (String scalarName : scalarNames)
+                    if (name.equals(scalarName))
+                        return true;
+                return false;
+            } else {
+                return name.equals(name());
+            }
+        }
+
+        public String toString() {
+            if (str == null)
+                str = fqName + (outside ? " (o)" : " (i)");
+            return str;
+        }
+
+        public FQName getFQName() {
+            return fqName;
+        }
+
+        public FExp createFIdUseExp() {
+            return fqName.createFIdUseExp();
+        }
+
+        /**
+         * Create an FIdUseExp that is an access to a variable in this entry, that is connected to 
+         * the variable named <code>name</code> in <code>other</code>.
+         */
+        public FExp createFIdUseExp(String name, ConnectionSetEntry other) {
+            if (other == this)
+                return new FIdUseExp(name); 
+            if (scalarNames == null || other.scalarNames == null)
+                return createFIdUseExp();
+            int i;
+            for (i = 0; i < other.scalarNames.length && !other.scalarNames[i].equals(name); i++);
+            return (i < scalarNames.length) ? new FIdUseExp(scalarNames[i]) : createFIdUseExp();
+        }
 
         /**
          * Create an access to the var of this entry and add or subtract it to/from e.
@@ -660,30 +695,108 @@ aspect Connections {
             return createFIdUseExp().appendSum(e, outside, cd.type());
         }
 
-		public int hashCode() {
-			return toString().hashCode();
-		}
-		
-		/**
-		 * Create a new connection set entry referring to a specific cell of the variable this refers to.
-		 * 
-		 * Assumes that the variable is an array and that <code>i</code> is suitable.
-		 */
-		public ConnectionSetEntry specifyCell(Index i) {
-		    return new ConnectionSetEntry(cd.findCell(i, 0), outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
-		}
-		
-		public boolean equals(Object o) {
-			return o instanceof ConnectionSetEntry && toString().equals(o.toString());
-		}
-	
-		public int compareTo(ConnectionSetEntry cse) {
-			return toString().compareTo(cse.toString());
-		}
-	
-	}
-	
-	
+        public int hashCode() {
+            return toString().hashCode();
+        }
+
+        /**
+         * Create a new connection set entry referring to a specific cell of the variable this refers to.
+         * 
+         * Assumes that the variable is an array and that <code>i</code> is suitable.
+         */
+        public ConnectionSetEntry specifyCell(Index i) {
+            return ConnectionSetEntry.create(cd.findCell(i, 0), outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
+        }
+
+        public boolean equals(Object o) {
+            return o instanceof ConnectionSetEntry && toString().equals(o.toString());
+        }
+    
+        public int compareTo(ConnectionSetEntry cse) {
+            return toString().compareTo(cse.toString());
+        }
+
+        /**
+         * Create an access expression to the associated flow variable.
+         * 
+         * Only valid for stream connection entries.
+         */
+        public FExp createFlowFIdUseExp() {
+            throw new UnsupportedOperationException("Only supported for stream connection sets");
+        }
+
+        /**
+         * Get the epsilon to use when calculating flows, based on the associated flow variable's nominal value.
+         * 
+         * Only valid for stream connection entries.
+         */
+         public double flowEps() {
+             throw new UnsupportedOperationException("Only supported for stream connection sets");
+        }
+
+         /**
+          * Check if this entry should contribute when calculating streams.
+          * 
+          * Only valid for stream connection entries.
+          */
+          public boolean contributesToStream() {
+              throw new UnsupportedOperationException("Only supported for stream connection sets");
+        }
+
+
+        private static class FlowConnectionSetEntry extends ConnectionSetEntry {
+
+            public FlowConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
+                super(cd, outside, fqName);
+            }
+
+            public boolean isFlow() {
+                return true;
+            }
+
+        }
+
+        private static class StreamConnectionSetEntry extends ConnectionSetEntry {
+
+            private FExp flowExp;
+            private double eps = 1e-8;
+            private boolean contribute = true;
+
+            public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
+                super(cd, outside, fqName);
+                InstComponentDecl flow = cd.myFlowVar();
+                flowExp = new FIdUseExp(flow.flattenedAccess());
+                try {
+                    eps *= flow.nominalAttributeCValue().realValue();
+                } catch (ConstantEvaluationException e) {}
+                try {
+                    contribute = isOutside() ? 
+                            (flow.maxAttributeCValue().realValue() > 0) : 
+                            (flow.minAttributeCValue().realValue() < 0);
+                } catch (ConstantEvaluationException e) {}
+            }
+
+            public boolean isStream() {
+                return true;
+            }
+
+            public FExp createFlowFIdUseExp() {
+                return flowExp.fullCopy();
+            }
+
+            public double flowEps() {
+                return eps;
+            }
+
+            public boolean contributesToStream() {
+                return contribute;
+            }
+
+        }
+
+    }
+
+
 	/**
 	 * Connect the variables referenced in a connect or branch statement in the connection set manager.
 	 * 
@@ -721,13 +834,13 @@ aspect Connections {
 				FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
 				InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
 				InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
-				ConnectionSetEntry leftEntry = new ConnectionSetEntry(leftCompCell, leftOutside, leftCellName);
-				ConnectionSetEntry rightEntry = new ConnectionSetEntry(rightCompCell, rightOutside, rightCellName);	
+				ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftCompCell, leftOutside, leftCellName);
+				ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);	
 				leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
 			}
 		} else {
-			ConnectionSetEntry leftEntry = new ConnectionSetEntry(leftComp, leftOutside, leftName);
-			ConnectionSetEntry rightEntry = new ConnectionSetEntry(rightComp, rightOutside, rightName);	
+			ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, leftOutside, leftName);
+			ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, rightOutside, rightName);	
 			leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
 		}
 	}
@@ -760,8 +873,8 @@ aspect Connections {
                 InstComponentDecl rightComp = rightChildren.tailSet(leftComp).first();
                 FQName leftName  = leftComp.flattenedAccess(left.getFQName());
                 FQName rightName = rightComp.flattenedAccess(right.getFQName());
-                ConnectionSetEntry leftEntry = new ConnectionSetEntry(leftComp, left.isOutside(), leftName);
-                ConnectionSetEntry rightEntry = new ConnectionSetEntry(rightComp, right.isOutside(), rightName);    
+                ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, left.isOutside(), leftName);
+                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, right.isOutside(), rightName);
                 leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
             }
         }

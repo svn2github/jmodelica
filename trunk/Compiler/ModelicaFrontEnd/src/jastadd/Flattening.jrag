@@ -2315,17 +2315,24 @@ aspect FlatExpressions {
 	public FForIndex FForIndex.flatten(FQName prefix) {
 		return (FForIndex) fullCopy();
 	}
-	
-	/**
-	 * \brief Creates a flattened access to this component.
-	 */
-	public FQName InstComponentDecl.flattenedAccess(FQName prefix) {
-		if (expandedSubscripts().getNumFSubscript() > 0)
-			return prefix.copyAndAppend(name(), expandedSubscripts());
-		else 
-			return prefix.copyAndAppend(name());
-	}
-	
+
+    /**
+     * \brief Creates a flattened access to this component.
+     */
+    public FQName InstComponentDecl.flattenedAccess() {
+        return flattenedAccess(getFQNamePrefix());
+    }
+
+    /**
+     * \brief Creates a flattened access to this component.
+     */
+    public FQName InstComponentDecl.flattenedAccess(FQName prefix) {
+        if (expandedSubscripts().getNumFSubscript() > 0)
+            return prefix.copyAndAppend(name(), expandedSubscripts());
+        else 
+            return prefix.copyAndAppend(name());
+    }
+
 	/**
 	 * Flatten variability specifier.
      *

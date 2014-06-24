@@ -568,7 +568,7 @@ aspect FlatAPI {
         if (!isParameter())
             return false;
         for (InstModification mod : totalMergedEnvironment()) {
-            FExp exp = mod.findFixedAttribute();
+            FExp exp = mod.findAttribute(FAttribute.FIXED);
             if (exp == null)
                 continue;
             if (!exp.ceval().booleanValue())
