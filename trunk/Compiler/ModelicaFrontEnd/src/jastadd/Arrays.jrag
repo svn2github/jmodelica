@@ -226,7 +226,9 @@ aspect Arrays {
 	
 	eq FHomotopyExp.ndims()   = getActual().ndims();
 	eq FSemiLinearExp.ndims() = size().ndims();
-	
+
+    eq FDelayExp.ndims()      = getFExp().ndims();
+
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
 	
@@ -949,7 +951,9 @@ aspect Arrays {
 	eq FMathematicalFunctionCall.size() = getFExp().size();
 	eq FHomotopyExp.size()              = getActual().size();
 	eq FSemiLinearExp.size()            = vectorizedSize();
-	
+
+    eq FDelayExp.size()                 = getFExp().size();
+
     syn Size FBuiltInFunctionCall.vectorizedSize() {
         for (FExp e : myArgs())
             if (e.isArray())
@@ -1919,8 +1923,8 @@ aspect Arrays {
 		}
 		return arr;
 	}
-	
-	eq FReinit.getArray() {
+
+    eq FReinit.getArray() {
         if (!getVar().isArray())
             return super.getArray();
         
@@ -1930,8 +1934,21 @@ aspect Arrays {
         for (Index i : arr.indices())
             arr.set(i, new FReinit(inner1.get(i), inner2.get(i)));
         return arr;
-	}
-	
+    }
+
+    eq FDelayExp.getArray() {
+        if (!getFExp().isArray())
+            return super.getArray();
+        
+        Array arr = new Array(getFExp().indices());
+        Array exp = getFExp().getArray();
+        Array delay = getDelay().getArray();
+        Array max = hasMax() ? getMax().getArray() : null;
+        for (Index i : arr.indices()) 
+            arr.set(i, new FDelayExp(exp.get(i), delay.get(i), (max == null) ? new Opt() : new Opt(max.get(i))));
+        return arr;
+    }
+
 	/**
 	 * \brief Add a copy of this expression to arr at position i. 
 	 */

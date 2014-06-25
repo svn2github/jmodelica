@@ -1684,6 +1684,8 @@ aspect ConstantEvaluation {
         throw new ConstantEvaluationException();
     }
 
+    eq FDelayExp.cevalCalc() = getFExp().ceval();
+
     /**
      * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
      */

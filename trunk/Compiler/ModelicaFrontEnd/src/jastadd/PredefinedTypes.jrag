@@ -223,294 +223,299 @@ aspect PredefinedTypes {
         return ecd;
         
     }
-    
+
     private static final String Program.BUILTIN_FUNCS = 
-    		  "function initial end initial;\n"
-    		+ "function terminal end terminal;\n"
-    		+ "function smooth\n"
-    		+ "  input Integer p;\n"
-    		+ "  input Real expr;\n"   // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end smooth;\n"
-    		+ "function noEvent\n"
-    		+ "  input Real expr;\n"   // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end noEvent;\n"
-    		+ "function sample\n"
-    		+ "  input Real start;\n"
-    		+ "  input Real interval;\n"
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end sample;\n"
-    		+ "function pre\n"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end pre;\n"
-    		+ "function edge\n"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end edge;\n"
-    		+ "function change\n"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end change;\n"
-    		+ "function reinit\n"
+              "function initial end initial;\n"
+            + "function terminal end terminal;\n"
+            + "function smooth\n"
+            + "  input Integer p;\n"
+            + "  input Real expr;\n"   // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end smooth;\n"
+            + "function noEvent\n"
+            + "  input Real expr;\n"   // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end noEvent;\n"
+            + "function sample\n"
+            + "  input Real start;\n"
+            + "  input Real interval;\n"
+            + "  output Real y;\n"     // Type not used
+            + "end sample;\n"
+            + "function pre\n"
+            + "  input Real x;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end pre;\n"
+            + "function edge\n"
+            + "  input Real x;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end edge;\n"
+            + "function change\n"
+            + "  input Real x;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end change;\n"
+            + "function reinit\n"
             + "  input Real x;\n"      // Type not used
             + "  input Real expr;\n"     // Type not used
             + "end reinit;\n"
-    		+ "function assert\n"
-    		+ "  input Boolean condition;\n"
-    		+ "  input String message;\n"
-    		+ "  input AssertionLevel level = AssertionLevel.error;\n"
-    		+ "end assert;\n"
-    		+ "function terminate\n"
-    		+ "  input String reason;\n"
-    		+ "end terminate;\n"
-    		+ "function abs\n"
-    		+ "  input Real v;\n"
-    		+ "  output Real y;\n"
-    		+ "end abs;\n"
-    		+ "function sign\n"
-    		+ "  input Real v;\n"
-    		+ "  output Real y;\n"
-    		+ "end sign;\n"
-    		+ "function sqrt\n"
-    		+ "  input Real x;\n"
-    		+ "  output Real y;\n"
-    		+ "end sqrt;\n"
-    		+ "function div"
-    		+ "  input Real x1;\n"      // Type not used
-    		+ "  input Real x2;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end div;\n"
-    		+ "function mod"
-    		+ "  input Real x1;\n"      // Type not used
-    		+ "  input Real x2;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end mod;\n"
-    		+ "function rem"
-    		+ "  input Real x1;\n"      // Type not used
-    		+ "  input Real x2;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end rem;\n"
-    		+ "function floor"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end floor;\n"
-    		+ "function ceil"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end ceil;\n"
-    		+ "function integer"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Integer y;\n"  // Type not used
-    		+ "end integer;\n"
-    		+ "function Integer"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Integer y;\n"  // Type not used
-    		+ "end Integer;\n"
-    		+ "function String"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  input Integer minimumLength = 0;\n"
-    		+ "  input Boolean leftJustified = true;\n"
-    		+ "  input Integer significantDigits = 6;\n"
-    		+ "  input String format = \"\";\n"
-    		+ "  output String y;\n"
-    		+ "end String;\n"
-            + "function delay end delay;\n"
+            + "function assert\n"
+            + "  input Boolean condition;\n"
+            + "  input String message;\n"
+            + "  input AssertionLevel level = AssertionLevel.error;\n"
+            + "end assert;\n"
+            + "function terminate\n"
+            + "  input String reason;\n"
+            + "end terminate;\n"
+            + "function abs\n"
+            + "  input Real v;\n"
+            + "  output Real y;\n"
+            + "end abs;\n"
+            + "function sign\n"
+            + "  input Real v;\n"
+            + "  output Real y;\n"
+            + "end sign;\n"
+            + "function sqrt\n"
+            + "  input Real x;\n"
+            + "  output Real y;\n"
+            + "end sqrt;\n"
+            + "function div"
+            + "  input Real x1;\n"      // Type not used
+            + "  input Real x2;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end div;\n"
+            + "function mod"
+            + "  input Real x1;\n"      // Type not used
+            + "  input Real x2;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end mod;\n"
+            + "function rem"
+            + "  input Real x1;\n"      // Type not used
+            + "  input Real x2;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end rem;\n"
+            + "function floor"
+            + "  input Real x;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end floor;\n"
+            + "function ceil"
+            + "  input Real x;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end ceil;\n"
+            + "function integer"
+            + "  input Real x;\n"      // Type not used
+            + "  output Integer y;\n"  // Type not used
+            + "end integer;\n"
+            + "function Integer"
+            + "  input Real x;\n"      // Type not used
+            + "  output Integer y;\n"  // Type not used
+            + "end Integer;\n"
+            + "function String"
+            + "  input Real x;\n"      // Type not used
+            + "  input Integer minimumLength = 0;\n"
+            + "  input Boolean leftJustified = true;\n"
+            + "  input Integer significantDigits = 6;\n"
+            + "  input String format = \"\";\n"
+            + "  output String y;\n"
+            + "end String;\n"
+            + "function delay"
+            + "  input Real exp;\n"      // Type not used
+            + "  input Real delayTime;\n"
+            + "  input Real delayMax = delayTime;\n"
+            + "  output Real y;\n"       // Type not used
+            + "end delay;\n"
             + "function spatialDistribution end spatialDistribution;\n"
-    		+ "function cardinality"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  output Integer y;\n"  // Type not used
-    		+ "end cardinality;\n"
-    		+ "function isPresent end isPresent;\n"
-    		+ "function promote end promote;\n"
-    		+ "function ndims\n"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  output Integer n;\n"
-    		+ "end ndims;\n"
-    		+ "function size\n"
-    		+ "  input Real A;\n"         // Type not used
-    		+ "  input Integer d = 0;\n"  // Default value not used
-    		+ "  output Integer s;\n"
-    		+ "end size;\n"
-    		+ "function scalar"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
-    		+ "end scalar;\n"
-    		+ "function vector"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  output Real B;\n"     // Type not used
-    		+ "end vector;\n"
-    		+ "function matrix"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  output Real B;\n"     // Type not used
-    		+ "end matrix;\n"
-    		+ "function transpose\n"
-    		+ "  input Real A;\n"    // Type not used
-    		+ "  output Real B;\n"   // Type not used
-    		+ "end transpose;\n"
-    		+ "function symmetric\n"
-    		+ "  input Real A;\n"    // Type not used
-    		+ "  output Real B;\n"   // Type not used
-    		+ "end symmetric;\n"
-    		+ "function cross\n"
-    		+ "  input Real x[3];\n"
-    		+ "  input Real y[3];\n"
-    		+ "  output Real z[3];\n"   // Type not used
-    		+ "end cross;\n"
-    		+ "function outerProduct\n"
-    		+ "  input Real x[:];\n"
-    		+ "  input Real y[:];\n"
-    		+ "  output Real z[:,:];\n"   // Type not used
-    		+ "end outerProduct;\n"
-    		+ "function diagonal\n"
-    		+ "  input Real v[:];\n"
-    		+ "  output Real z[:,:];\n"   // Type not used
-    		+ "end diagonal;\n"
-    		+ "function identity\n"
-    		+ "  input Integer n;\n"
-    		+ "  output Integer a[n, n];\n"
-    		+ "end identity;\n"
-    		+ "function array end array;\n"
-    		+ "function zeros end zeros;\n"
-    		+ "function ones end ones;\n"
-    		+ "function fill\n"
-    		+ "  input Real s;\n"      // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end fill;\n"
-    		+ "function cat\n"
-    		+ "  input Real k;\n"      // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end cat;\n"
-    		+ "function linspace\n" 
-    		+ "  input Real x1;\n"
-    		+ "  input Real x2;\n"
-    		+ "  input Integer n;\n"
-    		+ "  output Real z[1];\n"   // Size not used
-    		+ "end linspace;\n"
-    		+ "function min\n"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  input Real y = 0;\n"  // Type and default value not used
-    		+ "  output Real z;\n"     // Type not used
-    		+ "end min;\n"
-    		+ "function max\n"
-    		+ "  input Real x;\n"      // Type not used
-    		+ "  input Real y = 0;\n"  // Type and default value not used
-    		+ "  output Real z;\n"     // Type not used
-    		+ "end max;\n"
-    		+ "function sum\n"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end sum;\n"
-    		+ "function product\n"
-    		+ "  input Real A;\n"      // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end product;\n"
-    		+ "function skew\n"
-    		+ "  input Real x[3];\n"
-    		+ "  output Real y[3,3];\n"   // Type not used
-    		+ "end skew;\n"
-    		+ "function homotopy\n"
+            + "function cardinality"
+            + "  input Real x;\n"      // Type not used
+            + "  output Integer y;\n"  // Type not used
+            + "end cardinality;\n"
+            + "function isPresent end isPresent;\n"
+            + "function promote end promote;\n"
+            + "function ndims\n"
+            + "  input Real A;\n"      // Type not used
+            + "  output Integer n;\n"
+            + "end ndims;\n"
+            + "function size\n"
+            + "  input Real A;\n"         // Type not used
+            + "  input Integer d = 0;\n"  // Default value not used
+            + "  output Integer s;\n"
+            + "end size;\n"
+            + "function scalar"
+            + "  input Real A;\n"      // Type not used
+            + "  output Real y;\n"     // Type not used
+            + "end scalar;\n"
+            + "function vector"
+            + "  input Real A;\n"      // Type not used
+            + "  output Real B;\n"     // Type not used
+            + "end vector;\n"
+            + "function matrix"
+            + "  input Real A;\n"      // Type not used
+            + "  output Real B;\n"     // Type not used
+            + "end matrix;\n"
+            + "function transpose\n"
+            + "  input Real A;\n"    // Type not used
+            + "  output Real B;\n"   // Type not used
+            + "end transpose;\n"
+            + "function symmetric\n"
+            + "  input Real A;\n"    // Type not used
+            + "  output Real B;\n"   // Type not used
+            + "end symmetric;\n"
+            + "function cross\n"
+            + "  input Real x[3];\n"
+            + "  input Real y[3];\n"
+            + "  output Real z[3];\n"   // Type not used
+            + "end cross;\n"
+            + "function outerProduct\n"
+            + "  input Real x[:];\n"
+            + "  input Real y[:];\n"
+            + "  output Real z[:,:];\n"   // Type not used
+            + "end outerProduct;\n"
+            + "function diagonal\n"
+            + "  input Real v[:];\n"
+            + "  output Real z[:,:];\n"   // Type not used
+            + "end diagonal;\n"
+            + "function identity\n"
+            + "  input Integer n;\n"
+            + "  output Integer a[n, n];\n"
+            + "end identity;\n"
+            + "function array end array;\n"
+            + "function zeros end zeros;\n"
+            + "function ones end ones;\n"
+            + "function fill\n"
+            + "  input Real s;\n"      // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end fill;\n"
+            + "function cat\n"
+            + "  input Real k;\n"      // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end cat;\n"
+            + "function linspace\n" 
+            + "  input Real x1;\n"
+            + "  input Real x2;\n"
+            + "  input Integer n;\n"
+            + "  output Real z[1];\n"   // Size not used
+            + "end linspace;\n"
+            + "function min\n"
+            + "  input Real x;\n"      // Type not used
+            + "  input Real y = 0;\n"  // Type and default value not used
+            + "  output Real z;\n"     // Type not used
+            + "end min;\n"
+            + "function max\n"
+            + "  input Real x;\n"      // Type not used
+            + "  input Real y = 0;\n"  // Type and default value not used
+            + "  output Real z;\n"     // Type not used
+            + "end max;\n"
+            + "function sum\n"
+            + "  input Real A;\n"      // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end sum;\n"
+            + "function product\n"
+            + "  input Real A;\n"      // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end product;\n"
+            + "function skew\n"
+            + "  input Real x[3];\n"
+            + "  output Real y[3,3];\n"   // Type not used
+            + "end skew;\n"
+            + "function homotopy\n"
             + "  input Real actual;\n"
             + "  input Real simplified;\n"
             + "  output Real o;\n"
-    		+ "end homotopy;\n"
-    		+ "function semiLinear\n"
-    		+ "  input Real v1;\n"     // Type not used
-    		+ "  input Real v2;\n"     // Type not used
-    		+ "  input Real v3;\n"     // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end semiLinear;\n"
-    		+ "function inStream\n"
-    		+ "  input Real v;\n"      // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end inStream;\n"
-    		+ "function actualStream\n"
-    		+ "  input Real n;\n"      // Type not used
-    		+ "  output Real o;\n"     // Type not used
-    		+ "end actualStream;\n"
-    		+ "function getInstanceName\n"
-    		+ "  output String o;\n"
-    		+ "end getInstanceName;\n"
-    		+ "function sin \"sine\"\n"
-    		+ "  input Modelica.SIunits.Angle u;\n"
-    		+ "  output Real y;\n"
-    		+ "end sin;\n"
-    		+ "function cos \"cosine\"" 
-    		+ "  input Modelica.SIunits.Angle u;\n"
-    		+ "  output Real y;\n"
-    		+ "end cos;\n"
-    		+ "function tan \"tangent (u shall not be -pi/2, pi/2, 3*pi/2, ...)\"\n"
-    		+ "  input Modelica.SIunits.Angle u;\n"
-    		+ "  output Real y;\n"
-    		+ "end tan;\n"
-    		+ "function asin \"inverse sine (-1 <= u <= 1)\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Modelica.SIunits.Angle y;\n"
-    		+ "end asin;\n"
-    		+ "function acos \"inverse cosine (-1 <= u <= 1)\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Modelica.SIunits.Angle y;\n"
-    		+ "end acos;\n"
-    		+ "function atan \"inverse tangent\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Modelica.SIunits.Angle y;\n"
-    		+ "end atan;\n"
-    		+ "function atan2 \"four quadrant inverse tangent\"\n"
-    		+ "  input Real u1;\n"
-    		+ "  input Real u2;\n"
-    		+ "  output Modelica.SIunits.Angle y;\n"
-    		+ "end atan2;\n"
-    		+ "function sinh \"hyperbolic sine\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Real y;\n"
-    		+ "end sinh;\n"
-    		+ "function cosh \"hyperbolic cosine\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Real y;\n"
-    		+ "end cosh;\n"
-    		+ "function tanh \"hyperbolic tangent\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Real y;\n"
-    		+ "end tanh;\n"
-    		+ "function exp \"exponential, base e\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Real y;\n"
-    		+ "end exp;\n"
-    		+ "function log \"natural (base e) logarithm (u shall be > 0)\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Real y;\n"
-    		+ "end log;\n"
-    		+ "function log10 \"base 10 logarithm (u shall be > 0)\"\n"
-    		+ "  input Real u;\n"
-    		+ "  output Real y;\n"
-    		+ "end log10;\n"
-    		+ "package Connections"
-    		+ "  function branch"
-    		+ "    input Real a;\n"      // Type not used
-    		+ "    input Real b;\n"      // Type not used
-    		+ "  end branch;"
-    		+ "  function root"
-    		+ "    input Real a;\n"      // Type not used
-    		+ "  end root;"
-    		+ "  function potentialRoot"
-    		+ "    input Real A;\n"      // Type not used
-    		+ "    input Integer priority = 0;\n"
-    		+ "  end potentialRoot;"
-    		+ "  function isRoot"
-    		+ "    input Real a;\n"      // Type not used
-    		+ "  end isRoot;"
-    		+ "  function rooted"
-    		+ "    input Real a;\n"      // Type not used
-    		+ "    output Boolean y;\n"
-    		+ "  end rooted;"
-    		+ "end Connections;"
-    		+ "function rooted"
-    		+ "  input Real a;\n"      // Type not used
-    		+ "  output Boolean y;\n"
-    		+ "end rooted;"
-    		  ;
-    
+            + "end homotopy;\n"
+            + "function semiLinear\n"
+            + "  input Real v1;\n"     // Type not used
+            + "  input Real v2;\n"     // Type not used
+            + "  input Real v3;\n"     // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end semiLinear;\n"
+            + "function inStream\n"
+            + "  input Real v;\n"      // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end inStream;\n"
+            + "function actualStream\n"
+            + "  input Real n;\n"      // Type not used
+            + "  output Real o;\n"     // Type not used
+            + "end actualStream;\n"
+            + "function getInstanceName\n"
+            + "  output String o;\n"
+            + "end getInstanceName;\n"
+            + "function sin \"sine\"\n"
+            + "  input Modelica.SIunits.Angle u;\n"
+            + "  output Real y;\n"
+            + "end sin;\n"
+            + "function cos \"cosine\"" 
+            + "  input Modelica.SIunits.Angle u;\n"
+            + "  output Real y;\n"
+            + "end cos;\n"
+            + "function tan \"tangent (u shall not be -pi/2, pi/2, 3*pi/2, ...)\"\n"
+            + "  input Modelica.SIunits.Angle u;\n"
+            + "  output Real y;\n"
+            + "end tan;\n"
+            + "function asin \"inverse sine (-1 <= u <= 1)\"\n"
+            + "  input Real u;\n"
+            + "  output Modelica.SIunits.Angle y;\n"
+            + "end asin;\n"
+            + "function acos \"inverse cosine (-1 <= u <= 1)\"\n"
+            + "  input Real u;\n"
+            + "  output Modelica.SIunits.Angle y;\n"
+            + "end acos;\n"
+            + "function atan \"inverse tangent\"\n"
+            + "  input Real u;\n"
+            + "  output Modelica.SIunits.Angle y;\n"
+            + "end atan;\n"
+            + "function atan2 \"four quadrant inverse tangent\"\n"
+            + "  input Real u1;\n"
+            + "  input Real u2;\n"
+            + "  output Modelica.SIunits.Angle y;\n"
+            + "end atan2;\n"
+            + "function sinh \"hyperbolic sine\"\n"
+            + "  input Real u;\n"
+            + "  output Real y;\n"
+            + "end sinh;\n"
+            + "function cosh \"hyperbolic cosine\"\n"
+            + "  input Real u;\n"
+            + "  output Real y;\n"
+            + "end cosh;\n"
+            + "function tanh \"hyperbolic tangent\"\n"
+            + "  input Real u;\n"
+            + "  output Real y;\n"
+            + "end tanh;\n"
+            + "function exp \"exponential, base e\"\n"
+            + "  input Real u;\n"
+            + "  output Real y;\n"
+            + "end exp;\n"
+            + "function log \"natural (base e) logarithm (u shall be > 0)\"\n"
+            + "  input Real u;\n"
+            + "  output Real y;\n"
+            + "end log;\n"
+            + "function log10 \"base 10 logarithm (u shall be > 0)\"\n"
+            + "  input Real u;\n"
+            + "  output Real y;\n"
+            + "end log10;\n"
+            + "package Connections"
+            + "  function branch"
+            + "    input Real a;\n"      // Type not used
+            + "    input Real b;\n"      // Type not used
+            + "  end branch;"
+            + "  function root"
+            + "    input Real a;\n"      // Type not used
+            + "  end root;"
+            + "  function potentialRoot"
+            + "    input Real A;\n"      // Type not used
+            + "    input Integer priority = 0;\n"
+            + "  end potentialRoot;"
+            + "  function isRoot"
+            + "    input Real a;\n"      // Type not used
+            + "  end isRoot;"
+            + "  function rooted"
+            + "    input Real a;\n"      // Type not used
+            + "    output Boolean y;\n"
+            + "  end rooted;"
+            + "end Connections;"
+            + "function rooted"
+            + "  input Real a;\n"      // Type not used
+            + "  output Boolean y;\n"
+            + "end rooted;"
+            ;
+
     /**
      * This attribute defines the NTA for predefined types
      * which contains a list of predefined PrimitiveClassDecl:s.

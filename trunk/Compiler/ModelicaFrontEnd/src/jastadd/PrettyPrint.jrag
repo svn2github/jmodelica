@@ -1853,6 +1853,7 @@ aspect FlatPrettyPrint {
 	eq FTerminalExp.builtInName()        = "terminal";
 	eq FTerminate.builtInName()          = "terminate";
     eq FReinit.builtInName()             = "reinit";
+    eq FDelayExp.builtInName()           = "delay";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";

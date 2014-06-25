@@ -1328,6 +1328,11 @@ FLoadResource : FUnaryBuiltIn;
 FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 
 /**
+ * The delay() operator.
+ */
+FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp];
+
+/**
  * Sample built-in function.
  */
 FSampleExp : FBuiltInFunctionCall ::= Offset:FExp Interval:FExp;

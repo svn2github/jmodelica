@@ -2105,8 +2105,9 @@ aspect FlatExpressions {
         }
         return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
     }
-	public FSemiLinearExp       FSemiLinearExp.flatten(FQName prefix)            { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
-	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstBaseClassDecl().name() + "." + prefix.name()); }
+    public FSemiLinearExp FSemiLinearExp.flatten(FQName prefix)   { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
+    public FDelayExp      FDelayExp.flatten(FQName prefix)        { return new FDelayExp(getFExp().flatten(prefix), getDelay().flatten(prefix), hasMax() ? new Opt(getMax().flatten(prefix)) : new Opt()); }
+    public FExp           FGetInstanceName.flatten(FQName prefix) { return new FStringLitExp(myInstBaseClassDecl().name() + "." + prefix.name()); }
 	
 	inh InstFullClassDecl ASTNode.myInstBaseClassDecl();
 	eq Root.getChild().myInstBaseClassDecl() = null;

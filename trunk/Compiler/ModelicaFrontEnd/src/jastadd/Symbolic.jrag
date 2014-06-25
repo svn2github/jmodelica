@@ -727,47 +727,55 @@ aspect Derivatives {
 	public FExp FMinMaxExp.diff(String name) {
 		return dynamicFExp(new FNoEventExp(new FIfExp(createCompareNode(getX().copySymbolic(), getY().copySymbolic()), getX().diff(name), getY().diff(name))));
 	}
-	
-	public FExp FIdUseExp.diff(String name) {
-		return dynamicFExp(diffUseOrDerExp(name, name()));		
-	}
-	
-	public FExp FInstAccessExp.diff(String name) {
-		return dynamicFExp(diffUseOrDerExp(name, name()));		
-	}
-	
-	public FExp FPreExp.diff(String name) {
-		if (name.equals(name())) {
-			return new FRealLitExp(1);	
-		} else {
-			return new FRealLitExp(0);	
-		}	
-	}
-	
-	public FExp FDerExp.diff(String name) {	
-		return dynamicFExp(diffUseOrDerExp(name, name()));		
-	}
 
-	public FExp InstDerExp.diff(String name) {	
-		return dynamicFExp(diffUseOrDerExp(name, null));		
-	}
-	
-	public FExp FAbsExp.diff(String name) {
-	    FExp diff = getFExp().diff(name);
-	    if (diff.isLiteralZero())
-	        return dynamicFExp(diff);
-	    else
-	        return dynamicFExp(new FIfExp(new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0)), diff, new FNegExp(diff.copySymbolic())));
-	}
-	
-	public FExp FSignExp.diff(String name) {
-		return new FRealLitExp(0);
-	}
-	
+    public FExp FIdUseExp.diff(String name) {
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp FInstAccessExp.diff(String name) {
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp FPreExp.diff(String name) {
+        if (name.equals(name())) {
+            return new FRealLitExp(1);
+        } else {
+            return new FRealLitExp(0);
+        }   
+    }
+
+    public FExp FDerExp.diff(String name) { 
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp InstDerExp.diff(String name) {  
+        return dynamicFExp(diffUseOrDerExp(name, null));
+    }
+
+    public FExp FAbsExp.diff(String name) {
+        FExp diff = getFExp().diff(name);
+        if (diff.isLiteralZero())
+            return dynamicFExp(diff);
+        else
+            return dynamicFExp(new FIfExp(new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0)), diff, new FNegExp(diff.copySymbolic())));
+    }
+
+    public FExp FSignExp.diff(String name) {
+        return new FRealLitExp(0);
+    }
+
     public FExp FDivFuncExp.diff(String name) {
         return new FRealLitExp(0);
     }
-    
+
+    public FExp FDelayExp.diff(String name) {
+        Opt max = hasMax() ? new Opt(getMax().copySymbolic()) : new Opt();
+        FExp res = new FDelayExp(getFExp().diff(name), getDelay().copySymbolic(), max);
+        if (getDelay().isContinuousExp())
+            res = new FMulExp(getDelay().diff(name), res);
+        return res;
+    }
+
     public FExp FExp.diffUseOrDerExp(String name, String myName) {
         if (type().containsReal()) {
             if (name.equals(TIME) && !variability().parameterOrLess())

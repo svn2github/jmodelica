@@ -594,6 +594,8 @@ aspect FlatTypeAnalysis {
 	eq FAssert.type() = fNoType();
 	eq FGetInstanceName.type() = fStringScalarType();
 
+    eq FDelayExp.type() = getFExp().type();
+
 	/**
 	 * The scalar type of the expression.
 	 * 

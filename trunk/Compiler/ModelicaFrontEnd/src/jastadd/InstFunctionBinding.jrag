@@ -204,51 +204,51 @@ aspect InstFunctionBinding {
 	public void InstRecordConstructor.addArgument(InstFunctionArgument arg) {
 		addArg(arg);
 	}
-	
-	public class InstFunctionCall {
-		
-		private static BuiltInTranslator builtInTranslator = new BuiltInTranslator();
-		
-		/**
-		 * \brief Helper class for rewrite InstFunctionCall -> FAbstractFunctionCall. 
-		 * 
-		 * Creates an instance of the specific subclass of FBuiltInFunctionCall matching 
-		 * the name of the function, if one matches. 
-		 */
-		private static class BuiltInTranslator {
-			
-			private HashMap<String, BuiltInCreator> map;
-			private static final String MATH_PREF = "Modelica.Math.";
-			private static final int MATH_LEN = MATH_PREF.length();
-            
+
+    public class InstFunctionCall {
+
+        private static BuiltInTranslator builtInTranslator = new BuiltInTranslator();
+        
+        /**
+         * \brief Helper class for rewrite InstFunctionCall -> FAbstractFunctionCall. 
+         * 
+         * Creates an instance of the specific subclass of FBuiltInFunctionCall matching 
+         * the name of the function, if one matches. 
+         */
+        private static class BuiltInTranslator {
+
+            private HashMap<String, BuiltInCreator> map;
+            private static final String MATH_PREF = "Modelica.Math.";
+            private static final int MATH_LEN = MATH_PREF.length();
+
             /* Built-In-Type*/
             public enum BIT {
                 NONE, MATH
             }
-			
-			public FBuiltInFunctionCall create(String name, InstFunctionArgument[] args) {
-				boolean math = name.startsWith(MATH_PREF);
-				if (math) 
-					name = name.substring(MATH_LEN);
-				BuiltInCreator creator = map.get(name);
-				if (creator == null || (math && !creator.match(BIT.MATH)))
-					return null;
-				FBuiltInFunctionCall res = creator.create(args);
-				if (res != null)
-					for (InstFunctionArgument arg : args)
-						res.addToOriginalArgs(arg);
-				return res;
-			}
-			
-			public boolean isInfArgs(String name) {
-				BuiltInCreator creator = map.get(name);
-				return creator != null && creator.isInfArgs();
-			}
-			
-			
-			public BuiltInTranslator() {
-				map = new HashMap<String, BuiltInCreator>();
-				//       name                                 math       node                # args
+
+            public FBuiltInFunctionCall create(String name, InstFunctionArgument[] args) {
+                boolean math = name.startsWith(MATH_PREF);
+                if (math) 
+                    name = name.substring(MATH_LEN);
+                BuiltInCreator creator = map.get(name);
+                if (creator == null || (math && !creator.match(BIT.MATH)))
+                    return null;
+                FBuiltInFunctionCall res = creator.create(args);
+                if (res != null)
+                    for (InstFunctionArgument arg : args)
+                        res.addToOriginalArgs(arg);
+                return res;
+            }
+
+            public boolean isInfArgs(String name) {
+                BuiltInCreator creator = map.get(name);
+                return creator != null && creator.isInfArgs();
+            }
+
+
+            public BuiltInTranslator() {
+                map = new HashMap<String, BuiltInCreator>();
+                //       name                                 math       node                # args
                 map.put("abs",             new BuiltInCreator(BIT.NONE, new FAbsExp(),          1));
                 map.put("sign",            new BuiltInCreator(BIT.NONE, new FSignExp(),         1));
                 map.put("sqrt",            new BuiltInCreator(BIT.NONE, new FSqrtExp(),         1));
@@ -259,19 +259,19 @@ aspect InstFunctionBinding {
                 map.put("ceil",            new BuiltInCreator(BIT.NONE, new FCeilFuncExp(),     1));
                 map.put("floor",           new BuiltInCreator(BIT.NONE, new FFloorFuncExp(),    1));
                 map.put("integer",         new BuiltInCreator(BIT.NONE, new FIntegerFuncExp(),  1));
-                map.put("sin",             new BuiltInCreator(BIT.MATH,  new FSinExp(),          1));
-                map.put("cos",             new BuiltInCreator(BIT.MATH,  new FCosExp(),          1));
-                map.put("tan",             new BuiltInCreator(BIT.MATH,  new FTanExp(),          1));
-                map.put("asin",            new BuiltInCreator(BIT.MATH,  new FAsinExp(),         1));
-                map.put("acos",            new BuiltInCreator(BIT.MATH,  new FAcosExp(),         1));
-                map.put("atan",            new BuiltInCreator(BIT.MATH,  new FAtanExp(),         1));
-                map.put("atan2",           new BuiltInCreator(BIT.MATH,  new FAtan2Exp(),        2));
-                map.put("sinh",            new BuiltInCreator(BIT.MATH,  new FSinhExp(),         1));
-                map.put("cosh",            new BuiltInCreator(BIT.MATH,  new FCoshExp(),         1));
-                map.put("tanh",            new BuiltInCreator(BIT.MATH,  new FTanhExp(),         1));
-                map.put("exp",             new BuiltInCreator(BIT.MATH,  new FExpExp(),          1));
-                map.put("log",             new BuiltInCreator(BIT.MATH,  new FLogExp(),          1));
-                map.put("log10",           new BuiltInCreator(BIT.MATH,  new FLog10Exp(),        1));
+                map.put("sin",             new BuiltInCreator(BIT.MATH,  new FSinExp(),         1));
+                map.put("cos",             new BuiltInCreator(BIT.MATH,  new FCosExp(),         1));
+                map.put("tan",             new BuiltInCreator(BIT.MATH,  new FTanExp(),         1));
+                map.put("asin",            new BuiltInCreator(BIT.MATH,  new FAsinExp(),        1));
+                map.put("acos",            new BuiltInCreator(BIT.MATH,  new FAcosExp(),        1));
+                map.put("atan",            new BuiltInCreator(BIT.MATH,  new FAtanExp(),        1));
+                map.put("atan2",           new BuiltInCreator(BIT.MATH,  new FAtan2Exp(),       2));
+                map.put("sinh",            new BuiltInCreator(BIT.MATH,  new FSinhExp(),        1));
+                map.put("cosh",            new BuiltInCreator(BIT.MATH,  new FCoshExp(),        1));
+                map.put("tanh",            new BuiltInCreator(BIT.MATH,  new FTanhExp(),        1));
+                map.put("exp",             new BuiltInCreator(BIT.MATH,  new FExpExp(),         1));
+                map.put("log",             new BuiltInCreator(BIT.MATH,  new FLogExp(),         1));
+                map.put("log10",           new BuiltInCreator(BIT.MATH,  new FLog10Exp(),       1));
                 map.put("noEvent",         new BuiltInCreator(BIT.NONE, new FNoEventExp(),      1));
                 map.put("smooth",          new BuiltInCreator(BIT.NONE, new FSmoothExp(),       2));
                 map.put("pre",             new BuiltInCreator(BIT.NONE, new InstPreExp(),       1));
@@ -306,42 +306,43 @@ aspect InstFunctionBinding {
                         new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
                 map.put("ModelicaServices.ExternalReferences.loadResource", 
                         new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
-				//       name                                            node           # fixed args
-				map.put("array",           new InfArgsBuiltInCreator(new FParseArray(), 0));
-				map.put("ones",            new InfArgsBuiltInCreator(new FOnes(),       0));
-				map.put("zeros",           new InfArgsBuiltInCreator(new FZeros(),      0));
-				map.put("fill",            new InfArgsBuiltInCreator(new FFillExp(),    1));
-				map.put("cat",             new InfArgsBuiltInCreator(new FCatExp(),     1));
-				//       name                                            node          min/max # args
-				map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(),   1, 2));
-				map.put("String",          new VarArgsBuiltInCreator(new FStringExp(), 1, 5));
-				map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),    1, 2));
-				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
-				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
-				//       name                                    math       node              # args
+                //       name                                            node           # fixed args
+                map.put("array",           new InfArgsBuiltInCreator(new FParseArray(), 0));
+                map.put("ones",            new InfArgsBuiltInCreator(new FOnes(),       0));
+                map.put("zeros",           new InfArgsBuiltInCreator(new FZeros(),      0));
+                map.put("fill",            new InfArgsBuiltInCreator(new FFillExp(),    1));
+                map.put("cat",             new InfArgsBuiltInCreator(new FCatExp(),     1));
+                //       name                                            node          min/max # args
+                map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(),   1, 2));
+                map.put("String",          new VarArgsBuiltInCreator(new FStringExp(), 1, 5));
+                map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),    1, 2));
+                map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
+                map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
+                map.put("delay",           new VarArgsBuiltInCreator(new FDelayExp(),  2, 3));
+                //       name                                    math       node              # args
                 map.put("Connections.branch", new BuiltInCreator(BIT.NONE, new FConnBranch(),    2));
                 map.put("Connections.root",   new BuiltInCreator(BIT.NONE, new FConnRoot(),      1));
                 map.put("Connections.isRoot", new BuiltInCreator(BIT.NONE, new FConnIsRoot(),    1));
                 map.put("Connections.rooted", new BuiltInCreator(BIT.NONE, new FConnRooted(),    1));
                 map.put("rooted",             new BuiltInCreator(BIT.NONE, new FConnRootedDep(), 1));
-				//       name                                                      node                  min/max # args
-				map.put("Connections.potentialRoot", new VarArgsBuiltInCreator(new FConnPotentialRoot(), 1, 2));
-				
-				String[] unsupported = new String[] { 
-						// Ticket 664: Support all function-like operators
-						"delay", "spatialDistribution"
-					};
-				for (String name : unsupported)
-					if (!map.containsKey(name))
-						map.put(name, new UnsupportedBuiltInCreator(name));
-				
-				// Not used anymore, but left for possible future needs
-				String[] ignored = new String[] {};
-				for (String name : ignored)
-					if (!map.containsKey(name))
-						map.put(name, new IgnoredBuiltInCreator(name));
-			}
-			
+                //       name                                                      node                  min/max # args
+                map.put("Connections.potentialRoot", new VarArgsBuiltInCreator(new FConnPotentialRoot(), 1, 2));
+                
+                String[] unsupported = new String[] { 
+                        // Ticket 664: Support all function-like operators
+                        "delay", "spatialDistribution"
+                    };
+                for (String name : unsupported)
+                    if (!map.containsKey(name))
+                        map.put(name, new UnsupportedBuiltInCreator(name));
+                
+                // Not used anymore, but left for possible future needs
+                String[] ignored = new String[] {};
+                for (String name : ignored)
+                    if (!map.containsKey(name))
+                        map.put(name, new IgnoredBuiltInCreator(name));
+            }
+
 			private static class BuiltInCreator {
 				
                 protected BIT type;

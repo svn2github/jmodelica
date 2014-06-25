@@ -735,7 +735,12 @@ aspect CADCodeGen {
 	}
 	eq FSmoothExp.getChild().inlineVar_CAD() = true;
 	eq FSmoothExp.getChild().inlineDer_CAD() = true;
-	
+
+    public void FDelayExp.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
+        getFExp().prettyPrint_CAD(p, str, indent);
+    }
+
+
 	/**
 	 * If expressions need special handling during CAD since it is not possible to
 	 * write if expressions as a single statment.

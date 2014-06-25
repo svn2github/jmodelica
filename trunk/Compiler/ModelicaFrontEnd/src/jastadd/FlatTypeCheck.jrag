@@ -767,19 +767,21 @@ aspect FlatTypeCheck {
       else if (!getVar().type().typeCompatible(getFExp().type()))
           error("Arguments to reinit() must be of compatible types");
   }
-  
-  public void FEdgeExp.typeCheck(ErrorCheckType checkType) {
-    if (!getFExp().isAccess() || !getFExp().type().isBoolean()) {
-      error("Calling function edge(): argument must be a boolean variable access");	
+
+    public void FEdgeExp.typeCheck(ErrorCheckType checkType) {
+        if (!getFExp().isAccess() || !getFExp().type().isBoolean()) 
+            error("Calling function edge(): argument must be a boolean variable access");
     }
-  }
-  
-  public void FChangeExp.typeCheck(ErrorCheckType checkType) {
-    if (!getFExp().isAccess()) {
-      error("Calling function change(): argument must be a variable access");
-      return;  		
+
+    public void FChangeExp.typeCheck(ErrorCheckType checkType) {
+        if (!getFExp().isAccess()) 
+            error("Calling function change(): argument must be a variable access");
     }
-  }
+
+    public void FDelayExp.typeCheck(ErrorCheckType checkType) {
+        if (!(hasMax() ? getMax() : getDelay()).variability().parameterOrLess())
+            error("Calling function delay(): last argument supplied must be of parameter variability");
+    }
 
 	public void FStringExp.typeCheck(ErrorCheckType checkType) {
 		FType valueType = getValue().type();
@@ -1013,6 +1015,7 @@ aspect FlatTypeCheck {
     eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
     eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
     eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
+    eq FDelayExp.getOriginalArg(int i).argumentDefinedTypeValid()            = i > 0;
     eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
     eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
     eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
@@ -1039,8 +1042,9 @@ aspect FlatTypeCheck {
     eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
     eq FArrayDimAsArgsExp.getChild().argumentTypeValid(FType type)        = true;
     eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type)     = 
-	    hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
+        hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
     eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
+    eq FDelayExp.getChild().argumentTypeValid(FType type)                 = type.isNumeric();
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
     eq FCardinality.getChild().argumentTypeValid(FType type)              = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 

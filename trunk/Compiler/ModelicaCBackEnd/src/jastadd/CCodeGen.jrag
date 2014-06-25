@@ -1498,7 +1498,6 @@ aspect CCodeGen {
         str.format(" = %s;\n", tempName_C());
         str.format("%sjmi->reinit_triggered = 1;\n", indent);
     }
-    
     public void FAbstractFunctionCall.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {}
     
     public void FAbstractEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {}
@@ -1794,6 +1793,11 @@ aspect CCodeGen {
 		str.print("\""+prettyPrint("")+"\")");
 		str.print(")");
 	}
+
+    public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        getFExp().prettyPrint_C(p, str, indent);
+    }
+
 
 	public void FCeilFuncExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("ceil(");

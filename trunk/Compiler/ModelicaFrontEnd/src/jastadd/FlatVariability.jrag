@@ -514,6 +514,8 @@ aspect FlatVariability {
     eq FReinit.expVariability() = null;
 	eq FAssert.expVariability() = null;
 
+    eq FDelayExp.expVariability() = getFExp().variability();
+
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	eq FDerExp.expVariability() = 
 			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();

@@ -150,7 +150,7 @@ end ArrayOfRecords_Warn;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  delay(1);
+  delay(1, 2);
   spatialDistribution();
 
 	annotation(__JModelica(UnitTesting(tests={
