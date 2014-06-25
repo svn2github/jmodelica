@@ -374,6 +374,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
             }
             jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
+            jmi_log_fmt(log, topnode, logInfo, "<scaled_step_norm:%E>", N_VWL2Norm(kin_mem->kin_pp, kin_mem->kin_uscale));
 
             if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
