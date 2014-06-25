@@ -3653,7 +3653,7 @@ aspect FunctionInlining {
 			
 			FVariable var = type.createTempFVariable(name, variability);
 			vars.add(var);
-			vars.getChild(vars.getNumChild() - 1);
+			vars.getChild(vars.getNumChildNoTransform() - 1);
 			
 			setSizeOf(oldName, type.size());
 			lookupMap.addVariable(var);
