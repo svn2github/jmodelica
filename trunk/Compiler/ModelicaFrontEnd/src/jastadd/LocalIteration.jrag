@@ -11,13 +11,14 @@ aspect LocalIteration{
                 AnnotationNode localIterationNode = src.annotation().vendorNode().forPath("LocalIteration");
                 if (!localIterationNode.exists())
                     return;
-                FAttribute localIterationAttr = new FInternalAttribute("LocalIteration");
-                dest.addFAttribute(localIterationAttr);
+                AnnotationNode destNode = dest.annotation().vendorNode().createForPath("LocalIteration");
                 
                 AnnotationNode enabledAnnotation = localIterationNode.forPath("enabled");
                 Exp enabledExp = enabledAnnotation.exp();
-                if (enabledExp != null)
-                    localIterationAttr.addFAttribute(new FInternalAttribute("enabled", enabledExp.instantiate(), enabledAnnotation.isEach()));
+                if (enabledExp != null) {
+                    destNode.forPath("enabled").setValue(enabledExp.instantiate());
+                    destNode.forPath("enabled").setEach(enabledAnnotation.isEach());
+                }
             }
 
             @Override
@@ -65,22 +66,22 @@ aspect LocalIteration{
     }
     
     protected void FAbstractEquation.typeCheckLocalIteration(ErrorCheckType checkType) {
-        FAttribute localIterationAttr = findAttribute("LocalIteration");
-        if (localIterationAttr == null)
+        AnnotationNode node = annotation().vendorNode().forPath("LocalIteration");
+        if (!node.exists())
             return;
-        FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
-        if (enabledAttr != null) {
-            FExp enabledExp = enabledAttr.getValue();
-            typeCheckEnabled(checkType, enabledExp, type(), enabledAttr.hasFEach());
+        AnnotationNode enabledNode = node.forPath("enabled");
+        if (enabledNode.exists()) {
+            FExp enabledExp = enabledNode.fExp();
+            typeCheckEnabled(checkType, enabledExp, type(), enabledNode.isEach());
         }
     }
     
     syn boolean FAbstractEquation.hasLocalIteration() {
-        FAttribute localIterationAttr = findAttribute("LocalIteration");
-        if (localIterationAttr == null)
+        AnnotationNode node = annotation().vendorNode().forPath("LocalIteration");
+        if (!node.exists())
             return false;
-        FAttribute enabledAttr = localIterationAttr.findAttribute("enabled");
-        return enabledAttr == null || !enabledAttr.hasValue() || enabledAttr.getValue().ceval().booleanValue();
+        AnnotationNode enabledNode = node.forPath("enabled");
+        return !enabledNode.exists() || enabledNode.bool();
     }
     
 }

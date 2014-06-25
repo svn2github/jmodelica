@@ -71,7 +71,7 @@ Iteration variables:
   c()
 Solved equations:
  Iteration variables: b
-  23 = c * b
+  23 = c * b annotation(__Modelon(LocalIteration))
   c = a + b
 Residual equations:
  Iteration variables: c
@@ -136,7 +136,7 @@ Iteration variables:
   c()
 Solved equations:
  Iteration variables: b
-  23 = c * b
+  23 = c * b annotation(__Modelon(LocalIteration(enabled = true)))
   c = a + b
 Residual equations:
  Iteration variables: c
@@ -170,7 +170,7 @@ Solved equations:
   c = a + b
 Residual equations:
  Iteration variables: c
-  23 = c * b
+  23 = c * b annotation(__Modelon(LocalIteration(enabled = false)))
  Iteration variables: b
   20 = c * a
 -------------------------------
@@ -201,7 +201,7 @@ Iteration variables:
   c()
 Solved equations:
  Iteration variables: b
-  23 = c * b
+  23 = c * b annotation(__Modelon(LocalIteration(enabled = e)))
   c = a + b
 Residual equations:
  Iteration variables: c
@@ -234,7 +234,7 @@ Iteration variables:
   c[1]
 Solved equations:
  Iteration variables: b[1]
-  23 = c[1] .* b[1]
+  23 = c[1] .* b[1] annotation(__Modelon(LocalIteration(enabled = true)))
   c[1] = a[1] .+ b[1]
 Residual equations:
  Iteration variables: c[1]
@@ -255,7 +255,7 @@ Solved equations:
   c[2] = a[2] .+ b[2]
 Residual equations:
  Iteration variables: c[2]
-  42 = c[2] .* b[2]
+  42 = c[2] .* b[2] annotation(__Modelon(LocalIteration(enabled = false)))
  Iteration variables: b[2]
   1 = c[2] .* a[2]
 Jacobian:
