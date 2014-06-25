@@ -36,6 +36,7 @@ typedef enum jmi_log_category_t {
     logError,
     logWarning,
     logInfo
+/* NB: Enum values should currently be <= 3 due to log level handling as category */
 } jmi_log_category_t;
 
 const char* jmi_callback_log_category_to_string(jmi_log_category_t c);

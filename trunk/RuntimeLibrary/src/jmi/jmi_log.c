@@ -302,6 +302,8 @@ void file_logger(FILE *out, FILE *err,
     */    
 }
 
+category_t clamp_category(category_t c) { return c <= logInfo ? c : logInfo; }
+
 /** \brief Emit the currently buffered log message, if one exists. */
 static void emit(log_t *log) {
     
@@ -312,7 +314,9 @@ static void emit(log_t *log) {
 
         if (!emitted_category(log, log->c)) return;
 
-        cb->emit_log(cb, log->c, log->severest_category, buf->msg);
+        /* Clamp the category before we emit it since we currently don't pass
+           categories beyond logInfo to the outside. */
+        cb->emit_log(cb, clamp_category(log->c), clamp_category(log->severest_category), buf->msg);
 
     /* create_log_file_if_needed(log); */
         if (log->log_file) {
@@ -613,6 +617,13 @@ static int emitted_category(log_t *log, category_t c) {
     if (!log->filtering_enabled) {
         return TRUE;
     }
+
+    /* interim solution to allow to pass a log level >= 4 instead of a category */
+    if (c >= 4) {
+        if (cb->log_options.log_level < c) return FALSE;
+        c = logInfo;
+    }
+
     return cb->is_log_category_emitted(cb, c);
 }
 
