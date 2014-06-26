@@ -321,7 +321,7 @@ static void emit(log_t *log) {
     /* create_log_file_if_needed(log); */
         if (log->log_file) {
             file_logger(log->log_file, log->log_file, 
-                        log->c, log->severest_category, buf->msg);
+                        clamp_category(log->c), clamp_category(log->severest_category), buf->msg);
             fflush(log->log_file);
         }
 
