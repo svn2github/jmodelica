@@ -1641,8 +1641,31 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
 				
                 for (FVariable vv : variable.initDependsOn()) {
-                    if (initialUnknowns.contains(vv) || vv.isInput()) {
-                        dependencyIndex.add(variableIndexMap.get(vv.name()));
+                    if (!vv.isPreVariable() && !vv.isExternalObject() && !vv.isTemporary()) {
+                        //Duplicated code for finding if initial == exact. TODO: Refactor
+                        FExp e_start = null;
+                        Boolean isFixed;
+
+                        if (vv.fixedAttributeSet()) {
+                            isFixed = vv.fixedAttributeExp().ceval().booleanValue();
+                        } else {
+                            isFixed = false; //The default value.
+                        }
+        
+                        if (!isFixed) {
+                            if (vv.useBindingExpAsStart())
+                                e_start = vv.getBindingExp();
+                            else if (vv.startAttributeSet() && !vv.isDependentParameter())
+                                e_start = vv.startAttributeExp();
+                            
+                            if (e_start != null && e_start.isConstantExp() && vv.fixedAttribute() && !vv.isAlias())
+                                dependencyIndex.add(variableIndexMap.get(vv.name())); //The variables initial type is "exact"
+                            else if (vv.isInput())
+                                dependencyIndex.add(variableIndexMap.get(vv.name())); //The variables is an input
+                            
+                        } else {
+                            dependencyIndex.add(variableIndexMap.get(vv.name())); //The variables initial type is "exact"
+                        }
                     }
                 }
                 generateDependenciesAttribute(dependencyIndex, genPrinter);
