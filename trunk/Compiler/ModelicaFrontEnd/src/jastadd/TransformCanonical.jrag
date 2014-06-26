@@ -1002,9 +1002,9 @@ aspect TransformCanonical {
 		param = param || isParameter();
 		FEquation feq = new FEquation(new FIdUseExp(name), bexp.reflattenBindingExp(bexpPrefix));
 		if (param)
-			fc.addFParameterEquation(feq);
+			fc.addFParameterEquationNoTransform(feq);
 		else
-			fc.addFEquation(feq);	
+			fc.addFEquation(feq);
 	}
 	
 	protected void FRecordVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
@@ -3653,7 +3653,7 @@ aspect FunctionInlining {
 			
 			FVariable var = type.createTempFVariable(name, variability);
 			vars.add(var);
-			vars.getChild(vars.getNumChildNoTransform() - 1);
+			vars.getChild(vars.getNumChild() - 1);
 			
 			setSizeOf(oldName, type.size());
 			lookupMap.addVariable(var);

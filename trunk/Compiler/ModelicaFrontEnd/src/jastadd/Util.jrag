@@ -2072,7 +2072,7 @@ aspect FlatNames {
      * \brief Add an equation to the first equation block.
      */
     public void FClass.addFEquation(FAbstractEquation feq) {
-        addFAbstractEquation(feq);
+        addFAbstractEquationNoTransform(feq);
     }
     
 }
