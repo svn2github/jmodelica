@@ -563,7 +563,7 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
 
     if (emitted_category(log, c)) {
         set_category(log, c);
-        buffer_starttag(bufof(log), type, name, name_end, c, pc, flags);
+        buffer_starttag(bufof(log), type, name, name_end, clamp_category(c), clamp_category(pc), flags);
     }
     cancel_commas(log);
 
