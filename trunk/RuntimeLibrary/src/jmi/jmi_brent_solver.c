@@ -30,6 +30,8 @@
 #define BRENT_BASE_LOG_LEVEL 6     /* Minimal Brent printouts log level */
 #define BRENT_EXTENDED_LOG_LEVEL 7 /* Extended Brent printouts log level */
 
+#define BRENT_INITIAL_STEP_FACTOR 0.01 /* Initial bracketing step as a fraction of nominal */
+
 /* Interface to the residual function that is compatible with Brent search.
    @param y - input - function argument
    @param f - output - residual value
@@ -235,7 +237,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double x = block->x[0], tmp, f_tmp;
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
-        double lstep = block->nominal[0], ustep = lstep;
+        double lstep = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR, ustep = lstep;
         while (1) {
             if (lower > block->min[0] && /* lower is fine as long as we're inside the bounds */
                 (
