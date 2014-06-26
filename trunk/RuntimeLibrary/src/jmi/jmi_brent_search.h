@@ -24,10 +24,12 @@ typedef int (*jmi_brent_func_t)(realtype u, realtype* f, void* data);
     @param tolerance      Relative tolerance for u
     @param u_out    Solution or best guess
     @param f_out    Residual at u_out
-    @param data    user data propagated to the function
+    @param data     User data propagated to the function
     @return Error flag (may be forwarded from the call to f() or one of jmi_brent_exit_codes_t)
  */
-int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtype f_min, realtype f_max, realtype tolerance, realtype* u_out, realtype* f_out,void *data);
+int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max,
+                     realtype f_min, realtype f_max, realtype tolerance,
+                     realtype* u_out, realtype* f_out, void *data);
 
 #include <kinsol/kinsol.h>
 

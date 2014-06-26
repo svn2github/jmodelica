@@ -110,6 +110,8 @@ abstract public class OptionRegistry {
         public static final int INFO = 4;
         public static final int VERBOSE = 5;
         public static final int DEBUG = 6;
+        public static final int MOREDEBUG = 7;
+        public static final int MAXDEBUG = 8;
     }
     public interface LocalIteration {
         public static final String OFF        = "off";
@@ -428,7 +430,7 @@ abstract public class OptionRegistry {
               runtime, 
               RuntimeLogLevel.WARNING,
               "Log level for the runtime: 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug.",
-                RuntimeLogLevel.NONE, RuntimeLogLevel.DEBUG),
+                RuntimeLogLevel.NONE, RuntimeLogLevel.MAXDEBUG),
         ENFORCE_BOUNDS
             ("enforce_bounds",
             runtime,
