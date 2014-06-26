@@ -9146,8 +9146,8 @@ public
  algorithm
   assert(size(x, 1) == 2 or not size(x, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray45.f\");
   assert(size(y, 1) == 2 or not (not size(x, 1) == 2 and not not size(y, 1) == 2), \"Mismatching sizes in FunctionTests.UnknownArray45.f\");
-  r.x[1] := if size(x, 1) == 2 then FunctionTests.UnknownArray45.R1(x) elseif not size(y, 1) == 2 then FunctionTests.UnknownArray45.R1({1, 2}) else FunctionTests.UnknownArray45.R1(y);
-  r.x[2] := if size(x, 1) == 2 then FunctionTests.UnknownArray45.R1(x) elseif not size(y, 1) == 2 then FunctionTests.UnknownArray45.R1({1, 2}) else FunctionTests.UnknownArray45.R1(y);
+  r.x[1] := if size(x, 1) == 2 then x[1] elseif not size(y, 1) == 2 then 1 else y[1];
+  r.x[2] := if size(x, 1) == 2 then x[2] elseif not size(y, 1) == 2 then 2 else y[2];
   return;
  end FunctionTests.UnknownArray45.f;
 
