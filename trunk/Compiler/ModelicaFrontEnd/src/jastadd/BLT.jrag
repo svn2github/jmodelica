@@ -2150,13 +2150,23 @@ aspect Tearing {
         }
         
         public static TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options) {
+            TearingAlgorithm algorithm = getActiveAlgorithm(options);
+            if (algorithm == null)
+                return null;
+            else
+                return algorithm.tear(block, producer, options);
+        }
+        
+        public static TearingAlgorithm getActiveAlgorithm(OptionRegistry options) {
             for (TearingAlgorithm algorithm : tearingAlgorithms)
                 if (algorithm.active(options))
-                    return algorithm.tear(block, producer, options);
+                    return algorithm;
             return null;
         }
         
-        
+        public static boolean canTear(OptionRegistry options) {
+            return getActiveAlgorithm(options) != null;
+        }
     }
 }
 
