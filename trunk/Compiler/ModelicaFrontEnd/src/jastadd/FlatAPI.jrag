@@ -2409,7 +2409,7 @@ aspect FlatDiagnostics {
 
 		str.append("\n");  
 		
-		str.append(dependencyDiagonstics());
+		str.append(dependencyDiagnostics());
 
     	str.append("\n");
 		
@@ -2701,7 +2701,7 @@ aspect FlatDiagnostics {
 		
 	}
 
-	public String FClass.dependencyDiagonstics() {
+	public String FClass.dependencyDiagnostics() {
 		
 		StringBuilder str = new StringBuilder();
 			
