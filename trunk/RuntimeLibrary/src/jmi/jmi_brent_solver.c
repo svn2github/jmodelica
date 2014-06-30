@@ -156,7 +156,7 @@ static int jmi_brent_try_bracket(jmi_block_solver_t * block,
     }
 
     jmi_log_node(log, BRENT_EXTENDED_LOG_LEVEL, "BrentTryBracket",
-                 "Trying to bracket the root with <iv: %g, f: %g>", x_bracket, f_bracket);
+                 "Trying to bracket the root with <iv: %g, f: %g>", x_bracket, f_bracket[0]);
 
     if (f_bracket[0] > DBL_MIN) { 
         if (f_cur <= 0) { /* sign change - bracketing done */
@@ -271,7 +271,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                         block->min[0] = lower; /* we cannot step further without breaking the function -> update the bound */
                     }
                 }
-                else {
+                else if (flag == 0) {
                     /* increase the step */
                     lstep *= 2;
                     lower = tmp;
@@ -307,7 +307,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                         block->max[0] = upper; /* we cannot step further without breaking the function -> update the bound */
                     }
                 }
-                else {
+                else if (flag == 0) {
                     /* increase the step */
                     ustep *= 2;
                     upper = tmp;
