@@ -1644,11 +1644,14 @@ aspect FlatTypes {
 	eq FForIndex.getChild().inRecord()   = false;
 	
 	inh boolean InstComponentDecl.inRecord();
+    inh boolean InstExtends.inRecord();
     eq InstNode.getInstComponentDecl().inRecord()               = false;
     eq Root.getChild().inRecord()                               = false;
 	eq InstForIndex.getInstPrimitive().inRecord()               = false;
 	eq InstRecord.getInstComponentDecl().inRecord()             = true;
+    eq InstRecord.getInstExtends().inRecord()                   = true;
 	eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
+    eq InstExtends.getInstComponentDecl().inRecord()            = inRecord();
 	
     inh boolean FExp.inRecordDecl();
 	inh boolean InstComponentDecl.inRecordDecl();

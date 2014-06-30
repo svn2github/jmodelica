@@ -1100,6 +1100,38 @@ model FunctionEval30
  )})));
 end FunctionEval30;
 
+model FunctionEval31
+    record R1
+        Real x;
+    end R2;
+    record R2
+        extends R1;
+    end R2;
+    function f
+        input R2 r2;
+        output Real y;
+      algorithm
+        y := r2.x;
+    end f;
+    
+    constant Real y1 = f(R2(3));
+    Real y2 = f(R2(3));
+
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="FunctionEval31",
+            description="Constant evaluation record component in input",
+            variables="
+y1
+y2
+",
+            values="
+3.0
+3.0
+"
+ )})));
+end FunctionEval31;
+
 
 
 model StringConcat
