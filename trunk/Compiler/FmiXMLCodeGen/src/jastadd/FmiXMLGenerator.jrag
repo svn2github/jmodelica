@@ -271,8 +271,8 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             					 "vendorAnnotations", "modelVariables", "modelStructure",
             					 "implementation"};
         }
-		
-		public void generateAttributes(CodeStream genPrinter) {
+
+        public void generateAttributes(CodeStream genPrinter) {
             generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
@@ -283,13 +283,14 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators() ,              genPrinter);
         }
-		
-		private int numberOfEventIndicators() {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system"))
-				return fclass.numEventIndicators();
-			else
-				return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
-		}
+
+        private int numberOfEventIndicators() {
+            if (fclass.getDAEStructuredBLT() == null)
+                // Only generating init DAE
+                return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
+            else
+                return fclass.numEventIndicators();
+        }
 	}
 	
 	/**
@@ -924,8 +925,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                                   "typeDefinitions",   "logCategories",  "defaultExperiment",
                                   "vendorAnnotations", "modelVariables", "modelStructure"};
         }
-		
-		public void generateAttributes(CodeStream genPrinter) {
+
+        public void generateAttributes(CodeStream genPrinter) {
             generateAttribute("fmiVersion",               "2.0",                         genPrinter);
             generateAttribute("modelName",                fclass.name(),                 genPrinter);
             generateAttribute("guid",                     fclass.guid(),                 genPrinter);
@@ -934,13 +935,14 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             generateAttribute("variableNamingConvention", "structured",                  genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators() ,    genPrinter);
         }
-		
-		private int numberOfEventIndicators() {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system"))
-				return fclass.numEventIndicators();
-			else
-				return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
-		}
+
+        private int numberOfEventIndicators() {
+            if (fclass.getDAEStructuredBLT() == null)
+                // Only generating init DAE
+                return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
+            else
+                return fclass.numEventIndicators();
+        }
 	}
 	
 	/**

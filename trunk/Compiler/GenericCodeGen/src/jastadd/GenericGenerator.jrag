@@ -699,13 +699,13 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_event_indicators", myGenerator, fclass);
 		}
 	
-		public void generate(CodeStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
-				genPrinter.print(fclass.numEventIndicators());
-			} else {
-				genPrinter.print(fclass.numEventIndicators() + fclass.numInitialEventIndicators());
-			}
-		}
+        public void generate(CodeStream genPrinter) {
+            if (fclass.getDAEStructuredBLT() == null)
+                // Only generating init DAE
+                genPrinter.print(fclass.numEventIndicators() + fclass.numInitialEventIndicators());
+            else
+                genPrinter.print(fclass.numEventIndicators());
+        }
 	}
 	
 	/**
@@ -732,13 +732,13 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_initial_event_indicators", myGenerator, fclass);
 		}
 	
-		public void generate(CodeStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
-				genPrinter.print(fclass.numInitialEventIndicators());
-			} else {
-				genPrinter.print(0);
-			}			
-		}
+        public void generate(CodeStream genPrinter) {
+            if (fclass.getDAEStructuredBLT() == null)
+                // Only generating init DAE
+                genPrinter.print(0);
+            else
+                genPrinter.print(fclass.numInitialEventIndicators());
+        }
 	}
 
 	/**

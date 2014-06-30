@@ -396,10 +396,16 @@ aspect TransformCanonical {
             @Override
             public void perform() {
                 computeMatchingsAndBLT();
-                daeBLT.complianceCheck(ErrorCheckType.COMPILE);
+                complianceCheckBLT();
                 breakOnErrors();
             }
         }
+    }
+    
+    public void FClass.complianceCheckBLT() {
+        if (getDAEBLT() != null)
+            getDAEBLT().complianceCheck(ErrorCheckType.COMPILE);
+        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE);
     }
     
     private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
@@ -508,7 +514,9 @@ aspect TransformCanonical {
         } 
 
 		// Perform BLT
-		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
+		if (root().options.getBooleanOption("equation_sorting") &&
+		        !root().options.getBooleanOption("generate_only_initial_system") &&
+		        g.isComplete()) {
 			try {
 				daeBLT = g.computeBLT(root().options);
 				if (blockFunctionExtraction(daeBLT, g)) {
@@ -531,7 +539,9 @@ aspect TransformCanonical {
 			log.info(daeStructuredBLT);
 			
 			log.info(daeBLT);
-		
+		} else {
+		    daeBLT = null;
+		    daeStructuredBLT = null;
 		}
 		
 		// Find matching for the initialization system

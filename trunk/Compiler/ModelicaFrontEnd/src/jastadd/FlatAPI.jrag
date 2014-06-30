@@ -2782,7 +2782,7 @@ aspect FlatDiagnostics {
 	}
 	
 	public String FClass.printDAEBLT() {
-		return getDAEBLT().toString();
+		return getDAEBLT() == null ? "" : getDAEBLT().toString();
 	}
 
 	public String FClass.printDAEInitBLT() {

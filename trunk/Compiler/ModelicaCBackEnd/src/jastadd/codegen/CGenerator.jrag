@@ -190,7 +190,7 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+			if (fclass.getDAEStructuredBLT() != null) {
 				for (FRelExp e : fclass.relExpInEquations()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				Enumerator enumerator = new Enumerator();
@@ -428,6 +428,11 @@ public class CGenerator extends GenericGenerator {
 			super("C_dae_blocks_residual_functions", myGenerator, fclass);
             addOptions("generate_ode");
 		}
+		
+        @Override
+        public boolean isActive() {
+            return fclass.getDAEStructuredBLT() != null && super.isActive();
+        }
 
 		public void generate(CodeStream genPrinter) {
 			for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
@@ -447,6 +452,11 @@ public class CGenerator extends GenericGenerator {
 			super("C_dae_add_blocks_residual_functions", myGenerator, fclass);
             addOptions("generate_ode");
 		}
+
+        @Override
+        public boolean isActive() {
+            return fclass.getDAEStructuredBLT() != null && super.isActive();
+        }
 
 		public void generate(CodeStream genPrinter) {
 			if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
@@ -468,9 +478,13 @@ public class CGenerator extends GenericGenerator {
 			super("n_dae_blocks", myGenerator, fclass);
 		}
 
-		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.getDAEBLT().getNumLabledBlocks());
-		}
+        public void generate(CodeStream genPrinter) {
+            if (fclass.getDAEBLT() == null)
+                // Only producing init DAE
+                genPrinter.print(fclass.getDAEInitBLT().getNumLabledBlocks());
+            else
+                genPrinter.print(fclass.getDAEBLT().getNumLabledBlocks());
+        }
 	}
 
 	/**
@@ -545,7 +559,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(CodeStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+			if (fclass.getDAEStructuredBLT() != null) {
 				for (FExp e : fclass.guardExpInEquations()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
@@ -598,8 +612,13 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_time_events(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_time_events", myGenerator, fclass);
-            addOptions("!generate_only_initial_system", "generate_ode");
+            addOptions("generate_ode");
 		}
+
+        @Override
+        public boolean isActive() {
+            return fclass.getDAEStructuredBLT() != null && super.isActive();
+        }
 
 		public void generate(CodeStream genPrinter) {
 			for (FSampleExp e : fclass.samplers()) 
@@ -719,7 +738,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(CodeStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+			if (fclass.getDAEStructuredBLT() == null) {
 				genPrinter.print(INDENT + "ef = model_ode_initialize(jmi);\n");
 			} else {
 				fclass.getDAEStructuredBLT().genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);

@@ -133,6 +133,11 @@ public class CADGenerator extends CGenerator {
 			super("CAD_dae_blocks_residual_functions", myGenerator, fclass);
 		}
 
+        @Override
+        public boolean isActive() {
+            return fclass.getDAEStructuredBLT() != null && super.isActive();
+        }
+
 		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
@@ -171,6 +176,11 @@ public class CADGenerator extends CGenerator {
 			super("CAD_dae_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
+        @Override
+        public boolean isActive() {
+            return fclass.getDAEStructuredBLT() != null && super.isActive();
+        }
+
 		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
@@ -204,8 +214,12 @@ public class CADGenerator extends CGenerator {
 		
 		public DAETag_CAD_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_ode_derivatives", myGenerator, fclass);
-            addOptions("!generate_only_initial_system");
 		}
+
+        @Override
+        public boolean isActive() {
+            return fclass.getDAEStructuredBLT() != null && super.isActive();
+        }
 
 		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateODEJacobians(fclass)) {

@@ -130,10 +130,11 @@ public class XMLGenerator extends GenericXMLGenerator {
 			genPrinter.print("generationDateAndTime=\""+dateformat.format(new Date())+"\" ");
 			genPrinter.print("variableNamingConvention=\"structured\" ");
 			genPrinter.print("numberOfContinuousStates=\""+fclass.numDifferentiatedRealVariables()+"\" ");
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system"))
-			    genPrinter.print("numberOfEventIndicators=\"" + fclass.numEventIndicators() + "\"");
-			else
-			    genPrinter.print("numberOfEventIndicators=\"" + (fclass.numEventIndicators() + fclass.numInitialEventIndicators()) + "\"");
+            if (fclass.getDAEStructuredBLT() == null)
+                // Only generating init DAE
+                genPrinter.print("numberOfEventIndicators=\"" + (fclass.numEventIndicators() + fclass.numInitialEventIndicators()) + "\"");
+            else
+                genPrinter.print("numberOfEventIndicators=\"" + fclass.numEventIndicators() + "\"");
 		}
 	}
 	
