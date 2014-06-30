@@ -2721,10 +2721,19 @@ equation
             generate_ode_jacobian=true,
             equation_sorting=false,
             template="
+$CAD_ode_derivatives$
 $CAD_function_headers$
 $CAD_functions$
 ",
             generatedCode="
+/******** Declarations *******/
+
+jmi_real_t** dz = jmi->dz;
+    /*********** ODE section ***********/
+    /*********** Real outputs **********/
+    /*** Integer and boolean outputs ***/
+    /********* Other variables *********/
+
 void func_CADCodeGenTests_CADWhileStmtTest1_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t n_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
 
 void func_CADCodeGenTests_CADWhileStmtTest1_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t n_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {

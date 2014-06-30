@@ -700,8 +700,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
         public void generate(CodeStream genPrinter) {
-            if (fclass.getDAEStructuredBLT() == null)
-                // Only generating init DAE
+            if (fclass.onlyInitBLT())
                 genPrinter.print(fclass.numEventIndicators() + fclass.numInitialEventIndicators());
             else
                 genPrinter.print(fclass.numEventIndicators());
@@ -733,8 +732,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
         public void generate(CodeStream genPrinter) {
-            if (fclass.getDAEStructuredBLT() == null)
-                // Only generating init DAE
+            if (fclass.onlyInitBLT())
                 genPrinter.print(0);
             else
                 genPrinter.print(fclass.numInitialEventIndicators());

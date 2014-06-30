@@ -135,7 +135,7 @@ public class CADGenerator extends CGenerator {
 
         @Override
         public boolean isActive() {
-            return fclass.getDAEStructuredBLT() != null && super.isActive();
+            return !fclass.onlyInitBLT() && super.isActive();
         }
 
 		public void generate(CodeStream genPrinter) {
@@ -178,7 +178,7 @@ public class CADGenerator extends CGenerator {
 
         @Override
         public boolean isActive() {
-            return fclass.getDAEStructuredBLT() != null && super.isActive();
+            return !fclass.onlyInitBLT() && super.isActive();
         }
 
 		public void generate(CodeStream genPrinter) {
@@ -218,7 +218,7 @@ public class CADGenerator extends CGenerator {
 
         @Override
         public boolean isActive() {
-            return fclass.getDAEStructuredBLT() != null && super.isActive();
+            return !fclass.onlyInitBLT() && super.isActive();
         }
 
 		public void generate(CodeStream genPrinter) {

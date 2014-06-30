@@ -359,23 +359,25 @@ aspect TransformCanonical {
         return daeInitUnmatchedVariables;
     }
 
-    private BLT FClass.daeBLT = new BLT();
+    private BLT FClass.daeBLT = BLT.EMPTY_BLT;
     syn BLT FClass.getDAEBLT() {
         transformCanonical();
         return daeBLT;
     }
 
-    private StructuredBLT FClass.daeStructuredBLT = new StructuredBLT(this);
+    private StructuredBLT FClass.daeStructuredBLT = BLT.EMPTY_BLT;
     syn StructuredBLT FClass.getDAEStructuredBLT() {
         transformCanonical();
         return daeStructuredBLT;
     }
 
-    private BLT FClass.daeInitBLT = new BLT();
+    private BLT FClass.daeInitBLT = BLT.EMPTY_BLT;
     syn BLT FClass.getDAEInitBLT() {
         transformCanonical();
         return daeInitBLT;
     }
+    
+    syn boolean FClass.onlyInitBLT() = getDAEBLT() == BLT.EMPTY_BLT && getDAEInitBLT() != BLT.EMPTY_BLT;
 
     syn boolean FClass.shouldPerformMatchingsAndBLT() = true;
 
@@ -403,8 +405,7 @@ aspect TransformCanonical {
     }
     
     public void FClass.complianceCheckBLT() {
-        if (getDAEBLT() != null)
-            getDAEBLT().complianceCheck(ErrorCheckType.COMPILE);
+        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE);
         getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE);
     }
     
@@ -540,8 +541,8 @@ aspect TransformCanonical {
 			
 			log.info(daeBLT);
 		} else {
-		    daeBLT = null;
-		    daeStructuredBLT = null;
+		    daeBLT = BLT.EMPTY_BLT;
+		    daeStructuredBLT = BLT.EMPTY_BLT;
 		}
 		
 		// Find matching for the initialization system
@@ -647,6 +648,8 @@ aspect TransformCanonical {
 			}	
 			daeInitBLT.errorCheck();
 			log.info(daeInitBLT);
+		} else {
+		    daeInitBLT = BLT.EMPTY_BLT;
 		}
 	}	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			

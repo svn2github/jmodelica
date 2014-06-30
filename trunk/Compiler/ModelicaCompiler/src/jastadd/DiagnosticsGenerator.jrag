@@ -439,7 +439,7 @@ public class DiagnosticsGenerator {
                 ind++;
             }
             out.println("}<br />");
-            if (fc.getDAEBLT() != null) {
+            if (!fc.onlyInitBLT()) {
                 ArrayList<Integer> unsolvedDAEBlockSizes =
                         fc.getDAEBLT().unsolvedBlockSizes(); 
                 out.print("Number of unsolved equation blocks in DAE system: " + 
@@ -468,7 +468,7 @@ public class DiagnosticsGenerator {
                     ind++;
                 }
                 out.println("}<br />");
-                if (fc.getDAEBLT() != null) {
+                if (!fc.onlyInitBLT()) {
                     ArrayList<Integer> unsolvedDAEBlockSizes = fc.getDAEBLT().unsolvedBlockIterationSizes();
                     out.print("Number of unsolved equation blocks in DAE system after tearing: " + 
                               unsolvedDAEBlockSizes.size() + ": {");
@@ -554,7 +554,7 @@ public class DiagnosticsGenerator {
 					out.println("<h1>BLT for Init DAE System</h1>");
 					fc.getDAEInitBLT().diagnostics_generateBLTTable(out, true);
 					
-                    if (fc.getDAEBLT() != null) {
+                    if (!fc.onlyInitBLT()) {
                         out.println("<h1>BLT for DAE System</h1>");
                         fc.getDAEBLT().diagnostics_generateBLTTable(out, false);
                     }

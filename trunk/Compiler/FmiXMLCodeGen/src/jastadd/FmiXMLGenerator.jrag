@@ -285,8 +285,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
         }
 
         private int numberOfEventIndicators() {
-            if (fclass.getDAEStructuredBLT() == null)
-                // Only generating init DAE
+            if (fclass.onlyInitBLT())
                 return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
             else
                 return fclass.numEventIndicators();
@@ -937,8 +936,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         }
 
         private int numberOfEventIndicators() {
-            if (fclass.getDAEStructuredBLT() == null)
-                // Only generating init DAE
+            if (fclass.onlyInitBLT())
                 return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
             else
                 return fclass.numEventIndicators();

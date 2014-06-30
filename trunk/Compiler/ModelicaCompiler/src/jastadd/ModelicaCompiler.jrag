@@ -1269,7 +1269,7 @@ public class ModelicaCompiler {
 		
 		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
 			ASTNode.beginStep("writeIterationVariables()");
-            if (fc.getDAEBLT() != null)
+            if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
 			fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
 			ASTNode.endStep("writeIterationVariables()");
@@ -1277,7 +1277,7 @@ public class ModelicaCompiler {
 		
 		if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
 			ASTNode.beginStep("writeIterationVariables()");
-            if (fc.getDAEBLT() != null)
+            if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
 			fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
 			ASTNode.endStep("writeIterationVariables()");

@@ -289,6 +289,8 @@ aspect BLT{
     
 	public class BLT extends ArrayList<AbstractEquationBlock> {
 	    
+	    public static final StructuredBLT EMPTY_BLT = new StructuredBLT();
+	    
 	    private int numLabledBlocks = 0;
 		
 		public ArrayList<Integer> unsolvedBlockSizes() {
@@ -378,14 +380,10 @@ aspect BLT{
 		private ArrayList<AbstractEquationBlock> integerBooleanOutputBlocks = new ArrayList<AbstractEquationBlock>();
 		private ArrayList<AbstractEquationBlock> otherBlocks = new ArrayList<AbstractEquationBlock>();
 		
-		private FClass fclass;
-	
-		public StructuredBLT(FClass fclass) {
-			this.fclass = fclass;	
+		protected StructuredBLT() {
 		}
 		
 		public StructuredBLT(FClass fclass, BLT blt) {
-			this(fclass);
 			for (AbstractEquationBlock eb : blt) {
 				this.add(eb);
 				eb.setDAEPredecessors();
@@ -396,7 +394,7 @@ aspect BLT{
 
 			reset();
 			// Loop over all derivatives
-			for (FVariable fv : getFClass().derivativeVariables()) {
+			for (FVariable fv : fclass.derivativeVariables()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
 				if (!eb.isVisited()) {
@@ -412,7 +410,7 @@ aspect BLT{
 			}
 			
 			// Loop over all real outputs
-			for (FVariable fv : getFClass().realOutputs()) {
+			for (FVariable fv : fclass.realOutputs()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
 				//States and inputs can be outputs in which case they don't have equation blocks associated with them
@@ -429,7 +427,7 @@ aspect BLT{
 			}
 
 			// Loop over integer and boolean outputs
-			for (FVariable fv : getFClass().outputs()) {
+			for (FVariable fv : fclass.outputs()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
 				if (eb!=null && !eb.isVisited()) {
@@ -445,7 +443,7 @@ aspect BLT{
 			}
 
 			// Loop over all others
-			for (FVariable fv : getFClass().variables()) {
+			for (FVariable fv : fclass.variables()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
 				if (eb!=null && !eb.isVisited()) {
@@ -472,10 +470,6 @@ aspect BLT{
 			allBlocks.addAll(integerBooleanOutputBlocks);
 			allBlocks.addAll(otherBlocks);
 
-		}
-		
-		public FClass getFClass() {
-			return fclass;	
 		}
 		
 
