@@ -2222,7 +2222,7 @@ aspect ConstantEvaluation {
     eq InstRecord.attributeCValueDefault(String name) {
         CValueRecord res = new CValueRecord((FRecordType) type());
         int i = 0;
-        for (InstComponentDecl var : myInstClass().actualInstClass().getInstComponentDecls())
+        for (InstComponentDecl var : allInstComponentDecls())
             res.setMember(i++, var.attributeCValueGeneric(name));
         return res;
     }
@@ -2812,7 +2812,7 @@ aspect ConstantEvaluation {
         if (isArray()) {
             CValueArray res = new CValueArray(size());
             int ndims = ndims();
-            for (InstComponentDecl ch : getInstComponentDecls())
+            for (InstComponentDecl ch : allInstComponentDecls())
                 ch.cevalBindingExpForRecordArray(type, res, ndims);
             return res;
         } else {
@@ -2827,7 +2827,7 @@ aspect ConstantEvaluation {
     protected void InstArrayComponentDecl.cevalBindingExpForRecordArray(FRecordType type, CValueArray arr, int ndims) {
         ndims--;
         if (ndims > 0) {
-            for (InstComponentDecl ch : getInstComponentDecls())
+            for (InstComponentDecl ch : allInstComponentDecls())
                 ch.cevalBindingExpForRecordArray(type, arr, ndims);
         } else {
             arr.addCell(cevalBindingExpForRecord(type));

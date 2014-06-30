@@ -314,8 +314,8 @@ model RecordFlat9
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat9
- constant RecordTests.RecordFlat9.B b(y=2) = RecordTests.RecordFlat9.B(2, 0.0);
- RecordTests.RecordFlat9.B b2 = RecordTests.RecordFlat9.B(2, 0.0);
+ constant RecordTests.RecordFlat9.B b(y=2) = RecordTests.RecordFlat9.B(0.0, 2);
+ RecordTests.RecordFlat9.B b2 = RecordTests.RecordFlat9.B(0.0, 2);
 
 public
  record RecordTests.RecordFlat9.B
@@ -368,6 +368,61 @@ public
 end RecordTests.RecordFlat10;
 ")})));
 end RecordFlat10;
+
+/* This tests gives wrong result #3795 */
+model RecordFlat11
+    record A
+      Real a;
+    end A;
+    
+    record B1
+      Real b1;
+    end B1;
+    
+    record B2
+      Real b2;
+    end B2;
+    
+    record B
+      extends B1;
+      Real b;
+      extends B2;
+    end B;
+    
+    record C
+      Real c1;
+      extends A;
+      Real c2;
+      extends B;
+      Real c3;
+    end C;
+    
+    constant C c(c1=1,c2=2,c3=3,a=1.5,b=2.5,b1=2.25,b2=2.75);
+    C c2 = c;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat11",
+            description="Flattening records with modifiers.",
+            flatModel="
+fclass RecordTests.RecordFlat11
+ constant RecordTests.RecordFlat11.C c(c1 = 1,c2 = 2,c3 = 3,a = 1.5,b = 2.5,b1 = 2.25,b2 = 2.75) = RecordTests.RecordFlat11.C(1.5, 2.25, 2.75, 2.5, 1, 2, 3);
+ RecordTests.RecordFlat11.C c2 = RecordTests.RecordFlat11.C(1.5, 2.25, 2.75, 2.5, 1, 2, 3);
+
+public
+ record RecordTests.RecordFlat11.C
+  Real a;
+  Real b1;
+  Real b2;
+  Real b;
+  Real c1;
+  Real c2;
+  Real c3;
+ end RecordTests.RecordFlat11.C;
+
+end RecordTests.RecordFlat11;
+")})));
+end RecordFlat11;
 
 
 model RecordType1

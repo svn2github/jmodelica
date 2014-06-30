@@ -503,7 +503,7 @@ aspect Flattening {
                     stmt.setReturnVar(new FIdUseInstAccess(new InstComponentAccess(func.myOutputs().get(0).name())));
             }
             stmt.setName(func.name());
-            for (InstComponentDecl arg : func.getInstComponentDecls()) {
+            for (InstComponentDecl arg : func.allInstComponentDecls()) {
                 if (!hasReturn || !arg.isOutput()) {
                         arg.addExternalArg(stmt.getArgs(), flat);
                 }
@@ -886,7 +886,7 @@ aspect Flattening {
 	public void InstComponentDecl.generateSizeAttributes(List<FAttribute> attr) {}
 	
 	public void InstRecord.generateSizeAttributes(List<FAttribute> attr) {
-		for (InstComponentDecl icd : getInstComponentDecls()) {
+		for (InstComponentDecl icd : allInstComponentDecls()) {
 			FAttribute a = findMatching(attr, icd.name());
 			boolean create = (a == null);
 			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();

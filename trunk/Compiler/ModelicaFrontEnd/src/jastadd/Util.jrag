@@ -2101,11 +2101,7 @@ aspect FlatFunctionUtils {
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
          Set<String> names = new HashSet<String>();
-         for (InstExtends ie : getInstExtendss())
-        	 for (InstComponentDecl icd : ie.myInputs())
-        		 if (names.add(icd.name()))
-                     l.add(icd);
-         for (InstComponentDecl icd : getInstComponentDecls())
+         for (InstComponentDecl icd : allInstComponentDecls())
              if (icd.isInput() && names.add(icd.name()))
                  l.add(icd);
          return l;
@@ -2118,11 +2114,7 @@ aspect FlatFunctionUtils {
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
          Set<String> names = new HashSet<String>();
-         for (InstExtends ie : getInstExtendss())
-        	 for (InstComponentDecl icd : ie.myNonInputs())
-        		 if (names.add(icd.name()))
-                     l.add(icd);
-         for (InstComponentDecl icd : getInstComponentDecls())
+         for (InstComponentDecl icd : allInstComponentDecls())
              if (!icd.isInput() && names.add(icd.name()))
                  l.add(icd);
          return l;
@@ -2135,11 +2127,7 @@ aspect FlatFunctionUtils {
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
          Set<String> names = new HashSet<String>();
-         for (InstExtends ie : getInstExtendss())
-        	 for (InstComponentDecl icd : ie.myOutputs())
-        		 if (names.add(icd.name()))
-                     l.add(icd);
-         for (InstComponentDecl icd : getInstComponentDecls())
+         for (InstComponentDecl icd : allInstComponentDecls())
              if (icd.isOutput() && names.add(icd.name()))
                  l.add(icd);
          return l;
@@ -2151,9 +2139,7 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myModifiableComponents() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myModifiableComponents());
-         for (InstComponentDecl icd : getInstComponentDecls())
+         for (InstComponentDecl icd : allInstComponentDecls())
              if (icd.isModifiable())
                  l.add(icd);
          return l;

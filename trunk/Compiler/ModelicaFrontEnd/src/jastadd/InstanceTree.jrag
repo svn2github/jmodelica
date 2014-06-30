@@ -1898,10 +1898,16 @@ aspect InstanceAST_API {
 			
 			private Iterator<InstComponentDecl> current;
 			private Iterator<InstExtends> exts;
+            private Iterator<InstComponentDecl> last;
 			
 			public InstComponentIterator() {
-				current = getInstComponentDecls().iterator();
 				exts = getInstExtendss().iterator();
+                last = getInstComponentDecls().iterator();
+                if (exts.hasNext()) {
+                    current = exts.next().allInstComponentDeclsIterator();
+                } else {
+                    current = last;
+                }
 				update();
 			}
 			
@@ -1923,6 +1929,9 @@ aspect InstanceAST_API {
 				while (!current.hasNext() && exts.hasNext()) {
 					current = exts.next().allInstComponentDeclsIterator();
 				}
+                if (!current.hasNext()) {
+                    current = last;
+                }
 			}
 			
 		}
@@ -1931,10 +1940,16 @@ aspect InstanceAST_API {
 
             private Iterator<InstClassDecl> current;
             private Iterator<InstExtends> exts;
+            private Iterator<InstClassDecl> last;
 
             public InstClassIterator() {
-                current = getInstClassDecls().iterator();
                 exts = getInstExtendss().iterator();
+                last = getInstClassDecls().iterator();
+                if (exts.hasNext()) {
+                    current = exts.next().allInstClassDeclsIterator();
+                } else {
+                    current = last;
+                }
                 update();
             }
 
@@ -1955,6 +1970,9 @@ aspect InstanceAST_API {
             private void update() {
                 while (!current.hasNext() && exts.hasNext()) {
                     current = exts.next().allInstClassDeclsIterator();
+                }
+                if (!current.hasNext()) {
+                    current = last;
                 }
             }
             
