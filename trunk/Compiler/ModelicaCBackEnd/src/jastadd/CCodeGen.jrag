@@ -864,9 +864,16 @@ aspect CCodeGen {
             for (FExp arg : type.myConstructorStmt().myConstructorArgs()) {
                 pushLevel(name + "_arg" + i, false, arg.size().isUnknown());
                 FType t = arg.type();
-                if (t.parent == null)
+                boolean b = t.parent == null;
+                if (b) {
+                    // This needs to be done since some exps does
+                    // not parent their calculated type
                     t.setParent(type);
+                }
                 t.print(this);
+                if (b) {
+                    t.setParent(null);
+                }
                 popLevel();
                 i++;
             }
