@@ -7197,7 +7197,7 @@ model UnknownArray8
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 3796, column 7:
-  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [size(b, 1)]
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [:]
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 3796, column 14:
   Could not evaluate array size of output b
@@ -7697,7 +7697,7 @@ Semantic error at line 4429, column 32:
   Cannot find class or component declaration for b
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4433, column 7:
-  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, size(zeros(), 2)]
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, :]
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4433, column 16:
   Could not evaluate array size of output c
@@ -9213,6 +9213,65 @@ public
 end FunctionTests.UnknownArray46;
 ")})));
 end UnknownArray46;
+
+model UnknownArray47
+    function f2
+        input Real[:] a;
+        output Real[size(a,1)] b = a;
+        algorithm
+    end f2;
+    function f1
+        input Real[:] x;
+        output Real[size(x,1)] y;
+        algorithm
+            y := f2(x + x) + x;
+        annotation(Inline=false);
+    end f1;
+    
+    Real[1] y = f1({time});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray47",
+            description="Test flattening of function call sizes with unknown size args #3806",
+            flatModel="
+fclass FunctionTests.UnknownArray47
+ Real y[1];
+equation
+ ({y[1]}) = FunctionTests.UnknownArray47.f1({time});
+
+public
+ function FunctionTests.UnknownArray47.f1
+  input Real[:] x;
+  output Real[size(x, 1)] y;
+  Real[:] temp_1;
+  Real[:] temp_2;
+ algorithm
+  size(temp_1) := {size(x, 1)};
+  size(temp_2) := {size(x, 1)};
+  for i1 in 1:size(x, 1) loop
+   temp_2[i1] := x[i1] + x[i1];
+  end for;
+  (temp_1) := FunctionTests.UnknownArray47.f2(temp_2);
+  for i1 in 1:size(x, 1) loop
+   y[i1] := temp_1[i1] + x[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray47.f1;
+
+ function FunctionTests.UnknownArray47.f2
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(a, 1) loop
+   b[i1] := a[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray47.f2;
+
+end FunctionTests.UnknownArray47;
+")})));
+end UnknownArray47;
 
 // TODO: need more complex cases
 model IncompleteFunc1

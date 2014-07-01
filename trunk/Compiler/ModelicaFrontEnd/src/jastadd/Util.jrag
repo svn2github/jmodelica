@@ -2921,11 +2921,13 @@ aspect FlatExpressions {
      * 
      * Only dummy expressions and similar return false.
      */
-    syn boolean FExp.isValidExp()       = true;
-    eq FNoExp.isValidExp()              = false;
-    eq FUnsupportedExp.isValidExp()     = false;
-    eq FUnsupportedBuiltIn.isValidExp() = false;
-    eq FUnknownSizeExp.isValidExp()     = false;
+    syn boolean FExp.isValidExp()       = isValidExp(false);
+    
+    syn boolean FExp.isValidExp(boolean allowUnknownSize)       = true;
+    eq FNoExp.isValidExp(boolean allowUnknownSize)              = false;
+    eq FUnsupportedExp.isValidExp(boolean allowUnknownSize)     = false;
+    eq FUnsupportedBuiltIn.isValidExp(boolean allowUnknownSize) = false;
+    eq FUnknownSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
     
 }
 

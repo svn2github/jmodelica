@@ -998,14 +998,15 @@ aspect Arrays {
         for (int j = 0; j < getNumArg(); j++)
             varMap.put(myInputs().get(j), getArg(j).getFExp());
         
-        try {
-            MutableSize ms = new MutableSize(s.ndims());
-            for (int j = 0; j < s.ndims(); j++) 
+        MutableSize ms = new MutableSize(s.ndims());
+        for (int j = 0; j < s.ndims(); j++) {
+            try {
                 ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
-            return ms;
-        } catch (ConstantEvaluationException e) {
-            return s;
+            } catch (ConstantEvaluationException e) {
+                ms.append(dynamicFExp(new FUnknownSizeExp(unknownInstComponentDecl(), j)));
+            }
         }
+        return ms;
     }
     eq InstVectorFunctionCall.sizeOfOutput(int i) = 
         (i == 0) ? vectorizedSize() : super.sizeOfOutput(i);
@@ -1174,6 +1175,25 @@ aspect Arrays {
         for (int i = 0; i < getNumChild(); i++) 
             exp.setChild(getChild(i).createSizeFExp(varMap), i);
         return exp;
+    }
+    
+    public FExp FSizeExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+        if (varMap.containsKey(this))
+            throw new ConstantEvaluationException();
+        varMap.put(this, null);
+        Size s = getFExp().size();
+        if (s.ndims() == 0)
+            throw new ConstantEvaluationException();
+        return s.createSizeFExp(dimension(), varMap);
+    }
+    
+    public FExp FUnknownSizeExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+        boolean circ = varMap.containsKey(this);
+        varMap.put(this, null);
+        if (!circ && varMap.containsKey(getVariable()))
+            return varMap.get(getVariable()).size().createSizeFExp(getDim(), varMap);
+        else
+            return new FSizeExp(getVariable().createUseExp(), getDim());
     }
 
     public FExp FIdUseExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
@@ -3337,12 +3357,16 @@ aspect ArrayHelpers {
 			return size[dim] != UNKNOWN || okExp(exps[dim]);
 		}
 		
-		/**
-		 * \brief Check if an expression is valid.
-		 */
-		protected static boolean okExp(FExp e) {
-			return e != null && e.isValidExp();
-		}
+        /**
+         * \brief Check if an expression is valid.
+         */
+        protected static boolean okExp(FExp e) {
+            return okExp(e, false);
+        }
+        
+        protected static boolean okExp(FExp e, boolean allowUnknownSize) {
+            return e != null && e.isValidExp(allowUnknownSize);
+        }
 		
 		/**
 		 * \brief Copy value of dimension <code>d2</code> in size of <code>exp</code> to dimension 
@@ -3429,18 +3453,18 @@ aspect ArrayHelpers {
 			return ns;
 		}
 		
-		/**
-		 * \brief Create an FExp that describes the length of dimension <code>d</code>, 
-		 *        given the supplied variable values.
-		 *        
-		 * @param varMap  a map of variables to replace and expressions to replace them with
-		 */
-		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
-			evaluate(d);
-			return (okExp(exps[d])) ? 
-					exps[d].createSizeFExp(varMap) : 
-					super.createSizeFExp(d, varMap);
-		}
+        /**
+         * \brief Create an FExp that describes the length of dimension <code>d</code>, 
+         *        given the supplied variable values.
+         *        
+         * @param varMap  a map of variables to replace and expressions to replace them with
+         */
+        public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+            evaluate(d);
+            return (okExp(exps[d], true)) ?
+                    exps[d].createSizeFExp(varMap) :
+                    super.createSizeFExp(d, varMap);
+        }
 		
 		/**
 		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
@@ -3449,7 +3473,7 @@ aspect ArrayHelpers {
 		 */
 		public FExp createFExp(int d) {
 			evaluate(d);
-			return (exps[d] != null) ? 
+            return (okExp(exps[d], true)) ?
 					exps[d].createSizeFExp() : 
 					super.createFExp(d);
 		}
