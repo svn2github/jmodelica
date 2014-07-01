@@ -411,14 +411,12 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             }
 
             {
-                /* Only print header first time */
-                int user_flags = jmi_log_get_user_flags(log);
-                if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
+                /* Only print header first iteration */
+                if (nniters == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
                                  "jmi_kinsol_solver",
                                  "iter      nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
                                  1);
-                    jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
             }
             {
