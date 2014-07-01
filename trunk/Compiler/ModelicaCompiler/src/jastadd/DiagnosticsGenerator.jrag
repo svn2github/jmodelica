@@ -200,10 +200,6 @@ public class DiagnosticsGenerator {
 				out.print("<h2>BLT for initialization system </h2>\n");
 				for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
 					out.print("<pre>\n");
-					if (eb.getLabel() == null)
-					    out.print("--- Solved equation ---\n");
-					else
-					    out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
@@ -212,40 +208,24 @@ public class DiagnosticsGenerator {
 				// Loop over all derivatives
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
 					out.print("<pre>\n");
-                    if (eb.getLabel() == null)
-                        out.print("--- Solved equation ---\n");
-                    else
-                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Real output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
 					out.print("<pre>\n");
-                    if (eb.getLabel() == null)
-                        out.print("--- Solved equation ---\n");
-                    else
-                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Integer and boolean output blocks </h3>\n");	
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
 					out.print("<pre>\n");
-                    if (eb.getLabel() == null)
-                        out.print("--- Solved equation ---\n");
-                    else
-                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}
 				out.print("<h3> Other output blocks </h3>\n");
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
 					out.print("<pre>\n");
-                    if (eb.getLabel() == null)
-                        out.print("--- Solved equation ---\n");
-                    else
-                        out.print("--- <a href=\"" + bltTableFileName + "#block_init_" + eb.getLabel() + "\">Equation system " + eb.getLabel() + "</a> ---\n");
 					eb.prettyPrint(out);
 					out.print("</pre>\n");
 				}		

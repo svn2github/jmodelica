@@ -44,55 +44,46 @@ equation
 			automatic_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  u0
-Solution:
-  sin(time)
--------------------------------
-Torn linear block of 2 iteration variables and 3 solved variables:
+--- Solved equation ---
+u0 := sin(time)
+
+--- Torn linear system (Block 1) of 2 iteration variables and 3 solved variables ---
 Coefficient variability: parameter
-Solved variables:
+Torn variables:
   i1
   u1
   u2
+
 Iteration variables:
   i2
   i3
-Solved equations:
-  i1 = i2 + i3
-  u1 = R1 * i1
-  u0 = u1 + u2
+
+Torn equations:
+  i1 := i2 + i3
+  u1 := R1 * i1
+  u2 := (- u0 + u1) / (- 1.0)
+
 Residual equations:
- Iteration variables: i2
   u2 = R3 * i3
- Iteration variables: i3
+    Iteration variables: i2
   u2 = R2 * i2
+    Iteration variables: i3
+
 Jacobian:
   |1.0, 0.0, 0.0, - 1.0, - 1.0|
   |(- R1), 1.0, 0.0, 0.0, 0.0|
   |0.0, - 1.0, - 1.0, 0.0, 0.0|
   |0.0, 0.0, 1.0, 0.0, (- R3)|
   |0.0, 0.0, 1.0, (- R2), 0.0|
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  uL
-Solution:
-  u1 + u2
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  der(iL)
-Solution:
-  (- uL) / (- L)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  i0
-Solution:
-  i1 + iL
+
+--- Solved equation ---
+uL := u1 + u2
+
+--- Solved equation ---
+der(iL) := (- uL) / (- L)
+
+--- Solved equation ---
+i0 := i1 + iL
 -------------------------------
 ")})));
   end Test1;
@@ -138,51 +129,47 @@ equation
             automatic_tearing=true,
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  der(dummy)
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  u
-Solution:
-  2 * sin(time)
--------------------------------
-Torn mixed linear block of 1 iteration variables and 5 solved variables:
+--- Solved equation ---
+der(dummy) := 1
+
+--- Solved equation ---
+u := 2 * sin(time)
+
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 3 solved variables ---
 Coefficient variability: discrete-time
-Solved variables:
+Torn variables:
   a
   der(v)
   f
+
 Iteration variables:
   sa
+
 Solved discrete variables:
   startBack
   startFor
-Solved equations:
-  a = if pre(mode) == 1 or startFor then sa - 1 elseif pre(mode) == 3 or startBack then sa + 1 else 0
-  der(v) = a
-  f = if pre(mode) == 1 or startFor then f0 + f1 * v elseif pre(mode) == 3 or startBack then - f0 + f1 * v else f0 * sa
-Residual equations:
- Iteration variables: sa
+
+Torn equations:
+  a := if pre(mode) == 1 or startFor then sa - 1 elseif pre(mode) == 3 or startBack then sa + 1 else 0
+  der(v) := a
+  f := if pre(mode) == 1 or startFor then f0 + f1 * v elseif pre(mode) == 3 or startBack then - f0 + f1 * v else f0 * sa
+
+Continuous residual equations:
   m * der(v) = u - f
+    Iteration variables: sa
+
 Discrete equations:
-  startBack = pre(mode) == 2 and sa < -1
-  startFor = pre(mode) == 2 and sa > 1
+  startBack := pre(mode) == 2 and sa < -1
+  startFor := pre(mode) == 2 and sa > 1
+
 Jacobian:
   |1.0, 0.0, 0.0, - (if pre(mode) == 1 or startFor then 1.0 elseif pre(mode) == 3 or startBack then 1.0 else 0)|
   |- 1.0, 1.0, 0.0, 0.0|
   |0.0, 0.0, 1.0, - (if pre(mode) == 1 or startFor then 0.0 elseif pre(mode) == 3 or startBack then 0.0 else f0)|
   |0.0, m, 1.0, 0.0|
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  mode
-Solution:
-  if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 or startBack) and v < 0 then 3 else 2
+
+--- Solved equation ---
+mode := if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 or startBack) and v < 0 then 3 else 2
 -------------------------------
 ")})));
 end Test2;
@@ -310,27 +297,18 @@ equation
 			automatic_tearing=true,
 			description="Test of record tearing",
 			methodResult="
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := x + 2
+
+--- Solved function call equation ---
+(TearingTests.RecordTearingTest1.R(r.x, r.y)) = TearingTests.RecordTearingTest1.F(x, y)
+  Assigned variables: r.x
+                      r.y
 -------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  x + 2
--------------------------------
-Solved block of 2 variables:
-Unknown variables:
-  r.x
-  r.y
-Equations:
-  (TearingTests.RecordTearingTest1.R(r.x, r.y)) = TearingTests.RecordTearingTest1.F(x, y)
--------------------------------
-      ")})));
+")})));
 end RecordTearingTest1;
 
 model RecordTearingTest2
@@ -361,23 +339,23 @@ equation
 			inline_functions="none",
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  sin(time)
--------------------------------
-Torn block of 1 iteration variables and 1 solved variables:
-Solved variables:
+--- Solved equation ---
+y := sin(time)
+
+--- Torn system (Block 1) of 1 iteration variables and 1 solved variables ---
+Torn variables:
   r.x
+
 Iteration variables:
-  x()
-Solved equations:
+  x ()
+
+Torn equations:
   (TearingTests.RecordTearingTest2.R(r.x, r.y)) = TearingTests.RecordTearingTest2.F(x, y)
+    Assigned variables: r.x
+
 Residual equations:
- Iteration variables: x
   (TearingTests.RecordTearingTest2.R(r.x, r.y)) = TearingTests.RecordTearingTest2.F(x, y)
+    Iteration variables: x
 -------------------------------
 ")})));
 end RecordTearingTest2;
@@ -406,20 +384,23 @@ equation
 			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
--------------------------------
-Torn block of 2 iteration variables and 1 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 2 iteration variables and 1 solved variables ---
+Torn variables:
   y
+
 Iteration variables:
-  z()
-  x()
-Solved equations:
+  z ()
+  x ()
+
+Torn equations:
   (x, y) = TearingTests.RecordTearingTest3.F(z, x)
+    Assigned variables: y
+
 Residual equations:
- Iteration variables: z
   y = z + 3.14
- Iteration variables: x
+    Iteration variables: z
   (x, y) = TearingTests.RecordTearingTest3.F(z, x)
+    Iteration variables: x
 -------------------------------
 ")})));
 end RecordTearingTest3;
@@ -449,21 +430,25 @@ equation
 			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
   x
   y
+
 Iteration variables:
-  v()
-Solved equations:
+  v ()
+
+Torn equations:
   (x, y) = TearingTests.RecordTearingTest4.F(v, v)
+    Assigned variables: x
   (x, y) = TearingTests.RecordTearingTest4.F(v, v)
+    Assigned variables: y
+
 Residual equations:
- Iteration variables: v
   v = x + y
+    Iteration variables: v
 -------------------------------
-      ")})));
+")})));
 end RecordTearingTest4;
 
 model RecordTearingTest5
@@ -496,27 +481,32 @@ equation
 			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
--------------------------------
-Torn block of 3 iteration variables and 3 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 3 iteration variables and 3 solved variables ---
+Torn variables:
   c
   d
   e
+
 Iteration variables:
-  f()
-  a()
-  b()
-Solved equations:
+  f ()
+  a ()
+  b ()
+
+Torn equations:
   (c, d) = TearingTests.RecordTearingTest5.F(a, b)
+    Assigned variables: c
   (c, d) = TearingTests.RecordTearingTest5.F(a, b)
+    Assigned variables: d
   (e, f) = TearingTests.RecordTearingTest5.F(c, d)
+    Assigned variables: e
+
 Residual equations:
- Iteration variables: f
   (e, f) = TearingTests.RecordTearingTest5.F(c, d)
- Iteration variables: a
+    Iteration variables: f
   (a, b) = TearingTests.RecordTearingTest5.F(e, f)
- Iteration variables: b
+    Iteration variables: a
   (a, b) = TearingTests.RecordTearingTest5.F(e, f)
+    Iteration variables: b
 -------------------------------
 ")})));
 end RecordTearingTest5;
@@ -538,27 +528,29 @@ equation
 			inline_functions="none",
 			description="Test of algorithm tearing",
 			methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
   y
   x
-Iteration variables:
-  z()
-Solved equations:
-  algorithm
- x := x + y + z;
- y := y - x + z;
 
+Iteration variables:
+  z ()
+
+Torn equations:
   algorithm
- x := x + y + z;
- y := y - x + z;
+    x := x + y + z;
+    y := y - x + z;
+    Assigned variables: y
+  algorithm
+    x := x + y + z;
+    y := y - x + z;
+    Assigned variables: x
 
 Residual equations:
- Iteration variables: z
   z = x + y
+    Iteration variables: z
 -------------------------------
-      ")})));
+")})));
 end AlgorithmTearingTest1;
 
 model AlgorithmTearingTest2
@@ -578,23 +570,26 @@ equation
 			inline_functions="none",
 			description="Test of algorithm tearing",
 			methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
   y
   x
-Iteration variables:
-  z()
-Solved equations:
-  algorithm
- y := y * z + 1;
 
-  x = 2 * z + y
+Iteration variables:
+  z ()
+
+Torn equations:
+  algorithm
+    y := y * z + 1;
+
+    Assigned variables: y
+  x := 2 * z + y
+
 Residual equations:
- Iteration variables: z
   z = 2 * x
+    Iteration variables: z
 -------------------------------
-      ")})));
+")})));
 end AlgorithmTearingTest2;
 
 model TearingFixedFalse1
@@ -611,20 +606,22 @@ initial equation
             name="TearingFixedFalse1",
             methodName="printDAEInitBLT",
             methodResult="
--------------------------------
-Torn block of 2 iteration variables and 1 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 2 iteration variables and 1 solved variables ---
+Torn variables:
   c
+
 Iteration variables:
-  a()
-  b()
-Solved equations:
-  c = a + b
+  a ()
+  b ()
+
+Torn equations:
+  c := a + b
+
 Residual equations:
- Iteration variables: a
   23 = c * b
- Iteration variables: b
+    Iteration variables: a
   20 = c * a
+    Iteration variables: b
 -------------------------------
 ")})));
 end TearingFixedFalse1;

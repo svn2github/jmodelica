@@ -29,20 +29,24 @@ package LocalIteration
             description="Simple test of local iteration",
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
-  b()
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  (1.1) b
   a
+
 Iteration variables:
-  c()
-Solved equations:
- Iteration variables: b
+  c ()
+
+Torn equations:
+  --- Numerically solved equation (Block 1.1) ---
   23 = c * b
-  c = a + b
+    Computed variables: b ()
+
+  a := (- c + b) / (- 1.0)
+
 Residual equations:
- Iteration variables: c
   20 = c * a
+    Iteration variables: c
 -------------------------------
 ")})));
     end Simple1;
@@ -62,20 +66,24 @@ Residual equations:
                 description="Simple test of local iteration annotation",
                 methodName="printDAEBLT",
                 methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
-  b()
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  (1.1) b
   a
+
 Iteration variables:
-  c()
-Solved equations:
- Iteration variables: b
+  c ()
+
+Torn equations:
+  --- Numerically solved equation (Block 1.1) ---
   23 = c * b annotation(__Modelon(LocalIteration))
-  c = a + b
+    Computed variables: b ()
+
+  a := (- c + b) / (- 1.0)
+
 Residual equations:
- Iteration variables: c
   20 = c * a
+    Iteration variables: c
 -------------------------------
 ")})));
         end Simple1;
@@ -93,20 +101,22 @@ Residual equations:
                 description="Test with no annotation (no local iteration)",
                 methodName="printDAEBLT",
                 methodResult="
--------------------------------
-Torn block of 2 iteration variables and 1 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 2 iteration variables and 1 solved variables ---
+Torn variables:
   a
+
 Iteration variables:
-  c()
-  b()
-Solved equations:
-  c = a + b
+  c ()
+  b ()
+
+Torn equations:
+  a := (- c + b) / (- 1.0)
+
 Residual equations:
- Iteration variables: c
   23 = c * b
- Iteration variables: b
+    Iteration variables: c
   20 = c * a
+    Iteration variables: b
 -------------------------------
 ")})));
         end NoAnnotation;
@@ -127,20 +137,24 @@ Residual equations:
                     description="Test of enabled annotation set to true expression",
                     methodName="printDAEBLT",
                     methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
-  b()
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  (1.1) b
   a
+
 Iteration variables:
-  c()
-Solved equations:
- Iteration variables: b
+  c ()
+
+Torn equations:
+  --- Numerically solved equation (Block 1.1) ---
   23 = c * b annotation(__Modelon(LocalIteration(enabled = true)))
-  c = a + b
+    Computed variables: b ()
+
+  a := (- c + b) / (- 1.0)
+
 Residual equations:
- Iteration variables: c
   20 = c * a
+    Iteration variables: c
 -------------------------------
 ")})));
             end True;
@@ -159,20 +173,22 @@ Residual equations:
                     description="Test of enabled annotation set to false expression (no local iteration)",
                     methodName="printDAEBLT",
                     methodResult="
--------------------------------
-Torn block of 2 iteration variables and 1 solved variables:
-Solved variables:
+--- Torn system (Block 1) of 2 iteration variables and 1 solved variables ---
+Torn variables:
   a
+
 Iteration variables:
-  c()
-  b()
-Solved equations:
-  c = a + b
+  c ()
+  b ()
+
+Torn equations:
+  a := (- c + b) / (- 1.0)
+
 Residual equations:
- Iteration variables: c
   23 = c * b annotation(__Modelon(LocalIteration(enabled = false)))
- Iteration variables: b
+    Iteration variables: c
   20 = c * a
+    Iteration variables: b
 -------------------------------
 ")})));
             end False;
@@ -192,20 +208,24 @@ Residual equations:
                     description="Test of enabled annotation set to a parameter expression",
                     methodName="printDAEBLT",
                     methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
-  b()
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  (1.1) b
   a
+
 Iteration variables:
-  c()
-Solved equations:
- Iteration variables: b
+  c ()
+
+Torn equations:
+  --- Numerically solved equation (Block 1.1) ---
   23 = c * b annotation(__Modelon(LocalIteration(enabled = e)))
-  c = a + b
+    Computed variables: b ()
+
+  a := (- c + b) / (- 1.0)
+
 Residual equations:
- Iteration variables: c
   20 = c * a
+    Iteration variables: c
 -------------------------------
 ")})));
             end Exp;
@@ -224,40 +244,49 @@ Residual equations:
                     description="Test of enabled annotation set to a vectorized expression",
                     methodName="printDAEBLT",
                     methodResult="
--------------------------------
-Torn linear block of 1 iteration variables and 2 solved variables:
+--- Torn linear system (Block 1) of 1 iteration variables and 2 solved variables ---
 Coefficient variability: continuous-time
-Solved variables:
-  b[1]()
+Torn variables:
+  (1.1) b[1]
   a[1]
+
 Iteration variables:
   c[1]
-Solved equations:
- Iteration variables: b[1]
+
+Torn equations:
+  --- Numerically solved equation (Block 1.1) ---
   23 = c[1] .* b[1] annotation(__Modelon(LocalIteration(enabled = true)))
-  c[1] = a[1] .+ b[1]
+    Computed variables: b[1] ()
+
+  a[1] := (- c[1] + b[1]) / (- 1.0)
+
 Residual equations:
- Iteration variables: c[1]
   20 = c[1] .* a[1]
+    Iteration variables: c[1]
+
 Jacobian:
   |(- c[1]), 0.0, (- b[1])|
   |- 1.0, - 1.0, 1.0|
   |0.0, (- c[1]), (- a[1])|
--------------------------------
-Torn linear block of 2 iteration variables and 1 solved variables:
+
+--- Torn linear system (Block 2) of 2 iteration variables and 1 solved variables ---
 Coefficient variability: continuous-time
-Solved variables:
+Torn variables:
   a[2]
+
 Iteration variables:
   c[2]
   b[2]
-Solved equations:
-  c[2] = a[2] .+ b[2]
+
+Torn equations:
+  a[2] := (- c[2] + b[2]) / (- 1.0)
+
 Residual equations:
- Iteration variables: c[2]
   42 = c[2] .* b[2] annotation(__Modelon(LocalIteration(enabled = false)))
- Iteration variables: b[2]
+    Iteration variables: c[2]
   1 = c[2] .* a[2]
+    Iteration variables: b[2]
+
 Jacobian:
   |- 1.0, 1.0, - 1.0|
   |0.0, (- b[2]), (- c[2])|

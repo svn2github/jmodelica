@@ -4289,24 +4289,18 @@ equation
             description="Test if equation in BLT",
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  time * 23
--------------------------------
-Solved if equation block of 2 variables:
-Unknown variables:
-  a
-  b
-If Equation:
-  if time > 0.5 then
- (a, b) = TransformCanonicalTests.IfEqu26.F(x);
+--- Solved equation ---
+x := time * 23
+
+--- Solved if equation ---
+if time > 0.5 then
+  (a, b) = TransformCanonicalTests.IfEqu26.F(x);
 else
- a = 5;
- b = 2;
+  a = 5;
+  b = 2;
 end if
+  Assigned variables: a
+                      b
 -------------------------------
 ")})));
 end IfEqu26;
@@ -4337,23 +4331,17 @@ equation
             description="Test if equation in BLT",
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  time * 23
--------------------------------
-Solved if equation block of 2 variables:
-Unknown variables:
-  a
-  b
-If Equation:
-  if time > 0.5 then
- (a, b) = TransformCanonicalTests.IfEqu27.F(x);
+--- Solved equation ---
+x := time * 23
+
+--- Solved if equation ---
+if time > 0.5 then
+  (a, b) = TransformCanonicalTests.IfEqu27.F(x);
 else
- (a, b) = TransformCanonicalTests.IfEqu27.F(x - 2);
+  (a, b) = TransformCanonicalTests.IfEqu27.F(x - 2);
 end if
+  Assigned variables: a
+                      b
 -------------------------------
 ")})));
 end IfEqu27;
@@ -4388,29 +4376,23 @@ equation
             description="Test if equation in BLT",
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  time * 23
--------------------------------
-Solved if equation block of 4 variables:
-Unknown variables:
-  a
-  b
-  c
-  d
-If Equation:
-  if time > 0.5 then
- (a, b) = TransformCanonicalTests.IfEqu28.F(x);
- (c, d) = TransformCanonicalTests.IfEqu28.F(x);
+--- Solved equation ---
+x := time * 23
+
+--- Solved if equation ---
+if time > 0.5 then
+  (a, b) = TransformCanonicalTests.IfEqu28.F(x);
+  (c, d) = TransformCanonicalTests.IfEqu28.F(x);
 else
- a = 2;
- b = 3;
- c = 4;
- d = 5;
+  a = 2;
+  b = 3;
+  c = 4;
+  d = 5;
 end if
+  Assigned variables: a
+                      b
+                      c
+                      d
 -------------------------------
 ")})));
 end IfEqu28;
@@ -4444,28 +4426,22 @@ equation
             description="Test if equation in BLT",
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  time * 23
--------------------------------
-Solved if equation block of 4 variables:
-Unknown variables:
-  a
-  b
-  c
-  d
-If Equation:
-  if time > 0.5 then
- (a, b) = TransformCanonicalTests.IfEqu29.F(x);
- (c, d) = TransformCanonicalTests.IfEqu29.F(x);
+--- Solved equation ---
+x := time * 23
+
+--- Solved if equation ---
+if time > 0.5 then
+  (a, b) = TransformCanonicalTests.IfEqu29.F(x);
+  (c, d) = TransformCanonicalTests.IfEqu29.F(x);
 else
- a = 2;
- d = 5;
- (b, c) = TransformCanonicalTests.IfEqu29.F(x);
+  a = 2;
+  d = 5;
+  (b, c) = TransformCanonicalTests.IfEqu29.F(x);
 end if
+  Assigned variables: a
+                      b
+                      c
+                      d
 -------------------------------
 ")})));
 end IfEqu29;
@@ -4734,24 +4710,14 @@ end DuplicateVariables1;
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  x + 3
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z
-Solution:
-  x + (- y)
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := x + 3
+
+--- Solved equation ---
+z := x + (- y)
 -------------------------------
 ")})));
   end SolveEqTest1;
@@ -4771,24 +4737,14 @@ Solution:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  (x + 3) / (- 1.0)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z
-Solution:
-  (x + (- y)) / (- 1.0)
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := (x + 3) / (- 1.0)
+
+--- Solved equation ---
+z := (x + (- y)) / (- 1.0)
 -------------------------------
 ")})));
   end SolveEqTest2;
@@ -4808,24 +4764,14 @@ Solution:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  (x + 3) / 2
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z
-Solution:
-  (x + (- y)) /x
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := (x + 3) / 2
+
+--- Solved equation ---
+z := (x + (- y)) / x
 -------------------------------
 ")})));
   end SolveEqTest3;
@@ -4845,24 +4791,14 @@ Solution:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  (x + 3) / (1.0 / 2)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z
-Solution:
-  (x + (- y)) / (1.0 / x)
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := (x + 3) / (1.0 / 2)
+
+--- Solved equation ---
+z := (x + (- y)) / (1.0 / x)
 -------------------------------
 ")})));
   end SolveEqTest4;
@@ -4882,24 +4818,14 @@ Solution:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  (x + 3) / (1.0 - 3)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z
-Solution:
-  (x + (- y)) / (1.0 - (x + 3))
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := (x + 3) / (1.0 - 3)
+
+--- Solved equation ---
+z := (x + (- y)) / (1.0 - (x + 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -4920,24 +4846,16 @@ Solution:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Non-solved block of 1 variables:
-Unknown variables:
-  y
-Equations:
-  2 / y = x + 3
--------------------------------
-Non-solved block of 1 variables:
-Unknown variables:
-  z
-Equations:
-  x / z = x - y
+--- Solved equation ---
+x := 1
+
+--- Unsolved equation (Block 1) ---
+2 / y = x + 3
+  Computed variables: y
+
+--- Unsolved equation (Block 2) ---
+x / z = x - y
+  Computed variables: z
 -------------------------------
 ")})));
   end SolveEqTest6;
@@ -4958,24 +4876,14 @@ Equations:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  1
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  (x + 3) / (- 1.0 + 1.0 - 4)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z
-Solution:
-  (x + (- y)) / (- 1.0 + 1.0 + 5)
+--- Solved equation ---
+x := 1
+
+--- Solved equation ---
+y := (x + 3) / (- 1.0 + 1.0 - 4)
+
+--- Solved equation ---
+z := (x + (- y)) / (- 1.0 + 1.0 + 5)
 -------------------------------
 ")})));
   end SolveEqTest7;
@@ -4994,12 +4902,8 @@ Solution:
 			variability_propagation=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  der(x)
-Solution:
-  (- x) / (- 1.0 - (- 1.0) + (- 1.0))
+--- Solved equation ---
+der(x) := (- x) / (- 1.0 - (- 1.0) + (- 1.0))
 -------------------------------
 ")})));
 end SolveEqTest8;
@@ -5044,28 +4948,20 @@ equation
 			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
+--- Solved equation ---
+x := sin(time)
+
+--- Unsolved function call equation (Block 1) ---
+(TransformCanonicalTests.BlockTest1.R(r.x, r.y)) = TransformCanonicalTests.BlockTest1.f1(x + r.x)
+  Computed variables: r.x
+                      r.y
+
+--- Unsolved function call equation (Block 2) ---
+(y1, y2) = TransformCanonicalTests.BlockTest1.f2(x + y1)
+  Computed variables: y1
+                      y2
 -------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  sin(time)
--------------------------------
-Non-solved block of 2 variables:
-Unknown variables:
-  r.x
-  r.y
-Equations:
-  (TransformCanonicalTests.BlockTest1.R(r.x, r.y)) = TransformCanonicalTests.BlockTest1.f1(x + r.x)
--------------------------------
-Non-solved block of 2 variables:
-Unknown variables:
-  y1
-  y2
-Equations:
-  (y1, y2) = TransformCanonicalTests.BlockTest1.f2(x + y1)
--------------------------------
-      ")})));
+")})));
 end BlockTest1;
 
 model BlockTest2
@@ -5123,34 +5019,24 @@ equation
 			automatic_tearing=false,
 			description="Test of correct creation of blocks containing functions returning records",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  sin(time)
--------------------------------
-Non-solved block of 2 variables:
-Unknown variables:
-  r.x
-  r.y
-Equations:
-  (TransformCanonicalTests.BlockTest2.R(r.x, r.y)) = TransformCanonicalTests.BlockTest2.f1(x + r.x)
--------------------------------
-Non-solved block of 3 variables:
-Unknown variables:
-  r2.r.x
-  r2.x
-  r2.r.y
-Equations:
-  (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
--------------------------------
-Non-solved block of 2 variables:
-Unknown variables:
-  y1
-  y2
-Equations:
-  (y1, y2) = TransformCanonicalTests.BlockTest2.f2(x + y1)
+--- Solved equation ---
+x := sin(time)
+
+--- Unsolved function call equation (Block 1) ---
+(TransformCanonicalTests.BlockTest2.R(r.x, r.y)) = TransformCanonicalTests.BlockTest2.f1(x + r.x)
+  Computed variables: r.x
+                      r.y
+
+--- Unsolved function call equation (Block 2) ---
+(TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
+  Computed variables: r2.r.x
+                      r2.x
+                      r2.r.y
+
+--- Unsolved function call equation (Block 3) ---
+(y1, y2) = TransformCanonicalTests.BlockTest2.f2(x + y1)
+  Computed variables: y1
+                      y2
 -------------------------------
 ")})));
 end BlockTest2;
@@ -5182,22 +5068,23 @@ equation
 			automatic_tearing=false,
 			description="Test of correct creation of blocks containing functions returning records",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  sin(time)
--------------------------------
-Non-solved block of 4 variables:
+--- Solved equation ---
+x := sin(time)
+
+--- Unsolved system (Block 1) of 4 variables ---
 Unknown variables:
-  r2.y()
-  r2.x()
-  r1.x()
-  r1.y()
+  r2.y ()
+  r2.x ()
+  r1.x ()
+  r1.y ()
+
 Equations:
   (TransformCanonicalTests.BlockTest3.R(r2.x, r2.y)) = TransformCanonicalTests.BlockTest3.F(x + r1.x)
+    Iteration variables: r2.y
+                         r2.x
   (TransformCanonicalTests.BlockTest3.R(r1.x, r1.y)) = TransformCanonicalTests.BlockTest3.F(x + r2.x)
+    Iteration variables: r1.x
+                         r1.y
 -------------------------------
 ")})));
 end BlockTest3;
@@ -5218,17 +5105,21 @@ x1 - x2 = z*w;
             automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Non-solved linear block of 3 variables:
+--- Unsolved linear system (Block 1) of 3 variables ---
 Coefficient variability: constant
 Unknown variables:
   x1
   z
   x2
+
 Equations:
   x1 + x2 = z + 0.8414709848078965
+    Iteration variables: x1
   x1 - x2 = z
+    Iteration variables: z
   x2 = z + 1 + 1.0
+    Iteration variables: x2
+
 Jacobian:
   |1.0, - 1.0, 1.0|
   |1.0, - 1.0, - 1.0|
@@ -5252,17 +5143,21 @@ x1 - x2 = z;
             automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Non-solved linear block of 3 variables:
+--- Unsolved linear system (Block 1) of 3 variables ---
 Coefficient variability: constant
 Unknown variables:
   x1
   z
   x2
+
 Equations:
   x1 + x2 = z
+    Iteration variables: x1
   x1 - x2 = z
+    Iteration variables: z
   x2 = z + 1
+    Iteration variables: x2
+
 Jacobian:
   |1.0, - 1.0, 1.0|
   |1.0, - 1.0, - 1.0|
@@ -5287,17 +5182,21 @@ x1 - x2 = z*p;
             automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Non-solved linear block of 3 variables:
+--- Unsolved linear system (Block 1) of 3 variables ---
 Coefficient variability: parameter
 Unknown variables:
   x1
   z
   x2
+
 Equations:
   x1 + x2 = z
+    Iteration variables: x1
   x1 - x2 = z * p
+    Iteration variables: z
   x2 = z + p
+    Iteration variables: x2
+
 Jacobian:
   |1.0, - 1.0, 1.0|
   |1.0, (- p), - 1.0|
@@ -5322,19 +5221,24 @@ equation
             automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Non-solved mixed linear block of 3 variables:
+--- Unsolved mixed linear system (Block 1) of 3 variables ---
 Coefficient variability: discrete-time
 Unknown continuous variables:
   b
   a
+
 Solved discrete variables:
   d
-Continuous equations:
+
+Continuous residual equations:
   a = b * (if d then 1 else 2)
+    Iteration variables: b
   a = 1 - b
+    Iteration variables: a
+
 Discrete equations:
-  d = b < 0
+  d := b < 0
+
 Jacobian:
   |(- (if d then 1 else 2)), 1.0|
   |1.0, 1.0|
@@ -5357,15 +5261,18 @@ equation
             automatic_tearing=false,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Non-solved linear block of 2 variables:
+--- Unsolved linear system (Block 1) of 2 variables ---
 Coefficient variability: constant
 Unknown variables:
   y2
   y1
+
 Equations:
   y2 = y1 * 4 + 3 * time
+    Iteration variables: y2
   y1 = sin(time) + y2
+    Iteration variables: y1
+
 Jacobian:
   |1.0, - 4|
   |- 1.0, 1.0|
@@ -5401,15 +5308,12 @@ equation
 			inline_functions="none",
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 4 variables:
-Unknown variables:
-  r.a[1]
-  r.a[2]
-  i[1]
-  i[2]
-Equations:
-  (TransformCanonicalTests.BlockTest9.R({r.a[1], r.a[2]}), , {i[1], i[2]}) = TransformCanonicalTests.BlockTest9.f(time * 10)
+--- Solved function call equation ---
+(TransformCanonicalTests.BlockTest9.R({r.a[1], r.a[2]}), , {i[1], i[2]}) = TransformCanonicalTests.BlockTest9.f(time * 10)
+  Assigned variables: r.a[1]
+                      r.a[2]
+                      i[1]
+                      i[2]
 -------------------------------
 ")})));
 end BlockTest9;
@@ -5435,31 +5339,19 @@ equation
 			equation_sorting=true,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  w[1]
-Solution:
-  time
--------------------------------
-Solved block of 2 variables:
-Unknown variables:
-  temp_4
-  temp_5
-Equations:
-  ({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z[1]
-Solution:
-  temp_4 / (- 1.0)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  z[2]
-Solution:
-  temp_5 / (- 1.0)
+--- Solved equation ---
+w[1] := time
+
+--- Solved function call equation ---
+({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  Assigned variables: temp_4
+                      temp_5
+
+--- Solved equation ---
+z[1] := temp_4 / (- 1.0)
+
+--- Solved equation ---
+z[2] := temp_5 / (- 1.0)
 -------------------------------
 ")})));
 end BlockTest10;
@@ -5475,12 +5367,9 @@ equation
 			equation_sorting=true,
 			methodName="printDAEBLT",
 			methodResult="
--------------------------------
-Non-solved block of 1 variables:
-Unknown variables:
-  x
-Equations:
-  12 = if x < 0.5 then 0.5 else x * time
+--- Unsolved equation (Block 1) ---
+12 = if x < 0.5 then 0.5 else x * time
+  Computed variables: x
 -------------------------------
 ")})));
 end BlockTest11;
@@ -6243,24 +6132,24 @@ initial equation
 			description="Test differentiation of parameters with fixed = false",
 			methodName="printDAEInitBLT",
 			methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  d
-Solution:
-  time * 42
--------------------------------
-Torn linear block of 1 iteration variables and 1 solved variables:
+--- Solved equation ---
+d := time * 42
+
+--- Torn linear system (Block 1) of 1 iteration variables and 1 solved variables ---
 Coefficient variability: continuous-time
-Solved variables:
+Torn variables:
   a2
+
 Iteration variables:
   a1
-Solved equations:
-  a1 = a2 * 3.14
+
+Torn equations:
+  a2 := (- a1) / (- 3.14)
+
 Residual equations:
- Iteration variables: a1
   c = b * a1 - a2 * d
+    Iteration variables: a1
+
 Jacobian:
   |(- 3.14), 1.0|
   |d, - b|
