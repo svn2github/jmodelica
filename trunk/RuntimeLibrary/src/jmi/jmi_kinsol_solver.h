@@ -100,6 +100,10 @@ struct jmi_kinsol_solver_t {
     int last_bounding_index;       /**< \brief Index of the variable that most limited Newton step, or -1 if none */
     int last_num_limiting_bounds;  /**< \brief Number of limiting bounds at last jmi_kinsol_limit_step */
     int last_num_active_bounds;    /**< \brief Number of active bounds at last jmi_kinsol_limit_step */
+
+#define JMI_KINSOL_SOLVER_MAX_CHAR_LOG_LENGTH 8
+    int char_log_length;                                     /** Number of chars in char_log */
+    char char_log[JMI_KINSOL_SOLVER_MAX_CHAR_LOG_LENGTH+1];  /** Short log like "Js". Null-terminated. */
 };
 
 

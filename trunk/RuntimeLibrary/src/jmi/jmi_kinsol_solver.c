@@ -124,6 +124,21 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     /*return -1; //Unrecoverable error*/
 }
 
+static void kin_reset_char_log(jmi_kinsol_solver_t* solver) {
+    solver->char_log_length = 0;
+    solver->char_log[0] = 0;
+}
+
+static void kin_char_log(jmi_kinsol_solver_t* solver, char c) {
+    if (solver->char_log_length < JMI_KINSOL_SOLVER_MAX_CHAR_LOG_LENGTH) {
+        solver->char_log[solver->char_log_length] = c;
+        solver->char_log_length++;
+        solver->char_log[solver->char_log_length] = 0;
+    } else {
+        solver->char_log[JMI_KINSOL_SOLVER_MAX_CHAR_LOG_LENGTH-1] = '?';
+    }
+}
+
 /* Wrapper function to Jacobian evaluation as needed by standard KINSOL solvers */
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2){
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
@@ -134,7 +149,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
-    if((block->callbacks->log_options.log_level >= 4)) {
+    kin_char_log(solver, 'J');
+    if((block->callbacks->log_options.log_level >= 6)) {
         char message[256];
         sprintf(message, "Updating Jacobian (evaluations: %d)", (int)block->nb_jevals);
         jmi_log_node(block->log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
@@ -400,7 +416,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if ((user_flags & logUserFlagKinsolHeaderPrinted) == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
                                  "jmi_kinsol_solver",
-                                 "iter   nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
+                                 "iter      nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
                                  1);
                     jmi_log_set_user_flags(log, user_flags | logUserFlagKinsolHeaderPrinted);
                 }
@@ -422,9 +438,15 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     lambda_max = lambda = 0;
                 }
 
-                nwritten = sprintf(message, "%4d %5d %11.4e  %11.4e:%4d",
-                                   (int)nniters+1, (int)(block->nb_fevals),
+                if (solver->use_steepest_descent_flag) kin_char_log(solver, 'd');
+                else if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
+
+                nwritten = sprintf(message, "%4d%-4s%5d %11.4e  %11.4e:%4d",
+                                   (int)nniters+1, solver->char_log, (int)(block->nb_fevals),
                                    kin_mem->kin_fnorm, max_residual, max_index+1);
+
+                kin_reset_char_log(solver);
+
                 if (nniters > 0 && nwritten >= 0) {
                     char *buffer = message + nwritten;
                     if (solver->last_bounding_index >= 0) {
@@ -1073,7 +1095,8 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     realtype* scaled_col_ptr;
     int use_scaling_flag = block->options->residual_equation_scaling_mode;
 
-    solver->kin_scale_update_time = curtime;  
+    solver->kin_scale_update_time = curtime;
+    kin_char_log(solver, 's');
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
     if((block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
@@ -1235,6 +1258,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->lapack_work = (realtype*)calloc(4*(n+1),sizeof(realtype));
     solver->lapack_iwork = (int *)calloc(n+2, sizeof(int));
     solver->lapack_ipiv = (int *)calloc(n+2, sizeof(int));
+
+    kin_reset_char_log(solver);
 
     /* Initialize scaling to 1.0 - defaults */
     N_VConst_Serial(1.0,solver->kin_y_scale);
@@ -1502,9 +1527,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     if(    (block->options->residual_equation_scaling_mode != jmi_residual_scaling_none ) 
         && (block->init || (flag != KIN_SUCCESS))) {
         jmi_log_node(log, logInfo, "Rescaling", "Attempting rescaling in <block:%s>", block->label);
-
-        jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
-                     "jmi_kinsol_solver", block->label, "Updating residual scaling");
 
         flagNonscaled = flag;
         /* Get & store debug information */
