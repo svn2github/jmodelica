@@ -183,13 +183,4 @@ void jmi_log_vref_(  jmi_log_t *log, char t, int vref);
 
 char* jmi_log_get_build_date();
 
-/** \brief For internal use by the solvers. */
-int  jmi_log_get_user_flags(jmi_log_t *log);
-/** \brief For internal use by the solvers. */
-void jmi_log_set_user_flags(jmi_log_t *log, int user_flags);
-
-typedef enum jmi_log_user_flag_t {
-    logUserFlagKinsolHeaderPrinted = 1
-} jmi_log_user_flag_t;
-
 #endif

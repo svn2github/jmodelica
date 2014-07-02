@@ -73,8 +73,6 @@ struct jmi_log_t {
     jmi_log_options_t* options;          /**< \brief  A pointer to jmi options. */
     
     BOOL outstanding_comma;
-
-    int user_flags;  /**< \brief scratch space for user. Initialized to 0. */
 };
 
 /** \brief Return the one input that has the severest category. */
