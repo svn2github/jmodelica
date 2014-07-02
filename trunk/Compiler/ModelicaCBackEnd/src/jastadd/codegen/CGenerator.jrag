@@ -480,7 +480,7 @@ public class CGenerator extends GenericGenerator {
 
         public void generate(CodeStream genPrinter) {
             if (fclass.onlyInitBLT())
-                genPrinter.print(fclass.getDAEInitBLT().getNumLabledBlocks());
+                genPrinter.print("0");
             else
                 genPrinter.print(fclass.getDAEBLT().getNumLabledBlocks());
         }
