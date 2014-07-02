@@ -415,7 +415,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if (nniters == 0) {
                     jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
                                  "jmi_kinsol_solver",
-                                 "iter      nfe    res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
+                                 "iter       res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
                                  1);
                 }
             }
@@ -439,8 +439,8 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if (solver->use_steepest_descent_flag) kin_char_log(solver, 'd');
                 else if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
 
-                nwritten = sprintf(message, "%4d%-4s%5d %11.4e  %11.4e:%4d",
-                                   (int)nniters+1, solver->char_log, (int)(block->nb_fevals),
+                nwritten = sprintf(message, "%4d%-4s%11.4e  %11.4e:%4d",
+                                   (int)nniters+1, solver->char_log,
                                    kin_mem->kin_fnorm, max_residual, max_index+1);
 
                 kin_reset_char_log(solver);
