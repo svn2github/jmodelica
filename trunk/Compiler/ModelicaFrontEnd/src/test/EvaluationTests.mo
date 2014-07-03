@@ -1132,6 +1132,31 @@ y2
  )})));
 end FunctionEval31;
 
+model FunctionEval32
+    function f
+        input Real[:] x;
+        output Real[size(x,1)] y = zeros(n);
+      protected
+        Integer n = size(x,1);
+        algorithm
+    end f;
+    
+    constant Real[1] r = f({1}); 
+
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="FunctionEval32",
+            description="Constant evaluation record component in input",
+            variables="
+r[1]
+",
+            values="
+0.0
+"
+ )})));
+end FunctionEval32;
+
+
 model VectorFuncEval1
     function f
         input Real x;

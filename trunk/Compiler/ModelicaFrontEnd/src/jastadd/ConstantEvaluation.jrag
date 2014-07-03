@@ -2116,7 +2116,7 @@ aspect ConstantEvaluation {
         CValue val = CValue.UNKNOWN;
         if (evaluationValue != null) {
             val = evaluationValue;
-        } else if ((isConstant() || isParameter()) && !isForIndex()) {
+        } else if ((isConstant() || isParameter() || (inFunction() && !isInput())) && !isForIndex()) {
             boolean func = inFunction();
             if (hasBindingFExp()) {
                 FExp bexp = getBindingFExp();
@@ -2568,6 +2568,7 @@ aspect ConstantEvaluation {
         public String  name_C();
         public boolean isInput();
         public boolean isOutput();
+        public boolean hasBindingExp();
     }
 
     FAbstractVariable implements CommonVariableDecl;
@@ -4022,7 +4023,7 @@ aspect ExternalCEval {
         try {
             com.accept("START");
             for (CommonVariableDecl cvd : varsToSerialize())
-                com.put(values.get(cvd), cvd.type(), !cvd.isInput());
+                com.put(values.get(cvd), cvd.type(), !cvd.isInput() && !cvd.hasBindingExp());
             com.accept("CALC");
             com.accept("DONE");
             for (CommonVariableDecl cvd : varsToDeserialize())

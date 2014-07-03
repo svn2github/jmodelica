@@ -1184,6 +1184,12 @@ aspect Flattening {
 	syn boolean InstAssignable.hasInstValueMod() = (myInstValueMod() != null);
 	
 	/**
+     * \brief Check if this InstComponentDecl is an assignable with a value modifier
+     */
+    syn boolean InstComponentDecl.hasBindingExp() = false;
+    eq InstAssignable.hasBindingExp()             = hasInstValueMod();
+	
+	/**
 	 * \brief Retrieve the InstModification setting the binding expression of 
 	 *        this InstAssignable node.
 	 */
