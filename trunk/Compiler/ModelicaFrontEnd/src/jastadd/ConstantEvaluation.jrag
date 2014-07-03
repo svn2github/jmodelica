@@ -320,6 +320,15 @@ aspect ConstantEvaluation {
 	    public boolean isUnknown() {
       		return false;
       	}
+	    
+        /**
+         * \brief Check if there was an error in any part of the evaluation.
+         *
+         * @return true if there was an error, otherwise false. 
+         */
+        public boolean isPartlyUnknown() {
+            return isUnknown();
+        }
     	
 	    /**
 	     * \brief Check if there was a compliance error in the evaluation.
@@ -883,6 +892,18 @@ aspect ConstantEvaluation {
     	public boolean isArray() {
     		return true;
     	}
+    	
+        /**
+         * \brief Check if there was an error in any part of the evaluation.
+         *
+         * @return true if there was an error, otherwise false. 
+         */
+        public boolean isPartlyUnknown() {
+            for (CValue cvalue : values)
+                if (cvalue.isPartlyUnknown())
+                    return true;
+            return false;
+        }
         
         @Override
         public boolean isReal() {
@@ -1220,6 +1241,18 @@ aspect ConstantEvaluation {
          */
         public boolean isRecord() {
         	return true;
+        }
+        
+        /**
+         * \brief Check if there was an error in any part of the evaluation.
+         *
+         * @return true if there was an error, otherwise false. 
+         */
+        public boolean isPartlyUnknown() {
+            for (CValue cvalue : values)
+                if (cvalue.isPartlyUnknown())
+                    return true;
+            return false;
         }
         
         /**
@@ -2550,17 +2583,6 @@ aspect ConstantEvaluation {
   eq FFunctionCall.myFuncOutputs()    = myOutputs();
   eq InstFunctionCall.myFuncOutputs() = myOutputs();
   
-  public void FAbstractFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  values.clear();
-  }
-  
-  public void FFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  myFFunctionDecl().evaluate(values);
-  }
-  
-  public void InstFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  getName().myInstClassDecl().evaluate(values);
-  }
   
   syn FExp FAbstractFunctionCall.argument(int i) {
 	  for (FExp e : childFExps())
@@ -2599,6 +2621,56 @@ aspect ConstantEvaluation {
 	  }
 	  return res;
   }
+  
+    public void FAbstractFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
+        evaluateCell(values);
+    }
+    
+    public void FAbstractFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
+        values.clear();
+    }
+    
+    public void FFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
+        myFFunctionDecl().evaluate(values);
+    }
+    
+    public void InstFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
+        getName().myInstClassDecl().evaluate(values);
+    }
+    
+    public void FVectorFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
+        evaluateVector(values);
+    }
+    
+    public void InstVectorFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
+        evaluateVector(values);
+    }
+    
+    public void FAbstractFunctionCall.evaluateVector(Map<CommonVariableDecl, CValue> values) {
+        Size vectorizedSize = sizeOfOutput(0);
+        CommonVariableDecl output = myFuncOutputs().get(0);
+        Map<CommonVariableDecl, CValue> input  = new HashMap<CommonVariableDecl, CValue>(values.size());
+        input.putAll(values);
+        values.put(output, new CValueArray(vectorizedSize));
+        
+        Map<CommonVariableDecl, Boolean> isVectorized = new HashMap<CommonVariableDecl, Boolean>(input.size());
+        for (CommonVariableDecl cvd : input.keySet()) {
+            isVectorized.put(cvd, cvd.size().expand(vectorizedSize).equivalent(input.get(cvd).size(), true));
+        }
+        
+        for (Index i : Indices.create(vectorizedSize)) {
+            Map<CommonVariableDecl, CValue> valuesCell = new HashMap<CommonVariableDecl, CValue>();
+            for (CommonVariableDecl cvd : input.keySet()) {
+                if (isVectorized.get(cvd)) {
+                    valuesCell.put(cvd, input.get(cvd).array().getPart(i));
+                } else {
+                    valuesCell.put(cvd, input.get(cvd));
+                }
+            }
+            evaluateCell(valuesCell);
+            values.get(output).array().setCell(i, valuesCell.get(output));
+        }
+    }
   
   /**
    * \brief Prepare a function fro being function evaluation.

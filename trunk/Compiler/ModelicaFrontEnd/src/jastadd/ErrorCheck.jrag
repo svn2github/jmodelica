@@ -665,7 +665,7 @@ aspect InstanceErrorCheck {
     						varKind, varName, exp);
 			} else {
 				CValue val = ceval();
-				if (val.isUnknown()) {
+				if (val.isPartlyUnknown()) {
 					if (val.isUnsupported()) {
 						compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
 								"used by the binding expression for %s '%s': %s", varKind, varName, exp);

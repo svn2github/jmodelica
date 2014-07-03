@@ -1132,7 +1132,120 @@ y2
  )})));
 end FunctionEval31;
 
+model VectorFuncEval1
+    function f
+        input Real x;
+        output Real y = x + x;
+        algorithm
+    end f;
+    constant Real[2] y1 = f({1,2});
+    Real[2] y2 = f({1,2});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="VectorFuncEval1",
+            description="Constant evaluation of vectorized function call",
+            variables="
+y1[1]
+y1[2]
+y2[1]
+y2[2]
+",
+            values="
+2.0
+4.0
+2.0
+4.0
+"
+ )})));
+end VectorFuncEval1;
 
+model VectorFuncEval2
+    function f
+        input Real x1;
+        input Real[:] x2;
+        output Real y = x1 + sum(x2);
+        algorithm
+    end f;
+    constant Real[3] y1 = f({1,2,3},{{1,2},{3,4},{5,6}});
+    Real[3] y2 = f({1,2,3},{{1,2},{3,4},{5,6}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="VectorFuncEval2",
+            description="Constant evaluation of vectorized function call",
+            variables="
+y1[1]
+y1[2]
+y1[3]
+y2[1]
+y2[2]
+y2[3]
+",
+            values="
+4.0
+9.0
+14.0
+4.0
+9.0
+14.0
+"
+ )})));
+end VectorFuncEval2;
+
+model VectorFuncEval3
+    function f
+        input Real x1;
+        input Real[:] x2;
+        input Real[:,:] x3;
+        output Real y = x1 + sum(x2) + sum(x3);
+        algorithm
+    end f;
+    constant Real[3] y1 = f({1,2,3},{{1,2},{3,4},{5,6}}, {{1},{2},{3}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="VectorFuncEval3",
+            description="Constant evaluation of vectorized function call",
+            variables="
+y1[1]
+y1[2]
+y1[3]
+",
+            values="
+10.0
+15.0
+20.0
+"
+ )})));
+end VectorFuncEval3;
+
+model VectorFuncEval4
+    function f
+        input Real x1;
+        input Real[:] x2;
+        input Real[:,:] x3;
+        output Real y = x1 + sum(x2) + sum(x3);
+        algorithm
+    end f;
+    constant Real[3] y1 = f(3,{{1,2},{3,4},{5,6}}, {{{1},{1}},{{2},{2}},{{3},{3}}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="VectorFuncEval4",
+            description="Constant evaluation of vectorized function call",
+            variables="
+y1[1]
+y1[2]
+y1[3]
+",
+            values="
+8.0
+14.0
+20.0
+"
+ )})));
+end VectorFuncEval4;
 
 model StringConcat
  Real a = 1;
