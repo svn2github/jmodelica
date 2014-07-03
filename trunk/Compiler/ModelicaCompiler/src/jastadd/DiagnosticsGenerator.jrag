@@ -485,68 +485,194 @@ public class DiagnosticsGenerator {
 		
 	}
 
-	/**
+    /**
      *  Finalize the generation.
      */
-	public void finalize() {}
-	
-	private static String BLT_style = "table.incidenceMatrix {\n" +
-			"	border-collapse:collapse;\n" +
-			"}\n" +
-			"\n" +
-			"th.var {\n" +
-			"	border-right:1px solid black;\n" +
-			"	border-left:1px solid black;\n" +
-			"}\n" +
-			"\n" +
-			"div.var {\n" +
-			"	width:30px;\n" +
-			"	overflow:hidden;\n" +
-			"	white-space:nowrap;\n" +
-			"}\n" +
-			"\n" +
-			"th.eqn {\n" +
-			"	text-align:right;\n" +
-			"	border-top:1px solid black;\n" +
-			"	border-bottom:1px solid black;\n" +
-			"}\n" +
-			"\n" +
-			"div.eqn {\n" +
-			"	max-width:200px;\n" +
-			"	overflow:hidden;\n" +
-			"	white-space:nowrap;\n" +
-			"}\n" +
-			"\n" +
-			"table.incidenceMatrix td {\n" +
-			"text-align:center;\n" +
-			"height:30px;\n" +
-			"}\n";
-	
+    public void finalize() {}
 
-	public void writeBLTTableFile(FClass fc) {
-		try {
-			CodeStream out = new CodeStream(new PrintStream(bltTableAbsFileName, "UTF-8"));
-			out.print(html_header.replaceFirst("</head>", "<style type=\"text/css\">" + BLT_style + "</style></head>"));
-			if (fc.root().options.getBooleanOption("equation_sorting")) {
-				if (fc.numEquations() > 250) {
-					out.println("<p>The system is too big</p>");
-				} else {
-					out.println("<h1>BLT for Init DAE System</h1>");
-					fc.getDAEInitBLT().diagnostics_generateBLTTable(out, true);
-					
-                    if (!fc.onlyInitBLT()) {
-                        out.println("<h1>BLT for DAE System</h1>");
-                        fc.getDAEBLT().diagnostics_generateBLTTable(out, false);
-                    }
-				}
-			}
-			out.print(html_tail);
-			out.close();
-		} catch(FileNotFoundException e) {
-		} catch(UnsupportedEncodingException e) {		
-		}
-	}
-	
+    private static String BLT_style = "\n" +
+            "<style type=\"text/css\">" + 
+            "div.blt {\n" +
+            "    position:relative;\n" +
+            "    margin-left:200px;\n" +
+            "    margin-top:200px;\n" +
+            "    border:1px solid black;\n" +
+            "    font-family:sans-serif;\n" +
+            "    font-size:10px;\n" +
+            "}\n" +
+            "div.block {\n" +
+            "    position:absolute;\n" +
+            "    box-sizing:border-box;\n" +
+            "    border:1px solid black;\n" +
+            "}\n" +
+            "div.incidence {\n" +
+            "    position:absolute;\n" +
+            "    cursor:pointer;\n" +
+            "}\n" +
+            "div.incidence div{\n" +
+            "    width:" + AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE + "px;\n" +
+            "    height:" + AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE + "px;\n" +
+            "    overflow:hidden;\n" +
+            "    display:table-cell;\n" +
+            "    text-align:center;\n" +
+            "    vertical-align:middle;\n" +
+            "}\n" +
+            "div.equation {\n" +
+            "    position:absolute;\n" +
+            "    left:-200px;\n" +
+            "    width:200px;\n" +
+            "    box-sizing:border-box;\n" +
+            "    height:" + (AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE + 1) + "px;\n" +
+            "    border-top:1px solid black;\n" +
+            "    border-bottom:1px solid black;\n" +
+            "    overflow:hidden;\n" +
+            "    white-space:nowrap;\n" +
+            "}\n" +
+            "div.variable {\n" +
+            "    position:absolute;\n" +
+            "    top:-109px;\n" +
+            "    box-sizing:border-box;\n" +
+            "    height:" + (AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE + 1) + "px;\n" +
+            "    width:200px;\n" +
+            "    border-top:1px solid black;\n" +
+            "    border-bottom:1px solid black;\n" +
+            "    overflow:hidden;\n" +
+            "    white-space:nowrap;\n" +
+            "    transform:rotate(270deg);\n" +
+            "    -ms-transform:rotate(270deg);\n" +
+            "    -webkit-transform:rotate(270deg);\n" +
+            "    -moz-transform:rotate(270deg);\n" +
+            "}\n" +
+            "table.incidenceMatrix {\n" +
+            "    border-collapse:collapse;\n" +
+            "}\n" +
+            "\n" +
+            "th.var {\n" +
+            "    border-right:1px solid black;\n" +
+            "    border-left:1px solid black;\n" +
+            "}\n" +
+            "\n" +
+            "div.var {\n" +
+            "    width:30px;\n" +
+            "    overflow:hidden;\n" +
+            "    white-space:nowrap;\n" +
+            "}\n" +
+            "\n" +
+            "th.eqn {\n" +
+            "    text-align:right;\n" +
+            "    border-top:1px solid black;\n" +
+            "    border-bottom:1px solid black;\n" +
+            "}\n" +
+            "\n" +
+            "div.eqn {\n" +
+            "    max-width:200px;\n" +
+            "    overflow:hidden;\n" +
+            "    white-space:nowrap;\n" +
+            "}\n" +
+            "\n" +
+            "table.incidenceMatrix td {\n" +
+            "text-align:center;\n" +
+            "height:30px;\n" +
+            "}\n" +
+            "\n" +
+            "div#rowHighlight,\n" +
+            "div#colHighlight {\n" +
+            "    position:absolute;\n" +
+            "    z-index:1000;\n" +
+            "    background:#999;\n" +
+            "    opacity: 0.3;\n" +
+            "}\n" +
+            "\n" +
+            "div#rowLockHighlight,\n" +
+            "div#colLockHighlight {\n" +
+            "    position:absolute;\n" +
+            "    z-index:900;\n" +
+            "    background:#999;\n" +
+            "    opacity: 0.3;\n" +
+            "}\n" +
+            "\n" +
+            "</style>\n" +
+            "<script tyle=\"text/javascript\">\n" +
+            "\n" +
+            "var currentHightlight = null;\n" +
+            "var currentLockHightlight = null;\n" +
+            "\n" +
+            "function hightlight(incidence) {\n" +
+            "    var row = document.getElementById('rowHighlight');\n" +
+            "    var col = document.getElementById('colHighlight');\n" +
+            "    var blt = incidence.parentElement;\n" +
+            "    setHighlight(incidence, blt, row, col)\n" +
+            "}\n" +
+            "function unhighlight(incidence) {\n" +
+            "    var row = document.getElementById('rowHighlight');\n" +
+            "    row.style.display = 'none';\n" +
+            "    var col = document.getElementById('colHighlight');\n" +
+            "    col.style.display = 'none';\n" +
+            "}\n" +
+            "\n" +
+            "function lockHighlight(incidence) {\n" +
+            "    var row = document.getElementById('rowLockHighlight');\n" +
+            "    var col = document.getElementById('colLockHighlight');\n" +
+            "    var blt = incidence.parentElement;\n" +
+            "    setHighlight(incidence, blt, row, col)\n" +
+            "}\n" +
+            "\n" +
+            "function setHighlight(incidence, blt, row, col) {\n" +
+            "    row.style.width = blt.offsetWidth + 'px';\n" +
+            "    row.style.height = (incidence.offsetHeight + 1)+ 'px';\n" +
+            "    row.style.top = (offsetTop(incidence) + 1) + 'px';\n" +
+            "    row.style.left = offsetLeft(blt) + 'px';\n" +
+            "    row.style.display = 'block';\n" +
+            "    col.style.width = (incidence.offsetWidth + 1) + 'px';\n" +
+            "    col.style.height = blt.offsetHeight + 'px';\n" +
+            "    col.style.top = offsetTop(blt) + 'px';\n" +
+            "    col.style.left = (offsetLeft(incidence) + 1) + 'px';\n" +
+            "    col.style.display = 'block';\n" +
+            "}\n" +
+            "\n" +
+            "function offsetTop(obj) {\n" +
+            "    var res = 0;\n" +
+            "    while (obj != null) {\n" +
+            "        res += obj.offsetTop;\n" +
+            "        obj = obj.offsetParent;\n" +
+            "    }\n" +
+            "    return res;\n" +
+            "}\n" +
+            "function offsetLeft(obj) {\n" +
+            "    var res = 0;\n" +
+            "    while (obj != null) {\n" +
+            "        res += obj.offsetLeft;\n" +
+            "        obj = obj.offsetParent;\n" +
+            "    }\n" +
+            "    return res;\n" +
+            "}\n" +
+            "</script>\n";
+
+    public void writeBLTTableFile(FClass fc) {
+        try {
+            CodeStream out = new CodeStream(new PrintStream(bltTableAbsFileName, "UTF-8"));
+            out.print(html_header.replaceFirst("</head>", BLT_style + "</head>"));
+            if (fc.root().options.getBooleanOption("equation_sorting")) {
+                out.println("<div id=\"rowHighlight\" style=\"display:none;\"></div>");
+                out.println("<div id=\"colHighlight\" style=\"display:none;\"></div>");
+                out.println("<div id=\"rowLockHighlight\" style=\"display:none;\"></div>");
+                out.println("<div id=\"colLockHighlight\" style=\"display:none;\"></div>");
+
+                out.println("<h1>BLT for Init DAE System</h1>");
+                fc.getDAEInitBLT().diagnostics_generateBLTTable(out, true);
+
+                if (!fc.onlyInitBLT()) {
+                    out.println("<h1>BLT for DAE System</h1>");
+                    fc.getDAEBLT().diagnostics_generateBLTTable(out, false);
+                }
+            }
+            out.print(html_tail);
+            out.close();
+        } catch(FileNotFoundException e) {
+        } catch(UnsupportedEncodingException e) {
+        }
+    }
+
 	public abstract class DiagnosticsFile {
 		
 		protected String title;
@@ -609,329 +735,190 @@ public class DiagnosticsGenerator {
 		
 	}
 	
-	protected static class TableManager {
-		private LinkedList<StyleRule> rules = new LinkedList<StyleRule>();
-		private int blockCounter = -1;
-		private int blockDepth;
-		private boolean blockIdSet = true;
-		private int xPos = 0;
-		private int yPos = 0;
-		private String blockPrefix;
-		
-		protected TableManager(String blockPrefix) {
-			this.blockPrefix = blockPrefix;
-		}
-		
-		public String getBlockPrefix() {
-			return blockPrefix;
-		}
-		
-		public String getStyle() {
-			for (StyleRule rule : rules) {
-				if (!rule.withIn(xPos, yPos))
-					continue;
-				
-				String style = "";
-				if (rule.getBackground() != null)
-					style = "background:" + rule.getBackground() + ";";
-				if (rule.onTopEdge(xPos, yPos))
-					style += "border-top:" + rule.getStyle() + ";";
-				if (rule.onRightEdge(xPos, yPos))
-					style += "border-right:" + rule.getStyle() + ";";
-				if (rule.onBottomEdge(xPos, yPos))
-					style += "border-bottom:" + rule.getStyle() + ";";
-				if (rule.onLeftEdge(xPos, yPos))
-					style += "border-left:" + rule.getStyle() + ";";
-				return style;
-			}
-			return "";
-		}
-		
-		public void newRow() {
-			yPos++;
-			xPos = 0;
-		}
-		
-		public int getYPos() {
-			return yPos;
-		}
-		
-		public void newCol() {
-			xPos++;
-		}
-		
-		public int getXPos() {
-			return xPos;
-		}
-		
-		public void addStyleRule(StyleRule rule) {
-			rules.addFirst(rule);
-		}
-		
-		public void popStyleRule() {
-			rules.removeFirst();
-		}
-		
-		public void enterBlock() {
-			blockDepth++;
-			if (blockDepth > 1)
-				return;
-			if (blockDepth == 1)
-				blockIdSet = false;
-			blockCounter++;
-		}
-		
-		public void leaveBlock() {
-			if (blockDepth > 0)
-				blockDepth--;
-		}
-		
-		public int getBlockId() {
-			return blockCounter;
-		}
-		
-		
-		public boolean blockIdSet() {
-			return blockIdSet;
-		}
-		
-		public void blockIdIsSet() {
-			blockIdSet = true;
-		}
-		
-	}
-	
-	protected static class StyleRule {
-		private final int xStart;
-		private final int yStart;
-		private final int xEnd;
-		private final int yEnd;
-		private final String style;
-		private final String background;
-		
-		public StyleRule(int xStart, int yStart, int xEnd, int yEnd, String style) {
-			this (xStart, yStart, xEnd, yEnd, style, null);
-		}
+    protected static class TableManager {
+        private int xPos = 0;
+        private int yPos = 0;
+        private String blockPrefix;
 
-		public StyleRule(int xStart, int yStart, int xEnd, int yEnd, String style, String background) {
-			this.xStart = xStart;
-			this.yStart = yStart;
-			this.xEnd = xEnd;
-			this.yEnd = yEnd;
-			this.style = style;
-			this.background = background;
-		}
-		
-		public boolean withIn(int x, int y) {
-			return yStart <= y && yEnd >= y && xStart <= x && xEnd >= x;
-		}
-		
-		public boolean onTopEdge(int x, int y) {
-			return y == yStart;
-		}
-		
-		public boolean onRightEdge(int x, int y) {
-			return x == xEnd;
-		}
-		
-		public boolean onBottomEdge(int x, int y) {
-			return y == yEnd;
-		}
-		
-		public boolean onLeftEdge(int x, int y) {
-			return x == xStart;
-		}
-		
-		public String getStyle() {
-			return style;
-		}
-		
-		public String getBackground() {
-			return background;
-		}
-		
-		@Override
-		public String toString() {
-			return yStart + " " + xEnd + " " + yEnd + " " + xStart + " " + style;
-		}
-	}
-	
+        protected TableManager(String blockPrefix) {
+            this.blockPrefix = blockPrefix;
+        }
+
+        public String getBlockPrefix() {
+            return blockPrefix;
+        }
+
+        public void newRow() {
+            yPos++;
+            xPos = 0;
+        }
+
+        public int getYPos() {
+            return yPos;
+        }
+
+        public void newCol() {
+            xPos++;
+        }
+
+        public int getXPos() {
+            return xPos;
+        }
+    }
+}
+
+public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
+    Deque<FVariable> orderList = new ArrayDeque<FVariable>();
+    for (AbstractEquationBlock aeb : this) {
+        orderList.addAll(aeb.allVariables());
+    }
+    FVariable[] order = orderList.toArray(new FVariable[orderList.size()]);
+
+    DiagnosticsGenerator.TableManager tm = new DiagnosticsGenerator.TableManager(isInit ? "block_init_" : "block_");
+
+    out.formatln("<div class=\"blt\" style=\"width:%dpx;height:%dpx;\">", order.length * AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE + 1, order.length * AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE + 1);
+    for (int i = 0; i < order.length; i++) {
+        FVariable fv = order[i];
+        out.formatln("    <div class=\"variable\" style=\"left:%dpx\" title=\"%s\">%s</div>", (i - 6) * AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE - 2, ASTNode.escapeHTML(fv.name()), ASTNode.escapeHTML(fv.name()));
+    }
+
+    for (AbstractEquationBlock aeb : this) {
+        aeb.diagnostics_generateBLTTable_block(order, out, tm);
+    }
+
+    out.println("</div>");
+}
+
+protected abstract String AbstractEquationBlock.diagnostics_generateBLTTable_color();
+protected String TornEquationBlock.diagnostics_generateBLTTable_color() {
+    return "#F0CCCC";
+}
+
+protected String SimpleEquationBlock.diagnostics_generateBLTTable_color() {
+    return "#CCF0CC";
+}
+
+protected String AlgorithmBlock.diagnostics_generateBLTTable_color() {
+    return "#CCF0CC";
 }
 	
-	public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
-		Deque<FVariable> orderList = new ArrayDeque<FVariable>();
-		for (AbstractEquationBlock aeb : this) {
-			orderList.addAll(aeb.allVariables());
-		}
-		FVariable[] order = orderList.toArray(new FVariable[orderList.size()]);
-		
-		DiagnosticsGenerator.TableManager tm = new DiagnosticsGenerator.TableManager(isInit ? "block_init_" : "block_");
-		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(0, 0, order.length - 1, order.length - 1, "1px dashed black"));
-		
-		out.println("<table class=\"incidenceMatrix\">");
-		out.println("	<tr>");
-		out.println("		<th />");
-		for (FVariable fv : order) {
-			out.println("		<th class=\"var\"><div class=\"var\" title=\"" + ASTNode.escapeHTML(fv.name()) + "\">" + ASTNode.escapeHTML(fv.name()) + "</div></th>");
-		}
-		out.println("	</tr>");
-		
-		for (AbstractEquationBlock aeb : this) {
-			aeb.diagnostics_generateBLTTable_block(order, out, tm);
-		}
+protected String EquationBlock.diagnostics_generateBLTTable_color() {
+    return "#CCCCF0";
+}
+	
+protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Collections.emptyMap();
 
-		out.println("</table>");
-	}
-	
-	protected abstract String AbstractEquationBlock.diagnostics_generateBLTTable_color();
-	protected String TornEquationBlock.diagnostics_generateBLTTable_color() {
-		return "#F0CCCC";
-	}
+public static final int AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE = 15;
 
-	protected String SimpleEquationBlock.diagnostics_generateBLTTable_color() {
-		return "#CCF0CC";
-	}
+public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
+    int start = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
+    int size = allVariables().size() * DIAGNOSTICS_CELL_SIZE + 1;
+    int xStart = tm.getYPos();
+    int yStart = tm.getYPos();
+    int xEnd = xStart + allVariables().size() - 1;
+    int yEnd = yStart + allVariables().size() - 1;
+    out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, size, size);
+    diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
+}
 
-	protected String AlgorithmBlock.diagnostics_generateBLTTable_color() {
-		return "#CCF0CC";
-	}
-	
-	protected String EquationBlock.diagnostics_generateBLTTable_color() {
-		return "#CCCCF0";
-	}
-	
-	protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Collections.emptyMap();
+public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+    for (FAbstractEquation equation : allEquations()) {
+        if (varFilter == EMPTY_VAR_FILTER)
+            size = equation.numScalarEquations();
+        String equationStr = ASTNode.escapeHTML(equation);
+        for (int i = 0; i < size; i++) {
+            out.formatln("    <div class=\"equation\" style=\"top:%dpx;\" title=\"%s\">%s</div>", tm.getYPos() * DIAGNOSTICS_CELL_SIZE, equationStr, equationStr);
+            for (FVariable var : order) {
+                Integer pos = varFilter.get(var);
+                boolean contains = (equation.variables().contains(var) 
+                        || equation.discretePreVariables().contains(var)
+                        || equation.nonFixedParameters().contains(var))
+                        && (pos == null || pos == i);
+                if (contains)
+                    out.formatln("    <div class=\"incidence\" style=\"left:%dpx;top:%dpx;z-index:10000;\" title=\"%s&#13;&#13;%s\" onmouseover=\"hightlight(this);\" onmouseout=\"unhighlight(this);\" onclick=\"lockHighlight(this);\"><div>%s</div></div>", tm.getXPos() * DIAGNOSTICS_CELL_SIZE, tm.getYPos() * DIAGNOSTICS_CELL_SIZE, ASTNode.escapeHTML(var.name()), equationStr, diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var.name(), inTearBlock)));
+                tm.newCol();
+            }
+            tm.newRow();
+        }
+    }
+}
 
-	public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
-		tm.enterBlock();
-		int xStart = tm.getYPos();
-		int yStart = tm.getYPos();
-		int xEnd = xStart + allVariables().size() - 1;
-		int yEnd = yStart + allVariables().size() - 1;
-		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(xStart, yStart, xEnd, yEnd, "1px solid black", diagnostics_generateBLTTable_color()));
-		diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
-		tm.popStyleRule();
-		tm.leaveBlock();
-	}
-	
-	public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
-		for (FAbstractEquation equation : allEquations()) {
-			if (varFilter == EMPTY_VAR_FILTER)
-				size = equation.numScalarEquations();
-			String equationStr = ASTNode.escapeHTML(equation);
-			for (int i = 0; i < size; i++) {
-				out.println("	<tr>");
-				if (i == 0) {
-					out.print("		<th class=\"eqn\"");
-					if (size > 1)
-						out.print(" rowspan=\"" + size + "\"");
-					out.println("><div class=\"eqn\" title=\"" + equationStr + "\">" + equationStr + "</div></th>");
-				}
-				for (FVariable var : order) {
-					Integer pos = varFilter.get(var);
-					boolean contains = (equation.variables().contains(var) 
-							|| equation.discretePreVariables().contains(var)
-							|| equation.nonFixedParameters().contains(var))
-							&& (pos == null || pos == i);
-					out.print("		<td");
-					String style = tm.getStyle();
-					if (!style.isEmpty())
-						out.print(" style=\"" + style + "\"");
-					if (contains) {
-						out.print(" title=\"" + ASTNode.escapeHTML(var.name()) + "&#13;&#13;" + equationStr + "\"");
-						if (!tm.blockIdSet()) {
-							tm.blockIdIsSet();
-							out.print(" id=\"" + tm.getBlockPrefix() + tm.getBlockId() + "\"");
-						}
-					}
-					out.print(">");
-					if (contains)
-						out.print(diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var.name(), inTearBlock)));
-					out.println("</td>");
-					tm.newCol();
-				}
-				out.println("	</tr>");
-				tm.newRow();
-			}
-		}
-	}
-	
-	private String AbstractEquationBlock.diagnostics_generateBLTTable_solvabilitySymbol(Solvability s) {
-		switch (s) {
-		case ANALYTICALLY_SOLVABLE:
-			return "O";
-		case NUMERICALLY_SOLVABLE:
-			return "@";
-		case UNSOLVABLE:
-			return "X";
-		}
-		throw new IllegalArgumentException("Unsupported solvability type " + s);
-	}
-	
-	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
-		int startL = tm.getYPos();
-		int endL = startL + allVariables().size() - localUnsolvedVariables().size() - 1;
-		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startL, startL, endL, endL, "1px solid black", "#F0E4E4"));
-		int startJ = endL + 1;
-		int endJ = startL + allVariables().size() - 1;
-		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startJ, startJ, endJ, endJ, "1px solid black", "#F0C0C0"));
-		java.util.List<AbstractEquationBlock> blocks = new ArrayList<AbstractEquationBlock>();
-		blocks.addAll(solvedBlocks());
-		blocks.addAll(unsolvedBlocks());
-		for (AbstractEquationBlock seb : blocks) {
-			seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
-		}
-		tm.popStyleRule();
-		tm.popStyleRule();
-	}
-	
-	public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
-		varFilter = new HashMap<FVariable, Integer>();
-		int index = 0;
-		for (FVariable var : equation().referencedFVariablesInLHS()) {
-			varFilter.put(var, -1);
-		}
-		for (FVariable var : activeVars) {
-			varFilter.put(var, index);
-			index++;
-		}
-		for (FVariable var : equation().referencedFVariablesInRHS()) {
-			varFilter.remove(var);
-		}
-		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
-	}
-	
-	public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
-		varFilter = new HashMap<FVariable, Integer>();
-		int index = 0;
-		for (FVariable var : equation().referencedFVariablesInLHS()) {
-			varFilter.put(var, -1);
-		}
-		for (FVariable var : activeVars) {
-			varFilter.put(var, index);
-			index++;
-		}
-		for (FVariable var : equation().referencedFVariablesInRHS()) {
-			varFilter.remove(var);
-		}
-		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
-	}
-	
-	public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
-		
-	}
-	
-	
-	protected static String ASTNode.escapeHTML(Object o) {
-		return escapeHTML(o.toString());
-	}
-	protected static String ASTNode.escapeHTML(String str) {
-		str = str.replace("&", "&amp;");
-		str = str.replace("\"", "&quot;");
-		str = str.replace("\'", "&039;");
-		str = str.replace("<", "&lt;");
-		str = str.replace(">", "&gt;");
-		return str;
-	}
-	
+private String AbstractEquationBlock.diagnostics_generateBLTTable_solvabilitySymbol(Solvability s) {
+    switch (s) {
+    case ANALYTICALLY_SOLVABLE:
+        return "O";
+    case NUMERICALLY_SOLVABLE:
+        return "@";
+    case UNSOLVABLE:
+        return "X";
+    }
+    throw new IllegalArgumentException("Unsupported solvability type " + s);
+}
+
+public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+    int numSolved = allVariables().size() - localUnsolvedVariables().size() - localNonRealVariables().size();
+    int solvedStart = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
+    int solvedSize = numSolved * DIAGNOSTICS_CELL_SIZE + 1;
+    int unsolvedStart = (tm.getYPos() + numSolved) * DIAGNOSTICS_CELL_SIZE;
+    int unsolvedSize = localUnsolvedVariables().size() * DIAGNOSTICS_CELL_SIZE + 1;
+    if (inTearBlock)
+        out.formatln("    <div class=\"block\" style=\"background:#F0C7C7;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize + unsolvedSize - 1, solvedSize + unsolvedSize - 1);
+    out.formatln("    <div class=\"block\" style=\"background:#F0E4E4;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize, solvedSize);
+    out.formatln("    <div class=\"block\" style=\"background:#F0C0C0;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", unsolvedStart, unsolvedStart, unsolvedSize, unsolvedSize);
+    java.util.List<AbstractEquationBlock> blocks = new ArrayList<AbstractEquationBlock>();
+    blocks.addAll(solvedRealBlocks());
+    blocks.addAll(unsolvedBlocks());
+    for (AbstractEquationBlock seb : blocks) {
+        seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
+    }
+}
+
+public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+    varFilter = new HashMap<FVariable, Integer>();
+    int index = 0;
+    for (FVariable var : equation().referencedFVariablesInLHS()) {
+        varFilter.put(var, -1);
+    }
+    for (FVariable var : activeVars) {
+        varFilter.put(var, index);
+        index++;
+    }
+    for (FVariable var : equation().referencedFVariablesInRHS()) {
+        varFilter.remove(var);
+    }
+    super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+}
+
+public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+    varFilter = new HashMap<FVariable, Integer>();
+    int index = 0;
+    for (FVariable var : equation().referencedFVariablesInLHS()) {
+        varFilter.put(var, -1);
+    }
+    for (FVariable var : activeVars) {
+        varFilter.put(var, index);
+        index++;
+    }
+    for (FVariable var : equation().referencedFVariablesInRHS()) {
+        varFilter.remove(var);
+    }
+    super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+}
+
+public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
+}
+
+protected static String ASTNode.escapeHTML(Object o) {
+    return escapeHTML(o.toString());
+}
+
+protected static String ASTNode.escapeHTML(String str) {
+    str = str.replace("&", "&amp;");
+    str = str.replace("\"", "&quot;");
+    str = str.replace("\'", "&039;");
+    str = str.replace("<", "&lt;");
+    str = str.replace(">", "&gt;");
+    return str;
+}
+
 }
