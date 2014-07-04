@@ -1084,21 +1084,21 @@ equation
 
 public
  function FunctionInlining.O.destructor
-  input ExternalObject o;
+  input FunctionInlining.O o;
  algorithm
   external \"C\" destructor(o);
   return;
  end FunctionInlining.O.destructor;
 
  function FunctionInlining.O.constructor
-  output ExternalObject o;
+  output FunctionInlining.O o;
  algorithm
   external \"C\" o = constructor();
   return;
  end FunctionInlining.O.constructor;
 
  function FunctionInlining.ExternalInline1.f
-  input ExternalObject o;
+  input FunctionInlining.O o;
   input Real y;
   output Real x;
  algorithm
@@ -1144,14 +1144,14 @@ equation
 
 public
  function FunctionInlining.O.destructor
-  input ExternalObject o;
+  input FunctionInlining.O o;
  algorithm
   external \"C\" destructor(o);
   return;
  end FunctionInlining.O.destructor;
 
  function FunctionInlining.O.constructor
-  output ExternalObject o;
+  output FunctionInlining.O o;
  algorithm
   external \"C\" o = constructor();
   return;
@@ -1159,7 +1159,7 @@ public
 
  function FunctionInlining.ExternalInline2.g
   input Real y;
-  input ExternalObject[:] os;
+  input FunctionInlining.O[:] os;
   output Real x;
  algorithm
   x := y + FunctionInlining.ExternalInline2.f(os[1], y);
@@ -1167,7 +1167,7 @@ public
  end FunctionInlining.ExternalInline2.g;
 
  function FunctionInlining.ExternalInline2.f
-  input ExternalObject o;
+  input FunctionInlining.O o;
   input Real y;
   output Real x;
  algorithm

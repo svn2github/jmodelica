@@ -5550,14 +5550,14 @@ fclass TransformCanonicalTests.TestExternalObj1
 
 public
  function TransformCanonicalTests.MyExternalObject.destructor
-  input ExternalObject eo;
+  input TransformCanonicalTests.MyExternalObject eo;
  algorithm
   external \"C\" destroy_myEO(eo);
   return;
  end TransformCanonicalTests.MyExternalObject.destructor;
 
  function TransformCanonicalTests.MyExternalObject.constructor
-  output ExternalObject eo;
+  output TransformCanonicalTests.MyExternalObject eo;
  algorithm
   external \"C\" init_myEO();
   return;

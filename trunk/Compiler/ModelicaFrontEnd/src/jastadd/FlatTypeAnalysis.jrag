@@ -1395,7 +1395,7 @@ aspect FTypeCompatibility {
 	eq FEnumType.typeCompatible(FType type, boolean allowUnknown) = 
 		typeMatches(type, true, allowUnknown);
 	eq FExternalObjectType.typeCompatible(FType type, boolean allowUnknown) = 
-			type.isExternalObject() && dimensionCompatible(type, allowUnknown);
+		typeMatches(type, true, allowUnknown);
 	
 	syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
 		compatible ? typeCompatible(type, allowUnknown) : equivalentTo(type, allowUnknown);
@@ -1423,6 +1423,14 @@ aspect FTypeCompatibility {
                 return false;
         }
         return true;
+	}
+	eq FExternalObjectType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+	    if (!dimensionCompatible(type, allowUnknown) || !type.isExternalObject())
+            return false;
+	    FExternalObjectType obj = (FExternalObjectType) type;
+	    if (getName().equals(obj.getName())) 
+            return true;
+	    return false;
 	}
 	eq FEnumType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
 		if (!dimensionCompatible(type, allowUnknown) || !type.isEnum())
@@ -1469,7 +1477,7 @@ aspect FTypeEquivalent {
 	eq FEnumType.equivalentTo(FType type, boolean allowUnknown) = 
 		typeMatches(type, false, allowUnknown);
     eq FExternalObjectType.equivalentTo(FType type, boolean allowUnknown) = 
-            type.isExternalObject() && dimensionCompatible(type, allowUnknown);
+        typeMatches(type, false, allowUnknown);
  
 }
 

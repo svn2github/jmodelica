@@ -4827,7 +4827,7 @@ parameter equation
 
 public
  function RecordTests.ExternalObjectStructural1.A.destructor
-  input ExternalObject a;
+  input RecordTests.ExternalObjectStructural1.A a;
  algorithm
   external \"C\" destructor(a);
   return;
@@ -4835,14 +4835,14 @@ public
 
  function RecordTests.ExternalObjectStructural1.A.constructor
   input String b;
-  output ExternalObject a;
+  output RecordTests.ExternalObjectStructural1.A a;
  algorithm
   external \"C\" a = constructor(b);
   return;
  end RecordTests.ExternalObjectStructural1.A.constructor;
 
  function RecordTests.ExternalObjectStructural1.f
-  input ExternalObject a;
+  input RecordTests.ExternalObjectStructural1.A a;
   output Real b;
  algorithm
   external \"C\" b = f(a);

@@ -983,7 +983,44 @@ Semantic error at line 1010, column 8:
 ")})));
 end UnknownTypeAccess1;
 
-
+model ExtObjType1
+    model E1 
+        extends ExternalObject;
+        function constructor
+            output E1 e;
+            external "C";
+        end constructor;
+        
+        function destructor
+            input E1 e;
+            external "C";
+        end destructor;
+    end E1;
+    
+    model E2
+        extends ExternalObject;
+        function constructor
+            output E2 e;
+            external;
+        end constructor;
+        
+        function destructor
+            input E2 e;
+            external;
+        end destructor;
+    end E2;
+    parameter E1 e = E2();
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExtObjType1",
+            description="Check external object types",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 1012, column 22:
+  The binding expression of the variable e does not match the declared type of the variable
+")})));
+end ExtObjType1;
 
 model RecursiveStructure1
 	model A
