@@ -2845,6 +2845,7 @@ public
  algorithm
   y := sin(x);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.Simple.F;
 
  function IndexReduction.AlgorithmDifferentiation.Simple._der_F
@@ -2856,6 +2857,7 @@ public
   _der_y := cos(x) * _der_x;
   y := sin(x);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.Simple._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.Simple;
@@ -2902,6 +2904,7 @@ public
  algorithm
   y := sin(x.x[1]);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.RecordInput.F;
 
  function IndexReduction.AlgorithmDifferentiation.RecordInput._der_F
@@ -2913,6 +2916,7 @@ public
   _der_y := cos(x.x[1]) * _der_x.x[1];
   y := sin(x.x[1]);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.RecordInput._der_F;
 
  record IndexReduction.AlgorithmDifferentiation.RecordInput.R
@@ -2969,6 +2973,7 @@ public
  algorithm
   y.x[1] := sin(x);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.RecordOutput.F;
 
  function IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F
@@ -2980,6 +2985,7 @@ public
   _der_y.x[1] := cos(x) * _der_x;
   y.x[1] := sin(x);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F;
 
  record IndexReduction.AlgorithmDifferentiation.RecordOutput.R
@@ -3042,6 +3048,7 @@ public
   end for;
   y := sin(x);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.For.F;
 
  function IndexReduction.AlgorithmDifferentiation.For._der_F
@@ -3064,6 +3071,7 @@ public
   _der_y := cos(x) * _der_x;
   y := sin(x);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.For._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.For;
@@ -3122,6 +3130,7 @@ public
   (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   y := a + b;
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.FunctionCall.F1;
 
  function IndexReduction.AlgorithmDifferentiation.FunctionCall.F2
@@ -3152,6 +3161,7 @@ public
   _der_y := _der_a + _der_b;
   y := a + b;
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1;
 
  function IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2
@@ -3169,6 +3179,7 @@ public
   _der_b := cos(x2) * _der_x2;
   b := sin(x2);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2;
 
 end IndexReduction.AlgorithmDifferentiation.FunctionCall;
@@ -3224,6 +3235,7 @@ public
   end if;
   y := sin(x);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.If.F;
 
  function IndexReduction.AlgorithmDifferentiation.If._der_F
@@ -3244,6 +3256,7 @@ public
   _der_y := cos(x) * _der_x;
   y := sin(x);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.If._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.If;
@@ -3293,6 +3306,7 @@ public
   end for;
   y := a[1];
   return;
+ annotation(smoothOrder = 3);
  end IndexReduction.AlgorithmDifferentiation.InitArray.F;
 
  function IndexReduction.AlgorithmDifferentiation.InitArray._der_F
@@ -3312,6 +3326,7 @@ public
   _der_y := _der_a[1];
   y := a[1];
   return;
+ annotation(smoothOrder = 2);
  end IndexReduction.AlgorithmDifferentiation.InitArray._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.InitArray;
@@ -3421,6 +3436,7 @@ public
   end while;
   y := sin(x);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.While.F;
 
  function IndexReduction.AlgorithmDifferentiation.While._der_F
@@ -3440,6 +3456,7 @@ public
   _der_y := cos(x) * _der_x;
   y := sin(x);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.While._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.While;
@@ -3505,6 +3522,7 @@ public
   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   y := a + b;
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.Recursive.F1;
 
  function IndexReduction.AlgorithmDifferentiation.Recursive.F2
@@ -3540,6 +3558,7 @@ public
   _der_y := _der_a + _der_b;
   y := a + b;
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.Recursive._der_F1;
 
  function IndexReduction.AlgorithmDifferentiation.Recursive._der_F2
@@ -3563,6 +3582,7 @@ public
    b := sin(x2);
   end if;
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.Recursive._der_F2;
 
 end IndexReduction.AlgorithmDifferentiation.Recursive;
@@ -3613,6 +3633,7 @@ public
   c := c + 23;
   y := sin(x);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F;
 
  function IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F
@@ -3628,6 +3649,7 @@ public
   _der_y := cos(x) * _der_x;
   y := sin(x);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.DiscreteComponents;
@@ -3695,6 +3717,7 @@ public
  algorithm
   y := x ^ 2;
   return;
+ annotation(smoothOrder = 2);
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square;
 
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square
@@ -3706,6 +3729,7 @@ public
   _der_y := 2 * x * _der_x;
   y := x ^ 2;
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square;
 
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square
@@ -3720,6 +3744,7 @@ public
   _der_y := 2 * x * _der_x;
   y := x ^ 2;
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square;
 
 end IndexReduction.AlgorithmDifferentiation.PlanarPendulum;
@@ -3760,6 +3785,7 @@ public
   y := x * x;
   y := y * x;
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F
@@ -3773,6 +3799,7 @@ public
   _der_y := y * _der_x + _der_y * x;
   y := y * x;
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt;
@@ -3823,6 +3850,7 @@ public
   (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(x);
   (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2
@@ -3834,6 +3862,7 @@ public
   z := x * x;
   z := z * x;
   return;
+ annotation(smoothOrder = 1);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1
@@ -3847,6 +3876,7 @@ public
   (, _der_y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2(y, _der_y);
   (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2
@@ -3864,6 +3894,7 @@ public
   _der_z := z * _der_x + _der_z * x;
   z := z * x;
   return;
+ annotation(smoothOrder = 0);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2;
 
 end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall;

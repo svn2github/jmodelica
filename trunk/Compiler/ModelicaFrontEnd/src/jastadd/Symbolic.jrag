@@ -900,21 +900,13 @@ aspect SmoothOrder{
     }
     
     public void FFunctionDecl.smoothOrder(int order) {
-        FAttribute attribute = findAttribute("ResidualEquation");
-        if (attribute == null) {
-            attribute = new FInternalAttribute("ResidualEquation");
-            addFAttribute(attribute);
-        }
-        attribute.setValue(new FIntegerLitExp(order));
+        AnnotationNode node = annotation().forPath("smoothOrder");
+        if (node.exists() || order != SMOOTH_ORDER_ANNOTATION_DEFAULT)
+            // We only wan't to set this attribute if it is already set or order is non equal to default.
+            annotation().forPath("smoothOrder").setValue(new FIntegerLitExp(order));
     }
     
-    syn int FFunctionDecl.smoothOrder() {
-        FAttribute attribute = findAttribute("ResidualEquation");
-        if (attribute == null)
-            return SMOOTH_ORDER_ANNOTATION_DEFAULT;
-        return attribute.getValue().ceval().intValue();
-    }
-    
+    syn int FFunctionDecl.smoothOrder()  = readSmoothOrderAnnotation(annotation());
     syn int InstClassDecl.smoothOrder() = readSmoothOrderAnnotation(annotation());
     syn int InstFunctionCall.smoothOrder() = myInstClassDecl().smoothOrder();
     syn int FFunctionCall.smoothOrder() = myFFunctionDecl().smoothOrder();
