@@ -120,7 +120,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         dgetrf_(&n_x, &n_x, solver->factorization, &n_x, solver->ipiv, &info);
         if(info) {
             if(block->init) {
-                jmi_log_node(block->log, logError, "SingularJacobianErrorrror", "Singular Jacobian detected for <block: %s>", 
+                jmi_log_node(block->log, logError, "SingularJacobianError", "Singular Jacobian detected for <block: %s>", 
                              block->label);
             }
             else {
