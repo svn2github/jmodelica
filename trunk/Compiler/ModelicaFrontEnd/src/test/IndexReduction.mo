@@ -2661,6 +2661,49 @@ end IndexReduction.IndexReduction54;
 ")})));
 end IndexReduction54;
 
+model SSPreferBackoff1
+    function f
+        input Real a;
+        input Real b;
+        output Real d = a + b;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real x(stateSelect = StateSelect.prefer);
+    Real y(stateSelect = StateSelect.prefer);
+equation
+    x = y - 1;
+    0 = f(x, y);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SSPreferBackoff1",
+            description="Test of system with non differentiated variable with StateSelect prefer and see if backoff works when it fails",
+            flatModel="
+fclass IndexReduction.SSPreferBackoff1
+ Real x(stateSelect = StateSelect.prefer);
+ Real y(stateSelect = StateSelect.prefer);
+equation
+ x = y - 1;
+ 0 = IndexReduction.SSPreferBackoff1.f(x, y);
+
+public
+ function IndexReduction.SSPreferBackoff1.f
+  input Real a;
+  input Real b;
+  output Real d;
+ algorithm
+  d := a + b;
+  return;
+ end IndexReduction.SSPreferBackoff1.f;
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.SSPreferBackoff1;
+")})));
+end SSPreferBackoff1;
+
 model IndexReduction55
     Real a_s;
     Real a_v(stateSelect = StateSelect.always);

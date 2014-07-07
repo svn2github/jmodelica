@@ -67,18 +67,43 @@ aspect IndexReduction {
     private void FClass.reduceIndex() {
         log.info("Flat tree before index reduction");
         log.info(this);
-        // Only do index reduction based on real variables and equations
-        BiPGraph g = new BiPGraph();
-        g.addVariables(this, VAR_TYPES_REAL);
-        g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
         log.info("Index reduction starts");
-        log.info(g);
-        g.maximumMatching(true);    
-        log.info("DAE system real variables only");
-        log.info(g.printMatchingObj());
-        
-        IndexReductionResult result = null;
-        result = g.reduceIndex(false);
+        IndexReductionResult result;
+        while (true) {
+            BiPGraph g = new BiPGraph();
+            // Only do index reduction based on real variables and equations
+            g.addVariables(this, VAR_TYPES_REAL);
+            g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
+            log.info(g);
+            g.maximumMatching(true);
+            log.info("DAE system real variables only");
+            log.info(g.printMatchingObj());
+            
+            try {
+                result = g.reduceIndex(false);
+                break;
+            } catch (EquationDifferentiationException e) {
+                ASTNode.log.info("Unable to differentiate equation:\n%s", e.equation);
+                if (ssPreferVars == null || ssPreferVars.isEmpty())
+                    throw e;
+                Set<FVariable> removableVars = g.removablePreferDerivatives(ssPreferVars);
+                if (removableVars.isEmpty())
+                    throw e;
+                log.info("Retrying index reduction without the following state select prefer derivatives:");
+                for (FVariable var : removableVars)
+                    log.info("  %s", var.name());
+                log.info("");
+                
+                // Remove SS=prefer derivatives
+                List<FVariable> vars = new List<FVariable>();
+                for (FVariable var : getFVariableListNoTransform()) {
+                    if (!removableVars.contains(var))
+                        vars.add(var);
+                }
+                setFVariableList(vars);
+                root().flushAllRecursive();
+            }
+        }
         
         // Add the new equations
         // Replace selected dummy derivatives with algebraics
@@ -245,35 +270,17 @@ aspect IndexReduction {
         return diffedEqnsMap;
     }
     
-    private boolean BiPGraph.removePreferDerivatives(Collection<Eq> eqns, Stack<Eq> workStack) {
-        boolean skip = false;
-        for (Eq eqn : eqns) {
-            for (FVariable fv : eqn.getEquation().variables()) {
-                if (fv.stateSelectAttribute() != FAbstractVariable.StateSelect.PREFER)
-                    continue;
-                if (fv.getMeDifferentiated() == null)
-                    continue;
-                Var derVar = getVariable(fv.getMeDifferentiated().name());
-                if (derVar == null)
-                    continue;
-                if (derVar.getMatching() != null)
-                    continue;
-                ASTNode.log.info("Removing derivative variable that was introduced due to StateSelect.Prefer, \"%s\"", derVar);
-                removeVariable(derVar);
-                Var var = addVariable(fv.name(), fv);
-                ASTNode.log.info("Introducing the original variable, \"%s\"", var);
-                for (FIdUseExp use : fv.uses()) {
-                    FAbstractEquation fae = use.myFEquation();
-                    if (fae == null)
-                        continue;
-                    for (Eq useEqn : getEquations(fae))
-                        useEqn.addVariable(var);
-                }
-                skip = true;
-                workStack.push(eqn);
-            }
+    public Set<FVariable> BiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
+        Set<FVariable> removableVars = new HashSet<FVariable>();
+        for (FVariable preferVar : preferVars) {
+            FVariable fDerVar = preferVar.getMeDifferentiated();
+            if (fDerVar == null)
+                continue;
+            Var derVar = getVariable(fDerVar.name());
+            if (derVar != null && derVar.getMatching() == null)
+                removableVars.add(derVar.getVariable());
         }
-        return skip;
+        return removableVars;
     }
     
     public class EquationBlockFactory {
@@ -357,15 +364,7 @@ aspect IndexReduction {
                 // Remove derivative if we find StateSelect.Prefer variables that wasn't possible to select due to
                 // equation that can't be differentiated
                 Map<Eq, FAbstractEquation> diffedEqnsMap;
-                try {
-                    diffedEqnsMap = differentiateEquations(visitedEquations);
-                } catch (EquationDifferentiationException e) {
-                    ASTNode.log.info("Unable to differentiate equation:\n%s", e.equation);
-                    if (removePreferDerivatives(visitedEquations, eqToMatchStack))
-                        continue;
-                    else
-                        throw e;
-                }
+                diffedEqnsMap = differentiateEquations(visitedEquations);
                 for (Var var : visitedVariables) { // Loop over all visited variables, Step 3b-5i
                     // Create a new differentiated variable
                     FVariable diffedFVar = var.getVariable().createFDerivativeVariable();

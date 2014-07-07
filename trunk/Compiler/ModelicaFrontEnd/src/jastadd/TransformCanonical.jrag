@@ -1471,6 +1471,13 @@ aspect TransformCanonical {
                 root().flushAllRecursive();
             }
         }
+        
+        /**
+         * Used by index reduction when removing derivatives of state select
+         * prefer variables.
+         */
+        private Set<FVariable> ssPreferVars = null;
+        
         /**
          * Add derivative variables to the list of FVariables.
          * Derivative variable is added for a variable of either of the following is true:
@@ -1480,6 +1487,7 @@ aspect TransformCanonical {
         public class setFDerivativeVariablesPreBLT extends setFDerivativeVariables {
             @Override
             protected Set<FVariable> variablesToVisit() {
+                ssPreferVars = new HashSet<FVariable>();
                 Set<FVariable> fvsToVisit = super.variablesToVisit();
                 for (FVariable fv : variables()) {
                     if (!fv.isReal())
@@ -1487,6 +1495,8 @@ aspect TransformCanonical {
                     FRealVariable.StateSelect ss = ((FRealVariable)fv).stateSelectAttribute();
                     if (ss != FRealVariable.StateSelect.ALWAYS && ss != FRealVariable.StateSelect.PREFER)
                         continue;
+                    if (ss == FRealVariable.StateSelect.PREFER && !fvsToVisit.contains(fv))
+                        ssPreferVars.add(fv);
                     fvsToVisit.add(fv);
                 }
                 return fvsToVisit;
