@@ -31,6 +31,7 @@ import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 from pyjmi.log import parse_jmi_log, gather_solves
 from pyfmi.common.io import ResultHandler
+import pyfmi.fmi as fmi
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
@@ -720,7 +721,58 @@ class Test_FMUModelME2:
         """
 
 
-
+class Test_Result_Writing:
+    """
+    This test the result writing functionality.
+    """
+    @classmethod
+    def setUpClass(cls):
+        file_name = os.path.join(get_files_path(), 'Modelica', 'Friction.mo')
+        cls.enum_name = compile_fmu("Friction2", file_name, target="me", version="2.0")
+        
+    @testattr(fmi = True)
+    def test_enumeration_file(self):
+        
+        model = load_fmu(self.enum_name)
+        data_type = model.get_variable_data_type("mode")
+        
+        assert data_type == fmi.FMI2_ENUMERATION
+        
+        opts = model.simulate_options()
+        
+        res = model.simulate(options=opts)
+        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
+        
+    @testattr(fmi = True)
+    def test_enumeration_memory(self):
+        
+        model = load_fmu(self.enum_name)
+        data_type = model.get_variable_data_type("mode")
+        
+        assert data_type == fmi.FMI2_ENUMERATION
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "memory"
+        
+        res = model.simulate(options=opts)
+        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
+        
+    @testattr(fmi = True)
+    def test_enumeration_csv(self):
+        
+        model = load_fmu(self.enum_name)
+        data_type = model.get_variable_data_type("mode")
+        
+        assert data_type == fmi.FMI2_ENUMERATION
+        
+        from pyfmi.common.io import ResultHandlerCSV
+        opts = model.simulate_options()
+        opts["result_handling"] = "custom"
+        opts["result_handler"] = ResultHandlerCSV(model)
+        
+        res = model.simulate(options=opts)
+        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
+        
 
 class Test_load_fmu2:
     """

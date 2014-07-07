@@ -393,6 +393,41 @@ class Test_FMI_ODE:
         #User defined name
         assert res.result_file == "bouncingBallt_result_test.txt"
         assert os.path.exists(res.result_file)
+        
+    @testattr(stddist = True)
+    def test_result_enumeration(self):
+        """
+        Tests that enumerations are written to the result
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'Friction.mo')
+
+        enum_name = compile_fmu("Friction2", file_name)
+        
+        model = load_fmu(enum_name)
+        
+        data_type = model.get_variable_data_type("mode")
+        
+        from pyfmi.fmi import FMI_ENUMERATION
+        assert data_type == FMI_ENUMERATION
+        
+        opts = model.simulate_options()
+        
+        res = model.simulate(options=opts)
+        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
+        
+        model.reset()
+        opts["result_handling"] = "memory"
+        
+        res = model.simulate(options=opts)
+        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
+        
+        from pyfmi.common.io import ResultHandlerCSV
+        model.reset()
+        opts["result_handling"] = "custom"
+        opts["result_handler"] = ResultHandlerCSV(model)
+        
+        res = model.simulate(options=opts)
+        res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
     
     @testattr(stddist = True)
     def test_init(self):
