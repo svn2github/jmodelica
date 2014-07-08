@@ -898,7 +898,7 @@ aspect InstanceErrorCheck {
 	public void InstDot.collectErrors(ErrorCheckType checkType) {
 		for (InstAccess ia : getInstAccesss()) {
 			ia.collectErrors(checkType);
-			if (ia.isUnknown())
+			if (ia.isUnknown() || ia.isDisabled())
 				break;
 		}
 		allChecks(checkType);

@@ -2611,4 +2611,30 @@ end ConnectTests.ConditionalNoErrTest5;
 ")})));
 end ConditionalNoErrTest5;
 
+model ConditionalNoErrTest6
+    connector C = Real;
+    
+    model A
+        C c = false;
+    end A;
+    
+    parameter Boolean on = false;
+    
+    C c;
+    A a if on;
+equation
+    connect(a.c, c);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest6",
+			description="Ensure that components in conditionaly false components aren't error checked due to connections",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest6
+ parameter Boolean on = false /* false */;
+ Real c;
+end ConnectTests.ConditionalNoErrTest6;
+")})));
+end ConditionalNoErrTest6;
+
 end ConnectTests;
