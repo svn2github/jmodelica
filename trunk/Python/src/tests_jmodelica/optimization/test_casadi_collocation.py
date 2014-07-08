@@ -56,7 +56,7 @@ def assert_results(res, cost_ref, u_norm_ref,
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
     N.testing.assert_allclose(u_norm, u_norm_ref, u_norm_rtol)
 
-class TestLocalDAECollocator:
+class TestLocalDAECollocator(object):
     
     """
     Tests pyjmi.optimization.casadi_collocation.LocalDAECollocator.
@@ -161,6 +161,12 @@ class TestLocalDAECollocator:
                 transfer_to_casadi_interface(class_path, qt_file_path)
         
         self.algorithm = "LocalDAECollocationAlg"
+        
+    def optimize_options(self, op, alg=None):
+        if alg is None:
+            return op.optimize_options()
+        else:
+            return op.optimize_options(alg)
 
     @testattr(casadi = True)
     def test_init_traj_sim(self):
@@ -183,7 +189,7 @@ class TestLocalDAECollocator:
                                   options=opts)
         
         # Optimize
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['variable_scaling'] = False
         opts['init_traj'] = init_res.result_data
         col = LocalDAECollocator(op, opts)
@@ -202,7 +208,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 2.80997269112246e-1
         
         # Get initial guess
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
         res = op.optimize(self.algorithm, opts)
@@ -230,7 +236,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 2.848606420347583e-1
         
         # Get nominal and initial trajectories
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
         res = op.optimize(self.algorithm, opts)
@@ -288,7 +294,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.0507636243132043e2
         
         # Get nominal and initial trajectories
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
         res = op.optimize(self.algorithm, opts)
@@ -345,7 +351,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.0455503580669716e2
         
         # Get nominal and initial trajectories
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
         res = op.optimize(self.algorithm, opts)
@@ -420,7 +426,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.050971000653911e2
         
         # Mayer
-        opts = mayer_op.optimize_options(self.algorithm)
+        opts = self.optimize_options(mayer_op, self.algorithm)
         opts['discr'] = "LG"
         res = mayer_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -446,7 +452,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.050971000653911e2
         
         # Mayer
-        opts = mayer_op.optimize_options(self.algorithm)
+        opts = self.optimize_options(mayer_op, self.algorithm)
         opts['discr'] = "LG"
         opts['reorder_vars'] = True
         opts['checkpoint'] = True
@@ -488,7 +494,7 @@ class TestLocalDAECollocator:
         measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
         # Optimize without scaling
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['measurement_data'] = measurement_data
         opts['variable_scaling'] = False
         opts['n_e'] = 16
@@ -539,7 +545,7 @@ class TestLocalDAECollocator:
         measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
         # Optimize without scaling
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['measurement_data'] = measurement_data
         opts['n_e'] = 16
         opt_res = op.optimize(self.algorithm, opts)
@@ -599,7 +605,7 @@ class TestLocalDAECollocator:
                                            unconstrained=unconstrained)
         
         # Unconstrained
-        opts = op.optimize_options()
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
         opts['init_traj'] = sim_res.result_data
         opts['measurement_data'] = measurement_data
@@ -658,7 +664,7 @@ class TestLocalDAECollocator:
                                            eliminated=eliminated)
         
         # Eliminated
-        opts = op.optimize_options()
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 30
         opts['init_traj'] = sim_res.result_data
         opts['measurement_data'] = measurement_data
@@ -681,7 +687,7 @@ class TestLocalDAECollocator:
         op.getVariable('u1').setMin(-N.inf)
         
         # Point constraint on eliminated input
-        opts2 = op_2.optimize_options()
+        opts2 = self.optimize_options(op_2, self.algorithm)
         opts2['n_e'] = 30
         opts2['init_traj'] = sim_res.result_data
         opts2['measurement_data'] = measurement_data
@@ -755,7 +761,7 @@ class TestLocalDAECollocator:
                                            constrained=constrained)
         
         # Constrained
-        opts = op.optimize_options()
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 30
         opts['init_traj'] = sim_res.result_data
         opts['measurement_data'] = measurement_data
@@ -833,7 +839,7 @@ class TestLocalDAECollocator:
                                            eliminated=eliminated)
         
         # Eliminate u2
-        opts = op.optimize_options()
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
         opts['init_traj'] = sim_res.result_data
         opts['measurement_data'] = measurement_data
@@ -917,7 +923,7 @@ class TestLocalDAECollocator:
                                            eliminated=eliminated)
         
         # Semi-eliminated with user-defined interpolation function
-        opts = op.optimize_options()
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
         opts['measurement_data'] = measurement_data
         opt_res = op.optimize(self.algorithm, opts)
@@ -950,7 +956,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 9.991517452037317e-1
         
         # Scaled, Radau
-        opts = scaled_op.optimize_options(self.algorithm)
+        opts = self.optimize_options(scaled_op, self.algorithm)
         opts['discr'] = "LGR"
         res = scaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -1000,7 +1006,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.0668821961641106e2
         
         # Scaled, Radau
-        opts = scaled_op.optimize_options(self.algorithm)
+        opts = self.optimize_options(scaled_op, self.algorithm)
         opts['discr'] = "LGR"
         res = scaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, input_name="Tc")
@@ -1033,7 +1039,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.2936323844551e-1
         
         # Without exact Hessian
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['IPOPT_options']['hessian_approximation'] = "limited-memory"
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -1053,7 +1059,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 5.18716394291585e-1
         
         # Without derivative elimination
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['eliminate_der_var'] = False
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -1069,7 +1075,7 @@ class TestLocalDAECollocator:
         """Test non-uniformly distributed elements."""
         op = self.vdp_bounds_mayer_op
         
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 23
         opts['hs'] = N.array(4 * [0.01] + 2 * [0.05] + 10 * [0.02] +
                              5 * [0.02] + 2 * [0.28])
@@ -1092,7 +1098,7 @@ class TestLocalDAECollocator:
         free_ele_data = FreeElementLengthsData(c, Q, bounds)
         
         # Set options shared by both result modes
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 20
         opts['hs'] = "free"
         opts['free_element_lengths_data'] = free_ele_data
@@ -1124,7 +1130,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 2.4636859805244668e-1
 
         # Common options
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 2
 
         # Without naming
@@ -1166,7 +1172,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.0556730059e2
         
         # Unscaled variables, with derivatives
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['variable_scaling'] = False
         opts['write_scaled_result'] = False
         opts['eliminate_der_var'] = False
@@ -1220,7 +1226,7 @@ class TestLocalDAECollocator:
         assert(os.path.exists("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt"))
         
         # Custom file name
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['result_file_name'] = "vdp_custom_file_name.txt"
         try:
             os.remove("vdp_custom_file_name.txt")
@@ -1245,7 +1251,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 2.84538299160e-1
         
         # Collocation points
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 100
         opts['n_cp'] = 5
         opts['result_mode'] = "collocation_points"
@@ -1297,7 +1303,7 @@ class TestLocalDAECollocator:
         op = self.vdp_bounds_lagrange_op
 
         # Check constant blocking factors
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 3
         opts['blocking_factors'] = N.array(opts['n_e'] * [1])
@@ -1333,7 +1339,7 @@ class TestLocalDAECollocator:
                             2, 2, 2, 3, 3, 6]
 
         # Check blocking factors without scaling
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['blocking_factors'] = blocking_factors
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref,
@@ -1375,7 +1381,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 2.8723837585e-1
         
         # Keep derivative variables
-        opts = lagrange_op.optimize_options(self.algorithm)
+        opts = self.optimize_options(lagrange_op, self.algorithm)
         opts["eliminate_der_var"] = False
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -1406,7 +1412,7 @@ class TestLocalDAECollocator:
         u_norm_ref_gauss = 2.852405405154352e-1
         
         # Keep continuity variables, Radau
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['discr'] = "LGR"
         opts["eliminate_cont_var"] = False
         res = op.optimize(self.algorithm, opts)
@@ -1445,7 +1451,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.050971000653911e2
         
         # Quadrature constraint, with continuity variables
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['discr'] = "LG"
         opts['quadrature_constraint'] = True
         opts['eliminate_cont_var'] = False
@@ -1476,7 +1482,7 @@ class TestLocalDAECollocator:
         Test varying n_e and n_cp.
         """
         op = self.vdp_bounds_mayer_op
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         
         # n_cp = 1
         opts['n_e'] = 100
@@ -1513,7 +1519,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 2.8723837585e-1
         
         # Solve problem to get initialization trajectory
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         opts['init_traj'] = ResultDymolaTextual(
@@ -1600,9 +1606,9 @@ class TestLocalDAECollocator:
         model.set(['c_init', 'T_init'], op.get(['c_init', 'T_init']))
         
         # Optimize
-        opts = op.optimize_options(self.algorithm)
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 100        
-        opt_res = op.optimize(options=opts)
+        opt_res = op.optimize(self.algorithm, opts)
         
         # Simulate
         opt_input = opt_res.solver.get_opt_input()
@@ -1626,7 +1632,7 @@ class TestLocalDAECollocator:
         u_norm_ref = 3.045679e2
 
         # Solve
-        opts = op.optimize_options()
+        opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 20
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
@@ -1673,7 +1679,7 @@ class TestLocalDAECollocator:
         # Reference values
         cost_ref = 3.17619580332244e0
         u_norm_ref = 2.8723837585e-1
-        opts = op.optimize_options()
+        opts = self.optimize_options(op)
 
         # Test NLP expansion
         opts['expand_to_sx'] = "NLP"
@@ -1701,7 +1707,7 @@ class TestLocalDAECollocator:
         cost_ref = 3.17619580332244e0
         u_norm_ref = 2.8723837585e-1
 
-        opts = op.optimize_options()
+        opts = self.optimize_options(op)
 
         # Test with full SX expansion
         opts['expand_to_sx'] = "NLP"
@@ -1719,7 +1725,7 @@ class TestLocalDAECollocator:
         Test using WORHP instead of IPOPT.
         """
         op = self.vdp_bounds_lagrange_op
-        opts = op.optimize_options()
+        opts = self.optimize_options(op)
 
         # Reference values
         cost_ref = 3.17619580332244e0
@@ -1735,3 +1741,16 @@ class TestLocalDAECollocator:
         opts['WORHP_options']['NLPprint'] = -1
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)
+
+class TestLocalDAECollocator_expand_to_sx_DAE(TestLocalDAECollocator):
+    """
+    Tests pyjmi.optimization.casadi_collocation.LocalDAECollocator with option 'expand_to_sx': 'DAE'
+    """
+    def optimize_options(self, *args, **kwargs):
+        opts = TestLocalDAECollocator.optimize_options(self, *args, **kwargs)
+        opts['expand_to_sx'] = 'DAE'
+        return opts
+
+    @nose.tools.nottest
+    def test_cstr_checkpoint(self):
+        assert False # shouldn't be run, just used to disable this test with 'expand_to_sx': 'DAE'
