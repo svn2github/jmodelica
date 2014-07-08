@@ -15605,4 +15605,33 @@ $C_DAE_initial_dependent_parameter_assignments$
 ")})));
 end LoadResource1;
 
+model IntegerEnumIndices
+    type E = enumeration(ONE,TWO,THREE);
+    constant Integer i1 = 1;
+    parameter Integer i2 = 2;
+    Integer i3 = integer(time);
+    constant E e1 = E.ONE;
+    parameter E e2 = E.TWO;
+    E e3 = if i3 > 0 then E.THREE else E.TWO;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IntegerAndEnumIndices",
+            description="Check that indices given to integers and enums don't overlap. #3871",
+            variability_propagation=false,
+            template="
+$C_variable_aliases$
+",
+            generatedCode="
+#define _i1_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _e1_3 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _i2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _e2_4 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define _i3_2 ((*(jmi->z))[jmi->offs_integer_d+0])
+#define _e3_5 ((*(jmi->z))[jmi->offs_integer_d+1])
+#define pre_i3_2 ((*(jmi->z))[jmi->offs_pre_integer_d+0])
+#define pre_e3_5 ((*(jmi->z))[jmi->offs_pre_integer_d+1])
+")})));
+end IntegerEnumIndices;
+
 end CCodeGenTests;
