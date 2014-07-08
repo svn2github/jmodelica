@@ -937,16 +937,63 @@ aspect TransformCanonical {
 	 */
 	public boolean FStatement.shouldBeSorted = false;
 	
-	public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
-		if (!isInput() && hasBindingExp()) {
-			FAssignStmt stmt = new FAssignStmt(createUseExp(), getBindingExp());
-			stmt.shouldBeSorted = true;
-			stmts.add(stmt);
-			setBindingExpOpt(new Opt());
-		}
-	}
-	
-	
+    public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
+        if (!isInput()) {
+            if (hasBindingExp()) {
+                FAssignStmt stmt = new FAssignStmt(createUseExp(), getBindingExp());
+                stmt.shouldBeSorted = true;
+                stmts.add(stmt);
+                setBindingExpOpt(new Opt());
+            } else if (hasFAttribute() && isRecord()) {
+                type().genBindingAssignments(stmts, getFQName().fullCopy(), getFAttributes());
+            }
+        }
+        
+        if (hasFAttribute()) {
+            setFAttributeList(new List<FAttribute>());
+        }
+    }
+    
+    public void FType.genBindingAssignments(List<FStatement> stmts, FQName prefix, List<FAttribute> attrs) {
+        
+    }
+    
+    public void FRecordType.genBindingAssignments(List<FStatement> stmts, FQName prefix, List<FAttribute> attrs) {
+        Map<String,FAttribute> m = new HashMap<String,FAttribute>(attrs.getNumChild());
+        for (FAttribute attr : attrs) {
+            m.put(attr.name(), attr);
+        }
+        for (Index i : indices()) {
+            for (FVariable fv : myFRecordDecl().getFVariables()) {
+                fv.genBindingAssignments(stmts, prefix, m, i);
+            }
+        }
+    }
+    
+    public void FVariable.genBindingAssignments(List<FStatement> stmts, FQName prefix, Map<String, FAttribute> attrs, Index i) {
+        FQName left = prefix.copyAndAddIfFas(i).copyAndAppend(name());
+        FAttribute attr = attrs.get(name());
+        FExp right = selectBindingFExp(attr, i);
+        if (right != null) {
+            FAssignStmt stmt = new FAssignStmt(new FIdUseExp(left), right.fullCopy());
+            stmt.shouldBeSorted = true;
+            stmts.add(stmt);
+        } else {
+            type().genBindingAssignments(stmts, left, attr.getFAttributes());
+        }
+    }
+    
+    public FExp FVariable.selectBindingFExp(FAttribute attr, Index i) {
+        if (attr != null && attr.hasValue()) {
+            if (i.ndims() > 0 && !attr.hasFEach()) {
+                return attr.getValue().getArray().get(i);
+            } else {
+                return attr.getValue();
+            }
+        }
+        return getBindingExp();
+    }
+    
 	public FExp FVariable.selectBindingFExp(FAttribute attr) {
 		if (attr != null && attr.hasValue())
 			return attr.getValue();

@@ -1371,7 +1371,7 @@ fclass RecordTests.RecordArray8
 public
  function RecordTests.RecordArray8.f
   input Integer n;
-  output RecordTests.RecordArray8.A a;
+  output RecordTests.RecordArray8.A a(n = n);
  algorithm
   a.x := 1:n;
   return;

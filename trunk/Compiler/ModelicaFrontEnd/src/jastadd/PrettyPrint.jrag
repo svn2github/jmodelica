@@ -1194,6 +1194,7 @@ aspect FlatPrettyPrint {
     	}
     	str.print(" ");
     	str.print(name());
+    	getFAttributeList().prettyPrintFAttributeList(str, p);
     	if (hasBindingExp()) {
     		str.print(" := ");
     		p.print(getBindingExp(), str, indent);

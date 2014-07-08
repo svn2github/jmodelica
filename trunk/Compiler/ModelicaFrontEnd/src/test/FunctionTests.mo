@@ -614,7 +614,247 @@ end FunctionTests.FunctionFlatten12;
 ")})));
 end FunctionFlatten12;
 
+model FunctionFlatten13
+    record R
+        Real x;
+    end R;
+    function f
+      input Real a;
+      output R r(x=a);
+    algorithm
+    annotation(Inline=false);
+    end f;
+    
+    R r = f(time);
 
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten13",
+            description="Modifying records in functions",
+
+            flatModel="
+fclass FunctionTests.FunctionFlatten13
+ Real r.x;
+equation
+ (FunctionTests.FunctionFlatten13.R(r.x)) = FunctionTests.FunctionFlatten13.f(time);
+
+public
+ function FunctionTests.FunctionFlatten13.f
+  input Real a;
+  output FunctionTests.FunctionFlatten13.R r;
+ algorithm
+  r.x := a;
+  return;
+ end FunctionTests.FunctionFlatten13.f;
+
+ record FunctionTests.FunctionFlatten13.R
+  Real x;
+ end FunctionTests.FunctionFlatten13.R;
+
+end FunctionTests.FunctionFlatten13;
+")})));
+end FunctionFlatten13;
+
+model FunctionFlatten14
+    record R1
+        Real x;
+        R2 r2;
+        Real y = 3;
+    end R1;
+    record R2
+        Real x;
+    end R2;
+    function f
+      input Real a;
+      output R1 r(x=a, r2(x=a+a));
+    algorithm
+    annotation(Inline=false);
+    end f;
+    
+    R1 r = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten14",
+            description="Modifying records in functions",
+            flatModel="
+fclass FunctionTests.FunctionFlatten14
+ Real r.x;
+ Real r.r2.x;
+ Real r.y;
+equation
+ (FunctionTests.FunctionFlatten14.R1(r.x, FunctionTests.FunctionFlatten14.R2(r.r2.x), r.y)) = FunctionTests.FunctionFlatten14.f(time);
+
+public
+ function FunctionTests.FunctionFlatten14.f
+  input Real a;
+  output FunctionTests.FunctionFlatten14.R1 r;
+ algorithm
+  r.x := a;
+  r.r2.x := a + a;
+  r.y := 3;
+  return;
+ end FunctionTests.FunctionFlatten14.f;
+
+ record FunctionTests.FunctionFlatten14.R2
+  Real x;
+ end FunctionTests.FunctionFlatten14.R2;
+
+ record FunctionTests.FunctionFlatten14.R1
+  Real x;
+  FunctionTests.FunctionFlatten14.R2 r2;
+  Real y;
+ end FunctionTests.FunctionFlatten14.R1;
+
+end FunctionTests.FunctionFlatten14;
+")})));
+end FunctionFlatten14;
+
+model FunctionFlatten15
+    record R1
+        R2 r2 = R2(3);
+    end R1;
+    record R2
+        Real x;
+    end R2;
+    function f
+      input Real a;
+      output R1 r(r2(x=a+a));
+    algorithm
+    annotation(Inline=false);
+    end f;
+    
+    R1 r = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten15",
+            description="Modifying records in functions",
+            flatModel="
+fclass FunctionTests.FunctionFlatten15
+ Real r.r2.x;
+equation
+ (FunctionTests.FunctionFlatten15.R1(FunctionTests.FunctionFlatten15.R2(r.r2.x))) = FunctionTests.FunctionFlatten15.f(time);
+
+public
+ function FunctionTests.FunctionFlatten15.f
+  input Real a;
+  output FunctionTests.FunctionFlatten15.R1 r;
+ algorithm
+  r.r2.x := 3;
+  return;
+ end FunctionTests.FunctionFlatten15.f;
+
+ record FunctionTests.FunctionFlatten15.R2
+  Real x;
+ end FunctionTests.FunctionFlatten15.R2;
+
+ record FunctionTests.FunctionFlatten15.R1
+  FunctionTests.FunctionFlatten15.R2 r2;
+ end FunctionTests.FunctionFlatten15.R1;
+
+end FunctionTests.FunctionFlatten15;
+")})));
+end FunctionFlatten15;
+
+model FunctionFlatten16
+    record R1
+        R2 r2;
+    end R1;
+    record R2
+        Real x;
+    end R2;
+    function f
+      input Real a;
+      output R1[2] r(each r2(x=a+a));
+    algorithm
+    annotation(Inline=false);
+    end f;
+    
+    R1[2] r = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten16",
+            description="Modifying record arrays in functions",
+            flatModel="
+fclass FunctionTests.FunctionFlatten16
+ Real r[1].r2.x;
+ Real r[2].r2.x;
+equation
+ ({FunctionTests.FunctionFlatten16.R1(FunctionTests.FunctionFlatten16.R2(r[1].r2.x)), FunctionTests.FunctionFlatten16.R1(FunctionTests.FunctionFlatten16.R2(r[2].r2.x))}) = FunctionTests.FunctionFlatten16.f(time);
+
+public
+ function FunctionTests.FunctionFlatten16.f
+  input Real a;
+  output FunctionTests.FunctionFlatten16.R1[2] r;
+ algorithm
+  r[1].r2.x := a + a;
+  r[2].r2.x := a + a;
+  return;
+ end FunctionTests.FunctionFlatten16.f;
+
+ record FunctionTests.FunctionFlatten16.R2
+  Real x;
+ end FunctionTests.FunctionFlatten16.R2;
+
+ record FunctionTests.FunctionFlatten16.R1
+  FunctionTests.FunctionFlatten16.R2 r2;
+ end FunctionTests.FunctionFlatten16.R1;
+
+end FunctionTests.FunctionFlatten16;
+
+")})));
+end FunctionFlatten16;
+
+model FunctionFlatten17
+    record R1
+        R2 r2;
+    end R1;
+    record R2
+        Real x;
+    end R2;
+    function f
+      input Real a;
+      output R1[2] r(r2 = {R2(a), R2(a+a)});
+    algorithm
+    annotation(Inline=false);
+    end f;
+    
+    R1[2] r = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten17",
+            description="Modifying record arrays in functions",
+            flatModel="
+fclass FunctionTests.FunctionFlatten17
+ Real r[1].r2.x;
+ Real r[2].r2.x;
+equation
+ ({FunctionTests.FunctionFlatten17.R1(FunctionTests.FunctionFlatten17.R2(r[1].r2.x)), FunctionTests.FunctionFlatten17.R1(FunctionTests.FunctionFlatten17.R2(r[2].r2.x))}) = FunctionTests.FunctionFlatten17.f(time);
+
+public
+ function FunctionTests.FunctionFlatten17.f
+  input Real a;
+  output FunctionTests.FunctionFlatten17.R1[2] r;
+ algorithm
+  r[1].r2.x := a;
+  r[2].r2.x := a + a;
+  return;
+ end FunctionTests.FunctionFlatten17.f;
+
+ record FunctionTests.FunctionFlatten17.R2
+  Real x;
+ end FunctionTests.FunctionFlatten17.R2;
+
+ record FunctionTests.FunctionFlatten17.R1
+  FunctionTests.FunctionFlatten17.R2 r2;
+ end FunctionTests.FunctionFlatten17.R1;
+
+end FunctionTests.FunctionFlatten17;
+")})));
+end FunctionFlatten17;
 
 /* ====================== Function calls ====================== */
 
@@ -11444,7 +11684,7 @@ fclass FunctionTests.MinOnInput1
 
 public
  function FunctionTests.MinOnInput1.F
-  input Real x := 3.14;
+  input Real x(min=0) := 3.14;
   output Real y;
  algorithm
   y := x * 42;

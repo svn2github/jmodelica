@@ -1687,6 +1687,17 @@ aspect FlatNames {
     }
     
     /**
+     * Copies this and add <code>i</code> as subscripts if <code>i</code>
+     * has dimensions. Otherwise returns this.
+     */
+    public FQName FQName.copyAndAddIfFas(Index i) {
+        if (i.ndims() > 0) {
+            return copyAndAddFas(i.createFArraySubscripts());
+        }
+        return this;
+    }
+    
+    /**
      * Set the FArraySubscripts of the last FQNamePart.
      * 
      * Passing null as fas is equivalent to calling {@link #removeFArraySubscripts()}.

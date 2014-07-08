@@ -564,6 +564,7 @@ aspect Flattening {
 				ffv.setFTypePrefixInputOutput(new FInput());
 			if (isOutput())
 				ffv.setFTypePrefixInputOutput(new FOutput());
+			addAttributesToFV(ffv.getFAttributes());
 			// TODO: Mark var as constant if isConstant is true?
 			ffd.addFFunctionVariable(ffv);
 			myInstClass().flattenRecord(fc);

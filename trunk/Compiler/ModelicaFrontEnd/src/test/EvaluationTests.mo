@@ -903,7 +903,7 @@ end EvaluationTests.FunctionEval25;
 end FunctionEval25;
 
 
-model FunctionEval26
+model FunctionEval26a
     record A
         Real x;
         Real y;
@@ -919,30 +919,57 @@ model FunctionEval26
     constant A a2 = a1;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval26",
+        EvalTestCase(
+            name="FunctionEval26a",
             description="Evaluation in instance tree of function with modifications on record variable",
-            flatModel="
-fclass EvaluationTests.FunctionEval26
- constant EvaluationTests.FunctionEval26.A a1 = EvaluationTests.FunctionEval26.A(2, 4.0);
- constant EvaluationTests.FunctionEval26.A a2 = EvaluationTests.FunctionEval26.A(2, 4.0);
+            variables="
+a1.x
+a1.y
+a2.x
+a2.y
+",
+            values="
+2.0
+4.0
+2.0
+4.0
+"
+ )})));
+end FunctionEval26a;
 
-public
- function EvaluationTests.FunctionEval26.f
-  input Real x;
-  output EvaluationTests.FunctionEval26.A a;
- algorithm
-  return;
- end EvaluationTests.FunctionEval26.f;
+model FunctionEval26b
+    record A
+        Real x;
+        Real y;
+    end A;
+    
+    function f
+        input Real x;
+        output A a(x=x, y=x*x);
+    algorithm
+    end f;
+    
+    A a1 = f(2);
+    A a2 = a1;
 
- record EvaluationTests.FunctionEval26.A
-  Real x;
-  Real y;
- end EvaluationTests.FunctionEval26.A;
-
-end EvaluationTests.FunctionEval26;
-")})));
-end FunctionEval26;
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="FunctionEval26b",
+            description="Evaluation in flat tree of function with modifications on record variable",
+            variables="
+a1.x
+a1.y
+a2.x
+a2.y
+",
+            values="
+2.0
+4.0
+2.0
+4.0
+"
+ )})));
+end FunctionEval26b;
 
 
 model FunctionEval27
@@ -1004,7 +1031,7 @@ fclass EvaluationTests.FunctionEval28
 
 public
  function EvaluationTests.FunctionEval28.f2
-  input Real x;
+  input Real x(min = 1);
   output Real y;
  algorithm
   y := x + 2;

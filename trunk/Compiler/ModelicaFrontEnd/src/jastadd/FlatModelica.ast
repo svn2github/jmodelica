@@ -95,6 +95,7 @@ abstract FAbstractVariable : BaseNode;
  * A flat variable in a function.
  */
 FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
+                                          FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
                                           FQName

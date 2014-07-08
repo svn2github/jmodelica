@@ -800,7 +800,7 @@ public
  function Complex.'constructor'.fromReal
   input Real re;
   input Real im := 0;
-  output Complex result;
+  output Complex result(re = re,im = im);
  algorithm
   return;
  end Complex.'constructor'.fromReal;

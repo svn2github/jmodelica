@@ -830,28 +830,28 @@ aspect Constructors {
 	 * \brief Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(new Opt(), type, new Opt(), new FQNameString(name), 0);
+		this(new Opt(), new List<FAttribute>(), type, new Opt(), new FQNameString(name), 0);
 	}
 	
     /**
      * \brief Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
     public FFunctionVariable.FFunctionVariable(FType type, String name, FTypePrefixInputOutput inputOutput) {
-        this(new Opt<FTypePrefixInputOutput>(inputOutput), type, new Opt<FExp>(), new FQNameString(name), 0);
+        this(new Opt<FTypePrefixInputOutput>(inputOutput), new List<FAttribute>(), type, new Opt<FExp>(), new FQNameString(name), 0);
     }
     
     /**
-     * \brief Create an FFunctionVariable with everything but order given.
+     * \brief Create an FFunctionVariable with everything but order and attributes given.
      */
     public FFunctionVariable.FFunctionVariable(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
-        this(inputOutput, type, bindingExp, name, 0);
+        this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
     /**
-     * \brief Create an FFunctionArray with everything but order given.
+     * \brief Create an FFunctionArray with everything but order and attributes given.
      */
     public FFunctionArray.FFunctionArray(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
-        this(inputOutput, type, bindingExp, name, 0);
+        this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
 	/**
