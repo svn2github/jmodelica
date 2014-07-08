@@ -811,13 +811,15 @@ protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Colle
 public static final int AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE = 15;
 
 public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
+    int numReal = realVariables().size();
+    int numNonReal = nonRealVariables().size();
     int start = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
-    int size = allVariables().size() * DIAGNOSTICS_CELL_SIZE + 1;
-    int xStart = tm.getYPos();
-    int yStart = tm.getYPos();
-    int xEnd = xStart + allVariables().size() - 1;
-    int yEnd = yStart + allVariables().size() - 1;
-    out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, size, size);
+    int sizeReal = numReal * DIAGNOSTICS_CELL_SIZE + 1;
+    int sizeNonReal = (numReal + numNonReal) * DIAGNOSTICS_CELL_SIZE + 1;
+    if (numNonReal > 0)
+        out.formatln("    <div class=\"block\" style=\"background:#F0E7CC;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", start, start, sizeNonReal, sizeNonReal);
+    if (numReal > 0)
+        out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, sizeReal, sizeReal);
     diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
 }
 
@@ -856,11 +858,12 @@ private String AbstractEquationBlock.diagnostics_generateBLTTable_solvabilitySym
 }
 
 public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
-    int numSolved = allVariables().size() - localUnsolvedVariables().size() - localNonRealVariables().size();
+    int numSolved = realVariables().size() - localUnsolvedVariables().size();
     int solvedStart = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
     int solvedSize = numSolved * DIAGNOSTICS_CELL_SIZE + 1;
     int unsolvedStart = (tm.getYPos() + numSolved) * DIAGNOSTICS_CELL_SIZE;
     int unsolvedSize = localUnsolvedVariables().size() * DIAGNOSTICS_CELL_SIZE + 1;
+    int numNonReal = localNonRealVariables().size();
     if (inTearBlock)
         out.formatln("    <div class=\"block\" style=\"background:#F0C7C7;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize + unsolvedSize - 1, solvedSize + unsolvedSize - 1);
     out.formatln("    <div class=\"block\" style=\"background:#F0E4E4;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize, solvedSize);
@@ -868,6 +871,7 @@ public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] orde
     java.util.List<AbstractEquationBlock> blocks = new ArrayList<AbstractEquationBlock>();
     blocks.addAll(solvedRealBlocks());
     blocks.addAll(unsolvedBlocks());
+    blocks.addAll(localNonRealBlocks());
     for (AbstractEquationBlock seb : blocks) {
         seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
     }
