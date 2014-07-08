@@ -2878,7 +2878,6 @@ aspect FlatExpressions {
     
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
-    eq FAssert.getChild().inNoEventExp() = true;
     eq FFunctionDecl.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;

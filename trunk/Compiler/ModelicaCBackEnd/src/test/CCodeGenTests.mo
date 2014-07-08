@@ -6932,6 +6932,7 @@ $C_dae_init_blocks_residual_functions$
     }
 
 -----
+    jmi_ad_var_t tmp_1;
     model_ode_guards(jmi);
     _der_x_3 = 1;
     if (jmi->atInitial || jmi->atEvent) {
@@ -6940,6 +6941,9 @@ $C_dae_init_blocks_residual_functions$
     _temp_1_1 = _sw(0);
     _x_0 = 0.0;
     pre_temp_1_1 = JMI_FALSE;
+    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
+        tmp_1 = AD_WRAP_LITERAL(1);
+    }
 
 -----
 
@@ -7009,6 +7013,8 @@ $C_dae_init_blocks_residual_functions$
     }
 
 -----
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
     model_ode_guards(jmi);
     _der_x_6 = 1;
     _der_y_7 = 2;
@@ -7024,7 +7030,12 @@ $C_dae_init_blocks_residual_functions$
     _temp_2_3 = _sw(1);
     pre_temp_1_2 = JMI_FALSE;
     pre_temp_2_3 = JMI_FALSE;
-
+    if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
+        tmp_1 = AD_WRAP_LITERAL(1);
+    }
+    if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
+        tmp_2 = AD_WRAP_LITERAL(1);
+    }
 -----
 
 -----
@@ -14443,8 +14454,42 @@ equation
 		CCodeGenTestCase(
 			name="TestAssert2",
 			description="Test C code generation for assert() in equations",
-			template="$C_ode_derivatives$",
+			template="
+$C_ode_initialization$
+$C_ode_derivatives$
+",
 			generatedCode="
+    model_ode_guards(jmi);
+    _x_0 = _time + 1;
+    _y_1 = _x_0 + 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (AD_WRAP_LITERAL(3)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (AD_WRAP_LITERAL(3)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(0) == JMI_FALSE) {
+        jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(_y_1 - (AD_WRAP_LITERAL(4)), _sw(1), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(_y_1 - (AD_WRAP_LITERAL(4)), _sw(1), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(1) == JMI_FALSE) {
+        jmi_assert_failed(\"y is too high.\", JMI_ASSERT_ERROR);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(_x_0 + _y_1 - (AD_WRAP_LITERAL(5)), _sw(2), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(_x_0 + _y_1 - (AD_WRAP_LITERAL(5)), _sw(2), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(2) == JMI_FALSE) {
+        jmi_assert_failed(\"sum is a bit high.\", JMI_ASSERT_WARNING);
+    }
+    
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
@@ -14452,13 +14497,31 @@ equation
 /**** Other variables ***/
     _x_0 = _time + 1;
     _y_1 = _x_0 + 1;
-    if (COND_EXP_LT(_x_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (AD_WRAP_LITERAL(3)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (AD_WRAP_LITERAL(3)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(0) == JMI_FALSE) {
         jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
     }
-    if (COND_EXP_LT(_y_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(_y_1 - (AD_WRAP_LITERAL(4)), _sw(1), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(_y_1 - (AD_WRAP_LITERAL(4)), _sw(1), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(1) == JMI_FALSE) {
         jmi_assert_failed(\"y is too high.\", JMI_ASSERT_ERROR);
     }
-    if (COND_EXP_LT(_x_0 + _y_1, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(_x_0 + _y_1 - (AD_WRAP_LITERAL(5)), _sw(2), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(_x_0 + _y_1 - (AD_WRAP_LITERAL(5)), _sw(2), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(2) == JMI_FALSE) {
         jmi_assert_failed(\"sum is a bit high.\", JMI_ASSERT_WARNING);
     }
 /********* Write back reinits *******/
@@ -14485,7 +14548,13 @@ Auml: Ä\nbell: \a");
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _x_0 = _time + 1;
-    if (COND_EXP_LT(_x_0, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (AD_WRAP_LITERAL(5)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (AD_WRAP_LITERAL(5)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (_sw(0) == JMI_FALSE) {
         jmi_assert_failed(\"euro: \\xe2\\x82\\xac\\naring: \\xc3\\xa5\\nAuml: \\xc3\\x84\\nbell: \\a\", JMI_ASSERT_ERROR);
     }
 /********* Write back reinits *******/

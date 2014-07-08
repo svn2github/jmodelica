@@ -762,7 +762,7 @@ equation
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
     char tmp_1[27];
-    if (COND_EXP_GT(_time, AD_WRAP_LITERAL(0.5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    if (_sw(0) == JMI_FALSE) {
         char tmp_1[27];
         snprintf(tmp_1, 27, \"Time (%.6g) > 0.5\", _time);
         jmi_assert_failed(tmp_1, JMI_ASSERT_ERROR);

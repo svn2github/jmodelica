@@ -646,6 +646,9 @@ aspect TransformCanonical {
 					daeInitFVariableEquationBlockMap.put(fv,eb);
 				}
 			}	
+            for (FAbstractEquation e : equations())
+                if (e.numScalarEquations() == 0)
+                    daeInitBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER));
 			daeInitBLT.errorCheck();
 			log.info(daeInitBLT);
 		} else {
