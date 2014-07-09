@@ -4809,6 +4809,373 @@ plt.show()
               </mediaobject>
             </figure>
           </section>
+
+          <section>
+            <title>Optimization under delay constraints</title>
+
+            <para>In some applications, it can be useful to solve dynamic
+            optimization problems that include time delays in the model.
+            Collocation based optimization schemes are well suited to handle
+            this kind of models, since the whole state trajectory is available
+            at the same time. The direct collocation method using CasADi
+            contains an experimental implementation of such delays, which we
+            will describe with an example. Please note that the implementation
+            of this feature is experimental and subject to change.</para>
+
+            <para>We consider the optimization problem</para>
+
+            <informalequation>
+              <m:math display="block">
+                <m:mrow>
+                  <m:munder>
+                    <m:mi>min</m:mi>
+
+                    <m:mi>u(t)</m:mi>
+                  </m:munder>
+
+                  <m:mrow>
+                    <m:munderover>
+                      <m:mo>∫</m:mo>
+
+                      <m:mi>0</m:mi>
+
+                      <m:mi>1</m:mi>
+                    </m:munderover>
+
+                    <m:msup>
+                      <m:mi>(4x(t)</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msup>
+
+                    <m:msubsup>
+                      <m:mi> + u(t)</m:mi>
+
+                      <m:mi>1</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msubsup>
+
+                    <m:msubsup>
+                      <m:mi> + u(t)</m:mi>
+
+                      <m:mi>2</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msubsup>
+
+                    <m:mi>) dt</m:mi>
+                  </m:mrow>
+                </m:mrow>
+              </m:math>
+            </informalequation>
+
+            <para>subject to the dynamics</para>
+
+            <informalequation>
+              <m:math display="block">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mover>
+                          <m:mi>x</m:mi>
+
+                          <m:mi>.</m:mi>
+                        </m:mover>
+
+                        <m:mi>(t)</m:mi>
+
+                        <m:mo>=</m:mo>
+
+                        <m:msub>
+                          <m:mi>u</m:mi>
+
+                          <m:mi>1</m:mi>
+                        </m:msub>
+
+                        <m:mi>(t) - </m:mi>
+
+                        <m:mi>2</m:mi>
+
+                        <m:msub>
+                          <m:mi>u</m:mi>
+
+                          <m:mi>2</m:mi>
+                        </m:msub>
+
+                        <m:mi>(t)</m:mi>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>u</m:mi>
+
+                          <m:mi>2</m:mi>
+                        </m:msub>
+
+                        <m:mi>(t)</m:mi>
+
+                        <m:mo>=</m:mo>
+
+                        <m:msub>
+                          <m:mi>u</m:mi>
+
+                          <m:mi>1</m:mi>
+                        </m:msub>
+
+                        <m:mi>(t - </m:mi>
+
+                        <m:msub>
+                          <m:mi>t</m:mi>
+
+                          <m:mi>delay</m:mi>
+                        </m:msub>
+
+                        <m:mi>)</m:mi>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:math>
+            </informalequation>
+
+            <para>and the boundary conditions</para>
+
+            <informalequation>
+              <m:math display="block">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mi>x(0)</m:mi>
+
+                        <m:mo>=</m:mo>
+
+                        <m:mi>1</m:mi>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mi>x(1)</m:mi>
+
+                        <m:mo>=</m:mo>
+
+                        <m:mi>0</m:mi>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>u</m:mi>
+
+                          <m:mi>2</m:mi>
+                        </m:msub>
+
+                        <m:mi>(t)</m:mi>
+
+                        <m:mo>=</m:mo>
+
+                        <m:mi>0.25, t &lt; </m:mi>
+
+                        <m:msub>
+                          <m:mi>t</m:mi>
+
+                          <m:mi>delay</m:mi>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:math>
+            </informalequation>
+
+            <para>The effect of positive <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>1</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation> is initially to increase <inlineequation>
+                <m:math display="inline">
+                  <m:mi>x</m:mi>
+                </m:math>
+              </inlineequation>, but after a time delay of time
+            <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>delay</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation>, it comes back with twice the effect in the
+            negative direction through <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>2</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation>.</para>
+
+            <para>We model everything except the delay constraint in the
+            Optimica specification</para>
+
+            <programlisting>optimization DelayTest(startTime = 0, finalTime = 1,
+                       objectiveIntegrand = 4*x^2 + u1^2 + u2^2)
+    input Real u1, u2;
+    Real x(start = 1, fixed=true);
+equation
+    der(x) = u1 - 2*u2;
+constraint
+    x(finalTime) = 0;
+end DelayTest;
+</programlisting>
+
+            <para>The problem is then solved in the following python script.
+            Notice how delay constraint is added using the
+            <literal>delayed_feedback</literal> option, and the initial part
+            of <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>2</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation> is set using the
+            <literal>initialGuess</literal> attribute:</para>
+
+            <programlisting># Import numerical libraries
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Import JModelica.org Python packages
+from pyjmi import transfer_optimization_problem
+
+n_e = 20
+delay_n_e = 5
+horizon = 1.0
+delay = horizon*delay_n_e/n_e
+
+# Compile and load optimization problem
+opt = transfer_optimization_problem("DelayTest", "DelayedFeedbackOpt.mop")
+
+# Set value for u2(t) when t &lt; delay
+opt.getVariable('u2').setAttribute('initialGuess', 0.25)
+
+# Set algorithm options
+opts = opt.optimize_options()
+opts['n_e'] = n_e
+# Set delayed feedback from u1 to u2
+opts['delayed_feedback'] = {'u2': ('u1', delay_n_e)}
+
+# Optimize
+res = opt.optimize(options=opts)
+
+# Extract variable profiles
+x_res = res['x']
+u1_res = res['u1']
+u2_res = res['u2']
+time_res = res['time']
+
+# Plot results
+plt.plot(time_res, x_res, time_res, u1_res, time_res, u2_res)
+plt.hold(True)
+plt.plot(time_res+delay, u1_res, '--')
+plt.hold(False)
+plt.legend(('x', 'u1', 'u2', 'delay(u1)'))
+plt.show()
+</programlisting>
+
+            <para>The resulting control and state profiles are shown in <xref
+            linkend="opt-fig-delayed-feedback"/>. Notice that <inlineequation>
+                <m:math display="inline">
+                  <m:mi>x</m:mi>
+                </m:math>
+              </inlineequation> grows initially since <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>1</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation> is set positive to exploit the greater control
+            gain that appears delayed through <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>2</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation>. At time <inlineequation>
+                <m:math display="inline">
+                  <m:mi>1 - </m:mi>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>delay</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation>, the delayed value of <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>1</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation> ceases to influence <inlineequation>
+                <m:math display="inline">
+                  <m:mi>x</m:mi>
+                </m:math>
+              </inlineequation> within the horizon, and <inlineequation>
+                <m:math display="inline">
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mi>1</m:mi>
+                  </m:msub>
+                </m:math>
+              </inlineequation> immediately switches sign to drive down
+            <inlineequation>
+                <m:math display="inline">
+                  <m:mi>x</m:mi>
+                </m:math>
+              </inlineequation> to its final value <inlineequation>
+                <m:math display="inline">
+                  <m:mi>x(1) = 0</m:mi>
+                </m:math>
+              </inlineequation>.</para>
+
+            <figure xml:id="opt-fig-delayed-feedback">
+              <title>Optimization result for delayed feedback example.</title>
+
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref="images/delayed_feedback_opt.svg"
+                             scalefit="1" width="60%"/>
+                </imageobject>
+              </mediaobject>
+            </figure>
+          </section>
         </section>
       </section>
     </section>
