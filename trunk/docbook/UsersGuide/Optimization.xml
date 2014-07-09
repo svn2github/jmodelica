@@ -3412,7 +3412,27 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>solver</entry>
+              <entry>delayed_feedback</entry>
+
+              <entry>None</entry>
+
+              <entry>If not <literal>None</literal>, should be a
+              <literal>dict</literal> with mappings <literal>'delayed_var':
+              ('undelayed_var', delay_ne)</literal>. For each key-value pair,
+              adds the the constraint that the variable
+              <literal>'delayed_var'</literal> equals the value of the
+              variable <literal>'undelayed_var'</literal> delayed by
+              <literal>delay_ne</literal> elements. The initial part of the
+              trajectory for <literal>'delayed_var'</literal> is fixed to its
+              initial guess given by the <literal>init_traj</literal> option
+              or the <literal>initialGuess</literal> attribute.
+              <literal>'delayed_var'</literal> will typically be an input.
+              This is an experimental feature and is subject to
+              change.</entry>
+            </row>
+
+            <row>
+              <entry><literal>solver</literal></entry>
 
               <entry>'IPOPT'</entry>
 

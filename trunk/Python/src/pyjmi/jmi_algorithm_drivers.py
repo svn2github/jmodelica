@@ -2776,6 +2776,24 @@ class LocalDAECollocationAlgOptions(OptionBase):
             pyjmi.optimization.casadi_collocation.MeasurementData
             Default: None
 
+        delayed_feedback --
+            Experimental feature used to add delay constraints to the
+            optimization problem.
+
+            If not None, should be a dict with mappings
+            'delayed_var': ('undelayed_var', delay_ne).
+            For each such pair, adds the the constraint that the variable
+            'delayed_var' equals the value of the variable 'undelayed_var'
+            delayed by delay_ne elements. The initial part of the trajectory
+            for 'delayed_var' is fixed to its initial guess given by the
+            init_traj option or the initialGuess attribute.
+
+            'delayed_var' will typically be an input.
+            This is an experimental feature and is subject to change.
+
+            Type: None or dict
+            Default: None
+
         solver --
             Specifies the nonlinear programming solver to be used. Possible
             choices are 'IPOPT' and 'WORHP'.
