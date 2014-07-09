@@ -370,8 +370,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             {
                 char message[256];
                 sprintf(message, "Switch iteration %d", iter+1);
-                jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
-                             "jmi_block_solver", block_solver->label, message);
+                jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s><kind:%s><iter:%I>",
+                             "jmi_block_solver", block_solver->label, message, "BeginEventIteration", iter);
             }
 
             /* Solve block */
@@ -419,9 +419,10 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
                 "Starting enhanced event iteration at <t:%E>", cur_time);
 
-            jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
-                         "jmi_block_solver", block_solver->label, "Starting enhanced switch iterations");
-            
+            jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s><kind:%s>",
+                         "jmi_block_solver", block_solver->label, "Starting enhanced switch iterations",
+                         "BeginEnhancedEventIterations");
+
             x_new = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));
             x = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));            
             memcpy(x,block_solver->x,block_solver->n*sizeof(jmi_real_t));
@@ -446,8 +447,9 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 {
                     char message[256];
                     sprintf(message, "Enhanced switch iteration %d", iter+1);
-                    jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
-                                 "jmi_block_solver", block_solver->label, message);
+                    jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s><kind:%s><iter:%I>",
+                                 "jmi_block_solver", block_solver->label, message,
+                                 "BeginEnhancedEventIteration", iter);
                 }
 
                 h = compute_minimal_step(block_solver, x, x_new, 1e-4);
