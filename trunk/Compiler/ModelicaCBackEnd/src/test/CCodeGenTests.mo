@@ -6932,7 +6932,6 @@ $C_dae_init_blocks_residual_functions$
     }
 
 -----
-    jmi_ad_var_t tmp_1;
     model_ode_guards(jmi);
     _der_x_3 = 1;
     if (jmi->atInitial || jmi->atEvent) {
@@ -6941,9 +6940,6 @@ $C_dae_init_blocks_residual_functions$
     _temp_1_1 = _sw(0);
     _x_0 = 0.0;
     pre_temp_1_1 = JMI_FALSE;
-    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
-        tmp_1 = AD_WRAP_LITERAL(1);
-    }
 
 -----
 
@@ -7013,8 +7009,6 @@ $C_dae_init_blocks_residual_functions$
     }
 
 -----
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
     model_ode_guards(jmi);
     _der_x_6 = 1;
     _der_y_7 = 2;
@@ -7030,12 +7024,6 @@ $C_dae_init_blocks_residual_functions$
     _temp_2_3 = _sw(1);
     pre_temp_1_2 = JMI_FALSE;
     pre_temp_2_3 = JMI_FALSE;
-    if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
-        tmp_1 = AD_WRAP_LITERAL(1);
-    }
-    if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
-        tmp_2 = AD_WRAP_LITERAL(1);
-    }
 -----
 
 -----
