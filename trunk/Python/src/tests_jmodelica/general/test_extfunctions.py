@@ -25,6 +25,7 @@ import nose
 from pymodelica import compile_fmu
 from pymodelica.common.core import get_platform_dir, create_temp_dir
 from pyfmi import load_fmu
+from pyfmi.fmi import FMUException
 from tests_jmodelica import testattr, get_files_path
 from tests_jmodelica.general.base_simul import *
 from assimulo.solvers.sundials import CVodeError
@@ -226,13 +227,13 @@ class TestExternalObject2:
         else:
             assert False, 'External object destructor not called.'
             
-class TestAssertEqu(SimulationTest):
-    
+class TestAssertEqu1(SimulationTest):
+    '''Test assert in equation without event'''
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'Asserts.mo',
-            'Asserts.AssertEqu')
+            'Asserts.AssertEqu1')
 
     @testattr(stddist = True)
     def setUp(self):
@@ -245,7 +246,27 @@ class TestAssertEqu(SimulationTest):
             assert False, 'Simulation not stopped by failed assertions'
         except CVodeError, e:
             self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+    
+class TestAssertEqu2(SimulationTest):
+    '''Test assert in equation with event'''
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertEqu2')
 
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist = True)
+    def test_simulate(self):
+        try:
+            self.run()
+            assert False, 'Simulation not stopped by failed assertions'
+        except FMUException, e:
+            self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
+    
      
 class TestAssertFunc(SimulationTest):
     

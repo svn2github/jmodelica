@@ -1,13 +1,20 @@
 package Asserts
 
-    model AssertEqu
+    model AssertEqu1
 		Real x(start = 0);
 	equation
 		der(x) = time;
-		assert(x < 2, "X is too high.");
-		assert(x < 1, "X is a bit high.", level = AssertionLevel.warning);
-	end AssertEqu;
+		assert(noEvent(x < 2), "X is too high.");
+		assert(noEvent(x < 1), "X is a bit high.", level = AssertionLevel.warning);
+	end AssertEqu1;
 	
+    model AssertEqu2
+        Real x(start = 0);
+    equation
+        der(x) = time;
+        assert(x < 2, "X is too high.");
+        assert(x < 1, "X is a bit high.", level = AssertionLevel.warning);
+    end AssertEqu2;
 	
 	model AssertFunc
 		function f
