@@ -23,6 +23,7 @@ from compiler_exceptions import *
 import sys
 import traceback
 import os
+import tempfile
 
 class LogErrorParser(xml.sax.ContentHandler):
     """
@@ -101,10 +102,11 @@ class KeepLastStream():
         self.secondLastLine = None
         self.lastLine = ''
         self.line = 1 # Number of lines that has been read read
+        self.errorMessage = None
     def read(self, num = -1):
         """
         Reads num bytes from the underlying stream and preserves the latest
-        read contents internaly. It also preservs the last two lines of the
+        read contents internally. It also preserves the last two lines of the
         previously read contents.
         """
         if self.last is not None:
@@ -112,7 +114,7 @@ class KeepLastStream():
             self.line += self.last.count('\n')
             # Get the two last lines
             lines = self.last.rsplit('\n', 2)
-            # Update lastLien and secondLastLine depending on how meny
+            # Update lastLine and secondLastLine depending on how many
             # rows we got
             if len(lines) == 1:
                 self.lastLine = self.lastLine + lines[0]
@@ -125,9 +127,13 @@ class KeepLastStream():
         # Replace the old contents
         self.last = self.stream.read(num)
         return self.last
+    
     def genErrorMsg(self, e):
         column = e.getColumnNumber()
         localLine = e.getLineNumber() - self.line
+        
+        dump_file = tempfile.NamedTemporaryFile(prefix='JM_LOG_DUMP_', delete=False)
+        dump_file.write(self.last)
         
         lines = self.last.split('\n')
         lines[0] = self.lastLine + lines[0]
@@ -139,17 +145,20 @@ class KeepLastStream():
         # ... and after (if possible)
         if localLine + 2 >= len(lines):
             more = self.stream.read()
+            dump_file.write(more)
             while localLine + 2 >= len(lines) and more:
                 pos = more.find('\n')
                 if pos == -1:
                     lines[-1] = lines[-1] + more
                     more = self.stream.read()
+                    dump_file.write(more)
                 else:
                     lines[-1] = lines[-1] + more[0:pos]
                     lines.append('')
                     more = more[pos + 1:]
                     if not more:
                         more = self.stream.read()
+                        dump_file.write(more)
         
         #Construct message
         message = []
@@ -165,20 +174,23 @@ class KeepLastStream():
         message = ''.join(message)
         
         if localLine + 1 >= len(lines) and column >= len(lines[localLine]):
-            return "Unexpected end of output from the compiler:%s%s" \
+            message = "Unexpected end of output from the compiler:%s%s" \
                 % (os.linesep, message)
         else:
-            return "Unexpected output from the compiler, got '%s' in:%s%s" \
+            message = "Unexpected output from the compiler, got '%s' in:%s%s" \
                 % (lines[localLine][column], os.linesep, message)
-    
-    def discardRemaining(self):
-        """
-        A convenient method that will discard remainding data in stream
-        """
+        
+        # Discard remaining data.
         data = self.stream.read()
+        dump_file.write(data)
         while data is None or data != '':
             data = self.stream.read()
-
+            dump_file.write(data)
+        dump_file.close()
+        
+        message += "%sDump of the log has been saved in %s" % (os.linesep, dump_file.name)
+        return message
+    
 class LogHandlerThread(Thread):
     """
     A thread for reading the log stream
@@ -205,7 +217,6 @@ class LogHandlerThread(Thread):
         try:
             xml.sax.parse(self.stream, LogErrorParser(self.result))
         except xml.sax.SAXParseException, e:
-            self.stream.discardRemaining()
             self.result.problems.append(CompilationException('xml.sax.SAXParseException', self.stream.genErrorMsg(e),""))
 
 class _CompilerResultHolder:
