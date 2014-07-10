@@ -799,7 +799,8 @@ aspect Derivatives {
     eq FHDummyDerExp.order()                 = getOrder();
     syn int InstDerExp.order()               = 1;
     eq InstHDerExp.order()                   = getOrder();
-    syn int FDerivativeVariable.order()      = 1;
+    syn int FVariable.order()                = 0;
+    eq FDerivativeVariable.order()           = 1;
     eq FHDerivativeVariable.order()          = getOrder();
     syn int FDummyDerivativeVariable.order() = 1;
     eq FHDummyDerivativeVariable.order()     = getOrder();

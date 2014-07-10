@@ -71,9 +71,10 @@ aspect IndexReduction {
         IndexReductionResult result;
         while (true) {
             BiPGraph g = new BiPGraph();
+            Enumerator enumerator = new Enumerator(1);
             // Only do index reduction based on real variables and equations
             g.addVariables(this, VAR_TYPES_REAL);
-            g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
+            g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", enumerator);
             log.info(g);
             g.maximumMatching(true);
             log.info("DAE system real variables only");
@@ -589,7 +590,7 @@ aspect IndexReduction {
                 if (fv.getMeIntegrated() != null)
                     linearity += calculateLinearityWeight(g, fv.getMeIntegrated());
                 boolean fixed = fv.getTopIntegrated().fixedAttribute();
-                BiPGraphCost weight = new BiPGraphCost(fv.stateSelection(), fixed, linearity);
+                BiPGraphCost weight = new BiPGraphCost(fv.stateSelection(), fixed, fv.order(), linearity);
                 ASTNode.log.info("Weight: %s %s", var, weight);
                 weights.put(var, weight);
             }
@@ -703,14 +704,15 @@ aspect IndexReduction {
             
             public static BiPGraphCost UNMATCHED_WEIGHT = new BiPGraphCost();
             
-            private static final int NUM_WEIGHTS = 7;
+            private static final int NUM_WEIGHTS = 8;
             public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 0;
             public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 1;
             public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 2;
             public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 3;
             public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 4;
             private static final int FIXED_WEIGHT_POSITION               = 5;
-            private static final int LINEARITY_WEIGHT_POSITION           = 6;
+            private static final int ORDER_WEIGHT_POSITION               = 6;
+            private static final int LINEARITY_WEIGHT_POSITION           = 7;
             
             private boolean unmatched = false;
             private int[] weights = new int[NUM_WEIGHTS];
@@ -719,9 +721,10 @@ aspect IndexReduction {
                 unmatched = true;
             }
             
-            public BiPGraphCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int linearity) {
+            public BiPGraphCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
                 weights[stateSelect.weightPos()] += 1;
                 weights[FIXED_WEIGHT_POSITION] += fixed ? 1 : 0;
+                weights[ORDER_WEIGHT_POSITION] += -order;
                 weights[LINEARITY_WEIGHT_POSITION] += linearity;
             }
             

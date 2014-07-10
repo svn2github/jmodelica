@@ -66,7 +66,7 @@ aspect BlockFunctionExtraction {
         }
         // Add the equations to the BiPGraph and make new matchings
         root().flushAllRecursive();
-        g.addEquations(newEqs, VAR_TYPES_ALL, "eq_", g.getEquations().size() + 1);                
+        g.addEquations(newEqs, VAR_TYPES_ALL, "eq_", new Enumerator(g.getEquations().size() + 1));
         g.maximumMatching(true);
             
         return true;

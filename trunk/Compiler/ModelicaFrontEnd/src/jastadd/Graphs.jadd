@@ -213,8 +213,7 @@ public class BiPGraph {
 				addVariable(fv.name(), fv);
 	}
 		
-	public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, int startIndex) {
-		int k = startIndex;
+	public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
 		Eq eqn = null;
 		Var v = null;
 		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
@@ -244,9 +243,8 @@ public class BiPGraph {
 			            add = true;
 			    if (!add)
 			        continue;
-			    eqn = addEquation(eqNamePrefix+k, e, i, variability);
+			    eqn = addEquation(eqNamePrefix + enumerator.next(), e, i, variability);
 			    groupMembers.add(eqn);
-			    k++;
 
 			    for (FVariable fVar : ASTNode.lookupFVariablesInSet(e.findFIdUseExpsInTree())) {
 			        Var var = getVariable(fVar.name());

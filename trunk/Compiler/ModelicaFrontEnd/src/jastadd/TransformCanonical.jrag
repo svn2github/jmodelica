@@ -432,7 +432,7 @@ aspect TransformCanonical {
     private BiPGraph FClass.computeMatchedDAEBiPGraph() {
         BiPGraph g = new BiPGraph();
         g.addVariables(this, VAR_TYPES_NORMAL);
-        g.addEquations(equations(), VAR_TYPES_NORMAL,"eq_",1);
+        g.addEquations(equations(), VAR_TYPES_NORMAL,"eq_", new Enumerator(1));
         g.maximumMatching(true);
         daeUnmatchedVariables.clear();
         for (Var var : g.getUnmatchedVariables())
@@ -508,6 +508,8 @@ aspect TransformCanonical {
             DAEBiPGraph = null;
         }
 		
+        log.info(g);
+        
         // If no complete matching found, then fail
         if (!g.isComplete()) {
             checkStructure();
@@ -545,9 +547,10 @@ aspect TransformCanonical {
 		    daeStructuredBLT = BLT.EMPTY_BLT;
 		}
 		
+		Enumerator enumerator = new Enumerator(1);
 		// Find matching for the initialization system
 		g.addVariables(this, VAR_TYPES_INIT);
-		g.addEquations(equations(), VAR_TYPES_INIT, "eq_",1);
+		g.addEquations(equations(), VAR_TYPES_INIT, "eq_", enumerator);
 		g.isInitialSystem();
 
 		// Replace when equations
@@ -582,13 +585,13 @@ aspect TransformCanonical {
 			}
 			
 			if (!eq_list.isEmpty())
-				g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_", 1);
+				g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_", new Enumerator(1));
 		}		
 	
 		log.info(g);
 		
 
-		g.addEquations(initialEquations(), VAR_TYPES_ALL, "eq_", g.getEquations().size() + 1);
+		g.addEquations(initialEquations(), VAR_TYPES_ALL, "eq_", enumerator);
 
 		g.maximumMatching(false);
         log.info("Init DAE BiPGraph");
