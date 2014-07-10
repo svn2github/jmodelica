@@ -9513,6 +9513,51 @@ end FunctionTests.UnknownArray47;
 ")})));
 end UnknownArray47;
 
+model UnknownArray48
+    function f
+        input Real[1,:] x;
+        output Real[1,1] y;
+        algorithm
+            y := x*transpose(x);
+        annotation(Inline=false);
+    end f;
+    
+    Real[1,1] y = f({{time}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray48",
+            description="Scalarizing known size mul exp with unknown size parts as rhs of assigment. #3788",
+            flatModel="
+fclass FunctionTests.UnknownArray48
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.UnknownArray48.f({{time}});
+
+public
+ function FunctionTests.UnknownArray48.f
+  input Real[1, :] x;
+  output Real[1, 1] y;
+  Real[1, 1] temp_1;
+  Real temp_2;
+ algorithm
+  for i1 in 1:1 loop
+   for i2 in 1:1 loop
+    temp_2 := 0.0;
+    for i3 in 1:size(x, 2) loop
+     temp_2 := temp_2 + x[i1,i3] * x[i2,i3];
+    end for;
+    temp_1[i1,i2] := temp_2;
+   end for;
+  end for;
+  y[1,1] := temp_1[1,1];
+  return;
+ end FunctionTests.UnknownArray48.f;
+
+end FunctionTests.UnknownArray48;
+")})));
+end UnknownArray48;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

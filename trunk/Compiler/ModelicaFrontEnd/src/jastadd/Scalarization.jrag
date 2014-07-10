@@ -2137,7 +2137,7 @@ aspect Scalarization {
     }
 	
     public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        if (size().isUnknown()) // Note: fails when scalarize doesnt return fiduseexp
+        if (useTempVar || size().isUnknown()) // Note: fails when scalarize doesnt return fiduseexp
             return scalarize(indexMap).extractArrayCell(indexMap, i);
         return dynamicFExp(getArray().get(i));
     }
