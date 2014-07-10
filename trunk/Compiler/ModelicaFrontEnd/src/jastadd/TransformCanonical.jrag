@@ -5292,30 +5292,59 @@ aspect ArrayAccessRewrite {
         is$Final = false;
     }
     
-    private boolean FIdUseExp.rewriteContinuousArrayAccess = false;
+    public void FSubscriptedExp.enableArrayAccessRewrite() {
+        super.enableArrayAccessRewrite();
+        rewriteContinuousArrayAccess = true;
+        is$Final = false;
+    }
+    
+    private boolean FIdUseExp.rewriteContinuousArrayAccess       = false;
+    private boolean FSubscriptedExp.rewriteContinuousArrayAccess = false;
     
     rewrite FIdUseExp {
         when (rewriteContinuousArrayAccess) to FExp {
             rewriteContinuousArrayAccess = false;
-            FQName fqName = getFIdUse().getFQName();
-            if (getFIdUse().indexVariability().parameterOrLess() || inFunction())
-                return this;
+            return createSubscriptFunc();
+        }
+    }
+    
+    rewrite FSubscriptedExp {
+        when (rewriteContinuousArrayAccess) to FExp {
+            rewriteContinuousArrayAccess = false;
+            return createSubscriptFunc();
+        }
+    }
+    
+    public FExp FExp.createSubscriptFunc() {
+        if (indexVariability().parameterOrLess() || inFunction())
+            return this;
+        List<FExp> args = new List<FExp>();
+        List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
+        FQNameFull arrayUse = new FQNameFull("x");
+        Size inputSize = populateSubscriptFunc(args, funcVars, arrayUse);
+        String funcName = myFClass().nextTempFuncName();
+        FFunctionCall call = new FFunctionCall(new FIdUse(funcName), args, new Size[]{size()});
+        funcVars.add(inputSize.createFunctionVariable("x", type(), new FInput()));
+        funcVars.add(size().createFunctionVariable("y", type(), new FOutput()));
+        FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)), new FReturnStmt());
+        funcDecl.setInlineAnnotation(FFunctionDecl.InlineAnnotation.NONE);
+        myFClass().addFFunctionDecl(funcDecl);
+        return call;
+    }
+    
+    public Size FExp.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse) {
+        throw new UnsupportedOperationException();
+    }
+    public Size FIdUseExp.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse) {
             FQNameFull arrayArg = new FQNameFull();
-            List<FExp> args = new List<FExp>();
-            List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
             Size inputSize = Size.SCALAR;
-            Size outputSize = Size.SCALAR;
-            FQNameFull arrayUse = new FQNameFull("x");
-            Enumerator funcVarEnumerator = new Enumerator();
-            for (FQNamePart orgPart : fqName.asFQNameFull().getFQNameParts()) {
+            Enumerator enumerator = new Enumerator();
+            for (FQNamePart orgPart : getFIdUse().getFQName().asFQNameFull().getFQNameParts()) {
                 FQNamePart newPart = new FQNamePart(orgPart.name());
                 if (orgPart.hasFArraySubscripts()) {
                     for (FSubscript sub : orgPart.getFArraySubscripts().getFSubscripts()) {
                         if (!sub.variability().parameterOrLess()) {
-                            args.add(sub.asExpSubscript().getFExp().fullCopy());
-                            String varName = "i_" + funcVarEnumerator.next();
-                            funcVars.add(new FFunctionVariable(sub.type().scalarType(), varName, new FInput()));
-                            arrayUse.addSubscript(new FExpSubscript(new FIdUseExp(varName)));
+                            sub.populateSubscriptFunc(args, funcVars, arrayUse, enumerator);
                             newPart = newPart.addSubscript(new FColonSubscript());
                             inputSize = inputSize.expandRight(Size.UNKNOWN);
                         } else if (sub.size() == Size.SCALAR) {
@@ -5323,7 +5352,6 @@ aspect ArrayAccessRewrite {
                         } else if(sub.size().ndims() == 1) {
                             newPart = newPart.addSubscript(sub.fullCopy());
                             inputSize = inputSize.expandRight(size().last());
-                            outputSize = outputSize.expandRight(size().last());
                             arrayUse.addSubscript(new FColonSubscript());
                         } else {
                             throw new UnsupportedOperationException();
@@ -5333,15 +5361,27 @@ aspect ArrayAccessRewrite {
                 arrayArg.addFQNamePart(newPart);
             }
             args.add(new FIdUseExp(arrayArg));
-            String funcName = myFClass().nextTempFuncName();
-            FFunctionCall call = new FFunctionCall(new FIdUse(funcName), args, new Size[]{size()});
-            funcVars.add(inputSize.createFunctionVariable("x", type(), new FInput()));
-            funcVars.add(outputSize.createFunctionVariable("y", type(), new FOutput()));
-            FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)), new FReturnStmt());
-            funcDecl.setInlineAnnotation(FFunctionDecl.InlineAnnotation.NONE);
-            myFClass().addFFunctionDecl(funcDecl);
-            return call;
+            return inputSize;
+    }
+    
+    public Size FSubscriptedExp.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse) {
+        Enumerator enumerator = new Enumerator();
+        for (FSubscript sub : getFArraySubscripts().getFSubscripts()) {
+            sub.populateSubscriptFunc(args, funcVars, arrayUse, enumerator);
         }
+        args.add(getFExp().fullCopy());
+        return getFExp().size();
+    }
+    
+    public void FSubscript.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse, Enumerator enumerator) {
+        args.add(asExpSubscript().getFExp().fullCopy());
+        String varName = "i_" + enumerator.next();
+        funcVars.add(new FFunctionVariable(type(), varName, new FInput()));
+        FArraySubscripts fas = new FArraySubscripts();
+        for (int i = 0; i < ndims(); i++) {
+            fas.addFSubscript(new FRangeExp(new FIntegerLitExp(1), size().createFExp(i)));
+        }
+        arrayUse.addSubscript(new FExpSubscript(new FIdUseExp(varName, fas)));
     }
 }
 

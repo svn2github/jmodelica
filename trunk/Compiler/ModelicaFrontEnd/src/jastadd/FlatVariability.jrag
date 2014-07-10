@@ -583,14 +583,18 @@ aspect FlatVariability {
    		return (other.combineLevel() < combineLevel()) ? other : this;
 	}	
 	
-    syn FTypePrefixVariability FIdUse.indexVariability() {
+    syn FTypePrefixVariability FExp.indexVariability() {
+        throw new UnsupportedOperationException();
+    }
+    eq FSubscriptedExp.indexVariability() = getFArraySubscripts().variability();
+    eq FIdUseExp.indexVariability() {
+        FQName fqn = getFIdUse().getFQName();
         FTypePrefixVariability variability = fConstant();
-        if (getFQName().isSimple())
+        if (fqn.isSimple())
             return variability;
-        for (FQNamePart part : getFQName().asFQNameFull().getFQNameParts())
+        for (FQNamePart part : fqn.asFQNameFull().getFQNameParts())
             if (part.hasFArraySubscripts())
-                for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
-                    variability = variability.combine(sub.variability());
+                variability = variability.combine(part.getFArraySubscripts().variability());
         return variability;
     }
 }

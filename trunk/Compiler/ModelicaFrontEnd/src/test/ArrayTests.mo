@@ -6441,6 +6441,79 @@ end ArrayTests.VariableIndex.Bool;
 ")})));
 end Bool;
 
+model ExpEquation
+    package P
+      constant Real[3] c = {1,2,3};
+    end P;
+    input Integer i;
+    Real y = P.c[i];
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_ExpEquation",
+            description="Subscripted exp with discrete index",
+            flatModel="
+fclass ArrayTests.VariableIndex.ExpEquation
+ discrete input Integer i;
+ Real y;
+equation
+ y = temp_1(i, {1.0, 2.0, 3.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[3] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ end temp_1;
+
+end ArrayTests.VariableIndex.ExpEquation;
+")})));
+end ExpEquation;
+
+model ExpEquationArray
+    package P
+      constant Real[3] c = {1,2,3};
+    end P;
+    input Integer i;
+    Real[2] y = P.c[{i,i+1}];
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_ExpEquationArray",
+            description="Subscripted exp with discrete index, non scalar",
+            flatModel="
+fclass ArrayTests.VariableIndex.ExpEquationArray
+ discrete input Integer i;
+ Real y[1];
+ Real y[2];
+ discrete Real temp_1[1];
+ discrete Real temp_1[2];
+initial equation 
+ pre(temp_1[1]) = 0.0;
+ pre(temp_1[2]) = 0.0;
+equation
+ ({temp_1[1], temp_1[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
+ y[1] = temp_1[1];
+ y[2] = temp_1[2];
+
+public
+ function temp_1
+  input Integer[2] i_0;
+  input Real[3] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[i_0[1]];
+  y[2] := x[i_0[2]];
+  return;
+ end temp_1;
+
+end ArrayTests.VariableIndex.ExpEquationArray;
+")})));
+end ExpEquationArray;
+
 end VariableIndex;
 
 
