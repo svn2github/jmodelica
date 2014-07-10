@@ -2019,4 +2019,30 @@ Semantic error at line 0, column 0:
 ")})));
 end AlgorithmType4;
 
+model ModOnConstantExtends
+    function f
+      input Real[:] x;
+      output Real[size(x,1)] y;
+    protected
+      Real t[size(x,1)] = fill(1,size(x,1))./x;
+    algorithm
+      y := t;
+    end f;
+    model T2
+       constant Real[1] y;
+    end T2;
+    
+    extends T2(y=f({1}));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ModOnConstantExtends",
+            description="Error checking modification on constant before evaluation. #3822",
+            flatModel="
+fclass TypeTests.ModOnConstantExtends
+ constant Real y[1] = 1.0;
+end TypeTests.ModOnConstantExtends;
+")})));
+end ModOnConstantExtends;
+
 end TypeTests;

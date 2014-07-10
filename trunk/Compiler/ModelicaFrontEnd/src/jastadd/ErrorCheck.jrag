@@ -694,13 +694,13 @@ aspect InstanceErrorCheck {
             if (bexp != null) {
                 String type = isParameter() ? "parameter" : "constant";
                 // TODO: Check structural parameters as well
+                bexp.collectErrors(checkType);
                 // Check if the binding expression of constants can be evaluated
                 if (isConstant()) 
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
                 else if (isParameter() && bexp.isCircular())
                     bexp.error("Circularity in binding expression of parameter: %s = %s", 
                             qualifiedName(), bexp);
-                bexp.collectErrors(checkType);
             } else {
                 // Warn if constant or parameter does not have a binding expression (start is used)
                 if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
