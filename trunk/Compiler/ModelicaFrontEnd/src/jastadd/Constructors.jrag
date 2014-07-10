@@ -1033,6 +1033,7 @@ aspect InheritedFactoryMethods {
 	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
 	public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
 	public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
+	public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
 	
 	// Array expressions
 	public FArray          FArray.createEmptyNode()          { return new FArray();          }

@@ -2142,12 +2142,7 @@ aspect Scalarization {
         return dynamicFExp(getArray().get(i));
     }
     public FExp FIdUseExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        return dynamicFExp(new FIdUseExp(new FIdUse(getFIdUse().getFQName().specify(i, true))));
-    }
-    public FExp FIdTempExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        FQName fqn = getFIdUse().getFQName();
-        fqn = fqn.copyAndAddFas(i.createFArraySubscripts());
-        return new FIdTempExp(new FIdUse(fqn));
+        return dynamicFExp(createNode(new FIdUse(getFIdUse().getFQName().specify(i, true))));
     }
 	
 	/**

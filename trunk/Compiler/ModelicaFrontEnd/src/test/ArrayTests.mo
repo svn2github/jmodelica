@@ -6869,6 +6869,29 @@ end ArrayTests.Other.FuncCallInPackConstEval;
 ")})));
 end FuncCallInPackConstEval;
 
+model ScalarizingPre
+    Integer[2] i(start={0,0});
+  algorithm
+    i := pre(i);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Other_ScalarizingPre",
+            description="Test scalarizing of pre array",
+            flatModel="
+fclass ArrayTests.Other.ScalarizingPre
+ discrete Integer i[1](start = 0);
+ discrete Integer i[2](start = 0);
+initial equation 
+ pre(i[1]) = 0;
+ pre(i[2]) = 0;
+algorithm
+ i[1] := pre(i[1]);
+ i[2] := pre(i[2]);
+end ArrayTests.Other.ScalarizingPre;
+")})));
+end ScalarizingPre;
+
+
 end Other;
 
 end ArrayTests;
