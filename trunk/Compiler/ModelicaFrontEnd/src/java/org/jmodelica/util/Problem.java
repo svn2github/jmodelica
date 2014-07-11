@@ -1,6 +1,9 @@
 package org.jmodelica.util;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Problem implements Comparable<Problem>, Serializable {
     private static final long serialVersionUID = 1;
@@ -33,6 +36,12 @@ public class Problem implements Comparable<Problem>, Serializable {
     public Severity severity() { return severity; }
     protected Kind kind = Kind.OTHER;
     public Kind kind() { return kind; }
+    protected Set<String> components = new TreeSet<String>(); // TreeSet is used so that we get a sorted set
+    public void addComponent(String component) {
+        if (component != null)
+            components.add(component);
+    }
+    public Collection<String> components() { return components; }
     
     public Problem(String fileName, String message) {
         this.fileName = fileName;
@@ -67,12 +76,57 @@ public class Problem implements Comparable<Problem>, Serializable {
         return name.charAt(0) + name.substring(1).toLowerCase();
     }
     
+    public void merge(Problem p) {
+        components.addAll(p.components);
+    }
     
     public String toString() {
-        String kindStr = (kind == Kind.OTHER) ? "At " : capitalize(kind) + " error at ";
-        return capitalize(severity) + ": in file '" + fileName + "':\n" + 
-                kindStr + "line " + beginLine + ", column " + beginColumn + ":\n" + 
-                "  " + message;
+        StringBuilder sb = new StringBuilder();
+        sb.append(capitalize(severity));
+        sb.append(": in file '");
+        sb.append(fileName);
+        sb.append("'");
+        if (!components.isEmpty()) {
+            sb.append(",\n");
+            if (components.size() > 1) {
+                int limit = 4;
+                sb.append("In components:\n");
+                int i = 0;
+                if (limit + 1 == components.size())
+                    limit += 1;
+                for (String component : components) {
+                    i++;
+                    sb.append("  ");
+                    sb.append(component);
+                    sb.append("\n");
+                    if (i == limit) break;
+                }
+                if (components.size() > limit) {
+                    sb.append(".. and ");
+                    sb.append(components.size() - limit);
+                    sb.append(" additional components\n");
+                }
+            } else {
+                sb.append("In component ");
+                sb.append(components.iterator().next());
+                sb.append("\n");
+            }
+        } else {
+            sb.append(":\n");
+        }
+        if (kind == Kind.OTHER) {
+            sb.append("At ");
+        } else {
+            sb.append(capitalize(kind));
+            sb.append(" error at ");
+        }
+        sb.append("line ");
+        sb.append(beginLine);
+        sb.append(", column ");
+        sb.append(beginColumn);
+        sb.append(":\n  ");
+        sb.append(message);
+        return sb.toString();
     }
     
 //    public String toXML() {

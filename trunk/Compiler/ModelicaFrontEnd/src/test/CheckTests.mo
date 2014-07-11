@@ -427,4 +427,51 @@ Semantic error at line 16, column 5:
 ")})));
 end BreakWithoutLoop;
 
+model ComponentNameError1
+    model A
+        Real x = true;
+    end A;
+    
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentNameError1",
+            description="Check so that the option component_names_in_errors shows components names in errors",
+            component_names_in_errors=true,
+            errorMessage="
+1 errors found:
+
+Error: in file '...',
+In component a
+Semantic error at line 1, column 1:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end ComponentNameError1;
+
+model ComponentNameError2
+    model A
+        Real x = true;
+    end A;
+    
+    A a1;
+    A a2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentNameError2",
+            description="Check so that the option component_names_in_errors shows components names in errors",
+            component_names_in_errors=true,
+            errorMessage="
+1 errors found:
+
+Error: in file '...',
+In components:
+  a1
+  a2
+Semantic error at line 1, column 1:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end ComponentNameError2;
+
 end CheckTests;

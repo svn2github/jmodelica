@@ -304,6 +304,12 @@ abstract public class OptionRegistry {
              false, 
              "When this option is set to true (default is false), then compliance errors are treated " + 
              "as warnings instead. This can lead to the compiler or solver crashing. Use with caution!"),
+        COMPONENT_NAMES_IN_ERRORS 
+            ("component_names_in_errors", 
+             compiler, 
+             false, 
+             "When this option is set to true (default is false), the compiler will include the name of " +
+             "the component where the error was found, if applicable."),
         GEN_HTML_DIAG 
             ("generate_html_diagnostics", 
              compiler, 

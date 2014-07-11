@@ -131,14 +131,22 @@ import org.jmodelica.util.ErrorCheckType;
        */
       public void problem(Problem p) {
           ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? root.warnings : root.errors;
-          if (!list.contains(p))
+          int pos = list.indexOf(p);
+          if (pos == -1)
               list.add(p);
+          else
+              list.get(pos).merge(p);
       }
 
       protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
           Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
-          if (!list.contains(p))
+          if (n.root().options.getBooleanOption("component_names_in_errors"))
+              p.addComponent(n.errorComponentName());
+          int pos = list.indexOf(p);
+          if (pos == -1)
               list.add(p);
+          else
+              list.get(pos).merge(p);
       }
 
 	  public IErrorHandler connectTo(Root root) {
@@ -459,6 +467,17 @@ aspect ErrorCheck {
 		collectErrors(checkType);
 		root().breakOnErrors();
 	}
+
+    inh InstComponentDecl ASTNode.errorEnclosingComponent();
+    eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
+    eq FlatRoot.getChild().errorEnclosingComponent() = null;
+    eq InstRoot.getChild().errorEnclosingComponent() = null;
+    eq SourceRoot.getChild().errorEnclosingComponent() = null;
+
+    syn String ASTNode.errorComponentName() {
+        InstComponentDecl parent = errorEnclosingComponent();
+        return parent == null ? null : parent.qualifiedName();
+    }
 
 }
 
