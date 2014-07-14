@@ -914,14 +914,14 @@ aspect InstanceErrorCheck {
 		getFExp().collectErrors(checkType);
 	}
 
-	public void InstDot.collectErrors(ErrorCheckType checkType) {
-		for (InstAccess ia : getInstAccesss()) {
-			ia.collectErrors(checkType);
-			if (ia.isUnknown() || ia.isDisabled())
-				break;
-		}
-		allChecks(checkType);
-	}
+    public void InstDot.collectErrors(ErrorCheckType checkType) {
+        for (InstAccess ia : getInstAccesss()) {
+            ia.collectErrors(checkType);
+            if (ia.isUnknown() || !ia.myInstComponentDecl().shouldCheckInto(checkType))
+                break;
+        }
+        allChecks(checkType);
+    }
 
 	public void InstClassAccess.collectErrors(ErrorCheckType checkType) {
 	    nameCheck(checkType);
