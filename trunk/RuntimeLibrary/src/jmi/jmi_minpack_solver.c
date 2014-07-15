@@ -22,6 +22,20 @@
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
+static double max_norm(int n, const real *y) {
+    double norm = 0.0;
+    int i = 0;
+    
+    for (i=0; i < n; i++) {
+        if (y[i] > 0.0 && y[i] > norm) {
+            norm = y[i];
+        } else if (y[i] < 0.0 && -1.0*y[i] > norm) {
+            norm = -1.0*y[i];
+        }
+    }
+    return norm;
+}
+
 static int fcn(void *problem_data, int n, const real *y, real *fvec, int iflag ){
     jmi_block_solver_t *block = problem_data;
     int ret;
@@ -50,13 +64,16 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
     }
     if (iflag == 0) {
         /* Log the progression of the solver */
+        double resnorm = max_norm(n, fvec);
         jmi_log_node_t topnode = jmi_log_enter(block->log, logInfo, "MinpackInfo");
 
         jmi_log_fmt(block->log, topnode, logInfo, "<iteration_index:%I>", ++block->nb_iters);
         jmi_log_reals(block->log, topnode, logInfo, "ivs", y, block->n);
         jmi_log_reals(block->log, topnode, logInfo, "residual", fvec, block->n);
+        jmi_log_fmt(block->log, topnode, logInfo, "<residual_norm:%E>", resnorm);
 
         jmi_log_leave(block->log, topnode);
+        
     } else if (iflag == 1) {
         /*Evaluate the residual*/
         ret = block->F(block->problem_data,(jmi_real_t*)y,(jmi_real_t*)fvec,JMI_BLOCK_EVALUATE);
@@ -213,7 +230,7 @@ int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
     jmi_log_node_t topnode;
     int info, i;
     int mode; /* 2 for scaling with nominals, 1 for scaling done internally */
-    int nprint = 200; /* Enables logging entire simulation. */
+    int nprint = 1; /* Enables logging entire simulation. */
     int nbr_fcn_evals = 0, nbr_jac_evals = 0;
     int max_fcn_evals = 200; /* Max number of function evaluations */
     real factor = block->options->step_limit_factor * 10; /* Default is 100 and is scaled with the option step_limit_factor */
@@ -222,10 +239,10 @@ int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
         /* utilize the heuristict of MINPACK to guess nominal, internal scaling */
         mode = 1;
     } else {
-        /* utilize the heuristict of MINPACK to guess nominal, internal scaling */
+        /* use the nominals from the block, external scaling */
         mode = 2;
         for (i = 0; i < block->n; i++) {
-            solver->yscale[i] = block->nominal[i];
+            solver->yscale[i] = 1.0/block->nominal[i];
         }
     }
     
