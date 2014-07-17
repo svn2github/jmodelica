@@ -11085,8 +11085,8 @@ fclass FunctionTests.VectorizedCall5
  Real z[2];
 equation
  w[1].a = 1;
- w[2].a = 3;
  w[1].b = 2;
+ w[2].a = 3;
  w[2].b = 4;
  z[1] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[1].a, w[1].b));
  z[2] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[2].a, w[2].b));

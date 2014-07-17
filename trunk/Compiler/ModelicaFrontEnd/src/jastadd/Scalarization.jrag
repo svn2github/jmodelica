@@ -45,7 +45,6 @@ aspect Scalarization {
                 List<FVariable> vars = new List<FVariable>();
                 List<FVariable> alias_vars = new List<FVariable>();
                 scalarizeVars(vars, alias_vars);
-                scalarizeAllVarDependent(vars);
                 replaceScalarizedVars(vars, alias_vars);
                 scalarizeFuncs();
                 scalarizeTypes();
@@ -57,35 +56,34 @@ aspect Scalarization {
             }
         }
     }
-	
-	/**
-	 * Scalarize variable declarations.
-	 */
-	protected void FClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
-		for (FVariable fv : getFVariables()) 
-			fv.scalarize(vars);
-		for (FVariable fv : getAliasVariables()) 
-			fv.scalarize(alias_vars);
-	}
-	
-	protected void FClass.scalarizeAllVarDependent(List<FVariable> vars) {
-		scalarizeEquations(vars);
-	}
-	
-	protected void FClass.scalarizeEquations(List<FVariable> vars) {
-		setFAbstractEquationList(scalarizeEquationList(getFAbstractEquations(), vars));
-		setFInitialEquationList(scalarizeEquationList(getFInitialEquations(), vars));
-		setFParameterEquationList(scalarizeEquationList(getFParameterEquations(), vars));
-	}
-	
-	protected void FClass.replaceScalarizedVars(List<FVariable> vars, List<FVariable> alias_vars) {
-		Map<String,FExp> im = Collections.emptyMap();
-		getFVariables().createArrayTemporaries(getFParameterEquations(), vars, im);
-		getAliasVariables().createArrayTemporaries(getFParameterEquations(), vars, im);
-		setFVariableList(vars);
-		setAliasVariableList(alias_vars);
-	}
-	
+    
+    /**
+     * Scalarize variable declarations and equations.
+     */
+    protected void FClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
+        List<FAbstractEquation> equs = new List<FAbstractEquation>();
+        List<FAbstractEquation> pEqus = new List<FAbstractEquation>();
+        List<FAbstractEquation> iEqus = new List<FAbstractEquation>();
+        
+        FAbstractEquation.scalarizeList(getFAbstractEquations(),  equs,  vars);
+        FAbstractEquation.scalarizeList(getFInitialEquations(),   iEqus, vars);
+        FAbstractEquation.scalarizeList(getFParameterEquations(), pEqus, vars);
+        
+        for (FVariable fv : getFVariables()) 
+            fv.scalarize(vars, equs, pEqus);
+        for (FVariable fv : getAliasVariables()) 
+            fv.scalarize(alias_vars, equs, pEqus);
+        
+        setFAbstractEquationList(equs);
+        setFInitialEquationList(iEqus);
+        setFParameterEquationList(pEqus);
+    }
+    
+    protected void FClass.replaceScalarizedVars(List<FVariable> vars, List<FVariable> alias_vars) {
+        setFVariableList(vars);
+        setAliasVariableList(alias_vars);
+    }
+    
 	protected void FClass.scalarizeFuncs() {
 		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
 		for (FFunctionDecl f : getFFunctionDecls()) 
@@ -157,44 +155,38 @@ aspect Scalarization {
 		enableStreamsRewrite();
 		setDummyVariableList(new List<FVariable>());
 	}
-	
-	protected static List<FAbstractEquation> FClass.scalarizeEquationList(
-			List<FAbstractEquation> old, List<FVariable> vars) {
-		return FAbstractEquation.scalarizeList(old, vars, Collections.<String,FExp>emptyMap());
-	}
-	
-	public static List<FAbstractEquation> FAbstractEquation.scalarizeList(
-			List<FAbstractEquation> old, List<FVariable> vars, Map<String,FExp> indexMap) {
-		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
-		scalarizeList(old, eqns, vars, indexMap);
-		return eqns;
-	}
-	
+    
+    public static List<FAbstractEquation> FAbstractEquation.scalarizeList(List<FAbstractEquation> fromList, List<FAbstractEquation> toList, List<FVariable> vars) {
+        scalarizeList(fromList, toList, vars, Collections.<String,FExp>emptyMap());
+        return toList;
+    }
+    
 	public static void FAbstractEquation.scalarizeList(
 			List<FAbstractEquation> fromList, List<FAbstractEquation> toList, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		for (FAbstractEquation ae : fromList) 
 			ae.scalarize(toList, vars, indexMap);
 	}
-		
-	/**
-	 * \brief Scalarize the FVariable and put all scalarized variables in the
-	 * list vars.
-	 */
-	public void FVariable.scalarize(List<FVariable> vars) {
-		// Constants and parameters still have binding expressions, 
-		// they should be scalarized but can't contain any FForIndex 
-		// (except in reduction-expressions, and they are handled elsewhere)
-		if (isRecord()) {
-			FExp bexp = hasBindingExp() ? getBindingExp() : null;
-			scalarRecordFVariables(vars, new FQNameEmpty(), null, bexp, Index.NULL, false, Collections.<BindingExpSource>emptyList());
-		} else if (isArray()) {
-			for (Index i : indices()) 
-				vars.addChild(createScalarFVariable(i));
-		} else {
-			vars.addChild(createScalarFVariable(Index.NULL));
-		}
-	}
+    
+    /**
+     * \brief Scalarize the FVariable and put all scalarized variables in the
+     * list vars.
+     */
+    public void FVariable.scalarize(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
+        if (hasBindingExp())
+            getBindingExp().createArrayTemporaries(variability().parameterOrLess(), equs, pEqus, vars);
+        
+        if (isRecord()) {
+            FExp bexp = hasBindingExp() ? getBindingExp() : null;
+            int bexpDims = hasBindingExp() ? getBindingExp().ndims() : -1;
+            scalarRecordFVariables(vars, equs, pEqus, new FQNameEmpty(), null, bexp, Index.NULL, false, Collections.<BindingExpSource>emptyList(), bexpDims);
+        } else {
+            getFAttributes().createArrayTemporaries(pEqus, vars);
+            for (Index i : indices()) {
+                vars.add(createScalarFVariable(vars, equs, pEqus, i));
+            }
+        }
+    }
 	
 	/**
 	 * \brief Create a scalar FVariable for a single cell or an already scalar FVariable.
@@ -202,7 +194,7 @@ aspect Scalarization {
 	 * @param i  the Index of the cell to create an FVariable for. Should be Index.NULL for 
 	 *           already scalar FVariables.
 	 */
-	protected FVariable FVariable.createScalarFVariable(Index i) {
+    protected FVariable FVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
 		// Create new variable and copy fields that should be same
 		FVariable fv = createEmptyNode();
 		fv.setFVisibilityType((FVisibilityType) getFVisibilityType().fullCopy());
@@ -212,10 +204,22 @@ aspect Scalarization {
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
 		
-		// Constants and parameters still have binding expressions
-		if (hasBindingExp()) {
-			Map<String,FExp> im = Collections.emptyMap();
-			fv.setBindingExp(getBindingExp().getArray().get(i).scalarize(im));
+        // Copy name and replace last array subscripts
+        FQName name = (i == Index.NULL) ? 
+                getFQName().fullCopy() : 
+                getFQName().copyAndAddFas(i.createFArraySubscripts());
+        name.scalarized = true;
+        fv.setFQName(name);
+        
+        // Scalarize binding expressions
+        if (hasBindingExp()) {
+            Map<String,FExp> im = Collections.emptyMap();
+            FExp bexp = getBindingExp().getArray().get(i).scalarize(im);
+            if (keepBExp(isParameter(), getBindingExp())) {
+                fv.setBindingExp(bexp);
+            } else {
+                (isParameter() ? pEqus : equs).add(new FEquation(new FIdUseExp(name), bexp));
+            }
 		}
 		
 		// Iterate over all attributes and scalarize.
@@ -223,20 +227,13 @@ aspect Scalarization {
 			a.scalarize(fv.getFAttributes(), i, Collections.<String,FExp>emptyMap());
 		fv.setDerivedType(getDerivedType());
 		fv.addArrayAttributesFromType(i, myFDerivedType());
-		
-		// Copy name and replace last array subscripts
-		FQName name = (i == Index.NULL) ? 
-				getFQName().fullCopy() : 
-				getFQName().copyAndAddFas(i.createFArraySubscripts());
-		name.scalarized = true;
-		fv.setFQName(name);
 
 		return fv;
 	}
 	
-	protected FVariable FExternalObjectVariable.createScalarFVariable(Index i) {
+    protected FVariable FExternalObjectVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
 		Map<String, FExp> EMPTY = Collections.<String, FExp>emptyMap();
-		FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(i);
+        FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(vars, equs, pEqus, i);
 		FFunctionCall call = (FFunctionCall) getDestructorCall().getCall();
 		FFunctionCall scalarCall = (FFunctionCall) call.scalarize(EMPTY);
 		if (i != Index.NULL)
@@ -247,8 +244,8 @@ aspect Scalarization {
 		return fex;
 	}
 	
-	protected FEnumVariable FEnumVariable.createScalarFVariable(Index i) {
-		FEnumVariable fv = (FEnumVariable) super.createScalarFVariable(i);
+    protected FEnumVariable FEnumVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
+        FEnumVariable fv = (FEnumVariable) super.createScalarFVariable(vars, equs, pEqus, i);
 		fv.setEnum(getEnum().fullCopy());
 		return fv;
 	}
@@ -303,100 +300,206 @@ aspect Scalarization {
 		return add;
 	}
 	
-	/**
-	 * \brief Generate scalar FVariables for this record or record component.
-	 * 
-	 * @param vars     the list of FVariables to add the variables to
-	 * @param prefix   add this as a prefix to the name
-	 * @param last     an FVariable containing the attributes, variability, 
-	 *                 etc inherited from the surrounding record
-	 * @param bexp     binding expression inherited from surrounding record
-	 * @param bi       index of part of binding expression to use
-	 * @param inParam  this variable is within a constant or parameter record
-	 * @param attrs    attributes to search for modifications, before searching in this variable
-	 */
-	public void FVariable.scalarRecordFVariables(
-			List<FVariable> vars, FQName prefix, FVariable last, FExp bexp, Index bi, 
-			boolean inParam, java.util.List<BindingExpSource> attrs) {
-		inParam = (inParam || isConstant() || isParameter()) && !isDependentParameter();
-		if (bexp == null && hasBindingExp() && inParam && getBindingExp().isConstantExp()) {
-			bexp = getBindingExp();
-			bi = Index.NULL;
-		}
-		if (isArray()) {
-			FExp nbexp = null;
-			for (Index i : scalarizationIndices(last)) {
-				if (bexp != null) {
-					Index nbi = bi.expand(i);
-					nbi = nbi.subIndex(nbi.ndims() - bexp.ndims());
-					nbexp = bexp.getArray().get(nbi);
-				}
-				FQName name = prefix.copyAndAppend(getFQName(), i.createFArraySubscripts());
-				scalarRecordCellFVariables(vars, name, last, nbexp, i, inParam, attrs);
-			}
-		} else {
-			FQName name = prefix.copyAndAppend(getFQName());
-			if (bexp != null && bexp.isArray())
-				bexp = bexp.getArray().get(bi);
-			scalarRecordCellFVariables(vars, name, last, bexp, Index.NULL, inParam, attrs);
-		}
-	}
-	
-	/**
-	 * \brief Generate scalar FVariables for a single array cell of this record or record component.
-	 * 
-	 * @param vars     the list of FVariables to add the variables to
-	 * @param name     the name of the new variable
-	 * @param last     an FVariable containing the attributes, variability, etc inherited from surrounding record
-	 * @param bexp     binding expression inherited from surrounding record or array
-	 * @param i        the index of this scalar variable in an array, or Index.NULL for scalar components
-	 * @param inParam  this variable is within a constant or parameter record
-	 * @param attrs    attributes to search for modifications, before searching in this variable
-	 */
-	public void FVariable.scalarRecordCellFVariables(
-			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i, 
-			boolean inParam, java.util.List<BindingExpSource> attrs) {
-		FVariable fv = copyForName(name);
-		Map<String,FExp> im = Collections.emptyMap();
-		if (bexp != null)
-			fv.setBindingExp(bexp.scalarizeExp(im));
-		else
-			fv.setBindingExpOpt(new Opt());
-		fv.inheritFrom(last);
-		fv.addArrayAttributesFromType(i, myFDerivedType());
-		vars.add(fv);
-	}
-	
-	public void FRecordVariable.scalarRecordCellFVariables(
-			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i, 
-			boolean inParam, java.util.List<BindingExpSource> attrs) {
-		FVariable tmp = (FVariable) fullCopy();
-		myFClass().addDummyVariable(tmp);
-		tmp.inheritFrom(last);
+    /**
+     * \brief Generate scalar FVariables for this record or record component.
+     * 
+     * @param vars     the list of FVariables to add the variables to
+     * @param equs     a list of equations to add the equations to
+     * @param pEqus    a list of equations to add the parameter equations to
+     * @param prefix   add this as a prefix to the name
+     * @param last     an FVariable containing the attributes, variability, 
+     *                 etc inherited from the surrounding record
+     * @param bexp     binding expression inherited from surrounding record
+     * @param bi       index of part of binding expression to use
+     * @param inParam  this variable is within a constant or parameter record
+     * @param attrs    attributes to search for modifications, before searching in this variable
+     * @param bexpDims number of dimensions in the binding exp (if any)
+     */
+    public void FVariable.scalarRecordFVariables(
+            List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName prefix,
+            FVariable last, FExp bexp, Index bi, boolean inParam, java.util.List<BindingExpSource> attrs, int bexpDims) {
+        inParam = (inParam || isConstant() || isParameter());
+        if (bexp == null && hasBindingExp()) {
+            bexpDims = getBindingExp().ndims();
+            bexp = getBindingExp().reflatten(prefix);
+            bi = Index.NULL;
+            bexp.createArrayTemporaries(inParam, equs, pEqus, vars);
+        }
+        
+        if (!isRecord())
+            getFAttributes().createArrayTemporaries(inParam, equs, pEqus, vars);
+        
+        FExp nbexp = null;
+        for (Index i : scalarizationIndices(last)) {
+            if (bexp != null) {
+                Index nbi = bi.expand(i);
+                nbi = nbi.subIndex(nbi.ndims() - bexpDims);
+                nbexp = bexp.extractArrayCell(Collections.<String,FExp>emptyMap(), nbi);
+            }
+            FQName name = prefix.copyAndAppend(getFQName(), i.createFArraySubscripts());
+            scalarRecordCellFVariables(vars, equs, pEqus, name, last, nbexp, i, inParam, attrs, 0);
+        }
+    }
+    
+    
+    /**
+     * \brief Generate scalar FVariables for a single array cell of this record or record component.
+     * 
+     * @param vars     the list of FVariables to add the variables to
+     * @param equs     a list of equations to add the equations to
+     * @param pEqus    a list of equations to add the parameter equations to
+     * @param name     the name of the new variable
+     * @param last     an FVariable containing the attributes, variability, etc inherited from surrounding record
+     * @param bexp     binding expression inherited from surrounding record or array
+     * @param i        the index of this scalar variable in an array, or Index.NULL for scalar components
+     * @param inParam  this variable is within a constant or parameter record
+     * @param attrs    attributes to search for modifications, before searching in this variable
+     * @param bexpDims number of dimensions in the binding exp (if any)
+     */
+    public void FVariable.scalarRecordCellFVariables(
+            List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName name,
+            FVariable last, FExp bexp, Index i, boolean inParam, java.util.List<BindingExpSource> attrs, int bexpDims) {
+        FVariable fv = copyForName(name);
+        Map<String,FExp> im = Collections.emptyMap();
+        if (bexp != null) {
+            if (keepBExp(inParam, bexp)) {
+                fv.setBindingExp(bexp);
+            } else {
+                (inParam ? pEqus : equs).add(new FEquation(new FIdUseExp(name.scalarize(im)), bexp.scalarize(im)));
+                fv.setBindingExpOpt(new Opt());
+            }
+        } else {
+            fv.setBindingExpOpt(new Opt());
+        }
+        fv.inheritFrom(last);
+        fv.addArrayAttributesFromType(i, myFDerivedType());
+        vars.add(fv);
+    }
+    
+    public void FRecordVariable.scalarRecordCellFVariables(
+            List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName name,
+            FVariable last, FExp bexp, Index i, boolean inParam, java.util.List<BindingExpSource> attrs, int bexpDims) {
+        FVariable tmp = (FVariable) fullCopy();
+        if (last != null) {
+            tmp.parent = this;
+            tmp.reflatten(name.copyPrefix());
+            tmp.inheritFrom(last);
+        } else {
+            myFClass().addDummyVariable(tmp);
+        }
+        if (bexp == null && tmp.hasBindingExp()) {
+            bexp = tmp.getBindingExp();
+            bexpDims = bexp.ndims();
+        }
 		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
 		for (FVariable comp : myFRecordDecl().getFVariables()) {
 			java.util.List<BindingExpSource> nAttrs = Collections.emptyList();
 			FExp nbexp = null;
+            int nbexpDims = -1;
 			Index nbi = Index.NULL;
 			if (bexp != null) {
                 nbexp = bexp.dynamicFExp(bexp.scalarRecordFExp(emptyIndexMap, comp.name()));
+                nbexpDims = comp.ndims();
 			} else {
 				ArrayList<BindingExpSource> foundAttr = new ArrayList<BindingExpSource>();
 				String cName = comp.name();
 				for (BindingExpSource bes : attrs)
 					bes.addIfMatching(foundAttr, cName, i);
-				BindingExpSource.addIfMatching(foundAttr, this, cName, i);
+                BindingExpSource.addIfMatching(foundAttr, tmp, cName, i);
 				for (int j = 0; nbexp == null && j < foundAttr.size(); j++) {
 					nbexp = foundAttr.get(j).getFExp();
-					if (nbexp != null)
+                    if (nbexp != null) {
 						nbi = foundAttr.get(j).getI();
+                        nbexpDims = nbexp.ndims();
+                    }
 				}
 				if (nbexp == null)
 					nAttrs = foundAttr;
 			}
-			comp.scalarRecordFVariables(vars, name, tmp, nbexp, nbi, inParam, nAttrs);
-		}
-	}
+            comp.scalarRecordFVariables(vars, equs, pEqus, name, tmp, nbexp, nbi, inParam, nAttrs, nbexpDims);
+        }
+    }
+    
+    /**
+     * \brief Check if this FExp is in an binding exp that will still
+     * be a binding exp after scalarization 
+     */
+    inh boolean FExp.inKeptBExp();
+    eq Root.getChild().inKeptBExp() = false;
+    eq FVariable.getBindingExp().inKeptBExp() = keepBExp(isParameter(), getBindingExp());
+    
+    /**
+     * \brief Check if this FVariable should have a binding exp after scalarization
+     */
+    syn boolean FVariable.keepBExp(boolean inParam, FExp bexp) = variability().structuralOrLess() || isString() || (inParam && bexp.isIndependentParameterExp());
+    
+    /**
+     * \brief Apply a prefix to references to components declared in
+     * the containing record decl of this expression
+     */
+    public FExp FExp.reflatten(FQName prefix) {
+        FExp res = dynamicFExp(fullCopy());
+        FRecordDecl decl = containingRecordDecl();
+        if (decl != null)
+            res.prefixInternalUses(prefix, decl);
+        return res;
+    }
+    
+    /**
+     * \brief Apply a prefix to references to components declared in
+     * the containing record decl of this variable
+     */
+    public void FVariable.reflatten(FQName prefix) {
+        FRecordDecl decl = containingRecordDecl();
+        if (hasBindingExp()) {
+            getBindingExp().prefixInternalUses(prefix, decl);
+        }
+        for (FAttribute attr : getFAttributes()) {
+            attr.reflatten(prefix, decl);
+        }
+    }
+    
+    public void FAttribute.reflatten(FQName prefix, FRecordDecl decl) {
+        if (hasValue()) {
+            getValue().prefixInternalUses(prefix, decl);
+        }
+        for (FAttribute a : getFAttributes()) {
+            a.reflatten(prefix, decl);
+        }
+    }
+    
+    public void FExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        for (FExp e : childFExps())
+            e.prefixInternalUses(prefix, decl);
+    }
+    
+    public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        FQName fqn = getFIdUse().getFQName();
+        fqn.prefixInternalUses(prefix, decl);
+        if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
+            getFIdUse().setFQName(prefix.copyAndAppend(fqn));
+    }
+    
+    public void FQName.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+    
+    public void FQNameFull.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        for (FQNamePart p : getFQNameParts())
+            if (p.hasFArraySubscripts())
+                for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
+                    s.prefixInternalUses(prefix, decl);
+    }
+    
+    public void FQNameString.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        if (hasFArraySubscripts())
+            for (FSubscript s : getFArraySubscripts().getFSubscripts())
+                    s.prefixInternalUses(prefix, decl);
+    }
+    
+    public void FSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+    
+    public void FExpSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        getFExp().prefixInternalUses(prefix, decl);
+    }
 	
 	/**
 	 * Used to hold information on available candidates for binding expression when scalarizing 
@@ -483,13 +586,37 @@ aspect Scalarization {
 					na.getName().setFQName(a.getName().getFQName().copySuffix());
 					addFAttribute(na);
 				} else {
-					for (FAttribute ia : na.getFAttributes()) 
-						if (!ia.isInternal())
-							addFAttribute(ia);
+                    inheritFrom(getFAttributes(), na.getFAttributes());
 				}
 			}
 		}
 	}
+	
+    /**
+     * \brief Merge attributes from other into self, overwriting in conflicts.
+     */
+    public void FVariable.inheritFrom(List<FAttribute> self, List<FAttribute> other) {
+        Map<String, FAttribute> m2 = new HashMap<String,FAttribute>();
+        for (FAttribute a : other) {
+            m2.put(a.name(), a);
+        }
+        Set<FAttribute> visited = new HashSet<FAttribute>();
+        for (FAttribute a : self) {
+            String name = a.name();
+            if (m2.containsKey(name)) {
+                FAttribute o = m2.get(name);
+                inheritFrom(a.getFAttributes(), m2.get(name).getFAttributes());
+                if (o.hasValue())
+                    a.setValue(o.getValue().fullCopy());
+                visited.add(m2.get(name));
+            }
+        }
+        for (FAttribute a : other) {
+            if (!visited.contains(a) && !a.isInternal()) {
+                self.add(a.fullCopy());
+            }
+        }
+    }
 	
 	/**
 	 * Create a copy of the variable with a specific name.
@@ -1026,7 +1153,7 @@ aspect Scalarization {
     eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
     eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
     eq FMinMaxExp.extractTemp()    = getX().size().isUnknown();
-    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause() && !(variability().structuralOrLess() && inBindingExp());
+    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause();
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
@@ -1057,6 +1184,20 @@ aspect Scalarization {
     eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
     eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
     
+    
+    /**
+     * Wrapper for @see ASTNode#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     */
+    public void ASTNode.createArrayTemporaries(boolean inParam, List equs, List pEqus, List vars) {
+        createArrayTemporaries(inParam ? pEqus : equs, vars);
+    }
+    
+    /**
+     * Wrapper for @see ASTNode#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     */
+    public void ASTNode.createArrayTemporaries(List clauses, List vars) {
+        createArrayTemporaries(clauses, vars, Collections.<String,FExp>emptyMap());
+    }
     
     /**
      * Wrapper for @see ASTNode#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
@@ -2100,7 +2241,7 @@ aspect Scalarization {
       fqn = fqn.copyAndAppend(suffix);
       fqn.parent = this;
       fqn = fqn.scalarize(indexMap);
-      return new FIdUseExp(new FIdUse(fqn));
+      return createNode(new FIdUse(fqn));
     }
 	
 	/**
@@ -2305,7 +2446,7 @@ aspect Scalarization {
 			type = type.sizedType(expandSizeForIterExp(type.size()));
 		if (equation) {
     	    boolean init = inInitialEquationSection();
-    	    boolean param = init || inParameterEquation() || inAttributeValue();
+            boolean param = init || inParamBindingExp() || inAttributeValue();
             FTypePrefixVariability v = param ? fParameter() : fContinuous().combineDown(type().funcOutputVariability());
     	    if (variability().discreteVariability())
     	    	v = v.combineDown(variability());
@@ -2853,7 +2994,7 @@ aspect Scalarization {
 	
     public FExp FFunctionCall.scalarizeExp(Map<String,FExp> indexMap) {
         if (extractTemp())
-            return new FIdUseExp(tempVarName());
+            return tempExp();
         else
             return scalarizeFunction(indexMap);
     }

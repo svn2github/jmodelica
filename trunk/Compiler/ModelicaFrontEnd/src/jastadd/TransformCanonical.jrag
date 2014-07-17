@@ -111,7 +111,7 @@ aspect TransformCanonical {
             transformations.add(new addStateInitialEquationsIfSet());
             transformations.add(new enableArrayAccessRewrite());
             transformations.add(new genAlgorithmFunctionsIfSet());
-            transformations.add(new genBindingEquations());
+            transformations.add(new genBindingAssignments());
             transformations.add(new scalarize());
             transformations.add(new MakeReinitedVarsStates());
             transformations.add(new enableIfEquationElimination());
@@ -918,17 +918,13 @@ aspect TransformCanonical {
 
     public class FClass {
         /**
-         * Convert variable binding equations into regular equations.
+         * Convert function variable binding expressions into regular statements.
          */
-        public class genBindingEquations extends Transformation {
+        public class genBindingAssignments extends Transformation {
             public void perform() {
                 FQName empty = new FQNameEmpty();
-                for (FVariable fv : getFVariables()) 
-                    if (!fv.isConstant()) 
-                        fv.genBindingEquations(FClass.this, empty);
                 for (FFunctionDecl ffd : getFFunctionDecls())
                     ffd.genBindingAssignments();
-//              flush();
                 root().flushAllRecursive();
            }
         }
@@ -1007,143 +1003,6 @@ aspect TransformCanonical {
         }
         return getBindingExp();
     }
-    
-	public FExp FVariable.selectBindingFExp(FAttribute attr) {
-		if (attr != null && attr.hasValue())
-			return attr.getValue();
-		else if (hasBindingExp())
-			return getBindingExp();
-		else
-			return null;
-	}
-	
-	public FQName FVariable.createNameForBindingEquation(FQName prefix, FAttribute attr) {
-		FArraySubscripts fas = null;
-		if (isArray()) {
-			if (attr != null)
-				attr = attr.findAttribute(FAttribute.SIZE);
-			Size size = (attr != null && attr.hasValue()) ? new MutableSize(attr.getValue()) : size();
-			fas = size.rangeFArraySubscripts();
-		}
-		return prefix.copyAndAppend(getFQName(), fas);
-	}
-	
-	public void FVariable.genBindingEquations(FClass fc, FQName prefix) {
-		genBindingEquations(fc, prefix, null, prefix, false);
-	}
-	
-	public void FVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, 
-	        FQName attrPrefix, boolean param) {
-		FExp bexp = selectBindingFExp(attr);
-		boolean isAttr = attr != null && attr.hasValue();
-		param = param || isParameter();
-		if (bexp != null && !(param && bexp.isIndependentParameterExp())) {
-            FQName bexpPrefix = isAttr ? attrPrefix : prefix;
-			if (!inRecord())
-				setBindingExpOpt(new Opt());
-			genBindingEquationsFromExp(fc, prefix, attr, bexp, bexpPrefix, param);
-			if (isAttr)
-				attr.setValueOpt(new Opt());
-		}
-	}
-	
-	public void FRecordVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, 
-	        FQName attrPrefix, boolean param) {
-		/* TODO: Perhaps this is the wrong approach? Could we instead convert binding expressions 
-		 *       for records into attributes on the variable, and sort it out into binding expressions 
-		 *       during scalarization?
-		 */
-		FExp bexp = selectBindingFExp(attr);
-		if (bexp != null) {
-			super.genBindingEquations(fc, prefix, attr, attrPrefix, param);
-		} else {
-			List<FAttribute> attrs = selectFAttributeList(attr);
-			if (attrs == getFAttributes())
-			    attrPrefix = prefix;
-			FQName name = createNameForBindingEquation(prefix, attr);
-			for (FVariable comp : myFRecordDecl().getFVariables()) {
-				if (!comp.isConstant()) {
-					FAttribute cAttr = findMatching(attrs, comp.name());
-					comp.genBindingEquations(fc, name, cAttr, attrPrefix, param || isParameter());
-				}
-			}
-		}
-	}
-	
-	protected void FVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
-			FAttribute attr, FExp bexp, FQName bexpPrefix, boolean param) {
-		FQName name = createNameForBindingEquation(prefix, attr);
-		param = param || isParameter();
-		FEquation feq = new FEquation(new FIdUseExp(name), bexp.reflattenBindingExp(bexpPrefix));
-		if (param)
-			fc.addFParameterEquationNoTransform(feq);
-		else
-			fc.addFEquation(feq);
-	}
-	
-	protected void FRecordVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
-			FAttribute attr, FExp bexp, FQName bexpPrefix, boolean param) {
-		/* If we get here, then we won't be able to leave expressions for independent parameters 
-		 * as binding expressions on the FVariable - we'll have to clean that up later. Since it 
-		 * has to be done after records are broken into separate variables, we'll do it during 
-		 * parameter equation sorting.
-		 */
-		if (bexp.canExtractRecordComponents()) {
-			List<FAttribute> attrs = selectFAttributeList(attr);
-			FQName name = createNameForBindingEquation(prefix, attr);
-			for (FVariable comp : myFRecordDecl().getFVariables()) {
-				if (!comp.isConstant()) {
-					FAttribute cAttr = findMatching(attrs, comp.name());
-					FExp cExp = bexp.dynamicFExp(bexp.extractRecordFExp(comp.name()));
-					comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, bexpPrefix, param || isParameter());
-				}
-			}
-		} else {
-			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, bexpPrefix, param);
-		}
-	}
-	
-	public FExp FExp.reflattenBindingExp(FQName prefix) {
-		FExp res = dynamicFExp(fullCopy());
-		FRecordDecl decl = containingRecordDecl();
-		if (decl != null)
-			res.prefixInternalUses(prefix, decl);
-		return res;
-	}
-	
-	public void FExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
-		for (FExp e : childFExps())
-			e.prefixInternalUses(prefix, decl);
-	}
-	
-	public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
-		FQName fqn = getFIdUse().getFQName();
-		fqn.prefixInternalUses(prefix, decl);
-		if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
-			getFIdUse().setFQName(prefix.copyAndAppend(fqn));
-	}
-	
-	public void FQName.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
-	
-	public void FQNameFull.prefixInternalUses(FQName prefix, FRecordDecl decl) {
-		for (FQNamePart p : getFQNameParts())
-			if (p.hasFArraySubscripts())
-				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
-					s.prefixInternalUses(prefix, decl);
-	}
-	
-	public void FSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
-	
-	public void FExpSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {
-		getFExp().prefixInternalUses(prefix, decl);
-	}
-	
-	protected List<FAttribute> FRecordVariable.selectFAttributeList(FAttribute attr) {
-		if (attr != null && attr.getFAttributes().getNumChild() > 0)
-			return attr.getFAttributes();
-		else
-			return getFAttributes();
-	}
 	
 	syn boolean FExp.canExtractRecordComponents()      = false;
 	eq FIdUseExp.canExtractRecordComponents()          = true;

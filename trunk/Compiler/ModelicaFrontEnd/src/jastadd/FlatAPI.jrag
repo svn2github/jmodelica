@@ -2056,7 +2056,11 @@ aspect FVariableUses {
 	eq Root.getChild().inBindingExp() = false;
 	eq InstAssignable.getBindingFExp().inBindingExp() = true;
 	eq FVariable.getBindingExp().inBindingExp() = true;
-
+    
+    inh boolean FExp.inParamBindingExp();
+    eq Root.getChild().inParamBindingExp() = false;
+    eq FVariable.getBindingExp().inParamBindingExp() = isParameter();
+    
 	/**
 	 * \brief Collection attribute returning all dependent parameters which
 	 * depends on the parameter.

@@ -952,7 +952,7 @@ model RecordBinding9
 fclass RecordTests.RecordBinding9
  constant Real x.a = 1;
  parameter Real x.b = 2 /* 2 */;
- constant Real y.a = 1;
+ constant Real y.a = x.a;
  parameter Real y.b;
 parameter equation
  y.b = x.b;
@@ -977,7 +977,7 @@ model RecordBinding10
 			flatModel="
 fclass RecordTests.RecordBinding10
  constant Real x.a = 1;
- constant Real y.a = 1;
+ constant Real y.a = x.a;
  Real y.b;
 equation
  y.b = time;
@@ -1111,6 +1111,248 @@ fclass RecordTests.RecordBinding14
 end RecordTests.RecordBinding14;
 ")})));
 end RecordBinding14;
+
+model RecordBinding15
+    record R1
+      Real y1 = 50;
+      parameter R2 r2(y2=y1);
+    end R1;
+    
+    record R2
+      Real x2;
+      Real y2;
+    end R2;
+  
+    parameter R1 r1(r2(x2=1));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding15",
+            description="Flattening use of component in same record",
+            flatModel="
+fclass RecordTests.RecordBinding15
+ parameter Real r1.y1 = 50 /* 50 */;
+ parameter Real r1.r2.x2 = 1 /* 1 */;
+ parameter Real r1.r2.y2;
+parameter equation
+ r1.r2.y2 = r1.y1;
+end RecordTests.RecordBinding15;
+")})));
+end RecordBinding15;
+
+model RecordBinding16
+    record R1
+      Real y1 = 52;
+      parameter R2 r2(r3(y3=y1));
+    end R1;
+    
+    record R2
+      Real y2 = 51;
+      R3 r3(x3=y2,y3=1);
+    end R2;
+    
+    record R3
+      Real x3;
+      Real y3;
+    end R3;
+    
+    parameter R1 r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding16",
+            description="Flattening use of component in same record",
+            flatModel="
+fclass RecordTests.RecordBinding16
+ parameter Real r1.y1 = 52 /* 52 */;
+ parameter Real r1.r2.y2 = 51 /* 51 */;
+ parameter Real r1.r2.r3.x3;
+ parameter Real r1.r2.r3.y3;
+parameter equation
+ r1.r2.r3.x3 = r1.r2.y2;
+ r1.r2.r3.y3 = r1.y1;
+end RecordTests.RecordBinding16;
+")})));
+end RecordBinding16;
+
+model RecordBinding17
+    record R1
+      Real y1 = 52;
+      parameter R2 r2(r3(y3=y1));
+    end R1;
+  
+    record R2
+      Real y2 = 51;
+      R3 r3(x3=y2,y3=1);
+    end R2;
+  
+    record R3
+      Real x3;
+      Real y3;
+    end R3;
+    
+    parameter R1 r1(r2(r3(y3=y2)));
+    parameter Real y2 = 2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding17",
+            description="Flattening use of component in same record",
+            flatModel="
+fclass RecordTests.RecordBinding17
+ parameter Real r1.y1 = 52 /* 52 */;
+ parameter Real r1.r2.y2 = 51 /* 51 */;
+ parameter Real r1.r2.r3.x3;
+ parameter Real r1.r2.r3.y3;
+ parameter Real y2 = 2 /* 2 */;
+parameter equation
+ r1.r2.r3.x3 = r1.r2.y2;
+ r1.r2.r3.y3 = y2;
+end RecordTests.RecordBinding17;
+")})));
+end RecordBinding17;
+
+model RecordBinding18
+    record R1
+        Real x = time;
+    end R1;
+    
+    R1 r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding18",
+            description="Basic test of binding expression in record declaration",
+            flatModel="
+fclass RecordTests.RecordBinding18
+ Real r1.x;
+equation
+ r1.x = time;
+end RecordTests.RecordBinding18;
+")})));
+end RecordBinding18;
+
+model RecordBinding19
+    record R1
+        parameter String x = "A";
+        parameter String y = x;
+        Real z = time;
+    end R1;
+    
+    R1 r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding19",
+            description="String parameters in record with continuous part",
+            flatModel="
+fclass RecordTests.RecordBinding19
+ parameter String r1.x = \"A\" /* \"A\" */;
+ parameter String r1.y = \"A\" /* \"A\" */;
+ Real r1.z;
+equation
+ r1.z = time;
+end RecordTests.RecordBinding19;
+")})));
+end RecordBinding19;
+
+model RecordBinding20
+    record R1
+        parameter String x = "A";
+        parameter String y = x;
+        Real z = time;
+    end R1;
+    
+    R1 r1(x="B");
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding20",
+            description="Modified string parameters in record with continuous part",
+            flatModel="
+fclass RecordTests.RecordBinding20
+ parameter String r1.x = \"B\";
+ parameter String r1.y = \"B\" /* \"B\" */;
+ Real r1.z;
+equation
+ r1.z = time;
+end RecordTests.RecordBinding20;
+")})));
+end RecordBinding20;
+
+model RecordBinding21
+    record R1
+      Real y1 = 52;
+      R2 r2(r3(y3=y1));
+    end R1;
+      
+    record R2
+      Real y2 = 51;
+      R3 r3(x3=y2,y3=1);
+    end R2;
+    
+    record R3
+      Real x3;
+      Real y3;
+    end R3;
+  
+    R1 r1(r2(r3(y3=y2)));
+    Real y2 = 2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding21",
+            description="Flattening use of component in same record",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordBinding21
+ Real r1.y1;
+ Real r1.r2.y2;
+ Real r1.r2.r3.x3;
+ Real r1.r2.r3.y3;
+ Real y2;
+equation
+ r1.y1 = 52;
+ r1.r2.y2 = 51;
+ r1.r2.r3.x3 = r1.r2.y2;
+ r1.r2.r3.y3 = y2;
+ y2 = 2;
+end RecordTests.RecordBinding21;
+")})));
+end RecordBinding21;
+
+model RecordBinding22
+    record R1
+        Real t = 3;
+        R2 r2(x=t);
+    end R1;
+    record R2
+        Real x;
+        Real y;
+    end R2;
+    Real t = 3.14;
+    parameter R1 r1(r2(y=2));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding22",
+            description="Flattening use of component in same record",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordBinding22
+ Real t;
+ parameter Real r1.t = 3 /* 3 */;
+ parameter Real r1.r2.x;
+ parameter Real r1.r2.y = 2 /* 2 */;
+parameter equation
+ r1.r2.x = r1.t;
+equation
+ t = 3.14;
+end RecordTests.RecordBinding22;
+")})));
+end RecordBinding22;
 
 
 model RecordArray1
@@ -2145,8 +2387,8 @@ equation
  x[2].a = y[2].a;
  x[2].b = y[2].b;
  x[1].a = 1;
- x[2].a = 3;
  x[1].b = 2;
+ x[2].a = 3;
  x[2].b = 4;
 end RecordTests.RecordScalarize13;
 ")})));
@@ -3711,8 +3953,8 @@ fclass RecordTests.RecordInput4
  Real x;
 equation
  a[1].x = 1;
- a[2].x = 3;
  a[1].y = 2;
+ a[2].x = 3;
  a[2].y = 4;
  x = RecordTests.RecordInput4.f({RecordTests.RecordInput4.A(a[1].x, a[1].y),RecordTests.RecordInput4.A(a[2].x, a[2].y)});
 

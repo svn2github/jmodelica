@@ -2010,7 +2010,7 @@ aspect Arrays {
 		if (!isArray() || fc == null)
 			return super.getArray();
 		
-		if (variability().structuralOrLess() && inBindingExp()) {
+		if (variability().structuralOrLess() && inKeptBExp()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
@@ -2381,7 +2381,10 @@ aspect Arrays {
 			return Indices.create(size());
 		} else {
 			int extra = Math.max(ndims() - n, 0);
-			return NonConsecutiveIndices.create(getFExp().size(), dimensionsToKeep(), extra);
+            int[] keep = dimensionsToKeep();
+            if (keep.length + extra == 0)
+                return Indices.create(Size.SCALAR);
+            return NonConsecutiveIndices.create(getFExp().size(), keep, extra);
 		}
 	}
 	
