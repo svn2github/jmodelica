@@ -1887,7 +1887,7 @@ aspect FlatExpressions {
                 if (i < last)
                     buf.append('.');
             }
-            return base.copyAndAppend(buf.toString());
+           return base.copyAndAppend(new FQNameFull(buf.toString()));
         }
     }
 
