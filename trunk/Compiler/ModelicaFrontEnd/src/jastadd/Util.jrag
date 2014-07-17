@@ -1500,7 +1500,7 @@ aspect FlatNames {
      * to using {@link #copyAndAppend(String)}.
      */
 	public FQName FQName.copyAndAppend(String name, FArraySubscripts fas) {
-    	if (fas == null)
+        if (fas == null || fas.ndims() == 0)
     		return copyAndAppend(name);
     	FQNameFull res = copyAsFQNameFull();
     	res.addFQNamePart(new FQNamePartArray(name, fas));
@@ -1514,8 +1514,10 @@ aspect FlatNames {
      * to using {@link #copyAndAppend(FQName)}.
      */
 	public FQName FQName.copyAndAppend(FQName name, FArraySubscripts fas) {
-		FQName res = copyAndAppend(name);
-		return (fas == null) ? res : res.asFQNameFull().addFArraySubscripts(fas);
+        if (fas == null || fas.ndims() == 0)
+            return copyAndAppend(name);
+        FQName res = copyAndAppend(name);
+        return res.asFQNameFull().addFArraySubscripts(fas);
     }
     
     /**
