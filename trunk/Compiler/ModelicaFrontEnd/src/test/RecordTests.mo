@@ -1354,6 +1354,62 @@ end RecordTests.RecordBinding22;
 ")})));
 end RecordBinding22;
 
+model RecordBinding23
+    record R
+      parameter Real x = 1;
+      final parameter Real y = x;
+    end R;
+    parameter R r1 = R();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding23",
+            description="Final parameter record component",
+            flatModel="
+fclass RecordTests.RecordBinding23
+ parameter Real r1.x = 1 /* 1 */;
+ parameter Real r1.y;
+parameter equation
+ r1.y = r1.x;
+end RecordTests.RecordBinding23;
+")})));
+end RecordBinding23;
+
+model RecordBinding24
+    record R1
+      Real y1 = 52;
+      final parameter R2 r2(r3(y3=y1));
+    end R1;
+  
+    record R2
+      Real y2 = 51;
+      R3 r3(x3=y2,y3=1);
+    end R2;
+  
+    record R3
+      Real x3;
+      Real y3;
+    end R3;
+    
+    parameter R1 r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding24",
+            description="Final parameter record component",
+            flatModel="
+fclass RecordTests.RecordBinding24
+ parameter Real r1.y1 = 52 /* 52 */;
+ parameter Real r1.r2.y2 = 51 /* 51 */;
+ parameter Real r1.r2.r3.x3;
+ parameter Real r1.r2.r3.y3;
+parameter equation
+ r1.r2.r3.x3 = r1.r2.y2;
+ r1.r2.r3.y3 = r1.y1;
+end RecordTests.RecordBinding24;
+")})));
+end RecordBinding24;
+
 
 model RecordArray1
  record A

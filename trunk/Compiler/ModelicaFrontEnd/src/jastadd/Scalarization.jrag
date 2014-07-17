@@ -398,7 +398,12 @@ aspect Scalarization {
             int nbexpDims = -1;
 			Index nbi = Index.NULL;
 			if (bexp != null) {
-                nbexp = bexp.dynamicFExp(bexp.scalarRecordFExp(emptyIndexMap, comp.name()));
+                nbexp = bexp.scalarRecordFExp(emptyIndexMap, comp.name());
+                nbexp.parent = comp;
+                if (!comp.modifiableInRecord) {
+                    nbexp = nbexp.reflatten(name);
+                    nbexp.parent = comp;
+                }
                 nbexpDims = comp.ndims();
 			} else {
 				ArrayList<BindingExpSource> foundAttr = new ArrayList<BindingExpSource>();
