@@ -484,19 +484,21 @@ aspect XMLCodeGen {
 
 	}
 	
-	public void FArraySubscripts.prettyPrint_XML(Printer p, CodeStream str, String indent){
-		String namespace = "exp";
-		String tag = this.xmlTag();
-		
-		str.println(indent + "<" + namespace + ":" + tag + ">");
-		
-		for (FSubscript s : this.getFSubscriptList()) {
-			s.prettyPrint_XML(str,p.indent(indent+"\t"));
-		}
-		
-		str.println(indent + "</" + namespace + ":" + tag + ">");
-		
-	}
+    public void FArraySubscripts.prettyPrint_XML(Printer p, CodeStream str, String indent){
+        if (getNumFSubscript()>0) {
+            String namespace = "exp";
+            String tag = this.xmlTag();
+            
+            str.println(indent + "<" + namespace + ":" + tag + ">");
+            
+            for (FSubscript s : this.getFSubscriptList()) {
+                s.prettyPrint_XML(str,p.indent(indent+"\t"));
+            }
+            
+            str.println(indent + "</" + namespace + ":" + tag + ">");
+            
+        }
+    }
     
 	public void FSubscript.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		return;
