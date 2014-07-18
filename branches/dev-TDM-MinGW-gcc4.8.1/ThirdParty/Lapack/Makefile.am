@@ -16,371 +16,70 @@
 #    see <http://www.gnu.org/licenses/> or 
 #    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 #
+LAPACK_BUILD_DIR=../../lapack_build
+LAPACK_BUILD_DIR64=../../lapack_build64
+LAPACK_INSTALL_DIR=$(abs_builddir)/../../lapack_install
+LAPACK_INSTALL_DIR64=$(abs_builddir)/../../lapack_install64
 
-AUTOMAKE_OPTIONS = foreign
+$(LAPACK_BUILD_DIR):
+	mkdir -p $(LAPACK_BUILD_DIR) && \
+	cd $(LAPACK_BUILD_DIR) && \
+	case $(build) in \
+	*-cygwin*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*-mingw*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*-apple*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	esac
 
-lib_LIBRARIES = liblapack.a
+$(LAPACK_BUILD_DIR64):
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(LAPACK_BUILD_DIR64) && \
+	cd $(LAPACK_BUILD_DIR64) && \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*-mingw*) \
+	mkdir -p $(LAPACK_BUILD_DIR64) && \
+	cd $(LAPACK_BUILD_DIR64) && \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	esac
 
-liblapack_a_SOURCES = \
-	dbdsdc.f \
-	dbdsqr.f \
-	ddisna.f \
-	dgbbrd.f \
-	dgbcon.f \
-	dgbequ.f \
-	dgbrfs.f \
-	dgbsv.f \
-	dgbsvx.f \
-	dgbtf2.f \
-	dgbtrf.f \
-	dgbtrs.f \
-	dgebak.f \
-	dgebal.f \
-	dgebd2.f \
-	dgebrd.f \
-	dgecon.f \
-	dgeequ.f \
-	dgees.f \
-	dgeesx.f \
-	dgeev.f \
-	dgeevx.f \
-	dgegs.f \
-	dgegv.f \
-	dgehd2.f \
-	dgehrd.f \
-	dgelq2.f \
-	dgelqf.f \
-	dgels.f \
-	dgelsd.f \
-	dgelss.f \
-	dgelsx.f \
-	dgelsy.f \
-	dgeql2.f \
-	dgeqlf.f \
-	dgeqp3.f \
-	dgeqpf.f \
-	dgeqr2.f \
-	dgeqrf.f \
-	dgerfs.f \
-	dgerq2.f \
-	dgerqf.f \
-	dgesc2.f \
-	dgesdd.f \
-	dgesv.f \
-	dgesvd.f \
-	dgesvx.f \
-	dgetc2.f \
-	dgetf2.f \
-	dgetrf.f \
-	dgetri.f \
-	dgetrs.f \
-	dggbak.f \
-	dggbal.f \
-	dgges.f \
-	dggesx.f \
-	dggev.f \
-	dggevx.f \
-	dggglm.f \
-	dgghrd.f \
-	dgglse.f \
-	dggqrf.f \
-	dggrqf.f \
-	dggsvd.f \
-	dggsvp.f \
-	dgtcon.f \
-	dgtrfs.f \
-	dgtsv.f \
-	dgtsvx.f \
-	dgttrf.f \
-	dgttrs.f \
-	dgtts2.f \
-	dhgeqz.f \
-	dhsein.f \
-	dhseqr.f \
-	disnan.f \
-	dlabad.f \
-	dlabrd.f \
-	dlacn2.f \
-	dlacon.f \
-	dlacpy.f \
-	dladiv.f \
-	dlae2.f \
-	dlaebz.f \
-	dlaed0.f \
-	dlaed1.f \
-	dlaed2.f \
-	dlaed3.f \
-	dlaed4.f \
-	dlaed5.f \
-	dlaed6.f \
-	dlaed7.f \
-	dlaed8.f \
-	dlaed9.f \
-	dlaeda.f \
-	dlaein.f \
-	dlaev2.f \
-	dlaexc.f \
-	dlag2.f \
-	dlag2s.f \
-	dlags2.f \
-	dlagtf.f \
-	dlagtm.f \
-	dlagts.f \
-	dlagv2.f \
-	dlahqr.f \
-	dlahr2.f \
-	dlahrd.f \
-	dlaic1.f \
-	dlaisnan.f \
-	dlaln2.f \
-	dlals0.f \
-	dlalsa.f \
-	dlalsd.f \
-	dlamrg.f \
-	dlaneg.f \
-	dlangb.f \
-	dlange.f \
-	dlangt.f \
-	dlanhs.f \
-	dlansb.f \
-	dlansp.f \
-	dlanst.f \
-	dlansy.f \
-	dlantb.f \
-	dlantp.f \
-	dlantr.f \
-	dlanv2.f \
-	dlapll.f \
-	dlapmt.f \
-	dlapy2.f \
-	dlapy3.f \
-	dlaqgb.f \
-	dlaqge.f \
-	dlaqp2.f \
-	dlaqps.f \
-	dlaqr0.f \
-	dlaqr1.f \
-	dlaqr2.f \
-	dlaqr3.f \
-	dlaqr4.f \
-	dlaqr5.f \
-	dlaqsb.f \
-	dlaqsp.f \
-	dlaqsy.f \
-	dlaqtr.f \
-	dlar1v.f \
-	dlar2v.f \
-	dlarf.f \
-	dlarfb.f \
-	dlarfg.f \
-	dlarft.f \
-	dlarfx.f \
-	dlargv.f \
-	dlarnv.f \
-	dlarra.f \
-	dlarrb.f \
-	dlarrc.f \
-	dlarrd.f \
-	dlarre.f \
-	dlarrf.f \
-	dlarrj.f \
-	dlarrk.f \
-	dlarrr.f \
-	dlarrv.f \
-	dlartg.f \
-	dlartv.f \
-	dlaruv.f \
-	dlarz.f \
-	dlarzb.f \
-	dlarzt.f \
-	dlas2.f \
-	dlascl.f \
-	dlasd0.f \
-	dlasd1.f \
-	dlasd2.f \
-	dlasd3.f \
-	dlasd4.f \
-	dlasd5.f \
-	dlasd6.f \
-	dlasd7.f \
-	dlasd8.f \
-	dlasda.f \
-	dlasdq.f \
-	dlasdt.f \
-	dlaset.f \
-	dlasq1.f \
-	dlasq2.f \
-	dlasq3.f \
-	dlasq4.f \
-	dlasq5.f \
-	dlasq6.f \
-	dlasr.f \
-	dlasrt.f \
-	dlassq.f \
-	dlasv2.f \
-	dlaswp.f \
-	dlasy2.f \
-	dlasyf.f \
-	dlatbs.f \
-	dlatdf.f \
-	dlatps.f \
-	dlatrd.f \
-	dlatrs.f \
-	dlatrz.f \
-	dlatzm.f \
-	dlauu2.f \
-	dlauum.f \
-	dlazq3.f \
-	dlazq4.f \
-	dopgtr.f \
-	dopmtr.f \
-	dorg2l.f \
-	dorg2r.f \
-	dorgbr.f \
-	dorghr.f \
-	dorgl2.f \
-	dorglq.f \
-	dorgql.f \
-	dorgqr.f \
-	dorgr2.f \
-	dorgrq.f \
-	dorgtr.f \
-	dorm2l.f \
-	dorm2r.f \
-	dormbr.f \
-	dormhr.f \
-	dorml2.f \
-	dormlq.f \
-	dormql.f \
-	dormqr.f \
-	dormr2.f \
-	dormr3.f \
-	dormrq.f \
-	dormrz.f \
-	dormtr.f \
-	dpbcon.f \
-	dpbequ.f \
-	dpbrfs.f \
-	dpbstf.f \
-	dpbsv.f \
-	dpbsvx.f \
-	dpbtf2.f \
-	dpbtrf.f \
-	dpbtrs.f \
-	dpocon.f \
-	dpoequ.f \
-	dporfs.f \
-	dposv.f \
-	dposvx.f \
-	dpotf2.f \
-	dpotrf.f \
-	dpotri.f \
-	dpotrs.f \
-	dppcon.f \
-	dppequ.f \
-	dpprfs.f \
-	dppsv.f \
-	dppsvx.f \
-	dpptrf.f \
-	dpptri.f \
-	dpptrs.f \
-	dptcon.f \
-	dpteqr.f \
-	dptrfs.f \
-	dptsv.f \
-	dptsvx.f \
-	dpttrf.f \
-	dpttrs.f \
-	dptts2.f \
-	drscl.f \
-	dsbev.f \
-	dsbevd.f \
-	dsbevx.f \
-	dsbgst.f \
-	dsbgv.f \
-	dsbgvd.f \
-	dsbgvx.f \
-	dsbtrd.f \
-	dsgesv.f \
-	dspcon.f \
-	dspev.f \
-	dspevd.f \
-	dspevx.f \
-	dspgst.f \
-	dspgv.f \
-	dspgvd.f \
-	dspgvx.f \
-	dsprfs.f \
-	dspsv.f \
-	dspsvx.f \
-	dsptrd.f \
-	dsptrf.f \
-	dsptri.f \
-	dsptrs.f \
-	dstebz.f \
-	dstedc.f \
-	dstegr.f \
-	dstein.f \
-	dstemr.f \
-	dsteqr.f \
-	dsterf.f \
-	dstev.f \
-	dstevd.f \
-	dstevr.f \
-	dstevx.f \
-	dsycon.f \
-	dsyev.f \
-	dsyevd.f \
-	dsyevr.f \
-	dsyevx.f \
-	dsygs2.f \
-	dsygst.f \
-	dsygv.f \
-	dsygvd.f \
-	dsygvx.f \
-	dsyrfs.f \
-	dsysv.f \
-	dsysvx.f \
-	dsytd2.f \
-	dsytf2.f \
-	dsytrd.f \
-	dsytrf.f \
-	dsytri.f \
-	dsytrs.f \
-	dtbcon.f \
-	dtbrfs.f \
-	dtbtrs.f \
-	dtgevc.f \
-	dtgex2.f \
-	dtgexc.f \
-	dtgsen.f \
-	dtgsja.f \
-	dtgsna.f \
-	dtgsy2.f \
-	dtgsyl.f \
-	dtpcon.f \
-	dtprfs.f \
-	dtptri.f \
-	dtptrs.f \
-	dtrcon.f \
-	dtrevc.f \
-	dtrexc.f \
-	dtrrfs.f \
-	dtrsen.f \
-	dtrsna.f \
-	dtrsyl.f \
-	dtrti2.f \
-	dtrtri.f \
-	dtrtrs.f \
-	dtzrqf.f \
-	dtzrzf.f \
-	dzsum1.f \
-	ieeeck.f \
-	ilaenv.f \
-	ilaver.f \
-	iparmq.f \
-	lsamen.f \
-	dlamch.f
+all-local: $(LAPACK_BUILD_DIR) $(LAPACK_BUILD_DIR64)
+	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	case $(build) in \
+	*-cygwin*) \
+	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
+	*-mingw*) \
+	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
+	esac
 
-FFLAGS = -fPIC -O3 -ffloat-store
+install-exec-local:
+	mkdir -p $(prefix)/lib/RuntimeLibrary
+	cp $(LAPACK_INSTALL_DIR)/* $(prefix)/lib/RuntimeLibrary
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
+	*-mingw*) \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
+	esac
 
+check-local:
+	cd $(LAPACK_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	case $(build) in \
+	*-cygwin*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
+	*-mingw*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
+	esac
+
+clean-local:
+	cd $(LAPACK_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	case $(build) in \
+	*-cygwin*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
+	*-mingw*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
+	esac

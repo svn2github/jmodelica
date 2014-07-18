@@ -38,9 +38,9 @@ if(NOT MSVC)
 endif()
 
 #Install the libraries
-install(TARGETS fmi1_me DESTINATION "${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary")
+install(TARGETS fmi1_me DESTINATION "${RTLIB_LIB_DIR}")
 
 #Install header files
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-    DESTINATION "${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary"
+    DESTINATION "${RTLIB_INCLUDE_DIR}"
     FILES_MATCHING PATTERN "*.h")
