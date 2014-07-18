@@ -1,0 +1,1127 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import org.jmodelica.util.Solvability;
+
+aspect EquationSolve {
+
+	syn Solvability FAbstractEquation.isSolved(String name) = isSolved(name, false);
+	
+	syn Solvability FAbstractEquation.isSolved(String name, boolean duringTearing) = Solvability.UNSOLVABLE;
+	
+	eq FEquation.isSolved(String name, boolean duringTearing) {
+		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
+		if (solvable)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (duringTearing && canUseLocalIteration())
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
+	}
+
+	eq FFunctionCallEquation.isSolved(String name, boolean duringTearing) {
+		Set<FVariable> leftVars = referencedFVariablesInLHS();
+		
+		boolean inLeft = false;
+		for (FVariable fv : leftVars) {
+			if (fv.name().equals(name))
+				inLeft = true;
+		}
+		
+		Set<FVariable> argVars = referencedFVariablesInRHS();
+
+		boolean inArgs = false;
+		for (FVariable fv : argVars) {
+			if (fv.name().equals(name))
+				inArgs = true;
+		}
+
+		if (inLeft && !inArgs)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (leftVars.size() == 1 && duringTearing && canUseLocalIteration())
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
+	}
+	
+	eq FAlgorithm.isSolved(String name, boolean duringTearing) {
+		Set<FVariable> leftVars = referencedFVariablesInLHS();
+		
+		boolean inLeft = false;
+		for (FVariable fv : leftVars) {
+			if (fv.name().equals(name))
+				inLeft = true;
+		}
+		
+		if (inLeft)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (leftVars.size() == 1 && duringTearing && canUseLocalIteration())
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
+	}
+
+    eq FIfWhenElseEquation.isSolved(String name, boolean duringTearing) {
+        Set<FVariable> leftVars = referencedFVariablesInLHS();
+        
+        boolean inLeft = false;
+        for (FVariable fv : leftVars) {
+            if (fv.name().equals(name))
+                inLeft = true;
+        }
+        
+        Set<FVariable> argVars = referencedFVariablesInRHS();
+
+        boolean inArgs = false;
+        for (FVariable fv : argVars) {
+            if (fv.name().equals(name))
+                inArgs = true;
+        }
+
+        if (inLeft && !inArgs)
+            return Solvability.ANALYTICALLY_SOLVABLE;
+        else
+            return Solvability.UNSOLVABLE;
+    }
+    
+	syn FExp FEquation.solution(String name) {
+		return solution(name, false);
+	}
+	
+	syn nta FExp FEquation.solution(String name, boolean duringTearing) {
+		
+		// Get terms
+		ArrayList<FExp> t = terms();
+		
+		ArrayList<FExp> activeTerms = new ArrayList<FExp>();
+		ArrayList<FExp> inactiveTerms = new ArrayList<FExp>();
+		// Find terms
+		//System.out.println("Equation:\n" + prettyPrint(""));			
+		for (FExp e : t) {
+			//System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
+			if (e.nbrUses(name)==1) {
+			    //System.out.println(" - active");
+				activeTerms.add(e);
+			} else if (e.nbrUses(name)==0) {
+				//System.out.println(" - inactive");
+			    inactiveTerms.add(e);
+			} else {
+			    return new FNoExp();
+			}
+		}
+		//System.out.println("Found term" + (theTerm.isNegativeTerm()? "(-): ": "(+): ") + theTerm.prettyPrint(""));	
+		
+		FExp sol = null;
+		// Build new AST for the inactive terms
+		for (FExp e : inactiveTerms) {
+			FExp ee = e.copySymbolic();
+			if (!e.isNegativeTerm()) {
+			  	ee = new FNegExp(ee);
+			}
+			if (sol==null) {
+				sol = ee;
+			} else {
+			    sol = new FAddExp(sol,ee);
+			}
+		}
+		if (sol==null) { 
+			// No inactive terms
+			sol = new FRealLitExp(0);
+		}
+		
+		FExp mulCoeff = null;
+		FTypePrefixVariability mulCoeffVar = fConstant(); // Keep track of variability
+		// Build new AST for the active terms
+		for (FExp e : activeTerms) {
+			ArrayList<FExp> fac = e.factors();
+			// There is only one reference to the active variable in each
+			// term - this is checked above.			
+			ArrayList<FExp> activeFactors = new ArrayList<FExp>();
+			ArrayList<FExp> inactiveFactors = new ArrayList<FExp>();
+			// Find terms
+			//System.out.println("Equation:\n" + prettyPrint(""));
+			//System.out.println("N factors: " + fac.size());
+			boolean negatedFactor = false;			
+			for (FExp ee : fac) {
+				//System.out.println("Factor" + (ee.isNegativeTerm()? "(-): ": "(+): ") + ee.prettyPrint(""));
+				if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
+				    (ee.isIdentifier(name) || // Identifier 
+				    (ee instanceof FPreExp))) { // pre expression 
+					//System.out.println(" - active"); 
+					activeFactors.add(ee);
+				} else if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
+				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(name))) { 
+				    // TODO: remove this branch since it is not general enough
+					//System.out.println(" - active"); 
+					activeFactors.add(((FNegExp)ee).getFExp());
+					negatedFactor = true;
+				} else if (ee.nbrUses(name)==0) {
+					//System.out.println(" - inactive"); 
+				    inactiveFactors.add(ee);
+				} else {
+					// This equation cannot be solved
+				    return new FNoExp();
+				}
+			}
+						
+			FExp coeff = null;
+			for (FExp eee : inactiveFactors) {
+			    mulCoeffVar = mulCoeffVar.combine(eee.variability());			
+				FExp eeee = eee.copySymbolic();
+				if (eee.isInvertedFactor()) {
+				  	eeee = new FDivExp(new FRealLitExp(1), eeee);
+				}
+				if (coeff==null) {
+					coeff = eeee;
+				} else {
+				    coeff = new FMulExp(coeff,eeee);				  	
+				}
+			}
+			if (coeff==null) {
+				coeff = new FRealLitExp(1);
+			}
+/*			System.out.println("Coeff: ");
+			if (coeff!=null) 
+				System.out.println(coeff.prettyPrint(""));
+			else
+				System.out.println("null");
+			System.out.println("mulCoeff: ");
+			if (mulCoeff!=null) 
+				System.out.println(mulCoeff.prettyPrint(""));
+			else
+				System.out.println("null");
+*/
+			if (coeff!=null) {
+				if (mulCoeff==null) {
+					if (e.isNegativeTerm() || negatedFactor) {
+						mulCoeff = new FNegExp(coeff);
+					} else {
+					    mulCoeff = coeff;
+					}
+				} else {
+					if (e.isNegativeTerm() || negatedFactor) {
+						mulCoeff = new FSubExp(mulCoeff,coeff);				  
+					} else {
+					    mulCoeff = new FAddExp(mulCoeff,coeff);				  
+					}	
+				}					
+			}	
+/*			System.out.println("Coeff: ");
+			if (coeff!=null) 
+				System.out.println(coeff.prettyPrint(""));
+			else
+				System.out.println("null");
+			System.out.println("mulCoeff: ");
+			if (mulCoeff!=null) 
+				System.out.println(mulCoeff.prettyPrint(""));
+			else
+				System.out.println("null");
+			
+			//System.out.println("*Coeff: " + coeff!=null? coeff.prettyPrint(""): "null");
+			//System.out.println("*MulCoeff: " + mulCoeff!=null? mulCoeff.prettyPrint(""): "null");
+*/
+		}
+	    	
+	    if ((duringTearing && !root().options.getBooleanOption("divide_by_vars_in_tearing")) || 
+	            sol.isLiteralZero()) { 	   
+		    if (!mulCoeffVar.lessOrEqual(fConstant())) {
+		    	return new FNoExp();
+		    }
+		}
+	    
+	    if (mulCoeff!=null && !mulCoeff.isLiteralOne()) {
+	    	sol = new FDivExp(sol, mulCoeff);
+	    }
+
+		return sol;
+	}
+	
+	// Get terms
+	syn ArrayList<FExp> FEquation.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().terms());
+		t.addAll(getRight().terms());
+		return t;
+	}
+	
+	syn ArrayList<FExp> FExp.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.add(this);
+		return t;
+	}
+	
+	eq FDotAddExp.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().terms());
+		t.addAll(getRight().terms());
+		return t;
+	}
+
+	eq FDotSubExp.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().terms());
+		t.addAll(getRight().terms());
+		return t;
+	}
+
+	// Get factors	
+	syn ArrayList<FExp> FExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.add(this);
+		return t;
+	}
+	
+	eq FDotMulExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().factors());
+		t.addAll(getRight().factors());
+		return t;
+	}
+
+	eq FDotDivExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().factors());
+		t.addAll(getRight().factors());
+		return t;
+	}
+	
+	eq FNegExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.add(dynamicFExp(new FNegExp(new FRealLitExp(1.))));
+		t.addAll(getFExp().factors());
+		return t;
+	}
+
+	// Negated terms	
+	inh boolean FExp.isNegativeTerm();
+	eq FDotSubExp.getRight().isNegativeTerm() = !isNegativeTerm();
+	eq FNegExp.getFExp().isNegativeTerm() = !isNegativeTerm();
+	eq FEquation.getRight().isNegativeTerm() = true;
+	eq FEquation.getLeft().isNegativeTerm() = false;
+	eq Root.getChild().isNegativeTerm() = false;
+
+	// Inverted factors
+	inh boolean FExp.isInvertedFactor();
+	eq FDotDivExp.getRight().isInvertedFactor() = !isInvertedFactor();
+	eq FEquation.getChild().isInvertedFactor() = false;
+	eq Root.getChild().isInvertedFactor() = false;
+	
+	// Classification of terms
+	syn boolean FExp.isIdentifier(String name) = false;
+	eq FIdUseExp.isIdentifier(String name) = name.equals(name());
+	
+	syn int FExp.isMulTerm(String name) = 0;
+	eq FDotMulExp.isMulTerm(String name) {
+		if (getLeft().isIdentifier(name)) {
+			return 1;
+		} else if (getRight().isIdentifier(name)) {
+			return 2;
+		} else {
+			return 0;
+		}
+	}
+
+	syn boolean FExp.isDivTerm(String name) = false;
+	eq FDotDivExp.isDivTerm(String name) {
+		if (getLeft().isIdentifier(name)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	syn boolean FExp.isNegTerm(String name) = false;
+	eq FNegExp.isNegTerm(String name) = getFExp().isIdentifier(name);
+	
+	syn int FEquation.nbrUses(String name) {
+		return getLeft().nbrUses(name) + getRight().nbrUses(name);
+	}
+	
+	syn int ASTNode.nbrUses(String name) {
+		int n = 0;
+		for (int i=0;i<getNumChild();i++) {
+			n += getChild(i).nbrUses(name);
+		}
+		return n;
+	}
+	
+	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	eq FPreExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	
+	public FRelExp FRelExp.originalFRelExp = null;
+	public FSampleExp FSampleExp.originalFSampleExp = null;
+	
+	protected void ASTNode.traverseSymbolic(ASTNode e) {
+		for (int i = 0; i < getNumChildNoTransform(); i++) {
+			getChildNoTransform(i).traverseSymbolic(e.getChildNoTransform(i));
+		}
+	}
+
+	protected void FRelExp.traverseSymbolic(ASTNode e) {
+		FRelExp re = (FRelExp) e;
+		originalFRelExp = (re.originalFRelExp == null) ? re : re.originalFRelExp;
+		super.traverseSymbolic(e);
+	}
+
+	protected void FSampleExp.traverseSymbolic(ASTNode e) {
+		FSampleExp se = (FSampleExp) e;
+		originalFSampleExp = (se.originalFSampleExp == null) ? se : se.originalFSampleExp;
+		super.traverseSymbolic(e);
+	}
+	
+    public ASTNode ASTNode.copySymbolic() {
+		ASTNode res = fullCopy();
+		res.traverseSymbolic(this);
+		return res;
+	}
+	
+    public FExp FExp.copySymbolic() { return (FExp) super.copySymbolic(); }
+    public FStatement FStatement.copySymbolic() { return (FStatement) super.copySymbolic(); }
+    public FAbstractEquation FAbstractEquation.copySymbolic() { return (FAbstractEquation) super.copySymbolic(); }
+}
+
+
+aspect Derivatives {
+
+    public class EquationDifferentiationException extends RuntimeException {
+    
+    	public FAbstractEquation equation;
+    	
+    	public EquationDifferentiationException(FAbstractEquation e, String message) {
+    		super(message);
+    		this.equation = e;
+    	}
+    
+    }
+
+    public class ExpressionDifferentiationException extends RuntimeException {
+    	
+    	private static final String MSG = "Cannot differentiate the expression%s%s%s";
+    
+    	public FExp fexp;
+    	
+    	public ExpressionDifferentiationException(FExp e) {
+    		this.fexp = e;
+    	}
+    	
+    	public void generateError() {
+    		fexp.error(toString());
+    	}
+    	
+    	public String toString() {
+    		return toString(": ", "");
+    	}
+    	
+    	public String toQuotedString() {
+    		return toString(" '", "'");
+    	}
+    	
+    	public String toString(String pref, String suff) {
+    		return String.format(getFormat(), pref, fexp, suff);
+    	}
+    	
+    	protected String getFormat() {
+    		return MSG;
+    	}
+    
+    }
+
+    public class FunctionDifferentiationException extends ExpressionDifferentiationException {
+    	
+    	private static final String MSG = 
+    		"Cannot differentiate call to function without derivative or smooth order annotation%s%s%s";
+    
+    	public FExp fexp;
+    	
+    	public FunctionDifferentiationException(FExp e) {
+    		super(e);
+    	}
+    	
+    	protected String getFormat() {
+    		return MSG;
+    	}
+    
+    }
+
+	syn Collection<FAbstractEquation> FAbstractEquation.diff(String name) {
+		throw new EquationDifferentiationException(this, "Cannot differentate the equation:\n   " + prettyPrint(""));
+	}
+	
+	eq FEquation.diff(String name) {
+		try {
+			return Arrays.asList(dynamicFAbstractEquation(new FEquation(getLeft().diff(name), getRight().diff(name))));
+		} catch (ExpressionDifferentiationException e) {
+			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
+		}
+	}
+	
+	eq FFunctionCallEquation.diff(String name) {
+		List lefts = new List();
+		for (FFunctionCallLeft l : getLefts()) {
+			Opt lopt = l.hasFExp() ? new Opt(l.getFExp().diff(name)) : new Opt();
+			lefts.add(new FFunctionCallLeft(lopt));
+		}
+		try {
+			FExp diffedCall = getCall().diff(name);
+			if (diffedCall.isLiteralZero()) {
+				Collection<FAbstractEquation> res = new ArrayList<FAbstractEquation>();
+				for (FFunctionCallLeft left : getLefts())
+					for (FIdUseExp use : FIdUseExpsInLHS())
+						res.add(dynamicFAbstractEquation(
+								new FEquation(use.fullCopy(), use.type().zeroLiteral())));
+				return res;
+			} else {
+				return Arrays.asList(dynamicFAbstractEquation(
+						new FFunctionCallEquation(lefts, (FAbstractFunctionCall)diffedCall)));
+			}
+		} catch (ExpressionDifferentiationException e) {
+			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
+		}
+	}
+	
+	public static final String FExp.TIME = "time";
+	
+	public FExp FExp.diff(String name, int n) {
+		return (n <= 1) ? diff(name) : diff(name, n - 1).diff(name);
+	}
+
+	public FExp FExp.diff(String name) {
+		throw new ExpressionDifferentiationException(this);
+	}
+	
+	public FExp FDotAddExp.diff(String name) {
+		FExp rd = dynamicFExp(getRight().diff(name));
+		FExp ld = dynamicFExp(getLeft().diff(name));
+		boolean rz = rd.equalsRealValue(0);
+		boolean lz = ld.equalsRealValue(0);
+		if (rz && lz) {
+			return new FRealLitExp(0.0);
+		} else if (lz) {
+			return dynamicFExp(rd);
+		} else if (rz) {
+			return dynamicFExp(ld);
+		} else {
+			return dynamicFExp(newFAddExp(ld,rd));
+		}
+	}
+
+	public FExp FDotSubExp.diff(String name) {
+		FExp rd = dynamicFExp(getRight().diff(name));
+		FExp ld = dynamicFExp(getLeft().diff(name));
+		boolean rz = rd.equalsRealValue(0);
+		boolean lz = ld.equalsRealValue(0);
+		if (rz && lz) {
+			return new FRealLitExp(0.0);
+		} if (lz) {
+			return dynamicFExp(new FNegExp(rd));
+		} else if (rz) {
+			return dynamicFExp(ld);
+		} else {
+			return dynamicFExp(newFSubExp(ld,rd));
+		}
+	}
+
+	public FExp FDotMulExp.diff(String name) {
+		FExp rd = dynamicFExp((getRight().diff(name)));
+		FExp ld = dynamicFExp((getLeft().diff(name)));
+		boolean rz = rd.equalsRealValue(0);
+		boolean lz = ld.equalsRealValue(0);
+		if (rz && lz) {
+			return new FRealLitExp(0.0);
+		} else if (lz) {
+			return dynamicFExp(newFMulExp(getLeft().copySymbolic(), rd));
+		} else if (rz) {
+			return dynamicFExp(newFMulExp(ld, getRight().copySymbolic()));
+		} else {
+			return dynamicFExp(newFAddExp(
+				newFMulExp(getLeft().copySymbolic(), rd),
+				newFMulExp(ld, getRight().copySymbolic())));
+		}	
+	}
+
+	public FExp FDotDivExp.diff(String name) {
+		if (getRight().variability().lessOrEqual(fParameter())) {
+			return dynamicFExp(newFDivExp(
+			    getLeft().diff(name),
+				getRight().copySymbolic()));
+		} else {
+			return dynamicFExp(newFDivExp(newFSubExp(
+			    newFMulExp(getLeft().diff(name), getRight().copySymbolic()),
+				newFMulExp(getLeft().copySymbolic(), getRight().diff(name))),
+				newFPowExp(getRight().copySymbolic(), new FIntegerLitExp(2))));
+		}
+	}
+
+	public FExp FDotPowExp.diff(String name) {
+		FExp exponent;
+		FExp e;
+		if (getRight().variability().constantVariability()) {
+			double exponentValue = getRight().ceval().realValue();
+			if (exponentValue==2.0) {
+				e = getLeft().copySymbolic();
+			} else {
+				exponent = new FRealLitExp(getRight().ceval().realValue() - 1);
+				e = newFPowExp(getLeft().copySymbolic(),exponent);
+			}
+		} else {
+			exponent = newFSubExp(getRight().copySymbolic(),new FIntegerLitExp(1));
+			e = newFPowExp(getLeft().copySymbolic(),exponent);
+		}
+		
+		FExp e2 = newFMulExp(getRight().copySymbolic(), e);
+		return dynamicFExp(newFMulExp(e2, getLeft().diff(name)));	
+	}
+
+	public FExp FNegExp.diff(String name) {
+		return dynamicFExp(new FNegExp(getFExp().diff(name)));
+	}
+
+	public FExp FSinExp.diff(String name) {
+		FExp ed = dynamicFExp(getFExp().diff(name));
+		try {
+			if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			}
+		} catch(Exception e) {
+		}
+		return dynamicFExp(new FMulExp(new FCosExp(getFExp().copySymbolic()),
+			getFExp().diff(name)));
+	}
+	
+	public FExp FCosExp.diff(String name) {
+		FExp ed = dynamicFExp(getFExp().diff(name));
+		try {
+			if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			}
+		} catch(Exception e) {
+		}
+		return dynamicFExp(new FNegExp(new FMulExp(new FSinExp(getFExp().copySymbolic()),
+			getFExp().diff(name))));
+	}
+
+	public FExp FTanExp.diff(String name) {
+		FExp ed = dynamicFExp(getFExp().diff(name));
+		try {
+			if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
+				return new FRealLitExp(0.0);
+			}
+		} catch(Exception e) {
+		}
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+		                               new FPowExp(new FCosExp(getFExp().copySymbolic()), new FIntegerLitExp(2))));
+	}
+
+	public FExp FExpExp.diff(String name) {
+		return dynamicFExp(new FMulExp(new FExpExp(getFExp().copySymbolic()),
+			getFExp().diff(name)));
+	}
+
+	public FExp FAsinExp.diff(String name) {
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+		                               new FSqrtExp(new FSubExp(new FIntegerLitExp(1),
+		                               new FPowExp(getFExp().copySymbolic(),
+		                               new FIntegerLitExp(2))))));
+	}
+
+	public FExp FAcosExp.diff(String name) {
+		return dynamicFExp(new FDivExp(new FNegExp(getFExp().diff(name)),
+		                               new FSqrtExp(new FSubExp(new FIntegerLitExp(1),
+		                               new FPowExp(getFExp().copySymbolic(),
+		                               new FIntegerLitExp(2))))));
+	}
+
+	public FExp FAtanExp.diff(String name) {
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+		                               new FAddExp(new FIntegerLitExp(1),
+		                               new FPowExp(getFExp().copySymbolic(),
+		                               new FIntegerLitExp(2)))));
+	}
+
+	public FExp FAtan2Exp.diff(String name) {
+		/* der(atan2(y,x) = (der(y)*x - y*der(x)) / (y*y + x*x) */
+		FExp y = getFExp();
+		FExp x = getY();
+		FExp exp1 = new FSubExp(
+				new FMulExp(y.diff(name), x.copySymbolic()),
+				new FMulExp(y.copySymbolic(), x.diff(name)));
+		FExp exp2 = new FAddExp(
+				new FMulExp(y.copySymbolic(),y.copySymbolic()), 
+				new FMulExp(x.copySymbolic(),x.copySymbolic()));
+		return dynamicFExp(new FDivExp(exp1,exp2));
+	}
+	
+	public FExp FSinhExp.diff(String name) {
+		return dynamicFExp(new FMulExp(new FCoshExp(getFExp().copySymbolic()),
+			getFExp().diff(name)));
+	}
+	
+	public FExp FCoshExp.diff(String name) {
+		return dynamicFExp(new FMulExp(new FSinhExp(getFExp().copySymbolic()),
+			getFExp().diff(name)));
+	}
+
+	public FExp FTanhExp.diff(String name) {
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+				new FPowExp(new FCoshExp(getFExp().copySymbolic()), new FIntegerLitExp(2))));
+	}
+
+	public FExp FLogExp.diff(String name) {
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+				getFExp().copySymbolic()));
+	}
+
+	public FExp FLog10Exp.diff(String name) {
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+				new FMulExp(getFExp().copySymbolic(),new FLogExp(new FIntegerLitExp(10)))));
+	}
+
+	public FExp FSqrtExp.diff(String name) {
+		return dynamicFExp(new FDivExp(getFExp().diff(name),
+				new FMulExp(new FIntegerLitExp(2),new FSqrtExp(getFExp().copySymbolic()))));
+	}
+
+	public FExp FSmoothExp.diff(String name) {
+		int order = getOrder().ceval().intValue();
+		FExp diffExp = getFExp().diff(name);
+		if (order > 0)
+			return new FSmoothExp(new FIntegerLitExp(order - 1), diffExp);
+		else
+			return diffExp;
+	}
+
+	public FExp FHomotopyExp.diff(String name) {
+		return dynamicFExp(getActual().diff(name));
+	}
+	
+	public FExp FNoEventExp.diff(String name) {
+		return new FNoEventExp(getFExp().diff(name));
+	}
+	
+	public FExp FIfExp.diff(String name) {
+		FExp td = dynamicFExp((getThenExp().diff(name)));
+		FExp ed = dynamicFExp((getElseExp().diff(name)));
+		boolean tz = td.equalsRealValue(0);
+		boolean ez = ed.equalsRealValue(0);
+		if (ez && tz) {
+			return new FRealLitExp(0.0);
+		} 
+		FExp e = getIfExp().copySymbolic();
+		return dynamicFExp(new FIfExp(e, td, ed));
+	}
+	
+	public FExp FMinMaxExp.diff(String name) {
+		return dynamicFExp(new FNoEventExp(new FIfExp(createCompareNode(getX().copySymbolic(), getY().copySymbolic()), getX().diff(name), getY().diff(name))));
+	}
+
+    public FExp FIdUseExp.diff(String name) {
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp FInstAccessExp.diff(String name) {
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp FPreExp.diff(String name) {
+        if (name.equals(name())) {
+            return new FRealLitExp(1);
+        } else {
+            return new FRealLitExp(0);
+        }   
+    }
+
+    public FExp FDerExp.diff(String name) { 
+        return dynamicFExp(diffUseOrDerExp(name, name()));
+    }
+
+    public FExp InstDerExp.diff(String name) {  
+        return dynamicFExp(diffUseOrDerExp(name, null));
+    }
+
+    public FExp FAbsExp.diff(String name) {
+        FExp diff = getFExp().diff(name);
+        if (diff.isLiteralZero())
+            return dynamicFExp(diff);
+        else
+            return dynamicFExp(new FIfExp(new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0)), diff, new FNegExp(diff.copySymbolic())));
+    }
+
+    public FExp FSignExp.diff(String name) {
+        return new FRealLitExp(0);
+    }
+
+    public FExp FDivFuncExp.diff(String name) {
+        return new FRealLitExp(0);
+    }
+
+    public FExp FDelayExp.diff(String name) {
+        Opt max = hasMax() ? new Opt(getMax().copySymbolic()) : new Opt();
+        FExp res = new FDelayExp(getFExp().diff(name), getDelay().copySymbolic(), max);
+        if (getDelay().isContinuousExp())
+            res = new FMulExp(getDelay().diff(name), res);
+        return res;
+    }
+
+    public FExp FExp.diffUseOrDerExp(String name, String myName) {
+        if (type().containsReal()) {
+            if (name.equals(TIME) && !variability().parameterOrLess())
+                return createDerExp(1);
+            else if (name.equals(myName))
+                return new FRealLitExp(1);
+            else
+                return type().zeroLiteral();
+        } else {
+            FExp exp = type().zeroLiteral();
+            if (!exp.isValidExp())
+                exp = fullCopy();
+            return exp;
+        }
+    }
+    
+    syn int FIdUseExp.order()                = 0;
+    eq FDerExp.order()                       = 1;
+    eq FHDerExp.order()                      = getOrder();
+    eq FDummyDerExp.order()                  = 1;
+    eq FHDummyDerExp.order()                 = getOrder();
+    syn int InstDerExp.order()               = 1;
+    eq InstHDerExp.order()                   = getOrder();
+    syn int FVariable.order()                = 0;
+    eq FDerivativeVariable.order()           = 1;
+    eq FHDerivativeVariable.order()          = getOrder();
+    syn int FDummyDerivativeVariable.order() = 1;
+    eq FHDummyDerivativeVariable.order()     = getOrder();
+    
+    syn FExp FExp.createDerExp(int order) = diff(TIME, order);
+    eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
+    eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
+    eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
+	
+	syn FExp FIdUse.createDerExp(int order) = (order == 1) ? new FDerExp(fullCopy()) : new FHDerExp(fullCopy(), order);
+	
+	syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
+	
+	syn InstDerExp InstAccess.createDerExp(int order) {
+		FExp use = new FInstAccessExp(fullCopy());
+		return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
+	}
+	
+	public FExp FRecordConstructor.diff(String name) {
+		FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
+		for (FExp arg : getArgs())
+			res.addArg(arg.diff(name));
+		return res;
+	}
+	
+    public FExp FLitExp.diff(String name) {
+        return type().zeroLiteral();
+    }
+	
+	public FExp FTimeExp.diff(String name) {
+		int val = 0;
+		if (name.equals(TIME))
+			val = 1;
+		return dynamicFExp(new FRealLitExp(val));
+	}
+	
+	public FExp FFunctionCall.diff(String name) {
+		// If the function does not have an argument that matches name,
+		// and the name is not 'time', then the derivative is zero.
+		if (!name.equals(TIME)) {
+			boolean isIndependent = true;
+			FQName fqn = new FQNameString(name);
+			FIdUseExp fid = (FIdUseExp)dynamicFExp(fqn.createFIdUseExp());
+			FAbstractVariable fv = fid.myFV();
+			if (fv!=null) {
+				HashSet<FVariable> s = new HashSet<FVariable>();
+				s.add((FVariable)fv);
+				for (FExp e : getArgs()) {
+					if (!e.isIndependent(s)) {
+						isIndependent = false;
+						break;
+					}
+				}
+				if (isIndependent) {
+					return new FRealLitExp(0);
+				}
+			}
+		}
+		FFunctionDecl myDecl = myFFunctionDecl();
+		FFunctionDecl myDiffDecl = myDecl.diff(inFunction());
+		if (myDiffDecl == null)
+		    throw new FunctionDifferentiationException(this);
+		List args = new List();
+		for (FExp e : getArgs()) {
+			args.add(e.copySymbolic());
+		}
+		int i = 0;
+		for (FExp e : getArgs()) {
+			FFunctionVariable fv = myDecl.getFFunctionVariable(i);
+			if (fv.shouldBeDifferentiated())
+				args.add(e.diff(name));
+			i++;
+		}
+		FFunctionCall der_f = new FFunctionCall(myDiffDecl.getFQName().createFIdUse(), args, getSizes());
+		return dynamicFExp(der_f);
+	}
+
+	public FExp FArray.diff(String name) {
+		FArray diff_farray = new FArray();
+		for (FExp e : getFExps()) {
+			diff_farray.addFExp(e.diff(name));
+		}
+		return dynamicFExp(diff_farray);
+	}
+	
+}
+
+aspect SmoothOrder{
+
+    public static final int ASTNode.SMOOTH_ORDER_ANNOTATION_DEFAULT = -1;
+
+    public static int ASTNode.readSmoothOrderAnnotation(AnnotationNode a) {
+        AnnotationNode smoothOrder = a.forPath("smoothOrder");
+        if (smoothOrder.isIntegerValue())
+            return smoothOrder.integer();
+        else
+            return SMOOTH_ORDER_ANNOTATION_DEFAULT;
+    }
+    
+    public void FFunctionDecl.smoothOrder(int order) {
+        AnnotationNode node = annotation().forPath("smoothOrder");
+        if (node.exists() || order != SMOOTH_ORDER_ANNOTATION_DEFAULT)
+            // We only wan't to set this attribute if it is already set or order is non equal to default.
+            annotation().forPath("smoothOrder").setValue(new FIntegerLitExp(order));
+    }
+    
+    syn int FFunctionDecl.smoothOrder()  = readSmoothOrderAnnotation(annotation());
+    syn int InstClassDecl.smoothOrder() = readSmoothOrderAnnotation(annotation());
+    syn int InstFunctionCall.smoothOrder() = myInstClassDecl().smoothOrder();
+    syn int FFunctionCall.smoothOrder() = myFFunctionDecl().smoothOrder();
+    
+}
+
+aspect AlgorithmDifferentiation{
+    syn FFunctionDecl FFunctionDecl.diff(boolean inFunction) {
+        int order = order() + 1;
+        if (smoothOrder() == 0 && !inFunction)
+            return null;
+        if (hasFDerivativeFunction()) 
+            return getFDerivativeFunction().myFFunctionDecl();
+        if (smoothOrder() == SMOOTH_ORDER_ANNOTATION_DEFAULT && !inFunction)
+            return null;
+        FQName name = getFQName().createDerPrefixedName(1);
+        Collection<FFunctionVariable> inputs = new ArrayList<FFunctionVariable>();
+        Collection<FFunctionVariable> derivatedInputs = new ArrayList<FFunctionVariable>();
+        Collection<FFunctionVariable> outputs = new ArrayList<FFunctionVariable>();
+        Collection<FFunctionVariable> others = new ArrayList<FFunctionVariable>();
+        for (FFunctionVariable ffv : getFFunctionVariables()) {
+            FFunctionVariable ffvCopy = ffv.fullCopy();
+            if (ffv.isInput()) {
+                inputs.add(ffvCopy);
+                if (ffv.order() == order() && ffv.shouldBeDifferentiated())
+                    derivatedInputs.add(ffv.createDerivative());
+            } else if (ffv.isOutput()) {
+                ffvCopy.setFTypePrefixInputOutputOpt(new Opt<FTypePrefixInputOutput>());
+                others.add(ffvCopy);
+                if (ffv.order() == order() && ffv.shouldBeDifferentiated())
+                    outputs.add(ffv.createDerivative());
+            } else {
+                others.add(ffvCopy);
+                if (ffv.order() == order() && ffv.shouldBeDifferentiated())
+                    others.add(ffv.createDerivative());
+            }
+        }
+        List<FFunctionVariable> variables = new List<FFunctionVariable>();
+        variables.addAll(inputs);
+        variables.addAll(derivatedInputs);
+        variables.addAll(outputs);
+        variables.addAll(others);
+        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new Opt<FDerivativeFunction>(), new List<FAttribute>());
+        function.smoothOrder(Math.max(smoothOrder() - 1, 0));
+        myFClass().addFFunctionDecl(function);
+        setFDerivativeFunction(new FDerivativeFunction(name.createFIdUse(), order, new List<FIdUse>(), new List<FIdUse>()));
+        function.setFAlgorithm(getFAlgorithm().diff());
+        return function;
+    }
+    
+    syn FAlgorithm FAlgorithm.diff() {
+        List<FStatement> diffed = new List<FStatement>();
+        for (FStatement statement : getFStatements())
+            statement.diff(diffed);
+        return new FDerivativeAlgorithm(diffed, order() + 1);
+    }
+    
+    public void FStatement.diff(List<FStatement> diffed) {
+        throw new UnsupportedOperationException("Can not differentiate statment: " + this);
+    }
+    
+    @Override
+    public void FAssignStmt.diff(List<FStatement> diffed) {
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
+            diffed.add(new FDerivativeAssignStmt(getLeft().createDerExp(1).asFIdUseExp(), getRight().diff("time"), order() + 1));
+        diffed.add(fullCopy());
+    }
+   
+    @Override
+    public void FBreakStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+    }
+    
+    @Override
+    public void FForStmt.diff(List<FStatement> diffed) {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getForStmts())
+            statement.diff(statements);
+        diffed.add(new FForStmt(getIndex().fullCopy(), statements));
+    }
+    
+    @Override
+    public void FFunctionCallStmt.diff(List<FStatement> diffed) {
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
+            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+            for (FFunctionCallLeft l : getLefts()) {
+                Opt<FExp> lopt = l.hasFExp() ? new Opt<FExp>(l.getFExp().diff("time")) : new Opt<FExp>();
+                lefts.add(new FFunctionCallLeft(lopt));
+            }
+            FExp diffedCall = getCall().diff("time");
+            diffed.add(new FDerivativeFunctionCallStmt(lefts, (FAbstractFunctionCall) diffedCall, order() + 1));
+        }
+        diffed.add(fullCopy());
+    }
+    
+    syn FIfWhenStmt FIfWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses);
+    eq FIfStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses) {
+        List<FStatement> elseStatements = new List<FStatement>();
+        for (FStatement statement : getElseStmts())
+            statement.diff(elseStatements);
+        return new FIfStmt(differentiatedClauses, elseStatements);
+    }
+    eq FWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses) = new FWhenStmt(differentiatedClauses);
+    
+    @Override
+    public void FIfWhenStmt.diff(List<FStatement> diffed) {
+        List<FIfWhenClause> clauses = new List<FIfWhenClause>();
+        for (FIfWhenClause clause : getFIfWhenClauses())
+            clauses.add(clause.diff());
+        diffed.add(createDifferentiated(clauses));
+    }
+    
+    public FIfWhenClause FIfWhenClause.diff() {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getFStatements())
+            statement.diff(statements);
+        return createNode(getTest().fullCopy(), statements);
+    }
+    
+    @Override
+    public void FInitArrayStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
+            diffed.add(new FDerivatedInitArrayStmt(getFIdUseExp().createDerExp(1).asFIdUseExp(), order() + 1));
+    }
+    
+    @Override
+    public void FReturnStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+    }
+    
+    @Override
+    public void FWhileStmt.diff(List<FStatement> diffed) {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getWhileStmts())
+            statement.diff(statements);
+        diffed.add(new FWhileStmt(getTest().fullCopy(), statements));
+    }
+    
+    syn FFunctionVariable FFunctionVariable.createDerivative() {
+        FFunctionVariable ffv = createNode(getFTypePrefixInputOutputOpt().fullCopy(), getType().fullCopy(), new Opt<FExp>(), getFQName().createDerPrefixedName(1), order() + 1);
+        ffv.hasInitArrayStmt = hasInitArrayStmt;
+        if (hasBindingExp())
+            ffv.setBindingExp(getBindingExp().diff("time"));
+        return ffv;
+    }
+    
+    rewrite FDerExp {
+        when (inFunction()) to FIdUseExp 
+        new FIdUseExp(getFIdUse().getFQName().createDerPrefixedFunctionName(order()));
+    }
+    
+    
+    syn int FFunctionDecl.order()          = getFAlgorithm().order();
+    syn int FAlgorithm.order()             = 0;
+    eq FDerivativeAlgorithm.order()        = getOrder();
+    
+    syn int FFunctionVariable.order()      = getOrder();
+    
+    syn int FAssignStmt.order()            = 0;
+    eq FDerivativeAssignStmt.order()       = getOrder();
+    
+    syn int FFunctionCallStmt.order()      = 0;
+    eq FDerivativeFunctionCallStmt.order() = getOrder();
+    
+    syn int FInitArrayStmt.order()         = 0;
+    eq FDerivatedInitArrayStmt.order()     = getOrder();
+}
+
+ aspect ExpressionSimplification {
+	/**
+	 * Is this expression a literal zero?
+	 */
+	syn boolean FExp.isLiteralZero() = false;
+	eq FLitExp.isLiteralZero() =       type().isNumericScalar() && ceval().realValue() == 0.0;
+	eq FDotAddExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
+	eq FDotSubExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
+	eq FDotMulExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero() || getRightNoTransform().isLiteralZero();
+	eq FDotDivExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero();
+	eq FNegExp.isLiteralZero() =       getFExpNoTransform().isLiteralZero();
+	
+	/**
+	 * Is this expression a literal one?
+	 */
+	syn boolean FExp.isLiteralOne() = false;
+	eq FLitExp.isLiteralOne() =       type().isNumericScalar() && ceval().realValue() == 1.0;
+	eq FDotMulExp.isLiteralOne() =    getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
+	eq FDotDivExp.isLiteralOne() =    getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
+
+    rewrite FDotMulExp {
+        when (getLeftNoTransform().isLiteralZero() && !isArray())  to FExp getLeft();
+        when (getLeftNoTransform().isLiteralOne())                 to FExp getRight();
+        when (getRightNoTransform().isLiteralZero() && !isArray()) to FExp getRight();
+        when (getRightNoTransform().isLiteralOne())                to FExp getLeft();
+    }
+
+    rewrite FDotDivExp {
+        when (getLeftNoTransform().isLiteralZero() && !isArray()) to FExp getLeft();
+        when (getRightNoTransform().isLiteralOne())               to FExp getLeft();
+    }
+
+ 	rewrite FDotSubExp {
+		when (getLeftNoTransform().isLiteralZero())  to FExp getRight().makeNegated();
+		when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
+	}
+
+ 	rewrite FDotAddExp {
+		when (getLeftNoTransform().isLiteralZero())  to FExp getRight();
+		when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
+	}
+ 	
+ 	rewrite FNegExp {
+ 		when (getFExpNoTransform().isLiteralZero())    to FExp getFExp();
+ 		when (getFExpNoTransform() instanceof FNegExp) to FExp getFExp().makeNegated();
+ 	}
+ 
+ }
