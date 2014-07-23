@@ -508,4 +508,49 @@ Semantic error at line 0, column 0:
 ")})));
 end OverconstrainedMultiRootDef1;
 
+
+model OverconstrainedArray1
+    model A
+        C1 c1;
+        C1 c2;
+    equation
+        connect(c1, c2);
+    end A;
+    
+    model B
+        C1 c[2];
+    equation
+        Connections.potentialRoot(c[1].t);
+        Connections.potentialRoot(c[2].t);
+    end B;
+    
+    A a[2];
+    B b;
+equation
+    connect(a.c1, b.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedArray1",
+            description="Test that the overconstrained connection graph is built correctly when using slice access in connect",
+            flatModel="
+fclass OverconstrainedConnection.OverconstrainedArray1
+ OverconstrainedConnection.T1 a[1].c1.t[2];
+ OverconstrainedConnection.T1 a[1].c2.t[2];
+ OverconstrainedConnection.T1 a[2].c1.t[2];
+ OverconstrainedConnection.T1 a[2].c2.t[2];
+ OverconstrainedConnection.T1 b.c[1].t[2];
+ OverconstrainedConnection.T1 b.c[2].t[2];
+equation
+ a[1].c1.t[1:2] = b.c[1].t[1:2];
+ a[1].c1.t[1:2] = a[1].c2.t[1:2];
+ a[2].c1.t[1:2] = b.c[2].t[1:2];
+ a[2].c1.t[1:2] = a[2].c2.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.OverconstrainedArray1;
+")})));
+end OverconstrainedArray1;
+
 end OverconstrainedConnection;

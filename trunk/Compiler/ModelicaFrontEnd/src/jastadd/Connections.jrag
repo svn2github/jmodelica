@@ -1191,9 +1191,9 @@ aspect OverconstrainedConnections {
 		public static class OpsResult {
 			
 			/** The result for the Connections.isRoot() operator. */
-			public boolean isRoot;
+			public final boolean isRoot;
 			/** The result for the Connections.rooted() operator. */
-			public boolean rooted;
+			public final boolean rooted;
 			
 			public OpsResult(boolean isRoot, boolean rooted) {
 				this.isRoot = isRoot;
@@ -1204,7 +1204,7 @@ aspect OverconstrainedConnections {
 		
 		private Collection<Edge> edges = new ArrayList<Edge>();
 		private Collection<Node> nodes = new ArrayList<Node>();
-		private Map<InstComponentDecl,Node> nodeMap = new HashMap<InstComponentDecl,Node>();
+		private Map<String,Node> nodeMap = new HashMap<String,Node>();
 		private Map<String,OpsResult> opsMap;
 		static String UNROOTED_ERR_MSG  = "Set of unrooted connectors in overconstrained connection graph:";
 		static String MULTIROOT_ERR_MSG = "Multiple definite roots in unbreakable subgraph in overconstrained connection graph";
@@ -1221,8 +1221,8 @@ aspect OverconstrainedConnections {
 		 * @param source  the originating connect or branch statement
 		 */
 		public void addConnection(ConnectionSetEntry left, ConnectionSetEntry right, FQName prefix, ConnectionEdge source) {
-			Node leftNode = getNode(left.getVar());
-			Node rightNode = getNode(right.getVar());
+			Node leftNode = getNode(left.name(), left.getVar());
+			Node rightNode = getNode(right.name(), right.getVar());
 			edges.add(new Edge(source, leftNode, rightNode, left, right, prefix));
 		}
 		
@@ -1364,19 +1364,26 @@ aspect OverconstrainedConnections {
 			nodeMap = null;
 		}
 
-		/**
-		 * Find, or if neccessary create, the node for a given component.
-		 */
-		private Node getNode(InstComponentDecl var) {
-			Node res = nodeMap.get(var);
-			if (res == null) {
-				res = new Node(var);
-				nodeMap.put(var, res);
-				nodes.add(res);
-			}
-			return res;
-		}
-		
+        /**
+         * Find, or if neccessary create, the node for a given component.
+         */
+        private Node getNode(InstComponentDecl var) {
+            return getNode(var.getFQName().name(), var);
+        }
+
+        /**
+         * Find, or if neccessary create, the node for a given component accessed by the specified name.
+         */
+        private Node getNode(String name, InstComponentDecl var) {
+            Node res = nodeMap.get(name);
+            if (res == null) {
+                res = new Node(var, name);
+                nodeMap.put(name, res);
+                nodes.add(res);
+            }
+            return res;
+        }
+
 		/**
 		 * An edge in the graph.
 		 */
@@ -1478,190 +1485,192 @@ aspect OverconstrainedConnections {
 			}
 			
 		}
-		
-		/**
-		 * A node in the graph.
-		 */
-		private static class Node implements Comparable<Node> {
-			
-			/** Visited flag used in traversals. */
-			public boolean visited = false;
-			/** Depth of this node from root of tree. Depth 0 is the root. */
-			public int level = -1;
-			
-			private static final int DEFINITE_ROOT = -1;
-			private static final int NOT_ROOT      = Integer.MAX_VALUE;
-			
-			private InstComponentDecl var;
-			private int rootPriority;
-			private Collection<Edge> edges;
-			private Node selectedRoot;
-			
-			public Node(InstComponentDecl var) {
-				this.var = var;
-				rootPriority = NOT_ROOT;
-				edges = new ArrayList<Edge>();
-				selectedRoot = null;
-			}
-			
-			public int compareTo(Node other) {
-				return rootPriority - other.rootPriority;
-			}
-            
-            public String toString() {
-                return var.getFQName().name();
-            }
-			
-			public void addEdge(Edge e) {
-				edges.add(e);
-			}
-			
-			/**
-			 * Check if this node is declared either root or potential root.
-			 */
-			public boolean canBeRoot() {
-				return rootPriority != NOT_ROOT;
-			}
-			
-			/**
-			 * Check if this node was selected as a root during conversion to spanning trees.
-			 * 
-			 * Returns false before conversion.
-			 */
-			public boolean isSelectedRoot() {
-				return level == 0;
-			}
-			
-			/**
-			 * The flattened name of the node, as a String.
-			 */
-			public String flatName() {
-				return var.getFQName().name();
-			}
-			
-			/**
-			 * Mark this node as a potential root with the given priority.
-			 */
-			public void setPotentialRoot(int priority) {
-				if (rootPriority < NOT_ROOT && rootPriority != priority) {
-					// Error - Multiple root definitions of a connector 
-					StringBuilder errorMsg = new StringBuilder();
-					errorMsg.append(MULTIDEF_ERR_MSG);
-					errorMsg.append(ERR_SEP);
-					errorMsg.append("Connector: ");
-					errorMsg.append(this.flatName());
-					var.error(errorMsg.toString());
-				}
-				if (rootPriority > priority)
-					rootPriority = priority;
-			}
-			
-			/**
-			 * Mark this node as a definite root.
-			 */
-			public void setRoot() {
-				setPotentialRoot(DEFINITE_ROOT);
-			}
-			
-			/**
-			 * Calculate the results of isRoot() and rooted() when applied to this node.
-			 */
-			public OpsResult opsResult() {
-				Node other = null;
-				for (Edge e : edges)
-					if (e.isLeft(this) && !e.isBreakable())
-						other = e.other(this);
-				boolean rooted = other != null && level < other.level;
-				return new OpsResult(isSelectedRoot(), rooted);
-			}
-			
-			/** 
-			 * Traversal method for building the spanning trees.
-			 */
-			public void buildTree(Queue<Node> work, ConnectionSetManager csm) {
-				for (Edge e : edges) 
-					if (!e.visited) 
-						buildTreeVisit(e, work, csm);
-			}
-			
-			/** 
-			 * Traversal method for decending into unbreakable subgraphs when building the spanning trees.
-			 */
-			private void buildTreeForUnbreakable(Queue<Node> work, ConnectionSetManager csm) {
-				for (Edge e : edges) 
-					if (!e.visited && !e.isBreakable()) 
-						buildTreeVisit(e, work, csm);
-			}
-			
-			/**
-			 * Visit a specific edge during traversal for building the spanning trees.
-			 */
-			private void buildTreeVisit(Edge e, Queue<Node> work, ConnectionSetManager csm) {
-				e.visited = true;
-				Node n = e.other(this);
-				if (n.visited) {
-					e.breakEdge();
-				} else if (n.selectedRoot != selectedRoot) {
-					if (n.selectedRoot != null && n.selectedRoot.rootPriority == DEFINITE_ROOT)
-						e.breakEdge();
-					else
-						n.selectedRoot = selectedRoot;
-				}
-				n.visited = true;
-				e.connect(csm);
-				if (!e.isBroken()) {
-					n.level = level + 1;
-					work.add(n);
-					n.buildTreeForUnbreakable(work, csm);
-				}
-			}
 
-			/**
-			 * Set the selected root of this subgraph.
-			 * @param root        the selected root node
-			 * @param otherRoots  a collection to add any redundant roots to
-			 * @return true if unbreakable loop found
-			 */
-			public boolean markSelectedRoot(Node root, Collection<Node> otherRoots) {
-				boolean loop = false;
-				visited = true;
-				selectedRoot = root;
-				if (root != this && rootPriority == DEFINITE_ROOT) {
-					// Error - more than one definite root in unbreakable subgraph
-					otherRoots.add(this);
-				}
-				
-				for (Edge e : edges) {
-					if (!e.visited && !e.isBreakable()) {
-						e.visited = true;
-						Node n = e.other(this);
-						if (n.visited) {
-							// Error - unbreakable loop
-							loop = true;
-						}
-						loop = loop || n.markSelectedRoot(root, otherRoots);
-					}
-				}
-				return loop;
-			}
-			
-			/**
-			 * Gathers the subgraph which n is in.
-			 */
-			public void subGraph(ArrayList<Node> sg) {
-				if (visited)
-					return;
-				visited = true;
-				sg.add(this);
-				for (Edge e : edges) {
-					e.other(this).subGraph(sg);
-				}
-			}
-			
-		}
-		
-	}
-	
+        /**
+         * A node in the graph.
+         */
+        private static class Node implements Comparable<Node> {
+
+            /** Visited flag used in traversals. */
+            public boolean visited = false;
+            /** Depth of this node from root of tree. Depth 0 is the root. */
+            public int level = -1;
+
+            private static final int DEFINITE_ROOT = -1;
+            private static final int NOT_ROOT      = Integer.MAX_VALUE;
+
+            private InstComponentDecl var;
+            private String name;
+            private int rootPriority;
+            private Collection<Edge> edges;
+            private Node selectedRoot;
+
+            public Node(InstComponentDecl var, String name) {
+                this.var = var;
+                this.name = name;
+                rootPriority = NOT_ROOT;
+                edges = new ArrayList<Edge>();
+                selectedRoot = null;
+            }
+
+            public int compareTo(Node other) {
+                return rootPriority - other.rootPriority;
+            }
+
+            public String toString() {
+                return name;
+            }
+
+            public void addEdge(Edge e) {
+                edges.add(e);
+            }
+
+            /**
+             * Check if this node is declared either root or potential root.
+             */
+            public boolean canBeRoot() {
+                return rootPriority != NOT_ROOT;
+            }
+
+            /**
+             * Check if this node was selected as a root during conversion to spanning trees.
+             * 
+             * Returns false before conversion.
+             */
+            public boolean isSelectedRoot() {
+                return level == 0;
+            }
+
+            /**
+             * The flattened name of the node, as a String.
+             */
+            public String flatName() {
+                return name;
+            }
+
+            /**
+             * Mark this node as a potential root with the given priority.
+             */
+            public void setPotentialRoot(int priority) {
+                if (rootPriority < NOT_ROOT && rootPriority != priority) {
+                    // Error - Multiple root definitions of a connector 
+                    StringBuilder errorMsg = new StringBuilder();
+                    errorMsg.append(MULTIDEF_ERR_MSG);
+                    errorMsg.append(ERR_SEP);
+                    errorMsg.append("Connector: ");
+                    errorMsg.append(this.flatName());
+                    var.error(errorMsg.toString());
+                }
+                if (rootPriority > priority)
+                    rootPriority = priority;
+            }
+
+            /**
+             * Mark this node as a definite root.
+             */
+            public void setRoot() {
+                setPotentialRoot(DEFINITE_ROOT);
+            }
+
+            /**
+             * Calculate the results of isRoot() and rooted() when applied to this node.
+             */
+            public OpsResult opsResult() {
+                Node other = null;
+                for (Edge e : edges)
+                    if (e.isLeft(this) && !e.isBreakable())
+                        other = e.other(this);
+                boolean rooted = other != null && level < other.level;
+                return new OpsResult(isSelectedRoot(), rooted);
+            }
+
+            /** 
+             * Traversal method for building the spanning trees.
+             */
+            public void buildTree(Queue<Node> work, ConnectionSetManager csm) {
+                for (Edge e : edges) 
+                    if (!e.visited) 
+                        buildTreeVisit(e, work, csm);
+            }
+
+            /** 
+             * Traversal method for decending into unbreakable subgraphs when building the spanning trees.
+             */
+            private void buildTreeForUnbreakable(Queue<Node> work, ConnectionSetManager csm) {
+                for (Edge e : edges) 
+                    if (!e.visited && !e.isBreakable()) 
+                        buildTreeVisit(e, work, csm);
+            }
+
+            /**
+             * Visit a specific edge during traversal for building the spanning trees.
+             */
+            private void buildTreeVisit(Edge e, Queue<Node> work, ConnectionSetManager csm) {
+                e.visited = true;
+                Node n = e.other(this);
+                if (n.visited) {
+                    e.breakEdge();
+                } else if (n.selectedRoot != selectedRoot) {
+                    if (n.selectedRoot != null && n.selectedRoot.rootPriority == DEFINITE_ROOT)
+                        e.breakEdge();
+                    else
+                        n.selectedRoot = selectedRoot;
+                }
+                n.visited = true;
+                e.connect(csm);
+                if (!e.isBroken()) {
+                    n.level = level + 1;
+                    work.add(n);
+                    n.buildTreeForUnbreakable(work, csm);
+                }
+            }
+
+            /**
+             * Set the selected root of this subgraph.
+             * @param root        the selected root node
+             * @param otherRoots  a collection to add any redundant roots to
+             * @return true if unbreakable loop found
+             */
+            public boolean markSelectedRoot(Node root, Collection<Node> otherRoots) {
+                boolean loop = false;
+                visited = true;
+                selectedRoot = root;
+                if (root != this && rootPriority == DEFINITE_ROOT) {
+                    // Error - more than one definite root in unbreakable subgraph
+                    otherRoots.add(this);
+                }
+                
+                for (Edge e : edges) {
+                    if (!e.visited && !e.isBreakable()) {
+                        e.visited = true;
+                        Node n = e.other(this);
+                        if (n.visited) {
+                            // Error - unbreakable loop
+                            loop = true;
+                        }
+                        loop = loop || n.markSelectedRoot(root, otherRoots);
+                    }
+                }
+                return loop;
+            }
+
+            /**
+             * Gathers the subgraph which n is in.
+             */
+            public void subGraph(ArrayList<Node> sg) {
+                if (visited)
+                    return;
+                visited = true;
+                sg.add(this);
+                for (Edge e : edges) {
+                    e.other(this).subGraph(sg);
+                }
+            }
+
+        }
+
+    }
+
 }
 
 aspect ExpandableConnectors {
