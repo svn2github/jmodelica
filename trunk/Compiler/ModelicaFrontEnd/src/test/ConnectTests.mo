@@ -2637,4 +2637,35 @@ end ConnectTests.ConditionalNoErrTest6;
 ")})));
 end ConditionalNoErrTest6;
 
+
+model ConditionalConnectInIf1
+    connector C
+        Real c;
+    end C;
+    
+    parameter Boolean use_x = false;
+    input C x if use_x;
+    C y;
+equation 
+    if use_x then
+        connect(x,y);
+    else
+        y.c = 1;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConditionalConnectInIf1",
+            description="Check that if equations with if branch that becomes empty in flattening are flattened correctly",
+            variability_propagation=false,
+            flatModel="
+fclass ConnectTests.ConditionalConnectInIf1
+ parameter Boolean use_x = false /* false */;
+ Real y.c;
+equation
+ y.c = 1;
+end ConnectTests.ConditionalConnectInIf1;
+")})));
+end ConditionalConnectInIf1;
+
 end ConnectTests;

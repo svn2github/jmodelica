@@ -1397,32 +1397,33 @@ aspect FlatExpressions {
 		return new FForClauseE(forIndex, eqns);
 	}
 
-	public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
-		FIfWhenElseEquation res = createEmptyNode();
-		res.setType((FEquationType) getType().fullCopy());
-		res.eliminateOnParamTest = eliminateOnParamTest;
-		for (FAbstractEquation ae : getFAbstractEquations()) {
-			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
-			if (feqn != null)
-				res.addFAbstractEquation(feqn);
-		}
-		if (res.getNumFAbstractEquation() == 0)
-			return null;
-		return res;
-	}
+    public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
+        FIfWhenElseEquation res = createEmptyNode();
+        res.setType((FEquationType) getType().fullCopy());
+        res.eliminateOnParamTest = eliminateOnParamTest;
+        for (FAbstractEquation ae : getFAbstractEquations()) {
+            FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
+            if (feqn != null)
+                res.addFAbstractEquation(feqn);
+        }
+        flattenIfWhenTo(res, prefix, fc);
+        return res.isEmpty() ? null : res;
+    }
 
-	public FIfWhenEquation FIfWhenEquation.flattenEqn(FQName prefix, FClass fc) {
-		FIfWhenEquation res = (FIfWhenEquation) super.flattenEqn(prefix, fc);
-		if (res == null)
-			return null;
-		if (hasElse()) {
-			FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
-			if (elseRes != null)
-				res.setElse(elseRes);
-		}
-		res.setTest(getTest().flatten(prefix));
-		return res;
-	}
+    public void FIfWhenElseEquation.flattenIfWhenTo(FIfWhenElseEquation res, FQName prefix, FClass fc) {}
+
+    public void FIfWhenEquation.flattenIfWhenTo(FIfWhenElseEquation res, FQName prefix, FClass fc) {
+        FIfWhenEquation ifWhen = (FIfWhenEquation) res;
+        if (hasElse()) {
+            FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
+            if (elseRes != null)
+                ifWhen.setElse(elseRes);
+        }
+        ifWhen.setTest(getTest().flatten(prefix));
+    }
+
+    syn boolean FIfWhenElseEquation.isEmpty() = getNumFAbstractEquation() == 0;
+    eq FIfWhenEquation.isEmpty()              = super.isEmpty() && (!hasElse() || getElse().isEmpty());
 
 	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
 		return null;
