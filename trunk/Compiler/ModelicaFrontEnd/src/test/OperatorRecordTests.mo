@@ -3154,5 +3154,66 @@ end OperatorRecordTests.OperatorLimitations39;
     end OperatorLimitations39;
 
 
+    model BuildArrayInInst1
+        function f
+            input Integer n;
+            output Cplx[n] y;
+        algorithm
+            y := { Cplx(i) for i in 1:n };
+        end f;
+        
+        parameter Integer n = 3;
+        Cplx[n] x;
+    equation
+        x = f(n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="BuildArrayInInst1",
+            description="Test of literal expressions for records built from constant evaluation in instance tree",
+            flatModel="
+fclass OperatorRecordTests.BuildArrayInInst1
+ parameter Integer n = 3 /* 3 */;
+ OperatorRecordTests.Cplx x[3];
+equation
+ x[1:3] = {OperatorRecordTests.Cplx.'*'.mul(OperatorRecordTests.Cplx(1, 0), OperatorRecordTests.Cplx.'constructor'(time, 0)), OperatorRecordTests.Cplx.'*'.mul(OperatorRecordTests.Cplx(2, 0), OperatorRecordTests.Cplx.'constructor'(time, 0)), OperatorRecordTests.Cplx.'*'.mul(OperatorRecordTests.Cplx(3, 0), OperatorRecordTests.Cplx.'constructor'(time, 0))};
+
+public
+ function OperatorRecordTests.BuildArrayInInst1.f
+  input Integer n;
+  output OperatorRecordTests.Cplx[n] y;
+ algorithm
+  y := {OperatorRecordTests.Cplx.'constructor'(i, 0) for i in 1:n};
+  return;
+ end OperatorRecordTests.BuildArrayInInst1.f;
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'*'.mul
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  return;
+ end OperatorRecordTests.Cplx.'*'.mul;
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.BuildArrayInInst1;
+")})));
+    end BuildArrayInInst1;
+
 
 end OperatorRecordTests;

@@ -214,17 +214,25 @@ aspect ConstantEvaluation {
         public double maxValue() {
             throw new ConstantEvaluationException(this, "get max value of "); 
         }
-        
-	    /**
-	     * \brief Create a literal AST node from constant, default 
-	     *  implementation.
-	     *  
-	     *  @return Literal expression AST node.
-	     */
-	    public FExp buildLiteral() { 
-	    	throw new ConstantEvaluationException(this, "create literal expression from "); 
-	    }
-	    
+
+        /**
+         * Create a literal AST node from constant, for use in flat tree.
+         * 
+         * @return  literal expression AST node
+         */
+        public FExp buildLiteral() { 
+            throw new ConstantEvaluationException(this, "create literal expression from "); 
+        }
+
+        /**
+         * Create a literal AST node from constant, for use in instance tree.
+         * 
+         * @return  literal expression AST node
+         */
+        public FExp buildInstLiteral() { 
+            return buildLiteral(); 
+        }
+
 	    /**
 	     * \brief Convert to CValueInteger, default implementation.
 	     */
@@ -743,15 +751,15 @@ aspect ConstantEvaluation {
         public String stringValue() { 
         	return Boolean.toString(value); 
         }
-        
+
         /**
          * \brief Create a new literal expression AST node.
          * 
          * @return FBooleanLitExp AST node.
          */
         public FLitExp buildLiteral() { 
-      	  return FBooleanLitExp.create(value); 
-      	  }
+            return FBooleanLitExp.create(value); 
+        }
 
         @Override
         public boolean isBoolean() {
@@ -1165,29 +1173,38 @@ aspect ConstantEvaluation {
 				buf.append(it.next());
 			}
 		}
-	    
-	    /**
-	     * \brief Create a literal AST node from constant.
-	     *  
-	     *  @return FArray AST node containing literal expression nodes.
-	     */
-	    public FExp buildLiteral() { 
-	    	return buildLiteralRec(iterator(), 0);
-	    }
-	    
-	    private FExp buildLiteralRec(Iterator<CValue> it, int dim) {
-			if (dim < indices.ndims()) {
-				FArray arr = new FArray();
-				int n = indices.size().get(dim);
-				dim++;
-				for (int i = 0; i < n; i++) 
-					arr.addFExp(buildLiteralRec(it, dim));
-				return arr;
-			} else {
-				return it.next().buildLiteral();
-			}
-	    }
-		
+
+        /**
+         * Create a literal AST node from constant, for use in flat tree.
+         * 
+         * @return FArray AST node containing literal expression nodes.
+         */
+        public FExp buildLiteral() { 
+            return buildLiteralRec(iterator(), 0, true);
+        }
+
+        /**
+         * Create a literal AST node from constant, for use in instance tree.
+         * 
+         * @return FArray AST node containing literal expression nodes.
+         */
+        public FExp buildInstLiteral() { 
+            return buildLiteralRec(iterator(), 0, false);
+        }
+
+        private FExp buildLiteralRec(Iterator<CValue> it, int dim, boolean flat) {
+            if (dim < indices.ndims()) {
+                FArray arr = new FArray();
+                int n = indices.size().get(dim);
+                dim++;
+                for (int i = 0; i < n; i++) 
+                    arr.addFExp(buildLiteralRec(it, dim, flat));
+                return arr;
+            } else {
+                return flat ? it.next().buildLiteral() : it.next().buildInstLiteral();
+            }
+        }
+
 	    /**
 	     * \brief An iterator that iterates over all cells in the array.
 	     * 
@@ -1329,21 +1346,36 @@ aspect ConstantEvaluation {
         	buf.append(')');
         	return buf.toString();
         }
-	    
-	    /**
-	     * \brief Create a literal AST node from constant.
-	     *  
-	     *  @return FRecordConstructor AST node containing literal expression nodes.
-	     */
-	    public FExp buildLiteral() { 
-	    	FRecordConstructor res = new FRecordConstructor(name);
-	    	for (CValue val : values)
-	    		res.addArg(val.buildLiteral());
-	    	return res;
-	    }
-    	
+
+        /**
+         * Create a literal AST node from constant, for use in flat tree.
+         * 
+         * @return FArray AST node containing literal expression nodes.
+         */
+        public FExp buildLiteral() { 
+            FRecordConstructor res = new FRecordConstructor(name);
+            for (CValue val : values)
+                res.addArg(val.buildLiteral());
+            return res;
+        }
+
+        /**
+         * Create a literal AST node from constant, for use in instance tree.
+         * 
+         * @return FArray AST node containing literal expression nodes.
+         */
+        public FExp buildInstLiteral() { 
+            InstAccess rec = new InstGlobalAccess(InstAccess.fromName(name));
+            InstRecordConstructor res = new InstRecordConstructor(rec, new List());
+            int i = 1;
+            for (CValue val : values)
+                res.addArg(new InstPositionalArgument(i++, val.buildInstLiteral()));
+            return res;
+        }
+
     }
-    
+
+
     public class CValueExternalObject extends CValue {
         protected CValue[] values;
         public CValueExternalObject(CValue[] values) {

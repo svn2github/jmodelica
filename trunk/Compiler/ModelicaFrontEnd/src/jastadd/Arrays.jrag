@@ -1992,25 +1992,25 @@ aspect Arrays {
 	    else
 	        getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
-	
-	eq InstFunctionCall.getArray() {
-	      if (variability().structuralOrLess()) {
-	          Array arr = new Array(indices());
-	          CValueArray carr = (CValueArray) cevalArray(Index.NULL);
-	          for (Index i : arr.indices()) {
-	              arr.set(i, carr.getCell(i).buildLiteral());
-	          }
-	          return arr;
-	      }
-	      return super.getArray();
-	}
-	
-	eq FFunctionCall.getArray() {
-		FClass fc = myFClass();
-		if (!isArray() || fc == null)
-			return super.getArray();
-		
-		if (variability().structuralOrLess() && inKeptBExp()) {
+
+    eq InstFunctionCall.getArray() {
+        if (variability().structuralOrLess()) {
+            Array arr = new Array(indices());
+            CValueArray carr = (CValueArray) cevalArray(Index.NULL);
+            for (Index i : arr.indices()) {
+                arr.set(i, carr.getCell(i).buildInstLiteral());
+            }
+            return arr;
+        }
+        return super.getArray();
+    }
+
+    eq FFunctionCall.getArray() {
+        FClass fc = myFClass();
+        if (!isArray() || fc == null)
+            return super.getArray();
+        
+        if (variability().structuralOrLess() && inKeptBExp()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
@@ -2018,17 +2018,17 @@ aspect Arrays {
             }
             return arr;
         }
-		
-		FArraySubscripts fas = collectIterExpSubscripts();
-		Array arr = new Array(indices());
-		for (Index i : arr.indices()) {
-			FArraySubscripts fas2 = fas.fullCopy();
-			fas2.addFSubscripts(i);
-			arr.set(i, new FIdUseExp(tempVarName(), fas2));
-		}
-		return arr;
-	}
-	
+        
+        FArraySubscripts fas = collectIterExpSubscripts();
+        Array arr = new Array(indices());
+        for (Index i : arr.indices()) {
+            FArraySubscripts fas2 = fas.fullCopy();
+            fas2.addFSubscripts(i);
+            arr.set(i, new FIdUseExp(tempVarName(), fas2));
+        }
+        return arr;
+    }
+
 	/**
 	 * Collect an FArraySubscriptss for the indexes of surrounding iteration expressions, 
 	 * to use in getArray() for children.
