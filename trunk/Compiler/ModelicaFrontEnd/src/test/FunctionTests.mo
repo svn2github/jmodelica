@@ -12733,7 +12733,6 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear3
  constant Real x = 0;
  constant Real y = 0;
  Real sa;
- Real sb;
  parameter Real p1(fixed = false);
  parameter Real p2 = 2 /* 2 */;
  discrete Real r1;
@@ -12746,12 +12745,10 @@ initial equation
  pre(temp_1) = false;
 equation
  sa = time;
- sa = sb;
  temp_1 = time > 1;
  r1 = if temp_1 and not pre(temp_1) then 2 else pre(r1);
  r2 = if temp_1 and not pre(temp_1) then 2 else pre(r2);
 end FunctionTests.FunctionLike.Special.SemiLinear3;
-			
 ")})));
 end SemiLinear3;
 
@@ -12780,23 +12777,14 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear4
  Real y;
  Real sa;
  Real sb;
- Real s[1];
  Real s[2];
- Real s[3];
- Real s[4];
- Real s[5];
 equation
  sa = time;
  sb = time;
  x = time;
- s[1] = if x >= 0 then sa else sb;
- s[2] = s[1];
- s[3] = s[2];
- s[4] = s[3];
- s[5] = s[4];
+ s[2] = if x >= 0 then sa else sb;
  y = if x >= 0.0 then x * sa else x * sb;
 end FunctionTests.FunctionLike.Special.SemiLinear4;
-			
 ")})));
 end SemiLinear4;
 
@@ -12825,20 +12813,16 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear5
  Real y;
  Real sa;
  Real sb;
- Real s[1];
  Real s[2];
  Real s[3];
- Real s[4];
  Real s[5];
 equation
  sa = time;
  sb = time;
  x = time;
- s[4] = if x >= 0 then s[3] else sb;
- s[5] = s[4];
+ s[5] = if x >= 0 then s[3] else sb;
  y = - (if x >= 0.0 then x * s[3] else x * sb);
- s[1] = if x >= 0 then sa else s[3];
- s[2] = s[1];
+ s[2] = if x >= 0 then sa else s[3];
  y = if x >= 0.0 then x * sa else x * s[3];
 end FunctionTests.FunctionLike.Special.SemiLinear5;
 ")})));

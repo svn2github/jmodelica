@@ -4541,11 +4541,11 @@ model RecordParam3
 			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordParam3
- parameter Real temp_1[1];
- parameter Real temp_1[2];
  Real a1.y;
  parameter Real a1.x[1];
  parameter Real a1.x[2];
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
 parameter equation
  ({temp_1[1], temp_1[2]}) = RecordTests.RecordParam3.f(1);
  a1.x[1] = temp_1[1];
@@ -4646,10 +4646,6 @@ model RecordParam6
 			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordParam6
- parameter Real temp_1[1];
- parameter Real temp_1[2];
- parameter Real temp_2[1];
- parameter Real temp_2[2];
  parameter Real a1.x[1];
  parameter Real a1.x[2];
  parameter Real a2.x[1];
@@ -4658,6 +4654,10 @@ fclass RecordTests.RecordParam6
  parameter Real a1.y[2];
  parameter Real a2.y[1];
  parameter Real a2.y[2];
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ parameter Real temp_2[1];
+ parameter Real temp_2[2];
 parameter equation
  ({temp_1[1], temp_1[2]}) = RecordTests.RecordParam6.f();
  ({temp_2[1], temp_2[2]}) = RecordTests.RecordParam6.f();
