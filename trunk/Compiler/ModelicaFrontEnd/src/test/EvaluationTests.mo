@@ -1626,4 +1626,42 @@ end EvaluationTests.ConstantInRecord1;
 ")})));
 end ConstantInRecord1;
 
+
+model ShortClassWithInstanceNameHelper
+    model A
+        constant String b = getInstanceName();
+    end A;
+    
+    A a;
+    parameter Real c = 1;
+end ShortClassWithInstanceNameHelper;
+
+
+// TODO: this test gives the wrong value (may not be able to fix that in a reasonable way, since simple short class decl is only a pointer)
+model ShortClassWithInstanceName1 = ShortClassWithInstanceNameHelper
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ShortClassWithInstanceName1",
+            description="Check that getInstaneName() works correctly for short class declarations",
+            flatModel="
+fclass EvaluationTests.ShortClassWithInstanceName1
+ constant String a.b = \"ShortClassWithInstanceNameHelper.a\";
+ parameter Real c = 1 /* 1 */;
+end EvaluationTests.ShortClassWithInstanceName1;
+")})));
+
+
+model ShortClassWithInstanceName2 = ShortClassWithInstanceNameHelper(c = 2)
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ShortClassWithInstanceName2",
+            description="Check that getInstaneName() works correctly for short class declarations",
+            flatModel="
+fclass EvaluationTests.ShortClassWithInstanceName2
+ constant String a.b = \"ShortClassWithInstanceName2.a\";
+ parameter Real c = 2 /* 2 */;
+end EvaluationTests.ShortClassWithInstanceName2;
+")})));
+
+
 end EvaluationTests;

@@ -823,14 +823,16 @@ aspect InstBindingType {
     eq InstClassDecl.getInstExtends().findInheritingNode()     = this;
     eq InstComponentDecl.getInstExtends().findInheritingNode() = this;
     eq Root.getChild().findInheritingNode()                    = null;
-    
+
     /**
      * Find the surrounding class, if any.
      */
     inh InstClassDecl InstNode.surroundingInstClass();
+    inh InstClassDecl InstExternal.surroundingInstClass();
+    inh InstClassDecl FGetInstanceName.surroundingInstClass();
     eq InstClassDecl.getChild().surroundingInstClass() = this;
     eq Root.getChild().surroundingInstClass()          = null;
-    
+
     /**
      * Is this a member of an array component?
      */

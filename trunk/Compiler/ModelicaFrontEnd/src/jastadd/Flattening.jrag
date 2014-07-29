@@ -2115,12 +2115,8 @@ aspect FlatExpressions {
     }
     public FSemiLinearExp FSemiLinearExp.flatten(FQName prefix)   { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
     public FDelayExp      FDelayExp.flatten(FQName prefix)        { return new FDelayExp(getFExp().flatten(prefix), getDelay().flatten(prefix), hasMax() ? new Opt(getMax().flatten(prefix)) : new Opt()); }
-    public FExp           FGetInstanceName.flatten(FQName prefix) { return new FStringLitExp(myInstBaseClassDecl().name() + "." + prefix.name()); }
-	
-	inh InstFullClassDecl ASTNode.myInstBaseClassDecl();
-	eq Root.getChild().myInstBaseClassDecl() = null;
-	eq InstFullClassDecl.getChild().myInstBaseClassDecl() = this;
-	
+    public FExp           FGetInstanceName.flatten(FQName prefix) { return new FStringLitExp(surroundingInstClass().name() + "." + prefix.name()); }
+
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	
 	public FCross        FCross.flatten(FQName prefix)        { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }

@@ -2818,7 +2818,8 @@ aspect ComponentDeclMethods {
      * Check if this component is a functional input argument
      */
     syn boolean InstComponentDecl.isFunctionalArg() = false;
-    eq InstComposite.isFunctionalArg() = isInput() && myInstBaseClassDecl().isFunction() && myInstClass().isFunction();
+    eq InstComposite.isFunctionalArg()              = 
+        isInput() && inFunction() && surroundingInstClass().isFunction() && myInstClass().isFunction();
 }
 
 aspect ShortClassUtil {
