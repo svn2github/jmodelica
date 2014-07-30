@@ -1722,6 +1722,11 @@ aspect ConstantEvaluation {
 
     eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
 
+    eq FSubscriptedExp.cevalCalc() {
+        Index i = getFArraySubscripts().createIndex();
+        return getFExp().ceval(i).array().getCell(i);
+    }
+
     // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
     eq FCardinality.cevalCalc() = new CValueInteger(1);
 

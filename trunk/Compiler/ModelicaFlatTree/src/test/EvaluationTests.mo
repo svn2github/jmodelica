@@ -1664,4 +1664,43 @@ end EvaluationTests.ShortClassWithInstanceName2;
 ")})));
 
 
+model FuncInArrayExpEval1
+    function f
+        input Real x;
+        output Real[2] y;
+    algorithm
+        y := {x, x - 1};
+    end f;
+    
+    parameter Real[2] a = {1, 2};
+    parameter Real[2] b = a + f(m);
+    parameter Integer n = integer(b[1]);
+	parameter Integer m = 2;
+    Real x[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FuncInArrayExpEval1",
+            description="Constant evaluation of array binary expression containing function call returning array",
+            variability_propagation=false,
+            flatModel="
+fclass EvaluationTests.FuncInArrayExpEval1
+ parameter Real a[1] = 1 /* 1 */;
+ parameter Real a[2] = 2 /* 2 */;
+ parameter Real b[1] = 3.0 /* 3.0 */;
+ parameter Real b[2] = 3.0 /* 3.0 */;
+ parameter Integer n = 3 /* 3 */;
+ parameter Integer m = 2 /* 2 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = time;
+ x[2] = 2 * time;
+ x[3] = 3 * time;
+end EvaluationTests.FuncInArrayExpEval1;
+")})));
+end FuncInArrayExpEval1;
+
+
 end EvaluationTests;

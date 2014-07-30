@@ -1536,16 +1536,26 @@ aspect Arrays {
 		return list;
 	}
 
-	/**
-	 * \brief Computes an Array where all elements are scalar expressions.
-	 * 
-	 * This is used mainly to scalarize array expressions.
-	 * 
-	 * @return An Array with scalar expressions if this is an array expression, 
-	 *          a ScalarAsArray containing <code>this</code> otherwise.
-	 */
-	syn lazy Array FExp.getArray() = new ScalarAsArray(this);
-	
+    /**
+     * Computes a generic array expansion of the expression.
+     * 
+     * This is used mainly to scalarize array expressions. Should be overridden for all 
+     * expression types possible, since default implementation clones the original expression 
+     * for each cell.
+     * 
+     * @return An Array with scalar expressions if this is an array expression, 
+     *          a ScalarAsArray containing <code>this</code> otherwise.
+     */
+    syn lazy Array FExp.getArray() {
+        if (!isArray())
+            return new ScalarAsArray(this);
+        
+        Array res = new Array(indices());
+        for (Index i : res.indices())
+            res.set(i, new FSubscriptedExp(unboundCopy(), i.createFArraySubscripts()));
+        return res;
+    }
+
 	/**
 	 * \brief Allows for more efficient execution of {@link getArray()} in some cases.
 	 * 
