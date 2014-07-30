@@ -4,7 +4,7 @@
  * timed variability if it is composed of parameters, literals and timed
  * variables but no continuous or discrete variables.
  */
-aspect OptimicaFlatVariability {
+aspect OptimicaVariability {
 
 	syn boolean FTypePrefixVariability.timedVariability() = false;
 	eq FTimed.timedVariability() = true;	
@@ -44,13 +44,13 @@ aspect OptimicaFlatVariability {
 	// consequence.
     syn boolean FVariable.isOptParameter() = variability().optParameterVariability();
 	
-	// TODO: Change to be more in line with FlatVariability and more extensible
-	refine FlatVariability eq FVariable.variability() {
-		FTypePrefixVariability var = FlatVariability.FVariable.variability();
+	// TODO: Change to be more in line with Variability and more extensible
+	refine Variability eq FVariable.variability() {
+		FTypePrefixVariability var = Variability.FVariable.variability();
 		return (var.parameterVariability() && freeAttribute()) ? fOptParameter() : var;
 	}
 	
-	refine FlatVariability eq FExp.isParameterExp() = 
+	refine Variability eq FExp.isParameterExp() = 
 		variability().parameterVariability() || variability().optParameterVariability(); 
 	
    	eq FTimed.toString() = "timed";

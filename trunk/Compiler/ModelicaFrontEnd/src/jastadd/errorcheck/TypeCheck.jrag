@@ -1106,7 +1106,7 @@ aspect FlatTypeCheck {
   
 }
 
-aspect FlatVariabilityCheck {
+aspect VariabilityCheck {
     
     private FExp FPreExp.instanceTreeSource = null;
     private FExp FReinit.instanceTreeSource = null;

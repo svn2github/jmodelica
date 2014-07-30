@@ -1,0 +1,535 @@
+/*
+    Copyright (C) 2014 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.TreeSet;
+import java.util.Set;
+import java.util.HashSet;
+
+
+aspect InstTypeAnalysis {
+
+    syn FType InstComponentModification.type() {
+        if (getName().myInstComponentDecl().isAssignable()) {
+            InstAssignable ip = ((InstAssignable)getName().myInstComponentDecl());
+            return ip.type();
+        } else {
+            return fUnknownType();
+        }
+    }
+
+    syn lazy FType InstAssignable.type();
+
+    eq InstPrimitive.type() {
+        FType scalar = primitiveScalarType();
+        return isArray() ? scalar.arrayType(size()) : scalar;
+    }
+    eq InstExternalObject.type() = getType();
+
+    /**
+     * The scalar type of this class or component, if it is a primitive type, otherwise the unknown type.
+     */
+    syn FType InstNode.primitiveScalarType() {
+        if (isReal()) 
+            return fRealScalarType();
+        else if (isInteger()) 
+            return fIntegerScalarType();
+        else if (isBoolean()) 
+            return fBooleanScalarType();
+        else if (isString()) 
+            return fStringScalarType();
+        else if (isExternalObject())
+            return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FIdUse("ExternalObject.constructor"), new FIdUse("ExternalObject.destructor"));
+        return fUnknownType();
+    }
+    eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
+    eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
+    eq InstExternalObject.primitiveScalarType() = myInstClass().enumType();
+
+    syn nta FType InstExternalObject.getType() {
+        FIdUseInstAccess con = new FIdUseInstAccess(InstAccess.fromName(myConstructor().qualifiedName()));
+        FIdUseInstAccess de  = new FIdUseInstAccess(InstAccess.fromName(myDestructor().qualifiedName()));
+        return new FExternalObjectType(size(), getClassName().myInstClassDecl().qualifiedName(), con, de);
+    }
+
+
+    eq InstRecord.type() {
+        InstComponentDecl root = this;
+        for (int i = 0; i < ndims(); i++) {
+            if (root.getNumInstComponentDecl() == 0)
+                return myInstClass().recordType().sizedType(size());
+            root = root.getInstComponentDecl(0);
+        }
+        FRecordType type = myInstClass().createEmptyFRecordType(size());
+        for (InstComponentDecl icd : root.allInstComponentDecls()) 
+            type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
+        return type;
+    }
+
+    syn lazy FRecordType InstClassDecl.recordType() {
+        FRecordType type = createEmptyFRecordType(Size.SCALAR);
+        for (InstComponentDecl icd : allInstComponentDecls()) 
+            type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
+        return type;
+    }
+
+    syn FRecordType InstClassDecl.createEmptyFRecordType(Size s) = null;
+    eq InstBaseClassDecl.createEmptyFRecordType(Size s)          = 
+        getInstRestriction().createEmptyFRecordType(s);
+
+    syn FRecordType InstRestriction.createEmptyFRecordType(Size s) = null;
+    eq InstMRecord.createEmptyFRecordType(Size s)                  = 
+        new FRecordType(s, myInstClassDecl().qualifiedName(), new List(), null);
+    eq InstOperatorRecord.createEmptyFRecordType(Size s)           = 
+        new FOperatorRecordType(s, myInstClassDecl().baseClassName(), new List(), null, operatorMap());
+    eq InstConnector.createEmptyFRecordType(Size s)                = 
+        (inheritedRestriction() != null) ? inheritedRestriction().createEmptyFRecordType(s) : super.createEmptyFRecordType(s);
+
+
+    eq InstEnum.type()        = myInstClass().enumType().sizedType(size());
+    eq InstEnumLiteral.type() = myInstEnumClassDecl().enumType();
+
+    syn FType InstClassDecl.enumType() {
+        FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
+        for (InstEnumLiteral el : enumLiterals()) 
+            type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
+        return type;
+    }
+
+
+    eq InstRecordConstructor.type() = getRecord().recordType();
+
+    eq FIdUseInstAccess.recordType()        = getInstAccess().recordType();
+    syn FRecordType InstAccess.recordType() = myInstClassDecl().recordType();
+
+    eq FInstAccessExp.type()   = getInstAccess().type();
+    eq FIdUseInstAccess.type() = getInstAccess().type();
+
+    syn lazy FType InstComponentDecl.type() = fUnknownType();
+
+    eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
+
+
+    syn boolean InstNode.isReal()           = false;
+    syn boolean InstNode.isInteger()        = false;
+    syn boolean InstNode.isBoolean()        = false;
+    syn boolean InstNode.isString()         = false;
+    syn boolean InstNode.isEnum()           = false;
+    syn boolean InstNode.isExternalObject() = false;
+
+    eq InstPrimitive.isReal()           = myInstClass().isReal();
+    eq InstPrimitive.isInteger()        = myInstClass().isInteger();
+    eq InstPrimitive.isBoolean()        = myInstClass().isBoolean();
+    eq InstPrimitive.isString()         = myInstClass().isString();
+    eq InstEnum.isEnum()                = true;
+    eq InstPrimitive.isExternalObject() = myInstClass().isExternalObject();
+
+    eq InstClassDecl.isReal()    = finalClass().primitiveName().equals("Real");
+    eq InstClassDecl.isInteger() = finalClass().primitiveName().equals("Integer");
+    eq InstClassDecl.isBoolean() = finalClass().primitiveName().equals("Boolean");
+    eq InstClassDecl.isString()  = finalClass().primitiveName().equals("String");
+    eq InstClassDecl.isEnum()    = extendsEnum();
+
+    eq InstBuiltIn.isReal() = 
+        myInstClass().finalClass().primitiveName().equals("RealType");
+    eq InstBuiltIn.isInteger() = 
+        myInstClass().finalClass().primitiveName().equals("IntegerType");
+    eq InstBuiltIn.isBoolean() = 
+        myInstClass().finalClass().primitiveName().equals("BooleanType");
+    eq InstBuiltIn.isString() = 
+        myInstClass().finalClass().primitiveName().equals("StringType");
+
+}
+
+
+aspect InstBindingType {
+
+    /**
+     * \brief Returns the type the binding expression should have.
+     */
+    syn FType InstAssignable.bindingType() {
+        InstNode decl = myInstValueMod().myInstNode();
+        if (myBindingExpHasEach() || decl == this) {
+            return type();
+        } else {
+            if (!decl.isClassDecl())
+                decl = commonAncestor(decl);
+            return expandBindingType(type(), decl);
+        }
+    }
+
+    /**
+     * Constructs the size a specific attribute to this instance tree node should have. 
+     * 
+     * Default is <code>null</code>, so override is necessary for all InstNode 
+     * subclasses that needs this check.
+     */
+    syn Size InstNode.attributeSize(InstComponentModification icm) = null;
+
+    /**
+     * Constructs the size a specific attribute to this instance tree node should have. 
+     */
+    eq InstAssignable.attributeSize(InstComponentModification icm) {
+        InstNode decl = icm.myInstNode();
+        if (decl == this)
+            return size();
+        else if (icm.getEach()) 
+            return Size.SCALAR;
+        else if (decl == myInstClass())
+            return decl.size();
+        else
+            return expandBindingSize(size(), decl);
+    }
+
+    /**
+     * Add array dimensions for surrounding InstArrayComponentDecls to size for binding expression.
+     */
+    inh Size InstNode.expandBindingSize(Size size, InstNode node);
+    eq InstClassDecl.getChild().expandBindingSize(Size size, InstNode node)          = size;
+    eq InstRoot.getChild().expandBindingSize(Size size, InstNode node)               = size;
+    eq Root.getChild().expandBindingSize(Size size, InstNode node)                   = size;
+    eq InstArrayComponentDecl.getChild().expandBindingSize(Size size, InstNode node) = 
+        expandBindingSize(size.expand(myDimensionLength()), node);
+    eq InstNode.getChild().expandBindingSize(Size size, InstNode node)               = 
+        isMeOrMyClass(node) ? size : expandBindingSize(size, node);
+
+    /**
+     * Add array dimensions for surrounding InstArrayComponentDecls to type for binding expression.
+     */
+    syn FType InstNode.expandBindingType(FType type, InstNode node) = 
+        type.sizedType(expandBindingSize(type.size(), node));
+
+    /**
+     * Check if node is the same as this or the class of this component (if this is a component).
+     */
+    syn boolean InstNode.isMeOrMyClass(InstNode node) = node == this;
+    eq InstClassDecl.isMeOrMyClass(InstNode node)     = node.inheritingNode() == this;
+    eq InstComponentDecl.isMeOrMyClass(InstNode node) {
+        InstNode inherit = node.inheritingNode();
+        return inherit == this || inherit == myInstClass();
+    }
+
+    /**
+     * If this is an extends, get the surrounding class or component, otherwise return this.
+     */
+    syn InstNode InstNode.inheritingNode() = this;
+    eq InstExtends.inheritingNode()        = findInheritingNode();
+
+    /**
+     * Find the surrounding class or component.
+     */
+    inh InstNode InstExtends.findInheritingNode();
+    eq InstClassDecl.getInstExtends().findInheritingNode()     = this;
+    eq InstComponentDecl.getInstExtends().findInheritingNode() = this;
+    eq Root.getChild().findInheritingNode()                    = null;
+
+    /**
+     * Find the surrounding class, if any.
+     */
+    inh InstClassDecl InstNode.surroundingInstClass();
+    inh InstClassDecl InstExternal.surroundingInstClass();
+    inh InstClassDecl FGetInstanceName.surroundingInstClass();
+    eq InstClassDecl.getChild().surroundingInstClass() = this;
+    eq Root.getChild().surroundingInstClass()          = null;
+
+    /**
+     * Is this a member of an array component?
+     */
+    inh boolean InstAssignable.inArrayComponent();
+    eq InstClassDecl.getChild().inArrayComponent()          = false;
+    eq InstRoot.getChild().inArrayComponent()               = false;
+    eq FlatRoot.getChild().inArrayComponent()               = false;
+    eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+    syn boolean InstNode.inArrayComponent()                 = false;
+
+}
+
+
+aspect ClassRestriction {
+
+    /**
+     * Is this class partial?
+     */
+    syn boolean ClassDecl.isPartial() = false;
+    eq BaseClassDecl.isPartial()      = hasPartial();
+
+    /**
+     * Is this class encapsulated?
+     */
+    syn boolean ClassDecl.isEncapsulated() = false;
+    eq BaseClassDecl.isEncapsulated()      = hasEncapsulated();
+
+    /**
+     * Is this class a model?
+     */
+    syn boolean ClassDecl.isModel() = false;
+    eq BaseClassDecl.isModel()      = getRestriction().isModel();
+
+    /**
+     * Is this restriction "model"?
+     */
+    syn boolean Restriction.isModel() = false;
+    eq Model.isModel()                = true;
+
+    /**
+     * Is this class a block?
+     */
+    syn boolean ClassDecl.isBlock() = false;
+    eq BaseClassDecl.isBlock()      = getRestriction().isBlock();
+
+    /**
+     * Is this restriction "block"?
+     */
+    syn boolean Restriction.isBlock() = false;
+    eq Block.isBlock()                = true;
+
+    /**
+     * Is this class a class?
+     */
+    syn boolean ClassDecl.isClass() = false;
+    eq BaseClassDecl.isClass()      = getRestriction().isClass();
+
+    /**
+     * Is this restriction "class"?
+     */
+    syn boolean Restriction.isClass() = false;
+    eq MClass.isClass()               = true;
+
+    /**
+     * Is this class a package?
+     */
+    syn boolean ClassDecl.isPackage() = false;
+    eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
+    eq UnknownClassDecl.isPackage()   = false;
+
+    /**
+     * Is this restriction "package"?
+     */
+    syn boolean Restriction.isPackage() = false;
+    eq MPackage.isPackage()             = true;
+
+}
+
+
+aspect InstClassRestriction {
+
+    /**
+     * Is this class partial?
+     */
+    syn boolean InstClassDecl.isPartial() = getClassDecl().isPartial();
+
+    /**
+     * Is this class encapsulated?
+     */
+    syn boolean InstClassDecl.isEncapsulated() = getClassDecl().isEncapsulated();
+
+    /**
+     * Is this class a connector?
+     */
+    syn boolean InstClassDecl.isConnector() = false;
+    eq InstBaseClassDecl.isConnector()      = getInstRestriction().isConnector();
+    eq UnknownInstClassDecl.isConnector()   = false;
+
+    /**
+     * Is this restriction "connector"?
+     */
+    syn boolean InstRestriction.isConnector() = false;
+    eq InstConnector.isConnector() = true;
+
+    /**
+     * Is this component a connector?
+     */
+    syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
+
+    /**
+     * Is this class an expandable connector?
+     */
+    syn boolean InstClassDecl.isExpandableConnector() = false;
+    eq InstBaseClassDecl.isExpandableConnector()      = getInstRestriction().isExpandableConnector();
+    eq UnknownInstClassDecl.isExpandableConnector()   = false;
+
+    /**
+     * Is this restriction "expandable connector"?
+     */
+    syn boolean InstRestriction.isExpandableConnector() = false;
+    eq InstExpandableConnector.isExpandableConnector()  = true;
+
+    /**
+     * Is this component an expandable connector?
+     */
+    syn boolean InstComponentDecl.isExpandableConnector() = myInstClass().isExpandableConnector();
+
+    /**
+     * Is this class an operator record?
+     */
+    syn boolean InstClassDecl.isOperatorRecord() = false;
+    eq InstBaseClassDecl.isOperatorRecord()      = getInstRestriction().isOperatorRecord();
+    eq UnknownInstClassDecl.isOperatorRecord()   = false;
+
+    /**
+     * Is this restriction "operator record"?
+     */
+    syn boolean InstRestriction.isOperatorRecord() = false;
+    eq InstOperatorRecord.isOperatorRecord()       = true;
+    eq InstConnector.isOperatorRecord()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isOperatorRecord() : super.isOperatorRecord();
+
+    /**
+     * Is this component an operator record?
+     */
+    syn boolean InstComponentDecl.isOperatorRecord() = false;
+    eq InstRecord.isOperatorRecord()                 = myInstClass().isOperatorRecord();
+
+    /**
+     * Is this class an operator?
+     */
+    syn boolean InstClassDecl.isOperator() = false;
+    eq InstBaseClassDecl.isOperator()      = getInstRestriction().isOperator();
+    eq UnknownInstClassDecl.isOperator()   = false;
+
+    /**
+     * Is this restriction "operator" or "operator function"?
+     */
+    syn boolean InstRestriction.isOperator() = false;
+    eq InstOperator.isOperator()             = true;
+    eq InstOperatorFunction.isOperator()     = true;
+
+    /**
+     * \brief Is this class a function?
+     */
+    syn boolean InstNode.isFunction()      = false;
+    eq InstBaseClassDecl.isFunction()      = getInstRestriction().isFunction();
+    eq UnknownInstClassDecl.isFunction()   = false;
+
+    /**
+     * \brief Is this restriction "function"?
+     */
+    syn boolean InstRestriction.isFunction() = false;
+    eq InstFunction.isFunction() = true;
+
+    /**
+     * \brief Is this class a record?
+     */
+    syn boolean InstClassDecl.isRecord() = false;
+    eq InstBaseClassDecl.isRecord()      = getInstRestriction().isRecord();
+    eq UnknownInstClassDecl.isRecord()   = false;
+
+    /**
+     * \brief Is this restriction "record"?
+     */
+    syn boolean InstRestriction.isRecord() = false;
+    eq InstMRecord.isRecord()              = true;
+    eq InstConnector.isRecord()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isRecord() : super.isRecord();
+
+    /**
+     * \brief Is this class a function or record?
+     */
+    syn boolean InstClassDecl.isCallable() = false;
+    eq InstBaseClassDecl.isCallable()      = getInstRestriction().isCallable();
+    eq UnknownInstClassDecl.isCallable()   = false;
+
+    /**
+     * \brief Is this restriction "function" or "record"?
+     */
+    syn boolean InstRestriction.isCallable() = false;
+    eq InstFunction.isCallable()             = true;
+    eq InstMRecord.isCallable()              = true;
+    eq InstConnector.isCallable()            = 
+        (inheritedRestriction() != null) ? inheritedRestriction().isCallable() : super.isCallable();
+
+    /**
+     * Is this class a package?
+     */
+    syn boolean InstClassDecl.isPackage() = false;
+    eq InstBaseClassDecl.isPackage()      = getInstRestriction().isPackage();
+    eq UnknownInstClassDecl.isPackage()   = false;
+
+    /**
+     * Is this restriction "package"?
+     */
+    syn boolean InstRestriction.isPackage() = false;
+    eq InstMPackage.isPackage()             = true;
+
+    /**
+     * Is this class a model?
+     */
+    syn boolean InstClassDecl.isModel() = false;
+    eq InstBaseClassDecl.isModel()      = getInstRestriction().isModel();
+    eq UnknownInstClassDecl.isModel()   = false;
+
+    /**
+     * Is this restriction "model"?
+     */
+    syn boolean InstRestriction.isModel() = false;
+    eq InstModel.isModel()                = true;
+
+    /**
+     * Is this class a block?
+     */
+    syn boolean InstClassDecl.isBlock() = false;
+    eq InstBaseClassDecl.isBlock()      = getInstRestriction().isBlock();
+    eq UnknownInstClassDecl.isBlock()   = false;
+
+    /**
+     * Is this restriction "block"?
+     */
+    syn boolean InstRestriction.isBlock() = false;
+    eq InstBlock.isBlock()                = true;
+
+    /**
+     * Is this class a class?
+     */
+    syn boolean InstClassDecl.isClass() = false;
+    eq InstBaseClassDecl.isClass()      = getInstRestriction().isClass();
+    eq UnknownInstClassDecl.isClass()   = false;
+
+    /**
+     * Is this restriction "class"?
+     */
+    syn boolean InstRestriction.isClass() = false;
+    eq InstMClass.isClass()               = true;
+
+    /**
+     * Is this class an external object?
+     */
+    syn boolean InstClassDecl.isExternalObject() {
+        for (InstExtends ie : getInstExtendss()) {
+            String name = ie.getClassName().name();
+            if (name.equals("ExternalObject"))
+                return true;
+        }
+        return false;
+    }
+    eq InstSimpleShortClassDecl.isExternalObject() = false;
+
+    /**
+     * Check if this class has a restriction.
+     */
+    syn boolean InstClassDecl.hasInstRestriction() = false;
+    eq InstBaseClassDecl.hasInstRestriction()      = true;
+
+    /**
+     * Get the restriction of this class.
+     */
+    public InstRestriction InstClassDecl.getInstRestriction() {
+        throw new UnsupportedOperationException();
+    }
+
+}

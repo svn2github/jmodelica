@@ -1382,7 +1382,7 @@ aspect FunctionInlining {
      * We must be able to tell the difference between discrete and continous expressions 
      * during function inlining. Normally all expressions in functions are considered discrete.
      */
-    refine FlatVariability eq FExp.inDiscreteLocation() = inWhen() || (inFunction() && !duringFunctionInlining());
+    refine Variability eq FExp.inDiscreteLocation() = inWhen() || (inFunction() && !duringFunctionInlining());
 
     /*
      * We want to be able to scalarize all expressions (except size exps) fully during inlining.

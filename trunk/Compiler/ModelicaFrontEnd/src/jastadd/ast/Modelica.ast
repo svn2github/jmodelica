@@ -51,18 +51,10 @@
 
 
 
-/**
- * \defgroup aspect_Flattening Aspect: Flattening
- */
-
 
 /**
  * \package org.jmodelica.ast Package containing all AST classes.
  */
-
-abstract BaseNode;
-
-abstract Root : BaseNode;
 
 abstract SourceBaseNode : BaseNode;
 

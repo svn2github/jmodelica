@@ -1344,4 +1344,15 @@ public class Var implements Comparable<Var> {
 	};
 }
 
+
+public Set<Var> BiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
+    Set<Var> res = new LinkedHashSet<Var>();
+    for (FIdUseExp use : set) {
+        Var var = getVariable(use.name());
+        if (var != null)
+            res.add(var);
+    }
+    return res;
+}
+
 }
