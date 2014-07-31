@@ -252,45 +252,16 @@ package JMExamples_opt
 	rr<=5;
   end Distillation1_opt2;
   
-  optimization Distillation4_Opt_Lagrange(
-      objectiveIntegrand=((d.Temp[28] - d.T_14_ref) / d.T_14_ref)^2 +
-                         ((d.Temp[14] - d.T_28_ref) / d.T_28_ref)^2 +
-                         (0.02 * (d.Q_elec - d.Q_elec_ref) / d.Q_elec_ref)^2 +
-                         (0.015 * (d.Vdot_L1 - d.Vdot_L1_ref) / d.Vdot_L1_ref)^2,
-      startTime=0, finalTime=4000)
+  optimization Distillation4_Opt(
+      objectiveIntegrand=((Temp[28] - T_14_ref) / T_14_ref)^2 +
+                         ((Temp[14] - T_28_ref) / T_28_ref)^2 +
+                         (0.02 * (Q_elec - Q_elec_ref) / Q_elec_ref)^2 +
+                         (0.015 * (Vdot_L1 - Vdot_L1_ref) / Vdot_L1_ref)^2,
+      startTime=0, finalTime=5000)
     
-    JMExamples.Distillation.Distillation4 d;
-    
-    Modelica.Blocks.Interfaces.RealInput Q_elec;
-    Modelica.Blocks.Interfaces.RealInput Vdot_L1;
+    extends JMExamples.Distillation.Distillation4;
   
-  equation
-    
-    connect(Q_elec, d.Q_elec);
-    connect(Vdot_L1, d.Vdot_L1);
-  
-  end Distillation4_Opt_Lagrange;
-  
-  optimization Distillation4_Opt_Mayer(objective=cost(finalTime),
-      startTime=0, finalTime=3000)
-    
-    JMExamples.Distillation.Distillation4 d(Dist(min=0), Bott(min=0));
-    
-    Real cost(start=0, fixed=true);
-    
-    Modelica.Blocks.Interfaces.RealInput Q_elec;
-    Modelica.Blocks.Interfaces.RealInput Vdot_L1;
-  
-  equation
-    
-    der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
-                (d.Temp[14] - d.T_28_ref)^2 +
-                (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
-                (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2;
-    connect(Q_elec, d.Q_elec);
-    connect(Vdot_L1, d.Vdot_L1);
-  
-  end Distillation4_Opt_Mayer;
+  end Distillation4_Opt;
       
 	optimization MoonLander_opt (objective = J(finalTime),
                             startTime = 0,

@@ -2181,69 +2181,6 @@ Simulation time: 7200s
 </HTML>"));
     end Distillation4;
 
-    model Distillation4Init
-      Distillation4 d(xA(each fixed=false), V(each fixed=false),
-                      Temp(each fixed=false));
-    equation
-      d.Q_elec = d.Q_elec_ref;
-      d.Vdot_L1 = d.Vdot_L1_ref;
-    end Distillation4Init;
-
-    model Distillation4Breakdown
-      Distillation4 d;
-    equation
-      d.Q_elec = d.Q_elec_ref;
-      d.Vdot_L1 = if noEvent(time < 700) then
-                  d.Vdot_L1_ref else
-                  (0.5 / 1000 / 3600);
-    end Distillation4Breakdown;
-
-    connector RealConnector = Real;
-	
-    model Distillation4Reference
-      Distillation4 d;
-
-      constant Real time_constant = 35;
-
-      Real cost(start=0, fixed=true);
-      RealConnector Q_elec;
-      RealConnector Vdot_L1;
-
-    equation
-      der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
-                (d.Temp[14] - d.T_28_ref)^2 +
-                (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
-                (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2;
-      Q_elec = d.Q_elec_ref;
-      Vdot_L1 = (1 - time_constant / 2 / (time_constant + 5000)) *
-                d.Vdot_L1_ref +
-                time_constant / 2 * d.Vdot_L1_ref / (time_constant + time);
-
-      connect(Q_elec, d.Q_elec);
-      connect(Vdot_L1, d.Vdot_L1);
-
-    end Distillation4Reference;
-
-    model Distillation4Reference_Constant_Input
-      Distillation4 d;
-
-      Real cost(start=0, fixed=true);
-      Real Q_elec;
-      Real Vdot_L1;
-
-    equation
-      der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
-                (d.Temp[14] - d.T_28_ref)^2 +
-                (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
-                (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2;
-      Q_elec = d.Q_elec_ref;
-      Vdot_L1 = d.Vdot_L1_ref;
-
-      connect(Q_elec, d.Q_elec);
-      connect(Vdot_L1, d.Vdot_L1);
-
-    end Distillation4Reference_Constant_Input;
-
     package Examples
       model Distillation1const
         Modelica.Blocks.Sources.Constant const(k=3.7)

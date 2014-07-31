@@ -20,7 +20,8 @@ Test module for testing the CASADI examples.
 
 from tests_jmodelica import testattr
 from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
-                            cstr_casadi, qt_par_est_casadi, vehicle_turn)
+                            cstr_casadi, qt_par_est_casadi, vehicle_turn,
+                            distillation4_opt)
 
 @testattr(casadi = True)
 def test_ccpp():
@@ -51,3 +52,8 @@ def test_qt_par_casadi():
 def test_vehicle_turn():
     """Run the vehicle turn example."""
     vehicle_turn.run_demo(False)
+    
+@testattr(ma27 = True)
+def test_distillation4_opt():
+    """Run the large istillation optimization example."""
+    distillation4_opt.run_demo(False)

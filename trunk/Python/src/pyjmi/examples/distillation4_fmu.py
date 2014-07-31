@@ -33,19 +33,24 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    fmu_name = compile_fmu("JMExamples.Distillation.Distillation4Reference", 
-    curr_dir+"/files/JMExamples.mo")
+    fmu_name = compile_fmu("JMExamples.Distillation.Distillation4", 
+                           curr_dir+"/files/JMExamples.mo")
     dist4 = load_fmu(fmu_name)
-    
-    res = dist4.simulate(final_time=6000)
+
+    # Set constant inputs and simulate
+    [L_vol_ref] = dist4.get('Vdot_L1_ref')
+    [Q_ref] = dist4.get('Q_elec_ref')
+    res = dist4.simulate(final_time=6000,
+                         input=(['Q_elec', 'Vdot_L1'],
+                                lambda t: [Q_ref, L_vol_ref]))
 
     # Extract variable profiles
-    x20	= res['d.xA[20]']
-    x40	= res['d.xA[40]']
-    T20	= res['d.Temp[20]']
-    T40	= res['d.Temp[40]']
-    V20	= res['d.V[20]']
-    V40	= res['d.V[40]']
+    x20	= res['xA[20]']
+    x40	= res['xA[40]']
+    T20	= res['Temp[20]']
+    T40	= res['Temp[40]']
+    V20	= res['V[20]']
+    V40	= res['V[40]']
     t	= res['time']
     
     print "t = ", repr(N.array(t))
