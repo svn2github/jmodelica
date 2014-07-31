@@ -487,8 +487,7 @@ class CasadiCollocator(object):
             self._hi = map(lambda h: self.horizon * h, self.h_opt)
         else:
             self._hi = map(lambda h: self.horizon * h, self.h)
-        self._xi = self._u_opt[1:].reshape(self.n_e, self.model.n_u, self.n_cp)
-        self._xi = N.transpose(self._xi, [0, 2, 1])
+        self._xi = self._u_opt[1:].reshape(self.n_e, self.n_cp, self.model.n_u)
         self._ti = N.cumsum([self.t0] + self._hi[1:])
         input_names = tuple([repr(u) for u in self.model.u])
         return (input_names, self._input_interpolator)
@@ -3502,8 +3501,6 @@ class LocalDAECollocator(CasadiCollocator):
         self.n_var = n_var
         self.name_map = name_map
 
-
-
     def _eliminate_nonfree_parameters(self):
         """
         Substitute non-free parameters in expressions for their values.
@@ -3578,9 +3575,6 @@ class LocalDAECollocator(CasadiCollocator):
              self.mterm, self.lterm] = casadi.substitute(
                  op_expressions,
                  list_struct,list_scaled_vars)            
-
-
-
 
     def _define_collocation(self):
         """
@@ -6189,9 +6183,6 @@ class LocalDAECollocator(CasadiCollocator):
         # Sum up the two cost terms
         self.cost = self.cost_mayer + self.cost_lagrange
 
-
-    
-
     def _eliminate_der_var(self):
         """
         Eliminate derivative variables from OCP expressions.
@@ -6238,7 +6229,8 @@ class LocalDAECollocator(CasadiCollocator):
         cp_f.setInput(0., 0)
         cp_f.setInput(1., 1)
         cp_f.evaluate()
-        return cp_f.output().toScalar()    
+        return cp_f.output().toScalar()
+
     def _get_affine_scaling(self, name, i, k):
         """
         Get the affine scaling (d, e) of variable name at a collocation point.
@@ -7265,9 +7257,8 @@ class LocalDAECollocator(CasadiCollocator):
             self._hi = map(lambda h: self.horizon * h, self.h_opt)
         else:
             self._hi = map(lambda h: self.horizon * h, self.h)
-        self._xi = self._u_opt[1:].reshape(self.n_e, self.n_var['u'],
-                                           self.n_cp)
-        self._xi = N.transpose(self._xi, [0, 2, 1])
+        self._xi = self._u_opt[1:].reshape(self.n_e, self.n_cp,
+                                           self.n_var['u'])
         self._ti = N.cumsum([self.t0] + self._hi[1:])
         input_names = tuple([u.getName() for u in self.mvar_vectors['u']])
         return (input_names, self._input_interpolator)
