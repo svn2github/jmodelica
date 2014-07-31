@@ -2735,50 +2735,53 @@ aspect ConstantEvaluation {
 	  super.prepareForFunctionEval();
 	  flushUnknownSizes();
   }
-  
-  public void FExp.flushUnknownSizes() {
-	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size and make sure it is evaluated
-	  if (size().isUnknown()) {
-		  flushCache();
-		  size().isUnknown();
-	  }
-  }
-  
-  public void FFunctionCall.flushUnknownSizes() {}
-  
-  // TODO: reduce code duplication
-  
-  /**
-   * \brief Perform constant evaluation of functions.
-   * 
-   * @param values  constant values for the variables. 
-   *                Should be filled with the values of the inputs.
-   */
-  public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
- 	  FAlgorithm fab = getFAlgorithm();
-	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
-	  currentEvaluationValues = values;
-	  for (FFunctionVariable var : getFFunctionVariables())
-		  var.setEvaluationValue(null);
-	  fab.prepareForFunctionEval();
-	  
-	  for (FFunctionVariable var : myInputs())
-		  var.readEvaluationValue(values);
-	  for (FFunctionVariable var : myNonInputs())
-		  var.readEvaluationValue(values);
-	  
-	  try {
-		  fab.getFStatements().evaluateList(values);
-	  } finally {
-		  for (FFunctionVariable var : getFFunctionVariables())
-			  var.setEvaluationValue(null);
-		  if (oldVal != null)
-			  for (CommonVariableDecl var : oldVal.keySet())
-				  var.readEvaluationValue(oldVal);
-		  currentEvaluationValues = oldVal;
-	  }
-  }
-  private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
+
+    public void FExp.flushUnknownSizes() {
+        // Flush so that getArray() is cleared for unknown sizes, and then recalculate size and make sure it is evaluated
+        if (size().isUnknown()) {
+            flushCache();
+            size().isUnknown();
+        }
+    }
+
+    public void FFunctionCall.flushUnknownSizes() {}
+
+    // TODO: reduce code duplication
+
+    /**
+     * \brief Perform constant evaluation of functions.
+     * 
+     * @param values  constant values for the variables. 
+     *                Should be filled with the values of the inputs.
+     */
+    public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
+        FAlgorithm fab = getFAlgorithm();
+        Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
+        currentEvaluationValues = values;
+        for (FFunctionVariable var : getFFunctionVariables())
+            var.setEvaluationValue(null);
+        fab.prepareForFunctionEval();
+        for (FFunctionVariable var : myNonInputs())
+            var.prepareForFunctionEval();
+        
+        try {
+            for (FFunctionVariable var : myInputs())
+                var.readEvaluationValue(values);
+            for (FFunctionVariable var : myNonInputs())
+                var.readEvaluationValue(values);
+        
+            fab.getFStatements().evaluateList(values);
+        } finally {
+            for (FFunctionVariable var : getFFunctionVariables())
+                var.setEvaluationValue(null);
+            if (oldVal != null)
+                for (CommonVariableDecl var : oldVal.keySet())
+                    var.readEvaluationValue(oldVal);
+            currentEvaluationValues = oldVal;
+        }
+    }
+
+    private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
 
     /**
      * Constant-evaluate function with given set of arguments and return value for first output.
@@ -2836,21 +2839,23 @@ aspect ConstantEvaluation {
         for (InstComponentDecl var : allInstComponentDecls())
           var.setEvaluationValue(null);
         fab.prepareForFunctionEval();
-        
-        for (InstComponentDecl var : myInputs())
-          var.readEvaluationValue(values);
         for (InstComponentDecl var : myNonInputs())
-          var.readEvaluationValue(values);
+            var.prepareForFunctionEval();
         
         try {
-          fab.getFStatements().evaluateList(values);
+            for (InstComponentDecl var : myInputs())
+              var.readEvaluationValue(values);
+            for (InstComponentDecl var : myNonInputs())
+              var.readEvaluationValue(values);
+        
+            fab.getFStatements().evaluateList(values);
         } finally {
-          for (InstComponentDecl var : allInstComponentDecls())
-              var.setEvaluationValue(null);
-          if (oldVal != null)
-              for (CommonVariableDecl var : oldVal.keySet())
-                  var.readEvaluationValue(oldVal);
-          currentEvaluationValues = oldVal;
+            for (InstComponentDecl var : allInstComponentDecls())
+                var.setEvaluationValue(null);
+            if (oldVal != null)
+                for (CommonVariableDecl var : oldVal.keySet())
+                    var.readEvaluationValue(oldVal);
+            currentEvaluationValues = oldVal;
         }
     }
     private Map<CommonVariableDecl, CValue> InstBaseClassDecl.currentEvaluationValues = null;

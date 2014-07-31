@@ -1183,6 +1183,41 @@ r[1]
  )})));
 end FunctionEval32;
 
+model FunctionEval33
+    function f
+        input Integer x[:];
+        output Integer y = sum(x);
+    algorithm
+    end f;
+    
+    parameter Integer n1 = f({1,2});
+    Real x1[n1] = 1:n1;
+    parameter Integer n2 = f({1,2,3});
+    Real x2[n2] = 1:n2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval33",
+            description="Evaluation of function with non-input with binding expression depending on unknown size",
+            flatModel="
+fclass EvaluationTests.FunctionEval33
+ parameter Integer n1 = 3 /* 3 */;
+ Real x1[3] = 1:3;
+ parameter Integer n2 = 6 /* 6 */;
+ Real x2[6] = 1:6;
+
+public
+ function EvaluationTests.FunctionEval33.f
+  input Integer[:] x;
+  output Integer y := sum(x);
+ algorithm
+  return;
+ end EvaluationTests.FunctionEval33.f;
+
+end EvaluationTests.FunctionEval33;
+")})));
+end FunctionEval33;
+
 
 model VectorFuncEval1
     function f
