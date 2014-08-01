@@ -3265,7 +3265,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Get the options
         self.__dict__.update(options)
 
-        # Store model and op objects
+        # Store OptimizationProblem object
         self.op = op
 
         # Evaluate dependent parameters
@@ -3283,6 +3283,18 @@ class LocalDAECollocator(CasadiCollocator):
             self._normalize_min_time = True
         else:
             self._normalize_min_time = False
+
+        # Check if init_traj is a JMResult
+        try:
+            self.init_traj = self.init_traj.result_data
+        except AttributeError:
+            pass
+
+        # Check if nominal_traj is a JMResult
+        try:
+            self.nominal_traj = self.nominal_traj.result_data
+        except AttributeError:
+            pass
 
         # Get start and final time
         if self._normalize_min_time:

@@ -172,8 +172,8 @@ def run_demo(with_plots=True):
     # Set options
     opt_opts = op.optimize_options()
     opt_opts['n_e'] = 19 # Number of elements
-    opt_opts['init_traj'] = init_res.result_data
-    opt_opts['nominal_traj'] = init_res.result_data
+    opt_opts['init_traj'] = init_res
+    opt_opts['nominal_traj'] = init_res
     opt_opts['IPOPT_options']['tol'] = 1e-10
     
     # Solve the optimal control problem

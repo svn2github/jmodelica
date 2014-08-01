@@ -272,8 +272,8 @@ def run_demo(with_plots=True):
 
     # Set optimization options and solve
     opts = op.optimize_options()
-    opts['init_traj'] = ref_res.result_data
-    opts['nominal_traj'] = ref_res.result_data
+    opts['init_traj'] = ref_res
+    opts['nominal_traj'] = ref_res
     opts['n_e'] = 20
     opts['IPOPT_options']['linear_solver'] = "ma27"
     opts['IPOPT_options']['mu_init'] = 1e-3

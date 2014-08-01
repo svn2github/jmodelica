@@ -2583,7 +2583,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Variable trajectory data used for initialization of the NLP
             variables.
             
-            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Type: None or pyjmi.common.io.ResultDymolaTextual or
+                  pyjmi.common.algorithm_drivers.JMResultBase
             Default: None
         
         variable_scaling --
@@ -2597,7 +2598,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Variable trajectory data used for scaling of the NLP variables.
             This option is only applicable if variable scaling is enabled.
             
-            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Type: None or pyjmi.common.io.ResultDymolaTextual or
+                  pyjmi.common.algorithm_drivers.JMResultBase
             Default: None
         
         nominal_traj_mode --

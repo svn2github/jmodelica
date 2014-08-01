@@ -152,8 +152,8 @@ def run_demo(with_plots=True):
     opts = op.optimize_options()
     opts['n_e'] = 60
     opts['measurement_data'] = measurement_data
-    opts['init_traj'] = res.result_data
-    opts['nominal_traj'] = res.result_data
+    opts['init_traj'] = res
+    opts['nominal_traj'] = res
     res = op.optimize(options=opts)
 
     # Load state profiles

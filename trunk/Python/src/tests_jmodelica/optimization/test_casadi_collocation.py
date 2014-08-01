@@ -191,7 +191,7 @@ class TestLocalDAECollocator(object):
         # Optimize
         opts = self.optimize_options(op, self.algorithm)
         opts['variable_scaling'] = False
-        opts['init_traj'] = init_res.result_data
+        opts['init_traj'] = init_res
         col = LocalDAECollocator(op, opts)
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
@@ -557,8 +557,8 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(z, z_ref, 1e-2)
         
         # Optimize with trajectories
-        opts['init_traj'] = sim_res.result_data
-        opts['nominal_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res
+        opts['nominal_traj'] = sim_res
         traj_res = op.optimize(self.algorithm, opts)
         w_traj = traj_res.final('w')
         z_traj = traj_res.final('z')
@@ -607,7 +607,7 @@ class TestLocalDAECollocator(object):
         # Unconstrained
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
-        opts['init_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res
         opts['measurement_data'] = measurement_data
         opt_res = op.optimize(self.algorithm, options=opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
@@ -615,7 +615,7 @@ class TestLocalDAECollocator(object):
                                   a_ref, rtol=1e-4)
         
         # Unconstrained with nominal trajectories
-        opts['nominal_traj'] = sim_res.result_data
+        opts['nominal_traj'] = sim_res
         opt_res = op.optimize(self.algorithm, options=opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -666,7 +666,7 @@ class TestLocalDAECollocator(object):
         # Eliminated
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 30
-        opts['init_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res
         opts['measurement_data'] = measurement_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
@@ -674,7 +674,7 @@ class TestLocalDAECollocator(object):
                                   a_ref, rtol=1e-3)
         
         # Eliminated with nominal trajectories
-        opts['nominal_traj'] = sim_res.result_data
+        opts['nominal_traj'] = sim_res
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -689,7 +689,7 @@ class TestLocalDAECollocator(object):
         # Point constraint on eliminated input
         opts2 = self.optimize_options(op_2, self.algorithm)
         opts2['n_e'] = 30
-        opts2['init_traj'] = sim_res.result_data
+        opts2['init_traj'] = sim_res
         opts2['measurement_data'] = measurement_data
         N.testing.assert_raises(CasadiCollocatorException,
                                 op_2.optimize, self.algorithm, opts2)
@@ -763,7 +763,7 @@ class TestLocalDAECollocator(object):
         # Constrained
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 30
-        opts['init_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res
         opts['measurement_data'] = measurement_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
@@ -771,7 +771,7 @@ class TestLocalDAECollocator(object):
                                   a_ref, rtol=1e-3)
         
         # Constrained with nominal trajectories
-        opts['nominal_traj'] = sim_res.result_data
+        opts['nominal_traj'] = sim_res
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -841,7 +841,7 @@ class TestLocalDAECollocator(object):
         # Eliminate u2
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
-        opts['init_traj'] = sim_res.result_data
+        opts['init_traj'] = sim_res
         opts['measurement_data'] = measurement_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
@@ -849,7 +849,7 @@ class TestLocalDAECollocator(object):
                                   a_ref, rtol=1e-4)
         
         # Eliminate u2 with nominal trajectories
-        opts['nominal_traj'] = sim_res.result_data
+        opts['nominal_traj'] = sim_res
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -873,7 +873,7 @@ class TestLocalDAECollocator(object):
                                   a_ref, rtol=1e-4)
         
         # Eliminate u1 with nominal trajectories
-        opts['nominal_traj'] = sim_res.result_data
+        opts['nominal_traj'] = sim_res
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -1346,8 +1346,8 @@ class TestLocalDAECollocator(object):
                        cost_rtol=1e-2, u_norm_rtol=5e-3)
 
         # Check blocking factors with scaling
-        opts['init_traj'] = res.result_data
-        opts['nominal_traj'] = res.result_data
+        opts['init_traj'] = res
+        opts['nominal_traj'] = res
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref,
                        cost_rtol=1e-2, u_norm_rtol=5e-3)
