@@ -1600,18 +1600,24 @@ aspect InstanceAST_API {
     syn lazy String InstClassDecl.qualifiedName();
     eq InstComponentDecl.qualifiedName()    = getFQName().name();
     eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
-    eq InstBaseClassDecl.qualifiedName()    = buildQualifiedName(name());
+    eq InstBaseClassDecl.qualifiedName()    = getInstRestriction().qualifiedClassName();
     eq InstBuiltInClassDecl.qualifiedName() = name();
     eq InstProgramRoot.qualifiedName()      = "";
-    
-    syn String InstNode.buildQualifiedName(String last) = combineName(instClassNamePrefix(), last);
-    
-    inh lazy String InstNode.instClassNamePrefix();
-    eq InstBaseClassDecl.getChild().instClassNamePrefix() = qualifiedName();
-    eq InstComponentDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
-    eq SourceRoot.getChild().instClassNamePrefix()        = "";
-    eq FlatRoot.getChild().instClassNamePrefix()          = "";
-    eq InstRoot.getChild().instClassNamePrefix()          = "";
+
+    syn String InstRestriction.qualifiedClassName() = myInstClassDecl().buildQualifiedName();
+    eq InstOperator.qualifiedClassName()            = myInstClassDecl().buildQualifiedOperatorName();
+    eq InstOperatorFunction.qualifiedClassName()    = myInstClassDecl().buildQualifiedOperatorName();
+
+    syn String InstNode.buildQualifiedName() = combineName(instClassNamePrefix(false), name());
+
+    syn String InstClassDecl.buildQualifiedOperatorName() = combineName(instClassNamePrefix(true), name());
+
+    inh String InstNode.instClassNamePrefix(boolean sup);
+    eq InstExtends.getChild().instClassNamePrefix(boolean sup)       = sup ? qualifiedName() : instClassNamePrefix(sup);
+    eq InstBaseClassDecl.getChild().instClassNamePrefix(boolean sup) = qualifiedName();
+    eq InstComponentDecl.getChild().instClassNamePrefix(boolean sup) = buildQualifiedName();
+    eq Root.getChild().instClassNamePrefix(boolean sup)              = "";
+    eq InstRoot.getChild().instClassNamePrefix(boolean sup)          = "";
 
     /**
      * Get the qualified class name of the oldest ancestor in the inheritance structure.

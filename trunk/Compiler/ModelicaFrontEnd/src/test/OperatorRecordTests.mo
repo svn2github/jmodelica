@@ -2261,7 +2261,7 @@ Semantic error at line 2237, column 37:
             flatModel="
 fclass OperatorRecordTests.OperatorLimitations15
  OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
- OperatorRecordTests.OperatorLimitations15.Cplx2 c2(re(min = 1),im(max = 5,nominal = 2)) = OperatorRecordTests.OperatorLimitations15.Cplx2.'constructor'(3, 4);
+ OperatorRecordTests.OperatorLimitations15.Cplx2 c2(re(min = 1),im(max = 5,nominal = 2)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
 
 public
@@ -2274,16 +2274,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.OperatorLimitations15.Cplx2.'constructor'
-  input Real re;
-  input Real im := 0;
-  output OperatorRecordTests.Cplx c;
- algorithm
-  c.re := re;
-  c.im := im;
-  return;
- end OperatorRecordTests.OperatorLimitations15.Cplx2.'constructor';
 
  function OperatorRecordTests.Cplx.'+'
   input OperatorRecordTests.Cplx a;
@@ -2323,7 +2313,7 @@ end OperatorRecordTests.OperatorLimitations15;
             flatModel="
 fclass OperatorRecordTests.OperatorLimitations15b
  OperatorRecordTests.Cplx c1 = OperatorRecordTests.Cplx.'constructor'(1, 2);
- OperatorRecordTests.OperatorLimitations15b.Cplx2 c2 = OperatorRecordTests.OperatorLimitations15b.Cplx2.'constructor'(3, 4);
+ OperatorRecordTests.OperatorLimitations15b.Cplx2 c2 = OperatorRecordTests.Cplx.'constructor'(3, 4);
  OperatorRecordTests.Cplx c3 = OperatorRecordTests.Cplx.'+'(c1, c2);
 
 public
@@ -2336,16 +2326,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.OperatorLimitations15b.Cplx2.'constructor'
-  input Real re;
-  input Real im := 0;
-  output OperatorRecordTests.Cplx c;
- algorithm
-  c.re := re;
-  c.im := im;
-  return;
- end OperatorRecordTests.OperatorLimitations15b.Cplx2.'constructor';
 
  function OperatorRecordTests.Cplx.'+'
   input OperatorRecordTests.Cplx a;
@@ -3214,6 +3194,109 @@ public
 end OperatorRecordTests.BuildArrayInInst1;
 ")})));
     end BuildArrayInInst1;
+
+
+    model OperatorInherit1
+        operator record A = Cplx(re(min=-1), im(min=-1));
+        A a1 = A(1,2);
+        A a2 = A(3,4);
+        A a3 = a1 + a2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorInherit1",
+            description="Check that a short class decl of an operator record uses name of base class for functions",
+            flatModel="
+fclass OperatorRecordTests.OperatorInherit1
+ OperatorRecordTests.OperatorInherit1.A a1(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorInherit1.A a2(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.OperatorInherit1.A a3(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'+'(a1, a2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.OperatorInherit1.A
+  Real re(min = - 1);
+  Real im(min = - 1);
+ end OperatorRecordTests.OperatorInherit1.A;
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorInherit1;
+")})));
+    end OperatorInherit1;
+
+
+    model OperatorInherit2
+        operator record A = B(re(min=-1), im(min=-1));
+        operator record B = Cplx(re(max=10), im(max=10));
+        A a1 = A(1,2);
+        A a2 = A(3,4);
+        A a3 = a1 + a2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorInherit2",
+            description="Check that a short class decl of an operator record uses name of base class for functions",
+            flatModel="
+fclass OperatorRecordTests.OperatorInherit2
+ OperatorRecordTests.OperatorInherit2.A a1(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorInherit2.A a2(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.OperatorInherit2.A a3(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'+'(a1, a2);
+
+public
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
+
+ function OperatorRecordTests.Cplx.'+'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  return;
+ end OperatorRecordTests.Cplx.'+';
+
+ record OperatorRecordTests.OperatorInherit2.A
+  Real re(min = - 1,max = 10);
+  Real im(min = - 1,max = 10);
+ end OperatorRecordTests.OperatorInherit2.A;
+
+ record OperatorRecordTests.Cplx
+  Real re;
+  Real im;
+ end OperatorRecordTests.Cplx;
+
+end OperatorRecordTests.OperatorInherit2;
+")})));
+    end OperatorInherit2;
 
 
 end OperatorRecordTests;
