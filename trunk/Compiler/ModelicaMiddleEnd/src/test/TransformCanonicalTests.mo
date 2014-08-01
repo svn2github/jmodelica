@@ -4675,26 +4675,6 @@ Semantic error at line 4684, column 21:
 end StateInitialPars7;
 
 
-model DuplicateVariables1
-  model A
-    Real x(start=1, min=2) = 3;
-  end A;
-  Real x(start=1, min=2) = 3;
-  extends A;
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="DuplicateVariables1",
-			description="Test that identical variables in base classes are handled correctly.",
-			flatModel="
-fclass TransformCanonicalTests.DuplicateVariables1
- constant Real x(start = 1,min = 2) = 3;
-end TransformCanonicalTests.DuplicateVariables1;
-")})));
-end DuplicateVariables1;
-
-
   model SolveEqTest1
     Real x, y, z;
   equation

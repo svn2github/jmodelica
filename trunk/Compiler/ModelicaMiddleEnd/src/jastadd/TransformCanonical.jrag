@@ -3237,7 +3237,6 @@ aspect TransformCanonicalErrorCheck {
 	}
 	
 	public void FClass.collectErrors(ErrorCheckType checkType) {
-		checkDuplicateVariables();
 		checkFClassDimensions();
 		checkStructure();
 		allChecks(checkType);

@@ -576,31 +576,32 @@ aspect InstanceErrorCheck {
                     error("The declaration and end names of a class should be the same");
                 }
             }
+            removeComponentMap();
         }
     }
 
-  	public void InstFullClassDecl.collectErrors(ErrorCheckType checkType) {
-    	if (!errorChecked) {
+    public void InstFullClassDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
             super.collectErrors(checkType);
-    		errorChecked = true;
+            errorChecked = true;
             getInstExternalOpt().collectErrors(checkType);
-    	}
-  	}
-    
+        }
+    }
+
     public void InstSimpleShortClassDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
-        	errorChecked = true;
-        	getTarget().collectErrors(checkType);
-        	actualInstClass().collectErrors(checkType);
-        }    	
+            errorChecked = true;
+            getTarget().collectErrors(checkType);
+            actualInstClass().collectErrors(checkType);
+        }
     }
 
     public void InstImport.collectErrors(ErrorCheckType checkType) {
-    	if (!errorChecked) {
-    		errorChecked = true;
-			getPackageName().collectErrors(checkType);
-		}
-	}
+        if (!errorChecked) {
+            errorChecked = true;
+            getPackageName().collectErrors(checkType);
+        }
+    }
 
     public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
@@ -635,6 +636,7 @@ aspect InstanceErrorCheck {
                         getInstConstraining().collectErrors(checkType);
                 }
             }
+            removeComponentMap();
         }
     }
 

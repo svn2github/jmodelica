@@ -102,7 +102,7 @@ abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess
 InstComposite                 : InstComponentDecl;
 abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive                 : InstAssignable;
-InstEnum	                  : InstPrimitive;
+InstEnum                      : InstPrimitive;
 InstRecord                    : InstAssignable;
 InstBuiltIn                   : InstPrimitive;
 InstEnumLiteral               : InstBuiltIn;
@@ -112,7 +112,7 @@ InstArrayComponentDecl        : InstComponentDecl ::= <Index:int>;
 InstExpandableConnectorDecl   : InstComposite;
 InstArrayExpandableConnector  : InstArrayComponentDecl;
 InstExpandableConnectorMember : InstComponentDecl ::= <CopyOf:InstComponentDecl> <Name:String>;
-                         
+
 InstReplacingComposite   : InstComposite ::= <OriginalDecl:ComponentDecl> 
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;

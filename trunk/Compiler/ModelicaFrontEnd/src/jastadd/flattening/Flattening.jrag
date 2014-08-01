@@ -79,7 +79,6 @@ aspect Flattening {
 		buildConnectionSets(fc);
 		root().breakOnErrors();
 		flatten(fc, false);
-		fc.removeUniqueFVariableSet();
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
 		fc.updateVariablilityForVariablesInWhen();
@@ -732,7 +731,7 @@ aspect Flattening {
 	/**
 	 * Check if this component should be considered during flattening.
 	 */
-	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
+	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner()) && !duplicate;
 	eq InstArrayComponentDecl.useInFlattening()     = getIndex() > 0 && super.useInFlattening();
 	
 	public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding) {
@@ -769,7 +768,7 @@ aspect Flattening {
 	
 	public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		if (useInFlattening()) {
-			fc.addUniqueFVariable(createFVariable(name, excludeBinding));
+			fc.addFVariable(createFVariable(name, excludeBinding));
 			flattenMyType(fc);
 		}
 	}
@@ -1321,26 +1320,6 @@ aspect InstNodeInterface {
 
 }
 
-aspect UniqueVariables {
-
-	public Set<String> FClass.uniqueVars = new HashSet<String>();
-	// This can be removed when a real name collision check is added
-	public Set<String> FClass.nonUniqueVars = new HashSet<String>();
-	
-	public void FClass.addUniqueFVariable(FVariable fv) {
-		if (uniqueVars.add(fv.name())) {
-			addFVariableNoTransform(fv);
-		} else {
-			// This can be removed when a real name collision check is added
-			nonUniqueVars.add(fv.name());
-		}
-	}
-	
-	public void FClass.removeUniqueFVariableSet() {
-		uniqueVars = null;
-	}
-	
-}
 
 aspect FlatExpressions {
 

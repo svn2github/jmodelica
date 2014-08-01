@@ -296,18 +296,26 @@ end ArrayCellMod_ComplErr;
 
 
 model DuplicateVariables_Warn
-  Real x(start=1) = 1;
-  Real x = 1;
+    model A
+        Real x(start=1) = 1;
+    end A;
+    
+    model B
+        extends A;
+        Real x = 1;
+    end B;
+    
+    B b;
 
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="DuplicateVariables_Warn",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="DuplicateVariables_Warn",
+            description="Check that duplicate components from extends generates warning",
+            errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 0, column 0:
-  The variable x is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.
+  The component x is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.
 ")})));
 end DuplicateVariables_Warn;
 

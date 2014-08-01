@@ -3703,6 +3703,119 @@ Semantic error at line 3711, column 10:
 end InheritFlowTest2;
 
 
+
+model DuplicateVariables1
+    model A
+      Real x(start=1, min=2) = 3;
+    end A;
+    extends A;
+    
+    Real x(start=1, min=2) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicateVariables1",
+            description="Test that identical components in base classes are handled correctly",
+            flatModel="
+fclass NameTests.DuplicateVariables1
+ Real x(start = 1,min = 2) = 3;
+end NameTests.DuplicateVariables1;
+")})));
+end DuplicateVariables1;
+
+
+model DuplicateVariables2
+    model A
+        Real x;
+    equation
+        der(x) = time;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    extends B;
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicateVariables2",
+            description="Test that identical components in base classes are handled correctly",
+            flatModel="
+fclass NameTests.DuplicateVariables2
+ Real a.x;
+equation
+ a.der(x) = time;
+end NameTests.DuplicateVariables2;
+")})));
+end DuplicateVariables2;
+
+
+model DuplicateVariables3
+    Real x;
+    Real x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DuplicateVariables3",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3810, column 11:
+  Duplicate component in same class: Real x
+")})));
+end DuplicateVariables3;
+
+
+model DuplicateVariables5
+    model A
+      Real x(start=1, min=2) = 3;
+    end A;
+    
+    model B
+        extends A;
+        Real x(start=1, min=2) = 3;
+    end B;
+    
+    B b[2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicateVariables5",
+            description="Test that identical components in base classes are handled correctly",
+            flatModel="
+fclass NameTests.DuplicateVariables5
+ Real b[1].x(start = 1,min = 2) = 3;
+ Real b[2].x(start = 1,min = 2) = 3;
+end NameTests.DuplicateVariables5;
+")})));
+end DuplicateVariables5;
+
+
+model DuplicateVariables6
+    model A
+        Real x;
+        Real x;
+    end A;
+    
+    A a[2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DuplicateVariables6",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 3851, column 15:
+  Duplicate component in same class: Real x
+")})));
+end DuplicateVariables6;
+
+
+
 model BadEscape1
 	parameter String a = "\qabc\ def\nghi\\xjkl\?mno\#";
 

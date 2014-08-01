@@ -37,6 +37,7 @@ aspect SourceNameCheck {
 
 }
 
+
 aspect InstanceNameCheck {
 
     public void InstAmbiguousAccess.nameCheck(ErrorCheckType checkType) {
@@ -98,5 +99,76 @@ aspect InstanceNameCheck {
     eq FConnectClause.getConnector1().inConnectWithExistingComponent()   = !getConnector2().getInstAccess().isExpandableConnectorPart();
     eq FConnectClause.getConnector2().inConnectWithExistingComponent()   = !getConnector1().getInstAccess().isExpandableConnectorPart();
     eq BaseNode.getChild().inConnectWithExistingComponent()              = false;
+
+}
+
+
+aspect DuplicateComponents {
+
+    protected boolean InstComponentDecl.duplicate = false;
+
+    private Map<String,InstComponentDecl> InstComponentDecl.containedComponentsMap = null;
+    private Map<String,InstComponentDecl> InstClassDecl.containedComponentsMap     = null;
+
+    protected Map<String,InstComponentDecl> InstComponentDecl.myComponentMap() {
+        if (containedComponentsMap == null)
+            containedComponentsMap = new HashMap<String,InstComponentDecl>();
+        return containedComponentsMap;
+    }
+    protected Map<String,InstComponentDecl> InstClassDecl.myComponentMap() {
+        if (containedComponentsMap == null)
+            containedComponentsMap = new HashMap<String,InstComponentDecl>();
+        return containedComponentsMap;
+    }
+
+    public void InstComponentDecl.removeComponentMap() {
+        containedComponentsMap = null;
+    }
+    public void InstClassDecl.removeComponentMap() {
+        containedComponentsMap = null;
+    }
+
+    /**
+     * A map of name to component, containing all components with unique names in the 
+     * same scope. Not used for for-indices and returns <code>null</code> for them.
+     */
+    inh Map<String,InstComponentDecl> InstComponentDecl.componentMap();
+    eq InstComponentDecl.getChild().componentMap() = myComponentMap();
+    eq InstClassDecl.getChild().componentMap()     = myComponentMap();
+    eq InstForIndex.getChild().componentMap()      = null;
+    eq Root.getChild().componentMap()              = null;
+
+    /**
+     * The node containing the scope in which two components with identical names 
+     * constitute a collision, even if the components are also identical.
+     */
+    inh ASTNode InstComponentDecl.nameCollisionScope();
+    eq InstNode.getChild().nameCollisionScope()       = this;
+    eq InstForClauseE.getChild().nameCollisionScope() = this;
+    eq InstForStmt.getChild().nameCollisionScope()    = this;
+    eq Root.getChild().nameCollisionScope()           = this;
+
+
+    public void InstComponentDecl.nameCheck(ErrorCheckType checkType) {
+        // TODO: check for duplicate classes and for class and component with same name
+        Map<String,InstComponentDecl> map = componentMap();
+        if (map == null)
+            return;
+        InstComponentDecl other = map.get(name());
+        if (other != null && other != this) {
+            duplicate = true;
+            if (other.nameCollisionScope() == nameCollisionScope()) {
+                error("Duplicate component in same class: " + this);
+            } else {
+                // TODO: check if they are identical
+                warning("The component " + name() + " is declared multiple times and can not " +
+                        "be verified to be identical to other declaration(s) with the same name.");
+            }
+        } else {
+            map.put(name(), this);
+        }
+    }
+
+    public void InstArrayComponentDecl.nameCheck(ErrorCheckType checkType) {}
 
 }

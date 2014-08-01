@@ -286,14 +286,6 @@ aspect ComplianceCheck {
 		if (!variability().lessOrEqual(fParameter()) && !root().options.getBooleanOption("generate_ode"))
 			compliance("Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)");
 	}
-	
-	// This can be removed when a real name collision check is added
-	public void FClass.checkDuplicateVariables() {
-		for (String name : nonUniqueVars) {
-			warning("The variable " + name + " is declared multiple times and can not " +
-			        "be verified to be identical to other declaration(s) with the same name.");
-		}
-	}
 
     public void InstComposite.complianceCheck(ErrorCheckType checkType) {
         if (isFunctionalArg())

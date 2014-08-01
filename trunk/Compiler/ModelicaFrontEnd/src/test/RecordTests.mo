@@ -1425,8 +1425,8 @@ model RecordBinding25
     r1.r2 = r2;
   end Sub;
   
-  Sub sub;
-  Sub[1] sub;
+  Sub sub1;
+  Sub[1] sub2;
   
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1434,11 +1434,11 @@ model RecordBinding25
             description="Final parameter record component",
             flatModel="
 fclass RecordTests.RecordBinding25
- Real sub.r2.x;
- Real sub[1].r2.x;
+ Real sub1.r2.x;
+ Real sub2[1].r2.x;
 equation
- sub.r2.x = time;
- sub[1].r2.x = time;
+ sub1.r2.x = time;
+ sub2[1].r2.x = time;
 end RecordTests.RecordBinding25;
 ")})));
 end RecordBinding25;
