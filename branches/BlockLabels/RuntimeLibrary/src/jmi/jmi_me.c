@@ -79,6 +79,9 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
         jmi_delete(jmi_);
     	return -1;
     }
+    
+    /* Runtime options may be updated with start values */
+    jmi_update_runtime_options(jmi);
 
     /* Write start values to the pre vector*/
     jmi_copy_pre_values(jmi);
