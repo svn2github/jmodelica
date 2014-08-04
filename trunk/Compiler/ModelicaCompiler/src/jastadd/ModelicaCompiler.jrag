@@ -208,18 +208,17 @@ public class ModelicaCompiler {
 	public void setSubOutDir(String out) {
 		setOutDir(new File(tempDir, out));
 	}
-	
-	public void setRandomOutDir() {
-		try {
-			File out = File.createTempFile("jmc", "out", tempDir);
-			out.delete();
-			setOutDir(out);
-		} catch (IOException e) {
-			// TODO: this should result in an error message about not being able to write to output dir
-			e.printStackTrace();
-		}
-	}
-	
+
+    public void setRandomOutDir() {
+        try {
+            File out = File.createTempFile("jmc", "out", tempDir);
+            out.delete();
+            setOutDir(out);
+        } catch (IOException e) {
+            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and temp base directory '" + tempDir + "'!", e);
+        }
+    }
+
 	public void deleteOutDir() {
 		if (outDir != null)
 			recursiveDelete(outDir);
