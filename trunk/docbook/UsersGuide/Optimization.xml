@@ -3494,13 +3494,13 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       <para>Some statistics from the NLP solver can be obtained by issuing the
       command</para>
 
-      <programlisting>res_opt.solver.get_solver_statistics()
+      <programlisting>res_opt.get_solver_statistics()
 </programlisting>
 
       <para>The return argument of this function can be found by using the
       interactive help:</para>
 
-      <programlisting>help(res.solver.opt_get_solver_statistics)
+      <programlisting>help(res_opt.get_solver_statistics)
 Get nonlinear programming solver statistics.
     
 Returns::
@@ -4379,7 +4379,7 @@ sim_model = load_fmu(sim_fmu)
           object in the following manner.</para>
 
           <programlisting># Get optimized input
-(_, opt_input) = res.solver.get_opt_input()
+(_, opt_input) = res.get_opt_input()
 </programlisting>
 
           <para>We specify the initial values and simulate using the optimal
@@ -4849,7 +4849,7 @@ plt.show()
                     </m:msup>
 
                     <m:msubsup>
-                      <m:mi> + u(t)</m:mi>
+                      <m:mi>+ u(t)</m:mi>
 
                       <m:mi>1</m:mi>
 
@@ -4857,7 +4857,7 @@ plt.show()
                     </m:msubsup>
 
                     <m:msubsup>
-                      <m:mi> + u(t)</m:mi>
+                      <m:mi>+ u(t)</m:mi>
 
                       <m:mi>2</m:mi>
 
@@ -4894,7 +4894,7 @@ plt.show()
                           <m:mi>1</m:mi>
                         </m:msub>
 
-                        <m:mi>(t) - </m:mi>
+                        <m:mi>(t) -</m:mi>
 
                         <m:mi>2</m:mi>
 
@@ -4928,7 +4928,7 @@ plt.show()
                           <m:mi>1</m:mi>
                         </m:msub>
 
-                        <m:mi>(t - </m:mi>
+                        <m:mi>(t -</m:mi>
 
                         <m:msub>
                           <m:mi>t</m:mi>
@@ -4986,7 +4986,7 @@ plt.show()
 
                         <m:mo>=</m:mo>
 
-                        <m:mi>0.25, t &lt; </m:mi>
+                        <m:mi>0.25, t &lt;</m:mi>
 
                         <m:msub>
                           <m:mi>t</m:mi>
@@ -5126,7 +5126,7 @@ plt.show()
                 </m:math>
               </inlineequation>. At time <inlineequation>
                 <m:math display="inline">
-                  <m:mi>1 - </m:mi>
+                  <m:mi>1 -</m:mi>
 
                   <m:msub>
                     <m:mi>t</m:mi>

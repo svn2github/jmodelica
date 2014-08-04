@@ -1578,7 +1578,7 @@ class TestLocalDAECollocator(object):
         assert_results(res, cost_ref, u_norm_ref)
 
     @testattr(casadi = True)
-    def test_ipopt_statistics(self):
+    def test_solver_statistics(self):
         """
         Test getting IPOPT statistics
         """
@@ -1588,7 +1588,7 @@ class TestLocalDAECollocator(object):
         
         res = op.optimize()
         (return_status, nbr_iter, objective, total_exec_time) = \
-                res.solver.get_solver_statistics()
+                res.get_solver_statistics()
         N.testing.assert_string_equal(return_status, "Solve_Succeeded")
         N.testing.assert_array_less([nbr_iter, -nbr_iter], [100, -5])
         N.testing.assert_allclose(objective, cost_ref, 1e-3, 1e-4)
@@ -1611,7 +1611,7 @@ class TestLocalDAECollocator(object):
         opt_res = op.optimize(self.algorithm, opts)
         
         # Simulate
-        opt_input = opt_res.solver.get_opt_input()
+        opt_input = opt_res.get_opt_input()
         opts = model.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-6
         opts["CVode_options"]["atol"] = 1e-8 * model.nominal_continuous_states

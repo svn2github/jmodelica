@@ -2910,7 +2910,45 @@ class LocalDAECollocationAlgResult(JMResultBase):
                   KKT_init_cond)
             print("KKT matrix condition number at the optimum: %.3g" %
                   KKT_opt_cond)
-    
+
+    def get_opt_input(self):
+        """
+        Get the optimized input variables as a function of time.
+
+        The purpose of this method is to conveniently provide the optimized
+        input variables to a simulator.
+
+        Returns::
+
+            input_names --
+                Tuple consisting of the names of the input variables.
+
+            input_interpolator --
+                Collocation polynomials for input variables as a function of
+                time.
+        """
+        return self.solver.get_opt_input()
+
+    def get_solver_statistics(self):
+        """ 
+        Get nonlinear programming solver statistics.
+
+        Returns::
+
+            return_status -- 
+                Return status from nonlinear programming solver.
+
+            nbr_iter -- 
+                Number of iterations.
+
+            objective -- 
+                Final value of objective function.
+
+            total_exec_time -- 
+                Nonlinear programming solver execution time.
+        """
+        return self.solver.get_solver_statistics()
+
     def get_J(self, point="fcn"):
         """
         Get the Jacobian of the constraints.

@@ -231,7 +231,7 @@ def run_demo(with_plots=True):
     sim_model = load_fmu(sim_fmu)
 
     # Get optimized input
-    (_, opt_input) = res.solver.get_opt_input()
+    (_, opt_input) = res.get_opt_input()
     
     # Set initial values
     sim_model.set('c_init', c_0_A)

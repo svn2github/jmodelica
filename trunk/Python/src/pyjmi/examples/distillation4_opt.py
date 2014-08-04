@@ -317,7 +317,7 @@ def run_demo(with_plots=True):
 
     # Simulate with optimal input
     verif_res = verif_model.simulate(final_time=5000.,
-                                     input=opt_res.solver.get_opt_input())
+                                     input=opt_res.get_opt_input())
 
     # Extract results
     verif_T_14 = verif_res['Temp[28]']
