@@ -5477,6 +5477,206 @@ end ArrayTests.Constructors.Iterators.ArrayIterTest6;
 ")})));
 end ArrayIterTest6;
 
+model ArrayIterTest7
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y;
+    algorithm
+        y := R(x, x+1);
+    end f1;
+    
+    Real z[2] = time * {1, 2};
+    R w[2] = { f1(z[i]) for i in 1:2 };
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest7",
+            description="Iteration expressions with generated temporaries",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest7
+ Real z[1];
+ Real z[2];
+ Real w[1].a;
+ Real w[1].b;
+ Real w[2].a;
+ Real w[2].b;
+equation
+ z[1] = time;
+ z[2] = time * 2;
+ (ArrayTests.Constructors.Iterators.ArrayIterTest7.R(w[1].a, w[1].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest7.f1(z[1]);
+ (ArrayTests.Constructors.Iterators.ArrayIterTest7.R(w[2].a, w[2].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest7.f1(z[2]);
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTest7.f1
+  input Real x;
+  output ArrayTests.Constructors.Iterators.ArrayIterTest7.R y;
+ algorithm
+  y.a := x;
+  y.b := x + 1;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest7.f1;
+
+ record ArrayTests.Constructors.Iterators.ArrayIterTest7.R
+  Real a;
+  Real b;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest7.R;
+
+end ArrayTests.Constructors.Iterators.ArrayIterTest7;
+")})));
+end ArrayIterTest7;
+
+model ArrayIterTest8
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y;
+    algorithm
+        y := R(x, x+1);
+    end f1;
+    
+    function f2
+        input R x;
+        output Real y;
+    algorithm
+        y := x.a * x.b;
+    end f2;
+    
+    Real z[2] = time * {1, 2};
+    Real w[2] = { f2(f1(z[i])) for i in 1:2 };
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest8",
+            description="Iteration expressions with generated temporaries",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest8
+ Real z[1];
+ Real z[2];
+ Real w[1];
+ Real w[2];
+ Real temp_1[1].a;
+ Real temp_1[1].b;
+ Real temp_1[2].a;
+ Real temp_1[2].b;
+equation
+ z[1] = time;
+ z[2] = time * 2;
+ (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[1]);
+ (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[2]);
+ w[1] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b));
+ w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b));
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTest8.f2
+  input ArrayTests.Constructors.Iterators.ArrayIterTest8.R x;
+  output Real y;
+ algorithm
+  y := x.a * x.b;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest8.f2;
+
+ function ArrayTests.Constructors.Iterators.ArrayIterTest8.f1
+  input Real x;
+  output ArrayTests.Constructors.Iterators.ArrayIterTest8.R y;
+ algorithm
+  y.a := x;
+  y.b := x + 1;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest8.f1;
+
+ record ArrayTests.Constructors.Iterators.ArrayIterTest8.R
+  Real a;
+  Real b;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest8.R;
+
+end ArrayTests.Constructors.Iterators.ArrayIterTest8;
+")})));
+end ArrayIterTest8;
+
+model ArrayIterTest9
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y;
+    algorithm
+        y := R(x, x+1);
+    end f1;
+    
+    function f2
+        input Real[2] x;
+        output R[2] y = { f1(x[i]) for i in 1:2 };
+        algorithm
+    end f2;
+    
+    Real z[2] = time * {1, 2};
+    R w[2] = f2(z);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest9",
+            description="Iteration expressions with generated temporaries",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest9
+ Real z[1];
+ Real z[2];
+ Real w[1].a;
+ Real w[1].b;
+ Real w[2].a;
+ Real w[2].b;
+equation
+ z[1] = time;
+ z[2] = time * 2;
+ ({ArrayTests.Constructors.Iterators.ArrayIterTest9.R(w[1].a, w[1].b), ArrayTests.Constructors.Iterators.ArrayIterTest9.R(w[2].a, w[2].b)}) = ArrayTests.Constructors.Iterators.ArrayIterTest9.f2({z[1], z[2]});
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTest9.f1
+  input Real x;
+  output ArrayTests.Constructors.Iterators.ArrayIterTest9.R y;
+ algorithm
+  y.a := x;
+  y.b := x + 1;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest9.f1;
+
+ function ArrayTests.Constructors.Iterators.ArrayIterTest9.f2
+  input Real[2] x;
+  output ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2] y;
+  ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2] temp_1;
+ algorithm
+  (ArrayTests.Constructors.Iterators.ArrayIterTest9.R(temp_1[1].a, temp_1[1].b)) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]);
+  (ArrayTests.Constructors.Iterators.ArrayIterTest9.R(temp_1[2].a, temp_1[2].b)) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]);
+  y[1].a := temp_1[1].a;
+  y[1].b := temp_1[1].b;
+  y[2].a := temp_1[2].a;
+  y[2].b := temp_1[2].b;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest9.f2;
+
+ record ArrayTests.Constructors.Iterators.ArrayIterTest9.R
+  Real a;
+  Real b;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest9.R;
+
+end ArrayTests.Constructors.Iterators.ArrayIterTest9;
+")})));
+end ArrayIterTest9;
+
 
 model ArrayIterTestUnknown1
     function f

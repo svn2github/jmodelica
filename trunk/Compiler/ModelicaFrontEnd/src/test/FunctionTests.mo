@@ -9213,15 +9213,13 @@ public
   input Integer m;
   output FunctionTests.UnknownArray42.R1[m] o;
   FunctionTests.UnknownArray42.R1[:] temp_1;
-  FunctionTests.UnknownArray42.R2[:] temp_2;
-  FunctionTests.UnknownArray42.R2[:] temp_3;
+  FunctionTests.UnknownArray42.R2 temp_2;
+  FunctionTests.UnknownArray42.R2 temp_3;
  algorithm
   size(temp_1) := {m};
-  size(temp_2) := {m};
-  size(temp_3) := {m};
   for i2 in 1:m loop
-   (temp_2) := FunctionTests.UnknownArray42.f2(i2);
-   (temp_3) := FunctionTests.UnknownArray42.f2(i2);
+   (FunctionTests.UnknownArray42.R2({temp_2.p1[1]}, temp_2.p2)) := FunctionTests.UnknownArray42.f2(i2);
+   (FunctionTests.UnknownArray42.R2({temp_3.p1[1]}, temp_3.p2)) := FunctionTests.UnknownArray42.f2(i2);
    temp_1[i2].y[1].p1[1] := temp_2.p1[1];
    temp_1[i2].y[1].p2 := temp_2.p2;
    temp_1[i2].z.p1[1] := temp_3.p1[1];
