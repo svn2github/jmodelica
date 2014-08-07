@@ -1401,7 +1401,7 @@ aspect Arrays {
 	 * 
 	 * Size of new Array will be (n + m), where n = indices.size() and m = ndims().  
 	 */
-	public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
+    public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices, boolean scalarize) {
 		if (!forIndices.iterator().hasNext())
 			return (Array) fullCopy();
 		Indices newIndices = Indices.create(forIndices);
@@ -1411,7 +1411,7 @@ aspect Arrays {
 			newIndices.fillIndexMap(indexMap, i, forIndices);
 			for (CommonForIndex fi : forIndices)
 				indexMap.put(fi.uniqueIterExpName(), fi.evaluationValue().buildLiteral());
-			fillSubset(arr, i, indexMap);
+            fillSubset(arr, i, indexMap, scalarize);
 		}
 		for (CommonForIndex fi : forIndices) 
 			fi.setEvaluationValue(null);
@@ -1422,17 +1422,22 @@ aspect Arrays {
 		return size().expand(size);
 	}
 	
-	protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
+    protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap, boolean scalarize) {
 		for (Index i2 : indices()) {
-			FExp e = get(i2).fullCopy();
-			arr.set(i.expand(i2), e.replaceIndices(indexMap));
+            arr.set(i.expand(i2), createSubsetExp(get(i2), indexMap, scalarize));
 		}
 	}
-	protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
-		FExp org = get(Index.NULL);
-		FExp e = org.dynamicFExp(org.fullCopy());
-		arr.set(i, e.replaceIndices(indexMap));
-	}
+    
+    protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap, boolean scalarize) {
+        arr.set(i, createSubsetExp(get(Index.NULL), indexMap, scalarize));
+    }
+    
+    protected FExp Array.createSubsetExp(FExp e, Map<String,FExp> indexMap, boolean scalarize) {
+        if (scalarize)
+            return e.dynamicFExp(e.scalarize(indexMap));
+        else
+            return e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
+    }
 	
 	/**
 	 * Replaces all uses of indices in <code>indexMap</code> with the respective expressions.
@@ -1475,7 +1480,7 @@ aspect Arrays {
 	/**
 	 * \brief Expand index for all values of each for index used in expression.
 	 */
-	syn lazy Array FExpSubscript.getExpanded() = getFExp().getArray().createExpanded(collectForIndices());
+    syn lazy Array FExpSubscript.getExpanded() = getFExp().getArray().createExpanded(collectForIndices(), getFExp().myFClass() != null);
 	
 	/**
 	 * \brief Collect all ForIndexs used in the expression of this FExpSubscript.
@@ -1821,7 +1826,7 @@ aspect Arrays {
 		return new FIterExp(exp, fil);
 	}
 	
-	syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList());
+    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), getFExp().myFClass() != null);
 	eq FIterExp.getArray() = copyArray();
 	
 	eq FSubscriptedExp.getArray() {
@@ -2214,6 +2219,9 @@ aspect Arrays {
 							new FIntegerSubscript(i.get(dim[0]++));
 					newfas.addFSubscript(fs);
 				}
+                // If this is last part, append the rest of i to newfas
+                while (j == np - 1 && dim[0] < i.ndims())
+                    newfas.addFSubscript(i.get(dim[0]++));
 			}
 			FQNamePart newpart = (newfas == null) ? 
 					new FQNamePart(part.getName()) : 
