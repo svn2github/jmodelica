@@ -291,4 +291,10 @@ aspect ComplianceCheck {
         if (isFunctionalArg())
             compliance("Using functional input arguments is currently not supported");
     }
+    
+    public void InstFunctionCall.complianceCheck(ErrorCheckType checkType) {
+        if (isConstructorCall() && isBound() && inFunction()) {
+            compliance("Constructors for external objects is not supported in functions");
+        }
+    }
 }

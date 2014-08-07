@@ -474,4 +474,55 @@ Semantic error at line 1, column 1:
 ")})));
 end ComponentNameError2;
 
+model ExtObjConstructor
+  model EO
+    extends ExternalObject;
+    function constructor
+        output EO o;
+        external;
+    end constructor;
+    
+    function destructor
+        input EO o;
+        external;
+    end destructor;
+  end EO;
+  
+  function wrap
+    input  EO eo1 = EO(); // EO default input not allowed
+    output EO eo2 = EO(); // EO output not allowed
+    protected
+      EO eo3 = EO(); // Ok
+      Real x1 = use(eo3); // Ok
+      Real x2 = use(EO()); // Non-bound constructor not allowed
+    algorithm
+  end wrap;
+  
+  function use
+    input EO eo; // Ok
+    output Real x = 1;
+    algorithm
+  end use;
+    
+  EO eo1 = EO(); // Ok
+  EO eo2 = wrap(); // Type error or error generated in wrap
+  
+  Real x1 = use(eo1); // Ok
+  Real x2 = use(EO()); // Non-bound constructor not allowed
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExtObjConstructor",
+            description="Check that external object constructor is only allowed as binding expression",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 497, column 21:
+  Constructors for external objects can only be used as binding expressions
+Error: in file '...':
+Semantic error at line 511, column 17:
+  Constructors for external objects can only be used as binding expressions
+")})));
+end ExtObjConstructor;
+
 end CheckTests;

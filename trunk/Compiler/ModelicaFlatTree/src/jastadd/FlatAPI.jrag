@@ -2048,6 +2048,14 @@ aspect FVariableUses {
     eq InstAssignable.getBindingFExp().inBindingExp() = true;
     eq FVariable.getBindingExp().inBindingExp() = true;
     
+    /**
+     * Check if this is exp is bound in a declaration
+     */
+    inh boolean FExp.isBound();
+    eq Root.getChild().isBound()                   = false;
+    eq InstValueModification.getFExp().isBound()   = true;
+    eq InstFunctionCall.getArg().isBound()        = false;
+    
     inh boolean FExp.inParamBindingExp();
     eq Root.getChild().inParamBindingExp() = false;
     eq FVariable.getBindingExp().inParamBindingExp() = isParameter();

@@ -206,7 +206,13 @@ aspect ContentCheck {
     eq Root.getChild().isOperatorRecordDeclarationMember()          = false;
 
 	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
-		if (!generated) {
+       if (generated) {
+           if (isConstructorCall()) {
+               if (!isBound()) {
+                   error("Constructors for external objects can only be used as binding expressions");
+               }
+           }
+       } else {
 			InstClassDecl target = getName().myInstClassDecl();
 			if (target.isConstructor() || target.isDestructor())
 				error("Constructors and destructors for ExternalObjects can not be used directly");

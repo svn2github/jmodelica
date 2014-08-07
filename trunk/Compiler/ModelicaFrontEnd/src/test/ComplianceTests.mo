@@ -786,4 +786,37 @@ Semantic error at line 784, column 17:
 ")})));
 end FunctionalArgument;
 
+model ExtObjInFunction
+  model EO
+    extends ExternalObject;
+    function constructor
+        output EO o;
+        external;
+    end constructor;
+    
+    function destructor
+        input EO o;
+        external;
+    end destructor;
+  end EO;
+  
+  function wrap
+    output EO eo = EO();
+    algorithm
+  end wrap;
+    
+  EO eo = wrap();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ExtObjInFunction",
+            description="Test compliance error for external object constructor in function",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Compliance error at line 804, column 20:
+  Constructors for external objects is not supported in functions
+")})));
+end ExtObjInFunction;
+
 end ComplianceTests;
