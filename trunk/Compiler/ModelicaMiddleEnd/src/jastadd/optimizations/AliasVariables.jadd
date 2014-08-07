@@ -322,7 +322,8 @@ aspect AliasVariables {
 		 * 
 		 * @return A string containing the alias sets.
 		 */
-		public String printAliasSets() {
+		@Override
+		public String toString() {
 			StringBuilder str = new StringBuilder();
 			for (AliasSet aliasSet : aliasSets) {
 				str.append(aliasSet.toStringWithStart() +"\n");

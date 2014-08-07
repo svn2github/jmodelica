@@ -166,7 +166,7 @@ aspect IndexReduction {
         root().flushAllRecursive();
 
         log.info(this);
-        log.info(aliasManager.printAliasSets());
+        log.info(aliasManager);
 
         log.info("States:");
         Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();

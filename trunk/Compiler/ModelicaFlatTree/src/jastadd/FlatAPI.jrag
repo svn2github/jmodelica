@@ -2553,7 +2553,7 @@ aspect FlatDiagnostics {
         StringBuilder str = new StringBuilder();
         str.append("Alias sets:\n");
         if (getAliasManager()!=null) {
-            str.append(getAliasManager().printAliasSets());
+            str.append(getAliasManager());
             int n_elim = 0;
             for (AliasManager.AliasSet aliasSet : getAliasManager().getAliasSets()) {
                 n_elim += aliasSet.numAliases() - 1;
