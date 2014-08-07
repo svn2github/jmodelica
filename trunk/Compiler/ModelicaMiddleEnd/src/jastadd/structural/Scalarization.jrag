@@ -1138,7 +1138,7 @@ aspect Scalarization {
     /*
      * Attributes for creating FTempIdExps and function temps.
      */
-    syn FIdTempExp FExp.tempExp() = new FIdTempExp(new FIdUse(tempFQName()));
+    syn FIdTempExp FExp.tempExp() = new FIdTempExp(new FIdUse(tempVarName()));
     syn FIdTempExp FExp.tempExp(String name) = new FIdTempExp(new FIdUse(name));
     syn FIdTempExp FExp.tempExp(FArraySubscripts fas) = new FIdTempExp(new FIdUse(tempVarName(),fas));
     syn FFunctionVariable FExp.unknownTempVar() = unknownTempVar(type());
@@ -1150,26 +1150,6 @@ aspect Scalarization {
         type.size().replaceUnknowns(v); // Repoints parents to new tree
         return v;
     }
-    
-    syn FQName FExp.tempFQName() {
-        FQName fqn = new FQNameString(tempVarName());
-        if (expandWithIterExp())
-            fqn = fqn.copyAndAddFas(collectIterExpSubscripts());
-        return fqn;
-    }
-    
-    /**
-     * Check if this expression, when generating temporary uses and variables,
-     * should consider any surrounding FIterExp indices. 
-     */
-    syn boolean FExp.expandWithIterExp() = false;
-    inh boolean FFunctionCall.expandWithIterExp();
-    inh boolean FIterExp.expandWithIterExp();
-    eq Root.getChild().expandWithIterExp()       = false;
-    eq FStatement.getChild().expandWithIterExp() = false;
-    eq FEquation.getChild().expandWithIterExp()  = false;
-    eq FIterExp.getFExp().expandWithIterExp()    = !size().isUnknown() || expandWithIterExp();
-    
     
     /**
      * Should this expression be extracted into its own statement?
@@ -1317,12 +1297,14 @@ aspect Scalarization {
      * @see FExp#knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap)
      */
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
-        boolean func = inFunction();
+        boolean notFunc = !inFunction();
         getArgs().createArrayTemporaries(clauses, vars, indexMap);
-        FExp temp = (func && !type().isRecord()) ? tempExp() : buildRecordConstructor(indexMap);
-        createFunctionCallClause(clauses, indexMap, temp);
-        if (vars != null)
-            addTemporaryVars(vars, !func);
+        FExp temp = createTemporaryExp(indexMap, notFunc);
+        if (temp != null) {
+            createFunctionCallClause(clauses, indexMap, temp);
+            if (vars != null)
+                addTemporaryVars(vars, notFunc);
+        }
     }
     
     /**
@@ -2465,7 +2447,7 @@ aspect Scalarization {
 	 */
 	protected void FExp.addTemporaryVars(List vars, boolean equation) {
 		FType type = type();
-        if (equation || expandWithIterExp())
+		if (inIterExp())
 			type = type.sizedType(expandSizeForIterExp(type.size()));
 		if (equation) {
     	    boolean init = inInitialEquationSection();
@@ -2481,6 +2463,32 @@ aspect Scalarization {
 			else 
 				vars.add(new FFunctionArray(type.fullCopy(), tempVarName()));
 		}
+	}
+	
+	/**
+	 * \brief Creates an expression for using the temporary variables of this expression.
+	 * 
+	 * If this expression is neither an array nor a record, then <code>null</code> is returned.
+	 * 
+	 * This applies to expressions that may need temporaries anywhere, not only in 
+	 * expressions with unknown array sizes. Should be used from createArrayTemporaries().
+	 * 
+	 * @param indexMap  map of for indices to replace with literals
+	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
+	 */
+	protected FExp FExp.createTemporaryExp(Map<String,FExp> indexMap, boolean equation) {
+		if (type().isRecord()) {
+			if (equation)
+				return type().createRecordConstructor(new FQNameString(tempVarName()));
+			else
+				return new FIdUseExp(tempVarName());
+		} else if (isArray()) {
+			if (equation) 
+				return getArray().buildScalarized(indexMap, this);
+			else 
+				return new FIdUseExp(tempVarName());
+		}
+		return null;
 	}
 	
 	/**
@@ -2719,7 +2727,7 @@ aspect Scalarization {
 	 *        describing this record expression.
 	 */
 	public FExp FExp.buildRecordConstructor(Map<String,FExp> indexMap) {
-        return type().createRecordConstructor(tempFQName());
+		return type().createRecordConstructor(new FQNameString(tempVarName()));
 	}
 	
 	public FExp FIdUseExp.buildRecordConstructor(Map<String,FExp> indexMap) {
