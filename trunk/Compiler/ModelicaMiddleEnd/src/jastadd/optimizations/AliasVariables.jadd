@@ -25,7 +25,7 @@ import java.util.BitSet;
 aspect AliasVariables {
 	
 	/**
-	 * \brief Check if an FVariable is an alias.
+	 * Check if an FVariable is an alias.
 	 * 
 	 * Returns true if alias, else false.
 	 * 
@@ -45,7 +45,7 @@ aspect AliasVariables {
 	}
 	
 	/**
-	 * \brief Get the alias variable of an FVariable. 
+	 * Get the alias variable of an FVariable. 
 	 * 
 	 * If the FVariable is not an alias, null is returned.
 	 * 
@@ -62,7 +62,7 @@ aspect AliasVariables {
 	}
 	
 	/**
-	 * \brief Get the iteration variable corresponding to the alias.
+	 * Get the iteration variable corresponding to the alias.
 	 * 
 	 * If the FVariable is an alias, the alias() return corresponding iteration
 	 * FVariable, else null.
@@ -80,7 +80,7 @@ aspect AliasVariables {
 	}
 
 	/**
-	 * \brief Returns true if the alias is negated otherwise false.
+	 * Returns true if the alias is negated otherwise false.
 	 * 
 	 * @return True if negated alias, otherwise false.
 	 */
@@ -127,12 +127,12 @@ aspect AliasVariables {
     syn boolean FVariable.shouldPropagateAttributesForAlias() = true;
 
 	/**
-	 * \brief An FClass has an alias manager.
+	 * An FClass has an alias manager.
 	 */
 	private AliasManager FClass.aliasManager = new AliasManager();
 
 	/**
-	 * \brief Get the alias manager.
+	 * Get the alias manager.
 	 * 
 	 * @return the alias manager.
 	 */
@@ -141,7 +141,7 @@ aspect AliasVariables {
 	}
 	
 	/**
-	 * \brief AliasManager contains the connection sets of an FClass.
+	 * AliasManager contains the connection sets of an FClass.
 	 * 
 	 * The alias sets are build by adding pairs of FVariables, in addition
 	 * to information about whether the alias pair is negated.
@@ -160,7 +160,7 @@ aspect AliasVariables {
 		/**
 		 * Report any detected alias errors.
 		 * 
-		 * @fc  where to report errors
+		 * @param fc  where to report errors
 		 */
 		public void reportAliasErrors(FClass fc) {
 			for (String msg : aliasErrorMessages)
@@ -169,7 +169,7 @@ aspect AliasVariables {
 		}
 		
 		/**
-		 * \brief Get the set of alias sets.
+		 * Get the set of alias sets.
 		 * 
 		 * @return A set containing the alias sets.
 		 */
@@ -178,7 +178,7 @@ aspect AliasVariables {
 		}
 		
 		/**
-		 * \brief Get the AliasVariable object corresponding to an FVariable
+		 * Get the AliasVariable object corresponding to an FVariable
 		 * 
 		 * @param fv An FVariable object
 		 * @return The alias variable that corresponds to an FVariable
@@ -189,11 +189,11 @@ aspect AliasVariables {
 		
 
 		/**
-		 * \brief Retrieve the alias set corresponding to an FVariable.
+		 * Retrieve the alias set corresponding to an FVariable.
 		 * 
 		 * Returns null if the FVariable is not present in an alias set.
 		 * 
-		 * @param alias An FVariable.
+		 * @param fv  An FVariable.
 		 * @return The alias set corresponding to the alias variable.
 		 */
 		public AliasSet getAliasSet(FVariable fv) {
@@ -204,7 +204,7 @@ aspect AliasVariables {
 		}
 		
 		/**
-		 * \brief Remove a variable and its alias set from the alias manager.
+		 * Remove a variable and its alias set from the alias manager.
 		 */
         public void unAlias(FVariable fv) {
             AliasSet as = fv.aliasSet();
@@ -214,14 +214,14 @@ aspect AliasVariables {
         }
         
 		/**
-		 * \brief Add a pair of alias variables to the alias manager.
+		 * Add a pair of alias variables to the alias manager.
 		 */
 		public void addAliasVariables(AliasPair pair) {
 			addAliasVariables(pair.fv1, pair.fv2, pair.negated);
 		}
 
 		/**
-		 * \brief Add a pair of alias variables to the alias manager.
+		 * Add a pair of alias variables to the alias manager.
 		 * 
 		 * @param fvA An FVariable.
 		 * @param fvB Another FVariable.
@@ -318,7 +318,7 @@ aspect AliasVariables {
 		}
 		
 		/**
-		 * \brief Print the alias sets, with start attributes.
+		 * Print the alias sets, with start attributes.
 		 * 
 		 * @return A string containing the alias sets.
 		 */
@@ -442,7 +442,7 @@ aspect AliasVariables {
 		}
 		
 		/**
-		 * \brief AliasVariable is used to encapsulate an FVariable and whether
+		 * AliasVariable is used to encapsulate an FVariable and whether
 		 * the alias is negated. 
 		 * 
 		 * AliasVariable implements the Comparable interface and objects of the 
@@ -459,7 +459,7 @@ aspect AliasVariables {
 			private AliasSet set;
 			
 			/**
-			 * \brief Constructor.
+			 * Constructor.
 			 * 
 			 * @param fv           An FVariable.
 			 * @param negated      True if the alias is negated, otherwise false.
@@ -472,7 +472,7 @@ aspect AliasVariables {
 			}
 		
 			/**
-			 * \brief Returns true if the alias is negated.
+			 * Returns true if the alias is negated.
 			 * 
 			 * @return True if the alias is negated, otherwise false.
 			 */
@@ -481,7 +481,7 @@ aspect AliasVariables {
 			}
 		
 			/**
-			 * \brief Getter for the FVariable.
+			 * Getter for the FVariable.
 			 * 
 			 * @return The FVariable.
 			 */
@@ -823,7 +823,7 @@ aspect AliasVariables {
 	}
 	
 	/**
-	 * \brief Get the heuristic score for keeping this variable in an alias set.
+	 * Get the heuristic score for keeping this variable in an alias set.
 	 * 
 	 * The variable with the highest score should be kept. Score is always > 0.
 	 */

@@ -19,12 +19,12 @@ aspect CTestAnnotationizer {
 abstract public class TestAnnotationizerHelper {
 
 	/**
-	 * \brief A C code generation test.
+	 * A C code generation test.
 	 */
 	public static class CCodeGenTestCase extends CodeGenTestCase {
 
 		/**
-		 * \brief Constructor for C code generation test.
+		 * Constructor for C code generation test.
 		 * 
 		 * Delegates to super class.
 		 */
@@ -45,14 +45,14 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 		/**
-		 * \brief Prints a usage message for this test case type.
+		 * Prints a usage message for this test case type.
 		 */
 		public static void usage(String cl, String extra) {
 			TestAnnotationizerHelper.usage(cl, "C code template");
 		}
 
 		/**
-		 * \brief Create the code generator to use.
+		 * Create the code generator to use.
 		 * 
 		 * Creates a CGenerator.
 		 */
@@ -66,7 +66,7 @@ abstract public class TestAnnotationizerHelper {
 	public static class CADCodeGenTestCase extends CodeGenTestCase {
 
 		/**
-		 * \brief Constructor for CAD code generation test.
+		 * Constructor for CAD code generation test.
 		 * 
 		 * Delegates to super class.
 		 */
@@ -87,14 +87,14 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 		/**
-		 * \brief Prints a usage message for this test case type.
+		 * Prints a usage message for this test case type.
 		 */
 		public static void usage(String cl, String extra) {
 			TestAnnotationizerHelper.usage(cl, "CAD code template");
 		}
 
 		/**
-		 * \brief Create the code generator to use.
+		 * Create the code generator to use.
 		 * 
 		 * Creates a CADGenerator.
 		 */

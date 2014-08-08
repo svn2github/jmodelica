@@ -167,7 +167,7 @@ aspect OptimicaTransformCanonical {
 	}
 	
 	/**
-	 * \brief Scalarize constraint and put all scalarized equations in list eqns.
+	 * Scalarize constraint and put all scalarized equations in list eqns.
 	 */
 	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {}

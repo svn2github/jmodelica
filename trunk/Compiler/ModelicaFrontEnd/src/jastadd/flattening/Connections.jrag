@@ -64,7 +64,7 @@ aspect Connections {
     protected boolean FStreamBuiltIn.rewriteStreams = false;
 
     /**
-     * \brief Rewrite the inSteam operator to equations. 
+     * Rewrite the inSteam operator to equations. 
      */
     rewrite FInStream {
         when (rewriteStreams) to FExp {

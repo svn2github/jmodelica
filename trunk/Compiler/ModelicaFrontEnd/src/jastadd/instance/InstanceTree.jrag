@@ -676,9 +676,9 @@ aspect InstanceTreeConstruction {
 	
 	
 	/**
-	 * \brief Dynamically places an FExp in the tree under this InstNode.
+	 * Dynamically places an FExp in the tree under this InstNode.
 	 * 
-	 * @returns  the final version of the dynamically placed node.
+	 * @return  the final version of the dynamically placed node.
 	 */
 	public FExp InstNode.dynamicFExp(FExp exp) {
 		getDynamicFExpOpt().setChild(exp, 0);
@@ -692,7 +692,7 @@ aspect InstanceTreeConstruction {
 	 * If <code>exp</code> is already in tree of if <code>exp == this</code>, 
 	 * then <code>exp</code> is returned.
 	 * 
-	 * @returns  the final version of the dynamically placed node.
+	 * @return  the final version of the dynamically placed node.
 	 */
 	public FExp FExp.dynamicFExp(FExp exp) {
 		if (exp == this)
@@ -707,9 +707,9 @@ aspect InstanceTreeConstruction {
 	}
 
 	/**
-	 * \brief Dynamically places an FAbstractEquation in the tree under this FAbstractEquation.
+	 * Dynamically places an FAbstractEquation in the tree under this FAbstractEquation.
 	 * 
-	 * @returns  the final version of the dynamically placed node.
+	 * @return  the final version of the dynamically placed node.
 	 */
 	public FAbstractEquation FAbstractEquation.dynamicFAbstractEquation(FAbstractEquation eqn) {
 		if (eqn == this)
@@ -719,9 +719,9 @@ aspect InstanceTreeConstruction {
 	}
 		
 	/**
-	 * \brief Dynamically places an InstModification in the tree under this InstValueModification.
+	 * Dynamically places an InstModification in the tree under this InstValueModification.
 	 * 
-	 * @returns  the final version of the dynamically placed node.
+	 * @return  the final version of the dynamically placed node.
 	 */
 	public InstModification InstValueModification.dynamicInstMod(InstModification im) {
 		// TODO: only used for modifications on array components, should probably use an NTA specifically for that instead
@@ -1842,7 +1842,7 @@ aspect InstanceAST_API {
     eq Root.getChild().instNodeParent()     = null;
     
 	/**
-	 * \brief Find the component that this access should be evaluated in.
+	 * Find the component that this access should be evaluated in.
 	 */
 	inh InstComponentDecl InstAccess.containingInstComponent();
 	inh InstComponentDecl InstNode.containingInstComponent();
@@ -2089,19 +2089,19 @@ aspect InstArrays {
 	eq InstArrayComponentDecl.getChild().isTopDimension() = false;
 	
 	/**
-	 * \brief Find the length of the dimension corresponding to this InstArrayComponentDecl.
+	 * Find the length of the dimension corresponding to this InstArrayComponentDecl.
 	 */
 	syn int InstComponentDecl.myDimensionLength() = size().get(0);
 	eq InstArrayComponentDecl.myDimensionLength() = dimensionLength(0);
 	
 	/**
-	 * \brief Find the length of the dimension corresponding to the level under 
+	 * Find the length of the dimension corresponding to the level under 
 	 *        this InstArrayComponentDecl. 
 	 */
 	syn int InstArrayComponentDecl.childDimensionLength() = dimensionLength(1);
 	
 	/**
-	 * \brief Find the length of the dimension corresponding to the InstArrayComponentDecl(s)
+	 * Find the length of the dimension corresponding to the InstArrayComponentDecl(s)
 	 *        <code>i</code> levels under this one. 
 	 */
 	inh int InstArrayComponentDecl.dimensionLength(int i);

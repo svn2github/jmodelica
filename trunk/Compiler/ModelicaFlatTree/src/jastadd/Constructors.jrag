@@ -40,21 +40,21 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs a real literal expression from a double.
+	 * Constructs a real literal expression from a double.
 	 */
 	public RealLitExp.RealLitExp(double val) {
 		this(String.valueOf(val));
 	}
 	
 	/**
-	 * \brief Constructs an integer literal expression from an integer.
+	 * Constructs an integer literal expression from an integer.
 	 */
 	public IntegerLitExp.IntegerLitExp(int val) {
 		this(String.valueOf(val));
 	}
 	
 	/**
-	 * \brief Constructs a parse access from a String.
+	 * Constructs a parse access from a String.
 	 */
 	public ParseAccess.ParseAccess(String name) {
 		this();
@@ -62,7 +62,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs a component modification from an access and modification.
+	 * Constructs a component modification from an access and modification.
 	 */
 	public ComponentModification.ComponentModification(Access name, Modification mod) {
 		this();
@@ -71,7 +71,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs a complete modification from a class modification.
+	 * Constructs a complete modification from a class modification.
 	 */
 	public CompleteModification.CompleteModification(ClassModification cm) {
 		this();
@@ -79,21 +79,21 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Construcs a connect clause without any residual.
+	 * Construcs a connect clause without any residual.
 	 */
 	public FConnectClause.FConnectClause(FEquationType type, Opt<FStringComment> comment, ConnectClause connectClause, FIdUseInstAccess left, FIdUseInstAccess right) {
 		this(type, new List<FAttribute>(), comment, connectClause, left, right);
 	}
 	
 	/**
-	 * \brief Construcs a else equation without any residual.
+	 * Construcs a else equation without any residual.
 	 */
 	public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
 		this(type, new List<FAttribute>(), eqns);
 	}
 	
 	/**
-	 * \brief Constructs an equation that is not initial and is not marked as
+	 * Constructs an equation that is not initial and is not marked as
 	 * residual.
 	 */
 	public FEquation.FEquation(FExp left, FExp right) {
@@ -101,56 +101,56 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an equation that is not marked as residual.
+	 * Constructs an equation that is not marked as residual.
 	 */
 	public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
 		this(type, new List<FAttribute>(), left, right);
 	}
 	
 	/**
-	 * \brief Constructs an equation that is not initial
+	 * Constructs an equation that is not initial
 	 */
 	public FEquation.FEquation(List<FAttribute> attrs, FExp left, FExp right) {
 		this(new FNormalEquation(), attrs, left, right);
 	}
 	
 	/**
-	 * \brief Constructs a function call equation that is not initial.
+	 * Constructs a function call equation that is not initial.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
 		this(new FNormalEquation(), new List<FAttribute>(), left, call);
 	}
 	
 	/**
-	 * \brief Constructs a function call equation.
+	 * Constructs a function call equation.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
 		this(type, new List<FAttribute>(), left, call);
 	}
 	
 	/**
-	 * \brief Constructs a connection clause that is not initial.
+	 * Constructs a connection clause that is not initial.
 	 */
 //	public FConnectClause.FConnectClause(Opt<FStringComment> comment, FIdUseInstAccess left, FIdUseInstAccess right) {
 //		this(new FNormalEquation(), comment, left, right);
 //	}
 	
 	/**
-	 * \brief Constructs a for clause equation that is not initial.
+	 * Constructs a for clause equation that is not initial.
 	 */
 	public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
 		this(new FNormalEquation(), new List<FAttribute>(), indices, eqns);
 	}
 	
 	/**
-	 * \brief Constructs a for clause equation that is not initial.
+	 * Constructs a for clause equation that is not initial.
 	 */
 	public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
 		this(new FNormalEquation(), new List<FAttribute>(), indices, eqns);
 	}
 	
 	/**
-	 * \brief Constructs a for clause equation.
+	 * Constructs a for clause equation.
 	 */
 	public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
 		this(type, new List<FAttribute>(), indices, eqns);
@@ -182,70 +182,70 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an algorithm block that is not initial.
+	 * Constructs an algorithm block that is not initial.
 	 */
 	public FAlgorithm.FAlgorithm(List<FStatement> stmts) {
 		this(new FNormalEquation(), new List<FAttribute>(), stmts);
 	}
 	
 	/**
-	 * \brief Constructs an algorithm block.
+	 * Constructs an algorithm block.
 	 */
 	public FAlgorithm.FAlgorithm(FEquationType type, List<FStatement> stmts) {
 		this(type, new List<FAttribute>(), stmts);
 	}
 	
 	/**
-	 * \brief Constructs a derivative algorithm block that is not initial.
+	 * Constructs a derivative algorithm block that is not initial.
 	 */
 	public FDerivativeAlgorithm.FDerivativeAlgorithm(List<FStatement> stmts, int order) {
 	    this(new FNormalEquation(), new List<FAttribute>(), stmts, order);
 	}
 	
 	/**
-	 * \brief Constructs a boolean literal expression from a boolean.
+	 * Constructs a boolean literal expression from a boolean.
 	 */
 	public static FBooleanLitExp FBooleanLitExp.create(boolean val) {
 		return val ? new FBooleanLitExpTrue() : new FBooleanLitExpFalse();
 	}
 	
 	/**
-	 * \brief Constructs a enumeration literal expression from a type and an ordinal.
+	 * Constructs a enumeration literal expression from a type and an ordinal.
 	 */
 	public FEnumLitExp.FEnumLitExp(FEnumType type, int val) {
 		this(type.getName(), type.getFEnumLiteralType(val - 1).getName(), new Opt(type.unboundCopy()));
 	}
 	
 	/**
-	 * \brief Constructs a enumeration literal expression from a type and a literal name.
+	 * Constructs a enumeration literal expression from a type and a literal name.
 	 */
 	public FEnumLitExp.FEnumLitExp(FEnumType type, String val) {
 		this(type.getName(), val, new Opt(type.unboundCopy()));
 	}
 	
 	/**
-	 * \brief Constructs a enumeration literal expression from an enum name and a value name.
+	 * Constructs a enumeration literal expression from an enum name and a value name.
 	 */
 	public FEnumLitExp.FEnumLitExp(String name, String val) {
 		this(name, val, new Opt());
 	}
 	
 	/**
-	 * \brief Constructs an FIdUse that refers to the variable with the given name.
+	 * Constructs an FIdUse that refers to the variable with the given name.
 	 */
 	public FIdUse.FIdUse(String name) {
 		this(new FQNameString(name));
 	}
     
     /**
-     * \brief Constructs an FIdDecl with the given name.
+     * Constructs an FIdDecl with the given name.
      */
     public FIdDecl.FIdDecl(String name) {
         this(new FQNameString(name));
     }
 	
 	/**
-	 * \brief Constructs an FIdUse that refers to a cell of the variable with the given name.
+	 * Constructs an FIdUse that refers to a cell of the variable with the given name.
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
@@ -261,14 +261,14 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an if equation.
+	 * Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
 		this(type, new List<FAttribute>(), eqns, guard, elseClause);
 	}
     
 	/**
-	 * \brief Constructs an FQName by splitting the given name into name parts.
+	 * Constructs an FQName by splitting the given name into name parts.
 	 * 
 	 * Does <em>not</em> parse array subscripts.
 	 */
@@ -288,14 +288,14 @@ aspect Constructors {
     }
     
     /**
-     * \brief Creates and adds a new FQNamePart without array subscripts.
+     * Creates and adds a new FQNamePart without array subscripts.
      */
     public void FQNameFull.addFQNamePart(String name) {
     	addFQNamePart(new FQNamePart(name));
     }
 	
 	/**
-	 * \brief Constructs an FQName by splitting the given name into name parts and adding array subscripts.
+	 * Constructs an FQName by splitting the given name into name parts and adding array subscripts.
 	 * 
 	 * Does <em>not</em> parse array subscripts.
 	 *
@@ -307,21 +307,21 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs a flat FIdUseExp that refers to the variable with the given name.
+	 * Constructs a flat FIdUseExp that refers to the variable with the given name.
 	 */
 	public FIdUseExp.FIdUseExp(String name) {
 		this(new FIdUse(name));
 	}
 	
 	/**
-	 * \brief Constructs an FIdUseExp that refers to the variable with the given name.
+	 * Constructs an FIdUseExp that refers to the variable with the given name.
 	 */
 	public FIdUseExp.FIdUseExp(FQName name) {
 		this(new FIdUse(name));
 	}
 	
 	/**
-	 * \brief Constructs an FIdUseExp that refers to a cell of the variable with the given name.
+	 * Constructs an FIdUseExp that refers to a cell of the variable with the given name.
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
@@ -330,7 +330,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an FDerExp that refers to the variable with the given name.
+	 * Constructs an FDerExp that refers to the variable with the given name.
 	 */
 	public FDerExp.FDerExp(FQName name) {
 		this(new FIdUse(name));
@@ -346,14 +346,14 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an unsuported equation.
+	 * Constructs an unsuported equation.
 	 */
 	public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
 		this(type, new List<FAttribute>());
 	}
 	
 	/**
-	 * \brief Constructs a when equation.
+	 * Constructs a when equation.
 	 */
 	public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
 		this(type, new List<FAttribute>(), eqns, guard, elseClause);
@@ -390,7 +390,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an FForIndex with a temporary index variable and a 
+	 * Constructs an FForIndex with a temporary index variable and a 
 	 *        range expression starting at 1 as the in expression.
 	 * 
 	 * @param name  the name of the index
@@ -404,7 +404,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an FForIndex with a temporary index variable and loops 
+	 * Constructs an FForIndex with a temporary index variable and loops 
 	 *        over the given variable.        
 	 * 
 	 * @param name  the name of the index
@@ -416,35 +416,35 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Constructs an FSizeExp giving the size in the given dimension for the given variable.
+	 * Constructs an FSizeExp giving the size in the given dimension for the given variable.
 	 */
 	public FSizeExp.FSizeExp(FQName var, int dim) {
 		this(new FIdUseExp(var), dim);
 	}
 	
 	/**
-	 * \brief Constructs an FSizeExp giving the size in the given dimension for the given expression.
+	 * Constructs an FSizeExp giving the size in the given dimension for the given expression.
 	 */
 	public FSizeExp.FSizeExp(FExp exp, int dim) {
 		this(exp, new Opt(new FIntegerLitExp(dim + 1)));
 	}
 	
 	/**
-	 * \brief Constructs an FRangeExp with the given start and stop expressions.
+	 * Constructs an FRangeExp with the given start and stop expressions.
 	 */
 	public FRangeExp.FRangeExp(FExp start, FExp stop) {
 		this(new List().add(start).add(stop));
 	}
 	
 	/**
-	 * \brief Constructs an FRangeExp with the given start and stop literal values.
+	 * Constructs an FRangeExp with the given start and stop literal values.
 	 */
 	public FRangeExp.FRangeExp(int start, int stop) {
 		this(new FIntegerLitExp(start), new FIntegerLitExp(stop));
 	}
 	
 	/**
-	 * \brief Constructs an FRangeExp with the given start, step and and stop expressions.
+	 * Constructs an FRangeExp with the given start, step and and stop expressions.
 	 */
 	public FRangeExp.FRangeExp(FExp start, FExp step, FExp stop) {
 		this(new List().add(start).add(step).add(stop));
@@ -512,7 +512,7 @@ aspect Constructors {
     }
 
     /**
-     * \brief Constructs an FRecordConstructor for a record with the given name and no arguments.
+     * Constructs an FRecordConstructor for a record with the given name and no arguments.
      */
     public FRecordConstructor.FRecordConstructor(String name) {
         this(new FIdUse(name), new List());
@@ -703,7 +703,7 @@ aspect Constructors {
 
 	
 	/**
-	 * \brief Create an FInternalAttribute with only the children that are 
+	 * Create an FInternalAttribute with only the children that are 
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name) {
@@ -712,7 +712,7 @@ aspect Constructors {
 	}
 	
     /**
-     * \brief Create an FInternalAttribute with only the children that are 
+     * Create an FInternalAttribute with only the children that are 
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String name, int level) {
@@ -721,7 +721,7 @@ aspect Constructors {
     }
     
 	/**
-	 * \brief Create an FInternalAttribute with only the children that are 
+	 * Create an FInternalAttribute with only the children that are 
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
@@ -730,7 +730,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create an FInternalAttribute with only the children that are 
+	 * Create an FInternalAttribute with only the children that are 
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp exp, boolean eachKey) {
@@ -739,7 +739,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create an FInternalAttribute with only the children that are 
+	 * Create an FInternalAttribute with only the children that are 
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp exp, int level, boolean eachKey) {
@@ -748,7 +748,7 @@ aspect Constructors {
 	}
 	
     /**
-     * \brief Create an FInternalAttribute with only the children that are 
+     * Create an FInternalAttribute with only the children that are 
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String name, int level, boolean eachKey) {
@@ -757,7 +757,7 @@ aspect Constructors {
     }
     
     /**
-     * \brief Create an FInternalAttribute with only the children that are 
+     * Create an FInternalAttribute with only the children that are 
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String type, String name, FExp exp, int level) {
@@ -766,7 +766,7 @@ aspect Constructors {
     }
     
     /**
-     * \brief Create an FInternalAttribute with only the children that are 
+     * Create an FInternalAttribute with only the children that are 
      *        valid for them.
      */
     public FAnnotationAttribute.FAnnotationAttribute(String name) {
@@ -775,7 +775,7 @@ aspect Constructors {
     }
     
     /**
-     * \brief Create an FInternalAttribute with only the children that are 
+     * Create an FInternalAttribute with only the children that are 
      *        valid for them.
      */
     public FAnnotationAttribute.FAnnotationAttribute(String name, FExp exp, int level, boolean eachKey) {
@@ -818,7 +818,7 @@ aspect Constructors {
     }
 	
 	/**
-	 * \brief Create an FFunctionArray with the given name and type. 
+	 * Create an FFunctionArray with the given name and type. 
 	 *        Extracts array subscripts from type.
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
@@ -827,35 +827,35 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create an FFunctionVariable with the given name and type. 
+	 * Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
 		this(new Opt(), new List<FAttribute>(), type, new Opt(), new FQNameString(name), 0);
 	}
 	
     /**
-     * \brief Create an FFunctionVariable with the given name, type and input/output prefix. 
+     * Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
     public FFunctionVariable.FFunctionVariable(FType type, String name, FTypePrefixInputOutput inputOutput) {
         this(new Opt<FTypePrefixInputOutput>(inputOutput), new List<FAttribute>(), type, new Opt<FExp>(), new FQNameString(name), 0);
     }
     
     /**
-     * \brief Create an FFunctionVariable with everything but order and attributes given.
+     * Create an FFunctionVariable with everything but order and attributes given.
      */
     public FFunctionVariable.FFunctionVariable(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
         this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
     /**
-     * \brief Create an FFunctionArray with everything but order and attributes given.
+     * Create an FFunctionArray with everything but order and attributes given.
      */
     public FFunctionArray.FFunctionArray(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
         this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
 	/**
-	 * \brief Create a new FSubscriptedExp with a new FArraySubscripts, containing the 
+	 * Create a new FSubscriptedExp with a new FArraySubscripts, containing the 
 	 *        proper number of FSubscripts (according to <code>exp</code>).
 	 * 
 	 * All FSubscripts except the first will be FColonSubscripts.
@@ -870,7 +870,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create a new FArraySubscripts <code>n</code> literal subscripts from 
+	 * Create a new FArraySubscripts <code>n</code> literal subscripts from 
 	 *        <code>i</code>, starting at <code>j</code>.
 	 */
 	public FArraySubscripts.FArraySubscripts(Index i, int j, int n) {
@@ -909,7 +909,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create a new FArraySubscripts containing <code>n</code> {@link FColonSubscript}s.
+	 * Create a new FArraySubscripts containing <code>n</code> {@link FColonSubscript}s.
 	 */
 	public static FArraySubscripts FArraySubscripts.createFColonSubscripts(int n) {
 		List<FSubscript> l = new List<FSubscript>();
@@ -919,7 +919,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create a new FArraySubscripts containing an integer literal.
+	 * Create a new FArraySubscripts containing an integer literal.
 	 */
 	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
 		List<FSubscript> l = new List<FSubscript>();
@@ -950,7 +950,7 @@ aspect Constructors {
 aspect InheritedFactoryMethods {
 	
 	/**
-	 * \brief Create a new empty node.
+	 * Create a new empty node.
 	 * 
 	 * Abstract method needed for abstract node classes with declared 
 	 * (i.e. not inherited) children.
@@ -1257,7 +1257,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
+	 * Create new node of same class as this, with the specified 
 	 *        children.
 	 */
 	public FInfArgsFunctionCall FInfArgsFunctionCall.createNode(ArrayList<FExp> exps) {
@@ -1268,7 +1268,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
+	 * Create new node of same class as this, with the specified 
 	 *        children.
 	 */
 	public FArray FArray.createNode(List<FExp> exps) {
@@ -1278,7 +1278,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
+	 * Create new node of same class as this, with the specified 
 	 *        children.
 	 */
 	public FArray FArray.createNode(ArrayList<FExp> exps) {
@@ -1289,7 +1289,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
+	 * Create new node of same class as this, with the specified 
 	 *        children. Used to allow common algorithms to handle unrelated types.
 	 */
 	public FExp FExp.createNodeBinary(FExp a, FExp b) {
@@ -1297,7 +1297,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
+	 * Create new node of same class as this, with the specified 
 	 *        child. Used to allow common algorithms to handle unrelated types.
 	 */
 	public FExp FExp.createNodeUnary(FExp a) {
@@ -1355,7 +1355,7 @@ aspect InheritedFactoryMethods {
     public FFunctionArray    FFunctionArray.createEmptyNode()    { return new FFunctionArray(); }
 
 	/**
-	 * \brief Create new node of same class as this, with the specified 
+	 * Create new node of same class as this, with the specified 
 	 *        children.
 	 */
 	public FIfWhenClause FIfWhenClause.createNode(FExp test, List<FStatement> stmts) {

@@ -161,7 +161,7 @@ aspect InstTypeAnalysis {
 aspect InstBindingType {
 
     /**
-     * \brief Returns the type the binding expression should have.
+     * Returns the type the binding expression should have.
      */
     syn FType InstAssignable.bindingType() {
         InstNode decl = myInstValueMod().myInstNode();
@@ -411,27 +411,27 @@ aspect InstClassRestriction {
     eq InstOperatorFunction.isOperator()     = true;
 
     /**
-     * \brief Is this class a function?
+     * Is this class a function?
      */
     syn boolean InstNode.isFunction()      = false;
     eq InstBaseClassDecl.isFunction()      = getInstRestriction().isFunction();
     eq UnknownInstClassDecl.isFunction()   = false;
 
     /**
-     * \brief Is this restriction "function"?
+     * Is this restriction "function"?
      */
     syn boolean InstRestriction.isFunction() = false;
     eq InstFunction.isFunction() = true;
 
     /**
-     * \brief Is this class a record?
+     * Is this class a record?
      */
     syn boolean InstClassDecl.isRecord() = false;
     eq InstBaseClassDecl.isRecord()      = getInstRestriction().isRecord();
     eq UnknownInstClassDecl.isRecord()   = false;
 
     /**
-     * \brief Is this restriction "record"?
+     * Is this restriction "record"?
      */
     syn boolean InstRestriction.isRecord() = false;
     eq InstMRecord.isRecord()              = true;
@@ -439,14 +439,14 @@ aspect InstClassRestriction {
         (inheritedRestriction() != null) ? inheritedRestriction().isRecord() : super.isRecord();
 
     /**
-     * \brief Is this class a function or record?
+     * Is this class a function or record?
      */
     syn boolean InstClassDecl.isCallable() = false;
     eq InstBaseClassDecl.isCallable()      = getInstRestriction().isCallable();
     eq UnknownInstClassDecl.isCallable()   = false;
 
     /**
-     * \brief Is this restriction "function" or "record"?
+     * Is this restriction "function" or "record"?
      */
     syn boolean InstRestriction.isCallable() = false;
     eq InstFunction.isCallable()             = true;

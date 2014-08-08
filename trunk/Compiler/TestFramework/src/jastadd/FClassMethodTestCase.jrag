@@ -22,7 +22,7 @@ public class FClassMethodTestCase extends TestCase {
     private String methodName = null;
 
     /**
-     * \brief Perform tests on flat class after transform canonical step.
+     * Perform tests on flat class after transform canonical step.
      * 
      * @return  <code>true</code> if test case shoule stop after this method
      */

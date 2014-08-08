@@ -274,6 +274,7 @@
                     <arg value="--noComponentCheck" />
                     <arg value="--noVisitCheck" />
                     <arg value="--lazyMaps" />
+                    <arg value="--indent=4space" />
                     <arg value="--deterministic" />
                     <arg line="${jastadd_files}" />
                 </java>

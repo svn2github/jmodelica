@@ -30,7 +30,7 @@ public abstract class CodeGenTestCase extends TestCase {
     public abstract AbstractGenerator createGenerator(FClass fc);
 
     /**
-     * \brief Perform tests on flat class after transform canonical step.
+     * Perform tests on flat class after transform canonical step.
      * 
      * @return  <code>true</code> if test case shoule stop after this method
      */

@@ -40,7 +40,7 @@ aspect Variability {
         = compareTo(other) == 0;
 
     /**
-     * \brief Test if variability is at most the same as <code>other</code>.
+     * Test if variability is at most the same as <code>other</code>.
      * 
      * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
      */
@@ -54,7 +54,7 @@ aspect Variability {
     syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
 
     /**
-     * \brief An ordering of the variability types.
+     * An ordering of the variability types.
      * 
      * To be used by methods for comparing variabilities. 
      * Should <em>never</em> be compared to literals, only to the return value from other 

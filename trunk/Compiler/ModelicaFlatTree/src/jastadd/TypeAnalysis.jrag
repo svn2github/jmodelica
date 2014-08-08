@@ -453,18 +453,18 @@ aspect FlatTypeAnalysis {
     eq FSimulationStateBuiltIn.type() = fBooleanScalarType();
 
     /**
-     * \brief Check if this FArray is on the form "{exp for i in exp}".
+     * Check if this FArray is on the form "{exp for i in exp}".
      */
     syn boolean FArray.isIterArray() = getNumFExp() == 1 && getFExp(0).isIterExp();
 
     /**
-     * \brief Check if this FExp is on the form "exp for i in exp".
+     * Check if this FExp is on the form "exp for i in exp".
      */
     syn boolean FExp.isIterExp() = false;
     eq FIterExp.isIterExp()      = true;
 
     /**
-     * \brief Returns the expression being iterated over in an FIterExp child. 
+     * Returns the expression being iterated over in an FIterExp child. 
      *        Only valid if {@link #isIterExp()} returns <code>true</code>.
      */
     public FExp FReductionExp.iterExp() { return ((FIterExp) getFExp()).getFExp(); }
@@ -1030,7 +1030,7 @@ aspect BuiltInFlatTypes {
     }
 
     /**
-     * \brief Create a literal of the given integer value for this type, if applicable.
+     * Create a literal of the given integer value for this type, if applicable.
      */
     public FExp FType.createLiteral(int v)        { return null; }
     public FExp FIntegerType.createLiteral(int v) { return new FIntegerLitExp(v); }

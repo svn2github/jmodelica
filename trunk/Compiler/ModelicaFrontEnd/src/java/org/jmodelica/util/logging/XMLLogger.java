@@ -24,12 +24,7 @@ public final class XMLLogger extends PipeLogger {
     public XMLLogger(Level level, File file) throws IOException {
         super(level, file);
     }
-    
-    /**
-     * Constructs a XMLLogger with the sub logger <code>logger</code>
-     * 
-     * @param logger sub logger
-     */
+
     public XMLLogger(Level level, OutputStream stream) throws IOException {
         super(level, stream);
     }

@@ -19,12 +19,12 @@ aspect XMLTestAnnotationizer {
 abstract public class TestAnnotationizerHelper {
 
 	/**
-	 * \brief An XML code generation test.
+	 * An XML code generation test.
 	 */
 	public static class XMLCodeGenTestCase extends CodeGenTestCase {
 
 		/**
-		 * \brief Constructor for XML code generation test.
+		 * Constructor for XML code generation test.
 		 * 
 		 * Delegates to super class.
 		 */
@@ -45,14 +45,14 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 		/**
-		 * \brief Prints a usage message for this test case type.
+		 * Prints a usage message for this test case type.
 		 */
 		public static void usage(String cl, String extra) {
 			TestAnnotationizerHelper.usage(cl, "XML code template");
 		}
 
 		/**
-		 * \brief Create the code generator to use.
+		 * Create the code generator to use.
 		 * 
 		 * Creates an XMLGenerator.
 		 */

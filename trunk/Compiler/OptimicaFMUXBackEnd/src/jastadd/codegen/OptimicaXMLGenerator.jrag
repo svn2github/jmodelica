@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /** \file XMLGenerator.java
-*  \brief XMLGenerator class.
+*  XMLGenerator class.
 */
 
 import java.io.PrintStream;

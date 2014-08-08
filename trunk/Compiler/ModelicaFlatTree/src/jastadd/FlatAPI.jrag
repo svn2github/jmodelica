@@ -957,17 +957,17 @@ aspect FlatAPI {
     /**
      * Check if an expression will generate an event.
      * 
-     * @param boolean Controls whether parameters with fixed = false should be
-     *      considered to generate events.
+     * @param checkNonFixedParameters  Controls whether parameters with fixed = false should be
+     *                                 considered to generate events.
      */
     syn boolean FExp.generatesEvent(boolean checkNonFixedParameters) = generatesEvent(false, checkNonFixedParameters);
 
     /**
      * Check if an expression will generate an event.
      * 
-     * @param boolean Controles whether variability should be ignored.
-     * @param boolean Controls whether parameters with fixed = false should be
-     *      considered to generate events.
+     * @param ignoreVariability        Controles whether variability should be ignored.
+     * @param checkNonFixedParameters  Controls whether parameters with fixed = false should be
+     *                                 considered to generate events.
      */
     syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
             inEventGeneratingLocation() && hasEventGeneratingType() &&
@@ -1275,7 +1275,7 @@ aspect FlatAPI {
     eq FOrExp.isInitialGuard() = getLeft().isInitialGuard() || getRight().isInitialGuard();
             
     /**
-     * \brief Find LHS variables which are definetly assigned to before any use.
+     * Find LHS variables which are definetly assigned to before any use.
      */
     public Set<FVariable> FAlgorithm.defSet() {
         HashSet<FVariable> fvSet = new HashSet<FVariable>();
@@ -1305,7 +1305,7 @@ aspect FlatAPI {
     }
     
     /**
-     * \brief Check if tree contains a function call returning an array or a record.
+     * Check if tree contains a function call returning an array or a record.
      */
     syn boolean ASTNode.hasCompositeFunc() {
         for (ASTNode n : this)
@@ -1697,7 +1697,7 @@ aspect FlatTypes {
 }
 
 /**
- * \brief Evaluation of attriubtes for primitive types.
+ * Evaluation of attriubtes for primitive types.
  */
 aspect Attributes {
     
@@ -1934,7 +1934,7 @@ aspect Attributes {
 aspect FVariableUses {
     
     /**
-     * \brief Collection attribute returning all variable uses in expressions.
+     * Collection attribute returning all variable uses in expressions.
      */
     coll HashSet<FIdUseExp> FAbstractVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
         with add root FlatRoot;
@@ -2061,7 +2061,7 @@ aspect FVariableUses {
     eq FVariable.getBindingExp().inParamBindingExp() = isParameter();
     
     /**
-     * \brief Collection attribute returning all dependent parameters which
+     * Collection attribute returning all dependent parameters which
      * depends on the parameter.
      */
     
@@ -2085,7 +2085,7 @@ aspect FVariableUses {
         FClass.intersectFVColl(myFClass().strings(), dependentParameters());
 
     /**
-     * \brief Collection attribute returning all input variables (FVariables)
+     * Collection attribute returning all input variables (FVariables)
      * referenced in an equation.
      */
      
@@ -2120,7 +2120,7 @@ aspect FVariableUses {
 
     
     /**
-     * \brief Collection attribute returning all algebraic variables (FVariables)
+     * Collection attribute returning all algebraic variables (FVariables)
      * referenced in an equation.
      */
     coll LinkedHashSet<FVariable> FAbstractEquation.retrieveAlgebraicVariables() 
@@ -2179,7 +2179,7 @@ aspect FVariableUses {
 
 
     /**
-     * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
+     * Collection attribute returning all derivative variables (FDerivativeVariables)
      * referenced in an equation.
      */
     coll LinkedHashSet<FDerivativeVariable> FAbstractEquation.derivativeVariables() 
@@ -2189,7 +2189,7 @@ aspect FVariableUses {
         FAbstractEquation.derivativeVariables() for myFEquation();
 
     /**
-     * \brief Collection attribute returning all differentiated variables (FVariables)
+     * Collection attribute returning all differentiated variables (FVariables)
      * referenced in an equation.
      */
     coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedRealVariables() 
@@ -2199,7 +2199,7 @@ aspect FVariableUses {
         FAbstractEquation.differentiatedRealVariables() for myFEquation();
 
     /**
-     * \brief Collection attribute returning all discrete variables (FVariables)
+     * Collection attribute returning all discrete variables (FVariables)
      * referenced in an equation.
      */
     coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
@@ -2209,7 +2209,7 @@ aspect FVariableUses {
         FAbstractEquation.discreteVariables() for myFEquation();
 
     /**
-     * \brief Collection attribute returning all non-fixed parameters (FVariables)
+     * Collection attribute returning all non-fixed parameters (FVariables)
      * referenced in an equation.
      */
     coll LinkedHashSet<FVariable> FAbstractEquation.nonFixedParameters()
@@ -2219,7 +2219,7 @@ aspect FVariableUses {
         FAbstractEquation.nonFixedParameters() for myFEquation();
 
     /**
-     * \brief Collection attribute returning all pre variables (FPreVariable)
+     * Collection attribute returning all pre variables (FPreVariable)
      * referenced in an equation.
      */
     coll LinkedHashSet<FVariable> FAbstractEquation.discretePreVariables() 
@@ -2238,14 +2238,14 @@ aspect FVariableUses {
     }
 
     /**
-     * \brief Get the differenetiated variabel (FVariable) corresponding to 
+     * Get the differenetiated variabel (FVariable) corresponding to 
      * a derivative variable (FDerivativeVariable)
      */
     syn FRealVariable FDerivativeVariable.myDifferentiatedVariable() =
         (FRealVariable) lookupFV(getFQName());
 
     /**
-     * \brief Get the derivative variabel (FDerivativeVariable) corresponding to 
+     * Get the derivative variabel (FDerivativeVariable) corresponding to 
      * a differentiated variable (FVariable)
      */
     syn FDerivativeVariable FVariable.myDerivativeVariable() =
@@ -2273,7 +2273,7 @@ aspect FVariableUses {
 aspect LinearFVariables {
     
     /**
-     * \brief Check linearity of variable.
+     * Check linearity of variable.
      * 
      * The attribute isLinear returns true if all uses of the variable appears
      * linearly in equations and in initial equations. Parameters and constants
@@ -2295,7 +2295,7 @@ aspect LinearFVariables {
     }
     
     /**
-     * \brief Check if a subexpression appears linearly.
+     * Check if a subexpression appears linearly.
      * 
      * Note that this method does not check if the expression itself is linear
      * but wheather it apperas linearly in a composite expression. For example
@@ -2906,7 +2906,7 @@ aspect FlatAlgorithmAPI {
 aspect FlatExternalFunctionAPI {
     
     /**
-     * \brief Gives the arguments to pass to gcc required by external functions.
+     * Gives the arguments to pass to gcc required by external functions.
      */
     syn String FClass.externalCompilerArgs() {
         StringBuilder buf = new StringBuilder();
@@ -3020,7 +3020,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     /**
-     * \brief Converts an URI to a file-system path.
+     * Converts an URI to a file-system path.
      * 
      * Only modelica:// and file:// URIs are supported.
      * 

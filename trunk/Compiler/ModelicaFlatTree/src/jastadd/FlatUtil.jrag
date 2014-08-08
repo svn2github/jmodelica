@@ -127,7 +127,7 @@ aspect FlatNames {
     eq InstRoot.getChild().retrieveFQNameFromModification()               = new FQNameEmpty();
 
     /**
-     * \brief Get a string representation of a prefix of this name.
+     * Get a string representation of a prefix of this name.
      * 
      * @param n     the number of parts to include. If <code>n <= 0</code>, then 
      *              all but the last <code>-n</code> parts are included.
@@ -933,7 +933,7 @@ aspect FlatNames {
     }
     
     /**
-     * \brief Create a copy of this name without array subscripts.
+     * Create a copy of this name without array subscripts.
      */
     public FQName FQName.copyWithoutSubscripts() {
         return fullCopy();
@@ -986,7 +986,7 @@ aspect FlatNames {
     }
     
     /**
-     * \brief Interface for variable declarations in flat and instance trees.
+     * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
         public FExp createUseExp();
@@ -1125,7 +1125,7 @@ aspect FlatNames {
     }
     
     /**
-     * \brief Create an FIdUseExp using a copy of this name.
+     * Create an FIdUseExp using a copy of this name.
      * 
      * @param fas  array subscripts to use for the last name part.
      */
@@ -1134,7 +1134,7 @@ aspect FlatNames {
     }
     
     /**
-     * \brief Create an FIdUse using a copy of this name.
+     * Create an FIdUse using a copy of this name.
      * 
      * @param fas  array subscripts to use for the last name part.
      */
@@ -1169,7 +1169,7 @@ aspect FlatNames {
     eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
     
     /**
-     * \brief Add an equation to the first equation block.
+     * Add an equation to the first equation block.
      */
     public void FClass.addFEquation(FAbstractEquation feq) {
         addFAbstractEquationNoTransform(feq);
@@ -1184,7 +1184,7 @@ aspect FlatFunctionUtils {
      syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
      
      /**
-      * \brief Returns a list of all InstComponentDecls declared as "input".
+      * Returns a list of all InstComponentDecls declared as "input".
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
@@ -1197,7 +1197,7 @@ aspect FlatFunctionUtils {
      eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
      
      /**
-      * \brief Returns a list of all InstComponentDecls not declared as "input".
+      * Returns a list of all InstComponentDecls not declared as "input".
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
@@ -1210,7 +1210,7 @@ aspect FlatFunctionUtils {
      eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
      
      /**
-      * \brief Returns a list of all InstComponentDecls declared as "output".
+      * Returns a list of all InstComponentDecls declared as "output".
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
@@ -1223,7 +1223,7 @@ aspect FlatFunctionUtils {
      eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
      
      /**
-      * \brief Returns a list of all contained InstComponentDecls that may be altered by a modification.
+      * Returns a list of all contained InstComponentDecls that may be altered by a modification.
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myModifiableComponents() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
@@ -1241,7 +1241,7 @@ aspect FlatFunctionUtils {
      // TODO: Are there other reasons a component might not be modifiable?
      
      /**
-      * \brief Returns a list of all FFunctionVariables declared as "input".
+      * Returns a list of all FFunctionVariables declared as "input".
       */
      syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myInputs() {
          ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
@@ -1252,12 +1252,12 @@ aspect FlatFunctionUtils {
      }
      
     /**
-     * \brief Returns the i:th FFunctionVariable that is  declared as "input".
+     * Returns the i:th FFunctionVariable that is  declared as "input".
      */
     syn FFunctionVariable FFunctionDecl.myInput(int i) = myInputs().get(i);
      
      /**
-      * \brief Returns a list of all FFunctionVariables not declared as "input" or "output".
+      * Returns a list of all FFunctionVariables not declared as "input" or "output".
       */
      syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myProtected() {
          ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
@@ -1268,7 +1268,7 @@ aspect FlatFunctionUtils {
      }
      
      /**
-      * \brief Returns a list of all FFunctionVariables not declared as "input".
+      * Returns a list of all FFunctionVariables not declared as "input".
       */
      syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myNonInputs() {
          ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
@@ -1279,7 +1279,7 @@ aspect FlatFunctionUtils {
      }
      
      /**
-      * \brief Returns a list of all FFunctionVariables declared as "output".
+      * Returns a list of all FFunctionVariables declared as "output".
       */
      syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myOutputs() {
          ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
@@ -1322,17 +1322,17 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getChild().funcName()     = getCall().name();
      
      /**
-      * \brief Check if this function returns an array when used as an expression.
+      * Check if this function returns an array when used as an expression.
       */
      syn boolean FFunctionDecl.isArray() = hasOutputs() ? expOutput().isArray() : false;
      
      /**
-      * \brief Check if this function returns a record when used as an expression.
+      * Check if this function returns a record when used as an expression.
       */
      syn boolean FFunctionDecl.isRecord() = hasOutputs() ? expOutput().type().isRecord() : false;
      
      /**
-      * \brief Check if this function returns a non-primitive when used as an expression.
+      * Check if this function returns a non-primitive when used as an expression.
       */
      syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
      
@@ -1416,7 +1416,7 @@ aspect FlatFunctionUtils {
      private InstClassDecl InstAssignable.temporarilyInFunction = null;
      
      /**
-      * \brief Check is this node is in a function.
+      * Check is this node is in a function.
       */
      inh boolean FQName.inFunction();
      inh boolean InstFunctionArgument.inFunction();
@@ -1456,7 +1456,7 @@ aspect FlatFunctionUtils {
      eq Root.getChild().containingEntity()              = null;
      
      /**
-      * \brief Check is this node is in a non-function algorithm.
+      * Check is this node is in a non-function algorithm.
       */
      inh boolean FSubscript.inAlgorithm();
      inh boolean FFunctionCall.inAlgorithm();
@@ -1468,12 +1468,12 @@ aspect FlatFunctionUtils {
      eq FClass.getChild().inAlgorithm()            = false;
      
      /**
-      * \brief Check is this node is in an algorithm or a function.
+      * Check is this node is in an algorithm or a function.
       */
      syn boolean FSubscript.inAlgorithmOrFunction() = inFunction() || inAlgorithm();
      
      /**
-      * \brief Check if this function call is the call of a function call equation 
+      * Check if this function call is the call of a function call equation 
       *        or function call statement.
       */
      inh boolean FAbstractFunctionCall.isFunctionCallClause();
@@ -1495,7 +1495,7 @@ aspect FlatFunctionUtils {
      eq FIfWhenStmt.getChild().insideBranchedStmt() = true;
      
      /**
-      * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
+      * Return the index of the variable assigned by this FFunctionCallLeft among 
       *        all those assigned by the same FFunctionCallEquation/Stmt
       */
      syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFExp() ? 1 : 0);
@@ -1506,14 +1506,14 @@ aspect FlatFunctionUtils {
      syn int FFunctionCallLeft.myLastIndex() = myIndex() + (hasFExp() ? numScalarVars() - 1 : 0);
      
      /**
-      * \brief Get the number of scalar variables assigned by this FFunctionCallLeft.
+      * Get the number of scalar variables assigned by this FFunctionCallLeft.
       * 
       * Only valid after scalarization.
       */
      syn int FFunctionCallLeft.numScalarVars() = (hasFExp() ? getFExp().numScalarVars() : 0);
      
      /**
-      * \brief Get the number of scalar variables assigned by this a FFunctionCallLeft with this 
+      * Get the number of scalar variables assigned by this a FFunctionCallLeft with this 
       *        FExp as its expression.
       * 
       * Only valid after scalarization.
@@ -1704,7 +1704,7 @@ aspect FlatExpressions {
     eq FAbstractEquation.getInitialEquation().isInitial() = true;
     
     /**
-     * \brief Is this expression of a type that is valid for most uses?
+     * Is this expression of a type that is valid for most uses?
      * 
      * Only dummy expressions and similar return false.
      */

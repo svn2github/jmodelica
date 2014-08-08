@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /** \file CGenerator.java
-*  \brief CGenerator class.
+*  CGenerator class.
 */
 
 import java.io.*;
@@ -1100,7 +1100,7 @@ public class CGenerator extends GenericGenerator {
 	}
 	
 	/**
-	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 * Returns the string denoting the beginning of the copyright blurb.
 	 */
 	protected String startOfBlurb() { return "/*"; }
 	

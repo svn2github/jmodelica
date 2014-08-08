@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 aspect Arrays {
 
 	/**
-	 * \brief Get the array subscripts of a ComponentDecl.
+	 * Get the array subscripts of a ComponentDecl.
 	 * 
 	 * @return If the ComponentDecl has subscripts, then return these, otherwise
 	 * null.
@@ -35,7 +35,7 @@ aspect Arrays {
 		hasVarArraySubscripts() ? getVarArraySubscripts() : null;
 
 	/**
-	 * \brief Check if an expression is inside array subscripts.
+	 * Check if an expression is inside array subscripts.
 	 */
 	inh boolean FExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
@@ -43,7 +43,7 @@ aspect Arrays {
 	eq Root.getChild().inArraySubscripts() = false;
 	
 	/**
-	 * \brief Check if an access is an array access.
+	 * Check if an access is an array access.
 	 * 
 	 * @return True if the access has array subscripts, otherwise false.
 	 */
@@ -51,7 +51,7 @@ aspect Arrays {
 	eq ArrayAccess.isArrayAccess() = hasArraySubscripts();
 	
 	/**
-	 * \brief Get the array subscripts of an access, if any.
+	 * Get the array subscripts of an access, if any.
 	 * 
 	 * @return The array subscripts of the access, if any, otherwise null.
 	 */
@@ -59,7 +59,7 @@ aspect Arrays {
 	eq ArrayAccess.arraySubscripts() = hasArraySubscripts()? getArraySubscripts(): null;
 
 	/**
-	 * \brief Return an Index with these array subscripts.
+	 * Return an Index with these array subscripts.
 	 * 
 	 * This version is cached, to avoid repeating constant evaluation.
 	 * 
@@ -69,7 +69,7 @@ aspect Arrays {
 	syn lazy Index FArraySubscripts.asIndex() = createIndex();
 	
 	/**
-	 * \brief Return an Index with these array subscripts.
+	 * Return an Index with these array subscripts.
 	 * 
 	 * This version is not cached, to allow indices to be re-evaluated at each use 
 	 * during function evaluation.
@@ -99,7 +99,7 @@ aspect Arrays {
 	eq FMatrixExp.dimensionsToKeep() = new int[] { 0, 1 };
 
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -115,7 +115,7 @@ aspect Arrays {
 	}
 
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -128,7 +128,7 @@ aspect Arrays {
 
 	// Array dimensions
 	/**
-	 * \brief Get array dimensions of array subscripts when used in an identifier.
+	 * Get array dimensions of array subscripts when used in an identifier.
 	 * 
 	 * Here it is not sufficient to check the number of subscripts; the 
 	 * identifier x[1] has the dimension 0, not 1.
@@ -150,14 +150,14 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get array dimensions of a single part of an access.
+	 * Get array dimensions of a single part of an access.
 	 */
 	syn int InstAccess.localNdims() = 
 		hasFArraySubscripts() ? getFArraySubscripts().accessNdims() : myInstComponentDecl().ndims();
 
 	
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -170,7 +170,7 @@ aspect Arrays {
 	eq FIntegerSubscript.ndims() = 0;
 	
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -284,14 +284,14 @@ aspect Arrays {
 	eq FVectUnaryBuiltIn.ndims() = getFExp().ndims();
 	
 	/**
-	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
+	 * Check if multiplication is equivalent with an element-wise multiplication.
 	 * 
 	 * True if any operand is scalar.
 	 */
 	syn boolean FMulExp.isElementWise() = (getLeft().ndims() * getRight().ndims() == 0);
 	
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -316,7 +316,7 @@ aspect Arrays {
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -331,7 +331,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the expanded FArraySubscripts of each part of this access.
+	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
 	syn java.util.List<FArraySubscripts> InstAccess.allFArraySubscripts() = Arrays.asList(new FArraySubscripts());
 	eq InstArrayAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
@@ -388,7 +388,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the expanded FArraySubscripts of each part of this access.
+	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
 	syn lazy ArrayList<FArraySubscripts> FIdUse.allFArraySubscripts() {
 		ArrayList<FArraySubscripts> res = getFQName().createFArraySubscriptsList();
@@ -420,7 +420,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the expanded array subscripts of this access.
+	 * Get the expanded array subscripts of this access.
 	 * 
 	 * An access without subscripts returns subscripts that span the entire component.
 	 * Any colon subscripts are expanded into constant vector expressions.
@@ -431,7 +431,7 @@ aspect Arrays {
 //	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
 	
 	/**
-	 * \brief Get the expanded array subscripts of this access.
+	 * Get the expanded array subscripts of this access.
 	 * 
 	 * @return  an FArraySubscripts that spans the entire FV this access points to.
 	 */
@@ -452,7 +452,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Create a copy of this FArraySubscripts with all colon indices expanded.
+	 * Create a copy of this FArraySubscripts with all colon indices expanded.
 	 */
 	public FArraySubscripts FArraySubscripts.expandedSubscripts() {
 		FArraySubscripts res = new FArraySubscripts();
@@ -462,7 +462,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Create a copy of this FSubscript, expanding it to a vector if it is a colon.
+	 * Create a copy of this FSubscript, expanding it to a vector if it is a colon.
 	 */
 	public FSubscript FSubscript.expandedSubscript() {
 		return (FSubscript) fullCopy();
@@ -472,7 +472,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Create an FArraySubscripts that spans all array cells of this component.
+	 * Create an FArraySubscripts that spans all array cells of this component.
 	 * 
 	 * If this is a scalar component, an empty FArraySubscripts is returned.
 	 */
@@ -481,7 +481,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -491,7 +491,7 @@ aspect Arrays {
 	syn int InstAssignable.ndims() = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
 	
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -515,7 +515,7 @@ aspect Arrays {
 	syn int CommonForIndex.ndims() = hasFExp() ? getFExp().ndims() : 1;
 	
 	/**
-	 * \brief Get array dimensions.
+	 * Get array dimensions.
 	 * 
 	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
 	 * an error in computation of the array dimensions.
@@ -535,7 +535,7 @@ aspect Arrays {
 	}
 
 	/**
-	 * \brief Get array dimensions of an identifier when used in an identifier.
+	 * Get array dimensions of an identifier when used in an identifier.
 	 * 
 	 * Here it is not sufficient to check the number of subscripts; the 
 	 * identifier x[1] has the dimension 0, not 1.
@@ -559,7 +559,7 @@ aspect Arrays {
 	// Array sizes
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	syn lazy Size FAbstractEquation.size() = Size.SCALAR;
 	eq FEquation.size() {
@@ -608,7 +608,7 @@ aspect Arrays {
 	eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	syn lazy Size FArraySubscripts.declarationSize() = declarationSize(getFSubscripts());
 	
@@ -628,7 +628,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Add the size of the dimension denoted by this subscript when used 
+	 * Add the size of the dimension denoted by this subscript when used 
 	 *        in a declaration to the given Size.
 	 */
 	public abstract void FSubscript.addDeclarationSize(MutableSize s);
@@ -652,7 +652,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief The variable declaration that this subscript is a part of the size of, if any.
+	 * The variable declaration that this subscript is a part of the size of, if any.
 	 */
 	inh CommonVariableDecl FColonSubscript.surroundingVariableDecl();
 	eq FVariable.getFQName().surroundingVariableDecl()                   = this;
@@ -661,13 +661,13 @@ aspect Arrays {
 	eq Root.getChild().surroundingVariableDecl()                         = null;
 	
 	/**
-	 * \brief The dimension this subscript is used for.
+	 * The dimension this subscript is used for.
 	 */
 	inh int FSubscript.myDim();
 	eq FArraySubscripts.getFSubscript(int i).myDim() = i;
 
 	/**
-	 * \brief Get the array sizes when the array subscripts are used in an
+	 * Get the array sizes when the array subscripts are used in an
 	 * access. See also documentation of accessNdims(). 
 	 */
 	syn lazy Size FArraySubscripts.accessSize() {
@@ -682,7 +682,7 @@ aspect Arrays {
 
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	syn Size FSubscript.size();
 	eq FExpSubscript.size()     = getFExp().size();
@@ -690,7 +690,7 @@ aspect Arrays {
 	eq FIntegerSubscript.size() = Size.SCALAR;
 	
 	/**
-	 * \brief Get the size this subscript(s) would have if all subscripts were colons.
+	 * Get the size this subscript(s) would have if all subscripts were colons.
 	 */
 	inh Size FEndExp.mySize();
 	inh Size FSubscript.mySize();
@@ -715,7 +715,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	syn Size FExp.size() = Size.SCALAR;
 	syn lazy Size FAbstractArrayExp.size() = super.size();
@@ -779,7 +779,7 @@ aspect Arrays {
 	}
  	
  	/**
- 	 * \brief Create a new expression suitable for use in an expression calculating the 
+ 	 * Create a new expression suitable for use in an expression calculating the 
  	 *        array size of a range expression.
  	 */
  	public FExp FExp.makeRangeSizeExp() {
@@ -787,7 +787,7 @@ aspect Arrays {
  	}
  	
  	/**
- 	 * \brief Wrap the given expression so it is suitable for use in an expression 
+ 	 * Wrap the given expression so it is suitable for use in an expression 
  	 *        calculating the array size of a range expression.
  	 */
  	public FExp FType.wrapRangeSizeExp(FExp exp) {
@@ -1076,7 +1076,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the array sizes.
+	 * Get the array sizes.
 	 */
 	syn lazy Size FIdUse.size() {
 		if (ndims() == 0)
@@ -1094,14 +1094,14 @@ aspect Arrays {
 	eq FIdUseExp.size() = getFIdUse().size();
 	
     /**
-     * \brief Get the array sizes. 
+     * Get the array sizes. 
      */
     syn Size InstAccess.size()   = Size.SCALAR;
     eq InstScalarAccess.size()   = myInstComponentDecl().size();
     eq InstArrayAccess.size()    = getFArraySubscripts().accessSize();
 			
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	eq InstAssignable.size() {
 		Size s = declaredSize();
@@ -1130,26 +1130,26 @@ aspect Arrays {
 	eq InstGlobalAccess.size() = getInstAccess().size();
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	syn Size InstNode.size()               = FArraySubscripts.declarationSize(myFSubscripts());	
 	syn lazy Size InstComponentDecl.size() = declaredSize();
 
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
 	eq FFunctionArray.size() = getType().size();
 		
 	/**
-	 * \brief Get the array sizes of the loop index expression. 
+	 * Get the array sizes of the loop index expression. 
 	 */	
 	syn Size CommonForIndex.size() = hasFExp() ? getFExp().size() : Size.SCALAR;
 	// TODO: support automatic extrapolation of the loop expression
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * Get the array sizes. 
 	 */
 	syn Size FQName.size() = Size.SCALAR;
 	syn lazy Size FQNameFull.size() {
@@ -1217,7 +1217,7 @@ aspect Arrays {
     }
 
     /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map<ASTNode, FExp>)} - should not be called directly.
+     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
     protected FExp CommonAccess.createSizeFExpForUse(Map<ASTNode, FExp> varMap, CommonVariableDecl var) {
         if (varMap.containsKey(this))
@@ -1233,7 +1233,7 @@ aspect Arrays {
     }
 
     /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map<ASTNode, FExp>)} - should not be called directly.
+     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
     protected FExp CommonAccess.createSizeFExpForKeptUse(Map<ASTNode, FExp> varMap) {
         CommonAccess res = fullCopy();
@@ -1242,7 +1242,7 @@ aspect Arrays {
     }
 
     /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map<ASTNode, FExp>)} - should not be called directly.
+     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
     protected void CommonAccess.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {}
 
@@ -1261,7 +1261,7 @@ aspect Arrays {
     }
 
     /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map<ASTNode, FExp>)} - should not be called directly.
+     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
     protected void FQName.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {}
 
@@ -1273,7 +1273,7 @@ aspect Arrays {
     }
 
     /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map<ASTNode, FExp>)} - should not be called directly.
+     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
     protected void FSubscript.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {}
 
@@ -1300,7 +1300,7 @@ aspect Arrays {
     }
 
     /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map<ASTNode, FExp>)}.
+     * Helper method for {@link ASTNode#createSizeFExp(Map)}.
      */
     public InstFunctionArgument InstFunctionArgument.createSizeFExpArg(Map<ASTNode, FExp> varMap) {
         return fullCopy();
@@ -1363,28 +1363,28 @@ aspect Arrays {
 	}
 		
 	/**
-	 * \brief check if an expression is an array expression.
+	 * check if an expression is an array expression.
 	 * 
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean FExp.isArray() = ndims()>0;
 	
 	/**
-	 * \brief check if an access is an array expression.
+	 * check if an access is an array expression.
 	 * 
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean InstAccess.isArray() = ndims()>0;
 
 	/**
-	 * \brief check if a variable is an array expression.
+	 * check if a variable is an array expression.
 	 * 
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean FAbstractVariable.isArray() = ndims()>0;
 	
 	/**
-	 * \brief check if an instance node is an array expression.
+	 * check if an instance node is an array expression.
 	 * 
 	 * @return True if array dimension > 0 else false
 	 */
@@ -1394,7 +1394,7 @@ aspect Arrays {
 	public abstract String CommonForIndex.name();
 	
 	/**
-	 * \brief Expand for all values of for indices given in <code>indices</code>.
+	 * Expand for all values of for indices given in <code>indices</code>.
 	 * 
 	 * This is used to get the set of values for array indices while error checking 
 	 * and to expand summation reduction expressions.
@@ -1462,7 +1462,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief If this node is a use of an index in <code>indexMap</code>, return the 
+	 * If this node is a use of an index in <code>indexMap</code>, return the 
 	 *        respective expression, otherwise return <code>this</code>.
 	 */
 	protected ASTNode ASTNode.replaceFromIndexMap(Map<String,FExp> indexMap) {
@@ -1478,12 +1478,12 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Expand index for all values of each for index used in expression.
+	 * Expand index for all values of each for index used in expression.
 	 */
     syn lazy Array FExpSubscript.getExpanded() = getFExp().getArray().createExpanded(collectForIndices(), getFExp().myFClass() != null);
 	
 	/**
-	 * \brief Collect all ForIndexs used in the expression of this FExpSubscript.
+	 * Collect all ForIndexs used in the expression of this FExpSubscript.
 	 */
 	coll HashSet<CommonForIndex> FExpSubscript.collectForIndices() 
 		[new HashSet<CommonForIndex>()] with add root FExpSubscript;
@@ -1493,7 +1493,7 @@ aspect Arrays {
 		to FExpSubscript.collectForIndices() for each allSurroundingFExpSubscripts();
 	
 	/**
-	 * \brief Return the FForIndex or InstForIndex that this variable belongs to, if any.
+	 * Return the FForIndex or InstForIndex that this variable belongs to, if any.
 	 */
 	syn CommonForIndex FIdUse.myForIndex()            = myFV().myForIndex();
 	syn CommonForIndex FIdUseInstAccess.myForIndex()  = getInstAccess().myInstComponentDecl().myForIndex();
@@ -1507,7 +1507,7 @@ aspect Arrays {
 	eq InstNode.getChild().myForIndex()             = null;
 	
 	/**
-	 * \brief Find the closest ancestor that is an FExpSubscript, if any.
+	 * Find the closest ancestor that is an FExpSubscript, if any.
 	 */
 	inh FExpSubscript FIdUse.surroundingFExpSubscript();
 	inh FExpSubscript FInstAccessExp.surroundingFExpSubscript();
@@ -1516,7 +1516,7 @@ aspect Arrays {
 	eq Root.getChild().surroundingFExpSubscript()          = null;
 	
 	/**
-	 * \brief Find the all ancestors that are FExpSubscripts, if any.
+	 * Find the all ancestors that are FExpSubscripts, if any.
 	 */
 	syn ArrayList<FExpSubscript> FIdUse.allSurroundingFExpSubscripts() {
 		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
@@ -1529,7 +1529,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Find the all ancestors that are FExpSubscripts, if any.
+	 * Find the all ancestors that are FExpSubscripts, if any.
 	 */
 	syn ArrayList<FExpSubscript> FInstAccessExp.allSurroundingFExpSubscripts() {
 		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
@@ -1562,10 +1562,10 @@ aspect Arrays {
     }
 
 	/**
-	 * \brief Allows for more efficient execution of {@link getArray()} in some cases.
+	 * Allows for more efficient execution of {@link #getArray()} in some cases.
 	 * 
 	 * When the Array of a parent node is the same as a childs, replace 
-	 * getArray() with {@link createArray()} for the types the child can have, 
+	 * getArray() with {@link #createArray()} for the types the child can have, 
 	 * let getArray() for those types delegate to copyArray() and use copyArray() 
 	 * on the child in getArray() for the parent.
 	 * 
@@ -1575,9 +1575,9 @@ aspect Arrays {
 	syn Array FExp.copyArray() = (Array) createArray().unboundCopy();
 	
 	/**
-	 * \brief Allows for more efficient execution of {@link getArray()} in some cases.
+	 * Allows for more efficient execution of {@link #getArray()} in some cases.
 	 * 
-	 * See {@link copyArray()} for instructions. 
+	 * See {@link #copyArray()} for instructions. 
 	 * When overriding createArray(), always declare it as lazy.
 	 */
 	syn Array FExp.createArray() = getArray();
@@ -1985,7 +1985,7 @@ aspect Arrays {
     }
 
 	/**
-	 * \brief Add a copy of this expression to arr at position i. 
+	 * Add a copy of this expression to arr at position i. 
 	 */
 	public void FExp.fillArray(Array arr, Index i, int level) {
 		if (isArray())
@@ -1995,7 +1995,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Add a copy of the expression at position i to arr. 
+	 * Add a copy of the expression at position i to arr. 
 	 * 
 	 * @param arr    the Array to add the expression to.
 	 * @param i      the index to add at, denotes position in both Array and FArray.
@@ -2061,7 +2061,7 @@ aspect Arrays {
 	/**
 	 * Creates an FSubscript to use when scalarizing iteration expressions.
 	 * 
-	 * Returns a use of {@see #uniqueIterExpName()} if there is no current evaluation value, 
+	 * Returns a use of {@link #uniqueIterExpName()} if there is no current evaluation value, 
 	 * or that value if there is one.
 	 */
 	syn FSubscript CommonForIndex.iterExpSubscript() = 
@@ -2145,7 +2145,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Returns a scalar FIdUseInstAccess, as specified by an index.
+	 * Returns a scalar FIdUseInstAccess, as specified by an index.
 	 * 
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  ignored (needed by superclass implementation) 
@@ -2156,7 +2156,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Returns a scalar FIdUse, as specified by an index.
+	 * Returns a scalar FIdUse, as specified by an index.
 	 * 
 	 * The use is marked scalarized if this use is.
 	 * 
@@ -2167,7 +2167,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Returns a scalar FIdUse, as specified by an index.
+	 * Returns a scalar FIdUse, as specified by an index.
 	 * 
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  <code>true</code> if the use should be marked as scalarized 
@@ -2177,7 +2177,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Creates a new FQName with the FArraySubscripts taken from the given Index.
+	 * Creates a new FQName with the FArraySubscripts taken from the given Index.
 	 * 
 	 * The FQName is marked scalarized if this use is.
 	 * 
@@ -2188,7 +2188,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Creates a new FQName with the FArraySubscripts taken from the given Index.
+	 * Creates a new FQName with the FArraySubscripts taken from the given Index.
 	 * 
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
@@ -2233,7 +2233,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Creates a new FSubscript that specifies this array subscript to a single index.
+	 * Creates a new FSubscript that specifies this array subscript to a single index.
 	 * 
 	 * - For scalar subscripts, a copy is returned.
 	 * - For colon subscripts, the given index is used as the new subscript.
@@ -2262,13 +2262,13 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Gets the number of FSubscripts in the FArraySubscripts of this FQNamePart, if any.
+	 * Gets the number of FSubscripts in the FArraySubscripts of this FQNamePart, if any.
 	 */
 	syn int FQNamePart.numFSubscripts() = 
 		hasFArraySubscripts() ? getFArraySubscripts().getNumFSubscript() : 0;
 	
 	/**
-	 * \brief Creates a new InstAccess with the FArraySubscripts taken from the given Index.
+	 * Creates a new InstAccess with the FArraySubscripts taken from the given Index.
 	 * 
 	 * @param i  the Index specifying what array subscripts to use
 	 */
@@ -2277,7 +2277,7 @@ aspect Arrays {
 	}
 
 	/**
-	 * \brief Create a copy with the FArraySubscripts of each part set to match the Index.
+	 * Create a copy with the FArraySubscripts of each part set to match the Index.
 	 * 
 	 * @param i    the Index specifying what array subscripts to use
 	 * @param dim  the next dimension in <code>i</code> to use, 
@@ -2385,7 +2385,7 @@ aspect Arrays {
 	eq FFillExp.fillExp() = getFillExp();
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
@@ -2407,35 +2407,35 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices FArraySubscripts.indices() = Indices.createFromFas(this);
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices FSubscript.indices() = Indices.create(size());
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices FType.indices() = Indices.create(size());
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices FExpSubscript.indices() = getFExp().indices();
 
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
@@ -2443,28 +2443,28 @@ aspect Arrays {
 	syn Indices FIdUseInstAccess.indices() = getInstAccess().indices();
 
 	/**
-	 * \brief Get the set of all array indices of an instance array access. 
+	 * Get the set of all array indices of an instance array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices InstAccess.indices() = Indices.createFromFas(qualifiedAllFArraySubscripts());
 		
 	/**
-	 * \brief Get the set of all array indices of an subscripted array expression. 
+	 * Get the set of all array indices of an subscripted array expression. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices FSubscriptedExp.indices() = getFArraySubscripts().indices();
 
 	/**
-	 * \brief Get the set of all array indices of an instance primitive component. 
+	 * Get the set of all array indices of an instance primitive component. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices InstAssignable.indices() = Indices.create(size());
 
 	/**
-	 * \brief Get the set of all array indices of an FVariable. 
+	 * Get the set of all array indices of an FVariable. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
@@ -2473,21 +2473,21 @@ aspect Arrays {
 	eq FFunctionArray.indices() = Indices.create(size());
 
 	/**
-	 * \brief Get the set of all array indices of an InstComponentDecl. 
+	 * Get the set of all array indices of an InstComponentDecl. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices InstComponentDecl.indices() = Indices.create(size());
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices FEquation.indices() = getLeft().indices();
 	
 	/**
-	 * \brief Get the set of all indices this array subscript spans.
+	 * Get the set of all indices this array subscript spans.
 	 * 
 	 * @return an int array containing the indices spanned
 	 */
@@ -2526,7 +2526,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the set of all values this for index spans.
+	 * Get the set of all values this for index spans.
 	 * 
 	 * @return an int array containing the values spanned
 	 */
@@ -2538,7 +2538,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Get the set of all values this for index spans.
+	 * Get the set of all values this for index spans.
 	 * 
 	 * @return an int array containing the values spanned
 	 */
@@ -2550,7 +2550,7 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Try to infer type of an expression from its surrounding Array.
+	 * Try to infer type of an expression from its surrounding Array.
 	 * 
 	 * An FExp that is the direct child of an Array always has the same type as the Array, except scalar.
 	 * 
@@ -2559,7 +2559,7 @@ aspect Arrays {
 	syn FType FExp.inferType() = inArray() ? inferredType() : type();
 	
 	/**
-	 * \brief Check if this expression is the direct child of an Array.
+	 * Check if this expression is the direct child of an Array.
 	 */
 	inh boolean FExp.inArray();
 	inh boolean List.inArray();
@@ -2568,7 +2568,7 @@ aspect Arrays {
 	eq ASTNode.getChild().inArray() = false;
 	
 	/**
-	 * \brief Helper attribute to {@link FExp#inferType()}.
+	 * Helper attribute to {@link FExp#inferType()}.
 	 */
 	inh FType FExp.inferredType();
 	inh FType List.inferredType();
@@ -2577,7 +2577,7 @@ aspect Arrays {
 	eq ASTNode.getChild().inferredType() = null;
 
 	/**
-	 * \brief The type of the expression this Array belongs to.
+	 * The type of the expression this Array belongs to.
 	 */
 	inh FType Array.type();
 	eq FExp.getArray().type()             = type();
@@ -2588,31 +2588,31 @@ aspect Arrays {
 aspect ArrayHelpers {
 	
 	/**
-	 * \brief An array size. Can be multi-dimensional.
+	 * An array size. Can be multi-dimensional.
 	 */
 	public class Size {
 		
 		/**
-		 * \brief Used for unknown lengths.
+		 * Used for unknown lengths.
 		 */
 		public static final int UNKNOWN = -1;
 		
 		/**
-		 * \brief Used to represent the size of scalar expressions.
+		 * Used to represent the size of scalar expressions.
 		 */
 		public static final Size SCALAR = new Size();
 		
 		protected int[] size;
 		
 		/**
-		 * \brief Private constructor that creates a scalar size.
+		 * Private constructor that creates a scalar size.
 		 */
 		private Size() {
 			size = new int[0];
 		}
 		
 		/**
-		 * \brief Constructs a Size with the given lengths.
+		 * Constructs a Size with the given lengths.
 		 */
 		public Size(int... size) {
 			if (size.length == 0)
@@ -2621,35 +2621,35 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Get the number of dimensions.
+		 * Get the number of dimensions.
 		 */
 		public int ndims() {
 			return size.length;
 		}
 		
 		/**
-		 * \brief Get length in the <code>i</code>th dimension.
+		 * Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
 			return (i >= 0 && i < size.length) ? size[i] : UNKNOWN;
 		}
 		
 		/**
-		 * \brief Get length in the last dimension.
+		 * Get length in the last dimension.
 		 */
 		public int last() {
 			return get(size.length - 1);
 		}
 		
 		/**
-		 * \brief Check if this size has an <code>i</code>th dimension.
+		 * Check if this size has an <code>i</code>th dimension.
 		 */
 		public boolean has(int i) {
 			return size.length > i;
 		}
 		
 		/**
-		 * \brief Returns the number of elements spanned by this Size.
+		 * Returns the number of elements spanned by this Size.
 		 * 
 		 * Only valid if all dimensions are known or currently evaluable.
 		 */
@@ -2661,7 +2661,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a new flattened FArraySubscripts object describing this size.
+		 * Create a new flattened FArraySubscripts object describing this size.
 		 */
 		public FArraySubscripts flattenFArraySubscripts(FQName prefix) {
 			FArraySubscripts fas = new FArraySubscripts();
@@ -2671,14 +2671,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
+		 * Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
 			return size[i] == UNKNOWN ? new FColonSubscript() : new FIntegerSubscript(size[i]);
 		}
 		
 		/**
-		 * \brief Create a new FArraySubscripts object with ranges spanning this size.
+		 * Create a new FArraySubscripts object with ranges spanning this size.
 		 */
 		public FArraySubscripts rangeFArraySubscripts() {
 			FArraySubscripts fas = new FArraySubscripts();
@@ -2688,14 +2688,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a new FSubscript for dimension <code>i</code>.
+		 * Create a new FSubscript for dimension <code>i</code>.
 		 */
 		protected FSubscript rangeFSubscript(int i) {
 			return size[i] == UNKNOWN ? new FColonSubscript() : new FExpSubscript(new FRangeExp(1, size[i]));
 		}
 		
 		/**
-		 * \brief Check if any lengths are unknown.
+		 * Check if any lengths are unknown.
 		 */
 		public boolean isUnknown() {
 			for (int s : size)
@@ -2705,7 +2705,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if all lengths have a value (fix length or expression).
+		 * Check if all lengths have a value (fix length or expression).
 		 */
 		public boolean isComplete() {
 			for (int i = 0; i < size.length; i++)
@@ -2715,7 +2715,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check is the length in any dimension equals 0.
+		 * Check is the length in any dimension equals 0.
 		 */
 		public boolean isEmpty() {
 			for (int i = 0; i < size.length; i++)
@@ -2743,21 +2743,21 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
+		 * Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {
 			return size[dim] != UNKNOWN;
 		}
 		
 		/**
-		 * \brief Create a copy of this size.
+		 * Create a copy of this size.
 		 */
 		protected Size clone() {
 			return (size.length == 0) ? SCALAR : new Size(size.clone());
 		}
 		
 		/**
-		 * \brief Create a copy of this size as a MutableSize.
+		 * Create a copy of this size as a MutableSize.
 		 */
 		public MutableSize mutableClone() {
 			MutableSize ms = new MutableSize(size.length);
@@ -2766,7 +2766,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a copy of this with <code>dim</code> dimensions, if necessary 
+		 * Create a copy of this with <code>dim</code> dimensions, if necessary 
 		 *        adding dimensions of length 1 to the right side, or removing dimensions 
 		 *        from the left side.
 		 */
@@ -2796,7 +2796,7 @@ aspect ArrayHelpers {
         public void replaceUnknowns(FFunctionVariable parent) {}
 		
 		/**
-		 * \brief Return a Size that have the same lengths as this size where they are known, 
+		 * Return a Size that have the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
 		 * 
 		 * If the size of <code>exp</code> have more dimensions, the last part is assumed to match this size.
@@ -2833,7 +2833,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief For each unknown length, copy the equivalent length from size of <code>exp</code>. 
+		 * For each unknown length, copy the equivalent length from size of <code>exp</code>. 
 		 * 
 		 * If the size of <code>exp</code> have more dimensions than this, the last part is ignored.
 		 */
@@ -2846,7 +2846,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Copy value of dimension <code>d2</code> in <code>other</code> to dimension 
+		 * Copy value of dimension <code>d2</code> in <code>other</code> to dimension 
 		 *        <code>d1</code> in <code>this</code>.
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {
@@ -2854,14 +2854,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if another object is equal to this one.
+		 * Check if another object is equal to this one.
 		 */
 		public boolean equals(Object s) {
 			return s instanceof Size && equivalent((Size) s, false);
 		}
 		
 		/**
-		 * \brief Calculate hash code.
+		 * Calculate hash code.
 		 */
 		public int hashCode() {
 			int res = 0;
@@ -2871,7 +2871,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if another size is equivalent to this one.
+		 * Check if another size is equivalent to this one.
 		 * 
 		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length, 
 		 *                      otherwise consider unknown lengths to differ from all lengths, including
@@ -2882,7 +2882,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if another size is equivalent to this one, except in a given dimension.
+		 * Check if another size is equivalent to this one, except in a given dimension.
 		 * 
 		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length
 		 * @param dim			dimension not to check
@@ -2897,7 +2897,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if a specific dimension of another size is equivalent to a specific 
+		 * Check if a specific dimension of another size is equivalent to a specific 
 		 *        dimension of this one.
 		 * 
 		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length
@@ -2923,7 +2923,7 @@ aspect ArrayHelpers {
 		private static final String SEP = ", ";
 		
 		/**
-		 * \brief Returns a string representation on the form "[l1, l2, l3]".
+		 * Returns a string representation on the form "[l1, l2, l3]".
 		 */
 		public String toString() {
 			if (size.length == 0)
@@ -2940,14 +2940,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Returns a string representation of a single length.
+		 * Returns a string representation of a single length.
 		 */
 		protected String toString(int i) {
 			return (size[i] == UNKNOWN) ? ":" : Integer.toString(size[i]);
 		}
 		
 		/**
-		 * \brief Returns a string representation on the form "l1, l2, l3".
+		 * Returns a string representation on the form "l1, l2, l3".
 		 */
 		public String toUnclosedString() {
 			String tmp = toString();
@@ -3041,7 +3041,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an FExp that describes the length of dimension <code>d</code>, 
+		 * Create an FExp that describes the length of dimension <code>d</code>, 
 		 *        given the supplied variable values.
 		 *        
 		 * @param varMap  a map of variables to replace and expressions to replace them with
@@ -3072,7 +3072,7 @@ aspect ArrayHelpers {
         }
 		
 		/**
-		 * \brief Create an FArraySubscripts that spans this size.
+		 * Create an FArraySubscripts that spans this size.
 		 * 
 		 * Dimension that nothing is known about get an FColonSubscript.
 		 */
@@ -3084,7 +3084,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an FSubscript that spans the length of dimension <code>d</code>.
+		 * Create an FSubscript that spans the length of dimension <code>d</code>.
 		 * 
 		 * If nothing is known of the length of the dimension, an FColonSubscript is created.
 		 */
@@ -3100,7 +3100,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an FExp that describes this size.
+		 * Create an FExp that describes this size.
 		 * 
 		 * The resulting expression is not expanded like createSizeFExp().
 		 */
@@ -3112,7 +3112,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
+		 * Create an FExp that describes the length of dimension <code>d</code>.
 		 * 
 		 * The resulting expression is not expanded like createSizeFExp().
 		 */
@@ -3121,14 +3121,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an FExp that describes the number of elements of this size.
+		 * Create an FExp that describes the number of elements of this size.
 		 */
 		public FExp createNumElementsFExp() {
 			return new FIntegerLitExp(numElements());
 		}
 		
 		/**
-		 * \brief Create a dummy expression that has the size described by this Size.
+		 * Create a dummy expression that has the size described by this Size.
 		 */
 		public FExp createDummyFExp(Map<ASTNode, FExp> varMap) {
 			FZeros z = new FZeros();
@@ -3138,7 +3138,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a zero expression of this size.
+		 * Create a zero expression of this size.
 		 */
 		public FExp createZeroFExp() {
 			if (size.length == 0) {
@@ -3178,7 +3178,7 @@ aspect ArrayHelpers {
 		private boolean[] evaluated;
 		
 		/**
-		 * \brief Constructs a new mutable Size of <code>ndims</code> dimensions.
+		 * Constructs a new mutable Size of <code>ndims</code> dimensions.
 		 */
 		public MutableSize(int ndims) {
 			super(new int[ndims]);
@@ -3189,7 +3189,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Constructs the size descrived by a vector expression.
+		 * Constructs the size descrived by a vector expression.
 		 */
 		public MutableSize(FExp exp) {
 			this(exp.ndims() == 1 ? exp.size().get(0) : 0);
@@ -3198,7 +3198,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets the next length to <code>s</code>.
+		 * Sets the next length to <code>s</code>.
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
@@ -3207,7 +3207,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets the next length to the value of <code>e</code>.
+		 * Sets the next length to the value of <code>e</code>.
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
@@ -3216,7 +3216,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets the next length to the length of dimension <code>d</code> 
+		 * Sets the next length to the length of dimension <code>d</code> 
 		 *        of <code>s</code>.
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
@@ -3226,7 +3226,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets the next <code>s.ndims()</code> lengths from <code>s</code>.
+		 * Sets the next <code>s.ndims()</code> lengths from <code>s</code>.
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
@@ -3246,7 +3246,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets length <code>i</code> to <code>s</code>.
+		 * Sets length <code>i</code> to <code>s</code>.
 		 */
 		public void set(int i, int s) {
 			size[i] = s;
@@ -3254,7 +3254,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets length <code>d</code> to the value of <code>e</code>.
+		 * Sets length <code>d</code> to the value of <code>e</code>.
 		 */
 		public void set(int d, FExp e) {
 			int s = UNKNOWN;
@@ -3269,7 +3269,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Sets length <code>d1</code> to the length of dimension <code>d2</code> 
+		 * Sets length <code>d1</code> to the length of dimension <code>d2</code> 
 		 *        of <code>s</code>.
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
@@ -3316,7 +3316,7 @@ aspect ArrayHelpers {
         }
 		
 		/**
-		 * \brief Adds <code>s</code> to length <code>d</code>.
+		 * Adds <code>s</code> to length <code>d</code>.
 		 */
 		public void add(int d, int s) {
 			if (s == UNKNOWN) {
@@ -3331,7 +3331,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Adds the value of <code>e</code> to length <code>d</code>.
+		 * Adds the value of <code>e</code> to length <code>d</code>.
 		 */
 		public void add(int d, FExp e) {
 			try {
@@ -3344,7 +3344,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Adds the length of dimension <code>d2</code> of <code>s</code> 
+		 * Adds the length of dimension <code>d2</code> of <code>s</code> 
 		 *        to length <code>d1</code> of this size.
 		 */
 		public void add(int d1, Size s, int d2) {
@@ -3356,7 +3356,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Get length in the <code>i</code>th dimension.
+		 * Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
 			evaluate(i);
@@ -3372,14 +3372,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
+		 * Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {
 			return size[dim] != UNKNOWN || okExp(exps[dim]);
 		}
 		
         /**
-         * \brief Check if an expression is valid.
+         * Check if an expression is valid.
          */
         protected static boolean okExp(FExp e) {
             return okExp(e, false);
@@ -3390,7 +3390,7 @@ aspect ArrayHelpers {
         }
 		
 		/**
-		 * \brief Copy value of dimension <code>d2</code> in size of <code>exp</code> to dimension 
+		 * Copy value of dimension <code>d2</code> in size of <code>exp</code> to dimension 
 		 *        <code>d1</code> in <code>this</code>.
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {
@@ -3475,7 +3475,7 @@ aspect ArrayHelpers {
 		}
 		
         /**
-         * \brief Create an FExp that describes the length of dimension <code>d</code>, 
+         * Create an FExp that describes the length of dimension <code>d</code>, 
          *        given the supplied variable values.
          *        
          * @param varMap  a map of variables to replace and expressions to replace them with
@@ -3488,7 +3488,7 @@ aspect ArrayHelpers {
         }
 		
 		/**
-		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
+		 * Create an FExp that describes the length of dimension <code>d</code>.
 		 * 
 		 * the resulting expression is not expanded like createSizeFExp().
 		 */
@@ -3500,7 +3500,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an FExp that describes the number of elements of this size.
+		 * Create an FExp that describes the number of elements of this size.
 		 */
 		public FExp createNumElementsFExp() {
 			evaluate();
@@ -3552,7 +3552,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
+		 * Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
 			evaluate(i);
@@ -3561,7 +3561,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a new FSubscript with a range spanning dimension <code>i</code>.
+		 * Create a new FSubscript with a range spanning dimension <code>i</code>.
 		 */
 		protected FSubscript rangeFSubscript(int i) {
 			evaluate(i);
@@ -3570,7 +3570,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Returns a string representation of a single length.
+		 * Returns a string representation of a single length.
 		 */
 		protected String toString(int i) {
 			evaluate(i);
@@ -3579,7 +3579,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a copy of this size.
+		 * Create a copy of this size.
 		 */
 		protected MutableSize clone() {
 			MutableSize ms = new MutableSize(size.length);
@@ -3590,14 +3590,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a copy of this size as a MutableSize.
+		 * Create a copy of this size as a MutableSize.
 		 */
 		public MutableSize mutableClone() {
 			return clone();
 		}
 		
 		/**
-		 * \brief Create a copy of this with <code>dim</code> dimensions, if necessary 
+		 * Create a copy of this with <code>dim</code> dimensions, if necessary 
 		 *        adding dimensions of length 1 to the right side, or removing dimensions 
 		 *        from the left side.
 		 */
@@ -3636,7 +3636,7 @@ aspect ArrayHelpers {
 		protected int length;
 		
 		/**
-		 * \brief Create an Array spanning a given Indices.
+		 * Create an Array spanning a given Indices.
 		 */
 		public Array(Indices indices) {
 			this.indices = indices;
@@ -3647,21 +3647,21 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates an iterator that iterates over all FExp nodes in this Array.
+		 * Creates an iterator that iterates over all FExp nodes in this Array.
 		 */
 		public Iterator<FExp> iteratorFExp() {
 			return getFExps().iterator();
 		}
 		
 		/**
-		 * \brief Returns an Iterable<FExp> containing all expressions in Array.
+		 * Returns an Iterable<FExp> containing all expressions in Array.
 		 */
 		public Iterable<FExp> iterable() {
 			return getFExps();
 		}
 		
 		/**
-		 * \brief Creates a left-hand iterator for multiplication. 
+		 * Creates a left-hand iterator for multiplication. 
 		 * 
 		 * Creates an iterator that iterates over all FExp nodes involved in 
 		 * calculating the cell i in a multiplication with this Array at the 
@@ -3751,21 +3751,21 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Returns the number of dimensions spanned by this Array.
+		 * Returns the number of dimensions spanned by this Array.
 		 */
 		public int ndims() {
 			return indices.ndims();
 		}
 		
 		/**
-		 * \brief Returns the size of this Array in each dimension.
+		 * Returns the size of this Array in each dimension.
 		 */
 		public Size size() {
 			return indices.size();
 		}
 		
 	    /**
-	     * \brief Recursive method for building an FArray describing this Array.
+	     * Recursive method for building an FArray describing this Array.
 	     *        For use by methods creating specific types of FArrays.
 	     *  
 	     * @param it       the iterator returned by a call to {@link #iteratorFExp()}
@@ -3773,7 +3773,7 @@ aspect ArrayHelpers {
 	     * @param dim      the dimension to start at, use 0 to process entire array
 	     * 
 	     * @see #buildLiteral(boolean)
-	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
+	     * @see #buildScalarized(java.util.Map,FExp)
 	     */
 	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
 	    	FArray arr = new FArray(new List<FExp>());
@@ -3789,14 +3789,14 @@ aspect ArrayHelpers {
 	    }
 		
 	    /**
-	     * \brief Build an FArray describing this Array.
+	     * Build an FArray describing this Array.
 	     *        For use by methods creating specific types of FArrays.
 	     *  
 	     * @param builder  helper object that processes each subexpression
 	     * 
 	     * @see #buildLiteral(boolean)
-	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
-	     * @see #buildFArray(Iterator<FExp>,ElementBuilder,int)
+	     * @see #buildScalarized(java.util.Map,FExp)
+	     * @see #buildFArray(Iterator,ElementBuilder,int)
 	     */
 	    protected FExp buildFArray(ElementBuilder builder) {
 			Size s = size();
@@ -3842,7 +3842,7 @@ aspect ArrayHelpers {
 
 		
 	    /**
-	     * \brief Discribes the helper object for {@link #buildFArray(Iterator<FExp>,ElementBuilder,int)}. 
+	     * Discribes the helper object for {@link #buildFArray(Iterator,ElementBuilder,int)}. 
 	     */
 	    protected interface ElementBuilder {
 	    	public FExp build(FExp e);
@@ -3859,7 +3859,7 @@ aspect ArrayHelpers {
 		
 	    
 		/**
-		 * \brief Iterates over FExp nodes in this Array.
+		 * Iterates over FExp nodes in this Array.
 		 */
 		private class AIterator implements Iterator<FExp> {
 			
@@ -3908,14 +3908,14 @@ aspect ArrayHelpers {
 	public class ScalarAsArray {
 
 		/**
-		 * \brief Constructs a ScalarAsArray containing <code>exp</code>.
+		 * Constructs a ScalarAsArray containing <code>exp</code>.
 		 */
 		public ScalarAsArray(FExp exp) {
 			this(exp, Indices.create(Size.SCALAR));
 		}
 		
 		/**
-		 * \brief Constructs a ScalarAsArray containing <code>exp</code>, 
+		 * Constructs a ScalarAsArray containing <code>exp</code>, 
 		 *        pretending to have <code>ind</code> indices.
 		 * 
 		 * This makes indices().iterator() meaningful.
@@ -3927,28 +3927,28 @@ aspect ArrayHelpers {
 		}
 		
 	    /**
-	     * \brief Recursive method for building an FArray describing this Array.
+	     * Recursive method for building an FArray describing this Array.
 	     *        For use by methods creating specific types of FArrays.
 	     *        
 	     * This implementation only applies builder to the single expression of this 
 	     * ScalarAsArray.
 	     * 
 	     * @see #buildLiteral(boolean)
-	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
+	     * @see #buildScalarized(java.util.Map,FExp)
 	     */
 	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
 	    	return builder.build(it.next()).unboundCopy();
 	    }
 	    
 		/**
-		 * \brief Returns the single element wrapped by this Array. 
+		 * Returns the single element wrapped by this Array. 
 		 */
 		public FExp get(Index i) {
 			return getFExp(0);
 		}
 		
 		/**
-		 * \brief Sets the single element wrapped by this Array to <code>exp</code>.
+		 * Sets the single element wrapped by this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
 			setFExp(exp.unboundCopy(), 0);
@@ -3958,7 +3958,7 @@ aspect ArrayHelpers {
 
 	
 	/**
-	 * \brief Represents the index/indices of a single cell in an (possibly 
+	 * Represents the index/indices of a single cell in an (possibly 
 	 *        multi-dimensional) array.
 	 *        
 	 * Index objects are reused to a high degree. Always use clone() when retaining 
@@ -3971,63 +3971,63 @@ aspect ArrayHelpers {
 		protected int[] index;
 		
 		/**
-		 * \brief Construct an Index representing the indices given in <code>ind</code>.
+		 * Construct an Index representing the indices given in <code>ind</code>.
 		 */
 		public Index(int[] ind) {
 			index = ind;
 		}
 		
 		/**
-		 * \brief Returns the indices that specify this cell.
+		 * Returns the indices that specify this cell.
 		 */
 		public int[] index() {
 			return index;
 		}
 		
 		/**
-		 * \brief Returns the number of dimensions of this Index.
+		 * Returns the number of dimensions of this Index.
 		 */
 		public int ndims() {
 			return index.length;
 		}
 		
 		/**
-		 * \brief Returns the index for the first dimension.
+		 * Returns the index for the first dimension.
 		 */
 		public int first() {
 			return index.length > 0 ? index[0] : -1;
 		}
 		
 		/**
-		 * \brief Returns the index for the last dimension.
+		 * Returns the index for the last dimension.
 		 */
 		public int last() {
 			return index.length > 0 ? index[index.length - 1] : -1;
 		}
 		
 		/**
-		 * \brief Returns the index for the <code>i</code>th dimension (zero-based).
+		 * Returns the index for the <code>i</code>th dimension (zero-based).
 		 */
 		public int get(int i) {
 			return index[i];
 		}
 		
 		/**
-		 * \brief Sets the index for the <code>i</code>th dimension (zero-based).
+		 * Sets the index for the <code>i</code>th dimension (zero-based).
 		 */
 		public void set(int i, int index) {
 			this.index[i] = index;
 		}
 		
 		/**
-		 * \brief Compare two Index for equality.
+		 * Compare two Index for equality.
 		 */
 		public boolean equals(Object i) {
 			return (i instanceof Index) && Arrays.equals(index, ((Index) i).index);
 		}
 		
 		/**
-		 * \brief Calculate hash code.
+		 * Calculate hash code.
 		 * 
 		 * Creates perfect hash when ndims() <= 3 and all indices are <= 1023.
 		 */
@@ -4077,7 +4077,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a new Index that is a copy of this Index, but with <code>adj</code>
+		 * Creates a new Index that is a copy of this Index, but with <code>adj</code>
 		 *        added to dimension <code>dim</code> and promoted to <code>ndims</code> 
 		 *        dimensions by adding ones to the end.
 		 * 
@@ -4092,14 +4092,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a new FArraySubscripts object describing this index.
+		 * Create a new FArraySubscripts object describing this index.
 		 */
 		public FArraySubscripts createFArraySubscripts() {
 			return FArraySubscripts.createLiteralSubscripts(index);
 		}
 		
 		/**
-		 * \brief Copies this Index. Always use clone() when saving an Index.
+		 * Copies this Index. Always use clone() when saving an Index.
 		 */
 		public Index clone() {
 			try {
@@ -4128,14 +4128,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Return a string representation on the form "[i1,i2,i3]".
+		 * Return a string representation on the form "[i1,i2,i3]".
 		 */
 		public String toString() {
 			return buildString(new StringBuilder("[")).append(']').toString();
 		}
 		
 		/**
-		 * \brief Return a string representation on the form "i1,i2,i3".
+		 * Return a string representation on the form "i1,i2,i3".
 		 */
 		public String toUnclosedString() {
 			return buildString(new StringBuilder()).toString();
@@ -4160,23 +4160,23 @@ aspect ArrayHelpers {
 		
 		
 		/**
-		 * \brief Return the internal index in an Array of the cell this Index refers to.
+		 * Return the internal index in an Array of the cell this Index refers to.
 		 *        Only for use from Array.
 		 * 
-		 * @param indices  the indices to resolve the internal index with
+		 * @param ind  the indices to resolve the internal index with
 		 */
 		public int internal(Indices ind) {
 			return ind.internal(this);
 		}
 		
 		/**
-		 * \brief Construct an empty Index.
+		 * Construct an empty Index.
 		 */
 		protected Index() {
 		}
 		
 		/**
-		 * \brief Construct an Index of ndims dimensions, 
+		 * Construct an Index of ndims dimensions, 
 		 *        pointing at the spot before the first cell.
 		 */
 		protected Index(int ndims) {
@@ -4190,7 +4190,7 @@ aspect ArrayHelpers {
 	}
 	
 	/**
-	 * \brief Indices represents the set of array indices in each dimension.
+	 * Indices represents the set of array indices in each dimension.
 	 * 
 	 * Only supports indices of the form (1..n1, 1..n2, ... , 1..nk). 
 	 * See {@link NonConsecutiveIndices}. 
@@ -4211,14 +4211,14 @@ aspect ArrayHelpers {
 		public static final Indices SCALAR = new Indices(Size.SCALAR);
 		
 		/**
-		 * \brief A perfect hash for all Indices that have consecutive indicies, 
+		 * A perfect hash for all Indices that have consecutive indicies, 
 		 *        ndims <= 3 and size[i] <= 1023 for 0 <= i < ndims. -1 for other 
 		 *        Indices.
 		 */
 		protected int hash;
 		
 		/**
-		 * \brief Create an Indices object based on array sizes. 
+		 * Create an Indices object based on array sizes. 
 		 */
 		public static Indices create(Size size) {
 			if (size == Size.SCALAR)
@@ -4228,28 +4228,28 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create an Indices object based on FArraySubcripts.
+		 * Create an Indices object based on FArraySubcripts.
 		 */
 		public static Indices createFromFas(FArraySubscripts fas) {
 			return NonConsecutiveIndices.createFromFas(fas);
 		}
 		
 		/**
-		 * \brief Create an Indices object based on a list of FArraySubcripts.
+		 * Create an Indices object based on a list of FArraySubcripts.
 		 */
 		public static Indices createFromFas(java.util.List<FArraySubscripts> fasl) {
 			return NonConsecutiveIndices.createFromFas(fasl);
 		}
 		
 		/**
-		 * \brief Create an Indices object based on a list of int arrays.
+		 * Create an Indices object based on a list of int arrays.
 		 */
 		public static Indices create(ArrayList<int[]> ind) {
 			return NonConsecutiveIndices.create(ind, true);
 		}
 		
 		/**
-		 * \brief Create an Indices object based on a list of CommonForIndexes.
+		 * Create an Indices object based on a list of CommonForIndexes.
 		 */
 		public static Indices create(Iterable<? extends CommonForIndex> forIndices) {
 			ArrayList<int[]> ind = new ArrayList<int[]>();
@@ -4259,7 +4259,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Check that i is valid for this Indices object.
+		 * Check that i is valid for this Indices object.
 		 */
 		public boolean isValid(Index i) {
 			if (i.ndims() != ndims)
@@ -4272,35 +4272,35 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Returns an Iterator, that iterates over all indices spanned by this Indices object.
+		 * Returns an Iterator, that iterates over all indices spanned by this Indices object.
 		 */
 		public Iterator<Index> iterator() {
 			return new IIterator();
 		}
 		
 		/**
-		 * \brief Returns the number of elements spanned by this Indices object.
+		 * Returns the number of elements spanned by this Indices object.
 		 */
 		public int numElements() {
 			return size.numElements();
 		}
 		
 		/**
-		 * \brief Returns the number of dimensions spanned by this Indices object.
+		 * Returns the number of dimensions spanned by this Indices object.
 		 */
 		public int ndims() {
 			return ndims;
 		}
 		
 		/**
-		 * \brief Returns the size of this Indices object in each dimension.
+		 * Returns the size of this Indices object in each dimension.
 		 */
 		public Size size() {
 			return size;
 		}
 		
 		/**
-		 * \brief Translates an Index to the corresponding Index in the underlying 
+		 * Translates an Index to the corresponding Index in the underlying 
 		 *        expression.
 		 * 
 		 * Default implementation always returns <code>i</code>.
@@ -4326,7 +4326,7 @@ aspect ArrayHelpers {
 				
 		
 		/**
-		 * \brief Internal constructor to create an Indices object based on array sizes. 
+		 * Internal constructor to create an Indices object based on array sizes. 
 		 */
 		protected Indices(Size size) {
 			ndims = size.ndims();
@@ -4345,7 +4345,7 @@ aspect ArrayHelpers {
 		}
 				
 		/**
-		 * \brief Calculate the internal index in an Array that spans this Indices.
+		 * Calculate the internal index in an Array that spans this Indices.
 		 */
 		protected int internal(Index i) {
 			if (i.ndims() > ndims)
@@ -4358,7 +4358,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Iterates over all indices spanned by this Indices.
+		 * Iterates over all indices spanned by this Indices.
 		 */
 		protected class IIterator implements Iterator<Index> {
 			
@@ -4395,14 +4395,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Internal implementation of Index.
+		 * Internal implementation of Index.
 		 */
 		protected class IIndex extends Index {
 			
 			public int internal;
 			
 			/**
-			 * \brief Construct an Index over the number of dimensions of the enclosing Indices, 
+			 * Construct an Index over the number of dimensions of the enclosing Indices, 
 			 *        pointing at the spot before the first cell.
 			 */
 			public IIndex() {
@@ -4411,10 +4411,10 @@ aspect ArrayHelpers {
 			}
 			
 			/**
-			 * \brief Return the internal index in an Array of the cell this Index refers to.
+			 * Return the internal index in an Array of the cell this Index refers to.
 			 *        Only for use from Array.
 			 * 
-			 * @param indices  the indices to resolve the internal index with
+			 * @param ind  the indices to resolve the internal index with
 			 */
 			public int internal(Indices ind) {
 				if (Indices.this == ind || (hash != -1 && hash == ind.hash)) 
@@ -4428,7 +4428,7 @@ aspect ArrayHelpers {
 	}
 
 	/**
-	 * \brief NonConsecutiveIndices describes a set of array indices that isn't 
+	 * NonConsecutiveIndices describes a set of array indices that isn't 
 	 *        limited to 1..n.
 	 * 
 	 * For example, consider the declaration Real x[4,4,4] and the access
@@ -4445,7 +4445,7 @@ aspect ArrayHelpers {
 		protected boolean[] trim;
 		
 		/**
-		 * \brief Create a NonConsecutiveIndices object based on FArraySubcripts.
+		 * Create a NonConsecutiveIndices object based on FArraySubcripts.
 		 *        Use Indices.create(FArraySubscripts fas).
 		 */
 		public static NonConsecutiveIndices createFromFas(FArraySubscripts fas) {
@@ -4462,7 +4462,7 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Create a NonConsecutiveIndices object based on a list of FArraySubcripts.
+		 * Create a NonConsecutiveIndices object based on a list of FArraySubcripts.
 		 *        Use Indices.create(ArrayList<FArraySubscripts> fasl).
 		 */
 		public static NonConsecutiveIndices createFromFas(java.util.List<FArraySubscripts> fasl) {
@@ -4481,46 +4481,45 @@ aspect ArrayHelpers {
 			}
 			return new NonConsecutiveIndices(ind, trim, 0);
 		}
-		
-		/**
-		 * \brief Create a NonConsecutiveIndices object based on a list of int arrays
-		 *        Use Indices.create(ArrayList<int[]> ind).
-		 * 
-		 * @param trim  remove dimensions that only span one index.
-		 */
-		public static NonConsecutiveIndices create(ArrayList<int[]> ind, boolean trim) {
-			boolean[] trims = new boolean[ind.size()];
-			for (int i = 0; i < trims.length; i++)
-				trims[i] = trim && ind.get(i).length == 1;
-			return new NonConsecutiveIndices(ind, trims, 0);
-		}
-		
-		/**
-		 * Create a NonConsecutiveIndices object based on a Size, an array of dimensions to trim, 
-		 * and a number of extra dimensions to add to the end.
-		 * 
-		 * @param trim  remove dimensions that only span one index.
-		 */
-		public static NonConsecutiveIndices create(Size s, int[] dim, int extra) {
-			int n = s.ndims();
-			ArrayList<int[]> ind = new ArrayList<int[]>(n);
-			boolean[] trims = new boolean[n];
-			for (int i = 0; i < n; i++) {
-				ind.add(new int[] { 1 });
-				trims[i] = true;
-			}
-			for (int d : dim) {
-				if (d < n) {
-					int[] ii = new int[s.get(d)];
-					for (int i = 0; i < ii.length; i++)
-						ii[i] = i + 1;
-					ind.set(d, ii);
-					trims[d] = false;
-				}
-			}
-			return new NonConsecutiveIndices(ind, trims, extra);
-		}
-		
+
+        /**
+         * Create a NonConsecutiveIndices object based on a list of int arrays
+         *        Use Indices.create(ArrayList<int[]> ind).
+         * 
+         * @param ind   one array for each dimension, containing the indices to span for that dimension.
+         * @param trim  remove dimensions that only span one index.
+         */
+        public static NonConsecutiveIndices create(ArrayList<int[]> ind, boolean trim) {
+            boolean[] trims = new boolean[ind.size()];
+            for (int i = 0; i < trims.length; i++)
+                trims[i] = trim && ind.get(i).length == 1;
+            return new NonConsecutiveIndices(ind, trims, 0);
+        }
+
+        /**
+         * Create a NonConsecutiveIndices object based on a Size, an array of dimensions to trim, 
+         * and a number of extra dimensions to add to the end.
+         */
+        public static NonConsecutiveIndices create(Size s, int[] dim, int extra) {
+            int n = s.ndims();
+            ArrayList<int[]> ind = new ArrayList<int[]>(n);
+            boolean[] trims = new boolean[n];
+            for (int i = 0; i < n; i++) {
+                ind.add(new int[] { 1 });
+                trims[i] = true;
+            }
+            for (int d : dim) {
+                if (d < n) {
+                    int[] ii = new int[s.get(d)];
+                    for (int i = 0; i < ii.length; i++)
+                        ii[i] = i + 1;
+                    ind.set(d, ii);
+                    trims[d] = false;
+                }
+            }
+            return new NonConsecutiveIndices(ind, trims, extra);
+        }
+
 		/**
 		 * Translates an Index to the corresponding Index in the underlying 
 		 * expression.

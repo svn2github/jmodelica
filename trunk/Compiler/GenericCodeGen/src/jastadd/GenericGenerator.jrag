@@ -15,7 +15,7 @@
 */
 
 /** \file GenericGenerator.java
- *  \brief GenericGenerator class.
+ *  GenericGenerator class.
  */
 
 import java.io.*;

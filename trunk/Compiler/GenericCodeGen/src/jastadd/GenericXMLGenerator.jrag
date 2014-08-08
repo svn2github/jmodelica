@@ -106,11 +106,11 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     /**
      * Generates the XML Declaration.
      */
-    protected void generateXMLDeclaration(CodeStream printer) {	
-		printer.print("<?xml");		
-		printer.format(" %s=\"%s\"", "version", getXMLVersion());
-		printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
-		printer.print("?>\n");
+    protected void generateXMLDeclaration(CodeStream printer) {
+        printer.print("<?xml");
+        printer.format(" %s=\"%s\"", "version", getXMLVersion());
+        printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
+        printer.print("?>\n");
     }
     
     /**
@@ -244,7 +244,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * Construct a tag.
          * 
          * @param name        tag name
-         * @param xmlName     name to use for the xml tag or attribute
+         * @param xml         name to use for the xml tag or attribute
          * @param myGenerator the tag's generator
          * @param fclass      an FClass to generate code for
          */
@@ -363,12 +363,12 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * <ul>
          * <li>If {@link #value()} returns non-null, generate an XML attribute with that value.
          * <li>Otherwise if {@link #childTags()} returns an empty array, generate an XML node as 
-         * per {@link #generateNode(String, java.io.PrintStream)}.
+         * per {@link #generateNode(String, CodeStream)}.
          * <li>Otherwise generate a closed XML tag, as per 
-         * {@link #generateClosed(String, java.io.PrintStream)}.
+         * {@link #generateClosed(String, CodeStream)}.
          * </ul>
          * 
-         * @param printer A CodeStream objectfor output of the generated code.
+         * @param printer A CodeStream object for output of the generated code.
          */
         public void generate(CodeStream printer) {
         	Object val = value();

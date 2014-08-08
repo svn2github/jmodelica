@@ -24,12 +24,12 @@ import java.util.Collections;
 aspect Scalarization {
 
 	/**
-	 * \brief Flag indicating if a variable is scalarized.
+	 * Flag indicating if a variable is scalarized.
 	 */
 	boolean FQName.scalarized = false;
 
 	/**
-	 * \brief Flag indicating if a flat class is scalarized.
+	 * Flag indicating if a flat class is scalarized.
 	 */
 	boolean FClass.scalarized = false;
 	
@@ -169,7 +169,7 @@ aspect Scalarization {
 	}
     
     /**
-     * \brief Scalarize the FVariable and put all scalarized variables in the
+     * Scalarize the FVariable and put all scalarized variables in the
      * list vars.
      */
     public void FVariable.scalarize(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
@@ -189,7 +189,7 @@ aspect Scalarization {
     }
 	
 	/**
-	 * \brief Create a scalar FVariable for a single cell or an already scalar FVariable.
+	 * Create a scalar FVariable for a single cell or an already scalar FVariable.
 	 * 
 	 * @param i  the Index of the cell to create an FVariable for. Should be Index.NULL for 
 	 *           already scalar FVariables.
@@ -301,7 +301,7 @@ aspect Scalarization {
 	}
 	
     /**
-     * \brief Generate scalar FVariables for this record or record component.
+     * Generate scalar FVariables for this record or record component.
      * 
      * @param vars     the list of FVariables to add the variables to
      * @param equs     a list of equations to add the equations to
@@ -343,7 +343,7 @@ aspect Scalarization {
     
     
     /**
-     * \brief Generate scalar FVariables for a single array cell of this record or record component.
+     * Generate scalar FVariables for a single array cell of this record or record component.
      * 
      * @param vars     the list of FVariables to add the variables to
      * @param equs     a list of equations to add the equations to
@@ -426,7 +426,7 @@ aspect Scalarization {
     }
     
     /**
-     * \brief Check if this FExp is in an binding exp that will still
+     * Check if this FExp is in an binding exp that will still
      * be a binding exp after scalarization 
      */
     inh boolean FExp.inKeptBExp();
@@ -434,12 +434,12 @@ aspect Scalarization {
     eq FVariable.getBindingExp().inKeptBExp() = keepBExp(isParameter(), getBindingExp());
     
     /**
-     * \brief Check if this FVariable should have a binding exp after scalarization
+     * Check if this FVariable should have a binding exp after scalarization
      */
     syn boolean FVariable.keepBExp(boolean inParam, FExp bexp) = variability().structuralOrLess() || isString() || (inParam && bexp.isIndependentParameterExp());
     
     /**
-     * \brief Apply a prefix to references to components declared in
+     * Apply a prefix to references to components declared in
      * the containing record decl of this expression
      */
     public FExp FExp.reflatten(FQName prefix) {
@@ -451,7 +451,7 @@ aspect Scalarization {
     }
     
     /**
-     * \brief Apply a prefix to references to components declared in
+     * Apply a prefix to references to components declared in
      * the containing record decl of this variable
      */
     public void FVariable.reflatten(FQName prefix) {
@@ -547,7 +547,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief The Indices object to use when scalarizing records.
+	 * The Indices object to use when scalarizing records.
 	 * 
 	 * Either returns indices() or calculates from "size()" attribute.
 	 * 
@@ -563,7 +563,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Inherit prefixes and attributes from the FVariable representing the surrounding record.
+	 * Inherit prefixes and attributes from the FVariable representing the surrounding record.
 	 */
 	public void FVariable.inheritFrom(FVariable other) {
 		if (other == null)
@@ -598,7 +598,7 @@ aspect Scalarization {
 	}
 	
     /**
-     * \brief Merge attributes from other into self, overwriting in conflicts.
+     * Merge attributes from other into self, overwriting in conflicts.
      */
     public void FVariable.inheritFrom(List<FAttribute> self, List<FAttribute> other) {
         Map<String, FAttribute> m2 = new HashMap<String,FAttribute>();
@@ -696,7 +696,7 @@ aspect Scalarization {
         return scalarizeInternal(attrs, i, indexMap);
     }
     /**
-     * \brief Scalarize the attribute, picking out the specific element from an array 
+     * Scalarize the attribute, picking out the specific element from an array 
      *        expression or removing "each".
      */
     public FAttribute FAttribute.scalarizeInternal(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
@@ -768,7 +768,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Scalarize the function variable.
+	 * Scalarize the function variable.
 	 * 
 	 * Any binding expression is added to statement list as an assignment.
 	 */
@@ -781,7 +781,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief A node that can look up variable names in the flat tree.
+	 * A node that can look up variable names in the flat tree.
 	 */
 	public interface FlatLookupNode {
 		public FAbstractVariable lookupFV(FQName fqn);
@@ -790,7 +790,7 @@ aspect Scalarization {
 	FExp implements FlatLookupNode;
 	
 	/**
-	 * \brief Creates and organizes names of for indices for generated for loops.
+	 * Creates and organizes names of for indices for generated for loops.
 	 */
 	public class ForNames implements Iterable<String> {
 		private ArrayList<String[]> names;
@@ -798,7 +798,7 @@ aspect Scalarization {
 		private int pos;
 		
 		/**
-		 * \brief Standard constructor.
+		 * Standard constructor.
 		 */
 		public ForNames() {
 			names = new ArrayList<String[]>();
@@ -806,7 +806,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Creates a new ForNames with a single layer with space for <code>n</code> names.
+		 * Creates a new ForNames with a single layer with space for <code>n</code> names.
 		 */
 		public ForNames(int n) {
 			this();
@@ -814,7 +814,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Add a new layer of names, that can be filled with new names or names 
+		 * Add a new layer of names, that can be filled with new names or names 
 		 *        from the layer underneath.
 		 * 
 		 * @param n  the number of names in the new layer
@@ -825,7 +825,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Fills all empty spots in the top layer with newly created names.
+		 * Fills all empty spots in the top layer with newly created names.
 		 */
 		public void fillLayer(FlatLookupNode context) {
 			String[] top = topLayer();
@@ -834,7 +834,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Removes the top layer, exposing the layer underneath.
+		 * Removes the top layer, exposing the layer underneath.
 		 */
 		public void removeLayer() {
 			names.remove(names.size() - 1);
@@ -849,21 +849,21 @@ aspect Scalarization {
         }
 		
 		/**
-		 * \brief Gets name with index <code>i</code> in the top layer.
+		 * Gets name with index <code>i</code> in the top layer.
 		 */
 		public String get(int i) {
 			return topLayer()[i];
 		}
 		
 		/**
-		 * \brief Adds a name to the top layer.
+		 * Adds a name to the top layer.
 		 */
 		public void add(String name) {
 			topLayer()[pos++] = name;
 		}
 		
 		/**
-		 * \brief Creates a new name and adds it to the top layer.
+		 * Creates a new name and adds it to the top layer.
 		 * 
 		 * @return the created name
 		 */
@@ -877,7 +877,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Adds a name from the underlying layer to the top layer.
+		 * Adds a name from the underlying layer to the top layer.
 		 * 
 		 * @param i  the index in the underlying layer
 		 */
@@ -893,21 +893,21 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Return the number of names in the top layer.
+		 * Return the number of names in the top layer.
 		 */
 		public int size() {
 			return topLayer().length;
 		}
 		
 		/**
-		 * \brief Iterates over the top layer.
+		 * Iterates over the top layer.
 		 */
 		public Iterator<String> iterator() {
 			return Arrays.asList(topLayer()).iterator();
 		}
 		
 		/**
-		 * \brief Pushes a copy of the top layer with first and second names switched
+		 * Pushes a copy of the top layer with first and second names switched
 		 */
 		public void createTransposedLayer() {
 			String[] lay = topLayer();
@@ -941,7 +941,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Creates nestled for loops over a single variable, using the top layer of names.
+		 * Creates nestled for loops over a single variable, using the top layer of names.
 		 *  
 		 * Adds the outermost for loop to a list of statements.
 		 * 
@@ -958,7 +958,7 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Creates nestled (maximum d) for loops  over an expression, 
+		 * Creates nestled (maximum d) for loops  over an expression, 
 		 * using the top layer of names.
 		 *  
 		 * Adds the outermost for loop to a list of statements.
@@ -973,7 +973,7 @@ aspect Scalarization {
         }
         
         /**
-         * \brief Creates nestled (from d1 to d2) for loops over an expression, 
+         * Creates nestled (from d1 to d2) for loops over an expression, 
          * using the top layer of names.
          *  
          * Adds the outermost for loop to a list of statements.
@@ -992,7 +992,7 @@ aspect Scalarization {
         }
 		
 		/**
-		 * \brief Creates nestled for loops over an expression, using the top layer of names.
+		 * Creates nestled for loops over an expression, using the top layer of names.
 		 *  
 		 * Adds the outermost for loop to a list of statements.
 		 * 
@@ -1010,7 +1010,7 @@ aspect Scalarization {
         }
 		
         /**
-         * \brief Creates a new FArraySubscripts with uses of the <code>d</code> 
+         * Creates a new FArraySubscripts with uses of the <code>d</code> 
          * first names in the top layer as subscripts. When out of names, adds 1s.
          */
         public FArraySubscripts createFArraySubscripts(int d) {
@@ -1028,7 +1028,7 @@ aspect Scalarization {
 		
 		
 		/**
-		 * \brief Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
+		 * Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
 		 */
 		public FArraySubscripts createFArraySubscripts() {
 			return createFArraySubscripts(topLayer().length);
@@ -1043,7 +1043,7 @@ aspect Scalarization {
             return new FIdTempExp(new FIdUse(fqn));
         }
 		/**
-		 * \brief Creates a new ForNames with the top layer copied
+		 * Creates a new ForNames with the top layer copied
 		 */
 		public ForNames copySurface() {
 			ForNames fn = new ForNames();
@@ -1056,7 +1056,7 @@ aspect Scalarization {
 	}
 	
     /**
-     * \brief Scalarize an assignment and put the resulting statements in the list of statements. 
+     * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(
             List vars, List<FStatement> stmts, 
@@ -1211,28 +1211,28 @@ aspect Scalarization {
     
     
     /**
-     * Wrapper for @see ASTNode#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     * Wrapper for {@link ASTNode#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
      */
     public void ASTNode.createArrayTemporaries(boolean inParam, List equs, List pEqus, List vars) {
         createArrayTemporaries(inParam ? pEqus : equs, vars);
     }
     
     /**
-     * Wrapper for @see ASTNode#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     * Wrapper for {@link ASTNode#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
      */
     public void ASTNode.createArrayTemporaries(List clauses, List vars) {
         createArrayTemporaries(clauses, vars, Collections.<String,FExp>emptyMap());
     }
     
     /**
-     * Wrapper for @see ASTNode#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     * Wrapper for {@link ASTNode#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
      */
     public void ASTNode.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         createArrayTemporaries(clauses, vars, indexMap, new ForNames());
     }
     
     /**
-     * Traverser for @see FExp#createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     * Traverser for {@link FExp#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
      */
     public void ASTNode.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         for (ASTNode n : this)
@@ -1313,9 +1313,6 @@ aspect Scalarization {
         useTempVar = true;
     }
     
-    /**
-     * @see FExp#knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap)
-     */
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         boolean func = inFunction();
         getArgs().createArrayTemporaries(clauses, vars, indexMap);
@@ -1325,16 +1322,13 @@ aspect Scalarization {
             addTemporaryVars(vars, !func);
     }
     
-    /**
-     * @see FExp#knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap)
-     */
     public void FVectorFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         getArray().createArrayTemporaries(clauses, vars, indexMap);
     }
     
 
     /**
-     * Wrapper for @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
+     * Wrapper for {@link FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
      * Performs some common operations
      */
     public void FExp.unknownFunctionArrayTemporaries_pre(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
@@ -1369,17 +1363,11 @@ aspect Scalarization {
         type().scalarizeAssignment(vars, clauses, indexMap, left, right);
     }
     
-    /**
-     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
-     */
     public void FFunctionCall.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         getArgs().createArrayTemporaries(clauses, vars, indexMap);
         createFunctionCallClause(clauses, indexMap, tempUseExp());
     }
     
-    /**
-     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
-     */
     public void FArray.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         names.addLayer(ndims());
         names.fillLayer(this);
@@ -1418,11 +1406,8 @@ aspect Scalarization {
         if (!iter)
             names.removeLayer();
         names.removeLayer();
-	}
+    }
     
-    /**
-     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
-     */
     public void FAbstractCat.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         int catDim  = dimension();
         FExp offset = new FIntegerLitExp(0);
@@ -1449,11 +1434,8 @@ aspect Scalarization {
             offset = new FAddExp(offset, exp.size().has(catDim) ? exp.size().createFExp(catDim) : new FIntegerLitExp(1));
         }
     }
-    
-    /**
-     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
-     */
-	public void FReductionExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+
+    public void FReductionExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         // Set up names and create for loop(s)
         FExp exp = getFExp();
         names.addLayer(exp.ndims());
@@ -1477,10 +1459,7 @@ aspect Scalarization {
         
         names.removeLayer();
     }
-    
-    /**
-     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FMinMaxExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         // Set up names and create for loop(s)
         FExp exp = getX();
@@ -1539,10 +1518,7 @@ aspect Scalarization {
             names.promote(i);
         return true;
     }
-    
-    /**
-     * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FMulExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         HashMap<String,FExp> myIndexMap;
         FIdUseExp sum = new FIdUseExp(calcTempVarName());
@@ -1597,7 +1573,7 @@ aspect Scalarization {
     }
     
     /**
-     * Traverser for @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
+     * Traverser for {@link FExp#addArrayUsesToIndexMap(Map indexMap, ForNames names)}.
      */
     public void ASTNode.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         for (ASTNode n : this)
@@ -1616,10 +1592,7 @@ aspect Scalarization {
             super.addArrayUsesToIndexMap(indexMap, names);
         }
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         if (!hasFArraySubscripts() && isArray())
             indexNames = names.copySurface();
@@ -1628,33 +1601,21 @@ aspect Scalarization {
     public void FIdTempExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         indexNames = names.copySurface();
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         indexNames = names.copySurface();
         super.addArrayUsesToIndexMap(indexMap, names);
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FLinspace.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         indexNames = names.copySurface();
         super.addArrayUsesToIndexMap(indexMap, names);
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FColonSubscript.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         indexName = names.get(0);
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FArraySubscripts.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         int i = 0;
         for (FSubscript fs : getFSubscripts()) {
@@ -1666,19 +1627,13 @@ aspect Scalarization {
             }
         }
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FTranspose.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         names.createTransposedLayer();
         super.addArrayUsesToIndexMap(indexMap, names);
         names.removeLayer();
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FFunctionCall.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         // No names available as a function call arg.
         boolean b = !extractTemp();
@@ -1688,10 +1643,7 @@ aspect Scalarization {
         if (b)
             names.removeLayer();
     }
-    
-    /**
-     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
-     */
+
     public void FRecordConstructor.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         // No names available as record con arg.
         boolean b = !extractTemp();
@@ -1701,18 +1653,15 @@ aspect Scalarization {
         if (b)
             names.removeLayer();
     }
-    
-    /**
-     * TODO: comment
-     */
-	public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-		int n1 = stmts.getNumChild();
+
+    public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+        int n1 = stmts.getNumChild();
         addSizeAsserts(stmts);
         boolean breaker = scalarize(vars, stmts, indexMap);
-		if (shouldBeSorted) {
-			int n2 = stmts.getNumChild();
-			for (int i = n1; i < n2; i++) 
-				stmts.getChild(i).shouldBeSorted = true;
+        if (shouldBeSorted) {
+            int n2 = stmts.getNumChild();
+            for (int i = n1; i < n2; i++) 
+                stmts.getChild(i).shouldBeSorted = true;
             if (hasExtraSortingDependencies()) {
                 /* Might contain assert statements added by addSizeAsserts() */
                 for (int i = n1; i < n2; i++)  {
@@ -1722,10 +1671,10 @@ aspect Scalarization {
                     }
                 }
             }
-		}
-		return breaker;
-	}
-	
+        }
+        return breaker;
+    }
+
     /**
      * Creates assert statements to check sizes in assignments between known
      * and unknown sizes. 
@@ -1852,7 +1801,7 @@ aspect Scalarization {
         return e1;
     }
 	/**
-	 * \brief Scalarize the statement and put all resulting statements in the
+	 * Scalarize the statement and put all resulting statements in the
 	 *        list of statements.
 	 *        
 	 * @return FExp 
@@ -1921,7 +1870,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Scalarize the else part of an if statement. Does nothing for when statements.
+	 * Scalarize the else part of an if statement. Does nothing for when statements.
 	 */
     public boolean FIfWhenStmt.scalarizeElse(List vars, FIfWhenStmt stmt, Map<String,FExp> indexMap) { 
         return false; 
@@ -1933,7 +1882,7 @@ aspect Scalarization {
     }
     
     /**
-     * \brief Scalarize the if or when clause.
+     * Scalarize the if or when clause.
      */
     public boolean FIfWhenClause.scalarize(List vars, List<FIfWhenClause> clauses, Map<String,FExp> indexMap) {
         FExp test = getTest().scalarize(indexMap);
@@ -2037,7 +1986,7 @@ aspect Scalarization {
     }
     
     /**
-     * \brief Scalarize the function, replacing all array assignments with separate scalar 
+     * Scalarize the function, replacing all array assignments with separate scalar 
      *        assignments and scalarize all expressions.
      */
     public FFunctionDecl FFunctionDecl.scalarize() {
@@ -2110,7 +2059,7 @@ aspect Scalarization {
 			List<FVariable> vars, Map<String,FExp> indexMap) {}
 	
 	/**
-	 * \brief Scalarize equation and put all resulting equations in list eqns.
+	 * Scalarize equation and put all resulting equations in list eqns.
 	 */
 	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
@@ -2149,7 +2098,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Scalarize left and right expressions and create new scalar equations.
+	 * Scalarize left and right expressions and create new scalar equations.
 	 */
 	public void FEquation.createScalarFEquations(
 			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs,FExp left, FExp right) {
@@ -2161,7 +2110,7 @@ aspect Scalarization {
 	
 	// TODO: Introduce parameter object?
 	/**
-	 * \brief Generate scalar clauses for this record or record component.
+	 * Generate scalar clauses for this record or record component.
 	 * 
 	 * @param clauses   the list of clauses to add the clause to
 	 * @param eqn       if true adds equations, otherwise statements
@@ -2193,7 +2142,7 @@ aspect Scalarization {
 	
 	
 	/**
-	 * \brief Generate scalar clauses for this record component.
+	 * Generate scalar clauses for this record component.
 	 * 
 	 * @param clauses   the list of clauses to add the clause to
 	 * @param eqn       if true adds equations, otherwise statements
@@ -2222,7 +2171,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Create an FExp that represents a specific scalar component of this record.
+	 * Create an FExp that represents a specific scalar component of this record.
 	 * 
 	 * @param indexMap  translations for indices in the expressions
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
@@ -2277,19 +2226,19 @@ aspect Scalarization {
       fqn = fqn.scalarize(indexMap);
       return createNode(new FIdUse(fqn));
     }
-	
-	/**
-	 * \brief Create an FExp that represents a specific scalar component of the given record constructor.
-	 * 
-	 * @param indexMap  translations for indices in the expressions
-	 * @param con       the record constructor to extract an expression from
-	 * 
-	 * @see FExp#scalarRecordFExp(Map<String,FExp>, FQName)
-	 */
-	public FExp FQName.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
-		throw new UnsupportedOperationException();
-	}
-	
+
+    /**
+     * Create an FExp that represents a specific scalar component of the given record constructor.
+     * 
+     * @param indexMap  translations for indices in the expressions
+     * @param con       the record constructor to extract an expression from
+     * 
+     * @see FExp#scalarRecordFExp(Map, FQName)
+     */
+    public FExp FQName.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
+        throw new UnsupportedOperationException();
+    }
+
 	public FExp FQNameString.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
 		FExp arg = con.myArgFExp(getName());
 		return arg.scalarize(indexMap);
@@ -2321,7 +2270,7 @@ aspect Scalarization {
     }
 	
 	/**
-	 * \brief Scalarize equation and put all scalarized equations in list eqns.
+	 * Scalarize equation and put all scalarized equations in list eqns.
 	 */
 	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
@@ -2466,7 +2415,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Creates temporary variable(s) for this expression.
+	 * Creates temporary variable(s) for this expression.
 	 * 
 	 * This applies to expressions that may need temporaries anywhere, not only in 
 	 * expressions with unknown array sizes. Should be used from createArrayTemporaries().
@@ -2495,7 +2444,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Creates temporary function variables for a record with the given name.
+	 * Creates temporary function variables for a record with the given name.
 	 * 
 	 * @param vars      list of variable to add the new variables to
 	 * @param name      the name of the record variable
@@ -2510,7 +2459,7 @@ aspect Scalarization {
 	}	
 	
 	/**
-	 * \brief Create a record constructor (or FArray of record constructors),  
+	 * Create a record constructor (or FArray of record constructors),  
 	 *        with the arguments taken from a record variable with the given name.
 	 */
 	public FExp FType.createRecordConstructor(FQName name) {
@@ -2539,7 +2488,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Create a record constructor with the arguments taken from a record 
+	 * Create a record constructor with the arguments taken from a record 
 	 *        variable with the given name.
 	 * 
 	 * Assumes that <code>name</code> refers to a non-array variable 
@@ -2559,63 +2508,63 @@ aspect Scalarization {
 		}
 		return rc;
 	}
-	
+
+    /**
+     * Creates a new temporary varable with the given name.
+     *        If this is an array, variables are created for each cell.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     * @param fixed        if creating parameters, use this value for the fixed attribute
+     */
+    public void FType.createTempFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
+        if (isArray()) {
+            FQNameFull fqn = name.copyAsFQNameFull();
+            for (Index i : indices()) {
+                fqn.addFArraySubscripts(i.createFArraySubscripts());
+                createTempCellFVariables(vars, fqn, variability, fixed);
+            }
+        } else {
+            createTempCellFVariables(vars, name, variability, fixed);
+        }
+    }
+
+    /**
+     * Creates a new temporary variable with the given name.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     * @param fixed        if creating parameters, use this value for the fixed attribute
+     */
+    public void FType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
+        FQName fqn = name.fullCopy();
+        fqn.scalarized = true;
+        
+        FVariable var = createTempFVariable(fqn, variability);
+        vars.add(var);
+        if (!fixed)
+            var.addFAttribute(new FAttribute(new FIdUse("Boolean"), new FIdDecl("fixed"), new FBooleanLitExpFalse(), true, 0));
+    }
+
+    /**
+     * Creates temporary variables for a record with the given name.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     * @param fixed        if creating parameters, use this value for the fixed attribute
+     */
+    public void FRecordType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
+        for (FRecordComponentType comp : getComponents()) {
+            FQName next = name.copyAndAppend(comp.getName());
+            comp.getFType().createTempFVariables(vars, next, variability, fixed);
+        }
+    }
+
 	/**
-	 * \brief Creates a new temporary varable with the given name.
-	 *        If this is an array, variables are created for each cell.
-	 * 
-	 * @param vars   list of variable to add the new variable to
-	 * @param name   the name of the new variable
-	 * @param param  if <code>true</code>, create parameters instead of variables
-	 * @param fixed  if creating parameters, use this value for the fixed attribute
-	 */
-	public void FType.createTempFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
-		if (isArray()) {
-			FQNameFull fqn = name.copyAsFQNameFull();
-			for (Index i : indices()) {
-				fqn.addFArraySubscripts(i.createFArraySubscripts());
-				createTempCellFVariables(vars, fqn, variability, fixed);
-			}
-		} else {
-			createTempCellFVariables(vars, name, variability, fixed);
-		}
-	}
-	
-	/**
-	 * Creates a new temporary variable with the given name.
-	 * 
-	 * @param vars   list of variable to add the new variable to
-	 * @param name   the name of the new variable
-	 * @param param  if <code>true</code>, create parameters instead of variables
-     * @param fixed  if creating parameters, use this value for the fixed attribute
-	 */
-	public void FType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
-		FQName fqn = name.fullCopy();
-		fqn.scalarized = true;
-		
-		FVariable var = createTempFVariable(fqn, variability);
-		vars.add(var);
-		if (!fixed)
-		    var.addFAttribute(new FAttribute(new FIdUse("Boolean"), new FIdDecl("fixed"), new FBooleanLitExpFalse(), true, 0));
-	}
-	
-	/**
-	 * \brief Creates temporary variables for a record with the given name.
-	 * 
-	 * @param vars   list of variable to add the new variable to
-	 * @param name   the name of the new variable
-	 * @param param  if <code>true</code>, create parameters instead of variables
-     * @param fixed  if creating parameters, use this value for the fixed attribute
-	 */
-	public void FRecordType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
-		for (FRecordComponentType comp : getComponents()) {
-			FQName next = name.copyAndAppend(comp.getName());
-			comp.getFType().createTempFVariables(vars, next, variability, fixed);
-		}
-	}
-	
-	/**
-	 * \brief Creates a new temporary variable with the given visibility, name and visibility.
+	 * Creates a new temporary variable with the given visibility, name and visibility.
 	 * 
 	 * All optional children in the new variable are empty.
 	 * 
@@ -2626,7 +2575,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Creates a new variable with the given visibility, name and visibility.
+	 * Creates a new variable with the given visibility, name and visibility.
 	 * 
 	 * All optional children in the new variable are empty.
 	 * 
@@ -2683,7 +2632,7 @@ aspect Scalarization {
 
     public class Array {
         /**
-         * Helper object for {@link #buildScalarized(java.util.Map<String,FExp>)}.
+         * Helper object for {@link #buildScalarized(java.util.Map,FExp)}.
          */
         protected static class ScalarizedBuilder implements ElementBuilder {
             private Map<String,FExp> indexMap;
@@ -2701,12 +2650,12 @@ aspect Scalarization {
     }
 
 	/**
-	 * \brief Flag that signals that this expression should be replaced with a use of a temporary variable.
+	 * Flag that signals that this expression should be replaced with a use of a temporary variable.
 	 */
 	protected boolean FExp.useTempVar = false;
 
 	/**
-	 * \brief Scalarize expressions, replacing array expressions with FArrays of scalarized subexpressions.
+	 * Scalarize expressions, replacing array expressions with FArrays of scalarized subexpressions.
 	 * 
 	 * The FArrays are needed because function calls need arrays to be passed as arrays.
 	 */
@@ -2726,7 +2675,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Create a record constructor (or FArray of record constructors) 
+	 * Create a record constructor (or FArray of record constructors) 
 	 *        describing this record expression.
 	 */
 	public FExp FExp.buildRecordConstructor(Map<String,FExp> indexMap) {
@@ -2766,7 +2715,7 @@ aspect Scalarization {
 	eq FSizeExp.getFExp().canAcceptArray()          = inFunction();
 	
 	/**
-	 * \brief Scalarize expressions.
+	 * Scalarize expressions.
 	 */
 	public FExp FExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return fullCopy();
@@ -2848,7 +2797,7 @@ aspect Scalarization {
     }
     
     /**
-     * \brief Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
+     * Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
      */
     public FIdUseExp FIdUseExp.createUseWithNamedSubscripts(ForNames names) {
         return new FIdUseExp(name(), names.createFArraySubscripts());
@@ -2945,7 +2894,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Scalarize an expression by recursively scalarizing and combining the contents in its Array.
+	 * Scalarize an expression by recursively scalarizing and combining the contents in its Array.
 	 * 
 	 * New nodes are created with <code>template.createNodeBinary()</code>.
 	 */
@@ -3077,7 +3026,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Scalarize the expression of an FForIndex. 
+	 * Scalarize the expression of an FForIndex. 
 	 */
 	public FExp FExp.scalarizeIndexExp(Map<String,FExp> indexMap) {
 		return scalarize(indexMap);

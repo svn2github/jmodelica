@@ -23,6 +23,7 @@
  import $AST_PACKAGE$.*;
  import org.jmodelica.util.formattedPrint.FormattingInfo;
  import org.jmodelica.util.Problem;
+ import beaver.Parser.Events;
  import java.io.*;
  import java.util.Collection;
  import java.util.Map;
@@ -34,7 +35,7 @@
      * Error reporting class that creates an error message and delegates reporting the 
      * message to a subclass.
      */
-    public abstract static class Report extends Parser.Events {
+    public abstract static class Report extends Events {
 
         /**
          * Report an error with error message <code>msg</code>.
@@ -43,7 +44,7 @@
 
         /**
          * Creates an error message for when <code>token</code> is found unexpectedly. 
-         * Passes the error message to {@link #report(String)}.
+         * Passes the error message to {@link #report(Problem)}.
          * @param token     the unexpected symbol.
          */
         public void syntaxError(Symbol token) {
@@ -63,7 +64,7 @@
 
         /**
          * Creates an error message for when the scanner throws an exception.
-         * Passes the error message to {@link #report(String)}.
+         * Passes the error message to {@link #report(Problem)}.
          * @param e     the exception.
          */
         public void scannerError(Scanner.Exception e) {
@@ -88,7 +89,7 @@
     }
     
     /**
-     * Error reporting class that throws a {@link CompilerException} on an error.
+     * Error reporting class that throws a {@link ParserException} on an error.
      * Uses error message created by {@link Report}.
      */
     public class AbortingReport extends Report {
@@ -148,13 +149,13 @@
 
     /**
      * Set the error reporting class to use.
-     * @param report    a subclass of {@link Parser.Events} to use for reporting errors.
+     * @param report    a subclass of {@link Events} to use for reporting errors.
      */
-    public void setReport(Parser.Events report) {
+    public void setReport(Events report) {
         this.report = report;
     }
 
-    public Parser.Events getReport() {
+    public Events getReport() {
         return report;
     }
 

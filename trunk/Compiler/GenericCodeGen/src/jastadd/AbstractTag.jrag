@@ -15,7 +15,7 @@
 */
 
 /** \file AbstractTag.java
- *  \brief AbstractTag class.
+ *  AbstractTag class.
  */
 
 import java.io.*;

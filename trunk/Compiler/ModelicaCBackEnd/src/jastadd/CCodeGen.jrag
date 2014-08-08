@@ -480,7 +480,7 @@ aspect CCodeGen {
 	}
 	
 	/**
-	 * \brief Check if we need to generate a wrapper for expressions for this function.
+	 * Check if we need to generate a wrapper for expressions for this function.
 	 */
 	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 	
@@ -2809,7 +2809,7 @@ aspect CCodeGen {
 
 
     /**
-     * \brief Generate code for blocks of equations 
+     * Generate code for blocks of equations 
      */
     public void AbstractEquationBlock.genBlockBase_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         for (FRelExp relExp : inactiveSwitches_C())
@@ -2821,7 +2821,7 @@ aspect CCodeGen {
     }
 
     /**
-     * \brief Generate code for blocks of equations 
+     * Generate code for blocks of equations 
      */
     public void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         genBlockBase_C(p, str, indent, inInitial);
@@ -2850,7 +2850,7 @@ aspect CCodeGen {
      public boolean SolvedIfEquationBlock.genBlockEnabled()           { return true; }
     
     /**
-     * \brief Generate block code for equations
+     * Generate block code for equations
      * 
      * @param visited      Keeps track of visited equations
      * @param forVariables Variables that should get a writeback
@@ -2978,7 +2978,7 @@ aspect CCodeGen {
     
     
     /**
-     * \brief Generate residual code for equations
+     * Generate residual code for equations
      * 
      * @param enumerator Enumerates residuals
      * @param visited    Keeps track of visited equations
@@ -3147,7 +3147,7 @@ aspect CCodeGen {
 	
 	
     /**
-     * \brief Helper for printing if equations
+     * Helper for printing if equations
      */
     public void FIfWhenElseEquation.genIfStart_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
@@ -3164,7 +3164,7 @@ aspect CCodeGen {
     }
     
     /**
-     * \brief Helper for printing if equations
+     * Helper for printing if equations
      */
     public void FIfWhenElseEquation.genIfEnd_C(CodePrinter p, CodeStream str, String indent) {}
     

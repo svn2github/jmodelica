@@ -24,7 +24,7 @@ import org.jmodelica.util.ErrorCheckType;
 aspect TestCases {
 
 /**
- * \brief base class for test cases.
+ * base class for test cases.
  * 
  * Note that for each attribute (e.g. "attributeName") in the test case 
  * annotation, there must be a corresponding method (e.g. "setAttributeName()") 
@@ -49,7 +49,7 @@ abstract public class TestCase {
     private Exception exception = null;
 
 	/**
-	 * \brief Create the OptionsRegistry to be used during compilation.
+	 * Create the OptionsRegistry to be used during compilation.
 	 * 
 	 * Options may be further changed by test annotation.
 	 */
@@ -63,7 +63,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Set a string option to be used during compilation.
+	 * Set a string option to be used during compilation.
 	 */
 	public void setStringOption(String key, String value) {
 		try {
@@ -74,7 +74,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Set a boolean option to be used during compilation.
+	 * Set a boolean option to be used during compilation.
 	 */
 	public void setBooleanOption(String key, boolean value) {
 		try {
@@ -85,7 +85,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Set an integer option to be used during compilation.
+	 * Set an integer option to be used during compilation.
 	 */
 	public void setIntegerOption(String key, int value) {
 		try {
@@ -96,7 +96,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Set a real option to be used during compilation.
+	 * Set a real option to be used during compilation.
 	 */
 	public void setRealOption(String key, double value) {
 		try {
@@ -169,15 +169,15 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Activate or deactivate filtering (see {@link #filter(String)}).
+	 * Activate or deactivate filtering (see {@link #filter(String)}).
 	 */
 	public void setFilter(boolean val) {
 		filter = val;
 	}
 	
 	/**
-	 * \brief Activate or deactivate incusion of warnings and compliance errors 
-	 *        in error check (see {@link #filterProblems(Collection<Problem>)}).
+	 * Activate or deactivate incusion of warnings and compliance errors 
+	 *        in error check (see {@link #filterProblems(Collection)}).
 	 */
 	public void setCheckAll(boolean val) {
 		checkAll = val;
@@ -200,7 +200,7 @@ abstract public class TestCase {
     }
 	
 	/**
-	 * \brief Perform filtering on string, if activated.
+	 * Perform filtering on string, if activated.
 	 */
 	protected String filter(String str) {
 		if (filter) {
@@ -239,7 +239,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Interface for proxy class used to remove dependency on junit from TestCase.
+	 * Interface for proxy class used to remove dependency on junit from TestCase.
 	 */
 	public static interface Assert {
 		public void fail(String msg);
@@ -266,7 +266,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Signal that the test failed.
+	 * Signal that the test failed.
 	 * 
 	 * @param msg  a message describing what went wrong
 	 */
@@ -275,7 +275,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Signal that the test failed.
+	 * Signal that the test failed.
 	 * 
 	 * @param e  the exception that caused the failure
 	 */
@@ -356,7 +356,7 @@ abstract public class TestCase {
 	}
 
 	/**
-	 * \brief Perform tests on the set of semantic problems found in the instance tree.
+	 * Perform tests on the set of semantic problems found in the instance tree.
 	 * 
 	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
 	 * 
@@ -367,7 +367,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Perform tests on flattened class.
+	 * Perform tests on flattened class.
 	 * 
 	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
@@ -376,7 +376,7 @@ abstract public class TestCase {
 	}
 
 	/**
-	 * \brief Perform tests on flat class after transform canonical step.
+	 * Perform tests on flat class after transform canonical step.
 	 * 
 	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
@@ -385,7 +385,7 @@ abstract public class TestCase {
 	}
 
 	/**
-	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
+	 * Perform tests on the set of semantic problems found after transform canonical step.
 	 * 
 	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
 	 * 
@@ -396,7 +396,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Perform tests on a set of semantic problems.
+	 * Perform tests on a set of semantic problems.
 	 * 
 	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
 	 * 
@@ -410,7 +410,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Filters out any uninteresting problems from a set of semantic problems.
+	 * Filters out any uninteresting problems from a set of semantic problems.
 	 * 
 	 * Default implementation removes any warnings and any COMPLIANCE errors.
 	 */
@@ -421,7 +421,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Compare a flat class to a pretty-printed correct model and fail if different.
+	 * Compare a flat class to a pretty-printed correct model and fail if different.
 	 */
 	protected void testPrettyPrint(FClass fc, String correct) {
 		TokenTester tt = new TokenTester();
@@ -434,7 +434,7 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Sort lines in string alphabetically.
+	 * Sort lines in string alphabetically.
 	 */
 	protected String sortLines(String str) {
 		String[] lines = str.split("\n|\r|\r\n");

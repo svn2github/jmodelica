@@ -29,7 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * \brief Provides methods to evaluate flat constant 
+ * Provides methods to evaluate flat constant 
  * expressions. 
  * 
  * Evaluation of constants and parameters is needed in several locations in the
@@ -50,7 +50,7 @@ aspect ConstantEvaluation {
 	
 	// TODO: shouldn't this inherit ModelicaException?
 	/**
-	 * \brief An exception denoting a failure in constant evaluation.
+	 * An exception denoting a failure in constant evaluation.
 	 */
 	public class ConstantEvaluationException extends RuntimeException {
 		
@@ -67,14 +67,14 @@ aspect ConstantEvaluation {
 		}
 		
 		/**
-		 * \brief Gets the CValue that caused the failure.
+		 * Gets the CValue that caused the failure.
 		 */
 		public CValue getCValue() {
 			return val;
 		}
 		
 		/**
-		 * \brief Gets the error message.
+		 * Gets the error message.
 		 */
 		public String getMessage() {
 			return (val == null) ? super.getMessage() :
@@ -91,24 +91,24 @@ aspect ConstantEvaluation {
 	}
   
 	/**
-	 * \brief CValue represents a constant value and serves as the super class 
+	 * CValue represents a constant value and serves as the super class 
 	 * for constant value classes of the primitive types.
 	 */
 	public abstract class CValue implements Iterable<CValue>, Cloneable {
 		
 		/**
-		 * \brief An unknown value.
+		 * An unknown value.
 		 */
 		public static final CValue UNKNOWN = new CValueUnknown();
 		
 		/**
-		 * \brief An unknown value for an expression that constant evaluation 
+		 * An unknown value for an expression that constant evaluation 
 		 *        isn't supported for.
 		 */
 		public static final CValue UNSUPPORTED = new CValueUnsupported();
 
 		/** 
-		 * \brief Default constructor.
+		 * Default constructor.
 		 */
 	    protected CValue() {
 	    }
@@ -125,7 +125,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Get a string describing this CValue for use in 
+	     * Get a string describing this CValue for use in 
 	     *        ConstantEvaluationExceptions.
 	     */
 	    public String errorDesc() {
@@ -133,7 +133,7 @@ aspect ConstantEvaluation {
 	    }
 
 	    /**
-	     * \brief Convert to int, default implementation.
+	     * Convert to int, default implementation.
 	     * 
 	     * @return Value converted to int.
 	     */
@@ -142,7 +142,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Convert to double, default implementation.
+	     * Convert to double, default implementation.
 	     * 
 	     * @return Value converted to double.
 	     */
@@ -151,7 +151,7 @@ aspect ConstantEvaluation {
 	    }
 	    
         /**
-         * \brief Convert to a vector of double, default implementation.
+         * Convert to a vector of double, default implementation.
          * 
          * @return Value converted to double vector.
          */
@@ -160,7 +160,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Convert to a matrix of doubles, default implementation.
+         * Convert to a matrix of doubles, default implementation.
          * 
          * @return Value converted to double matrix.
          */
@@ -169,7 +169,7 @@ aspect ConstantEvaluation {
         }
         
 	    /**
-	     * \brief Convert to boolean, default implementation.
+	     * Convert to boolean, default implementation.
 	     * 
 	     * @return Value converted to boolean.
 	     */
@@ -178,7 +178,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Convert to string, default implementation.
+	     * Convert to string, default implementation.
 	     * 
 	     * @return Value converted to string.
 	     */
@@ -187,7 +187,7 @@ aspect ConstantEvaluation {
 	    }
 	    
         /**
-         * \brief Convert to a vector of strings, default implementation.
+         * Convert to a vector of strings, default implementation.
          * 
          * @return Value converted to string vector.
          */
@@ -234,28 +234,28 @@ aspect ConstantEvaluation {
         }
 
 	    /**
-	     * \brief Convert to CValueInteger, default implementation.
+	     * Convert to CValueInteger, default implementation.
 	     */
 	    public CValue convertInteger() {
 	    	return new CValueInteger(intValue());
 	    }
 	    
 	    /**
-	     * \brief Convert to CValueReal, default implementation.
+	     * Convert to CValueReal, default implementation.
 	     */
 	    public CValue convertReal() {
 	    	return new CValueReal(realValue());
 	    }
 	    
 	    /**
-	     * \brief Convert to CValueBoolean, default implementation.
+	     * Convert to CValueBoolean, default implementation.
 	     */
 	    public CValue convertBoolean() {
 	    	return new CValueBoolean(booleanValue());
 	    }
 	    
 	    /**
-	     * \brief Convert to CValueString, default implementation.
+	     * Convert to CValueString, default implementation.
 	     */
 	    public CValue convertString() {
 	    	return new CValueString(stringValue());
@@ -312,7 +312,7 @@ aspect ConstantEvaluation {
         }
 
 	    /**
-	     * \brief Returns true if the constant value is of numeric type.
+	     * Returns true if the constant value is of numeric type.
 	     * 
 	     * @return True if the constant is a numerical value.
 	     */
@@ -321,7 +321,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Check if there was an error in the evaluation.
+	     * Check if there was an error in the evaluation.
 	     *
 	     * @return true if there was an error, otherwise false. 
 	     */
@@ -330,7 +330,7 @@ aspect ConstantEvaluation {
       	}
 	    
         /**
-         * \brief Check if there was an error in any part of the evaluation.
+         * Check if there was an error in any part of the evaluation.
          *
          * @return true if there was an error, otherwise false. 
          */
@@ -339,7 +339,7 @@ aspect ConstantEvaluation {
         }
     	
 	    /**
-	     * \brief Check if there was a compliance error in the evaluation.
+	     * Check if there was a compliance error in the evaluation.
 	     *
 	     * @return true if there was a compliance error, otherwise false. 
 	     */
@@ -405,7 +405,7 @@ aspect ConstantEvaluation {
          * It is possible to allow dimention of unknown size by providing a
          * negative number for that dimention.
          * 
-         * @param int[] Sizes of each dimention. 
+         * @param dims Sizes of each dimention. 
          * @return True if the constant is an array with given dimention sizes.
          */
         public final boolean isArray(int ... dims) {
@@ -420,7 +420,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-         * \brief Convenience method for accessing an array CValue as CValueArray.
+         * Convenience method for accessing an array CValue as CValueArray.
          * 
          * Only valid for arrays.
          */
@@ -442,14 +442,14 @@ aspect ConstantEvaluation {
         }
  	   
         /**
-         * \brief Check if this is a record.
+         * Check if this is a record.
          */
         public boolean isRecord() {
         	return false;
         }
        
         /**
-         * \brief Convenience method for accessing a record CValue as CValueRecord.
+         * Convenience method for accessing a record CValue as CValueRecord.
          * 
          * Only valid for records.
          */
@@ -503,14 +503,14 @@ aspect ConstantEvaluation {
         };
         
 		/**
-		 * \brief Returns the array size of this constant value.
+		 * Returns the array size of this constant value.
 		 */
 		public Size size() {
 			return Size.SCALAR;
 		}
 		
 		/**
-		 * \brief Iterates over all array cells in CValue.
+		 * Iterates over all array cells in CValue.
 		 * 
 		 * A scalar CValue is considered to have a single array cell.
 		 */
@@ -521,13 +521,13 @@ aspect ConstantEvaluation {
 	}
 	
 	/**
-	 * \brief Constant integer value.
+	 * Constant integer value.
 	 */
     public class CValueInteger extends CValue {
         private int value;
         
         /** 
-         * \brief Constructor.
+         * Constructor.
          * 
   	     * @param i Integer value.
          */
@@ -536,7 +536,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-	     * \brief Convert to int.
+	     * Convert to int.
 	     * 
 	     * @return Value converted to int.
 	     */
@@ -545,7 +545,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-	     * \brief Convert to double.
+	     * Convert to double.
 	     * 
 	     *  @return Value converted to double.
 	     */
@@ -564,14 +564,14 @@ aspect ConstantEvaluation {
         }
 
 	    /**
-	     * \brief Convert to CValueInteger.
+	     * Convert to CValueInteger.
 	     */
 	    public CValue convertInteger() {
 	    	return this;
 	    }
         
         /**
-	     * \brief Convert to string.
+	     * Convert to string.
 	     * 
 	     * @return Value converted to string.
 	     */
@@ -611,7 +611,7 @@ aspect ConstantEvaluation {
     }
     
 	/**
-	 * \brief Constant real value.
+	 * Constant real value.
 	 */      
     public class CValueReal extends CValue {
         private double value;
@@ -626,7 +626,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-	     * \brief Convert to int.
+	     * Convert to int.
 	     * 
 	     * @return Value converted to int.
 	     */
@@ -636,7 +636,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-	     * \brief Convert to double.
+	     * Convert to double.
 	     * 
 	     * @return Value converted to double.
 	     */
@@ -655,14 +655,14 @@ aspect ConstantEvaluation {
         }
 	    
 	    /**
-	     * \brief Convert to CValueReal.
+	     * Convert to CValueReal.
 	     */
 	    public CValue convertReal() {
 	    	return this;
 	    }
 
         /**
-	     * \brief Convert to string.
+	     * Convert to string.
 	     * 
 	     * @return Value converted to string.
 	     */
@@ -671,7 +671,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Create a new literal expression AST node.
+         * Create a new literal expression AST node.
          * 
          * @return FRealLitExp AST node.
          */
@@ -696,7 +696,7 @@ aspect ConstantEvaluation {
       }
     
 	/**
-	 * \brief Constant boolean value.
+	 * Constant boolean value.
 	 */
     public class CValueBoolean extends CValue {
     	/** A CValueBolean with the value <code>false</code>, for conveniance. */
@@ -717,7 +717,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-	     * \brief Convert to boolean.
+	     * Convert to boolean.
 	     * 
 	     * @return Value converted to boolean.
 	     */
@@ -726,7 +726,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Convert to int.
+         * Convert to int.
          * 
          * Used for array index and comparisons.
 	     * 
@@ -737,14 +737,14 @@ aspect ConstantEvaluation {
         }
 	    
 	    /**
-	     * \brief Convert to CValueBoolean.
+	     * Convert to CValueBoolean.
 	     */
 	    public CValue convertBoolean() {
 	    	return this;
 	    }
        
         /**
-	     * \brief Convert to string.
+	     * Convert to string.
 	     * 
 	     * @return Value converted to string.
 	     */
@@ -753,7 +753,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-         * \brief Create a new literal expression AST node.
+         * Create a new literal expression AST node.
          * 
          * @return FBooleanLitExp AST node.
          */
@@ -769,7 +769,7 @@ aspect ConstantEvaluation {
       }
       
 	/**
-	 * \brief Constant string value.
+	 * Constant string value.
 	 */
     public class CValueString extends CValue {
         private String value;
@@ -782,21 +782,21 @@ aspect ConstantEvaluation {
         public CValueString(String s) { this.value = s; }
         
         /**
-	     * \brief Convert to string.
+	     * Convert to string.
 	     * 
 	     * @return Value converted to string.
 	     */        
         public String stringValue() { return value; }
 	    
 	    /**
-	     * \brief Convert to CValueString.
+	     * Convert to CValueString.
 	     */
 	    public CValue convertString() {
 	    	return this;
 	    }
 
         /**
-         * \brief Create a new literal expression AST node.
+         * Create a new literal expression AST node.
          * 
          * @return FStringLitExp AST node.
          */
@@ -816,7 +816,7 @@ aspect ConstantEvaluation {
       }
     
 	/**
-	 * \brief Constant unknown value. This class is used to represent 
+	 * Constant unknown value. This class is used to represent 
 	 * non-constant values and values resulting from expressions with
 	 * type errors.
 	 */
@@ -836,7 +836,7 @@ aspect ConstantEvaluation {
       	}
 	    
 	    /**
-	     * \brief Get a string describing this CValue for use in 
+	     * Get a string describing this CValue for use in 
 	     *        ConstantEvaluationExceptions.
 	     */
 	    public String errorDesc() {
@@ -846,7 +846,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * \brief Constant unknown value generated by an expression that 
+     * Constant unknown value generated by an expression that 
      *        constant evaluation isn't supported for.  
      */
     public class CValueUnsupported extends CValueUnknown {
@@ -856,7 +856,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * \brief Constant value for array.
+     * Constant value for array.
      * 
      * Note that this class is mutable, care must be taken not to modify 
      * arrays that have already been returned. The only place where that 
@@ -876,7 +876,7 @@ aspect ConstantEvaluation {
 		private int add = 0;
     	
 		/**
-		 * \brief Create a CValueArray of size <code>s</code>.
+		 * Create a CValueArray of size <code>s</code>.
 		 * 
 		 * The array is initially filled with unknown values. 
 		 * Individual values must be set with setCell().
@@ -902,7 +902,7 @@ aspect ConstantEvaluation {
     	}
     	
         /**
-         * \brief Check if there was an error in any part of the evaluation.
+         * Check if there was an error in any part of the evaluation.
          *
          * @return true if there was an error, otherwise false. 
          */
@@ -1008,7 +1008,7 @@ aspect ConstantEvaluation {
         }
 
         /**
-         * \brief Convenience method for accessing an array CValue as CValueArray.
+         * Convenience method for accessing an array CValue as CValueArray.
          * 
          * Only valid for arrays.
          */
@@ -1034,14 +1034,14 @@ aspect ConstantEvaluation {
         }
  	   
         /**
-         * \brief Set the value of a specific cell of an array constant value.
+         * Set the value of a specific cell of an array constant value.
          */
         public void setCell(Index i, CValue val) {
         	values[i.internal(indices)] = val;
         }
         
         /**
-         * \brief Set the value of the next free cell of an array constant value.
+         * Set the value of the next free cell of an array constant value.
          * 
          * "Free" here means the cell after the last one set by addCell(), or the 
          * first cell if this is the first call.
@@ -1059,7 +1059,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Get the value of a specific cell of an array constant value.
+         * Get the value of a specific cell of an array constant value.
          */
         public CValue getCell(Index i) {
         	if (!indices.isValid(i))
@@ -1096,21 +1096,21 @@ aspect ConstantEvaluation {
         }
 		
 		/**
-		 * \brief Returns the Indices associated with this constant array.
+		 * Returns the Indices associated with this constant array.
 		 */
 		public Indices indices() {
 			return indices;
 		}
 		
 		/**
-		 * \brief Returns the array size of this constant value.
+		 * Returns the array size of this constant value.
 		 */
 		public Size size() {
 			return indices.size();
 		}
 	    
 	    /**
-	     * \brief Convert each cell to CValueInteger.
+	     * Convert each cell to CValueInteger.
 	     */
 	    public CValue convertInteger() {
 	    	CValueArray res = new CValueArray(indices.size());
@@ -1120,7 +1120,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Convert each cell to CValueReal.
+	     * Convert each cell to CValueReal.
 	     */
 	    public CValue convertReal() {
 	    	CValueArray res = new CValueArray(indices.size());
@@ -1130,7 +1130,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Convert each cell to CValueBoolean.
+	     * Convert each cell to CValueBoolean.
 	     */
 	    public CValue convertBoolean() {
 	    	CValueArray res = new CValueArray(indices.size());
@@ -1140,7 +1140,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Convert each cell to CValueString.
+	     * Convert each cell to CValueString.
 	     */
 	    public CValue convertString() {
 	    	CValueArray res = new CValueArray(indices.size());
@@ -1206,7 +1206,7 @@ aspect ConstantEvaluation {
         }
 
 	    /**
-	     * \brief An iterator that iterates over all cells in the array.
+	     * An iterator that iterates over all cells in the array.
 	     * 
 	     * Traverses the array in the same order as indices().iterator().
 	     */
@@ -1217,7 +1217,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * \brief Constant value for record.
+     * Constant value for record.
      * 
      * Note that this class is mutable, care must be taken not to modify 
      * records that have already been returned. The only place where that 
@@ -1231,7 +1231,7 @@ aspect ConstantEvaluation {
     	protected CValue[] values;
     	
     	/**
-    	 * \brief Create a new record constant value for the described record.
+    	 * Create a new record constant value for the described record.
     	 * 
     	 * @param type  the FRecordType describing the record
     	 */
@@ -1254,14 +1254,14 @@ aspect ConstantEvaluation {
 	    }
   	   
         /**
-         * \brief Check if this is a record.
+         * Check if this is a record.
          */
         public boolean isRecord() {
         	return true;
         }
         
         /**
-         * \brief Check if there was an error in any part of the evaluation.
+         * Check if there was an error in any part of the evaluation.
          *
          * @return true if there was an error, otherwise false. 
          */
@@ -1273,7 +1273,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Convenience method for accessing a record CValue as CValueRecord.
+         * Convenience method for accessing a record CValue as CValueRecord.
          * 
          * Only valid for records.
          */
@@ -1282,7 +1282,7 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Get the internal index for a given member.
+         * Get the internal index for a given member.
          */
         protected int index(String name) {
         	Integer i = members.get(name);
@@ -1300,14 +1300,14 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Set the value of a specific member of a record constant value.
+         * Set the value of a specific member of a record constant value.
          */
         public void setMember(String name, CValue val) {
         	values[index(name)] = val;
         }
         
         /**
-         * \brief Set the value of a specific member of a record constant value.
+         * Set the value of a specific member of a record constant value.
          * 
          * @param i  the zero-based index of the member, according to the order 
          *           in the record declaration
@@ -1317,14 +1317,14 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Get the value of a specific member of a record constant value.
+         * Get the value of a specific member of a record constant value.
          */
         public CValue getMember(String name) {
         	return getMember(index(name));
         }
         
         /**
-         * \brief Get the value of a specific member of a record constant value.
+         * Get the value of a specific member of a record constant value.
          * 
          * @param i  the zero-based index of the member, according to the order 
          *           in the record declaration
@@ -1397,7 +1397,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * \brief Constant value for enumeration literal.
+     * Constant value for enumeration literal.
      */
     public class CValueEnum extends CValue {
     	
@@ -1406,7 +1406,7 @@ aspect ConstantEvaluation {
     	private int index;
     	
     	/**
-    	 * \brief Create a new constant value for enumeration literal.
+    	 * Create a new constant value for enumeration literal.
     	 * 
     	 * @param type   the type of the enumeration
     	 * @param value  the name of the enumeration literal
@@ -1422,7 +1422,7 @@ aspect ConstantEvaluation {
     	}
     	
     	/**
-    	 * \brief Create a new constant value for enumeration literal.
+    	 * Create a new constant value for enumeration literal.
     	 * 
     	 * @param type   the type of the enumeration
     	 * @param index  the ordinal for the enumeration literal
@@ -1452,7 +1452,7 @@ aspect ConstantEvaluation {
     	}
 	    
 	    /**
-	     * \brief Create a literal AST node from constant.
+	     * Create a literal AST node from constant.
 	     * 
 	     * Always creates node for the flat tree.
 	     *  
@@ -1466,7 +1466,7 @@ aspect ConstantEvaluation {
 
 
     /**
-     * \brief Create a CValue with the zero value for this type, if applicable.
+     * Create a CValue with the zero value for this type, if applicable.
      */
     public CValue FType.zeroCValue() {
         if (isArray() && !zeroCValueScalar().isUnknown()) {
@@ -1527,7 +1527,7 @@ aspect ConstantEvaluation {
     }
 
     /** 
-     * \brief Convenience function for savely checking if an expression as a particular value.
+     * Convenience function for savely checking if an expression as a particular value.
      * 
      */ 
     syn boolean FExp.equalsRealValue(double val) {
@@ -1540,7 +1540,7 @@ aspect ConstantEvaluation {
 
 
     /**
-     * \brief Returns the constant value of a flat expression. 
+     * Returns the constant value of a flat expression. 
      * 
      * If the expression is not constant, or if it contains type errors, a 
      * CValueUnknown object is returned.
@@ -1582,7 +1582,7 @@ aspect ConstantEvaluation {
     }
 
     /**
-     * \brief Like {@see #ceval()}, but in the case of an array, only calculate 
+     * Like {@link #ceval()}, but in the case of an array, only calculate 
      *        the given cell, if possible. 
      */
     syn CValue FExp.ceval(Index i) {
@@ -1624,7 +1624,7 @@ aspect ConstantEvaluation {
 
 
     /**
-     * \brief Constant evaluation for arrays.
+     * Constant evaluation for arrays.
      * 
      * @param i  the index of the cell to calculate, 
      *           where Index.NULL means to calculate all cells
@@ -1650,7 +1650,7 @@ aspect ConstantEvaluation {
     eq FIfExp.cevalArray(Index i)           = cevalSelectExp().cevalArray(i);
 
     /**
-     * \brief Delegate attribute for ceval().
+     * Delegate attribute for ceval().
      * 
      * This needs to be overridden for subclasses of FExp.
      */
@@ -1884,7 +1884,7 @@ aspect ConstantEvaluation {
       eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
 
     /**
-     * \brief Create a copy with all array subscripts replaced by literals.
+     * Create a copy with all array subscripts replaced by literals.
      */
     public FQName FQName.resolveSubscripts() {
         return fullCopy();
@@ -1898,7 +1898,7 @@ aspect ConstantEvaluation {
     }
 
     /**
-     * \brief Create a copy with all array subscripts replaced by literals.
+     * Create a copy with all array subscripts replaced by literals.
      */
     public FQNamePart FQNamePart.resolveSubscripts() {
         return fullCopy();
@@ -1909,7 +1909,7 @@ aspect ConstantEvaluation {
     }
 
     /**
-     * \brief Create a copy with all array subscripts replaced by literals.
+     * Create a copy with all array subscripts replaced by literals.
      */
     public FArraySubscripts FArraySubscripts.resolveSubscripts() {
         FArraySubscripts res = new FArraySubscripts();
@@ -1919,21 +1919,21 @@ aspect ConstantEvaluation {
     }
 
     /**
-     * \brief Create a copy with all array subscripts replaced by literals.
+     * Create a copy with all array subscripts replaced by literals.
      */
     public FSubscript FSubscript.resolveSubscripts() {
         return this;
     }
 
     /**
-     * \brief Create a copy with all array subscripts replaced by literals.
+     * Create a copy with all array subscripts replaced by literals.
      */
     public FExpSubscript FExpSubscript.resolveSubscripts() {
         return new FExpSubscript(ceval().buildLiteral());
     }
 
     /**
-     * \brief Perform constant evaluation of an access to a record member.
+     * Perform constant evaluation of an access to a record member.
      */
     syn CValue FIdUse.cevalRecordMember(FQName name) {
         if (name.numDots() < 1)
@@ -2112,7 +2112,7 @@ aspect ConstantEvaluation {
 		(evaluationValue == null) ? CValue.UNKNOWN : evaluationValue;
 
 	/**
-	 * \brief Evaluation of a assignable instance node located in the instance
+	 * Evaluation of a assignable instance node located in the instance
 	 * AST.
 	 * 
 	 * In some situations, expressions are evaluated in the instance AST. 
@@ -2130,7 +2130,7 @@ aspect ConstantEvaluation {
 	
 
     /**
-     * \brief Evaluation of a assignable instance node located in the instance
+     * Evaluation of a assignable instance node located in the instance
      * AST. Evaluates a specific cell if this assignable is an array.
      * 
      * If assignable is not an array, <code>i</code> should be Index.NULL.
@@ -2357,7 +2357,7 @@ aspect ConstantEvaluation {
 
 
 	/**
-	 * \brief Constant evaluation of FVariable binding expressions.
+	 * Constant evaluation of FVariable binding expressions.
 	 * 
 	 * If an expression is evaluated in an FClass, then identifiers are 
 	 * referencing FVariables. The constant value of an FVariable is computed
@@ -2386,7 +2386,7 @@ aspect ConstantEvaluation {
 	}
 
 	/**
-	 * \brief Constant evaluation of FVariable binding expressions.
+	 * Constant evaluation of FVariable binding expressions.
 	 * 
 	 * If an expression is evaluated in an FClass, then identifiers are 
 	 * referencing FVariables. The constant value of an FVariable is computed
@@ -2422,7 +2422,7 @@ aspect ConstantEvaluation {
 	}
 
   /**
-   * \brief Constant evaluation of binding equation for dependent parameter.
+   * Constant evaluation of binding equation for dependent parameter.
    */
   syn CValue FAbstractEquation.cevalParameter(FVariable fv) = CValue.UNKNOWN;
   eq FEquation.cevalParameter(FVariable fv)                 = getRight().ceval();
@@ -2437,13 +2437,13 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Constant evaluation of binding equation for dependent parameter.
+   * Constant evaluation of binding equation for dependent parameter.
    */
   syn CValue FAbstractEquation.cevalParameter(FVariable fv, Index i) = CValue.UNKNOWN;
   eq FEquation.cevalParameter(FVariable fv, Index i)                 = getRight().ceval(i);
   
   /**
-   * \brief Given that <code>val</code> is the value of this use expression, 
+   * Given that <code>val</code> is the value of this use expression, 
    *        extract the part of it referring to <code>fv</code>, 
    *        or <code>null</code> if none match. 
    */
@@ -2451,7 +2451,7 @@ aspect ConstantEvaluation {
 	  hasFExp() ? getFExp().extractCValue(val, fv) : null;
   
   /**
-   * \brief Given that <code>val</code> is the value of this use expression, 
+   * Given that <code>val</code> is the value of this use expression, 
    *        extract the part of it referring to <code>fv</code>, 
    *        or <code>null</code> if none match. 
    */
@@ -2566,7 +2566,7 @@ aspect ConstantEvaluation {
   
   
   /**
-   * \brief Check if this node is in a function that is being evaluated.
+   * Check if this node is in a function that is being evaluated.
    */
   inh boolean FExp.duringFunctionEval();
   inh boolean InstNamedAccess.duringFunctionEval();
@@ -2577,9 +2577,9 @@ aspect ConstantEvaluation {
   eq Root.getChild().duringFunctionEval()     = false;
   
   /**
-   * \brief Perform constant evaluation of functions, with caching.
+   * Perform constant evaluation of functions, with caching.
    * 
-   * Delegates to {@see #evaluate()};
+   * Delegates to {@link #evaluate()};
    * 
    * @return  constant values for the outputs
    */
@@ -2588,7 +2588,7 @@ aspect ConstantEvaluation {
   syn lazy CValue[] InstFunctionCall.cevalFunction() = evaluate();
 
     /**
-     * \brief Interface for variable declarations in flat and instance trees.
+     * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
         public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
@@ -2632,7 +2632,7 @@ aspect ConstantEvaluation {
   eq InstFunctionCall.argument(int i) = getArg(i).getFExp();
 
   /**
-   * \brief Perform constant evaluation of functions.
+   * Perform constant evaluation of functions.
    * 
    * @return  constant values for the outputs
    */
@@ -2711,7 +2711,7 @@ aspect ConstantEvaluation {
     }
   
   /**
-   * \brief Prepare a function fro being function evaluation.
+   * Prepare a function fro being function evaluation.
    * 
    * This entails: 
    * <ul>
@@ -2749,7 +2749,7 @@ aspect ConstantEvaluation {
     // TODO: reduce code duplication
 
     /**
-     * \brief Perform constant evaluation of functions.
+     * Perform constant evaluation of functions.
      * 
      * @param values  constant values for the variables. 
      *                Should be filled with the values of the inputs.
@@ -2861,21 +2861,21 @@ aspect ConstantEvaluation {
     private Map<CommonVariableDecl, CValue> InstBaseClassDecl.currentEvaluationValues = null;
 
     /**
-     * \brief Save current function evaluation value to map.
+     * Save current function evaluation value to map.
      */
     public void FAbstractVariable.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
         map.put(this, evaluationValue);
     }
 
     /**
-     * \brief Save current function evaluation value to map.
+     * Save current function evaluation value to map.
      */
     public void InstComponentDecl.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
         map.put(this, evaluationValue);
     }
 
     /**
-     * \brief Read current function evaluation value from map.
+     * Read current function evaluation value from map.
      * 
      * If this variable isn't in the map, set to value of binding expression.
      */
@@ -2894,7 +2894,7 @@ aspect ConstantEvaluation {
     }
 
     /**
-     * \brief Read current function evaluation value from map.
+     * Read current function evaluation value from map.
      * 
      * If this variable isn't in the map, set to value of binding expression.
      */
@@ -3030,7 +3030,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Set the current function evaluation value of referenced variable.
+   * Set the current function evaluation value of referenced variable.
    * 
    * Also updates value map.
    */
@@ -3046,7 +3046,7 @@ aspect ConstantEvaluation {
     }
   
   /**
-   * \brief Set the current function evaluation value of referenced variable.
+   * Set the current function evaluation value of referenced variable.
    * 
    * Also updates value map.
    */
@@ -3178,7 +3178,7 @@ aspect ConstantEvaluation {
   public static final int FStatement.EVAL_IFHIT  = 4;  // Flag that can be added to normal value
   
   /**
-   * \brief Evaluate a list of statements or if-else clauses in a function.
+   * Evaluate a list of statements or if-else clauses in a function.
    * 
    * This must be a list of nodes implementing FunctionEvalNode, or an exception will be thrown.
    * 
@@ -3193,7 +3193,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief General contract for nodes that can be evaluated during a function evaluation.
+   * General contract for nodes that can be evaluated during a function evaluation.
    */
   public interface FunctionEvalNode {
 	  public int evaluate(Map<CommonVariableDecl, CValue> values);
@@ -3202,7 +3202,7 @@ aspect ConstantEvaluation {
   FIfWhenClause implements FunctionEvalNode;
   
   /**
-   * \brief Evaluate statement during function evaluation.
+   * Evaluate statement during function evaluation.
    * 
    * @param values  constant values for the variables. 
    */
@@ -3219,7 +3219,7 @@ aspect ConstantEvaluation {
   }
 
   /**
-   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * Evaluate an assignment with this as the left side during function evaluation.
    * 
    * @param values  constant values for the variables
    * @param right   the right hand side
@@ -3229,7 +3229,7 @@ aspect ConstantEvaluation {
   }
 
   /**
-   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * Evaluate an assignment with this as the left side during function evaluation.
    * 
    * @param values  constant values for the variables
    * @param right   the right hand side
@@ -3239,7 +3239,7 @@ aspect ConstantEvaluation {
   }
 
   /**
-   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * Evaluate an assignment with this as the left side during function evaluation.
    * 
    * @param values   constant values for the variables
    * @param right    the right hand side
@@ -3262,7 +3262,7 @@ aspect ConstantEvaluation {
   }
 
   /**
-   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * Evaluate an assignment with this as the left side during function evaluation.
    * 
    * @param values  constant values for the variables
    */
@@ -3277,7 +3277,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Common interface for parts of qualified names.
+   * Common interface for parts of qualified names.
    */
   public interface CommonNamePart {
 	  public String name();
@@ -3295,7 +3295,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Check if this name part accesses an array.
+   * Check if this name part accesses an array.
    * 
    * Note that the check is based only on the array subscripts, and a name part 
    * without array subscripts is assumed to be scalar. Thus this method should 
@@ -3310,7 +3310,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Get the next part in the name this is a part of, or null if this is the last part. 
+   * Get the next part in the name this is a part of, or null if this is the last part. 
    */
   syn CommonNamePart InstAccess.nextNamePart() = getNextInstAccess();
   inh CommonNamePart FQNamePart.nextNamePart();
@@ -3318,7 +3318,7 @@ aspect ConstantEvaluation {
 	  getNumFQNamePart() > i + 1 ? getFQNamePart(i + 1) : null;
 	  
   /**
-   * \brief Handle one part of the left access of an assignment during function evaluation.
+   * Handle one part of the left access of an assignment during function evaluation.
    */
   public CValue FType.assignToPartInFuncEval(CommonNamePart name, CValue left, CValue right) {
 	  return assignToLastInFuncEval(name, left, right);
@@ -3364,7 +3364,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Handle one part of the left access of an assignment during function evaluation.
+   * Handle one part of the left access of an assignment during function evaluation.
    */
   public CValue FRecordType.assignToRecPartInFuncEval(
 		  CommonNamePart next, FType nextType, CValue left, CValue right) {
@@ -3377,7 +3377,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Get the type of a specific component.
+   * Get the type of a specific component.
    */
   public FType FRecordType.componentType(String name) {
 	  for (FRecordComponentType comp : getComponents())
@@ -3387,7 +3387,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Handle the last part of the left access of an assignment during function evaluation.
+   * Handle the last part of the left access of an assignment during function evaluation.
    */
   public CValue FType.assignToLastInFuncEval(CommonNamePart name, CValue left, CValue right) {
 	  if (left.isUnknown() || !isArray()) {
@@ -3482,7 +3482,7 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Evaluate statement list over this for index during function evaluation.
+   * Evaluate statement list over this for index during function evaluation.
    * 
    * @param values  constant values for the variables. 
    */
@@ -3514,7 +3514,7 @@ aspect ConstantEvaluation {
 
   
   /**
-   * \brief Addition of constant values.
+   * Addition of constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3530,7 +3530,7 @@ aspect ConstantEvaluation {
 	  new CValueString(v1.stringValue() + v2.stringValue());
 
   /**
-   * \brief Subtraction of constant values.
+   * Subtraction of constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3544,7 +3544,7 @@ aspect ConstantEvaluation {
 	  new CValueInteger(v1.intValue() - v2.intValue());
 
   /**
-   * \brief Multiplication of constant values.
+   * Multiplication of constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3558,7 +3558,7 @@ aspect ConstantEvaluation {
 	  new CValueInteger(v1.intValue()*v2.intValue());
 
   /**
-   * \brief Division of constant values.
+   * Division of constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3572,7 +3572,7 @@ aspect ConstantEvaluation {
 	  new CValueReal(v1.realValue()/v2.realValue());
 
   /**
-   * \brief Power expression for constant values.
+   * Power expression for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3584,7 +3584,7 @@ aspect ConstantEvaluation {
 	  new CValueReal(java.lang.StrictMath.pow(v1.realValue(),v2.realValue()));
 
   /**
-   * \brief Negation of a constant value.
+   * Negation of a constant value.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -3595,7 +3595,7 @@ aspect ConstantEvaluation {
   eq FIntegerType.neg(CValue v) = new CValueInteger(-v.intValue());
 
   /**
-   * \brief Abs expression for constant values.
+   * Abs expression for constant values.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -3608,7 +3608,7 @@ aspect ConstantEvaluation {
 	  new CValueInteger(StrictMath.abs(v.intValue()));
   
   /**
-   * \brief Sign expression for constant values.
+   * Sign expression for constant values.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -3619,7 +3619,7 @@ aspect ConstantEvaluation {
 	  new CValueInteger((int) StrictMath.signum(v.realValue()));
   
   /**
-   * \brief Ceil expression for constant values.
+   * Ceil expression for constant values.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -3632,7 +3632,7 @@ aspect ConstantEvaluation {
 	  new CValueInteger((int) StrictMath.ceil(v.realValue()));
 
   /**
-   * \brief Truncation to zero for constant values.
+   * Truncation to zero for constant values.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -3645,7 +3645,7 @@ aspect ConstantEvaluation {
 	  v.realValue() < 0 ? ceil(v) : v.convertInteger();
 
   /**
-   * \brief And expression for constant values.
+   * And expression for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3657,7 +3657,7 @@ aspect ConstantEvaluation {
 	  new CValueBoolean(v1.booleanValue() && v2.booleanValue());
 
   /**
-   * \brief Or expression for constant values.
+   * Or expression for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3669,7 +3669,7 @@ aspect ConstantEvaluation {
 	  new CValueBoolean(v1.booleanValue() || v2.booleanValue());
 
   /**
-   * \brief Not expression for constant values.
+   * Not expression for constant values.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -3680,7 +3680,7 @@ aspect ConstantEvaluation {
 	  new CValueBoolean(!v.booleanValue());
   
   /**
-   * \brief Equals comparison for constant values.
+   * Equals comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3696,7 +3696,7 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   
   /**
-   * \brief Not equal comparison for constant values.
+   * Not equal comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3712,7 +3712,7 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   
   /**
-   * \brief Greater or equal than comparison for constant values.
+   * Greater or equal than comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3728,7 +3728,7 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   
   /**
-   * \brief Greater than comparison for constant values.
+   * Greater than comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3744,7 +3744,7 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   
   /**
-   * \brief Less or equal than comparison for constant values.
+   * Less or equal than comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3760,7 +3760,7 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   
   /**
-   * \brief Less than comparison for constant values.
+   * Less than comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
    * @param v2 Constant value of right operand.
@@ -3780,7 +3780,7 @@ aspect ConstantEvaluation {
 aspect ArrayConstantEvaluation {
 	
 	/**
-	 * \brief Returns the set of array indices spanned by a component declared with this subscript.
+	 * Returns the set of array indices spanned by a component declared with this subscript.
 	 */
 	syn int[] FSubscript.arrayIndices() = new int[0];
 	eq FExpSubscript.arrayIndices() {
@@ -3795,7 +3795,7 @@ aspect ArrayConstantEvaluation {
 
 	
 	/**
-	 * \brief Get the number of array indices spanned by a component declared with this subscript.
+	 * Get the number of array indices spanned by a component declared with this subscript.
 	 */
 	syn int FSubscript.numIndices() = 0;
 	eq FExpSubscript.numIndices() = getFExp().ceval().intValue();
@@ -3820,7 +3820,7 @@ aspect LiteralExpressions {
 aspect CircularExpressions {
 
 	/**
-	 * \brief Check if expression is circular.
+	 * Check if expression is circular.
 	 * 
 	 * Default implementation returns <code>true</code> if any direct FExp child 
 	 * is circular.

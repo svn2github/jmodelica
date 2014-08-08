@@ -26,14 +26,14 @@ import org.jmodelica.util.ChainedIterator;
 aspect AnnotationAPI {
 
     /**
-     * \brief Get the annotation node for this AST node's annotation, if any.
+     * Get the annotation node for this AST node's annotation, if any.
      * 
      * This should be overridden for all nodes that can have annotations.
      */
     syn AnnotationNode ASTNode.annotation() = AnnotationNode.NO_ANNOTATION;
 
     /**
-     * \brief Get the annotation node for a sub-node of this AST node's annotation, if any.
+     * Get the annotation node for a sub-node of this AST node's annotation, if any.
      * 
      * Path is interpreted as a "/"-separated list of names of nested annotations.
      * 
@@ -161,7 +161,7 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Checks if this annotation node represents an existing annotation.
+		 * Checks if this annotation node represents an existing annotation.
 		 */
 		public boolean exists() {
 			return true;
@@ -517,7 +517,7 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Represents a non-existing annotation.
+		 * Represents a non-existing annotation.
 		 */
 		private static class NullAnnotationNode extends AnnotationNode {
 			private static final Iterator<AnnotationNode> EMPTY_ITERATOR = 
@@ -745,7 +745,7 @@ aspect AnnotationAPI {
         }
     }
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
+	 * Represents an annotation that is represented in the source tree by a ClassModification.
 	 */
 	public class ClassModAnnotationNode extends AnnotationNode {
 		
@@ -785,7 +785,7 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by a FunctionCall.
+	 * Represents an annotation that is represented in the source tree by a FunctionCall.
 	 */
 	public class FCAnnotationNode extends AnnotationNode {
 		
@@ -856,7 +856,7 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
+	 * Represents an annotation that is represented in the source tree by a ValueModification.
 	 */
 	public class ValueModAnnotationNode extends ExpAnnotationNode {
 		
@@ -885,7 +885,7 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by a ComponentModification.
+	 * Represents an annotation that is represented in the source tree by a ComponentModification.
 	 */
 	public class ComponentModAnnotationNode extends ExpAnnotationNode {
 		
@@ -958,7 +958,7 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by a CompleteModification.
+	 * Represents an annotation that is represented in the source tree by a CompleteModification.
 	 */
 	public class CompleteModAnnotationNode extends ExpAnnotationNode {
 		
@@ -1024,7 +1024,7 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by a NamedArgument.
+	 * Represents an annotation that is represented in the source tree by a NamedArgument.
 	 */
 	public class NAAnnotationNode extends ExpAnnotationNode {
 		
@@ -1054,7 +1054,7 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * \brief Represents an annotation that is represented in the source tree by an Exp.
+	 * Represents an annotation that is represented in the source tree by an Exp.
 	 */
 	public class EAnnotationNode extends ExpAnnotationNode {
 		

@@ -29,7 +29,7 @@ import org.jmodelica.util.ErrorCheckType;
    */
   public interface IErrorHandler {
 	  /**
-	   * \brief Called when a semantic error is found. 
+	   * Called when a semantic error is found. 
 	   * 
 	   * @param s	error message.
 	   * @param n	the node the error originated from.
@@ -38,7 +38,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  public void error(String s, ASTNode n);
 	  
 	  /**
-	   * \brief Called when a compiler compliance error is found.
+	   * Called when a compiler compliance error is found.
 	   * 
 	   * These errors are generated when compiling code that is legal Modelica, 
 	   * but uses features that aren't implemented. Compliance errors are ignored 
@@ -51,7 +51,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  public void compliance(String s, ASTNode n);
 	  
 	  /**
-	   * \brief Called when a warning is issued during semantic error checking.
+	   * Called when a warning is issued during semantic error checking.
 	   * 
 	   * @param s	warning message.
 	   * @param n	the node the warning originated from.
@@ -80,7 +80,7 @@ import org.jmodelica.util.ErrorCheckType;
   }
   
   /**
-   * \brief Default implementation of {@link IErrorHandler}.
+   * Default implementation of {@link IErrorHandler}.
    *  
    * Collects a list of {@link Problem} for all found errors.
    */
@@ -92,7 +92,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  }
 
 	  /**
-	   * \brief Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
+	   * Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
 	   * 
 	   * @param s	error message.
 	   * @param n	the node the error originated from.
@@ -102,7 +102,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  }
 
 	  /**
-	   * \brief Creates a new {@link Problem} with kind COMPLIANCE 
+	   * Creates a new {@link Problem} with kind COMPLIANCE 
 	   *        and adds it to root.errors, ignoring duplicates.
 	   * 
 	   * @param s	error message.
@@ -113,7 +113,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  }
 
 	  /**
-	   * \brief Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
+	   * Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
 	   * 
 	   * @param s	warning message.
 	   * @param n	the node the warning originated from.
@@ -157,7 +157,7 @@ import org.jmodelica.util.ErrorCheckType;
   }
   
   /**
-   * \brief Error handler that generates warnings for compliance errors, 
+   * Error handler that generates warnings for compliance errors, 
    *        delegating to another error handler.
    */
   public class ComplianceWarnErrorHandler implements IErrorHandler {
@@ -171,7 +171,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  }
 
 	  /**
-	   * \brief Delegates to wrapped error handler.
+	   * Delegates to wrapped error handler.
 	   * 
 	   * @param s	error message.
 	   * @param n	the node the error originated from.
@@ -181,7 +181,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  }
 
 	  /**
-	   * \brief Delegates to warning() in wrapped error handler.
+	   * Delegates to warning() in wrapped error handler.
 	   * 
 	   * @param s	error message.
 	   * @param n	the node the error originated from.
@@ -191,7 +191,7 @@ import org.jmodelica.util.ErrorCheckType;
 	  }
 
 	  /**
-	   * \brief Delegates to wrapped error handler.
+	   * Delegates to wrapped error handler.
 	   * 
 	   * @param s	warning message.
 	   * @param n	the node the warning originated from.
@@ -428,7 +428,7 @@ aspect ErrorCheck {
      * A list that contains all error checkers. New error checkers are added
      * dynamically during static evaluation by calling addErrorChecker().
      * 
-     * @see ASTNode.addErrorCheck()
+     * @see ASTNode.addErrorChecker(ErrorChecker)
      */
     private static Collection<ErrorChecker> ASTNode.ERROR_CHECKERS;
 
@@ -448,7 +448,7 @@ aspect ErrorCheck {
     /**
      * A helper method that calls all registered error checkers.
      * 
-     * @see ASTNode.addErrorCheck()
+     * @see ASTNode#addErrorChecker(ErrorChecker)
      */
     protected void ASTNode.allChecks(ErrorCheckType checkType) {
         for (ErrorChecker checker : ERROR_CHECKERS)
@@ -544,7 +544,7 @@ aspect InstanceErrorCheck {
   }
     
     /**
-     * \brief Check if this node is in an InstComponentDecl.
+     * Check if this node is in an InstComponentDecl.
      */
     inh boolean InstExtends.inInstComponent();
     inh boolean InstClassRedeclare.inInstComponent();
@@ -970,7 +970,7 @@ aspect InstanceErrorCheck {
     }
 
 	/**
-	 * \brief Check if class has exactly one algorithm section or external function declaration.
+	 * Check if class has exactly one algorithm section or external function declaration.
 	 */
     public boolean InstClassDecl.isCompleteFunction() {
         return (numFAlgorithm() == 1);
@@ -1189,7 +1189,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	/**
-	 * \brief Check if this node is in a recursive structure.
+	 * Check if this node is in a recursive structure.
 	 */
 	syn boolean InstNode.isRecursed()      = false;
 	eq InstComponentDecl.isRecursed()      = isWithin(myInstClass());
@@ -1198,7 +1198,7 @@ aspect InstanceErrorCheck {
 	
 	// TODO: check if we realy need this in addition to isRecursed()
 	/**
-	 * \brief Check if extends tree is recursive.
+	 * Check if extends tree is recursive.
 	 */
 	public boolean InstExtends.isRecursive() {
 		if (recursiveCache == RECURSIVE_UNKNOWN)
@@ -1207,7 +1207,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	/**
-	 * \brief Check if extends tree is recursive.
+	 * Check if extends tree is recursive.
 	 */
 	public boolean InstSimpleShortClassDecl.isRecursive() {
 		if (recursiveCache == RECURSIVE_UNKNOWN)
@@ -1216,7 +1216,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	/**
-	 * \brief Examine extends tree to find recursive extends nodes.
+	 * Examine extends tree to find recursive extends nodes.
 	 */
 	public void InstExtends.calcIsRecursive(HashSet<InstNode> visited) {
 		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
@@ -1226,7 +1226,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	/**
-	 * \brief Examine extends tree to find recursive extends nodes.
+	 * Examine extends tree to find recursive extends nodes.
 	 */
 	public void InstClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
 		for (InstExtends ie : getInstExtendss())
@@ -1247,7 +1247,7 @@ aspect InstanceErrorCheck {
 	protected static final byte InstNode.RECURSIVE_NO      = 2;
 	
 	/**
-	 * \brief Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
+	 * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
 	 *        instance of <code>icd</code>.
 	 */
 	inh boolean InstComponentDecl.isWithin(InstClassDecl icd);
@@ -1258,7 +1258,7 @@ aspect InstanceErrorCheck {
     eq Root.getChild().isWithin(InstClassDecl icd)              = false;
 	
 	/**
-	 * \brief Check if this node is equal to or an instance of <code>icd</code>.
+	 * Check if this node is equal to or an instance of <code>icd</code>.
 	 */
 	syn boolean InstNode.isOfInstClassDecl(InstClassDecl icd) = false;
 	eq InstClassDecl.isOfInstClassDecl(InstClassDecl icd)     = icd == this;

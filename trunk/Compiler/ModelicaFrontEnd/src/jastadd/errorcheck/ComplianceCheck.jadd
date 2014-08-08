@@ -19,7 +19,7 @@ import org.jmodelica.util.ErrorCheckType;
 aspect ComplianceCheck {
 
     /**
-     * \brief Check for code that is not allowed in its current context.
+     * Check for code that is not allowed in its current context.
      * 
      * Examples would be checking that classes follow the requirements of 
      * their restriction. 

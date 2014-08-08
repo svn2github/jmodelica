@@ -15,7 +15,7 @@
 */
 
 /** \file AbstractGenerator.java
- *  \brief AbstractGenerator class.
+ *  AbstractGenerator class.
  */
 
 /**
@@ -81,19 +81,19 @@ public abstract class AbstractGenerator {
     /** The prefix for includes. */
     public static final String INCLUDE_PREFIX = "INCLUDE:";
     
-	/** \brief A map containing all normal tags */
+	/** A map containing all normal tags */
 	protected Map<String,AbstractTag> tagMap;
 	/** Map of the hook tags. */
 	protected Map<String,Set<AbstractTag>> hookTagMap;
-	/** \brief A Printer object used to generated code for expressions */
+	/** A Printer object used to generated code for expressions */
 	protected Printer expPrinter;
-	/** \brief A character used as escape character when decoding tags during
+	/** A character used as escape character when decoding tags during
 	 * code generation. 
 	 */
 	protected int escapeCharacter;
 	
 	/**
-	 * \brief Constructor for AbstractGenerator.
+	 * Constructor for AbstractGenerator.
 	 * 
 	 * All inner classes inheriting {@link AbstractTag} in the subclass being instantited 
 	 * (and in any superclasses) are automatically instantiated and added to {@link #tagMap}.
@@ -221,7 +221,7 @@ public abstract class AbstractGenerator {
 	}
 	
 	/**
-	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 * Returns the string denoting the beginning of the copyright blurb.
 	 * 
 	 * Must not contain the tag escape character.
 	 * 
@@ -230,7 +230,7 @@ public abstract class AbstractGenerator {
 	protected String startOfBlurb() { return null; }
 	
 	/**
-	 * \brief Returns the string denoting the end of the copyright blurb.
+	 * Returns the string denoting the end of the copyright blurb.
 	 * 
 	 * Must not contain the tag escape character.
 	 * 
@@ -246,12 +246,12 @@ public abstract class AbstractGenerator {
 	}
 	
 	/**
-	 * \brief Internal modes for {@see #generate(Reader, CodeStream)}.
+	 * Internal modes for {@see #generate(Reader, CodeStream)}.
 	 */
 	private enum Mode { NORMAL, TAG, START, BLURB, END, END_WS, BEFORE };
 
     /**
-     * \brief See generate(String templateFile, String outputFile).
+     * See generate(String templateFile, String outputFile).
      * 
      * @param templateReader A Reader object from which the template 
      * file can be used.
@@ -263,7 +263,7 @@ public abstract class AbstractGenerator {
     }
 
 	/**
-	 * \brief See generate(String templateFile, String outputFile).
+	 * See generate(String templateFile, String outputFile).
 	 * 
 	 * @param templateReader  a Reader object from which the template file can be used.
 	 * @param genPrinter      a CodeStream object to which the generated code is written.
@@ -386,7 +386,7 @@ public abstract class AbstractGenerator {
 	}
 
 	/**
-	 * \brief Prints out all registered tags in the generator.	
+	 * Prints out all registered tags in the generator.	
 	 */
 	public String toString() {
 		StringBuilder str = new StringBuilder();

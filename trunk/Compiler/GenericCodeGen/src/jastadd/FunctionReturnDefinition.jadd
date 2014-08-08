@@ -15,13 +15,13 @@
 */
 
 /** \file FunctionReturnDefinition.java
- *  \brief FunctionReturnDefinition class.
+ *  FunctionReturnDefinition class.
  */
 
 import java.util.ArrayList;
 
 /**
- * \brief A class representing the return values of a function.
+ * A class representing the return values of a function.
  */
 public class FunctionReturnDefinition {
 	private ArrayList<FFunctionVariable> outputs;

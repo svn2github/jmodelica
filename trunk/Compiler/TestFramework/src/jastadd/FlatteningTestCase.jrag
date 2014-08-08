@@ -21,7 +21,7 @@ public class FlatteningTestCase extends TestCase {
 	private String flatModel = null;
 
 	/**
-	 * \brief Test that the flattened model matches the correct one.
+	 * Test that the flattened model matches the correct one.
 	 * 
 	 * @return  <code>true</code> if test case shoule stop after this method
 	 */

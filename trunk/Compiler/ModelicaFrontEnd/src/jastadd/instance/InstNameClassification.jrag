@@ -18,7 +18,7 @@
 aspect InstNameClassification {
 
 	/**
-	 * \brief Helper class for definition of kinds.
+	 * Helper class for definition of kinds.
 	 */
     abstract public class Kind {
     	static Kind CLASS_ACCESS           = new ClassAccess();

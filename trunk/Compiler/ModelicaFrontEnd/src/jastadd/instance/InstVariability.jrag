@@ -160,13 +160,13 @@ aspect SourceVariability {
 
 
     /**
-     * \brief An ordering of the variability types.
+     * An ordering of the variability types.
      * 
      * To be used by methods for comparing variabilities. 
      * Should <em>never</em> be compared to literals, only to the return value from other 
      * FTypePrefixVariability objects. This simplifies adding new variabilities.
      *  
-     * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
+     * Also used to determine the behaviour of {@link #combine(TypePrefixVariability)}.
      */
     abstract protected int TypePrefixVariability.variabilityLevel();
     protected int Constant.variabilityLevel()   { return VARIABILITY_LEVEL; }

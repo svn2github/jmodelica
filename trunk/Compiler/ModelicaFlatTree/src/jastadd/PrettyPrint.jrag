@@ -170,7 +170,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints a list of any type of ASTNode, adding <code>sep</code> between nodes.
+	 * Prints a list of any type of ASTNode, adding <code>sep</code> between nodes.
 	 * 
 	 * Typical use: <code>list.prettyPrintWithSep(p, str, indent, ", ");</code> 
 	 * (Prints comma-separated list.)
@@ -192,7 +192,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>sep</code> between nodes.
+	 * Prints an ArrayList of any type of ASTNode, adding <code>sep</code> between nodes.
 	 * 
 	 * Typical use: <code>prettyPrintWithSep(list, p, str, indent, ", ");</code> 
 	 * (Prints comma-separated list.)
@@ -207,7 +207,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints a list of any type of ASTNode, adding <code>prefix</code> before each node and 
+	 * Prints a list of any type of ASTNode, adding <code>prefix</code> before each node and 
 	 * <code>suffix</code> after each node.
 	 */
 	public void List.prettyPrintWithFix(Printer p, CodeStream str, String indent, String prefix, String suffix) {
@@ -219,7 +219,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>prefix</code> before each node and 
+	 * Prints an ArrayList of any type of ASTNode, adding <code>prefix</code> before each node and 
 	 * <code>suffix</code> after each node.
 	 */
 	public static void ASTNode.prettyPrintWithFix(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent, String prefix, String suffix) {
@@ -231,7 +231,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
 	public void List.prettyPrintWithIndent(Printer p, CodeStream str, String indent, String suffix) {
@@ -239,7 +239,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
 	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent, String suffix) {
@@ -247,7 +247,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * a line break after after each node.
 	 */
 	public void List.prettyPrintWithIndent(Printer p, CodeStream str, String indent) {
@@ -255,7 +255,7 @@ aspect PrettyPrint {
 	}
 	
 	/**
-	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * a line break after after each node.
 	 */
 	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent) {
@@ -1767,7 +1767,7 @@ aspect FlatPrettyPrint {
 	protected static final String FBuiltInFunctionCall.SEP = ", ";
 	
 	/**
-	 * \brief Pretty-print all arguments of function.
+	 * Pretty-print all arguments of function.
 	 * 
 	 * Default implementation prints all direct FExp children (including those in Lists and Opts), 
 	 * separated by {@link #SEP}.

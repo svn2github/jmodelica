@@ -27,7 +27,7 @@ aspect FlatTree {
 	 * 
 	 * Also creates a FlatRoot and sets its fields.
 	 * 
-	 * @param icd   the class being flattened
+	 * @param icl   the class being flattened
 	 * @param file  the path to the file to report errors on
 	 */
 	public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc) {
@@ -101,7 +101,7 @@ aspect Flattening {
     protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {}
 
     /**
-     * \brief Find functions, record and enumeration declarations that need to be flattened.
+     * Find functions, record and enumeration declarations that need to be flattened.
      */
 	public void ASTNode.flattenUsedFuncsAndEnums(FClass fc) {
 		for (ASTNode n : this) 
@@ -675,7 +675,7 @@ aspect Flattening {
 	}
 	
 	/**
-	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
+	 * Change the variable of any FUnknownSizeExp to the given variable.
 	 */
 	public void FExp.updateFUnknownSizeExps(FAbstractVariable var) {
 	}
@@ -685,7 +685,7 @@ aspect Flattening {
 	}
 	
 	/**
-	 * \brief Change the variable of any FUnknownSizeExp in size to the given variable.
+	 * Change the variable of any FUnknownSizeExp in size to the given variable.
 	 */
 	public void FType.updateFUnknownSizeExps(FAbstractVariable var) {
 		if (getSize() != Size.SCALAR) {
@@ -696,7 +696,7 @@ aspect Flattening {
 	}
 
 	/**
-	 * \brief Change the variable of any FUnknownSizeExp dimension to the given variable.
+	 * Change the variable of any FUnknownSizeExp dimension to the given variable.
 	 */
 	public void Size.updateFUnknownSizeExps(FAbstractVariable var) {}
 	
@@ -955,7 +955,7 @@ aspect Flattening {
     }
 
     /**
-     * \brief Retrieve the binding expression of an InstAssignable node.
+     * Retrieve the binding expression of an InstAssignable node.
      */
     syn FExp InstAssignable.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
@@ -968,7 +968,7 @@ aspect Flattening {
     eq InstAssignable.hasBindingFExp()             = myBindingInstExp() != null;
 
 	/**
-	 * \brief Retrieve the part of the binding expression that applies to this InstAssignable.
+	 * Retrieve the part of the binding expression that applies to this InstAssignable.
 	 */
 	syn lazy FExp InstAssignable.getBindingFExp() {
 		//log.debug("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
@@ -1005,7 +1005,7 @@ aspect Flattening {
 		
 	
 	/**
-	 * \brief Extract the part of a binding array expression that refers to this primitive or record.
+	 * Extract the part of a binding array expression that refers to this primitive or record.
 	 * 
 	 * Will not create new nodes unless necessary.
 	 * 
@@ -1170,7 +1170,7 @@ aspect Flattening {
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
 	/**
-	 * \brief Check if the binding expression of an InstAssignable node is set 
+	 * Check if the binding expression of an InstAssignable node is set 
 	 *        through a modification that is declared "each".
 	 */
 	syn lazy boolean InstAssignable.myBindingExpHasEach() {
@@ -1178,19 +1178,19 @@ aspect Flattening {
 	}
 	
 	/**
-	 * \brief Check if this InstAssignable node has an InstModification setting 
+	 * Check if this InstAssignable node has an InstModification setting 
 	 *        its binding expression.
 	 */
 	syn boolean InstAssignable.hasInstValueMod() = (myInstValueMod() != null);
 	
 	/**
-     * \brief Check if this InstComponentDecl is an assignable with a value modifier
+     * Check if this InstComponentDecl is an assignable with a value modifier
      */
     syn boolean InstComponentDecl.hasBindingExp() = false;
     eq InstAssignable.hasBindingExp()             = hasInstValueMod();
 	
 	/**
-	 * \brief Retrieve the InstModification setting the binding expression of 
+	 * Retrieve the InstModification setting the binding expression of 
 	 *        this InstAssignable node.
 	 */
 	syn lazy InstValueModification InstAssignable.myInstValueMod() {
@@ -1248,7 +1248,7 @@ aspect Flattening {
 	eq InstCompleteModification.getInstValueMod() = getInstValueModification();
 	
 	/**
-	 * \brief Delegate object that retrieves the FExp of an InstValueModification, and 
+	 * Delegate object that retrieves the FExp of an InstValueModification, and 
 	 *        possibly alters it.
 	 * 
 	 * Default implementation only retrieves the expression.
@@ -1747,7 +1747,7 @@ aspect FlatExpressions {
 	}
 	
 	/**
-	 * \brief Get the list of constants that need to be added to the surrounding function.
+	 * Get the list of constants that need to be added to the surrounding function.
 	 */
 	inh Set<InstAssignable> InstAccess.functionConstantList();
 	inh Set<InstAssignable> InstAssignable.functionConstantList();
@@ -1759,7 +1759,7 @@ aspect FlatExpressions {
 	eq Root.getChild().functionConstantList()           = null;
 	
 	/**
-	 * \brief The list of constants that need to be added to this function.
+	 * The list of constants that need to be added to this function.
 	 * 
 	 * The list will be populated when expressions in the function are flattened.
 	 */
@@ -2042,7 +2042,7 @@ aspect FlatExpressions {
 
     public class Array {
         /**
-         * Helper object for {@link #buildFlattened(java.util.Map<String,FExp>)}.
+         * Helper object for {@link #buildFlattened(FQName, FExp)}.
          */
         protected static class FlattenedBuilder implements ElementBuilder {
             private FQName prefix;
@@ -2301,14 +2301,14 @@ aspect FlatExpressions {
 	}
 
     /**
-     * \brief Creates a flattened access to this component.
+     * Creates a flattened access to this component.
      */
     public FQName InstComponentDecl.flattenedAccess() {
         return flattenedAccess(getFQNamePrefix());
     }
 
     /**
-     * \brief Creates a flattened access to this component.
+     * Creates a flattened access to this component.
      */
     public FQName InstComponentDecl.flattenedAccess(FQName prefix) {
         if (expandedSubscripts().getNumFSubscript() > 0)

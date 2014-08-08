@@ -439,7 +439,7 @@ aspect FlatTypeCheck {
   
   
   /**
-   * \brief Check if the FExp of this FIterExp must be scalar.
+   * Check if the FExp of this FIterExp must be scalar.
    */
   inh boolean FIterExp.iterExpMustBeScalar();
   eq FExp.getChild().iterExpMustBeScalar()       = false;
@@ -991,7 +991,7 @@ aspect FlatTypeCheck {
   }
 
     /**
-     * \brief Check if the type defined for this argument in the built-in function list 
+     * Check if the type defined for this argument in the built-in function list 
      *        is valid.
      */
     inh boolean InstFunctionArgument.argumentDefinedTypeValid();
@@ -1022,7 +1022,7 @@ aspect FlatTypeCheck {
     eq FReinit.getOriginalArg().argumentDefinedTypeValid()                   = false;
 
     /**
-     * \brief Check if the type supplied is valid for this argument.
+     * Check if the type supplied is valid for this argument.
      * 
      * Only used if argumentDefinedTypeValid() returns <code>false</code>.
      */

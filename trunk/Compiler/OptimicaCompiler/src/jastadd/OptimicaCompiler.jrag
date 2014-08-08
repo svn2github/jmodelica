@@ -109,7 +109,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Create a new OptimicaCGenerator object.
+	 * Create a new OptimicaCGenerator object.
 	 */
 	protected CGenerator createCGenerator(FClass fc) {
 		if (fc instanceof FOptClass) {

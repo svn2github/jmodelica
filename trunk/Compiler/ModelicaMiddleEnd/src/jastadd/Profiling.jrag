@@ -453,10 +453,10 @@ aspect MemoryUse {
 	}
 	
 	/**
-	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
+	 * Output a view of an AST, showing the classname and approximate memory footprint 
 	 *        of the subtree.
 	 * 
-	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>deep = false</code>, 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, long)}, with <code>deep = false</code>, 
 	 * <code>maxDepth = -1</code>, <code>minSize = 0</code>, and saving the output to a file.
 	 * 
 	 * @param file     filename to save output as
@@ -466,10 +466,10 @@ aspect MemoryUse {
 	}
 	
 	/**
-	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
+	 * Output a view of an AST, showing the classname and approximate memory footprint 
 	 *        of the subtree.
 	 * 
-	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>maxDepth = -1</code>, 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, long)}, with <code>maxDepth = -1</code>, 
 	 * <code>minSize = 0</code>, and saving the output to a file.
 	 * 
 	 * @param file     filename to save output as
@@ -480,10 +480,10 @@ aspect MemoryUse {
 	}
 	
 	/**
-	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
+	 * Output a view of an AST, showing the classname and approximate memory footprint 
 	 *        of the subtree.
 	 * 
-	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, but saving the output to a file.
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, long)}, but saving the output to a file.
 	 * 
 	 * @param file     filename to save output as
 	 * @param deep     if the memory calculation should include the contents of non-ASTNode members
@@ -497,10 +497,10 @@ aspect MemoryUse {
 	
 	
 	/**
-	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
+	 * Output a view of an AST, showing the classname and approximate memory footprint 
 	 *        of the subtree.
 	 * 
-	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>deep = false</code>, 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, long)}, with <code>deep = false</code>, 
 	 * <code>maxDepth = -1</code> and <code>minSize = 0</code>.
 	 * 
 	 * @param out      stream to use for output
@@ -510,10 +510,10 @@ aspect MemoryUse {
 	}
 	
 	/**
-	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
+	 * Output a view of an AST, showing the classname and approximate memory footprint 
 	 *        of the subtree.
 	 * 
-	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>maxDepth = -1</code> and 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, long)}, with <code>maxDepth = -1</code> and 
 	 * <code>minSize = 0</code>.
 	 * 
 	 * @param out      stream to use for output
@@ -524,7 +524,7 @@ aspect MemoryUse {
 	}
 	
 	/**
-	 * \brief Output a view of an AST, showing the classname and approximate memory footprint 
+	 * Output a view of an AST, showing the classname and approximate memory footprint 
 	 *        of the subtree.
 	 * 
 	 * @param out      stream to use for output
@@ -594,7 +594,7 @@ aspect MemoryUse {
 	}
 	
 	/**
-	 * \brief Traversal method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
+	 * Traversal method for {@link #dumpMemoryUse(PrintStream, boolean, int, long)}.
 	 * 
 	 * @return approximation of the memory footprint for the subtree
 	 */
@@ -621,7 +621,7 @@ aspect MemoryUse {
 	}
 
 	/**
-	 * \brief Output method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
+	 * Output method for {@link #dumpMemoryUse(PrintStream, boolean, int, long)}.
 	 */
 	protected void ASTNode.addMemoryUseRow(PrintStream out, String indent, long mem, long local) {
 		out.println(indent + getClass().getSimpleName() + extraMemoryUseInfo() + ": " + 
@@ -631,7 +631,7 @@ aspect MemoryUse {
 	protected void Opt.addMemoryUseRow(PrintStream out, String indent, long mem, long local) {}
 	
 	/**
-	 * \brief Any extra info to add to the memory use output.
+	 * Any extra info to add to the memory use output.
 	 */
 	syn String ASTNode.extraMemoryUseInfo()   = "";
 	eq InstClassDecl.extraMemoryUseInfo()     = " \"" + name() + "\"";
@@ -692,7 +692,7 @@ aspect MemoryUse {
 	}
 
 	/**
-	 * \brief Contains methods for calculating the size of AST nodes.
+	 * Contains methods for calculating the size of AST nodes.
 	 * 
 	 * Uses minimum sizes stipulated by language standard, and ignores padding for memory alignment 
 	 * used by many JVMs. Thus values should be treated as minimum values.
@@ -700,7 +700,7 @@ aspect MemoryUse {
 	public abstract class Profiler {
 		
 		/**
-		 * \brief Approximates the memory footprint of an AST node.
+		 * Approximates the memory footprint of an AST node.
 		 * 
 		 * @param deep  if the approximation should include the contents of non-ASTNode members
 		 */
@@ -712,7 +712,7 @@ aspect MemoryUse {
 		}
 		
 		/**
-		 * \brief Clear cached data.
+		 * Clear cached data.
 		 */
 		public static void clear() {
 			visited.clear();

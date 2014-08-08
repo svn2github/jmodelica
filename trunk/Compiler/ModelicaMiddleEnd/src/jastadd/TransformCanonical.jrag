@@ -45,13 +45,13 @@ import org.jmodelica.graphs.Variable;
 */
 
 /**
- * \brief Contains transformations on the flattened model which converts
+ * Contains transformations on the flattened model which converts
  * it into a canonical form.
  */
 aspect TransformCanonical {
 
     /**
-     * \brief Transform the raw flattened model into a structured form.
+     * Transform the raw flattened model into a structured form.
      * 
      * Currently, the following operations are performed:
      *  <ul>
@@ -1033,7 +1033,7 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * \brief Create an FExp that represents a specific component of this record expression.
+	 * Create an FExp that represents a specific component of this record expression.
 	 * 
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
@@ -1087,7 +1087,7 @@ aspect TransformCanonical {
     }
 	
 	/**
-	 * \brief Generate functions from algorithms.
+	 * Generate functions from algorithms.
 	 */
 	public void FClass.genAlgorithmFunctions() {
 		for (FAlgorithm alg : myAlgorithms()) {
@@ -1180,7 +1180,7 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * \brief Visitor pattern for inserting new statements in an algorithm
+	 * Visitor pattern for inserting new statements in an algorithm
 	 * <code>transform(FAlgorithm)</code> is called at start of algorithm
 	 * <code>transform(FStatement)</code> is called at each statement
 	 */
@@ -1260,7 +1260,7 @@ aspect TransformCanonical {
 	public void FWhenStmt.acceptTransform(AlgorithmTransformer tf)   { tf.visit(this); }
 	
 	/**
-	 * \brief Generates initial statements and indicator statements for relational expressions.
+	 * Generates initial statements and indicator statements for relational expressions.
 	 */
 	public class IndicatorAlgoTransformer extends AlgorithmTransformer {
 		public boolean transform(FAlgorithm alg) {
@@ -1301,13 +1301,13 @@ aspect TransformCanonical {
 	eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
 	
 	/**
-	 * \brief A reference to the FVariable set as indicator for a FRelExp
+	 * A reference to the FVariable set as indicator for a FRelExp
 	 * Only used in algorithms
 	 */
 	syn nta Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
 	
 	/**
-	 * \brief Creates an indicator for this FRelExp
+	 * Creates an indicator for this FRelExp
 	 */
 	public void FRelExp.genIndicator() {
 		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
@@ -1316,26 +1316,26 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * \brief Creates an initial assign statement for the indicator
+	 * Creates an initial assign statement for the indicator
 	 */
 	syn FStatement FRelExp.indicatorInitStmt() = 
 			new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
 	
 	/**
-	 * \brief Creates an assign statement for the indicator
+	 * Creates an assign statement for the indicator
 	 */
 	syn FStatement FRelExp.indicatorStmt() =
 			new FAssignStmt(getIndicator().fullCopy(), new FSubExp(getLeft(), getRight()));
 	
 	/**
-	 * \brief Replace one equation with another.
+	 * Replace one equation with another.
 	 */
 	public void FClass.replaceEquation(FAbstractEquation oldEq, FAbstractEquation newEq) {
 		getFAbstractEquations().replaceChild(oldEq, newEq);
 	}
 	
 	/**
-	 * \brief Create an FFunctionCallLeft using a copy of this name.
+	 * Create an FFunctionCallLeft using a copy of this name.
 	 */
 	public FFunctionCallLeft FQName.createFFunctionCallLeft() {
 		FQName fqn = fullCopy();
@@ -1344,7 +1344,7 @@ aspect TransformCanonical {
 	}
 
 	/**
-	 * \brief Create an expression to serve as argument to a generated algorithm function.
+	 * Create an expression to serve as argument to a generated algorithm function.
 	 * 
 	 * @param init  <code>true</code> if the argument is to initialize an assigned variable
 	 */
@@ -1359,21 +1359,21 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * \brief Create an input representing this variable in a generated algorithm function.
+	 * Create an input representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionOutput() {
 		return createFFunctionVariable(new FOutput());
 	}
 
 	/**
-	 * \brief Create an output representing this variable in a generated algorithm function.
+	 * Create an output representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionInput() {
 		return createFFunctionVariable(new FInput());
 	}
 
 	/**
-	 * \brief Create an function variable representing this variable in a generated algorithm function.
+	 * Create an function variable representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionVariable(FTypePrefixInputOutput io) {
 		FType type = (FType) type().fullCopy();
@@ -1548,7 +1548,7 @@ aspect TransformCanonical {
 
     public class FClass {
         /**
-         * \brief Generate initial equations from variables with fixed start
+         * Generate initial equations from variables with fixed start
          * attributes.
          * 
          * Intitial equations corresponding to explicitly set start attributes of 
@@ -1607,7 +1607,7 @@ aspect TransformCanonical {
 	
 	
 	/**
-	 * \brief A helper class containing information about an alias pair.
+	 * A helper class containing information about an alias pair.
 	 */
 	public class AliasPair {
 		public FVariable fv1;
@@ -1628,7 +1628,7 @@ aspect TransformCanonical {
 	public boolean FAbstractEquation.classifiedAsAlias = false;
 	
 	/**
-	 * \brief Detection of alias variables in equations
+	 * Detection of alias variables in equations
 	 * 
 	 * Equations of the type 'x=y', 'x=-y', '-x=y' and '-x=-y' are detected
 	 * as alias equations and an AliasPair object is returned.
@@ -1677,7 +1677,7 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * \brief Detection of alias variables in expressions
+	 * Detection of alias variables in expressions
 	 * 
 	 * Only valid when in an equation that gives that the value of this expression is always 0.
 	 */
@@ -1720,7 +1720,7 @@ aspect TransformCanonical {
 	eq FEquation.isAliasEquation() = aliasClassified? classifiedAsAlias: aliasVariables()!=null;
 	
 	/**
-	 * \brief Generate alias information and remove alias equations.
+	 * Generate alias information and remove alias equations.
 	 */
 	public void FClass.genAlias() {
 		if (aliasManager == null) {
@@ -1742,13 +1742,13 @@ aspect TransformCanonical {
 	}
 
 	/**
-	 * \brief Flag indicating if alias variables have been eliminated from the
+	 * Flag indicating if alias variables have been eliminated from the
 	 * model.
 	 */
 	public boolean FClass.aliasVariablesEliminated = false;
 	
 	/**
-	 * \brief Eliminate alias variables from the flat model.
+	 * Eliminate alias variables from the flat model.
 	 * 
 	 * The non-alias variables are kept in the list FClass.FVariableList but the
 	 * alias variables are moved to FClass.AliasVariablesList.
@@ -1852,7 +1852,7 @@ aspect TransformCanonical {
 	boolean FAssignStmt.rewriteAlias = false;
 	
 	/**
-	 * \brief FIdUses referring to alias variables need to be changed to 
+	 * FIdUses referring to alias variables need to be changed to 
 	 * FIdUses referring to their alias targets. 
 	 * 
 	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
@@ -1891,7 +1891,7 @@ aspect TransformCanonical {
 	}
 	
 	/**
-	 * \brief FDerExps referring to alias variables need to be changed to 
+	 * FDerExps referring to alias variables need to be changed to 
 	 * FDerExps referring to their alias targets. 
 	 * 
 	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
@@ -1918,7 +1918,7 @@ aspect TransformCanonical {
 	}
 
 	/**
-	 * \brief FDummyDerExps referring to alias variables need to be changed to 
+	 * FDummyDerExps referring to alias variables need to be changed to 
 	 * FDummyDerExps referring to their alias targets. 
 	 * 
 	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
@@ -1937,7 +1937,7 @@ aspect TransformCanonical {
 	}
 
 	/**
-	 * \brief FHDummyDerExps referring to alias variables need to be changed to 
+	 * FHDummyDerExps referring to alias variables need to be changed to 
 	 * FHDummyDerExps referring to their alias targets. 
 	 * 
 	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
@@ -2895,7 +2895,7 @@ aspect NonFixedParametersPropagation {
 aspect ParameterSorting {
 
 	/**
-	 * \brief Index of equation during equation sorting.
+	 * Index of equation during equation sorting.
 	 */
 	public int FAbstractEquation.sortingIndex = -1;
 	
@@ -2916,14 +2916,14 @@ aspect ParameterSorting {
 	}
 	
 	/**
-	 * \brief Creates a TreeSet that can hold FAbstractEquations, sorted by their sortingIndex.
+	 * Creates a TreeSet that can hold FAbstractEquations, sorted by their sortingIndex.
 	 */
 	public static TreeSet<FAbstractEquation> FAbstractEquation.sortingSet() {
 		return new TreeSet<FAbstractEquation>(new SortingIndexComparator());
 	}
 	
 	/** 
-	 * \brief Sorts a list of FVariables according to the sortingIndex of their equation.
+	 * Sorts a list of FVariables according to the sortingIndex of their equation.
 	 */
 	public static void FVariable.sortParameters(java.util.List<FVariable> vars) {
 		Collections.sort(vars, new SortingIndexComparator());
@@ -3245,7 +3245,7 @@ aspect TransformCanonicalErrorCheck {
 
 aspect FlushFClass {
 	/**
-	 * \brief Flush all caches, including collection attributes.
+	 * Flush all caches, including collection attributes.
 	 */
 	public void ASTNode.flushAll() {
 		flushCache();
@@ -3253,7 +3253,7 @@ aspect FlushFClass {
 	}
 
 	/**
-	 * \brief Flush all caches, including collection attributes, and also
+	 * Flush all caches, including collection attributes, and also
 	 * flush all children. In addition, the is$final attribute is set to false
 	 * for FExps in order to enable rewrites of such nodes after elimination 
 	 * of alias variables and after function inlining.
@@ -3272,7 +3272,7 @@ aspect FlushFClass {
 	}
 
 	/**
-	 * \brief Flush all caches, including collection attributes, and also
+	 * Flush all caches, including collection attributes, and also
 	 * flush all children. 
 	 */
 	public void ASTNode.flushAllRecursive() {
@@ -3283,7 +3283,7 @@ aspect FlushFClass {
 	}
 	
 	/**
-	 * \brief Flush model AST and enable rewrites of FIdUseExps and FDerExps
+	 * Flush model AST and enable rewrites of FIdUseExps and FDerExps
 	 * after alias elimination.
 	 */
 	public void FClass.flush() {

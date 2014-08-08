@@ -1235,8 +1235,8 @@ aspect FunctionInlining {
      * If any of the statements is not an assign statement, then 
      * IllegalArgumentException is thrown.
      * 
-     * @param left   the assignment from this branch
-     * @param right  the assignment from the next branch
+     * @param leftStmt   the assignment from this branch
+     * @param rightStmt  the assignment from the next branch
      */
     protected FAssignStmt FIfWhenClause.createIfElseAssignment(FStatement leftStmt, FStatement rightStmt) {
         try {

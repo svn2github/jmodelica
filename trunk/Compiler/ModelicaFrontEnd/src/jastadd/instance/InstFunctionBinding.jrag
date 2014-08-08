@@ -22,7 +22,7 @@ import java.util.HashSet;
 aspect InstFunctionBinding {
 
     /**
-     * \brief Finds which, if any, of the inputs for its function a single argument should 
+     * Finds which, if any, of the inputs for its function a single argument should 
      * bind to, and adds it to an array in the corresponding place.
      * 
      * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
@@ -50,7 +50,7 @@ aspect InstFunctionBinding {
     }
 
 	/**
-	 * \brief Return an InstMultipleBoundArgument containing both <code>this</code> and <code>arg</code>.
+	 * Return an InstMultipleBoundArgument containing both <code>this</code> and <code>arg</code>.
 	 * 
 	 * If <code>this</code> is an InstMultipleBoundArgument, <code>arg</code> is simply added to it.
 	 */
@@ -64,7 +64,7 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Return the position of the input the argument corresponds to.
+	 * Return the position of the input the argument corresponds to.
 	 */
 	protected int InstFunctionArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
 		return -1;
@@ -85,19 +85,19 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Check if the argument was explicitly given in the call.
+	 * Check if the argument was explicitly given in the call.
 	 */
 	syn boolean InstFunctionArgument.isGiven() = false;
 	eq InstPositionalArgument.isGiven() = true;
 	eq InstNamedArgument.isGiven()      = true;
 	
 	/**
-	 * \brief The input component this argument is bound to.
+	 * The input component this argument is bound to.
 	 */
 	protected InstComponentDecl InstFunctionArgument.boundInput = null;
 	
 	/**
-	 * \brief Set the input component this argument is bound to.
+	 * Set the input component this argument is bound to.
 	 */
 	public void InstFunctionArgument.setBoundInput(InstComponentDecl input) {
 		boundInput = input;
@@ -110,12 +110,12 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Get the input component this argument is bound to.
+	 * Get the input component this argument is bound to.
 	 */
 	syn InstComponentDecl InstFunctionArgument.getBoundInput() = boundInput;
 	
 	/**
-	 * \brief Argument nodes representing arguments that are missing or given multiple times do 
+	 * Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 
 	 * for other nodes.
 	 */
@@ -124,7 +124,7 @@ aspect InstFunctionBinding {
 	public void InstMultipleBoundArgument.setErrorArgLocation(ASTNode node) { setLocation(node); }
 	
 	/**
-	 * \brief Returns <code>false</code> if this argument node represents an error, 
+	 * Returns <code>false</code> if this argument node represents an error, 
 	 * e.g. a missing argument.
 	 */
 	syn boolean InstFunctionArgument.isOKArg() = true;
@@ -132,7 +132,7 @@ aspect InstFunctionBinding {
 	eq InstMultipleBoundArgument.isOKArg() = false;
 
     /**
-     * \brief List of arguments that could not be bound to inputs.
+     * List of arguments that could not be bound to inputs.
      */
     private java.util.List<InstFunctionArgument> InstFunctionCall.unbindableArgs     = Collections.emptyList();
     private java.util.List<InstFunctionArgument> FInfArgsFunctionCall.unbindableArgs = Collections.emptyList();
@@ -160,7 +160,7 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
+	 * Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
 	 * if the input has a default value and an InstMissingArgument otherwise.
 	 */
 	public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
@@ -180,14 +180,14 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Add a new argument to list of arguments. (Only valid for some subclasses.)
+	 * Add a new argument to list of arguments. (Only valid for some subclasses.)
 	 * 
 	 * Default implementation does nothing.
 	 */
 	public void FAbstractFunctionCall.addArgument(InstFunctionArgument arg) {}
 	
 	/**
-	 * \brief Add a new argument to list of arguments.
+	 * Add a new argument to list of arguments.
 	 * 
 	 * This implementation adds the argument as a child.
 	 */
@@ -196,7 +196,7 @@ aspect InstFunctionBinding {
 	}
 	
 	/**
-	 * \brief Add a new argument to list of arguments.
+	 * Add a new argument to list of arguments.
 	 * 
 	 * This implementation adds the argument to the original arguments 
 	 * and the expression from the argument as a child.
@@ -210,7 +210,7 @@ aspect InstFunctionBinding {
         private static BuiltInTranslator builtInTranslator = new BuiltInTranslator();
         
         /**
-         * \brief Helper class for rewrite InstFunctionCall -> FAbstractFunctionCall. 
+         * Helper class for rewrite InstFunctionCall -> FAbstractFunctionCall. 
          * 
          * Creates an instance of the specific subclass of FBuiltInFunctionCall matching 
          * the name of the function, if one matches. 
@@ -804,7 +804,7 @@ aspect InstFunctionBinding {
 	
 	
 	/**
-	 * \brief Replace initial node for construct "array(...)" with permanent one.
+	 * Replace initial node for construct "array(...)" with permanent one.
 	 */
 	rewrite FParseArray {
     	when (!isFunctionCallClause()) to FLongArray {

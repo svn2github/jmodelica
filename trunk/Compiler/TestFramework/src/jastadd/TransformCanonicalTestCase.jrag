@@ -25,7 +25,7 @@ public class TransformCanonicalTestCase extends TestCase {
     private boolean resultOnFile = false;
 
     /**
-     * \brief Perform tests on flat class after transform canonical step.
+     * Perform tests on flat class after transform canonical step.
      */
     protected boolean testTransformed(FClass fc) {
         testPrettyPrint(fc, getFlatModel());

@@ -32,7 +32,7 @@ aspect FmiXMLTestAnnotationizer {
 abstract public class TestAnnotationizerHelper {
 
     /**
-     * \brief An FMI XML code generation test.
+     * An FMI XML code generation test.
      */
     public static class FmiXMLCodeGenTestCase extends CodeGenTestCase {
 

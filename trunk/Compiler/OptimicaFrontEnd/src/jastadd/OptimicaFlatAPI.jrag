@@ -24,19 +24,19 @@ aspect OptimicaFlatAPI {
 	
 	// === free ===
 	/**
-	 * \brief Check if the free attribute is set for a variable.
+	 * Check if the free attribute is set for a variable.
 	 */
 	syn boolean FVariable.freeAttributeSet()    = attributeSet(FAttribute.FREE);
 		
 	/**
-	 * \brief Get the free attribute expression.
+	 * Get the free attribute expression.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
 	syn FExp    FVariable.freeAttributeExp()    = attributeExp(FAttribute.FREE);
 
 	/**
-	 * \brief Get the free attribute CValue.
+	 * Get the free attribute CValue.
 	 */
 	syn CValue  FVariable.freeAttributeCValue() = attributeCValueBoolean(FAttribute.FREE, false);
 		
@@ -49,17 +49,17 @@ aspect OptimicaFlatAPI {
 
 	// === initialGuess ===
 	/**
-	 * \brief Check if the initialGuess attribute is set for a variable.
+	 * Check if the initialGuess attribute is set for a variable.
 	 */
 	syn boolean FVariable.initialGuessAttributeSet()     = attributeSet(FAttribute.INITIAL_GUESS);
 
 	/**
-	 * \brief Get the initialGuess attribute expression.
+	 * Get the initialGuess attribute expression.
 	 */
 	syn FExp    FVariable.initialGuessAttributeExp()     = attributeExp(FAttribute.INITIAL_GUESS);
 	
 	/**
-	 * \brief Get the initialGuess attribute CValue.
+	 * Get the initialGuess attribute CValue.
 	 */
 	syn CValue FVariable.initialGuessAttributeCValue()   = CValue.UNKNOWN;
 	eq FRealVariable.initialGuessAttributeCValue()       = attributeCValueReal(FAttribute.INITIAL_GUESS, 0.0);
@@ -69,24 +69,24 @@ aspect OptimicaFlatAPI {
 	eq FStringVariable.initialGuessAttributeCValue()     = attributeCValueString(FAttribute.INITIAL_GUESS);
 
 	/**
-	 * \brief Get the initialGuess attribute value.
+	 * Get the initialGuess attribute value.
 	 */
 	syn double  FRealVariable.initialGuessAttribute()    = initialGuessAttributeCValue().realValue();
 	/**
-	 * \brief Get the initialGuess attribute value.
+	 * Get the initialGuess attribute value.
 	 */
 	syn int     FIntegerVariable.initialGuessAttribute() = initialGuessAttributeCValue().intValue();
 	/**
-	 * \brief Get the initialGuess attribute value.
+	 * Get the initialGuess attribute value.
 	 */
 	syn boolean FBooleanVariable.initialGuessAttribute() = initialGuessAttributeCValue().booleanValue();
 	/**
-	 * \brief Get the initialGuess attribute value.
+	 * Get the initialGuess attribute value.
 	 */
 	syn String  FStringVariable.initialGuessAttribute()  = initialGuessAttributeCValue().stringValue();
 
 	/**
-	 * \brief Get the cost function expression.
+	 * Get the cost function expression.
 	 * 
 	 * @return Cost function expression.
 	 */
@@ -100,7 +100,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the integrand cost function expression.
+	 * Get the integrand cost function expression.
 	 * 
 	 * @return Cost function expression.
 	 */
@@ -114,7 +114,7 @@ aspect OptimicaFlatAPI {
 	}
 	
 	/**
-	 * \brief Check if the startTime attribute is set.
+	 * Check if the startTime attribute is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -128,7 +128,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the startTime attribute expression.
+	 * Get the startTime attribute expression.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -142,7 +142,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the startTime attribute CValue.
+	 * Get the startTime attribute CValue.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * 0.0 if not set.
@@ -152,7 +152,7 @@ aspect OptimicaFlatAPI {
 			new CValueReal(0.0);
 		
 	/**
-	 * \brief Get the startTime attribute value.
+	 * Get the startTime attribute value.
 	 * 
 	 * @return Attribute value, 0.0 if attribute not set.
 	 */	
@@ -160,7 +160,7 @@ aspect OptimicaFlatAPI {
 		startTimeAttributeCValue().realValue();
 
 	/**
-	 * \brief Check if the free attribute of the startTime is set.
+	 * Check if the free attribute of the startTime is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -178,7 +178,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the free attribute expression for startTime.
+	 * Get the free attribute expression for startTime.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -196,7 +196,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the free attribute CValue of startTime.
+	 * Get the free attribute CValue of startTime.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * false if not set.
@@ -206,7 +206,7 @@ aspect OptimicaFlatAPI {
 			new CValueBoolean(false);
 		
 	/**
-	 * \brief Get the free attribute value for startTime.
+	 * Get the free attribute value for startTime.
 	 * 
 	 * @return Attribute value, false if attribute not set.
 	 */	
@@ -214,7 +214,7 @@ aspect OptimicaFlatAPI {
 		startTimeFreeAttributeCValue().booleanValue();
 
 	/**
-	 * \brief Check if the initialGuess attribute of the startTime is set.
+	 * Check if the initialGuess attribute of the startTime is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -232,7 +232,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the initialGuess attribute expression for startTime.
+	 * Get the initialGuess attribute expression for startTime.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -250,7 +250,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the initialGuess attribute CValue of startTime.
+	 * Get the initialGuess attribute CValue of startTime.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * 0.0 if not set.
@@ -260,7 +260,7 @@ aspect OptimicaFlatAPI {
 			new CValueReal(0.0);
 		
 	/**
-	 * \brief Get the initialGuess attribute value for startTime.
+	 * Get the initialGuess attribute value for startTime.
 	 * 
 	 * @return Attribute value, 0.0 if attribute not set.
 	 */
@@ -268,7 +268,7 @@ aspect OptimicaFlatAPI {
 		startTimeInitialGuessAttributeCValue().realValue();
 	
 	/**
-	 * \brief Check if the finalTime attribute is set.
+	 * Check if the finalTime attribute is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -282,7 +282,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the finalTime attribute expression.
+	 * Get the finalTime attribute expression.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -296,7 +296,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the finalTime attribute CValue.
+	 * Get the finalTime attribute CValue.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * 1.0 if not set.
@@ -306,7 +306,7 @@ aspect OptimicaFlatAPI {
 			new CValueReal(1.0);
 		
 	/**
-	 * \brief Get the finalTime attribute value.
+	 * Get the finalTime attribute value.
 	 * 
 	 * @return Attribute value, 1.0 if attribute not set.
 	 */	
@@ -314,7 +314,7 @@ aspect OptimicaFlatAPI {
 		finalTimeAttributeCValue().realValue();
 
 	/**
-	 * \brief Check if the static attribute is set.
+	 * Check if the static attribute is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -328,7 +328,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the static attribute expression.
+	 * Get the static attribute expression.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -342,7 +342,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the static attribute CValue.
+	 * Get the static attribute CValue.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * false if not set.
@@ -352,7 +352,7 @@ aspect OptimicaFlatAPI {
 			new CValueBoolean(false);
 		
 	/**
-	 * \brief Get the static attribute value.
+	 * Get the static attribute value.
 	 * 
 	 * @return Attribute value, false if attribute not set.
 	 */	
@@ -360,7 +360,7 @@ aspect OptimicaFlatAPI {
 		staticAttributeCValue().booleanValue();
 
 	/**
-	 * \brief Check if the free attribute of the finalTime is set.
+	 * Check if the free attribute of the finalTime is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -378,7 +378,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the free attribute expression for finalTime.
+	 * Get the free attribute expression for finalTime.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -396,7 +396,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the free attribute CValue for finalTime.
+	 * Get the free attribute CValue for finalTime.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * false if not set.
@@ -406,7 +406,7 @@ aspect OptimicaFlatAPI {
 			new CValueBoolean(false);
 
 	/**
-	 * \brief Get the free attribute value for finalTime.
+	 * Get the free attribute value for finalTime.
 	 * 
 	 * @return Attribute value, false if attribute not set.
 	 */		
@@ -414,7 +414,7 @@ aspect OptimicaFlatAPI {
 		finalTimeFreeAttributeCValue().booleanValue();
 	
 	/**
-	 * \brief Check if the initialGuess attribute of the finalTime is set.
+	 * Check if the initialGuess attribute of the finalTime is set.
 	 * 
 	 * @return True if attribute set.
 	 */
@@ -432,7 +432,7 @@ aspect OptimicaFlatAPI {
 	}
 		
 	/**
-	 * \brief Get the initialGuess attribute expression for finalTime.
+	 * Get the initialGuess attribute expression for finalTime.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
@@ -450,7 +450,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the initialGuess attribute CValue for finalTime.
+	 * Get the initialGuess attribute CValue for finalTime.
 	 * 
 	 * @return A CValue containing the evaluated attribute expression or 
 	 * 1.0 if not set.
@@ -460,7 +460,7 @@ aspect OptimicaFlatAPI {
 			new CValueReal(1.0);
 		
 	/**
-	 * \brief Get the initialGuess attribute value for finalTime.
+	 * Get the initialGuess attribute value for finalTime.
 	 * 
 	 * @return Attribute value, 1.0 if attribute not set.
 	 */	
@@ -476,24 +476,24 @@ aspect OptimicaFlatAPI {
 	
 
 	/**
-	 * \brief Get the number of Constraints.
+	 * Get the number of Constraints.
 	 */
     syn int FOptClass.numConstraints() = constraints().size();
     
     /**
-     * \brief Get a list of all constraints.
+     * Get a list of all constraints.
      */
 	coll ArrayList<FConstraint> FOptClass.constraints() 
 	  [new ArrayList<FConstraint>()] with add root FlatRoot;
 	FRelationConstraint contributes this to FOptClass.constraints() for myFClass();
 	
 	/**
-	 * \brief Get the number of equality constraints.
+	 * Get the number of equality constraints.
 	 */
     syn int FOptClass.numEqConstraints() = eqConstraints().size();
 	
     /**
-     * \brief Get a list of equality constraints.
+     * Get a list of equality constraints.
      */
     coll ArrayList<FConstraint> FOptClass.eqConstraints() 
 	  [new ArrayList<FConstraint>()] with add root FlatRoot;
@@ -502,12 +502,12 @@ aspect OptimicaFlatAPI {
 	to FOptClass.eqConstraints() for myFClass();
 
 	/**
-	 * \brief Get the number of LEQ constraints.
+	 * Get the number of LEQ constraints.
 	 */
     syn int FOptClass.numLeqConstraints() = leqConstraints().size();
 
 	/**
-	 * \brief Get a list of LEQ constraints.
+	 * Get a list of LEQ constraints.
 	 */
     coll ArrayList<FConstraint> FOptClass.leqConstraints() 
 	  [new ArrayList<FConstraint>()] with add root FlatRoot;
@@ -516,12 +516,12 @@ aspect OptimicaFlatAPI {
 	to FOptClass.leqConstraints() for myFClass();
 
 	/**
-	 * \brief Get the number of GEQ constraints.
+	 * Get the number of GEQ constraints.
 	 */
     syn int FOptClass.numGeqConstraints() = geqConstraints().size();
 	
 	/**
-	 * \brief Get the number of GEQ constraints.
+	 * Get the number of GEQ constraints.
 	 */
     coll ArrayList<FConstraint> FOptClass.geqConstraints() 
 	  [new ArrayList<FConstraint>()] with add root FlatRoot;
@@ -530,12 +530,12 @@ aspect OptimicaFlatAPI {
 	to FOptClass.geqConstraints() for myFClass();	
 
 	/**
-	 * \brief Get the number of path constraints.
+	 * Get the number of path constraints.
 	 */
     syn int FOptClass.numPathConstraints() = pathConstraints().size();
 
 	/**
-	 * \brief Get a list of path constraints.
+	 * Get a list of path constraints.
 	 */
     syn lazy ArrayList<FConstraint> FOptClass.pathConstraints() {
     	ArrayList<FConstraint> list = new ArrayList<FConstraint>();
@@ -546,12 +546,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of equality path constraints.
+	 * Get the number of equality path constraints.
 	 */
     syn int FOptClass.numPathEqConstraints() = pathEqConstraints().size();
 
 	/**
-	 * \brief Get a list of equality path constraints.
+	 * Get a list of equality path constraints.
 	 */
     syn lazy ArrayList<FConstraintEq> FOptClass.pathEqConstraints() {
     	ArrayList<FConstraintEq> list = new ArrayList<FConstraintEq>();
@@ -564,12 +564,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of LEQ path constraints.
+	 * Get the number of LEQ path constraints.
 	 */
     syn int FOptClass.numPathLeqConstraints() = pathLeqConstraints().size();
     
 	/**
-	 * \brief Get a list of LEQ path constraints.
+	 * Get a list of LEQ path constraints.
 	 */
     syn lazy ArrayList<FConstraintLeq> FOptClass.pathLeqConstraints() {
     	ArrayList<FConstraintLeq> list = new ArrayList<FConstraintLeq>();
@@ -582,12 +582,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of GEQ path constraints.
+	 * Get the number of GEQ path constraints.
 	 */
     syn int FOptClass.numPathGeqConstraints() = pathGeqConstraints().size();
     
 	/**
-	 * \brief Get a list of GEQ path constraints.
+	 * Get a list of GEQ path constraints.
 	 */
     syn lazy ArrayList<FConstraintGeq> FOptClass.pathGeqConstraints() {
     	ArrayList<FConstraintGeq> list = new ArrayList<FConstraintGeq>();
@@ -600,12 +600,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of point constraints.
+	 * Get the number of point constraints.
 	 */
     syn int FOptClass.numPointConstraints() = pointConstraints().size();
 
 	/**
-	 * \brief Get a list of point constraints.
+	 * Get a list of point constraints.
 	 */
     syn lazy ArrayList<FConstraint> FOptClass.pointConstraints() {
     	ArrayList<FConstraint> list = new ArrayList<FConstraint>();
@@ -616,12 +616,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of equality point constraints.
+	 * Get the number of equality point constraints.
 	 */
     syn int FOptClass.numPointEqConstraints() = pointEqConstraints().size();
 
 	/**
-	 * \brief Get a list of equality point constraints.
+	 * Get a list of equality point constraints.
 	 */
     syn lazy ArrayList<FConstraintEq> FOptClass.pointEqConstraints() {
     	ArrayList<FConstraintEq> list = new ArrayList<FConstraintEq>();
@@ -634,12 +634,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of LEQ point constraints.
+	 * Get the number of LEQ point constraints.
 	 */
     syn int FOptClass.numPointLeqConstraints() = pointLeqConstraints().size();
  
 	/**
-	 * \brief Get a list of LEQ point constraints.
+	 * Get a list of LEQ point constraints.
 	 */
     syn lazy ArrayList<FConstraintLeq> FOptClass.pointLeqConstraints() {
     	ArrayList<FConstraintLeq> list = new ArrayList<FConstraintLeq>();
@@ -652,12 +652,12 @@ aspect OptimicaFlatAPI {
     }
 
 	/**
-	 * \brief Get the number of GEQ point constraints.
+	 * Get the number of GEQ point constraints.
 	 */
     syn int FOptClass.numPointGeqConstraints() = pointGeqConstraints().size();
     
 	/**
-	 * \brief Get a list of GEQ point constraints.
+	 * Get a list of GEQ point constraints.
 	 */
     syn lazy ArrayList<FConstraintGeq> FOptClass.pointGeqConstraints() {
     	ArrayList<FConstraintGeq> list = new ArrayList<FConstraintGeq>();
@@ -670,30 +670,30 @@ aspect OptimicaFlatAPI {
     }
     	
     /**
-     * \brief Returns true for equality constraints.
+     * Returns true for equality constraints.
      */
 	syn boolean FConstraint.isEqConstraint() = false;
 	eq FConstraintEq.isEqConstraint() = true;
 
     /**
-     * \brief Returns true for LEQ constraints.
+     * Returns true for LEQ constraints.
      */
 	syn boolean FConstraint.isLeqConstraint() = false;
 	eq FConstraintLeq.isLeqConstraint() = true;
 
     /**
-     * \brief Returns true for GEQ constraints.
+     * Returns true for GEQ constraints.
      */
 	syn boolean FConstraint.isGeqConstraint() = false;
 	eq FConstraintGeq.isGeqConstraint() = true;
 			
     /**
-     * \brief Get the number of timed variables.
+     * Get the number of timed variables.
      */
 	syn int FOptClass.numTimedVariables() = timedVariables().size();
 	
     /**
-     * \brief Get the a list of timed variables.
+     * Get the a list of timed variables.
      */
 	coll ArrayList<FTimedVariable> FOptClass.timedVariables() 
 		[new ArrayList<FTimedVariable>()] with add root FlatRoot;
@@ -702,12 +702,12 @@ aspect OptimicaFlatAPI {
 	to FOptClass.timedVariables() for myFClass();
 
     /**
-     * \brief Get the number of real timed variables.
+     * Get the number of real timed variables.
      */
 	syn int FOptClass.numTimedRealVariables() = timedRealVariables().size();
 
     /**
-     * \brief Get the a list of real timed variables.
+     * Get the a list of real timed variables.
      */
 	syn lazy ArrayList<FTimedVariable> FOptClass.timedRealVariables() {
 		ArrayList<FTimedVariable> list = new ArrayList<FTimedVariable>();
@@ -722,12 +722,12 @@ aspect OptimicaFlatAPI {
 	inh FClass FConstraint.myFClass();
 
     /**
-     * \brief Get the number of time points.
+     * Get the number of time points.
      */
 	syn int FOptClass.numTimePointsExp() = timePointsExp().size();
 	
     /**
-     * \brief Get a list of time point expressions.
+     * Get a list of time point expressions.
      */
 	syn ArrayList<FExp> FOptClass.timePointsExp() {
 		ArrayList<FExp> list = new ArrayList<FExp>();
@@ -738,12 +738,12 @@ aspect OptimicaFlatAPI {
 	}
 	
     /**
-     * \brief Get the number of (unique) time points.
+     * Get the number of (unique) time points.
      */
 	syn int FOptClass.numTimePoints() = timePoints().length;
 	
     /**
-     * \brief Get a sorted vector of unique time points.
+     * Get a sorted vector of unique time points.
      */
 	syn lazy double[] FOptClass.timePoints() {
 		ArrayList<Double> ts = new ArrayList<Double>();
@@ -771,7 +771,7 @@ aspect OptimicaFlatAPI {
 	}
 
 	/**
-	 * \brief Get the index of a time point.
+	 * Get the index of a time point.
 	 * 
 	 * @param t Time point
 	 * @return Time point index. Returns -1 if time point not found.
@@ -830,7 +830,7 @@ aspect OptimicaFlatAPI {
 aspect OptimicaFVariableUses {
 	
 	/**
-	 * \brief Collection attribute returning all variable uses in timed
+	 * Collection attribute returning all variable uses in timed
 	 * variables.
 	 */
 	coll HashSet<FTimedVariable> FVariable.usesTimedVariables() 
@@ -859,7 +859,7 @@ aspect OptimicaLinearVariables {
 	refine LinearFVariables eq FExp.isLinearParameterExp() = isParameterExp() && !isOptParameterExp();
 	
 	/**
-	 * \brief Linearity of timed variables.
+	 * Linearity of timed variables.
 	 * 
 	 * The returned vector of booleans corresponds to linearity of the
 	 * FVariable at each time point included in the optimization problem. 
@@ -893,7 +893,7 @@ aspect OptimicaLinearVariables {
 aspect OptimicaFlatAPIDiagnostics {
 
 	/**
-	 * \brief Print diagnostics for FOptClass.
+	 * Print diagnostics for FOptClass.
 	 */
 	public String FOptClass.diagnostics() {
 		StringBuilder str = new StringBuilder();
@@ -982,7 +982,7 @@ aspect OptimicaFlatAPIDiagnostics {
 	}	
 	
 	/**
-	 * \brief Returns a string containing information of timed variable
+	 * Returns a string containing information of timed variable
 	 * linearity.
 	 */
 	public String FOptClass.timedVariablesLinearityDiagnostics() {
@@ -1053,7 +1053,7 @@ aspect OptimicaFreeParameters {
       intersectFVColl(booleans(), freeIndependentParameters());
 	
 	/**
-	 * \brief Get a list of all dependent parameters that depends on
+	 * Get a list of all dependent parameters that depends on
 	 * free parameters.
 	 */
 	syn int FClass.numFreeDependentParameters() = freeDependentParameters().size();
@@ -1086,7 +1086,7 @@ aspect OptimicaFreeParameters {
 	}
 	
 	/**
-	 * \brief Get a list of the equations of all dependent parameters that depends on free parameters.
+	 * Get a list of the equations of all dependent parameters that depends on free parameters.
 	 */
 	syn lazy LinkedHashSet<FAbstractEquation> FClass.freeDependentParameterEquations() {
 		LinkedHashSet<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();

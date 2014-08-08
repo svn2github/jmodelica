@@ -465,7 +465,7 @@ public class ModelicaCompiler {
 	protected long timeCompilationStarted;
 
 	/**
-	 * \brief Initilize vars gathering debug information about compilation.
+	 * Initilize vars gathering debug information about compilation.
 	 * 
 	 * Should be called before compilation process begins.
 	 */
@@ -475,7 +475,7 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Log debug information about compilation.
+	 * Log debug information about compilation.
 	 * 
 	 * Should be called after compilation process ends.
 	 */
@@ -510,7 +510,7 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Saves away the current amount of memory used.
+	 * Saves away the current amount of memory used.
 	 */
 	protected void noteUsedMemory() {
 		if (numUsedMemFilled < NUM_USED_MEMORY_SLOTS)
@@ -529,7 +529,7 @@ public class ModelicaCompiler {
 	}
 
 	/**
-	 * \brief Save a dump of the memory use of an AST.
+	 * Save a dump of the memory use of an AST.
 	 * 
 	 * The dump will be saved in a file named <code>"size_" + type + ".txt"</code>.
 	 * 
@@ -542,7 +542,7 @@ public class ModelicaCompiler {
 	}
 
 	/**
-	 * \brief Save a dump of the memory use of an AST.
+	 * Save a dump of the memory use of an AST.
 	 * 
 	 * The dump will be saved in a file named <code>"size_" + name + ".txt"</code>.
 	 * 
@@ -565,22 +565,20 @@ public class ModelicaCompiler {
 		}
 	}
 
-	/**
-	 * Save a dump of the node class counts of an AST (or several).
-	 * 
-	 * The dump will be saved in a file named <code>"node_count.txt"</code>.
-	 * 
-	 * @param root  the roots of the ASTs to dump node counts for
-	 */
-	protected void dumpNodeCountFile() 
-			throws FileNotFoundException {
-		if (dumpMemoryUse) {
-			String file = "node_count.txt";
-			log.debug("Dumping node counts to '" + file + "'...");
-			ASTNode.dumpNodeCount(file);
-		}
-	}
-	
+    /**
+     * Save a dump of the node class counts of an AST (or several).
+     * 
+     * The dump will be saved in a file named <code>"node_count.txt"</code>.
+     */
+    protected void dumpNodeCountFile() 
+            throws FileNotFoundException {
+        if (dumpMemoryUse) {
+            String file = "node_count.txt";
+            log.debug("Dumping node counts to '" + file + "'...");
+            ASTNode.dumpNodeCount(file);
+        }
+    }
+
 	/**
 	 * Find any links from the flat tree to the instance tree.
 	 */
@@ -619,7 +617,7 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Creates a target object.
+	 * Creates a target object.
 	 * 
 	 * @param target The type of target: me, cs, jmu, ect. Use nocodegen for a NOCODEGEN target.
 	 * @param version The version in case of a fmu. Use null for a NOCODEGEN.
@@ -770,11 +768,11 @@ public class ModelicaCompiler {
     }
 
     /**
-     * \brief Packs either a JMU or FMU (helper function for compileUnit).
+     * Packs either a JMU or FMU (helper function for compileUnit).
      * 
-     * @param className Name of model class that was compiled (will determine file names).
-     * @param path Location on file system where the packed file should be saved (created if does not exist).
-     * @param targetObject Target object, contains information about the target, its unit suffix for example.
+     * @param className  Name of model class that was compiled (will determine file names).
+     * @param path       Location on file system where the packed file should be saved (created if does not exist).
+     * @param target     Target object, contains information about the target, its unit suffix for example.
      * @return the path to the packed unit 
      */
     protected File packUnit(String className, String path, TargetObject target) throws PackingFailedException {
@@ -1174,139 +1172,139 @@ public class ModelicaCompiler {
 		warnings = new ArrayList<Problem>();
 		return oldWarnings;
 	}
-	
-	/**
-	 * Computes the flattened model representation from a model instance.
-	 * 
-	 * @param icd
-	 *            A reference to the model instance node.
-	 * @param target
-	 *            The model represenation type the model should be compiled to.
-	 * 
-	 * @return FClass object representing the flattened model.
-	 * 
-	 * @throws CompilerException
-	 *             If errors have been found during the flattening.
-	 * @throws IOException
-	 *             If there was an error creating the .mof file.
-	 * @throws ModelicaClassNotFoundException
-	 *             If the Modelica class to flatten is not found.
-	 */
-	public FClass flattenModel(InstClassDecl icl, TargetObject target) 
-			throws CompilerException, ModelicaClassNotFoundException, IOException {
-		hookCheckAbort();
-		ASTNode.beginStep("flattenModel()");
-		
-		String instName = icl.qualifiedName();
-		File flatFile = new File(sourceDir, instName + ".mof");
-		final FClass fc = FClass.create(icl, flatFile.getPath(), this);
-		
-		ASTNode.beginStep("flatten()");
-		log.info("Flattening model...");
-		icl.flattenInstClassDecl(fc);
-		dumpMemoryUseFile(fc, "flat", true);
-		dumpNodeCountFile();
-		icl = null;
-		ASTNode.endStep("flatten()");
-		
-		findFlatToInstanceLinks(fc);
-		hookModelFlattened(fc);
-		hookCheckAbort();
-		
-		//fc.dumpTree("");
-		// Output the untransformed flattened model
-		ASTNode.beginStep("prettyPrintRawFlat()");
-		if (fc.root().options.getBooleanOption("generate_mof_files")) {
-			log.debug("Creating raw .mof file...");
-			CodeStream out = new CodeStream(flatFile);
-			fc.prettyPrint_MC(out, "");
-			out.close();
-			log.debug("... raw .mof file created.");
-		}
 
-		log.info("Raw flattened model:");
-		log.info(fc);
-		ASTNode.endStep("prettyPrintRawFlat()");
+    /**
+     * Computes the flattened model representation from a model instance.
+     * 
+     * @param icd
+     *            A reference to the model instance node.
+     * @param target
+     *            The model represenation type the model should be compiled to.
+     * 
+     * @return FClass object representing the flattened model.
+     * 
+     * @throws CompilerException
+     *             If errors have been found during the flattening.
+     * @throws IOException
+     *             If there was an error creating the .mof file.
+     * @throws ModelicaClassNotFoundException
+     *             If the Modelica class to flatten is not found.
+     */
+    public FClass flattenModel(InstClassDecl icd, TargetObject target) 
+            throws CompilerException, ModelicaClassNotFoundException, IOException {
+        hookCheckAbort();
+        ASTNode.beginStep("flattenModel()");
+        
+        String instName = icd.qualifiedName();
+        File flatFile = new File(sourceDir, instName + ".mof");
+        final FClass fc = FClass.create(icd, flatFile.getPath(), this);
+        
+        ASTNode.beginStep("flatten()");
+        log.info("Flattening model...");
+        icd.flattenInstClassDecl(fc);
+        dumpMemoryUseFile(fc, "flat", true);
+        dumpNodeCountFile();
+        icd = null;
+        ASTNode.endStep("flatten()");
+        
+        findFlatToInstanceLinks(fc);
+        hookModelFlattened(fc);
+        hookCheckAbort();
+        
+        //fc.dumpTree("");
+        // Output the untransformed flattened model
+        ASTNode.beginStep("prettyPrintRawFlat()");
+        if (fc.root().options.getBooleanOption("generate_mof_files")) {
+            log.debug("Creating raw .mof file...");
+            CodeStream out = new CodeStream(flatFile);
+            fc.prettyPrint_MC(out, "");
+            out.close();
+            log.debug("... raw .mof file created.");
+        }
 
-		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
-			ASTNode.beginStep("htmlDiagnostics()");
-			getDiagnosticsGenerator().writeRawFlattenedModel(fc);
-			getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
-			ASTNode.endStep("htmlDiagnostics()");
-		}
-		
-		fc.transformCanonical();
-		
+        log.info("Raw flattened model:");
+        log.info(fc);
+        ASTNode.endStep("prettyPrintRawFlat()");
+
+        if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+            ASTNode.beginStep("htmlDiagnostics()");
+            getDiagnosticsGenerator().writeRawFlattenedModel(fc);
+            getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
+            ASTNode.endStep("htmlDiagnostics()");
+        }
+        
+        fc.transformCanonical();
+        
         /* Temporary fix to problems with long compilation times due to later evaluations */
         fc.root().options.setIntegerOption("external_constant_evaluation", 0);
-		
-		hookModelTransformed(fc);
-		hookCheckAbort();
-		
-		ASTNode.beginStep("prettyPrintFlat()");
-		if (fc.root().options.getBooleanOption("generate_mof_files")) {
-			log.debug("Creating transformed .mof file...");
-			CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
-			fc.prettyPrint_MC(out, "");
-			out.close();
-			log.debug("... transformed .mof file created.");
-		}
-		
-		log.info("Diagnostics for transformed flattened model:");
-		log.info(new Object() {
-			public String toString() {
-				return fc.diagnostics();
-			};
-		});
-		
-		log.info("Transformed flattened model:");
-		log.info(fc);
-		
-		ASTNode.endStep("prettyPrintFlat()");
-		
-		dumpMemoryUseFile(fc, "transformed", false);
-		
-		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
-			ASTNode.beginStep("writeIterationVariables()");
+        
+        hookModelTransformed(fc);
+        hookCheckAbort();
+        
+        ASTNode.beginStep("prettyPrintFlat()");
+        if (fc.root().options.getBooleanOption("generate_mof_files")) {
+            log.debug("Creating transformed .mof file...");
+            CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
+            fc.prettyPrint_MC(out, "");
+            out.close();
+            log.debug("... transformed .mof file created.");
+        }
+        
+        log.info("Diagnostics for transformed flattened model:");
+        log.info(new Object() {
+            public String toString() {
+                return fc.diagnostics();
+            };
+        });
+        
+        log.info("Transformed flattened model:");
+        log.info(fc);
+        
+        ASTNode.endStep("prettyPrintFlat()");
+        
+        dumpMemoryUseFile(fc, "transformed", false);
+        
+        if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
+            ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
-			fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
-			ASTNode.endStep("writeIterationVariables()");
-		}
-		
-		if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
-			ASTNode.beginStep("writeIterationVariables()");
+            fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
+            ASTNode.endStep("writeIterationVariables()");
+        }
+        
+        if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
+            ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
-			fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
-			ASTNode.endStep("writeIterationVariables()");
-		}
-		
-		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
-			ASTNode.beginStep("htmlDiagnostics()");
-			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
-			getDiagnosticsGenerator().writeDiagnostics(fc);
-			ASTNode.endStep("htmlDiagnostics()");
-		}
-		
-		fc.errorCheck(target.getCheckType());
-		handleCompilerWarnings(fc.collectWarnings());
+            fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
+            ASTNode.endStep("writeIterationVariables()");
+        }
+        
+        if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+            ASTNode.beginStep("htmlDiagnostics()");
+            getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
+            getDiagnosticsGenerator().writeDiagnostics(fc);
+            ASTNode.endStep("htmlDiagnostics()");
+        }
+        
+        fc.errorCheck(target.getCheckType());
+        handleCompilerWarnings(fc.collectWarnings());
 
-		hookFlatModelChecked(fc);
-		ASTNode.endStep("flattenModel()");
+        hookFlatModelChecked(fc);
+        ASTNode.endStep("flattenModel()");
 
-		return fc;
-	}
-	
-	/**
-	 * \brief Create a new CGenerator object.
-	 * 
-	 * Override for subclasses needing another subclass of CGenerator.
-	 */
-	protected CGenerator createCGenerator(FClass fc) {
-		return new CADGenerator(new PrettyPrinter(), '$', fc);
-	}
-	
+        return fc;
+    }
+
+    /**
+     * Create a new CGenerator object.
+     * 
+     * Override for subclasses needing another subclass of CGenerator.
+     */
+    protected CGenerator createCGenerator(FClass fc) {
+        return new CADGenerator(new PrettyPrinter(), '$', fc);
+    }
+    
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
         return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
     }
@@ -1520,7 +1518,7 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Compile model given on command line options and print any error messages.
+	 * Compile model given on command line options and print any error messages.
 	 */
 	protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
 		// Get files and class
@@ -1787,8 +1785,8 @@ public class ModelicaCompiler {
         /**
         * Returns an enum of the target that contains all relevant information for the target.
         * 
-        * @param target The compiler target. Valid options are 'me' or 'cs'.
-        * @param version The FMI version. Valid options are '1.0' or '2.0'.
+        * @param targetType  The compiler target.
+        * @param version     The FMI version.
         */
         public static TargetObject getTarget(String targetType, String version)
                 throws IllegalCompilerArgumentException {
@@ -1856,7 +1854,7 @@ public class ModelicaCompiler {
         }
         
     	/**
-    	 * \brief Create a new XMLGenerator object.
+    	 * Create a new XMLGenerator object.
     	 * 
     	 * Override for subclasses needing another subclass of XMLGenerator.
     	 */
@@ -2203,7 +2201,7 @@ private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER
 /**
  * Base class for interface to C compiler.
  * 
- * To add a new delegator, call {@link #addDelegator(CCompilerDelegator.Creator)} before 
+ * To add a new delegator, call {@link #addDelegator(String, CCompilerDelegator.Creator)} before 
  * OptionRegistry is instantiated. This is preferably accomplished by using a JastAdd 
  * aspect to add a static field in this class that gets its value from addDelegator().
  */

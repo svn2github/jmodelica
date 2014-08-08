@@ -76,7 +76,7 @@ public abstract class ModelicaLogger {
      * Build message using <code>format</code> as format string and log
      * on log level <code>level</code>.
      * 
-     * Uses {@link #log(Level, String)} to log message.
+     * Uses {@link #log(Level, String, Object...)} to log message.
      */
     public final void debug(String format, Object... args) {
         log(Level.DEBUG, format, args);
@@ -161,27 +161,49 @@ public abstract class ModelicaLogger {
     }
 
     /**
-     * Creates an output stream that writes to the log.
+     * Creates an output stream that writes to the log on the debug log level.
      * 
      * Note that while this class tries to log entire lines separately, it
      * only handles the line break representations "\n", "\r" and "\r\n",
      * and assumes that the character encoding used encodes both '\n' and '\r'
      * like ASCII & UTF-8 does.
-     * 
-     * @param data.level the log level to write to
      */
     public final OutputStream debugStream() {
         return logStream(Level.DEBUG);
     }
 
+    /**
+     * Creates an output stream that writes to the log on the info log level.
+     * 
+     * Note that while this class tries to log entire lines separately, it
+     * only handles the line break representations "\n", "\r" and "\r\n",
+     * and assumes that the character encoding used encodes both '\n' and '\r'
+     * like ASCII & UTF-8 does.
+     */
     public final OutputStream infoStream() {
         return logStream(Level.INFO);
     }
 
+    /**
+     * Creates an output stream that writes to the log on the warning log level.
+     * 
+     * Note that while this class tries to log entire lines separately, it
+     * only handles the line break representations "\n", "\r" and "\r\n",
+     * and assumes that the character encoding used encodes both '\n' and '\r'
+     * like ASCII & UTF-8 does.
+     */
     public final OutputStream warningStream() {
         return logStream(Level.WARNING);
     }
 
+    /**
+     * Creates an output stream that writes to the log on the error log level.
+     * 
+     * Note that while this class tries to log entire lines separately, it
+     * only handles the line break representations "\n", "\r" and "\r\n",
+     * and assumes that the character encoding used encodes both '\n' and '\r'
+     * like ASCII & UTF-8 does.
+     */
     public final OutputStream errorStream() {
         return logStream(Level.ERROR);
     }

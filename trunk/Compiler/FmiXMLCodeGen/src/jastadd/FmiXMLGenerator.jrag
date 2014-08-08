@@ -45,7 +45,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
          * Construct a tag.
          * 
          * @param name        tag name
-         * @param xmlName     name to use for the xml tag or attribute
+         * @param xml         name to use for the xml tag or attribute
          * @param myGenerator the tag's generator
          * @param fclass      an FClass to generate code for
          */
@@ -65,7 +65,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
          * Construct a tag.
          * 
          * @param name        tag name
-         * @param xmlName     name to use for the xml tag or attribute
+         * @param xml         name to use for the xml tag or attribute
          * @param myGenerator the tag's generator
          * @param fclass      an FClass to generate code for
          */

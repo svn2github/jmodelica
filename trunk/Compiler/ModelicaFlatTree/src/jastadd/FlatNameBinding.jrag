@@ -445,7 +445,7 @@ aspect ParameterEquations {
 	}
 	
 	/**
-	 * \brief Is this expression in a parameter equation?
+	 * Is this expression in a parameter equation?
 	 */
 	inh boolean FExp.inParameterEquation();
 	eq FClass.getFParameterEquation().inParameterEquation() = true;
@@ -454,7 +454,7 @@ aspect ParameterEquations {
 	eq Root.getChild().inParameterEquation()                = false;
 	
 	/**
-	 * \brief Is this expression in the value of an attribute?
+	 * Is this expression in the value of an attribute?
 	 */
 	inh boolean FExp.inAttributeValue();
 	eq FAttribute.getValue().inAttributeValue()    = true;
@@ -486,7 +486,7 @@ aspect FlatFunctionBinding {
 aspect FlatRecordBinding {
 	
 	/**
-	 * \brief Get the outermost record variable of this access.
+	 * Get the outermost record variable of this access.
 	 * 
 	 * Access is assumed to be refering to a member of a record and be in a function.
 	 */

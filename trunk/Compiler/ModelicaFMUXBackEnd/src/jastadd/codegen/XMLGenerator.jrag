@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /** \file XMLGenerator.java
-*  \brief XMLGenerator class.
+*  XMLGenerator class.
 */
 
 
@@ -56,12 +56,12 @@ public class XMLGenerator extends GenericXMLGenerator {
 	private HashMap<Character,String> illegalCharsSub;
 	
 	/**
-	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 * Returns the string denoting the beginning of the copyright blurb.
 	 */
 	protected String startOfBlurb() { return "<!--"; }
 	
 	/**
-	 * \brief Returns the string denoting the end of the copyright blurb.
+	 * Returns the string denoting the end of the copyright blurb.
 	 */
 	protected String endOfBlurb() { return "-->"; }
 	
