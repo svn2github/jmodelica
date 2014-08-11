@@ -1738,6 +1738,42 @@ end OperatorRecordTests.OperatorRecordConnect4;
     end OperatorRecordConnect4;
 
 
+    model OperatorRecordConnect5
+        connector C = Cplx;
+        
+        model A
+            C c;
+        end A;
+        
+        A a[2];
+        C c[2];
+    equation
+        connect(a.c, c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OperatorRecordConnect5",
+            description="Test connecting to array of operator record",
+            flatModel="
+fclass OperatorRecordTests.OperatorRecordConnect5
+ OperatorRecordTests.OperatorRecordConnect5.C a[1].c;
+ OperatorRecordTests.OperatorRecordConnect5.C a[2].c;
+ OperatorRecordTests.OperatorRecordConnect5.C c[2];
+equation
+ a[1].c = c[1];
+ a[2].c = c[2];
+
+public
+ record OperatorRecordTests.OperatorRecordConnect5.C
+  Real re;
+  Real im;
+ end OperatorRecordTests.OperatorRecordConnect5.C;
+
+end OperatorRecordTests.OperatorRecordConnect5;
+")})));
+    end OperatorRecordConnect5;
+
+
     model OperatorLimitations1
         encapsulated operator function '*'
             input Real x;

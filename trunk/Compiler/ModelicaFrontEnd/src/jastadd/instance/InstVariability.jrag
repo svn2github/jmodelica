@@ -70,9 +70,11 @@ aspect InstVariability {
     }
 
     syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
-    eq InstEnumLiteral.variability() = fConstant();
-    
-    syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fConstant();
+    eq InstEnumLiteral.variability()                                = fConstant();
+    eq UnknownInstComponentDecl.variability()                       = fConstant();
+
+    syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
+    eq InstArrayComponentDecl.defaultVariability()                    = parentVariability();
     eq InstPrimitive.defaultVariability() {
         if (isReal())
             return fContinuous();
@@ -94,6 +96,13 @@ aspect InstVariability {
         return var;
     }
 
+    /**
+     * The variability of the surrounding component, if any (null otherwise).
+     */
+    inh FTypePrefixVariability InstComponentDecl.parentVariability();
+    eq InstComponentDecl.getChild().parentVariability() = variability();
+    eq InstClassDecl.getChild().parentVariability()     = null;
+    eq Root.getChild().parentVariability()              = null;
 
     protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
         Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
