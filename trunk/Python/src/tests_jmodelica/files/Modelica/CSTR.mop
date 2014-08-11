@@ -203,6 +203,21 @@ constraint
 
 end CSTR_Opt_Unscaled_Min_Time;
 
+optimization CSTR_Opt_Min_Time_No_Initial_Guess(objective=finalTime,
+    startTime=0, finalTime(min=0.2, free=true))
+                                                 
+  extends CSTR(T(max=350), Tc(min=230, max=370),
+               c_init=956.271065, T_init=250.051971);
+
+  parameter Real c_ref = 338.775766;
+  parameter Real T_ref = 280.099198;
+
+constraint
+  c(finalTime) = c_ref;
+  T(finalTime) = T_ref;
+
+end CSTR_Opt_Min_Time_No_Initial_Guess;
+
 optimization CSTR_Opt_Unscaled_Min_Time_FMUX(objective=finalTime, startTime=0,
     finalTime(min=0.2, free=true, initialGuess=100))
                                                  

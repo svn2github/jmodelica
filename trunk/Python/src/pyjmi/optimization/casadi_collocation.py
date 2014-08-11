@@ -4621,13 +4621,14 @@ class LocalDAECollocator(CasadiCollocator):
             for t_name in ['startTime', 'finalTime']:
                 t_var = self.op.getVariable(t_name)
                 if self.op.get_attr(t_var, "free"):
+                    var_init_guess = self.op.get_attr(t_var, "initialGuess")
                     if self.init_traj is None:
-                        t_init[t_name] = self.op.get_attr(t_var, "initialGuess")
+                        t_init[t_name] = var_init_guess
                     else:
                         try:
                             data = self.init_traj.get_variable_data(t_name)
                         except VariableNotFoundError:
-                            if self.op.get_attr(t_var, "initialGuess") == 0.:
+                            if (var_init_guess in [0., 1.]):
                                 print("Warning: Could not find initial " +
                                       "guess for %s in initial " % t_name +
                                       "trajectories. Using end-point of " +
@@ -4644,8 +4645,7 @@ class LocalDAECollocator(CasadiCollocator):
                                       "guess for %s in initial " % t_name +
                                       "trajectories. Using initialGuess " +
                                       "attribute value instead.")
-                                t_init[t_name] = self.op.get_attr(t_var,
-                                                                  "initialGuess")
+                                t_init[t_name] = var_init_guess
                         else:
                             t_init[t_name] = data.x[0]
                     if self.nominal_traj is None:
@@ -5905,8 +5905,6 @@ class LocalDAECollocator(CasadiCollocator):
         It does not include restricted inputs. Those are added to 
         self.cost later
         """
-
-        
         # Collocation and DAE constraints
         for i in xrange(1, self.n_e + 1):
             for k in xrange(1, self.n_cp + 1):
@@ -6249,7 +6247,6 @@ class LocalDAECollocator(CasadiCollocator):
 
             unscaled_value = d*scaled_value + e
         """
-        
         if self.variable_scaling:
             if self.nominal_traj is None:
                 (ind, vt) = self.name_map[name]
@@ -6265,9 +6262,8 @@ class LocalDAECollocator(CasadiCollocator):
         
     def _get_unscaled_expr(self, name, i, k):
         """
-        Get an expression for the unscaled value of variable name at a collocation point.
+        Get expression for unscaled value of variable at collocation point.
         """
-        
         (ind, vt) = self.name_map[name]
         val = self.var_map[i][k][vt][ind]
         d, e = self._get_affine_scaling(name, i, k)        
@@ -6463,9 +6459,8 @@ class LocalDAECollocator(CasadiCollocator):
 
     def _create_initial_trajectories(self):
         """
-        Create interpolated initial trajectories and store in self.init_traj_interp
+        Create interpolated initial trajectories.
         """
-
         if self.init_traj is not None:
             n = len(self.init_traj.get_data_matrix()[:, 0])
             self.init_traj_interp = traj = {}
@@ -6501,7 +6496,8 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             time = self.time_points[i][k]
             if self._normalize_min_time:
-                time = self._denorm_t0_init + (self._denorm_tf_init - self._denorm_t0_init) * time
+                time = (self._denorm_t0_init +
+                        (self._denorm_tf_init - self._denorm_t0_init) * time)
             return self.init_traj_interp[var].eval(time)
 
     def _compute_bounds_and_init(self):
@@ -6544,7 +6540,7 @@ class LocalDAECollocator(CasadiCollocator):
                     sf_index = name_idx_sf_map[name]
                     sf = invariant_d[sf_index]
             else:
-                sf = 1
+                sf = 1.
             p_min[var_index] = op.get_attr(var, "min") / sf
             p_max[var_index] = op.get_attr(var, "max") / sf
 

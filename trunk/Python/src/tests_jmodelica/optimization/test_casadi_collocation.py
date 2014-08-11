@@ -133,6 +133,10 @@ class TestLocalDAECollocator(object):
         class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time"
         self.cstr_unscaled_min_time_op = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
+
+        class_path = "CSTR.CSTR_Opt_Min_Time_No_Initial_Guess"
+        self.cstr_min_time_no_init_guess_op = \
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
                                     'ParameterEstimation_1.mop')
@@ -174,6 +178,7 @@ class TestLocalDAECollocator(object):
         model = self.cstr_model
         model.reset()
         op = self.cstr_extends_op
+        op_min_time = self.cstr_min_time_no_init_guess_op
         model.set(['c_init', 'T_init'], op.get(['c_init', 'T_init']))
         
         # Create input trajectory
@@ -184,11 +189,11 @@ class TestLocalDAECollocator(object):
         # Generate initial trajectories
         opts = model.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-6
-        opts["CVode_options"]["atol"] = 1e-8*model.nominal_continuous_states
+        opts["CVode_options"]["atol"] = 1e-8 * model.nominal_continuous_states
         init_res = model.simulate(final_time=300, input=('Tc', u_traj),
                                   options=opts)
         
-        # Optimize
+        # Check computed initial guess
         opts = self.optimize_options(op, self.algorithm)
         opts['variable_scaling'] = False
         opts['init_traj'] = init_res
@@ -197,6 +202,16 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
                 [435.4425832, 333.42862629], rtol=1e-4)
+
+        # Check compute initial guess for minimum time
+        opts = self.optimize_options(op_min_time, self.algorithm)
+        opts['variable_scaling'] = False
+        opts['init_traj'] = init_res
+        col = LocalDAECollocator(op_min_time, opts)
+        xx_init = col.get_xx_init()
+        (ind, vt) = col.name_map['finalTime']
+        N.testing.assert_allclose(xx_init[col.var_indices[vt][ind]], 300.,
+                                  rtol=1e-4)
 
     @testattr(casadi = True)
     def test_init_traj_opt(self):
