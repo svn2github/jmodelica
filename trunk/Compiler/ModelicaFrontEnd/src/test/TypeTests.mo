@@ -2045,4 +2045,93 @@ end TypeTests.ModOnConstantExtends;
 ")})));
 end ModOnConstantExtends;
 
+model Functional1
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    partial function partFunc2
+        input Real x;
+        output Real y;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc2 pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(), time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Functional1",
+            description="Check type error for functional input argument",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 2073, column 26:
+  Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
+    type of 'fullFunc()' is TypeTests.Functional1.fullFunc
+")})));
+end Functional1;
+
+model Functional2
+    partial function partFunc1
+        input Real x;
+        output Real y;
+    end partFunc1;
+    
+    partial function partFunc2
+        input Real x;
+        output Real y;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc1;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc1
+        input partFunc1 pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc1;
+    
+    function usePartFunc2
+        input partFunc2 pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc2;
+    
+    Real[2] y1 = usePartFunc1({{function fullFunc(), function fullFunc()}}, time);
+    Real[2] y2 = usePartFunc2({{function fullFunc(), function fullFunc()}}, time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Functional2",
+            description="Check type error for functional input argument",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 554, column 27:
+  Array size mismatch in declaration of y1, size of declaration is [2] and size of binding expression is [1, 2]
+Error: in file '...':
+Semantic error at line 554, column 27:
+  Array size mismatch in declaration of y2, size of declaration is [2] and size of binding expression is [1, 2]
+")})));
+end Functional2;
+
 end TypeTests;

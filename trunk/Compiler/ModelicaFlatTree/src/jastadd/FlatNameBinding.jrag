@@ -471,16 +471,24 @@ aspect FlatFunctionBinding {
 	syn FFunctionDecl FIdUse.myFFunctionDecl() = lookupFFunctionDecl(name());
 	
 	inh FFunctionDecl FIdUse.lookupFFunctionDecl(String name);
-	eq Root.getChild().lookupFFunctionDecl(String name)   = null;
-	eq FClass.getChild().lookupFFunctionDecl(String name) = lookupFunc(name);
-	
+    inh FFunctionDecl FFunctionDecl.lookupFFunctionDecl(String name);
+    eq Root.getChild().lookupFFunctionDecl(String name)          = null;
+    eq FClass.getChild().lookupFFunctionDecl(String name)        = lookupFunc(name);
+    eq FFunctionDecl.getChild().lookupFFunctionDecl(String name) = lookupFunc(name);
+    
 	syn FFunctionDecl FClass.lookupFunc(String name) {
 		for (FFunctionDecl f : getFFunctionDecls())
 			if (f.name().equals(name))
 				return f;
 		return null;
 	}
-	
+    
+    syn FFunctionDecl FFunctionDecl.lookupFunc(String name) {
+        for (FFunctionVariable ffv : getFFunctionVariables())
+            if (ffv.name().equals(name) && ffv.type().isPartialFunction())
+                return lookupFFunctionDecl(ffv.type().name());
+        return lookupFFunctionDecl(name);
+    }
 }
 
 aspect FlatRecordBinding {

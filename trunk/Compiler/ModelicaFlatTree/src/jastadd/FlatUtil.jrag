@@ -1222,6 +1222,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
+     eq InstPartialFunction.myOutputs()      = myInstClass().myOutputs();
      
      /**
       * Returns a list of all contained InstComponentDecls that may be altered by a modification.

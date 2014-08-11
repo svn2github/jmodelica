@@ -112,7 +112,7 @@ aspect InstTypeAnalysis {
         return type;
     }
 
-    eq InstPartialFunction.type() = myInstClass().partialFunctionType();
+    eq InstPartialFunction.type() = myInstClass().partialFunctionType().sizedType(size());
     
     syn FType InstClassDecl.partialFunctionType() {
         List<FRecordComponentType> inputTypes = new List();

@@ -1115,7 +1115,8 @@ aspect ComponentDeclMethods {
     eq InstComponentDecl.getChild().inheritsInputOutputFrom() {
         return (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
     }
-    eq InstPartialFunction.getChild().inheritsInputOutputFrom()      = null;
+    eq InstPartialFunction.getChild().inheritsInputOutputFrom()    = null;
+    eq InstArrayComponentDecl.getChild().inheritsInputOutputFrom() = inheritsInputOutputFrom();
     eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
     eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
     eq Root.getChild().inheritsInputOutputFrom()              = null;

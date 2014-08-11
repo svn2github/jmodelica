@@ -722,6 +722,44 @@ Semantic error at line 594, column 44:
 ")})));
 end Duplicate2;
 
+model Array1
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        output Real y2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc[1] pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc({function fullFunc()}, time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Array1",
+            description="Check error when declaring as array",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Compliance error at line 738, column 24:
+  Arrays of functional input arguments is currently not supported
+Error: in file '...':
+Compliance error at line 738, column 24:
+  Using functional input arguments is currently not supported
+")})));
+end Array1;
+
 end Functional;
 
 end CheckTests;
