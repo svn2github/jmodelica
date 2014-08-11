@@ -525,4 +525,203 @@ Semantic error at line 511, column 17:
 ")})));
 end ExtObjConstructor;
 
+
+
+package Functional
+
+model PartialCall1
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        output Real y2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(fullFunc(), time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="PartialCall1",
+            description="Check error when leaving out function key word",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 554, column 27:
+  Calling function fullFunc(): missing argument for required input x
+Error: in file '...':
+Semantic error at line 554, column 27:
+  Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
+    type of 'fullFunc()' is Real
+")})));
+end PartialCall1;
+
+model PartialCall2
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        output Real y2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := partFunc(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc(), time) + partFunc(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="PartialCall2",
+            description="Check error when calling partial function declaration directly",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 570, column 15:
+  Calling function partFunc(): can only call functions that have one algorithm section or external function specification
+Error: in file '...':
+Semantic error at line 570, column 15:
+  Calling function partFunc(): can only call functions that have one algorithm section or external function specification
+")})));
+end PartialCall2;
+
+model NumArgs1
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x2;
+        output Real y2;
+      algorithm
+        y := x*x2;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x,x) + pf();
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc(), time);
+    Real y2 = usePartFunc(function fullFunc(x=y1,x2=y1), y1);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NumArgs1",
+            description="Check missing and extra arguments for functional inputs",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Semantic error at line 551, column 19:
+  Calling function pf(): too many positional arguments
+Error: in file '...':
+Semantic error at line 551, column 24:
+  Calling function pf(): missing argument for required input x
+Error: in file '...':
+Semantic error at line 554, column 26:
+  Creating functional input argument fullFunc(): missing argument for required input x2
+ Error: in file '...':
+Semantic error at line 555, column 45:
+  Creating functional input argument fullFunc(): no input matching named argument x found
+")})));
+end NumArgs1;
+
+model Duplicate1
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(x=time), time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Duplicate1",
+            description="Check that duplicate component declaration is handled correctly",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 594, column 44:
+  Creating functional input argument fullFunc(): no input matching named argument x found
+")})));
+end Duplicate1;
+
+model Duplicate2
+    partial function partFunc1
+        input Real x;
+        output Real y;
+    end partFunc1;
+    
+    partial function partFunc2
+        input Real x;
+        output Real y;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc1;
+        extends partFunc2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc1 pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(x=time), time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Duplicate2",
+            description="Check that duplicate component declaration is handled correctly",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 594, column 44:
+  Creating functional input argument fullFunc(): no input matching named argument x found
+")})));
+end Duplicate2;
+
+end Functional;
+
 end CheckTests;

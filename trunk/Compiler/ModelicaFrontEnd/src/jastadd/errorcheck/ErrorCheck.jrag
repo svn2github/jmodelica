@@ -1152,6 +1152,7 @@ aspect InstanceErrorCheck {
     eq InstRecordConstructor.functionCallDecription() = "Record constructor for " + name();
 	eq InstFunctionCall.functionCallDecription()      = getName().myInstClassDecl().isRecord() ? 
 			"Record constructor for " + name() : super.functionCallDecription();
+    eq InstPartialFunctionCall.functionCallDecription() = "Creating functional input argument " + name() + "()";
 	  
 	public boolean InstFunctionArgument.generateUnbindableError(String desc, boolean genForPos) {
 		return genForPos;
