@@ -112,6 +112,14 @@ aspect InstTypeAnalysis {
         return type;
     }
 
+    eq InstPartialFunction.type() = myInstClass().partialFunctionType();
+    
+    syn FType InstClassDecl.partialFunctionType() {
+        List<FRecordComponentType> inputTypes = new List();
+        for (InstComponentDecl icd : myInputs())
+            inputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
+        return new FPartialFunctionType(Size.SCALAR, qualifiedName(), inputTypes);
+    }
 
     eq InstRecordConstructor.type() = getRecord().recordType();
 
@@ -124,28 +132,31 @@ aspect InstTypeAnalysis {
     syn lazy FType InstComponentDecl.type() = fUnknownType();
 
     eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
-
-
-    syn boolean InstNode.isReal()           = false;
-    syn boolean InstNode.isInteger()        = false;
-    syn boolean InstNode.isBoolean()        = false;
-    syn boolean InstNode.isString()         = false;
-    syn boolean InstNode.isEnum()           = false;
-    syn boolean InstNode.isExternalObject() = false;
-
+    eq InstPartialFunctionCall.type() = getName().myInstClassDecl().partialFunctionType();
+    
+    syn boolean InstNode.isReal()            = false;
+    syn boolean InstNode.isInteger()         = false;
+    syn boolean InstNode.isBoolean()         = false;
+    syn boolean InstNode.isString()          = false;
+    syn boolean InstNode.isEnum()            = false;
+    syn boolean InstNode.isExternalObject()  = false;
+    syn boolean InstNode.isPartialFunction() = false;
+    
     eq InstPrimitive.isReal()           = myInstClass().isReal();
     eq InstPrimitive.isInteger()        = myInstClass().isInteger();
     eq InstPrimitive.isBoolean()        = myInstClass().isBoolean();
     eq InstPrimitive.isString()         = myInstClass().isString();
     eq InstEnum.isEnum()                = true;
     eq InstPrimitive.isExternalObject() = myInstClass().isExternalObject();
-
+    eq InstPartialFunction.isPartialFunction() = true;
+    
     eq InstClassDecl.isReal()    = finalClass().primitiveName().equals("Real");
     eq InstClassDecl.isInteger() = finalClass().primitiveName().equals("Integer");
     eq InstClassDecl.isBoolean() = finalClass().primitiveName().equals("Boolean");
     eq InstClassDecl.isString()  = finalClass().primitiveName().equals("String");
     eq InstClassDecl.isEnum()    = extendsEnum();
-
+    eq InstClassDecl.isPartialFunction() = isPartial() && isFunction();
+    
     eq InstBuiltIn.isReal() = 
         myInstClass().finalClass().primitiveName().equals("RealType");
     eq InstBuiltIn.isInteger() = 
@@ -154,7 +165,12 @@ aspect InstTypeAnalysis {
         myInstClass().finalClass().primitiveName().equals("BooleanType");
     eq InstBuiltIn.isString() = 
         myInstClass().finalClass().primitiveName().equals("StringType");
-
+    
+    syn boolean InstComponentDecl.typeExtendsCheck(FExp source) = true;
+    syn boolean InstPartialFunction.typeExtendsCheck(FExp exp)  = exp.typeExtendsCheck(this);
+    
+    syn boolean FExp.typeExtendsCheck(InstPartialFunction decl)           = true;
+    eq InstPartialFunctionCall.typeExtendsCheck(InstPartialFunction decl) = myInstClassDecl().extendsClass(decl.myInstClass());
 }
 
 
@@ -444,7 +460,9 @@ aspect InstClassRestriction {
     syn boolean InstClassDecl.isCallable() = false;
     eq InstBaseClassDecl.isCallable()      = getInstRestriction().isCallable();
     eq UnknownInstClassDecl.isCallable()   = false;
-
+    
+    syn boolean InstPartialFunction.isCallable() = true;
+    
     /**
      * Is this restriction "function" or "record"?
      */

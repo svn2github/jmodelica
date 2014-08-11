@@ -109,7 +109,7 @@ aspect InstNameClassification {
 	eq InstComponentModification.getName().kind() = hasValue() ? Kind.COMPONENT_ACCESS : Kind.AMBIGUOUS_ACCESS;
 	eq InstClassRedeclare.getName().kind()        = Kind.CLASS_ACCESS;
 	eq InstComponentRedeclare.getName().kind()    = Kind.COMPONENT_ACCESS;
-	eq InstFunctionCall.getName().kind()          = Kind.FIRST_AMBIGUOUS_ACCESS;
+    eq InstFunctionCall.getName().kind()          = Kind.AMBIGUOUS_ACCESS;
 	
 	eq InstConstraining.getClassName().kind()             = Kind.CLASS_ACCESS;
 	eq InstComponentDecl.getConditionalAttribute().kind() = Kind.AMBIGUOUS_ACCESS;

@@ -390,9 +390,16 @@ aspect Flattening {
 		super.updateRecordArraySizes(from);
 		FRecordType rfrom = (FRecordType) from;
 		for (FRecordComponentType comp : getComponents())
-			comp.getFType().updateRecordArraySizes(rfrom.componentType(comp.getName()));
+            comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getComponents()));
 	}
-	
+    
+    public void FPartialFunctionType.updateRecordArraySizes(FType from) {
+        super.updateRecordArraySizes(from);
+        FPartialFunctionType rfrom = (FPartialFunctionType) from;
+        for (FRecordComponentType comp : getInputs())
+            comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getInputs()));
+    }
+    
 	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added) {
    		for (InstExtends ie : getInstExtendss())
    	   		ie.flattenComponentsInFunction(ffd, fc, added);
@@ -619,6 +626,12 @@ aspect Flattening {
 		for (FRecordComponentType comp : getComponents())
 			comp.getFType().flattenSize(prefix, null);
 	}
+	
+    public void FPartialFunctionType.flattenSize(FQName prefix, ASTNode context) {
+        super.flattenSize(prefix, context);
+        for (FRecordComponentType comp : getInputs())
+            comp.getFType().flattenSize(prefix, null);
+    }
 	
 	public Size Size.flatten(FQName prefix, ASTNode context) {
 		return this;

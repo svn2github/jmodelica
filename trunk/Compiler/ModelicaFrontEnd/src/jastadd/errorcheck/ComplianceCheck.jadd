@@ -287,9 +287,8 @@ aspect ComplianceCheck {
 			compliance("Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)");
 	}
 
-    public void InstComposite.complianceCheck(ErrorCheckType checkType) {
-        if (isFunctionalArg())
-            compliance("Using functional input arguments is currently not supported");
+    public void InstPartialFunction.complianceCheck(ErrorCheckType checkType) {
+        compliance("Using functional input arguments is currently not supported");
     }
     
     public void InstFunctionCall.complianceCheck(ErrorCheckType checkType) {

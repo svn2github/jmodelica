@@ -1128,19 +1128,25 @@ Exp primary =
  FunctionCall function_call =
     parse_access LPAREN function_arguments? RPAREN 
                                       {: return new FunctionCall(parse_access, function_arguments); :}
-  ;  
+  ;
   
  PartialFunctionCall partial_function_call =
-    FUNCTION parse_access LPAREN function_arguments? RPAREN 
-                                      {: return new PartialFunctionCall(parse_access, function_arguments); :}
-  ;  
+    FUNCTION parse_access LPAREN function_arguments_named? RPAREN
+                                      {: return new PartialFunctionCall(parse_access, function_arguments_named); :}
+    | FUNCTION parse_access
+                                      {: return new PartialFunctionCall(parse_access, new Opt()); :}
+  ;
   
 FunctionArguments function_arguments =
     exp FOR for_indices               {: List arg_list_f = new List().add(new IterExp(exp, for_indices));
                                          return new FunctionArguments(arg_list_f, new List()); :} 
   | arg_list_p                        {: return new FunctionArguments(arg_list_p, new List()); :}  
   | arg_list_p COMMA named_arguments  {: return new FunctionArguments(arg_list_p, named_arguments); :}
-  | named_arguments                   {: return new FunctionArguments(new List(), named_arguments); :}
+  | function_arguments_named
+  ;
+  
+FunctionArguments function_arguments_named =
+  named_arguments {: return new FunctionArguments(new List(), named_arguments); :}
   ;
   
 List named_arguments =

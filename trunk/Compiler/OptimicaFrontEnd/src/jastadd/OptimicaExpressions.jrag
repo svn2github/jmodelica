@@ -21,7 +21,7 @@ aspect OptimicaExpressions {
 				//	((InstDot)getName()).getLeft()!=null: true) && 
 				(getName().getLastInstAccess() instanceof InstComponentAccess ||
 				getName().getLastInstAccess() instanceof InstComponentArrayAccess) &&
-				getNumArg()==1 && !getName().myInstComponentDecl().isFunctionalArg())
+				getNumArg()==1 && !getName().myInstComponentDecl().isPartialFunction())
 		 to InstTimedVariable {
 //			System.out.println("rewrite InstFunctionCall: " + getName().name());
 		 	InstTimedVariable iv = new InstTimedVariable(getName(), getArg(0).getFExp());

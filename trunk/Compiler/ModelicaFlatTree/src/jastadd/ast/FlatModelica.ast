@@ -315,6 +315,11 @@ FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 FExternalObjectType : FType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
 
 /**
+ * Partial function call type
+ */
+FPartialFunctionType : FType ::= <Name> Input:FRecordComponentType*;
+
+/**
  * An operator record type. 
  *
  * Only used in instance tree.

@@ -975,7 +975,8 @@ aspect InstanceErrorCheck {
     public boolean InstClassDecl.isCompleteFunction() {
         return (numFAlgorithm() == 1);
     }
-	
+    syn boolean InstPartialFunction.isCompleteFunction() = true;
+    
 	syn boolean InstClassDecl.hasInstExternal() = false;
 	
 	syn int InstClassDecl.numInstExternal() {
@@ -1078,13 +1079,13 @@ aspect InstanceErrorCheck {
 	    if (!errorChecked) {
 	    	errorChecked = true;
 	    	// Check that the function exists
-	    	InstClassDecl func = getName().myInstClassDecl();
+            InstFunctionDecl func = getName().myInstFunctionDecl();
 	    	if (!func.isCallable()) {
 	    		// Report that function does not exist
 		    	String name = getName().name();
 		    	if (func.isExternalObject()) {
 		    		name += ".constructor";
-		    		func = func.myConstructor();
+		    		func = func.asInstClassDecl().myConstructor();
 		    	}
 		    	if (func.isUnknown()) 
 	    			error("Cannot find function declaration for " + name + "()");
@@ -1092,7 +1093,7 @@ aspect InstanceErrorCheck {
 	    			error("The class " + name + " is not a function");
 	    	} else if (!func.isRecord() && !func.isCompleteFunction()) {
 	    		// TODO: add check if function is partial?
-	    	    if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func))
+	    	    if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func.asInstNode()))
 	    	        error("Calling function " + getName().name() + 
 	    	                "(): can only call functions that have one algorithm section or external function specification");
 	    	} else {

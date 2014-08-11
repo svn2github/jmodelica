@@ -776,13 +776,6 @@ model FunctionalArgument
 Error: in file '...':
 Compliance error at line 764, column 3:
   Using functional input arguments is currently not supported
-Error: in file '...':
-Semantic error at line 769, column 10:
-  Cannot find function declaration for f()
-Error: in file '...':
-Semantic error at line 784, column 17:
-  Calling function functional(): missing argument for required input u
-
 ")})));
 end FunctionalArgument;
 

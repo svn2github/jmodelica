@@ -478,12 +478,12 @@ aspect InstFunctionBinding {
         private InstFunctionArgument[] bound;
         private ArrayList<InstFunctionArgument> unbindable;
         private ArrayList<InstComponentDecl> inputs;
-        private InstClassDecl target;
+        private InstFunctionDecl target;
         private InstFunctionCall source;
         private boolean ok = true;
 
-        public ArgumentBinding(InstClassDecl target, InstFunctionCall source, boolean infArgs) {
-            inputs = target.myCallInputs();
+        public ArgumentBinding(InstFunctionDecl target, InstFunctionCall source, boolean infArgs) {
+            inputs = source.myInputsToBind(target);
             unbindable = new ArrayList<InstFunctionArgument>();
             this.target = target;
             this.source = source;
@@ -503,7 +503,7 @@ aspect InstFunctionBinding {
         /**
          * Get the target function.
          */
-        public InstClassDecl target() {
+        public InstFunctionDecl target() {
             return target;
         }
 
@@ -640,8 +640,8 @@ aspect InstFunctionBinding {
 
             // Get info
             boolean generated = this.generated;
-            InstClassDecl target = getName().myInstClassDecl().actualInstClass();
-            InstClassDecl namedTarget = target;
+            InstFunctionDecl target = getName().myInstFunctionDecl();
+            InstFunctionDecl namedTarget = target;
             String name = target.qualifiedName();
             ArgumentBinding binding = null;
 
@@ -664,7 +664,7 @@ aspect InstFunctionBinding {
                 }
             } else if (target.isExternalObject()) {
                 // Use the external object constructor
-                InstClassDecl icd = target.myConstructor();
+                InstClassDecl icd = target.asInstClassDecl().myConstructor();
                 if (icd.isFunction())
                     target = icd;
                 generated = true;
@@ -673,7 +673,7 @@ aspect InstFunctionBinding {
                 // TODO: Error if several perfect matches
                 // TODO: Make toString() match original decl
                 // TODO: handle vectorized constructors
-                binding = matchOverloadedFunctionCall(target.recordType(), FExp.OP_CON);
+                binding = matchOverloadedFunctionCall(target.asInstClassDecl().recordType(), FExp.OP_CON);
                 if (binding != null) {
                     target = binding.target();
                     generated = true;
@@ -698,8 +698,9 @@ aspect InstFunctionBinding {
                 if (target.isRecord() && binding.isOK()) {
                     n = new InstRecordConstructor(getName(), new List());
                 } else {
-                    InstAccess accessName = generated ? target.retargetFrom(namedTarget, getName()) : getName();
-                    InstFunctionCall ifc = new InstFunctionCall(accessName, new List());
+                    InstAccess accessName = generated ? target.asInstClassDecl().retargetFrom(namedTarget.asInstClassDecl(), getName()) : getName();
+                    InstFunctionCall ifc = createEmptyNode();
+                    ifc.setName(accessName);
                     ifc.generated = generated;
                     ifc.unbindableArgs = binding.unbindable();
                     ifc.bound = true;
@@ -717,8 +718,29 @@ aspect InstFunctionBinding {
     }
     private boolean InstFunctionCall.bound = false;
     public boolean InstFunctionCall.generated = false;
-
-
+    
+    inh FPartialFunctionType InstPartialFunctionCall.expectedPartialType();
+    eq Root.getChild().expectedPartialType() = null;
+    eq InstFunctionCall.getArg(int i).expectedPartialType() =
+        (FPartialFunctionType) myInstClassDecl().myInputs().get(i).type();
+    
+    syn ArrayList<InstComponentDecl> InstFunctionCall.myInputsToBind(InstFunctionDecl target) = target.myCallInputs();
+    eq InstPartialFunctionCall.myInputsToBind(InstFunctionDecl target) {
+        ArrayList<InstComponentDecl> allInputs = super.myInputsToBind(target);
+        FPartialFunctionType t = expectedPartialType();
+        Set<String> noBind = new HashSet<String>();
+        for (FRecordComponentType c : t.getInputs()) {
+            noBind.add(c.getName());
+        }
+        ArrayList<InstComponentDecl> res = new ArrayList<InstComponentDecl>();
+        for (InstComponentDecl icd : allInputs) {
+            if (!noBind.contains(icd.qualifiedName())) {
+                res.add(icd);
+            }
+        }
+        return res;
+    }
+    
     /**
      * Calculate if this is a vectorized function call.
      */

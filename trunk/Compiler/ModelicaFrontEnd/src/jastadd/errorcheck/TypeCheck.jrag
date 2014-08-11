@@ -859,13 +859,15 @@ aspect FlatTypeCheck {
         FType type = getFExp().type();
         if (!type.isUnknown()) {
             if (argumentDefinedTypeValid()) {
-                FType boundType = getBoundInput().type();
+                InstComponentDecl boundInput = getBoundInput();
+                FType boundType = boundInput.type();
                 if (!boundType.isUnknown()) {
                     if (isVectorized()) 
                         boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
                     else if (isDestructorArgument())
                         boundType = boundType.sizedType(type.size());
-                    typeOk = boundType.typeCompatible(type, true);
+                    typeOk = boundInput.typeExtendsCheck(getFExp()) &&
+                            boundType.typeCompatible(type, true);
                 }
             } else {
                 typeOk = argumentTypeValid(type);

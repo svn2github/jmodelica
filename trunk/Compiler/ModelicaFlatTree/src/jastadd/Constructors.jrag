@@ -1048,13 +1048,14 @@ aspect InheritedFactoryMethods {
 	public FLinspace       FLinspace.createEmptyNode()       { return new FLinspace();       }
 	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp();         }
 	public FIterExp        FIterExp.createEmptyNode()        { return new FIterExp();        }
-	
-	// Function calls
-	public FFunctionCall         FFunctionCall.createEmptyNode()         { return new FFunctionCall();      }
-	public InstFunctionCall      InstFunctionCall.createEmptyNode()      { return new InstFunctionCall();   }
-    public FRecordConstructor    FRecordConstructor.createEmptyNode()    { return new FRecordConstructor(); }
-    public InstRecordConstructor InstRecordConstructor.createEmptyNode() { return new InstRecordConstructor(); }
-	
+    
+    // Function calls
+    public FFunctionCall         FFunctionCall.createEmptyNode()           { return new FFunctionCall();           }
+    public InstFunctionCall      InstFunctionCall.createEmptyNode()        { return new InstFunctionCall();        }
+    public InstFunctionCall      InstPartialFunctionCall.createEmptyNode() { return new InstPartialFunctionCall(); }
+    public FRecordConstructor    FRecordConstructor.createEmptyNode()      { return new FRecordConstructor();      }
+    public InstRecordConstructor InstRecordConstructor.createEmptyNode()   { return new InstRecordConstructor();   }
+    
 	// Calls to built-in mathematical functions
 	public FSinExp   FSinExp.createEmptyNode()   { return new FSinExp();   }
 	public FCosExp   FCosExp.createEmptyNode()   { return new FCosExp();   }

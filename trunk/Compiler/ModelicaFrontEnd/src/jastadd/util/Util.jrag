@@ -1113,10 +1113,9 @@ aspect ComponentDeclMethods {
      */
     inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
     eq InstComponentDecl.getChild().inheritsInputOutputFrom() {
-        if (isFunctionalArg())
-            return null;
         return (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
     }
+    eq InstPartialFunction.getChild().inheritsInputOutputFrom()      = null;
     eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
     eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
     eq Root.getChild().inheritsInputOutputFrom()              = null;
@@ -1221,13 +1220,60 @@ aspect ComponentDeclMethods {
     			return true;
     	return false;
     }
+}
+
+aspect ClassDeclMethods {
+    public boolean InstClassDecl.extendsClass(InstClassDecl icd) {
+        if (equals(icd))
+            return true;
+        for (InstExtends ie : getInstExtendss()) {
+            if (ie.myInstClass().extendsClass(icd))
+                return true;
+        }
+        return false;
+    }
+}
+
+
+aspect MultiDeclMethods {
     
-    /**
-     * Check if this component is a functional input argument
-     */
-    syn boolean InstComponentDecl.isFunctionalArg() = false;
-    eq InstComposite.isFunctionalArg()              = 
-        isInput() && inFunction() && surroundingInstClass().isFunction() && myInstClass().isFunction();
+    InstClassDecl implements InstFunctionDecl;
+    InstPartialFunction  implements InstFunctionDecl;
+    public interface InstFunctionDecl {
+        public boolean isCallable();
+        public boolean isCompleteFunction();
+        public boolean canBeReplacedForMe(InstNode node);
+        public void    collectErrors(ErrorCheckType checkType);
+
+        public boolean isRecord();
+        public boolean isPrimitive();
+        public boolean isExternalObject();
+        public boolean isOperatorRecord();
+        public boolean isUnknown();
+        
+        public InstClassDecl asInstClassDecl();
+        public InstNode      asInstNode();
+        
+        public String qualifiedName();
+        public String name();
+        
+        public ArrayList<InstComponentDecl> myCallInputs();
+        public ArrayList<InstComponentDecl> myOutputs();
+    }
+    
+    syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
+    syn InstClassDecl InstPartialFunction.asInstClassDecl()  = unknownInstClassDecl();
+    
+    syn InstNode InstClassDecl.asInstNode() = this;
+    syn InstNode InstPartialFunction.asInstNode()  = this;
+    
+    syn InstFunctionDecl InstAccess.myInstFunctionDecl() {
+        return myInstClassDecl().actualInstClass();
+    }
+    eq InstComponentAccess.myInstFunctionDecl() {
+        InstComponentDecl icd = myInstComponentDecl();
+        return icd.isPartialFunction() ? (InstPartialFunction) icd : unknownInstClassDecl();
+    }
 }
 
 aspect ShortClassUtil {

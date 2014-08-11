@@ -1017,6 +1017,8 @@ aspect InstanceTreeConstruction {
 			return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else if (isExpandableConnector())
 		    return new InstExpandableConnectorDecl(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+        else if (isPartialFunction())
+            return new InstPartialFunction(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else
 			return new InstComposite(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 	}

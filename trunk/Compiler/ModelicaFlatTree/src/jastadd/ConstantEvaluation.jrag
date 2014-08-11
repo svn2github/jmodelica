@@ -2615,6 +2615,7 @@ aspect ConstantEvaluation {
 	  new ArrayList<CommonVariableDecl>(0);
   eq FFunctionCall.myFuncInputs()    = myInputs();
   eq InstFunctionCall.myFuncInputs() = myInputs();
+  eq InstPartialFunctionCall.myFuncInputs() = new ArrayList<CommonVariableDecl>(0);
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncOutputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
@@ -2660,6 +2661,10 @@ aspect ConstantEvaluation {
 	  return res;
   }
   
+    public CValue[] InstPartialFunctionCall.evaluate() {
+        throw new ConstantEvaluationException();
+    }
+    
     public void FAbstractFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
         evaluateCell(values);
     }
@@ -3330,7 +3335,7 @@ aspect ConstantEvaluation {
 	  if (next == null) 
 		  return assignToLastInFuncEval(name, left, right);
 
-	  FType nextType = componentType(next.name());
+	  FType nextType = componentType(next.name(), getComponents());
 	  if (isArray()) {
 		  if (left.isUnknown()) 
 			  left = new CValueArray(size());
@@ -3375,17 +3380,18 @@ aspect ConstantEvaluation {
 	  left.record().setMember(next.name(), val);
 	  return left;
   }
-  
-  /**
-   * Get the type of a specific component.
-   */
-  public FType FRecordType.componentType(String name) {
-	  for (FRecordComponentType comp : getComponents())
-		  if (comp.getName().equals(name))
-			  return comp.getFType();
-	  return null;
-  }
-  
+    
+   /**
+    * \brief Get the type of a specific component.
+    */
+    public FType FType.componentType(String name, List<FRecordComponentType> comps) {
+        for (FRecordComponentType comp : comps)
+            if (comp.getName().equals(name))
+                return comp.getFType();
+        return null;
+    }
+    
+    
   /**
    * Handle the last part of the left access of an assignment during function evaluation.
    */
