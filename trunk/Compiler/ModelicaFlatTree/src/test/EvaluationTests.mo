@@ -1470,6 +1470,136 @@ end EvaluationTests.EvaluateAnnotation4;
 ")})));
 end EvaluateAnnotation4;
 
+model EvaluateAnnotation5
+    record R
+        Real a;
+    end R;
+    
+    parameter R r = R(1) annotation(Evaluate=true);
+    Real x = r.a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation5",
+            description="Check that annotation(Evaluate=true) is honored for components of recors with the annotation",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation5
+ parameter EvaluationTests.EvaluateAnnotation5.R r = EvaluationTests.EvaluateAnnotation5.R(1) /* EvaluationTests.EvaluateAnnotation5.R(1) */;
+
+ Real x = 1.0;
+
+public
+ record EvaluationTests.EvaluateAnnotation5.R
+  Real a;
+ end EvaluationTests.EvaluateAnnotation5.R;
+
+end EvaluationTests.EvaluateAnnotation5;
+")})));
+end EvaluateAnnotation5;
+
+
+
+model FinalParameterEval1
+    model A
+        parameter Real p = 1;
+        Real x = p;
+    end A;
+    
+    A a(final p = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval1",
+            description="Check that parameters with final modification are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval1
+ parameter Real a.p = 2 /* 2 */;
+
+ Real a.x = 2.0;
+end EvaluationTests.FinalParameterEval1;
+")})));
+end FinalParameterEval1;
+
+
+model FinalParameterEval2
+    final parameter Real p = 1;
+    Real x = p;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval2",
+            description="Check that final parameters are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval2
+ parameter Real p = 1 /* 1 */;
+
+ Real x = 1.0;
+end EvaluationTests.FinalParameterEval2;
+")})));
+end FinalParameterEval2;
+
+
+model FinalParameterEval3
+    record R
+        Real a;
+    end R;
+    
+    final parameter R r = R(1);
+    Real x = r.a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval3",
+            description="Check that members of final record parameters are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval3
+ parameter EvaluationTests.FinalParameterEval3.R r = EvaluationTests.FinalParameterEval3.R(1) /* EvaluationTests.FinalParameterEval3.R(1) */;
+
+ Real x = 1.0;
+
+public
+ record EvaluationTests.FinalParameterEval3.R
+  Real a;
+ end EvaluationTests.FinalParameterEval3.R;
+
+end EvaluationTests.FinalParameterEval3;
+")})));
+end FinalParameterEval3;
+
+
+model FinalParameterEval4
+    record R
+        Real a;
+    end R;
+    
+    model A
+        
+        parameter R r;
+        Real x = r.a;
+    end A;
+    
+    A a(final r = R(1));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval4",
+            description="Check that members of record parameters with final modification are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval4
+ parameter EvaluationTests.FinalParameterEval4.R a.r = EvaluationTests.FinalParameterEval4.R(1) /* EvaluationTests.FinalParameterEval4.R(1) */;
+
+ Real a.x = 1.0;
+
+public
+ record EvaluationTests.FinalParameterEval4.R
+  Real a;
+ end EvaluationTests.FinalParameterEval4.R;
+
+end EvaluationTests.FinalParameterEval4;
+")})));
+end FinalParameterEval4;
+
+
 
 model EvalColonSizeCell
     function f
