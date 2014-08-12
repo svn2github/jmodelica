@@ -63,7 +63,7 @@ aspect FlatTypeAnalysis {
 
     syn FType FEnumVariable.getType() = myFEnumDecl().type().sizedType(size());
 
-    syn nta FType FExternalObjectVariable.getType() = getConstructor().myFFunctionDecl().myOutputs().get(0).type().sizedType(size());
+    syn nta FType FExternalObjectVariable.getType() = getConstructor().myFCallable().myOutputs().get(0).type().sizedType(size());
 
 
     public FExternalStmt FAlgorithm.getFExternalStmt() {
@@ -1058,20 +1058,27 @@ aspect BuiltInFlatTypes {
 
 
 aspect ExternalObjectTypes {
+    
+    public interface FCallable {
+        public boolean isConstructor();
+        public boolean isDestructor();
+    }
 
     syn boolean FExp.isConstructorCall()    = false;
     eq InstFunctionCall.isConstructorCall() = getName().myInstClassDecl().isConstructor();
-    eq FFunctionCall.isConstructorCall()    = myFFunctionDecl().isConstructor();
+    eq FFunctionCall.isConstructorCall()    = myFCallable().isConstructor();
     syn boolean FExp.isDestructorCall()     = false;
     eq InstFunctionCall.isDestructorCall()  = getName().myInstClassDecl().isDestructor();
-    eq FFunctionCall.isDestructorCall()     = myFFunctionDecl().isDestructor();
+    eq FFunctionCall.isDestructorCall()     = myFCallable().isDestructor();
 
-    syn boolean InstClassDecl.isDestructor()  = name().equals("destructor") && inExternalObject();
-    syn boolean FFunctionDecl.isDestructor()  = false;
-    eq FDestructorDecl.isDestructor()         = true;
-    syn boolean InstClassDecl.isConstructor() = name().equals("constructor") && inExternalObject();
-    syn boolean FFunctionDecl.isConstructor() = false;
-    eq FConstructorDecl.isConstructor()       = true;
+    syn boolean InstClassDecl.isDestructor()      = name().equals("destructor") && inExternalObject();
+    syn boolean FFunctionDecl.isDestructor()      = false;
+    syn boolean FFunctionVariable.isDestructor()  = false;
+    eq FDestructorDecl.isDestructor()             = true;
+    syn boolean InstClassDecl.isConstructor()     = name().equals("constructor") && inExternalObject();
+    syn boolean FFunctionDecl.isConstructor()     = false;
+    syn boolean FFunctionVariable.isConstructor() = false;
+    eq FConstructorDecl.isConstructor()           = true;
 
     syn boolean FExternalObjectVariable.hasConstructorCall(Index i) {
         if (hasBindingExp()) {

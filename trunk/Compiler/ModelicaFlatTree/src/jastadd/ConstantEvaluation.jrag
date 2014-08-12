@@ -2607,6 +2607,10 @@ aspect ConstantEvaluation {
         public boolean isOutput();
         public boolean hasBindingExp();
     }
+    
+    public interface FCallable {
+        public void evaluate(Map<CommonVariableDecl, CValue> values);
+    }
 
     FAbstractVariable implements CommonVariableDecl;
     InstComponentDecl implements CommonVariableDecl;
@@ -2674,7 +2678,7 @@ aspect ConstantEvaluation {
     }
     
     public void FFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
-        myFFunctionDecl().evaluate(values);
+        myFCallable().evaluate(values);
     }
     
     public void InstFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
@@ -2784,6 +2788,10 @@ aspect ConstantEvaluation {
                     var.readEvaluationValue(oldVal);
             currentEvaluationValues = oldVal;
         }
+    }
+    
+    public void FFunctionVariable.evaluate(Map<CommonVariableDecl, CValue> values) {
+        throw new ConstantEvaluationException();
     }
 
     private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;

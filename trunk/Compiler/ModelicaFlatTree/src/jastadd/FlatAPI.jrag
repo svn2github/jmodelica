@@ -2000,7 +2000,7 @@ aspect FVariableUses {
      * NOTICE, this method will throw exception if this exp does not reside in a function call.
      */
     inh FFunctionVariable FExp.myCorrespondingInput();
-    eq FFunctionCall.getArg(int i).myCorrespondingInput() = myFFunctionDecl().myInput(i);
+    eq FFunctionCall.getArg(int i).myCorrespondingInput() = myFCallable().myInput(i);
     eq FClass.getChild().myCorrespondingInput() {
         throw new UnsupportedOperationException();
     }

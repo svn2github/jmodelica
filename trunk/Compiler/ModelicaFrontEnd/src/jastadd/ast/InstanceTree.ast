@@ -107,7 +107,7 @@ InstRecord                    : InstAssignable;
 InstBuiltIn                   : InstPrimitive;
 InstEnumLiteral               : InstBuiltIn;
 InstExternalObject            : InstPrimitive ::= /DestructorCall:FFunctionCallStmt/;
-InstPartialFunction           : InstComponentDecl;
+InstPartialFunction           : InstAssignable;
 UnknownInstComponentDecl      : InstComponentDecl;
 InstArrayComponentDecl        : InstComponentDecl ::= <Index:int>;
 InstExpandableConnectorDecl   : InstComposite;

@@ -162,9 +162,9 @@ aspect Flattening {
 	}
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
-	    InstClassDecl target = getName().myInstClassDecl();
-		if (target.inOrIsOuter()) 
-		    target = target.myInnerInstClassDecl();
+        InstFunctionDecl target = myInstFunctionDecl();
+        if (target.asInstClassDecl().inOrIsOuter()) 
+		    target = target.asInstClassDecl().myInnerInstClassDecl();
 		target.flattenFunction(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
@@ -234,6 +234,10 @@ aspect Flattening {
 	}
 	
 	// Flatten function if not already done
+    public void InstPartialFunction.flattenFunction(FClass fc) {
+        myInstClass().flattenFunction(fc);
+    }
+    
 	public void InstClassDecl.flattenFunction(FClass fc) {}
 	
 	public void InstBaseClassDecl.flattenFunction(FClass fc) {
@@ -398,6 +402,8 @@ aspect Flattening {
         FPartialFunctionType rfrom = (FPartialFunctionType) from;
         for (FRecordComponentType comp : getInputs())
             comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getInputs()));
+        for (FRecordComponentType comp : getOutputs())
+            comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getOutputs()));
     }
     
 	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added) {
@@ -419,6 +425,7 @@ aspect Flattening {
 				if (tmp != null) 
 					return tmp;
 			}
+			return new FAlgorithm(new List());
 		}
 		return null;
 	}
@@ -631,6 +638,8 @@ aspect Flattening {
         super.flattenSize(prefix, context);
         for (FRecordComponentType comp : getInputs())
             comp.getFType().flattenSize(prefix, null);
+        for (FRecordComponentType comp : getOutputs())
+            comp.getFType().flattenSize(prefix, null);
     }
 	
 	public Size Size.flatten(FQName prefix, ASTNode context) {
@@ -795,6 +804,10 @@ aspect Flattening {
     public void InstRecord.flattenMyType(FClass fc) {
         myInstClass().flattenRecord(fc);
     }
+    
+    public void InstPartialFunction.flattenMyType(FClass fc) {
+        throw new UnsupportedOperationException("Partial function component only allowed in functions");
+    }
 
 	public void InstEnum.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		myInstClass().flattenEnum(fc);
@@ -858,7 +871,11 @@ aspect Flattening {
 		rec.setRecord(new FQNameString(myInstClass().qualifiedName()));
 		return rec;
 	}
-		
+    
+    public FVariable InstPartialFunction.createEmptyFVariable() {
+        throw new UnsupportedOperationException("Partial function component only allowed in functions");
+    }
+    
 	public FVariable InstExternalObject.createEmptyFVariable() {
 		FExternalObjectVariable exo = new FExternalObjectVariable();
 		exo.setConstructor(new FIdUse(myConstructor().qualifiedName()));
@@ -2238,9 +2255,9 @@ aspect FlatExpressions {
 		List args = new List();
 		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
-		InstClassDecl target = getName().myInstClassDecl().actualInstClass();
-		if (target.inOrIsOuter()) 
-			target = target.myInnerInstClassDecl();
+        InstFunctionDecl target = myInstFunctionDecl();
+        if (target.asInstClassDecl().inOrIsOuter()) 
+            target = target.asInstClassDecl().myInnerInstClassDecl();
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
 		Size[] sizes = new Size[myOutputs().size()];
 		FFunctionCall res = createFFunctionCall(name, args, sizes);

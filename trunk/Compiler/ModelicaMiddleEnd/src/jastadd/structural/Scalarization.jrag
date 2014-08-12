@@ -1703,7 +1703,7 @@ aspect Scalarization {
         to FStatement.sizeAssertsColl() for this;
     FFunctionCallLeft contributes sizeAsserts() when hasFExp()
         to FStatement.sizeAssertsColl() for getFExp().myFStatement();
-    FFunctionCall contributes myFFunctionDecl().sizeAsserts(this) 
+    FFunctionCall contributes myFCallable().sizeAsserts(this) 
         to FStatement.sizeAssertsColl() for myFStatement();
     FRecordConstructor contributes getRecord().myFRecordDecl().sizeAsserts(this)
         to FStatement.sizeAssertsColl() for myFStatement();
@@ -1725,6 +1725,10 @@ aspect Scalarization {
         }
         return a;
     }
+    
+    public interface FCallable {
+        public ArrayList<FAssert> sizeAsserts(FFunctionCall fc);
+    }
     syn ArrayList<FAssert> FFunctionDecl.sizeAsserts(FFunctionCall fc) {
         ArrayList<FAssert> a = new ArrayList<FAssert>();
         for (int i = 0; i < fc.getNumArg(); i++) {
@@ -1733,6 +1737,7 @@ aspect Scalarization {
         }
         return a;
     }
+    syn ArrayList<FAssert> FFunctionVariable.sizeAsserts(FFunctionCall fc) = new ArrayList<FAssert>();
     syn ArrayList<FAssert> FRecordDecl.sizeAsserts(FRecordConstructor frc) {
         ArrayList<FAssert> a = new ArrayList<FAssert>();
         for (FRecordComponentType comp : type().getComponents()) {

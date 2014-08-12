@@ -36,6 +36,10 @@ aspect FExpToCasADi {
 
     /******** MXFunction ********/
     
+    public interface FCallable {
+        public MXFunction toMXFunction();
+    }
+    
     /**
      * Creates A MXFunction for this FFunctionDecl. The MXFunction requires a single expression
      * for all output variables, and only functions for which this is possible are supported. 
@@ -47,6 +51,10 @@ aspect FExpToCasADi {
         f.setOption("name",new GenericType(name()));
         f.init();
         return f; 
+    }
+    
+    syn MXFunction FFunctionVariable.toMXFunction() {
+        throw new UnsupportedOperationException();
     }
     
     /**
@@ -304,7 +312,7 @@ aspect FExpToCasADi {
     }
     /** @return A MXVector with the outputs from this function call */
     eq FFunctionCall.toMXVector() {
-        MXFunction f = myFFunctionDecl().toMXFunction();
+        MXFunction f = myFCallable().toMXFunction();
         MXVector argVec = new MXVector();
         for (FExp exp : getArgs()) {
             MXVector expMXVec = exp.toMXVector();
@@ -322,7 +330,7 @@ aspect FExpToCasADi {
         ArrayList<FFunctionCallLeft> lefts = myLefts();
         int index = 0;
         ArrayList<FFunctionCallLeft> myLefts = myLefts();
-        ArrayList<FFunctionVariable> myOutVars = myFFunctionDecl().myOutputs();
+        ArrayList<FFunctionVariable> myOutVars = myFCallable().myOutputs();
         for (int i = 0; i < myLefts.size(); ++i) {
             if (myLefts.get(i).hasFExp()) {
                 for (int j = 0; j < myLefts.get(i).getFExp().toMXVector().size(); ++j) {

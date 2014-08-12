@@ -317,7 +317,7 @@ FExternalObjectType : FType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
 /**
  * Partial function call type
  */
-FPartialFunctionType : FType ::= <Name> Input:FRecordComponentType*;
+FPartialFunctionType : FType ::= <Name> Input:FRecordComponentType* Output:FRecordComponentType*;
 
 /**
  * An operator record type. 

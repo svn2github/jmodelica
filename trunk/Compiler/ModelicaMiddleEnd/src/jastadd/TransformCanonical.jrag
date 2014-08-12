@@ -4170,8 +4170,12 @@ aspect FunctionAndRecordCleanup {
     
     @Override
     public void FFunctionCall.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
-        myFFunctionDecl().markUsedFunctionsAndRecords(type);
+        myFCallable().markUsedFunctionsAndRecords(type);
         super.markUsedFunctionsAndRecords(type);
+    }
+    
+    public interface FCallable {
+        public void markUsedFunctionsAndRecords(FFunctionDecl.UseType type);
     }
     
     @Override
@@ -4186,10 +4190,18 @@ aspect FunctionAndRecordCleanup {
                 if (requiresDerivative() && !canDifferentiate()) {
                     error("Unable to determine derivative function for function '" + name() + "'");
                 } else if (hasFDerivativeFunction()) {
-                    getFDerivativeFunction().myFFunctionDecl().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
+                    getFDerivativeFunction().myFCallable().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
                 }
             }
             super.markUsedFunctionsAndRecords(functionUsed);
+        }
+    }
+    
+    @Override
+    public void FFunctionVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        if (type().isPartialFunction()) {
+            myFCallable().markUsedFunctionsAndRecords(type);
         }
     }
     

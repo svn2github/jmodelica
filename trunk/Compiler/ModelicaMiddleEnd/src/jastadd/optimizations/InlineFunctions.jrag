@@ -591,7 +591,7 @@ aspect FunctionInlining {
      * Check if an expression is a call to a function that we can inline.
      */
     syn boolean FExp.isInlinableFunctionCall(FunctionInliner fi) = false;
-    eq FFunctionCall.isInlinableFunctionCall(FunctionInliner fi) = myFFunctionDecl().isInlinable(fi);
+    eq FFunctionCall.isInlinableFunctionCall(FunctionInliner fi) = myFCallable().isInlinable(fi);
 
 
     /**
@@ -722,7 +722,7 @@ aspect FunctionInlining {
      * Inline this function call. 
      */
     public void FFunctionCall.inline(FunctionInliner fi) {
-        myFFunctionDecl().inline(fi, getArgs());
+        myFCallable().inline(fi, getArgs());
     }
 
     /**
@@ -800,6 +800,11 @@ aspect FunctionInlining {
             p.replaceChildWithList(this, repl);
     }
 
+    public interface FCallable {
+        public boolean isInlinable(FunctionInliner fi);
+        public boolean isTrivialInlinable(boolean last);
+        public void inline(FunctionInliner fi, List<FExp> args);
+    }
 
     // TODO: check for recursive functions
     /**
@@ -807,7 +812,8 @@ aspect FunctionInlining {
      */
     syn boolean FFunctionDecl.isInlinable(FunctionInliner fi) =
         fi.isInlinable(this);
-
+    
+    syn boolean FFunctionVariable.isInlinable(FunctionInliner fi) = false;
 
     private boolean FFunctionDecl.containsExtObjArrays(ArrayList<FFunctionVariable> variables) {
         for (FFunctionVariable var : variables)
@@ -852,6 +858,8 @@ aspect FunctionInlining {
         }
         return true;
     }
+    
+    syn boolean FFunctionVariable.isTrivialInlinable(boolean late) = false;
 
     /**
      * Helper method to find unsupported statements in isTrivialInlinable().
@@ -866,7 +874,7 @@ aspect FunctionInlining {
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
     syn boolean FAbstractFunctionCall.isOkTrivialInline(boolean last) = isIgnored();
-    eq FFunctionCall.isOkTrivialInline(boolean last)                  = myFFunctionDecl().isTrivialInlinable(last);
+    eq FFunctionCall.isOkTrivialInline(boolean last)                  = myFCallable().isTrivialInlinable(last);
 
     /**
      * Helper method to unsupported statements in isTrivialInlinable().
@@ -1054,6 +1062,10 @@ aspect FunctionInlining {
         
         tempLookupMap = null;
         duringInlining = false;
+    }
+    
+    public void FFunctionVariable.inline(FunctionInliner fi, List<FExp> args) {
+        throw new UnsupportedOperationException();
     }
 
     syn lazy FExp FFunctionDecl.getDummyExp() = new FNoExp();

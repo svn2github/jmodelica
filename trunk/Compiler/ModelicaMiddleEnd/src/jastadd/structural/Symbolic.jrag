@@ -859,7 +859,9 @@ aspect Derivatives {
 				}
 			}
 		}
-		FFunctionDecl myDecl = myFFunctionDecl();
+        FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
+        if (myDecl == null)
+            throw new FunctionDifferentiationException(this);
 		FFunctionDecl myDiffDecl = myDecl.diff(inFunction());
 		if (myDiffDecl == null)
 		    throw new FunctionDifferentiationException(this);
@@ -907,10 +909,15 @@ aspect SmoothOrder{
             annotation().forPath("smoothOrder").setValue(new FIntegerLitExp(order));
     }
     
-    syn int FFunctionDecl.smoothOrder()  = readSmoothOrderAnnotation(annotation());
-    syn int InstClassDecl.smoothOrder() = readSmoothOrderAnnotation(annotation());
-    syn int InstFunctionCall.smoothOrder() = myInstClassDecl().smoothOrder();
-    syn int FFunctionCall.smoothOrder() = myFFunctionDecl().smoothOrder();
+    public interface FCallable {
+        public int smoothOrder();
+    }
+    
+    syn int FFunctionDecl.smoothOrder()     = readSmoothOrderAnnotation(annotation());
+    syn int FFunctionVariable.smoothOrder() = myFCallable().smoothOrder();
+    syn int InstClassDecl.smoothOrder()     = readSmoothOrderAnnotation(annotation());
+    syn int InstFunctionCall.smoothOrder()  = myInstClassDecl().smoothOrder();
+    syn int FFunctionCall.smoothOrder()     = myFCallable().smoothOrder();
     
 }
 
@@ -920,7 +927,7 @@ aspect AlgorithmDifferentiation{
         if (smoothOrder() == 0 && !inFunction)
             return null;
         if (hasFDerivativeFunction()) 
-            return getFDerivativeFunction().myFFunctionDecl();
+            return getFDerivativeFunction().myFCallable().asFFunctionDecl();
         if (smoothOrder() == SMOOTH_ORDER_ANNOTATION_DEFAULT && !inFunction)
             return null;
         FQName name = getFQName().createDerPrefixedName(1);

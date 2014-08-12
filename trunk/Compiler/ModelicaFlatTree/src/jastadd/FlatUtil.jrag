@@ -441,14 +441,19 @@ aspect FlatNames {
     syn String FFunctionDecl.funcNameUnderscore(String suffix)       = getFQName().funcNameUnderscore(suffix) + functionIndex();
     syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix) + functionIndex();
 
+    public interface FCallable {
+        public int functionIndex();
+    }
+    
     /**
      * Get the index of this function.
      */
     inh int FFunctionDecl.functionIndex();
     eq FClass.getFFunctionDecl(int i).functionIndex() = i;
+    syn int FFunctionVariable.functionIndex() = -1;
 
-    syn int FFunctionCall.functionIndex()       = myFFunctionDecl().functionIndex();
-    syn int FDerivativeFunction.functionIndex() = myFFunctionDecl().functionIndex();
+    syn int FFunctionCall.functionIndex()       = myFCallable().functionIndex();
+    syn int FDerivativeFunction.functionIndex() = myFCallable().functionIndex();
 
     syn int FAbstractVariable.variableIndex() = findVariableIndex();
     eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
@@ -1180,6 +1185,21 @@ aspect FlatNames {
 
 
 aspect FlatFunctionUtils {
+    
+    FFunctionDecl     implements FCallable;
+    FFunctionVariable implements FCallable;
+    public interface FCallable {
+        public ArrayList<FFunctionVariable> myInputs();
+        public ArrayList<FFunctionVariable> myOutputs();
+        public FFunctionVariable myInput(int i);
+        public boolean hasOutputs();
+        public FFunctionVariable expOutput();
+        
+        public FFunctionDecl asFFunctionDecl();
+    }
+    
+    syn FFunctionDecl FFunctionDecl.asFFunctionDecl()     = this;
+    syn FFunctionDecl FFunctionVariable.asFFunctionDecl() = null;
      
      syn boolean FFunctionVariable.isInput()  = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
      syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
@@ -1253,10 +1273,13 @@ aspect FlatFunctionUtils {
          return l;
      }
      
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs() = myFCallable().myInputs();
+     
     /**
      * Returns the i:th FFunctionVariable that is  declared as "input".
      */
-    syn FFunctionVariable FFunctionDecl.myInput(int i) = myInputs().get(i);
+    syn FFunctionVariable FFunctionDecl.myInput(int i)     = myInputs().get(i);
+    syn FFunctionVariable FFunctionVariable.myInput(int i) = myInputs().get(i);
      
      /**
       * Returns a list of all FFunctionVariables not declared as "input" or "output".
@@ -1291,7 +1314,9 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = getName().myInstFunctionDecl().myCallInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs() = myFCallable().myOutputs();
+     
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = myInstFunctionDecl().myCallInputs();
      
      /**
       * Returns a list of all components in this class that would be inputs in a function call or 
@@ -1300,17 +1325,19 @@ aspect FlatFunctionUtils {
      syn ArrayList<InstComponentDecl> InstClassDecl.myCallInputs()        = isRecord() ? myModifiableComponents() : myInputs();
      syn ArrayList<InstComponentDecl> InstPartialFunction.myCallInputs()  = myInputs();
      
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstFunctionDecl().myOutputs();
-     syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
-     syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFFunctionDecl().myOutputs();
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = myInstFunctionDecl().myOutputs();
+     syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFCallable().myInputs();
+     syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFCallable().myOutputs();
      
-     syn boolean InstFunctionCall.hasOutputs() = !myOutputs().isEmpty();
-     syn boolean FFunctionDecl.hasOutputs()    = !myOutputs().isEmpty();
-     syn boolean FFunctionCall.hasOutputs()    = myFFunctionDecl().hasOutputs();
+     syn boolean InstFunctionCall.hasOutputs()  = !myOutputs().isEmpty();
+     syn boolean FFunctionDecl.hasOutputs()     = !myOutputs().isEmpty();
+     syn boolean FFunctionVariable.hasOutputs() = !myOutputs().isEmpty();
+     syn boolean FFunctionCall.hasOutputs()     = myFCallable().hasOutputs();
      
-     syn InstComponentDecl InstFunctionCall.expOutput() = myOutputs().get(0);
-     syn FFunctionVariable FFunctionDecl.expOutput()    = myOutputs().get(0);
-     syn FFunctionVariable FFunctionCall.expOutput()    = myFFunctionDecl().expOutput();
+     syn InstComponentDecl InstFunctionCall.expOutput()  = myOutputs().get(0);
+     syn FFunctionVariable FFunctionDecl.expOutput()     = myOutputs().get(0);
+     syn FFunctionVariable FFunctionVariable.expOutput() = myOutputs().get(0);
+     syn FFunctionVariable FFunctionCall.expOutput()     = myFCallable().expOutput();
     
      syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
      inh FunctionReturnDefinition FReturnStmt.returnDefinition();

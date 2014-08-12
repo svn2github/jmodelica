@@ -116,9 +116,12 @@ aspect InstTypeAnalysis {
     
     syn FType InstClassDecl.partialFunctionType() {
         List<FRecordComponentType> inputTypes = new List();
+        List<FRecordComponentType> outputTypes = new List();
         for (InstComponentDecl icd : myInputs())
             inputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
-        return new FPartialFunctionType(Size.SCALAR, qualifiedName(), inputTypes);
+        for (InstComponentDecl icd : myOutputs())
+            outputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
+        return new FPartialFunctionType(Size.SCALAR, qualifiedName(), inputTypes, outputTypes);
     }
 
     eq InstRecordConstructor.type() = getRecord().recordType();
