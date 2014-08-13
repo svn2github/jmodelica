@@ -1737,5 +1737,70 @@ end EvaluationTests.FuncInArrayExpEval1;
 ")})));
 end FuncInArrayExpEval1;
 
+model Functional1
+    partial function partFunc
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+      algorithm
+        y := 3;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        output Real y;
+      algorithm
+        y := pf();
+    end usePartFunc;
+    
+    constant Real y1 = usePartFunc(function fullFunc());
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional1",
+            description="Constant evaluation of functional input arguments",
+            variability_propagation=false,
+            flatModel="
+fclass EvaluationTests.Functional1
+ constant Real y1 = 3;
+end EvaluationTests.Functional1;
+")})));
+end Functional1;
+
+model Functional2
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    constant Real y1 = usePartFunc(function fullFunc(), 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional2",
+            description="Constant evaluation of functional input arguments",
+            variability_propagation=false,
+            flatModel="
+fclass EvaluationTests.Functional2
+ constant Real y1 = 9.0;
+end EvaluationTests.Functional2;
+")})));
+end Functional2;
 
 end EvaluationTests;

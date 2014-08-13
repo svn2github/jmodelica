@@ -719,15 +719,10 @@ aspect InstFunctionBinding {
     private boolean InstFunctionCall.bound = false;
     public boolean InstFunctionCall.generated = false;
     
-    inh FPartialFunctionType InstPartialFunctionCall.expectedPartialType();
-    eq Root.getChild().expectedPartialType() = null;
-    eq InstFunctionCall.getArg(int i).expectedPartialType() =
-        (FPartialFunctionType) myInstClassDecl().myInputs().get(i).type();
-    
     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputsToBind(InstFunctionDecl target) = target.myCallInputs();
     eq InstPartialFunctionCall.myInputsToBind(InstFunctionDecl target) {
         ArrayList<InstComponentDecl> allInputs = super.myInputsToBind(target);
-        FPartialFunctionType t = expectedPartialType();
+        FPartialFunctionType t = (FPartialFunctionType) myCorrespondingInput().type();
         Set<String> noBind = new HashSet<String>();
         for (FRecordComponentType c : t.getInputs()) {
             noBind.add(c.getName());

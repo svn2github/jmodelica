@@ -517,7 +517,13 @@ aspect ConstantEvaluation {
 		public Iterator<CValue> iterator() {
 			return new SingleIterator<CValue>(this);
 		}
-
+        
+        /**
+         * Evaluate this as a partial function. Throws exception if not a partial function.
+         */
+        public void evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
+            throw new ConstantEvaluationException(this, "use this as a partial function: ");
+        }
 	}
 	
 	/**
@@ -1393,6 +1399,52 @@ aspect ConstantEvaluation {
             }
             buf.append('}');
             return buf.toString();
+        }
+    }
+    
+    public class CValuePartialFunction extends CValue {
+        protected Map<CommonVariableDecl,CValue> values;
+        protected CommonCallable func;
+        
+        public CValuePartialFunction(CommonCallable func, Map<CommonVariableDecl,CValue> values) {
+            this.values = values;
+            this.func   = func;
+        }
+        
+        @Override
+        public String toString() {
+            StringBuilder buf = new StringBuilder();
+            buf.append(func.name());
+            buf.append('(');
+            String sep = "";
+            for (CommonVariableDecl cvd : values.keySet()) {
+                buf.append(sep);
+                buf.append(cvd.name());
+                buf.append("=");
+                buf.append(values.get(cvd));
+                sep = ", ";
+            }
+            buf.append(')');
+            return buf.toString();
+        }
+        
+        @Override
+        public void evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
+            Iterator<? extends CommonVariableDecl> concreteIterator;
+            concreteIterator = func.myInputs().iterator();
+            for (CommonVariableDecl partialInput : partial.myInputs()) {
+                CommonVariableDecl concreteInput = concreteIterator.next();
+                values.put(concreteInput, values.get(partialInput));
+                values.remove(partialInput);
+            }
+            values.putAll(this.values);
+            func.evaluate(values);
+            concreteIterator = func.myOutputs().iterator();
+            for (CommonVariableDecl partialOutput : partial.myOutputs()) {
+                CommonVariableDecl concreteOutput = concreteIterator.next();
+                values.put(partialOutput, values.get(concreteOutput));
+                values.remove(concreteOutput);
+            }
         }
     }
     
@@ -2606,25 +2658,32 @@ aspect ConstantEvaluation {
         public boolean isInput();
         public boolean isOutput();
         public boolean hasBindingExp();
+        
+        public FAbstractVariable asFAbstractVariable();
     }
     
-    public interface FCallable {
-        public void evaluate(Map<CommonVariableDecl, CValue> values);
-    }
-
     FAbstractVariable implements CommonVariableDecl;
     InstComponentDecl implements CommonVariableDecl;
+    
+    syn FAbstractVariable FAbstractVariable.asFAbstractVariable() = this;
+    syn FAbstractVariable InstComponentDecl.asFAbstractVariable() = null;
+    
 
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
-  eq FFunctionCall.myFuncInputs()    = myInputs();
-  eq InstFunctionCall.myFuncInputs() = myInputs();
-  eq InstPartialFunctionCall.myFuncInputs() = new ArrayList<CommonVariableDecl>(0);
+    eq FFunctionCall.myFuncInputs()           = myInputs();
+    eq InstFunctionCall.myFuncInputs()        = myInputs();
+    eq InstPartialFunctionCall.myFuncInputs() = myInputsToBind(myInstFunctionDecl());
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncOutputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
-  eq FFunctionCall.myFuncOutputs()    = myOutputs();
-  eq InstFunctionCall.myFuncOutputs() = myOutputs();
+    eq FFunctionCall.myFuncOutputs()           = myOutputs();
+    eq InstFunctionCall.myFuncOutputs()        = myOutputs();
+    eq InstPartialFunctionCall.myFuncOutputs() {
+        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>(); 
+        res.add(myCorrespondingInput());
+        return res;
+    }
   
   
   syn FExp FAbstractFunctionCall.argument(int i) {
@@ -2664,10 +2723,6 @@ aspect ConstantEvaluation {
 	  }
 	  return res;
   }
-  
-    public CValue[] InstPartialFunctionCall.evaluate() {
-        throw new ConstantEvaluationException();
-    }
     
     public void FAbstractFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
         evaluateCell(values);
@@ -2682,7 +2737,16 @@ aspect ConstantEvaluation {
     }
     
     public void InstFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
-        getName().myInstClassDecl().evaluate(values);
+        myInstFunctionDecl().evaluate(values);
+    }
+    
+    public void InstPartialFunctionCall.evaluateCell(Map<CommonVariableDecl, CValue> values) {
+        Map<CommonVariableDecl, CValue> resValues = new HashMap<CommonVariableDecl, CValue>();
+        for (CommonVariableDecl cvd : myFuncInputs()) {
+            resValues.put(cvd, values.get(cvd));
+        }
+        CValue res = new CValuePartialFunction(myInstFunctionDecl(), resValues);
+        values.put(myFuncOutputs().get(0), res);
     }
     
     public void FVectorFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
@@ -2872,7 +2936,10 @@ aspect ConstantEvaluation {
         }
     }
     private Map<CommonVariableDecl, CValue> InstBaseClassDecl.currentEvaluationValues = null;
-
+    
+    public void InstPartialFunction.evaluate(Map<CommonVariableDecl, CValue> values) {
+        evaluationValue.evaluatePartialFunction(myInstClass(), values);
+    }
     /**
      * Save current function evaluation value to map.
      */

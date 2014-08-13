@@ -714,7 +714,7 @@ aspect CADCodeGen {
 			sep = ", ";
 		}
 		for (FExp arg : getArgs()) {
-			if (arg.myCorrespondingInput().shouldBeDifferentiated()) {
+            if (arg.myCorrespondingInput().asFAbstractVariable().shouldBeDifferentiated()) {
 				str.print(sep);
 				arg.genArgument_der_CAD(str);
 				sep = ", ";

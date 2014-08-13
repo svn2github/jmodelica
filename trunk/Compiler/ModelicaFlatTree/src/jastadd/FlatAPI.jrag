@@ -1999,8 +1999,9 @@ aspect FVariableUses {
      * Returnes the function input that this expressions corresponds to.
      * NOTICE, this method will throw exception if this exp does not reside in a function call.
      */
-    inh FFunctionVariable FExp.myCorrespondingInput();
-    eq FFunctionCall.getArg(int i).myCorrespondingInput() = myFCallable().myInput(i);
+    inh CommonVariableDecl FExp.myCorrespondingInput();
+    eq FFunctionCall.getArg(int i).myCorrespondingInput()    = myFCallable().myInput(i);
+    eq InstFunctionCall.getArg(int i).myCorrespondingInput() = myInstFunctionDecl().myCallInputs().get(i);
     eq FClass.getChild().myCorrespondingInput() {
         throw new UnsupportedOperationException();
     }

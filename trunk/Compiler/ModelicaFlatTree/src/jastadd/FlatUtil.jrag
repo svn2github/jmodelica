@@ -1186,8 +1186,24 @@ aspect FlatNames {
 
 aspect FlatFunctionUtils {
     
-    FFunctionDecl     implements FCallable;
-    FFunctionVariable implements FCallable;
+    /**
+     * Interface for a callable (function declaration or partial 
+     * function component declaration) in both flat and instance tree.
+     */
+    public interface CommonCallable {
+        public String name();
+        public void evaluate(Map<CommonVariableDecl, CValue> values);
+        public ArrayList<? extends CommonVariableDecl> myInputs();
+        public ArrayList<? extends CommonVariableDecl> myOutputs();
+    }
+    
+    public interface FCallable        extends CommonCallable {}
+    public interface InstFunctionDecl extends CommonCallable {}
+    
+    /**
+     * Interface for a flat callable (function declaration or partial 
+     * function component declaration) in flat tree.
+     */
     public interface FCallable {
         public ArrayList<FFunctionVariable> myInputs();
         public ArrayList<FFunctionVariable> myOutputs();
@@ -1197,6 +1213,9 @@ aspect FlatFunctionUtils {
         
         public FFunctionDecl asFFunctionDecl();
     }
+    
+    FFunctionDecl     implements FCallable;
+    FFunctionVariable implements FCallable;
     
     syn FFunctionDecl FFunctionDecl.asFFunctionDecl()     = this;
     syn FFunctionDecl FFunctionVariable.asFFunctionDecl() = null;
@@ -1323,7 +1342,7 @@ aspect FlatFunctionUtils {
       * record constructor. Treats all non-records as functions.
       */
      syn ArrayList<InstComponentDecl> InstClassDecl.myCallInputs()        = isRecord() ? myModifiableComponents() : myInputs();
-     syn ArrayList<InstComponentDecl> InstPartialFunction.myCallInputs()  = myInputs();
+     syn ArrayList<InstComponentDecl> InstPartialFunction.myCallInputs()  = myInstClass().myInputs();
      
      syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = myInstFunctionDecl().myOutputs();
      syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFCallable().myInputs();
@@ -1586,6 +1605,7 @@ aspect FlatFunctionUtils {
      eq FFunctionCall.getChild().myFunctionCall() = this;
      eq FFunctionCallEquation.getLeft().myFunctionCall() = getCall();
      eq FFunctionCallStmt.getLeft().myFunctionCall() = getCall();
+     eq InstFunctionCall.getChild().myFunctionCall() = this;
      
      /**
       * Get the name this expression should use for temporary variable.
