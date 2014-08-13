@@ -731,18 +731,14 @@ aspect InstanceErrorCheck {
                 }
             }
             
-            // Mark parameters with Evaluate=true or final as structural
-            if (isParameter() && !isCircular()) {
-                if (annotation().forPath("Evaluate").bool()) {
-                    if (valueIsFixed())
-                        markAsStructuralParameter(checkType);
-                    else
-                        warning("Evaluate annotation is ignored when fixed equals false");
-                } else if ((variability().structParameterVariability() || (hasFinalBindingExp() && !inRecord())) && 
-                        valueIsFixed() && hasBindingFExp() && getBindingFExp().canCeval()) {
+            // Mark parameters with Evaluate=true as structural
+            if (isParameter() && annotation().forPath("Evaluate").bool()) {
+                if (canEvaluateAsStructural())
                     markAsStructuralParameter(checkType);
-                }
-                // TODO: If final or depending on structural but didn't get marked, add that info to be propagated to runtime - #3852
+                else
+                    warning("Evaluate annotation is ignored when fixed equals false");
+            } else if (variability().structParameterVariability() && hasBindingFExp() && getBindingFExp().canCeval()) {
+                markAsStructuralParameter(checkType);
             }
             
             // Check array indices
@@ -754,25 +750,23 @@ aspect InstanceErrorCheck {
         }
     }
 
-    syn boolean InstComponentDecl.valueIsFixed() = true;
-    eq InstAssignable.valueIsFixed() {
+    syn boolean InstComponentDecl.canEvaluateAsStructural() = true;
+    eq InstAssignable.canEvaluateAsStructural() {
         // TODO: hierarchical check for records?
         if (isPrimitive() && !fixedAttributeCValue().reduceBooleanAnd())
             return false;
-        if (hasBindingFExp() && !getBindingFExp().valueIsFixed())
+        if (hasBindingFExp() && !getBindingFExp().canEvaluateAsStructural())
             return false;
         return true;
     }
-    syn boolean FExp.valueIsFixed() {
+    syn boolean FExp.canEvaluateAsStructural() {
         for (FExp n : childFExps())
-            if (!n.valueIsFixed())
+            if (!n.canEvaluateAsStructural())
                 return false;
         return true;
     }
-    eq FInstAccessExp.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
-
-    syn boolean InstAssignable.hasFinalBindingExp() = hasInstValueMod() && myInstValueMod().isFinal();
-
+    eq FInstAccessExp.canEvaluateAsStructural() = getInstAccess().myInstComponentDecl().canEvaluateAsStructural();
+	
 	public void InstAssignable.checkAttributes(ErrorCheckType checkType) {}
 	
 	public void InstPrimitive.checkAttributes(ErrorCheckType checkType) {
