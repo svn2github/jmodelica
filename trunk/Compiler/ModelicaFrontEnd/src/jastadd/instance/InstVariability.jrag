@@ -55,7 +55,7 @@ aspect InstVariability {
             if (circularVariability)
                 return v;
             circularVariability = true;
-            if (annotation().forPath("Evaluate").bool() && canEvaluateAsStructural()) {
+            if (annotation().forPath("Evaluate").bool() && valueIsFixed()) {
                 v = fEvalParameter();
             } else if (isStructuralParam) {
                 v = fStructParameter();
