@@ -1911,8 +1911,7 @@ model Functional1
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Functional1",
-            description="Constant evaluation of functional input arguments",
-            variability_propagation=false,
+            description="Constant evaluation of functional input arguments, zero inputs",
             flatModel="
 fclass EvaluationTests.Functional1
  constant Real y1 = 3;
@@ -1945,13 +1944,174 @@ model Functional2
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Functional2",
-            description="Constant evaluation of functional input arguments",
-            variability_propagation=false,
+            description="Constant evaluation of functional input arguments, zero inputs, one partial input",
             flatModel="
 fclass EvaluationTests.Functional2
  constant Real y1 = 9.0;
 end EvaluationTests.Functional2;
 ")})));
 end Functional2;
+
+model Functional3
+    partial function partFunc
+        input Real x1;
+        input Integer x2;
+        output Real y1;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x3;
+        input Integer x4;
+        output Real y2;
+      algorithm
+        y1 := x1*x2 + x3*x4;
+        y2 := y1 + 1;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Integer x;
+        output Real y;
+      algorithm
+        y := pf(x,x+1);
+    end usePartFunc;
+    
+    constant Real y1 = usePartFunc(function fullFunc(x3=1,x4=2), 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional3",
+            description="Constant evaluation of functional input arguments, many inputs",
+            flatModel="
+fclass EvaluationTests.Functional3
+ constant Real y1 = 14.0;
+end EvaluationTests.Functional3;
+")})));
+end Functional3;
+
+model Functional4
+    partial function partFunc
+        input Real x1 = 1;
+        input Integer x2 = 2;
+        output Real y1 = x1 * x2;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x3 = 10;
+        input Integer x4 = 11;
+      algorithm
+        y1 := y1 + x3*x4;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Integer x;
+        output Real y;
+      algorithm
+        y := pf(x) + pf(x1=x) + pf(x2=x);
+    end usePartFunc;
+    
+    constant Real y1 = usePartFunc(function fullFunc(x3=100), 3);
+    constant Real y2 = usePartFunc(function fullFunc(x4=100), 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional4",
+            description="Constant evaluation of functional input arguments, binding expressions",
+            flatModel="
+fclass EvaluationTests.Functional4
+ constant Real y1 = 3315.0;
+ constant Real y2 = 3015.0;
+end EvaluationTests.Functional4;
+")})));
+end Functional4;
+
+model Functional5
+    partial function partFunc1
+        input Real x1;
+        output Real y1;
+    end partFunc1;
+    
+    partial function partFunc2
+        extends partFunc1;
+        input Real x2;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc2;
+        input Real x3;
+      algorithm
+        y1 := x1*x2*x3;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc1 pf1;
+        input partFunc2 pf2;
+        input Integer x;
+        output Real y;
+        Real t1,t2;
+      algorithm
+        y := pf1(x) + pf2(x,2);
+    end usePartFunc;
+    
+    constant Real y1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional5",
+            description="Constant evaluation of functional input arguments, multiple extend levels",
+            flatModel="
+fclass EvaluationTests.Functional5
+ constant Real y1 = 18.0;
+end EvaluationTests.Functional5;
+")})));
+end Functional5;
+
+model Functional6
+    partial function partFunc1
+        input Real x1;
+        output Real y1;
+    end partFunc1;
+    
+    partial function partFunc2
+        extends partFunc1;
+        input Real x2;
+        output Real y2;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc2;
+        input Real x3;
+      algorithm
+        y1 := x1*x2*x3;
+        y2 := 1;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc1 pf1;
+        input partFunc2 pf2;
+        input Integer x;
+        output Real y;
+      protected
+        Real t1,t2;
+      algorithm
+        (t1,t2) := pf2(x,2);
+        y := pf1(x) + t1 + t2;
+    end usePartFunc;
+    
+    constant Real y1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional6",
+            description="Constant evaluation of functional input arguments, multiple outputs",
+            flatModel="
+fclass EvaluationTests.Functional6
+ constant Real y1 = 19.0;
+end EvaluationTests.Functional6;
+")})));
+end Functional6;
 
 end EvaluationTests;
