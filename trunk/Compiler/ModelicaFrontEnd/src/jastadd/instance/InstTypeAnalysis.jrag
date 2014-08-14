@@ -114,7 +114,7 @@ aspect InstTypeAnalysis {
 
     eq InstPartialFunction.type() = myInstClass().partialFunctionType().sizedType(size());
     
-    syn FType InstClassDecl.partialFunctionType() {
+    syn FPartialFunctionType InstClassDecl.partialFunctionType() {
         List<FRecordComponentType> inputTypes = new List();
         List<FRecordComponentType> outputTypes = new List();
         for (InstComponentDecl icd : myInputs())
@@ -135,7 +135,25 @@ aspect InstTypeAnalysis {
     syn lazy FType InstComponentDecl.type() = fUnknownType();
 
     eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
-    eq InstPartialFunctionCall.type() = getName().myInstClassDecl().partialFunctionType();
+    eq InstPartialFunctionCall.type() = partialFunctionType();
+    
+    syn FPartialFunctionType InstPartialFunctionCall.partialFunctionType() {
+         FPartialFunctionType partialType = getName().myInstClassDecl().partialFunctionType();
+         Set<String> s = new HashSet(namedArgs());
+         List<FRecordComponentType> n = new List<FRecordComponentType>();
+         for (FRecordComponentType frc : partialType.getInputs())
+             if (!s.contains(frc.getName()))
+                 n.add(frc);
+         partialType.setInputList(n);
+         return partialType;
+    }
+    
+    syn ArrayList<String> InstPartialFunctionCall.namedArgs() {
+        ArrayList<String> res = new ArrayList<String>();
+        for (InstComponentDecl icd : myInputsToBind(myInstFunctionDecl()))
+            res.add(icd.name());
+        return res;
+    }
     
     syn boolean InstNode.isReal()            = false;
     syn boolean InstNode.isInteger()         = false;
@@ -168,12 +186,6 @@ aspect InstTypeAnalysis {
         myInstClass().finalClass().primitiveName().equals("BooleanType");
     eq InstBuiltIn.isString() = 
         myInstClass().finalClass().primitiveName().equals("StringType");
-    
-    syn boolean InstComponentDecl.typeExtendsCheck(FExp source) = true;
-    syn boolean InstPartialFunction.typeExtendsCheck(FExp exp)  = exp.typeExtendsCheck(this);
-    
-    syn boolean FExp.typeExtendsCheck(InstPartialFunction decl)           = true;
-    eq InstPartialFunctionCall.typeExtendsCheck(InstPartialFunction decl) = myInstClassDecl().extendsClass(decl.myInstClass());
 }
 
 

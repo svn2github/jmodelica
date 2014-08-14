@@ -1755,7 +1755,8 @@ model Functional1
         y := pf();
     end usePartFunc;
     
-    constant Real y1 = usePartFunc(function fullFunc());
+    constant Real c1 = usePartFunc(function fullFunc());
+    Real y1 = usePartFunc(function fullFunc());
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1763,6 +1764,7 @@ model Functional1
             description="Constant evaluation of functional input arguments, zero inputs",
             flatModel="
 fclass EvaluationTests.Functional1
+ constant Real c1 = 3;
  constant Real y1 = 3;
 end EvaluationTests.Functional1;
 ")})));
@@ -1788,7 +1790,8 @@ model Functional2
         y := pf(x);
     end usePartFunc;
     
-    constant Real y1 = usePartFunc(function fullFunc(), 3);
+    constant Real c1 = usePartFunc(function fullFunc(), 3);
+    Real y1 = usePartFunc(function fullFunc(), 3);
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1796,6 +1799,7 @@ model Functional2
             description="Constant evaluation of functional input arguments, zero inputs, one partial input",
             flatModel="
 fclass EvaluationTests.Functional2
+ constant Real c1 = 9.0;
  constant Real y1 = 9.0;
 end EvaluationTests.Functional2;
 ")})));
@@ -1826,7 +1830,8 @@ model Functional3
         y := pf(x,x+1);
     end usePartFunc;
     
-    constant Real y1 = usePartFunc(function fullFunc(x3=1,x4=2), 3);
+    constant Real c1 = usePartFunc(function fullFunc(x3=1,x4=2), 3);
+    Real y1 = usePartFunc(function fullFunc(x3=1,x4=2), 3);
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1834,6 +1839,7 @@ model Functional3
             description="Constant evaluation of functional input arguments, many inputs",
             flatModel="
 fclass EvaluationTests.Functional3
+ constant Real c1 = 14.0;
  constant Real y1 = 14.0;
 end EvaluationTests.Functional3;
 ")})));
@@ -1862,8 +1868,10 @@ model Functional4
         y := pf(x) + pf(x1=x) + pf(x2=x);
     end usePartFunc;
     
-    constant Real y1 = usePartFunc(function fullFunc(x3=100), 3);
-    constant Real y2 = usePartFunc(function fullFunc(x4=100), 3);
+    constant Real c1 = usePartFunc(function fullFunc(x3=100), 3);
+    constant Real c2 = usePartFunc(function fullFunc(x4=100), 3);
+    Real y1 = usePartFunc(function fullFunc(x3=100), 3);
+    Real y2 = usePartFunc(function fullFunc(x4=100), 3);
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1871,6 +1879,8 @@ model Functional4
             description="Constant evaluation of functional input arguments, binding expressions",
             flatModel="
 fclass EvaluationTests.Functional4
+ constant Real c1 = 3315.0;
+ constant Real c2 = 3015.0;
  constant Real y1 = 3315.0;
  constant Real y2 = 3015.0;
 end EvaluationTests.Functional4;
@@ -1905,7 +1915,8 @@ model Functional5
         y := pf1(x) + pf2(x,2);
     end usePartFunc;
     
-    constant Real y1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
+    constant Real c1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
+    Real y1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1913,6 +1924,7 @@ model Functional5
             description="Constant evaluation of functional input arguments, multiple extend levels",
             flatModel="
 fclass EvaluationTests.Functional5
+ constant Real c1 = 18.0;
  constant Real y1 = 18.0;
 end EvaluationTests.Functional5;
 ")})));
@@ -1950,7 +1962,8 @@ model Functional6
         y := pf1(x) + t1 + t2;
     end usePartFunc;
     
-    constant Real y1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
+    constant Real c1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
+    Real y1 = usePartFunc(function fullFunc(x2=2,x3=1), function fullFunc(x3=2), 3);
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -1958,6 +1971,7 @@ model Functional6
             description="Constant evaluation of functional input arguments, multiple outputs",
             flatModel="
 fclass EvaluationTests.Functional6
+ constant Real c1 = 19.0;
  constant Real y1 = 19.0;
 end EvaluationTests.Functional6;
 ")})));

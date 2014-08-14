@@ -1200,6 +1200,10 @@ aspect FlatFunctionUtils {
     public interface FCallable        extends CommonCallable {}
     public interface InstFunctionDecl extends CommonCallable {}
     
+    syn CommonCallable FAbstractFunctionCall.myCommonCallable() = null;
+    eq FFunctionCall.myCommonCallable()    = myFCallable();
+    eq InstFunctionCall.myCommonCallable() = myInstFunctionDecl();
+    
     /**
      * Interface for a flat callable (function declaration or partial 
      * function component declaration) in flat tree.

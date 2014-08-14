@@ -1222,6 +1222,11 @@ abstract FAbstractFunctionCall : FAbstractArrayExp;
 FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
  
 /**
+ * Partial function call expression in flat tree.
+ */
+FPartialFunctionCall : FFunctionCall ::= ArgName:FIdUse*;
+ 
+/**
  * Generic vectorized function call expression.
  */
 FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>;

@@ -722,14 +722,29 @@ aspect InstFunctionBinding {
     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputsToBind(InstFunctionDecl target) = target.myCallInputs();
     eq InstPartialFunctionCall.myInputsToBind(InstFunctionDecl target) {
         ArrayList<InstComponentDecl> allInputs = super.myInputsToBind(target);
-        FPartialFunctionType t = (FPartialFunctionType) myCorrespondingInput().type();
-        Set<String> noBind = new HashSet<String>();
-        for (FRecordComponentType c : t.getInputs()) {
-            noBind.add(c.getName());
+        FType type = myCorrespondingInput().type();
+        Set<String> filter = new HashSet<String>();
+        boolean error = !type.isPartialFunction();
+        if (error) {
+            /* This call is not matched to a partial function. 
+             * Error will be given by normal typecheck, bind all arguments for now. */
+            
+            // Filter will contain arguments that should be bound (all)
+            for (InstFunctionArgument ifa : getArgs()) {
+                if (ifa instanceof InstNamedArgument) {
+                    filter.add(((InstNamedArgument) ifa).getName().name());
+                }
+            }
+        } else {
+            // Filter will contain arguments that should not be bound
+            FPartialFunctionType t = (FPartialFunctionType) type;
+            for (FRecordComponentType c : t.getInputs()) {
+                filter.add(c.getName());
+            }
         }
         ArrayList<InstComponentDecl> res = new ArrayList<InstComponentDecl>();
         for (InstComponentDecl icd : allInputs) {
-            if (!noBind.contains(icd.qualifiedName())) {
+            if (!(error ^ filter.contains(icd.qualifiedName()))) {
                 res.add(icd);
             }
         }

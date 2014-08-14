@@ -592,6 +592,7 @@ aspect FunctionInlining {
      */
     syn boolean FExp.isInlinableFunctionCall(FunctionInliner fi) = false;
     eq FFunctionCall.isInlinableFunctionCall(FunctionInliner fi) = myFCallable().isInlinable(fi);
+    eq FPartialFunctionCall.isInlinableFunctionCall(FunctionInliner fi) = false;
 
 
     /**
@@ -821,9 +822,17 @@ aspect FunctionInlining {
                 return true;
         return false;
     }
+    
+    private boolean FFunctionDecl.containsPartialFunction() {
+        for (FFunctionVariable var : getFFunctionVariables())
+            if (var.getType().isPartialFunction())
+                return true;
+        return false;
+    }
 
     private boolean FFunctionDecl.hasInlinableIO() {
-        return !containsExtObjArrays(myInputs()) && !containsExtObjArrays(myOutputs());
+        return !containsExtObjArrays(myInputs()) && !containsExtObjArrays(myOutputs())
+                && !containsPartialFunction();
     }
 
     /**

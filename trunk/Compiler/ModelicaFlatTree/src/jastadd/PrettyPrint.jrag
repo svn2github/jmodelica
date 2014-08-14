@@ -936,7 +936,25 @@ aspect PrettyPrint {
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();
 	
+    eq FPartialFunctionType.toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("((");
+        sb.append(getOutputs().toString());
+        sb.append(") = ");
+        sb.append(getName());
+        sb.append("(");
+        sb.append(getInputs().toString());
+        sb.append("))");
+        return sb.toString();
+    }
+	
 	syn String FRecordComponentType.toString() = getFType() + " " + getName();
+    
+    public void FRecordComponentType.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getFType());
+        str.print(" ");
+        str.print(getName());
+    }
 
 }
 
@@ -1732,7 +1750,12 @@ aspect FlatPrettyPrint {
 		getArgs().prettyPrintWithSep(p, str, "", ", ");
 		str.print(")");
 	}
-
+    
+    protected void FPartialFunctionCall.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("function ");
+        super.prettyPrintExp(p, str, indent);
+    }
+    
 	protected void InstFunctionCall.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");

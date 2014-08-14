@@ -2046,45 +2046,6 @@ end TypeTests.ModOnConstantExtends;
 end ModOnConstantExtends;
 
 model Functional1
-    partial function partFunc
-        input Real x;
-        output Real y;
-    end partFunc;
-    
-    partial function partFunc2
-        input Real x;
-        output Real y;
-    end partFunc2;
-    
-    function fullFunc
-        extends partFunc;
-      algorithm
-        y := x*x;
-    end fullFunc;
-    
-    function usePartFunc
-        input partFunc2 pf;
-        input Real x;
-        output Real y;
-      algorithm
-        y := pf(x);
-    end usePartFunc;
-    
-    Real y = usePartFunc(function fullFunc(), time);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="Functional1",
-            description="Check type error for functional input argument",
-            errorMessage="
-1 errors found:
-Error: in file '...':
-Semantic error at line 2073, column 26:
-  Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
-    type of 'fullFunc()' is TypeTests.Functional1.fullFunc
-")})));
-end Functional1;
-
-model Functional2
     partial function partFunc1
         input Real x;
         output Real y;
@@ -2121,7 +2082,7 @@ model Functional2
     Real[2] y2 = usePartFunc2({{function fullFunc(), function fullFunc()}}, time);
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="Functional2",
+            name="Functional1",
             description="Check type error for functional input argument",
             errorMessage="
 2 errors found:
@@ -2132,6 +2093,196 @@ Error: in file '...':
 Semantic error at line 554, column 27:
   Array size mismatch in declaration of y2, size of declaration is [2] and size of binding expression is [1, 2]
 ")})));
+end Functional1;
+
+model Functional2
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(x=time), time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Functional2",
+            description="Check that duplicate component declaration is handled correctly",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 673, column 26:
+  Creating functional input argument fullFunc(): no input matching named argument x found
+")})));
 end Functional2;
+
+model Functional3
+    partial function partFunc1
+        input Real x;
+        output Real y;
+    end partFunc1;
+    
+    partial function partFunc2
+        input Real x;
+        output Real y;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc1;
+        extends partFunc2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc1 pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(x=time), time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Functional3",
+            description="Check that duplicate component declaration is handled correctly",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 594, column 44:
+  Creating functional input argument fullFunc(): no input matching named argument x found
+")})));
+end Functional3;
+
+model Functional4
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(time, function fullFunc());
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional4",
+            description="Check type error",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Compliance error at line 775, column 24:
+  Using functional input arguments is currently not supported
+Error: in file '...':
+Semantic error at line 783, column 27:
+  Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
+    type of 'time' is Real
+Error: in file '...':
+Semantic error at line 783, column 33:
+  Calling function usePartFunc(): types of positional argument 2 and input x are not compatible
+    type of 'fullFunc()' is ((Real y) = TypeTests.Functional4.fullFunc(Real x))
+")})));
+end Functional4;
+
+model Functional5
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        input Real a;
+        output Real b;
+      algorithm
+        b := a*a;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc(), time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional5",
+            description="Check type error",
+            errorMessage="
+3 errors found:
+Error: in file '...':
+Compliance error at line 775, column 24:
+  Using functional input arguments is currently not supported
+Error: in file '...':
+Semantic error at line 783, column 27:
+  Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
+    type of 'fullFunc()' is ((Real b) = TypeTests.Functional5.fullFunc())
+Error: in file '...':
+Semantic error at line 2234, column 27:
+  Creating functional input argument fullFunc(): missing argument for required input a
+")})));
+end Functional5;
+
+model Functional6
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        input Real a;
+        output Real b;
+      algorithm
+        b := a*a;
+    end fullFunc;
+    
+    function usePartFunc
+        output Real y;
+      algorithm
+        y := 3;
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc());
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional6",
+            description="Check type error",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 2274, column 27:
+  Calling function usePartFunc(): too many positional arguments
+")})));
+end Functional6;
 
 end TypeTests;

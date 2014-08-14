@@ -2272,6 +2272,13 @@ aspect FlatExpressions {
 	public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
 		return new FFunctionCall(name, args, sizes);
 	}
+    
+    public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+        List<FIdUse> argNames = new List<FIdUse>();
+        for (FRecordComponentType comp : partialFunctionType().getInputs())
+            argNames.add(new FIdUse(comp.getName()));
+        return new FPartialFunctionCall(name, args, sizes, argNames);
+    }
 
 	public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
 		boolean[] vectorFlags = new boolean[getNumArg()];

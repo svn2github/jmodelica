@@ -2988,9 +2988,17 @@ aspect Scalarization {
 		List<FExp> args = new List<FExp>();
 		for (FExp arg : getArgs())
 			args.add(arg.scalarize(indexMap));
-		return new FFunctionCall(getName().fullCopy(), args, getSizes()); 
+        return createScalarized(getName().fullCopy(), args, getSizes());
 	}
-	
+    
+    protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, Size[] sizes) {
+        return new FFunctionCall(name, args, sizes); 
+    }
+    
+    protected FFunctionCall FPartialFunctionCall.createScalarized(FIdUse name, List<FExp> args, Size[] sizes) {
+        return new FPartialFunctionCall(name, args, sizes, getArgNames().fullCopy()); 
+    }
+    
 	public FAssert FAssert.scalarizeExp(Map<String,FExp> indexMap) {
 		Opt level = hasLevel() ? new Opt(getLevel().scalarize(indexMap)) : new Opt();
 		return new FAssert(getTest().scalarize(indexMap), getMsg().scalarize(indexMap), level);

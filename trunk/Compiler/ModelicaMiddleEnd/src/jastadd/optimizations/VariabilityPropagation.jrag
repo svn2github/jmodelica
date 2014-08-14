@@ -409,6 +409,11 @@ aspect ConstantFolding {
     public void FAlgorithm.enableConstantFolding() {
        
     }
+    
+    public void FPartialFunctionCall.enableConstantFolding() {
+        for (ASTNode n : this)
+            n.enableConstantFolding();
+    }
 	
 	public void FIfExp.enableConstantFolding() {
 		super.enableConstantFolding();
