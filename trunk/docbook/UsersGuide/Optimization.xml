@@ -4160,7 +4160,8 @@ init_sim_model.set('Tc_ref', Tc_0_B)
             <para>Having initialized the model parameters, we can simulate the
             model using the <literal>simulate</literal> function.</para>
 
-            <programlisting language="python">init_res = init_sim_model.simulate(start_time=0., final_time=150.)
+            <programlisting language="python"># Simulate with constant input Tc
+init_res = init_sim_model.simulate(start_time=0., final_time=150.)
 </programlisting>
 
             <para>The method <literal>simulate</literal> first computes
@@ -4251,7 +4252,8 @@ op.set('cstr.T_init', float(T_0_A))
             <programlisting language="python"># Set options
 opt_opts = op.optimize_options()
 opt_opts['n_e'] = 19 # Number of elements
-opt_opts['init_traj'] = init_res.result_data
+opt_opts['init_traj'] = init_res
+opt_opts['nominal_traj'] = init_res
 opt_opts['IPOPT_options']['tol'] = 1e-10
 
 # Solve the optimal control problem
@@ -4310,7 +4312,6 @@ plt.grid()
 plt.ylabel('Cooling temperature')
 plt.xlabel('time')
 plt.show()
-
 </programlisting>
 
             <para>You should now see the plot shown in <xref
