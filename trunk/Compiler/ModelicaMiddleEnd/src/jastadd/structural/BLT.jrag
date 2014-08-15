@@ -2411,18 +2411,17 @@ aspect AutomaticTearing {
 aspect TearingPrinting {
     public void BLT.writeTearingPairsToFile(File file) throws FileNotFoundException {
         CodeStream out = new CodeStream(file);
-        int count = 0;
         for (AbstractEquationBlock block : this)
-            block.printTearingPairs(out, count++);
+            block.printTearingPairs(out);
         out.close();
     }
     
-    protected void AbstractEquationBlock.printTearingPairs(CodeStream str, int blockNumber) {}
+    protected void AbstractEquationBlock.printTearingPairs(CodeStream str) {}
     
     @Override
-    protected void TornEquationBlock.printTearingPairs(CodeStream str, int blockNumber) {
+    protected void TornEquationBlock.printTearingPairs(CodeStream str) {
         int counter = 0;
-        str.println("In block #" + blockNumber);
+        str.println("In block #" + getLabel());
         for (SimpleEquationBlock block : unsolvedBlocks()) {
             for (FVariable var : block.allLocalVariables()) {
                 str.print(" (");
@@ -2440,5 +2439,7 @@ aspect TearingPrinting {
             str.println();
         }
         str.println();
+        for (AbstractEquationBlock subBlock : solvedBlocks())
+            subBlock.printTearingPairs(str);
     }
 }
