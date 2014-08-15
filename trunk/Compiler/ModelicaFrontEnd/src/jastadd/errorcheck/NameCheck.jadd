@@ -105,38 +105,51 @@ aspect InstanceNameCheck {
 
 aspect DuplicateComponents {
 
-    protected boolean InstComponentDecl.duplicate = false;
+    /**
+     * Is this component a duplicate of another component?
+     */
+    syn boolean InstComponentDecl.isDuplicate() = duplicateOf() != null;
 
-    private Map<String,InstComponentDecl> InstComponentDecl.containedComponentsMap = null;
-    private Map<String,InstComponentDecl> InstClassDecl.containedComponentsMap     = null;
+    /**
+     * Get the component that this component is a duplicate of, if any.
+     */
+    syn InstComponentDecl InstComponentDecl.duplicateOf() {
+        if (!duplicateOfCalculated) 
+            containingInstClassOrComponent().calculateDuplicates();
+        return duplicateOfValue;
+    }
+    eq InstArrayComponentDecl.duplicateOf() = null;
 
-    protected Map<String,InstComponentDecl> InstComponentDecl.myComponentMap() {
-        if (containedComponentsMap == null)
-            containedComponentsMap = new HashMap<String,InstComponentDecl>();
-        return containedComponentsMap;
-    }
-    protected Map<String,InstComponentDecl> InstClassDecl.myComponentMap() {
-        if (containedComponentsMap == null)
-            containedComponentsMap = new HashMap<String,InstComponentDecl>();
-        return containedComponentsMap;
-    }
+    private boolean InstComponentDecl.duplicateOfCalculated = false;
+    private InstComponentDecl InstComponentDecl.duplicateOfValue = null;
 
-    public void InstComponentDecl.removeComponentMap() {
-        containedComponentsMap = null;
-    }
-    public void InstClassDecl.removeComponentMap() {
-        containedComponentsMap = null;
+    /**
+     * Find the class or component containing this component.
+     */
+    inh InstNode InstComponentDecl.containingInstClassOrComponent();
+    eq InstComponentDecl.getChild().containingInstClassOrComponent() = this;
+    eq InstClassDecl.getChild().containingInstClassOrComponent()     = this;
+    eq Root.getChild().containingInstClassOrComponent()              = null;
+
+    /**
+     * Find all duplicates among child components.
+     */
+    public void InstNode.calculateDuplicates() {
+        Map<String,InstComponentDecl> map = new HashMap<String,InstComponentDecl>();
+        for (InstComponentDecl comp : allInstComponentDecls()) 
+            comp.calculateDuplicate(map);
     }
 
     /**
-     * A map of name to component, containing all components with unique names in the 
-     * same scope. Not used for for-indices and returns <code>null</code> for them.
+     * Update duplicate information for this component.
      */
-    inh Map<String,InstComponentDecl> InstComponentDecl.componentMap();
-    eq InstComponentDecl.getChild().componentMap() = myComponentMap();
-    eq InstClassDecl.getChild().componentMap()     = myComponentMap();
-    eq InstForIndex.getChild().componentMap()      = null;
-    eq Root.getChild().componentMap()              = null;
+    public void InstComponentDecl.calculateDuplicate(Map<String,InstComponentDecl> map) {
+        if (map.containsKey(name()))
+            duplicateOfValue = map.get(name());
+        else
+            map.put(name(), this);
+        duplicateOfCalculated = true;
+    }
 
     /**
      * The node containing the scope in which two components with identical names 
@@ -151,12 +164,8 @@ aspect DuplicateComponents {
 
     public void InstComponentDecl.nameCheck(ErrorCheckType checkType) {
         // TODO: check for duplicate classes and for class and component with same name
-        Map<String,InstComponentDecl> map = componentMap();
-        if (map == null)
-            return;
-        InstComponentDecl other = map.get(name());
-        if (other != null && other != this) {
-            duplicate = true;
+        if (isDuplicate()) {
+            InstComponentDecl other = duplicateOf();
             if (other.nameCollisionScope() == nameCollisionScope()) {
                 error("Duplicate component in same class: " + this);
             } else {
@@ -164,8 +173,6 @@ aspect DuplicateComponents {
                 warning("The component " + name() + " is declared multiple times and can not " +
                         "be verified to be identical to other declaration(s) with the same name.");
             }
-        } else {
-            map.put(name(), this);
         }
     }
 

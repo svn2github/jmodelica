@@ -753,7 +753,7 @@ aspect Flattening {
 	/**
 	 * Check if this component should be considered during flattening.
 	 */
-	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner()) && !duplicate;
+	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner()) && !isDuplicate();
 	eq InstArrayComponentDecl.useInFlattening()     = getIndex() > 0 && super.useInFlattening();
 	
 	public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding) {
@@ -787,14 +787,14 @@ aspect Flattening {
             flattenMyType(fc);
         }
     }
-	
-	public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding) {
-		if (useInFlattening()) {
-			fc.addFVariable(createFVariable(name, excludeBinding));
-			flattenMyType(fc);
-		}
-	}
-	
+
+    public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding) {
+        if (useInFlattening()) {
+            fc.addFVariableNoTransform(createFVariable(name, excludeBinding));
+            flattenMyType(fc);
+        }
+    }
+
     public abstract void InstAssignable.flattenMyType(FClass fc);
 
     public void InstPrimitive.flattenMyType(FClass fc) {

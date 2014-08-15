@@ -576,7 +576,6 @@ aspect InstanceErrorCheck {
                     error("The declaration and end names of a class should be the same");
                 }
             }
-            removeComponentMap();
         }
     }
 
@@ -636,7 +635,6 @@ aspect InstanceErrorCheck {
                         getInstConstraining().collectErrors(checkType);
                 }
             }
-            removeComponentMap();
         }
     }
 
