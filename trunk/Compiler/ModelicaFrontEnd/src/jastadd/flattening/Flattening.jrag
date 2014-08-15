@@ -783,7 +783,7 @@ aspect Flattening {
             FVariable fv = createFVariable();
             if (isConstant() || (isParameter() && tokenComponentDecl_ComponentDecl.hasFinal()))
                 fv.modifiableInRecord = false;
-            frd.addFVariable(fv);
+            frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
         }
     }
@@ -800,20 +800,19 @@ aspect Flattening {
     public void InstPrimitive.flattenMyType(FClass fc) {
         myInstClass().addFDerivedType(fc);
     }
-    
+
     public void InstRecord.flattenMyType(FClass fc) {
         myInstClass().flattenRecord(fc);
     }
-    
+
+    public void InstEnum.flattenMyType(FClass fc) {
+        myInstClass().flattenEnum(fc);
+    }
+
     public void InstPartialFunction.flattenMyType(FClass fc) {
         throw new UnsupportedOperationException("Partial function component only allowed in functions");
     }
 
-	public void InstEnum.flatten(FClass fc, FQName name, boolean excludeBinding) {
-		myInstClass().flattenEnum(fc);
-		fc.addFVariable(createFVariable(name, excludeBinding));
-	}
-	
 	public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
 		FEnumLiteral e = new FEnumLiteral(new FIdUse(name()),new Opt());
 		if (getComponentDecl().getComment().hasStringComment())
