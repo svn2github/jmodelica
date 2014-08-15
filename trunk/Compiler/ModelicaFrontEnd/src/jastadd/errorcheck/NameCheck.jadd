@@ -115,21 +115,14 @@ aspect DuplicateComponents {
      */
     syn InstComponentDecl InstComponentDecl.duplicateOf() {
         if (!duplicateOfCalculated) 
-            containingInstClassOrComponent().calculateDuplicates();
+            containingEntity().calculateDuplicates();
         return duplicateOfValue;
     }
-    eq InstArrayComponentDecl.duplicateOf() = null;
+    eq InstArrayComponentDecl.duplicateOf()   = null;
+    eq UnknownInstComponentDecl.duplicateOf() = null;
 
     private boolean InstComponentDecl.duplicateOfCalculated = false;
     private InstComponentDecl InstComponentDecl.duplicateOfValue = null;
-
-    /**
-     * Find the class or component containing this component.
-     */
-    inh InstNode InstComponentDecl.containingInstClassOrComponent();
-    eq InstComponentDecl.getChild().containingInstClassOrComponent() = this;
-    eq InstClassDecl.getChild().containingInstClassOrComponent()     = this;
-    eq Root.getChild().containingInstClassOrComponent()              = null;
 
     /**
      * Find all duplicates among child components.
