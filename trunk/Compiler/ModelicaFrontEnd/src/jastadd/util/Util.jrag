@@ -1252,8 +1252,9 @@ aspect MultiDeclMethods {
         public boolean isOperatorRecord();
         public boolean isUnknown();
         
-        public InstClassDecl asInstClassDecl();
-        public InstNode      asInstNode();
+        public InstClassDecl    asInstClassDecl();
+        public InstNode         asInstNode();
+        public InstFunctionDecl actualInstFunctionDecl();
         
         public String qualifiedName();
         public String name();
@@ -1267,12 +1268,15 @@ aspect MultiDeclMethods {
     syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
     syn InstClassDecl InstPartialFunction.asInstClassDecl()  = unknownInstClassDecl();
     
+    syn InstFunctionDecl InstClassDecl.actualInstFunctionDecl()       = actualInstClass();
+    syn InstFunctionDecl InstPartialFunction.actualInstFunctionDecl() = this;
+    
     syn InstNode InstClassDecl.asInstNode() = this;
     syn InstNode InstPartialFunction.asInstNode()  = this;
     
     syn InstFunctionDecl InstFunctionCall.myInstFunctionDecl() = getName().myInstFunctionDecl();
     
-    syn InstFunctionDecl InstAccess.myInstFunctionDecl() = myInstClassDecl().actualInstClass();
+    syn InstFunctionDecl InstAccess.myInstFunctionDecl() = myInstClassDecl();
     eq InstComponentAccess.myInstFunctionDecl() {
         InstComponentDecl icd = myInstComponentDecl();
         return icd.isPartialFunction() ? (InstPartialFunction) icd : unknownInstClassDecl();

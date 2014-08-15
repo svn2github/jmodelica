@@ -2254,7 +2254,7 @@ aspect FlatExpressions {
 		List args = new List();
 		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
-        InstFunctionDecl target = myInstFunctionDecl();
+        InstFunctionDecl target = myInstFunctionDecl().actualInstFunctionDecl();
         if (target.asInstClassDecl().inOrIsOuter()) 
             target = target.asInstClassDecl().myInnerInstClassDecl();
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
