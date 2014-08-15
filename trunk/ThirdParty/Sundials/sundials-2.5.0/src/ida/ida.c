@@ -3233,7 +3233,8 @@ static int IDARootfind(IDAMem IDA_mem)
     for (i = 0; i < nrtfn; i++) {
       iroots[i] = 0;
       if(!gactive[i]) continue;
-      if (ABS(ghi[i]) == ZERO) iroots[i] = glo[i] > 0 ? -1:1;
+      if ( (ABS(ghi[i]) == ZERO) && (rootdir[i]*glo[i] <= ZERO) ) 
+	iroots[i] = glo[i] > 0 ? -1:1;
     }
     return(RTFOUND);
   }
@@ -3245,6 +3246,9 @@ static int IDARootfind(IDAMem IDA_mem)
 
   side = 0;  sideprev = -1;
   loop {                                    /* Looping point */
+
+    /* If interval size is already less than tolerance ttol, break. */
+    if (ABS(thi - tlo) <= ttol) break;
 
     /* Set weight alph.
        On the first two passes, set alph = 1.  Thereafter, reset alph
@@ -3374,19 +3378,18 @@ void IDAProcessError(IDAMem IDA_mem,
 
   va_start(ap, msgfmt);
 
+  /* Compose the message */
+
+  vsprintf(msg, msgfmt, ap);
+
   if (IDA_mem == NULL) {    /* We write to stderr */
 
 #ifndef NO_FPRINTF_OUTPUT
     fprintf(stderr, "\n[%s ERROR]  %s\n  ", module, fname);
-    fprintf(stderr, msgfmt);
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "%s\n\n", msg);
 #endif
 
   } else {                 /* We can call ehfun */
-
-    /* Compose the message */
-
-    vsprintf(msg, msgfmt, ap);
 
     /* Call ehfun */
 

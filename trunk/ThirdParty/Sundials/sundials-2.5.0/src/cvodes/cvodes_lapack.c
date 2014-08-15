@@ -303,7 +303,7 @@ int CVLapackBand(void *cvode_mem, int N, int mupper, int mlower)
   }
 
   /* Set extended upper half-bandwith for M (required for pivoting) */
-  smu = MIN(n-1, mu + ml);
+  smu = mu + ml;
 
   /* Allocate memory for M, savedJ, and pivot arrays */
   M = NULL;

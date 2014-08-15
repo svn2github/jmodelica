@@ -1507,7 +1507,7 @@ static int KINStop(KINMem kin_mem, int strategy, booleantype maxStepTaken, int s
     if (setupNonNull && !jacCurrent) {
       /* If the Jacobian is out of date, update it and retry */
       sthrsh = TWO;
-      return(CONTINUE_ITERATIONS);
+      return(RETRY_ITERATION);
     } else {
       /* Give up */
       if (strategy == KIN_NONE)  return(KIN_STEP_LT_STPTOL);
@@ -1589,7 +1589,7 @@ static int KINStop(KINMem kin_mem, int strategy, booleantype maxStepTaken, int s
 	if (setupNonNull && !jacCurrent) {
           /* If the Jacobian is out of date, update it and retry */
 	  sthrsh = TWO;
-	  return(RETRY_ITERATION);
+	  return(CONTINUE_ITERATIONS);
 	} else {
           /* Otherwise, we cannot do anything, so just return. */
         }
@@ -1696,6 +1696,29 @@ static realtype KINScFNorm(KINMem kin_mem, N_Vector v, N_Vector scale)
 {
   N_VProd(scale, v, vtemp1);
   return(N_VMaxNorm(vtemp1));
+}
+
+
+/*
+ * Function : KINScWRMSNorm
+ * 
+ * This routine computes the weighted root mean square norm of the
+ * steplength, ss.
+ */
+
+static realtype KINScWRMSNorm(KINMem kin_mem, N_Vector delta, N_Vector u)
+{
+    realtype length = ZERO;
+    
+    N_VInv(uscale, vtemp1);
+    N_VAbs(u, vtemp2);
+    N_VLinearSum(scsteptol, vtemp2, POINT01*scsteptol, vtemp1, vtemp1);
+    N_VInv(vtemp1, vtemp1);
+    
+    
+    length = N_VWrmsNorm(delta, vtemp1);
+    
+    return(length);
 }
 
 /*
@@ -1872,19 +1895,18 @@ void KINProcessError(KINMem kin_mem,
 
   va_start(ap, msgfmt);
 
+  /* Compose the message */
+
+  vsprintf(msg, msgfmt, ap);
+
   if (kin_mem == NULL) {    /* We write to stderr */
 
 #ifndef NO_FPRINTF_OUTPUT
     fprintf(stderr, "\n[%s ERROR]  %s\n  ", module, fname);
-    fprintf(stderr, msgfmt);
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "%s\n\n", msg);
 #endif
 
   } else {                 /* We can call ehfun */
-
-    /* Compose the message */
-
-    vsprintf(msg, msgfmt, ap);
 
     /* Call ehfun */
 

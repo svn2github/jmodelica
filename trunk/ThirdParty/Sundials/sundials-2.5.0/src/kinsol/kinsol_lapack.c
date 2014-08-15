@@ -291,7 +291,7 @@ int KINLapackBand(void *kinmem, int N, int mupper, int mlower)
   }
 
   /* Set extended upper half-bandwith for M (required for pivoting) */
-  smu = MIN(n-1, mu + ml);
+  smu = mu + ml;
 
   /* Allocate memory for J and pivot array */
   J = NULL;

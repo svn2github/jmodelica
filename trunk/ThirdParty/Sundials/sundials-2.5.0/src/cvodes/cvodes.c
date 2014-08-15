@@ -1972,7 +1972,7 @@ int CVodeQuadSensInit(void *cvode_mem, CVQuadSensRhsFn fQS, N_Vector *yQS0)
     cv_mem->cv_fQSDQ = FALSE;
     cv_mem->cv_fQS = fQS;
 
-    cv_mem->cv_fS_data = cv_mem->cv_user_data;
+    cv_mem->cv_fQS_data = cv_mem->cv_user_data;
 
   }
 
@@ -8311,7 +8311,8 @@ static int cvRootFind(CVodeMem cv_mem)
     for (i = 0; i < nrtfn; i++) {
       iroots[i] = 0;
       if(!gactive[i]) continue;
-      if (ABS(ghi[i]) == ZERO) iroots[i] = glo[i] > 0 ? -1:1;
+      if ( (ABS(ghi[i]) == ZERO) && (rootdir[i]*glo[i] <= ZERO) ) 
+	iroots[i] = glo[i] > 0 ? -1:1;
     }
     return(RTFOUND);
   }
@@ -8323,6 +8324,9 @@ static int cvRootFind(CVodeMem cv_mem)
 
   side = 0;  sideprev = -1;
   loop {                                    /* Looping point */
+
+    /* If interval size is already less than tolerance ttol, break. */
+    if (ABS(thi - tlo) <= ttol) break;
 
     /* Set weight alpha.
        On the first two passes, set alpha = 1.  Thereafter, reset alpha
@@ -8958,8 +8962,7 @@ void cvProcessError(CVodeMem cv_mem,
 
 #ifndef NO_FPRINTF_OUTPUT
     fprintf(stderr, "\n[%s ERROR]  %s\n  ", module, fname);
-    fprintf(stderr, msg);
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "%s\n\n", msg);
 #endif
 
   } else {                 /* We can call ehfun */

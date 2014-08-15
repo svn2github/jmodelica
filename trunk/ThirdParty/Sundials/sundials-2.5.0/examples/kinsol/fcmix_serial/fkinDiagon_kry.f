@@ -46,7 +46,7 @@ c * * * * * * * * * * * * * * * * * * * * * *
       call fnvinits(3, neq, ier)
       if (ier .ne. 0) then
          write(6,1220) ier
- 1220    format('SUNDIALS_ERROR: FNVINITS returned IER = ', i2)
+ 1220    format('SUNDIALS_ERROR: FNVINITS returned IER = ', i4)
          stop
       endif
 
@@ -59,7 +59,7 @@ c * * * * * * * * * * * * * * * * * * * * * *
       call fkinmalloc(iout, rout, ier)
       if (ier .ne. 0) then
          write(6,1230) ier
- 1230    format('SUNDIALS_ERROR: FKINMALLOC returned IER = ', i2)
+ 1230    format('SUNDIALS_ERROR: FKINMALLOC returned IER = ', i4)
          stop
       endif
 
@@ -71,7 +71,7 @@ c * * * * * * * * * * * * * * * * * * * * * *
       call fkinspgmr(maxl, maxlrst, ier)
       if (ier .ne. 0) then
          write(6,1235) ier
- 1235    format('SUNDIALS_ERROR: FKINSPGMR returned IER = ', i2)
+ 1235    format('SUNDIALS_ERROR: FKINSPGMR returned IER = ', i4)
          call fkinfree
          stop
       endif
@@ -88,8 +88,8 @@ c * * * * * * * * * * * * * * * * * * * * * *
       call fkinsol(uu, globalstrat, scale, scale, ier)
       if (ier .lt. 0) then
          write(6,1242) ier, iout(9)
- 1242    format('SUNDIALS_ERROR: FKINSOL returned IER = ', i2, /,
-     1          '                Linear Solver returned IER = ', i2)
+ 1242    format('SUNDIALS_ERROR: FKINSOL returned IER = ', i4, /,
+     1          '                Linear Solver returned IER = ', i4)
          call fkinfree
          stop
       endif
