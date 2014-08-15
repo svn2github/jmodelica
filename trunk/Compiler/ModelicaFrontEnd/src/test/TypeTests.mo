@@ -1651,36 +1651,6 @@ end TypeTests.IfExpType5;
 ")})));
 end IfExpType5;
 
-model EquationNominalTypeTest1
-	Real x, y;
-	parameter Real pEnabled = 1;
-	Real pValues[2] = {2,3};
-equation
-	x = y + 1;
-	y = x - 1 annotation(__Modelon(nominal(enabled=pEnabled)=pValues));
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="EquationNominalTypeTest1",
-			description="If expression errors: non-parameter test expression",
-			errorMessage="
-3 errors found:
-
-Error: in file '...':
-Semantic error at line 0, column 0:
-  The type of the enabled expression is not boolean
-
-Error: in file '...':
-Semantic error at line 0, column 0:
-  Nominal expression should have parameter variability or less, pValues has continuous-time variability
-
-Error: in file '...':
-Semantic error at line 0, column 0:
-  Size of nominal expression pValues is not the same size as the surrounding equation, size of expression [2], size of equation scalar
-")})));
-end EquationNominalTypeTest1;
-
-
-
 model Primitive1
     type T2 = Real[3];
     type T = T2;

@@ -166,45 +166,48 @@ public class CADGenerator extends CGenerator {
 		}
 	}
 	
-	/**
-	 * Generates code for adding BLT AD-blocks 
-	 */
-	
-	public class DAETag_CAD_dae_add_blocks_residual_functions extends DAETag {
-		
-		public DAETag_CAD_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_dae_add_blocks_residual_functions", myGenerator, fclass);
-		}
+    /**
+     * Generates code for adding BLT AD-blocks 
+     */
+    public class DAETag_CAD_dae_add_blocks_residual_functions extends DAETag {
+
+        public DAETag_CAD_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+            super("CAD_dae_add_blocks_residual_functions", myGenerator, fclass);
+        }
 
         @Override
         public boolean isActive() {
             return !fclass.onlyInitBLT() && super.isActive();
         }
 
-		public void generate(CodeStream genPrinter) {
-			if (shouldGenerateBlockJacobians(fclass)) {
-				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-					block.genBlockAddCall_C(true, false, ASTNode.printer_CAD.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
-			}
-		}
-	}
-	
-	/**
-	 * Generates code for adding BLT AD-blocks 
-	 */
-	public class DAETag_CAD_dae_init_add_blocks_residual_functions extends DAETag {
-		
-		public DAETag_CAD_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_dae_init_add_blocks_residual_functions", myGenerator, fclass);
-		}
+        public void generate(CodeStream genPrinter) {
+            if (shouldGenerateBlockJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_CAD;
+                String indent = p.indent("");
+                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                    block.genBlockAddCall_C(p, genPrinter, indent, true, false, fclass.root().options.getStringOption("nonlinear_solver"));
+            }
+        }
+	    }
 
-		public void generate(CodeStream genPrinter) {
-			if (shouldGenerateBlockJacobians(fclass)) {
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-					block.genBlockAddCall_C(true, true, ASTNode.printer_CAD.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
-			}
-		}
-	}
+    /**
+     * Generates code for adding BLT AD-blocks 
+     */
+    public class DAETag_CAD_dae_init_add_blocks_residual_functions extends DAETag {
+
+        public DAETag_CAD_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+            super("CAD_dae_init_add_blocks_residual_functions", myGenerator, fclass);
+        }
+
+        public void generate(CodeStream genPrinter) {
+            if (shouldGenerateBlockJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_CAD;
+                String indent = p.indent("");
+                for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+                    block.genBlockAddCall_C(p, genPrinter, indent, true, true, fclass.root().options.getStringOption("nonlinear_solver"));
+            }
+        }
+    }
 
 	
 	/**

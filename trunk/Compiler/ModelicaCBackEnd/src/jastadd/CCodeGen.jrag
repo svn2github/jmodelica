@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -29,12 +30,73 @@ aspect CCodeGen {
 
     public abstract class CodePrinter extends Printer {
         
+        /**
+         * A list of code generator providers. Each provider in this list is
+         * called in the constructor of CodePrinter.
+         */
+        private static Collection<CodeGeneratorProvider> providers = null;
+        
+        /**
+         * Adds a CodeGeneratorProvider to the list of providers.
+         */
+        private <T extends CodeGeneratorProvider> T addProvider(T provider) {
+            if (providers == null)
+                providers = new PriorityQueue<CodeGeneratorProvider>();
+            providers.add(provider);
+            return provider;
+        }
+        
+        /**
+         * Returns the list of CodeGeneratorProvider providers.
+         */
+        public Collection<CodeGeneratorProvider> getProviders() {
+            if (providers == null)
+                return Collections.emptyList();
+            else
+                return providers;
+        }
+        
         private final boolean inInitialSystem;
 
         public CodePrinter(boolean inInitialSystem) {
             super("    ");
+            for (CodeGeneratorProvider provider : getProviders())
+                provider.provide(this);
             this.inInitialSystem = inInitialSystem;
         }
+        
+        /**
+         * Abstract base class for code generator providers. Features that
+         * needs to affect the code gen process should extend this object and
+         * add it to the list of providers.
+         */
+        private abstract static class CodeGeneratorProvider implements Comparable<CodeGeneratorProvider> {
+            private final int priority;
+            
+            /**
+             * Constructs a new provider.
+             * The argument priority controls the order of wich providers are
+             * called. Providers are called in ascending order.
+             * 
+             * @param priority Denotes the priority of this provider.
+             */
+            private CodeGeneratorProvider(int priority) {
+                this.priority = priority;
+            }
+            
+            @Override
+            public int compareTo(CodeGeneratorProvider other) {
+                return Integer.valueOf(priority).compareTo(Integer.valueOf(other.priority));
+            }
+            
+            /**
+             * Abstract method that should be implemented by sub classes.
+             * The provider is then free to modify the CodePrinter object
+             * and redefine code generators.
+             */
+            public abstract void provide(CodePrinter p);
+        }
+        
 
         @Override
         public abstract void print(ASTNode node, CodeStream str, String indent);
@@ -1128,8 +1190,14 @@ aspect CCodeGen {
 			node.genVarDecls_C(p, str, indent);
 	}
 	
-	
-	
+    @Override
+    public void FAbstractEquation.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this)
+            if (node != attributeList)
+                node.genVarDecls_C(p, str, indent);
+    }
+
     public void FAlgorithm.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         super.genVarDecls_C(p, str, indent);
         if (!inFunction()) {
@@ -2119,7 +2187,15 @@ aspect CCodeGen {
 		for (ASTNode node : this)
 			p.printPreSteps(node, str, indent);
 	}
-	
+
+    @Override
+    public void FAbstractEquation.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this)
+            if (node != attributeList)
+                p.printPreSteps(node, str, indent);
+    }
+
 	public void FExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
 		if (isArray() && !size().isUnknown())
 			p.printPreSteps(getArray(), str, indent);
@@ -2269,7 +2345,7 @@ aspect CCodeGen {
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
             subBlock.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
         
-        Map<FAbstractVariable,String> solverArrayMap = new HashMap<FAbstractVariable,String>();
+        Map<FVariable,String> solverArrayMap = new LinkedHashMap<FVariable,String>();
         int i = 0;
         for (FVariable fv : localUnsolvedVariables()) 
             solverArrayMap.put(fv, "x[" + (i++) + "]");
@@ -2286,18 +2362,19 @@ aspect CCodeGen {
         
         // Nominal values
         str.print(indent + "if (evaluation_mode == JMI_BLOCK_NOMINAL) {\n");
-        for (FVariable fv : localUnsolvedVariables()) 
-            fv.genBlockResidualAttribute_C(p, str, nextIndent, FAttribute.NOMINAL, solverArrayMap);
+        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.NOMINAL, solverArrayMap);
+        
+        // Start values
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_START) {\n");
+        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.START, solverArrayMap);
         
         // Min values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MIN) {\n");
-        for (FVariable fv : localUnsolvedVariables()) 
-            fv.genBlockResidualAttribute_C(p, str, nextIndent, FAttribute.MIN, solverArrayMap);
+        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.MIN, solverArrayMap);
         
         // Max values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MAX) {\n");
-        for (FVariable fv : localUnsolvedVariables()) 
-            fv.genBlockResidualAttribute_C(p, str, nextIndent, FAttribute.MAX, solverArrayMap);
+        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.MAX, solverArrayMap);
         
         // Variable value references
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {\n");
@@ -2320,7 +2397,7 @@ aspect CCodeGen {
         
         // Equation nominal values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
-        genBlockResidualFunctionEqnNominals_C(p, str, nextIndent, new Enumerator());
+        p.C_blockResidualAttributePrinter.printEquationNominal(p, str, nextIndent, this);
         
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {\n");
         // Loop over all active variables and write their value to x	
@@ -2385,18 +2462,18 @@ aspect CCodeGen {
      * Generates residual equation for all unsolved equations in this block.
      */
     public abstract void AbstractEquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap);
+            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap);
 
     @Override
     public void EquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
         for (SimpleEquationBlock block : unsolvedBlocks())
             block.genBlockResidualFunction_residualEqn_C(p, str, indent, enumerator, visited, solverArrayMap);
     }
     
     @Override
     public void SimpleEquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
         genBlockResidualFunction_residualEqn_C(p, str, indent, enumerator, visited, solverArrayMap);
     }
 
@@ -2404,7 +2481,7 @@ aspect CCodeGen {
      * Generates residual equation for this simple block.
      */
     public void SimpleEquationBlock.genBlockResidualFunction_residualEqn_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
         equation().genResidual_C(p, str, indent, enumerator, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
     }
 
@@ -2460,21 +2537,39 @@ aspect CCodeGen {
             throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName() + " in residual function");
         }
     }
+    
+    public C_blockResidualAttributePrinter CodePrinter.C_blockResidualAttributePrinter = new C_blockResidualAttributePrinter();
+    
+    public abstract class CodePrinter {
+        public static class C_blockResidualAttributePrinter {
+            public void print(CodePrinter p, CodeStream str, String indent, String attr, Map<FVariable, String> iterVarMap) {
+                if (attr.equals(FAttribute.START))
+                    return;
+                for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
+                    FVariable iv = iterEntry.getKey();
+                    FExp exp = iv.attributeExp(attr);
+                    if (exp != null)
+                        str.format("%s%s = %s;\n", indent, iterEntry.getValue(), exp.ceval());
+                }
+            }
 
-	public void FVariable.genBlockResidualAttribute_C(CodePrinter p, CodeStream str, String indent,
-	        String attr, Map<FAbstractVariable,String> solverArrayMap) {
-		if (attributeSet(attr)) 
-			str.format("%s%s = %s;\n", indent, solverArrayMap.get(this), attributeExp(attr).ceval());
-	}
-	
+            public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
+                str.print(ASTNode.fConstant().genJMIVariabilityConstant_C() + ", ");
+            }
+
+            public void printEquationNominal(CodePrinter p, CodeStream str, String indent, AbstractEquationBlock block) {
+            }
+        }
+    }
+
 	public void FVariable.genBlockResidualValuref_C(CodePrinter p, CodeStream str, String indent, 
-	        Map<FAbstractVariable,String> solverArrayMap) {
+	        Map<FVariable,String> solverArrayMap) {
 		if (valueReference() != -1) 
 			str.format("%s%s = %d;\n", indent, solverArrayMap.get(this), valueReference());
 	}
 	
 	public void FVariable.genBlockResidualBoundsCall_C(CodePrinter p, CodeStream str, String indent,
-	        String func, String msg, Map<FAbstractVariable,String> solverArrayMap) {
+	        String func, String msg, Map<FVariable,String> solverArrayMap) {
 		boolean min = minAttributeSet();
 		boolean max = maxAttributeSet();
 		if (min || max) {
@@ -2489,19 +2584,19 @@ aspect CCodeGen {
 	}
 	
 	public void FVariable.genBlockResidualInit_C(CodePrinter p, CodeStream str, String indent,
-	        Map<FAbstractVariable,String> solverArrayMap) {
+	        Map<FVariable,String> solverArrayMap) {
 		str.format("%s%s = %s;\n", indent, solverArrayMap.get(this), name_C());
 		genBlockResidualBoundsCall_C(p, str, indent, "init_with", "Resetting initial value", solverArrayMap);
 	}
 	
 	public void FVariable.genBlockResidualEvalInit_C(CodePrinter p, CodeStream str, String indent,
-	        Map<FAbstractVariable,String> solverArrayMap) {
+	        Map<FVariable,String> solverArrayMap) {
 		genBlockResidualBoundsCall_C(p, str, indent, "check", "Out of bounds", solverArrayMap);
 		genBlockResidualWriteback_C(p, str, indent, solverArrayMap);
 	}
 	
 	public void FVariable.genBlockResidualWriteback_C(CodePrinter p, CodeStream str, String indent,
-	        Map<FAbstractVariable,String> solverArrayMap) {
+	        Map<FVariable,String> solverArrayMap) {
 		str.format("%s%s = %s;\n", indent, name_C(), solverArrayMap.get(this));
 	}
 	
@@ -2563,33 +2658,6 @@ aspect CCodeGen {
         return res;
     }
 
-	
-	public void AbstractEquationBlock.genBlockResidualFunctionEqnNominals_C(CodePrinter p, CodeStream str,
-	        String indent, Enumerator enumerator) {
-		for (FAbstractEquation e : localRealEquations()) {
-			e.genNominal_C(p, str, indent, enumerator, null);
-		}
-	}
-	
-	@Override
-	public void TornEquationBlock.genBlockResidualFunctionEqnNominals_C(CodePrinter p, CodeStream str, String indent,
-	        Enumerator enumerator) {
-		for (SimpleEquationBlock block : unsolvedBlocks())
-			block.genBlockResidualFunctionEqnNominals_C(p, str, indent, enumerator);
-	}
-	
-	@Override
-	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqnNominals_C(CodePrinter p, CodeStream str,
-	        String indent, Enumerator enumerator) {
-		equation().genNominal_C(p, str, indent, enumerator, new HashSet<FVariable>(activeVars));
-	}
-	
-	@Override
-	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqnNominals_C(CodePrinter p, CodeStream str,
-	        String indent, Enumerator enumerator) {
-		equation().genNominal_C(p, str, indent, enumerator, new HashSet<FVariable>(activeVars));
-	}
-	
     public void AbstractEquationBlock.genBlockResidualFunction_jacobianDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (jacobian != null)
             for (FExp[] col : jacobian)
@@ -2697,11 +2765,11 @@ aspect CCodeGen {
         str.format("%sdgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);\n", indent);
     }
     
-	public void AbstractEquationBlock.genBlockAddCall_C(boolean dirDer, boolean inInit, String indent, CodeStream str, String nleSolver) {
+	public void AbstractEquationBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver) {
 		if (getLabel() == null)
 			return;
 		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
-			subBlock.genBlockAddCall_C(dirDer, inInit, indent, str, nleSolver);
+			subBlock.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver);
 		
 		str.print(indent);
 		str.print("jmi_dae_" + (inInit ? "init_" : "") + "add_equation_block(");
@@ -2714,6 +2782,7 @@ aspect CCodeGen {
 		str.print(localNonRealVariables().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
+		p.C_blockResidualAttributePrinter.printVariability(p, str, indent, this.localUnsolvedVariables());
 		str.print(genJMISolverConstant_C(nleSolver) + ", ");
 		str.print(getSequenceNumber() + ", \"");
 		str.print(getLabel() + "\");\n");
@@ -3073,79 +3142,6 @@ aspect CCodeGen {
         str.print(indent + dst + " = " + src + ";\n");
     }
 
-	
-	/**
-	 * Nominals
-	 */
-	public void FAbstractEquation.genNominal_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {}
-	
-	@Override
-	public void FEquation.genNominal_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
-		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		if (hasNominal()) {
-			p.print(getNominal(), str, indent);
-		} else {
-			str.print('1');
-		}
-		str.print(";\n");
-	}
-	
-	@Override
-	public void FFunctionCallEquation.genNominal_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (!getCall().isIgnored()) {
-			for (FFunctionCallLeft l : getLefts())
-				l.genWriteNominal_C(str, indent, enumerator, forVariables);
-		}
-	}
-	
-	@Override
-	public void FAlgorithm.genNominal_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
-		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
-			use.genCellWriteNominal_C(str, indent, enumerator, forVariables);
-	}
-	
-	public void FFunctionCallLeft.genWriteNominal_C(CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (hasFExp()) 
-			getFExp().type().genWriteNominal_C(str, indent, getFExp(), enumerator, forVariables);
-	}
-	
-	public void FType.genWriteNominal_C(CodeStream str, String indent, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (isArray()) {
-			Array arr = exp.getArray();
-			for (Index i : arr.indices()) {
-				genCellWriteNominal_C(str, indent, arr.get(i), enumerator, forVariables);
-			}
-		} else {
-			genCellWriteNominal_C(str, indent, exp, enumerator, forVariables);
-		}
-	}
-	
-	public void FType.genCellWriteNominal_C(CodeStream str, String indent, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
-		exp.genCellWriteNominal_C(str, indent, enumerator, forVariables);
-	}
-	
-	public void FExp.genCellWriteNominal_C(CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void FIdUseExp.genCellWriteNominal_C(CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (forVariables != null && !forVariables.contains(myFV()))
-			return; // This variable is not in the set of variables to generate code for.
-		str.print(indent + "(*res)[");
-		str.print(enumerator.next());
-		str.print("] = 1;\n");
-	}
-	
-	@Override
-	public void FRecordType.genCellWriteNominal_C(CodeStream str, String indent, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
-		for (FRecordComponentType comp : getComponents()) {
-			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteNominal_C(str, indent, compExp, enumerator, forVariables);
-		}
-	}
-	
-	
     /**
      * Helper for printing if equations
      */

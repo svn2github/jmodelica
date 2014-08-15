@@ -424,30 +424,32 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
-	/**
-	 * Generates code for adding BLT blocks 
-	 */
-	/**
-	 * C: Add the DAE block functions to the JMI struct
-	 */
-	public class DAETag_C_dae_add_blocks_residual_functions extends DAETag {
-		
-		public DAETag_C_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_add_blocks_residual_functions", myGenerator, fclass);
+    /**
+     * Generates code for adding BLT blocks 
+     */
+    /**
+     * C: Add the DAE block functions to the JMI struct
+     */
+    public class DAETag_C_dae_add_blocks_residual_functions extends DAETag {
+
+        public DAETag_C_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_dae_add_blocks_residual_functions", myGenerator, fclass);
             addOptions("generate_ode");
-		}
+        }
 
         @Override
         public boolean isActive() {
             return !fclass.onlyInitBLT() && super.isActive();
         }
 
-		public void generate(CodeStream genPrinter) {
-			if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
-				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-					block.genBlockAddCall_C(false, false, ASTNode.printer_C.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
-			}
-		}
+        public void generate(CodeStream genPrinter) {
+            if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_C;
+                String indent = p.indent("");
+                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                    block.genBlockAddCall_C(p, genPrinter, indent, false, false, fclass.root().options.getStringOption("nonlinear_solver"));
+            }
+        }
 	}
 
 	/**
@@ -490,26 +492,28 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
-	/**
-	 * Generates code for adding BLT blocks 
-	 */
-	/**
-	 * C: Add the DAE initialization block functions to the JMI struct
-	 */
-	public class DAETag_C_dae_init_add_blocks_residual_functions extends DAETag {
-		
-		public DAETag_C_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_init_add_blocks_residual_functions", myGenerator, fclass);
-            addOptions("generate_ode");
-		}
+    /**
+     * Generates code for adding BLT blocks 
+     */
+    /**
+     * C: Add the DAE initialization block functions to the JMI struct
+     */
+    public class DAETag_C_dae_init_add_blocks_residual_functions extends DAETag {
 
-		public void generate(CodeStream genPrinter) {
-			if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-					block.genBlockAddCall_C(false, true, ASTNode.printer_C.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
-			}
-		}
-	}
+        public DAETag_C_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_dae_init_add_blocks_residual_functions", myGenerator, fclass);
+            addOptions("generate_ode");
+        }
+
+        public void generate(CodeStream genPrinter) {
+            if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_C;
+                String indent = p.indent("");
+                for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+                    block.genBlockAddCall_C(p, genPrinter, indent, false, true, fclass.root().options.getStringOption("nonlinear_solver"));
+            }
+        }
+    }
 
 	/**
 	 * Number of DAE initialization blocks

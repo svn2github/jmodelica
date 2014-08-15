@@ -1524,6 +1524,14 @@ aspect CADCodeGen {
         }
     }
 
+    @Override
+    public void FAbstractEquation.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this)
+            if (node != attributeList)
+                p.printPreSteps(node, str, indent);
+    }
+
     public void FIfWhenElseEquation.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {}
     public void FIfWhenEquation.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_CAD(p, str, indent);
@@ -1614,6 +1622,14 @@ aspect CADCodeGen {
     public void ASTNode.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
         for (ASTNode node : this)
             node.genVarDecls_CAD(p, str, indent);
+    }
+
+    @Override
+    public void FAbstractEquation.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this)
+            if (node != attributeList)
+                node.genVarDecls_CAD(p, str, indent);
     }
 
     /**

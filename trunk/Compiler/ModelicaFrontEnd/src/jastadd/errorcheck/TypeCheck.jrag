@@ -204,7 +204,6 @@ aspect FlatTypeCheck {
 
 
   public void FEquation.typeCheck(ErrorCheckType checkType) {
-      typeCheckNominal(checkType);
       typeCheckLocalIteration(checkType);
       FType left = getLeft().type();
       FType right = getRight().type();

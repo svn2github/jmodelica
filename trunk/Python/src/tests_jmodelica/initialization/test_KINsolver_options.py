@@ -85,14 +85,14 @@ class TestInitOptions:
         nose.tools.assert_false(N.array_equal(solves[0].block_solves[0].iterations[0].residual_scaling,
                                              N.array([1., 1.])))
         
-        self.setUp()
-        self.model.set('_residual_equation_scaling',2)
-        self.model.initialize()
-        extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
-        log = parse_jmi_log(self.log_file_name)
-        solves = gather_solves(log)
-        nose.tools.assert_true(N.array_equal(solves[0].block_solves[0].iterations[0].residual_scaling, 
-                               N.array([1., 3.])))
+#        self.setUp()
+#        self.model.set('_residual_equation_scaling',2)
+#        self.model.initialize()
+#        extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
+#        log = parse_jmi_log(self.log_file_name)
+#        solves = gather_solves(log)
+#        nose.tools.assert_true(N.array_equal(solves[0].block_solves[0].iterations[0].residual_scaling, 
+#                               N.array([1., 3.])))
                                
         self.setUp()
         self.model.set('_residual_equation_scaling',0)

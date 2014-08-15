@@ -1148,9 +1148,6 @@ public class Eq implements Comparable<Eq> {
 		diff = other.analyticallySolvableOccurrences - analyticallySolvableOccurrences;
 		if (diff != 0)
 			return diff;
-		diff = (getEquation().hasNominal() ? 1 : 0) - (other.getEquation().hasNominal() ? 1 : 0);
-		if (diff != 0)
-			return diff;
 		return 0;
 	}
 

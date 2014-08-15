@@ -1796,6 +1796,16 @@ aspect Attributes {
         }
     }
 
+    public void FVariable.unsetAttribute(String name) {
+        List<FAttribute> newList = new List<FAttribute>();
+        for (FAttribute attr : getFAttributes()) {
+            if (!attr.matches(name))
+                newList.add(attr);
+        }
+        setFAttributeList(newList);
+        flushCache();
+    }
+
     // Quantity attribute
     syn boolean FVariable.quantityAttributeSet()    = attributeSet(FAttribute.QUANTITY);
     syn FExp    FVariable.quantityAttributeExp()    = attributeExp(FAttribute.QUANTITY);

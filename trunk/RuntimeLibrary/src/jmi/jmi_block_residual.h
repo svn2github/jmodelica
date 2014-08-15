@@ -175,12 +175,13 @@ struct jmi_block_residual_t {
  * @param n_nr Integer size of the block of non-real variables
  * @param n_as Integer size of the number of active switches
  * @param jacobian_variability Variability of the Jacobian coefficients
+ * @param attribute_variability Variability of the variable attributes
  * @param solver Solver to be used for the block
  * @param index Block integer index, used for internal representation of the block
  * @param label Block string label, used for external representation of the block
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -192,12 +193,13 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param n_nr Integer size of the block of non-real variables
  * @param n_as Integer size of the number of active switches
  * @param jacobian_variability Variability of the Jacobian coefficients
+ * @param attribute_variability Variability of the variable attributes
  * @param solver Solver to be used for the block
  * @param index Block integer index, used for internal representation of the block
  * @param label Block string label, used for external representation of the block
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label);
 
 
 /**

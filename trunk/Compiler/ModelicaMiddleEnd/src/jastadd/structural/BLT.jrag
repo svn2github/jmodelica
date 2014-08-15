@@ -2432,8 +2432,6 @@ aspect TearingPrinting {
                 str.print("   (");
                 str.print(block.producer().symbol());
                 str.print(") " + block.equation().toString()); 
-                if (block.equation().hasNominal())
-                    str.print("    (Nominal=" + block.equation().getNominal() + ")");
                 str.println();
             }
             str.println();
