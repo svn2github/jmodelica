@@ -3642,15 +3642,11 @@ aspect Serialize {
         str.println();
         
         str.println(indent + "/* Free strings */");
-        /* Use this instead when mystery with dissappearing destructors is solved.
         TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
         for (CommonVariableDecl cvd : vars) {
              fp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
              cvd.type().print(fp);
         }
-        */
-        for (CommonVariableDecl cvd : vars)
-            cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
         str.println();
         
         genCheckPoint(str, indent, "END");
