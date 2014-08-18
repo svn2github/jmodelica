@@ -293,7 +293,7 @@ int IDALapackBand(void *ida_mem, int N, int mupper, int mlower)
   }
 
   /* Set extended upper half-bandwith for M (required for pivoting) */
-  smu = mu + ml;
+  smu = MIN(n-1, mu + ml);
 
   /* Allocate memory for JJ and pivot arrays */
   JJ = NULL;
