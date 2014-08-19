@@ -499,6 +499,23 @@ aspect FlatAPI {
     to FClass.differentiatedRealVariablesSet() for myFClass();
     syn int FVariable.differentiatedRealVariableIndex() =
         myFClass().differentiatedRealVariables().indexOf(this);
+    
+    /**
+     * \brief Collection of all callables called by a partial function call
+     * or kept as a component.
+     */
+    coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartial() 
+        [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
+    FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartial() for myFClass();
+    FFunctionVariable contributes myFCallable().actualFFunctionDecl() when type().isPartialFunction()
+        to FClass.myFFunctionDeclsPartial() for myFClass();
+    
+    /**
+     * \brief Collection of all FFunctionDecls called by a partial function call.
+     */
+    coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartialCalled() 
+        [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
+    FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartialCalled() for myFClass();
 
     inh boolean FExp.inDeadIfBranch();
     eq FIfEquation.getFAbstractEquation().inDeadIfBranch() = getTest().inDeadIfBranchTest(false);

@@ -121,7 +121,7 @@ aspect InstTypeAnalysis {
             inputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
         for (InstComponentDecl icd : myOutputs())
             outputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
-        return new FPartialFunctionType(Size.SCALAR, qualifiedName(), inputTypes, outputTypes);
+        return new FPartialFunctionType(Size.SCALAR, qualifiedName(), inputTypes, outputTypes, null);
     }
 
     eq InstRecordConstructor.type() = getRecord().recordType();

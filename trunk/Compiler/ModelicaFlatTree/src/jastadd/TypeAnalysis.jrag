@@ -53,6 +53,9 @@ aspect FlatTypeAnalysis {
                 FRecordType type = (FRecordType) getType();
                 type.setFClass(myFClass());
                 setType((FType) type.myFRecordDecl().type().sizedType(type.size()).unboundCopy());
+            } else if (getType().isPartialFunction()) {
+                FPartialFunctionType type = (FPartialFunctionType) getType();
+                type.setFClass(myFClass());
             }
             typeRewritten = true;
             return this;
@@ -573,14 +576,14 @@ aspect FlatTypeAnalysis {
             s.add(u.name());
         }
         for (CommonVariableDecl cvd : myFCallable().myInputs()) {
-            if (s.contains(cvd.name()))
+            if (!s.contains(cvd.name()))
                 inputs.add(new FRecordComponentType(cvd.name(), cvd.type()));
         }
         List<FRecordComponentType> outputs = new List<FRecordComponentType>();
         for (CommonVariableDecl cvd : myFCallable().myOutputs()) {
             outputs.add(new FRecordComponentType(cvd.name(), cvd.type()));
         }
-        return new FPartialFunctionType(size(), name(), inputs, outputs);
+        return new FPartialFunctionType(size(), name(), inputs, outputs, myFClass());
     }
 
     // TODO: expand to handle boolean end enum index
@@ -770,7 +773,13 @@ aspect FTypeCompatibility {
             return true;
         if (getNumComponent() != rec.getNumComponent())
             return false;
-        return typeMatches(getComponents(), rec.getComponents(), compatible, allowUnknown);
+        TreeSet<FRecordComponentType> comps1 = new TreeSet<FRecordComponentType>();
+        TreeSet<FRecordComponentType> comps2 = new TreeSet<FRecordComponentType>();
+        for (FRecordComponentType t : getComponents())
+            comps1.add(t);
+        for (FRecordComponentType t : rec.getComponents())
+            comps2.add(t);
+        return typeMatches(comps1, comps2, compatible, allowUnknown);
     }
     eq FExternalObjectType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isExternalObject())
@@ -810,14 +819,8 @@ aspect FTypeCompatibility {
                 typeMatches(getOutputs(), obj.getOutputs(), compatible, allowUnknown);
     }
     
-    syn boolean FType.typeMatches(List<FRecordComponentType> l1, List<FRecordComponentType> l2, 
+    syn boolean FType.typeMatches(Iterable<FRecordComponentType> comps1, Iterable<FRecordComponentType> comps2, 
             boolean compatible, boolean allowUnknown) {
-        TreeSet<FRecordComponentType> comps1 = new TreeSet<FRecordComponentType>();
-        TreeSet<FRecordComponentType> comps2 = new TreeSet<FRecordComponentType>();
-        for (FRecordComponentType t : l1)
-            comps1.add(t);
-        for (FRecordComponentType t : l2)
-            comps2.add(t);
         Iterator<FRecordComponentType> i1 = comps1.iterator();
         Iterator<FRecordComponentType> i2 = comps2.iterator();
         while (i1.hasNext()) {

@@ -786,6 +786,10 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(CodeStream genPrinter) {
+            for (FFunctionDecl func : fclass.myFFunctionDeclsPartial())
+                func.genStructsPartial_C(genPrinter, "");
+            for (FFunctionDecl func : fclass.myFFunctionDeclsPartialCalled())
+                func.genHeadersPartial_C(genPrinter, "");
 			for (FFunctionDecl func : fclass.getFFunctionDecls())
 				func.genHeader_C(genPrinter, "");
 		}
@@ -804,6 +808,8 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(CodeStream genPrinter) {
+            for (FFunctionDecl func : fclass.myFFunctionDeclsPartialCalled())
+                func.prettyPrintPartial_C(genPrinter, "");
 			for (FFunctionDecl func : fclass.getFFunctionDecls())
 				func.prettyPrint_C(genPrinter, "");
 		}

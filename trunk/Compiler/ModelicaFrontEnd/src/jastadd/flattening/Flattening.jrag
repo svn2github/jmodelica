@@ -2274,8 +2274,8 @@ aspect FlatExpressions {
     
     public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
         List<FIdUse> argNames = new List<FIdUse>();
-        for (FRecordComponentType comp : partialFunctionType().getInputs())
-            argNames.add(new FIdUse(comp.getName()));
+        for (String s : namedArgs())
+            argNames.add(new FIdUse(s));
         return new FPartialFunctionCall(name, args, sizes, argNames);
     }
 

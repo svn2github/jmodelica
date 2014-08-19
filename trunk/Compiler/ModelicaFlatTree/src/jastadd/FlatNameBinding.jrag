@@ -521,6 +521,9 @@ aspect FlatRecordBinding {
 	syn lazy FRecordDecl FType.myFRecordDecl() = null;
 	eq FRecordType.myFRecordDecl()             = 
 		(getFClass() != null) ? getFClass().lookupFRec(getName()) : null;
+    syn lazy FFunctionDecl FType.myFFunctionDecl() = null;
+    eq FPartialFunctionType.myFFunctionDecl() = 
+        (getFClass() != null) ? getFClass().lookupFunc(getName()) : null;
 	
 	inh FRecordDecl FRecordVariable.lookupFRec(String name);
 	inh FRecordDecl FRecordType.lookupFRec(String name);

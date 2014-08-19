@@ -391,34 +391,121 @@ aspect CCodeGen {
 		return res;
 	}	
 	
-	public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		boolean exp = functionCallIsExp();
-		if (!exp)
-			str.print(indent);
-		str.print(funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
-		str.print("(");
-		String sep = "";
-		for (FExp arg : getArgs()) {
-			str.print(sep);
-			arg.genArgument_C(p, str, indent);
-			sep = ", ";
-		}
-		if (!exp) {
-			int tot = myOutputs().size();
-			int lefts = myLefts().size();
-			for (int i = 0; i < tot; i++) {
-				str.print(sep);
-				if (i < lefts)
-					myLefts().get(i).genArgument_C(str);
-				else
-					str.print("NULL");
-				sep = ", ";
-			}
-		}
-		str.print(")");
-		if (!exp)
-			str.print(";\n");
-	}
+    public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        myFCallable().prettyPrintCall_C(p, str, indent, this);
+    }
+    
+    public interface FCallable {
+        /**
+         * \brief Generate a call to this callable.
+         */
+        public void prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call);
+    }
+    
+    @Override
+    public void FFunctionDecl.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call) {
+        boolean exp = call.functionCallIsExp();
+        if (!exp)
+            str.print(indent);
+        str.print(funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
+        str.print("(");
+        String sep = "";
+        for (FExp arg : call.getArgs()) {
+            str.print(sep);
+            arg.genArgument_C(p, str, indent);
+            sep = ", ";
+        }
+        if (!exp) {
+            int tot = myOutputs().size();
+            int lefts = call.myLefts().size();
+            for (int i = 0; i < tot; i++) {
+                str.print(sep);
+                if (i < lefts)
+                    call.myLefts().get(i).genArgument_C(str);
+                else
+                    str.print("NULL");
+                sep = ", ";
+            }
+        }
+        str.print(")");
+        if (!exp)
+            str.print(";\n");
+    }
+    
+    @Override
+    public void FFunctionVariable.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call) {
+        boolean exp = call.functionCallIsExp();
+        String out = "NULL";
+        if (!exp) {
+            out = call.tempName_C();
+            str.formatln("%s%s.n = %s;", indent, out, call.myLefts().size());
+            out = "&" +out;
+            str.print(indent);
+        }
+        str.format("%s->call(%s, %s", name_C(), name_C(), out);
+        String sep = ", ";
+        for (FExp arg : call.getArgs()) {
+            str.format("%s(%s)(", sep, arg.type().type_C());
+            arg.genArgument_C(p, str, indent);
+            str.print(")");
+        }
+        str.print(")");
+        if (!exp)
+            str.print(";\n");
+        if (!exp) {
+            int tot = myOutputs().size();
+            int lefts = call.myLefts().size();
+            for (int i = 0; i < tot; i++) {
+                if (i < lefts) {
+                    String n = call.myLefts().get(i).prettyPrint_C(indent);
+                    str.formatln("%s%s = %s.%s;", indent, n, call.tempName_C(), n);
+                }
+            }
+        }
+    }
+    
+    @Override
+    public void FPartialFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        boolean exp = functionCallIsExp();
+        FCallable fc = myFCallable();
+        String previous = "NULL";
+        String result   = "NULL";
+        if (fc.isPartialFunction()) {
+            previous = ((FFunctionVariable) fc).name_C();
+        } else {
+            result = "&" + tempName_C();
+        }
+        str.print("(");
+        str.print(myCorrespondingInput().type().type_C());
+        str.print(")");
+        str.print(funcNameUnderscore(C_SUFFIX_FPCR));
+        str.print("(");
+        str.print(previous);
+        str.print(", ");
+        str.print(result);
+        
+        /* Print "0" for the inputs we don't set, and "1, value" for those we do set */
+        Iterator<FIdUse> it = getArgNames().iterator();
+        Iterator<FFunctionVariable> it2 = myInputs().iterator();
+        for (FExp arg : getArgs()) {
+            String name = it.next().name();
+            while (!it2.next().name().equals(name)) {
+                str.print(", 0");
+            }
+            str.print(", 1");
+            
+            str.print(", ");
+            str.format("(%s)(", arg.type().type_C());
+            arg.genArgument_C(p, str, indent);
+            str.print(")");
+        }
+        while (it2.hasNext()) {
+            str.print(", 0");
+            it2.next();
+        }
+        
+        str.print(")");
+    }
 	
 	public String FunctionReturnDefinition.getDeclaredType_C() {
 		if (outputs.size() > 0) 
@@ -505,6 +592,120 @@ aspect CCodeGen {
     	}
 	}
 	
+    /**
+     * \brief Generates forward declarations for FPCL and FPCR functions used
+     * by partial function calls.
+     */
+    public void FFunctionDecl.genHeadersPartial_C(CodeStream str, String indent) {
+        prettyPrintHeadFPCL_C(str, indent);
+        str.println(";");
+        prettyPrintHeadFPCR_C(str, indent);
+        str.println(";");
+    }
+    
+    /**
+     * \brief Generates FP and OUT structs used by partial function calls.
+     */
+    public void FFunctionDecl.genStructsPartial_C(CodeStream str, String indent) {
+        CodePrinter p = ASTNode.printer_C;
+        String fp  = funcNameUnderscore(C_SUFFIX_FP);
+        String out = funcNameUnderscore(C_SUFFIX_FPOUT);
+        String next = p.indent(indent);
+        
+        beginStruct_C(str, indent, out);
+        str.formatln("%sint n;", next);
+        for (FFunctionVariable ffv : myOutputs()) {
+            str.formatln("%s%s %s;", next, ffv.type().type_C(), ffv.name_C());
+        }
+        endStruct_C(str, indent);
+        
+        beginStruct_C(str, indent, fp);
+        str.formatln("%s%s (*call)(%s*, %s*, ...);", next, returnDefinition().getDeclaredType_C(), fp, out);
+        str.formatln("%s%s* (*fpcr)(%s*, ...);", next, fp, fp);
+        for (FFunctionVariable ffv : myInputs()) {
+            String name = ffv.name_C();
+            str.formatln("%s%s %s;", next, ffv.type().type_C(), name);
+            str.formatln("%sint %s_s;", next, name);
+        }
+        endStruct_C(str, indent);
+    }
+    
+    /**
+     * \brief Generate first line of struct declaration name_ with typedef to name
+     */
+    public void FFunctionDecl.beginStruct_C(CodeStream str, String indent, String name) {
+        str.formatln("%stypedef struct %s_ %s;", indent, name, name);
+        str.formatln("%sstruct %s_ {", indent, name);
+    }
+    
+    /**
+     * \brief Generate last line of struct declaration
+     */
+    public void FFunctionDecl.endStruct_C(CodeStream str, String indent) {
+        str.formatln("%s};", indent);
+    }
+    
+    /**
+     * \brief Generate declaration for varargs
+     */
+    public void FFunctionDecl.genVarArgsDecl(CodeStream str, String indent) {
+        str.print(indent);
+        str.println("va_list argp;");
+    }
+    
+    /**
+     * \brief Generate initialization for varargs
+     */
+    public void FFunctionDecl.genVarArgsOpen(CodeStream str, String indent, String last) {
+        str.print(indent);
+        str.print("va_start(argp, ");
+        str.print(last);
+        str.println(");");
+    }
+    
+    /**
+     * \brief Generate use for varargs
+     */
+    public void FFunctionDecl.genVarArgsRead(CodeStream str, String indent, String dest, String type) {
+        str.print(indent);
+        str.print(dest);
+        str.print(" = ");
+        genVarArgsRead(str, type);
+        str.println(";");
+    }
+    
+    /**
+     * \brief Generate use for varargs
+     */
+    public void FFunctionDecl.genVarArgsRead(CodeStream str, String type) {
+        str.print("va_arg(argp, ");
+        str.print(type);
+        str.print(")");
+    }
+    
+    /**
+     * \brief Generate closing for varargs
+     */
+    public void FFunctionDecl.genVarArgsClose(CodeStream str, String indent) {
+        str.print(indent);
+        str.println("va_end(argp);");
+    }
+    
+    /**
+     * \brief Generate header for FPCL function.
+     */
+    public void FFunctionDecl.prettyPrintHeadFPCL_C(CodeStream str, String indent) {
+        str.format("%s%s %s(%s* fp_in, %s* out, ...)", indent, returnDefinition().getDeclaredType_C(), funcNameUnderscore(C_SUFFIX_FPCL), funcNameUnderscore(C_SUFFIX_FP), funcNameUnderscore(C_SUFFIX_FPOUT));
+    }
+    
+    /**
+     * \brief Generate header for FPCR function.
+     */
+    public void FFunctionDecl.prettyPrintHeadFPCR_C(CodeStream str, String indent) {
+        String fp = funcNameUnderscore(C_SUFFIX_FP);
+        str.format("%s%s* %s(%s* fp_in, %s* fp_out, ...)", indent, fp, funcNameUnderscore(C_SUFFIX_FPCR), fp, fp);
+    }
+	
 	/**
 	 * Helper method that checks wether the functiondecl should be printed.
 	 */
@@ -540,6 +741,116 @@ aspect CCodeGen {
 	    	str.print("}\n\n");
     	}
 	}
+	
+    /**
+     * \brief Generates FPCL and FPCR functions used by partial function calls.
+     */
+    public void FFunctionDecl.prettyPrintPartial_C(CodeStream str, String indent) {
+        int i;
+        CodePrinter p = ASTNode.printer_C;
+        String next = p.indent(indent);
+        String next2 = p.indent(next);
+        String next3 = p.indent(next2);
+        String fp = funcNameUnderscore(C_SUFFIX_FP);
+        ArrayList<FFunctionVariable> inputs  = myInputs();
+        ArrayList<FFunctionVariable> outputs = myOutputs();
+        int n = inputs.size() + outputs.size();
+        String[] names = new String[n];
+        for (i = 0; i < n; i++) {
+            names[i] = "tmp_" + (i+1); 
+        }
+        
+        // FPCL
+        prettyPrintHeadFPCL_C(str, indent);
+        str.print(" {\n");
+        
+        i = 0;
+        for (FFunctionVariable ffv : inputs) {
+            str.formatln("%s%s %s;", next, ffv.type_C(), names[i++]);
+        }
+        for (FFunctionVariable ffv : outputs) {
+            str.formatln("%s%s %s;", next, ffv.type_C(), names[i++]);
+        }
+        
+        genVarArgsDecl(str, next);
+        genVarArgsOpen(str, next, "out");
+        i = 0;
+        for (FFunctionVariable ffv : inputs) {
+              str.formatln("%sif (fp_in->%s_s) {", next, ffv.name_C());
+              str.formatln("%s%s = fp_in->%s;", next2, names[i], ffv.name_C());
+              str.formatln("%s} else {", next);
+              genVarArgsRead(str, next2, names[i], ffv.type_C());
+              str.formatln("%s}", next);
+              i++;
+        }
+        genVarArgsClose(str, indent);
+        
+        str.format("%s%s(", next, funcNameUnderscore("def"));
+        String prefix = "";
+        i = 0;
+        for (FFunctionVariable ffv : inputs) {
+            str.print(prefix);
+            str.print(names[i++]);
+            prefix = ", ";
+        }
+        for (FFunctionVariable ffv : outputs) {
+            str.print(prefix);
+            str.print("&");
+            str.print(names[i++]);
+        }
+        str.println(");");
+        
+        str.formatln("%sif (out != NULL) {",next);
+        i = 0;
+        for (FFunctionVariable ffv : outputs) {
+              str.formatln("%sif (out->n > %d) {", next2, i);
+              str.formatln("%sout->%s = %s;", next3, ffv.name_C(), names[i + inputs.size()]);
+              str.formatln("%s}", next2);
+              i++;
+        }
+        str.formatln("%s}",next);
+        if (outputs.size() > 0)
+            str.formatln("%sreturn %s;", next, names[inputs.size()]);
+        str.format("%s}\n\n", indent);
+        
+        
+        // FPCR
+        prettyPrintHeadFPCR_C(str, indent);
+        str.print(" {\n");
+        genVarArgsDecl(str, indent);
+        str.formatln("%sif (fp_out == NULL) {", next);
+        str.formatln("%sfp_out = malloc(sizeof(%s));", next2, fp);
+        str.formatln("%s}", next);
+        
+        str.formatln("%sif (fp_in == NULL) {", next);
+        str.formatln("%sfp_out->call = &%s;", next2, funcNameUnderscore(C_SUFFIX_FPCL));
+        for (FFunctionVariable ffv : inputs) {
+            str.formatln("%sfp_out->%s_s = 0;", next2, ffv.name_C());
+        }
+        str.formatln("%s} else {", next);
+        str.formatln("%sfp_out->call = fp_in->call;", next2, fp);
+        for (FFunctionVariable ffv : inputs) {
+            String name = ffv.name_C();
+            str.formatln("%sfp_out->%s_s = fp_in->%s_s;", next2, name, name);
+            str.formatln("%sfp_out->%s = fp_in->%s;", next2, name, name);
+        }
+        str.formatln("%s}", next);
+        
+        genVarArgsOpen(str, indent, "fp_out");
+        for (FFunctionVariable ffv : inputs) {
+            String name = ffv.name_C();
+            str.format("%sif (!fp_out->%s_s && ", next, name);
+            genVarArgsRead(str, "int");
+            str.println(") {");
+            str.formatln("%sfp_out->%s_s = 1;", next2, name);
+            genVarArgsRead(str, next2, "fp_out->" + name, ffv.type_C());
+            str.formatln("%s}", next);
+        }
+        genVarArgsClose(str, indent);
+        
+        str.formatln("%sreturn fp_out;", next);
+        str.format("%s}\n\n", indent);
+    }
 	
 	/**
 	 * Check if we need to generate a wrapper for expressions for this function.
@@ -607,7 +918,13 @@ aspect CCodeGen {
 	public static final String ASTNode.C_ARRAY_RECORD    = "rec";
 	public static final String ASTNode.C_ARRAY_REFERENCE = "ref";
 	public static final String ASTNode.C_ARRAY_VALUE     = "val";
-	
+    
+    // Suffixes used with functional arguments
+    public static final String ASTNode.C_SUFFIX_FP       = "fp";
+    public static final String ASTNode.C_SUFFIX_FPCL     = "fpcl";
+    public static final String ASTNode.C_SUFFIX_FPCR     = "fpcr";
+    public static final String ASTNode.C_SUFFIX_FPOUT    = "fpout";
+    
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
     
@@ -688,6 +1005,7 @@ aspect CCodeGen {
     eq FRecordType.nameScalar_C()         = myFRecordDecl().name_C();
     eq FStringType.nameScalar_C()         = "jmi_string_t";
     eq FExternalObjectType.nameScalar_C() = "jmi_extobj_t";
+    eq FPartialFunctionType.nameScalar_C() = myFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP) + "*";
     
     syn String FType.nameArray_C()        = "jmi_array_t";
     eq FRecordType.nameArray_C()          = myFRecordDecl().nameArray_C();
@@ -1233,9 +1551,21 @@ aspect CCodeGen {
 	
 	public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
 		super.genVarDecls_C(p, str, indent);
+        if (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall()) {
+            str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
+        }
 		for (FExp arg : getArgs()) 
 			arg.genTempInputDecl_C(p, str, indent);
 	}
+	
+    public void FPartialFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        super.genVarDecls_C(p, str, indent);
+        String fp = myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP);
+        if (myFCallable().isPartialFunction()) {
+            fp = fp + "*";
+        }
+        str.formatln("%s%s %s;", indent, fp, tempName_C());
+    }
 	
 	public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
 		if (hasFExp() && !getFExp().keepAsArray())
@@ -2278,6 +2608,13 @@ aspect CCodeGen {
 			type().genTempInputAssigns_C(p, str, indent, name, this);
 		}
 	}
+    
+    public void FPartialFunctionCall.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
+        if (myFCallable().isPartialFunction()) {
+            type().genTempInputAssigns_C(p, str, indent, tempName_C(), this);
+            str.formatln("JMI_DYNAMIC_ADD(%s)", tempName_C());
+        }
+    }
 	
 	public void FType.genTempInputAssigns_C(
 			CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
@@ -3338,7 +3675,15 @@ aspect CCodeGen {
 		else
 			p.print(this, str, indent);
 	}
-
+    
+    public void FPartialFunctionCall.genArgument_C(CodePrinter p, CodeStream str, String indent) {
+        if (myFCallable().isPartialFunction()) {
+            str.print(tempName_C());
+        } else {
+            p.print(this, str, indent);
+        }
+    }
+    
 	public void FRelExp.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
         getLeft().genTempVars_C(p, str, indent);
         getRight().genTempVars_C(p, str, indent);

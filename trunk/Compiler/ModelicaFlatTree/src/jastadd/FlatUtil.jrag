@@ -1216,6 +1216,8 @@ aspect FlatFunctionUtils {
         public FFunctionVariable expOutput();
         
         public FFunctionDecl asFFunctionDecl();
+        public FFunctionDecl actualFFunctionDecl();
+        public boolean isPartialFunction();
     }
     
     FFunctionDecl     implements FCallable;
@@ -1223,6 +1225,15 @@ aspect FlatFunctionUtils {
     
     syn FFunctionDecl FFunctionDecl.asFFunctionDecl()     = this;
     syn FFunctionDecl FFunctionVariable.asFFunctionDecl() = null;
+    
+    syn FFunctionDecl FFunctionDecl.actualFFunctionDecl()     = this;
+    syn FFunctionDecl FFunctionVariable.actualFFunctionDecl() = myFCallable().actualFFunctionDecl();
+    
+    syn boolean FFunctionDecl.isPartialFunction()     = false;
+    syn boolean FFunctionVariable.isPartialFunction() = type().isPartialFunction();
+    
+    syn boolean FFunctionCall.isPartialFunctionCall() = false;
+    eq FPartialFunctionCall.isPartialFunctionCall()   = true;
      
      syn boolean FFunctionVariable.isInput()  = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
      syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();

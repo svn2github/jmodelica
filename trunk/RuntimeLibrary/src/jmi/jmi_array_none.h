@@ -208,6 +208,10 @@ struct _jmi_dynamic_list {
     jmi_dynamic_list* jmi_dynamic_first = 0;\
     jmi_dynamic_list* jmi_dynamic_last = 0;
 
+/* Macro for adding a pointer to dynamic list - used from generated code */
+#define JMI_DYNAMIC_ADD(pointer) \
+    JMI_DYNAMIC_ADD_POINTER(pointer)
+
 /* Macro for adding a pointer to dynamic list - only for use in other macros */
 #define JMI_DYNAMIC_ADD_POINTER(pointer) \
     do { \
