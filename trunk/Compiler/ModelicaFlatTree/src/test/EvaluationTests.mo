@@ -1977,4 +1977,55 @@ end EvaluationTests.Functional6;
 ")})));
 end Functional6;
 
+model Functional7
+    partial function partFunc
+        input Real x1;
+        output Real y;
+    end partFunc;
+    
+    partial function middleFunc
+        extends partFunc;
+        input Real x2;
+    end middleFunc;
+    
+    function fullFunc
+        extends middleFunc;
+        input Real x3;
+      algorithm
+        y := x1 + x2 + x3;
+    end fullFunc;
+    
+    function useMiddleFunc
+        input middleFunc mf;
+        input Real b;
+        input Real c;
+        output Real y = usePartFunc(function mf(x2=b), c);
+        algorithm
+    end useMiddleFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real c;
+        output Real y;
+      algorithm
+        y := pf(c);
+    end usePartFunc;
+    
+    //function partAlias = usePartFunc;
+    
+    constant Real c1 = useMiddleFunc(function fullFunc(x3=1), 2, 3);
+    Real y1 = useMiddleFunc(function fullFunc(x3=1), 2, 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional7",
+            description="Constant evaluation of functional input arguments, chained",
+            flatModel="
+fclass EvaluationTests.Functional7
+ constant Real c1 = 6.0;
+ constant Real y1 = 6.0;
+end EvaluationTests.Functional7;
+")})));
+end Functional7;
+
 end EvaluationTests;

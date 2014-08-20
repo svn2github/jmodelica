@@ -2249,4 +2249,62 @@ Semantic error at line 2274, column 27:
 ")})));
 end Functional6;
 
+model Functional7
+    partial function partFunc
+        input Real x1;
+        output Real y;
+    end partFunc;
+    
+    partial function middleFunc
+        extends partFunc;
+        input Real x2;
+    end middleFunc;
+    
+    function fullFunc
+        extends middleFunc;
+        input Real x3;
+      algorithm
+        y := x1 + x2 + x3;
+    end fullFunc;
+    
+    function useMiddleFunc
+        input middleFunc mf;
+        input Real b;
+        input Real c;
+        output Real y = usePartFunc(function mf(x1=1,x2="string",x3=3,x4=4), c);
+        algorithm
+    end useMiddleFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real c;
+        output Real y;
+      algorithm
+        y := pf(c);
+    end usePartFunc;
+
+    Real y = useMiddleFunc(function fullFunc(x3=time), time, time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional7",
+            description="Check type error for functional arguments. Chained",
+            errorMessage="
+4 errors found:
+Error: in file '...':
+Semantic error at line 2274, column 49:
+  Creating functional input argument mf(): no input matching named argument x1 found
+Error: in file '...':
+Semantic error at line 2274, column 54:
+  Creating functional input argument mf(): types of named argument x2 and input x2 are not compatible
+    type of '\"string\"' is String
+Error: in file '...':
+Semantic error at line 2274, column 66:
+  Creating functional input argument mf(): no input matching named argument x3 found
+Error: in file '...':
+Semantic error at line 2274, column 71:
+  Creating functional input argument mf(): no input matching named argument x4 found
+")})));
+end Functional7;
+
 end TypeTests;

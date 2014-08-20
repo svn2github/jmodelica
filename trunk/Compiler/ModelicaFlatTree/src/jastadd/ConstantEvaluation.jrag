@@ -519,9 +519,16 @@ aspect ConstantEvaluation {
 		}
         
         /**
-         * Evaluate this as a partial function. Throws exception if not a partial function.
+         * Evaluate this as a function call. Throws exception if not a partial function.
          */
-        public void evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
+        public void evaluateFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
+            throw new ConstantEvaluationException(this, "use this as a partial function: ");
+        }
+        
+        /**
+         * Evaluate this as a partial function call. Throws exception if not a partial function.
+         */
+        public CValue evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
             throw new ConstantEvaluationException(this, "use this as a partial function: ");
         }
 	}
@@ -1403,12 +1410,19 @@ aspect ConstantEvaluation {
     }
     
     public class CValuePartialFunction extends CValue {
-        protected Map<CommonVariableDecl,CValue> values;
+        protected Map<String,CValue> values;
         protected CommonCallable func;
         
-        public CValuePartialFunction(CommonCallable func, Map<CommonVariableDecl,CValue> values) {
+        public CValuePartialFunction(CommonCallable func, Map<String, CValue> values) {
             this.values = values;
             this.func   = func;
+        }
+        
+        public static CValuePartialFunction create(CommonCallable func, Map<CommonVariableDecl,CValue> values) {
+            Map<String,CValue> resValues = new HashMap<String,CValue>();
+            for (CommonVariableDecl cvd : values.keySet())
+                resValues.put(cvd.name(), values.get(cvd));
+            return new CValuePartialFunction(func, resValues);
         }
         
         @Override
@@ -1417,9 +1431,9 @@ aspect ConstantEvaluation {
             buf.append(func.name());
             buf.append('(');
             String sep = "";
-            for (CommonVariableDecl cvd : values.keySet()) {
+            for (String cvd : values.keySet()) {
                 buf.append(sep);
-                buf.append(cvd.name());
+                buf.append(cvd);
                 buf.append("=");
                 buf.append(values.get(cvd));
                 sep = ", ";
@@ -1429,22 +1443,37 @@ aspect ConstantEvaluation {
         }
         
         @Override
-        public void evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
-            Iterator<? extends CommonVariableDecl> concreteIterator;
-            concreteIterator = func.myInputs().iterator();
-            for (CommonVariableDecl partialInput : partial.myInputs()) {
-                CommonVariableDecl concreteInput = concreteIterator.next();
-                values.put(concreteInput, values.get(partialInput));
-                values.remove(partialInput);
+        public void evaluateFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
+            Iterator<? extends CommonVariableDecl> partials = partial.myInputs().iterator();
+            for (CommonVariableDecl fullCvd : func.myInputs()) {
+                if (this.values.containsKey(fullCvd.name())) {
+                    values.put(fullCvd, this.values.get(fullCvd.name()));
+                } else {
+                    CommonVariableDecl partCvd = partials.next();
+                    values.put(fullCvd, values.get(partCvd));
+                    values.remove(partCvd);
+                }
             }
-            values.putAll(this.values);
             func.evaluate(values);
-            concreteIterator = func.myOutputs().iterator();
-            for (CommonVariableDecl partialOutput : partial.myOutputs()) {
-                CommonVariableDecl concreteOutput = concreteIterator.next();
-                values.put(partialOutput, values.get(concreteOutput));
-                values.remove(concreteOutput);
+            partials = partial.myOutputs().iterator();
+            for (CommonVariableDecl fullCvd : func.myOutputs()) {
+                if (partials.hasNext()) {
+                    values.put(partials.next(), values.get(fullCvd));
+                }
+                values.remove(fullCvd);
             }
+        }
+        
+        @Override
+        public CValue evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
+            Map<String,CValue> resValues = new HashMap<String,CValue>();
+            resValues.putAll(this.values);
+            for (CommonVariableDecl partCvd : partial.myInputs()) {
+                if (values.containsKey(partCvd)) {
+                    resValues.put(partCvd.name(), values.get(partCvd));
+                }
+            }
+            return new CValuePartialFunction(func, resValues);
         }
     }
     
@@ -2668,13 +2697,18 @@ aspect ConstantEvaluation {
     syn FAbstractVariable FAbstractVariable.asFAbstractVariable() = this;
     syn FAbstractVariable InstComponentDecl.asFAbstractVariable() = null;
     
-    
+    /**
+     * \brief List of inputs required to evaluate this function call.
+     */
     syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = new ArrayList<CommonVariableDecl>(0);
     eq FFunctionCall.myFuncInputs()           = myInputs();
     eq InstFunctionCall.myFuncInputs()        = myInputs();
     eq FPartialFunctionCall.myFuncInputs()    = myFuncInputsPartial();
     eq InstPartialFunctionCall.myFuncInputs() = myFuncInputsPartial();
     
+    /**
+     * \brief List of outputs generated when evaluating this function call.
+     */
     syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncOutputs() = new ArrayList<CommonVariableDecl>(0);
     eq FFunctionCall.myFuncOutputs()           = myOutputs();
     eq InstFunctionCall.myFuncOutputs()        = myOutputs();
@@ -2808,11 +2842,21 @@ aspect ConstantEvaluation {
     }
     
     public void FAbstractFunctionCall.evaluatePartial(Map<CommonVariableDecl, CValue> values) {
-        Map<CommonVariableDecl, CValue> resValues = new HashMap<CommonVariableDecl, CValue>();
-        resValues.putAll(values);
-        CValue res = new CValuePartialFunction(myCommonCallable(), resValues);
-        values.put(myFuncOutputs().get(0), res);
+        values.put(myCorrespondingInput(), myCommonCallable().evaluatePartial(values));
     }
+    
+    public interface CommonCallable {
+        public CValue evaluatePartial(Map<CommonVariableDecl, CValue> values);
+    }
+    
+    syn CValue InstClassDecl.evaluatePartial(Map<CommonVariableDecl, CValue> values) = 
+        CValuePartialFunction.create(this, values);
+    syn CValue FFunctionDecl.evaluatePartial(Map<CommonVariableDecl, CValue> values) = 
+        CValuePartialFunction.create(this, values);
+    syn CValue InstPartialFunction.evaluatePartial(Map<CommonVariableDecl, CValue> values) =
+        evaluationValue.evaluatePartialFunction(this, values);
+    syn CValue FFunctionVariable.evaluatePartial(Map<CommonVariableDecl, CValue> values) =
+        evaluationValue.evaluatePartialFunction(this, values);
   
   /**
    * Prepare a function fro being function evaluation.
@@ -2886,7 +2930,7 @@ aspect ConstantEvaluation {
     }
     
     public void FFunctionVariable.evaluate(Map<CommonVariableDecl, CValue> values) {
-        evaluationValue.evaluatePartialFunction(myFCallable(), values);
+        evaluationValue.evaluateFunction(myFCallable(), values);
     }
 
     private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
@@ -2969,7 +3013,7 @@ aspect ConstantEvaluation {
     private Map<CommonVariableDecl, CValue> InstBaseClassDecl.currentEvaluationValues = null;
     
     public void InstPartialFunction.evaluate(Map<CommonVariableDecl, CValue> values) {
-        evaluationValue.evaluatePartialFunction(myInstClass(), values);
+        evaluationValue.evaluateFunction(myInstClass(), values);
     }
     /**
      * Save current function evaluation value to map.
