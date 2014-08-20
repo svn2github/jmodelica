@@ -288,7 +288,7 @@ aspect ComplianceCheck {
 	}
 
     public void InstPartialFunction.complianceCheck(ErrorCheckType checkType) {
-        compliance("Using functional input arguments is currently not supported");
+        complianceOnlyFMU("Using functional input arguments is");
         if (isArray())
             compliance("Arrays of functional input arguments is currently not supported");
     }

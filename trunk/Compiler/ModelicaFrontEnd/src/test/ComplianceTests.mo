@@ -771,11 +771,13 @@ model FunctionalArgument
         ComplianceErrorTestCase(
             name="FunctionalArgument",
             description="Test compliance error for functional argument",
+            generate_ode=false,
+            generate_dae=true,
             errorMessage="
 3 errors found:
 Error: in file '...':
 Compliance error at line 764, column 3:
-  Using functional input arguments is currently not supported
+  Using functional input arguments is currently only supported when compiling FMUs
 ")})));
 end FunctionalArgument;
 

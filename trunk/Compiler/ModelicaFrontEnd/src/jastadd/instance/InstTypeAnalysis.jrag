@@ -138,7 +138,7 @@ aspect InstTypeAnalysis {
     eq InstPartialFunctionCall.type() = partialFunctionType();
     
     syn FPartialFunctionType InstPartialFunctionCall.partialFunctionType() {
-         FPartialFunctionType partialType = getName().myInstClassDecl().partialFunctionType();
+         FPartialFunctionType partialType = myInstFunctionDecl().actualInstClassDecl().partialFunctionType();
          Set<String> s = new HashSet(namedArgs());
          List<FRecordComponentType> n = new List<FRecordComponentType>();
          for (FRecordComponentType frc : partialType.getInputs())

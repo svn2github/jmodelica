@@ -15524,7 +15524,7 @@ model Functional1
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="Functional1",
-            description="Check that indices given to integers and enums don't overlap. #3871",
+            description="Code generation for functional input arguments. Basic.",
             variability_propagation=false,
             generate_ode=true,
             equation_sorting=true,
@@ -15541,8 +15541,8 @@ struct func_CCodeGenTests_Functional1_fullFunc_fpout2_ {
 };
 typedef struct func_CCodeGenTests_Functional1_fullFunc_fp2_ func_CCodeGenTests_Functional1_fullFunc_fp2;
 struct func_CCodeGenTests_Functional1_fullFunc_fp2_ {
-    jmi_ad_var_t (*call)(func_CCodeGenTests_Functional1_fullFunc_fp2*, func_CCodeGenTests_Functional1_fullFunc_fpout2*, ...);
-    func_CCodeGenTests_Functional1_fullFunc_fp2* (*fpcr)(func_CCodeGenTests_Functional1_fullFunc_fp2*, ...);
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional1_fullFunc_fp2*, func_CCodeGenTests_Functional1_fullFunc_fpout2*, ...);
+    func_CCodeGenTests_Functional1_fullFunc_fp2* (*fpcr)(func_CCodeGenTests_Functional1_fullFunc_fp2*, func_CCodeGenTests_Functional1_fullFunc_fp2*, ...);
     jmi_ad_var_t x_v;
     int x_v_s;
 };
@@ -15553,8 +15553,8 @@ struct func_CCodeGenTests_Functional1_partFunc_fpout1_ {
 };
 typedef struct func_CCodeGenTests_Functional1_partFunc_fp1_ func_CCodeGenTests_Functional1_partFunc_fp1;
 struct func_CCodeGenTests_Functional1_partFunc_fp1_ {
-    jmi_ad_var_t (*call)(func_CCodeGenTests_Functional1_partFunc_fp1*, func_CCodeGenTests_Functional1_partFunc_fpout1*, ...);
-    func_CCodeGenTests_Functional1_partFunc_fp1* (*fpcr)(func_CCodeGenTests_Functional1_partFunc_fp1*, ...);
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional1_partFunc_fp1*, func_CCodeGenTests_Functional1_partFunc_fpout1*, ...);
+    func_CCodeGenTests_Functional1_partFunc_fp1* (*fpcr)(func_CCodeGenTests_Functional1_partFunc_fp1*, func_CCodeGenTests_Functional1_partFunc_fp1*, ...);
 };
 jmi_ad_var_t func_CCodeGenTests_Functional1_fullFunc_fpcl2(func_CCodeGenTests_Functional1_fullFunc_fp2* fp_in, func_CCodeGenTests_Functional1_fullFunc_fpout2* out, ...);
 func_CCodeGenTests_Functional1_fullFunc_fp2* func_CCodeGenTests_Functional1_fullFunc_fpcr2(func_CCodeGenTests_Functional1_fullFunc_fp2* fp_in, func_CCodeGenTests_Functional1_fullFunc_fp2* fp_out, ...);
@@ -15590,11 +15590,11 @@ func_CCodeGenTests_Functional1_fullFunc_fp2* func_CCodeGenTests_Functional1_full
     if (fp_out == NULL) {
         fp_out = malloc(sizeof(func_CCodeGenTests_Functional1_fullFunc_fp2));
     }
+    fp_out->fpcl = &func_CCodeGenTests_Functional1_fullFunc_fpcl2;
+    fp_out->fpcr = &func_CCodeGenTests_Functional1_fullFunc_fpcr2;
     if (fp_in == NULL) {
-        fp_out->call = &func_CCodeGenTests_Functional1_fullFunc_fpcl2;
         fp_out->x_v_s = 0;
     } else {
-        fp_out->call = fp_in->call;
         fp_out->x_v_s = fp_in->x_v_s;
         fp_out->x_v = fp_in->x_v;
     }
@@ -15610,7 +15610,7 @@ func_CCodeGenTests_Functional1_fullFunc_fp2* func_CCodeGenTests_Functional1_full
 void func_CCodeGenTests_Functional1_usePartFunc_def0(func_CCodeGenTests_Functional1_partFunc_fp1* pf1_v, func_CCodeGenTests_Functional1_partFunc_fp1* pf2_v, jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_v;
-    y_v = pf1_v->call(pf1_v, NULL) + pf2_v->call(pf2_v, NULL);
+    y_v = pf1_v->fpcl(pf1_v, NULL) + pf2_v->fpcl(pf2_v, NULL);
     if (y_o != NULL) *y_o = y_v;
     JMI_DYNAMIC_FREE()
     return;
@@ -15707,7 +15707,7 @@ model Functional2
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="Functional2",
-            description="Check that indices given to integers and enums don't overlap. #3871",
+            description="Code generation for functional input arguments. Multiple inputs and outputs.",
             variability_propagation=false,
             generate_ode=true,
             equation_sorting=true,
@@ -15726,8 +15726,8 @@ struct func_CCodeGenTests_Functional2_fullFunc_fpout2_ {
 };
 typedef struct func_CCodeGenTests_Functional2_fullFunc_fp2_ func_CCodeGenTests_Functional2_fullFunc_fp2;
 struct func_CCodeGenTests_Functional2_fullFunc_fp2_ {
-    jmi_ad_var_t (*call)(func_CCodeGenTests_Functional2_fullFunc_fp2*, func_CCodeGenTests_Functional2_fullFunc_fpout2*, ...);
-    func_CCodeGenTests_Functional2_fullFunc_fp2* (*fpcr)(func_CCodeGenTests_Functional2_fullFunc_fp2*, ...);
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional2_fullFunc_fp2*, func_CCodeGenTests_Functional2_fullFunc_fpout2*, ...);
+    func_CCodeGenTests_Functional2_fullFunc_fp2* (*fpcr)(func_CCodeGenTests_Functional2_fullFunc_fp2*, func_CCodeGenTests_Functional2_fullFunc_fp2*, ...);
     jmi_ad_var_t x1_v;
     int x1_v_s;
     jmi_ad_var_t x2_v;
@@ -15745,8 +15745,8 @@ struct func_CCodeGenTests_Functional2_partFunc_fpout1_ {
 };
 typedef struct func_CCodeGenTests_Functional2_partFunc_fp1_ func_CCodeGenTests_Functional2_partFunc_fp1;
 struct func_CCodeGenTests_Functional2_partFunc_fp1_ {
-    jmi_ad_var_t (*call)(func_CCodeGenTests_Functional2_partFunc_fp1*, func_CCodeGenTests_Functional2_partFunc_fpout1*, ...);
-    func_CCodeGenTests_Functional2_partFunc_fp1* (*fpcr)(func_CCodeGenTests_Functional2_partFunc_fp1*, ...);
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional2_partFunc_fp1*, func_CCodeGenTests_Functional2_partFunc_fpout1*, ...);
+    func_CCodeGenTests_Functional2_partFunc_fp1* (*fpcr)(func_CCodeGenTests_Functional2_partFunc_fp1*, func_CCodeGenTests_Functional2_partFunc_fp1*, ...);
     jmi_ad_var_t x1_v;
     int x1_v_s;
     jmi_ad_var_t x2_v;
@@ -15812,14 +15812,14 @@ func_CCodeGenTests_Functional2_fullFunc_fp2* func_CCodeGenTests_Functional2_full
     if (fp_out == NULL) {
         fp_out = malloc(sizeof(func_CCodeGenTests_Functional2_fullFunc_fp2));
     }
+    fp_out->fpcl = &func_CCodeGenTests_Functional2_fullFunc_fpcl2;
+    fp_out->fpcr = &func_CCodeGenTests_Functional2_fullFunc_fpcr2;
     if (fp_in == NULL) {
-        fp_out->call = &func_CCodeGenTests_Functional2_fullFunc_fpcl2;
         fp_out->x1_v_s = 0;
         fp_out->x2_v_s = 0;
         fp_out->r_v_s = 0;
         fp_out->a_v_s = 0;
     } else {
-        fp_out->call = fp_in->call;
         fp_out->x1_v_s = fp_in->x1_v_s;
         fp_out->x1_v = fp_in->x1_v;
         fp_out->x2_v_s = fp_in->x2_v_s;
@@ -15857,7 +15857,7 @@ void func_CCodeGenTests_Functional2_usePartFunc_def0(func_CCodeGenTests_Function
     jmi_ad_var_t y2_v;
     func_CCodeGenTests_Functional2_partFunc_fpout1 tmp_1;
     tmp_1.n = 2;
-    pf_v->call(pf_v, &tmp_1, (jmi_ad_var_t)(x_v), (jmi_ad_var_t)(x_v + AD_WRAP_LITERAL(1)));
+    pf_v->fpcl(pf_v, &tmp_1, (jmi_ad_var_t)(x_v), (jmi_ad_var_t)(x_v + AD_WRAP_LITERAL(1)));
     y1_v = tmp_1.y1_v;
     y2_v = tmp_1.y2_v;
     y_v = y1_v + y2_v;
@@ -15926,6 +15926,326 @@ jmi_ad_var_t func_CCodeGenTests_Functional2_fullFunc_exp2(jmi_ad_var_t x1_v, jmi
 
 ")})));
 end Functional2;
+
+model Functional3
+    partial function partFunc
+        input Real x1;
+        output Real y;
+    end partFunc;
+    
+    partial function middleFunc
+        extends partFunc;
+        input Real x2;
+    end middleFunc;
+    
+    function fullFunc
+        extends middleFunc;
+        input Real x3;
+      algorithm
+        y := x1 + x2 + x3;
+    end fullFunc;
+    
+    function useMiddleFunc
+        input middleFunc mf;
+        input Real b;
+        input Real c;
+        output Real y = usePartFunc(function mf(x2=b), c);
+        algorithm
+    end useMiddleFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real c;
+        output Real y;
+      algorithm
+        y := pf(c);
+    end usePartFunc;
+
+    Real y = useMiddleFunc(function fullFunc(x3=time), time, time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Functional3",
+            description="Code generation for functional input arguments. Chained.",
+            variability_propagation=false,
+            generate_ode=true,
+            equation_sorting=true,
+            template="
+$C_function_headers$
+$C_functions$
+$C_ode_derivatives$
+",
+            generatedCode="
+typedef struct func_CCodeGenTests_Functional3_fullFunc_fpout4_ func_CCodeGenTests_Functional3_fullFunc_fpout4;
+struct func_CCodeGenTests_Functional3_fullFunc_fpout4_ {
+    int n;
+    jmi_ad_var_t y_v;
+};
+typedef struct func_CCodeGenTests_Functional3_fullFunc_fp4_ func_CCodeGenTests_Functional3_fullFunc_fp4;
+struct func_CCodeGenTests_Functional3_fullFunc_fp4_ {
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional3_fullFunc_fp4*, func_CCodeGenTests_Functional3_fullFunc_fpout4*, ...);
+    func_CCodeGenTests_Functional3_fullFunc_fp4* (*fpcr)(func_CCodeGenTests_Functional3_fullFunc_fp4*, func_CCodeGenTests_Functional3_fullFunc_fp4*, ...);
+    jmi_ad_var_t x1_v;
+    int x1_v_s;
+    jmi_ad_var_t x2_v;
+    int x2_v_s;
+    jmi_ad_var_t x3_v;
+    int x3_v_s;
+};
+typedef struct func_CCodeGenTests_Functional3_partFunc_fpout1_ func_CCodeGenTests_Functional3_partFunc_fpout1;
+struct func_CCodeGenTests_Functional3_partFunc_fpout1_ {
+    int n;
+    jmi_ad_var_t y_v;
+};
+typedef struct func_CCodeGenTests_Functional3_partFunc_fp1_ func_CCodeGenTests_Functional3_partFunc_fp1;
+struct func_CCodeGenTests_Functional3_partFunc_fp1_ {
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional3_partFunc_fp1*, func_CCodeGenTests_Functional3_partFunc_fpout1*, ...);
+    func_CCodeGenTests_Functional3_partFunc_fp1* (*fpcr)(func_CCodeGenTests_Functional3_partFunc_fp1*, func_CCodeGenTests_Functional3_partFunc_fp1*, ...);
+    jmi_ad_var_t x1_v;
+    int x1_v_s;
+};
+typedef struct func_CCodeGenTests_Functional3_middleFunc_fpout2_ func_CCodeGenTests_Functional3_middleFunc_fpout2;
+struct func_CCodeGenTests_Functional3_middleFunc_fpout2_ {
+    int n;
+    jmi_ad_var_t y_v;
+};
+typedef struct func_CCodeGenTests_Functional3_middleFunc_fp2_ func_CCodeGenTests_Functional3_middleFunc_fp2;
+struct func_CCodeGenTests_Functional3_middleFunc_fp2_ {
+    jmi_ad_var_t (*fpcl)(func_CCodeGenTests_Functional3_middleFunc_fp2*, func_CCodeGenTests_Functional3_middleFunc_fpout2*, ...);
+    func_CCodeGenTests_Functional3_middleFunc_fp2* (*fpcr)(func_CCodeGenTests_Functional3_middleFunc_fp2*, func_CCodeGenTests_Functional3_middleFunc_fp2*, ...);
+    jmi_ad_var_t x1_v;
+    int x1_v_s;
+    jmi_ad_var_t x2_v;
+    int x2_v_s;
+};
+jmi_ad_var_t func_CCodeGenTests_Functional3_fullFunc_fpcl4(func_CCodeGenTests_Functional3_fullFunc_fp4* fp_in, func_CCodeGenTests_Functional3_fullFunc_fpout4* out, ...);
+func_CCodeGenTests_Functional3_fullFunc_fp4* func_CCodeGenTests_Functional3_fullFunc_fpcr4(func_CCodeGenTests_Functional3_fullFunc_fp4* fp_in, func_CCodeGenTests_Functional3_fullFunc_fp4* fp_out, ...);
+jmi_ad_var_t func_CCodeGenTests_Functional3_middleFunc_fpcl2(func_CCodeGenTests_Functional3_middleFunc_fp2* fp_in, func_CCodeGenTests_Functional3_middleFunc_fpout2* out, ...);
+func_CCodeGenTests_Functional3_middleFunc_fp2* func_CCodeGenTests_Functional3_middleFunc_fpcr2(func_CCodeGenTests_Functional3_middleFunc_fp2* fp_in, func_CCodeGenTests_Functional3_middleFunc_fp2* fp_out, ...);
+void func_CCodeGenTests_Functional3_usePartFunc_def0(func_CCodeGenTests_Functional3_partFunc_fp1* pf_v, jmi_ad_var_t c_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_Functional3_usePartFunc_exp0(func_CCodeGenTests_Functional3_partFunc_fp1* pf_v, jmi_ad_var_t c_v);
+void func_CCodeGenTests_Functional3_partFunc_def1(jmi_ad_var_t x1_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_Functional3_partFunc_exp1(jmi_ad_var_t x1_v);
+void func_CCodeGenTests_Functional3_middleFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_Functional3_middleFunc_exp2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v);
+void func_CCodeGenTests_Functional3_useMiddleFunc_def3(func_CCodeGenTests_Functional3_middleFunc_fp2* mf_v, jmi_ad_var_t b_v, jmi_ad_var_t c_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_Functional3_useMiddleFunc_exp3(func_CCodeGenTests_Functional3_middleFunc_fp2* mf_v, jmi_ad_var_t b_v, jmi_ad_var_t c_v);
+void func_CCodeGenTests_Functional3_fullFunc_def4(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_Functional3_fullFunc_exp4(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v);
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_fullFunc_fpcl4(func_CCodeGenTests_Functional3_fullFunc_fp4* fp_in, func_CCodeGenTests_Functional3_fullFunc_fpout4* out, ...) {
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    va_list argp;
+    va_start(argp, out);
+    if (fp_in->x1_v_s) {
+        tmp_1 = fp_in->x1_v;
+    } else {
+        tmp_1 = va_arg(argp, jmi_ad_var_t);
+    }
+    if (fp_in->x2_v_s) {
+        tmp_2 = fp_in->x2_v;
+    } else {
+        tmp_2 = va_arg(argp, jmi_ad_var_t);
+    }
+    if (fp_in->x3_v_s) {
+        tmp_3 = fp_in->x3_v;
+    } else {
+        tmp_3 = va_arg(argp, jmi_ad_var_t);
+    }
+    va_end(argp);
+    func_CCodeGenTests_Functional3_fullFunc_def4(tmp_1, tmp_2, tmp_3, &tmp_4);
+    if (out != NULL) {
+        if (out->n > 0) {
+            out->y_v = tmp_4;
+        }
+    }
+    return tmp_4;
+}
+
+func_CCodeGenTests_Functional3_fullFunc_fp4* func_CCodeGenTests_Functional3_fullFunc_fpcr4(func_CCodeGenTests_Functional3_fullFunc_fp4* fp_in, func_CCodeGenTests_Functional3_fullFunc_fp4* fp_out, ...) {
+    va_list argp;
+    if (fp_out == NULL) {
+        fp_out = malloc(sizeof(func_CCodeGenTests_Functional3_fullFunc_fp4));
+    }
+    fp_out->fpcl = &func_CCodeGenTests_Functional3_fullFunc_fpcl4;
+    fp_out->fpcr = &func_CCodeGenTests_Functional3_fullFunc_fpcr4;
+    if (fp_in == NULL) {
+        fp_out->x1_v_s = 0;
+        fp_out->x2_v_s = 0;
+        fp_out->x3_v_s = 0;
+    } else {
+        fp_out->x1_v_s = fp_in->x1_v_s;
+        fp_out->x1_v = fp_in->x1_v;
+        fp_out->x2_v_s = fp_in->x2_v_s;
+        fp_out->x2_v = fp_in->x2_v;
+        fp_out->x3_v_s = fp_in->x3_v_s;
+        fp_out->x3_v = fp_in->x3_v;
+    }
+    va_start(argp, fp_out);
+    if (!fp_out->x1_v_s && va_arg(argp, int)) {
+        fp_out->x1_v_s = 1;
+        fp_out->x1_v = va_arg(argp, jmi_ad_var_t);
+    }
+    if (!fp_out->x2_v_s && va_arg(argp, int)) {
+        fp_out->x2_v_s = 1;
+        fp_out->x2_v = va_arg(argp, jmi_ad_var_t);
+    }
+    if (!fp_out->x3_v_s && va_arg(argp, int)) {
+        fp_out->x3_v_s = 1;
+        fp_out->x3_v = va_arg(argp, jmi_ad_var_t);
+    }
+    va_end(argp);
+    return fp_out;
+}
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_middleFunc_fpcl2(func_CCodeGenTests_Functional3_middleFunc_fp2* fp_in, func_CCodeGenTests_Functional3_middleFunc_fpout2* out, ...) {
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    va_list argp;
+    va_start(argp, out);
+    if (fp_in->x1_v_s) {
+        tmp_1 = fp_in->x1_v;
+    } else {
+        tmp_1 = va_arg(argp, jmi_ad_var_t);
+    }
+    if (fp_in->x2_v_s) {
+        tmp_2 = fp_in->x2_v;
+    } else {
+        tmp_2 = va_arg(argp, jmi_ad_var_t);
+    }
+    va_end(argp);
+    func_CCodeGenTests_Functional3_middleFunc_def2(tmp_1, tmp_2, &tmp_3);
+    if (out != NULL) {
+        if (out->n > 0) {
+            out->y_v = tmp_3;
+        }
+    }
+    return tmp_3;
+}
+
+func_CCodeGenTests_Functional3_middleFunc_fp2* func_CCodeGenTests_Functional3_middleFunc_fpcr2(func_CCodeGenTests_Functional3_middleFunc_fp2* fp_in, func_CCodeGenTests_Functional3_middleFunc_fp2* fp_out, ...) {
+    va_list argp;
+    if (fp_out == NULL) {
+        fp_out = malloc(sizeof(func_CCodeGenTests_Functional3_middleFunc_fp2));
+    }
+    fp_out->fpcl = &func_CCodeGenTests_Functional3_middleFunc_fpcl2;
+    fp_out->fpcr = &func_CCodeGenTests_Functional3_middleFunc_fpcr2;
+    if (fp_in == NULL) {
+        fp_out->x1_v_s = 0;
+        fp_out->x2_v_s = 0;
+    } else {
+        fp_out->x1_v_s = fp_in->x1_v_s;
+        fp_out->x1_v = fp_in->x1_v;
+        fp_out->x2_v_s = fp_in->x2_v_s;
+        fp_out->x2_v = fp_in->x2_v;
+    }
+    va_start(argp, fp_out);
+    if (!fp_out->x1_v_s && va_arg(argp, int)) {
+        fp_out->x1_v_s = 1;
+        fp_out->x1_v = va_arg(argp, jmi_ad_var_t);
+    }
+    if (!fp_out->x2_v_s && va_arg(argp, int)) {
+        fp_out->x2_v_s = 1;
+        fp_out->x2_v = va_arg(argp, jmi_ad_var_t);
+    }
+    va_end(argp);
+    return fp_out;
+}
+
+void func_CCodeGenTests_Functional3_usePartFunc_def0(func_CCodeGenTests_Functional3_partFunc_fp1* pf_v, jmi_ad_var_t c_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = pf_v->fpcl(pf_v, NULL, (jmi_ad_var_t)(c_v));
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_usePartFunc_exp0(func_CCodeGenTests_Functional3_partFunc_fp1* pf_v, jmi_ad_var_t c_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_Functional3_usePartFunc_def0(pf_v, c_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_Functional3_partFunc_def1(jmi_ad_var_t x1_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_partFunc_exp1(jmi_ad_var_t x1_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_Functional3_partFunc_def1(x1_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_Functional3_middleFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_middleFunc_exp2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_Functional3_middleFunc_def2(x1_v, x2_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_Functional3_useMiddleFunc_def3(func_CCodeGenTests_Functional3_middleFunc_fp2* mf_v, jmi_ad_var_t b_v, jmi_ad_var_t c_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_Functional3_middleFunc_fp2* tmp_1;
+    tmp_1 = mf_v->fpcr(mf_v, NULL, 0, 1, (jmi_ad_var_t)(b_v));
+    JMI_DYNAMIC_ADD(tmp_1)
+    y_v = func_CCodeGenTests_Functional3_usePartFunc_exp0((func_CCodeGenTests_Functional3_partFunc_fp1*)tmp_1, c_v);
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_useMiddleFunc_exp3(func_CCodeGenTests_Functional3_middleFunc_fp2* mf_v, jmi_ad_var_t b_v, jmi_ad_var_t c_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_Functional3_useMiddleFunc_def3(mf_v, b_v, c_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_Functional3_fullFunc_def4(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = x1_v + x2_v + x3_v;
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_Functional3_fullFunc_exp4(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_Functional3_fullFunc_def4(x1_v, x2_v, x3_v, &y_v);
+    return y_v;
+}
+
+
+    func_CCodeGenTests_Functional3_fullFunc_fp4 tmp_1;
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = func_CCodeGenTests_Functional3_useMiddleFunc_exp3((func_CCodeGenTests_Functional3_middleFunc_fp2*)func_CCodeGenTests_Functional3_fullFunc_fpcr4(NULL, &tmp_1, 0, 0, 1, (jmi_ad_var_t)(_time)), _time, _time);
+/********* Write back reinits *******/
+
+
+
+")})));
+end Functional3;
 
 
 end CCodeGenTests;

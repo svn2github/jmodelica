@@ -442,7 +442,7 @@ aspect CCodeGen {
             out = "&" +out;
             str.print(indent);
         }
-        str.format("%s->call(%s, %s", name_C(), name_C(), out);
+        str.format("%s->fpcl(%s, %s", name_C(), name_C(), out);
         String sep = ", ";
         for (FExp arg : call.getArgs()) {
             str.format("%s(%s)(", sep, arg.type().type_C());
@@ -475,10 +475,12 @@ aspect CCodeGen {
         } else {
             result = "&" + tempName_C();
         }
-        str.print("(");
-        str.print(myCorrespondingInput().type().type_C());
-        str.print(")");
-        str.print(funcNameUnderscore(C_SUFFIX_FPCR));
+        if (fc.isPartialFunction()) {
+            str.print(previous);
+            str.print("->fpcr");
+        } else {
+            str.print(fc.funcNameUnderscore(C_SUFFIX_FPCR));
+        }
         str.print("(");
         str.print(previous);
         str.print(", ");
@@ -620,8 +622,8 @@ aspect CCodeGen {
         endStruct_C(str, indent);
         
         beginStruct_C(str, indent, fp);
-        str.formatln("%s%s (*call)(%s*, %s*, ...);", next, returnDefinition().getDeclaredType_C(), fp, out);
-        str.formatln("%s%s* (*fpcr)(%s*, ...);", next, fp, fp);
+        str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, returnDefinition().getDeclaredType_C(), fp, out);
+        str.formatln("%s%s* (*fpcr)(%s*, %s*, ...);", next, fp, fp, fp);
         for (FFunctionVariable ffv : myInputs()) {
             String name = ffv.name_C();
             str.formatln("%s%s %s;", next, ffv.type().type_C(), name);
@@ -783,7 +785,7 @@ aspect CCodeGen {
               str.formatln("%s}", next);
               i++;
         }
-        genVarArgsClose(str, indent);
+        genVarArgsClose(str, next);
         
         str.format("%s%s(", next, funcNameUnderscore("def"));
         String prefix = "";
@@ -817,18 +819,19 @@ aspect CCodeGen {
         // FPCR
         prettyPrintHeadFPCR_C(str, indent);
         str.print(" {\n");
-        genVarArgsDecl(str, indent);
+        genVarArgsDecl(str, next);
         str.formatln("%sif (fp_out == NULL) {", next);
         str.formatln("%sfp_out = malloc(sizeof(%s));", next2, fp);
         str.formatln("%s}", next);
         
+        str.formatln("%sfp_out->fpcl = &%s;", next, funcNameUnderscore(C_SUFFIX_FPCL));
+        str.formatln("%sfp_out->fpcr = &%s;", next, funcNameUnderscore(C_SUFFIX_FPCR));
+        
         str.formatln("%sif (fp_in == NULL) {", next);
-        str.formatln("%sfp_out->call = &%s;", next2, funcNameUnderscore(C_SUFFIX_FPCL));
         for (FFunctionVariable ffv : inputs) {
             str.formatln("%sfp_out->%s_s = 0;", next2, ffv.name_C());
         }
         str.formatln("%s} else {", next);
-        str.formatln("%sfp_out->call = fp_in->call;", next2, fp);
         for (FFunctionVariable ffv : inputs) {
             String name = ffv.name_C();
             str.formatln("%sfp_out->%s_s = fp_in->%s_s;", next2, name, name);
@@ -836,7 +839,7 @@ aspect CCodeGen {
         }
         str.formatln("%s}", next);
         
-        genVarArgsOpen(str, indent, "fp_out");
+        genVarArgsOpen(str, next, "fp_out");
         for (FFunctionVariable ffv : inputs) {
             String name = ffv.name_C();
             str.format("%sif (!fp_out->%s_s && ", next, name);
@@ -846,7 +849,7 @@ aspect CCodeGen {
             genVarArgsRead(str, next2, "fp_out->" + name, ffv.type_C());
             str.formatln("%s}", next);
         }
-        genVarArgsClose(str, indent);
+        genVarArgsClose(str, next);
         
         str.formatln("%sreturn fp_out;", next);
         str.format("%s}\n\n", indent);
@@ -2612,7 +2615,7 @@ aspect CCodeGen {
     public void FPartialFunctionCall.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
         if (myFCallable().isPartialFunction()) {
             type().genTempInputAssigns_C(p, str, indent, tempName_C(), this);
-            str.formatln("JMI_DYNAMIC_ADD(%s)", tempName_C());
+            str.formatln("%sJMI_DYNAMIC_ADD(%s)", indent, tempName_C());
         }
     }
 	
@@ -3677,6 +3680,9 @@ aspect CCodeGen {
 	}
     
     public void FPartialFunctionCall.genArgument_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("(");
+        str.print(myCorrespondingInput().type().type_C());
+        str.print(")");
         if (myFCallable().isPartialFunction()) {
             str.print(tempName_C());
         } else {

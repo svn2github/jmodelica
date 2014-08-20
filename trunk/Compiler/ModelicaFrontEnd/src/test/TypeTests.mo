@@ -2167,9 +2167,6 @@ model Functional4
             errorMessage="
 3 errors found:
 Error: in file '...':
-Compliance error at line 775, column 24:
-  Using functional input arguments is currently not supported
-Error: in file '...':
 Semantic error at line 783, column 27:
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'time' is Real
@@ -2209,9 +2206,6 @@ model Functional5
             description="Check type error",
             errorMessage="
 3 errors found:
-Error: in file '...':
-Compliance error at line 775, column 24:
-  Using functional input arguments is currently not supported
 Error: in file '...':
 Semantic error at line 783, column 27:
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible

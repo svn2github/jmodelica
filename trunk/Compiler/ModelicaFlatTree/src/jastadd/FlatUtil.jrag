@@ -440,8 +440,10 @@ aspect FlatNames {
     syn String FFunctionCall.funcNameUnderscore(String suffix)       = getName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionDecl.funcNameUnderscore(String suffix)       = getFQName().funcNameUnderscore(suffix) + functionIndex();
     syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix) + functionIndex();
+    syn String FFunctionVariable.funcNameUnderscore(String suffix)   = myFCallable().funcNameUnderscore(suffix);
 
     public interface FCallable {
+        public String funcNameUnderscore(String suffix);
         public int functionIndex();
     }
     

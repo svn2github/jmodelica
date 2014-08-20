@@ -681,9 +681,6 @@ model Array1
 Error: in file '...':
 Compliance error at line 738, column 24:
   Arrays of functional input arguments is currently not supported
-Error: in file '...':
-Compliance error at line 738, column 24:
-  Using functional input arguments is currently not supported
 ")})));
 end Array1;
 

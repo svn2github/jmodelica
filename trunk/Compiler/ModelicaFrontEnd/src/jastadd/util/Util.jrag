@@ -1255,6 +1255,7 @@ aspect MultiDeclMethods {
         public InstClassDecl    asInstClassDecl();
         public InstNode         asInstNode();
         public InstFunctionDecl actualInstFunctionDecl();
+        public InstClassDecl    actualInstClassDecl();
         
         public String qualifiedName();
         public String name();
@@ -1270,6 +1271,9 @@ aspect MultiDeclMethods {
     
     syn InstFunctionDecl InstClassDecl.actualInstFunctionDecl()       = actualInstClass();
     syn InstFunctionDecl InstPartialFunction.actualInstFunctionDecl() = this;
+    
+    syn InstClassDecl InstClassDecl.actualInstClassDecl()       = actualInstClass();
+    syn InstClassDecl InstPartialFunction.actualInstClassDecl() = myInstClass().actualInstClass();
     
     syn InstNode InstClassDecl.asInstNode() = this;
     syn InstNode InstPartialFunction.asInstNode()  = this;
