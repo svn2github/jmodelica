@@ -982,6 +982,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public void generateAttributes(CodeStream genPrinter) {
+            Boolean supportDirDer = fclass.root().options.getBooleanOption("generate_ode_jacobian");
+            
 			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                     false,                   genPrinter);
 			generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
@@ -991,7 +993,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
 			generateAttribute("canSerializeFMUstate",                   false,                   genPrinter);
-			generateAttribute("providesDirectionalDerivative",          true,                    genPrinter);
+			generateAttribute("providesDirectionalDerivative",          supportDirDer,           genPrinter);
         }
 	}
 	
