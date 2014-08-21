@@ -439,8 +439,7 @@ static void create_log_file_if_needed(log_t *log) {
                                            instance_name);
         }
         else {
-            sprintf(filename, "%s_runtime_log.xml", cb->model_name,
-                                           instance_name);
+            sprintf(filename, "%s_runtime_log.xml", cb->model_name);
         }
         /* TODO: 
            create_log_file_if_needed need to be called several times since the options are
