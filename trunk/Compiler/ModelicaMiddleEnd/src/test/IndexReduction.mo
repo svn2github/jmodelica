@@ -4016,6 +4016,44 @@ equation
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
+model Functional1
+    partial function partFunc
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x1;
+      algorithm
+        y := x1;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        output Real y;
+      algorithm
+        y := pf();
+        annotation(smoothOrder=1);
+    end usePartFunc;
+    
+    Real x1,x2;
+equation
+    der(x1) + der(x2) = 1;
+    x1 + usePartFunc(function fullFunc(x1=x2)) = 1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Functional1",
+            description="Test failing differentiation of functional input arguments",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Cannot differentiate call to function without derivative or smooth order annotation 'pf()' in equation:
+   x1 + IndexReduction.Functional1.usePartFunc(function IndexReduction.Functional1.fullFunc(x2)) = 1
+")})));
+end Functional1;
+
 model FunctionAttributeScalarization1
     function F1
         input Real x;

@@ -478,11 +478,11 @@ aspect InstFunctionBinding {
         private InstFunctionArgument[] bound;
         private ArrayList<InstFunctionArgument> unbindable;
         private ArrayList<InstComponentDecl> inputs;
-        private InstFunctionDecl target;
+        private InstCallable target;
         private InstFunctionCall source;
         private boolean ok = true;
 
-        public ArgumentBinding(InstFunctionDecl target, InstFunctionCall source, boolean infArgs) {
+        public ArgumentBinding(InstCallable target, InstFunctionCall source, boolean infArgs) {
             inputs = source.myInputsToBind(target);
             unbindable = new ArrayList<InstFunctionArgument>();
             this.target = target;
@@ -503,7 +503,7 @@ aspect InstFunctionBinding {
         /**
          * Get the target function.
          */
-        public InstFunctionDecl target() {
+        public InstCallable target() {
             return target;
         }
 
@@ -640,8 +640,8 @@ aspect InstFunctionBinding {
 
             // Get info
             boolean generated = this.generated;
-            InstFunctionDecl target = getName().myInstFunctionDecl();
-            InstFunctionDecl namedTarget = target;
+            InstCallable target = getName().myInstCallable();
+            InstCallable namedTarget = target;
             String name = target.qualifiedName();
             ArgumentBinding binding = null;
 
@@ -719,8 +719,8 @@ aspect InstFunctionBinding {
     private boolean InstFunctionCall.bound = false;
     public boolean InstFunctionCall.generated = false;
     
-    syn ArrayList<InstComponentDecl> InstFunctionCall.myInputsToBind(InstFunctionDecl target) = target.myCallInputs();
-    eq InstPartialFunctionCall.myInputsToBind(InstFunctionDecl target) {
+    syn ArrayList<InstComponentDecl> InstFunctionCall.myInputsToBind(InstCallable target) = target.myCallInputs();
+    eq InstPartialFunctionCall.myInputsToBind(InstCallable target) {
         ArrayList<InstComponentDecl> allInputs = super.myInputsToBind(target);
         FType type = myCorrespondingInput().type();
         Set<String> filter = new HashSet<String>();

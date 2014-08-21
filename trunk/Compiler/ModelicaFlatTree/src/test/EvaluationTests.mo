@@ -2085,4 +2085,48 @@ end EvaluationTests.Functional8;
 ")})));
 end Functional8;
 
+
+model Functional9
+    partial function partFunc
+        input Real x1;
+        input Real x3;
+        input Real x5;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        input Real x1;
+        input Real x2;
+        input Real x3;
+        input Real x4;
+        input Real x5;
+        output Real y;
+      algorithm
+        y := x1 + x2 + x3 + x4 + x5;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        output Real y;
+      algorithm
+        y := pf(1,3,5);
+    end usePartFunc;
+    
+    function usePartAlias = usePartFunc;
+    
+    constant Real c1 = usePartFunc(function fullFunc(x2=2, x4=4));
+    Real y1 = usePartFunc(function fullFunc(x2=2, x4=4));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional9",
+            description="Constant evaluation of functional input arguments. Interleaving binds.",
+            flatModel="
+fclass EvaluationTests.Functional9
+ constant Real c1 = 15.0;
+ constant Real y1 = 15.0;
+end EvaluationTests.Functional9;
+")})));
+end Functional9;
+
 end EvaluationTests;

@@ -1196,11 +1196,11 @@ aspect FlatFunctionUtils {
     }
     
     public interface FCallable        extends CommonCallable {}
-    public interface InstFunctionDecl extends CommonCallable {}
+    public interface InstCallable extends CommonCallable {}
     
     syn CommonCallable FAbstractFunctionCall.myCommonCallable() = null;
     eq FFunctionCall.myCommonCallable()    = myFCallable();
-    eq InstFunctionCall.myCommonCallable() = myInstFunctionDecl();
+    eq InstFunctionCall.myCommonCallable() = myInstCallable();
     
     /**
      * Interface for a flat callable (function declaration or partial 
@@ -1353,8 +1353,8 @@ aspect FlatFunctionUtils {
      * \brief List of CommonVariableDecl used as inputs in this function call
      */
     public abstract ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myCallInputs();
-    syn ArrayList<InstComponentDecl> InstFunctionCall.myCallInputs()       = myInstFunctionDecl().myCallInputs();
-    eq InstPartialFunctionCall.myCallInputs()                              = filterPartialInputs(myInstFunctionDecl().myCallInputs());
+    syn ArrayList<InstComponentDecl> InstFunctionCall.myCallInputs()       = myInstCallable().myCallInputs();
+    eq InstPartialFunctionCall.myCallInputs()                              = filterPartialInputs(myInstCallable().myCallInputs());
     syn ArrayList<FFunctionVariable> FFunctionCall.myCallInputs()          = myFCallable().myInputs();
     eq FPartialFunctionCall.myCallInputs()                                 = filterPartialInputs(myFCallable().myInputs());
     syn ArrayList<CommonVariableDecl> FBuiltInFunctionCall.myCallInputs()  = new ArrayList<CommonVariableDecl>();
@@ -1381,7 +1381,7 @@ aspect FlatFunctionUtils {
      * \brief List of CommonVariableDecl used as outputs in this function call
      */
     public abstract ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myCallOutputs();
-    syn ArrayList<InstComponentDecl> InstFunctionCall.myCallOutputs()       = myInstFunctionDecl().myOutputs();
+    syn ArrayList<InstComponentDecl> InstFunctionCall.myCallOutputs()       = myInstCallable().myOutputs();
     eq InstPartialFunctionCall.myCallOutputs()                              = new ArrayList<InstComponentDecl>(Arrays.asList((InstComponentDecl)myCorrespondingInput()));
     syn ArrayList<FFunctionVariable> FFunctionCall.myCallOutputs()          = myFCallable().myOutputs();
     eq FPartialFunctionCall.myCallOutputs()                                 = new ArrayList<FFunctionVariable>(Arrays.asList((FFunctionVariable)myCorrespondingInput()));

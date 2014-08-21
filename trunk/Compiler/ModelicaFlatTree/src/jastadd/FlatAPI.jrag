@@ -2028,7 +2028,7 @@ aspect FVariableUses {
      */
     inh CommonVariableDecl FExp.myCorrespondingInput();
     eq FFunctionCall.getArg(int i).myCorrespondingInput()    = myFCallable().myInput(i);
-    eq InstFunctionCall.getArg(int i).myCorrespondingInput() = myInstFunctionDecl().myCallInputs().get(i);
+    eq InstFunctionCall.getArg(int i).myCorrespondingInput() = myInstCallable().myCallInputs().get(i);
     eq FClass.getChild().myCorrespondingInput() {
         throw new UnsupportedOperationException();
     }

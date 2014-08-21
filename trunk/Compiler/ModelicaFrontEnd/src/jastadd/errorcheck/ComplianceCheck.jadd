@@ -291,12 +291,24 @@ aspect ComplianceCheck {
         complianceOnlyFMU("Using functional input arguments is");
         for (InstComponentDecl icd : myInputs()) {
             if (icd.hasBindingExp()) {
-                compliance("Creating functional input arguments from functions with default input arguments is not supported");
+                compliance("Creating functional input arguments from functions with default input arguments is currently not supported");
+                break;
+            }
+        }
+        for (InstComponentDecl icd : myInputs()) {
+            if (icd.isComposite()) {
+                compliance("Functional input arguments with record/array inputs/outputs is currently not supported");
+                break;
+            }
+        }
+        for (InstComponentDecl icd : myOutputs()) {
+            if (icd.isComposite()) {
+                compliance("Functional input arguments with record/array inputs/outputs is currently not supported");
                 break;
             }
         }
         if (hasBindingExp()) {
-            compliance("Default values of functional input arguments is not supported");
+            compliance("Default values of functional input arguments is currently not supported");
         }
         if (isArray())
             compliance("Arrays of functional input arguments is currently not supported");

@@ -3197,5 +3197,63 @@ end FunctionInlining.AssertInline1;
 ")})));
 end AssertInline1;
 
+
+model FunctionalInline1
+    partial function partFunc
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x1;
+      algorithm
+        y := x1;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        output Real y;
+      algorithm
+        y := pf();
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(x1=time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionalInline1",
+            description="Don't inline function containing functional arguments",
+            flatModel="
+fclass FunctionInlining.FunctionalInline1
+ Real y;
+equation
+ y = FunctionInlining.FunctionalInline1.usePartFunc(function FunctionInlining.FunctionalInline1.fullFunc(time));
+
+public
+ function FunctionInlining.FunctionalInline1.usePartFunc
+  input ((Real y) = FunctionInlining.FunctionalInline1.partFunc()) pf;
+  output Real y;
+ algorithm
+  y := pf();
+  return;
+ end FunctionInlining.FunctionalInline1.usePartFunc;
+
+ function FunctionInlining.FunctionalInline1.partFunc
+  output Real y;
+ algorithm
+  return;
+ end FunctionInlining.FunctionalInline1.partFunc;
+
+ function FunctionInlining.FunctionalInline1.fullFunc
+  output Real y;
+  input Real x1;
+ algorithm
+  y := x1;
+  return;
+ end FunctionInlining.FunctionalInline1.fullFunc;
+
+end FunctionInlining.FunctionalInline1;
+")})));
+end FunctionalInline1;
 	
 end FunctionInlining;

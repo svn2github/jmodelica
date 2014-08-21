@@ -138,7 +138,7 @@ aspect InstTypeAnalysis {
     eq InstPartialFunctionCall.type() = functionType();
     
     syn FFunctionType InstPartialFunctionCall.functionType() {
-         FFunctionType type = myInstFunctionDecl().actualInstClassDecl().functionType();
+         FFunctionType type = myInstCallable().actualInstClassDecl().functionType();
          Set<String> s = new HashSet(namedArgs());
          List<FRecordComponentType> n = new List<FRecordComponentType>();
          for (FRecordComponentType frc : type.getInputs())
@@ -150,7 +150,7 @@ aspect InstTypeAnalysis {
     
     syn ArrayList<String> InstPartialFunctionCall.namedArgs() {
         ArrayList<String> res = new ArrayList<String>();
-        for (InstComponentDecl icd : myInputsToBind(myInstFunctionDecl()))
+        for (InstComponentDecl icd : myInputsToBind(myInstCallable()))
             res.add(icd.name());
         return res;
     }

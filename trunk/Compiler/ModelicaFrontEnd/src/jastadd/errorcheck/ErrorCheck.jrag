@@ -1077,7 +1077,7 @@ aspect InstanceErrorCheck {
 	    if (!errorChecked) {
 	    	errorChecked = true;
 	    	// Check that the function exists
-            InstFunctionDecl func = getName().myInstFunctionDecl();
+            InstCallable func = getName().myInstCallable();
 	    	if (!func.isCallable()) {
 	    		// Report that function does not exist
 		    	String name = getName().name();

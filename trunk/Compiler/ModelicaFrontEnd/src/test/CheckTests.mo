@@ -553,7 +553,7 @@ model PartialCall1
     Real y1 = usePartFunc(fullFunc(), time);
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="PartialCall1",
+            name="Functional_PartialCall1",
             description="Check error when leaving out function key word",
             errorMessage="
 2 errors found:
@@ -591,7 +591,7 @@ model PartialCall2
     Real y1 = usePartFunc(function fullFunc(), time) + partFunc(time);
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="PartialCall2",
+            name="Functional_PartialCall2",
             description="Check error when calling partial function declaration directly",
             errorMessage="
 2 errors found:
@@ -630,7 +630,7 @@ model NumArgs1
     Real y2 = usePartFunc(function fullFunc(x=y1,x2=y1), y1);
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="NumArgs1",
+            name="Functional_NumArgs1",
             description="Check missing and extra arguments for functional inputs",
             errorMessage="
 3 errors found:
@@ -674,7 +674,7 @@ model Array1
     
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
-            name="Array1",
+            name="Functional_Array1",
             description="Check error when declaring as array",
             errorMessage="
 2 errors found:
@@ -709,13 +709,13 @@ model Bind1
     
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
-            name="Bind1",
+            name="Functional_Bind1",
             description="Check error when having input default value",
             errorMessage="
 2 errors found:
 Error: in file '...':
 Compliance error at line 738, column 24:
-  Creating functional input arguments from functions with default input arguments is not supported
+  Creating functional input arguments from functions with default input arguments is currently not supported
 ")})));
 end Bind1;
 
@@ -746,31 +746,121 @@ model Bind2
     
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
-            name="Bind2",
+            name="Functional_Bind2",
             description="Check error when having input default value",
             errorMessage="
 6 errors found:
 
 Error: in file '...':
 Compliance error at line 735, column 24:
-  Default values of functional input arguments is not supported
+  Default values of functional input arguments is currently not supported
 Error: in file '...':
 Semantic error at line 736, column 30:
   The binding expression of the variable pf1 does not match the declared type of the variable
 Error: in file '...':
 Compliance error at line 736, column 31:
-  Default values of functional input arguments is not supported
+  Default values of functional input arguments is currently not supported
 Error: in file '...':
 Semantic error at line 737, column 30:
   Illegal access to class in expression: fullFunc
 Error: in file '...':
 Compliance error at line 737, column 38:
-  Default values of functional input arguments is not supported
+  Default values of functional input arguments is currently not supported
 Error: in file '...':
 Semantic error at line 738, column 30:
   Illegal access to class in expression: fullFunc
 ")})));
 end Bind2;
+
+model Bind3
+    record R
+        Real a;
+    end R;
+    
+    partial function partFunc
+        input R x1;
+        output Real y;
+    end partFunc;
+    
+    partial function partFunc2
+        input Real[1] x1;
+        output Real y;
+    end partFunc2;
+    
+    function fullFunc
+        extends partFunc;
+      algorithm
+        y := x1.a;
+    end fullFunc;
+    
+    function fullFunc2
+        extends partFunc2;
+      algorithm
+        y := x1[1];
+    end fullFunc2;
+    
+    function usePartFunc
+        input partFunc pf;
+        input partFunc2 pf2;
+        output Real y;
+      algorithm
+        y := pf(R(1)) + pf2({1});
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc(),function fullFunc2());
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional_Bind3",
+            description="Check error when having record or array input/output",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Compliance error at line 791, column 24:
+  Functional input arguments with record/array inputs/outputs is currently not supported
+Error: in file '...':
+Compliance error at line 791, column 24:
+  Functional input arguments with record/array inputs/outputs is currently not supported
+")})));
+end Bind3;
+
+model Duplicate1
+    partial function partFunc
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x1;
+        input Real x1;
+      algorithm
+        y := x1;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        output Real y;
+      algorithm
+        y := pf();
+    end usePartFunc;
+    
+    Real y = usePartFunc(function fullFunc(x1=1, x1=2));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional_Duplicate1",
+            description="Check error with duplicates",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 834, column 22:
+  Duplicate component in same class: input Real x1
+Error: in file '...':
+Semantic error at line 847, column 26:
+  Creating functional input argument fullFunc(): multiple arguments matches input x1
+
+")})));
+end Duplicate1;
 
 end Functional;
 

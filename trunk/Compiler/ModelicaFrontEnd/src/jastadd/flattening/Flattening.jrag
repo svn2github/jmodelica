@@ -162,7 +162,7 @@ aspect Flattening {
 	}
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
-        InstFunctionDecl target = myInstFunctionDecl();
+        InstCallable target = myInstCallable();
         if (target.asInstClassDecl().inOrIsOuter()) 
 		    target = target.asInstClassDecl().myInnerInstClassDecl();
 		target.flattenFunction(fc);
@@ -2260,7 +2260,7 @@ aspect FlatExpressions {
 		List args = new List();
 		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
-        InstFunctionDecl target = myInstFunctionDecl().actualInstFunctionDecl();
+        InstCallable target = myInstCallable().actualInstCallable();
         if (target.asInstClassDecl().inOrIsOuter()) 
             target = target.asInstClassDecl().myInnerInstClassDecl();
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));

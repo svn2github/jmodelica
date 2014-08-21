@@ -1238,9 +1238,9 @@ aspect ClassDeclMethods {
 
 aspect MultiDeclMethods {
     
-    InstClassDecl implements InstFunctionDecl;
-    InstPartialFunction  implements InstFunctionDecl;
-    public interface InstFunctionDecl {
+    InstClassDecl implements InstCallable;
+    InstPartialFunction  implements InstCallable;
+    public interface InstCallable {
         public boolean isCallable();
         public boolean isCompleteFunction();
         public boolean canBeReplacedForMe(InstNode node);
@@ -1254,7 +1254,7 @@ aspect MultiDeclMethods {
         
         public InstClassDecl    asInstClassDecl();
         public InstNode         asInstNode();
-        public InstFunctionDecl actualInstFunctionDecl();
+        public InstCallable actualInstCallable();
         public InstClassDecl    actualInstClassDecl();
         
         public String qualifiedName();
@@ -1270,8 +1270,8 @@ aspect MultiDeclMethods {
     syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
     syn InstClassDecl InstPartialFunction.asInstClassDecl()  = unknownInstClassDecl();
     
-    syn InstFunctionDecl InstClassDecl.actualInstFunctionDecl()       = actualInstClass();
-    syn InstFunctionDecl InstPartialFunction.actualInstFunctionDecl() = this;
+    syn InstCallable InstClassDecl.actualInstCallable()       = actualInstClass();
+    syn InstCallable InstPartialFunction.actualInstCallable() = this;
     
     syn InstClassDecl InstClassDecl.actualInstClassDecl()       = actualInstClass();
     syn InstClassDecl InstPartialFunction.actualInstClassDecl() = myInstClass().actualInstClass();
@@ -1279,10 +1279,10 @@ aspect MultiDeclMethods {
     syn InstNode InstClassDecl.asInstNode() = this;
     syn InstNode InstPartialFunction.asInstNode()  = this;
     
-    syn InstFunctionDecl InstFunctionCall.myInstFunctionDecl() = getName().myInstFunctionDecl();
+    syn InstCallable InstFunctionCall.myInstCallable() = getName().myInstCallable();
     
-    syn InstFunctionDecl InstAccess.myInstFunctionDecl() = myInstClassDecl();
-    eq InstComponentAccess.myInstFunctionDecl() {
+    syn InstCallable InstAccess.myInstCallable() = myInstClassDecl();
+    eq InstComponentAccess.myInstCallable() {
         InstComponentDecl icd = myInstComponentDecl();
         return icd.isPartialFunction() ? (InstPartialFunction) icd : unknownInstClassDecl();
     }
