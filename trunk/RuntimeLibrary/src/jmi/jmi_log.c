@@ -28,6 +28,8 @@
 /*#define INLINE inline */ /* not supported in c89 */
 #define INLINE 
 
+static void create_log_file_if_needed(log_t *log);
+
 const char* jmi_callback_log_category_to_string(jmi_log_category_t c) {
     switch(c){
     case logError:
@@ -318,7 +320,7 @@ static void emit(log_t *log) {
            categories beyond logInfo to the outside. */
         cb->emit_log(cb, clamp_category(log->c), clamp_category(log->severest_category), buf->msg);
 
-    /* create_log_file_if_needed(log); */
+        create_log_file_if_needed(log);
         if (log->log_file) {
             file_logger(log->log_file, log->log_file, 
                         clamp_category(log->c), clamp_category(log->severest_category), buf->msg);
@@ -425,20 +427,38 @@ static void init_log(log_t *log, jmi_log_options_t* options, jmi_callbacks_t* jm
 
 static void create_log_file_if_needed(log_t *log) {
     if (log->log_file != NULL) return;
+
     if (log->options->copy_log_to_file_flag) {
         /* Create new log file */
         jmi_callbacks_t *cb = log->jmi_callbacks;
         const char *instance_name = cb->instance_name;
         char filename[8000];
 
-        sprintf(filename, "%s_%s.log", cb->model_name,
-                                       instance_name);
-        /* TODO: fopen returns NULL on error
-           ==> will try to reopen the file at the next emit. Do we want this? 
-           Not an issue if create_log_file_if_needed is only called once.*/
+        if(instance_name && instance_name[0]) {
+            sprintf(filename, "%s_%s.xml", cb->model_name,
+                                           instance_name);
+        }
+        else {
+            sprintf(filename, "%s_runtime_log.xml", cb->model_name,
+                                           instance_name);
+        }
+        /* TODO: 
+           create_log_file_if_needed need to be called several times since the options are
+           updated in fmiInitialize() and at that point copy_log_to_file_flag might be set.
+
+           Just to make this safer: if fopen fails - print a message on stderr and
+           clear the option.
+           */
+
         log->log_file = fopen(filename, "w");
 
-        fprintf(log->log_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<JMILog category=\"info\">\n");
+        if(!log->log_file) {
+            fprintf(stderr,"Could not open runtime log file %s", filename);
+            log->options->copy_log_to_file_flag = 0;
+        }
+        else {
+            fprintf(log->log_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<JMILog category=\"info\">\n");
+        }
     }
 }
 
