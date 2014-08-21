@@ -760,7 +760,7 @@ aspect Scalarization {
 		if (!hasValue()) 
 			return null;
 		FExp v = getValue();
-		if (v.isArray()) {
+		if (v.isArray() && !v.size().isUnknown()) {
 			i = i.subIndex(i.ndims() - v.ndims());
 			v = v.getArray().get(i);
 		}

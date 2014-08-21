@@ -4016,4 +4016,79 @@ equation
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
+model FunctionAttributeScalarization1
+    function F1
+        input Real x;
+        input Real a[:];
+        output Real y;
+    algorithm
+        y := x + sum(a);
+    annotation(Inline=false,derivative(noDerivative=a)=F1_der);
+    end F1;
+    
+    function F1_der
+        input Real x;
+        input Real a[:];
+        input Real x_der;
+        output Real y_der;
+    algorithm
+        y_der := x_der;
+    annotation(Inline=false);
+    end F1_der;
+    
+    Real x;
+    Real der_y;
+    Real y;
+equation
+    x * y = time;
+    y + 42 = F1(x, {x , -x});
+    der_y = der(y);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionAttributeScalarization1",
+            description="Test so that it is possible to reference function variables with unknown size in function attributes",
+            flatModel="
+fclass IndexReduction.FunctionAttributeScalarization1
+ Real x;
+ Real der_y;
+ Real y;
+ Real _der_y;
+ Real _der_x;
+equation
+ x * y = time;
+ y + 42 = IndexReduction.FunctionAttributeScalarization1.F1(x, {x, - x});
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.FunctionAttributeScalarization1.F1_der(x, {x, - x}, _der_x);
+
+public
+ function IndexReduction.FunctionAttributeScalarization1.F1
+  input Real x;
+  input Real[:] a;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := temp_1 + a[i1];
+  end for;
+  y := x + temp_1;
+  return;
+ annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization1.F1_der);
+ end IndexReduction.FunctionAttributeScalarization1.F1;
+
+ function IndexReduction.FunctionAttributeScalarization1.F1_der
+  input Real x;
+  input Real[:] a;
+  input Real x_der;
+  output Real y_der;
+ algorithm
+  y_der := x_der;
+  return;
+ end IndexReduction.FunctionAttributeScalarization1.F1_der;
+
+end IndexReduction.FunctionAttributeScalarization1;
+")})));
+end FunctionAttributeScalarization1;
+
 end IndexReduction;
