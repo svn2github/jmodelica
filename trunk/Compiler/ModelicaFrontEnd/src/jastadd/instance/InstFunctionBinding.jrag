@@ -724,7 +724,7 @@ aspect InstFunctionBinding {
         ArrayList<InstComponentDecl> allInputs = super.myInputsToBind(target);
         FType type = myCorrespondingInput().type();
         Set<String> filter = new HashSet<String>();
-        boolean error = !type.isPartialFunction();
+        boolean error = !type.isFunction();
         if (error) {
             /* This call is not matched to a partial function. 
              * Error will be given by normal typecheck, bind all arguments for now. */
@@ -737,7 +737,7 @@ aspect InstFunctionBinding {
             }
         } else {
             // Filter will contain arguments that should not be bound
-            FPartialFunctionType t = (FPartialFunctionType) type;
+            FFunctionType t = (FFunctionType) type;
             for (FRecordComponentType c : t.getInputs()) {
                 filter.add(c.getName());
             }

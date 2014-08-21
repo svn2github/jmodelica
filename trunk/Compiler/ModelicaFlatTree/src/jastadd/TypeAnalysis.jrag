@@ -53,8 +53,8 @@ aspect FlatTypeAnalysis {
                 FRecordType type = (FRecordType) getType();
                 type.setFClass(myFClass());
                 setType((FType) type.myFRecordDecl().type().sizedType(type.size()).unboundCopy());
-            } else if (getType().isPartialFunction()) {
-                FPartialFunctionType type = (FPartialFunctionType) getType();
+            } else if (getType().isFunction()) {
+                FFunctionType type = (FFunctionType) getType();
                 type.setFClass(myFClass());
             }
             typeRewritten = true;
@@ -583,7 +583,7 @@ aspect FlatTypeAnalysis {
         for (CommonVariableDecl cvd : myFCallable().myOutputs()) {
             outputs.add(new FRecordComponentType(cvd.name(), cvd.type()));
         }
-        return new FPartialFunctionType(size(), name(), inputs, outputs, myFClass());
+        return new FFunctionType(size(), name(), inputs, outputs, myFClass());
     }
 
     // TODO: expand to handle boolean end enum index
@@ -760,7 +760,7 @@ aspect FTypeCompatibility {
         typeMatches(type, true, allowUnknown);
     eq FExternalObjectType.typeCompatible(FType type, boolean allowUnknown) = 
         typeMatches(type, true, allowUnknown);
-    eq FPartialFunctionType.typeCompatible(FType type, boolean allowUnknown) =
+    eq FFunctionType.typeCompatible(FType type, boolean allowUnknown) =
         typeMatches(type, true, allowUnknown);
     
     syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
@@ -804,10 +804,10 @@ aspect FTypeCompatibility {
                 return false;
         return true;
     }
-    eq FPartialFunctionType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
-        if (!dimensionCompatible(type, allowUnknown) || !type.isPartialFunction())
+    eq FFunctionType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+        if (!dimensionCompatible(type, allowUnknown) || !type.isFunction())
             return false;
-        FPartialFunctionType obj = (FPartialFunctionType) type;
+        FFunctionType obj = (FFunctionType) type;
         if (!compatible && !getName().equals(obj.getName())) 
             return false;
         if (getNumInput() != obj.getNumInput())
@@ -865,7 +865,7 @@ aspect FTypeEquivalent {
         typeMatches(type, false, allowUnknown);
     eq FExternalObjectType.equivalentTo(FType type, boolean allowUnknown) = 
         typeMatches(type, false, allowUnknown);
-    eq FPartialFunctionType.equivalentTo(FType type, boolean allowUnknown) =
+    eq FFunctionType.equivalentTo(FType type, boolean allowUnknown) =
         typeMatches(type, false, allowUnknown);
 }
 
@@ -895,8 +895,8 @@ aspect BuiltInFlatTypes {
     eq FEnumType.isEnum()                       = true;
     syn boolean FType.isExternalObject()        = false;
     eq FExternalObjectType.isExternalObject()   = true;
-    syn boolean FType.isPartialFunction()              = false;
-    eq FPartialFunctionType.isPartialFunction()               = true;
+    syn boolean FType.isFunction()              = false;
+    eq FFunctionType.isFunction()               = true;
 
     syn boolean FType.isArray()  = getSize() != Size.SCALAR;
     syn boolean FType.isScalar() = getSize() == Size.SCALAR;

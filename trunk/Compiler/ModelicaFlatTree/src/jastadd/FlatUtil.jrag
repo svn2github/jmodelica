@@ -1156,7 +1156,7 @@ aspect FlatNames {
     eq FUnknownType.name()          = "(unknown type)";
     eq FNoType.name()               = "(no return value)";
     eq FExternalObjectType.name()   = getName();
-    eq FPartialFunctionType.name()  = getName();
+    eq FFunctionType.name()  = getName();
     
     
     syn boolean FAbstractFunctionCall.ignoreInFlattening() = false;
@@ -1228,7 +1228,7 @@ aspect FlatFunctionUtils {
     syn FFunctionDecl FFunctionVariable.actualFFunctionDecl() = myFCallable().actualFFunctionDecl();
     
     syn boolean FFunctionDecl.isPartialFunction()     = false;
-    syn boolean FFunctionVariable.isPartialFunction() = type().isPartialFunction();
+    syn boolean FFunctionVariable.isPartialFunction() = type().isFunction();
     
     syn boolean FFunctionCall.isPartialFunctionCall() = false;
     eq FPartialFunctionCall.isPartialFunctionCall()   = true;
@@ -1362,7 +1362,7 @@ aspect FlatFunctionUtils {
     
     public class FAbstractFunctionCall {
         public <T extends CommonVariableDecl> ArrayList<T> filterPartialInputs(ArrayList<T> decls) {
-            List<FRecordComponentType> comps = ((FPartialFunctionType)type()).getInputs();
+            List<FRecordComponentType> comps = ((FFunctionType)type()).getInputs();
             ArrayList<T> res = new ArrayList<T>();
             Iterator<FRecordComponentType> it = comps.iterator();
             String name = it.hasNext() ? it.next().getName() : "";

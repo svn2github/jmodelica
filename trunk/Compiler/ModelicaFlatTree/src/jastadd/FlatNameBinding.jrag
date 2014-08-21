@@ -486,7 +486,7 @@ aspect FlatFunctionBinding {
     
     syn FCallable FFunctionDecl.lookupFunc(String name) {
         for (FFunctionVariable ffv : getFFunctionVariables())
-            if (ffv.name().equals(name) && ffv.type().isPartialFunction())
+            if (ffv.name().equals(name) && ffv.type().isFunction())
                 return ffv;
         return lookupFCallable(name);
     }
@@ -512,7 +512,7 @@ aspect FlatRecordBinding {
 	eq FRecordType.myFRecordDecl()             = 
 		(getFClass() != null) ? getFClass().lookupFRec(getName()) : null;
     syn lazy FFunctionDecl FType.myFFunctionDecl() = null;
-    eq FPartialFunctionType.myFFunctionDecl() = 
+    eq FFunctionType.myFFunctionDecl() = 
         (getFClass() != null) ? getFClass().lookupFunc(getName()) : null;
 	
 	inh FRecordDecl FRecordVariable.lookupFRec(String name);

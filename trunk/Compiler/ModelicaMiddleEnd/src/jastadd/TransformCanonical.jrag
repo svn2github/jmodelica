@@ -4200,7 +4200,7 @@ aspect FunctionAndRecordCleanup {
     @Override
     public void FFunctionVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
         super.markUsedFunctionsAndRecords(type);
-        if (type().isPartialFunction()) {
+        if (type().isFunction()) {
             myFCallable().markUsedFunctionsAndRecords(type);
         }
     }

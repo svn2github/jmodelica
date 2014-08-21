@@ -507,7 +507,7 @@ aspect FlatAPI {
     coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartial() 
         [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartial() for myFClass();
-    FFunctionVariable contributes myFCallable().actualFFunctionDecl() when type().isPartialFunction()
+    FFunctionVariable contributes myFCallable().actualFFunctionDecl() when type().isFunction()
         to FClass.myFFunctionDeclsPartial() for myFClass();
     
     /**

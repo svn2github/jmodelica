@@ -825,7 +825,7 @@ aspect FunctionInlining {
     
     private boolean FFunctionDecl.containsPartialFunction() {
         for (FFunctionVariable var : getFFunctionVariables())
-            if (var.getType().isPartialFunction())
+            if (var.getType().isFunction())
                 return true;
         return false;
     }

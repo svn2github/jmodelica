@@ -936,7 +936,7 @@ aspect PrettyPrint {
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();
 	
-    eq FPartialFunctionType.toString() {
+    eq FFunctionType.toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("((");
         sb.append(getOutputs().toString());

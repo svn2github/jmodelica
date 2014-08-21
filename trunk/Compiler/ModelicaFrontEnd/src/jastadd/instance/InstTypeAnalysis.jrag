@@ -112,16 +112,16 @@ aspect InstTypeAnalysis {
         return type;
     }
 
-    eq InstPartialFunction.type() = myInstClass().partialFunctionType().sizedType(size());
+    eq InstPartialFunction.type() = myInstClass().functionType().sizedType(size());
     
-    syn FPartialFunctionType InstClassDecl.partialFunctionType() {
+    syn FFunctionType InstClassDecl.functionType() {
         List<FRecordComponentType> inputTypes = new List();
         List<FRecordComponentType> outputTypes = new List();
         for (InstComponentDecl icd : myInputs())
             inputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
         for (InstComponentDecl icd : myOutputs())
             outputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
-        return new FPartialFunctionType(Size.SCALAR, qualifiedName(), inputTypes, outputTypes, null);
+        return new FFunctionType(Size.SCALAR, qualifiedName(), inputTypes, outputTypes, null);
     }
 
     eq InstRecordConstructor.type() = getRecord().recordType();
@@ -135,17 +135,17 @@ aspect InstTypeAnalysis {
     syn lazy FType InstComponentDecl.type() = fUnknownType();
 
     eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
-    eq InstPartialFunctionCall.type() = partialFunctionType();
+    eq InstPartialFunctionCall.type() = functionType();
     
-    syn FPartialFunctionType InstPartialFunctionCall.partialFunctionType() {
-         FPartialFunctionType partialType = myInstFunctionDecl().actualInstClassDecl().partialFunctionType();
+    syn FFunctionType InstPartialFunctionCall.functionType() {
+         FFunctionType type = myInstFunctionDecl().actualInstClassDecl().functionType();
          Set<String> s = new HashSet(namedArgs());
          List<FRecordComponentType> n = new List<FRecordComponentType>();
-         for (FRecordComponentType frc : partialType.getInputs())
+         for (FRecordComponentType frc : type.getInputs())
              if (!s.contains(frc.getName()))
                  n.add(frc);
-         partialType.setInputList(n);
-         return partialType;
+         type.setInputList(n);
+         return type;
     }
     
     syn ArrayList<String> InstPartialFunctionCall.namedArgs() {

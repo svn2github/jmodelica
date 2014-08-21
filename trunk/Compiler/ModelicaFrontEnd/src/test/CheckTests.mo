@@ -684,6 +684,94 @@ Compliance error at line 738, column 24:
 ")})));
 end Array1;
 
+model Bind1
+    partial function partFunc
+        input Real x = 3;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        output Real y2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc(), time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Bind1",
+            description="Check error when having input default value",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Compliance error at line 738, column 24:
+  Creating functional input arguments from functions with default input arguments is not supported
+")})));
+end Bind1;
+
+model Bind2
+    partial function partFunc
+        input Real x;
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        output Real y2;
+      algorithm
+        y := x*x;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf1 = 3;
+        input partFunc pf2 = fullFunc;
+        input partFunc pf3 = fullFunc;
+        input Real x;
+        output Real y;
+      algorithm
+        y := pf1(x);
+    end usePartFunc;
+    
+    Real y1 = usePartFunc(function fullFunc(), function fullFunc(), x=time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Bind2",
+            description="Check error when having input default value",
+            errorMessage="
+6 errors found:
+
+Error: in file '...':
+Compliance error at line 735, column 24:
+  Default values of functional input arguments is not supported
+Error: in file '...':
+Semantic error at line 736, column 30:
+  The binding expression of the variable pf1 does not match the declared type of the variable
+Error: in file '...':
+Compliance error at line 736, column 31:
+  Default values of functional input arguments is not supported
+Error: in file '...':
+Semantic error at line 737, column 30:
+  Illegal access to class in expression: fullFunc
+Error: in file '...':
+Compliance error at line 737, column 38:
+  Default values of functional input arguments is not supported
+Error: in file '...':
+Semantic error at line 738, column 30:
+  Illegal access to class in expression: fullFunc
+")})));
+end Bind2;
+
 end Functional;
 
 end CheckTests;

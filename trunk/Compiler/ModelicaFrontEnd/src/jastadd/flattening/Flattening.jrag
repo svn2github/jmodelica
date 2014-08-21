@@ -400,9 +400,9 @@ aspect Flattening {
             comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getComponents()));
 	}
     
-    public void FPartialFunctionType.updateRecordArraySizes(FType from) {
+    public void FFunctionType.updateRecordArraySizes(FType from) {
         super.updateRecordArraySizes(from);
-        FPartialFunctionType rfrom = (FPartialFunctionType) from;
+        FFunctionType rfrom = (FFunctionType) from;
         for (FRecordComponentType comp : getInputs())
             comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getInputs()));
         for (FRecordComponentType comp : getOutputs())
@@ -624,8 +624,8 @@ aspect Flattening {
     public FType FExternalObjectType.flatten(FQName prefix, InstAssignable ia) {
         return new FExternalObjectType(getSize(), getName(), getConstructor().flatten(prefix), getDestructor().flatten(prefix));
     }
-    public FType FPartialFunctionType.flatten(FQName prefix, InstAssignable ia) {
-        return new FPartialFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), getInputs().fullCopy(), getOutputs().fullCopy(), getFClass());
+    public FType FFunctionType.flatten(FQName prefix, InstAssignable ia) {
+        return new FFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), getInputs().fullCopy(), getOutputs().fullCopy(), getFClass());
     }
 	
 	// TODO: perhaps we should duplicate the instance tree algorithm for calculating the size 
@@ -640,7 +640,7 @@ aspect Flattening {
 			comp.getFType().flattenSize(prefix, null);
 	}
 	
-    public void FPartialFunctionType.flattenSize(FQName prefix, ASTNode context) {
+    public void FFunctionType.flattenSize(FQName prefix, ASTNode context) {
         super.flattenSize(prefix, context);
         for (FRecordComponentType comp : getInputs())
             comp.getFType().flattenSize(prefix, null);

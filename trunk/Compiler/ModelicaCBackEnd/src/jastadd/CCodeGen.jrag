@@ -1008,7 +1008,7 @@ aspect CCodeGen {
     eq FRecordType.nameScalar_C()         = myFRecordDecl().name_C();
     eq FStringType.nameScalar_C()         = "jmi_string_t";
     eq FExternalObjectType.nameScalar_C() = "jmi_extobj_t";
-    eq FPartialFunctionType.nameScalar_C() = myFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP) + "*";
+    eq FFunctionType.nameScalar_C() = myFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP) + "*";
     
     syn String FType.nameArray_C()        = "jmi_array_t";
     eq FRecordType.nameArray_C()          = myFRecordDecl().nameArray_C();
