@@ -762,7 +762,7 @@ aspect InstFunctionBinding {
                 return this;
             if (getName().myInstClassDecl().isUnknown() || !unbindableArgs.isEmpty())
                 return this;
-            if (!hasOutputs() || !myOutputs().get(0).isAssignable())
+            if (!hasOutputs() || !myCallOutputs().get(0).isAssignable())
                 return this;
             
             int dims = 0;

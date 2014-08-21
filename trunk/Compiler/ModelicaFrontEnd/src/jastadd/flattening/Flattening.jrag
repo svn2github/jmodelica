@@ -608,7 +608,7 @@ aspect Flattening {
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, override this
-		FType type = type().flatten(new FQNameEmpty());
+        FType type = type().flatten(new FQNameEmpty(), this);
 		FFunctionVariable ffv;
 		if (isArray())
 			ffv = new FFunctionArray(new Opt(), type, eo, fqn);
@@ -618,11 +618,14 @@ aspect Flattening {
 		return ffv;
 	}
 	
-    public FType FType.flatten(FQName prefix) {
+    public FType FType.flatten(FQName prefix, InstAssignable ia) {
         return fullCopy();
     }
-    public FType FExternalObjectType.flatten(FQName prefix) {
+    public FType FExternalObjectType.flatten(FQName prefix, InstAssignable ia) {
         return new FExternalObjectType(getSize(), getName(), getConstructor().flatten(prefix), getDestructor().flatten(prefix));
+    }
+    public FType FPartialFunctionType.flatten(FQName prefix, InstAssignable ia) {
+        return new FPartialFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), getInputs().fullCopy(), getOutputs().fullCopy(), getFClass());
     }
 	
 	// TODO: perhaps we should duplicate the instance tree algorithm for calculating the size 
@@ -2261,7 +2264,7 @@ aspect FlatExpressions {
         if (target.asInstClassDecl().inOrIsOuter()) 
             target = target.asInstClassDecl().myInnerInstClassDecl();
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
-		Size[] sizes = new Size[myOutputs().size()];
+		Size[] sizes = new Size[myCallOutputs().size()];
 		FFunctionCall res = createFFunctionCall(name, args, sizes);
 		if (isFunctionCallClause()) 
 			for (int i = 0; i < myLefts().size(); i++)

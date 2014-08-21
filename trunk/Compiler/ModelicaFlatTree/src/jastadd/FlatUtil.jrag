@@ -1248,6 +1248,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
+     eq InstPartialFunction.myInputs()      = myInstClass().myInputs();
      
      /**
       * Returns a list of all InstComponentDecls not declared as "input".
@@ -1348,28 +1349,71 @@ aspect FlatFunctionUtils {
      
      syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs() = myFCallable().myOutputs();
      
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = myInstFunctionDecl().myCallInputs();
+    /**
+     * \brief List of CommonVariableDecl used as inputs in this function call
+     */
+    public abstract ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myCallInputs();
+    syn ArrayList<InstComponentDecl> InstFunctionCall.myCallInputs()       = myInstFunctionDecl().myCallInputs();
+    eq InstPartialFunctionCall.myCallInputs()                              = filterPartialInputs(myInstFunctionDecl().myCallInputs());
+    syn ArrayList<FFunctionVariable> FFunctionCall.myCallInputs()          = myFCallable().myInputs();
+    eq FPartialFunctionCall.myCallInputs()                                 = filterPartialInputs(myFCallable().myInputs());
+    syn ArrayList<CommonVariableDecl> FBuiltInFunctionCall.myCallInputs()  = new ArrayList<CommonVariableDecl>();
+    syn ArrayList<CommonVariableDecl> InstRecordConstructor.myCallInputs() = new ArrayList<CommonVariableDecl>();
+    
+    public class FAbstractFunctionCall {
+        public <T extends CommonVariableDecl> ArrayList<T> filterPartialInputs(ArrayList<T> decls) {
+            List<FRecordComponentType> comps = ((FPartialFunctionType)type()).getInputs();
+            ArrayList<T> res = new ArrayList<T>();
+            Iterator<FRecordComponentType> it = comps.iterator();
+            String name = it.hasNext() ? it.next().getName() : "";
+            for (T cvd : decls) {
+                if (name.equals(cvd.name())) {
+                    name = it.hasNext() ? it.next().getName() : "";
+                } else {
+                    res.add(cvd);
+                }
+            }
+            return res;
+        }
+    }
+    
+    /**
+     * \brief List of CommonVariableDecl used as outputs in this function call
+     */
+    public abstract ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myCallOutputs();
+    syn ArrayList<InstComponentDecl> InstFunctionCall.myCallOutputs()       = myInstFunctionDecl().myOutputs();
+    eq InstPartialFunctionCall.myCallOutputs()                              = new ArrayList<InstComponentDecl>(Arrays.asList((InstComponentDecl)myCorrespondingInput()));
+    syn ArrayList<FFunctionVariable> FFunctionCall.myCallOutputs()          = myFCallable().myOutputs();
+    eq FPartialFunctionCall.myCallOutputs()                                 = new ArrayList<FFunctionVariable>(Arrays.asList((FFunctionVariable)myCorrespondingInput()));
+    syn ArrayList<CommonVariableDecl> FBuiltInFunctionCall.myCallOutputs()  = new ArrayList<CommonVariableDecl>();
+    syn ArrayList<CommonVariableDecl> InstRecordConstructor.myCallOutputs() = new ArrayList<CommonVariableDecl>();
+    
+    /**
+     * \brief Alias of myCallInputs.
+     * @Deprecated Use {@link #myCallInputs()} instead.
+     */
+    @Deprecated
+    public ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() {
+        return myCallInputs();
+    }
+    
+    /**
+     * Returns a list of all components in this class that would be inputs in a function call or 
+     * record constructor. Treats all non-records as functions.
+     */
+    syn ArrayList<InstComponentDecl> InstClassDecl.myCallInputs()        = isRecord() ? myModifiableComponents() : myInputs();
+    syn ArrayList<InstComponentDecl> InstPartialFunction.myCallInputs()  = myInstClass().myCallInputs();
+    
      
-     /**
-      * Returns a list of all components in this class that would be inputs in a function call or 
-      * record constructor. Treats all non-records as functions.
-      */
-     syn ArrayList<InstComponentDecl> InstClassDecl.myCallInputs()        = isRecord() ? myModifiableComponents() : myInputs();
-     syn ArrayList<InstComponentDecl> InstPartialFunction.myCallInputs()  = myInstClass().myInputs();
-     
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = myInstFunctionDecl().myOutputs();
-     syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFCallable().myInputs();
-     syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFCallable().myOutputs();
-     
-     syn boolean InstFunctionCall.hasOutputs()  = !myOutputs().isEmpty();
      syn boolean FFunctionDecl.hasOutputs()     = !myOutputs().isEmpty();
      syn boolean FFunctionVariable.hasOutputs() = !myOutputs().isEmpty();
-     syn boolean FFunctionCall.hasOutputs()     = myFCallable().hasOutputs();
+     syn boolean FFunctionCall.hasOutputs()     = !myCallOutputs().isEmpty();
+     syn boolean InstFunctionCall.hasOutputs()  = !myCallOutputs().isEmpty();
      
-     syn InstComponentDecl InstFunctionCall.expOutput()  = myOutputs().get(0);
      syn FFunctionVariable FFunctionDecl.expOutput()     = myOutputs().get(0);
      syn FFunctionVariable FFunctionVariable.expOutput() = myOutputs().get(0);
-     syn FFunctionVariable FFunctionCall.expOutput()     = myFCallable().expOutput();
+     syn FFunctionVariable FFunctionCall.expOutput()     = myCallOutputs().get(0);
+     syn InstComponentDecl InstFunctionCall.expOutput()  = myCallOutputs().get(0);
     
      syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
      inh FunctionReturnDefinition FReturnStmt.returnDefinition();
@@ -1597,7 +1641,7 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
      syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
      eq InstFunctionCall.findOutput(int i)                         = 
-         (i >= myOutputs().size()) ? unknownInstComponentDecl() : myOutputs().get(i);
+         (i >= myCallOutputs().size()) ? unknownInstComponentDecl() : myCallOutputs().get(i);
      
      inh boolean FAbstractFunctionCall.functionCallIsExp();
      eq FExp.getChild().functionCallIsExp()                 = true;

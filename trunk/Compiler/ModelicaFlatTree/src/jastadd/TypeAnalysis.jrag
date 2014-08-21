@@ -564,8 +564,8 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.getLeft(int i).type()     = getCall().typeOfOutput(i);
 
 	syn FType FAbstractFunctionCall.typeOfOutput(int i) = (i == 0) ? type() : fUnknownType();
-	syn lazy FType InstFunctionCall.typeOfOutput(int i) = myOutputs().get(i).type().sizedType(sizeOfOutput(i));
-	syn lazy FType FFunctionCall.typeOfOutput(int i)    = myOutputs().get(i).type().sizedType(sizeOfOutput(i));
+    syn lazy FType InstFunctionCall.typeOfOutput(int i) = myCallOutputs().get(i).type().sizedType(sizeOfOutput(i));
+    syn lazy FType FFunctionCall.typeOfOutput(int i)    = myCallOutputs().get(i).type().sizedType(sizeOfOutput(i));
 
     eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
     eq FMathematicalFunctionCall.type() = fRealType(size());

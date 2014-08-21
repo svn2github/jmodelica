@@ -720,7 +720,7 @@ aspect CADCodeGen {
 				sep = ", ";
 			}
 		}
-		ArrayList<FFunctionVariable> outputs = myOutputs();
+        ArrayList<FFunctionVariable> outputs = myCallOutputs();
 		if (!exp){
 			// The function is not an expression, generate arguments from my FFunctionCallLeft
 			int lefts = myLefts().size();

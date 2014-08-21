@@ -945,6 +945,9 @@ aspect PrettyPrint {
         sb.append("(");
         sb.append(getInputs().toString());
         sb.append("))");
+        if (ndims() > 0) {
+            sb.append(size());
+        }
         return sb.toString();
     }
 	

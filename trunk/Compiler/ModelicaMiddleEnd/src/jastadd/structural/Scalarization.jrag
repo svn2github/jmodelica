@@ -2809,7 +2809,7 @@ aspect Scalarization {
     inh boolean FIdUseExp.shouldKeepArrayDuringScalarization();
     eq BaseNode.getChild().shouldKeepArrayDuringScalarization() = false;
     eq FFunctionCall.getArg(int i).shouldKeepArrayDuringScalarization() = 
-    	getArg(i).isArray() && myInputs().get(i).ndims() == getArg(i).ndims();
+    	getArg(i).isArray() && myCallInputs().get(i).ndims() == getArg(i).ndims();
     
 	inh boolean FExp.wantsRecordCon();
 	eq BaseNode.getChild().wantsRecordCon()         = false;

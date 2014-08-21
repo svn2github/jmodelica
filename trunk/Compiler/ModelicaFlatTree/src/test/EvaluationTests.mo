@@ -2011,8 +2011,6 @@ model Functional7
         y := pf(c);
     end usePartFunc;
     
-    //function partAlias = usePartFunc;
-    
     constant Real c1 = useMiddleFunc(function fullFunc(x3=1), 2, 3);
     Real y1 = useMiddleFunc(function fullFunc(x3=1), 2, 3);
     
@@ -2027,5 +2025,64 @@ fclass EvaluationTests.Functional7
 end EvaluationTests.Functional7;
 ")})));
 end Functional7;
+
+model Functional8
+    partial function partFunc
+        input Real x1;
+        output Real y;
+    end partFunc;
+    
+    function partAlias = partFunc;
+    
+    partial function middleFunc
+        extends partAlias;
+        input Real x2;
+    end middleFunc;
+    
+    function middleAlias = middleFunc;
+    
+    function fullFunc
+        extends middleAlias;
+        input Real x3;
+      algorithm
+        y := x1 + x2 + x3;
+    end fullFunc;
+    
+    function fullAlias = fullFunc;
+    
+    function useMiddleFunc
+        input middleAlias mf;
+        input Real b;
+        input Real c;
+        output Real y = usePartAlias(function mf(x2=b), c);
+        algorithm
+    end useMiddleFunc;
+    
+    function useMiddleAlias = useMiddleFunc;
+    
+    function usePartFunc
+        input partAlias pf;
+        input Real c;
+        output Real y;
+      algorithm
+        y := pf(c);
+    end usePartFunc;
+    
+    function usePartAlias = usePartFunc;
+    
+    constant Real c1 = useMiddleAlias(function fullAlias(x3=1), 2, 3);
+    Real y1 = useMiddleAlias(function fullAlias(x3=1), 2, 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Functional8",
+            description="Constant evaluation of functional input arguments, chained with shortclassdecls",
+            flatModel="
+fclass EvaluationTests.Functional8
+ constant Real c1 = 6.0;
+ constant Real y1 = 6.0;
+end EvaluationTests.Functional8;
+")})));
+end Functional8;
 
 end EvaluationTests;

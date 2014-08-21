@@ -815,14 +815,17 @@ aspect FlatTypeCheck {
   eq FMatrixRow.dimensionIsOk() = true;
  
   public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
-	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs())
+	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall())
 		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
 	  else if (!isFunctionCallClause() && !inFunction() && size().isUnknown())
 		  error("Could not evaluate array size of output " + expOutput().name());
-	  if (myOutputs().size() < myLefts().size())
+        if (myCallOutputs().size() < myLefts().size())
 		  error("Too many components assigned from function call: " + getName().name() + 
-				  "() has " + myOutputs().size() + " output(s)");
+                "() has " + myCallOutputs().size() + " output(s)");
   }
+  
+  syn boolean InstFunctionCall.isPartialFunctionCall() = false;
+  eq InstPartialFunctionCall.isPartialFunctionCall()   = true;
   
   public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
 	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error

@@ -237,6 +237,7 @@ aspect Arrays {
 	eq FFunctionCall.ndims()          = hasOutputs() ? expOutput().ndims() : -1;
 	eq FVectorFunctionCall.ndims()    = size().ndims();
 	eq InstFunctionCall.ndims()       = hasOutputs() ? expOutput().ndims() : -1;
+    eq InstPartialFunctionCall.ndims() = hasOutputs() ? 0 : -1;
 	eq InstVectorFunctionCall.ndims() = getDims();
 	
 	/**
@@ -990,13 +991,13 @@ aspect Arrays {
 	syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
 
     syn Size InstFunctionCall.sizeOfOutput(int i) {
-        Size s = myOutputs().get(i).size();
+        Size s = myCallOutputs().get(i).size();
         if (!s.isUnknown() || isCircular())
             return s;
         
         HashMap<ASTNode, FExp> varMap = new HashMap<ASTNode, FExp>();
         for (int j = 0; j < getNumArg(); j++)
-            varMap.put(myInputs().get(j), getArg(j).getFExp());
+            varMap.put(myCallInputs().get(j), getArg(j).getFExp());
         
         MutableSize ms = new MutableSize(s.ndims());
         for (int j = 0; j < s.ndims(); j++) {
@@ -1064,6 +1065,7 @@ aspect Arrays {
 	
 	eq FFunctionCall.size()    = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
+    eq InstPartialFunctionCall.size() = Size.SCALAR;
 	
 	eq FIfExp.size() {
 		if (isParameterIf()) {

@@ -611,7 +611,7 @@ aspect FunctionInlining {
     public FAbstractEquation FFunctionCallEquation.inlineFunctions(FunctionInliner fi) {
         if (getCall().isInlinableFunctionCall(fi)) {
             getCall().inline(fi);
-            ArrayList<FFunctionVariable> outs = ((FFunctionCall) getCall()).myOutputs();
+            ArrayList<FFunctionVariable> outs = ((FFunctionCall) getCall()).myCallOutputs();
             int n = getNumLeft();
             ArrayList<FEquation> list = new ArrayList<FEquation>();
             for (int i = 0; i < n; i++) {
@@ -679,7 +679,7 @@ aspect FunctionInlining {
     public void FFunctionCall.inlineFunctions(FunctionInliner fi) {
         if (isInlinableFunctionCall(fi)) {
             inline(fi);
-            replaceMe(fi.getReplacementExp(myOutputs().get(0).name()).fullCopy());
+            replaceMe(fi.getReplacementExp(myCallOutputs().get(0).name()).fullCopy());
         } else {
             super.inlineFunctions(fi);
         }
