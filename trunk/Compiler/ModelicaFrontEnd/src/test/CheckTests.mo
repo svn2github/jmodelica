@@ -862,6 +862,40 @@ Semantic error at line 847, column 26:
 ")})));
 end Duplicate1;
 
+model Vectorized1
+    partial function partFunc
+        output Real y;
+    end partFunc;
+    
+    function fullFunc
+        extends partFunc;
+        input Real x1;
+      algorithm
+        y := x1;
+    end fullFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        output Real y;
+      algorithm
+        y := pf();
+    end usePartFunc;
+    
+    Real[1] y = usePartFunc(function fullFunc(x1={1}));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional_Vectorized1",
+            description="Check error with vectorized",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 884, column 29:
+  Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
+    type of 'fullFunc(x1={1})' is Real[1]
+")})));
+end Vectorized1;
+
 end Functional;
 
 end CheckTests;
