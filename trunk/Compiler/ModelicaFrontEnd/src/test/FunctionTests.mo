@@ -11469,6 +11469,7 @@ public
  algorithm
   value := u * 2;
   return;
+ annotation(derivative = FunctionTests.Interpolate.interpDer);
  end FunctionTests.Interpolate.interp;
 
 end FunctionTests.UseInterpolate;

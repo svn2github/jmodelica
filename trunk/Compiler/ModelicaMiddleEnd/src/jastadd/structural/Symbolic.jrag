@@ -837,48 +837,48 @@ aspect Derivatives {
 		return dynamicFExp(new FRealLitExp(val));
 	}
 	
-	public FExp FFunctionCall.diff(String name) {
-		// If the function does not have an argument that matches name,
-		// and the name is not 'time', then the derivative is zero.
-		if (!name.equals(TIME)) {
-			boolean isIndependent = true;
-			FQName fqn = new FQNameString(name);
-			FIdUseExp fid = (FIdUseExp)dynamicFExp(fqn.createFIdUseExp());
-			FAbstractVariable fv = fid.myFV();
-			if (fv!=null) {
-				HashSet<FVariable> s = new HashSet<FVariable>();
-				s.add((FVariable)fv);
-				for (FExp e : getArgs()) {
-					if (!e.isIndependent(s)) {
-						isIndependent = false;
-						break;
-					}
-				}
-				if (isIndependent) {
-					return new FRealLitExp(0);
-				}
-			}
-		}
+    public FExp FFunctionCall.diff(String name) {
+        // If the function does not have an argument that matches name,
+        // and the name is not 'time', then the derivative is zero.
+        if (!name.equals(TIME)) {
+            boolean isIndependent = true;
+            FQName fqn = new FQNameString(name);
+            FIdUseExp fid = (FIdUseExp)dynamicFExp(fqn.createFIdUseExp());
+            FAbstractVariable fv = fid.myFV();
+            if (fv!=null) {
+                HashSet<FVariable> s = new HashSet<FVariable>();
+                s.add((FVariable)fv);
+                for (FExp e : getArgs()) {
+                    if (!e.isIndependent(s)) {
+                        isIndependent = false;
+                        break;
+                    }
+                }
+                if (isIndependent) {
+                    return new FRealLitExp(0);
+                }
+            }
+        }
         FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
         if (myDecl == null)
             throw new FunctionDifferentiationException(this);
-		FFunctionDecl myDiffDecl = myDecl.diff(inFunction());
-		if (myDiffDecl == null)
-		    throw new FunctionDifferentiationException(this);
-		List args = new List();
-		for (FExp e : getArgs()) {
-			args.add(e.copySymbolic());
-		}
-		int i = 0;
-		for (FExp e : getArgs()) {
-			FFunctionVariable fv = myDecl.getFFunctionVariable(i);
-			if (fv.shouldBeDifferentiated())
-				args.add(e.diff(name));
-			i++;
-		}
-		FFunctionCall der_f = new FFunctionCall(myDiffDecl.getFQName().createFIdUse(), args, getSizes());
-		return dynamicFExp(der_f);
-	}
+        FCallable myDiffDecl = myDecl.diff(inFunction());
+        if (myDiffDecl == null)
+            throw new FunctionDifferentiationException(this);
+        List args = new List();
+        for (FExp e : getArgs()) {
+            args.add(e.copySymbolic());
+        }
+        int i = 0;
+        for (FExp e : getArgs()) {
+            FFunctionVariable fv = myDecl.getFFunctionVariable(i);
+            if (fv.shouldBeDifferentiated())
+                args.add(e.diff(name));
+            i++;
+        }
+        FFunctionCall der_f = new FFunctionCall(new FIdUse(myDiffDecl.name()), args, getSizes());
+        return dynamicFExp(der_f);
+    }
 
 	public FExp FArray.diff(String name) {
 		FArray diff_farray = new FArray();
@@ -922,14 +922,17 @@ aspect SmoothOrder{
 }
 
 aspect AlgorithmDifferentiation{
-    syn FFunctionDecl FFunctionDecl.diff(boolean inFunction) {
-        int order = order() + 1;
+    syn FCallable FFunctionDecl.diff(boolean inFunction) {
         if (smoothOrder() == 0 && !inFunction)
             return null;
-        if (hasFDerivativeFunction()) 
-            return getFDerivativeFunction().myFCallable().asFFunctionDecl();
+        if (derivativeFunction() != null) 
+            return derivativeFunction();
         if (smoothOrder() == SMOOTH_ORDER_ANNOTATION_DEFAULT && !inFunction)
             return null;
+        return createAndAddDerivativeFunction();
+    }
+    
+    public FFunctionDecl FFunctionDecl.createAndAddDerivativeFunction() {
         FQName name = getFQName().createDerPrefixedName(1);
         Collection<FFunctionVariable> inputs = new ArrayList<FFunctionVariable>();
         Collection<FFunctionVariable> derivatedInputs = new ArrayList<FFunctionVariable>();
@@ -957,11 +960,17 @@ aspect AlgorithmDifferentiation{
         variables.addAll(derivatedInputs);
         variables.addAll(outputs);
         variables.addAll(others);
-        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new Opt<FDerivativeFunction>(), new List<FAttribute>());
+        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new List<FAttribute>());
         function.smoothOrder(Math.max(smoothOrder() - 1, 0));
+        
         myFClass().addFFunctionDecl(function);
-        setFDerivativeFunction(new FDerivativeFunction(name.createFIdUse(), order, new List<FIdUse>(), new List<FIdUse>()));
+        
+        AnnotationNode derNode = derivativeAnnotation();
+        derNode.setValue(name.createFIdUseExp());
+        derNode.forPath("order").setValue(new FIntegerLitExp(order() + 1));
+        
         function.setFAlgorithm(getFAlgorithm().diff());
+        
         return function;
     }
     

@@ -50,7 +50,6 @@ FClass : BaseNode ::= FQName
 FFunctionDecl : BaseNode ::= FQName 
                              FFunctionVariable* 
                              FAlgorithm 
-                             [FDerivativeFunction] 
                              /DummyExp:FExp/
                              FAttribute*;
 
@@ -63,14 +62,6 @@ FConstructorDecl : FFunctionDecl;
  * A function that is the destructor of an external object.
  */
 FDestructorDecl : FFunctionDecl;
-
-/**
- * A derivative function reference.
- * 
- * The information in this node is extracted from the derivative 
- * annotation in a function declaration.
- */
-FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int> NoDerivative:FIdUse* ZeroDerivative:FIdUse*;
 
 /**
  * A flattenend record declaration.

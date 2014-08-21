@@ -280,6 +280,15 @@ public
   return;
  end TransformCanonicalTests.TransformCanonicalTest8.f;
 
+ function TransformCanonicalTests.TransformCanonicalTest8.f1
+  input Real x;
+  output Real y;
+ algorithm
+  y := x ^ 2;
+  return;
+ annotation(derivative = TransformCanonicalTests.TransformCanonicalTest8.f_der);
+ end TransformCanonicalTests.TransformCanonicalTest8.f1;
+
  function TransformCanonicalTests.TransformCanonicalTest8.f_der
   input Real x;
   input Real der_x;
@@ -288,14 +297,6 @@ public
   der_y := 2 * x * der_x;
   return;
  end TransformCanonicalTests.TransformCanonicalTest8.f_der;
-
- function TransformCanonicalTests.TransformCanonicalTest8.f1
-  input Real x;
-  output Real y;
- algorithm
-  y := x ^ 2;
-  return;
- end TransformCanonicalTests.TransformCanonicalTest8.f1;
 
 end TransformCanonicalTests.TransformCanonicalTest8;
 ")})));

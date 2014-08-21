@@ -2005,8 +2005,6 @@ aspect Scalarization {
         fd.setFAlgorithm(new FAlgorithm(stmts));
         for (FAttribute a : getFAttributes()) 
             a.scalarize(fd.getFAttributes(), Index.NULL, Collections.<String,FExp>emptyMap());
-        if (hasFDerivativeFunction())
-            fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
         fd.inlineAnnotation = inlineAnnotation;
         fd.parent = this;
 

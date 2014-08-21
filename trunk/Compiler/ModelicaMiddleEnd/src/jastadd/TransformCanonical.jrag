@@ -1166,7 +1166,7 @@ aspect TransformCanonical {
 			
 			// Add return statement, create function declaration and add it to FClass 
 			alg.addFStatement(new FReturnStmt());
-			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new Opt(), new List<FAttribute>()));
+			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg, new List<FAttribute>()));
 		}
 	}
 
@@ -4189,8 +4189,8 @@ aspect FunctionAndRecordCleanup {
                 root().options.getBooleanOption("generate_ode_jacobian"))) {
                 if (requiresDerivative() && !canDifferentiate()) {
                     error("Unable to determine derivative function for function '" + name() + "'");
-                } else if (hasFDerivativeFunction()) {
-                    getFDerivativeFunction().myFCallable().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
+                } else if (derivativeFunction() != null) {
+                    derivativeFunction().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
                 }
             }
             super.markUsedFunctionsAndRecords(functionUsed);

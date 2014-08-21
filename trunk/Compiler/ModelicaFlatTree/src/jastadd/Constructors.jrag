@@ -935,11 +935,11 @@ aspect Constructors {
 		fas.addFSubscripts(index);
 		return fas;
 	}
-	
-	public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
-	    this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new Opt<FDerivativeFunction>(), new List<FAttribute>());
-	}
-	
+
+    public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
+        this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new List<FAttribute>());
+    }
+
 }
 
 /*

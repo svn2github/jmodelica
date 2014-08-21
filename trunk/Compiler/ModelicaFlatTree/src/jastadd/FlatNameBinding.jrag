@@ -467,7 +467,6 @@ aspect ParameterEquations {
 aspect FlatFunctionBinding {
     
     syn FCallable FFunctionCall.myFCallable()       = getName().myFCallable();
-    syn FCallable FDerivativeFunction.myFCallable() = getName().myFCallable();
     syn FCallable FIdUse.myFCallable()              = lookupFCallable(name());
     syn FCallable FFunctionVariable.myFCallable()   = lookupFCallable(type().name());
     
@@ -492,15 +491,6 @@ aspect FlatFunctionBinding {
         return lookupFCallable(name);
     }
     
-    // Keeping these for legacy reasons
-    syn FFunctionDecl FFunctionCall.myFFunctionDecl() = getName().myFFunctionDecl();
-    syn FFunctionDecl FDerivativeFunction.myFFunctionDecl() = getName().myFFunctionDecl();  
-    syn FFunctionDecl FIdUse.myFFunctionDecl() = lookupFFunctionDecl(name());
-    
-    inh FFunctionDecl FIdUse.lookupFFunctionDecl(String name);
-    inh FFunctionDecl FFunctionDecl.lookupFFunctionDecl(String name);
-    eq Root.getChild().lookupFFunctionDecl(String name)   = null;
-    eq FClass.getChild().lookupFFunctionDecl(String name) = lookupFunc(name);
 }
 
 aspect FlatRecordBinding {

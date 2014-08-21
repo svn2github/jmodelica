@@ -2431,10 +2431,23 @@ $CAD_function_headers$
 $CAD_functions$
 ",
             generatedCode="
-void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o);
-void func_CADCodeGenTests_CADDerAnno1_f_der_AD1(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_CADDerAnno1_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD1(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o);
 
-void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o) {
+void func_CADCodeGenTests_CADDerAnno1_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADDerAnno1_f_def0(x_var_v, &y_var_v);
+    func_CADCodeGenTests_CADDerAnno1_f_der_def1(x_var_v, x_der_v, &y_der_v);
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD1(jmi_ad_var_t x_var_v, jmi_ad_var_t der_x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t der_x_der_v, jmi_ad_var_t* der_y_var_o, jmi_ad_var_t* der_y_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t der_y_var_v;
     jmi_ad_var_t der_y_der_v;
@@ -2446,19 +2459,6 @@ void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD0(jmi_ad_var_t x_var_v, jmi_ad
     der_y_der_v = d_0 * der_x_var_v + v_0 * der_x_der_v;
     if (der_y_var_o != NULL) *der_y_var_o = der_y_var_v;
     if (der_y_der_o != NULL) *der_y_der_o = der_y_der_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-void func_CADCodeGenTests_CADDerAnno1_f_der_AD1(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_var_v;
-    jmi_ad_var_t y_der_v;
-    /*Using specified derivative annotation instead of AD*/
-    func_CADCodeGenTests_CADDerAnno1_f_def1(x_var_v, &y_var_v);
-    func_CADCodeGenTests_CADDerAnno1_f_der_def0(x_var_v, x_der_v, &y_der_v);
-    if (y_var_o != NULL) *y_var_o = y_var_v;
-    if (y_der_o != NULL) *y_der_o = y_der_v;
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -2518,17 +2518,17 @@ $CAD_functions$
 $C_functions$
 ",
             generatedCode="
-void func_CADCodeGenTests_CADDerAnno2_f2_der_AD1(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_CADDerAnno2_f2_der_AD0(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
 
-void func_CADCodeGenTests_CADDerAnno2_f2_der_AD1(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+void func_CADCodeGenTests_CADDerAnno2_f2_der_AD0(jmi_ad_var_t x1_var_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t x1_der_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t i1_v;
     jmi_ad_var_t b1_v;
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     /*Using specified derivative annotation instead of AD*/
-    func_CADCodeGenTests_CADDerAnno2_f2_def1(x1_var_v, i_v, b_v, &i1_v, &b1_v, &y_var_v);
-    func_CADCodeGenTests_CADDerAnno2_f_der_def0(x1_var_v, i_v, b_v, x1_der_v, &y_der_v);
+    func_CADCodeGenTests_CADDerAnno2_f2_def0(x1_var_v, i_v, b_v, &i1_v, &b1_v, &y_var_v);
+    func_CADCodeGenTests_CADDerAnno2_f_der_def1(x1_var_v, i_v, b_v, x1_der_v, &y_der_v);
     if (i1_o != NULL) *i1_o = i1_v;
     if (b1_o != NULL) *b1_o = b1_v;
     if (y_var_o != NULL) *y_var_o = y_var_v;
@@ -2538,22 +2538,7 @@ void func_CADCodeGenTests_CADDerAnno2_f2_der_AD1(jmi_ad_var_t x1_var_v, jmi_ad_v
 }
 
 
-void func_CADCodeGenTests_CADDerAnno2_f_der_def0(jmi_ad_var_t x1_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_v, jmi_ad_var_t* der_y1_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t der_y1_v;
-    der_y1_v = COND_EXP_EQ(b1_v, JMI_TRUE, AD_WRAP_LITERAL(2) * x1_v * der_x1_v, AD_WRAP_LITERAL(3) * (1.0 * (x1_v) * (x1_v)) * der_x1_v);
-    if (der_y1_o != NULL) *der_y1_o = der_y1_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f_der_exp0(jmi_ad_var_t x1_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_v) {
-    jmi_ad_var_t der_y1_v;
-    func_CADCodeGenTests_CADDerAnno2_f_der_def0(x1_v, i1_v, b1_v, der_x1_v, &der_y1_v);
-    return der_y1_v;
-}
-
-void func_CADCodeGenTests_CADDerAnno2_f2_def1(jmi_ad_var_t x1_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_o) {
+void func_CADCodeGenTests_CADDerAnno2_f2_def0(jmi_ad_var_t x1_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t* i1_o, jmi_ad_var_t* b1_o, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t i1_v;
     jmi_ad_var_t b1_v;
@@ -2568,10 +2553,25 @@ void func_CADCodeGenTests_CADDerAnno2_f2_def1(jmi_ad_var_t x1_v, jmi_ad_var_t i_
     return;
 }
 
-jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f2_exp1(jmi_ad_var_t x1_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v) {
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f2_exp0(jmi_ad_var_t x1_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v) {
     jmi_ad_var_t i1_v;
-    func_CADCodeGenTests_CADDerAnno2_f2_def1(x1_v, i_v, b_v, &i1_v, NULL, NULL);
+    func_CADCodeGenTests_CADDerAnno2_f2_def0(x1_v, i_v, b_v, &i1_v, NULL, NULL);
     return i1_v;
+}
+
+void func_CADCodeGenTests_CADDerAnno2_f_der_def1(jmi_ad_var_t x1_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_v, jmi_ad_var_t* der_y1_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t der_y1_v;
+    der_y1_v = COND_EXP_EQ(b1_v, JMI_TRUE, AD_WRAP_LITERAL(2) * x1_v * der_x1_v, AD_WRAP_LITERAL(3) * (1.0 * (x1_v) * (x1_v)) * der_x1_v);
+    if (der_y1_o != NULL) *der_y1_o = der_y1_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f_der_exp1(jmi_ad_var_t x1_v, jmi_ad_var_t i1_v, jmi_ad_var_t b1_v, jmi_ad_var_t der_x1_v) {
+    jmi_ad_var_t der_y1_v;
+    func_CADCodeGenTests_CADDerAnno2_f_der_def1(x1_v, i1_v, b1_v, der_x1_v, &der_y1_v);
+    return der_y1_v;
 }
 
 ")})));
@@ -4785,10 +4785,10 @@ $CAD_functions$
 void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_destructor_def0(jmi_extobj_t eo_v);
 void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_constructor_def1(jmi_ad_var_t i_v, jmi_extobj_t* eo_o);
 jmi_extobj_t func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_constructor_exp1(jmi_ad_var_t i_v);
-void func_CADCodeGenTests_TestExtObject1_f_der_def2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_der_o);
-jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_der_exp2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v);
-void func_CADCodeGenTests_TestExtObject1_f_def3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t* r_o);
-jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_exp3(jmi_extobj_t eo_v, jmi_ad_var_t x_v);
+void func_CADCodeGenTests_TestExtObject1_f_def2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t* r_o);
+jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_exp2(jmi_extobj_t eo_v, jmi_ad_var_t x_v);
+void func_CADCodeGenTests_TestExtObject1_f_der_def3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_der_o);
+jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_der_exp3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v);
 
 void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
@@ -4812,22 +4812,7 @@ jmi_extobj_t func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_constructor_exp
     return eo_v;
 }
 
-void func_CADCodeGenTests_TestExtObject1_f_der_def2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_der_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t r_der_v;
-    r_der_v = useMyEO_der(eo_v, x_v, x_der_v);
-    if (r_der_o != NULL) *r_der_o = r_der_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_der_exp2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v) {
-    jmi_ad_var_t r_der_v;
-    func_CADCodeGenTests_TestExtObject1_f_der_def2(eo_v, x_v, x_der_v, &r_der_v);
-    return r_der_v;
-}
-
-void func_CADCodeGenTests_TestExtObject1_f_def3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t* r_o) {
+void func_CADCodeGenTests_TestExtObject1_f_def2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t r_v;
     r_v = useMyEO(eo_v, x_v);
@@ -4836,22 +4821,37 @@ void func_CADCodeGenTests_TestExtObject1_f_def3(jmi_extobj_t eo_v, jmi_ad_var_t 
     return;
 }
 
-jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_exp3(jmi_extobj_t eo_v, jmi_ad_var_t x_v) {
+jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_exp2(jmi_extobj_t eo_v, jmi_ad_var_t x_v) {
     jmi_ad_var_t r_v;
-    func_CADCodeGenTests_TestExtObject1_f_def3(eo_v, x_v, &r_v);
+    func_CADCodeGenTests_TestExtObject1_f_def2(eo_v, x_v, &r_v);
     return r_v;
 }
 
+void func_CADCodeGenTests_TestExtObject1_f_der_def3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t r_der_v;
+    r_der_v = useMyEO_der(eo_v, x_v, x_der_v);
+    if (r_der_o != NULL) *r_der_o = r_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
 
-void func_CADCodeGenTests_TestExtObject1_f_der_AD3(jmi_extobj_t eo_v, jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_var_o, jmi_ad_var_t* r_der_o);
+jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_der_exp3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v) {
+    jmi_ad_var_t r_der_v;
+    func_CADCodeGenTests_TestExtObject1_f_der_def3(eo_v, x_v, x_der_v, &r_der_v);
+    return r_der_v;
+}
 
-void func_CADCodeGenTests_TestExtObject1_f_der_AD3(jmi_extobj_t eo_v, jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_var_o, jmi_ad_var_t* r_der_o) {
+
+void func_CADCodeGenTests_TestExtObject1_f_der_AD2(jmi_extobj_t eo_v, jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_var_o, jmi_ad_var_t* r_der_o);
+
+void func_CADCodeGenTests_TestExtObject1_f_der_AD2(jmi_extobj_t eo_v, jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_var_o, jmi_ad_var_t* r_der_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t r_var_v;
     jmi_ad_var_t r_der_v;
     /*Using specified derivative annotation instead of AD*/
-    func_CADCodeGenTests_TestExtObject1_f_def3(eo_v, x_var_v, &r_var_v);
-    func_CADCodeGenTests_TestExtObject1_f_der_def2(eo_v, x_var_v, x_der_v, &r_der_v);
+    func_CADCodeGenTests_TestExtObject1_f_def2(eo_v, x_var_v, &r_var_v);
+    func_CADCodeGenTests_TestExtObject1_f_der_def3(eo_v, x_var_v, x_der_v, &r_der_v);
     if (r_var_o != NULL) *r_var_o = r_var_v;
     if (r_der_o != NULL) *r_der_o = r_der_v;
     JMI_DYNAMIC_FREE()

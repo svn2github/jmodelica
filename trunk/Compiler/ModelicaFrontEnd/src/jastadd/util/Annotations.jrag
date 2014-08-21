@@ -177,14 +177,37 @@ aspect AnnotationAPI {
 		public String name() {
 			return null;
 		}
-		
-		/**
-		 * Iterate over this node's child annotation nodes.
-		 */
-		public Iterator<AnnotationNode> iterator() {
-			return NO_ANNOTATION.iterator();
-		}
-		
+
+        /**
+         * Iterate over this node's child annotation nodes.
+         */
+        public final Iterator<AnnotationNode> iterator() {
+            Iterator<AnnotationNode> attrIt = attributeIterator();
+            Iterator<AnnotationNode> valueIt = valueIterator();
+            if (attrIt != NullAnnotationNode.EMPTY_ITERATOR && valueIt != NullAnnotationNode.EMPTY_ITERATOR)
+                return new ChainedIterator<AnnotationNode>(attrIt, valueIt);
+            else if (attrIt != NullAnnotationNode.EMPTY_ITERATOR)
+                return attrIt;
+            else
+                return valueIt;
+        }
+
+        /**
+         * Iterate over this node's child annotation nodes that are declared in
+         * an attribute looking way.
+         */
+        public Iterator<AnnotationNode> attributeIterator() {
+            return NullAnnotationNode.EMPTY_ITERATOR;
+        }
+
+        /**
+         * Iterate over this node's child annotation nodes that are declared in
+         * a asignment looking way.
+         */
+        public Iterator<AnnotationNode> valueIterator() {
+            return NullAnnotationNode.EMPTY_ITERATOR;
+        }
+
         /**
          * Calculates and returns the evaluated value of this annotation
          * node (if possible).
@@ -523,10 +546,6 @@ aspect AnnotationAPI {
 			private static final Iterator<AnnotationNode> EMPTY_ITERATOR = 
 				new ArrayList<AnnotationNode>().iterator();
 			
-			public Iterator<AnnotationNode> iterator() {
-				return EMPTY_ITERATOR;
-			}
-			
 			public boolean exists() {
 				return false;
 			}
@@ -755,7 +774,7 @@ aspect AnnotationAPI {
 			mod = cm;
 		}
 
-		public Iterator<AnnotationNode> iterator() {
+		public Iterator<AnnotationNode> attributeIterator() {
 			return new AnnotationIterator(mod.getArguments());
 		}
 		
@@ -795,11 +814,11 @@ aspect AnnotationAPI {
 			call = fc;
 		}
 
-		public Iterator<AnnotationNode> iterator() {
-			return new AnnotationIterator(new ChainedIterator(
-					call.getFunctionArguments().getExps().iterator(), 
-					call.getFunctionArguments().getNamedArguments().iterator()));
-		}
+        public Iterator<AnnotationNode> attributeIterator() {
+            return new AnnotationIterator(new ChainedIterator(
+                    call.getFunctionArguments().getExps().iterator(), 
+                    call.getFunctionArguments().getNamedArguments().iterator()));
+        }
 		
 		public String name() {
 			return call.getName().name();
@@ -830,8 +849,8 @@ aspect AnnotationAPI {
 				return !exp().isAnnotationExp();
 		}
 
-		public Iterator<AnnotationNode> iterator() {
-			return exp() == null || isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
+		public Iterator<AnnotationNode> valueIterator() {
+			return exp() == null || isValue() ? super.valueIterator() : new AnnotationIterator(exp().annotationList());
 		}
 		
 		@Override
@@ -930,11 +949,11 @@ aspect AnnotationAPI {
 		}
 		
 		@Override
-		public Iterator<AnnotationNode> iterator() {
+		public Iterator<AnnotationNode> attributeIterator() {
 			if (mod.hasModification())
-				return mod.getModification().annotationNode().iterator();
+				return mod.getModification().annotationNode().attributeIterator();
 			else
-				return super.iterator();
+				return super.attributeIterator();
 		}
 
 		@Override
@@ -1002,15 +1021,11 @@ aspect AnnotationAPI {
 				return false;
 		}
 		
-		@Override
-		public Iterator<AnnotationNode> iterator() {
-			Iterator<AnnotationNode> it = mod.getClassModification().annotationNode().iterator();
-			if (mod.hasValueModification() && !it.hasNext())
-				return mod.getValueModification().annotationNode().iterator();
-			else
-				return it;
-		}
-		
+        @Override
+        public Iterator<AnnotationNode> attributeIterator() {
+            return mod.getClassModification().annotationNode().iterator();
+        }
+
         @Override
         protected AnnotationNode lookup(String path) {
             return mod.getClassModification().annotationNode().lookup(path);
@@ -1093,8 +1108,8 @@ aspect AnnotationAPI {
         }
 
         @Override
-        public Iterator<AnnotationNode> iterator() {
-            return fExp() == null || isValue() ? super.iterator() : new AnnotationIterator(fExp().annotationList());
+        public Iterator<AnnotationNode> valueIterator() {
+            return fExp() == null || isValue() ? super.valueIterator() : new AnnotationIterator(fExp().annotationList());
         }
 
         @Override
@@ -1147,8 +1162,8 @@ aspect AnnotationAPI {
         }
 
         @Override
-        public Iterator<AnnotationNode> iterator() {
-            return fExp() == null ? new AnnotationIterator(attr.getFAttributes()) : super.iterator();
+        public Iterator<AnnotationNode> attributeIterator() {
+            return attr.getNumFAttribute() > 0 ? new AnnotationIterator(attr.getFAttributes()) : super.attributeIterator();
         }
 
         @Override
@@ -1185,6 +1200,11 @@ aspect AnnotationAPI {
         @Override
         public void setLevel(int level) {
             attr.setLevel(level);
+        }
+
+        @Override
+        public String name() {
+            return attr.getName().name();
         }
     }
 

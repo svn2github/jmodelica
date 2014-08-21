@@ -2422,7 +2422,7 @@ aspect CADCodeGen {
         
         // Print the call to the specified derivative function
         str.print(indent);
-        str.print(getFDerivativeFunction().funcNameUnderscore("def") + "(");
+        str.print(derivativeFunction().funcNameUnderscore("def") + "(");
         String sep = "";
         for (FFunctionVariable ffv : myInputs()){
             str.print(sep);
@@ -2514,7 +2514,7 @@ aspect CADCodeGen {
         prettyPrintHead_CAD(p, str, outerIndent, "void", "der_AD", true);
         str.print(" {\n");
         str.print(indent + "JMI_DYNAMIC_INIT()\n");
-        if (hasFDerivativeFunction()){
+        if (derivativeFunction() != null){
             genFuncAnnotation_CAD(p, str, indent);
             genReturnStmt_CAD(p, str, indent);
         } else if (derivativEqualsZero()){

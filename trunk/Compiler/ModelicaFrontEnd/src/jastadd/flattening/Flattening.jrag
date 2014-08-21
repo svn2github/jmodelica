@@ -258,10 +258,8 @@ aspect Flattening {
         if (fc.lookupFunc(qualifiedName()) == null) {
             InstExternal ie = findFunctionExternal();
 
-            FDerivativeFunction der = createFDerivativeFunction(fc, ie);
             FFunctionDecl ffd = createFFunction(fc, ie);
-            if (der != null)
-                ffd.setFDerivativeFunction(der);
+            copyDerivativeAnnotations(fc, ie, ffd.annotation());
             // TODO: should we look in extends as well?
             ffd.readInlineAnnotation(annotation());
             ffd.smoothOrder(smoothOrder());
@@ -314,35 +312,40 @@ aspect Flattening {
         fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
     }
     
-	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
-		AnnotationNode functionDer = derivativeAnnotation(ie);
-		
-		if (functionDer.exists()) {
-			String functionDerName = functionDer.string();
-            List<FIdUse> noDerivatives = new List<FIdUse>();
-            List<FIdUse> zeroDerivatives = new List<FIdUse>();
-            int order = 1;
-			for (AnnotationNode nd : functionDer) {
-				if (nd != null) {
-					if ("noDerivative".equals(nd.name()) && nd.isStringValue()) 
-						noDerivatives.add(new FIdUse(nd.string()));
-                    if ("zeroDerivative".equals(nd.name()) && nd.isStringValue()) 
-                        noDerivatives.add(new FIdUse(nd.string()));
-                    if ("order".equals(nd.name()) && nd.isIntegerValue()) 
-                        order = nd.integer();
-				}	
-			}				
-			
-			InstClassDecl fd_decl = lookupInstClassQualified(functionDer.string());
-			if (!fd_decl.isUnknown()) {
-				fd_decl.flattenFunction(fc);
-				FIdUse use = new FIdUse(new FQNameString(fd_decl.qualifiedName()));
-				return new FDerivativeFunction(use, order, noDerivatives, zeroDerivatives);
-			}
-		}
-		return null;
-	}
-	
+    private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, InstExternal ie, AnnotationNode dest) {
+        copyDerivativeAnnotations(fc, annotation(), dest);
+        if (ie != null)
+            copyDerivativeAnnotations(fc, ie.annotation(), dest);
+    }
+
+    private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, AnnotationNode src, AnnotationNode dest) {
+        
+        for (AnnotationNode derSrcNode : src) {
+            if (!"derivative".equals(derSrcNode.name()))
+                continue;
+            String derName = derSrcNode.string();
+            InstClassDecl fd_decl = lookupInstClassQualified(derName);
+            if (fd_decl.isUnknown())
+                continue;
+            AnnotationNode derDestNode = dest.addNode("derivative");
+            fd_decl.flattenFunction(fc);
+            FExp derNameExp = new FIdUseExp(new FQNameString(fd_decl.qualifiedName()));
+            derDestNode.setValue(derNameExp);
+            for (AnnotationNode attrSrcNode : derSrcNode) {
+                if ("noDerivative".equals(attrSrcNode.name()) && attrSrcNode.isStringValue()) {
+                    AnnotationNode noDer = derDestNode.addNode("noDerivative");
+                    noDer.setValue(new FIdUseExp(attrSrcNode.string()));
+                } else if ("zeroDerivative".equals(attrSrcNode.name()) && attrSrcNode.isStringValue()) {
+                    AnnotationNode zeroDer = derDestNode.addNode("zeroDerivative");
+                    zeroDer.setValue(new FIdUseExp(attrSrcNode.string()));
+                } else if ("order".equals(attrSrcNode.name()) && attrSrcNode.isIntegerValue()) {
+                    AnnotationNode order = derDestNode.addNode("order");
+                    order.setValue(new FIntegerLitExp(attrSrcNode.integer()));
+                }
+            }
+        }
+    }
+
 	public void ASTNode.ensureFQNamesFull() {
 		for (ASTNode n : this)
 			n.ensureFQNamesFull();
@@ -2377,7 +2380,7 @@ aspect InstantiatedExpressions {
     }
 
     public FAbstractEquation AbstractEquation.instantiate() {
-        return copyLocationTo(new FUnsupportedEquation(equationType()));
+        return contribute(copyLocationTo(new FUnsupportedEquation(equationType())));
     }
 
     public FAbstractEquation Equation.instantiate() {
@@ -2394,7 +2397,7 @@ aspect InstantiatedExpressions {
 				new FIdUseInstAccess(getConnector1().newInstAccess()),
 				new FIdUseInstAccess(getConnector2().newInstAccess()));
 		c.setLocation(this);
-		return c;
+		return contribute(c);
 	}
 	
 	protected FIfWhenElseEquation IfWhenElseEquation.instantiate(FIfWhenElseEquation res) {
@@ -2402,7 +2405,7 @@ aspect InstantiatedExpressions {
 		for (AbstractEquation eqn : getAbstractEquations())
 			res.addFAbstractEquation(eqn.instantiate());
 		res.setLocation(this);
-		return res;
+		return contribute(res);
 	}
 	
 	protected FIfWhenEquation IfWhenEquation.instantiate(FIfWhenEquation res) {

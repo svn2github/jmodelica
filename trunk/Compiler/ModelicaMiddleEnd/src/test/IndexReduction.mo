@@ -971,22 +971,23 @@ equation
  _der_x1 + IndexReduction.IndexReduction24_DerFunc.f_der(x2, der(x2)) = 0;
 
 public
+ function IndexReduction.IndexReduction24_DerFunc.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x ^ 2;
+  return;
+ annotation(derivative = IndexReduction.IndexReduction24_DerFunc.f_der);
+ end IndexReduction.IndexReduction24_DerFunc.f;
+
  function IndexReduction.IndexReduction24_DerFunc.f_der
   input Real x;
   input Real der_x;
   output Real der_y;
-algorithm
+ algorithm
   der_y := 2 * x * der_x;
   return;
  end IndexReduction.IndexReduction24_DerFunc.f_der;
-
- function IndexReduction.IndexReduction24_DerFunc.f
-  input Real x;
-  output Real y;
-algorithm
-  y := x ^ 2;
-  return;
- end IndexReduction.IndexReduction24_DerFunc.f;
 
 end IndexReduction.IndexReduction24_DerFunc;
 ")})));
@@ -1044,25 +1045,26 @@ equation
  der(x1[1]) + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), _der_x2[2]}, {{0.0, 0.0}, {0.0, 0.0}}) = 0;
 
 public
+ function IndexReduction.IndexReduction25_DerFunc.f
+  input Real[2] x;
+  input Real[2, 2] A;
+  output Real y;
+ algorithm
+  y := (x[1] * A[1,1] + x[2] * A[2,1]) * x[1] + (x[1] * A[1,2] + x[2] * A[2,2]) * x[2];
+  return;
+ annotation(derivative = IndexReduction.IndexReduction25_DerFunc.f_der);
+ end IndexReduction.IndexReduction25_DerFunc.f;
+
  function IndexReduction.IndexReduction25_DerFunc.f_der
   input Real[2] x;
   input Real[2, 2] A;
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output Real der_y;
-algorithm
+ algorithm
   der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + ((x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2]);
   return;
  end IndexReduction.IndexReduction25_DerFunc.f_der;
-
- function IndexReduction.IndexReduction25_DerFunc.f
-  input Real[2] x;
-  input Real[2, 2] A;
-  output Real y;
-algorithm
-  y := (x[1] * A[1,1] + x[2] * A[2,1]) * x[1] + (x[1] * A[1,2] + x[2] * A[2,2]) * x[2];
-  return;
- end IndexReduction.IndexReduction25_DerFunc.f;
 
 end IndexReduction.IndexReduction25_DerFunc;
 ")})));
@@ -1113,22 +1115,23 @@ equation
  der(x1[1]) + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), _der_x2[2]}) = 0;
 
 public
+ function IndexReduction.IndexReduction26_DerFunc.f
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[1] ^ 2 + x[2] ^ 3;
+  return;
+ annotation(derivative = IndexReduction.IndexReduction26_DerFunc.f_der);
+ end IndexReduction.IndexReduction26_DerFunc.f;
+
  function IndexReduction.IndexReduction26_DerFunc.f_der
   input Real[2] x;
   input Real[2] der_x;
   output Real der_y;
-algorithm
+ algorithm
   der_y := 2 * x[1] * der_x[1] + 3 * x[2] ^ 2 * der_x[2];
   return;
  end IndexReduction.IndexReduction26_DerFunc.f_der;
-
- function IndexReduction.IndexReduction26_DerFunc.f
-  input Real[2] x;
-  output Real y;
-algorithm
-  y := x[1] ^ 2 + x[2] ^ 3;
-  return;
- end IndexReduction.IndexReduction26_DerFunc.f;
 
 end IndexReduction.IndexReduction26_DerFunc;
 ")})));
@@ -1195,27 +1198,28 @@ equation
  - _der_x1[2] = _der_temp_5;
 
 public
+ function IndexReduction.IndexReduction27_DerFunc.f
+  input Real[2] x;
+  input Real[2, 2] A;
+  output Real[2] y;
+ algorithm
+  y[1] := A[1,1] * x[1] + A[1,2] * x[2];
+  y[2] := A[2,1] * x[1] + A[2,2] * x[2];
+  return;
+ annotation(derivative = IndexReduction.IndexReduction27_DerFunc.f_der);
+ end IndexReduction.IndexReduction27_DerFunc.f;
+
  function IndexReduction.IndexReduction27_DerFunc.f_der
   input Real[2] x;
   input Real[2, 2] A;
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output Real[2] der_y;
-algorithm
+ algorithm
   der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
  end IndexReduction.IndexReduction27_DerFunc.f_der;
-
- function IndexReduction.IndexReduction27_DerFunc.f
-  input Real[2] x;
-  input Real[2, 2] A;
-  output Real[2] y;
-algorithm
-  y[1] := A[1,1] * x[1] + A[1,2] * x[2];
-  y[2] := A[2,1] * x[1] + A[2,2] * x[2];
-  return;
- end IndexReduction.IndexReduction27_DerFunc.f;
 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
@@ -1290,6 +1294,17 @@ equation
  - x1._der_a[2] = _der_temp_5;
 
 public
+ function IndexReduction.IndexReduction28_Record.f
+  input Real[2] x;
+  input Real[2, 2] A;
+  output IndexReduction.IndexReduction28_Record.R y;
+ algorithm
+  y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
+  y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
+  return;
+ annotation(derivative = IndexReduction.IndexReduction28_Record.f_der);
+ end IndexReduction.IndexReduction28_Record.f;
+
  function IndexReduction.IndexReduction28_Record.f_der
   input Real[2] x;
   input Real[2, 2] A;
@@ -1301,16 +1316,6 @@ public
   der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
  end IndexReduction.IndexReduction28_Record.f_der;
-
- function IndexReduction.IndexReduction28_Record.f
-  input Real[2] x;
-  input Real[2, 2] A;
-  output IndexReduction.IndexReduction28_Record.R y;
- algorithm
-  y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
-  y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
-  return;
- end IndexReduction.IndexReduction28_Record.f;
 
  record IndexReduction.IndexReduction28_Record.R
   Real a[2];
@@ -1376,6 +1381,18 @@ equation
  _der_x + IndexReduction.IndexReduction29_FunctionNoDerivative.der_F(y, x, 0, x, der(y), _der_x) = 0;
 
 public
+ function IndexReduction.IndexReduction29_FunctionNoDerivative.F
+  input Real p;
+  input Real h;
+  input Integer phase;
+  input Real z;
+  output Real rho;
+ algorithm
+  rho := p + h;
+  return;
+ annotation(derivative(noDerivative = z) = IndexReduction.IndexReduction29_FunctionNoDerivative.der_F);
+ end IndexReduction.IndexReduction29_FunctionNoDerivative.F;
+
  function IndexReduction.IndexReduction29_FunctionNoDerivative.der_F
   input Real p;
   input Real h;
@@ -1388,17 +1405,6 @@ public
   der_rho := der_p + der_h;
   return;
  end IndexReduction.IndexReduction29_FunctionNoDerivative.der_F;
-
- function IndexReduction.IndexReduction29_FunctionNoDerivative.F
-  input Real p;
-  input Real h;
-  input Integer phase;
-  input Real z;
-  output Real rho;
- algorithm
-  rho := p + h;
-  return;
- end IndexReduction.IndexReduction29_FunctionNoDerivative.F;
 
 end IndexReduction.IndexReduction29_FunctionNoDerivative;
 ")})));
@@ -2036,35 +2042,37 @@ equation
  _der_der_x + IndexReduction.IndexReduction43_Order.ddf(y, der(y), _der_der_y) = 0;
 
 public
- function IndexReduction.IndexReduction43_Order.ddf
+ function IndexReduction.IndexReduction43_Order.f
   input Real x;
-  input Real dx;
-  input Real ddx;
-  output Real ddy;
-algorithm
-  ddy := x;
-  ddy := ddy + 2;
+  output Real y;
+ algorithm
+  y := x * x;
+  y := y * x + 2 * y + 3 * x;
   return;
- end IndexReduction.IndexReduction43_Order.ddf;
+ annotation(derivative = IndexReduction.IndexReduction43_Order.df);
+ end IndexReduction.IndexReduction43_Order.f;
 
  function IndexReduction.IndexReduction43_Order.df
   input Real x;
   input Real dx;
   output Real dy;
-algorithm
+ algorithm
   dy := x * x;
   dy := dy + 2 * x + 3;
   return;
+ annotation(derivative(order = 2) = IndexReduction.IndexReduction43_Order.ddf);
  end IndexReduction.IndexReduction43_Order.df;
 
- function IndexReduction.IndexReduction43_Order.f
+ function IndexReduction.IndexReduction43_Order.ddf
   input Real x;
-  output Real y;
-algorithm
-  y := x * x;
-  y := y * x + 2 * y + 3 * x;
+  input Real dx;
+  input Real ddx;
+  output Real ddy;
+ algorithm
+  ddy := x;
+  ddy := ddy + 2;
   return;
- end IndexReduction.IndexReduction43_Order.f;
+ end IndexReduction.IndexReduction43_Order.ddf;
 
 end IndexReduction.IndexReduction43_Order;
 ")})));
@@ -2145,6 +2153,30 @@ equation
  _der_der_x + IndexReduction.IndexReduction44_Order2Arg.ddf(y, time, der(y), 1.0, _der_der_y, 0.0) = 0;
 
 public
+ function IndexReduction.IndexReduction44_Order2Arg.f
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := x1 * x1;
+  y := y * x2;
+  return;
+ annotation(derivative = IndexReduction.IndexReduction44_Order2Arg.df);
+ end IndexReduction.IndexReduction44_Order2Arg.f;
+
+ function IndexReduction.IndexReduction44_Order2Arg.df
+  input Real x1;
+  input Real x2;
+  input Real dx1;
+  input Real dx2;
+  output Real dy;
+ algorithm
+  dy := x1 * x1;
+  dy := y * x2;
+  return;
+ annotation(derivative(order = 2) = IndexReduction.IndexReduction44_Order2Arg.ddf);
+ end IndexReduction.IndexReduction44_Order2Arg.df;
+
  function IndexReduction.IndexReduction44_Order2Arg.ddf
   input Real x1;
   input Real x2;
@@ -2153,35 +2185,14 @@ public
   input Real ddx1;
   input Real ddx2;
   output Real ddy;
-algorithm
+ algorithm
   ddy := x1 * x1;
   ddy := y * x2;
   return;
  end IndexReduction.IndexReduction44_Order2Arg.ddf;
 
- function IndexReduction.IndexReduction44_Order2Arg.df
-  input Real x1;
-  input Real x2;
-  input Real dx1;
-  input Real dx2;
-  output Real dy;
-algorithm
-  dy := x1 * x1;
-  dy := y * x2;
-  return;
- end IndexReduction.IndexReduction44_Order2Arg.df;
-
- function IndexReduction.IndexReduction44_Order2Arg.f
-  input Real x1;
-  input Real x2;
-  output Real y;
-algorithm
-  y := x1 * x1;
-  y := y * x2;
-  return;
- end IndexReduction.IndexReduction44_Order2Arg.f;
-
 end IndexReduction.IndexReduction44_Order2Arg;
+
 ")})));
 end IndexReduction44_Order2Arg;
 
@@ -2881,7 +2892,7 @@ public
  algorithm
   y := sin(x);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Simple._der_F);
  end IndexReduction.AlgorithmDifferentiation.Simple.F;
 
  function IndexReduction.AlgorithmDifferentiation.Simple._der_F
@@ -2940,7 +2951,7 @@ public
  algorithm
   y := sin(x.x[1]);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.RecordInput._der_F);
  end IndexReduction.AlgorithmDifferentiation.RecordInput.F;
 
  function IndexReduction.AlgorithmDifferentiation.RecordInput._der_F
@@ -3009,7 +3020,7 @@ public
  algorithm
   y.x[1] := sin(x);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F);
  end IndexReduction.AlgorithmDifferentiation.RecordOutput.F;
 
  function IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F
@@ -3084,7 +3095,7 @@ public
   end for;
   y := sin(x);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.For._der_F);
  end IndexReduction.AlgorithmDifferentiation.For.F;
 
  function IndexReduction.AlgorithmDifferentiation.For._der_F
@@ -3166,7 +3177,7 @@ public
   (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   y := a + b;
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1);
  end IndexReduction.AlgorithmDifferentiation.FunctionCall.F1;
 
  function IndexReduction.AlgorithmDifferentiation.FunctionCall.F2
@@ -3178,6 +3189,7 @@ public
   a := x1;
   b := sin(x2);
   return;
+ annotation(derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2);
  end IndexReduction.AlgorithmDifferentiation.FunctionCall.F2;
 
  function IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1
@@ -3271,7 +3283,7 @@ public
   end if;
   y := sin(x);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.If._der_F);
  end IndexReduction.AlgorithmDifferentiation.If.F;
 
  function IndexReduction.AlgorithmDifferentiation.If._der_F
@@ -3342,7 +3354,7 @@ public
   end for;
   y := a[1];
   return;
- annotation(smoothOrder = 3);
+ annotation(smoothOrder = 3,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.InitArray._der_F);
  end IndexReduction.AlgorithmDifferentiation.InitArray.F;
 
  function IndexReduction.AlgorithmDifferentiation.InitArray._der_F
@@ -3362,7 +3374,7 @@ public
   _der_y := _der_a[1];
   y := a[1];
   return;
- annotation(smoothOrder = 2);
+ annotation(smoothOrder = 2,derivative(order = 2) = IndexReduction.AlgorithmDifferentiation.InitArray._der_der_F);
  end IndexReduction.AlgorithmDifferentiation.InitArray._der_F;
 
 end IndexReduction.AlgorithmDifferentiation.InitArray;
@@ -3472,7 +3484,7 @@ public
   end while;
   y := sin(x);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.While._der_F);
  end IndexReduction.AlgorithmDifferentiation.While.F;
 
  function IndexReduction.AlgorithmDifferentiation.While._der_F
@@ -3558,7 +3570,7 @@ public
   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   y := a + b;
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Recursive._der_F1);
  end IndexReduction.AlgorithmDifferentiation.Recursive.F1;
 
  function IndexReduction.AlgorithmDifferentiation.Recursive.F2
@@ -3575,6 +3587,7 @@ public
    b := sin(x2);
   end if;
   return;
+ annotation(derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Recursive._der_F2);
  end IndexReduction.AlgorithmDifferentiation.Recursive.F2;
 
  function IndexReduction.AlgorithmDifferentiation.Recursive._der_F1
@@ -3669,7 +3682,7 @@ public
   c := c + 23;
   y := sin(x);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F);
  end IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F;
 
  function IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F
@@ -3753,7 +3766,7 @@ public
  algorithm
   y := x ^ 2;
   return;
- annotation(smoothOrder = 2);
+ annotation(smoothOrder = 2,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square);
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square;
 
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square
@@ -3765,7 +3778,7 @@ public
   _der_y := 2 * x * _der_x;
   y := x ^ 2;
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 2) = IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square);
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square;
 
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square
@@ -3821,7 +3834,7 @@ public
   y := x * x;
   y := y * x;
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F
@@ -3886,7 +3899,7 @@ public
   (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(x);
   (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2
@@ -3898,7 +3911,7 @@ public
   z := x * x;
   z := z * x;
   return;
- annotation(smoothOrder = 1);
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2);
  end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2;
 
  function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1
