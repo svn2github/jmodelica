@@ -252,12 +252,18 @@ aspect IndexReduction {
         protected IndexReductionVar createVar(String name, FVariable var) {
             return new IndexReductionVar(name, var);
         }
+        
+        @Override
+        public boolean canMatch(IndexReductionEq e, IndexReductionVar v) {
+            return super.canMatch(e, v) && !e.isNonDiffUse(v);
+        }
     }
     
     public class IndexReductionEq extends AbstractEq<IndexReductionEq, IndexReductionVar> {
 
         private IndexReductionEq meDifferentiated = null;
         private IndexReductionEq meIntegrated = null;
+        private Map<IndexReductionVar, Boolean> nonDiffUseMap;
 
         public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
             super(name, eqn, groupNumber, variability);
@@ -283,6 +289,31 @@ aspect IndexReduction {
 
         public IndexReductionEq getMeIntegrated() {
             return this.meIntegrated;
+        }
+
+        public boolean isNonDiffUse(IndexReductionVar var) {
+            if (nonDiffUseMap == null)
+                nonDiffUseMap = new HashMap<IndexReductionVar, Boolean>();
+            Boolean res = nonDiffUseMap.get(var);
+            if (res != null)
+                return res;
+            Set<FIdUseExp> uses = getEquation().referencedFIdUseExps();
+            res = true;
+            for (FIdUseExp use : uses) {
+                if (!use.name().equals(var.getName()))
+                    continue;
+                res &= use.inNonDiffArg();
+            }
+            nonDiffUseMap.put(var, res);
+            return res;
+        }
+        
+        public int numDiffableVars() {
+            int n = 0;
+            for (IndexReductionVar var : getVariables())
+                if (!isNonDiffUse(var))
+                    n++;
+            return n;
         }
 
     }
@@ -527,7 +558,7 @@ aspect IndexReduction {
         // Remove equations that are not connected
         java.util.List<IndexReductionEq> eqToRemove = new ArrayList<IndexReductionEq>();
         for (IndexReductionEq e : getEquations())
-            if (e.getVariables().size() == 0)
+            if (e.numDiffableVars() == 0)
                 eqToRemove.add(e);
         for (IndexReductionEq e : eqToRemove)
             removeEquation(e);

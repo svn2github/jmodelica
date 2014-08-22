@@ -4129,4 +4129,192 @@ end IndexReduction.FunctionAttributeScalarization1;
 ")})));
 end FunctionAttributeScalarization1;
 
+model NonDiffArgsTest1
+    function F1
+        input Real x;
+        input Real r;
+        output Real y;
+    algorithm
+        y := x + r;
+    annotation(Inline=false,derivative(noDerivative=r)=F1_der);
+    end F1;
+    
+    function F1_der
+        input Real x;
+        input Real r;
+        input Real x_der;
+        output Real y_der;
+    algorithm
+        y_der := x_der;
+    annotation(Inline=false);
+    end F1_der;
+    
+    function F2
+        input Real x;
+        output Real r;
+    algorithm
+        r := x;
+    annotation(Inline=false);
+    end F2;
+
+    Real x;
+    Real der_y;
+    Real y;
+    Real r;
+equation
+    x * y = time;
+    r = F2(x);
+    y + 42 = F1(x, r);
+    der_y = der(y);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonDiffArgsTest1",
+            description="Test so that noDerivative and zeroDerivative augmenting are ignored in augmenting path",
+            flatModel="
+fclass IndexReduction.NonDiffArgsTest1
+ Real x;
+ Real der_y;
+ Real y;
+ Real r;
+ Real _der_y;
+ Real _der_x;
+equation
+ x * y = time;
+ r = IndexReduction.NonDiffArgsTest1.F2(x);
+ y + 42 = IndexReduction.NonDiffArgsTest1.F1(x, r);
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.NonDiffArgsTest1.F1_der(x, r, _der_x);
+
+public
+ function IndexReduction.NonDiffArgsTest1.F2
+  input Real x;
+  output Real r;
+ algorithm
+  r := x;
+  return;
+ end IndexReduction.NonDiffArgsTest1.F2;
+
+ function IndexReduction.NonDiffArgsTest1.F1
+  input Real x;
+  input Real r;
+  output Real y;
+ algorithm
+  y := x + r;
+  return;
+ annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest1.F1_der);
+ end IndexReduction.NonDiffArgsTest1.F1;
+
+ function IndexReduction.NonDiffArgsTest1.F1_der
+  input Real x;
+  input Real r;
+  input Real x_der;
+  output Real y_der;
+ algorithm
+  y_der := x_der;
+  return;
+ end IndexReduction.NonDiffArgsTest1.F1_der;
+
+end IndexReduction.NonDiffArgsTest1;
+")})));
+end NonDiffArgsTest1;
+
+model NonDiffArgsTest2
+    record R
+        Real a;
+    end R;
+
+    function F1
+        input Real x;
+        input R r;
+        output Real y;
+    algorithm
+        y := x + r.a;
+    annotation(Inline=false,derivative(noDerivative=r)=F1_der);
+    end F1;
+    
+    function F1_der
+        input Real x;
+        input R r;
+        input Real x_der;
+        output Real y_der;
+    algorithm
+        y_der := x_der;
+    annotation(Inline=false);
+    end F1_der;
+    
+    function F2
+        input Real x;
+        output R r;
+    algorithm
+        r := R(x);
+    annotation(Inline=false);
+    end F2;
+
+    Real x;
+    Real der_y;
+    Real y;
+    R r;
+equation
+    x * y = time;
+    r = F2(x);
+    y + 42 = F1(x, r);
+    der_y = der(y);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonDiffArgsTest2",
+            description="Test so that noDerivative and zeroDerivative augmenting are ignored in augmenting path",
+            flatModel="
+fclass IndexReduction.NonDiffArgsTest2
+ Real x;
+ Real der_y;
+ Real y;
+ Real r.a;
+ Real _der_y;
+ Real _der_x;
+equation
+ x * y = time;
+ (IndexReduction.NonDiffArgsTest2.R(r.a)) = IndexReduction.NonDiffArgsTest2.F2(x);
+ y + 42 = IndexReduction.NonDiffArgsTest2.F1(x, IndexReduction.NonDiffArgsTest2.R(r.a));
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.NonDiffArgsTest2.F1_der(x, IndexReduction.NonDiffArgsTest2.R(r.a), _der_x);
+
+public
+ function IndexReduction.NonDiffArgsTest2.F2
+  input Real x;
+  output IndexReduction.NonDiffArgsTest2.R r;
+ algorithm
+  r.a := x;
+  return;
+ end IndexReduction.NonDiffArgsTest2.F2;
+
+ function IndexReduction.NonDiffArgsTest2.F1
+  input Real x;
+  input IndexReduction.NonDiffArgsTest2.R r;
+  output Real y;
+ algorithm
+  y := x + r.a;
+  return;
+ annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest2.F1_der);
+ end IndexReduction.NonDiffArgsTest2.F1;
+
+ function IndexReduction.NonDiffArgsTest2.F1_der
+  input Real x;
+  input IndexReduction.NonDiffArgsTest2.R r;
+  input Real x_der;
+  output Real y_der;
+ algorithm
+  y_der := x_der;
+  return;
+ end IndexReduction.NonDiffArgsTest2.F1_der;
+
+ record IndexReduction.NonDiffArgsTest2.R
+  Real a;
+ end IndexReduction.NonDiffArgsTest2.R;
+
+end IndexReduction.NonDiffArgsTest2;
+")})));
+end NonDiffArgsTest2;
+
 end IndexReduction;
