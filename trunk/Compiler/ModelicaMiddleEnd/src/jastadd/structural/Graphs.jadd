@@ -142,7 +142,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 e.setMatching(null);
             }
             e.getVariables().remove(v);
-            e.getSolvableVariables().remove(v);
         }
         v.setMatching(null);
         variableMap.remove(v.getName());
@@ -287,7 +286,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
 
     public void addInsidence(E e, V v) {
         e.addVariable(v);
-        v.occurrence();
     }
 
     public Collection<E> greedyMatching() {
@@ -692,7 +690,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
 
         for (E e : getEquations()) {
-            if (!e.isVisited() && !e.isRes())
+            if (!e.isVisited() && e.tarjanVisit())
                 tarjan(indexer, stack, components, contributors, keepTogetherMap, e);
         }
 
@@ -710,16 +708,16 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         if (keepTogetherLists != null)
             for (Collection<E> keepTogether : keepTogetherLists)
                 for (E ee : keepTogether)
-                    if (ee != e && !ee.isRes())
+                    if (ee != e && ee.tarjanVisit())
                         eqToVisit.add(ee);
         for (V v : e.getVariables()) {
             E ee = v.getMatching();
-            if (!v.isIter() && ee != null && e != ee)
+            if (ee != null && e != ee && v.tarjanVisit())
                 eqToVisit.add(ee);
         }
         for (SCCContributor contributor : contributors)
             for (E ee : contributor.members(e, this))
-                if (!ee.isRes() && e != ee)
+                if (e != ee && ee.tarjanVisit())
                     eqToVisit.add(ee);
         for (E ee : eqToVisit) {
             if (!ee.isVisited()) {
@@ -729,7 +727,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
             }
         }
-        if (e.getTarjanNbr()==e.getTarjanLowLink()) {
+        if (e.getTarjanNbr() == e.getTarjanLowLink()) {
             Collection<E> component = new ArrayList<E>();
             E ee;
             do {
@@ -939,6 +937,7 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar> {
     @Override
     public void addInsidence(SolvingEq e, SolvingVar v) {
         super.addInsidence(e, v);
+        v.occurrence();
         if (e.getEquation().isReal() != v.getVariable().isReal())
             return;
         e.sameTypeOccurrence();
@@ -965,42 +964,185 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar> {
     protected SolvingVar createVar(String name, FVariable var) {
         return new SolvingVar(name, var);
     }
+
+    @Override
+    public void removeVariable(SolvingVar v) {
+        for (SolvingEq e : getEquations())
+            e.getSolvableVariables().remove(v);
+        super.removeVariable(v);
+    }
+
 }
 
-public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> {
+public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comparable<SolvingEq> {
+
+    private java.util.List<SolvingVar> solvableVariables = new ArrayList<SolvingVar>();
+    private int analyticallySolvableOccurrences = 0;
+    private int numericallySolvableOccurrences = 0;
+    private int sameTypeOccurrences = 0;
+    private boolean isRes = false;
 
     public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
         super(name, eqn, groupNumber, variability);
     }
 
+    public void sameTypeOccurrence(){
+        sameTypeOccurrences++;
+    }
+
+    public int getNbrSameTypeOccurrences(){
+        return sameTypeOccurrences;
+    }
+
+    public void addAnalyticallySolvableVariable(SolvingVar v) {
+        solvableVariables.add(v);
+        analyticallySolvableOccurrences++;
+    }
+
+    public void addNumericallySolvableVariable(SolvingVar v) {
+        solvableVariables.add(v);
+        numericallySolvableOccurrences++;
+    }
+
+    public java.util.List<SolvingVar> getSolvableVariables() {
+        return solvableVariables;
+    }
+
+    public void isRes(boolean bol){
+        isRes = bol;
+    }
+
+    public boolean isRes(){
+        return isRes;
+    }
+
+    public boolean tarjanVisit() {
+        return !isRes();
+    }
+
+    /**
+     * Returns integer greather than zero if this variable sutes better as iteration
+     * variable than the <code>other</code> variable. Zero is returned if they are equal
+     * and <0 is returned if the <code>other</code> variable is better.
+     */
+    @Override
+    public int compareTo(SolvingEq other) {
+        int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
+        if (diff != 0)
+            return diff;
+        diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
+        if (diff != 0)
+            return diff;
+        diff = numericallySolvableOccurrences - other.numericallySolvableOccurrences;
+        if (diff != 0)
+            return diff;
+        diff = other.analyticallySolvableOccurrences - analyticallySolvableOccurrences;
+        if (diff != 0)
+            return diff;
+        return 0;
+    }
+
 }
 
-public class SolvingVar extends AbstractVar<SolvingEq, SolvingVar> {
+public class SolvingVar extends AbstractVar<SolvingEq, SolvingVar> implements Comparable<SolvingVar> {
+
+    private int occurrences = 0;
+    private int sameTypeOccurrences = 0;
+    private int analyticallySolvableOccurrences = 0;
+    private int numericallySolvableOccurrences = 0;
+    private boolean isIter = false;
 
     public SolvingVar(String name, FVariable v) {
         super(name, v);
     }
 
+    public void occurrence(){
+        occurrences++;
+    }
+
+    public void sameTypeOccurrence(){
+        sameTypeOccurrences++;
+    }
+
+    public void analyticallySolvableOccurrence(){
+        analyticallySolvableOccurrences++;
+    }
+
+    public void numericallySolvableOccurrence(){
+        numericallySolvableOccurrences++;
+    }
+
+    public int getNbrOccurrences(){
+        return occurrences;
+    }
+
+    public int getNbrSameTypeOccurrences(){
+        return sameTypeOccurrences;
+    }
+
+    public int getNbrAnalyticallySolvableOccurrences(){
+        return analyticallySolvableOccurrences;
+    }
+
+    public int getNbrNumericallySolvableOccurrences(){
+        return numericallySolvableOccurrences;
+    }
+
+    public void isIter(boolean bol){
+        isIter = bol;
+    }
+
+    public boolean isIter(){
+        return isIter;
+    }
+
+    public boolean tarjanVisit() {
+        return !isIter();
+    }
+
+    /**
+     * Returns integer greather than zero if this variable sutes better as iteration
+     * variable than the <code>other</code> variable. Zero is returned if they are equal
+     * and <0 is returned if the <code>other</code> variable is better.
+     */
+    @Override
+    public int compareTo(SolvingVar other) {
+        int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
+        if (diff != 0)
+            return diff;
+        diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
+        if (diff != 0)
+            return diff;
+        diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
+        if (diff != 0)
+            return diff;
+        diff = getNbrNumericallySolvableOccurrences() - other.getNbrNumericallySolvableOccurrences();
+        if (diff != 0)
+            return diff;
+        diff = other.getNbrAnalyticallySolvableOccurrences() - getNbrAnalyticallySolvableOccurrences();
+        if (diff != 0)
+            return diff;
+        diff = (getVariable().attributeSet(FAttribute.START) ? 1 : 0) - (other.getVariable().attributeSet(FAttribute.START) ? 1 : 0);
+        if (diff != 0)
+            return diff;
+        diff = other.getVariable().getFQName().numDots() - getVariable().getFQName().numDots();
+        if (diff != 0)
+            return diff;
+        return 0;
+    }
 }
 
 
-public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> implements Comparable<E> {
+public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
 
     private final String name;
     private final FAbstractEquation eqn;
     private final int groupNumber;
     private final FTypePrefixVariability variability;
     private java.util.List<V> variables = new ArrayList<V>();
-    private java.util.List<V> solvableVariables = new ArrayList<V>();
-    protected int analyticallySolvableOccurrences = 0;
-    protected int numericallySolvableOccurrences = 0;
-    private int sameTypeOccurrences = 0;
     private V matching = null;
     private boolean visited = false;
     private int layer = 1000000;
-    private E meDifferentiated = null;
-    private E meIntegrated = null;
-    private boolean isRes = false;
     private int tarjanNbr = 0;
     private int tarjanLowLink = 0;
     private int depth = 1;
@@ -1074,6 +1216,10 @@ public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
         this.visited = visited;
     }
 
+    public boolean tarjanVisit() {
+        return true;
+    }
+
     public int getLayer() {
         return layer;
     }
@@ -1098,64 +1244,12 @@ public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
         this.tarjanLowLink = tarjanLowLink;
     }
 
-    public int numDifferentiations() {
-        return getMeIntegrated()==null? 0: getMeIntegrated().numDifferentiations() + 1;	
-    }
-
-    public void setMeDifferentiated(E e) {
-        this.meDifferentiated = e;
-        this.getEquation().setMeDifferentiated(e.getEquation());
-    }
-
-    public E getMeDifferentiated() {
-        return this.meDifferentiated;
-    }
-
-    public void setMeIntegrated(E e) {
-        this.meIntegrated = e;
-        this.getEquation().setMeIntegrated(e.getEquation());
-    }
-
-    public E getMeIntegrated() {
-        return this.meIntegrated;
-    }
-
     public String toString() {
         return getName();
     }
 
-    public void sameTypeOccurrence(){
-        sameTypeOccurrences++;
-    }
-
-    public int getNbrSameTypeOccurrences(){
-        return sameTypeOccurrences;
-    }
-
-    public void addAnalyticallySolvableVariable(V v) {
-        solvableVariables.add(v);
-        analyticallySolvableOccurrences++;
-    }
-
-    public void addNumericallySolvableVariable(V v) {
-        solvableVariables.add(v);
-        numericallySolvableOccurrences++;
-    }
-
-    public java.util.List<V> getSolvableVariables() {
-        return solvableVariables;
-    }
-
     public boolean isReal() {
         return getEquation().isReal();
-    }
-
-    public void isRes(boolean bol){
-        this.isRes=bol;
-    }
-
-    public boolean isRes(){
-        return this.isRes;
     }
 
     public int getDepth(){
@@ -1187,28 +1281,6 @@ public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
         return variability;
     }
 
-    /**
-     * Returns integer greather than zero if this variable sutes better as iteration
-     * variable than the <code>other</code> variable. Zero is returned if they are equal
-     * and <0 is returned if the <code>other</code> variable is better.
-     */
-    @Override
-    public int compareTo(E other) {
-        int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
-        if (diff != 0)
-            return diff;
-        diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
-        if (diff != 0)
-            return diff;
-        diff = numericallySolvableOccurrences - other.numericallySolvableOccurrences;
-        if (diff != 0)
-            return diff;
-        diff = other.analyticallySolvableOccurrences - analyticallySolvableOccurrences;
-        if (diff != 0)
-            return diff;
-        return 0;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof AbstractEq))
@@ -1224,20 +1296,13 @@ public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
 
 }
 
-public class AbstractVar<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> implements Comparable<V> {
+public class AbstractVar<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
 
     private final String name;
     private final FVariable v;
     private E matching = null;
     private boolean visited = false;
     private int layer = 1000000;
-    private V meDifferentiated = null; // A reference to this variable differentiated once
-    private V meIntegrated = null;
-    private int occurrences = 0;
-    private int sameTypeOccurrences = 0;
-    private int analyticallySolvableOccurrences = 0;
-    private int numericallySolvableOccurrences = 0;
-    private boolean isIter=false;
 
     public AbstractVar(String name, FVariable v) {
         this.name = name;
@@ -1279,6 +1344,10 @@ public class AbstractVar<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>
         this.visited = visited;
     }
 
+    public boolean tarjanVisit() {
+        return true;
+    }
+
     public int getLayer() {
         return layer;
     }
@@ -1287,101 +1356,12 @@ public class AbstractVar<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>
         this.layer = layer;
     }
 
-    public void setMeDifferentiated(V var) {
-        this.meDifferentiated = var;
-        this.getVariable().setMeDifferentiated(var.getVariable());
-    }
-
-    public V getMeDifferentiated() {
-        return this.meDifferentiated;
-    }
-
-    public void setMeIntegrated(V var) {
-        this.meIntegrated = var;
-        this.getVariable().setMeIntegrated(var.getVariable());
-    }
-
-    public V getMeIntegrated() {
-        return this.meIntegrated;
-    }
-
-    public void occurrence(){
-        occurrences++;
-    }
-
-    public void sameTypeOccurrence(){
-        sameTypeOccurrences++;
-    }
-
-    public void analyticallySolvableOccurrence(){
-        analyticallySolvableOccurrences++;
-    }
-
-    public void numericallySolvableOccurrence(){
-        numericallySolvableOccurrences++;
-    }
-
-    public int getNbrOccurrences(){
-        return occurrences;
-    }
-
-    public int getNbrSameTypeOccurrences(){
-        return sameTypeOccurrences;
-    }
-
-    public int getNbrAnalyticallySolvableOccurrences(){
-        return analyticallySolvableOccurrences;
-    }
-
-    public int getNbrNumericallySolvableOccurrences(){
-        return numericallySolvableOccurrences;
-    }
-
     public String toString() {
         return v.displayName();
     }
 
     public boolean isReal() {
         return getVariable().isReal();
-    }
-
-    public void isIter(boolean bol){
-        this.isIter=bol;
-    }
-
-    public boolean isIter(){
-        return this.isIter;
-    }
-
-    /**
-     * Returns integer greather than zero if this variable sutes better as iteration
-     * variable than the <code>other</code> variable. Zero is returned if they are equal
-     * and <0 is returned if the <code>other</code> variable is better.
-     */
-    @Override
-    public int compareTo(V other) {
-        int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
-        if (diff != 0)
-            return diff;
-        diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
-        if (diff != 0)
-            return diff;
-        diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
-        if (diff != 0)
-            return diff;
-        diff = getNbrNumericallySolvableOccurrences() - other.getNbrNumericallySolvableOccurrences();
-        if (diff != 0)
-            return diff;
-        diff = other.getNbrAnalyticallySolvableOccurrences() - getNbrAnalyticallySolvableOccurrences();
-        if (diff != 0)
-            return diff;
-        diff = (getVariable().attributeSet(FAttribute.START) ? 1 : 0) - (other.getVariable().attributeSet(FAttribute.START) ? 1 : 0);
-        if (diff != 0)
-            return diff;
-        diff = other.getVariable().getFQName().numDots() - getVariable().getFQName().numDots();
-        if (diff != 0)
-            return diff;
-        return 0;
     }
 
     @Override

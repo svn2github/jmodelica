@@ -256,16 +256,62 @@ aspect IndexReduction {
     
     public class IndexReductionEq extends AbstractEq<IndexReductionEq, IndexReductionVar> {
 
+        private IndexReductionEq meDifferentiated = null;
+        private IndexReductionEq meIntegrated = null;
+
         public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
             super(name, eqn, groupNumber, variability);
+        }
+
+        public int numDifferentiations() {
+            return getMeIntegrated()==null? 0: getMeIntegrated().numDifferentiations() + 1; 
+        }
+
+        public void setMeDifferentiated(IndexReductionEq e) {
+            this.meDifferentiated = e;
+            this.getEquation().setMeDifferentiated(e.getEquation());
+        }
+
+        public IndexReductionEq getMeDifferentiated() {
+            return this.meDifferentiated;
+        }
+
+        public void setMeIntegrated(IndexReductionEq e) {
+            this.meIntegrated = e;
+            this.getEquation().setMeIntegrated(e.getEquation());
+        }
+
+        public IndexReductionEq getMeIntegrated() {
+            return this.meIntegrated;
         }
 
     }
     
     public class IndexReductionVar extends AbstractVar<IndexReductionEq, IndexReductionVar> {
 
+        private IndexReductionVar meDifferentiated = null; // A reference to this variable differentiated once
+        private IndexReductionVar meIntegrated = null;
+
         public IndexReductionVar(String name, FVariable v) {
             super(name, v);
+        }
+
+        public void setMeDifferentiated(IndexReductionVar var) {
+            this.meDifferentiated = var;
+            this.getVariable().setMeDifferentiated(var.getVariable());
+        }
+
+        public IndexReductionVar getMeDifferentiated() {
+            return this.meDifferentiated;
+        }
+
+        public void setMeIntegrated(IndexReductionVar var) {
+            this.meIntegrated = var;
+            this.getVariable().setMeIntegrated(var.getVariable());
+        }
+
+        public IndexReductionVar getMeIntegrated() {
+            return this.meIntegrated;
         }
 
     }
