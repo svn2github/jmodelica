@@ -428,6 +428,49 @@ class Test_FMI_ODE:
         
         res = model.simulate(options=opts)
         res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
+        
+    @testattr(stddist = True)
+    def test_result_enumeration_2(self):
+        file_name = os.path.join(get_files_path(), 'Modelica', 'Enumerations.mo')
+
+        enum_name = compile_fmu("Enumerations.Enumeration2", file_name)
+        model = load_fmu(enum_name)
+        
+        opts = model.simulate_options()
+        
+        res = model.simulate(options=opts)
+        assert res["one"][0] == 1
+        assert res["one"][-1] == 3
+        assert res["two"][0] == 2
+        assert res["two"][-1] == 2
+        assert res["three"][0] == 3
+        assert res["three"][-1] == 3
+        
+        model.reset()
+        opts["result_handling"] = "memory"
+        
+        res = model.simulate(options=opts)
+        
+        assert res["one"][0] == 1
+        assert res["one"][-1] == 3
+        assert res["two"][0] == 2
+        assert res["two"][-1] == 2
+        assert res["three"][0] == 3
+        assert res["three"][-1] == 3
+        
+        from pyfmi.common.io import ResultHandlerCSV
+        model.reset()
+        opts["result_handling"] = "custom"
+        opts["result_handler"] = ResultHandlerCSV(model)
+        
+        res = model.simulate(options=opts)
+        
+        assert res["one"][0] == 1
+        assert res["one"][-1] == 3
+        assert res["two"][0] == 2
+        assert res["two"][-1] == 2
+        assert res["three"][0] == 3
+        assert res["three"][-1] == 3
     
     @testattr(stddist = True)
     def test_init(self):
