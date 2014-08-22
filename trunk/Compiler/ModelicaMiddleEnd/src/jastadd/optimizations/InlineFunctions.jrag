@@ -839,7 +839,7 @@ aspect FunctionInlining {
      * Check if we can inline this function.
      */
     syn lazy boolean FFunctionDecl.isInlinable(boolean late) =
-        inlineAnnotation.may() && 
+        inlineAnnotation.may() && (late || !inlineAnnotation.late()) && 
         isAllInlinable(getFAlgorithm().getFStatements()) && hasInlinableIO();
     // TODO: Add warning if a function where user suggests inlining can't be inlined?
 
@@ -848,6 +848,8 @@ aspect FunctionInlining {
      */
     syn lazy boolean FFunctionDecl.isTrivialInlinable(boolean late) {
         if (!inlineAnnotation.may())
+            return false;
+        if (!late && inlineAnnotation.late())
             return false;
         if (inlineAnnotation.always())
             return isInlinable(late);

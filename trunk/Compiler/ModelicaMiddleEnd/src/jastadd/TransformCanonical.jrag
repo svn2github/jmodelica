@@ -135,6 +135,8 @@ aspect TransformCanonical {
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
             transformations.add(new indexReduction());
+            transformations.add(new LateFunctionInliningIfSet());
+            transformations.add(new aliasEliminationIfSet());
             transformations.add(new computeMatchingsAndBLT());
         }
 
