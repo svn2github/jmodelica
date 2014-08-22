@@ -726,7 +726,7 @@ aspect IndexReduction {
         return (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
     }
     
-    public class AbstractBiPGraph{
+    public abstract class AbstractBiPGraph{
         
         public static class IndexReductionCost implements MunkresCost<IndexReductionCost> {
             

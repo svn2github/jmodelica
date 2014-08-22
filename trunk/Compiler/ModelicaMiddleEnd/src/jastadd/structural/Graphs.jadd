@@ -992,8 +992,8 @@ public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
     private final FTypePrefixVariability variability;
     private java.util.List<V> variables = new ArrayList<V>();
     private java.util.List<V> solvableVariables = new ArrayList<V>();
-    private int analyticallySolvableOccurrences = 0;
-    private int numericallySolvableOccurrences = 0;
+    protected int analyticallySolvableOccurrences = 0;
+    protected int numericallySolvableOccurrences = 0;
     private int sameTypeOccurrences = 0;
     private V matching = null;
     private boolean visited = false;
