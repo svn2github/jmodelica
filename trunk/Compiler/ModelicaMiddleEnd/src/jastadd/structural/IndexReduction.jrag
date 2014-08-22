@@ -70,7 +70,7 @@ aspect IndexReduction {
         log.info("Index reduction starts");
         IndexReductionResult result;
         while (true) {
-            BiPGraph g = new BiPGraph();
+            IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             Enumerator enumerator = new Enumerator(1);
             // Only do index reduction based on real variables and equations
             g.addVariables(this, VAR_TYPES_REAL);
@@ -241,17 +241,46 @@ aspect IndexReduction {
         return copyAndAddPrefix(prefix, true);
     }
     
-    public static final int BiPGraph.MAX_N_EQ_DIFFS = 5;
+    public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar> {
+
+        @Override
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
+            return new IndexReductionEq(name, eqn, groupNumber, variability);
+        }
+
+        @Override
+        protected IndexReductionVar createVar(String name, FVariable var) {
+            return new IndexReductionVar(name, var);
+        }
+    }
     
-    private static Map<Eq, FAbstractEquation> BiPGraph.differentiateEquations(Collection<Eq> eqns) {
-        Map<Eq, FAbstractEquation> diffedEqnsMap = new HashMap<Eq, FAbstractEquation>();
-        for (Eq eqn : eqns) {
+    public class IndexReductionEq extends AbstractEq<IndexReductionEq, IndexReductionVar> {
+
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
+            super(name, eqn, groupNumber, variability);
+        }
+
+    }
+    
+    public class IndexReductionVar extends AbstractVar<IndexReductionEq, IndexReductionVar> {
+
+        public IndexReductionVar(String name, FVariable v) {
+            super(name, v);
+        }
+
+    }
+    
+    public static final int IndexReductionBiPGraph.MAX_N_EQ_DIFFS = 5;
+    
+    private static Map<IndexReductionEq, FAbstractEquation> IndexReductionBiPGraph.differentiateEquations(Collection<IndexReductionEq> eqns) {
+        Map<IndexReductionEq, FAbstractEquation> diffedEqnsMap = new HashMap<IndexReductionEq, FAbstractEquation>();
+        for (IndexReductionEq eqn : eqns) {
             FAbstractEquation fEqn = eqn.getEquation();
             if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
                 throw new IndexReductionException("Maximum number of differentiations reached");
             FAbstractEquation diffedFEqn = null;
             // Look through member equations and check if the differentiated equation already exists
-            for (Eq groupMember : eqn.getGroupMembers())
+            for (IndexReductionEq groupMember : eqn.getGroupMembers())
                 if (groupMember.getMeDifferentiated() != null)
                     diffedFEqn = groupMember.getMeDifferentiated().getEquation();
             if (diffedFEqn == null) {
@@ -271,13 +300,13 @@ aspect IndexReduction {
         return diffedEqnsMap;
     }
     
-    public Set<FVariable> BiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
+    public Set<FVariable> IndexReductionBiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
         Set<FVariable> removableVars = new HashSet<FVariable>();
         for (FVariable preferVar : preferVars) {
             FVariable fDerVar = preferVar.getMeDifferentiated();
             if (fDerVar == null)
                 continue;
-            Var derVar = getVariable(fDerVar.name());
+            AbstractVar derVar = getVariable(fDerVar.name());
             if (derVar != null && derVar.getMatching() == null)
                 removableVars.add(derVar.getVariable());
         }
@@ -305,15 +334,14 @@ aspect IndexReduction {
         }
     }
     
-    
-    public IndexReductionResult BiPGraph.reduceIndex(boolean resetMatching) {
+    public IndexReductionResult IndexReductionBiPGraph.reduceIndex(boolean resetMatching) {
         IndexReductionResult result = new IndexReductionResult();
         if (resetMatching) {
             reset();
         }
         FClass fclass = null;
-        Stack<Eq> eqToMatchStack = new Stack<Eq>();
-        for (Eq e : getEquations()) {
+        Stack<IndexReductionEq> eqToMatchStack = new Stack<IndexReductionEq>();
+        for (IndexReductionEq e : getEquations()) {
             if (e.getEquation().isContinuous()) {
                 eqToMatchStack.push(e);
                 fclass = e.getEquation().myFClass();
@@ -329,7 +357,7 @@ aspect IndexReduction {
         // Algoritm step numbering from the original Pantelides paper
         // Loop over all equations (step 3)
         while (!eqToMatchStack.empty() ){
-            Eq eqToMatch = eqToMatchStack.pop(); // Step 3a
+            IndexReductionEq eqToMatch = eqToMatchStack.pop(); // Step 3a
             if (eqToMatch.getMatching() != null || eqToMatch.getMeDifferentiated() != null)
                 continue;
             
@@ -342,8 +370,8 @@ aspect IndexReduction {
             // Find an augmenting path, step 3b-4
             //n_ind = 0;
             boolean pathFound = augmentPath(eqToMatch);
-            Collection<Eq> visitedEquations = getVisitedEquations();
-            Collection<Var> visitedVariables = getVisitedVariables();
+            Collection<IndexReductionEq> visitedEquations = getVisitedEquations();
+            Collection<IndexReductionVar> visitedVariables = getVisitedVariables();
             ASTNode.log.info("*************");
             ASTNode.log.info("Looking for augmented path starting in equation: %s", eqToMatch);
             if (pathFound) {
@@ -352,11 +380,11 @@ aspect IndexReduction {
                 ASTNode.log.info("Path not found!");
             }
             ASTNode.log.info("Visisted equations:");
-            for (Eq ee : visitedEquations) {
+            for (IndexReductionEq ee : visitedEquations) {
                 ASTNode.log.info("  %s", ee.getEquation());
             }
             ASTNode.log.info("Visisted variables:");
-            for (Var vv : visitedVariables) {
+            for (IndexReductionVar vv : visitedVariables) {
                 ASTNode.log.info("  %s", vv.toString());
             }
             
@@ -364,27 +392,27 @@ aspect IndexReduction {
                 // First, differentiate all equations to see if it is possible.
                 // Remove derivative if we find StateSelect.Prefer variables that wasn't possible to select due to
                 // equation that can't be differentiated
-                Map<Eq, FAbstractEquation> diffedEqnsMap;
+                Map<IndexReductionEq, FAbstractEquation> diffedEqnsMap;
                 diffedEqnsMap = differentiateEquations(visitedEquations);
-                for (Var var : visitedVariables) { // Loop over all visited variables, Step 3b-5i
+                for (IndexReductionVar var : visitedVariables) { // Loop over all visited variables, Step 3b-5i
                     // Create a new differentiated variable
                     FVariable diffedFVar = var.getVariable().createFDerivativeVariable();
                     newDiffedVars.add(diffedFVar);
                     // Add the differentiated variable to the graph 
-                    Var diffedVar = addVariable(diffedFVar.name(), diffedFVar);
+                    IndexReductionVar diffedVar = addVariable(diffedFVar.name(), diffedFVar);
                     // Set the "A vector" in the paper: 
                     // a reference from the visited variable to its 
                     // differentiated counterpart
                     var.setMeDifferentiated(diffedVar); 
                     diffedVar.setMeIntegrated(var);
                 }
-                for (Eq eqn : visitedEquations) { // Step 3b-5ii
+                for (IndexReductionEq eqn : visitedEquations) { // Step 3b-5ii
                     FAbstractEquation diffedFEqn = diffedEqnsMap.get(eqn);
                     if (diffedFEqn != null) {
                         result.addEquation(diffedFEqn);
                     } else {
                         // Already differentiated, look through member equations
-                        for (Eq groupMember : eqn.getGroupMembers())
+                        for (IndexReductionEq groupMember : eqn.getGroupMembers())
                             if (groupMember.getMeDifferentiated() != null)
                                 diffedFEqn = groupMember.getMeDifferentiated().getEquation();
                         // It already exists we need to flush cached values since we might have added new variables
@@ -392,24 +420,24 @@ aspect IndexReduction {
                     }
                     ASTNode.log.info("About to add equation: %s", diffedFEqn);
                     // Sets that indicates the variables in the lhs and rhs.
-                    Set<Var> rhsVars = Collections.emptySet();
-                    Map<Var, Integer> lhsVars = Collections.emptyMap();
+                    Set<IndexReductionVar> rhsVars = Collections.emptySet();
+                    Map<IndexReductionVar, Integer> lhsVars = Collections.emptyMap();
                     if (diffedFEqn.numScalarEquations() > 1) {
                         rhsVars = lookupVarsInSet(diffedFEqn.FIdUseExpsInRHS());
-                        lhsVars = new HashMap<Var, Integer>();
+                        lhsVars = new HashMap<IndexReductionVar, Integer>();
                         int i = 0;
-                        for (Var var : lookupVarsInSet(diffedFEqn.FIdUseExpsInLHS()))
+                        for (IndexReductionVar var : lookupVarsInSet(diffedFEqn.FIdUseExpsInLHS()))
                             lhsVars.put(var, i++);
                         if (diffedFEqn.lhsVarsAreSolved())
                             rhsVars.removeAll(lhsVars.keySet());
                     }
                     // Add the differentiated equation
                     int groupNumber = eqn.groupNumber();
-                    Eq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber, diffedFEqn.variability());
+                    IndexReductionEq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber, diffedFEqn.variability());
                     
                     // Add edges
-                    Collection<Var> variables = lookupVarsInSet(diffedFEqn.findFIdUseExpsInTree());
-                    for (Var var : variables) {
+                    Collection<IndexReductionVar> variables = lookupVarsInSet(diffedFEqn.findFIdUseExpsInTree());
+                    for (IndexReductionVar var : variables) {
                         Integer pos = lhsVars.get(var);
                         if (var != null && (pos == null || pos == groupNumber || rhsVars.contains(var))) {
                             ASTNode.log.info("*** %s", var);
@@ -425,9 +453,9 @@ aspect IndexReduction {
                     // TODO: We might need to add this equation to its existing groupmembers?
                     ASTNode.log.info("Equation added");
                 }
-                for (Var var : visitedVariables) {
+                for (IndexReductionVar var : visitedVariables) {
                     // Set matchings, Step 3b-5iii
-                    Eq eqn = var.getMatching();
+                    IndexReductionEq eqn = var.getMatching();
                     match(eqn.getMeDifferentiated(), var.getMeDifferentiated());
                     // Remove variables that have been differentiated, Step 3b-1
                     removeVariable(var);
@@ -436,7 +464,7 @@ aspect IndexReduction {
                 // Step 3b-5iv
                 // Push all differentiated equations in the group to the stack
                 // of equations to be matched
-                for (Eq groupMemberEquation : eqToMatch.getGroupMembers())
+                for (IndexReductionEq groupMemberEquation : eqToMatch.getGroupMembers())
                     eqToMatchStack.push(groupMemberEquation.getMeDifferentiated());
                 
                 ASTNode.log.info("Graph after addition of equations and variables:");
@@ -451,11 +479,11 @@ aspect IndexReduction {
             eqn.flushAllRecursive();
 
         // Remove equations that are not connected
-        java.util.List<Eq> eqToRemove = new ArrayList<Eq>();
-        for (Eq e : getEquations())
+        java.util.List<IndexReductionEq> eqToRemove = new ArrayList<IndexReductionEq>();
+        for (IndexReductionEq e : getEquations())
             if (e.getVariables().size() == 0)
                 eqToRemove.add(e);
-        for (Eq e : eqToRemove)
+        for (IndexReductionEq e : eqToRemove)
             removeEquation(e);
         
         ASTNode.log.info("Index reduction done!");
@@ -583,14 +611,14 @@ aspect IndexReduction {
             
             // Run matching
             // Compute weights for variables based on linearity
-            Map<Var, BiPGraphCost> weights = new HashMap<Var, BiPGraphCost>();
+            Map<Var, IndexReductionCost> weights = new HashMap<Var, IndexReductionCost>();
             for (Var var : gd.getVariables()) {
                 FVariable fv = var.getVariable();
                 int linearity = calculateLinearityWeight(g, fv);
                 if (fv.getMeIntegrated() != null)
                     linearity += calculateLinearityWeight(g, fv.getMeIntegrated());
                 boolean fixed = fv.getTopIntegrated().fixedAttribute();
-                BiPGraphCost weight = new BiPGraphCost(fv.stateSelection(), fixed, fv.order(), linearity);
+                IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), linearity);
                 ASTNode.log.info("Weight: %s %s", var, weight);
                 weights.put(var, weight);
             }
@@ -599,7 +627,7 @@ aspect IndexReduction {
             ASTNode.log.info(gd.printMatchingObj());
             
             // The matched variables are selected as dummy derivatives
-            for (Var vv : gd.getMatchedVariables()) {
+            for (AbstractVar vv : gd.getMatchedVariables()) {
                 zHat.add(vv.getVariable());
             }
             
@@ -647,7 +675,7 @@ aspect IndexReduction {
         return result;
     }
     
-    private int BiPGraph.calculateLinearityWeight(Collection<FAbstractEquation> equations, FVariable variable) {
+    private int IndexReductionBiPGraph.calculateLinearityWeight(Collection<FAbstractEquation> equations, FVariable variable) {
         int weight = 0;
         for (FAbstractEquation feq : equations) {
             try {
@@ -672,11 +700,11 @@ aspect IndexReduction {
     
     public class FAbstractVariable {
         public enum StateSelect {
-            NEVER   (BiPGraph.BiPGraphCost.STATE_SELECT_NEVER_WEIGHT_POSITION), 
-            AVOID   (BiPGraph.BiPGraphCost.STATE_SELECT_AVOID_WEIGHT_POSITION), 
-            DEFAULT (BiPGraph.BiPGraphCost.STATE_SELECT_DEFAULT_WEIGHT_POSITION), 
-            PREFER  (BiPGraph.BiPGraphCost.STATE_SELECT_PREFER_WEIGHT_POSITION), 
-            ALWAYS  (BiPGraph.BiPGraphCost.STATE_SELECT_ALWAYS_WEIGHT_POSITION);
+            NEVER   (IndexReductionBiPGraph.IndexReductionCost.STATE_SELECT_NEVER_WEIGHT_POSITION), 
+            AVOID   (IndexReductionBiPGraph.IndexReductionCost.STATE_SELECT_AVOID_WEIGHT_POSITION), 
+            DEFAULT (IndexReductionBiPGraph.IndexReductionCost.STATE_SELECT_DEFAULT_WEIGHT_POSITION), 
+            PREFER  (IndexReductionBiPGraph.IndexReductionCost.STATE_SELECT_PREFER_WEIGHT_POSITION), 
+            ALWAYS  (IndexReductionBiPGraph.IndexReductionCost.STATE_SELECT_ALWAYS_WEIGHT_POSITION);
             
             private int weightPos;
             
@@ -698,11 +726,11 @@ aspect IndexReduction {
         return (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
     }
     
-    public class BiPGraph{
+    public class AbstractBiPGraph{
         
-        public static class BiPGraphCost implements MunkresCost<BiPGraphCost> {
+        public static class IndexReductionCost implements MunkresCost<IndexReductionCost> {
             
-            public static BiPGraphCost UNMATCHED_WEIGHT = new BiPGraphCost();
+            public static IndexReductionCost UNMATCHED_WEIGHT = new IndexReductionCost();
             
             private static final int NUM_WEIGHTS = 8;
             public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 0;
@@ -717,11 +745,11 @@ aspect IndexReduction {
             private boolean unmatched = false;
             private int[] weights = new int[NUM_WEIGHTS];
             
-            private BiPGraphCost() {
+            private IndexReductionCost() {
                 unmatched = true;
             }
             
-            public BiPGraphCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
+            public IndexReductionCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
                 weights[stateSelect.weightPos()] += 1;
                 weights[FIXED_WEIGHT_POSITION] += fixed ? 1 : 0;
                 weights[ORDER_WEIGHT_POSITION] += -order;
@@ -729,7 +757,7 @@ aspect IndexReduction {
             }
             
             @Override
-            public int compareTo(BiPGraphCost other) {
+            public int compareTo(IndexReductionCost other) {
                 int diff = new Boolean(unmatched).compareTo(other.unmatched);
                 if (diff != 0)
                     return diff;
@@ -742,14 +770,14 @@ aspect IndexReduction {
             }
             
             @Override
-            public void subtract(BiPGraphCost other) {
+            public void subtract(IndexReductionCost other) {
                 unmatched |= other.unmatched;
                 for (int i = 0; i < weights.length; i++)
                     weights[i] -= other.weights[i];
             }
             
             @Override
-            public void add(BiPGraphCost other) {
+            public void add(IndexReductionCost other) {
                 unmatched |= other.unmatched;
                 for (int i = 0; i < weights.length; i++)
                     weights[i] += other.weights[i];
@@ -766,8 +794,8 @@ aspect IndexReduction {
             }
             
             @Override
-            public BiPGraphCost copy() {
-                BiPGraphCost copy = new BiPGraphCost();
+            public IndexReductionCost copy() {
+                IndexReductionCost copy = new IndexReductionCost();
                 copy.unmatched = unmatched;
                 for (int i = 0; i < weights.length; i++)
                     copy.weights[i] = weights[i];
@@ -791,42 +819,41 @@ aspect IndexReduction {
                 return unmatched;
             }
             
-            public static BiPGraphCost zeroCost() {
-                BiPGraphCost cost = new BiPGraphCost();
+            public static IndexReductionCost zeroCost() {
+                IndexReductionCost cost = new IndexReductionCost();
                 cost.unmatched = false;
                 return cost;
             }
         }
     }
 
-    public void BiPGraph.matchMunkres(Map<Var, BiPGraphCost> weights) {
+    public void AbstractBiPGraph.matchMunkres(Map<V, IndexReductionCost> weights) {
 
         if (equationMap.size()==0 || variableMap.size()==0) {
             throw new MunkresException("Empty set of equations or variables was given to the munkres algorithm");
         }
 
-        BiPGraphCost cost[][] = new BiPGraphCost[equationMap.size()][variableMap.size()];
+        IndexReductionCost cost[][] = new IndexReductionCost[equationMap.size()][variableMap.size()];
 
         int i = 0;
         
-        for (Eq e : getEquations()) {
+        for (E e : getEquations()) {
             int j = 0;
-            for (Var var : variableMap.values())
-                cost[i][j++] = e.getVariables().contains(var) ? weights.get(var) : BiPGraphCost.UNMATCHED_WEIGHT;
+            for (V var : variableMap.values())
+                cost[i][j++] = e.getVariables().contains(var) ? weights.get(var) : IndexReductionCost.UNMATCHED_WEIGHT;
             i++;
         }
         
-        MunkresProblem<BiPGraphCost> munk = new MunkresProblem<BiPGraphCost>(cost);
+        MunkresProblem<IndexReductionCost> munk = new MunkresProblem<IndexReductionCost>(cost);
         int[][] result = munk.solve();
-        BiPGraphCost opt_cost = BiPGraphCost.zeroCost();
+        IndexReductionCost opt_cost = IndexReductionCost.zeroCost();
         ASTNode.log.info("Munkres result:");
-        Eq[] eqs = equationMap.values().toArray(new Eq[equationMap.size()]);
-        Var[] vars = variableMap.values().toArray(new Var[variableMap.size()]);
-        boolean failed = false;
+        java.util.List<E> eqs = new ArrayList<E>(equationMap.values());
+        java.util.List<V> vars = new ArrayList<V>(variableMap.values());
         for (i=0;i<result.length;i++) {
             opt_cost.add(cost[result[i][0]][result[i][1]]);
-            Eq eqn = eqs[result[i][0]];
-            Var var = vars[result[i][1]];
+            E eqn = eqs.get(result[i][0]);
+            V var = vars.get(result[i][1]);
             match(eqn, var);
             ASTNode.log.info("%s: %s %s", eqn, var, cost[result[i][0]][result[i][1]]);
         }
@@ -862,5 +889,5 @@ aspect IndexReduction {
             return dummyDerivatives;
         }
     }
-    
+
 }

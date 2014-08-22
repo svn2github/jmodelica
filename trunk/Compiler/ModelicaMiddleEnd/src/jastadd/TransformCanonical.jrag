@@ -505,9 +505,6 @@ aspect TransformCanonical {
         log.info("Flat tree before matching and BLT:");
         log.info(this);
 
-        Eq eqn = null;
-        Var v = null;
-
         BiPGraph g;
         if (DAEBiPGraph == null) {
             g = computeMatchedDAEBiPGraph();
@@ -620,8 +617,8 @@ aspect TransformCanonical {
 				FEquation fe = new FEquation(lhs, rhs);
 				addFInitialEquation(fe);
 				
-				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0, fe.variability());
-				v = g.getVariable(lhs.name());
+				Eq eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0, fe.variability());
+				Var v = g.getVariable(lhs.name());
 				g.addEdge(eqn,v);
 			}
 			root().flushAllRecursive();

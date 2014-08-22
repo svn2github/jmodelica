@@ -23,71 +23,67 @@ import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.ChainedIterable;
 
 aspect BLT{
-	
-	public class EquationBlockFactory {
 
-		/**
-		 * This method groups the Eq objects in a BLT block so that Eqs that
-		 * originates from the same FAbstractEquation are grouped together.
-		 */
-		public static Collection<Collection<Eq>> groupComponent(Collection<Eq> eqs) {
-		    Map<FAbstractEquation, Collection<Eq>> groups = new LinkedHashMap<FAbstractEquation, Collection<Eq>>();
-		    for (Eq eqn : eqs) {
-		        Collection<Eq> group = groups.get(eqn.getEquation());
-		        if (group == null) {
-		            group = new ArrayList<Eq>();
-		            groups.put(eqn.getEquation(), group);
-		        }
-		        group.add(eqn);
-		    }
-		    return groups.values();
-		}
+    public class EquationBlockFactory {
+ 
+        /**
+         * This method groups the Eq objects in a BLT block so that Eqs that
+         * originates from the same FAbstractEquation are grouped together.
+         */
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<Collection<E>> groupComponent(Collection<E> eqs) {
+            Map<FAbstractEquation, Collection<E>> groups = new LinkedHashMap<FAbstractEquation, Collection<E>>();
+            for (E eqn : eqs) {
+                Collection<E> group = groups.get(eqn.getEquation());
+                if (group == null) {
+                    group = new ArrayList<E>();
+                    groups.put(eqn.getEquation(), group);
+                }
+                group.add(eqn);
+            }
+            return groups.values();
+        }
 
-		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, BlockProducer producer, boolean solve) {
-			// Check if equation is solvable for all active variables (only if we want a solved block)
-			Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
-			for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
-				solvability = Solvability.least(solvability, e.isSolved(it.next().name(), producer.duringTearing()));
-			
-			return e.createSimpleEquationBlock(fvs, assignedIndices, solvability, producer);
-		}
-		
-		/**
-		 * This method takes an equation and a variable and constructs an equation block.
-		 * If <code>solve</code> is true the equation will be solved for the variable. 
-		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, BlockProducer producer, boolean solve) {
-			return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), producer, solve);
-		}
+        public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, BlockProducer producer, boolean solve) {
+            // Check if equation is solvable for all active variables (only if we want a solved block)
+            Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
+            for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
+                solvability = Solvability.least(solvability, e.isSolved(it.next().name(), producer.duringTearing()));
+            return e.createSimpleEquationBlock(fvs, assignedIndices, solvability, producer);
+        }
 
-		/**
-		 * This method takes an equation <code>eqn</code> and variable
-		 * <code>var</code> and produces an unsolved block of types
-		 * ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
-		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var, BlockProducer producer) {
-			return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), producer, false);
-		}
-		
-		/**
-		 * This method takes a list of Eq objects and create equation blocks
-		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
-		 */
-		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, BlockProducer producer, boolean solve) {
-			Collection<FVariable> fvs = new ArrayList<FVariable>();
-			Collection<Integer> assignedIndices = new ArrayList<Integer>();
-			
-			FAbstractEquation e = eqns.iterator().next().getEquation();
-			for (Eq eqn : eqns) {
-				if (eqn.getEquation() != e) 
-					return null;
-				fvs.add(eqn.getMatching().getVariable());
-				assignedIndices.add(eqn.groupNumber());
-			} 
+        /**
+         * This method takes an equation and a variable and constructs an equation block.
+         * If <code>solve</code> is true the equation will be solved for the variable. 
+         */
+        public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, BlockProducer producer, boolean solve) {
+            return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), producer, solve);
+        }
 
-			return createSimpleEquationBlock(e, fvs, assignedIndices, producer, solve);
-			
-		}
+        /**
+         * This method takes an equation <code>eqn</code> and variable
+         * <code>var</code> and produces an unsolved block of types
+         * ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
+         */
+        public static <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> SimpleEquationBlock createSimpleEquationBlock(E eqn, V var, BlockProducer producer) {
+            return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), producer, false);
+        }
+
+        /**
+         * This method takes a list of Eq objects and create equation blocks
+         * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
+         */
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SimpleEquationBlock createSimpleEquationBlock(Collection<E> eqns, BlockProducer producer, boolean solve) {
+            Collection<FVariable> fvs = new ArrayList<FVariable>();
+            Collection<Integer> assignedIndices = new ArrayList<Integer>();
+            FAbstractEquation e = eqns.iterator().next().getEquation();
+            for (E eqn : eqns) {
+                if (eqn.getEquation() != e) 
+                    return null;
+                fvs.add(eqn.getMatching().getVariable());
+                assignedIndices.add(eqn.groupNumber());
+            }
+            return createSimpleEquationBlock(e, fvs, assignedIndices, producer, solve);
+        }
 
         /**
          * This method takes as input a set of Eq objects corresponeing to
@@ -96,23 +92,23 @@ aspect BLT{
          * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
          * a real or mixed equation block is created.
          */
-        public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, BlockProducer producer, OptionRegistry options) {
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> AbstractEquationBlock createEquationBlock(Collection<E> component, BlockProducer producer, OptionRegistry options) {
             
             SimpleEquationBlock seb = createSimpleEquationBlock(component, producer, true);
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            Collection<Eq> realEquations = new ArrayList<Eq>();
-            Collection<Eq> nonRealEquations = new ArrayList<Eq>();
+            Collection<E> realEquations = new ArrayList<E>();
+            Collection<E> nonRealEquations = new ArrayList<E>();
             
             // Check if an equation block is mixed, i.e., contains both continous
             // and discrete variables, and if it is linear in the unknowns
             Set<FVariable> activeVariables = new HashSet<FVariable>();
-            for (Eq e : component)
+            for (E e : component)
                 activeVariables.add(e.getMatching().getVariable());
             
             boolean linear = true;
-            for (Eq e : component) {
+            for (E e : component) {
                 if (e.getMatching().getVariable().isReal()) {
                     realEquations.add(e);
                     linear &= e.getEquation().checkLinearity(activeVariables);
@@ -146,14 +142,14 @@ aspect BLT{
             }
             return block;
         }
-		
-		public static Collection<SimpleEquationBlock> createSimpleBlocks(Collection<Collection<Eq>> eqs, BlockProducer producer) {
-			Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
-			for (Collection<Eq> e : eqs)
-				blocks.add(createSimpleEquationBlock(e, producer, false));
-			return blocks;
-		}
-		
+
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<SimpleEquationBlock> createSimpleBlocks(Collection<Collection<E>> eqs, BlockProducer producer) {
+            Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+            for (Collection<E> e : eqs)
+                blocks.add(createSimpleEquationBlock(e, producer, false));
+            return blocks;
+        }
+
         public static abstract class BlockProducer {
             public abstract boolean useTearing();
             public abstract boolean duringTearing();
@@ -240,43 +236,41 @@ aspect BLT{
         }
     }
 
-	
-	public class BiPGraph{}
-	
-    public BLT BiPGraph.computeBLT(OptionRegistry options) {
+    public abstract class AbstractBiPGraph{}
+
+    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options) {
         return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER);
     }
 
-	public BLT BiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer) {
-		ASTNode.beginStep("computeBLT()");
-		try {
-			Collection<Collection<Eq>> components = tarjan(options);
-			BLT blt = new BLT();
-			int blockNumber = 1;
-			for (Collection<Eq> bl : components)
-				blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
-			blt.setLabels();
-			return blt;
-		} finally {
-			ASTNode.endStep("computeBLT()");
-		}
-	}
-	
-    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
-        Collection<Collection<Eq>> components = tarjan(options);
+    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer) {
+        ASTNode.beginStep("computeBLT()");
+        try {
+            Collection<Collection<E>> components = tarjan(options);
+            BLT blt = new BLT();
+            for (Collection<E> bl : components)
+                blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
+            blt.setLabels();
+            return blt;
+        } finally {
+            ASTNode.endStep("computeBLT()");
+        }
+    }
+
+    public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
+        Collection<Collection<E>> components = tarjan(options);
         Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
-        for (Collection<Eq> component : components) {
+        for (Collection<E> component : components) {
             SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, producer, true);
             if (block == null) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("Non-real equations contains an algebraic loop:");
-                for (Eq e : component) {
+                for (E e : component) {
                     sb.append("\n");
                     sb.append(e.getEquation());
                 }
                 throw new BLTException(sb.toString());
             } else if (!block.isSolvable()) {
-                Eq e = component.iterator().next();
+                E e = component.iterator().next();
                 StringBuffer sb = new StringBuffer();
                 sb.append("Unable to solve variable '" + e.getMatching().getName() + "' from equation:\n");
                 sb.append(e.getEquation());
@@ -2152,7 +2146,7 @@ aspect Tearing {
         
         private static <T extends TearingAlgorithm> T addTearingAlgorithm(T algorithm) {
             if (tearingAlgorithms == null)
-                tearingAlgorithms = new PriorityQueue();
+                tearingAlgorithms = new PriorityQueue<TearingAlgorithm>();
             tearingAlgorithms.add(algorithm);
             return algorithm;
         }
@@ -2179,10 +2173,10 @@ aspect Tearing {
                 return other.priority - priority;
             }
 
-            public abstract TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options);
+            public abstract <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(Collection<E> block, BlockProducer producer, OptionRegistry options);
         }
         
-        public static TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options) {
+        public static <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(Collection<E> block, BlockProducer producer, OptionRegistry options) {
             TearingAlgorithm algorithm = getActiveAlgorithm(options);
             if (algorithm == null)
                 return null;
@@ -2234,20 +2228,20 @@ aspect AutomaticTearing {
             }
 
             @Override
-            public TornEquationBlock tear(Collection<Eq> block, BlockProducer producer, OptionRegistry options) {
+            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(Collection<E> block, BlockProducer producer, OptionRegistry options) {
                 TornEquationBlock teb = new TornEquationBlock(producer);
                 tear(block, teb);
                 return teb;
             }
             
-            private void tear(Collection<Eq> block, TornEquationBlock eb) {
+            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(Collection<E> block, TornEquationBlock eb) {
                 SolvingBiPGraph g = new SolvingBiPGraph(block);
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
-                Collection<Eq> SUME = g.greedyMatching();
-                Iterator<Eq> itr = SUME.iterator();
+                Collection<SolvingEq> SUME = g.greedyMatching();
+                Iterator<SolvingEq> itr = SUME.iterator();
                 while (itr.hasNext()) {
-                    Eq e = itr.next();
+                    SolvingEq e = itr.next();
                     if (g.augmentPath(e)) {
                         itr.remove();
                     } else {
@@ -2269,11 +2263,11 @@ aspect AutomaticTearing {
                 } else {
                     // Else: Start out by trying to insert residuals that contain
                     //       few variables. 
-                    java.util.List<Eq> residuals = new ArrayList<Eq>();
-                    for (Eq e : SUME) {
-                        Eq bestRes = e;
-                        for (Var v : e.getSolvableVariables()) {
-                            Eq ee = v.getMatching();
+                    java.util.List<SolvingEq> residuals = new ArrayList<SolvingEq>();
+                    for (SolvingEq e : SUME) {
+                        SolvingEq bestRes = e;
+                        for (SolvingVar v : e.getSolvableVariables()) {
+                            SolvingEq ee = v.getMatching();
                             if (ee.compareTo(bestRes) > 0)
                                 bestRes = ee;
                         }
@@ -2288,18 +2282,18 @@ aspect AutomaticTearing {
                     }
 
                     // Compute inner BLT and see if tearings can be changed 
-                    Set<Var> SUMV = new LinkedHashSet<Var>(g.getUnmatchedVariables());
-                    Collection<Collection<Eq>> innerBlocks = g.tarjan();
-                    java.util.List<Var> tearings = new ArrayList<Var>();
+                    Set<SolvingVar> SUMV = new LinkedHashSet<SolvingVar>(g.getUnmatchedVariables());
+                    Collection<Collection<SolvingEq>> innerBlocks = g.tarjan();
+                    java.util.List<SolvingVar> tearings = new ArrayList<SolvingVar>();
 
-                    for (Collection<Eq> bInner : innerBlocks) {
+                    for (Collection<SolvingEq> bInner : innerBlocks) {
                         SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                         if (tearBlock != null && tearBlock.isSolvable()) {
                             eb.addSolvedBlock(tearBlock);
                             // If the equation contains a Var in SUMV, that Var cannot be
                             // reinserted and must be used as a iteration variable.
-                            for (Eq e : bInner) {
-                                for (Var vv : e.getVariables()) {
+                            for (SolvingEq e : bInner) {
+                                for (SolvingVar vv : e.getVariables()) {
                                     if (SUMV.remove(vv))
                                         tearings.add(vv);
                                 }
@@ -2308,12 +2302,12 @@ aspect AutomaticTearing {
                             // Build Inner Graph and add info about iteration variables
                             SolvingBiPGraph gInner = new SolvingBiPGraph(bInner);
                             // Build block-graph and look for interchangeable variables in SUMV
-                            java.util.List<Eq> eqs = new ArrayList<Eq>();
+                            java.util.List<SolvingEq> eqs = new ArrayList<SolvingEq>();
                             boolean graphHasTear = false;
-                            for (Eq e : bInner) {
-                                Eq gInnerEq = gInner.getEquation(e.getName());
-                                for (Var v : e.getVariables()) {
-                                    Var gInnerVar = gInner.getVariable(v.getName());
+                            for (SolvingEq e : bInner) {
+                                SolvingEq gInnerEq = gInner.getEquation(e.getName());
+                                for (SolvingVar v : e.getVariables()) {
+                                    SolvingVar gInnerVar = gInner.getVariable(v.getName());
                                     if (gInnerVar != null) {
                                         if (gInner.canMatch(gInnerEq, gInnerVar) && gInnerVar.isIter() && !eqs.contains(gInnerEq)) {
                                             eqs.add(gInnerEq);
@@ -2333,14 +2327,14 @@ aspect AutomaticTearing {
                             }
                             // Go through equations that might get a new matching
                             boolean isChanged = false;
-                            for (Eq e : eqs) {
-                                Var bestMatch = e.getMatching();
-                                for (Var v : e.getSolvableVariables()) {
+                            for (SolvingEq e : eqs) {
+                                SolvingVar bestMatch = e.getMatching();
+                                for (SolvingVar v : e.getSolvableVariables()) {
                                     if (v.isIter() && v.compareTo(bestMatch) < 0)
                                         bestMatch = v;
                                 }
                                 if (bestMatch != e.getMatching()) {
-                                    Var tmp = e.getMatching();
+                                    SolvingVar tmp = e.getMatching();
                                     tmp.isIter(true);
                                     bestMatch.isIter(false);
                                     tearings.add(tmp);
@@ -2352,8 +2346,8 @@ aspect AutomaticTearing {
 
                             if (graphHasTear) {
                                 if (isChanged) {
-                                    Collection<Collection<Eq>> newBlocks = gInner.tarjan();
-                                    for (Collection<Eq> bInnerInner : newBlocks) {
+                                    Collection<Collection<SolvingEq>> newBlocks = gInner.tarjan();
+                                    for (Collection<SolvingEq> bInnerInner : newBlocks) {
                                         tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                                         if (tearBlock != null && tearBlock.isSolvable()) {
                                             eb.addSolvedBlock(tearBlock);
@@ -2370,7 +2364,7 @@ aspect AutomaticTearing {
                             }
                         }
                     }
-                    for (Var v : SUMV) {
+                    for (SolvingVar v : SUMV) {
                         //SUMV ought to be empty, but there might exist variables that hasn't 
                         // been altered before. 
                         tearings.add(v);
@@ -2383,19 +2377,19 @@ aspect AutomaticTearing {
             }
             
             private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
-                Var bestIter = null;
-                for (Eq e : g.getEquations()) {
-                    Var v = e.getMatching();
+                SolvingVar bestIter = null;
+                for (SolvingEq e : g.getEquations()) {
+                    SolvingVar v = e.getMatching();
                     if (bestIter == null || v.compareTo(bestIter) > 0)
                         bestIter = v;
                 }
-                Eq res = bestIter.getMatching();
+                SolvingEq res = bestIter.getMatching();
                 bestIter.isIter(true);
                 res.isRes(true);
                 ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
-                Collection<Collection<Eq>> blt = g.tarjan();
-                for (Collection<Eq> block : blt) {
+                Collection<Collection<SolvingEq>> blt = g.tarjan();
+                for (Collection<SolvingEq> block : blt) {
                     SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
