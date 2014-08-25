@@ -9,7 +9,7 @@ model DepPar1
    parameter Real b[N] = a;
    parameter Integer N1 = 1;
    parameter Integer N2 = 1;
-   parameter Integer N = N1+N2;
+   parameter Integer N = 2;
    parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3);
    parameter Boolean b1 = true;
    parameter Boolean b2 = false;

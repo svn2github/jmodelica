@@ -133,7 +133,52 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
-
+    
+    /**
+     * Number of independent structural real parameters
+     */
+    public class DAETag_numStructuralIndependentRealParameters extends DAETag {
+        
+        public DAETag_numStructuralIndependentRealParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_real_pi_s", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numStructuralIndependentRealParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent final real parameters
+     */
+    public class DAETag_numFinalIndependentRealParameters extends DAETag {
+        
+        public DAETag_numFinalIndependentRealParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_real_pi_f", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numFinalIndependentRealParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent evaluate real parameters
+     */
+    public class DAETag_numEvalIndependentRealParameters extends DAETag {
+        
+        public DAETag_numEvalIndependentRealParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_real_pi_e", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numEvalIndependentRealParameters());
+        }
+    
+    }
+    
 	/**
 	 * Number of dependent real parameters
 	 */
@@ -223,6 +268,51 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
+    
+    /**
+     * Number of independent structural integer parameters
+     */
+    public class DAETag_numStructuralIndependentIntegerParameters extends DAETag {
+        
+        public DAETag_numStructuralIndependentIntegerParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_integer_pi_s", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numStructuralIndependentIntegerParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent final integer parameters
+     */
+    public class DAETag_numFinalIndependentIntegerParameters extends DAETag {
+        
+        public DAETag_numFinalIndependentIntegerParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_integer_pi_f", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numFinalIndependentIntegerParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent evaluate integer parameters
+     */
+    public class DAETag_numEvalIndependentIntegerParameters extends DAETag {
+        
+        public DAETag_numEvalIndependentIntegerParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_integer_pi_e", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numEvalIndependentIntegerParameters());
+        }
+    
+    }
 
 	/**
 	 * Number of independent enum parameters
@@ -238,7 +328,52 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
-
+    
+    /**
+     * Number of independent structural enum parameters
+     */
+    public class DAETag_numStructuralIndependentEnumParameters extends DAETag {
+        
+        public DAETag_numStructuralIndependentEnumParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_enum_pi_s", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numStructuralIndependentEnumParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent final enum parameters
+     */
+    public class DAETag_numFinalIndependentEnumParameters extends DAETag {
+        
+        public DAETag_numFinalIndependentEnumParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_enum_pi_f", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numFinalIndependentEnumParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent evaluate enum parameters
+     */
+    public class DAETag_numEvalIndependentEnumParameters extends DAETag {
+        
+        public DAETag_numEvalIndependentEnumParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_enum_pi_e", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numEvalIndependentEnumParameters());
+        }
+    
+    }
+    
 	/**
 	 * Number of dependent integer parameters
 	 */
@@ -313,7 +448,52 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
-
+    
+    /**
+     * Number of independent structural boolean parameters
+     */
+    public class DAETag_numStructuralIndependentBooleanParameters extends DAETag {
+        
+        public DAETag_numStructuralIndependentBooleanParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_boolean_pi_s", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numStructuralIndependentBooleanParameters());
+        }
+        
+    }
+    
+    /**
+     * Number of independent final boolean parameters
+     */
+    public class DAETag_numFinalIndependentBooleanParameters extends DAETag {
+        
+        public DAETag_numFinalIndependentBooleanParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_boolean_pi_f", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numFinalIndependentBooleanParameters());
+        }
+        
+    }
+    
+    /**
+     * Number of independent evaluate boolean parameters
+     */
+    public class DAETag_numEvalIndependentBooleanParameters extends DAETag {
+        
+        public DAETag_numEvalIndependentBooleanParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_boolean_pi_e", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numEvalIndependentBooleanParameters());
+        }
+        
+    }
+    
 	/**
 	 * Number of dependent boolean parameters
 	 */
@@ -373,7 +553,52 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
-
+    
+    /**
+     * Number of independent structural string parameters
+     */
+    public class DAETag_numStructuralIndependentStringParameters extends DAETag {
+        
+        public DAETag_numStructuralIndependentStringParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_string_pi_s", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numStructuralIndependentStringParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent final string parameters
+     */
+    public class DAETag_numFinalIndependentStringParameters extends DAETag {
+        
+        public DAETag_numFinalIndependentStringParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_string_pi_f", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numFinalIndependentStringParameters());
+        }
+    
+    }
+    
+    /**
+     * Number of independent evaluate string parameters
+     */
+    public class DAETag_numEvalIndependentStringParameters extends DAETag {
+        
+        public DAETag_numEvalIndependentStringParameters(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_string_pi_e", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numEvalIndependentStringParameters());
+        }
+    
+    }
+    
 	/**
 	 * Number of dependent string parameters
 	 */

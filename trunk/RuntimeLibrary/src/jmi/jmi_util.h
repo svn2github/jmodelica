@@ -755,11 +755,15 @@ struct jmi_simple_color_info_t {
  * @param jmi_callbacks A jmi_callback_t struct.
  * @return Error code.
  */
-int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
-        int n_real_pd, int n_integer_ci, int n_integer_cd,
-        int n_integer_pi, int n_integer_pd,int n_boolean_ci, int n_boolean_cd,
-        int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
-        int n_string_pi, int n_string_pd,
+int jmi_init(jmi_t** jmi,
+        int n_real_ci, int n_real_cd, int n_real_pi,
+        int n_real_pi_s, int n_real_pi_f, int n_real_pi_e, int n_real_pd,
+        int n_integer_ci, int n_integer_cd, int n_integer_pi,
+        int n_integer_pi_s, int n_integer_pi_f, int n_integer_pi_e, int n_integer_pd, 
+        int n_boolean_ci, int n_boolean_cd, int n_boolean_pi,
+        int n_boolean_pi_s, int n_boolean_pi_f, int n_boolean_pi_e, int n_boolean_pd,
+        int n_string_ci, int n_string_cd, int n_string_pi,
+        int n_string_pi_s, int n_string_pi_f, int n_string_pi_e, int n_string_pd,
         int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
         int n_real_d, int n_integer_d, int n_integer_u,
         int n_boolean_d, int n_boolean_u,
@@ -1009,19 +1013,31 @@ struct jmi_t {
     int n_dae_init_blocks;               /**< \brief Number of initial BLT blocks. */
 
     /* Offset variables in the z vector, for convenience. */
+    /* Structural, final, and evaluated parameters "_pi_s", "_ip_f", and
+     * "_pi_e" are subsets of independent parameters "_pi"
+     * and their offsets are only used for generating error messages */
     int offs_real_ci;                    /**< \brief  Offset of the independent real constant vector in \f$z\f$. */
     int offs_real_cd;                    /**< \brief  Offset of the dependent real constant vector in \f$z\f$. */
     int offs_real_pi;                    /**< \brief  Offset of the independent real parameter vector in \f$z\f$. */
+    int offs_real_pi_s;                  /**< \brief  Offset of the structural real parameter vector in \f$z\f$. */
+    int offs_real_pi_f;                  /**< \brief  Offset of the final real parameter vector in \f$z\f$. */
+    int offs_real_pi_e;                  /**< \brief  Offset of the evaluated real parameter vector in \f$z\f$. */
     int offs_real_pd;                    /**< \brief  Offset of the dependent real parameter vector in \f$z\f$. */
 
     int offs_integer_ci;                 /**< \brief  Offset of the independent integer constant vector in \f$z\f$. */
     int offs_integer_cd;                 /**< \brief  Offset of the dependent integer constant vector in \f$z\f$. */
     int offs_integer_pi;                 /**< \brief  Offset of the independent integer parameter vector in \f$z\f$. */
+    int offs_integer_pi_s;               /**< \brief  Offset of the structural integer parameter vector in \f$z\f$. */
+    int offs_integer_pi_f;               /**< \brief  Offset of the final integer parameter vector in \f$z\f$. */
+    int offs_integer_pi_e;               /**< \brief  Offset of the evaluated integer parameter vector in \f$z\f$. */
     int offs_integer_pd;                 /**< \brief  Offset of the dependent integer parameter vector in \f$z\f$. */
 
     int offs_boolean_ci;                 /**< \brief  Offset of the independent boolean constant vector in \f$z\f$. */
     int offs_boolean_cd;                 /**< \brief  Offset of the dependent boolean constant vector in \f$z\f$. */
     int offs_boolean_pi;                 /**< \brief  Offset of the independent boolean parameter vector in \f$z\f$. */
+    int offs_boolean_pi_s;               /**< \brief  Offset of the structural boolean parameter vector in \f$z\f$. */
+    int offs_boolean_pi_f;               /**< \brief  Offset of the final boolean parameter vector in \f$z\f$. */
+    int offs_boolean_pi_e;               /**< \brief  Offset of the evaluated boolean parameter vector in \f$z\f$. */
     int offs_boolean_pd;                 /**< \brief  Offset of the dependent boolean parameter vector in \f$z\f$. */
 
     int offs_real_dx;                    /**< \brief  Offset of the derivative real vector in \f$z\f$. */

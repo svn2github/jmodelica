@@ -27,11 +27,15 @@
 #include "jmi_block_residual.h"
 #include "jmi_log.h"
 
-int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
-        int n_real_pd, int n_integer_ci, int n_integer_cd,
-        int n_integer_pi, int n_integer_pd,int n_boolean_ci, int n_boolean_cd,
-        int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
-        int n_string_pi, int n_string_pd,
+int jmi_init(jmi_t** jmi,
+        int n_real_ci, int n_real_cd, int n_real_pi,
+        int n_real_pi_s, int n_real_pi_f, int n_real_pi_e, int n_real_pd,
+        int n_integer_ci, int n_integer_cd, int n_integer_pi,
+        int n_integer_pi_s, int n_integer_pi_f, int n_integer_pi_e, int n_integer_pd, 
+        int n_boolean_ci, int n_boolean_cd, int n_boolean_pi,
+        int n_boolean_pi_s, int n_boolean_pi_f, int n_boolean_pi_e, int n_boolean_pd,
+        int n_string_ci, int n_string_cd, int n_string_pi,
+        int n_string_pi_s, int n_string_pi_f, int n_string_pi_e, int n_string_pd,
         int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
         int n_real_d, int n_integer_d, int n_integer_u,
         int n_boolean_d, int n_boolean_u,
@@ -109,16 +113,28 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->offs_real_ci = 0;
     jmi_->offs_real_cd = jmi_->offs_real_ci + n_real_ci;
     jmi_->offs_real_pi = jmi_->offs_real_cd + n_real_cd;
+    jmi_->offs_real_pi_s = jmi_->offs_real_pi   + n_real_pi
+        - (n_real_pi_s + n_real_pi_f + n_real_pi_e);
+    jmi_->offs_real_pi_f = jmi_->offs_real_pi_s + n_real_pi_s;
+    jmi_->offs_real_pi_e = jmi_->offs_real_pi_f + n_real_pi_f;
     jmi_->offs_real_pd = jmi_->offs_real_pi + n_real_pi;
 
     jmi_->offs_integer_ci = jmi_->offs_real_pd + n_real_pd;
     jmi_->offs_integer_cd = jmi_->offs_integer_ci + n_integer_ci;
     jmi_->offs_integer_pi = jmi_->offs_integer_cd + n_integer_cd;
+    jmi_->offs_integer_pi_s = jmi_->offs_integer_pi   + n_integer_pi
+        - (n_integer_pi_s + n_integer_pi_f + n_integer_pi_e);
+    jmi_->offs_integer_pi_f = jmi_->offs_integer_pi_s + n_integer_pi_s;
+    jmi_->offs_integer_pi_e = jmi_->offs_integer_pi_f + n_integer_pi_f;
     jmi_->offs_integer_pd = jmi_->offs_integer_pi + n_integer_pi;
 
     jmi_->offs_boolean_ci = jmi_->offs_integer_pd + n_integer_pd;
     jmi_->offs_boolean_cd = jmi_->offs_boolean_ci + n_boolean_ci;
     jmi_->offs_boolean_pi = jmi_->offs_boolean_cd + n_boolean_cd;
+    jmi_->offs_boolean_pi_s = jmi_->offs_boolean_pi   + n_boolean_pi
+        - (n_boolean_pi_s + n_boolean_pi_f + n_boolean_pi_e);
+    jmi_->offs_boolean_pi_f = jmi_->offs_boolean_pi_s + n_boolean_pi_s;
+    jmi_->offs_boolean_pi_e = jmi_->offs_boolean_pi_f + n_boolean_pi_f;
     jmi_->offs_boolean_pd = jmi_->offs_boolean_pi + n_boolean_pi;
 
     jmi_->offs_real_dx = jmi_->offs_boolean_pd + n_boolean_pd;

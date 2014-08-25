@@ -950,6 +950,141 @@ $C_set_start_values$
 ")})));
 end CCodeGenParameters1;
 
+model CCodeGenParameters2
+    type E = enumeration(A,B,C);
+    
+    // Regular independent
+    parameter Real    reg1 = 1;
+    parameter Integer reg2 = 1;
+    parameter E       reg3 = E.A;
+    parameter Boolean reg4 = true;
+    parameter String  reg5 = "string";
+    
+    // Structural independent
+    parameter Real    struct1 = 1;
+    parameter Integer struct2 = 1;
+    parameter E       struct3 = E.A;
+    parameter Boolean struct4 = true;
+    parameter String  struct5 = "string";
+    
+    // Final independent
+    final parameter Real    final1 = 1;
+    final parameter Integer final2 = 1;
+    final parameter E       final3 = E.A;
+    final parameter Boolean final4 = true;
+    final parameter String  final5 = "string";
+    
+    // Evaluate independent
+    parameter Real    eval1 = 1 annotation(Evaluate=true);
+    parameter Integer eval2 = 1 annotation(Evaluate=true);
+    parameter E       eval3 = E.A annotation(Evaluate=true);
+    parameter Boolean eval4 = true annotation(Evaluate=true);
+    parameter String  eval5 = "string" annotation(Evaluate=true);
+    
+    parameter Real dummy[n];
+    parameter Integer n = if (struct4) then integer(struct1) + struct2 else Integer(struct3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenParameters2",
+            description="Code generated for independent parameters",
+            generate_dae=true,
+            variability_propagation=false,
+            template="
+N_real_pi = $n_real_pi$;
+N_real_pi_s = $n_real_pi_s$;
+N_real_pi_f = $n_real_pi_f$;
+N_real_pi_e = $n_real_pi_e$;
+
+N_integer_pi = $n_integer_pi$ + $n_enum_pi$;
+N_integer_pi_s = $n_integer_pi_s$ + $n_enum_pi_s$;
+N_integer_pi_f = $n_integer_pi_f$ + $n_enum_pi_f$;
+N_integer_pi_e = $n_integer_pi_e$ + $n_enum_pi_e$;
+
+N_boolean_pi = $n_boolean_pi$;
+N_boolean_pi_s = $n_boolean_pi_s$;
+N_boolean_pi_f = $n_boolean_pi_f$;
+N_boolean_pi_e = $n_boolean_pi_e$;
+
+N_string_pi = $n_string_pi$;
+N_string_pi_s = $n_string_pi_s$;
+N_string_pi_f = $n_string_pi_f$;
+N_string_pi_e = $n_string_pi_e$;
+---
+$C_variable_aliases$
+---
+$C_DAE_initial_dependent_parameter_assignments$
+---
+$C_set_start_values$
+",
+            generatedCode="
+N_real_pi = 6;
+N_real_pi_s = 2;
+N_real_pi_f = 0;
+N_real_pi_e = 0;
+
+N_integer_pi = 5 + 4;
+N_integer_pi_s = 3 + 2;
+N_integer_pi_f = 0 + 0;
+N_integer_pi_e = 0 + 0;
+
+N_boolean_pi = 4;
+N_boolean_pi_s = 2;
+N_boolean_pi_f = 0;
+N_boolean_pi_e = 0;
+
+N_string_pi = 4;
+N_string_pi_s = 4;
+N_string_pi_f = 0;
+N_string_pi_e = 0;
+---
+#define _reg1_0 ((*(jmi->z))[jmi->offs_real_pi+0])
+#define _final1_10 ((*(jmi->z))[jmi->offs_real_pi+1])
+#define _dummy_1_20 ((*(jmi->z))[jmi->offs_real_pi+2])
+#define _dummy_2_21 ((*(jmi->z))[jmi->offs_real_pi+3])
+#define _struct1_5 ((*(jmi->z))[jmi->offs_real_pi+4])
+#define _eval1_15 ((*(jmi->z))[jmi->offs_real_pi+5])
+#define _reg2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+3])
+#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+4])
+#define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+5])
+#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+6])
+#define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+7])
+#define _eval3_17 ((*(jmi->z))[jmi->offs_integer_pi+8])
+#define _reg4_3 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define _final4_13 ((*(jmi->z))[jmi->offs_boolean_pi+1])
+#define _struct4_8 ((*(jmi->z))[jmi->offs_boolean_pi+2])
+#define _eval4_18 ((*(jmi->z))[jmi->offs_boolean_pi+3])
+#define _time ((*(jmi->z))[jmi->offs_t])
+
+---
+
+---
+    _reg1_0 = (1);
+    _reg2_1 = (1);
+    _reg3_2 = (1);
+    _reg4_3 = (JMI_TRUE);
+    _final1_10 = (1);
+    _final2_11 = (1);
+    _final3_12 = (1);
+    _final4_13 = (JMI_TRUE);
+    _dummy_1_20 = (0.0);
+    _dummy_2_21 = (0.0);
+    _struct1_5 = (1);
+    _struct2_6 = (1);
+    _struct3_7 = (1);
+    _struct4_8 = (JMI_TRUE);
+    _eval1_15 = (1);
+    _eval2_16 = (1);
+    _eval3_17 = (1);
+    _eval4_18 = (JMI_TRUE);
+    _n_22 = (2);
+    model_init_eval_parameters(jmi);
+")})));
+end CCodeGenParameters2;
+
 model CCodeGenUniqueNames
  model A
   Real y;

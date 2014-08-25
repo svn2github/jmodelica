@@ -369,7 +369,7 @@ public class CGenerator extends GenericGenerator {
             // Handle enums as Integers
             generateVarList(genPrinter, "integer_ci", fclass.independentIntegerConstants(),  fclass.independentEnumConstants());
             generateVarList(genPrinter, "integer_cd", fclass.dependentIntegerConstants(),    fclass.dependentEnumConstants());
-            generateVarList(genPrinter, "integer_pi", fclass.independentIntegerParameters(), fclass.independentEnumParameters());
+            generateVarList(genPrinter, "integer_pi", fclass.independentIntegerEnumParameters());
             generateVarList(genPrinter, "integer_pd", fclass.dependentIntegerParameters(),   fclass.dependentEnumParameters());
             generateVarList(genPrinter, "boolean_ci", fclass.independentBooleanConstants());
             generateVarList(genPrinter, "boolean_cd", fclass.dependentBooleanConstants());

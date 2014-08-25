@@ -105,8 +105,7 @@ aspect FlatAPI {
         map.add(independentEnumConstants());
         map.add(dependentIntegerConstants());
         map.add(dependentEnumConstants());
-        map.add(independentIntegerParameters());
-        map.add(independentEnumParameters());
+        map.add(independentIntegerEnumParameters());
         map.add(dependentIntegerParameters());
         map.add(dependentEnumParameters());
         
@@ -186,11 +185,6 @@ aspect FlatAPI {
     syn int FClass.IndependentBooleanConstantsOffset() =
         independentEnumConstantsOffset() +    
         numIndependentEnumConstants();  
-        /*
-    syn int FClass.independentBooleanConstantsOffset() = 
-        numIndependentRealConstants() + 
-        numIndependentIntegerConstants();   
-        */
     syn int FClass.independentStringConstantsOffset() = 
         numIndependentRealConstants() + 
         numIndependentIntegerConstants()
@@ -208,11 +202,6 @@ aspect FlatAPI {
     syn int FClass.dependentBooleanConstantsOffset() =
         dependentEnumConstantsOffset() +      
         numDependentEnumConstants();    
-/*
-    syn int FClass.dependentBooleanConstantsOffset() =
-        dependentIntegerConstantsOffset() +       
-        numDependentIntegerConstants(); 
-        */
     syn int FClass.dependentStringConstantsOffset() = 
         dependentBooleanConstantsOffset() +       
         + numDependentBooleanConstants();
@@ -229,12 +218,6 @@ aspect FlatAPI {
     syn int FClass.independentBooleanParametersOffset() =
         independentEnumParametersOffset() +       
         numIndependentEnumParameters(); 
-
-        /*
-    syn int FClass.independentBooleanParametersOffset() =
-        independentIntegerParametersOffset() +    
-        numIndependentIntegerParameters();  
-        */
     syn int FClass.independentStringParametersOffset() = 
         independentBooleanParametersOffset() +    
         + numIndependentBooleanParameters();
@@ -245,18 +228,12 @@ aspect FlatAPI {
     syn int FClass.dependentIntegerParametersOffset() =
         dependentRealParametersOffset() +    
         numDependentRealParameters();   
-
     syn int FClass.dependentEnumParametersOffset() =
         dependentIntegerParametersOffset() +      
         numDependentIntegerParameters();    
     syn int FClass.dependentBooleanParametersOffset() =
         dependentEnumParametersOffset() +     
         numDependentEnumParameters();   
-        /*
-    syn int FClass.dependentBooleanParametersOffset() =
-        dependentIntegerParametersOffset() +      
-        numDependentIntegerParameters();    
-        */
     syn int FClass.dependentStringParametersOffset() = 
         dependentBooleanParametersOffset() +      
         + numDependentBooleanParameters();
@@ -409,32 +386,187 @@ aspect FlatAPI {
       intersectFVColl(strings(), dependentConstants());
 
     syn int FClass.numIndependentParameters() = independentParameters().size();
-    coll ArrayList<FVariable> FClass.independentParameters() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
-    FVariable contributes
-        this when isIndependentParameter() && shouldContribute()
-    to FClass.independentParameters() for myFClass();
+    syn lazy ArrayList<FVariable> FClass.independentParameters() {
+        ArrayList<FVariable> l = new ArrayList<FVariable>();
+        l.addAll(regularIndependentParameters());
+        l.addAll(structuralIndependentParameters());
+        l.addAll(finalIndependentParameters());
+        l.addAll(evalIndependentParameters());
+        return l;
+    }
+    
+    syn int FClass.numIndependentIntegerEnumParameters() = independentIntegerEnumParameters().size();
+    syn lazy ArrayList<FVariable> FClass.independentIntegerEnumParameters() {
+        ArrayList<FVariable> l = new ArrayList<FVariable>();
+        l.addAll(regularIndependentIntegerParameters());
+        l.addAll(regularIndependentEnumParameters());
+        l.addAll(structuralIndependentIntegerParameters());
+        l.addAll(structuralIndependentEnumParameters());
+        l.addAll(finalIndependentIntegerParameters());
+        l.addAll(finalIndependentEnumParameters());
+        l.addAll(evalIndependentIntegerParameters());
+        l.addAll(evalIndependentEnumParameters());
+        return l;
+    }
     
     syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
-    syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() =
-      intersectFVColl(reals(), independentParameters());
-
+    syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() {
+        ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
+        l.addAll(regularIndependentRealParameters());
+        l.addAll(structuralIndependentRealParameters());
+        l.addAll(finalIndependentRealParameters());
+        l.addAll(evalIndependentRealParameters());
+        return l;
+    }
+    
     syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
-    syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() =
-      intersectFVColl(integers(), independentParameters());
-
+    syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() {
+        ArrayList<FIntegerVariable> l = new ArrayList<FIntegerVariable>();
+        l.addAll(regularIndependentIntegerParameters());
+        l.addAll(structuralIndependentIntegerParameters());
+        l.addAll(finalIndependentIntegerParameters());
+        l.addAll(evalIndependentIntegerParameters());
+        return l;
+    }
+    
     syn int FClass.numIndependentEnumParameters() = independentEnumParameters().size();
-    syn lazy ArrayList<FEnumVariable> FClass.independentEnumParameters() =
-      intersectFVColl(enums(), independentParameters());
+    syn lazy ArrayList<FEnumVariable> FClass.independentEnumParameters() {
+        ArrayList<FEnumVariable> l = new ArrayList<FEnumVariable>();
+        l.addAll(regularIndependentEnumParameters());
+        l.addAll(structuralIndependentEnumParameters());
+        l.addAll(finalIndependentEnumParameters());
+        l.addAll(evalIndependentEnumParameters());
+        return l;
+    }
     
     syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
-    syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() =
-      intersectFVColl(booleans(), independentParameters());
-
+    syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() {
+        ArrayList<FBooleanVariable> l = new ArrayList<FBooleanVariable>();
+        l.addAll(regularIndependentBooleanParameters());
+        l.addAll(structuralIndependentBooleanParameters());
+        l.addAll(finalIndependentBooleanParameters());
+        l.addAll(evalIndependentBooleanParameters());
+        return l;
+    }
+    
     syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
-    syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() =
-      intersectFVColl(strings(), independentParameters());
+    syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() {
+        ArrayList<FStringVariable> l = new ArrayList<FStringVariable>();
+        l.addAll(regularIndependentStringParameters());
+        l.addAll(structuralIndependentStringParameters());
+        l.addAll(finalIndependentStringParameters());
+        l.addAll(evalIndependentStringParameters());
+        return l;
+    }
+    
+    syn int FClass.numRegularIndependentParameters() = regularIndependentParameters().size();
+    coll ArrayList<FVariable> FClass.regularIndependentParameters() 
+      [new ArrayList<FVariable>()] with add root FlatRoot;
+    FVariable contributes
+        this when isRegularIndependentParameter() && shouldContribute()
+    to FClass.regularIndependentParameters() for myFClass();
+    
+    syn int FClass.numRegularIndependentRealParameters() = regularIndependentRealParameters().size();
+    syn lazy ArrayList<FRealVariable> FClass.regularIndependentRealParameters() =
+      intersectFVColl(reals(), regularIndependentParameters());
 
+    syn int FClass.numRegularIndependentIntegerParameters() = regularIndependentIntegerParameters().size();
+    syn lazy ArrayList<FIntegerVariable> FClass.regularIndependentIntegerParameters() =
+      intersectFVColl(integers(), regularIndependentParameters());
+
+    syn int FClass.numRegularIndependentEnumParameters() = regularIndependentEnumParameters().size();
+    syn lazy ArrayList<FEnumVariable> FClass.regularIndependentEnumParameters() =
+      intersectFVColl(enums(), regularIndependentParameters());
+    
+    syn int FClass.numRegularIndependentBooleanParameters() = regularIndependentBooleanParameters().size();
+    syn lazy ArrayList<FBooleanVariable> FClass.regularIndependentBooleanParameters() =
+      intersectFVColl(booleans(), regularIndependentParameters());
+
+    syn int FClass.numRegularIndependentStringParameters() = regularIndependentStringParameters().size();
+    syn lazy ArrayList<FStringVariable> FClass.regularIndependentStringParameters() =
+      intersectFVColl(strings(), regularIndependentParameters());
+    
+    syn int FClass.numStructuralIndependentParameters() = structuralIndependentParameters().size();
+    coll ArrayList<FVariable> FClass.structuralIndependentParameters() 
+      [new ArrayList<FVariable>()] with add root FlatRoot;
+    FVariable contributes
+        this when isStructuralIndependentParameter() && shouldContribute()
+    to FClass.structuralIndependentParameters() for myFClass();
+    
+    syn int FClass.numStructuralIndependentRealParameters() = structuralIndependentRealParameters().size();
+    syn lazy ArrayList<FRealVariable> FClass.structuralIndependentRealParameters() =
+      intersectFVColl(reals(), structuralIndependentParameters());
+    
+    syn int FClass.numStructuralIndependentIntegerParameters() = structuralIndependentIntegerParameters().size();
+    syn lazy ArrayList<FIntegerVariable> FClass.structuralIndependentIntegerParameters() =
+      intersectFVColl(integers(), structuralIndependentParameters());
+    
+    syn int FClass.numStructuralIndependentEnumParameters() = structuralIndependentEnumParameters().size();
+    syn lazy ArrayList<FEnumVariable> FClass.structuralIndependentEnumParameters() =
+      intersectFVColl(enums(), structuralIndependentParameters());
+    
+    syn int FClass.numStructuralIndependentBooleanParameters() = structuralIndependentBooleanParameters().size();
+    syn lazy ArrayList<FBooleanVariable> FClass.structuralIndependentBooleanParameters() =
+      intersectFVColl(booleans(), structuralIndependentParameters());
+    
+    syn int FClass.numStructuralIndependentStringParameters() = structuralIndependentStringParameters().size();
+    syn lazy ArrayList<FStringVariable> FClass.structuralIndependentStringParameters() =
+      intersectFVColl(strings(), structuralIndependentParameters());
+    
+    syn int FClass.numFinalIndependentParameters() = finalIndependentParameters().size();
+    coll ArrayList<FVariable> FClass.finalIndependentParameters()
+      [new ArrayList<FVariable>()] with add root FlatRoot;
+    FVariable contributes
+        this when isFinalIndependentParameter() && shouldContribute()
+    to FClass.finalIndependentParameters() for myFClass();
+    
+    syn int FClass.numFinalIndependentRealParameters() = finalIndependentRealParameters().size();
+    syn lazy ArrayList<FRealVariable> FClass.finalIndependentRealParameters() =
+      intersectFVColl(reals(), finalIndependentParameters());
+    
+    syn int FClass.numFinalIndependentIntegerParameters() = finalIndependentIntegerParameters().size();
+    syn lazy ArrayList<FIntegerVariable> FClass.finalIndependentIntegerParameters() =
+      intersectFVColl(integers(), finalIndependentParameters());
+    
+    syn int FClass.numFinalIndependentEnumParameters() = finalIndependentEnumParameters().size();
+    syn lazy ArrayList<FEnumVariable> FClass.finalIndependentEnumParameters() =
+      intersectFVColl(enums(), finalIndependentParameters());
+    
+    syn int FClass.numFinalIndependentBooleanParameters() = finalIndependentBooleanParameters().size();
+    syn lazy ArrayList<FBooleanVariable> FClass.finalIndependentBooleanParameters() =
+      intersectFVColl(booleans(), finalIndependentParameters());
+    
+    syn int FClass.numFinalIndependentStringParameters() = finalIndependentStringParameters().size();
+    syn lazy ArrayList<FStringVariable> FClass.finalIndependentStringParameters() =
+      intersectFVColl(strings(), finalIndependentParameters());
+    
+    syn int FClass.numEvalIndependentParameters() = evalIndependentParameters().size();
+    coll ArrayList<FVariable> FClass.evalIndependentParameters()
+      [new ArrayList<FVariable>()] with add root FlatRoot;
+    FVariable contributes
+        this when isEvalIndependentParameter() && shouldContribute()
+    to FClass.evalIndependentParameters() for myFClass();
+    
+    syn int FClass.numEvalIndependentRealParameters() = evalIndependentRealParameters().size();
+    syn lazy ArrayList<FRealVariable> FClass.evalIndependentRealParameters() =
+      intersectFVColl(reals(), evalIndependentParameters());
+    
+    syn int FClass.numEvalIndependentIntegerParameters() = evalIndependentIntegerParameters().size();
+    syn lazy ArrayList<FIntegerVariable> FClass.evalIndependentIntegerParameters() =
+      intersectFVColl(integers(), evalIndependentParameters());
+    
+    syn int FClass.numEvalIndependentEnumParameters() = evalIndependentEnumParameters().size();
+    syn lazy ArrayList<FEnumVariable> FClass.evalIndependentEnumParameters() =
+      intersectFVColl(enums(), evalIndependentParameters());
+    
+    syn int FClass.numEvalIndependentBooleanParameters() = evalIndependentBooleanParameters().size();
+    syn lazy ArrayList<FBooleanVariable> FClass.evalIndependentBooleanParameters() =
+      intersectFVColl(booleans(), evalIndependentParameters());
+    
+    syn int FClass.numEvalIndependentStringParameters() = evalIndependentStringParameters().size();
+    syn lazy ArrayList<FStringVariable> FClass.evalIndependentStringParameters() =
+      intersectFVColl(strings(), evalIndependentParameters());
+    
     syn int FClass.numDependentParameters() = dependentParameters().size();
     coll ArrayList<FVariable> FClass.dependentParameters() 
       [new ArrayList<FVariable>()] with add root FlatRoot;
@@ -1151,9 +1283,19 @@ aspect FlatAPI {
     
     syn lazy boolean FVariable.isDependentParameter() = 
         isParameter() && !isIndependentParameter();
-    syn lazy boolean FVariable.isIndependentParameter() = 
-        isParameter() && !isNonFixedParameter() && !hasParameterEquation() && 
-        (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
+    
+    syn lazy boolean FVariable.isIndependentParameter() =
+            isParameter() && !isNonFixedParameter() && !hasParameterEquation() && 
+            (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
+    
+    syn lazy boolean FVariable.isRegularIndependentParameter() =
+        isIndependentParameter() && !variability().structuralOrLess();
+    syn lazy boolean FVariable.isStructuralIndependentParameter() =
+        isIndependentParameter() && variability().structuralOrLess();
+    syn lazy boolean FVariable.isFinalIndependentParameter() =
+        false; // TODO
+    syn lazy boolean FVariable.isEvalIndependentParameter() =
+        false; // TODO
 
     syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
     

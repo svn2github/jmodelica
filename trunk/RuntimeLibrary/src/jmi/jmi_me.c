@@ -185,6 +185,22 @@ int jmi_initialize(jmi_t* jmi) {
     return 0;
 }
 
+int jmi_cannot_set(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
+                    size_t start, size_t end, char* fmt) {
+    jmi_value_reference i;
+    jmi_value_reference index;
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
+        index = get_index_from_value_ref(vr[i]);
+        if (index >= start && index < end) {
+            jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         fmt, vr[i]);
+            return -1;
+        }
+    }
+    return 0;
+}
+
 int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  const jmi_real_t value[]) {
     
@@ -199,21 +215,18 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
     
-    for (i = 0; i < nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index >= (size_t)(jmi->offs_real_pd) && index < (size_t)(jmi->offs_integer_ci)) {
-            jmi_log_node(jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Real dependent parameter <variable: #r%d#>", vr[i]);
-            return -1;
-        }
-
-        if (index >= (size_t)jmi->offs_real_ci && index < (size_t)jmi->offs_real_pi) {
-            jmi_log_node(jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Real constant <variable: #r%d#>", vr[i]);
-            return -1;
-        }
+    if (jmi_cannot_set(jmi, vr, nvr, jmi->offs_real_ci, jmi->offs_real_pi,
+        "Cannot set Real constant <variable: #r%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_real_pi_s, jmi->offs_real_pi_f,
+        "Cannot set Real structural parameter <variable: #r%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_real_pi_f, jmi->offs_real_pi_e,
+        "Cannot set Real final parameter <variable: #r%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_real_pi_e, jmi->offs_real_pd,
+        "Cannot set Real evaluated parameter <variable: #r%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_real_pd, jmi->offs_integer_ci,
+        "Cannot set Real dependent parameter <variable: #r%d#>")) {
+        
+        return -1;
     }
     
     jmi->recomputeVariables = 1;
@@ -247,21 +260,18 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
     
-    for (i = 0; i < nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index >= jmi->offs_integer_pd && index < jmi->offs_boolean_ci) {
-            jmi_log_node(jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Integer dependent parameter <variable: #i%d#>", vr[i]);
-            return -1;
-        }
-
-        if (index >= jmi->offs_integer_ci && index < jmi->offs_integer_pi) {
-            jmi_log_node(jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Integer constant <variable: #i%d#>", vr[i]);
-            return -1;
-        }
+    if (jmi_cannot_set(jmi, vr, nvr, jmi->offs_integer_ci, jmi->offs_integer_pi,
+        "Cannot set Integer constant <variable: #i%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_integer_pi_s, jmi->offs_integer_pi_f,
+        "Cannot set Integer structural parameter <variable: #i%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_integer_pi_f, jmi->offs_integer_pi_e,
+        "Cannot set Integer final parameter <variable: #i%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_integer_pi_e, jmi->offs_integer_pd,
+        "Cannot set Integer evaluated parameter <variable: #i%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_integer_pd, jmi->offs_boolean_ci,
+        "Cannot set Integer dependent parameter <variable: #i%d#>")) {
+        
+        return -1;
     }
 
     jmi->recomputeVariables = 1;
@@ -295,21 +305,18 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
     
-    for (i = 0; i < nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index >= jmi->offs_boolean_pd && index < jmi->offs_real_dx) {
-            jmi_log_node(jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Boolean dependent parameter <variable: #b%d#>", vr[i]);
-            return -1;
-        }
-
-        if (index >= jmi->offs_boolean_ci && index < jmi->offs_boolean_pi) {
-            jmi_log_node(jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Boolean constant <variable: #b%d#>", vr[i]);
-            return -1;
-        }
+    if (jmi_cannot_set(jmi, vr, nvr, jmi->offs_boolean_ci, jmi->offs_boolean_pi,
+        "Cannot set Boolean constant <variable: #b%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_boolean_pi_s, jmi->offs_boolean_pi_f,
+        "Cannot set Boolean structural parameter <variable: #b%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_boolean_pi_f, jmi->offs_boolean_pi_e,
+        "Cannot set Boolean final parameter <variable: #b%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_boolean_pi_e, jmi->offs_boolean_pd,
+        "Cannot set Boolean evaluated parameter <variable: #b%d#>")
+        || jmi_cannot_set(jmi, vr, nvr, jmi->offs_boolean_pd, jmi->offs_real_dx,
+        "Cannot set Boolean dependent parameter <variable: #b%d#>")) {
+        
+        return -1;
     }
 
     jmi->recomputeVariables = 1;

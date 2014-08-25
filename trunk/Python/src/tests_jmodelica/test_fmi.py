@@ -76,7 +76,7 @@ class Test_FMUModelBase:
         Sets up the test class.
         """
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
-        cls.tableFmu = compile_fmu('TablesTest.Table1DfromArray', os.path.join(path_to_mofiles,'TablesTests.mo'))
+        cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     @testattr(stddist = True)
     def test_initialize_once(self):
@@ -124,13 +124,13 @@ class Test_FMUModelBase:
         
     @testattr(stddist = True)
     def test_set_get_enumeration(self):
-        tables = load_fmu(Test_FMUModelBase.tableFmu)
-        tables.get("modelicaTable1D.smoothness") #Test that it works
-        tables.set("modelicaTable1D.smoothness",2)
+        tables = load_fmu(Test_FMUModelBase.enumFMU)
+        assert tables.get("e") == 1 #Test that it works
+        tables.set("e",2)
         
-        assert tables.get("modelicaTable1D.smoothness") == 2
+        assert tables.get("e") == 2
         
-        var = tables.get_model_variables()["modelicaTable1D.smoothness"]
+        var = tables.get_model_variables()["e"]
         
         tables.set_integer([var.value_reference],3)
         assert tables.get_integer([var.value_reference]) == 3
@@ -1054,17 +1054,17 @@ class Test_SetDependentParameterError:
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         """
         Sets up the test class.
         """
-        cls.fmu =  compile_fmu('DependentParameterTest2',os.path.join(path_to_mofiles,'DependentParameterTest.mo'))
+        self.fmu =  compile_fmu('Parameter.Error.Dependent',os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.m = load_fmu(Test_SetDependentParameterError.fmu)
+        self.m = load_fmu(self.fmu)
 
     @testattr(stddist = True)
     def test_dependent_parameter_setting(self):
@@ -1081,6 +1081,33 @@ class Test_SetDependentParameterError:
         nose.tools.assert_raises(FMUException,self.m.set, 'pbd', True)
         nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)
 
+class Test_StructuralParameterError:
+    """
+    Test that setting structural independent parameters results in exception
+    """
+
+    @classmethod
+    def setUpClass(self):
+        """
+        Sets up the test class.
+        """
+        self.fmu =  compile_fmu('Parameter.Error.Structural',os.path.join(path_to_mofiles,'ParameterTests.mo'))
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu(self.fmu)
+
+    @testattr(stddist = True)
+    def test_dependent_parameter_setting(self):
+        """
+        Test that expeptions are thrown when dependent parameters are set.
+        """
+        nose.tools.assert_raises(FMUException,self.m.set, 'a', 1)
+        nose.tools.assert_raises(FMUException,self.m.set, 'b', 1)
+        nose.tools.assert_raises(FMUException,self.m.set, 'c', 1)
+        nose.tools.assert_raises(FMUException,self.m.set, 'd', 1)
 
 class Test_RaisesIfNonConverge:
     """
