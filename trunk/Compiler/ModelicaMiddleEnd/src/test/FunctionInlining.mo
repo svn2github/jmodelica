@@ -371,11 +371,11 @@ end FunctionInlining.BasicInline8;
 			eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionInlining.BasicInline9
- parameter Real y = 2 /* 2 */;
- parameter Real x;
  parameter Real temp_1;
+ parameter Real y = 2 /* 2 */;
  parameter Real temp_3;
  parameter Real temp_4;
+ parameter Real x;
 parameter equation
  temp_1 = y - 1;
  temp_3 = 2 * temp_1 + temp_1;
@@ -3112,134 +3112,6 @@ public
 end FunctionInlining.InlineAnnotation7;
 ")})));
 end InlineAnnotation7;
-
-
-model InlineAnnotation8
-    function f
-        input Real a;
-        output Real b;
-    algorithm
-        b := f2(a);
-        annotation(LateInline=true, derivative=fd);
-    end f;
-    
-    function fd
-        input Real a;
-        input Real ad;
-        output Real b;
-    algorithm
-        b := a * ad;
-    end fd;
-    
-    function f2
-        input Real a;
-        output Real b;
-    algorithm
-        b := a + 1;
-        b := b * a;
-    end f2;
-    
-    Real x = f(y);
-    Real y;
-    Real z = der(y);
-equation
-    der(x) = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InlineAnnotation8",
-            description="Check that functions with LateInline=true is inlined after index reduction",
-            flatModel="
-fclass FunctionInlining.InlineAnnotation8
- Real x;
- Real y;
- Real z;
- Real _der_x;
-initial equation 
- y = 0.0;
-equation
- _der_x = time;
- x = FunctionInlining.InlineAnnotation8.f2(y);
- z = der(y);
- _der_x = y * der(y);
-
-public
- function FunctionInlining.InlineAnnotation8.f2
-  input Real a;
-  output Real b;
- algorithm
-  b := a + 1;
-  b := b * a;
-  return;
- end FunctionInlining.InlineAnnotation8.f2;
-
-end FunctionInlining.InlineAnnotation8;
-")})));
-end InlineAnnotation8;
-
-
-model InlineAnnotation9
-    function f
-        input Real a;
-        output Real b;
-    algorithm
-        b := f2(a);
-        annotation(InlineAfterIndexReduction=true, derivative=fd);
-    end f;
-    
-    function fd
-        input Real a;
-        input Real ad;
-        output Real b;
-    algorithm
-        b := a * ad;
-    end fd;
-    
-    function f2
-        input Real a;
-        output Real b;
-    algorithm
-        b := a + 1;
-        b := b * a;
-    end f2;
-    
-    Real x = f(y);
-    Real y;
-    Real z = der(y);
-equation
-    der(x) = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InlineAnnotation9",
-            description="Check that functions with InlineAfterIndexReduction=true is inlined after index reduction",
-            flatModel="
-fclass FunctionInlining.InlineAnnotation9
- Real x;
- Real y;
- Real z;
- Real _der_x;
-initial equation 
- y = 0.0;
-equation
- _der_x = time;
- x = FunctionInlining.InlineAnnotation9.f2(y);
- z = der(y);
- _der_x = y * der(y);
-
-public
- function FunctionInlining.InlineAnnotation9.f2
-  input Real a;
-  output Real b;
- algorithm
-  b := a + 1;
-  b := b * a;
-  return;
- end FunctionInlining.InlineAnnotation9.f2;
-
-end FunctionInlining.InlineAnnotation9;
-")})));
-end InlineAnnotation9;
 
 
 model EmptyArray

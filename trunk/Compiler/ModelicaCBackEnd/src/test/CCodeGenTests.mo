@@ -433,7 +433,6 @@ equation
             generate_dae=false,
             equation_sorting=true,
             variability_propagation=false,
-            inline_functions="none",
             template="$C_ode_derivatives$",
             generatedCode="
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
@@ -5570,8 +5569,8 @@ model DependentParametersWithScalingTest1
     _p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp0((_p2_1*sf(2))))/sf(4);
     tmp_2->x = (_r2_x_2*sf(3));
     func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def1(tmp_2, tmp_1);
-    _temp_1_x_6 = (tmp_1->x)/sf(6);
-    _r3_x_5 = ((_temp_1_x_6*sf(6)))/sf(5);
+    _temp_1_x_5 = (tmp_1->x)/sf(5);
+    _r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
 ")})));
 end DependentParametersWithScalingTest1;
 
