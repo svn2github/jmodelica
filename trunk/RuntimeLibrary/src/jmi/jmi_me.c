@@ -937,7 +937,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 }
 
 int jmi_update_and_terminate(jmi_t* jmi) {
-    int retval = jmi_ode_derivatives(jmi);
+    int retval;
+
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
@@ -946,9 +947,11 @@ int jmi_update_and_terminate(jmi_t* jmi) {
         }
         jmi->recomputeVariables = 0;
     }
+
+    jmi_terminate(jmi);
     jmi->user_terminate = 1;
 
-    return 0; 
+    return 0;
 }
 
 int compare_option_names(const void* a, const void* b) {
