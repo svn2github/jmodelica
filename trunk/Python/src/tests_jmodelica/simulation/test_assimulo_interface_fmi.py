@@ -234,6 +234,45 @@ class Test_Relations:
         nose.tools.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,places=3)
         nose.tools.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,places=3)
 
+class Test_Singular_Systems:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'Singular.mo')
+
+        compile_fmu("Singular.LinearInf", file_name)
+    
+    @testattr(stddist = True)
+    def test_linear_inf_1(self):
+        
+        model = load_fmu("Singular_LinearInf.fmu", log_level=6)
+        model.set("_log_level", 6)
+        
+        model.set("a22", N.inf)
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_linear_inf_2(self):
+        
+        model = load_fmu("Singular_LinearInf.fmu", log_level=6)
+        model.set("_log_level", 6)
+        
+        model.set("a33", 0)
+        model.set("a22", N.inf)
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_linear_inf_3(self):
+        
+        model = load_fmu("Singular_LinearInf.fmu", log_level=6)
+        model.set("_log_level", 6)
+        
+        model.set("b[1]", N.inf)
+        nose.tools.assert_raises(FMUException, model.initialize)
+
 class Test_FMI_ODE:
     """
     This class tests pyfmi.simulation.assimulo.FMIODE and together

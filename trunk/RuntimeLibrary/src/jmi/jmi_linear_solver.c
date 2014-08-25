@@ -72,6 +72,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     
     /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
+        int j = 0;
 
         /*printf("** Computing factorization in jmi_linear_solver_solve for block %s\n",block->label);*/
           /*
@@ -101,6 +102,18 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             }
             else
                 solver->equed = 'N';
+        }
+        
+        /*Check the Jacobian for INF and NANs */
+        for (i = 0; i < n_x; i++) {
+            for (j = 0; j < n_x; j++) {
+                /* Unrecoverable error*/
+                if ( solver->jacobian[i*n_x+j] - solver->jacobian[i*n_x+j] != 0) {
+                    jmi_log_node(block->log, logError, "NaNOutput", "Not a number in the Jacobian <row: %I> <col: %I> from <block: %s>", 
+                            i,j, block->label);
+                    return -1;
+                }
+            }
         }
 	}
 
@@ -155,7 +168,16 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         }
         return -1;
     }
-
+    
+    /*Check the right hand side for INF and NANs */
+    for (i = 0; i < n_x; i++) {
+        /* Unrecoverable error*/
+        if ( block->res[i] - block->res[i] != 0) {
+            jmi_log_node(block->log, logError, "NaNOutput", "Not a number in <rhs: %I> from <block: %s>", 
+                         i, block->label);
+            return -1;
+        }
+    }
     
     if((solver->equed == 'R') || (solver->equed == 'B')) {
         for (i=0;i<n_x;i++) {
