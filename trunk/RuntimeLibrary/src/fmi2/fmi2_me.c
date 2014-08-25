@@ -307,11 +307,16 @@ fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
 
 fmi2Status fmi2_terminate(fmi2Component c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
+    int retval;
+
     if (c == NULL) {
 		return fmi2Fatal;
     }
     
-    jmi_terminate(&((fmi2_me_t*)c)->jmi);
+    retval = jmi_update_and_terminate(&((fmi2_me_t*)c)->jmi);
+    if (retval != 0) {
+        return fmi2Error;
+    }
     return fmi2OK;
 }
 
@@ -636,6 +641,7 @@ fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
     }
     
     ((fmi2_me_t *)c) -> fmu_mode = continuousTimeMode;
+    ((fmi2_me_t *)c)->jmi.recomputeVariables = 0;
     return fmi2OK;
 }
 
@@ -669,6 +675,8 @@ fmi2Status fmi2_completed_integrator_step(fmi2Component c,
 }
 
 fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
+    fmi2Integer retval;
+
     if (c == NULL) {
 		return fmi2Fatal;
     }
@@ -677,20 +685,28 @@ fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
         jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot set a time past the <stop_time: %g>.", ((fmi2_me_t*)c)->stopTime);
         return fmi2Error;
     }
+
+    retval = jmi_set_time(&((fmi2_me_t*)c)->jmi, time);
+    if (retval != 0) {
+        return fmi2Error;
+    }
     
-    *(jmi_get_t(&((fmi2_me_t *)c)->jmi)) = time;
-    ((fmi2_me_t *)c)->jmi.recomputeVariables = 1;
     return fmi2OK;
 }
 
 fmi2Status fmi2_set_continuous_states(fmi2Component c, const fmi2Real x[],
                                       size_t nx) {
+    fmi2Integer retval;
+
     if (c == NULL) {
 		return fmi2Fatal;
     }
     
-    memcpy (jmi_get_real_x(&((fmi2_me_t *)c)->jmi), x, nx*sizeof(fmi2Real));
-    ((fmi2_me_t *)c)->jmi.recomputeVariables = 1;
+    retval = jmi_set_continuous_states(&((fmi2_me_t*)c)->jmi, x, nx);
+    if (retval != 0) {
+        return fmi2Error;
+    }
+
     return fmi2OK;
 }
 

@@ -234,8 +234,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     jmi_->log = jmi_log_init(jmi_callbacks);
 
-    jmi_->terminate = 0;
-
+    jmi_->model_terminate = 0;
+    jmi_->user_terminate = 0;
     jmi_->reinit_triggered = 0;
 
     jmi_->is_initialized = 0;

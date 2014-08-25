@@ -192,6 +192,12 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+
+    if (jmi->user_terminate == 1) {
+        jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         "Cannot set Real variables when the model is terminated");
+        return -1;
+    }
     
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
@@ -234,6 +240,12 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+
+    if (jmi->user_terminate == 1) {
+        jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         "Cannot set Integer variables when the model is terminated");
+        return -1;
+    }
     
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
@@ -276,6 +288,12 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+
+    if (jmi->user_terminate == 1) {
+        jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         "Cannot set Boolean variables when the model is terminated");
+        return -1;
+    }
     
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
@@ -315,6 +333,12 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 int jmi_set_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    const jmi_string value[]) {
     
+    if (jmi->user_terminate == 1) {
+        jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         "Cannot set String variables when the model is terminated");
+        return -1;
+    }
+
     jmi->recomputeVariables = 1;
     jmi_log_comment(jmi->log, logWarning, "Strings are not yet supported.");
     return 0;
@@ -341,7 +365,7 @@ int jmi_get_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
     }
 
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0) {
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
@@ -384,7 +408,7 @@ int jmi_get_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
     }
 
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0) {
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
@@ -427,7 +451,7 @@ int jmi_get_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
     }
 
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0) {
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
@@ -469,7 +493,7 @@ int jmi_get_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
     }
 
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0) {
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
@@ -532,7 +556,7 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     }
     
     
-    if (jmi->recomputeVariables == 1) {
+    if (jmi->recomputeVariables == 1  && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             
@@ -567,12 +591,49 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
         }
         jmi->recomputeVariables = 0;
     }
+
     memcpy (derivatives, jmi_get_real_dx(jmi), nx*sizeof(jmi_real_t));
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         jmi_log_leave(jmi->log, node);
     }
     
+    return 0;
+}
+
+int jmi_set_time(jmi_t* jmi, jmi_real_t time) {
+    jmi_real_t* time_old = (jmi_get_t(jmi));
+
+    if (jmi->user_terminate == 1) {
+        jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         "Cannot set time when the model is terminated");
+        return -1;
+    }
+
+    if (*time_old != time) {
+        *time_old = time;
+        jmi->recomputeVariables = 1;
+    }
+
+    return 0;
+}
+
+int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx) {
+    jmi_real_t* x_cur = jmi_get_real_x(jmi);
+    size_t i;
+    
+    if (jmi->user_terminate == 1) {
+        jmi_log_node(jmi->log, logError, "CannotSetVariable",
+                         "Cannot set continuous states when the model is terminated");
+        return -1;
+    }
+
+    for (i = 0; i < nx; i++){
+        if (x_cur[i] != x[i]){
+            x_cur[i] = x[i];
+            jmi->recomputeVariables = 1;
+        }
+    }
     return 0;
 }
 
@@ -607,13 +668,13 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
                                 "Call to get event indicators at <t:%g>.", jmi_get_t(jmi)[0]);
     }
     
-    if (jmi->recomputeVariables == 1) {
+    if (jmi->recomputeVariables == 1 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             
             /* Store the current time and states */
             jmi_real_t time = *(jmi_get_t(jmi));
-            jmi_real_t *x = jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
+            jmi_real_t *x = (jmi_real_t*)jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
             memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
             
             jmi_log_node(jmi->log, logWarning, "Warning",
@@ -642,8 +703,8 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
         }
         jmi->recomputeVariables = 0;
     }
+
     retval = jmi_dae_R_perturbed(jmi,eventIndicators);
-    
     if(retval != 0) {
         jmi_log_comment(jmi->log, logError, "Evaluating the event indicators failed.");
         if (jmi->jmi_callbacks.log_options.log_level >= 5){
@@ -688,8 +749,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_dae_get_sizes(jmi, &nF, &nR);
     switches = jmi_get_sw(jmi);
     
-    jmi->terminate = 0;  /* Reset terminate flag. */
-    max_iterations = 30; /* Maximum number of event iterations */
+    jmi->model_terminate = 0;  /* Reset terminate flag. */
+    max_iterations = 30;       /* Maximum number of event iterations */
 
     /* Performed at the fist event iteration: */
     if (jmi->nbr_event_iter == 0) {
@@ -869,10 +930,25 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     }
 
 	/* If everything went well, check if termination of simulation was requested. */
-	event_info->terminate_simulation = jmi->terminate ? TRUE : FALSE;
+	event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
     
     
     return 0;
+}
+
+int jmi_update_and_terminate(jmi_t* jmi) {
+    int retval = jmi_ode_derivatives(jmi);
+    if (jmi->recomputeVariables == 1) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            return -1;
+        }
+        jmi->recomputeVariables = 0;
+    }
+    jmi->user_terminate = 1;
+
+    return 0; 
 }
 
 int compare_option_names(const void* a, const void* b) {

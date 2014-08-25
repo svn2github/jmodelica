@@ -200,39 +200,32 @@ fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 /* Providing independent variables and re-initialization of caching */
 
 fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
-    fmi1_me_t* self = (fmi1_me_t*)c;
-    jmi_t* jmi = &self->jmi;
-    jmi_real_t* time_old = (jmi_get_t(jmi));
+    fmiInteger retval;
+
     if (c == NULL) {
 		return fmiFatal;
     }
-    
-    if (*time_old != time) {
-        *time_old = time;
-        jmi->recomputeVariables = 1;
+
+    retval = jmi_set_time(&((fmi1_me_t*)c)->jmi, time);
+    if (retval != 0) {
+        return fmiError;
     }
-    /* *(jmi_get_t(jmi)) = time; 
-    jmi->recomputeVariables = 1; */
+    
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
-    fmi1_me_t* self = (fmi1_me_t*)c;
-    jmi_t* jmi = &self->jmi;
-    jmi_real_t* x_cur = jmi_get_real_x(jmi);
-    size_t i;
+    fmiInteger retval;
+
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    for (i = 0; i < nx; i++){
-        if (x_cur[i] != x[i]){
-            x_cur[i] = x[i];
-            jmi->recomputeVariables = 1;
-        }
+    retval = jmi_set_continuous_states(&((fmi1_me_t*)c)->jmi, x, nx);
+    if (retval != 0) {
+        return fmiError;
     }
-    /* memcpy (jmi_get_real_x(jmi), x, nx*sizeof(fmiReal));
-    jmi->recomputeVariables = 1; */
+
     return fmiOK;
 }
 
@@ -277,9 +270,9 @@ fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
 }
 
 fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
-     fmi1_me_t* self = (fmi1_me_t*)c;
+    fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
-   fmiInteger retval;
+    fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -360,6 +353,8 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         jmi_log_comment(jmi->log, logError, "Event iteration failed during the initialization.");
         return fmiError;
     }
+
+    jmi->recomputeVariables = 0;
 
     /* For debugging Jacobians */
 /*
@@ -1072,7 +1067,11 @@ fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference v
 
 fmiStatus fmi1_me_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
-    jmi_terminate(&((fmi1_me_t *)c)->jmi);
+    int retval = jmi_update_and_terminate(&((fmi1_me_t *)c)->jmi);
+    if (retval != 0) {
+        return fmiError;
+    }
+
     return fmiOK;
 }
 

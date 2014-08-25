@@ -1109,7 +1109,8 @@ struct jmi_t {
 
 
     jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
-    jmi_int_t terminate;                 /**< \brief Flag to trigger termination of the simulation. */
+    jmi_int_t model_terminate;           /**< \brief Flag to trigger termination of the simulation. */
+    jmi_int_t user_terminate;            /**< \brief Flag that the user has terminated the model. */
 
     jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
     

@@ -47,7 +47,7 @@ jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den,
 }
 
 void jmi_flag_termination(jmi_t *jmi, const char* msg) {
-	jmi->terminate = 1;
+	jmi->model_terminate = 1;
 	/* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
 	jmi_log_node(jmi->log, logWarning, "SimulationTerminated", "<msg:%s>", msg);
 }

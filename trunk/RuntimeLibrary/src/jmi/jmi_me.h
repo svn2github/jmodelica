@@ -108,6 +108,12 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results, jmi_event_
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event);
 
+int jmi_set_time(jmi_t* jmi, jmi_real_t time);
+
+int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx);
+
+int jmi_update_and_terminate(jmi_t* jmi);
+
 /**
  * Update run-time options specified by the user.
  */

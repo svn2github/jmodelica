@@ -605,6 +605,9 @@ class Test_FMUModelME1:
         dep.set(["b1","b2"],[True,True])
         assert dep.get("b1")
         assert dep.get("b2")
+        
+        dep.terminate()
+        nose.tools.assert_raises(FMUException, dep.set, "b1", False)
 
     @testattr(stddist = True)
     def test_real(self):
@@ -645,6 +648,9 @@ class Test_FMUModelME1:
 
         dep.set("N1", 4.0)
         assert dep.get("N1")==4
+        
+        dep.terminate()
+        nose.tools.assert_raises(FMUException, dep.set, "N1", 4.0)
 
     @testattr(stddist = True)
     def test_string(self):
@@ -671,6 +677,9 @@ class Test_FMUModelME1:
         assert bounce.time == 1.0
 
         nose.tools.assert_raises(TypeError, bounce._set_time, N.array([1.0,1.0]))
+        
+        bounce.terminate()
+        nose.tools.assert_raises(FMUException, bounce._set_time, N.array([1.0]))
 
 
     @testattr(stddist = True)
@@ -690,6 +699,9 @@ class Test_FMUModelME1:
 
         nose.tools.assert_almost_equal(bounce.continuous_states[0],temp[0])
         nose.tools.assert_almost_equal(bounce.continuous_states[1],temp[1])
+        
+        bounce.terminate()
+        nose.tools.assert_raises(FMUException, bounce._set_continuous_states, temp)
 
 
     @testattr(stddist = True)
@@ -987,7 +999,7 @@ class Test_Logger:
 
         d = gather_solves(parse_jmi_log('LoggerTest_log.txt'))
 
-        assert len(d)==7, "Unexpected number of solver invocations"
+        assert len(d)==6, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
 
     @testattr(stddist = True)
