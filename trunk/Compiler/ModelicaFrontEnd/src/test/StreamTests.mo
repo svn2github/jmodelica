@@ -128,9 +128,9 @@ parameter equation
  r1.fluidPort.h_outflow = r1.h0;
  r2.fluidPort.p = r2.p0;
  r2.fluidPort.h_outflow = r2.h0;
- res.port_a.p = (- r1.fluidPort.p) / -1.0;
+ res.port_a.p = r1.fluidPort.p;
  res.port_b.h_outflow = r1.fluidPort.h_outflow;
- res.port_b.p = (- r2.fluidPort.p) / -1.0;
+ res.port_b.p = r2.fluidPort.p;
  res.port_a.h_outflow = r2.fluidPort.h_outflow;
  res.port_a.m_flow = res.port_a.p + (- res.port_b.p);
  res.port_b.m_flow = - res.port_a.m_flow;

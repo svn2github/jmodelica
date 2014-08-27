@@ -4062,31 +4062,30 @@ aspect CircularExpressions {
 }
 
 aspect AritmeticTransformations {
-	
-	/**
-	 * Create a negated copy of this expression.
-	 */
-	public FExp FExp.createNegated() {
-		return new FNegExp(fullCopy());
-	}
-	
-	public FExp FNegExp.createNegated() {
-		return getFExp().fullCopy();
-	}
-	
-	/**
-	 * Return this expression negated.
-	 * 
-	 * Does not copy expression.
-	 */
-	public FExp FExp.makeNegated() {
-		return new FNegExp(this);
-	}
-	
-	public FExp FNegExp.makeNegated() {
-		return getFExp();
-	}
-	
+
+    /**
+     * Create a negated copy of this expression.
+     */
+    syn FExp FExp.createNegated()   = new FNegExp(fullCopy());
+    eq FNegExp.createNegated()     = getFExp().fullCopy();
+    eq FIntegerLitExp.createNegated() = new FIntegerLitExp(- getValue());
+    eq FRealLitExp.createNegated()    = new FRealLitExp(- getValue());
+
+    /**
+     * Return this expression negated.
+     * 
+     * Does not copy expression.
+     */
+    syn FExp FExp.makeNegated()     = new FNegExp(this);
+    eq FNegExp.makeNegated()        = getFExp();
+    eq FIntegerLitExp.makeNegated() {
+        setValue(- getValue());
+        return this;
+    }
+    eq FRealLitExp.makeNegated() {
+        setValue(- getValue());
+        return this;
+    }
 }
 
 aspect ExternalCEval {

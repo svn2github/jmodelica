@@ -4415,9 +4415,9 @@ model ArrayPow8
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
 Semantic error at line 4385, column 16:
-  Type error in expression: {{1, 2}, {3, 4}} ^ (- 1)
+  Type error in expression: {{1, 2}, {3, 4}} ^ -1
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
-    type of '(- 1)' is Integer
+    type of '-1' is Integer
 ")})));
 end ArrayPow8;
 

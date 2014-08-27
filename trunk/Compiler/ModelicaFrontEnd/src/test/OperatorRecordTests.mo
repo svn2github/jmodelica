@@ -3244,9 +3244,9 @@ end OperatorRecordTests.BuildArrayInInst1;
             description="Check that a short class decl of an operator record uses name of base class for functions",
             flatModel="
 fclass OperatorRecordTests.OperatorInherit1
- OperatorRecordTests.OperatorInherit1.A a1(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(1, 2);
- OperatorRecordTests.OperatorInherit1.A a2(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
- OperatorRecordTests.OperatorInherit1.A a3(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'+'(a1, a2);
+ OperatorRecordTests.OperatorInherit1.A a1(re(min = -1),im(min = -1)) = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorInherit1.A a2(re(min = -1),im(min = -1)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.OperatorInherit1.A a3(re(min = -1),im(min = -1)) = OperatorRecordTests.Cplx.'+'(a1, a2);
 
 public
  function OperatorRecordTests.Cplx.'constructor'
@@ -3269,8 +3269,8 @@ public
  end OperatorRecordTests.Cplx.'+';
 
  record OperatorRecordTests.OperatorInherit1.A
-  Real re(min = - 1);
-  Real im(min = - 1);
+  Real re(min = -1);
+  Real im(min = -1);
  end OperatorRecordTests.OperatorInherit1.A;
 
  record OperatorRecordTests.Cplx
@@ -3296,9 +3296,9 @@ end OperatorRecordTests.OperatorInherit1;
             description="Check that a short class decl of an operator record uses name of base class for functions",
             flatModel="
 fclass OperatorRecordTests.OperatorInherit2
- OperatorRecordTests.OperatorInherit2.A a1(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(1, 2);
- OperatorRecordTests.OperatorInherit2.A a2(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
- OperatorRecordTests.OperatorInherit2.A a3(re(min = - 1),im(min = - 1)) = OperatorRecordTests.Cplx.'+'(a1, a2);
+ OperatorRecordTests.OperatorInherit2.A a1(re(min = -1),im(min = -1)) = OperatorRecordTests.Cplx.'constructor'(1, 2);
+ OperatorRecordTests.OperatorInherit2.A a2(re(min = -1),im(min = -1)) = OperatorRecordTests.Cplx.'constructor'(3, 4);
+ OperatorRecordTests.OperatorInherit2.A a3(re(min = -1),im(min = -1)) = OperatorRecordTests.Cplx.'+'(a1, a2);
 
 public
  function OperatorRecordTests.Cplx.'constructor'
@@ -3321,8 +3321,8 @@ public
  end OperatorRecordTests.Cplx.'+';
 
  record OperatorRecordTests.OperatorInherit2.A
-  Real re(min = - 1,max = 10);
-  Real im(min = - 1,max = 10);
+  Real re(min = -1,max = 10);
+  Real im(min = -1,max = 10);
  end OperatorRecordTests.OperatorInherit2.A;
 
  record OperatorRecordTests.Cplx

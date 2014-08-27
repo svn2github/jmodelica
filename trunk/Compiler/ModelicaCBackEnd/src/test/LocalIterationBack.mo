@@ -82,7 +82,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _c_2 = x[0];
         }
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
-        _a_0 = jmi_divide_equation(jmi, (- _c_2 + _b_1),(- 1.0),\"(- c + b) / (- 1.0)\");
+        _a_0 = - (- _c_2 + _b_1);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _c_2 * _a_0 - (20);
         }
@@ -155,7 +155,6 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
     jmi_real_t** res = &residual;
     int ef = 0;
     jmi_real_t** dF = &dRes;
@@ -180,9 +179,8 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     d_1 = - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
     v_0 = (v_1 + _b_1);
     d_0 = d_1 + (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    v_2 = (- 1.0);
-    _a_0 = jmi_divide_equation(jmi, v_0,v_2,\"(- c + b) / (- 1.0)\");
-    (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (d_0 * v_2 - v_0 * AD_WRAP_LITERAL(0)) / (v_2 * v_2);
+    _a_0 = - v_0;
+    (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = - (d_0);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         (*res)[0] = _c_2 * _a_0 - (20);
         (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _a_0 + _c_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));

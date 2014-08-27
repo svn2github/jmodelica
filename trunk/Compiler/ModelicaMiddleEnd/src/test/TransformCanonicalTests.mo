@@ -4722,10 +4722,10 @@ z := x + (- y)
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (- 1.0)
+y := - (x + 3)
 
 --- Solved equation ---
-z := (x + (- y)) / (- 1.0)
+z := - (x + (- y))
 -------------------------------
 ")})));
   end SolveEqTest2;
@@ -4884,7 +4884,7 @@ z := (x + (- y)) / (- 1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (- 1.0 - (- 1.0) + (- 1.0))
+der(x) := (- x) / (-1.0 - -1.0 + -1.0)
 -------------------------------
 ")})));
 end SolveEqTest8;
@@ -5329,10 +5329,10 @@ w[1] := time
                       temp_5
 
 --- Solved equation ---
-z[1] := temp_4 / (- 1.0)
+z[1] := - temp_4
 
 --- Solved equation ---
-z[2] := temp_5 / (- 1.0)
+z[2] := - temp_5
 -------------------------------
 ")})));
 end BlockTest10;
@@ -6125,14 +6125,14 @@ Iteration variables:
   a1
 
 Torn equations:
-  a2 := (- a1) / (- 3.14)
+  a2 := (- a1) / -3.14
 
 Residual equations:
   c = b * a1 - a2 * d
     Iteration variables: a1
 
 Jacobian:
-  |(- 3.14), 1.0|
+  |-3.14, 1.0|
   |d, - b|
 -------------------------------
 ")})));
