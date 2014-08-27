@@ -34,7 +34,7 @@
 	</equation>
 
 	<constraint>
-		<greaterThan>
+		<greaterThan kind="pathConstraint">
 			<local name="x1"/>
 			<real value="1.0"/>
 		</greaterThan>

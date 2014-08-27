@@ -20,10 +20,10 @@
 			<real value="1.0"/>
 		</bindingExpression>
 	</component>
-	<operator name="at">
+	<timedVariable>
 		<local name="x1"/>
 		<local name="finalTime"/>
-	</operator>
+	</timedVariable>
 
 	<equation>
 		<equal>

@@ -20,32 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 #include <vector>
-
-// include casadi
-#include "symbolic/casadi.hpp"
-
 #include "OptimizationProblem.hpp"
-#include "Model.hpp"
-// XML parser include
-#include "tinyxml2.h"
 
 namespace ModelicaCasADi {
 
-void transferXmlOptimization(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, 
+void transferXMLOptimization(Ref<OptimizationProblem> m, 
 	std::string modelName, const std::vector<std::string> &modelFiles);
-
-void transferObjective(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, tinyxml2::XMLElement* elem);
-void transferObjectiveIntegrand(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, tinyxml2::XMLElement* elem);
-
-void transferStartTime(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, tinyxml2::XMLElement* elem);
-void transferFinalTime(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, tinyxml2::XMLElement* elem);
-
-void transferConstraints(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, tinyxml2::XMLElement* elem);
-void transferTimedVariable(ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> m, tinyxml2::XMLElement* elem);
-
-ModelicaCasADi::Constraint::Type getConstraintType(std::string name);
-CasADi::MX timedVarToMx(Ref<OptimizationProblem> optProblem, tinyxml2::XMLElement* timedVar);
-std::string timedVarArgsToString(tinyxml2::XMLElement* timedVarArg);
 };
 
 #endif

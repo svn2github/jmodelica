@@ -34,10 +34,10 @@
 	</equation>
 
 	<constraint>
-<greaterThan kind="pathConstraint">
-		<local name="x1"/>
-		<real value="1.0"/>
-</greaterThan>
+		<greaterThan kind="pathConstraint">
+			<local name="x1"/>
+			<real value="1.0"/>
+		</greaterThan>
 	</constraint>
 	<finalTime>
 		<integer value="10"/>

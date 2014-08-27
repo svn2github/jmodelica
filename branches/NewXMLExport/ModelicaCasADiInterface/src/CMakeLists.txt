@@ -82,6 +82,7 @@ set(MC_HPP
   tinyxml2.h
   transferModelica.hpp
   transferOptimica.hpp
+  transferXML_impl.hpp
   transferXML.hpp
   transferXMLOptimization.cpp
   Variable.hpp

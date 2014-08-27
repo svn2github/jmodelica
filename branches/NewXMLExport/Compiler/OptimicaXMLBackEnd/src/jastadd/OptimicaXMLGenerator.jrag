@@ -1,3 +1,18 @@
+/*
+Copyright (C) 2014 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /**
  * Aspect for generating XML from flat Optimica model
@@ -7,7 +22,7 @@ aspect OptimicaXMLCodeGenerator {
 	public void FOptClass.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
 		String indentTwoSteps = p.indent(indentOneStep);
-		generateOpenTag(str, "optimization", indent);
+		openTagXML(str, "optimization", indent);
 		for (FFunctionDecl function : getFFunctionDeclList()) {
 			p.print(function, str, indentOneStep);
 			str.print("\n");
@@ -38,10 +53,10 @@ aspect OptimicaXMLCodeGenerator {
 		for (FTimedVariable timedVar : timedRealVariables()) {
 			//timedVar.generateDecl(p, str, indentOneStep);
 			//p.print(timedVar, str, indentOneStep);
-			generateOpenTag(str, "timedVariable", indentOneStep);
+			openTagXML(str, "timedVariable", indentOneStep);
 			p.print(timedVar.getName(), str, indentTwoSteps);
 			p.print(timedVar.getArg(), str, indentTwoSteps);
-			generateCloseTag(str, "timedVariable", indentOneStep);
+			closeTagXML(str, "timedVariable", indentOneStep);
 		}
 		
 		// add a newline between sections for clearer XML
@@ -49,29 +64,29 @@ aspect OptimicaXMLCodeGenerator {
 		
 		// generate xml for initial equations
 		if (getNumFInitialEquation() > 0) {
-			generateOpenTag(str, "equation", indentOneStep, "kind", "initial");
+			openTagXML(str, "equation", indentOneStep, "kind", "initial");
 			for (FAbstractEquation initEqu : getFInitialEquations()) {
 				p.print(initEqu, str, indentTwoSteps);
 			}
-			generateCloseTag(str, "equation", indentOneStep);
+			closeTagXML(str, "equation", indentOneStep);
 			// add a newline between sections for clearer XML
 			str.print("\n");
 		}
 		
 		// generate xml for parameter equations
 		if (getNumFParameterEquation() > 0) {
-			generateOpenTag(str, "equation", indentOneStep, "kind", "parameter");
+			openTagXML(str, "equation", indentOneStep, "kind", "parameter");
 			for (FAbstractEquation paramEqu : getFParameterEquations()) {
 				p.print(paramEqu, str, indentTwoSteps);
 			}
-			generateCloseTag(str, "equation", indentOneStep);
+			closeTagXML(str, "equation", indentOneStep);
 			str.print("\n");
 		}
 		
 		// generate xml for equations
 		if (hasFAbstractEquation()) {
 			ArrayList<FAbstractEquation> algorithms = new ArrayList<FAbstractEquation>();
-			generateOpenTag(str, "equation", indentOneStep);
+			openTagXML(str, "equation", indentOneStep);
 			for (FAbstractEquation equ : getFAbstractEquations()) {
 				if (equ instanceof FAlgorithm) {
 					algorithms.add(equ);
@@ -79,7 +94,7 @@ aspect OptimicaXMLCodeGenerator {
 					p.print(equ, str, indentTwoSteps);
 				}
 			}
-			generateCloseTag(str, "equation", indentOneStep);
+			closeTagXML(str, "equation", indentOneStep);
 			
 			// add a newline between sections for clearer XML
 			str.print("\n");
@@ -91,64 +106,64 @@ aspect OptimicaXMLCodeGenerator {
 		
 		// transfer constraints
 		if (getNumFConstraint() > 0) {
-			generateOpenTag(str, "constraint", indentOneStep);
+			openTagXML(str, "constraint", indentOneStep);
 			for (FConstraint c : pathLeqConstraints()) {
-				generateOpenTag(str, "lessThan", indentTwoSteps, "kind", "pathConstraint");
+				openTagXML(str, "lessThan", indentTwoSteps, "kind", "pathConstraint");
 				p.print(c, str, indentTwoSteps);
-				generateCloseTag(str, "lessThan", indentTwoSteps);
+				closeTagXML(str, "lessThan", indentTwoSteps);
 			}
 			for (FConstraint c : pathEqConstraints()) {
-				generateOpenTag(str, "equal", indentTwoSteps, "kind", "pathConstraint");
+				openTagXML(str, "equal", indentTwoSteps, "kind", "pathConstraint");
 				p.print(c, str, indentTwoSteps);
-				generateCloseTag(str, "equal", indentTwoSteps);
+				closeTagXML(str, "equal", indentTwoSteps);
 			}
 			for (FConstraint c : pathGeqConstraints()) {
-				generateOpenTag(str, "greaterThan", indentTwoSteps, "kind", "pathConstraint");
+				openTagXML(str, "greaterThan", indentTwoSteps, "kind", "pathConstraint");
 				p.print(c, str, indentTwoSteps);
-				generateCloseTag(str, "greaterThan", indentTwoSteps);
+				closeTagXML(str, "greaterThan", indentTwoSteps);
 			}
 			for (FConstraint c : pointLeqConstraints()) {
-				generateOpenTag(str, "lessThan", indentTwoSteps, "kind", "pointConstraint");
+				openTagXML(str, "lessThan", indentTwoSteps, "kind", "pointConstraint");
 				p.print(c, str, indentTwoSteps);
-				generateCloseTag(str, "lessThan", indentTwoSteps);
+				closeTagXML(str, "lessThan", indentTwoSteps);
 			}
 			for (FConstraint c : pointEqConstraints()) {
-				generateOpenTag(str, "equal", indentTwoSteps, "kind", "pointConstraint");
+				openTagXML(str, "equal", indentTwoSteps, "kind", "pointConstraint");
 				p.print(c, str, indentTwoSteps);
-				generateCloseTag(str, "equal", indentTwoSteps);
+				closeTagXML(str, "equal", indentTwoSteps);
 			}
 			for (FConstraint c : pointGeqConstraints()) {
-				generateOpenTag(str, "greaterThan", indentTwoSteps, "kind", "pointConstraint");
+				openTagXML(str, "greaterThan", indentTwoSteps, "kind", "pointConstraint");
 				p.print(c, str, indentTwoSteps);
-				generateCloseTag(str, "greaterThan", indentTwoSteps);
+				closeTagXML(str, "greaterThan", indentTwoSteps);
 			}
-			generateCloseTag(str, "constraint", indentOneStep);
+			closeTagXML(str, "constraint", indentOneStep);
 		}
 		
 		if (startTimeAttributeSet()) {
-			generateOpenTag(str, "startTime", indentOneStep);
+			openTagXML(str, "startTime", indentOneStep);
 			p.print(startTimeAttributeExp(), str, indentTwoSteps);
-			generateCloseTag(str, "startTime", indentOneStep);
+			closeTagXML(str, "startTime", indentOneStep);
 		}
 		
 		if (finalTimeAttributeSet()) {
-			generateOpenTag(str, "finalTime", indentOneStep);
+			openTagXML(str, "finalTime", indentOneStep);
 			p.print(finalTimeAttributeExp(), str, indentTwoSteps);
-			generateCloseTag(str, "finalTime", indentOneStep);
+			closeTagXML(str, "finalTime", indentOneStep);
 		}
 		
 		if (objectiveExp() != null) {
-			generateOpenTag(str, "objective", indentOneStep);
+			openTagXML(str, "objective", indentOneStep);
 			p.print(objectiveExp(), str, indentTwoSteps);
-			generateCloseTag(str, "objective", indentOneStep);
+			closeTagXML(str, "objective", indentOneStep);
 		}
 		
 		if (objectiveIntegrandExp() != null) {
-			generateOpenTag(str, "objectiveIntegrand", indentOneStep);
+			openTagXML(str, "objectiveIntegrand", indentOneStep);
 			p.print(objectiveIntegrandExp(), str, indentTwoSteps);
-			generateCloseTag(str, "objectiveIntegrand", indentOneStep);
+			closeTagXML(str, "objectiveIntegrand", indentOneStep);
 		}
-		generateCloseTag(str, "optimization", indent);
+		closeTagXML(str, "optimization", indent);
 	}
 	
 	syn String FRelationConstraint.getName();
@@ -157,10 +172,10 @@ aspect OptimicaXMLCodeGenerator {
 	eq FConstraintGeq.getName() = "greaterThan";
 	
 	public void FRelationConstraint.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		//generateOpenTag(str, getName(), indent);
+		//openTagXML(str, getName(), indent);
 		p.print(getLeft(), str, p.indent(indent));
 		p.print(getRight(), str, p.indent(indent));
-		//generateCloseTag(str, getName(), indent);
+		//closeTagXML(str, getName(), indent);
 	}
 	
 	public void FForClauseC.prettyPrintXML(Printer p, CodeStream str, String indent) {
@@ -169,10 +184,10 @@ aspect OptimicaXMLCodeGenerator {
 	
 	public void FTimedVariable.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
-		generateOpenTag(str, "operator", indent, "name", "at");
+		openTagXML(str, "operator", indent, "name", "at");
 		p.print(getName(), str, indentOneStep);
 		p.print(getArg(), str, indentOneStep);
-		generateCloseTag(str, "operator", indent);
+		closeTagXML(str, "operator", indent);
 	}
 	
 	public void FTimed.prettyPrintXML(Printer p, CodeStream str, String indent) {

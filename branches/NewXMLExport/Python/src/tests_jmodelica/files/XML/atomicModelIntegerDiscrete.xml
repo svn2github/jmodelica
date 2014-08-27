@@ -22,7 +22,7 @@
 			<if>
 				<cond>
 					<call builtin="&gt;">
-						<operator name="time"/>
+						<builtin name="time"/>
 						<integer value="1"/>
 					</call>
 				</cond>
@@ -35,4 +35,5 @@
 			</if>
 		</equal>
 	</equation>
+
 </class>
