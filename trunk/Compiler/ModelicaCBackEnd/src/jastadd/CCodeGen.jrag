@@ -3105,11 +3105,11 @@ aspect CCodeGen {
         str.format("%sdgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);\n", indent);
     }
     
-	public void AbstractEquationBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver) {
+	public void AbstractEquationBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
 		if (getLabel() == null)
 			return;
 		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
-			subBlock.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver);
+			subBlock.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver, getSequenceNumber());
 		
 		str.print(indent);
 		str.print("jmi_dae_" + (inInit ? "init_" : "") + "add_equation_block(");
@@ -3125,7 +3125,8 @@ aspect CCodeGen {
 		p.C_blockResidualAttributePrinter.printVariability(p, str, indent, this.localUnsolvedVariables());
 		str.print(genJMISolverConstant_C(nleSolver) + ", ");
 		str.print(getSequenceNumber() + ", \"");
-		str.print(getLabel() + "\");\n");
+		str.print(getLabel() + "\", ");
+		str.print(parentBlockNumber + ");\n");
 	}
 	
 	syn String FTypePrefixVariability.genJMIVariabilityConstant_C();

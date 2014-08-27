@@ -447,7 +447,7 @@ public class CGenerator extends GenericGenerator {
                 CodePrinter p = ASTNode.printer_C;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false, false, fclass.root().options.getStringOption("nonlinear_solver"));
+                    block.genBlockAddCall_C(p, genPrinter, indent, false, false, fclass.root().options.getStringOption("nonlinear_solver"), -1);
             }
         }
 	}
@@ -510,7 +510,7 @@ public class CGenerator extends GenericGenerator {
                 CodePrinter p = ASTNode.printer_C;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false, true, fclass.root().options.getStringOption("nonlinear_solver"));
+                    block.genBlockAddCall_C(p, genPrinter, indent, false, true, fclass.root().options.getStringOption("nonlinear_solver"), -1);
             }
         }
     }

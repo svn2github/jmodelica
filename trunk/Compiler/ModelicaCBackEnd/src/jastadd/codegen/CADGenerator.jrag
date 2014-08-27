@@ -185,7 +185,7 @@ public class CADGenerator extends CGenerator {
                 CodePrinter p = ASTNode.printer_CAD;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, true, false, fclass.root().options.getStringOption("nonlinear_solver"));
+                    block.genBlockAddCall_C(p, genPrinter, indent, true, false, fclass.root().options.getStringOption("nonlinear_solver"), -1);
             }
         }
 	    }
@@ -204,7 +204,7 @@ public class CADGenerator extends CGenerator {
                 CodePrinter p = ASTNode.printer_CAD;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, true, true, fclass.root().options.getStringOption("nonlinear_solver"));
+                    block.genBlockAddCall_C(p, genPrinter, indent, true, true, fclass.root().options.getStringOption("nonlinear_solver"), -1);
             }
         }
     }
