@@ -68,9 +68,7 @@ aspect Types {
        if (superType.isArray()) {
            List<InstComponentDecl> superComponents = superType.getInstComponentDecls();
            List<InstComponentDecl> subComponents = subType.getInstComponentDecls();
-           if (superComponents.getNumChild() != subComponents.getNumChild())
-               return false;
-           for (int i = 0, n = superComponents.getNumChild(); i < n; i++)
+           for (int i = 0, n = Math.min(superComponents.getNumChild(), subComponents.getNumChild()); i < n; i++)
                if (!subComponents.getChild(i).subType(superComponents.getChild(i)))
                    return false;
        } else {

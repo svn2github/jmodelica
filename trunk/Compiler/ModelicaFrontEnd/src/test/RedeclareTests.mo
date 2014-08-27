@@ -3244,7 +3244,7 @@ model RedeclareTest40
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RedeclareTest40",
-            description="Check that only final redeclared are erro checked",
+            description="Check that only final redeclared are error checked",
             flatModel="
 fclass RedeclareTests.RedeclareTest40
  Real c.b.a.x = RedeclareTests.RedeclareTest40.f2(time);
@@ -3294,6 +3294,39 @@ fclass RedeclareTests.RedeclareTest41
 end RedeclareTests.RedeclareTest41;
 ")})));
 end RedeclareTest41;
+
+
+model RedeclareTest42
+    model A
+        parameter Integer n = 2;
+        D d[n](x = {1,2,3});
+    end A;
+    
+    model B = A(n = 3);
+    
+    model C
+        replaceable A a constrainedby A;
+    end C;
+    
+    model D
+        Real x;
+    end D;
+    
+    C c(redeclare B a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest42",
+            description="Redeclare that changes size of array of models",
+            flatModel="
+fclass RedeclareTests.RedeclareTest42
+ parameter Integer c.a.n = 3 /* 3 */;
+ Real c.a.d[1].x = 1;
+ Real c.a.d[2].x = 2;
+ Real c.a.d[3].x = 3;
+end RedeclareTests.RedeclareTest42;
+")})));
+end RedeclareTest42;
 
 
 model RedeclareElement1
