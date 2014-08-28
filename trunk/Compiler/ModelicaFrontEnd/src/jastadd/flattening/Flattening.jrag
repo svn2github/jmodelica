@@ -755,13 +755,20 @@ aspect Flattening {
 		getInstExtendsList().flatten(fc, excludeBinding);
         contribute(fc);
 	}
-	
-	/**
-	 * Check if this component should be considered during flattening.
-	 */
-	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner()) && !isDuplicate();
-	eq InstArrayComponentDecl.useInFlattening()     = getIndex() > 0 && super.useInFlattening();
-	
+
+    /**
+     * Check if this component is present in the model (i.e. not a disabled conditional 
+     * and not a non-selected duplicate).
+     */
+    syn boolean InstComponentDecl.isPresent()    = !isDisabled() && !isDuplicate();
+    eq InstArrayComponentDecl.isPresent()        = getIndex() > 0 && super.isPresent();
+    eq InstExpandableConnectorMember.isPresent() = getCopyOf().isPresent();
+
+    /**
+     * Check if this component should be considered during flattening.
+     */
+    syn boolean InstComponentDecl.useInFlattening()    = isPresent() && !(isOuter() && !isInner());
+
 	public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		if (useInFlattening()) 
 			super.flatten(fc, name, excludeBinding);

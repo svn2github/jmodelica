@@ -861,73 +861,78 @@ aspect Connections {
      */
     public void InstComponentDecl.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-        if (buildGraph && isOverconstrainedConnection(right.getVar())) {
-            csm.getGraph().addConnection(left, right, prefix, source);
-        } else if (isArray()) {
-            for (Index i : indices()) {
-                ConnectionSetEntry leftEntry = left.specifyCell(i);
-                ConnectionSetEntry rightEntry = right.specifyCell(i);
-                leftEntry.getVar().connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+        if (isPresent() && right.getVar().isPresent()) {
+            if (buildGraph && isOverconstrainedConnection(right.getVar())) {
+                csm.getGraph().addConnection(left, right, prefix, source);
+            } else if (isArray()) {
+                for (Index i : indices()) {
+                    ConnectionSetEntry leftEntry = left.specifyCell(i);
+                    ConnectionSetEntry rightEntry = right.specifyCell(i);
+                    leftEntry.getVar().connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+                }
+            } else if (isOperatorRecord()) {
+                connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
+            } else {
+                SortedSet<InstComponentDecl> rightChildren = right.getVar().containedInstComponents();
+                for (InstComponentDecl leftComp : containedInstComponents()) {
+                    InstComponentDecl rightComp = rightChildren.tailSet(leftComp).first();
+                    FQName leftName  = leftComp.flattenedAccess(left.getFQName());
+                    FQName rightName = rightComp.flattenedAccess(right.getFQName());
+                    ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, left.isOutside(), leftName);
+                    ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, right.isOutside(), rightName);
+                    leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+                }
             }
-        } else if (isOperatorRecord()) {
-            connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
-        } else {
-            SortedSet<InstComponentDecl> rightChildren = right.getVar().containedInstComponents();
-            for (InstComponentDecl leftComp : containedInstComponents()) {
-                InstComponentDecl rightComp = rightChildren.tailSet(leftComp).first();
-                FQName leftName  = leftComp.flattenedAccess(left.getFQName());
-                FQName rightName = rightComp.flattenedAccess(right.getFQName());
-                ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, left.isOutside(), leftName);
-                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, right.isOutside(), rightName);
-                leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
-            }
+            csm.countCardinality(left.name());
+            csm.countCardinality(right.name());
         }
-        csm.countCardinality(left.name());
-        csm.countCardinality(right.name());
     }
 
     public void InstPrimitive.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-        connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
+        if (isPresent() && right.getVar().isPresent())
+            connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
     }
 
-	public void InstComponentDecl.connectToAsPrimitive(ConnectionSetEntry left, ConnectionSetEntry right, 
-			FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-	    if (left.equals(right)) {
-	        source.warning("Ignored connection from connector to itself");
-	    } else {
-	        if (buildGraph && isOverconstrainedConnection(right.getVar())) {
-	            csm.getGraph().addConnection(left, right, prefix, source);
-	        } else {
-	            // In the special case of members of expandable connectors, we need each cell separately.
-	            if (isArray() && (isExpandableConnectorMember() || right.getVar().isExpandableConnectorMember()) && 
-	                    !left.getFQName().hasScalarSubscripts()) 
-	                for (Index i : indices())
-	                    csm.addVars(left.specifyCell(i), right.specifyCell(i));
-	            else
-	                csm.addVars(left, right);
-	        }
-	        csm.countCardinality(left.name());
-	        csm.countCardinality(right.name());
-	    }
-	}
-	
-	syn boolean FQName.hasScalarSubscripts() {
-	    FArraySubscripts fas = getFArraySubscripts();
-	    if (fas == null)
-	        return false;
-	    for (FSubscript s : fas.getFSubscripts())
-	        if (s.ndims() > 0)
-	            return false;
-	    return true;
-	}
+    public void InstComponentDecl.connectToAsPrimitive(ConnectionSetEntry left, ConnectionSetEntry right, 
+            FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
+        if (left.equals(right)) {
+            source.warning("Ignored connection from connector to itself");
+        } else {
+            if (buildGraph && isOverconstrainedConnection(right.getVar())) {
+                csm.getGraph().addConnection(left, right, prefix, source);
+            } else {
+                // In the special case of members of expandable connectors, we need each cell separately.
+                if (isArray() && (isExpandableConnectorMember() || right.getVar().isExpandableConnectorMember()) && 
+                        !left.getFQName().hasScalarSubscripts()) 
+                    for (Index i : indices())
+                        csm.addVars(left.specifyCell(i), right.specifyCell(i));
+                else
+                    csm.addVars(left, right);
+            }
+            csm.countCardinality(left.name());
+            csm.countCardinality(right.name());
+        }
+    }
+
+    syn boolean FQName.hasScalarSubscripts() {
+        FArraySubscripts fas = getFArraySubscripts();
+        if (fas == null)
+            return false;
+        for (FSubscript s : fas.getFSubscripts())
+            if (s.ndims() > 0)
+                return false;
+        return true;
+    }
 
     public void InstExpandableConnectorMember.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-        if (getCopyOf().isPrimitive())
-            connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
-        else
+        if (getCopyOf().isPrimitive()) {
+            if (isPresent() && right.getVar().isPresent())
+                connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
+        } else {
             super.connectTo(left, right, prefix, csm, source, buildGraph);
+        }
     }
 	
 	syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =

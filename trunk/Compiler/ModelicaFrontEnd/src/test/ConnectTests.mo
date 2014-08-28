@@ -2668,4 +2668,64 @@ end ConnectTests.ConditionalConnectInIf1;
 ")})));
 end ConditionalConnectInIf1;
 
+
+model ConditionalCompInConnector1
+    connector C
+        parameter Boolean b = false;
+        Real x if b;
+        Real y;
+    end C;
+    
+    C c1, c2;
+equation
+    connect(c1, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConditionalCompInConnector1",
+            description="Check that inactive conditional components in connnectors are handled properly",
+            flatModel="
+fclass ConnectTests.ConditionalCompInConnector1
+ parameter Boolean c1.b = false /* false */;
+ Real c1.y;
+ parameter Boolean c2.b = false /* false */;
+ Real c2.y;
+equation
+ c1.y = c2.y;
+end ConnectTests.ConditionalCompInConnector1;
+")})));
+end ConditionalCompInConnector1;
+
+
+model ConditionalCompInConnector2
+    connector C
+        parameter Boolean b = true;
+        Real x if b;
+        Real y;
+    end C;
+    
+    C c1, c2;
+equation
+    connect(c1, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConditionalCompInConnector2",
+            description="Check that active conditional components in connnectors are handled properly",
+            flatModel="
+fclass ConnectTests.ConditionalCompInConnector2
+ parameter Boolean c1.b = true /* true */;
+ Real c1.x;
+ Real c1.y;
+ parameter Boolean c2.b = true /* true */;
+ Real c2.x;
+ Real c2.y;
+equation
+ c1.x = c2.x;
+ c1.y = c2.y;
+end ConnectTests.ConditionalCompInConnector2;
+")})));
+end ConditionalCompInConnector2;
+
+
 end ConnectTests;

@@ -623,7 +623,7 @@ aspect InstanceErrorCheck {
                     getFArraySubscripts().collectErrors(checkType);
                 if (hasConditionalAttribute()) 
                     getConditionalAttribute().collectErrors(checkType);
-                if (isActive() && hasInstModification())
+                if (!isDisabled() && hasInstModification())
                     getInstModification().collectErrors(checkType);
                 for (InstModification im : getMergedEnvironment())
                     im.checkModificationNames(checkType);
@@ -655,16 +655,7 @@ aspect InstanceErrorCheck {
 	
 	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
 	        !isDisabled() || checkType.checkInactiveComponents() || root().options.getBooleanOption("check_inactive_contitionals");
-	
-	// TODO: move to better place (InstanceTree.jrag?)
-	syn boolean InstComponentDecl.isActive() {
-		try {
-			return !hasConditionalAttribute() || getConditionalAttribute().ceval().booleanValue();
-		} catch (ConstantEvaluationException e) {
-			return false;
-		}
-	}
-	
+
 	public void InstComponentDecl.collectErrorsInClassName(ErrorCheckType checkType) {
 		getClassName().collectErrors(checkType);
 	}	
@@ -895,7 +886,7 @@ aspect InstanceErrorCheck {
     }
 
     public void InstComponentDecl.checkRedeclares(ErrorCheckType checkType) {
-        if (isActive() && hasInstModification())
+        if (!isDisabled() && hasInstModification())
             getInstModification().collectErrors(checkType);
         if (shouldCheckInto(checkType)) {
             if (hasInstConstraining())
