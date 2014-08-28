@@ -75,7 +75,8 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     if(ret) {
         jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %s>", 
                      ret, block->label);
-        return ret;
+        /* Always treat this as a recoverable error */
+        return 1;
     }
 
     /* Test if output is OK (no -1.#IND) */
