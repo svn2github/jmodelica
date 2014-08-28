@@ -1429,7 +1429,7 @@ public class ModelicaCompiler {
 			// Eat any output
 			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();
 			new StreamGobbler(proc.getInputStream(), log.infoStream()).start();
-								   
+			
 			// Wait for process to finish and return result
 			return proc.waitFor();
 			

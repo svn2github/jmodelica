@@ -496,7 +496,7 @@ aspect FlatTypeCheck {
   syn boolean FIdUse.isAccessToStream()  = false;
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
-  syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().getComponentDecl().isStream();
+  syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
   
   
   

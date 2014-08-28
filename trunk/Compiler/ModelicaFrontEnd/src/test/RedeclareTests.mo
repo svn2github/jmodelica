@@ -5225,4 +5225,349 @@ end RedeclareTests.RedeclarePrimitive1;
 end RedeclarePrimitive1;
 
 
+model RedeclarePrefix1
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix1",
+            description="Check that inner/outer is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix1
+ Real a.x = 1;
+end RedeclareTests.RedeclarePrefix1;
+")})));
+end RedeclarePrefix1;
+
+
+model RedeclarePrefix2
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    model C
+        extends A;
+        redeclare outer Real x=1;
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclarePrefix2",
+            description="Check that inner/outer can be changed in a redeclare",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 5253, column 11:
+  Cannot find inner declaration for outer x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 5258, column 11:
+  Cannot find inner declaration for outer x
+")})));
+end RedeclarePrefix2;
+
+
+model RedeclarePrefix3
+    model A
+        replaceable discrete Real x = 2;
+    end A;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix3",
+            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix3
+ discrete Real a.x = 1;
+end RedeclareTests.RedeclarePrefix3;
+")})));
+end RedeclarePrefix3;
+
+
+model RedeclarePrefix4
+    model A
+        replaceable parameter Real x = 2;
+    end A;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix4",
+            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix4
+ parameter Real a.x = 1 /* 1 */;
+end RedeclareTests.RedeclarePrefix4;
+")})));
+end RedeclarePrefix4;
+
+
+model RedeclarePrefix5
+    model A
+        replaceable constant Real x = 2;
+    end A;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix5",
+            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix5
+ constant Real a.x = 1;
+end RedeclareTests.RedeclarePrefix5;
+")})));
+end RedeclarePrefix5;
+
+
+model RedeclarePrefix6
+    model A
+        replaceable discrete Real x = 2;
+    end A;
+    
+    A a(redeclare constant Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix6",
+            description="Check that variability prefix can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix6
+ constant Real a.x = 1;
+end RedeclareTests.RedeclarePrefix6;
+")})));
+end RedeclarePrefix6;
+
+
+model RedeclarePrefix7
+    model A
+        replaceable parameter Real x = 2;
+    end A;
+    
+    A a(redeclare discrete Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix7",
+            description="Check that variability prefix can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix7
+ discrete Real a.x = 1;
+end RedeclareTests.RedeclarePrefix7;
+")})));
+end RedeclarePrefix7;
+
+
+model RedeclarePrefix8
+    model A
+        replaceable constant Real x = 2;
+    end A;
+    
+    A a(redeclare parameter Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix8",
+            description="Check that variability prefix can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix8
+ parameter Real a.x = 1 /* 1 */;
+end RedeclareTests.RedeclarePrefix8;
+")})));
+end RedeclarePrefix8;
+
+
+model RedeclarePrefix9
+    connector C
+        replaceable flow Real x;
+    end C;
+    
+    C c(redeclare Real x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix9",
+            description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix9
+ Real c.x;
+equation
+ c.x = 0;
+end RedeclareTests.RedeclarePrefix9;
+")})));
+end RedeclarePrefix9;
+
+
+model RedeclarePrefix10
+    connector C
+        replaceable stream Real x;
+    end C;
+    
+    C c(redeclare flow Real x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix10",
+            description="Check that flow/stream can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix10
+ Real c.x;
+equation
+ c.x = 0;
+end RedeclareTests.RedeclarePrefix10;
+")})));
+end RedeclarePrefix10;
+
+
+model RedeclarePrefix11
+    model A
+        replaceable input Real x;
+    end A;
+    
+    extends A(redeclare Real x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix11",
+            description="Check that input/output is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix11
+ input Real x;
+end RedeclareTests.RedeclarePrefix11;
+")})));
+end RedeclarePrefix11;
+
+
+model RedeclarePrefix12
+    model A
+        replaceable input Real x;
+    end A;
+    
+    extends A(redeclare output Real x = 1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix12",
+            description="Check that input/output can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix12
+ output Real x = 1;
+end RedeclareTests.RedeclarePrefix12;
+")})));
+end RedeclarePrefix12;
+
+
+model RedeclarePrefix13
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    model C = A(replaceable Real x);
+    
+    C c(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix13",
+            description="Check that inner/outer is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix13
+ Real c.x = 1;
+end RedeclareTests.RedeclarePrefix13;
+")})));
+end RedeclarePrefix13;
+
+
+model RedeclarePrefix14
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    model C = A(replaceable Real x);
+    
+    model D
+        extends C;
+        redeclare outer Real x=1;
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclarePrefix14",
+            description="Check that inner/outer can be changed in a redeclare",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 5402, column 11:
+  Cannot find inner declaration for outer x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 5407, column 11:
+  Cannot find inner declaration for outer x
+")})));
+end RedeclarePrefix14;
+
+
+model RedeclarePrefix15
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    model C
+        extends A;
+        redeclare outer Real x=1;
+    end C;
+    
+    C c(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclarePrefix15",
+            description="Check that inner/outer can be changed in the middle level of a multi-level redeclare",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 5437, column 11:
+  Cannot find inner declaration for outer x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 5442, column 11:
+  Cannot find inner declaration for outer x
+")})));
+end RedeclarePrefix15;
+
+
 end RedeclareTests;

@@ -960,8 +960,7 @@ aspect Flattening {
     public FVariable InstAssignable.createFVariable(FQName name, boolean excludeBinding) {
         FVariable fv = createEmptyFVariable();
         
-        fv.setFVisibilityType(getComponentDecl().isPublic() ? 
-                new FPublicVisibilityType() : new FProtectedVisibilityType());
+        fv.setFVisibilityType(isPublic() ? new FPublicVisibilityType() : new FProtectedVisibilityType());
         
         fv.setFTypePrefixVariability(variability().fullCopy());
         

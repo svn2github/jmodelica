@@ -968,18 +968,25 @@ aspect DebugHelpers {
 
 
 aspect Visibility {
-    
-    syn boolean BaseClassDecl.isPublic() = getVisibilityType().isPublic();
-    syn boolean ComponentDecl.isPublic() = getVisibilityType().isPublic();
 
-    syn boolean BaseClassDecl.isProtected() = getVisibilityType().isProtected();
-    syn boolean ComponentDecl.isProtected() = getVisibilityType().isProtected();
+    syn boolean ClassDecl.isPublic()         = true;
+    eq BaseClassDecl.isPublic()              = getVisibilityType().isPublic();
+    syn boolean ComponentDecl.isPublic()     = getVisibilityType().isPublic();
+    syn boolean InstClassDecl.isPublic()     = getClassDecl().isPublic();
+    syn boolean InstComponentDecl.isPublic() = getComponentDecl().isPublic();
+
+    syn boolean ClassDecl.isProtected()         = false;
+    eq BaseClassDecl.isProtected()              = getVisibilityType().isProtected();
+    syn boolean ComponentDecl.isProtected()     = getVisibilityType().isProtected();
+    syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
+    syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
 
     syn boolean VisibilityType.isPublic() = false;
     eq PublicVisibilityType.isPublic()    = true;
 
     syn boolean VisibilityType.isProtected() = false;
     eq ProtectedVisibilityType.isProtected() = true;
+
 
     syn boolean FVisibilityType.isPublic() = false;
     eq FPublicVisibilityType.isPublic()    = true;
@@ -998,42 +1005,59 @@ aspect Visibility {
 
 
 aspect ComponentDeclMethods {
-	
+
     /**
      * Check if a ComponentDecl is declared flow.
      */
-	syn boolean ComponentDecl.isFlow()  = hasTypePrefixFlow() && getTypePrefixFlow().isFlow();
-	syn boolean TypePrefixFlow.isFlow() = false;
-	eq Flow.isFlow()                    = true;
-	
+    syn boolean ComponentDecl.isFlow()  = hasTypePrefixFlow() && getTypePrefixFlow().isFlow();
+    syn boolean TypePrefixFlow.isFlow() = false;
+    eq Flow.isFlow()                    = true;
+
     /**
      * Check if a ComponentDecl is declared stream.
      */
-	syn boolean ComponentDecl.isStream()  = hasTypePrefixFlow() && getTypePrefixFlow().isStream();
-	syn boolean TypePrefixFlow.isStream() = false;
-	eq Stream.isStream()                  = true;
-      
+    syn boolean ComponentDecl.isStream()  = hasTypePrefixFlow() && getTypePrefixFlow().isStream();
+    syn boolean TypePrefixFlow.isStream() = false;
+    eq Stream.isStream()                  = true;
+
+    /**
+     * Check if a ComponentDecl is declared flow or stream.
+     */
+    syn boolean ComponentDecl.hasFlowOrStream() = hasTypePrefixFlow();
+
     /**
      * Check if a ComponentDecl is declared inner.
      */
     syn boolean ComponentDecl.isInner() = hasInner();
-    
+
     /**
      * Check if a ComponentDecl is declared outer.
      */
     syn boolean ComponentDecl.isOuter() = hasOuter();
 
     /**
+     * Check if a ComponentDecl is declared inner or outer.
+     */
+    syn boolean ComponentDecl.hasInnerOrOuter() = hasInner() || hasOuter();
+
+    /**
      * Check if a ClassDecl is declared inner.
      */
     syn boolean ClassDecl.isInner() = false;
     eq BaseClassDecl.isInner() = hasInner();
-    
+
     /**
      * Check if a ClassDecl is declared outer.
      */
     syn boolean ClassDecl.isOuter() = false;
     eq BaseClassDecl.isOuter() = hasOuter();
+
+    /**
+     * Check if a ClassDecl is declared inner or outer.
+     */
+    syn boolean ClassDecl.hasInnerOrOuter() = false;
+    eq BaseClassDecl.hasInnerOrOuter()      = hasInner() || hasOuter();
+    
 
     /**
      * Check if this component is declared parameter.
@@ -1062,12 +1086,23 @@ aspect ComponentDeclMethods {
         InstComponentDecl source = inheritsInputOutputFrom();
         return source != null && source.isDeclaredInput();
     }
-    
+
+    /**
+     * Check if this component or its class is declared input.
+     */
+    syn boolean InstComponentDecl.isDeclaredInput() = isComponentDeclaredInput() || myInstClass().isInput();
+
     /**
      * Check if this component is declared input.
      */
-    syn boolean InstComponentDecl.isDeclaredInput() = getComponentDecl().isInput() || myInstClass().isInput();
-    
+    syn boolean InstComponentDecl.isComponentDeclaredInput() = getComponentDecl().isInput();
+    eq InstReplacingComposite.isComponentDeclaredInput()     = 
+        getComponentDecl().hasTypePrefixInputOutput() ? getComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
+    eq InstReplacingRecord.isComponentDeclaredInput()        = 
+        getComponentDecl().hasTypePrefixInputOutput() ? getComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
+    eq InstReplacingPrimitive.isComponentDeclaredInput()     = 
+        getComponentDecl().hasTypePrefixInputOutput() ? getComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
+
     /**
      * Check if this component is declared input.
      */
@@ -1174,32 +1209,68 @@ aspect ComponentDeclMethods {
      * Check if this component is declared flow.
      */
     syn boolean InstComponentDecl.isDeclaredFlow() = getComponentDecl().isFlow();
+    eq InstReplacingComposite.isDeclaredFlow()     = 
+        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isFlow() : getOriginalDecl().isFlow();
+    eq InstReplacingRecord.isDeclaredFlow()        = 
+        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isFlow() : getOriginalDecl().isFlow();
+    eq InstReplacingPrimitive.isDeclaredFlow()     = 
+        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isFlow() : getOriginalDecl().isFlow();
 
     /**
      * Check if this component is declared stream.
      */
     syn boolean InstComponentDecl.isStream() = getComponentDecl().isStream();
+    eq InstReplacingComposite.isStream()     = 
+        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isStream() : getOriginalDecl().isStream();
+    eq InstReplacingRecord.isStream()        = 
+        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isStream() : getOriginalDecl().isStream();
+    eq InstReplacingPrimitive.isStream()     = 
+        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isStream() : getOriginalDecl().isStream();
 
     /**
      * Check if this component is declared inner.
      */
     syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
+    eq InstReplacingComposite.isInner()     = 
+        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
+    eq InstReplacingRecord.isInner()        = 
+        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
+    eq InstReplacingPrimitive.isInner()     = 
+        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
 
     /**
      * Check if this component is declared outer.
      */
     syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
-    
+    eq InstReplacingComposite.isOuter()     = 
+        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
+    eq InstReplacingRecord.isOuter()        = 
+        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
+    eq InstReplacingPrimitive.isOuter()     = 
+        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
+
     /**
      * Check if this class is declared inner.
      */
-    syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
+    syn boolean InstClassDecl.isInner()            = getClassDecl().isInner();
+    eq InstReplacingFullClassDecl.isInner()        = 
+        getClassDecl().hasInnerOrOuter() ? getClassDecl().isInner() : getOriginalClassDecl().isInner();
+    eq InstReplacingShortClassDecl.isInner()       = 
+        getClassDecl().hasInnerOrOuter() ? getClassDecl().isInner() : getOriginalClassDecl().isInner();
+    eq InstReplacingSimpleShortClassDecl.isInner() = 
+        getClassDecl().hasInnerOrOuter() ? getClassDecl().isInner() : getOriginalClassDecl().isInner();
 
     /**
      * Check if this component is declared outer.
      */
     syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
-    
+    eq InstReplacingFullClassDecl.isOuter()        = 
+        getClassDecl().hasInnerOrOuter() ? getClassDecl().isOuter() : getOriginalClassDecl().isOuter();
+    eq InstReplacingShortClassDecl.isOuter()       = 
+        getClassDecl().hasInnerOrOuter() ? getClassDecl().isOuter() : getOriginalClassDecl().isOuter();
+    eq InstReplacingSimpleShortClassDecl.isOuter() = 
+        getClassDecl().hasInnerOrOuter() ? getClassDecl().isOuter() : getOriginalClassDecl().isOuter();
+
     /**
      * Check if this component is disabled by a conditional clause
      */
@@ -1296,36 +1367,39 @@ aspect ShortClassUtil {
 
 
     syn boolean ClassDecl.isInput() = false;
-    eq ShortClassDecl.isInput() {
-        if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
-            if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Input)
-                return true;
-        return false;
-    }
-    
+    eq ShortClassDecl.isInput()     = 
+        hasInputOrOutput() && getExtendsClauseShortClass().getTypePrefixInputOutput().isInput();
+
     syn boolean ClassDecl.isOutput() = false;
-    eq ShortClassDecl.isOutput() {
-        if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
-            if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Output)
-                return true;
-        return false;
-    }
+    eq ShortClassDecl.isOutput()     = 
+        hasInputOrOutput() && getExtendsClauseShortClass().getTypePrefixInputOutput().isOutput();
 
-    syn boolean InstClassDecl.isInput()   = false;
-    eq InstShortClassDecl.isInput()       = 
-    	getClassDecl().isInput() || getInstExtends(0).myInstClass().isInput();
-    eq InstSimpleShortClassDecl.isInput() = actualInstClass().isInput();
+    syn boolean ClassDecl.hasInputOrOutput() = false;
+    eq ShortClassDecl.hasInputOrOutput()     = getExtendsClauseShortClass().hasTypePrefixInputOutput();
 
-    syn boolean InstClassDecl.isOutput()   = false;
-    eq InstShortClassDecl.isOutput()       =
+    syn boolean InstClassDecl.isInput()            = false;
+    eq InstShortClassDecl.isInput()                = 
+        getClassDecl().isInput() || getInstExtends(0).myInstClass().isInput();
+    eq InstSimpleShortClassDecl.isInput()          = actualInstClass().isInput();
+    eq InstReplacingShortClassDecl.isInput()       = 
+        (super.isInput() || super.isOutput()) ? super.isInput() : getOriginalInstClass().isInput();
+    eq InstReplacingSimpleShortClassDecl.isInput() = 
+        (super.isInput() || super.isOutput()) ? super.isInput() : getOriginalInstClass().isInput();
+
+    syn boolean InstClassDecl.isOutput()            = false;
+    eq InstShortClassDecl.isOutput()                =
         getClassDecl().isOutput() || getInstExtends(0).myInstClass().isOutput();
-    eq InstSimpleShortClassDecl.isOutput() = actualInstClass().isOutput();
-    
+    eq InstSimpleShortClassDecl.isOutput()          = actualInstClass().isOutput();
+    eq InstReplacingShortClassDecl.isOutput()       = 
+        (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
+    eq InstReplacingSimpleShortClassDecl.isOutput() = 
+        (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
+
     syn boolean BaseComponentDecl.isEnumLiteral() = false;
     eq EnumLiteralDecl.isEnumLiteral() = true;
     syn boolean InstComponentDecl.isEnumLiteral() = false;
     eq InstEnumLiteral.isEnumLiteral() = true;
-    
+
 }
 
 

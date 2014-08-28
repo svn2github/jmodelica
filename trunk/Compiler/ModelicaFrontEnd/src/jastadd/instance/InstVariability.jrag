@@ -20,13 +20,18 @@ import java.util.HashSet;
 import java.util.Collections;
 
 aspect InstVariability {
-    
-    syn lazy TypePrefixVariability InstComponentDecl.definedVariability() {
+
+    syn lazy TypePrefixVariability InstComponentDecl.definedVariability() = overrideVariability(localDefinedVariability());
+
+    syn lazy TypePrefixVariability InstComponentDecl.localDefinedVariability() {
         ComponentDecl cd = getComponentDecl();
-        TypePrefixVariability var = cd.hasTypePrefixVariability() ? 
-                cd.getTypePrefixVariability() : continuous();
-        return overrideVariability(var);
+        return cd.hasTypePrefixVariability() ? cd.getTypePrefixVariability() : noDefinedVariability();
     }
+
+    syn TypePrefixVariability InstComponentDecl.noDefinedVariability() = continuous();
+    eq InstReplacingComposite.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
+    eq InstReplacingRecord.noDefinedVariability()    = getOriginalInstComponent().localDefinedVariability();
+    eq InstReplacingPrimitive.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
 
     inh TypePrefixVariability InstNode.overrideVariability(TypePrefixVariability var);
     eq InstBaseNode.getChild().overrideVariability(TypePrefixVariability var)  = var;
