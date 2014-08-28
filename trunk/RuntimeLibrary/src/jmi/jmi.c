@@ -457,6 +457,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives);
 
     if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+        jmi_log_reals(jmi->log, node, logInfo, "Derivatives", jmi_get_real_dx(jmi), jmi->n_real_x);
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
     }
