@@ -641,7 +641,6 @@ fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
     }
     
     ((fmi2_me_t *)c) -> fmu_mode = continuousTimeMode;
-    ((fmi2_me_t *)c)->jmi.recomputeVariables = 0;
     return fmi2OK;
 }
 

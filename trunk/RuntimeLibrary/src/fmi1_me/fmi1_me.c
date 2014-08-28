@@ -354,8 +354,6 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         return fmiError;
     }
 
-    jmi->recomputeVariables = 0;
-
     /* For debugging Jacobians */
 /*
     n_states = ((fmi1_me_t *)c)->jmi->n_real_x;

@@ -919,6 +919,18 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
+
+        /* Final evaluation of the model with event flag set to false. It can
+         * for example change values of booleans that should only be true during
+         * events due to a sample function.
+        */
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Final evaluation of the model equations during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
+        jmi->recomputeVariables = 0; /* The variables are computed. End of event iteration. */
         
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
