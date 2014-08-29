@@ -150,6 +150,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     cb->free_memory = functions.freeMemory;
     cb->model_name = jmi_get_model_identifier();       /**< \brief Name of the model (corresponds to a fixed compiled unit name) */
     cb->model_data = component;
+    cb->instance_name = instanceName;  /* set instance name to use under instantiation (to avoid initial malloc)*/
     
     resource_location = jmi_locate_resources(functions.allocateMemory);
     if (!resource_location)
@@ -162,11 +163,12 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
         return NULL;
     }
 
+    /* fmiString must be copied in and saved */ 
     inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi1_me_t *)functions.allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
     component -> fmi_instance_name = tmpname;
-    cb->instance_name = tmpname;  /** < \brief Name of this model instance. */
+    cb->instance_name = tmpname;  /** reset the pointer to use after instantiate. */
 
     return component;
 }
