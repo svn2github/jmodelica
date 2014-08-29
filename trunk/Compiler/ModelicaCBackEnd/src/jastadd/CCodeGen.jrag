@@ -3039,8 +3039,8 @@ aspect CCodeGen {
         FExp[][] jacobian = jacobian();
         int n1 = localSolvedRealBlocks().size();
         int n2 = unsolvedBlocks().size();
-        str.format("%sjmi_real_t Q1[%d] = {0};\n", indent, n1 * n2);
-        str.format("%sjmi_real_t Q2[%d] = {0};\n", indent, n2 * n1);
+        str.format("%sjmi_real_t* Q1 = calloc(%d, sizeof(jmi_real_t));\n", indent, n1 * n2);
+        str.format("%sjmi_real_t* Q2 = calloc(%d, sizeof(jmi_real_t));\n", indent, n2 * n1);
         str.format("%sjmi_real_t* Q3 = residual;\n", indent);
         str.format("%sint i;\n", indent);
         str.format("%schar trans = 'N';\n", indent);
@@ -3103,6 +3103,9 @@ aspect CCodeGen {
         
         // Compute block jacobian into Q3
         str.format("%sdgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);\n", indent);
+        
+        str.format("%sfree(Q1);\n", indent);
+        str.format("%sfree(Q2);\n", indent);
     }
     
 	public void AbstractEquationBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {

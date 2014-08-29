@@ -12503,8 +12503,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = _i2_6;
         x[1] = _i3_7;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-        jmi_real_t Q1[6] = {0};
-        jmi_real_t Q2[6] = {0};
+        jmi_real_t* Q1 = calloc(6, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(6, sizeof(jmi_real_t));
         jmi_real_t* Q3 = residual;
         int i;
         char trans = 'N';
@@ -12525,6 +12525,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         Q3[1] = (- _R2_10);
         Q3[2] = (- _R3_11);
         dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _i2_6 = x[0];
@@ -12611,8 +12613,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _sa_7;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-        jmi_real_t Q1[3] = {0};
-        jmi_real_t Q2[3] = {0};
+        jmi_real_t* Q1 = calloc(3, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(3, sizeof(jmi_real_t));
         jmi_real_t* Q3 = residual;
         int i;
         char trans = 'N';
@@ -12631,6 +12633,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         Q2[2] = 1.0;
         memset(Q3, 0, 1 * sizeof(jmi_real_t));
         dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _sa_7 = x[0];
@@ -12678,8 +12682,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _sa_7;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-        jmi_real_t Q1[3] = {0};
-        jmi_real_t Q2[3] = {0};
+        jmi_real_t* Q1 = calloc(3, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(3, sizeof(jmi_real_t));
         jmi_real_t* Q3 = residual;
         int i;
         char trans = 'N';
@@ -12698,6 +12702,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         Q2[2] = 1.0;
         memset(Q3, 0, 1 * sizeof(jmi_real_t));
         dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _sa_7 = x[0];
@@ -14730,8 +14736,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _a_0;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-        jmi_real_t Q1[2] = {0};
-        jmi_real_t Q2[2] = {0};
+        jmi_real_t* Q1 = calloc(2, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(2, sizeof(jmi_real_t));
         jmi_real_t* Q3 = residual;
         int i;
         char trans = 'N';
@@ -14750,6 +14756,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         memset(Q3, 0, 1 * sizeof(jmi_real_t));
         Q3[0] = 1.0;
         dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _a_0 = x[0];
@@ -14827,8 +14835,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _p_1;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-        jmi_real_t Q1[1] = {0};
-        jmi_real_t Q2[1] = {0};
+        jmi_real_t* Q1 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(1, sizeof(jmi_real_t));
         jmi_real_t* Q3 = residual;
         int i;
         char trans = 'N';
@@ -14847,6 +14855,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         memset(Q3, 0, 1 * sizeof(jmi_real_t));
         Q3[0] = 1.0;
         dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _p_1 = x[0];
