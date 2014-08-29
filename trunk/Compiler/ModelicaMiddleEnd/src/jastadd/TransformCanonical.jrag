@@ -538,6 +538,7 @@ aspect TransformCanonical {
 				error(e.getMessage());
 				return;
 			}
+			daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
 			for (AbstractEquationBlock eb : daeBLT) {
 				for (FVariable fv : eb.allVariables()) {
 					daeFVariableEquationBlockMap.put(fv,eb);
@@ -545,7 +546,7 @@ aspect TransformCanonical {
 			}
 			for (FAbstractEquation e : equations())
 				if (e.numScalarEquations() == 0)
-					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER));
+					daeBLT.add(EquationBlockFactory.createMetaBlock(e));
 			daeStructuredBLT = new StructuredBLT(this, daeBLT);
 			daeStructuredBLT.errorCheck();
 			log.info(daeStructuredBLT);
@@ -653,6 +654,7 @@ aspect TransformCanonical {
 				error(e.getMessage());
 				return;
 			}
+			daeInitFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
 			for (AbstractEquationBlock eb : daeInitBLT) {
 				for (FVariable fv : eb.allVariables()) {
 					daeInitFVariableEquationBlockMap.put(fv,eb);
@@ -662,10 +664,10 @@ aspect TransformCanonical {
                 if (e.numScalarEquations() == 0) {
                     if (e.replacedAtInitialization()) {
                         for (FAbstractEquation fae : e.getInitialEquations()) {
-                            daeInitBLT.add(fae.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER));
+                            daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
                         }
                     } else {
-                        daeInitBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER));
+                        daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
                     }
                 }
             }
@@ -674,7 +676,8 @@ aspect TransformCanonical {
 		} else {
 		    daeInitBLT = BLT.EMPTY_BLT;
 		}
-	}	
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
 	
 	public void FClass.checkStructure() {

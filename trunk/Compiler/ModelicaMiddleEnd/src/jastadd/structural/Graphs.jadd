@@ -650,15 +650,15 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
 
-    public Collection<Collection<E>> tarjan() {
+    public Collection<SCCBlock<E, V>> tarjan() {
         return tarjan(null);
     }
     
 
-    public Collection<Collection<E>> tarjan(OptionRegistry options) {
+    public Collection<SCCBlock<E, V>> tarjan(OptionRegistry options) {
         Enumerator indexer = new Enumerator();
         Stack<E> stack = new Stack<E>();
-        Collection<Collection<E>> components = new ArrayList<Collection<E>>();
+        Collection<SCCBlock<E, V>> components = new ArrayList<SCCBlock<E, V>>();
         tarjanReset();
 
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
@@ -689,16 +689,17 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             }
         }
 
+        Map<E, Collection<E>> eqToVisitMap = new HashMap<E, Collection<E>>();
+
         for (E e : getEquations()) {
             if (!e.isVisited() && e.tarjanVisit())
-                tarjan(indexer, stack, components, contributors, keepTogetherMap, e);
+                tarjan(indexer, stack, components, contributors, keepTogetherMap, eqToVisitMap, e);
         }
 
         return components;
     }
 
-    public void tarjan(Enumerator indexer, Stack<E> stack, Collection<Collection<E>> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap,  E e) {
-        stack.add(e);
+    public void tarjan(Enumerator indexer, Stack<E> stack, Collection<SCCBlock<E, V>> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
         int index = indexer.next();
         e.setTarjanNbr(index);
         e.setTarjanLowLink(index);
@@ -719,20 +720,23 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             for (E ee : contributor.members(e, this))
                 if (e != ee && ee.tarjanVisit())
                     eqToVisit.add(ee);
+        stack.add(e);
+        eqToVisitMap.put(e, eqToVisit);
         for (E ee : eqToVisit) {
             if (!ee.isVisited()) {
-                tarjan(indexer, stack, components, contributors, keepTogetherMap, ee);
+                tarjan(indexer, stack, components, contributors, keepTogetherMap, eqToVisitMap, ee);
                 e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanLowLink()));
             } else if (stack.contains(ee)) { //TODO: should not be stack.contains, it's slow...
                 e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
             }
         }
         if (e.getTarjanNbr() == e.getTarjanLowLink()) {
-            Collection<E> component = new ArrayList<E>();
+            SCCBlock<E, V> component = new SCCBlock<E, V>();
             E ee;
             do {
                 ee = stack.pop();
-                component.add(ee);
+                component.addMember(ee);
+                component.addPredecessors(eqToVisitMap.remove(ee));
             } while (ee != e);
             components.add(component);
         }
@@ -870,6 +874,52 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return "(" + equation + "," + variable + ")";
         }
 
+    }
+}
+
+/**
+ * This class represent a component result from Tarjan's strongly connected
+ * components algorithm.
+ * It is basically a list of equations that depends on eachother and a list of
+ * equations that they depend upon.
+ */
+public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> implements Iterable<E> {
+    private Collection<E> members = new LinkedHashSet<E>();
+    private Collection<E> predecessors = null;
+
+    
+    public SCCBlock() {}
+    
+    public void addPredecessors(Collection<E> newPredecessors) {
+        if (predecessors == null)
+            predecessors = new LinkedHashSet<E>();
+        for (E eqn : newPredecessors)
+            if (!members.contains(eqn))
+                predecessors.add(eqn);
+    }
+
+    public void addMember(E member) {
+        // Ensure that the member isn't in the list of predecessors
+        if (predecessors != null)
+            predecessors.remove(member);
+        members.add(member);
+    }
+    
+    public Collection<E> getMembers() {
+        return members;
+    }
+    
+    @Override
+    public Iterator<E> iterator() {
+        return members.iterator();
+    }
+    
+    public boolean hasPredecessorInfo() {
+        return predecessors != null;
+    }
+    
+    public Collection<E> getPredecessors() {
+        return predecessors;
     }
 }
 
