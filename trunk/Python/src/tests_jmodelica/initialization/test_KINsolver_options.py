@@ -160,7 +160,7 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(len(solves), 3)
+        nose.tools.assert_equals(len(solves), 4)
         
         self.setUp()
         self.model.set('_log_level',6)
@@ -168,7 +168,7 @@ class TestInitOptions:
         extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
-        nose.tools.assert_equals(len(solves), 3)
+        nose.tools.assert_equals(len(solves), 4)
     
     @testattr(stddist = True)
     def test_debbug_solution(self):

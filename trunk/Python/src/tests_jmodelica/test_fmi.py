@@ -999,7 +999,7 @@ class Test_Logger:
 
         d = gather_solves(parse_jmi_log('LoggerTest_log.txt'))
 
-        assert len(d)==6, "Unexpected number of solver invocations"
+        assert len(d)==7, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
 
     @testattr(stddist = True)
