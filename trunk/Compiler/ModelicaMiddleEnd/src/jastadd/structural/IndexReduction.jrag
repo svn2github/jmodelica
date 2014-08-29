@@ -809,21 +809,21 @@ aspect IndexReduction {
             
             public static IndexReductionCost UNMATCHED_WEIGHT = new IndexReductionCost();
             
-            private static final int NUM_WEIGHTS = 8;
-            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 0;
-            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 1;
-            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 2;
-            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 3;
-            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 4;
-            private static final int FIXED_WEIGHT_POSITION               = 5;
-            private static final int ORDER_WEIGHT_POSITION               = 6;
-            private static final int LINEARITY_WEIGHT_POSITION           = 7;
+            private static final int NUM_WEIGHTS = 9;
+            public static final int UNMATCHED  = 0;
+            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 1;
+            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 2;
+            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 3;
+            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 4;
+            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 5;
+            private static final int FIXED_WEIGHT_POSITION               = 6;
+            private static final int ORDER_WEIGHT_POSITION               = 7;
+            private static final int LINEARITY_WEIGHT_POSITION           = 8;
             
-            private boolean unmatched = false;
             private int[] weights = new int[NUM_WEIGHTS];
             
             private IndexReductionCost() {
-                unmatched = true;
+                weights[UNMATCHED] = 1;
             }
             
             public IndexReductionCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
@@ -835,11 +835,8 @@ aspect IndexReduction {
             
             @Override
             public int compareTo(IndexReductionCost other) {
-                int diff = new Boolean(unmatched).compareTo(other.unmatched);
-                if (diff != 0)
-                    return diff;
                 for (int i = 0; i < weights.length; i++) {
-                    diff = new Integer(weights[i]).compareTo(other.weights[i]);
+                    int diff = new Integer(weights[i]).compareTo(other.weights[i]);
                     if (diff != 0)
                         return diff;
                 }
@@ -848,22 +845,18 @@ aspect IndexReduction {
             
             @Override
             public void subtract(IndexReductionCost other) {
-                unmatched |= other.unmatched;
                 for (int i = 0; i < weights.length; i++)
                     weights[i] -= other.weights[i];
             }
             
             @Override
             public void add(IndexReductionCost other) {
-                unmatched |= other.unmatched;
                 for (int i = 0; i < weights.length; i++)
                     weights[i] += other.weights[i];
             }
             
             @Override
             public boolean isZero() {
-                if (unmatched)
-                    return false;
                 for (int i = 0; i < weights.length; i++)
                     if (weights[i] != 0)
                         return false;
@@ -873,7 +866,6 @@ aspect IndexReduction {
             @Override
             public IndexReductionCost copy() {
                 IndexReductionCost copy = new IndexReductionCost();
-                copy.unmatched = unmatched;
                 for (int i = 0; i < weights.length; i++)
                     copy.weights[i] = weights[i];
                 return copy;
@@ -882,8 +874,6 @@ aspect IndexReduction {
             public String toString() {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(");
-                sb.append(unmatched);
-                sb.append(" ");
                 for (int weight : weights) {
                     sb.append(", ");
                     sb.append(weight);
@@ -893,12 +883,12 @@ aspect IndexReduction {
             }
             
             public boolean isUnmatched() {
-                return unmatched;
+                return weights[UNMATCHED] != 0;
             }
             
             public static IndexReductionCost zeroCost() {
                 IndexReductionCost cost = new IndexReductionCost();
-                cost.unmatched = false;
+                cost.weights[UNMATCHED] = 0;
                 return cost;
             }
         }
