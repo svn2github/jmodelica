@@ -4317,4 +4317,71 @@ end IndexReduction.NonDiffArgsTest2;
 ")})));
 end NonDiffArgsTest2;
 
+model FunctionCallEquation1
+    function f
+        input Real x;
+        output Real y[2];
+    algorithm
+        y[1] := x;
+        y[2] := -x;
+    annotation(Inline=false, smoothOrder=1);
+    end f;
+    
+    Real x[2];
+    Real y;
+    Real z;
+equation
+    x = f(time);
+    y = x[1] + x[2];
+    z = der(y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation1",
+            description="Test so that non scalar equations such as FunctionCallEquations are handled correctly",
+            flatModel="
+fclass IndexReduction.FunctionCallEquation1
+ Real x[1];
+ Real x[2];
+ Real y;
+ Real z;
+ Real _der_y;
+ Real _der_x[1];
+ Real _der_x[2];
+equation
+ ({x[1], x[2]}) = IndexReduction.FunctionCallEquation1.f(time);
+ y = x[1] + x[2];
+ z = _der_y;
+ ({_der_x[1], _der_x[2]}) = IndexReduction.FunctionCallEquation1._der_f(time, 1.0);
+ _der_y = _der_x[1] + _der_x[2];
+
+public
+ function IndexReduction.FunctionCallEquation1.f
+  input Real x;
+  output Real[2] y;
+ algorithm
+  y[1] := x;
+  y[2] := - x;
+  return;
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation1._der_f);
+ end IndexReduction.FunctionCallEquation1.f;
+
+ function IndexReduction.FunctionCallEquation1._der_f
+  input Real x;
+  input Real _der_x;
+  output Real[2] _der_y;
+  Real[2] y;
+ algorithm
+  _der_y[1] := _der_x;
+  y[1] := x;
+  _der_y[2] := - _der_x;
+  y[2] := - x;
+  return;
+ annotation(smoothOrder = 0);
+ end IndexReduction.FunctionCallEquation1._der_f;
+
+end IndexReduction.FunctionCallEquation1;
+")})));
+end FunctionCallEquation1;
+
 end IndexReduction;

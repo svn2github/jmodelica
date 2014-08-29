@@ -357,9 +357,12 @@ aspect IndexReduction {
                 throw new IndexReductionException("Maximum number of differentiations reached");
             FAbstractEquation diffedFEqn = null;
             // Look through member equations and check if the differentiated equation already exists
-            for (IndexReductionEq groupMember : eqn.getGroupMembers())
+            for (IndexReductionEq groupMember : eqn.getGroupMembers()) {
                 if (groupMember.getMeDifferentiated() != null)
                     diffedFEqn = groupMember.getMeDifferentiated().getEquation();
+                if (diffedEqnsMap.get(groupMember) != null)
+                    diffedFEqn = diffedEqnsMap.get(groupMember);
+            }
             if (diffedFEqn == null) {
                 // It does not exsit, create it.
                 Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
@@ -527,7 +530,15 @@ aspect IndexReduction {
                     eqn.setMeDifferentiated(diffedEqn);
                     diffedEqn.setMeIntegrated(eqn);
                     
-                    // TODO: We might need to add this equation to its existing groupmembers?
+                    for (IndexReductionEq groupMember : eqn.getGroupMembers()) {
+                        if (groupMember == eqn)
+                            continue;
+                        IndexReductionEq diffedGroupMember = groupMember.getMeDifferentiated();
+                        if (diffedGroupMember != null) {
+                            diffedGroupMember.addGroupMember(diffedEqn);
+                            diffedEqn.addGroupMember(diffedGroupMember);
+                        }
+                    }
                     ASTNode.log.info("Equation added");
                 }
                 for (IndexReductionVar var : visitedVariables) {
@@ -874,9 +885,10 @@ aspect IndexReduction {
             public String toString() {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(");
-                for (int weight : weights) {
-                    sb.append(", ");
-                    sb.append(weight);
+                for (int i = 0; i < weights.length; i++) {
+                    if (i > 0)
+                        sb.append(", ");
+                    sb.append(weights[i]);
                 }
                 sb.append(")");
                 return sb.toString();

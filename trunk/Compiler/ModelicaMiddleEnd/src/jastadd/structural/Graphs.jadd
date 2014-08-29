@@ -921,6 +921,10 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> i
     public Collection<E> getPredecessors() {
         return predecessors;
     }
+    @Override
+    public String toString() {
+        return members.toString();
+    }
 }
 
 public class BiPGraph extends AbstractBiPGraph<Eq, Var> {
