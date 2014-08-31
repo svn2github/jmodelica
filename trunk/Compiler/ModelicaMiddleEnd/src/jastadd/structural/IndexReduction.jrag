@@ -706,8 +706,7 @@ aspect IndexReduction {
                 if (fv.getMeIntegrated() != null)
                     linearity += calculateLinearityWeight(g, fv.getMeIntegrated());
                 boolean fixed = fv.getTopIntegrated().fixedAttribute();
-                FAttribute start = fv.getTopIntegrated().findAttribute(FAttribute.START);
-                IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), start == null ? 0 : 30 - start.getLevel(), linearity);
+                IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), linearity);
                 ASTNode.log.info("Weight: %s %s", var, weight);
                 weights.put(var, weight);
             }
@@ -821,7 +820,7 @@ aspect IndexReduction {
             
             public static IndexReductionCost UNMATCHED_WEIGHT = new IndexReductionCost();
             
-            private static final int NUM_WEIGHTS = 10;
+            private static final int NUM_WEIGHTS = 9;
             public static final int UNMATCHED  = 0;
             public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 1;
             public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 2;
@@ -830,8 +829,7 @@ aspect IndexReduction {
             public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 5;
             private static final int FIXED_WEIGHT_POSITION               = 6;
             private static final int ORDER_WEIGHT_POSITION               = 7;
-            private static final int START_WEIGHT_POSITION               = 8;
-            private static final int LINEARITY_WEIGHT_POSITION           = 9;
+            private static final int LINEARITY_WEIGHT_POSITION           = 8;
             
             private int[] weights = new int[NUM_WEIGHTS];
             
@@ -839,11 +837,10 @@ aspect IndexReduction {
                 weights[UNMATCHED] = 1;
             }
             
-            public IndexReductionCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int startSetLevel, int linearity) {
+            public IndexReductionCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
                 weights[stateSelect.weightPos()] += 1;
                 weights[FIXED_WEIGHT_POSITION] += fixed ? 1 : 0;
                 weights[ORDER_WEIGHT_POSITION] += -order;
-                weights[START_WEIGHT_POSITION] += startSetLevel;
                 weights[LINEARITY_WEIGHT_POSITION] += linearity;
             }
             
