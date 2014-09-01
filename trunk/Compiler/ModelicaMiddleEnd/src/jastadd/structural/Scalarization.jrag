@@ -749,24 +749,26 @@ aspect Scalarization {
             }
         }
     }
-    
-	/**
-	 * Scalarize the value of this attribute, picking out the specific element from an array 
-	 * expression.
-	 * 
-	 * Returns null if attribute has no value.
-	 */
-	public FExp FAttribute.scalarizeValue(Index i, Map<String,FExp> indexMap) {
-		if (!hasValue()) 
-			return null;
-		FExp v = getValue();
-		if (v.isArray() && !v.size().isUnknown()) {
-			i = i.subIndex(i.ndims() - v.ndims());
-			v = v.getArray().get(i);
-		}
-		return v.scalarize(indexMap);
-	}
-	
+
+    /**
+     * Scalarize the value of this attribute, picking out the specific element from an array 
+     * expression.
+     * 
+     * Returns null if attribute has no value.
+     */
+    public FExp FAttribute.scalarizeValue(Index i, Map<String,FExp> indexMap) {
+        if (!hasValue()) 
+            return null;
+        FExp v = getValue();
+        if (inFunction())
+            return v.scalarizeExp(indexMap);
+        if (v.isArray()) {
+            i = i.subIndex(i.ndims() - v.ndims());
+            v = v.getArray().get(i);
+        }
+        return v.scalarize(indexMap);
+    }
+
 	/**
 	 * Scalarize the function variable.
 	 * 

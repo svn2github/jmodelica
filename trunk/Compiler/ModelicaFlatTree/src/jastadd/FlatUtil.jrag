@@ -1536,6 +1536,7 @@ aspect FlatFunctionUtils {
      inh boolean FAbstractEquation.inFunction();
      inh boolean FSubscript.inFunction();
      inh boolean FFunctionCallLeft.inFunction();
+     inh boolean FAttribute.inFunction();
      eq InstBaseClassDecl.getChild().inFunction() = isFunction();
      eq FFunctionDecl.getChild().inFunction()     = true;
      eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();

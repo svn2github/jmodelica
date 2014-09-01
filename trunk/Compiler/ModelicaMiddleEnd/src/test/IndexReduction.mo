@@ -4129,6 +4129,76 @@ end IndexReduction.FunctionAttributeScalarization1;
 ")})));
 end FunctionAttributeScalarization1;
 
+model FunctionAttributeScalarization2
+    function F1
+        input Real x;
+        input Real a[2];
+        output Real y;
+    algorithm
+        y := x + sum(a);
+    annotation(Inline=false,derivative(noDerivative=a)=F1_der);
+    end F1;
+    
+    function F1_der
+        input Real x;
+        input Real a[2];
+        input Real x_der;
+        output Real y_der;
+    algorithm
+        y_der := x_der;
+    annotation(Inline=false);
+    end F1_der;
+    
+    Real x;
+    Real der_y;
+    Real y;
+equation
+    x * y = time;
+    y + 42 = F1(x, {x , -x});
+    der_y = der(y);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionAttributeScalarization2",
+            description="Test so that it is possible to reference function variables with known size in function attributes",
+            flatModel="
+fclass IndexReduction.FunctionAttributeScalarization2
+ Real x;
+ Real der_y;
+ Real y;
+ Real _der_y;
+ Real _der_x;
+equation
+ x * y = time;
+ y + 42 = IndexReduction.FunctionAttributeScalarization2.F1(x, {x, - x});
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.FunctionAttributeScalarization2.F1_der(x, {x, - x}, _der_x);
+
+public
+ function IndexReduction.FunctionAttributeScalarization2.F1
+  input Real x;
+  input Real[2] a;
+  output Real y;
+ algorithm
+  y := x + (a[1] + a[2]);
+  return;
+ annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization2.F1_der);
+ end IndexReduction.FunctionAttributeScalarization2.F1;
+
+ function IndexReduction.FunctionAttributeScalarization2.F1_der
+  input Real x;
+  input Real[2] a;
+  input Real x_der;
+  output Real y_der;
+ algorithm
+  y_der := x_der;
+  return;
+ end IndexReduction.FunctionAttributeScalarization2.F1_der;
+
+end IndexReduction.FunctionAttributeScalarization2;
+")})));
+end FunctionAttributeScalarization2;
+
 model NonDiffArgsTest1
     function F1
         input Real x;
