@@ -1031,7 +1031,7 @@ aspect Flattening {
 	
 	public FExp InstAssignable.flattenBindingFExp() {
         try {
-            if (variability().structuralOrLess()) {
+            if (variability().knownParameterOrLess()) {
                 return ceval().buildLiteral();
             }
         } catch (ConstantEvaluationException e) {
@@ -1240,7 +1240,22 @@ aspect Flattening {
 				return im.getInstValueMod();
 		return null;
 	}
-
+    
+    syn boolean InstAssignable.hasInstValueModTop() = myInstValueModTop() != null;
+    
+    syn InstValueModification InstAssignable.myInstValueModTop() {
+        InstValueModification top = inheritedInstValueModTop();
+        if (top == null)
+            top = myInstValueMod();
+        return top;
+    }
+    
+    inh InstValueModification InstAssignable.inheritedInstValueModTop();
+    inh InstValueModification InstExtends.inheritedInstValueModTop();
+    eq BaseNode.getChild().inheritedInstValueModTop()          = null;
+    eq InstAssignable.getChild().inheritedInstValueModTop()    = myInstValueModTop();
+    eq InstExtends.getChild().inheritedInstValueModTop()       = inheritedInstValueModTop();
+    
     /**
      * Check if this InstValueModification is part of a modification 
      * that is declared "each".
@@ -1641,7 +1656,7 @@ aspect FlatExpressions {
         // have binding expressions, however, array subscripts may need to be 
         // flattened during error checks, when using qualifiedName()
         InstAccess ia = iae.getInstAccess();
-        if (variability().structuralOrLess()) {
+        if (variability().knownParameterOrLess()) {
             try {
                 if (!size().isEmpty()) {
                     // Check if we have non-constant array subscripts

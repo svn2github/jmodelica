@@ -22,10 +22,14 @@ aspect Variability {
 
     syn boolean FTypePrefixVariability.constantVariability() = false;
     eq FConstant.constantVariability() = true;	
-    syn boolean FTypePrefixVariability.evalParameterVariability() = false;
-    eq FEvalParameter.evalParameterVariability() = true;
     syn boolean FTypePrefixVariability.structParameterVariability() = false;
     eq FStructParameter.structParameterVariability() = true;
+    syn boolean FTypePrefixVariability.evalParameterVariability() = false;
+    eq FEvalParameter.evalParameterVariability() = true;
+    syn boolean FTypePrefixVariability.finalParameterVariability() = false;
+    eq FFinalParameter.finalParameterVariability() = true;
+    syn boolean FTypePrefixVariability.knownParameterVariability() = false;
+    eq FKnownParameter.knownParameterVariability() = true;
     syn boolean FTypePrefixVariability.parameterVariability() = false;
     eq FParameter.parameterVariability() = true;	
     syn boolean FTypePrefixVariability.discreteVariability() = false;
@@ -48,7 +52,7 @@ aspect Variability {
             compareTo(other) <= 0;
 	
     syn boolean FTypePrefixVariability.evalOrLess()       = lessOrEqual(fEvalParameter());
-    syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
+    syn boolean FTypePrefixVariability.knownParameterOrLess() = lessOrEqual(fFinalParameter());
     syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
     syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
     syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
@@ -64,14 +68,16 @@ aspect Variability {
      */
     abstract protected int FTypePrefixVariability.variabilityLevel();
     protected int FConstant.variabilityLevel()        { return VARIABILITY_LEVEL; }
-    protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
     protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
+    protected int FFinalParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
     protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
     protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
     protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
     protected static final int FConstant.VARIABILITY_LEVEL        = 0;
-    protected static final int FEvalParameter.VARIABILITY_LEVEL   = 2;
-    protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
+    protected static final int FStructParameter.VARIABILITY_LEVEL = 3;
+    protected static final int FEvalParameter.VARIABILITY_LEVEL   = 4;
+    protected static final int FFinalParameter.VARIABILITY_LEVEL  = 5;
     protected static final int FParameter.VARIABILITY_LEVEL       = 10;
     protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
     protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
@@ -445,8 +451,9 @@ aspect VariabilitySingletons {
     public static final FContinuous      FContinuous.instance      = new FContinuous();
     public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
     public static final FParameter       FParameter.instance       = new FParameter();
-    public static final FStructParameter FStructParameter.instance = new FStructParameter();
+    public static final FFinalParameter  FFinalParameter.instance  = new FFinalParameter();
     public static final FEvalParameter   FEvalParameter.instance   = new FEvalParameter();
+    public static final FStructParameter FStructParameter.instance = new FStructParameter();
     public static final FConstant        FConstant.instance        = new FConstant();
 
     public static FContinuous ASTNode.fContinuous() {
@@ -460,15 +467,19 @@ aspect VariabilitySingletons {
     public static FParameter ASTNode.fParameter() {
         return FParameter.instance;
     }
-
-    public static FStructParameter ASTNode.fStructParameter() {
-        return FStructParameter.instance;
+    
+    public static FFinalParameter ASTNode.fFinalParameter() {
+        return FFinalParameter.instance;
     }
-
+    
     public static FEvalParameter ASTNode.fEvalParameter() {
         return FEvalParameter.instance;
     }
-
+    
+    public static FStructParameter ASTNode.fStructParameter() {
+        return FStructParameter.instance;
+    }
+    
     public static FConstant ASTNode.fConstant() {
         return FConstant.instance;
     }

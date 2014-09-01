@@ -436,7 +436,7 @@ aspect Scalarization {
     /**
      * Check if this FVariable should have a binding exp after scalarization
      */
-    syn boolean FVariable.keepBExp(boolean inParam, FExp bexp) = variability().structuralOrLess() || isString() || (inParam && bexp.isIndependentParameterExp());
+    syn boolean FVariable.keepBExp(boolean inParam, FExp bexp) = variability().knownParameterOrLess() || isString() || (inParam && bexp.isIndependentParameterExp());
     
     /**
      * Apply a prefix to references to components declared in
@@ -2794,7 +2794,7 @@ aspect Scalarization {
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization()) 
             return indexMap.get(name()).fullCopy();
-        if (variability().structuralOrLess() && !(inParameterEquation() && isParameterExp()) && !inFunctionCallLeft())
+        if (variability().knownParameterOrLess() && !(inParameterEquation() && isParameterExp()) && !inFunctionCallLeft())
             return ceval().buildLiteral();
         if (indexNames != null)
             return indexNames.createUseWithSubscripts(name());

@@ -726,8 +726,6 @@ aspect InstanceErrorCheck {
                     markAsStructuralParameter(checkType);
                 else
                     warning("Evaluate annotation is ignored when fixed equals false");
-            } else if (variability().structParameterVariability() && hasBindingFExp() && getBindingFExp().canCeval()) {
-                markAsStructuralParameter(checkType);
             }
             
             // Check array indices
@@ -738,7 +736,7 @@ aspect InstanceErrorCheck {
             checkAttributes(checkType);
         }
     }
-
+    
     syn boolean InstComponentDecl.canEvaluateAsStructural() = true;
     eq InstAssignable.canEvaluateAsStructural() {
         // TODO: hierarchical check for records?
@@ -755,7 +753,8 @@ aspect InstanceErrorCheck {
         return true;
     }
     eq FInstAccessExp.canEvaluateAsStructural() = getInstAccess().myInstComponentDecl().canEvaluateAsStructural();
-	
+    
+    
 	public void InstAssignable.checkAttributes(ErrorCheckType checkType) {}
 	
 	public void InstPrimitive.checkAttributes(ErrorCheckType checkType) {

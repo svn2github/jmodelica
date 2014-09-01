@@ -2011,7 +2011,7 @@ aspect Arrays {
 	}
 
     eq InstFunctionCall.getArray() {
-        if (variability().structuralOrLess()) {
+        if (variability().knownParameterOrLess()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
@@ -2027,7 +2027,7 @@ aspect Arrays {
         if (!isArray() || fc == null)
             return super.getArray();
         
-        if (variability().structuralOrLess() && inKeptBExp()) {
+        if (variability().knownParameterOrLess() && inKeptBExp()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {

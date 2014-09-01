@@ -1020,17 +1020,17 @@ $C_set_start_values$
 ",
             generatedCode="
 N_real_pi = 6;
-N_real_pi_s = 2;
+N_real_pi_s = 3;
 N_real_pi_f = 0;
 N_real_pi_e = 0;
 
 N_integer_pi = 5 + 4;
-N_integer_pi_s = 3 + 2;
+N_integer_pi_s = 4 + 3;
 N_integer_pi_f = 0 + 0;
 N_integer_pi_e = 0 + 0;
 
 N_boolean_pi = 4;
-N_boolean_pi_s = 2;
+N_boolean_pi_s = 3;
 N_boolean_pi_f = 0;
 N_boolean_pi_e = 0;
 
@@ -1040,23 +1040,23 @@ N_string_pi_f = 0;
 N_string_pi_e = 0;
 ---
 #define _reg1_0 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _final1_10 ((*(jmi->z))[jmi->offs_real_pi+1])
-#define _dummy_1_20 ((*(jmi->z))[jmi->offs_real_pi+2])
-#define _dummy_2_21 ((*(jmi->z))[jmi->offs_real_pi+3])
-#define _struct1_5 ((*(jmi->z))[jmi->offs_real_pi+4])
+#define _dummy_1_20 ((*(jmi->z))[jmi->offs_real_pi+1])
+#define _dummy_2_21 ((*(jmi->z))[jmi->offs_real_pi+2])
+#define _struct1_5 ((*(jmi->z))[jmi->offs_real_pi+3])
+#define _final1_10 ((*(jmi->z))[jmi->offs_real_pi+4])
 #define _eval1_15 ((*(jmi->z))[jmi->offs_real_pi+5])
 #define _reg2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+2])
-#define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+3])
-#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+4])
-#define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+5])
-#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+6])
-#define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+7])
+#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+3])
+#define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+4])
+#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+5])
+#define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+6])
+#define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+7])
 #define _eval3_17 ((*(jmi->z))[jmi->offs_integer_pi+8])
 #define _reg4_3 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define _final4_13 ((*(jmi->z))[jmi->offs_boolean_pi+1])
-#define _struct4_8 ((*(jmi->z))[jmi->offs_boolean_pi+2])
+#define _struct4_8 ((*(jmi->z))[jmi->offs_boolean_pi+1])
+#define _final4_13 ((*(jmi->z))[jmi->offs_boolean_pi+2])
 #define _eval4_18 ((*(jmi->z))[jmi->offs_boolean_pi+3])
 #define _time ((*(jmi->z))[jmi->offs_t])
 
@@ -1067,16 +1067,16 @@ N_string_pi_e = 0;
     _reg2_1 = (1);
     _reg3_2 = (1);
     _reg4_3 = (JMI_TRUE);
-    _final1_10 = (1);
-    _final2_11 = (1);
-    _final3_12 = (1);
-    _final4_13 = (JMI_TRUE);
     _dummy_1_20 = (0.0);
     _dummy_2_21 = (0.0);
     _struct1_5 = (1);
     _struct2_6 = (1);
     _struct3_7 = (1);
     _struct4_8 = (JMI_TRUE);
+    _final1_10 = (1);
+    _final2_11 = (1);
+    _final3_12 = (1);
+    _final4_13 = (JMI_TRUE);
     _eval1_15 = (1);
     _eval2_16 = (1);
     _eval3_17 = (1);

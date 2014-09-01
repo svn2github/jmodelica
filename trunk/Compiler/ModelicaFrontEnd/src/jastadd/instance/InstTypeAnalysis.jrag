@@ -566,3 +566,25 @@ aspect InstClassRestriction {
     }
 
 }
+
+
+aspect InstModificationType {
+    
+    /**
+     * Is this modification final?
+     */
+    syn boolean InstModification.isFinal() = inheritsFinal();
+    eq InstArgument.isFinal()              = getFinal() || inheritsFinal();
+
+    /**
+     * Is this modification within another modification or component that is declared final?
+     */
+    inh boolean InstModification.inheritsFinal();
+    inh boolean InstComponentDecl.inheritsFinal();
+    inh boolean InstExtends.inheritsFinal();
+    eq InstModification.getChild().inheritsFinal()  = isFinal();
+    eq InstComponentDecl.getChild().inheritsFinal() = getComponentDecl().hasFinal() || inheritsFinal();
+    eq InstExtends.getChild().inheritsFinal()       = inheritsFinal();
+    eq BaseNode.getChild().inheritsFinal()          = false;
+
+}

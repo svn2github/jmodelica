@@ -1382,6 +1382,37 @@ x = if a[1,1] > a[1,2] then true else false;
 end ParameterEval1;
 
 
+model Structural1
+    function f
+        output Integer[2] y = {2,1};
+      algorithm
+    end f;
+    parameter Integer y[2] = f();
+    parameter Integer z = y[1];
+    Real[z] a = {1,1};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Structural1",
+            description="Partially structural array",
+            flatModel="
+fclass EvaluationTests.Structural1
+ parameter Integer y[2] = {2, 1} /* { 2, 1 } */;
+ parameter Integer z = 2 /* 2 */;
+ Real a[2] = {1, 1};
+
+public
+ function EvaluationTests.Structural1.f
+  output Integer[2] y := {2, 1};
+ algorithm
+  return;
+ end EvaluationTests.Structural1.f;
+
+end EvaluationTests.Structural1;
+")})));
+end Structural1;
+
+
 model EvaluateAnnotation1
 	parameter Real a = 1.0;
 	parameter Real b = a annotation(Evaluate=true);
@@ -1469,6 +1500,354 @@ initial equation
 end EvaluationTests.EvaluateAnnotation4;
 ")})));
 end EvaluateAnnotation4;
+
+model EvaluateAnnotation5
+    record R
+        Real a;
+    end R;
+    
+    parameter R r = R(1) annotation(Evaluate=true);
+    Real x = r.a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation5",
+            description="Check that annotation(Evaluate=true) is honored for components of recors with the annotation",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation5
+ parameter EvaluationTests.EvaluateAnnotation5.R r = EvaluationTests.EvaluateAnnotation5.R(1) /* EvaluationTests.EvaluateAnnotation5.R(1) */;
+ Real x = 1.0;
+
+public
+ record EvaluationTests.EvaluateAnnotation5.R
+  Real a;
+ end EvaluationTests.EvaluateAnnotation5.R;
+
+end EvaluationTests.EvaluateAnnotation5;
+")})));
+end EvaluateAnnotation5;
+
+model EvaluateAnnotation6
+    record R
+        Real n = 1;
+    end R;
+    
+    function f
+        input R x;
+        output R y = x;
+      algorithm
+    end f;
+    
+    parameter R r1 annotation(Evaluate=true);
+    parameter R r2 = f(r1);
+    Real x = r2.n;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation6",
+            description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation6
+ parameter EvaluationTests.EvaluateAnnotation6.R r1 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
+ parameter EvaluationTests.EvaluateAnnotation6.R r2 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
+ Real x = 1.0;
+
+public
+ function EvaluationTests.EvaluateAnnotation6.f
+  input EvaluationTests.EvaluateAnnotation6.R x;
+  output EvaluationTests.EvaluateAnnotation6.R y := x;
+ algorithm
+  return;
+ end EvaluationTests.EvaluateAnnotation6.f;
+
+ record EvaluationTests.EvaluateAnnotation6.R
+  Real n = 1;
+ end EvaluationTests.EvaluateAnnotation6.R;
+
+end EvaluationTests.EvaluateAnnotation6;
+")})));
+end EvaluateAnnotation6;
+
+model EvaluateAnnotation7
+    record R
+        Real n = 1;
+    end R;
+    
+    record P
+        extends R;
+    end P;
+    
+    function f
+        input P x;
+        output P y = x;
+      algorithm
+    end f;
+    
+    parameter P r1 annotation(Evaluate=true);
+    parameter P r2 = f(r1);
+    Real x = r2.n;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation7",
+            description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation7
+ parameter EvaluationTests.EvaluateAnnotation7.P r1 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
+ parameter EvaluationTests.EvaluateAnnotation7.P r2 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
+ Real x = 1.0;
+
+public
+ function EvaluationTests.EvaluateAnnotation7.f
+  input EvaluationTests.EvaluateAnnotation7.P x;
+  output EvaluationTests.EvaluateAnnotation7.P y := x;
+ algorithm
+  return;
+ end EvaluationTests.EvaluateAnnotation7.f;
+
+ record EvaluationTests.EvaluateAnnotation7.P
+  Real n = 1;
+ end EvaluationTests.EvaluateAnnotation7.P;
+
+end EvaluationTests.EvaluateAnnotation7;
+")})));
+end EvaluateAnnotation7;
+
+// This test gives wrong result #3629
+model EvaluateAnnotation8
+    record R
+        Real y;
+        Real x = y annotation(Evaluate=true);
+    end R;
+   
+    parameter R r(y=2) = R(y=3);
+    Real x = r.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation8",
+            description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation8
+ parameter EvaluationTests.EvaluateAnnotation8.R r(y = 2) = EvaluationTests.EvaluateAnnotation8.R(3, 3) /* EvaluationTests.EvaluateAnnotation8.R(3, 3) */;
+ Real x = 2.0;
+
+public
+ record EvaluationTests.EvaluateAnnotation8.R
+  Real y;
+  Real x = y;
+ end EvaluationTests.EvaluateAnnotation8.R;
+
+end EvaluationTests.EvaluateAnnotation8;
+")})));
+end EvaluateAnnotation8;
+
+// This test gives wrong result #3629
+model EvaluateAnnotation9
+    function F
+        input R i;
+        output R o;
+    algorithm
+        o.p := i.p + 42;
+    end F;
+    record R
+        parameter Real p = -41;
+    end R;
+    parameter R r1 annotation(Evaluate=true);
+    parameter R r2 = F(r1);
+    
+    Real x = (r2.p - 1) * time;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation9",
+            description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation9
+ parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
+ parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
+ Real x = (-41.0 - 1) * time;
+
+public
+ function EvaluationTests.EvaluateAnnotation9.F
+  input EvaluationTests.EvaluateAnnotation9.R i;
+  output EvaluationTests.EvaluateAnnotation9.R o;
+ algorithm
+  o.p := i.p + 42;
+  return;
+ end EvaluationTests.EvaluateAnnotation9.F;
+
+ record EvaluationTests.EvaluateAnnotation9.R
+  parameter Real p = -41 /* -41 */;
+ end EvaluationTests.EvaluateAnnotation9.R;
+
+end EvaluationTests.EvaluateAnnotation9;
+")})));
+end EvaluateAnnotation9;
+
+
+
+model FinalParameterEval1
+    model A
+        parameter Real p = 1;
+        Real x = p;
+    end A;
+    
+    A a(final p = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval1",
+            description="Check that parameters with final modification are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval1
+ parameter Real a.p = 2 /* 2 */;
+
+ Real a.x = 2.0;
+end EvaluationTests.FinalParameterEval1;
+")})));
+end FinalParameterEval1;
+
+
+model FinalParameterEval2
+    final parameter Real p = 1;
+    Real x = p;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval2",
+            description="Check that final parameters are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval2
+ parameter Real p = 1 /* 1 */;
+
+ Real x = 1.0;
+end EvaluationTests.FinalParameterEval2;
+")})));
+end FinalParameterEval2;
+
+
+model FinalParameterEval3
+    record R
+        Real a;
+    end R;
+    
+    final parameter R r = R(1);
+    Real x = r.a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval3",
+            description="Check that members of final record parameters are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval3
+ parameter EvaluationTests.FinalParameterEval3.R r = EvaluationTests.FinalParameterEval3.R(1) /* EvaluationTests.FinalParameterEval3.R(1) */;
+
+ Real x = 1.0;
+
+public
+ record EvaluationTests.FinalParameterEval3.R
+  Real a;
+ end EvaluationTests.FinalParameterEval3.R;
+
+end EvaluationTests.FinalParameterEval3;
+")})));
+end FinalParameterEval3;
+
+
+model FinalParameterEval4
+    record R
+        Real a;
+    end R;
+    
+    model A
+        
+        parameter R r;
+        Real x = r.a;
+    end A;
+    
+    A a(final r = R(1));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval4",
+            description="Check that members of record parameters with final modification are evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval4
+ parameter EvaluationTests.FinalParameterEval4.R a.r = EvaluationTests.FinalParameterEval4.R(1) /* EvaluationTests.FinalParameterEval4.R(1) */;
+
+ Real a.x = 1.0;
+
+public
+ record EvaluationTests.FinalParameterEval4.R
+  Real a;
+ end EvaluationTests.FinalParameterEval4.R;
+
+end EvaluationTests.FinalParameterEval4;
+")})));
+end FinalParameterEval4;
+
+
+model FinalParameterEval5
+    final parameter Real p(fixed = false);
+    Real x = p;
+initial equation
+    p = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval5",
+            description="Check that final parameters with fixed=false are not evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval5
+ parameter Real p(fixed = false);
+ Real x = p;
+initial equation 
+ p = 1;
+end EvaluationTests.FinalParameterEval5;
+")})));
+end FinalParameterEval5;
+
+model FinalParameterEval6
+    record R
+        Real n = 1;
+    end R;
+    
+    function f
+        input R x;
+        output R y = x;
+      algorithm
+    end f;
+    
+    final parameter R r1;
+    parameter R r2 = f(r1);
+    Real x = r2.n;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FinalParameterEval6",
+            description="Check that final parameters with fixed=false are not evaluated",
+            flatModel="
+fclass EvaluationTests.FinalParameterEval6
+ parameter EvaluationTests.FinalParameterEval6.R r1 = EvaluationTests.FinalParameterEval6.R(1) /* EvaluationTests.FinalParameterEval6.R(1) */;
+ parameter EvaluationTests.FinalParameterEval6.R r2 = EvaluationTests.FinalParameterEval6.R(1) /* EvaluationTests.FinalParameterEval6.R(1) */;
+ Real x = 1.0;
+
+public
+ function EvaluationTests.FinalParameterEval6.f
+  input EvaluationTests.FinalParameterEval6.R x;
+  output EvaluationTests.FinalParameterEval6.R y := x;
+ algorithm
+  return;
+ end EvaluationTests.FinalParameterEval6.f;
+
+ record EvaluationTests.FinalParameterEval6.R
+  Real n = 1;
+ end EvaluationTests.FinalParameterEval6.R;
+
+end EvaluationTests.FinalParameterEval6;
+")})));
+end FinalParameterEval6;
 
 
 model EvalColonSizeCell

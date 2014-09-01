@@ -1817,7 +1817,7 @@ aspect CCodeGen {
     public void FRangeExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%s = ", name);
         p.print(getFExp(0), str, indent);
-        if (hasStep() && !getFExp(1).variability().structuralOrLess()) {
+        if (hasStep() && !getFExp(1).variability().knownParameterOrLess()) {
             str.format("; %s * ", name);
             p.print(getFExp(1), str, indent);
             str.format(" < %se * ", name);
