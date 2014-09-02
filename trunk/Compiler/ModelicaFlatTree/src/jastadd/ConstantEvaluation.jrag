@@ -2236,12 +2236,13 @@ aspect ConstantEvaluation {
             val = evaluationValue;
         } else if ((isConstant() || isParameter() || (inFunction() && !isInput())) && !isForIndex()) {
             boolean func = inFunction();
+            i = func ? i : Index.NULL;
             if (hasBindingFExp()) {
                 FExp bexp = getBindingFExp();
                 if (!bexp.type().isUnknown())
-                    val = bexp.ceval(func ? i : Index.NULL);
+                    val = bexp.ceval(i);
             } else if (!func && !inRecordDecl()) {
-                val = cevalNoBExp();
+                val = cevalNoBExp(i);
             }
             if (!func)
                 evaluationValue = val;
@@ -2249,28 +2250,36 @@ aspect ConstantEvaluation {
         return val;
     }
     
-    
-    syn CValue InstComponentDecl.cevalNoBExp() {
-        if (isArray()) {
-            CValueArray a = new CValueArray(new Size(myDimensionLength()));
-            for (InstComponentDecl icd : allInstComponentDecls()) {
-                a.addCell(icd.cevalNoBExp());
-            }
-            return a;
+    syn CValue InstAssignable.cevalNoBExp(Index i) {
+        CValue val = startAttributeCValue();
+        if (i == Index.NULL) {
+            return val;
         } else {
-            return cevalNoBExpScalar();
+            return val.array().getCell(i);
         }
     }
-    syn CValue InstComponentDecl.cevalNoBExpScalar() = CValue.UNKNOWN;
-    eq InstPrimitive.cevalNoBExpScalar() = startAttributeCValue();
-    eq InstRecord.cevalNoBExpScalar()  = cevalNoBExpCell(allInstComponentDecls());
-    eq InstArrayComponentDecl.cevalNoBExpScalar() = instComponentDecl().cevalNoBExpCell(allInstComponentDecls());
     
-    syn CValue InstComponentDecl.cevalNoBExpCell(Iterable<InstComponentDecl> icds) 
-        = CValue.UNKNOWN;
-    eq InstPrimitive.cevalNoBExpCell(Iterable<InstComponentDecl> icds) 
-        = icds.iterator().next().ceval();
-    eq InstRecord.cevalNoBExpCell(Iterable<InstComponentDecl> icds) {
+    eq InstRecord.cevalNoBExp(Index i) {
+        if (isArray()) {
+            CValueArray val = new CValueArray(size());
+            cevalNoBExpArray(this, val, ndims());
+            return i == Index.NULL ? val : val.getCell(i);
+        } else {
+            return cevalNoBExpCell(allInstComponentDecls());
+        }
+    }
+    
+    public void InstComponentDecl.cevalNoBExpArray(InstRecord top, CValueArray a, int ndims) {
+        if (ndims > 0) {
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                icd.cevalNoBExpArray(top, a, ndims-1);
+            }
+        } else {
+            a.addCell(top.cevalNoBExpCell(getInstComponentDecls()));
+        }
+    }
+    
+    syn CValue InstRecord.cevalNoBExpCell(Iterable<InstComponentDecl> icds) {
         CValueRecord rec = new CValueRecord(myInstClass().recordType());
         for (InstComponentDecl icd : icds) {
             rec.setMember(icd.name(), icd.ceval());
@@ -2287,8 +2296,6 @@ aspect ConstantEvaluation {
      */
     syn CValue InstComponentDecl.startAttributeCValue()  = CValue.UNKNOWN;
     syn lazy CValue InstPrimitive.startAttributeCValue() = attributeCValueGeneric(FAttribute.START);
-    // TODO: should be removed, but currently used in constant eval
-    syn lazy CValue InstRecord.startAttributeCValue()    = attributeCValueGeneric(FAttribute.START);
 
     /**
      * Find and evaluate the "fixed" attribute. If it is not found, use default value.
@@ -2337,8 +2344,17 @@ aspect ConstantEvaluation {
     eq InstAssignable.attributeCValueGeneric(String name) {
         for (InstModification im : totalMergedEnvironment()) {
             FExp exp = im.findAttribute(name);
-            if (exp != null)
-                return exp.ceval();
+            if (exp != null) {
+                CValue val = exp.ceval();
+                if (im.hasEach()) {
+                    CValueArray a = new CValueArray(size());
+                    for (Index i : indices()) {
+                        a.addCell(val);
+                    }
+                    val = a;
+                }
+                return val;
+            }
         }
         
         CValue res = attributeCValueDefault(name);
@@ -2368,14 +2384,6 @@ aspect ConstantEvaluation {
             return new CValueEnum(type(), -1);
         else
             return super.attributeCValueDefault(name);
-    }
-    // TODO: should be removed, but currently used in constant eval
-    eq InstRecord.attributeCValueDefault(String name) {
-        CValueRecord res = new CValueRecord((FRecordType) type());
-        int i = 0;
-        for (InstComponentDecl var : allInstComponentDecls())
-            res.setMember(i++, var.attributeCValueGeneric(name));
-        return res;
     }
 
     private static Map<String,CValue> InstPrimitive.REAL_DEFAULT_ATTRIBUTES = null;

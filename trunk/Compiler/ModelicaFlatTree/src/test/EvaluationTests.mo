@@ -1849,6 +1849,107 @@ end EvaluationTests.FinalParameterEval6;
 ")})));
 end FinalParameterEval6;
 
+model EvalNoBinding1
+    parameter Real x(start=1);
+    parameter Real y(start=3);
+    parameter Real z = x + y annotation(Evaluate=true);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvalNoBinding1",
+            description="Evaluate primitives without binding exp",
+            flatModel="
+fclass EvaluationTests.EvalNoBinding1
+ parameter Real x(start = 1) = 1 /* 1 */;
+ parameter Real y(start = 3) = 3 /* 3 */;
+ parameter Real z = 4.0 /* 4.0 */;
+end EvaluationTests.EvalNoBinding1;
+")})));
+end EvalNoBinding1;
+
+model EvalNoBinding2
+    parameter Real x[2,2](start={{1,2},{3,4}});
+    parameter Real y[2,2](each start=5);
+    parameter Real z1[2,2] = x + y annotation(Evaluate=true);
+    parameter Real z2 = sum({{x[i,j] + y[i,j] for i in 1:2} for j in 1:2});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvalNoBinding2",
+            description="Evaluate array primitives without binding exp",
+            flatModel="
+fclass EvaluationTests.EvalNoBinding2
+ parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
+ parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
+ parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
+ parameter Real z2 = 30.0 /* 30.0 */;
+end EvaluationTests.EvalNoBinding2;
+")})));
+end EvalNoBinding2;
+
+model EvalNoBinding3
+    record R
+        parameter Real x(start=2);
+        Real[2,2] c(start={{3,4},{5,6}});
+        Real[2,2] d(each start=7);
+    end R;
+    
+    parameter R r1 annotation(Evaluate=true);
+    parameter R r2 = r1 annotation(Evaluate=true);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvalNoBinding3",
+            description="Evaluate primitives in record without binding exp",
+            flatModel="
+fclass EvaluationTests.EvalNoBinding3
+ parameter EvaluationTests.EvalNoBinding3.R r1 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
+ parameter EvaluationTests.EvalNoBinding3.R r2 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
+
+public
+ record EvaluationTests.EvalNoBinding3.R
+  parameter Real x(start = 2);
+  Real c[2,2](start = {{3, 4}, {5, 6}});
+  Real d[2,2](each start = 7);
+ end EvaluationTests.EvalNoBinding3.R;
+
+end EvaluationTests.EvalNoBinding3;
+")})));
+end EvalNoBinding3;
+
+model EvalNoBinding4
+    record R
+        parameter Real x(start=2);
+        Real[2,2] c(start={{3,4},{5,6}});
+        Real[2,2] d(each start=7);
+    end R;
+    
+    parameter R r[2,2] annotation(Evaluate=true);
+    parameter Real[2,2] x = {{r[i,j].c[i,j] + r[i,j].d[i,j] for j in 1:2} for i in 1:2} annotation(Evaluate=true);
+    parameter Real y = sum({{r[i,j].x for j in 1:2} for i in 1:2}) annotation(Evaluate=true);
+        
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvalNoBinding4",
+            description="Evaluate primitives in record array without binding exp",
+            flatModel="
+fclass EvaluationTests.EvalNoBinding4
+ parameter EvaluationTests.EvalNoBinding4.R r[2,2] = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
+ parameter Real x[2,2] = {{10.0, 11.0}, {12.0, 13.0}} /* { { 10.0, 11.0 }, { 12.0, 13.0 } } */;
+ parameter Real y = 8.0 /* 8.0 */;
+
+public
+ record EvaluationTests.EvalNoBinding4.R
+  parameter Real x(start = 2);
+  Real c[2,2](start = {{3, 4}, {5, 6}});
+  Real d[2,2](each start = 7);
+ end EvaluationTests.EvalNoBinding4.R;
+
+end EvaluationTests.EvalNoBinding4;
+
+")})));
+end EvalNoBinding4;
+
 
 model EvalColonSizeCell
     function f
