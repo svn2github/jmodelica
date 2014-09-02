@@ -481,7 +481,8 @@ void jmi_kinsol_error_handling(jmi_block_solver_t * block, int flag){
 
 /* initialize data on bounds */
 static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
-    jmi_kinsol_solver_t* solver = block->solver;
+    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
+    jmi_log_t *log = block->log;
     
     int i,num_bounds = 0;
     
@@ -496,21 +497,35 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
     }
     
     solver->num_bounds = num_bounds;
-    if(!num_bounds) return 0;
-    solver->bound_vindex = (int*)calloc(num_bounds, sizeof(int));
-    solver->bound_kind  = (int*)calloc(num_bounds, sizeof(int));
-    solver->bound_limiting  = (int*)calloc(num_bounds, sizeof(int));
-    solver->bounds = (realtype*)calloc(num_bounds, sizeof(realtype));
-    solver->active_bounds = (realtype*)calloc(block->n, sizeof(realtype));
-    num_bounds = 0;
+    if(num_bounds) {
+        solver->bound_vindex = (int*)calloc(num_bounds, sizeof(int));
+        solver->bound_kind  = (int*)calloc(num_bounds, sizeof(int));
+        solver->bound_limiting  = (int*)calloc(num_bounds, sizeof(int));
+        solver->bounds = (realtype*)calloc(num_bounds, sizeof(realtype));
+        solver->active_bounds = (realtype*)calloc(block->n, sizeof(realtype));
+        num_bounds = 0;
+    }
+
+    /* 
+        step limit factor cannot be above one (that would take us outside bounds in one step)
+        Reset this to 0.2 as default.
+    */
+    if(block->options->step_limit_factor > 1) {
+        block->options->step_limit_factor = 0.2;
+    }
+
 
     for(i=0; i < block->n; ++i) {
+        int hasMin = 0, hasMax = 0;
+        double range = block->max[i] - block->min[i];
+
         if(block->max[i] != BIG_REAL) {
             /* upper bound on a variable */
             solver->bound_vindex[num_bounds] = i; /* variable index */
             solver->bound_kind[num_bounds] = 1;
             solver->bounds[num_bounds] = block->max[i];
             num_bounds++;
+            hasMax = 1;
         }
         if(block->min[i] != -BIG_REAL) {
             /* lower bound on a variable */
@@ -518,9 +533,20 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
             solver->bound_kind[num_bounds] = -1;
             solver->bounds[num_bounds] = block->min[i];
             num_bounds++;
+            hasMin = 1;
         }
+        if(hasMin && hasMax && (range > block->max[i]) && (range > 0)) {
+            solver->range_limits[i] = range * block->options->step_limit_factor;
+        }
+        else {
+            solver->range_limits[i] = BIG_REAL;
+        }
+        if (block->callbacks->log_options.log_level >= 5) {
+            jmi_log_real_(log, solver->range_limits[i]);
+        }
+
     }
-    
+
     return 0;
 }
 
@@ -542,6 +568,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "SolverOptions", "<block:%s>", block->label);
     jmi_log_fmt(block->log, node,logInfo, "Tolerance <tolerance: %g>",block->options->res_tol);
     jmi_log_fmt(block->log, node,logInfo, "Max number of iterations <max_iter: %d>",block->options->max_iter);
+    jmi_log_fmt(block->log, node,logInfo, "Step limit <factor: %g>",block->options->step_limit_factor);
     jmi_log_fmt(block->log, node,logInfo, "Experimental <mode: %d>",block->options->experimental_mode);
     jmi_log_leave(block->log, node);
 
@@ -573,11 +600,13 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     /* Allow long steps */
     max_nominal = 1;
     for(i=0;i< block->n;++i){
-        if (RAbs(block->nominal[i]) > max_nominal) {
+        double nom = RAbs(block->nominal[i]);
+        if (nom > max_nominal) {
             max_nominal = RAbs(block->nominal[i]);
         }
     }
-    KINSetMaxNewtonStep(solver->kin_mem, block->options->step_limit_factor*max_nominal);
+    solver->max_nw_step = block->options->step_limit_factor*max_nominal;
+    KINSetMaxNewtonStep(solver->kin_mem, solver->max_nw_step);
     
     if(block->options->iteration_variable_scaling_mode)
     {
@@ -627,8 +656,11 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     realtype* xd = N_VGetArrayPointer(b); /* used as a buffer */
     booleantype activeBounds = FALSE;
     booleantype limitingBounds = FALSE;
+    booleantype rangeLimited = FALSE;
     int i;
     jmi_log_t *log = block->log;
+    jmi_log_node_t outer;
+    jmi_log_node_t inner;
 
     /* MAX_NETON_STEP_RATIO is used just to ensure that full Newton step can 
     be taken when no bounds are present. 
@@ -644,7 +676,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     solver->last_num_limiting_bounds = 0;
     solver->last_num_active_bounds = 0;
 
-    if((solver->num_bounds == 0) || (xnorm == 0.0)) 
+    if((!block->options->enforce_bounds_flag) || (xnorm == 0.0)) 
     {
         /* make sure full newton step can be taken */
         realtype maxstep = MAX_NETON_STEP_RATIO * xnorm;
@@ -663,6 +695,58 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     /* minimal/maximal allowed step multiplier */
     max_step_ratio = 1.0;
     min_step_ratio = 2*solver->kin_stol;
+
+    /*
+        Go over the iteration vars and reduce max_step_ratio
+        based on step_limits
+    */
+    if (block->callbacks->log_options.log_level >= 5) {
+        /* Print variables with long steps */
+        outer = jmi_log_enter_(log, logInfo, "StepLimits");
+        inner = jmi_log_enter_vector_(log, outer, logInfo, "range");
+    }
+
+    for( i=0; i<block->n; i++ ) {
+        double range_limit = solver->range_limits[i];
+        double step_limit = range_limit;
+        realtype pi = RAbs(xd[i]);            /* abs solved step length for the variable*/
+        double nom = RAbs(block->nominal[i]);
+        double nom_limit;
+        double ui =  RAbs(NV_Ith_S(kin_mem->kin_uu,i));  /* current variable value */
+        double step_ratio;
+
+        if(nom < ui) {  /* if nominal is below current - take current*/
+            nom = ui; 
+        }
+        /* step length limit based on max(nominal, |current|)*/
+        nom_limit = nom *  block->options->step_limit_factor;
+        if(range_limit > nom_limit) { /* if nominal based is tighter than range based update step factor */
+            step_limit = nom_limit;
+        }
+
+        if (block->callbacks->log_options.log_level >= 5) {
+            jmi_log_real_(log, step_limit);
+        }
+
+        if( pi < step_limit) {
+            solver->range_limited[i] = 0;
+            continue;
+        }
+        solver->last_bounding_index = i;
+        solver->range_limited[i] = 1;
+        rangeLimited = TRUE;
+
+        step_ratio = step_limit/RAbs(pi);
+
+        if(max_step_ratio > step_ratio) {
+            max_step_ratio = step_ratio;
+        }
+    }
+
+    if (block->callbacks->log_options.log_level >= 5) {
+        jmi_log_leave(log, inner);
+        jmi_log_leave(log, outer);
+    }
 
     /* 
         Go over the list of bounds and reduce "max_step_ratio" 
@@ -700,6 +784,20 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 solver->last_bounding_index = index;
             }
         }
+    }
+
+    /* log the IV ranges that limit the step */
+    if (block->callbacks->log_options.log_level >= 5 && rangeLimited) {
+        /* Print variables with long steps */
+        jmi_log_node_t outer = jmi_log_enter_(log, logInfo, "RangeLimited");
+        jmi_log_node_t inner = jmi_log_enter_vector_(log, outer, logInfo, "range");            
+        for (i=0; i < block->n; i++) {
+            if (solver->range_limited[i]) {
+                jmi_log_vref_(log, 'r', block->value_references[i]);
+            }
+        }
+        jmi_log_leave(log, inner);
+        jmi_log_leave(log, outer);
     }
 
     /* log the bounds that limit the step */
@@ -877,8 +975,16 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
             dlaqge_(&N, &N, solver->J_LU->data, &N, solver->rScale, solver->cScale, 
                     &rowcnd, &colcnd, &amax, &solver->equed);
         }
-        else
+        else if(info > 0) {
             solver->equed = 'N';
+            if(info <= N)
+                jmi_log_node(block->log, logWarning, "ZeroRow", "Row %d of the Jacobian is exactly zero in <block: %s>.", info, block->label);
+            else
+                jmi_log_node(block->log, logWarning, "ZeroColumn", "Column %d of the Jacobian is exactly zero in <block: %s>.", info-N, block->label);
+        }
+        else {
+            solver->equed = 'N';
+        }
     }
     
     /* Perform factorization to detect if there is a singular Jacobian */
@@ -1253,6 +1359,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->equed = 'N';
     solver->rScale = (realtype*)calloc(n+1,sizeof(realtype));
     solver->cScale = (realtype*)calloc(n+1,sizeof(realtype));
+    solver->range_limits = (realtype*)calloc(n+1,sizeof(realtype));
+    solver->range_limited = (int*)calloc(n+1,sizeof(int));
 
     solver->lapack_work = (realtype*)calloc(4*(n+1),sizeof(realtype));
     solver->lapack_iwork = (int *)calloc(n+2, sizeof(int));
@@ -1333,6 +1441,8 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     DestroyMat(solver->J_scale);
     free(solver->cScale);
     free(solver->rScale);
+    free(solver->range_limits);
+    free(solver->range_limited);
     free(solver->lapack_work);
     free(solver->lapack_iwork);
     free(solver->lapack_ipiv);
@@ -1359,11 +1469,13 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_solver_t * block,
         *destnode = jmi_log_enter_fmt(log, logInfo, "NewtonSolve", 
                                       "Newton solver invoked for <block:%s>", block->label);
         if ((block->callbacks->log_options.log_level >= 5)) {
+            jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
             jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
             jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
             jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
             jmi_log_reals(log, *destnode, logInfo, "nominal", block->nominal, block->n);
             jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->x, block->n);
+            jmi_log_reals(log, *destnode, logInfo, "ranges", solver->range_limits, block->n);
         }
     }
 }
