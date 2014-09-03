@@ -469,14 +469,12 @@ class TestLocalDAECollocator(object):
         # Mayer
         opts = self.optimize_options(mayer_op, self.algorithm)
         opts['discr'] = "LG"
-        opts['reorder_vars'] = True
         opts['checkpoint'] = True
         res = mayer_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Lagrange
         opts['discr'] = "LGR"
-        opts['reorder_vars'] = True
         opts['checkpoint'] = True
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)    
