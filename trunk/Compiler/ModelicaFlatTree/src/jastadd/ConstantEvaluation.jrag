@@ -2275,7 +2275,7 @@ aspect ConstantEvaluation {
                 icd.cevalNoBExpArray(top, a, ndims-1);
             }
         } else {
-            a.addCell(top.cevalNoBExpCell(getInstComponentDecls()));
+            a.addCell(top.cevalNoBExpCell(allInstComponentDecls()));
         }
     }
     
