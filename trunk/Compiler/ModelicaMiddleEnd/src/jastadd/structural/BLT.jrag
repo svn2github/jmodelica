@@ -770,12 +770,15 @@ aspect BLT{
             return blockDependency.allPredecessors();
         }
 
+        private Set<FVariable> dependsOnVariables_cashe = null;
+
         public Set<FVariable> dependsOn() {
-            Set<FVariable> dependsOnVariables = new LinkedHashSet<FVariable>();
-            dependsOnVariables.addAll(independentVariables());
+            if (dependsOnVariables_cashe != null)
+                return dependsOnVariables_cashe;
+            dependsOnVariables_cashe = new LinkedHashSet<FVariable>(independentVariables());
             for (AbstractEquationBlock eb : blockDependency.immediatePredecessors())
-                dependsOnVariables.addAll(eb.dependsOn());
-            return dependsOnVariables;
+                dependsOnVariables_cashe.addAll(eb.dependsOn());
+            return dependsOnVariables_cashe;
         }
 
         public boolean isSimple() {
