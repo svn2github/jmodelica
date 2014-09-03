@@ -3902,20 +3902,20 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Contains the indices at which xx is gonna be splited
             # Those indices will let us split the xx as follows
-            # [0, all_x, all_dx, all_unelimu, all_w, initial_final_points, popt, h_free]
+            # [0, all_x, all_dx, all_w, all_unelimu, initial_final_points, popt, h_free]
             global_split_indices=[0]
             
             # Map with split order
             split_map = dict()
             split_map['x'] = 0
             split_map['dx'] = 1
-            split_map['unelim_u'] = 2
-            split_map['w'] = 3
+            split_map['w'] = 2
+            split_map['unelim_u'] = 3
             split_map['init_final'] = 4
             split_map['p_opt'] = 5
             split_map['h'] = 6
 
-            for varType in ['x', 'dx', 'unelim_u', 'w']:
+            for varType in ['x', 'dx', 'w', 'unelim_u']:
                 if varType=='x':
                     if self.discr == "LGR":
                         global_split_indices.append(
@@ -3975,7 +3975,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Index for the free parameters 
             global_split_indices.append(global_split_indices[-1]+n_popt)
             n_freeh2 = self.n_e if self.hs == "free" else 0
-            # Index for the ree elements
+            # Index for the free elements
             global_split_indices.append(global_split_indices[-1]+n_freeh2) 
             # Tuple with the splitted mx variables
             global_split=casadi.vertsplit(xx,global_split_indices)
@@ -3983,17 +3983,10 @@ class LocalDAECollocator(CasadiCollocator):
             
             # Define the order of the loop for building the check_point map 
             if self.blocking_factors is not None:
-                global_split = list(global_split)
                 variable_type_list = ['x','dx','w']
-                tmp = global_split[split_map['unelim_u']]
-                global_split[split_map['unelim_u']] = \
-                            global_split[split_map['w']]
-                global_split[split_map['w']] = tmp
-                split_map['unelim_u'] = 3
-                split_map['w'] = 2
             else:
-                variable_type_list = ['x','dx','unelim_u','w'] 
-            # Buils the check_point map
+                variable_type_list = ['x','dx','w','unelim_u'] 
+            # Builds the check_point map
             for j,varType in enumerate(variable_type_list):
                 cp_var_map[varType] = dict()
                 new_var_index[varType] = dict()
@@ -4043,8 +4036,6 @@ class LocalDAECollocator(CasadiCollocator):
                                     reordered_named_xx.append(
                                         casadi.ssym(name+'_%d_%d' % (i, k+move_zero)))
                                 counter_s+=1
-                    if self.blocking_factors is not None and varType=='dx':
-                        counter_s+=count_us
                 else:
                     # Handle the cases of empty variables
                     for i in range(1, self.n_e+1):
@@ -4063,7 +4054,6 @@ class LocalDAECollocator(CasadiCollocator):
                 new_var_index[varType] = dict() 
                 
                 # Creates auxiliary list
-                counter_s -= count_us
                 aux_list = [counter_s]*n_u
                 
                 if self.named_vars:
@@ -4181,14 +4171,14 @@ class LocalDAECollocator(CasadiCollocator):
                     nlp_n_var['w'])  
                 variable_type_list = ['dx','w']
             else:
-                for varType in ['unelim_u', 'w']:
+                for varType in ['w','unelim_u']:
                     split_indices.append(split_indices[-1]+nlp_n_var[varType])                
                 inter_split=casadi.vertsplit(
                     global_split[split_map['init_final']],
                     nlp_n_var['dx']+\
                     nlp_n_var['unelim_u']+\
                     nlp_n_var['w'])            
-                variable_type_list = ['dx', 'unelim_u', 'w']
+                variable_type_list = ['dx', 'w', 'unelim_u']
             
             split_init=casadi.vertsplit(inter_split[0], split_indices)
             for zt,varType in enumerate(variable_type_list):
@@ -4263,7 +4253,7 @@ class LocalDAECollocator(CasadiCollocator):
                     counter_s+=1         
 
             # Update the map
-            var_list = ['x','dx','unelim_u','w']
+            var_list = ['x', 'dx', 'w', 'unelim_u']
             if self.blocking_factors is not None:
                 var_list = ['x','dx','w']
             for i in range(1, self.n_e+1):
@@ -4283,7 +4273,7 @@ class LocalDAECollocator(CasadiCollocator):
                             new_var_index[varType][i][k+move_zero]
 
             # Update initial values ignored in the previous loop
-            var_list = ['dx','unelim_u','w']
+            var_list = ['dx', 'w', 'unelim_u']
             if self.blocking_factors is not None:
                 var_list = ['dx','w']            
             for varType in var_list:
@@ -4594,6 +4584,7 @@ class LocalDAECollocator(CasadiCollocator):
                         "input %s" % name)
                 nlp_timed_variables.append(self.var_map[i][k][vt][index])
 
+        
         # Classical scaling of timed variables
         if (self.variable_scaling and self.nominal_traj is None and
             self.hs != "free" and len(collocation_constraint_points) > 0):
@@ -4603,7 +4594,7 @@ class LocalDAECollocator(CasadiCollocator):
              self.mterm] = casadi.substitute(
                  ocp_expressions, timed_variables,
                  map(operator.mul, timed_variables_sfs, timed_variables))
-
+            
         self._timed_variables = timed_variables
         self._nlp_timed_variables = nlp_timed_variables 
 

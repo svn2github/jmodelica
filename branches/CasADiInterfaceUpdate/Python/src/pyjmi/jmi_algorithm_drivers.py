@@ -2318,11 +2318,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                       "not supported.")
         elif self.discr != "LG" and self.discr != "LGR":
             raise ValueError("Unknown discretization scheme %s." % self.discr)
-
-        # Check validity of named_vars
-        if self.named_vars and self.reorder_vars:
-            raise NotImplementedError("Named variables does not work with " +
-                                      "reordered variables.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and
@@ -2839,7 +2834,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_cont_var': False,
                 'measurement_data': None,
                 'checkpoint': False,
-                'reorder_vars': False,
+                'reorder_vars': True,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
                 'IPOPT_options': {},

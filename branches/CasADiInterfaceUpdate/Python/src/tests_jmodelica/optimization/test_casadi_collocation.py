@@ -1150,7 +1150,6 @@ class TestLocalDAECollocator(object):
 
         # Without naming
         opts['named_vars'] = False
-        opts['reorder_vars'] = False
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
