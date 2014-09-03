@@ -174,6 +174,39 @@ mode := if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 
 ")})));
 end Test2;
 
+model Test3
+    Real a,b,c;
+equation
+    a * b = 0;
+    a - b = c;
+    a + b = c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="Test3",
+            description="Tests a tricky tearing bug where incorrect torn part was constructed.",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn system (Block 1) of 2 iteration variables and 1 solved variables ---
+Torn variables:
+  c
+
+Iteration variables:
+  b ()
+  a ()
+
+Torn equations:
+  c := - (- a + (- b))
+
+Residual equations:
+  a - b = c
+    Iteration variables: b
+  a * b = 0
+    Iteration variables: a
+-------------------------------
+")})));
+end Test3;
+
 model WarningTest1
 	Real u0,u1,u2,u3,uL;
 	Real i0,i1,i2,i3,iL;

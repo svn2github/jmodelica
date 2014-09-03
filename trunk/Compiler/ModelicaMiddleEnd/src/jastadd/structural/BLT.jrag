@@ -2420,7 +2420,8 @@ aspect AutomaticTearing {
                                 SolvingEq gInnerEq = gInner.getEquation(e.getName());
                                 for (SolvingVar v : e.getVariables()) {
                                     SolvingVar gInnerVar = gInner.getVariable(v.getName());
-                                    if (gInnerVar != null) {
+                                    if (gInnerVar != null && gInnerVar.isIter()) {
+                                        gInner.addInsidence(gInnerEq, gInnerVar);
                                         if (gInner.canMatch(gInnerEq, gInnerVar) && gInnerVar.isIter() && !eqs.contains(gInnerEq)) {
                                             eqs.add(gInnerEq);
                                         }
