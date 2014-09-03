@@ -205,13 +205,6 @@ aspect ComplianceCheck {
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
 	}
 	
-    public void FArrayDimAsArgsExp.complianceCheck(ErrorCheckType checkType) {
-        super.complianceCheck(checkType);
-        if (inFunction() && size().isUnknown()) {
-            compliance("Unknown size operator " + name() + "() is not supported in functions");
-        }
-    }
-	
 	public void FPowExp.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (inFunction() && getLeft().size().isUnknown()) {
