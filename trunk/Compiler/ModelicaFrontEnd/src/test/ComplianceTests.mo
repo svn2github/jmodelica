@@ -628,6 +628,8 @@ model Error2
   algorithm
 	y := symmetric(x);
 	b := identity(n+1-1);
+	b := zeros(n,n);
+	b := fill(n,n,n);
 	a := min(c);
 	a := max(c);
 	b := b^2;
@@ -647,9 +649,12 @@ model Error2
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
 Compliance error at line 627, column 7:
   Unknown sizes in operator symmetric() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Compliance error at line 628, column 7:
-  Unknown size arg in operator identity() is not supported in functions
+Error: in file '...':
+Compliance error at line 631, column 7:
+  Unknown size operator zeros() is not supported in functions
+Error: in file '...':
+Compliance error at line 632, column 7:
+  Unknown size operator fill() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
 Compliance error at line 631, column 7:
   Unknown sizes in operator ^ is not supported in functions

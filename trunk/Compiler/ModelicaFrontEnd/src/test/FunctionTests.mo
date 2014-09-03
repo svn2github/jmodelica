@@ -5741,6 +5741,98 @@ end FunctionTests.ArrayExpInFunc33;
 ")})));
 end ArrayExpInFunc33;
 
+model ArrayExpInFunc34
+    function f
+        input Integer n;
+        output Real[n,n] o;
+      algorithm
+        o := identity(n);
+    end f;
+    Real[1,1] y = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc34",
+            description="Scalarization of functions: unknown size identity expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc34
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.ArrayExpInFunc34.f(1);
+
+public
+ function FunctionTests.ArrayExpInFunc34.f
+  input Integer n;
+  output Real[n, n] o;
+  Integer[:,:] temp_1;
+ algorithm
+  size(temp_1) := {n, n};
+  for i3 in 1:n loop
+   for i4 in 1:n loop
+    temp_1[i3,i4] := if i3 == i4 then 1 else 0;
+   end for;
+  end for;
+  for i1 in 1:n loop
+   for i2 in 1:n loop
+    o[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc34.f;
+
+end FunctionTests.ArrayExpInFunc34;
+")})));
+end ArrayExpInFunc34;
+
+model ArrayExpInFunc35
+    function f
+        input Integer n;
+        output Real o;
+      algorithm
+        o := sum(identity(n));
+    end f;
+    Real y = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc35",
+            description="Scalarization of functions: unknown size identity expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc35
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc35.f(1);
+
+public
+ function FunctionTests.ArrayExpInFunc35.f
+  input Integer n;
+  output Real o;
+  Integer temp_1;
+  Integer[:,:] temp_2;
+ algorithm
+  size(temp_2) := {n, n};
+  for i3 in 1:n loop
+   for i4 in 1:n loop
+    temp_2[i3,i4] := if i3 == i4 then 1 else 0;
+   end for;
+  end for;
+  temp_1 := 0;
+  for i1 in 1:n loop
+   for i2 in 1:n loop
+    temp_1 := temp_1 + temp_2[i1,i2];
+   end for;
+  end for;
+  o := temp_1;
+  return;
+ end FunctionTests.ArrayExpInFunc35.f;
+
+end FunctionTests.ArrayExpInFunc35;
+")})));
+end ArrayExpInFunc35;
 
 model ArrayOutputScalarization1
  function f

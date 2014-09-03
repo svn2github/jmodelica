@@ -1183,6 +1183,7 @@ aspect Scalarization {
     eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause();
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
+    eq FIdentity.extractTemp()     = size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
     
     /**
@@ -1192,6 +1193,7 @@ aspect Scalarization {
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
     eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
     eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq FIdentity.extractAsUnknown()     = true;
     
     /**
      * Stores fornames to be uses by <code>scalarize()</code>
@@ -1435,6 +1437,24 @@ aspect Scalarization {
             
             offset = new FAddExp(offset, exp.size().has(catDim) ? exp.size().createFExp(catDim) : new FIntegerLitExp(1));
         }
+    }
+    
+    public void FIdentity.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(ndims());
+        names.fillLayer(this);
+        
+        getFExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        getFExp().addArrayUsesToIndexMap(indexMap, names);
+        
+        FArraySubscripts fas = names.createFArraySubscripts(ndims());
+        FIdUseExp left = tempExp(fas);
+        FIfExp right = new FIfExp(
+                new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
+                new FIntegerLitExp(1),
+                new FIntegerLitExp(0)
+        );
+        names.createForLoops(clauses, this).add(new FAssignStmt(left, right));
+        names.removeLayer();
     }
 
     public void FReductionExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
