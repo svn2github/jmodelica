@@ -308,6 +308,8 @@ aspect TransformCanonical {
 
         root().flushAllRecursive();	
         transformCanonicalCleanup();
+        getDAEBLT().errorCheck();
+        getDAEInitBLT().errorCheck();
 
         endStep("transformCanonical()");
     }
@@ -567,7 +569,6 @@ aspect TransformCanonical {
                 if (e.numScalarEquations() == 0)
                     daeBLT.add(EquationBlockFactory.createMetaBlock(e));
             setDAEBLT(daeBLT);
-            getDAEStructuredBLT().errorCheck();
             log.info(getDAEStructuredBLT());
             log.info(getDAEBLT());
         } else {
@@ -684,7 +685,6 @@ aspect TransformCanonical {
                 }
             }
             setDAEInitBLT(daeInitBLT);
-            daeInitBLT.errorCheck();
             log.info(daeInitBLT);
         } else {
             setDAEInitBLT(BLT.EMPTY_BLT);

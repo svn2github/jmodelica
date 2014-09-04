@@ -2892,6 +2892,10 @@ aspect CCodeGen {
                         str.format("%s%s = %s;\n", indent, iterEntry.getValue(), exp.ceval());
                 }
             }
+            
+            public boolean attributeSet(FVariable var, String attr) {
+                return var.attributeSet(attr);
+            }
 
             public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
                 str.print(ASTNode.fConstant().genJMIVariabilityConstant_C() + ", ");

@@ -2055,7 +2055,7 @@ aspect Attributes {
     syn int     FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();
     
     public void FVariable.warnStartAttributeNotSet() {
-        if (!startAttributeSet())
+        if (!ASTNode.printer_C.C_blockResidualAttributePrinter.attributeSet(this, "start"))
             warning("Iteration variable \"" + name() + "\" is missing start value!");
     }
     
