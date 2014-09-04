@@ -1044,15 +1044,29 @@ aspect Scalarization {
                 fqn = new FQNameFull(name);
             return new FIdTempExp(new FIdUse(fqn));
         }
+        
+        public FExp[] createFExpArray() {
+            if (!hasNames())
+                return new FExp[0];
+            FExp[] subs = new FExp[topLayer().length];
+            int i = 0;
+            for (String s : topLayer()) {
+                subs[i++] = new FIdUseExp(s);
+            }
+            return subs;
+        }
+        
 		/**
 		 * Creates a new ForNames with the top layer copied
 		 */
 		public ForNames copySurface() {
 			ForNames fn = new ForNames();
-			fn.addLayer(topLayer().length);
-			for (String s : topLayer())
-				fn.add(s);
-			fn.last = last;
+            if (names.size() > 0) {
+                fn.addLayer(topLayer().length);
+                for (String s : topLayer())
+                    fn.add(s);
+            }
+            fn.last = last;
 			return fn;
 		}
 	}
@@ -1133,9 +1147,7 @@ aspect Scalarization {
     }
     
     syn FExp FIdTempExp.scalarize(Map<String,FExp> indexMap) =
-            indexNames == null ?
-                    fullCopy() :
-                        createUseWithNamedSubscripts(indexNames);
+            indexNames == null ? fullCopy() : createUseFas(name());
     
     /*
      * Attributes for creating FTempIdExps and function temps.
@@ -1184,6 +1196,8 @@ aspect Scalarization {
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
     eq FIdentity.extractTemp()     = size().isUnknown() || inUnknownSize();
+    eq FVectorExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
+    eq FMatrixExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
     
     /**
@@ -1193,13 +1207,31 @@ aspect Scalarization {
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
     eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
     eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FIdentity.extractAsUnknown()     = true;
+    eq FIdentity.extractAsUnknown()     = size().isUnknown();
+    eq FVectorExp.extractAsUnknown()    = getFExp().size().isUnknown();
+    eq FMatrixExp.extractAsUnknown()    = getFExp().size().isUnknown();
     
     /**
-     * Stores fornames to be uses by <code>scalarize()</code>
+     * Stores FSubscripts to be uses by <code>scalarize()</code>
      */
-    public ForNames FExp.indexNames = null;
-    public String FColonSubscript.indexName = null;
+    public FExp[] FExp.indexNames = null;
+    public FExp FColonSubscript.indexName = null;
+    
+    public FIdUseExp FIdUseExp.createUseFas(String name) {
+        if (indexNames != null && indexNames.length > 0) {
+            return new FIdUseExp(name, createIndexNameFas());
+        } else {
+            return new FIdUseExp(name);
+        }
+    }
+    
+    public FArraySubscripts FIdUseExp.createIndexNameFas() {
+        List<FSubscript> l = new List<FSubscript>();
+        for (FExp e : indexNames) {
+            l.add(new FExpSubscript(e.fullCopy()));
+        }
+        return new FArraySubscripts(l);
+    }
     
     /**
      * Will this expression be scalarized as an unknown size?
@@ -1456,6 +1488,47 @@ aspect Scalarization {
         names.createForLoops(clauses, this).add(new FAssignStmt(left, right));
         names.removeLayer();
     }
+    
+    public void FVectorExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(getFExp().ndims());
+        names.fillLayer(getFExp());
+        
+        getFExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        getFExp().addArrayUsesToIndexMap(indexMap, names);
+        
+        FExp ind = null;
+        for (int i = 0; i < names.size(); i++) {
+            FIdUseExp u = new FIdUseExp(names.get(i));
+            FSubExp u1 = new FSubExp(u, new FIntegerLitExp(1));
+            if (ind != null) {
+                ind = new FMulExp(ind, getFExp().size().createFExp(i));
+                ind = new FAddExp(ind, u1);
+            } else {
+                ind = u1;
+            }
+        }
+        ind = new FAddExp(ind, new FIntegerLitExp(1));
+        
+        FArraySubscripts fas = new FArraySubscripts();
+        fas.addFSubscript(new FExpSubscript(ind));
+        FIdUseExp left = tempExp(fas);
+        FExp right = getFExp().scalarize(indexMap);
+        names.createForLoops(clauses, getFExp()).add(new FAssignStmt(left, right));
+        names.removeLayer();
+    }
+    
+    public void FMatrixExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(getFExp().ndims());
+        names.fillLayer(getFExp());
+        
+        getFExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        getFExp().addArrayUsesToIndexMap(indexMap, names);
+        
+        FIdUseExp left = tempExp(names.createFArraySubscripts(2));
+        FExp right = getFExp().scalarize(indexMap);
+        names.createForLoops(clauses, getFExp()).add(new FAssignStmt(left, right));
+        names.removeLayer();
+    }
 
     public void FReductionExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         // Set up names and create for loop(s)
@@ -1595,9 +1668,16 @@ aspect Scalarization {
     }
     
     /**
-     * Traverser for {@link FExp#addArrayUsesToIndexMap(Map indexMap, ForNames names)}.
+     * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(Map indexMap, FExp[] names)}.
      */
     public void ASTNode.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+        addArrayUsesToIndexMap(indexMap, names.createFExpArray());
+    }
+    
+    /**
+     * Traverser for {@link FExp#addArrayUsesToIndexMap(Map indexMap, FExp[] names)}.
+     */
+    public void ASTNode.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         for (ASTNode n : this)
             n.addArrayUsesToIndexMap(indexMap, names);
     }
@@ -1606,74 +1686,70 @@ aspect Scalarization {
      * Copies top layer in <code>names</code> to id uses and creates entries
      * in <code>indexNames</code> for expressions replaced with temps.
      */
-    public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+    public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         if (useTempVar) {
-            if (isArray())
-                indexMap.put(tempVarName(), names.createUseWithSubscripts(tempVarName()));
+            if (isArray()) {
+                List<FSubscript> l = new List<FSubscript>();
+                for (FExp e : names) {
+                    l.add(new FExpSubscript(e.fullCopy()));
+                }
+                FArraySubscripts fas = new FArraySubscripts(l);
+                indexMap.put(tempVarName(), tempExp(fas));
+            }
         } else {
             super.addArrayUsesToIndexMap(indexMap, names);
         }
     }
 
-    public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+    public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         if (!hasFArraySubscripts() && isArray())
-            indexNames = names.copySurface();
+            indexNames = names;
         super.addArrayUsesToIndexMap(indexMap, names);
     }
-    public void FIdTempExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        indexNames = names.copySurface();
+    public void FIdTempExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexNames = names;
     }
 
-    public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        indexNames = names.copySurface();
-        super.addArrayUsesToIndexMap(indexMap, names);
-    }
-
-    public void FLinspace.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        indexNames = names.copySurface();
+    public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexNames = names;
         super.addArrayUsesToIndexMap(indexMap, names);
     }
 
-    public void FColonSubscript.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        indexName = names.get(0);
+    public void FLinspace.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexNames = names;
+        super.addArrayUsesToIndexMap(indexMap, names);
     }
 
-    public void FArraySubscripts.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+    public void FColonSubscript.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexName = names[0];
+    }
+
+    public void FArraySubscripts.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         int i = 0;
         for (FSubscript fs : getFSubscripts()) {
             if (fs.type().isArray()) {
-                names.addLayer(1);
-                names.promote(i++);
-                fs.addArrayUsesToIndexMap(indexMap, names);
-                names.removeLayer();
+                FExp[] local = new FExp[1];
+                local[0] = names[i++];
+                fs.addArrayUsesToIndexMap(indexMap, local);
             }
         }
     }
 
-    public void FTranspose.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-        names.createTransposedLayer();
-        super.addArrayUsesToIndexMap(indexMap, names);
-        names.removeLayer();
+    public void FTranspose.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        FExp[] local = names.clone();
+        local[0] = names[1];
+        local[1] = names[0];
+        super.addArrayUsesToIndexMap(indexMap, local);
     }
 
-    public void FFunctionCall.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+    public void FFunctionCall.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         // No names available as a function call arg.
-        boolean b = !extractTemp();
-        if (b)
-            names.addLayer(0);
-        super.addArrayUsesToIndexMap(indexMap, names);
-        if (b)
-            names.removeLayer();
+        super.addArrayUsesToIndexMap(indexMap, extractTemp() ? names : new FExp[0]);
     }
 
-    public void FRecordConstructor.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+    public void FRecordConstructor.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         // No names available as record con arg.
-        boolean b = !extractTemp();
-        if (b)
-            names.addLayer(0);
-        super.addArrayUsesToIndexMap(indexMap, names);
-        if (b)
-            names.removeLayer();
+        super.addArrayUsesToIndexMap(indexMap, extractTemp() ? names : new FExp[0]);
     }
 
     public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
@@ -1731,6 +1807,8 @@ aspect Scalarization {
         to FStatement.sizeAssertsColl() for myFStatement();
     FAbstractCat contributes sizeAsserts() when extractTemp()
         to FStatement.sizeAssertsColl() for myFStatement();
+    FDimensionConvert contributes sizeAsserts() when getFExp().size().isUnknown() && getFExp().ndims() > ndims()
+        to FStatement.sizeAssertsColl() for myFStatement();
                 
     syn ArrayList<FAssert> FAssignStmt.sizeAsserts() {
         ArrayList<FAssert> a = new ArrayList<FAssert>();
@@ -1782,9 +1860,7 @@ aspect Scalarization {
                         FExp re = arg.size().has(i) ? arg.size().createFExp(i) : new FIntegerLitExp(1);
                         String rs = re.prettyPrint("");
                         if (!ls.equals(rs)) {
-                            res.add(new FAssert(orNotIfExpConds(new FEqExp(le.unboundCopy(), re)), 
-                                    new FStringLitExp(
-                                            String.format("Mismatching size in dimension %d of expression %s in function %s", i+1, prettyPrint(""), containingFFunctionDecl().name())), new Opt<FExp>()));
+                            res.add(sizeAssert(orNotIfExpConds(new FEqExp(le.unboundCopy(), re)), i));
                         }
                     }
                 }
@@ -1792,6 +1868,51 @@ aspect Scalarization {
         }
         return res;
     }
+    
+    syn ArrayList<FAssert> FDimensionConvert.sizeAsserts();
+    
+    eq FScalarExp.sizeAsserts() {
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        Size s = getFExp().size();
+        for (int i = 0; i < s.ndims(); i++) {
+            if (s.isUnknown(i)) {
+                FExp e = new FEqExp(s.createFExp(i), new FIntegerLitExp(1));
+                res.add(sizeAssert(e, i));
+            }
+        }
+        return res;
+    }
+    
+    eq FVectorExp.sizeAsserts() {
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        Size s = getFExp().size();
+        FExp prod = s.createFExp(0);
+        FExp sum  = s.createFExp(0);
+        for (int i = 1; i < s.ndims(); i++) {
+            prod = new FMulExp(prod, s.createFExp(i));
+            sum  = new FAddExp(sum,  s.createFExp(i));
+        }
+        // prod <= sum - n + 1
+        FExp e = new FLeqExp(prod, new FAddExp(new FSubExp(sum, new FIntegerLitExp(s.ndims())), new FIntegerLitExp(1)));
+        res.add(sizeAssert(e, -1));
+        return res;
+    }
+    
+    eq FMatrixExp.sizeAsserts() {
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        Size s = getFExp().size();
+        for (int i = 2; i < s.ndims(); i++) {
+            res.add(sizeAssert(new FEqExp(s.createFExp(i), new FIntegerLitExp(1)), i));
+        }
+        return res;
+    }
+    
+    public FAssert FExp.sizeAssert(FExp e, int i) {
+        String dim = i < 0 ? "" : String.format("dimension %d of ", i+1);
+        return new FAssert(e, new FStringLitExp(String.format("Mismatching size in %sexpression %s in function %s",
+                dim, prettyPrint(""), containingFFunctionDecl().name())), new Opt<FExp>());
+    }
+    
     /**
      * Adds an assert statement to <code>asserts</code> for all dimensions where
      * size is known in this size but unknown in <code>other</code>.
@@ -2245,7 +2366,7 @@ aspect Scalarization {
       if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization())
             fqn = ((FIdUseExp) indexMap.get(name())).getFIdUse().getFQName();
       if (indexNames != null)
-            fqn = fqn.copyAndAddFas(indexNames.createFArraySubscripts());
+            fqn = fqn.copyAndAddFas(createIndexNameFas());
       fqn = fqn.copyAndAppend(suffix);
       fqn.parent = this;
       fqn = fqn.scalarize(indexMap);
@@ -2285,11 +2406,30 @@ aspect Scalarization {
         return exp.scalarize(indexMap);
     }
 	
-    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        if (useTempVar || size().isUnknown()) // Note: fails when scalarize doesnt return fiduseexp
-            return scalarize(indexMap).extractArrayCell(indexMap, i);
-        return dynamicFExp(getArray().get(i));
+    
+    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, ForNames names) {
+        addArrayUsesToIndexMap(indexMap, names);
+        return scalarize(indexMap);
     }
+    
+    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
+        if (useTempVar || size().isUnknown()) {
+            int[] ind = i.index();
+            FExp[] subs = new FExp[ind.length];
+            for (int k = 0; k < ind.length; k++) {
+                subs[k] = new FIntegerLitExp(ind[k]);
+            }
+            return extractArrayCell(indexMap, subs);
+        } else {
+            return dynamicFExp(getArray().get(i));
+        }
+    }
+    
+    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, FExp[] subs) {
+        addArrayUsesToIndexMap(indexMap, subs);
+        return scalarize(indexMap);
+    }
+    
     public FExp FIdUseExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
         return dynamicFExp(createNode(new FIdUse(getFIdUse().getFQName().specify(i, true))));
     }
@@ -2762,7 +2902,7 @@ aspect Scalarization {
 	public FSubscript FColonSubscript.scalarize(Map<String,FExp> indexMap) {
 		if (indexName == null)
 			throw new UnsupportedOperationException("Colon subscript without index name");
-		return new FExpSubscript(new FIdUseExp(indexName));
+		return new FExpSubscript(indexName.fullCopy());
 	}
 	
 	public FSubscript FExpSubscript.scalarize(Map<String,FExp> indexMap) {
@@ -2817,15 +2957,8 @@ aspect Scalarization {
         if (variability().knownParameterOrLess() && !(inParameterEquation() && isParameterExp()) && !inFunctionCallLeft())
             return ceval().buildLiteral();
         if (indexNames != null)
-            return indexNames.createUseWithSubscripts(name());
+            return createUseFas(name());
         return new FIdUseExp(getFIdUse().scalarize(indexMap));
-    }
-    
-    /**
-     * Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
-     */
-    public FIdUseExp FIdUseExp.createUseWithNamedSubscripts(ForNames names) {
-        return new FIdUseExp(name(), names.createFArraySubscripts());
     }
     
     inh boolean FIdUseExp.shouldKeepArrayDuringScalarization();
@@ -2853,7 +2986,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FRangeExp.scalarizeExp(Map<String,FExp> indexMap) {
-		FExp res = new FIdUseExp(indexNames.get(0));
+        FExp res = indexNames[0].fullCopy();
 		boolean startIsOne = getFExp(0).isIntegerLiteral(1);
 		if (!startIsOne || hasStep()) {
 			res = new FSubExp(res, new FIntegerLitExp(1));
@@ -2865,7 +2998,7 @@ aspect Scalarization {
 	}
 	
     public FExp FLinspace.scalarizeExp(Map<String,FExp> indexMap) {
-        FExp index = new FSubExp(new FIdUseExp(indexNames.get(0)), new FIntegerLitExp(1));
+        FExp index = new FSubExp(indexNames[0].fullCopy(), new FIntegerLitExp(1));
         FExp len  = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());
         FExp step = new FDivExp(len, new FSubExp(getN().fullCopy(), new FIntegerLitExp(1)));
         FExp res = new FAddExp(getStartExp().fullCopy(), new FMulExp(index, step));
@@ -2995,11 +3128,13 @@ aspect Scalarization {
 	public FExp FOnes.scalarizeExp(Map<String,FExp> indexMap) {
 		return new FIntegerLitExp(1);
 	}
-	
-	public FExp FScalarExp.scalarizeExp(Map<String,FExp> indexMap) {
-		return getFExp().getArray().getFExp(0).scalarize(indexMap);
-	}
-	
+    
+    public FExp FScalarExp.scalarizeExp(Map<String,FExp> indexMap) {
+        int[] t = new int[getFExp().ndims()];
+        Arrays.fill(t, 1);
+        return getFExp().extractArrayCell(indexMap, new Index(t));
+    }
+    
 	public FExp FFillExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return getFillExp().fullCopy();
 	}

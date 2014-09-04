@@ -185,9 +185,6 @@ aspect ComplianceCheck {
 	
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
 	eq FSymmetric.unknownSizeSupported()             = false;
-	eq FScalarExp.unknownSizeSupported()             = false;
-	eq FVectorExp.unknownSizeSupported()             = false;
-	eq FMatrixExp.unknownSizeSupported()             = false;
 	
 	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);

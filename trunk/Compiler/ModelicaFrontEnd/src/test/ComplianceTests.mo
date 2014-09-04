@@ -629,13 +629,14 @@ model Error2
 	y := symmetric(x);
 	b := identity(n+1-1);
 	b := zeros(n,n);
+	b := ones(n,n);
 	b := fill(n,n,n);
 	a := min(c);
 	a := max(c);
 	b := b^2;
 	a := scalar(x);
-	c := vector(x);
-	b := matrix(x);
+	c := vector(c);
+	b := matrix(c);
   end f;
   
   Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, 4);
@@ -652,23 +653,6 @@ Compliance error at line 627, column 7:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
 Compliance error at line 631, column 7:
   Unknown sizes in operator ^ is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Compliance error at line 632, column 7:
-  Unknown sizes in operator scalar() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Semantic error at line 632, column 14:
-  Calling function scalar(): types of positional argument 1 and input A are not compatible
-    type of 'x' is Real[:, :]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Compliance error at line 633, column 7:
-  Unknown sizes in operator vector() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Semantic error at line 633, column 14:
-  Calling function vector(): types of positional argument 1 and input A are not compatible
-    type of 'x' is Real[:, :]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Compliance error at line 634, column 7:
-  Unknown sizes in operator matrix() is not supported in functions
 ")})));
 end Error2;
 

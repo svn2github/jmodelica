@@ -218,7 +218,9 @@ aspect Arrays {
 	eq FIdentity.ndims()     = 2;
 	eq FDiagonal.ndims()     = 2;
 	
-	eq FDimensionConvert.ndims() = dimensionsToKeep().length;
+	eq FScalarExp.ndims() = 0;
+	eq FVectorExp.ndims() = 1;
+	eq FMatrixExp.ndims() = 2;
 	
 	eq FUnaryBuiltIn.ndims()              = getFExp().ndims();
 	eq FEventGenExp.ndims()               = getX().ndims();
@@ -934,6 +936,26 @@ aspect Arrays {
 		}
 	}
 	eq FScalarExp.size()        = Size.SCALAR;
+	
+    eq FVectorExp.size() {
+        Size s = getFExp().size();
+        if (s.ndims() > 0 && s.isUnknown()) {
+            FExp e = null;
+            for (int i = 0; i < s.ndims(); i++) {
+                FExp e1 = s.createFExp(i);
+                if (e == null) {
+                    e = e1;
+                } else {
+                    e = new FMulExp(e,e1);
+                }
+            }
+            dynamicFExp(e);
+            MutableSize ss = new MutableSize(1);
+            ss.set(0, e);
+            return ss;
+        }
+        return super.size();
+    }
 	
 	syn Size FDimensionConvert.sizeForScalarArg();
 	eq FScalarExp.sizeForScalarArg() = Size.SCALAR;
@@ -2705,7 +2727,14 @@ aspect ArrayHelpers {
 					return true;
 			return false;
 		}
-		
+        
+        /**
+         * Check if length in dimension d is unknown.
+         */
+        public boolean isUnknown(int d) {
+            return size[d] == UNKNOWN;
+        }
+        
 		/**
 		 * Check if all lengths have a value (fix length or expression).
 		 */

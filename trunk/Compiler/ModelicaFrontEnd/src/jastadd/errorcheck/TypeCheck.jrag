@@ -1075,6 +1075,9 @@ aspect FlatTypeCheck {
    * Check if the given Size is valid for the argument of the operator.
    */
   syn boolean FDimensionConvert.argumentSizeValid(Size s) {
+      if (s.isUnknown())
+          return true;
+      
 	  boolean[] useDim = new boolean[s.ndims()];
 	  for (int d : dimensionsToKeep())
 		  if (d < useDim.length)
