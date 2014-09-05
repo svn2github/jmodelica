@@ -1713,6 +1713,8 @@ aspect ConstantEvaluation {
      */
     syn CValue FExp.cevalArray(Index i) {
         CValueArray res = new CValueArray(size());
+        if (size().evaluated().isUnknown())
+            return CValue.UNKNOWN;
         Array arr = getArray();
         if (i == Index.NULL)
           for (Index j : arr.indices())
@@ -1863,6 +1865,8 @@ aspect ConstantEvaluation {
           boolean selectX = type().lt(x, y).booleanValue() ^ !selectLesser();
           return selectX ? x : y;
         } else {
+            if (getX().size().evaluated().isUnknown())
+                return CValue.UNKNOWN;
           Iterator<FExp> it = getX().getArray().iteratorFExp();
           boolean less = selectLesser();
           CValue sel = it.next().ceval();
@@ -1876,6 +1880,8 @@ aspect ConstantEvaluation {
     }
 
     eq FReductionExp.cevalCalc() {
+        if (getFExp().size().evaluated().isUnknown())
+            return CValue.UNKNOWN;
         Iterator<FExp> it = getFExp().getArray().iteratorFExp();
         CValue value = reduceStartValue();
         while (it.hasNext())
@@ -2179,8 +2185,6 @@ aspect ConstantEvaluation {
     eq FExpExp.cevalCalc()   = new CValueReal(StrictMath.exp(getFExp().ceval().realValue()));
     eq FLogExp.cevalCalc()   = new CValueReal(StrictMath.log(getFExp().ceval().realValue()));
     eq FLog10Exp.cevalCalc() = new CValueReal(StrictMath.log10(getFExp().ceval().realValue()));
-
-    eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval()      = getFExp().ceval();

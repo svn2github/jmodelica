@@ -12651,6 +12651,126 @@ end Combinations3;
 
 end Hidden;
 
+package Misc
+
+model Misc1
+    function f
+      input Integer n;
+      output Integer[sum(1:n)] b;
+      algorithm
+        for i in 1:n loop
+            b[i] := i;
+        end for;
+    end f;
+    
+    Real[6] y = f(3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Misc_Misc1",
+            description="Scalarization of functions: size described with reduction expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Misc.Misc1
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+ Real y[5];
+ Real y[6];
+ discrete Integer temp_1[1];
+ discrete Integer temp_1[2];
+ discrete Integer temp_1[3];
+ discrete Integer temp_1[4];
+ discrete Integer temp_1[5];
+ discrete Integer temp_1[6];
+initial equation 
+ pre(temp_1[1]) = 0;
+ pre(temp_1[2]) = 0;
+ pre(temp_1[3]) = 0;
+ pre(temp_1[4]) = 0;
+ pre(temp_1[5]) = 0;
+ pre(temp_1[6]) = 0;
+equation
+ ({temp_1[1], temp_1[2], temp_1[3], temp_1[4], temp_1[5], temp_1[6]}) = FunctionTests.UnknownSize.Misc.Misc1.f(3);
+ y[1] = temp_1[1];
+ y[2] = temp_1[2];
+ y[3] = temp_1[3];
+ y[4] = temp_1[4];
+ y[5] = temp_1[5];
+ y[6] = temp_1[6];
+
+public
+ function FunctionTests.UnknownSize.Misc.Misc1.f
+  input Integer n;
+  output Integer[sum(1:n)] b;
+ algorithm
+  for i in 1:n loop
+   b[i] := i;
+  end for;
+  return;
+ end FunctionTests.UnknownSize.Misc.Misc1.f;
+
+end FunctionTests.UnknownSize.Misc.Misc1;
+
+")})));
+end Misc1;
+
+model Misc2
+    function f
+      input Integer[:] a;
+      output Integer[max(a)] b;
+      algorithm
+        for i in 1:size(b,1) loop
+            b[i] := i;
+        end for;
+    end f;
+    
+    Real[3] y = f({1,2,3});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Misc_Misc2",
+            description="Scalarization of functions: size described with reduction expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Misc.Misc2
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ discrete Integer temp_1[1];
+ discrete Integer temp_1[2];
+ discrete Integer temp_1[3];
+initial equation 
+ pre(temp_1[1]) = 0;
+ pre(temp_1[2]) = 0;
+ pre(temp_1[3]) = 0;
+equation
+ ({temp_1[1], temp_1[2], temp_1[3]}) = FunctionTests.UnknownSize.Misc.Misc2.f({1, 2, 3});
+ y[1] = temp_1[1];
+ y[2] = temp_1[2];
+ y[3] = temp_1[3];
+
+public
+ function FunctionTests.UnknownSize.Misc.Misc2.f
+  input Integer[:] a;
+  output Integer[max(a)] b;
+ algorithm
+  for i in 1:size(b, 1) loop
+   b[i] := i;
+  end for;
+  return;
+ end FunctionTests.UnknownSize.Misc.Misc2.f;
+
+end FunctionTests.UnknownSize.Misc.Misc2;
+
+")})));
+end Misc2;
+
+end Misc;
+
 end UnknownSize;
 
 
