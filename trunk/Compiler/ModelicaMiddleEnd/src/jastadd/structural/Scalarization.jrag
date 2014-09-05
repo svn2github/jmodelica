@@ -173,6 +173,9 @@ aspect Scalarization {
      * list vars.
      */
     public void FVariable.scalarize(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
+        if (size().isZero())
+            return;
+        
         if (hasBindingExp())
             getBindingExp().createArrayTemporaries(variability().parameterOrLess(), equs, pEqus, vars);
         
@@ -2210,6 +2213,9 @@ aspect Scalarization {
 	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		//log.debug("FEquation.scalarize() " + ndims());
+        if (size().isZero())
+            return;
+        
 		createArrayTemporaries(eqns, vars, indexMap);
 		if (ndims()==0) {
 			/*

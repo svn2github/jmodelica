@@ -1037,6 +1037,61 @@ end ArrayTests.General.ArrayTest38;
 ")})));
 end ArrayTest38;
 
+model ArrayTest39
+    function f
+        input Integer n;
+        input Real t;
+        output Real[n] o;
+      algorithm
+        o := {t for i in 1:n};
+    end f;
+
+    parameter Integer n = 0;
+    parameter Real[n] y;
+    parameter Real p = 1;
+    parameter Real[n] a;
+  initial equation
+    y = f(n, p);
+    a = y;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest39",
+            description="Initial equation for size zero array",
+            flatModel="
+fclass ArrayTests.General.ArrayTest39
+ parameter Integer n = 0 /* 0 */;
+ parameter Real p = 1 /* 1 */;
+end ArrayTests.General.ArrayTest39;
+")})));
+end ArrayTest39;
+
+model ArrayTest40
+    function f
+        input Integer n;
+        input Real t;
+        output Real[n] o;
+      algorithm
+        o := {t for i in 1:n};
+    end f;
+
+    parameter Integer n = 0;
+    parameter Real[n] y(start=f(n, p));
+    parameter Real p = 1;
+    parameter Real[n] a = y;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest40",
+            description="Start value for size zero array",
+            flatModel="
+fclass ArrayTests.General.ArrayTest40
+ parameter Integer n = 0 /* 0 */;
+ parameter Real p = 1 /* 1 */;
+end ArrayTests.General.ArrayTest40;
+")})));
+end ArrayTest40;
+
 end General;
 
 

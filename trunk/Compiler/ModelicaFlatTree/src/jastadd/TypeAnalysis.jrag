@@ -473,6 +473,8 @@ aspect FlatTypeAnalysis {
     public FExp FReductionExp.iterExp() { return ((FIterExp) getFExp()).getFExp(); }
 
     eq FArray.type() {
+        if (getNumFExp() == 0)
+            return fUnknownType().arrayType(size());
         if (isIterArray())
             return getFExp(0).type();
         

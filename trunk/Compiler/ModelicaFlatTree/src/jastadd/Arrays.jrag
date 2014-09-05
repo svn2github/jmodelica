@@ -2684,6 +2684,13 @@ aspect ArrayHelpers {
 			return res < 0 ? 0 : res;
 		}
 		
+        /**
+         * True if any dimension is verified to be zero
+         */
+        public boolean isZero() {
+            return !isUnknown() && numElements() == 0;
+        }
+		
 		/**
 		 * Create a new flattened FArraySubscripts object describing this size.
 		 */
