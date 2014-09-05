@@ -1579,9 +1579,23 @@ aspect Arrays {
         if (!isArray())
             return new ScalarAsArray(this);
         
+        if (useTempVar())
+            return createTempArray();
+        
         Array res = new Array(indices());
         for (Index i : res.indices())
             res.set(i, new FSubscriptedExp(unboundCopy(), i.createFArraySubscripts()));
+        return res;
+    }
+    
+    /**
+     * Computes a generic array expansion of the temporary replacing this expression.
+     */
+    syn Array FExp.createTempArray() {
+        Array res = new Array(indices());
+        for (Index i : res.indices()) {
+            res.set(i, tempExp(i.createFArraySubscripts()));
+        }
         return res;
     }
 
@@ -1640,7 +1654,8 @@ aspect Arrays {
 	eq FMulExp.getArray() {
 		if (isElementWise())
 			return super.getArray();
-		
+        if (useTempVar())
+            return createTempArray();
 		if (!isArray())
 			return new ScalarAsArray(composeMulScalarCellExp(Index.NULL));
 		
@@ -1787,6 +1802,8 @@ aspect Arrays {
 	}
 	
 	eq FDimensionConvert.getArray() {
+        if (useTempVar())
+            return createTempArray();
 		Indices ind = indices();
 		Array arr = new Array(ind);
 		if (getFExp().isArray()) {

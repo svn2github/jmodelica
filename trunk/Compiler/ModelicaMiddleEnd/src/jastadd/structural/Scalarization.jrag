@@ -2411,12 +2411,7 @@ aspect Scalarization {
     public FExp FQNameEmpty.scalarRecordFExp(Map<String,FExp> indexMap, FExp exp) {
         return exp.scalarize(indexMap);
     }
-	
     
-    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, ForNames names) {
-        addArrayUsesToIndexMap(indexMap, names);
-        return scalarize(indexMap);
-    }
     
     public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
         if (useTempVar || size().isUnknown()) {
@@ -2427,7 +2422,7 @@ aspect Scalarization {
             }
             return extractArrayCell(indexMap, subs);
         } else {
-            return dynamicFExp(getArray().get(i));
+            return dynamicFExp(getArray().get(i).scalarize(indexMap));
         }
     }
     
@@ -2824,7 +2819,8 @@ aspect Scalarization {
 	 * Flag that signals that this expression should be replaced with a use of a temporary variable.
 	 */
 	protected boolean FExp.useTempVar = false;
-
+    syn boolean FExp.useTempVar() = useTempVar;
+	
 	/**
 	 * Scalarize expressions, replacing array expressions with FArrays of scalarized subexpressions.
 	 * 
