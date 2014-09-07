@@ -1640,7 +1640,6 @@ end RecordTests.RecordArray6;
 end RecordArray6;
 
 
-// TODO: entire record is here turned into a structural parameter, but should only be n
 model RecordArray7
     record A
         parameter Integer n;
@@ -1658,8 +1657,8 @@ model RecordArray7
             flatModel="
 fclass RecordTests.RecordArray7
  parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, {1, 2}) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
- Real y[2] = {1.0, 2.0};
+ parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ Real y[2] = a.x[1:2];
 
 public
  record RecordTests.RecordArray7.A
@@ -2876,20 +2875,20 @@ end RecordScalarize22;
 
 
 model RecordScalarize23
-	record R
-		Real[1] X;
-	end R;
-	
-	final parameter Real p = -0.1;
-	final parameter Real[1] s =  {0.4 - p};
-	R r(X(start=s)) = R({1});
+    record R
+        Real[1] X;
+    end R;
+    
+    parameter Real p = -0.1;
+    parameter Real[1] s =  {0.4 - p};
+    R r(X(start=s)) = R({1});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RecordScalarize23",
-			description="",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize23",
+            description="",
+            variability_propagation=false,
+            flatModel="
 fclass RecordTests.RecordScalarize23
  parameter Real p = - 0.1 /* -0.1 */;
  parameter Real s[1];
@@ -2904,19 +2903,19 @@ end RecordScalarize23;
 
 
 model RecordScalarize24
-	record R
-		Real[1] X;
-	end R;
-	
-	final parameter Real p = -0.1;
-	R r(X(start={0.4 - p})) = R({1});
+    record R
+        Real[1] X;
+    end R;
+    
+    parameter Real p = -0.1;
+    R r(X(start={0.4 - p})) = R({1});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RecordScalarize24",
-			description="",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize24",
+            description="",
+            variability_propagation=false,
+            flatModel="
 fclass RecordTests.RecordScalarize24
  parameter Real p = - 0.1 /* -0.1 */;
  Real r.X[1](start = 0.4 - p);

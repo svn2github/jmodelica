@@ -90,6 +90,9 @@ struct jmi_kinsol_solver_t {
     int* bound_limiting;           /**< \brief 1 if bound is limitng stepsize, 0 otherwise*/    
     realtype* bounds;              /**< \brief bound vals */
     realtype* active_bounds;
+    realtype max_nw_step;           /**< \brief maximal newton step calculated from nominals */
+    realtype* range_limits;         /**< \brief step limits on the different IVs */
+    int* range_limited;             /**< \brief flags indicating if step in specific IV is limiting */
     
     realtype y_pos_min_1d;
     realtype f_pos_min_1d;

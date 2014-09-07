@@ -5741,6 +5741,474 @@ end FunctionTests.ArrayExpInFunc33;
 ")})));
 end ArrayExpInFunc33;
 
+model ArrayExpInFunc34
+    function f
+        input Integer n;
+        output Real[n,n] o;
+      algorithm
+        o := identity(n);
+    end f;
+    Real[1,1] y = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc34",
+            description="Scalarization of functions: unknown size identity expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc34
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.ArrayExpInFunc34.f(1);
+
+public
+ function FunctionTests.ArrayExpInFunc34.f
+  input Integer n;
+  output Real[n, n] o;
+  Integer[:,:] temp_1;
+ algorithm
+  size(temp_1) := {n, n};
+  for i3 in 1:n loop
+   for i4 in 1:n loop
+    temp_1[i3,i4] := if i3 == i4 then 1 else 0;
+   end for;
+  end for;
+  for i1 in 1:n loop
+   for i2 in 1:n loop
+    o[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc34.f;
+
+end FunctionTests.ArrayExpInFunc34;
+")})));
+end ArrayExpInFunc34;
+
+model ArrayExpInFunc35
+    function f
+        input Integer n;
+        output Real o;
+      algorithm
+        o := sum(identity(n));
+    end f;
+    Real y = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc35",
+            description="Scalarization of functions: unknown size identity expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc35
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc35.f(1);
+
+public
+ function FunctionTests.ArrayExpInFunc35.f
+  input Integer n;
+  output Real o;
+  Integer temp_1;
+  Integer[:,:] temp_2;
+ algorithm
+  size(temp_2) := {n, n};
+  for i3 in 1:n loop
+   for i4 in 1:n loop
+    temp_2[i3,i4] := if i3 == i4 then 1 else 0;
+   end for;
+  end for;
+  temp_1 := 0;
+  for i1 in 1:n loop
+   for i2 in 1:n loop
+    temp_1 := temp_1 + temp_2[i1,i2];
+   end for;
+  end for;
+  o := temp_1;
+  return;
+ end FunctionTests.ArrayExpInFunc35.f;
+
+end FunctionTests.ArrayExpInFunc35;
+")})));
+end ArrayExpInFunc35;
+
+model ArrayExpInFunc36
+    function f
+        input Real[:] a;
+        output Real[size(a,1)] b;
+      algorithm
+        b := vector(a);
+    end f;
+    
+    Real[1] y = f({1});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc36",
+            description="Scalarization of functions: unknown size vector operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc36
+ Real y[1];
+equation
+ ({y[1]}) = FunctionTests.ArrayExpInFunc36.f({1});
+
+public
+ function FunctionTests.ArrayExpInFunc36.f
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+  Real[:] temp_1;
+ algorithm
+  size(temp_1) := {size(a, 1)};
+  for i2 in 1:size(a, 1) loop
+   temp_1[i2 - 1 + 1] := a[i2];
+  end for;
+  for i1 in 1:size(a, 1) loop
+   b[i1] := temp_1[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc36.f;
+
+end FunctionTests.ArrayExpInFunc36;
+")})));
+end ArrayExpInFunc36;
+
+model ArrayExpInFunc37
+    function f
+        input Real[:,:,:] a;
+        output Real[size(a,1)*size(a,2)*size(a,3)] b;
+      algorithm
+        b := vector(a);
+    end f;
+    
+    Real[1] y = f({{{1}}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc37",
+            description="Scalarization of functions: unknown size vector operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc37
+ Real y[1];
+equation
+ ({y[1]}) = FunctionTests.ArrayExpInFunc37.f({{{1}}});
+
+public
+ function FunctionTests.ArrayExpInFunc37.f
+  input Real[:, :, :] a;
+  output Real[size(a, 1) * size(a, 2) * size(a, 3)] b;
+  Real[:] temp_1;
+ algorithm
+  size(temp_1) := {size(a, 1) * size(a, 2) * size(a, 3)};
+  assert(size(a, 1) * size(a, 2) * size(a, 3) <= size(a, 1) + size(a, 2) + size(a, 3) - 3 + 1, \"Mismatching size in expression vector(a) in function FunctionTests.ArrayExpInFunc37.f\");
+  for i2 in 1:size(a, 1) loop
+   for i3 in 1:size(a, 2) loop
+    for i4 in 1:size(a, 3) loop
+     temp_1[((i2 - 1) * size(a, 2) + (i3 - 1)) * size(a, 3) + (i4 - 1) + 1] := a[i2,i3,i4];
+    end for;
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) * size(a, 2) * size(a, 3) loop
+   b[i1] := temp_1[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc37.f;
+
+end FunctionTests.ArrayExpInFunc37;
+")})));
+end ArrayExpInFunc37;
+
+model ArrayExpInFunc38
+    function f
+        input Real[:] a;
+        output Real[size(a,1),1] b;
+      algorithm
+        b := matrix(a);
+    end f;
+    
+    Real[1,1] y = f({3});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc38",
+            description="Scalarization of functions: unknown size matrix operator, vector input",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc38
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.ArrayExpInFunc38.f({3});
+
+public
+ function FunctionTests.ArrayExpInFunc38.f
+  input Real[:] a;
+  output Real[size(a, 1), 1] b;
+  Real[:,:] temp_1;
+ algorithm
+  size(temp_1) := {size(a, 1), 1};
+  for i3 in 1:size(a, 1) loop
+   temp_1[i3,1] := a[i3];
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:1 loop
+    b[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc38.f;
+
+end FunctionTests.ArrayExpInFunc38;
+")})));
+end ArrayExpInFunc38;
+
+model ArrayExpInFunc39
+    function f
+        input Real[:,:] a;
+        output Real[size(a,1),size(a,2)] b;
+      algorithm
+        b := matrix(a);
+    end f;
+    
+    Real[1,1] y = f({{3}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc39",
+            description="Scalarization of functions: unknown size vector operator, matrix input",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc39
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.ArrayExpInFunc39.f({{3}});
+
+public
+ function FunctionTests.ArrayExpInFunc39.f
+  input Real[:, :] a;
+  output Real[size(a, 1), size(a, 2)] b;
+  Real[:,:] temp_1;
+ algorithm
+  size(temp_1) := {size(a, 1), size(a, 2)};
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(a, 2) loop
+    temp_1[i3,i4] := a[i3,i4];
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    b[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc39.f;
+
+end FunctionTests.ArrayExpInFunc39;
+")})));
+end ArrayExpInFunc39;
+
+model ArrayExpInFunc40
+    function f
+        input Real[:,:,:] a;
+        output Real[size(a,1),size(a,2)] b;
+      algorithm
+        b := matrix(a);
+    end f;
+    
+    Real[1,1] y = f({{{3}}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc40",
+            description="Scalarization of functions: unknown size vector operator, many dims input",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc40
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.ArrayExpInFunc40.f({{{3}}});
+
+public
+ function FunctionTests.ArrayExpInFunc40.f
+  input Real[:, :, :] a;
+  output Real[size(a, 1), size(a, 2)] b;
+  Real[:,:] temp_1;
+ algorithm
+  size(temp_1) := {size(a, 1), size(a, 2)};
+  assert(size(a, 3) == 1, \"Mismatching size in dimension 3 of expression matrix(a) in function FunctionTests.ArrayExpInFunc40.f\");
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(a, 2) loop
+    for i5 in 1:size(a, 3) loop
+     temp_1[i3,i4] := a[i3,i4,i5];
+    end for;
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    b[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc40.f;
+
+end FunctionTests.ArrayExpInFunc40;
+")})));
+end ArrayExpInFunc40;
+
+model ArrayExpInFunc41
+    function f
+        input Real[:,:,:] a;
+        output Real b;
+      algorithm
+        b := scalar(a + a);
+    end f;
+    
+    Real y = f({{{1}}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc41",
+            description="Scalarization of functions: unknown size in scalar operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc41
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc41.f({{{1}}});
+
+public
+ function FunctionTests.ArrayExpInFunc41.f
+  input Real[:, :, :] a;
+  output Real b;
+ algorithm
+  assert(size(a, 1) == 1, \"Mismatching size in dimension 1 of expression scalar(a + a) in function FunctionTests.ArrayExpInFunc41.f\");
+  assert(size(a, 2) == 1, \"Mismatching size in dimension 2 of expression scalar(a + a) in function FunctionTests.ArrayExpInFunc41.f\");
+  assert(size(a, 3) == 1, \"Mismatching size in dimension 3 of expression scalar(a + a) in function FunctionTests.ArrayExpInFunc41.f\");
+  b := a[1,1,1] + a[1,1,1];
+  return;
+ end FunctionTests.ArrayExpInFunc41.f;
+
+end FunctionTests.ArrayExpInFunc41;
+")})));
+end ArrayExpInFunc41;
+
+model ArrayExpInFunc42
+    function f
+      input Real a[:, :];
+      input Real b[size(a, 1)];
+      output Real o;
+
+    algorithm
+      o := sum({scalar(2*transpose(matrix(b))*a[:, i]) for i in 1:size(a,2)});
+    end f;
+    
+    Real y = f({{1}},{1});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc42",
+            description="Scalarization of functions: unknown size in scalar operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc42
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc42.f({{1}}, {1});
+
+public
+ function FunctionTests.ArrayExpInFunc42.f
+  input Real[:, :] a;
+  input Real[size(a, 1)] b;
+  output Real o;
+  Real temp_1;
+  Real[:] temp_2;
+  Real[1] temp_3;
+  Real temp_4;
+  Real[:,:] temp_5;
+ algorithm
+  size(temp_2) := {size(a, 2)};
+  size(temp_5) := {size(a, 1), 1};
+  for i2 in 1:size(a, 2) loop
+   for i5 in 1:size(a, 1) loop
+    temp_5[i5,1] := b[i5];
+   end for;
+   for i3 in 1:1 loop
+    temp_4 := 0.0;
+    for i4 in 1:size(a, 1) loop
+     temp_4 := temp_4 + 2 * temp_5[i4,i3] * a[i4,i2];
+    end for;
+    temp_3[i3] := temp_4;
+   end for;
+   temp_2[i2] := temp_3[1];
+  end for;
+  temp_1 := 0.0;
+  for i1 in 1:size(a, 2) loop
+   temp_1 := temp_1 + temp_2[i1];
+  end for;
+  o := temp_1;
+  return;
+ end FunctionTests.ArrayExpInFunc42.f;
+
+end FunctionTests.ArrayExpInFunc42;
+")})));
+end ArrayExpInFunc42;
+
+model ArrayExpInFunc43
+    function f
+      input Real a[:, 1];
+      input Real b[1, :];
+      output Real tk;
+      algorithm
+        tk := scalar(transpose(b*a));
+    end f;
+    
+    Real y = f({{1},{2}},{{3,4}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc43",
+            description="Scalarization of functions: unknown size in scalar operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc43
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc43.f({{1}, {2}}, {{3, 4}});
+
+public
+ function FunctionTests.ArrayExpInFunc43.f
+  input Real[:, 1] a;
+  input Real[1, :] b;
+  output Real tk;
+  Real[1, 1] temp_1;
+  Real temp_2;
+ algorithm
+  for i1 in 1:1 loop
+   for i2 in 1:1 loop
+    temp_2 := 0.0;
+    for i3 in 1:size(a, 1) loop
+     temp_2 := temp_2 + b[i1,i3] * a[i3,i2];
+    end for;
+    temp_1[i1,i2] := temp_2;
+   end for;
+  end for;
+  tk := temp_1[1,1];
+  return;
+ end FunctionTests.ArrayExpInFunc43.f;
+
+end FunctionTests.ArrayExpInFunc43;
+")})));
+end ArrayExpInFunc43;
 
 model ArrayOutputScalarization1
  function f
@@ -11739,6 +12207,571 @@ end FunctionTests.MinOnInput1;
 ")})));
 end MinOnInput1;
 
+package UnknownSize
+
+package Hidden
+
+// Unknown sizes hidden by dimension converting expressions
+model Mul1
+    function f
+      input Real a[2, :];
+      input Real b[:, 2];
+      output Real[2,2] c;
+      algorithm
+        c := 2*(a*b);
+    end f;
+    
+    Real[2,2] y = f({{1,2},{3,4}},{{1,2},{3,4}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Mul1",
+            description="Scalarization of functions: hidden unknown size in multiplication",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Mul1
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}}) = FunctionTests.UnknownSize.Hidden.Mul1.f({{1, 2}, {3, 4}}, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Mul1.f
+  input Real[2, :] a;
+  input Real[:, 2] b;
+  output Real[2, 2] c;
+  Real[2, 2] temp_1;
+  Real temp_2;
+ algorithm
+  for i1 in 1:2 loop
+   for i2 in 1:2 loop
+    temp_2 := 0.0;
+    for i3 in 1:size(b, 1) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i3,i2];
+    end for;
+    temp_1[i1,i2] := temp_2;
+   end for;
+  end for;
+  c[1,1] := 2 * temp_1[1,1];
+  c[1,2] := 2 * temp_1[1,2];
+  c[2,1] := 2 * temp_1[2,1];
+  c[2,2] := 2 * temp_1[2,2];
+  return;
+ end FunctionTests.UnknownSize.Hidden.Mul1.f;
+
+end FunctionTests.UnknownSize.Hidden.Mul1;
+")})));
+end Mul1;
+
+model Scalar1
+    function f
+      input Real a[:, :];
+      output Real c;
+      algorithm
+        c := 2*scalar(a);
+    end f;
+    Real y = f({{1}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Scalar1",
+            description="Scalarization of functions: hidden unknown size in scalar operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Scalar1
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Hidden.Scalar1.f({{1}});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Scalar1.f
+  input Real[:, :] a;
+  output Real c;
+ algorithm
+  assert(size(a, 1) == 1, \"Mismatching size in dimension 1 of expression scalar(a) in function FunctionTests.UnknownSize.Hidden.Scalar1.f\");
+  assert(size(a, 2) == 1, \"Mismatching size in dimension 2 of expression scalar(a) in function FunctionTests.UnknownSize.Hidden.Scalar1.f\");
+  c := 2 * a[1,1];
+  return;
+ end FunctionTests.UnknownSize.Hidden.Scalar1.f;
+
+end FunctionTests.UnknownSize.Hidden.Scalar1;
+")})));
+end Scalar1;
+
+model Vector1
+    function f
+      input Real a[2, :];
+      output Real c[size(a,1)];
+      algorithm
+        c := 2*vector(a);
+    end f;
+    Real[2] y = f({{1},{1}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Vector1",
+            description="Scalarization of functions: hidden unknown size in vector operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Vector1
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = FunctionTests.UnknownSize.Hidden.Vector1.f({{1}, {1}});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Vector1.f
+  input Real[2, :] a;
+  output Real[2] c;
+  Real[:] temp_1;
+ algorithm
+  size(temp_1) := {2 * size(a, 2)};
+  assert(2 * size(a, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownSize.Hidden.Vector1.f\");
+  assert(2 * size(a, 2) <= 2 + size(a, 2) - 2 + 1, \"Mismatching size in expression vector(a) in function FunctionTests.UnknownSize.Hidden.Vector1.f\");
+  for i2 in 1:2 loop
+   for i3 in 1:size(a, 2) loop
+    temp_1[(i2 - 1) * size(a, 2) + (i3 - 1) + 1] := a[i2,i3];
+   end for;
+  end for;
+  for i1 in 1:2 * size(a, 2) loop
+   c[i1] := 2 * temp_1[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownSize.Hidden.Vector1.f;
+
+end FunctionTests.UnknownSize.Hidden.Vector1;
+")})));
+end Vector1;
+
+model Matrix1
+    function f
+      input Real a[1, 1, :];
+      output Real c[1,1];
+      algorithm
+        c := 2*matrix(a);
+    end f;
+    Real[1,1] y = f({{{1}}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Matrix1",
+            description="Scalarization of functions: hidden unknown size in matrix operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Matrix1
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.UnknownSize.Hidden.Matrix1.f({{{1}}});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Matrix1.f
+  input Real[1, 1, :] a;
+  output Real[1, 1] c;
+  Real[1, 1] temp_1;
+ algorithm
+  assert(size(a, 3) == 1, \"Mismatching size in dimension 3 of expression matrix(a) in function FunctionTests.UnknownSize.Hidden.Matrix1.f\");
+  for i1 in 1:1 loop
+   for i2 in 1:1 loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[i1,i2] := a[i1,i2,i3];
+    end for;
+   end for;
+  end for;
+  c[1,1] := 2 * temp_1[1,1];
+  return;
+ end FunctionTests.UnknownSize.Hidden.Matrix1.f;
+
+end FunctionTests.UnknownSize.Hidden.Matrix1;
+")})));
+end Matrix1;
+
+model Sum1
+    function f
+      input Real a[:];
+      output Real c;
+      algorithm
+        c := 2*sum(a);
+    end f;
+    Real y = f({1});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Sum1",
+            description="Scalarization of functions: hidden unknown size in sum operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Sum1
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Hidden.Sum1.f({1});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Sum1.f
+  input Real[:] a;
+  output Real c;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := temp_1 + a[i1];
+  end for;
+  c := 2 * temp_1;
+  return;
+ end FunctionTests.UnknownSize.Hidden.Sum1.f;
+
+end FunctionTests.UnknownSize.Hidden.Sum1;
+
+")})));
+end Sum1;
+
+model Product1
+    function f
+      input Real a[:];
+      output Real c;
+      algorithm
+        c := 2*product(a);
+    end f;
+    Real y = f({1});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Product1",
+            description="Scalarization of functions: hidden unknown size in product operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Product1
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Hidden.Product1.f({1});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Product1.f
+  input Real[:] a;
+  output Real c;
+  Real temp_1;
+ algorithm
+  temp_1 := 1;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := temp_1 * a[i1];
+  end for;
+  c := 2 * temp_1;
+  return;
+ end FunctionTests.UnknownSize.Hidden.Product1.f;
+
+end FunctionTests.UnknownSize.Hidden.Product1;
+
+")})));
+end Product1;
+
+model Min1
+    function f
+      input Real a[:];
+      output Real c;
+      algorithm
+        c := 2*min(a);
+    end f;
+    Real y = f({1});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Min1",
+            description="Scalarization of functions: hidden unknown size in min operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Min1
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Hidden.Min1.f({1});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Min1.f
+  input Real[:] a;
+  output Real c;
+  Real temp_1;
+ algorithm
+  temp_1 := 1.7976931348623157E308;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := if temp_1 < a[i1] then temp_1 else a[i1];
+  end for;
+  c := 2 * temp_1;
+  return;
+ end FunctionTests.UnknownSize.Hidden.Min1.f;
+
+end FunctionTests.UnknownSize.Hidden.Min1;
+")})));
+end Min1;
+
+model Max1
+    function f
+      input Real a[:];
+      output Real c;
+      algorithm
+        c := 2*max(a);
+    end f;
+    Real y = f({1});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Max1",
+            description="Scalarization of functions: hidden unknown size in max operator",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Max1
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Hidden.Max1.f({1});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Max1.f
+  input Real[:] a;
+  output Real c;
+  Real temp_1;
+ algorithm
+  temp_1 := -1.7976931348623157E308;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := if temp_1 > a[i1] then temp_1 else a[i1];
+  end for;
+  c := 2 * temp_1;
+  return;
+ end FunctionTests.UnknownSize.Hidden.Max1.f;
+
+end FunctionTests.UnknownSize.Hidden.Max1;
+")})));
+end Max1;
+
+model Combinations1
+    function f
+      input Real a[2, :];
+      input Real b[2, :];
+      output Real c;
+      algorithm
+        c := scalar(matrix(sum(2*(a*transpose(b)))));
+    end f;
+    
+    Real y = f({{1,2},{3,4}},{{1,2},{3,4}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Combinations1",
+            description="Scalarization of functions: hidden unknown size in multiplication",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Combinations1
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Hidden.Combinations1.f({{1, 2}, {3, 4}}, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Combinations1.f
+  input Real[2, :] a;
+  input Real[2, :] b;
+  output Real c;
+  Real[2, 2] temp_1;
+  Real temp_2;
+ algorithm
+  for i1 in 1:2 loop
+   for i2 in 1:2 loop
+    temp_2 := 0.0;
+    for i3 in 1:size(b, 2) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i2,i3];
+    end for;
+    temp_1[i1,i2] := temp_2;
+   end for;
+  end for;
+  c := 2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2];
+  return;
+ end FunctionTests.UnknownSize.Hidden.Combinations1.f;
+
+end FunctionTests.UnknownSize.Hidden.Combinations1;
+")})));
+end Combinations1;
+
+model Combinations3
+    function f
+      input Real a[2, :];
+      input Real b[2, :];
+      output Real[1,1] c;
+      algorithm
+        c := 2*transpose(matrix(scalar(sum(matrix(sum(2*(a*transpose(b))) * (a * transpose(b)))))));
+    end f;
+    
+    Real[1,1] y = f({{1,2},{3,4}},{{1,2},{3,4}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Hidden_Combinations3",
+            description="Scalarization of functions: hidden unknown size in multiplication",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Hidden.Combinations3
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionTests.UnknownSize.Hidden.Combinations3.f({{1, 2}, {3, 4}}, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.UnknownSize.Hidden.Combinations3.f
+  input Real[2, :] a;
+  input Real[2, :] b;
+  output Real[1, 1] c;
+  Real[2, 2] temp_1;
+  Real temp_2;
+  Real[2, 2] temp_3;
+  Real temp_4;
+ algorithm
+  for i1 in 1:2 loop
+   for i2 in 1:2 loop
+    temp_2 := 0.0;
+    for i3 in 1:size(b, 2) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i2,i3];
+    end for;
+    temp_1[i1,i2] := temp_2;
+   end for;
+  end for;
+  for i4 in 1:2 loop
+   for i5 in 1:2 loop
+    temp_4 := 0.0;
+    for i6 in 1:size(b, 2) loop
+     temp_4 := temp_4 + a[i4,i6] * b[i5,i6];
+    end for;
+    temp_3[i4,i5] := temp_4;
+   end for;
+  end for;
+  c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[1,2] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[2,2]);
+  return;
+ end FunctionTests.UnknownSize.Hidden.Combinations3.f;
+
+end FunctionTests.UnknownSize.Hidden.Combinations3;
+")})));
+end Combinations3;
+
+end Hidden;
+
+package Misc
+
+model Misc1
+    function f
+      input Integer n;
+      output Integer[sum(1:n)] b;
+      algorithm
+        for i in 1:n loop
+            b[i] := i;
+        end for;
+    end f;
+    
+    Real[6] y = f(3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Misc_Misc1",
+            description="Scalarization of functions: size described with reduction expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Misc.Misc1
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+ Real y[5];
+ Real y[6];
+ discrete Integer temp_1[1];
+ discrete Integer temp_1[2];
+ discrete Integer temp_1[3];
+ discrete Integer temp_1[4];
+ discrete Integer temp_1[5];
+ discrete Integer temp_1[6];
+initial equation 
+ pre(temp_1[1]) = 0;
+ pre(temp_1[2]) = 0;
+ pre(temp_1[3]) = 0;
+ pre(temp_1[4]) = 0;
+ pre(temp_1[5]) = 0;
+ pre(temp_1[6]) = 0;
+equation
+ ({temp_1[1], temp_1[2], temp_1[3], temp_1[4], temp_1[5], temp_1[6]}) = FunctionTests.UnknownSize.Misc.Misc1.f(3);
+ y[1] = temp_1[1];
+ y[2] = temp_1[2];
+ y[3] = temp_1[3];
+ y[4] = temp_1[4];
+ y[5] = temp_1[5];
+ y[6] = temp_1[6];
+
+public
+ function FunctionTests.UnknownSize.Misc.Misc1.f
+  input Integer n;
+  output Integer[sum(1:n)] b;
+ algorithm
+  for i in 1:n loop
+   b[i] := i;
+  end for;
+  return;
+ end FunctionTests.UnknownSize.Misc.Misc1.f;
+
+end FunctionTests.UnknownSize.Misc.Misc1;
+
+")})));
+end Misc1;
+
+model Misc2
+    function f
+      input Integer[:] a;
+      output Integer[max(a)] b;
+      algorithm
+        for i in 1:size(b,1) loop
+            b[i] := i;
+        end for;
+    end f;
+    
+    Real[3] y = f({1,2,3});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Misc_Misc2",
+            description="Scalarization of functions: size described with reduction expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Misc.Misc2
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ discrete Integer temp_1[1];
+ discrete Integer temp_1[2];
+ discrete Integer temp_1[3];
+initial equation 
+ pre(temp_1[1]) = 0;
+ pre(temp_1[2]) = 0;
+ pre(temp_1[3]) = 0;
+equation
+ ({temp_1[1], temp_1[2], temp_1[3]}) = FunctionTests.UnknownSize.Misc.Misc2.f({1, 2, 3});
+ y[1] = temp_1[1];
+ y[2] = temp_1[2];
+ y[3] = temp_1[3];
+
+public
+ function FunctionTests.UnknownSize.Misc.Misc2.f
+  input Integer[:] a;
+  output Integer[max(a)] b;
+ algorithm
+  for i in 1:size(b, 1) loop
+   b[i] := i;
+  end for;
+  return;
+ end FunctionTests.UnknownSize.Misc.Misc2.f;
+
+end FunctionTests.UnknownSize.Misc.Misc2;
+
+")})));
+end Misc2;
+
+end Misc;
+
+end UnknownSize;
 
 
 package FunctionLike

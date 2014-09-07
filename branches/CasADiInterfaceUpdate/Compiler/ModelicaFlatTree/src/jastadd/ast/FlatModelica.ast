@@ -157,14 +157,24 @@ FDiscrete : FTypePrefixVariability;
 FParameter : FTypePrefixVariability;
 
 /**
+ * Parameter with known value variability
+ */
+abstract FKnownParameter : FParameter;
+
+/**
  * Structural parameter variability.
  */
-FStructParameter : FParameter;
+FStructParameter : FKnownParameter;
 
 /**
  * Evaluate true parameter variability.
  */
-FEvalParameter : FParameter;
+FEvalParameter : FKnownParameter;
+
+/**
+ * Final parameter variability.
+ */
+FFinalParameter : FKnownParameter;
 
 /**
  * Constant variability.

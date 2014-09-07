@@ -699,4 +699,14 @@ aspect StructuralParams {
         }
     }
 
+    public void InstRecord.markAsStructuralParameter(ErrorCheckType checkType) {
+        super.markAsStructuralParameter(checkType);
+        for (InstComponentDecl icd : getInstComponentDecls())
+            icd.markAsStructuralParameter(checkType);
+    }
+    
+    public void InstExternalObject.markAsStructuralParameter(ErrorCheckType checkType) {
+        
+    }
+
 }

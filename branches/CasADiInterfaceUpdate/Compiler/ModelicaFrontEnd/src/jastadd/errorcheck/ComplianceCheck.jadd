@@ -185,9 +185,6 @@ aspect ComplianceCheck {
 	
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
 	eq FSymmetric.unknownSizeSupported()             = false;
-	eq FScalarExp.unknownSizeSupported()             = false;
-	eq FVectorExp.unknownSizeSupported()             = false;
-	eq FMatrixExp.unknownSizeSupported()             = false;
 	
 	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
@@ -203,13 +200,6 @@ aspect ComplianceCheck {
 	}
 	
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
-	}
-	
-	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction() && !getFExp().canCeval()) {
-			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
-		}
 	}
 	
 	public void FPowExp.complianceCheck(ErrorCheckType checkType) {

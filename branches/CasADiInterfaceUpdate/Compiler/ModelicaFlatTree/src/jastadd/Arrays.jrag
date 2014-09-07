@@ -218,7 +218,9 @@ aspect Arrays {
 	eq FIdentity.ndims()     = 2;
 	eq FDiagonal.ndims()     = 2;
 	
-	eq FDimensionConvert.ndims() = dimensionsToKeep().length;
+	eq FScalarExp.ndims() = 0;
+	eq FVectorExp.ndims() = 1;
+	eq FMatrixExp.ndims() = 2;
 	
 	eq FUnaryBuiltIn.ndims()              = getFExp().ndims();
 	eq FEventGenExp.ndims()               = getX().ndims();
@@ -935,6 +937,26 @@ aspect Arrays {
 	}
 	eq FScalarExp.size()        = Size.SCALAR;
 	
+    eq FVectorExp.size() {
+        Size s = getFExp().size();
+        if (s.ndims() > 0 && s.isUnknown()) {
+            FExp e = null;
+            for (int i = 0; i < s.ndims(); i++) {
+                FExp e1 = s.createFExp(i);
+                if (e == null) {
+                    e = e1;
+                } else {
+                    e = new FMulExp(e,e1);
+                }
+            }
+            dynamicFExp(e);
+            MutableSize ss = new MutableSize(1);
+            ss.set(0, e);
+            return ss;
+        }
+        return super.size();
+    }
+	
 	syn Size FDimensionConvert.sizeForScalarArg();
 	eq FScalarExp.sizeForScalarArg() = Size.SCALAR;
 	eq FVectorExp.sizeForScalarArg() = new Size(1);
@@ -1557,9 +1579,23 @@ aspect Arrays {
         if (!isArray())
             return new ScalarAsArray(this);
         
+        if (useTempVar())
+            return createTempArray();
+        
         Array res = new Array(indices());
         for (Index i : res.indices())
             res.set(i, new FSubscriptedExp(unboundCopy(), i.createFArraySubscripts()));
+        return res;
+    }
+    
+    /**
+     * Computes a generic array expansion of the temporary replacing this expression.
+     */
+    syn Array FExp.createTempArray() {
+        Array res = new Array(indices());
+        for (Index i : res.indices()) {
+            res.set(i, tempExp(i.createFArraySubscripts()));
+        }
         return res;
     }
 
@@ -1618,7 +1654,8 @@ aspect Arrays {
 	eq FMulExp.getArray() {
 		if (isElementWise())
 			return super.getArray();
-		
+        if (useTempVar())
+            return createTempArray();
 		if (!isArray())
 			return new ScalarAsArray(composeMulScalarCellExp(Index.NULL));
 		
@@ -1765,6 +1802,8 @@ aspect Arrays {
 	}
 	
 	eq FDimensionConvert.getArray() {
+        if (useTempVar())
+            return createTempArray();
 		Indices ind = indices();
 		Array arr = new Array(ind);
 		if (getFExp().isArray()) {
@@ -2011,7 +2050,7 @@ aspect Arrays {
 	}
 
     eq InstFunctionCall.getArray() {
-        if (variability().structuralOrLess()) {
+        if (variability().knownParameterOrLess()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
@@ -2027,7 +2066,7 @@ aspect Arrays {
         if (!isArray() || fc == null)
             return super.getArray();
         
-        if (variability().structuralOrLess() && inKeptBExp()) {
+        if (variability().knownParameterOrLess() && inKeptBExp()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
@@ -2662,6 +2701,13 @@ aspect ArrayHelpers {
 			return res < 0 ? 0 : res;
 		}
 		
+        /**
+         * True if any dimension is verified to be zero
+         */
+        public boolean isZero() {
+            return !isUnknown() && numElements() == 0;
+        }
+		
 		/**
 		 * Create a new flattened FArraySubscripts object describing this size.
 		 */
@@ -2705,7 +2751,14 @@ aspect ArrayHelpers {
 					return true;
 			return false;
 		}
-		
+        
+        /**
+         * Check if length in dimension d is unknown.
+         */
+        public boolean isUnknown(int d) {
+            return size[d] == UNKNOWN;
+        }
+        
 		/**
 		 * Check if all lengths have a value (fix length or expression).
 		 */

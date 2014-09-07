@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Stack;
+
 import org.jmodelica.util.exceptions.MunkresException;
 import org.jmodelica.util.exceptions.IndexReductionException;
 import org.jmodelica.util.munkres.MunkresProblem;
@@ -349,35 +351,87 @@ aspect IndexReduction {
     
     public static final int IndexReductionBiPGraph.MAX_N_EQ_DIFFS = 5;
     
-    private static Map<IndexReductionEq, FAbstractEquation> IndexReductionBiPGraph.differentiateEquations(Collection<IndexReductionEq> eqns) {
-        Map<IndexReductionEq, FAbstractEquation> diffedEqnsMap = new HashMap<IndexReductionEq, FAbstractEquation>();
-        for (IndexReductionEq eqn : eqns) {
-            FAbstractEquation fEqn = eqn.getEquation();
-            if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
-                throw new IndexReductionException("Maximum number of differentiations reached");
-            FAbstractEquation diffedFEqn = null;
-            // Look through member equations and check if the differentiated equation already exists
-            for (IndexReductionEq groupMember : eqn.getGroupMembers()) {
-                if (groupMember.getMeDifferentiated() != null)
-                    diffedFEqn = groupMember.getMeDifferentiated().getEquation();
-                if (diffedEqnsMap.get(groupMember) != null)
-                    diffedFEqn = diffedEqnsMap.get(groupMember);
-            }
-            if (diffedFEqn == null) {
-                // It does not exsit, create it.
-                Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
-                if (diffedFEqns.size() != 1)
-                    throw new UnsupportedOperationException("Differentiation of equations should result" +
-                            " in a single equation when differentiating on time");
-                else
-                    diffedFEqn = diffedFEqns.iterator().next();
-            } else {
-                // It already exists, we need to flush cached value later, indicate with null.
-                diffedFEqn = null;
-            }
-            diffedEqnsMap.put(eqn, diffedFEqn);
+    private void IndexReductionBiPGraph.differentiateVariable(IndexReductionVar var, Collection<FVariable> newDiffedVars, Collection<IndexReductionVar> varsToRemove) {
+        if (var.getMeDifferentiated() != null)
+            return;
+        // Create a new differentiated variable
+        FVariable diffedFVar = var.getVariable().createFDerivativeVariable();
+        newDiffedVars.add(diffedFVar);
+        // Add the differentiated variable to the graph 
+        IndexReductionVar diffedVar = addVariable(diffedFVar.name(), diffedFVar);
+        // a reference from the visited variable to its 
+        // differentiated counterpart
+        varsToRemove.add(var);
+        var.setMeDifferentiated(diffedVar);
+        diffedVar.setMeIntegrated(var);
+    }
+    
+    private void IndexReductionBiPGraph.differentiateEquation(IndexReductionEq eqn, Collection<FVariable> newDiffedVars, Collection<IndexReductionVar> varsToRemove, IndexReductionResult result) {
+        if (eqn.getMeDifferentiated() != null)
+            return;
+        
+        FAbstractEquation fEqn = eqn.getEquation();
+        
+        if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
+            throw new IndexReductionException("Maximum number of differentiations reached");
+        
+        for (IndexReductionEq member : eqn.getGroupMembers())
+            if (member.getMatching() != null)
+                differentiateVariable(member.getMatching(), newDiffedVars, varsToRemove);
+        
+        Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
+        if (diffedFEqns.size() != 1)
+            throw new UnsupportedOperationException("Differentiation of equations should result" +
+                    " in a single equation when differentiating on time");
+        FAbstractEquation diffedFEqn = diffedFEqns.iterator().next();
+        
+        result.addEquation(diffedFEqn);
+        
+        // Sets that indicates the variables in the lhs and rhs.
+        Set<IndexReductionVar> rhsVars = Collections.emptySet();
+        Map<IndexReductionVar, Integer> lhsVars = Collections.emptyMap();
+        if (diffedFEqn.numScalarEquations() > 1) {
+            rhsVars = lookupVarsInSet(diffedFEqn.FIdUseExpsInRHS());
+            lhsVars = new HashMap<IndexReductionVar, Integer>();
+            int i = 0;
+            for (IndexReductionVar var : lookupVarsInSet(diffedFEqn.FIdUseExpsInLHS()))
+                lhsVars.put(var, i++);
+            if (diffedFEqn.lhsVarsAreSolved())
+                rhsVars.removeAll(lhsVars.keySet());
         }
-        return diffedEqnsMap;
+        Collection<IndexReductionVar> variables = lookupVarsInSet(diffedFEqn.findFIdUseExpsInTree());
+        
+        // Build new differentiated BiP equations for all group members.
+        for (IndexReductionEq member : eqn.getGroupMembers()) {
+            ASTNode.log.info("About to add equation: %s", diffedFEqn);
+            // Add the differentiated equation
+            int groupNumber = member.groupNumber();
+            IndexReductionEq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber, diffedFEqn.variability());
+            
+            // Add edges
+            for (IndexReductionVar var : variables) {
+                Integer pos = lhsVars.get(var);
+                if (var != null && (pos == null || pos == groupNumber || rhsVars.contains(var))) {
+                    ASTNode.log.info("*** %s", var);
+                    addEdge(diffedEqn, var);
+                }
+            }
+            
+            // Set a reference from the visited equation to
+            // its differentiated counterpart
+            member.setMeDifferentiated(diffedEqn);
+            diffedEqn.setMeIntegrated(member);
+            
+            if (member.getMatching() != null) {
+                match(member.getMeDifferentiated(), member.getMatching().getMeDifferentiated());
+            }
+            
+        }
+        for (IndexReductionEq groupMember1 : eqn.getGroupMembers())
+            for (IndexReductionEq groupMember2 : eqn.getGroupMembers())
+                groupMember1.getMeDifferentiated().addGroupMember(groupMember2.getMeDifferentiated());
+        
+        ASTNode.log.info("Equation added");
     }
     
     public Set<FVariable> IndexReductionBiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
@@ -392,7 +446,7 @@ aspect IndexReduction {
         }
         return removableVars;
     }
-    
+
     public class EquationBlockFactory {
         public static final BlockProducer INDEX_REDUCTION_BLOCK_PRODUCER = new IndexReductionBlockProducer();
 
@@ -438,7 +492,15 @@ aspect IndexReduction {
         // Loop over all equations (step 3)
         while (!eqToMatchStack.empty() ){
             IndexReductionEq eqToMatch = eqToMatchStack.pop(); // Step 3a
-            if (eqToMatch.getMatching() != null || eqToMatch.getMeDifferentiated() != null)
+            
+            // Ensure that we have the top differentiated equation, it might
+            // have been differentiated since it was put on the stack.
+            while (eqToMatch.getMeDifferentiated() != null)
+                eqToMatch = eqToMatch.getMeDifferentiated();
+            
+            // Ignore, if it is already been matched.
+            // TODO: Can this happen?
+            if (eqToMatch.getMatching() != null)
                 continue;
             
             // If the equation is not matched
@@ -469,91 +531,26 @@ aspect IndexReduction {
             }
             
             if (!pathFound) { // Step 3b-5
-                // First, differentiate all equations to see if it is possible.
-                // Remove derivative if we find StateSelect.Prefer variables that wasn't possible to select due to
-                // equation that can't be differentiated
-                Map<IndexReductionEq, FAbstractEquation> diffedEqnsMap;
-                diffedEqnsMap = differentiateEquations(visitedEquations);
+                Collection<IndexReductionVar> varsToRemove = new ArrayList<IndexReductionVar>();
                 for (IndexReductionVar var : visitedVariables) { // Loop over all visited variables, Step 3b-5i
-                    // Create a new differentiated variable
-                    FVariable diffedFVar = var.getVariable().createFDerivativeVariable();
-                    newDiffedVars.add(diffedFVar);
-                    // Add the differentiated variable to the graph 
-                    IndexReductionVar diffedVar = addVariable(diffedFVar.name(), diffedFVar);
-                    // Set the "A vector" in the paper: 
-                    // a reference from the visited variable to its 
-                    // differentiated counterpart
-                    var.setMeDifferentiated(diffedVar); 
-                    diffedVar.setMeIntegrated(var);
+                    // Differentiate variable
+                    differentiateVariable(var, newDiffedVars, varsToRemove);
                 }
                 for (IndexReductionEq eqn : visitedEquations) { // Step 3b-5ii
-                    FAbstractEquation diffedFEqn = diffedEqnsMap.get(eqn);
-                    if (diffedFEqn != null) {
-                        result.addEquation(diffedFEqn);
-                    } else {
-                        // Already differentiated, look through member equations
-                        for (IndexReductionEq groupMember : eqn.getGroupMembers())
-                            if (groupMember.getMeDifferentiated() != null)
-                                diffedFEqn = groupMember.getMeDifferentiated().getEquation();
-                        // It already exists we need to flush cached values since we might have added new variables
-                        diffedFEqn.flushAllRecursive();
-                    }
-                    ASTNode.log.info("About to add equation: %s", diffedFEqn);
-                    // Sets that indicates the variables in the lhs and rhs.
-                    Set<IndexReductionVar> rhsVars = Collections.emptySet();
-                    Map<IndexReductionVar, Integer> lhsVars = Collections.emptyMap();
-                    if (diffedFEqn.numScalarEquations() > 1) {
-                        rhsVars = lookupVarsInSet(diffedFEqn.FIdUseExpsInRHS());
-                        lhsVars = new HashMap<IndexReductionVar, Integer>();
-                        int i = 0;
-                        for (IndexReductionVar var : lookupVarsInSet(diffedFEqn.FIdUseExpsInLHS()))
-                            lhsVars.put(var, i++);
-                        if (diffedFEqn.lhsVarsAreSolved())
-                            rhsVars.removeAll(lhsVars.keySet());
-                    }
-                    // Add the differentiated equation
-                    int groupNumber = eqn.groupNumber();
-                    IndexReductionEq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber, diffedFEqn.variability());
-                    
-                    // Add edges
-                    Collection<IndexReductionVar> variables = lookupVarsInSet(diffedFEqn.findFIdUseExpsInTree());
-                    for (IndexReductionVar var : variables) {
-                        Integer pos = lhsVars.get(var);
-                        if (var != null && (pos == null || pos == groupNumber || rhsVars.contains(var))) {
-                            ASTNode.log.info("*** %s", var);
-                            addEdge(diffedEqn, var);
-                        }
-                    }
-                    
-                    // Set a reference from the visited equation to
-                    // its differentiated counterpart
-                    eqn.setMeDifferentiated(diffedEqn);
-                    diffedEqn.setMeIntegrated(eqn);
-                    
-                    for (IndexReductionEq groupMember : eqn.getGroupMembers()) {
-                        if (groupMember == eqn)
-                            continue;
-                        IndexReductionEq diffedGroupMember = groupMember.getMeDifferentiated();
-                        if (diffedGroupMember != null) {
-                            diffedGroupMember.addGroupMember(diffedEqn);
-                            diffedEqn.addGroupMember(diffedGroupMember);
-                        }
-                    }
-                    ASTNode.log.info("Equation added");
+                    // Differentiate equation
+                    differentiateEquation(eqn, newDiffedVars, varsToRemove, result);
                 }
-                for (IndexReductionVar var : visitedVariables) {
-                    // Set matchings, Step 3b-5iii
-                    IndexReductionEq eqn = var.getMatching();
-                    match(eqn.getMeDifferentiated(), var.getMeDifferentiated());
-                    // Remove variables that have been differentiated, Step 3b-1
+                // Remove variables that have been differentiated, Step 3b-1
+                for (IndexReductionVar var : varsToRemove) {
+                    // Copy matching to differentiated var
+                    match(var.getMatching().getMeDifferentiated(), var.getMeDifferentiated());
+                    // Remove var
                     removeVariable(var);
                 }
                 // Set the next equation to start matching from, 
                 // Step 3b-5iv
-                // Push all differentiated equations in the group to the stack
-                // of equations to be matched
-                for (IndexReductionEq groupMemberEquation : eqToMatch.getGroupMembers())
-                    eqToMatchStack.push(groupMemberEquation.getMeDifferentiated());
+                // Push the matched equation to the stack of equations to be matched
+                eqToMatchStack.push(eqToMatch);
                 
                 ASTNode.log.info("Graph after addition of equations and variables:");
                 ASTNode.log.info(this);
