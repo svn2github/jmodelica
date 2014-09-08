@@ -93,8 +93,10 @@ aspect IndexReduction {
                 if (removableVars.isEmpty())
                     throw e;
                 log.info("Retrying index reduction without the following state select prefer derivatives:");
-                for (FVariable var : removableVars)
+                for (FVariable var : removableVars) {
                     log.info("  %s", var.name());
+                    ssPreferVars.remove(var.getMeIntegrated());
+                }
                 log.info("");
                 
                 // Remove SS=prefer derivatives
@@ -572,6 +574,7 @@ aspect IndexReduction {
             removeEquation(e);
         
         ASTNode.log.info("Index reduction done!");
+        ASTNode.log.info(this);
         ASTNode.log.info("Matching:");
         ASTNode.log.info(printMatchingObj());
         

@@ -2708,6 +2708,34 @@ end IndexReduction.SSPreferBackoff1;
 ")})));
 end SSPreferBackoff1;
 
+model SSPreferBackoff2
+    function f
+        input Real a;
+        output Real b = a * 42;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real x(stateSelect = StateSelect.prefer),y,z;
+equation
+    0 = f(x);
+    x = y * 3.12;
+    z = der(y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="SSPreferBackoff2",
+            description="Test of system with non differentiated variable with StateSelect prefer that is differentiated by equation dependency. Check so that no infinite loop occures.",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Cannot differentiate call to function without derivative or smooth order annotation 'IndexReduction.SSPreferBackoff2.f(x)' in equation:
+   0 = IndexReduction.SSPreferBackoff2.f(x)
+")})));
+end SSPreferBackoff2;
+
 model IndexReduction55
     Real a_s;
     Real a_v(stateSelect = StateSelect.always);
