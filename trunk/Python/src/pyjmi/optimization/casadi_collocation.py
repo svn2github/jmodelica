@@ -3654,62 +3654,232 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Create NLP variables
         xx = casadi.msym("xx", n_xx)
-        if self.named_vars:
-            named_xx = []
 
-        # Create objects for variable indexing
+        # Create structures for the dictionaries
         var_map = {}
         var_indices = {}
-        index = 0
 
-        # Index the parameters
-        new_index = index + n_popt
-        var_indices['p_opt'] = range(index, new_index)
-        index = new_index
-        var_map['p_opt'] = xx[var_indices['p_opt']]
-        if self.named_vars:
-            named_xx += [casadi.ssym(p.getName()) for
-                         p in mvar_vectors['p_opt']]
-
-        # Index the variables at the collocation points
+        # Nested dictionaries for the collocation points
         for i in xrange(1, self.n_e + 1):
             var_indices[i] = {}
             var_map[i] = {}
             for k in xrange(1, self.n_cp + 1):
                 var_indices[i][k] = {}
                 var_map[i][k] = {}
-                for var_type in nlp_n_var.keys():
-                    new_index = index + nlp_n_var[var_type]
-                    var_indices[i][k][var_type] = range(index, new_index)
-                    index = new_index
-                    var_map[i][k][var_type] = xx[var_indices[i][k][var_type]]
-                    if self.named_vars:
-                        named_xx += [casadi.ssym(var.getName() +
-                                                 '_%d_%d' % (i, k)) for
-                                     var in mvar_vectors[var_type]]
 
-        # Index controls separately if blocking_factors is not None
+        # Nested dictionaries for the mesh points
+        for i in xrange(2, self.n_e + 1):
+            var_indices[i][0] = {}
+            var_map[i][0] = {}        
+
+        if self.discr == "LG":
+            # Index x_{i, n_cp + 1}
+            for i in xrange(1, self.n_e):
+                var_indices[i][self.n_cp + 1] = {}
+                var_map[i][self.n_cp + 1] = {}
+                
+            # Final mesh point
+            var_indices[self.n_e][self.n_cp + 1] = {}
+            var_map[self.n_e][self.n_cp + 1] = {}
+
+        if self.discr != "LGR" and self.discr != "LG":
+            raise CasadiCollocatorException(
+                "Unknown discretization scheme %s." % self.discr)
+
+        # Index the variables for initial values
+        var_map[1][0] = {}
+        var_indices[1][0] = {}
+
+            
+        # Map with new indices of variables
+        new_var_index=dict()
+        # Map with different levels of packing mx variables
+        cp_var_map=dict()
+
+        if self.named_vars:
+            named_xx = []            
+
+        # Contains the indices at which xx is gonna be splited
+        # Those indices will let us split the xx as follows
+        # [0, all_x, all_dx, all_w, all_unelimu, initial_final_points, popt, h_free]
+        global_split_indices=[0]
+        
+        # Map with split order
+        split_map = dict()
+        split_map['x'] = 0
+        split_map['dx'] = 1
+        split_map['w'] = 2
+        split_map['unelim_u'] = 3
+        split_map['init_final'] = 4
+        split_map['p_opt'] = 5
+        split_map['h'] = 6
+
+        for varType in ['x', 'dx', 'w', 'unelim_u']:
+            if varType=='x':
+                if self.discr == "LGR":
+                    global_split_indices.append(
+                        global_split_indices[-1]+\
+                        nlp_n_var[varType]*(self.n_cp+1)*self.n_e)
+                elif self.discr == "LG":
+                    global_split_indices.append(
+                        global_split_indices[-1]+\
+                        nlp_n_var[varType]*(self.n_cp+2)*self.n_e)
+                else:
+                    raise CasadiCollocatorException(
+                        "Unknown discretization scheme %s." % self.discr)
+            elif varType=='unelim_u':
+                if self.blocking_factors is not None:
+                    count_us=(1+self.n_e * self.n_cp) * n_cont_u
+                    for factors in self.blocking_factors.factors.values():
+                        count_us += len(factors)
+                    global_split_indices.append(
+                        global_split_indices[-1]+\
+                        count_us) 
+                else:
+                    global_split_indices.append(
+                        global_split_indices[-1]+\
+                        nlp_n_var[varType]*(self.n_cp)*self.n_e)                        
+            else:
+                global_split_indices.append(
+                    global_split_indices[-1]+\
+                    nlp_n_var[varType]*(self.n_cp)*self.n_e)
+        # Initial and final points
+        if self.discr == "LGR":
+            if self.blocking_factors is not None:
+                global_split_indices.append(
+                    global_split_indices[-1]+\
+                    nlp_n_var['dx']+\
+                    nlp_n_var['w'])                     
+            else:
+                global_split_indices.append(
+                    global_split_indices[-1]+\
+                    nlp_n_var['dx']+\
+                    nlp_n_var['unelim_u']+\
+                    nlp_n_var['w'])
+        elif self.discr == "LG":
+            if self.blocking_factors is not None:
+                global_split_indices.append(
+                    global_split_indices[-1]+\
+                    2*(nlp_n_var['dx']+\
+                       nlp_n_var['w']))                    
+            else:
+                global_split_indices.append(
+                    global_split_indices[-1]+\
+                    2*(nlp_n_var['dx']+\
+                       nlp_n_var['unelim_u']+\
+                       nlp_n_var['w']))
+        else:
+            raise CasadiCollocatorException(
+                "Unknown discretization scheme %s." % self.discr)                
+        # Index for the free parameters 
+        global_split_indices.append(global_split_indices[-1]+n_popt)
+        n_freeh2 = self.n_e if self.hs == "free" else 0
+        # Index for the free elements
+        global_split_indices.append(global_split_indices[-1]+n_freeh2) 
+        # Tuple with the splitted mx variables
+        global_split=casadi.vertsplit(xx,global_split_indices)
+        counter_s = 0
+        
+        # Define the order of the loop for building the check_point map 
         if self.blocking_factors is not None:
+            variable_type_list = ['x','dx','w']
+        else:
+            variable_type_list = ['x','dx','w','unelim_u'] 
+        # Builds the check_point map
+        for j,varType in enumerate(variable_type_list):
+            cp_var_map[varType] = dict()
+            new_var_index[varType] = dict()
+            cp_var_map[varType]['all'] = \
+                      global_split[split_map[varType]]
+            if nlp_n_var[varType]>0:
+                add=0
+                if varType=='x':
+                    add=1
+                    if self.discr == "LG":
+                        add=2
+                element_split2 = casadi.vertsplit(
+                    cp_var_map[varType]['all'],
+                    nlp_n_var[varType]*(self.n_cp+add))
+                # Builds element branch of the map
+                for i in range(1, self.n_e+1):
+                    cp_var_map[varType][i] = dict()
+                    cp_var_map[varType][i]['all'] = element_split2[i-1]
+                    new_var_index[varType][i] = dict()
+                    collocations_split2 = casadi.vertsplit(
+                        cp_var_map[varType][i]['all'],
+                        nlp_n_var[varType])
+                    discrete_points=self.n_cp 
+                    move_zero=1
+                    if varType=='x':
+                        if self.discr == "LGR":
+                            discrete_points+=1
+                        else:
+                            discrete_points+=2
+                        move_zero=0
+                    # Builds collocation branch of the map
+                    for k in range(discrete_points):
+                        cp_var_map[varType][i][k+move_zero] = dict()
+                        cp_var_map[varType][i][k+move_zero]['all'] = \
+                                  collocations_split2[k]
+                        new_var_index[varType][i][k+move_zero] = list()
+                        scalar_split = casadi.vertsplit(
+                            cp_var_map[varType][i][k+move_zero]['all'])
+                        # Builds the individual variables branch of the map
+                        for var in mvar_vectors[varType]:
+                            name = var.getName()
+                            (var_index, _) = self.name_map[name]
+                            cp_var_map[varType][i][k+move_zero][var_index] = \
+                                      scalar_split[var_index]
+                            new_var_index[varType][i][k+move_zero].append(counter_s)
+                            if self.named_vars:
+                                named_xx.append(
+                                    casadi.ssym(name+'_%d_%d' % (i, k+move_zero)))
+                            counter_s+=1
+            else:
+                # Handle the cases of empty variables
+                for i in range(1, self.n_e+1):
+                    cp_var_map[varType][i] = dict()
+                    new_var_index[varType][i] = dict()
+                    cp_var_map[varType][i]['all'] = xx[0:0]
+                    for k in range(1, self.n_cp+1):
+                        cp_var_map[varType][i][k] = dict()
+                        new_var_index[varType][i][k] = list()
+                        cp_var_map[varType][i][k]['all'] = xx[0:0]
+                        
+        if self.blocking_factors is not None:
+            varType = 'unelim_u'
             # Index controls without blocking factors
+            cp_var_map[varType] = dict()
+            new_var_index[varType] = dict() 
+            
+            # Creates auxiliary list
+            aux_list = [counter_s]*n_u
+            
             if self.named_vars:
                 u_cont_names = [
                     var.getName() for var in mvar_vectors['unelim_u']
                     if var.getName() not in
                     self.blocking_factors.factors.keys()]
+            
+            new_var_index['u_cont'] = dict()
             for i in xrange(1, self.n_e + 1):
+                new_var_index['u_cont'][i]=dict()
                 for k in xrange(1, self.n_cp + 1):
-                    new_index = index + n_cont_u
-                    var_indices[i][k]['u_cont'] = range(index, new_index)
-                    index = new_index
+                    new_index = counter_s + n_cont_u
+                    new_var_index['u_cont'][i][k] = range(counter_s, new_index)
+                    counter_s = new_index
                     if self.named_vars:
                         named_xx += [casadi.ssym('%s_%d_%d' % (name, i, k)) for
-                                     name in u_cont_names]
-
+                                     name in u_cont_names] 
+                        
             # Create index storage for inputs with blocking factors
+            new_var_index['u_bf'] = dict()
             for i in xrange(1, self.n_e + 1):
+                new_var_index['u_bf'][i] = dict()
                 for k in xrange(1, self.n_cp + 1):
-                    var_indices[i][k]['u_bf'] = []
-
+                    new_var_index['u_bf'][i][k]= []
+                    
+                    
             # Index controls with blocking factors
             for name in self.blocking_factors.factors.keys():
                 element = 1
@@ -3717,134 +3887,43 @@ class LocalDAECollocator(CasadiCollocator):
                 for (factor_i, factor) in enumerate(factors):
                     for i in xrange(element, element + factor):
                         for k in xrange(1, self.n_cp + 1):
-                            var_indices[i][k]['u_bf'].append(index)
+                            new_var_index['u_bf'][i][k].append(counter_s)
                     if self.named_vars:
                         named_xx.append(casadi.ssym('%s_%d' % (name, element)))
-                    index += 1
+                    counter_s += 1
                     element += factor
-
+                    
             # Weave indices for inputs with and without blocking factors
             for i in xrange(1, self.n_e + 1):
+                new_var_index[varType][i]=dict()
                 for k in xrange(1, self.n_cp + 1):
                     i_cont = 0
                     i_bf = 0
                     indices = []
                     for var in self.mvar_vectors['unelim_u']:
                         if var.getName() in self.blocking_factors.factors:
-                            indices.append(var_indices[i][k]['u_bf'][i_bf])
+                            indices.append(new_var_index['u_bf'][i][k][i_bf])
                             i_bf += 1
                         else:
-                            indices.append(var_indices[i][k]['u_cont'][i_cont])
+                            indices.append(new_var_index['u_cont'][i][k][i_cont])
                             i_cont += 1
-                    del var_indices[i][k]['u_bf']
-                    del var_indices[i][k]['u_cont']
-                    var_indices[i][k]['unelim_u'] = indices
-
+                    new_var_index[varType][i][k] = indices                    
+                del new_var_index['u_bf'][i]
+                del new_var_index['u_cont'][i]
+            
+            del new_var_index['u_bf']
+            del new_var_index['u_cont'] 
+            
             # Add inputs to variable map
             for i in xrange(1, self.n_e + 1):
+                cp_var_map[varType][i] = dict()
                 for k in xrange(1, self.n_cp + 1):
-                    var_map[i][k]['unelim_u'] = \
-                        xx[var_indices[i][k]['unelim_u']]
-
-        # Index state continuity variables
-        if self.discr == "LGR":
-            if self.eliminate_cont_var:
-                for i in xrange(2, self.n_e + 1):
-                    var_indices[i][0] = {}
-                    var_map[i][0] = {}
-                    var_indices[i][0]['x'] = var_indices[i - 1][self.n_cp]['x']
-                    var_map[i][0]['x'] = var_map[i - 1][self.n_cp]['x']
-            else:
-                for i in xrange(2, self.n_e + 1):
-                    var_indices[i][0] = {}
-                    var_map[i][0] = {}
-                    new_index = index + nlp_n_var['x']
-                    var_indices[i][0]['x'] = range(index, new_index)
-                    index = new_index
-                    var_map[i][0]['x'] = xx[var_indices[i][0]['x']]
-                    if self.named_vars:
-                        named_xx += [casadi.ssym(var.getName() + '_%d_0'%i) for
-                                     var in mvar_vectors['x']]
-        elif self.discr == "LG":
-            # Index x_{i, n_cp + 1}
-            for i in xrange(1, self.n_e):
-                # Create storage
-                var_indices[i][self.n_cp + 1] = {}
-                var_map[i][self.n_cp + 1] = {}
-
-                # Store
-                new_index = index + nlp_n_var['x']
-                var_indices[i][self.n_cp + 1]['x'] = range(index, new_index)
-                index = new_index
-                var_map[i][self.n_cp + 1]['x'] = \
-                    xx[var_indices[i][self.n_cp + 1]['x']]
-                if self.named_vars:
-                    named_xx += [casadi.ssym(var.getName() +
-                                             '_%d_%d' % (i, self.n_cp + 1))
-                                 for var in mvar_vectors['x']]
-
-            # Index x_{i, 0}
-            if self.eliminate_cont_var:
-                for i in xrange(2, self.n_e + 1):
-                    var_indices[i][0] = {}
-                    var_map[i][0] = {}
-                    var_indices[i][0]['x'] = \
-                        var_indices[i - 1][self.n_cp + 1]['x']
-                    var_map[i][0]['x'] = var_map[i - 1][self.n_cp + 1]['x']
-            else:
-                for i in xrange(2, self.n_e + 1):
-                    var_indices[i][0] = {}
-                    var_map[i][0] = {}
-                    new_index = index + nlp_n_var['x']
-                    var_indices[i][0]['x'] = range(index, new_index)
-                    index = new_index
-                    var_map[i][0]['x'] = xx[var_indices[i][0]['x']]
-                    if self.named_vars:
-                        named_xx += [casadi.ssym(var.getName() + '_%d_0'%i) for
-                                     var in mvar_vectors['x']]
-        else:
-            raise CasadiCollocatorException(
-                "Unknown discretization scheme %s." % self.discr)
-
-        # Index variables for final mesh point
-        if self.is_gauss:
-            i = self.n_e
-            k = self.n_cp + 1
-            var_indices[i][k] = {}
-            var_map[i][k] = {}
-            for var_type in nlp_n_var.keys():
-                new_index = index + nlp_n_var[var_type]
-                var_indices[i][k][var_type] = range(index, new_index)
-                index = new_index
-                var_map[i][k][var_type] = xx[var_indices[i][k][var_type]]
-                if self.named_vars:
-                    named_xx += [casadi.ssym(var.getName() + '_%d_%d' % (i, k))
-                                 for var in mvar_vectors[var_type]]
-
-        # Index the variables for the derivative initial values
-        var_map[1][0] = {}
-        var_indices[1][0] = {}
-        if self.eliminate_der_var:
-            new_index = index + nlp_n_var['x']
-            var_indices[1][0]['dx'] = range(index, new_index)
-            index = new_index
-            var_map[1][0]['dx'] = xx[var_indices[1][0]['dx']]
-            if self.named_vars:
-                named_xx += [casadi.ssym(var.getName() + '_1_0') for
-                             var in mvar_vectors['dx']]
-
-        # Index the variables for the remaining initial values
-        for var_type in nlp_n_var.keys():
-            new_index = index + nlp_n_var[var_type]
-            var_indices[1][0][var_type] = range(index, new_index)
-            index = new_index
-            var_map[1][0][var_type] = xx[var_indices[1][0][var_type]]
-            if self.named_vars:
-                named_xx += [casadi.ssym(var.getName() + '_1_0') for
-                             var in mvar_vectors[var_type]]
-
-        # Index initial controls separately if blocking_factors is not None
-        if self.blocking_factors is not None:
+                    cp_var_map[varType][i][k] = \
+                        global_split[split_map['unelim_u']][
+                            map(sub, new_var_index[varType][i][k], 
+                                aux_list)]
+                    
+            # Index initial controls separately if blocking_factors is not None       
             # Find indices of inputs with blocking factors
             bf_indices = []
             cont_indices = []
@@ -3857,502 +3936,207 @@ class LocalDAECollocator(CasadiCollocator):
                     cont_indices.append(idx)
             bf_indices = N.array(bf_indices, dtype=int)
             cont_indices = N.array(cont_indices, dtype=int)
-
+            
             # Index initial controls with blocking factors
-            var_indices[1][0]['unelim_u'] = N.empty(n_u, dtype=int)
-            var_indices[1][0]['unelim_u'][bf_indices] = \
-                    [var_indices[1][1]['unelim_u'][bf_i] for
-                     bf_i in bf_indices]
-
+            new_var_index['unelim_u'][1][0] = N.empty(n_u, dtype=int)
+            new_var_index['unelim_u'][1][0][bf_indices] = \
+                [new_var_index['unelim_u'][1][1][bf_i] for
+                 bf_i in bf_indices]
+            
             # Index initial controls without blocking factors
-            new_index = index + n_cont_u
-            var_indices[1][0]['unelim_u'][cont_indices] = \
-                    range(index, new_index)
-            var_indices[1][0]['unelim_u'] = list(var_indices[1][0]['unelim_u'])
-            index = new_index
-
-            # Insert initial controls into variable map
-            var_map[1][0]['unelim_u'] = xx[var_indices[1][0]['unelim_u']]
+            new_index = counter_s + n_cont_u
+            new_var_index['unelim_u'][1][0][cont_indices] = \
+                         range(counter_s, new_index)
+            new_var_index['unelim_u'][1][0] = \
+                         list(new_var_index['unelim_u'][1][0])
+            counter_s = new_index
+            
+            # Insert initial controls into variable map                
+            cp_var_map['unelim_u'][1][0] = xx[new_var_index['unelim_u'][1][0]]
             if self.named_vars:
                 named_xx += [
                     casadi.ssym(var.getName() + '_1_0') for
                     var in mvar_vectors['unelim_u'] if
-                    var.getName() not in self.blocking_factors.factors]
+                    var.getName() not in self.blocking_factors.factors] 
 
-        # Index element lengths
-        if self.hs == "free":
-            new_index = index + self.n_e
-            var_indices['h'] = [N.nan] + range(index, new_index)
-            index = new_index
-            self.h = casadi.vertcat([N.nan, xx[var_indices['h'][1:]]])
-            if self.named_vars:
-                named_xx += [casadi.ssym('h_%d' % i)
-                             for i in range(1, self.n_e + 1)]
-
+        # Creates map entry for initial points
+        split_indices=[0,nlp_n_var['dx']]
+        if self.blocking_factors is not None:
+            varType='w'
+            split_indices.append(split_indices[-1]+nlp_n_var[varType])
+            inter_split=casadi.vertsplit(
+                global_split[split_map['init_final']],
+                nlp_n_var['dx']+\
+                nlp_n_var['w'])  
+            variable_type_list = ['dx','w']
+        else:
+            for varType in ['w','unelim_u']:
+                split_indices.append(split_indices[-1]+nlp_n_var[varType])                
+            inter_split=casadi.vertsplit(
+                global_split[split_map['init_final']],
+                nlp_n_var['dx']+\
+                nlp_n_var['unelim_u']+\
+                nlp_n_var['w'])            
+            variable_type_list = ['dx', 'w', 'unelim_u']
         
-        if self.reorder_vars:
-            
-            # Map with new indices of variables
-            new_var_index=dict()
-            # Map with different levels of packing mx variables
-            cp_var_map=dict()
-
-            if self.named_vars:
-                reordered_named_xx = []            
-
-            # Contains the indices at which xx is gonna be splited
-            # Those indices will let us split the xx as follows
-            # [0, all_x, all_dx, all_unelimu, all_w, initial_final_points, popt, h_free]
-            global_split_indices=[0]
-            
-            # Map with split order
-            split_map = dict()
-            split_map['x'] = 0
-            split_map['dx'] = 1
-            split_map['unelim_u'] = 2
-            split_map['w'] = 3
-            split_map['init_final'] = 4
-            split_map['p_opt'] = 5
-            split_map['h'] = 6
-
-            for varType in ['x', 'dx', 'unelim_u', 'w']:
-                if varType=='x':
-                    if self.discr == "LGR":
-                        global_split_indices.append(
-                            global_split_indices[-1]+\
-                            nlp_n_var[varType]*(self.n_cp+1)*self.n_e)
-                    elif self.discr == "LG":
-                        global_split_indices.append(
-                            global_split_indices[-1]+\
-                            nlp_n_var[varType]*(self.n_cp+2)*self.n_e)
-                    else:
-                        raise CasadiCollocatorException(
-                            "Unknown discretization scheme %s." % self.discr)
-                elif varType=='unelim_u':
-                    if self.blocking_factors is not None:
-                        count_us=(1+self.n_e * self.n_cp) * n_cont_u
-                        for factors in self.blocking_factors.factors.values():
-                            count_us += len(factors)
-                        global_split_indices.append(
-                            global_split_indices[-1]+\
-                            count_us) 
-                    else:
-                        global_split_indices.append(
-                            global_split_indices[-1]+\
-                            nlp_n_var[varType]*(self.n_cp)*self.n_e)                        
-                else:
-                    global_split_indices.append(
-                        global_split_indices[-1]+\
-                        nlp_n_var[varType]*(self.n_cp)*self.n_e)
-            # Initial and final points
-            if self.discr == "LGR":
-                if self.blocking_factors is not None:
-                    global_split_indices.append(
-                        global_split_indices[-1]+\
-                        nlp_n_var['dx']+\
-                        nlp_n_var['w'])                     
-                else:
-                    global_split_indices.append(
-                        global_split_indices[-1]+\
-                        nlp_n_var['dx']+\
-                        nlp_n_var['unelim_u']+\
-                        nlp_n_var['w'])
-            elif self.discr == "LG":
-                if self.blocking_factors is not None:
-                    global_split_indices.append(
-                        global_split_indices[-1]+\
-                        2*(nlp_n_var['dx']+\
-                           nlp_n_var['w']))                    
-                else:
-                    global_split_indices.append(
-                        global_split_indices[-1]+\
-                        2*(nlp_n_var['dx']+\
-                           nlp_n_var['unelim_u']+\
-                           nlp_n_var['w']))
-            else:
-                raise CasadiCollocatorException(
-                    "Unknown discretization scheme %s." % self.discr)                
-            # Index for the free parameters 
-            global_split_indices.append(global_split_indices[-1]+n_popt)
-            n_freeh2 = self.n_e if self.hs == "free" else 0
-            # Index for the ree elements
-            global_split_indices.append(global_split_indices[-1]+n_freeh2) 
-            # Tuple with the splitted mx variables
-            global_split=casadi.vertsplit(xx,global_split_indices)
-            counter_s = 0
-            
-            # Define the order of the loop for building the check_point map 
-            if self.blocking_factors is not None:
-                global_split = list(global_split)
-                variable_type_list = ['x','dx','w']
-                tmp = global_split[split_map['unelim_u']]
-                global_split[split_map['unelim_u']] = \
-                            global_split[split_map['w']]
-                global_split[split_map['w']] = tmp
-                split_map['unelim_u'] = 3
-                split_map['w'] = 2
-            else:
-                variable_type_list = ['x','dx','unelim_u','w'] 
-            # Buils the check_point map
-            for j,varType in enumerate(variable_type_list):
-                cp_var_map[varType] = dict()
-                new_var_index[varType] = dict()
-                cp_var_map[varType]['all'] = \
-                          global_split[split_map[varType]]
-                if nlp_n_var[varType]>0:
-                    add=0
-                    if varType=='x':
-                        add=1
-                        if self.discr == "LG":
-                            add=2
-                    element_split2 = casadi.vertsplit(
-                        cp_var_map[varType]['all'],
-                        nlp_n_var[varType]*(self.n_cp+add))
-                    # Builds element branch of the map
-                    for i in range(1, self.n_e+1):
-                        cp_var_map[varType][i] = dict()
-                        cp_var_map[varType][i]['all'] = element_split2[i-1]
-                        new_var_index[varType][i] = dict()
-                        collocations_split2 = casadi.vertsplit(
-                            cp_var_map[varType][i]['all'],
-                            nlp_n_var[varType])
-                        discrete_points=self.n_cp 
-                        move_zero=1
-                        if varType=='x':
-                            if self.discr == "LGR":
-                                discrete_points+=1
-                            else:
-                                discrete_points+=2
-                            move_zero=0
-                        # Builds collocation branch of the map
-                        for k in range(discrete_points):
-                            cp_var_map[varType][i][k+move_zero] = dict()
-                            cp_var_map[varType][i][k+move_zero]['all'] = \
-                                      collocations_split2[k]
-                            new_var_index[varType][i][k+move_zero] = list()
-                            scalar_split = casadi.vertsplit(
-                                cp_var_map[varType][i][k+move_zero]['all'])
-                            # Builds the individual variables branch of the map
-                            for var in mvar_vectors[varType]:
-                                name = var.getName()
-                                (var_index, _) = self.name_map[name]
-                                cp_var_map[varType][i][k+move_zero][var_index] = \
-                                          scalar_split[var_index]
-                                new_var_index[varType][i][k+move_zero].append(counter_s)
-                                if self.named_vars:
-                                    reordered_named_xx.append(
-                                        casadi.ssym(name+'_%d_%d' % (i, k+move_zero)))
-                                counter_s+=1
-                    if self.blocking_factors is not None and varType=='dx':
-                        counter_s+=count_us
-                else:
-                    # Handle the cases of empty variables
-                    for i in range(1, self.n_e+1):
-                        cp_var_map[varType][i] = dict()
-                        new_var_index[varType][i] = dict()
-                        cp_var_map[varType][i]['all'] = xx[0:0]
-                        for k in range(1, self.n_cp+1):
-                            cp_var_map[varType][i][k] = dict()
-                            new_var_index[varType][i][k] = list()
-                            cp_var_map[varType][i][k]['all'] = xx[0:0]
-                            
-            if self.blocking_factors is not None:
-                varType = 'unelim_u'
-                # Index controls without blocking factors
-                cp_var_map[varType] = dict()
-                new_var_index[varType] = dict() 
-                
-                # Creates auxiliary list
-                counter_s -= count_us
-                aux_list = [counter_s]*n_u
-                
-                if self.named_vars:
-                    u_cont_names = [
-                        var.getName() for var in mvar_vectors['unelim_u']
-                        if var.getName() not in
-                        self.blocking_factors.factors.keys()]
-                
-                new_var_index['u_cont'] = dict()
-                for i in xrange(1, self.n_e + 1):
-                    new_var_index['u_cont'][i]=dict()
-                    for k in xrange(1, self.n_cp + 1):
-                        new_index = counter_s + n_cont_u
-                        new_var_index['u_cont'][i][k] = range(counter_s, new_index)
-                        counter_s = new_index
-                        if self.named_vars:
-                            named_xx += [casadi.ssym('%s_%d_%d' % (name, i, k)) for
-                                         name in u_cont_names] 
-                            
-                # Create index storage for inputs with blocking factors
-                new_var_index['u_bf'] = dict()
-                for i in xrange(1, self.n_e + 1):
-                    new_var_index['u_bf'][i] = dict()
-                    for k in xrange(1, self.n_cp + 1):
-                        new_var_index['u_bf'][i][k]= []
-                        
-                        
-                # Index controls with blocking factors
-                for name in self.blocking_factors.factors.keys():
-                    element = 1
-                    factors = self.blocking_factors.factors[name]
-                    for (factor_i, factor) in enumerate(factors):
-                        for i in xrange(element, element + factor):
-                            for k in xrange(1, self.n_cp + 1):
-                                new_var_index['u_bf'][i][k].append(counter_s)
-                        if self.named_vars:
-                            named_xx.append(casadi.ssym('%s_%d' % (name, element)))
-                        counter_s += 1
-                        element += factor
-                        
-                # Weave indices for inputs with and without blocking factors
-                for i in xrange(1, self.n_e + 1):
-                    new_var_index[varType][i]=dict()
-                    for k in xrange(1, self.n_cp + 1):
-                        i_cont = 0
-                        i_bf = 0
-                        indices = []
-                        for var in self.mvar_vectors['unelim_u']:
-                            if var.getName() in self.blocking_factors.factors:
-                                indices.append(new_var_index['u_bf'][i][k][i_bf])
-                                i_bf += 1
-                            else:
-                                indices.append(new_var_index['u_cont'][i][k][i_cont])
-                                i_cont += 1
-                        new_var_index[varType][i][k] = indices                    
-                    del new_var_index['u_bf'][i]
-                    del new_var_index['u_cont'][i]
-                
-                del new_var_index['u_bf']
-                del new_var_index['u_cont'] 
-                
-                # Add inputs to variable map
-                for i in xrange(1, self.n_e + 1):
-                    cp_var_map[varType][i] = dict()
-                    for k in xrange(1, self.n_cp + 1):
-                        cp_var_map[varType][i][k] = \
-                            global_split[split_map['unelim_u']][
-                                map(sub, new_var_index[varType][i][k], 
-                                    aux_list)]
-                        
-                # Index initial controls separately if blocking_factors is not None       
-                # Find indices of inputs with blocking factors
-                bf_indices = []
-                cont_indices = []
-                for var in mvar_vectors['unelim_u']:
+        split_init=casadi.vertsplit(inter_split[0], split_indices)
+        for zt,varType in enumerate(variable_type_list):
+            cp_var_map[varType][1][0] = dict()
+            new_var_index[varType][1][0]=list() 
+            if nlp_n_var[varType]!=0:
+                cp_var_map[varType][1][0]['all']=split_init[zt]                    
+                tmp_split=casadi.vertsplit(cp_var_map[varType][1][0]['all'])
+                for var in mvar_vectors[varType]:
                     name = var.getName()
-                    (idx, _) = self.name_map[name]
-                    if name in self.blocking_factors.factors:
-                        bf_indices.append(idx)
-                    else:
-                        cont_indices.append(idx)
-                bf_indices = N.array(bf_indices, dtype=int)
-                cont_indices = N.array(cont_indices, dtype=int)
-                
-                # Index initial controls with blocking factors
-                new_var_index['unelim_u'][1][0] = N.empty(n_u, dtype=int)
-                new_var_index['unelim_u'][1][0][bf_indices] = \
-                    [new_var_index['unelim_u'][1][1][bf_i] for
-                     bf_i in bf_indices]
-                
-                # Index initial controls without blocking factors
-                new_index = counter_s + n_cont_u
-                new_var_index['unelim_u'][1][0][cont_indices] = \
-                             range(counter_s, new_index)
-                new_var_index['unelim_u'][1][0] = \
-                             list(new_var_index['unelim_u'][1][0])
-                counter_s = new_index
-                
-                # Insert initial controls into variable map                
-                cp_var_map['unelim_u'][1][0] = xx[new_var_index['unelim_u'][1][0]]
-                if self.named_vars:
-                    named_xx += [
-                        casadi.ssym(var.getName() + '_1_0') for
-                        var in mvar_vectors['unelim_u'] if
-                        var.getName() not in self.blocking_factors.factors] 
-
-            # Creates map entry for initial points
-            split_indices=[0,nlp_n_var['dx']]
-            if self.blocking_factors is not None:
-                varType='w'
-                split_indices.append(split_indices[-1]+nlp_n_var[varType])
-                inter_split=casadi.vertsplit(
-                    global_split[split_map['init_final']],
-                    nlp_n_var['dx']+\
-                    nlp_n_var['w'])  
-                variable_type_list = ['dx','w']
+                    (var_index, _) = self.name_map[name]
+                    cp_var_map[varType][1][0][var_index] = \
+                              tmp_split[var_index]
+                    new_var_index[varType][1][0].append(counter_s)
+                    if self.named_vars:
+                        named_xx.append(casadi.ssym(name+'_1_0'))                        
+                    counter_s+=1
             else:
-                for varType in ['unelim_u', 'w']:
-                    split_indices.append(split_indices[-1]+nlp_n_var[varType])                
-                inter_split=casadi.vertsplit(
-                    global_split[split_map['init_final']],
-                    nlp_n_var['dx']+\
-                    nlp_n_var['unelim_u']+\
-                    nlp_n_var['w'])            
-                variable_type_list = ['dx', 'unelim_u', 'w']
-            
-            split_init=casadi.vertsplit(inter_split[0], split_indices)
+                cp_var_map[varType][1][0]['all']=xx[0:0]
+                           
+        # Creates map entry for final points
+        if self.discr == "LG":
+            split_end=casadi.vertsplit(inter_split[1], split_indices)
+            ii=self.n_e
+            kk=self.n_cp+1 
             for zt,varType in enumerate(variable_type_list):
-                cp_var_map[varType][1][0] = dict()
-                new_var_index[varType][1][0]=list() 
+                cp_var_map[varType][ii][kk] = dict()
+                new_var_index[varType][ii][kk]=list()
                 if nlp_n_var[varType]!=0:
-                    cp_var_map[varType][1][0]['all']=split_init[zt]                    
-                    tmp_split=casadi.vertsplit(cp_var_map[varType][1][0]['all'])
+                    cp_var_map[varType][ii][kk]['all']=split_end[zt]
+                    tmp_split=casadi.vertsplit(
+                        cp_var_map[varType][ii][kk]['all'])
                     for var in mvar_vectors[varType]:
                         name = var.getName()
                         (var_index, _) = self.name_map[name]
-                        cp_var_map[varType][1][0][var_index] = \
+                        cp_var_map[varType][ii][kk][var_index] = \
                                   tmp_split[var_index]
-                        new_var_index[varType][1][0].append(counter_s)
+                        new_var_index[varType][ii][kk].append(counter_s)
                         if self.named_vars:
-                            reordered_named_xx.append(casadi.ssym(name+'_1_0'))                        
+                            named_xx.append(
+                                casadi.ssym(name+'_%d_%d' % (ii, kk)))                             
                         counter_s+=1
                 else:
-                    cp_var_map[varType][1][0]['all']=xx[0:0]
-                               
-            # Creates map entry for final points
-            if self.discr == "LG":
-                split_end=casadi.vertsplit(inter_split[1], split_indices)
-                ii=self.n_e
-                kk=self.n_cp+1 
-                for zt,varType in enumerate(variable_type_list):
-                    cp_var_map[varType][ii][kk] = dict()
-                    new_var_index[varType][ii][kk]=list()
-                    if nlp_n_var[varType]!=0:
-                        cp_var_map[varType][ii][kk]['all']=split_end[zt]
-                        tmp_split=casadi.vertsplit(
-                            cp_var_map[varType][ii][kk]['all'])
-                        for var in mvar_vectors[varType]:
-                            name = var.getName()
-                            (var_index, _) = self.name_map[name]
-                            cp_var_map[varType][ii][kk][var_index] = \
-                                      tmp_split[var_index]
-                            new_var_index[varType][ii][kk].append(counter_s)
-                            if self.named_vars:
-                                reordered_named_xx.append(
-                                    casadi.ssym(name+'_%d_%d' % (ii, kk)))                             
-                            counter_s+=1
-                    else:
-                        cp_var_map[varType][ii][kk]['all']=xx[0:0]
+                    cp_var_map[varType][ii][kk]['all']=xx[0:0]
 
-            # Indexing parameters
-            cp_var_map['p_opt'] = dict()
-            cp_var_map['p_opt']['all'] = \
-                      global_split[split_map['p_opt']]
-            new_var_index['p_opt']=range(counter_s,counter_s+n_popt)
-            if n_popt!=0:
-                tmp_split=casadi.vertsplit(cp_var_map['p_opt']['all'])
-                for par in mvar_vectors['p_opt']:
-                    name = par.getName()
-                    (var_index, _) = self.name_map[name] 
-                    cp_var_map['p_opt'][var_index] = tmp_split[var_index]
-                    if self.named_vars:
-                        reordered_named_xx.append(casadi.ssym(name))
-                    counter_s+=1
-                                       
-            # Indexing free elements
-            cp_var_map['h'] = dict()
-            cp_var_map['h']['all'] = \
-                      global_split[split_map['h']]
-            new_var_index['h']=range(counter_s,counter_s+n_freeh2)
-            if n_freeh2!=0:
-                tmp_split=casadi.vertsplit(cp_var_map['h']['all'])
-                for i in range(self.n_e):
-                    cp_var_map['h'][i+1] = tmp_split[i]
-                    if self.named_vars:
-                        reordered_named_xx.append(casadi.ssym('h_%d' % i+1))
-                    counter_s+=1         
+        # Indexing parameters
+        cp_var_map['p_opt'] = dict()
+        cp_var_map['p_opt']['all'] = \
+                  global_split[split_map['p_opt']]
+        new_var_index['p_opt']=range(counter_s,counter_s+n_popt)
+        if n_popt!=0:
+            tmp_split=casadi.vertsplit(cp_var_map['p_opt']['all'])
+            for par in mvar_vectors['p_opt']:
+                name = par.getName()
+                (var_index, _) = self.name_map[name] 
+                cp_var_map['p_opt'][var_index] = tmp_split[var_index]
+                if self.named_vars:
+                    named_xx.append(casadi.ssym(name))
+                counter_s+=1
+                                   
+        # Indexing free elements
+        cp_var_map['h'] = dict()
+        cp_var_map['h']['all'] = \
+                  global_split[split_map['h']]
+        new_var_index['h']=range(counter_s,counter_s+n_freeh2)
+        if n_freeh2!=0:
+            tmp_split=casadi.vertsplit(cp_var_map['h']['all'])
+            for i in range(self.n_e):
+                cp_var_map['h'][i+1] = tmp_split[i]
+                if self.named_vars:
+                    named_xx.append(casadi.ssym('h_%d' % i+1))
+                counter_s+=1         
 
-            # Update the map
-            var_list = ['x','dx','unelim_u','w']
-            if self.blocking_factors is not None:
-                var_list = ['x','dx','w']
-            for i in range(1, self.n_e+1):
-                for varType in var_list:
-                    discrete_points=self.n_cp 
-                    move_zero=1
-                    if varType=='x':
-                        if self.discr == "LGR":
-                            discrete_points+=1
-                        else:
-                            discrete_points+=2
-                        move_zero=0
-                    for k in range(discrete_points):
-                        var_map[i][k+move_zero][varType]=\
-                            cp_var_map[varType][i][k+move_zero]['all']
-                        var_indices[i][k+move_zero][varType]=\
-                            new_var_index[varType][i][k+move_zero]
-
-            # Update initial values ignored in the previous loop
-            var_list = ['dx','unelim_u','w']
-            if self.blocking_factors is not None:
-                var_list = ['dx','w']            
+        # Update the map
+        var_list = ['x', 'dx', 'w', 'unelim_u']
+        if self.blocking_factors is not None:
+            var_list = ['x','dx','w']
+        for i in range(1, self.n_e+1):
             for varType in var_list:
-                var_map[1][0][varType]=\
-                    cp_var_map[varType][1][0]['all']
-                var_indices[1][0][varType]=\
-                    new_var_index[varType][1][0]
-                
-            # Update final points
+                discrete_points=self.n_cp 
+                move_zero=1
+                if varType=='x':
+                    if self.discr == "LGR":
+                        discrete_points+=1
+                    else:
+                        discrete_points+=2
+                    move_zero=0
+                for k in range(discrete_points):
+                    var_map[i][k+move_zero][varType]=\
+                        cp_var_map[varType][i][k+move_zero]['all']
+                    var_indices[i][k+move_zero][varType]=\
+                        new_var_index[varType][i][k+move_zero]
+
+        # Update initial values ignored in the previous loop
+        var_list = ['dx', 'w', 'unelim_u']
+        if self.blocking_factors is not None:
+            var_list = ['dx','w']            
+        for varType in var_list:
+            var_map[1][0][varType]=\
+                cp_var_map[varType][1][0]['all']
+            var_indices[1][0][varType]=\
+                new_var_index[varType][1][0]
+            
+        # Update final points
+        if self.discr == "LG":
+            ii=self.n_e
+            kk=self.n_cp+1
+            for varType in var_list:      
+                var_map[ii][kk][varType]=\
+                    cp_var_map[varType][ii][kk]['all']
+                var_indices[ii][kk][varType]=\
+                    new_var_index[varType][ii][kk]
+        
+        # Update controls separately  
+        if self.blocking_factors is not None:
+            varType='unelim_u'
+            # Collocation points
+            for i in range(1, self.n_e+1):
+                for k in range(1, self.n_cp+1):
+                    var_map[i][k][varType]=\
+                        cp_var_map[varType][i][k]
+                    var_indices[i][k][varType]=\
+                        new_var_index[varType][i][k]
+            
+            # Initial points
+            var_map[1][0][varType]=\
+                cp_var_map[varType][1][0]
+            var_indices[1][0][varType]=\
+                new_var_index[varType][1][0]
+            
+            # Final points 
             if self.discr == "LG":
                 ii=self.n_e
-                kk=self.n_cp+1
-                for varType in var_list:      
-                    var_map[ii][kk][varType]=\
-                        cp_var_map[varType][ii][kk]['all']
-                    var_indices[ii][kk][varType]=\
-                        new_var_index[varType][ii][kk]
+                kk=self.n_cp+1     
+                var_map[ii][kk][varType]=\
+                    cp_var_map[varType][ii][kk]
+                var_indices[ii][kk][varType]=\
+                    new_var_index[varType][ii][kk]                
             
-            # Update controls separately  
-            if self.blocking_factors is not None:
-                varType='unelim_u'
-                # Collocation points
-                for i in range(1, self.n_e+1):
-                    for k in range(1, self.n_cp+1):
-                        var_map[i][k][varType]=\
-                            cp_var_map[varType][i][k]
-                        var_indices[i][k][varType]=\
-                            new_var_index[varType][i][k]
-                
-                # Initial points
-                var_map[1][0][varType]=\
-                    cp_var_map[varType][1][0]
-                var_indices[1][0][varType]=\
-                    new_var_index[varType][1][0]
-                
-                # Final points 
-                if self.discr == "LG":
-                    ii=self.n_e
-                    kk=self.n_cp+1     
-                    var_map[ii][kk][varType]=\
-                        cp_var_map[varType][ii][kk]
-                    var_indices[ii][kk][varType]=\
-                        new_var_index[varType][ii][kk]                
-                
-            # Update free parameters
-            var_map['p_opt']=cp_var_map['p_opt']['all'] 
-            var_indices['p_opt']=new_var_index['p_opt']
+        # Update free parameters
+        var_map['p_opt']=cp_var_map['p_opt']['all'] 
+        var_indices['p_opt']=new_var_index['p_opt']
 
-            # Update h_i for free elements length
-            if self.hs == "free":
-                var_indices['h'] =[ N.nan ]+ new_var_index['h']
-                self.h = casadi.vertcat([N.nan,cp_var_map['h']['all']])
+        # Update h_i for free elements length
+        if self.hs == "free":
+            var_indices['h'] =[ N.nan ]+ new_var_index['h']
+            self.h = casadi.vertcat([N.nan,cp_var_map['h']['all']])
 
-            self.cp_var_map = cp_var_map
+        self.cp_var_map = cp_var_map
 
-        # Sanity check
-        assert(index == n_xx)
-        if self.reorder_vars:
-            assert(counter_s == n_xx)
+        assert(counter_s == n_xx)
         if self.named_vars:
             assert(len(named_xx) == n_xx)
         
         # Save variables and indices as data attributes
         self.xx = xx
         if self.named_vars:
-            if self.reorder_vars:
-                self.named_xx = casadi.vertcat(reordered_named_xx)
-            else:
-                self.named_xx = casadi.vertcat(named_xx)
+            self.named_xx = casadi.vertcat(named_xx)
+
             
                 
         self.n_xx = n_xx
@@ -4594,6 +4378,7 @@ class LocalDAECollocator(CasadiCollocator):
                         "input %s" % name)
                 nlp_timed_variables.append(self.var_map[i][k][vt][index])
 
+        
         # Classical scaling of timed variables
         if (self.variable_scaling and self.nominal_traj is None and
             self.hs != "free" and len(collocation_constraint_points) > 0):
@@ -4603,7 +4388,7 @@ class LocalDAECollocator(CasadiCollocator):
              self.mterm] = casadi.substitute(
                  ocp_expressions, timed_variables,
                  map(operator.mul, timed_variables_sfs, timed_variables))
-
+            
         self._timed_variables = timed_variables
         self._nlp_timed_variables = nlp_timed_variables 
 

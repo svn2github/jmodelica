@@ -2318,11 +2318,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
                                       "not supported.")
         elif self.discr != "LG" and self.discr != "LGR":
             raise ValueError("Unknown discretization scheme %s." % self.discr)
-
-        # Check validity of named_vars
-        if self.named_vars and self.reorder_vars:
-            raise NotImplementedError("Named variables does not work with " +
-                                      "reordered variables.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and
@@ -2400,19 +2395,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
                     self.nominal_traj_mode[mvar.getName()] = \
                             self.nominal_traj_mode[name]
                     del self.nominal_traj_mode[name]
-        
-        # Check validity of reoderer variables
-        if self.reorder_vars and self.eliminate_cont_var:
-            raise NotImplementedError("reordered variables does not work with " +
-                                      "eliminated continuity variables.")
-        # Check validity of reoderer variables
-        if self.reorder_vars and self.eliminate_der_var:
-            raise NotImplementedError("reordered variables does not work with " +
-                                      "eliminated derivative variables.")
-        # Check validity of check point
-        if not self.reorder_vars and self.checkpoint:
-            raise NotImplementedError("Check point does not work without " +
-                                      "reordered variables.")
         # Check validity of check point
         if self.checkpoint and self.blocking_factors is not None:
             raise NotImplementedError("Check point does not work with " +
@@ -2839,7 +2821,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_cont_var': False,
                 'measurement_data': None,
                 'checkpoint': False,
-                'reorder_vars': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
                 'IPOPT_options': {},
