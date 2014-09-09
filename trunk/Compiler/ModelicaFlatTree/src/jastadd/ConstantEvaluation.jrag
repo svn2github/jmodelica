@@ -2144,10 +2144,15 @@ aspect ConstantEvaluation {
           throw new UnsupportedOperationException();
         return new CValueString(String.format((Locale) null, formatString(), value));
     }
-
-    // TODO: support format args
-    syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
-
+    
+    syn String FStringExp.formatString() {
+        if (hasFormat()) {
+            return getFormat().ceval().stringValue();
+        } else {
+            return "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
+        }
+    }
+    
     syn String FStringExp.formatWidth()     = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
     syn String FStringExp.formatFlags()     = leftJustified() && minimumLength() > 0 ? "-" : "";
     syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";

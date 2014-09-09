@@ -244,10 +244,9 @@ aspect ComplianceCheck {
 				getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
 		}
 		if (hasFormat()) {
-			getFormat().compliance("format argument is not supported");
-//			getFormat().markAsStructuralParameter(checkType);
-//			if (!getSignificantDigits().variability().parameterOrLess())
-//				getFormat().compliance("format with higher than parameter variability is not supported");
+            if (!getFormat().variability().parameterOrLess())
+                getFormat().compliance("format with higher than parameter variability is not supported");
+            getFormat().markAsStructuralParameter(checkType);
 		}
 	}
 		

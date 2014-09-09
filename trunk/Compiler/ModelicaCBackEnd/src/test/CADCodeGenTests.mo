@@ -761,10 +761,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-    char tmp_1[27];
+    char tmp_1[28];
     if (_sw(0) == JMI_FALSE) {
-        char tmp_1[27];
-        snprintf(tmp_1, 27, \"Time (%.6g) > 0.5\", _time);
+        char tmp_1[28];
+        snprintf(tmp_1, 28, \"Time (%.6g) > 0.5\", _time);
         jmi_assert_failed(tmp_1, JMI_ASSERT_ERROR);
     }
 ")})));

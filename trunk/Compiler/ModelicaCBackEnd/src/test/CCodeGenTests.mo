@@ -759,6 +759,9 @@ equation
 	StringCompare("medium      ", String(enumVar, minimumLength=12));
 	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
 
+    StringCompare("42",           String(intVar, format="%d"));
+	StringCompare("3.1400000",    String(realVar, format="%f"));
+	
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="CStringExp",
@@ -771,18 +774,18 @@ equation
     char tmp_1[11];
     char tmp_2[13];
     char tmp_3[13];
-    char tmp_4[14];
-    char tmp_5[14];
-    char tmp_6[14];
-    char tmp_7[16];
-    char tmp_8[16];
-    char tmp_9[16];
-    char tmp_10[14];
-    char tmp_11[14];
-    char tmp_12[14];
-    char tmp_13[16];
-    char tmp_14[16];
-    char tmp_15[16];
+    char tmp_4[15];
+    char tmp_5[15];
+    char tmp_6[15];
+    char tmp_7[17];
+    char tmp_8[17];
+    char tmp_9[17];
+    char tmp_10[15];
+    char tmp_11[15];
+    char tmp_12[15];
+    char tmp_13[17];
+    char tmp_14[17];
+    char tmp_15[17];
     char tmp_16[6];
     char tmp_17[13];
     char tmp_18[13];
@@ -792,35 +795,37 @@ equation
     char tmp_22[7];
     char tmp_23[13];
     char tmp_24[13];
+    char tmp_25[15];
+    char tmp_26[15];
     snprintf(tmp_1, 11, \"%d\", (int) _intVar_1);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"42\", tmp_1);
     snprintf(tmp_2, 13, \"%-12d\", (int) _intVar_1);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"42          \", tmp_2);
     snprintf(tmp_3, 13, \"%12d\", (int) _intVar_1);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"          42\", tmp_3);
-    snprintf(tmp_4, 14, \"%.6g\", _realVar_0);
+    snprintf(tmp_4, 15, \"%.6g\", _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.14000\", tmp_4);
-    snprintf(tmp_5, 14, \"%-12.6g\", _realVar_0);
+    snprintf(tmp_5, 15, \"%-12.6g\", _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.14000     \", tmp_5);
-    snprintf(tmp_6, 14, \"%12.6g\", _realVar_0);
+    snprintf(tmp_6, 15, \"%12.6g\", _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"     3.14000\", tmp_6);
-    snprintf(tmp_7, 16, \"%.8g\", _realVar_0);
+    snprintf(tmp_7, 17, \"%.8g\", _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.1400000\", tmp_7);
-    snprintf(tmp_8, 16, \"%-12.8g\", _realVar_0);
+    snprintf(tmp_8, 17, \"%-12.8g\", _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.1400000   \", tmp_8);
-    snprintf(tmp_9, 16, \"%12.8g\", _realVar_0);
+    snprintf(tmp_9, 17, \"%12.8g\", _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"   3.1400000\", tmp_9);
-    snprintf(tmp_10, 14, \"%.6g\", - _realVar_0);
+    snprintf(tmp_10, 15, \"%.6g\", - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"-3.14000\", tmp_10);
-    snprintf(tmp_11, 14, \"%-12.6g\", - _realVar_0);
+    snprintf(tmp_11, 15, \"%-12.6g\", - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"-3.14000    \", tmp_11);
-    snprintf(tmp_12, 14, \"%12.6g\", - _realVar_0);
+    snprintf(tmp_12, 15, \"%12.6g\", - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"    -3.14000\", tmp_12);
-    snprintf(tmp_13, 16, \"%.8g\", - _realVar_0);
+    snprintf(tmp_13, 17, \"%.8g\", - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"-3.1400000\", tmp_13);
-    snprintf(tmp_14, 16, \"%-12.8g\", - _realVar_0);
+    snprintf(tmp_14, 17, \"%-12.8g\", - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"-3.1400000  \", tmp_14);
-    snprintf(tmp_15, 16, \"%12.8g\", - _realVar_0);
+    snprintf(tmp_15, 17, \"%12.8g\", - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"  -3.1400000\", tmp_15);
     snprintf(tmp_16, 6, \"%s\", COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"false\", tmp_16);
@@ -840,6 +845,10 @@ equation
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"medium      \", tmp_23);
     snprintf(tmp_24, 13, \"%12s\", E_0_e[(int) _enumVar_3]);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"      medium\", tmp_24);
+    snprintf(tmp_25, 15, \"%d\", (int) _intVar_1);
+    func_CCodeGenTests_CStringExp_StringCompare_def0(\"42\", tmp_25);
+    snprintf(tmp_26, 15, \"%f\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.1400000\", tmp_26);
     (*res)[0] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(12), AD_WRAP_LITERAL(42)) - (_intVar_1);
     (*res)[1] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, JMI_TRUE, JMI_FALSE) - (_boolVar_2);
     (*res)[2] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_enumVar_3);
@@ -14136,7 +14145,7 @@ $C_ode_derivatives$
             generatedCode="
 char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 
-    char tmp_1[45];
+    char tmp_1[46];
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
@@ -14149,7 +14158,7 @@ char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
     _b_1 = _sw(0);
     _e_2 = COND_EXP_EQ(_b_1, JMI_TRUE, AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3));
     _i_3 = (_e_2);
-    snprintf(tmp_1, 45, \"x %.6g y %s z %s v %d w\", _r_0, COND_EXP_EQ(_b_1, JMI_TRUE, \"true\", \"false\"), E_0_e[(int) _e_2], (int) _i_3);
+    snprintf(tmp_1, 46, \"x %.6g y %s z %s v %d w\", _r_0, COND_EXP_EQ(_b_1, JMI_TRUE, \"true\", \"false\"), E_0_e[(int) _e_2], (int) _i_3);
     _dummy_4 = func_CCodeGenTests_StringOperations1_f_exp0(tmp_1);
 /********* Write back reinits *******/
 ")})));
@@ -14180,13 +14189,13 @@ $C_ode_derivatives$
             generatedCode="
 char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 
-    char tmp_1[43];
+    char tmp_1[44];
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    snprintf(tmp_1, 43, \"x 0.123457 y true z a v 42 w %.6g\", _time);
+    snprintf(tmp_1, 44, \"x 0.123457 y true z a v 42 w %.6g\", _time);
     _dummy_0 = func_CCodeGenTests_StringOperations2_f_exp0(tmp_1);
 /********* Write back reinits *******/
 ")})));
@@ -14271,13 +14280,13 @@ jmi_ad_var_t func_CCodeGenTests_StringOperations4_f_exp0(jmi_string_t s_v) {
 }
 
 
-    char tmp_1[17];
+    char tmp_1[18];
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    snprintf(tmp_1, 17, \"abc%.6g\", _time);
+    snprintf(tmp_1, 18, \"abc%.6g\", _time);
     _y_0 = func_CCodeGenTests_StringOperations4_f_exp0(tmp_1);
 /********* Write back reinits *******/
 ")})));
