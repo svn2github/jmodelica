@@ -567,26 +567,6 @@ end ComplianceTests.String2;
 ")})));
 end String2;
 
-model Format1
-    function f
-        input String format;
-        output String res;
-      algorithm
-        res := String(1, format=format);
-    end f;
-    parameter String s = f("%d");
-    
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="Format1",
-            description="",
-            errorMessage="
-1 errors found:
-Error: in file '...':
-Compliance error at line 575, column 33:
-  format with higher than parameter variability is not supported
-")})));
-end Format1;
 
 
 package UnknownArraySizes

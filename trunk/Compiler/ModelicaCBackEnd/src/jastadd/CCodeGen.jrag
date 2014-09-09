@@ -2093,15 +2093,7 @@ aspect CCodeGen {
 	}
 	syn lazy int FStringAddExp.maxStringLength_C() = Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), MAX_STRING_LENGTH_C);
 	eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
-    eq FStringExp.maxStringLength_C()  {
-        int res;
-        if (hasFormat()) {
-            res = getValue().type().maxNumericStringLength_C(significantDigits());
-        } else {
-            res = getValue().type().maxStringLength_C(significantDigits());
-        }
-        return Math.max(res, minimumLength());
-    }
+	eq FStringExp.maxStringLength_C()              = Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
 	
 	/**
 	 * The maximum length string representations of values of this type can have in C.
@@ -2109,21 +2101,15 @@ aspect CCodeGen {
 	syn int FType.maxStringLength_C(int precision) {
 		throw new UnsupportedOperationException();
 	}
-    eq FRealType.maxStringLength_C(int precision)    = REAL_BASE_STR_LEN_C + precision; // -1.(...)E-123
-    eq FIntegerType.maxStringLength_C(int precision) = INT_BASE_STR_LEN_C;
-    eq FBooleanType.maxStringLength_C(int precision) = BOOL_BASE_STR_LEN_C;
+	eq FRealType.maxStringLength_C(int precision)    = 7 + precision;
+	eq FIntegerType.maxStringLength_C(int precision) = 10;
+	eq FBooleanType.maxStringLength_C(int precision) = 5;
 	eq FEnumType.maxStringLength_C(int precision) {
 		int res = 0;
 		for (FEnumLiteralType lit : getFEnumLiteralTypes())
 			res = Math.max(res, lit.getName().length());
 		return res;
 	}
-    
-    syn int FType.maxNumericStringLength_C(int precision) = Math.max(REAL_BASE_STR_LEN_C + precision, INT_BASE_STR_LEN_C);
-    
-    public static final int FType.REAL_BASE_STR_LEN_C = 8;
-    public static final int FType.INT_BASE_STR_LEN_C = 10;
-    public static final int FType.BOOL_BASE_STR_LEN_C = 5;
 	
 	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
 	

@@ -898,18 +898,4 @@ end Vectorized1;
 
 end Functional;
 
-model Format1
-    parameter String s = String(true, format="%f");
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="Format1",
-            description="",
-            errorMessage="
-1 errors found:
-Error: in file '...':
-Semantic error at line 902, column 26:
-  Format string specifier is only allowed with numeric values
-")})));
-end Format1;
-
 end CheckTests;

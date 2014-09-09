@@ -622,14 +622,7 @@ aspect ContentCheck {
     eq InstComponentDecl.getChild().myOperatorRecord() = null;
     eq InstRoot.getChild().myOperatorRecord()          = null;
     eq Root.getChild().myOperatorRecord()              = null;
-    
-    
-    public void FStringExp.contentCheck(ErrorCheckType checkType) {
-        super.contentCheck(checkType);
-        if (hasFormat() && !getValue().type().isNumeric()) {
-            error("Format string specifier is only allowed with numeric values");
-        }
-    }
+
 }
 
 aspect StructuralParams {
