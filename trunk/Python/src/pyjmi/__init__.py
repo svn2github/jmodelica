@@ -75,7 +75,6 @@ try:
 except ImportError:
     casadi_present = False
 if casadi_present:
-    from casadi_interface import CasadiModel
     try:
         import modelicacasadi_wrapper
         modelicacasadi_present = True

@@ -23,10 +23,10 @@ using std::string; using CasADi::MX;
 RealType::RealType(){
     // Default attributes for non parameter/constant Real type, according to
     // Modelica specification.
-    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("quantity"), MX("")));
+    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("quantity"), MX::sym("")));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("nominal"), MX(1)));
-    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("unit"), MX("")));
-    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("displayUnit"), MX("")));
+    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("unit"), MX::sym("")));
+    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("displayUnit"), MX::sym("")));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("min"), MX(-std::numeric_limits<double>::infinity())));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("max"), MX(std::numeric_limits<double>::infinity())));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("start"), MX(0)));

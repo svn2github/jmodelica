@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Printable.hpp"
 
-
 // MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS should be used in the public
 // section of all subclasses of SharedNode, which should also be used with
 // %instantiate_Ref in the swig files.

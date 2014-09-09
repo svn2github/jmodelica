@@ -22,7 +22,7 @@ using std::string; using CasADi::MX;
 IntegerType::IntegerType(){
     // Default attributes for non parameter/constant Integer type, according to
     // Modelica specification.
-    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("quantity"), MX("")));
+    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("quantity"), MX::sym("")));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("min"), MX(-std::numeric_limits<double>::infinity())));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("max"),  MX(std::numeric_limits<double>::infinity())));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("start"), MX(0)));

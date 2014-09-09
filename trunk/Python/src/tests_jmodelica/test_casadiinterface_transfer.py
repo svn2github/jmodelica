@@ -28,10 +28,10 @@ def load_optimization_problem(*args, **kwargs):
     return ocp
 
 # Common variables used in the tests
-x1 = MX("x1")
-x2 = MX("x2")
-x3 = MX("x3")
-der_x1 = MX("der(x1)")
+x1 = MX.sym("x1")
+x2 = MX.sym("x2")
+x3 = MX.sym("x3")
+der_x1 = MX.sym("der(x1)")
 
     
 def assertNear(val1, val2, tol):
@@ -79,26 +79,26 @@ class ModelicaTransfer(object):
         dependent =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
         independent =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
         actual =  str(independent[0].getAttribute("bindingExpression")) + str(dependent[0].getAttribute("bindingExpression"))
-        expected = str(MX(2)) + str(MX("p1"))
+        expected = str(MX(2)) + str(MX.sym("p1"))
         assert actual == expected
 
     @testattr(casadi = True)
     def test_ModelicaUnit(self):
         model =  self.load_model("AtomicModelAttributeUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert str(diffs[0].getAttribute("unit")) == str(MX("kg")) 
+        assert str(diffs[0].getAttribute("unit")) == str(MX.sym("kg")) 
 
     @testattr(casadi = True)
     def test_ModelicaQuantity(self):
         model =  self.load_model("AtomicModelAttributeQuantity", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert str(diffs[0].getAttribute("quantity")) == str(MX("kg")) 
+        assert str(diffs[0].getAttribute("quantity")) == str(MX.sym("kg")) 
 
     @testattr(casadi = True)
     def test_ModelicaDisplayUnit(self):
         model =  self.load_model("AtomicModelAttributeDisplayUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert str(diffs[0].getAttribute("displayUnit")) == str(MX("kg")) 
+        assert str(diffs[0].getAttribute("displayUnit")) == str(MX.sym("kg")) 
 
     @testattr(casadi = True)
     def test_ModelicaMin(self):
@@ -134,7 +134,7 @@ class ModelicaTransfer(object):
     def test_ModelicaComment(self):
         model =  self.load_model("AtomicModelComment", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert str(diffs[0].getAttribute("comment")) == str(MX("I am x1's comment"))
+        assert str(diffs[0].getAttribute("comment")) == str(MX.sym("I am x1's comment"))
 
     @testattr(casadi = True)
     def test_ModelicaRealDeclaredType(self):
@@ -162,14 +162,14 @@ class ModelicaTransfer(object):
     def test_ModelicaRealConstant(self):
         model =  self.load_model("atomicModelRealConstant", modelFile)
         constVars =  model.getVariables(Model.REAL_CONSTANT)
-        assert str(constVars[0].getVar()) == str(MX("pi"))
+        assert str(constVars[0].getVar()) == str(MX.sym("pi"))
         assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaRealIndependentParameter(self):
         model =  self.load_model("atomicModelRealIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
-        assert str(indepParam[0].getVar()) == str(MX("pi"))
+        assert str(indepParam[0].getVar()) == str(MX.sym("pi"))
         assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
 
     @testattr(casadi = True)
@@ -212,14 +212,14 @@ class ModelicaTransfer(object):
     def test_ModelicaIntegerConstant(self):
         model =  self.load_model("atomicModelIntegerConstant", modelFile)
         constVars =  model.getVariables(Model.INTEGER_CONSTANT)
-        assert str(constVars[0].getVar()) == str(MX("pi"))
+        assert str(constVars[0].getVar()) == str(MX.sym("pi"))
         assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaIntegerIndependentParameter(self):
         model =  self.load_model("atomicModelIntegerIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
-        assert str(indepParam[0].getVar()) == str(MX("pi"))
+        assert str(indepParam[0].getVar()) == str(MX.sym("pi"))
         assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
 
     @testattr(casadi = True)
@@ -245,14 +245,14 @@ class ModelicaTransfer(object):
     def test_ModelicaBooleanConstant(self):
         model =  self.load_model("atomicModelBooleanConstant", modelFile)
         constVars =  model.getVariables(Model.BOOLEAN_CONSTANT)
-        assert str(constVars[0].getVar()) == str(MX("pi"))
+        assert str(constVars[0].getVar()) == str(MX.sym("pi"))
         assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaBooleanIndependentParameter(self):
         model =  self.load_model("atomicModelBooleanIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
-        assert str(indepParam[0].getVar()) == str(MX("pi"))
+        assert str(indepParam[0].getVar()) == str(MX.sym("pi"))
         assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
 
     @testattr(casadi = True)
@@ -1337,32 +1337,32 @@ def test_OptimicaSevaralPathConstraints():
 @testattr(casadi = True)
 def test_OptimicaEqualityPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationEQpoint", optproblemsFile)
-    expected = str(MX("x1(finalTime)")) + " = " + str(MX(1.0))
+    expected = str(MX.sym("x1(finalTime)")) + " = " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
     
 @testattr(casadi = True)    
 def test_OptimicaLessThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQpoint", optproblemsFile)
-    expected = str(MX("x1(finalTime)")) + " <= " + str(MX(1.0))
+    expected = str(MX.sym("x1(finalTime)")) + " <= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
 
 @testattr(casadi = True)
 def test_OptimicaGreaterThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQpoint", optproblemsFile)
-    expected = str(MX("x1(finalTime)")) + " >= " + str(MX(1.0))
+    expected = str(MX.sym("x1(finalTime)")) + " >= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
     
 @testattr(casadi = True)    
 def test_OptimicaSevaralPointConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQandEQpoint", optproblemsFile)
-    expected = str(MX("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX("x1(startTime + 1)")) + " >= " + str(MX(1.0)) + str(MX("x2(finalTime + 1)")) + " = " + str(MX(1.0))
+    expected = str(MX.sym("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX.sym("x1(startTime + 1)")) + " >= " + str(MX(1.0)) + str(MX.sym("x2(finalTime + 1)")) + " = " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
     
 @testattr(casadi = True)    
 def test_OptimicaMixedConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationMixedConstraints", optproblemsFile)
-    expectedPath = str(MX("x3(startTime + 1)")) + " <= " + str(x1)
-    expectedPoint =  str(MX("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX("x1(startTime + 1)")) + " >= " + str(MX(1.0)) 
+    expectedPath = str(MX.sym("x3(startTime + 1)")) + " <= " + str(x1)
+    expectedPoint =  str(MX.sym("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX.sym("x1(startTime + 1)")) + " >= " + str(MX(1.0)) 
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expectedPath)
     assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expectedPoint)
     
@@ -1431,7 +1431,7 @@ def test_OptimicaObjectiveIntegrand():
 @testattr(casadi = True)
 def test_OptimicaObjective():
     optProblem =  load_optimization_problem("atomicMayerFinalTime", optproblemsFile)
-    assert str(optProblem.getObjective()) == str(MX("finalTime")) 
+    assert str(optProblem.getObjective()) == str(MX.sym("finalTime")) 
     optProblem =  load_optimization_problem("atomicMayerNull", optproblemsFile)
     assert str(optProblem.getObjective()) == str(MX(0))
 

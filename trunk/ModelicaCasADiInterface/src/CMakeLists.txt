@@ -82,7 +82,6 @@ set(MC_HPP
   ${TYPES_HPP}
   jcc/initjcc.h
   jcc/jccutils.h
-  jcc/sxwrap.hpp
   jcc/mxwrap.hpp
   jcc/mxvectorwrap.hpp
   jcc/mxfunctionwrap.hpp

@@ -40,7 +40,7 @@ Variable::Variable(Model *owner, MX var, Variable::Causality causality,
 
 
 
-void Variable::setQuantity(std::string quantity) { setAttribute("quantity", MX(quantity)); }
+void Variable::setQuantity(std::string quantity) { setAttribute("quantity", MX::sym(quantity)); }
 void Variable::setQuantity(CasADi::MX quantity) { setAttribute("quantity", quantity); }
 CasADi::MX* Variable::getQuantity() { return getAttribute("quantity"); }
 
@@ -48,11 +48,11 @@ void Variable::setNominal(double nominal) { setAttribute("nominal", MX(nominal))
 void Variable::setNominal(CasADi::MX nominal) { setAttribute("nominal", nominal); }
 CasADi::MX* Variable::getNominal() { return getAttribute("nominal"); }
 
-void Variable::setUnit(std::string unit) { setAttribute("unit", MX(unit)); }
+void Variable::setUnit(std::string unit) { setAttribute("unit", MX::sym(unit)); }
 void Variable::setUnit(CasADi::MX unit) { setAttribute("unit", unit); }
 CasADi::MX* Variable::getUnit() { return getAttribute("unit"); }
 
-void Variable::setDisplayUnit(std::string displayUnit) { setAttribute("displayUnit", MX(displayUnit)); }
+void Variable::setDisplayUnit(std::string displayUnit) { setAttribute("displayUnit", MX::sym(displayUnit)); }
 void Variable::setDisplayUnit(CasADi::MX displayUnit) { setAttribute("displayUnit", displayUnit); }
 CasADi::MX* Variable::getDisplayUnit() { return getAttribute("displayUnit"); }
 

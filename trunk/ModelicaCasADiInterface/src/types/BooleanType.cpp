@@ -22,7 +22,7 @@ using std::string; using CasADi::MX;
 BooleanType::BooleanType() {
     // Default attributes for non parameter/constant Boolean type, according to
     // Modelica specification.
-    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("quantity"), MX("")));
+    attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("quantity"), MX::sym("")));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("start"), MX(false)));
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("fixed"), MX(false)));
 }
