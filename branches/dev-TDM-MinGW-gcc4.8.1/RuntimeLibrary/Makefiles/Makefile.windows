@@ -226,7 +226,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	mkdir $(BINARY_MKDIR)
 	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o -L$(JMI_LIB_DIR) $(LIBS_IPOPT)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o -L$(JMI_LIB_DIR) $(LIBS_IPOPT)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 	$(RM) $(OBJS)
