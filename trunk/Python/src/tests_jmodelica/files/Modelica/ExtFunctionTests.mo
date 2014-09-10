@@ -471,7 +471,6 @@ package CEval
         Integer ncol=size(A, 2);
         Integer nx=max(nrow, ncol);
         Integer nrhs=size(B, 2);
-        Integer lwork=max(min(nrow, ncol) + 3*ncol, 2*min(nrow, ncol) + nrhs);
         Real work[max(min(size(A, 1), size(A, 2)) + 3*size(A, 2), 2*min(size(A, 1),
           size(A, 2)) + size(B, 2))];
         Real Awork[size(A, 1), size(A, 2)]=A;
@@ -488,7 +487,6 @@ package CEval
                 rcond,
                 rank,
                 work,
-                lwork,
                 info);
       end dgelsx;
       
