@@ -215,7 +215,7 @@ public class ModelicaCompiler {
             out.delete();
             setOutDir(out);
         } catch (IOException e) {
-            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and temp base directory '" + tempDir + "'!", e);
+            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and temp base directory '" + tempDir + "'! java.io.tmpdir: '" + System.getProperty("java.io.tmpdir") + "'. TMP: '" + System.getenv("TMP") + "'. TEMP: '" + System.getenv("TEMP") + "'.", e);
         }
     }
 
