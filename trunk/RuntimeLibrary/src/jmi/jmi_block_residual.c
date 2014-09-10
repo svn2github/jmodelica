@@ -187,7 +187,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     }
 
     if(iter >= nbr_allocated_iterations) {
-        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
+        jmi_log_node(log, logWarning, "ToManyEventIterations", "Failed to converge during switches iteration due to too many iterations in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
         block->event_iter = 0;
         return jmi_block_solver_status_event_non_converge;
     }

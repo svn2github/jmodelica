@@ -53,15 +53,22 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     /*Evaluate the residual*/
     ret = block->F(block->problem_data,&y,f,JMI_BLOCK_EVALUATE);
     if (ret) {
-        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %s>", ret, block->label);
+        jmi_log_t* log = block->log;
+        jmi_log_node_t node = 
+            jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling residual function in <block: %s>", ret, block->label);
+        jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
+        jmi_log_leave(log, node);
         return ret;
     }
     /* Check that outputs are valid */    
     {
         realtype v = *f;
         if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
-            ret = 1;
+             jmi_log_t* log = block->log;
+             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
+             jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
+             jmi_log_leave(log, node);
+             ret = 1;
         }
     }
     return ret;
@@ -207,7 +214,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         block->F(block->problem_data,block->max,block->res,JMI_BLOCK_MAX);
 
         if (flag) {        
-            jmi_log_node(log, logWarning, "Warning", "<errorCode: %d> returned from <block: %s> "
+            jmi_log_node(log, logWarning, "ErrorReadingInitialGuess", "<errorCode: %d> returned from <block: %s> "
                          "when reading initial guess.", flag, block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, flag);
             return flag;

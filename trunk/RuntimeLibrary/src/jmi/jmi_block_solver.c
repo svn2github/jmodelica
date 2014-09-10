@@ -36,6 +36,8 @@
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
+const double jmi_block_solver_canari = 3.14159;
+
 /**
  * \brief Allocate the internal structure for the block solver.
  */
@@ -52,11 +54,11 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            void* problem_data){
     jmi_block_solver_t* block_solver = (jmi_block_solver_t*)calloc(1, sizeof(jmi_block_solver_t));
     if(!block_solver) {
-        jmi_log_comment(log, logError, "Coupld not allocate memory for block solver");
+        jmi_log_comment(log, logError, "Could not allocate memory for block solver");
         return 1;
     }
     *block_solver_ptr = block_solver;
-
+    block_solver->canari = jmi_block_solver_canari;
     block_solver->problem_data = problem_data;
     block_solver->callbacks = cb;
     block_solver->options = options;
@@ -164,6 +166,13 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     jmi_block_solver_t* block_solver = * block_solver_ptr;
     * block_solver_ptr = 0;
     if(!block_solver) return;
+
+    if(block_solver->canari != jmi_block_solver_canari) {
+        /* something is very wrong */
+        assert(block_solver->canari == jmi_block_solver_canari);
+        return;
+    }
+
     block_solver->delete_solver(block_solver);
 
     free(block_solver->x);

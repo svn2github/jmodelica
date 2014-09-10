@@ -122,7 +122,7 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
     }
     
     if(ret) {
-        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %s>", 
+        jmi_log_node(block->log, logWarning, "ErrOutput", "<errorCode: %d> returned from function evaluation in <block: %s>", 
                      ret, block->label);
         return ret;
     }

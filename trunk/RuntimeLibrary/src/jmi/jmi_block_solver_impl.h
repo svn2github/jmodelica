@@ -78,7 +78,10 @@ struct jmi_block_solver_t {
     double time_spent;             /**< \brief Total time spent in non-linear solver */
     char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
 
+    double canari; /* for debugging */
 } ;
+
+extern const double jmi_block_solver_canari;
 
 /* Lapack function */
 extern double dnrm2_(int* N, double* X, int* INCX);

@@ -83,11 +83,11 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         memcpy(solver->factorization, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
         if(info) {
             if(block->init) {
-                jmi_log_node(block->log, logError, "Error", "Failed in Jacobian calculation for <block: %s>", 
+                jmi_log_node(block->log, logError, "ErrJac", "Failed in Jacobian calculation for <block: %s>", 
                              block->label);
             }
             else {
-                jmi_log_node(block->log, logWarning, "Warning", "Failed in Jacobian calculation for <block: %s>", 
+                jmi_log_node(block->log, logWarning, "WarnJac", "Failed in Jacobian calculation for <block: %s>", 
                              block->label);
             }
             return -1;
@@ -161,10 +161,10 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
 		if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
 
         if(block->init) {
-            jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %s>", block->label);
+            jmi_log_node(block->log, logError, "ErrEvalEq", "Failed to evaluate equations in <block: %s>", block->label);
         }
         else {
-            jmi_log_node(block->log, logWarning, "Warning", "Failed to evaluate equations in <block: %s>", block->label);
+            jmi_log_node(block->log, logWarning, "WarnEvalEq", "Failed to evaluate equations in <block: %s>", block->label);
         }
         return -1;
     }
