@@ -47,16 +47,15 @@ using namespace std;
 %rename(deref1)  CasADi::MXFunction::operator->;
 %rename(deref2)  CasADi::FX::operator->;
 
-%include "symbolic/sx/sx.hpp"
 %include "symbolic/printable_object.hpp"
 %include "symbolic/shared_object.hpp"
 %include "symbolic/generic_type.hpp"
 %include "symbolic/options_functionality.hpp"
-%include "symbolic/matrix/crs_sparsity.hpp"
+%include "symbolic/matrix/sparsity.hpp"
 %include "symbolic/mx/mx.hpp"
 %include "symbolic/mx/mx_tools.hpp"
-%include "symbolic/fx/fx.hpp"
-%include "symbolic/fx/mx_function.hpp"
+%include "symbolic/function/function.hpp"
+%include "symbolic/function/mx_function.hpp"
 
 namespace std {
    %template(MXVector) vector<CasADi::MX>;
