@@ -45,3 +45,4 @@ check-local:
 
 clean-local:
 	-cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(SUNDIALS_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean

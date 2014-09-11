@@ -59,10 +59,5 @@ check-local:
 	esac
 
 clean-local:
-	cd $(MINPACK_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	case $(build) in \
-	*-cygwin*) \
-	cd $(MINPACK_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
-	*-mingw*) \
-	cd $(MINPACK_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
-	esac
+	-cd $(MINPACK_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(MINPACK_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean

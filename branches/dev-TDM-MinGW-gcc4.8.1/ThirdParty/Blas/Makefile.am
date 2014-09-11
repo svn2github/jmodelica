@@ -76,10 +76,5 @@ check-local:
 	esac
 
 clean-local:
-	cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	case $(build) in \
-	*-cygwin*) \
-	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
-	*-mingw*) \
-	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
-	esac
+	-cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
