@@ -365,6 +365,32 @@ aspect EquationSolve {
 	public FRelExp FRelExp.originalFRelExp = null;
 	public FSampleExp FSampleExp.originalFSampleExp = null;
 	
+    /**
+     * This method is used when the original node has been discarded and the
+     * orignal references in FRelExp and FSampleExp needs to be reset.
+     * 
+     * It is also used when it is known that original expression doesn't
+     * produce events but the new does. For example the derivative of
+     * smooot(1, ...).
+     */
+    protected void ASTNode.resetOriginalReferences() {
+        for (int i = 0; i < getNumChildNoTransform(); i++) {
+            getChildNoTransform(i).resetOriginalReferences();
+        }
+    }
+    
+    @Override
+    protected void FRelExp.resetOriginalReferences() {
+        originalFRelExp = null;
+        super.resetOriginalReferences();
+    }
+    
+    @Override
+    protected void FSampleExp.resetOriginalReferences() {
+        originalFSampleExp = null;
+        super.resetOriginalReferences();
+    }
+
 	protected void ASTNode.traverseSymbolic(ASTNode e) {
 		for (int i = 0; i < getNumChildNoTransform(); i++) {
 			getChildNoTransform(i).traverseSymbolic(e.getChildNoTransform(i));
@@ -695,14 +721,16 @@ aspect Derivatives {
 				new FMulExp(new FIntegerLitExp(2),new FSqrtExp(getFExp().copySymbolic()))));
 	}
 
-	public FExp FSmoothExp.diff(String name) {
-		int order = getOrder().ceval().intValue();
-		FExp diffExp = getFExp().diff(name);
-		if (order > 0)
-			return new FSmoothExp(new FIntegerLitExp(order - 1), diffExp);
-		else
-			return diffExp;
-	}
+    public FExp FSmoothExp.diff(String name) {
+        int order = getOrder().ceval().intValue();
+        FExp diffExp = getFExp().diff(name);
+        if (order <= 1)
+            diffExp.resetOriginalReferences();
+        if (order > 0)
+            return new FSmoothExp(new FIntegerLitExp(order - 1), diffExp);
+        else
+            return diffExp;
+    }
 
 	public FExp FHomotopyExp.diff(String name) {
 		return dynamicFExp(getActual().diff(name));
