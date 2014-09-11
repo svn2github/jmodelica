@@ -42,10 +42,10 @@ using namespace std;
 %include "std_pair.i"
 
 %rename(__neg__) operator-;
-%rename(_null) CasADi::CRSSparsity::null;
+%rename(_null) CasADi::Sparsity::null;
 %rename(toString) __repr__;
 %rename(deref1)  CasADi::MXFunction::operator->;
-%rename(deref2)  CasADi::FX::operator->;
+%rename(deref2)  CasADi::Function::operator->;
 
 %include "symbolic/printable_object.hpp"
 %include "symbolic/shared_object.hpp"

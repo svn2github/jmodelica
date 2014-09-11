@@ -3792,9 +3792,6 @@ class LocalDAECollocator(CasadiCollocator):
                         bf_pen += weight * quad_pen
             self.cost += bf_pen
 
-        # Check for lack of inequality constraints
-        if c_i.isNull():
-            self.c_i = casadi.MX(0, 1)
 
     def _create_initial_trajectories(self):
         """
