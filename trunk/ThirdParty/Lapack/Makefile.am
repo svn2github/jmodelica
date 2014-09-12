@@ -30,9 +30,9 @@ $(LAPACK_BUILD_DIR):
 	*-mingw*) \
 	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
 	*-apple*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
 	*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
 	esac
 
 $(LAPACK_BUILD_DIR64):

@@ -30,9 +30,9 @@ $(BLAS_BUILD_DIR):
 	*-mingw*) \
 	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	*-apple*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	esac
 
 $(BLAS_BUILD_DIR64):
