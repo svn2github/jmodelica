@@ -450,7 +450,7 @@ void Model::print(std::ostream& os) const {
 
     using std::endl;
     os << "------------------------------- Variables -------------------------------\n" << endl;
-    if (!timeVar.isNull()) {
+    if (!timeVar.isEmpty()) {
         os << "Time variable: ";
         timeVar.print(os);
         os << endl;

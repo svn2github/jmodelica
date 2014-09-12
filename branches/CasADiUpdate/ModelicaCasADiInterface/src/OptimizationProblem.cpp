@@ -50,14 +50,14 @@ void OptimizationProblem::print(ostream& os) const {
     Model::print(os);
     os << "----------------------- Optimization information ------------------------\n\n";
     os << "Start time = ";
-    if (startTime.isNull()) {
+    if (startTime.isEmpty()) {
         os << "not set";
     } else {
         startTime.print(os);
     }
     
     os << "\nFinal time = ";
-    if (finalTime.isNull()) {
+    if (finalTime.isEmpty()) {
         os << "not set";
     } else {
         finalTime.print(os);
@@ -84,14 +84,14 @@ void OptimizationProblem::print(ostream& os) const {
     }
     
     os << "\n-- Objective integrand term --\n";
-    if (objectiveIntegrand.isNull()) {
+    if (objectiveIntegrand.isEmpty()) {
         os << "not set";
     } else {
         objectiveIntegrand.print(os);
     }
     
     os << "\n-- Objective term --\n";
-    if (objective.isNull()) {
+    if (objective.isEmpty()) {
         os << "not set";
     } else {
         objective.print(os);

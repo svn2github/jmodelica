@@ -108,15 +108,15 @@ def test_NegatedAliasAttributes():
     realVar3.setAttribute("nominal", attr4)
 
     # Check correctness for negated and non-negated alias. 
-    assert isEqual(realVar1.getAttribute("min"), -attr2)
-    assert isEqual(realVar1.getAttribute("max"), -attr1)
-    assert isEqual(realVar1.getAttribute("start"), -attr3)
-    assert isEqual(realVar1.getAttribute("nominal"), -attr4)
+    assert realVar1.getAttribute("min").isEqual(-attr2)
+    assert realVar1.getAttribute("max").isEqual(-attr1)
+    assert realVar1.getAttribute("start").isEqual(-attr3)
+    assert realVar1.getAttribute("nominal").isEqual(-attr4)
 
-    assert isEqual(realVar2.getAttribute("min"), attr1)
-    assert isEqual(realVar2.getAttribute("max"), attr2)
-    assert isEqual(realVar2.getAttribute("start"), attr3)
-    assert isEqual(realVar2.getAttribute("nominal"), attr4)
+    assert realVar2.getAttribute("min").isEqual(attr1)
+    assert realVar2.getAttribute("max").isEqual(attr2)
+    assert realVar2.getAttribute("start").isEqual(attr3)
+    assert realVar2.getAttribute("nominal").isEqual(attr4)
 
     # Set attributes on negated alias
     realVar1.setAttribute("min", attr1)
@@ -125,20 +125,20 @@ def test_NegatedAliasAttributes():
     realVar1.setAttribute("nominal", attr4)
 
     # Check that the attributes are propagated correctly
-    assert isEqual(realVar1.getAttribute("min"), attr1)
-    assert isEqual(realVar1.getAttribute("max"), attr2)
-    assert isEqual(realVar1.getAttribute("start"), attr3)
-    assert isEqual(realVar1.getAttribute("nominal"), attr4)
+    assert realVar1.getAttribute("min").isEqual(attr1)
+    assert realVar1.getAttribute("max").isEqual(attr2)
+    assert realVar1.getAttribute("start").isEqual(attr3)
+    assert realVar1.getAttribute("nominal").isEqual(attr4)
 
-    assert isEqual(realVar2.getAttribute("min"), -attr2)
-    assert isEqual(realVar2.getAttribute("max"), -attr1)
-    assert isEqual(realVar2.getAttribute("start"), -attr3)
-    assert isEqual(realVar2.getAttribute("nominal"), -attr4)
+    assert realVar2.getAttribute("min").isEqual(-attr2)
+    assert realVar2.getAttribute("max").isEqual(-attr1)
+    assert realVar2.getAttribute("start").isEqual(-attr3)
+    assert realVar2.getAttribute("nominal").isEqual(-attr4)
 
-    assert isEqual(realVar3.getAttribute("min"), -attr2)
-    assert isEqual(realVar3.getAttribute("max"), -attr1)
-    assert isEqual(realVar3.getAttribute("start"), -attr3)
-    assert isEqual(realVar3.getAttribute("nominal"), -attr4)
+    assert realVar3.getAttribute("min").isEqual(-attr2)
+    assert realVar3.getAttribute("max").isEqual(-attr1)
+    assert realVar3.getAttribute("start").isEqual(-attr3)
+    assert realVar3.getAttribute("nominal").isEqual(-attr4)
 
     
 @testattr(casadi = True)    
@@ -155,9 +155,9 @@ def test_ModelAliasAndModelGetters():
     model.addVariable(realVar3)
     modelVars = model.getModelVariables()
     aliasVars = model.getAliases()
-    assert isEqual(modelVars[0].getVar(), realVar3.getVar())
-    assert isEqual(aliasVars[0].getVar(), realVar1.getVar())
-    assert isEqual(aliasVars[1].getVar(), realVar2.getVar())
+    assert modelVars[0].getVar().isEqual(realVar3.getVar())
+    assert aliasVars[0].getVar().isEqual(realVar1.getVar())
+    assert aliasVars[1].getVar().isEqual(realVar2.getVar())
 
 @testattr(casadi = True)    
 def test_DependentParameters():
@@ -337,9 +337,9 @@ def test_equationGetter():
     lhs = MX.sym("lhs")
     rhs = MX.sym("rhs")
     eq = Equation(lhs, rhs)
-    assert( isEqual(eq.getLhs(), lhs) )
-    assert( isEqual(eq.getRhs(), rhs) )
-    assert( isEqual(eq.getResidual(), lhs - rhs) )
+    assert( eq.getLhs().isEqual(lhs) )
+    assert( eq.getRhs().isEqual(rhs) )
+    assert( eq.getResidual().isEqual(lhs - rhs) )
     
 @testattr(casadi = True)    
 def test_equationPrinting(): 
@@ -421,9 +421,9 @@ def test_RealVariableAttributes():
     realVar = RealVariable(m, MX.sym("node"), Variable.INTERNAL, Variable.CONTINUOUS)
 
     realVar.setAttribute("myAttribute", attributeNode1)
-    assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode1) )
+    assert( realVar.getAttribute("myAttribute").isEqual(attributeNode1) )
     realVar.setAttribute("myAttribute", attributeNode2)
-    assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( realVar.getAttribute("myAttribute").isEqual(attributeNode2) )
     assert( realVar.hasAttributeSet("myAttribute"))
     assert( not realVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( realVar.getName() == "node" )
@@ -446,7 +446,7 @@ def test_RealVariableNode():
 
     node = MX.sym("var")
     realVar = RealVariable(m, node, Variable.INTERNAL, Variable.CONTINUOUS)
-    assert( isEqual(realVar.getVar(), node) )
+    assert( realVar.getVar().isEqual(node) )
     
 @testattr(casadi = True)    
 def test_RealVariableVariableType():
@@ -546,9 +546,9 @@ def test_DerivativeVariableAttributes():
     derVar = DerivativeVariable(m, MX.sym("node"), None)
 
     derVar.setAttribute("myAttribute", attributeNode1)
-    assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode1) )
+    assert( derVar.getAttribute("myAttribute").isEqual(attributeNode1) )
     derVar.setAttribute("myAttribute", attributeNode2)
-    assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( derVar.getAttribute("myAttribute").isEqual(attributeNode2) )
     assert( derVar.hasAttributeSet("myAttribute"))
     assert( not derVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( derVar.getName() == "node" )
@@ -569,7 +569,7 @@ def test_DerivativeVariableNode():
 
     node = MX.sym("var")
     derVar = DerivativeVariable(m, node, None)
-    assert( isEqual(derVar.getVar(), node) )
+    assert( derVar.getVar().isEqual(node) )
     
 @testattr(casadi = True)    
 def test_DerivativeVariableVariableType():
@@ -631,9 +631,9 @@ def test_IntegerVariableAttributes():
     intVar = IntegerVariable(m, MX.sym("node"), Variable.INTERNAL, Variable.DISCRETE)
 
     intVar.setAttribute("myAttribute", attributeNode1)
-    assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode1) )
+    assert( intVar.getAttribute("myAttribute").isEqual(attributeNode1) )
     intVar.setAttribute("myAttribute", attributeNode2)
-    assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( intVar.getAttribute("myAttribute").isEqual(attributeNode2) )
     assert( intVar.hasAttributeSet("myAttribute"))
     assert( not intVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( intVar.getName() == "node")
@@ -653,7 +653,7 @@ def test_IntegerVariableNode():
     
     node = MX.sym("var")
     intVar = IntegerVariable(m, node, Variable.INTERNAL, Variable.DISCRETE)
-    assert( isEqual(intVar.getVar(), node) )
+    assert( intVar.getVar().isEqual(node) )
     
 @testattr(casadi = True)    
 def test_IntegerVariableVariableType():
@@ -698,9 +698,9 @@ def test_BooleanVariableAttributes():
     boolVar = BooleanVariable(m, MX.sym("node"), Variable.INTERNAL, Variable.DISCRETE)
 
     boolVar.setAttribute("myAttribute", attributeNode1)
-    assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode1) )
+    assert( boolVar.getAttribute("myAttribute").isEqual(attributeNode1) )
     boolVar.setAttribute("myAttribute", attributeNode2)
-    assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( boolVar.getAttribute("myAttribute").isEqual(attributeNode2) )
     assert( boolVar.hasAttributeSet("myAttribute"))
     assert( not boolVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( boolVar.getName() == "node")
@@ -720,7 +720,7 @@ def test_BooleanVariableNode():
     
     node = MX.sym("var")
     boolVar = BooleanVariable(m, node, Variable.INTERNAL, Variable.DISCRETE)
-    assert( isEqual(boolVar.getVar(), node) )
+    assert( boolVar.getVar().isEqual(node) )
     
 @testattr(casadi = True)    
 def test_BooleanVariableVariableType():
@@ -804,7 +804,7 @@ def test_ModelFunctionGetNameCall():
     argVec.append(arg)
     manualCall = function.call(argVec)[0]
     mfCall = modelFunction.call(argVec)
-    assert( isEqual( mfCall[0].getDep(0).getDep(0),arg) )
+    assert( mfCall[0].getDep(0).getDep(0).isEqual(arg) )
     assert( str(manualCall) == str(mfCall[0]) )
 
 @testattr(casadi = True)    
@@ -851,19 +851,19 @@ def test_Constraint():
     greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
     
     # Equality constraint
-    assert( isEqual(equalityConstraint.getLhs(), lhs) )
-    assert( isEqual(equalityConstraint.getRhs(), rhs) )
-    assert( isEqual(equalityConstraint.getResidual(), lhs - rhs) )
+    assert( equalityConstraint.getLhs().isEqual(lhs) )
+    assert( equalityConstraint.getRhs().isEqual(rhs) )
+    assert( equalityConstraint.getResidual().isEqual(lhs - rhs) )
     assert( equalityConstraint.getType() == Constraint.EQ)
     # Less than or equal to constraint
-    assert( isEqual(lessThanConstraint.getLhs(), lhs) )
-    assert( isEqual(lessThanConstraint.getRhs(), rhs) )
-    assert( isEqual(equalityConstraint.getResidual(), lhs - rhs) )
+    assert( lessThanConstraint.getLhs().isEqual(lhs) )
+    assert( lessThanConstraint.getRhs().isEqual(rhs) )
+    assert( equalityConstraint.getResidual().isEqual(lhs - rhs) )
     assert( lessThanConstraint.getType() == Constraint.LEQ )
     # Greater than or equal to constraint
-    assert( isEqual(greaterThanConstraint.getLhs(), lhs) )
-    assert( isEqual(greaterThanConstraint.getRhs(), rhs) )
-    assert( isEqual(greaterThanConstraint.getResidual(), lhs - rhs) )
+    assert( greaterThanConstraint.getLhs().isEqual(lhs) )
+    assert( greaterThanConstraint.getRhs().isEqual(rhs) )
+    assert( greaterThanConstraint.getResidual().isEqual(lhs - rhs) )
     assert( greaterThanConstraint.getType() == Constraint.GEQ )
 
 @testattr(casadi = True)    
@@ -887,8 +887,8 @@ def test_OptimizationProblemTime():
     assert( MX_equal(opt.getFinalTime(), MX(0)) )
     opt.setStartTime(start)
     opt.setFinalTime(final)
-    assert( isEqual(start, opt.getStartTime()) )
-    assert( isEqual(final, opt.getFinalTime()) )
+    assert( start.isEqual(opt.getStartTime()) )
+    assert( final.isEqual(opt.getFinalTime()) )
     
 @testattr(casadi = True)    
 def test_OptimizationProblemLagrangeMayer():
@@ -902,8 +902,8 @@ def test_OptimizationProblemLagrangeMayer():
     opt.setObjective(mayer)
     opt.setObjectiveIntegrand(lagrange)
     
-    assert( isEqual(lagrange, opt.getObjectiveIntegrand()) )
-    assert( isEqual(mayer, opt.getObjective()) )
+    assert( lagrange.isEqual(opt.getObjectiveIntegrand()) )
+    assert( mayer.isEqual(opt.getObjective()) )
 
 @testattr(casadi = True)    
 def test_OptimizationProblemPathConstraints():
@@ -920,10 +920,10 @@ def test_OptimizationProblemPathConstraints():
     
     assert( len(opt.getPathConstraints()) == 0 )
     opt.setPathConstraints(constraintsLessThan)
-    assert( isEqual(opt.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    assert( opt.getPathConstraints()[0].getResidual().isEqual(lessThanConstraint.getResidual()) )
     
     opt.setPathConstraints(constraintsGreaterThan)
-    assert( isEqual(opt.getPathConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
+    assert( opt.getPathConstraints()[0].getResidual().isEqual(greaterThanConstraint.getResidual()) )
     assert( len(opt.getPathConstraints()) == 1)
     
 @testattr(casadi = True)    
@@ -941,10 +941,10 @@ def test_OptimizationProblemPointConstraints():
     
     assert( len(opt.getPointConstraints()) == 0 )
     opt.setPointConstraints(constraintsLessThan)
-    assert( isEqual(opt.getPointConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    assert( opt.getPointConstraints()[0].getResidual().isEqual(lessThanConstraint.getResidual()) )
     
     opt.setPointConstraints(constraintsGreaterThan)
-    assert( isEqual(opt.getPointConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
+    assert( opt.getPointConstraints()[0].getResidual().isEqual(greaterThanConstraint.getResidual()) )
     assert( len(opt.getPointConstraints()) == 1)
     
 @testattr(casadi = True)    
@@ -964,10 +964,10 @@ def test_OptimizationProblemTimedVariables():
     timedVarsFromModel = optTimedVars.getTimedVariables();
 
     assert( len(timedVarsFromModel) == 2 )
-    assert( isEqual(t1.getVar(), timedVarsFromModel[0].getVar()) )
-    assert( isEqual(t2.getVar(), timedVarsFromModel[1].getVar()) )
-    assert( isEqual(realVar1.getVar(), timedVarsFromModel[0].getBaseVariable().getVar()) )
-    assert( isEqual(realVar2.getVar(), timedVarsFromModel[1].getBaseVariable().getVar()) )
+    assert( t1.getVar().isEqual(timedVarsFromModel[0].getVar()) )
+    assert( t2.getVar().isEqual(timedVarsFromModel[1].getVar()) )
+    assert( realVar1.getVar().isEqual(timedVarsFromModel[0].getBaseVariable().getVar()) )
+    assert( realVar2.getVar().isEqual(timedVarsFromModel[1].getBaseVariable().getVar()) )
     
 @testattr(casadi = True)    
 def test_OptimizationProblemPrinting():
@@ -1165,7 +1165,7 @@ def test_ModelEqutionFunctionality():
     model.addDaeEquation(eq1)
     model.addDaeEquation(eq2)
     model.addInitialEquation(eq1)
-    assert( isEqual(res1, model.getInitialResidual()) )
+    assert( res1.isEqual(model.getInitialResidual()) )
     # Also test residuals with more than one residual equation
     res1.append(res2)
     # isEqual in the casadi namespace gives a false negative 
