@@ -230,9 +230,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/Blas/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Blas/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ThirdParty/Blas/Makefile
+	  $(AUTOMAKE) --gnu ThirdParty/Blas/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -461,13 +461,8 @@ check-local:
 	esac
 
 clean-local:
-	cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	case $(build) in \
-	*-cygwin*) \
-	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
-	*-mingw*) \
-	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
-	esac
+	-cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
