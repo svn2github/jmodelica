@@ -18,7 +18,6 @@ import casadi.GenericType;
 import casadi.OptionsFunctionality;
 import casadi.MX;
 import casadi.SharedObject;
-import casadi.FX;
 import casadi.MXFunction;
 import casadi.MXVector;
 
@@ -198,7 +197,7 @@ aspect FExpToCasADi {
      */
     int FStatement.findIndexOfMXInMXVector(MX node, MXVector vec){
         for (int i = 0; i < vec.size(); ++i) {
-            if (casadi.isEqual(vec.get(i), node)) {
+            if (vec.get(i).isEqual(node)) {
                 return i;
             }
         }
@@ -592,7 +591,7 @@ aspect FExpToCasADi {
                 if (fleft.hasFExp()) {
                     MXVector fleftExpAsMXVex = fleft.getFExp().toMXVector();
                     for (int i = 0; i < fleftExpAsMXVex.size(); ++i) {
-                        if (casadi.isEqual(fleftExpAsMXVex.get(i), asMXVariable())) {
+                        if (fleftExpAsMXVex.get(i).isEqual(asMXVariable())) {
                             return outs.get(myOutIndex);
                         }
                         myOutIndex++;
