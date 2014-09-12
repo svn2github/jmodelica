@@ -397,9 +397,9 @@ $(SUNDIALS_DIR):
 	*-mingw*) \
 	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
 	*-apple*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
+	cmake -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
 	*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
+	cmake -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
 	esac
 
 $(SUNDIALS_DIR64):
