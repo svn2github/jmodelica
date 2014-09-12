@@ -209,16 +209,62 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         * This is needed if the user has changed initial guesses in between calls to
         * the solver.
         */
+        double init, nom, min, max;
         flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
-        block->F(block->problem_data,block->min,block->res,JMI_BLOCK_MIN);
-        block->F(block->problem_data,block->max,block->res,JMI_BLOCK_MAX);
-
-        if (flag) {        
+        init = block->x[0];
+        if (flag ||(init != init)) {        
+            if(!flag) flag = 100;
             jmi_log_node(log, logWarning, "ErrorReadingInitialGuess", "<errorCode: %d> returned from <block: %s> "
                          "when reading initial guess.", flag, block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, flag);
             return flag;
         }
+
+        if(block->options->iteration_variable_scaling_mode != jmi_iter_var_scaling_none) {
+            flag = block->F(block->problem_data,block->nominal,block->res,JMI_BLOCK_NOMINAL);
+            nom = block->nominal[0];
+            if (flag ||(nom != nom)) {
+                if(!flag) flag = 100;
+                jmi_log_node(log, logWarning, "ErrorReadingNominal", "<errorCode: %d> returned to <block: %s> "
+                    "when reading nominal value.", flag, block->label);
+                jmi_brent_solver_print_solve_end(block, &topnode, flag);
+                return flag;
+            }
+        }
+
+
+        flag = block->F(block->problem_data,block->min,block->res,JMI_BLOCK_MIN);
+        min = block->min[0];
+        if (flag ||(min != min)) {        
+            if(!flag) flag = 100;
+            jmi_log_node(log, logWarning, "ErrorReadingMin", "<errorCode: %d> returned to <block: %s> "
+                "when reading  min bound value.", flag, block->label);
+            jmi_brent_solver_print_solve_end(block, &topnode, flag);
+            return flag;
+        }
+
+        flag = block->F(block->problem_data,block->max,block->res,JMI_BLOCK_MAX);
+        max = block->max[0];
+        if (flag || (max != max)) {        
+            if(!flag) flag = 100;
+            jmi_log_node(log, logWarning, "ErrorReadingMax", "<errorCode: %d> returned to <block: %s> "
+                "when reading max bound value.", flag, block->label);
+            jmi_brent_solver_print_solve_end(block, &topnode, flag);
+            return flag;
+        }
+
+
+        if ((init > max) || (init < min)) {
+            realtype old_init = init;
+            init = init > max ? max : min;
+            block->x[0] = block->initial[0] = init;
+            jmi_log_node(block->log, logWarning, "StartOutOfBounds",
+                         "Start value <start: %g> is not between <min: %g> and <max: %g> "
+                         "for the iteration variable <iv: #r%d#> in <block: %s>. Clamping to <clamped_start: %g>.",
+                         old_init, min, max, block->value_references[0], block->label, init);
+        }
+
+
     }
 
     jmi_log_fmt(log, topnode, BRENT_EXTENDED_LOG_LEVEL, "<max: %g>", block->max[0]);
@@ -358,6 +404,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             jmi_log_node(log, logError, "Error", "Function evaluation failed while iterating in <block: %s>", block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SYSFUNC_FAIL);
             return JMI_BRENT_SYSFUNC_FAIL;
+        }
+        else {
+                /* Write solution back to model just to make sure. In some cases x was not the last evaluations*/    
+            block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
         }
     }   
         
