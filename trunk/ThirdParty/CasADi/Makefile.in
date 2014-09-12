@@ -190,7 +190,6 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -212,9 +211,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/CasADi/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/CasADi/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu ThirdParty/CasADi/Makefile
+	  $(AUTOMAKE) --foreign ThirdParty/CasADi/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -402,9 +401,9 @@ $(CASADI_BUILD_DIR):
 	cd $(CASADI_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles"  -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DPYTHON_PREFIX=$(CASADI_INST_DIR) -DPython_ADDITIONAL_VERSIONS="2.7;2.6;2.5;2.4" $${CMAKE_EXTRA_ARGS} $(CASADI_SRC_DIR) ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_C_COMPILER_ARG1="-m32" -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2" -DCMAKE_CXX_FLAGS="-m32 -mincoming-stack-boundary=2" -DCMAKE_SHARED_LINKER_FLAGS="-m32" -DCMAKE_EXE_LINKER_FLAGS="-m32" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DPYTHON_PREFIX=$(CASADI_INST_DIR) -DPython_ADDITIONAL_VERSIONS="2.7;2.6;2.5;2.4" $${CMAKE_EXTRA_ARGS} $(CASADI_SRC_DIR) ;; \
 	*-mingw*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles"  -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DPYTHON_PREFIX=$(CASADI_INST_DIR) -DPython_ADDITIONAL_VERSIONS="2.7;2.6;2.5;2.4" $${CMAKE_EXTRA_ARGS} $(CASADI_SRC_DIR) ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_C_COMPILER_ARG1="-m32" -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2" -DCMAKE_CXX_FLAGS="-m32 -mincoming-stack-boundary=2" -DCMAKE_SHARED_LINKER_FLAGS="-m32" -DCMAKE_EXE_LINKER_FLAGS="-m32" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DPYTHON_PREFIX=$(CASADI_INST_DIR) -DPython_ADDITIONAL_VERSIONS="2.7;2.6;2.5;2.4" $${CMAKE_EXTRA_ARGS} $(CASADI_SRC_DIR) ;; \
 	*-apple*) \
 	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DPYTHON_PREFIX=$(CASADI_INST_DIR) -DPython_ADDITIONAL_VERSIONS="2.7;2.6;2.5;2.4" $${CMAKE_EXTRA_ARGS} $(CASADI_SRC_DIR) ;; \
 	*) \
@@ -413,7 +412,6 @@ $(CASADI_BUILD_DIR):
 
 all-local: $(CASADI_BUILD_DIR)
 	cd $(CASADI_BUILD_DIR) && make $(AM_MAKEFLAGS) install_python
-
 check-local:
 	cd $(CASADI_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
 

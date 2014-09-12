@@ -74,9 +74,9 @@ ifcasadi: casadi
 	cd $(MC_BUILD)/ifcasadi; \
 	case $(build) in \
 	*-cygwin*) \
-	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" ;; \
+	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" ;; \
 	*-mingw*) \
-	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" ;; \
+	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" ;; \
 	*) \
 	cmake $(MC_SRC)/src/swig ;; \
 	esac 
@@ -129,9 +129,9 @@ modelicacasadi_wrapper:
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $${CMAKE_EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" $${CMAKE_EXTRA_ARGS} ;; \
 	*-mingw*) \
-	cmake $(MC_INTERFACE) -G "MSYS Makefiles" $${CMAKE_EXTRA_ARGS} ;; \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" $${CMAKE_EXTRA_ARGS} ;; \
 	*) \
 	cmake $(MC_INTERFACE) $${CMAKE_EXTRA_ARGS} ;; \
 	esac 
@@ -161,13 +161,27 @@ build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
 	cd $(abs_top_srcdir)/external/Assimulo; \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
+	case $(build) in \
+	*-cygwin*) \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	*-mingw*) \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --no-msvcr="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	*) \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
+	esac
 endif
 endif
 if WITH_SUNDIALS
 if !WITH_SUPERLU
 	cd $(abs_top_srcdir)/external/Assimulo; \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --lapack-home=$(abs_builddir)/ThirdParty/Lapack/ --prefix=$(assimulo_install_dir)
+	case $(build) in \
+	*-cygwin*) \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	*-mingw*) \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --no-msvcr="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	*) \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
+	esac
 endif
 endif
 	cd $(abs_top_srcdir)/Python/src; \
@@ -175,7 +189,14 @@ endif
 	rm -rf build
 
 	cd $(abs_top_srcdir)/external/PyFMI; \
-	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --prefix=$(pyfmi_install_dir); \
+	case $(build) in \
+	*-cygwin*) \
+	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
+	*-mingw*) \
+	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --no-msvcr="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
+	*) \
+	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --prefix=$(pyfmi_install_dir) ;; \
+	esac
 	rm -rf build
 
 	cd $(abs_top_srcdir)/Python/src; \
@@ -293,6 +314,14 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 && \
+	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 ;; \
+	*-mingw*) \
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 && \
+	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 ;; \
+	esac
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack

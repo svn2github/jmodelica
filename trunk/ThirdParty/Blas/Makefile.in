@@ -14,26 +14,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
-#
-#    Copyright (C) 2009 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License version 3 as published 
-#    by the Free Software Foundation, or optionally, under the terms of the 
-#    Common Public License version 1.0 as published by IBM.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License, or the Common Public License, for more details.
-#
-#    You should have received copies of the GNU General Public License
-#    and the Common Public License along with this program.  If not, 
-#    see <http://www.gnu.org/licenses/> or 
-#    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
-#
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -66,58 +46,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)"
-LIBRARIES = $(lib_LIBRARIES)
-ARFLAGS = cru
-libblas_a_AR = $(AR) $(ARFLAGS)
-libblas_a_LIBADD =
-am_libblas_a_OBJECTS = dasum.$(OBJEXT) daxpy.$(OBJEXT) \
-	dcabs1.$(OBJEXT) dcopy.$(OBJEXT) ddot.$(OBJEXT) \
-	dgbmv.$(OBJEXT) dgemm.$(OBJEXT) dgemv.$(OBJEXT) dger.$(OBJEXT) \
-	dnrm2.$(OBJEXT) drot.$(OBJEXT) drotg.$(OBJEXT) drotm.$(OBJEXT) \
-	drotmg.$(OBJEXT) dsbmv.$(OBJEXT) dscal.$(OBJEXT) \
-	dsdot.$(OBJEXT) dspmv.$(OBJEXT) dspr.$(OBJEXT) dspr2.$(OBJEXT) \
-	dswap.$(OBJEXT) dsymm.$(OBJEXT) dsymv.$(OBJEXT) dsyr.$(OBJEXT) \
-	dsyr2.$(OBJEXT) dsyr2k.$(OBJEXT) dsyrk.$(OBJEXT) \
-	dtbmv.$(OBJEXT) dtbsv.$(OBJEXT) dtpmv.$(OBJEXT) \
-	dtpsv.$(OBJEXT) dtrmm.$(OBJEXT) dtrmv.$(OBJEXT) \
-	dtrsm.$(OBJEXT) dtrsv.$(OBJEXT) dzasum.$(OBJEXT) \
-	dznrm2.$(OBJEXT) idamax.$(OBJEXT) lsame.$(OBJEXT) \
-	xerbla.$(OBJEXT)
-libblas_a_OBJECTS = $(am_libblas_a_OBJECTS)
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-F77COMPILE = $(F77) $(AM_FFLAGS) $(FFLAGS)
-LTF77COMPILE = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS)
-F77LD = $(F77)
-F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-SOURCES = $(libblas_a_SOURCES)
-DIST_SOURCES = $(libblas_a_SOURCES)
-ETAGS = etags
-CTAGS = ctags
+SOURCES =
+DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -155,7 +85,7 @@ ECLIPSE_HOME = @ECLIPSE_HOME@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
-FFLAGS = -fPIC -O3
+FFLAGS = @FFLAGS@
 FGREP = @FGREP@
 GREP = @GREP@
 INSTALL = @INSTALL@
@@ -260,60 +190,37 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = foreign
-lib_LIBRARIES = libblas.a
-libblas_a_SOURCES = \
-	dasum.f \
-	daxpy.f \
-	dcabs1.f \
-	dcopy.f \
-	ddot.f \
-	dgbmv.f \
-	dgemm.f \
-	dgemv.f \
-	dger.f \
-	dnrm2.f \
-	drot.f \
-	drotg.f \
-	drotm.f \
-	drotmg.f \
-	dsbmv.f \
-	dscal.f \
-	dsdot.f \
-	dspmv.f \
-	dspr.f \
-	dspr2.f \
-	dswap.f \
-	dsymm.f \
-	dsymv.f \
-	dsyr.f \
-	dsyr2.f \
-	dsyr2k.f \
-	dsyrk.f \
-	dtbmv.f \
-	dtbsv.f \
-	dtpmv.f \
-	dtpsv.f \
-	dtrmm.f \
-	dtrmv.f \
-	dtrsm.f \
-	dtrsv.f \
-	dzasum.f \
-	dznrm2.f \
-	idamax.f \
-	lsame.f \
-	xerbla.f
 
+#
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License version 3 as published 
+#    by the Free Software Foundation, or optionally, under the terms of the 
+#    Common Public License version 1.0 as published by IBM.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License, or the Common Public License, for more details.
+#
+#    You should have received copies of the GNU General Public License
+#    and the Common Public License along with this program.  If not, 
+#    see <http://www.gnu.org/licenses/> or 
+#    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
+#
+BLAS_BUILD_DIR = ../../blas_build
+BLAS_BUILD_DIR64 = ../../blas_build64
+BLAS_INSTALL_DIR = $(abs_builddir)/../../blas_install
+BLAS_INSTALL_DIR64 = $(abs_builddir)/../../blas_install64
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .f .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -344,115 +251,18 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-libLIBRARIES: $(lib_LIBRARIES)
-	@$(NORMAL_INSTALL)
-	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(INSTALL_DATA) $$list2 '$(DESTDIR)$(libdir)'"; \
-	  $(INSTALL_DATA) $$list2 "$(DESTDIR)$(libdir)" || exit $$?; }
-	@$(POST_INSTALL)
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	for p in $$list; do \
-	  if test -f $$p; then \
-	    $(am__strip_dir) \
-	    echo " ( cd '$(DESTDIR)$(libdir)' && $(RANLIB) $$f )"; \
-	    ( cd "$(DESTDIR)$(libdir)" && $(RANLIB) $$f ) || exit $$?; \
-	  else :; fi; \
-	done
-
-uninstall-libLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(libdir)' && rm -f "$$files" )"; \
-	cd "$(DESTDIR)$(libdir)" && rm -f $$files
-
-clean-libLIBRARIES:
-	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-libblas.a: $(libblas_a_OBJECTS) $(libblas_a_DEPENDENCIES) 
-	-rm -f libblas.a
-	$(libblas_a_AR) libblas.a $(libblas_a_OBJECTS) $(libblas_a_LIBADD)
-	$(RANLIB) libblas.a
-
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT)
-
-distclean-compile:
-	-rm -f *.tab.c
-
-.f.o:
-	$(F77COMPILE) -c -o $@ $<
-
-.f.obj:
-	$(F77COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-.f.lo:
-	$(LTF77COMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	mkid -fID $$unique
 tags: TAGS
+TAGS:
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	set x; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	shift; \
-	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
-	  test -n "$$unique" || unique=$$empty_fix; \
-	  if test $$# -gt 0; then \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      "$$@" $$unique; \
-	  else \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      $$unique; \
-	  fi; \
-	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	test -z "$(CTAGS_ARGS)$$unique" \
-	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$unique
+CTAGS:
 
-GTAGS:
-	here=`$(am__cd) $(top_builddir) && pwd` \
-	  && $(am__cd) $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) "$$here"
-
-distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -485,12 +295,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile all-local
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -518,13 +326,11 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
-distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
 
@@ -544,7 +350,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLIBRARIES
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -572,8 +378,7 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -583,24 +388,86 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLIBRARIES
+uninstall-am:
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
-	install-libLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
+.PHONY: all all-am all-local check check-am check-local clean \
+	clean-generic clean-libtool clean-local distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLIBRARIES
+	uninstall uninstall-am
 
+
+$(BLAS_BUILD_DIR):
+	mkdir -p $(BLAS_BUILD_DIR) && \
+	cd $(BLAS_BUILD_DIR) && \
+	case $(build) in \
+	*-cygwin*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	*-mingw*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	*-apple*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	esac
+
+$(BLAS_BUILD_DIR64):
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(BLAS_BUILD_DIR64) && \
+	cd $(BLAS_BUILD_DIR64) && \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	*-mingw*) \
+	mkdir -p $(BLAS_BUILD_DIR64) && \
+	cd $(BLAS_BUILD_DIR64) && \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	esac
+
+all-local: $(BLAS_BUILD_DIR) $(BLAS_BUILD_DIR64)
+	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	case $(build) in \
+	*-cygwin*) \
+	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
+	*-mingw*) \
+	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
+	esac
+
+install-exec-local:
+	mkdir -p $(prefix)/lib/RuntimeLibrary
+	cp $(BLAS_INSTALL_DIR)/* $(prefix)/lib/RuntimeLibrary
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(BLAS_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
+	*-mingw*) \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(BLAS_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
+	esac
+
+check-local:
+	cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	case $(build) in \
+	*-cygwin*) \
+	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
+	*-mingw*) \
+	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
+	esac
+
+clean-local:
+	cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	case $(build) in \
+	*-cygwin*) \
+	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
+	*-mingw*) \
+	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
+	esac
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

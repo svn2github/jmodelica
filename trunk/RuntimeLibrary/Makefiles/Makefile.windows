@@ -131,12 +131,12 @@ JMI_AD=JMI_AD_CPPAD
 FMU_TYPES =
 
 # C++ Compiler options
-CXXFLAGS = -g -DJMI_AD=${JMI_AD}
+CXXFLAGS = -mincoming-stack-boundary=2 -m32 -g -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES}
+CFLAGS = -mincoming-stack-boundary=2 -m32 -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES}
 
-SHARED_LDFLAGS = -shared
+SHARED_LDFLAGS = -m32 -shared
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
@@ -155,11 +155,11 @@ LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && 
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
 
 # Libraries necessary to link with jmi
-LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a $(LIB_MINPACK) -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1 -lstdc++
-LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK) -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1 -lstdc++
-LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK) -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1 -lstdc++
-LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -lstdc++ -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
-LIBS_CEVAL = -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a 
+LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a $(LIB_MINPACK)
+LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
+LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
+LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
+LIBS_CEVAL = -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a 
 
 #LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 
@@ -226,7 +226,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	mkdir $(BINARY_MKDIR)
 	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o -L$(JMI_LIB_DIR) $(LIBS_IPOPT)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o -L$(JMI_LIB_DIR) $(LIBS_IPOPT)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 	$(RM) $(OBJS)

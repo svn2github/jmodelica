@@ -14,26 +14,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
-#
-#    Copyright (C) 2009 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License version 3 as published 
-#    by the Free Software Foundation, or optionally, under the terms of the 
-#    Common Public License version 1.0 as published by IBM.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License, or the Common Public License, for more details.
-#
-#    You should have received copies of the GNU General Public License
-#    and the Common Public License along with this program.  If not, 
-#    see <http://www.gnu.org/licenses/> or 
-#    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
-#
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -66,165 +46,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)"
-LIBRARIES = $(lib_LIBRARIES)
-ARFLAGS = cru
-liblapack_a_AR = $(AR) $(ARFLAGS)
-liblapack_a_LIBADD =
-am_liblapack_a_OBJECTS = dbdsdc.$(OBJEXT) dbdsqr.$(OBJEXT) \
-	ddisna.$(OBJEXT) dgbbrd.$(OBJEXT) dgbcon.$(OBJEXT) \
-	dgbequ.$(OBJEXT) dgbrfs.$(OBJEXT) dgbsv.$(OBJEXT) \
-	dgbsvx.$(OBJEXT) dgbtf2.$(OBJEXT) dgbtrf.$(OBJEXT) \
-	dgbtrs.$(OBJEXT) dgebak.$(OBJEXT) dgebal.$(OBJEXT) \
-	dgebd2.$(OBJEXT) dgebrd.$(OBJEXT) dgecon.$(OBJEXT) \
-	dgeequ.$(OBJEXT) dgees.$(OBJEXT) dgeesx.$(OBJEXT) \
-	dgeev.$(OBJEXT) dgeevx.$(OBJEXT) dgegs.$(OBJEXT) \
-	dgegv.$(OBJEXT) dgehd2.$(OBJEXT) dgehrd.$(OBJEXT) \
-	dgelq2.$(OBJEXT) dgelqf.$(OBJEXT) dgels.$(OBJEXT) \
-	dgelsd.$(OBJEXT) dgelss.$(OBJEXT) dgelsx.$(OBJEXT) \
-	dgelsy.$(OBJEXT) dgeql2.$(OBJEXT) dgeqlf.$(OBJEXT) \
-	dgeqp3.$(OBJEXT) dgeqpf.$(OBJEXT) dgeqr2.$(OBJEXT) \
-	dgeqrf.$(OBJEXT) dgerfs.$(OBJEXT) dgerq2.$(OBJEXT) \
-	dgerqf.$(OBJEXT) dgesc2.$(OBJEXT) dgesdd.$(OBJEXT) \
-	dgesv.$(OBJEXT) dgesvd.$(OBJEXT) dgesvx.$(OBJEXT) \
-	dgetc2.$(OBJEXT) dgetf2.$(OBJEXT) dgetrf.$(OBJEXT) \
-	dgetri.$(OBJEXT) dgetrs.$(OBJEXT) dggbak.$(OBJEXT) \
-	dggbal.$(OBJEXT) dgges.$(OBJEXT) dggesx.$(OBJEXT) \
-	dggev.$(OBJEXT) dggevx.$(OBJEXT) dggglm.$(OBJEXT) \
-	dgghrd.$(OBJEXT) dgglse.$(OBJEXT) dggqrf.$(OBJEXT) \
-	dggrqf.$(OBJEXT) dggsvd.$(OBJEXT) dggsvp.$(OBJEXT) \
-	dgtcon.$(OBJEXT) dgtrfs.$(OBJEXT) dgtsv.$(OBJEXT) \
-	dgtsvx.$(OBJEXT) dgttrf.$(OBJEXT) dgttrs.$(OBJEXT) \
-	dgtts2.$(OBJEXT) dhgeqz.$(OBJEXT) dhsein.$(OBJEXT) \
-	dhseqr.$(OBJEXT) disnan.$(OBJEXT) dlabad.$(OBJEXT) \
-	dlabrd.$(OBJEXT) dlacn2.$(OBJEXT) dlacon.$(OBJEXT) \
-	dlacpy.$(OBJEXT) dladiv.$(OBJEXT) dlae2.$(OBJEXT) \
-	dlaebz.$(OBJEXT) dlaed0.$(OBJEXT) dlaed1.$(OBJEXT) \
-	dlaed2.$(OBJEXT) dlaed3.$(OBJEXT) dlaed4.$(OBJEXT) \
-	dlaed5.$(OBJEXT) dlaed6.$(OBJEXT) dlaed7.$(OBJEXT) \
-	dlaed8.$(OBJEXT) dlaed9.$(OBJEXT) dlaeda.$(OBJEXT) \
-	dlaein.$(OBJEXT) dlaev2.$(OBJEXT) dlaexc.$(OBJEXT) \
-	dlag2.$(OBJEXT) dlag2s.$(OBJEXT) dlags2.$(OBJEXT) \
-	dlagtf.$(OBJEXT) dlagtm.$(OBJEXT) dlagts.$(OBJEXT) \
-	dlagv2.$(OBJEXT) dlahqr.$(OBJEXT) dlahr2.$(OBJEXT) \
-	dlahrd.$(OBJEXT) dlaic1.$(OBJEXT) dlaisnan.$(OBJEXT) \
-	dlaln2.$(OBJEXT) dlals0.$(OBJEXT) dlalsa.$(OBJEXT) \
-	dlalsd.$(OBJEXT) dlamrg.$(OBJEXT) dlaneg.$(OBJEXT) \
-	dlangb.$(OBJEXT) dlange.$(OBJEXT) dlangt.$(OBJEXT) \
-	dlanhs.$(OBJEXT) dlansb.$(OBJEXT) dlansp.$(OBJEXT) \
-	dlanst.$(OBJEXT) dlansy.$(OBJEXT) dlantb.$(OBJEXT) \
-	dlantp.$(OBJEXT) dlantr.$(OBJEXT) dlanv2.$(OBJEXT) \
-	dlapll.$(OBJEXT) dlapmt.$(OBJEXT) dlapy2.$(OBJEXT) \
-	dlapy3.$(OBJEXT) dlaqgb.$(OBJEXT) dlaqge.$(OBJEXT) \
-	dlaqp2.$(OBJEXT) dlaqps.$(OBJEXT) dlaqr0.$(OBJEXT) \
-	dlaqr1.$(OBJEXT) dlaqr2.$(OBJEXT) dlaqr3.$(OBJEXT) \
-	dlaqr4.$(OBJEXT) dlaqr5.$(OBJEXT) dlaqsb.$(OBJEXT) \
-	dlaqsp.$(OBJEXT) dlaqsy.$(OBJEXT) dlaqtr.$(OBJEXT) \
-	dlar1v.$(OBJEXT) dlar2v.$(OBJEXT) dlarf.$(OBJEXT) \
-	dlarfb.$(OBJEXT) dlarfg.$(OBJEXT) dlarft.$(OBJEXT) \
-	dlarfx.$(OBJEXT) dlargv.$(OBJEXT) dlarnv.$(OBJEXT) \
-	dlarra.$(OBJEXT) dlarrb.$(OBJEXT) dlarrc.$(OBJEXT) \
-	dlarrd.$(OBJEXT) dlarre.$(OBJEXT) dlarrf.$(OBJEXT) \
-	dlarrj.$(OBJEXT) dlarrk.$(OBJEXT) dlarrr.$(OBJEXT) \
-	dlarrv.$(OBJEXT) dlartg.$(OBJEXT) dlartv.$(OBJEXT) \
-	dlaruv.$(OBJEXT) dlarz.$(OBJEXT) dlarzb.$(OBJEXT) \
-	dlarzt.$(OBJEXT) dlas2.$(OBJEXT) dlascl.$(OBJEXT) \
-	dlasd0.$(OBJEXT) dlasd1.$(OBJEXT) dlasd2.$(OBJEXT) \
-	dlasd3.$(OBJEXT) dlasd4.$(OBJEXT) dlasd5.$(OBJEXT) \
-	dlasd6.$(OBJEXT) dlasd7.$(OBJEXT) dlasd8.$(OBJEXT) \
-	dlasda.$(OBJEXT) dlasdq.$(OBJEXT) dlasdt.$(OBJEXT) \
-	dlaset.$(OBJEXT) dlasq1.$(OBJEXT) dlasq2.$(OBJEXT) \
-	dlasq3.$(OBJEXT) dlasq4.$(OBJEXT) dlasq5.$(OBJEXT) \
-	dlasq6.$(OBJEXT) dlasr.$(OBJEXT) dlasrt.$(OBJEXT) \
-	dlassq.$(OBJEXT) dlasv2.$(OBJEXT) dlaswp.$(OBJEXT) \
-	dlasy2.$(OBJEXT) dlasyf.$(OBJEXT) dlatbs.$(OBJEXT) \
-	dlatdf.$(OBJEXT) dlatps.$(OBJEXT) dlatrd.$(OBJEXT) \
-	dlatrs.$(OBJEXT) dlatrz.$(OBJEXT) dlatzm.$(OBJEXT) \
-	dlauu2.$(OBJEXT) dlauum.$(OBJEXT) dlazq3.$(OBJEXT) \
-	dlazq4.$(OBJEXT) dopgtr.$(OBJEXT) dopmtr.$(OBJEXT) \
-	dorg2l.$(OBJEXT) dorg2r.$(OBJEXT) dorgbr.$(OBJEXT) \
-	dorghr.$(OBJEXT) dorgl2.$(OBJEXT) dorglq.$(OBJEXT) \
-	dorgql.$(OBJEXT) dorgqr.$(OBJEXT) dorgr2.$(OBJEXT) \
-	dorgrq.$(OBJEXT) dorgtr.$(OBJEXT) dorm2l.$(OBJEXT) \
-	dorm2r.$(OBJEXT) dormbr.$(OBJEXT) dormhr.$(OBJEXT) \
-	dorml2.$(OBJEXT) dormlq.$(OBJEXT) dormql.$(OBJEXT) \
-	dormqr.$(OBJEXT) dormr2.$(OBJEXT) dormr3.$(OBJEXT) \
-	dormrq.$(OBJEXT) dormrz.$(OBJEXT) dormtr.$(OBJEXT) \
-	dpbcon.$(OBJEXT) dpbequ.$(OBJEXT) dpbrfs.$(OBJEXT) \
-	dpbstf.$(OBJEXT) dpbsv.$(OBJEXT) dpbsvx.$(OBJEXT) \
-	dpbtf2.$(OBJEXT) dpbtrf.$(OBJEXT) dpbtrs.$(OBJEXT) \
-	dpocon.$(OBJEXT) dpoequ.$(OBJEXT) dporfs.$(OBJEXT) \
-	dposv.$(OBJEXT) dposvx.$(OBJEXT) dpotf2.$(OBJEXT) \
-	dpotrf.$(OBJEXT) dpotri.$(OBJEXT) dpotrs.$(OBJEXT) \
-	dppcon.$(OBJEXT) dppequ.$(OBJEXT) dpprfs.$(OBJEXT) \
-	dppsv.$(OBJEXT) dppsvx.$(OBJEXT) dpptrf.$(OBJEXT) \
-	dpptri.$(OBJEXT) dpptrs.$(OBJEXT) dptcon.$(OBJEXT) \
-	dpteqr.$(OBJEXT) dptrfs.$(OBJEXT) dptsv.$(OBJEXT) \
-	dptsvx.$(OBJEXT) dpttrf.$(OBJEXT) dpttrs.$(OBJEXT) \
-	dptts2.$(OBJEXT) drscl.$(OBJEXT) dsbev.$(OBJEXT) \
-	dsbevd.$(OBJEXT) dsbevx.$(OBJEXT) dsbgst.$(OBJEXT) \
-	dsbgv.$(OBJEXT) dsbgvd.$(OBJEXT) dsbgvx.$(OBJEXT) \
-	dsbtrd.$(OBJEXT) dsgesv.$(OBJEXT) dspcon.$(OBJEXT) \
-	dspev.$(OBJEXT) dspevd.$(OBJEXT) dspevx.$(OBJEXT) \
-	dspgst.$(OBJEXT) dspgv.$(OBJEXT) dspgvd.$(OBJEXT) \
-	dspgvx.$(OBJEXT) dsprfs.$(OBJEXT) dspsv.$(OBJEXT) \
-	dspsvx.$(OBJEXT) dsptrd.$(OBJEXT) dsptrf.$(OBJEXT) \
-	dsptri.$(OBJEXT) dsptrs.$(OBJEXT) dstebz.$(OBJEXT) \
-	dstedc.$(OBJEXT) dstegr.$(OBJEXT) dstein.$(OBJEXT) \
-	dstemr.$(OBJEXT) dsteqr.$(OBJEXT) dsterf.$(OBJEXT) \
-	dstev.$(OBJEXT) dstevd.$(OBJEXT) dstevr.$(OBJEXT) \
-	dstevx.$(OBJEXT) dsycon.$(OBJEXT) dsyev.$(OBJEXT) \
-	dsyevd.$(OBJEXT) dsyevr.$(OBJEXT) dsyevx.$(OBJEXT) \
-	dsygs2.$(OBJEXT) dsygst.$(OBJEXT) dsygv.$(OBJEXT) \
-	dsygvd.$(OBJEXT) dsygvx.$(OBJEXT) dsyrfs.$(OBJEXT) \
-	dsysv.$(OBJEXT) dsysvx.$(OBJEXT) dsytd2.$(OBJEXT) \
-	dsytf2.$(OBJEXT) dsytrd.$(OBJEXT) dsytrf.$(OBJEXT) \
-	dsytri.$(OBJEXT) dsytrs.$(OBJEXT) dtbcon.$(OBJEXT) \
-	dtbrfs.$(OBJEXT) dtbtrs.$(OBJEXT) dtgevc.$(OBJEXT) \
-	dtgex2.$(OBJEXT) dtgexc.$(OBJEXT) dtgsen.$(OBJEXT) \
-	dtgsja.$(OBJEXT) dtgsna.$(OBJEXT) dtgsy2.$(OBJEXT) \
-	dtgsyl.$(OBJEXT) dtpcon.$(OBJEXT) dtprfs.$(OBJEXT) \
-	dtptri.$(OBJEXT) dtptrs.$(OBJEXT) dtrcon.$(OBJEXT) \
-	dtrevc.$(OBJEXT) dtrexc.$(OBJEXT) dtrrfs.$(OBJEXT) \
-	dtrsen.$(OBJEXT) dtrsna.$(OBJEXT) dtrsyl.$(OBJEXT) \
-	dtrti2.$(OBJEXT) dtrtri.$(OBJEXT) dtrtrs.$(OBJEXT) \
-	dtzrqf.$(OBJEXT) dtzrzf.$(OBJEXT) dzsum1.$(OBJEXT) \
-	ieeeck.$(OBJEXT) ilaenv.$(OBJEXT) ilaver.$(OBJEXT) \
-	iparmq.$(OBJEXT) lsamen.$(OBJEXT) dlamch.$(OBJEXT)
-liblapack_a_OBJECTS = $(am_liblapack_a_OBJECTS)
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-F77COMPILE = $(F77) $(AM_FFLAGS) $(FFLAGS)
-LTF77COMPILE = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS)
-F77LD = $(F77)
-F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-SOURCES = $(liblapack_a_SOURCES)
-DIST_SOURCES = $(liblapack_a_SOURCES)
-ETAGS = etags
-CTAGS = ctags
+SOURCES =
+DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -262,7 +85,7 @@ ECLIPSE_HOME = @ECLIPSE_HOME@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
-FFLAGS = -fPIC -O3 -ffloat-store
+FFLAGS = @FFLAGS@
 FGREP = @FGREP@
 GREP = @GREP@
 INSTALL = @INSTALL@
@@ -367,379 +190,37 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = foreign
-lib_LIBRARIES = liblapack.a
-liblapack_a_SOURCES = \
-	dbdsdc.f \
-	dbdsqr.f \
-	ddisna.f \
-	dgbbrd.f \
-	dgbcon.f \
-	dgbequ.f \
-	dgbrfs.f \
-	dgbsv.f \
-	dgbsvx.f \
-	dgbtf2.f \
-	dgbtrf.f \
-	dgbtrs.f \
-	dgebak.f \
-	dgebal.f \
-	dgebd2.f \
-	dgebrd.f \
-	dgecon.f \
-	dgeequ.f \
-	dgees.f \
-	dgeesx.f \
-	dgeev.f \
-	dgeevx.f \
-	dgegs.f \
-	dgegv.f \
-	dgehd2.f \
-	dgehrd.f \
-	dgelq2.f \
-	dgelqf.f \
-	dgels.f \
-	dgelsd.f \
-	dgelss.f \
-	dgelsx.f \
-	dgelsy.f \
-	dgeql2.f \
-	dgeqlf.f \
-	dgeqp3.f \
-	dgeqpf.f \
-	dgeqr2.f \
-	dgeqrf.f \
-	dgerfs.f \
-	dgerq2.f \
-	dgerqf.f \
-	dgesc2.f \
-	dgesdd.f \
-	dgesv.f \
-	dgesvd.f \
-	dgesvx.f \
-	dgetc2.f \
-	dgetf2.f \
-	dgetrf.f \
-	dgetri.f \
-	dgetrs.f \
-	dggbak.f \
-	dggbal.f \
-	dgges.f \
-	dggesx.f \
-	dggev.f \
-	dggevx.f \
-	dggglm.f \
-	dgghrd.f \
-	dgglse.f \
-	dggqrf.f \
-	dggrqf.f \
-	dggsvd.f \
-	dggsvp.f \
-	dgtcon.f \
-	dgtrfs.f \
-	dgtsv.f \
-	dgtsvx.f \
-	dgttrf.f \
-	dgttrs.f \
-	dgtts2.f \
-	dhgeqz.f \
-	dhsein.f \
-	dhseqr.f \
-	disnan.f \
-	dlabad.f \
-	dlabrd.f \
-	dlacn2.f \
-	dlacon.f \
-	dlacpy.f \
-	dladiv.f \
-	dlae2.f \
-	dlaebz.f \
-	dlaed0.f \
-	dlaed1.f \
-	dlaed2.f \
-	dlaed3.f \
-	dlaed4.f \
-	dlaed5.f \
-	dlaed6.f \
-	dlaed7.f \
-	dlaed8.f \
-	dlaed9.f \
-	dlaeda.f \
-	dlaein.f \
-	dlaev2.f \
-	dlaexc.f \
-	dlag2.f \
-	dlag2s.f \
-	dlags2.f \
-	dlagtf.f \
-	dlagtm.f \
-	dlagts.f \
-	dlagv2.f \
-	dlahqr.f \
-	dlahr2.f \
-	dlahrd.f \
-	dlaic1.f \
-	dlaisnan.f \
-	dlaln2.f \
-	dlals0.f \
-	dlalsa.f \
-	dlalsd.f \
-	dlamrg.f \
-	dlaneg.f \
-	dlangb.f \
-	dlange.f \
-	dlangt.f \
-	dlanhs.f \
-	dlansb.f \
-	dlansp.f \
-	dlanst.f \
-	dlansy.f \
-	dlantb.f \
-	dlantp.f \
-	dlantr.f \
-	dlanv2.f \
-	dlapll.f \
-	dlapmt.f \
-	dlapy2.f \
-	dlapy3.f \
-	dlaqgb.f \
-	dlaqge.f \
-	dlaqp2.f \
-	dlaqps.f \
-	dlaqr0.f \
-	dlaqr1.f \
-	dlaqr2.f \
-	dlaqr3.f \
-	dlaqr4.f \
-	dlaqr5.f \
-	dlaqsb.f \
-	dlaqsp.f \
-	dlaqsy.f \
-	dlaqtr.f \
-	dlar1v.f \
-	dlar2v.f \
-	dlarf.f \
-	dlarfb.f \
-	dlarfg.f \
-	dlarft.f \
-	dlarfx.f \
-	dlargv.f \
-	dlarnv.f \
-	dlarra.f \
-	dlarrb.f \
-	dlarrc.f \
-	dlarrd.f \
-	dlarre.f \
-	dlarrf.f \
-	dlarrj.f \
-	dlarrk.f \
-	dlarrr.f \
-	dlarrv.f \
-	dlartg.f \
-	dlartv.f \
-	dlaruv.f \
-	dlarz.f \
-	dlarzb.f \
-	dlarzt.f \
-	dlas2.f \
-	dlascl.f \
-	dlasd0.f \
-	dlasd1.f \
-	dlasd2.f \
-	dlasd3.f \
-	dlasd4.f \
-	dlasd5.f \
-	dlasd6.f \
-	dlasd7.f \
-	dlasd8.f \
-	dlasda.f \
-	dlasdq.f \
-	dlasdt.f \
-	dlaset.f \
-	dlasq1.f \
-	dlasq2.f \
-	dlasq3.f \
-	dlasq4.f \
-	dlasq5.f \
-	dlasq6.f \
-	dlasr.f \
-	dlasrt.f \
-	dlassq.f \
-	dlasv2.f \
-	dlaswp.f \
-	dlasy2.f \
-	dlasyf.f \
-	dlatbs.f \
-	dlatdf.f \
-	dlatps.f \
-	dlatrd.f \
-	dlatrs.f \
-	dlatrz.f \
-	dlatzm.f \
-	dlauu2.f \
-	dlauum.f \
-	dlazq3.f \
-	dlazq4.f \
-	dopgtr.f \
-	dopmtr.f \
-	dorg2l.f \
-	dorg2r.f \
-	dorgbr.f \
-	dorghr.f \
-	dorgl2.f \
-	dorglq.f \
-	dorgql.f \
-	dorgqr.f \
-	dorgr2.f \
-	dorgrq.f \
-	dorgtr.f \
-	dorm2l.f \
-	dorm2r.f \
-	dormbr.f \
-	dormhr.f \
-	dorml2.f \
-	dormlq.f \
-	dormql.f \
-	dormqr.f \
-	dormr2.f \
-	dormr3.f \
-	dormrq.f \
-	dormrz.f \
-	dormtr.f \
-	dpbcon.f \
-	dpbequ.f \
-	dpbrfs.f \
-	dpbstf.f \
-	dpbsv.f \
-	dpbsvx.f \
-	dpbtf2.f \
-	dpbtrf.f \
-	dpbtrs.f \
-	dpocon.f \
-	dpoequ.f \
-	dporfs.f \
-	dposv.f \
-	dposvx.f \
-	dpotf2.f \
-	dpotrf.f \
-	dpotri.f \
-	dpotrs.f \
-	dppcon.f \
-	dppequ.f \
-	dpprfs.f \
-	dppsv.f \
-	dppsvx.f \
-	dpptrf.f \
-	dpptri.f \
-	dpptrs.f \
-	dptcon.f \
-	dpteqr.f \
-	dptrfs.f \
-	dptsv.f \
-	dptsvx.f \
-	dpttrf.f \
-	dpttrs.f \
-	dptts2.f \
-	drscl.f \
-	dsbev.f \
-	dsbevd.f \
-	dsbevx.f \
-	dsbgst.f \
-	dsbgv.f \
-	dsbgvd.f \
-	dsbgvx.f \
-	dsbtrd.f \
-	dsgesv.f \
-	dspcon.f \
-	dspev.f \
-	dspevd.f \
-	dspevx.f \
-	dspgst.f \
-	dspgv.f \
-	dspgvd.f \
-	dspgvx.f \
-	dsprfs.f \
-	dspsv.f \
-	dspsvx.f \
-	dsptrd.f \
-	dsptrf.f \
-	dsptri.f \
-	dsptrs.f \
-	dstebz.f \
-	dstedc.f \
-	dstegr.f \
-	dstein.f \
-	dstemr.f \
-	dsteqr.f \
-	dsterf.f \
-	dstev.f \
-	dstevd.f \
-	dstevr.f \
-	dstevx.f \
-	dsycon.f \
-	dsyev.f \
-	dsyevd.f \
-	dsyevr.f \
-	dsyevx.f \
-	dsygs2.f \
-	dsygst.f \
-	dsygv.f \
-	dsygvd.f \
-	dsygvx.f \
-	dsyrfs.f \
-	dsysv.f \
-	dsysvx.f \
-	dsytd2.f \
-	dsytf2.f \
-	dsytrd.f \
-	dsytrf.f \
-	dsytri.f \
-	dsytrs.f \
-	dtbcon.f \
-	dtbrfs.f \
-	dtbtrs.f \
-	dtgevc.f \
-	dtgex2.f \
-	dtgexc.f \
-	dtgsen.f \
-	dtgsja.f \
-	dtgsna.f \
-	dtgsy2.f \
-	dtgsyl.f \
-	dtpcon.f \
-	dtprfs.f \
-	dtptri.f \
-	dtptrs.f \
-	dtrcon.f \
-	dtrevc.f \
-	dtrexc.f \
-	dtrrfs.f \
-	dtrsen.f \
-	dtrsna.f \
-	dtrsyl.f \
-	dtrti2.f \
-	dtrtri.f \
-	dtrtrs.f \
-	dtzrqf.f \
-	dtzrzf.f \
-	dzsum1.f \
-	ieeeck.f \
-	ilaenv.f \
-	ilaver.f \
-	iparmq.f \
-	lsamen.f \
-	dlamch.f
 
+#
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License version 3 as published 
+#    by the Free Software Foundation, or optionally, under the terms of the 
+#    Common Public License version 1.0 as published by IBM.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License, or the Common Public License, for more details.
+#
+#    You should have received copies of the GNU General Public License
+#    and the Common Public License along with this program.  If not, 
+#    see <http://www.gnu.org/licenses/> or 
+#    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
+#
+LAPACK_BUILD_DIR = ../../lapack_build
+LAPACK_BUILD_DIR64 = ../../lapack_build64
+LAPACK_INSTALL_DIR = $(abs_builddir)/../../lapack_install
+LAPACK_INSTALL_DIR64 = $(abs_builddir)/../../lapack_install64
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .f .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -770,115 +251,18 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-libLIBRARIES: $(lib_LIBRARIES)
-	@$(NORMAL_INSTALL)
-	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(INSTALL_DATA) $$list2 '$(DESTDIR)$(libdir)'"; \
-	  $(INSTALL_DATA) $$list2 "$(DESTDIR)$(libdir)" || exit $$?; }
-	@$(POST_INSTALL)
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	for p in $$list; do \
-	  if test -f $$p; then \
-	    $(am__strip_dir) \
-	    echo " ( cd '$(DESTDIR)$(libdir)' && $(RANLIB) $$f )"; \
-	    ( cd "$(DESTDIR)$(libdir)" && $(RANLIB) $$f ) || exit $$?; \
-	  else :; fi; \
-	done
-
-uninstall-libLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LIBRARIES)'; test -n "$(libdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(libdir)' && rm -f "$$files" )"; \
-	cd "$(DESTDIR)$(libdir)" && rm -f $$files
-
-clean-libLIBRARIES:
-	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-liblapack.a: $(liblapack_a_OBJECTS) $(liblapack_a_DEPENDENCIES) 
-	-rm -f liblapack.a
-	$(liblapack_a_AR) liblapack.a $(liblapack_a_OBJECTS) $(liblapack_a_LIBADD)
-	$(RANLIB) liblapack.a
-
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT)
-
-distclean-compile:
-	-rm -f *.tab.c
-
-.f.o:
-	$(F77COMPILE) -c -o $@ $<
-
-.f.obj:
-	$(F77COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-.f.lo:
-	$(LTF77COMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	mkid -fID $$unique
 tags: TAGS
+TAGS:
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	set x; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	shift; \
-	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
-	  test -n "$$unique" || unique=$$empty_fix; \
-	  if test $$# -gt 0; then \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      "$$@" $$unique; \
-	  else \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      $$unique; \
-	  fi; \
-	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	test -z "$(CTAGS_ARGS)$$unique" \
-	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$unique
+CTAGS:
 
-GTAGS:
-	here=`$(am__cd) $(top_builddir) && pwd` \
-	  && $(am__cd) $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) "$$here"
-
-distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -911,12 +295,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile all-local
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -944,13 +326,11 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
-distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
 
@@ -970,7 +350,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLIBRARIES
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -998,8 +378,7 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -1009,24 +388,86 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLIBRARIES
+uninstall-am:
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
-	install-libLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
+.PHONY: all all-am all-local check check-am check-local clean \
+	clean-generic clean-libtool clean-local distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLIBRARIES
+	uninstall uninstall-am
 
+
+$(LAPACK_BUILD_DIR):
+	mkdir -p $(LAPACK_BUILD_DIR) && \
+	cd $(LAPACK_BUILD_DIR) && \
+	case $(build) in \
+	*-cygwin*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*-mingw*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*-apple*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*) \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	esac
+
+$(LAPACK_BUILD_DIR64):
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(LAPACK_BUILD_DIR64) && \
+	cd $(LAPACK_BUILD_DIR64) && \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	*-mingw*) \
+	mkdir -p $(LAPACK_BUILD_DIR64) && \
+	cd $(LAPACK_BUILD_DIR64) && \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
+	esac
+
+all-local: $(LAPACK_BUILD_DIR) $(LAPACK_BUILD_DIR64)
+	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	case $(build) in \
+	*-cygwin*) \
+	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
+	*-mingw*) \
+	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
+	esac
+
+install-exec-local:
+	mkdir -p $(prefix)/lib/RuntimeLibrary
+	cp $(LAPACK_INSTALL_DIR)/* $(prefix)/lib/RuntimeLibrary
+	case $(build) in \
+	*-cygwin*) \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
+	*-mingw*) \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
+	esac
+
+check-local:
+	cd $(LAPACK_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	case $(build) in \
+	*-cygwin*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
+	*-mingw*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
+	esac
+
+clean-local:
+	cd $(LAPACK_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	case $(build) in \
+	*-cygwin*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
+	*-mingw*) \
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ;; \
+	esac
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

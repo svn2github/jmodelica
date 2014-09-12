@@ -47,10 +47,16 @@ endif()
 message(STATUS JMODELICA_INSTALL_DIR=${JMODELICA_INSTALL_DIR})
 
 #Make the directory for header files to be installed in.
-file(MAKE_DIRECTORY ${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary)
+set(RTLIB_INCLUDE_DIR ${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary)
+file(MAKE_DIRECTORY ${RTLIB_INCLUDE_DIR})
                 
 #Make the directory for lib files to be installed in.
-file(MAKE_DIRECTORY ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary)
+if(${CMAKE_C_FLAGS} STREQUAL "-m64")
+    set(RTLIB_LIB_DIR ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary64)
+else()
+    set(RTLIB_LIB_DIR ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary)
+endif()
+file(MAKE_DIRECTORY ${RTLIB_LIB_DIR})
 
 if(NOT(WIN32 OR CYGWIN OR APPLE))
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS}")

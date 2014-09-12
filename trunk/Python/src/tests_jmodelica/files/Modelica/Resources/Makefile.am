@@ -6,9 +6,9 @@ $(TESTLIBRARY_BUILD_DIR):
 	cd $(TESTLIBRARY_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_Fortran_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_Fortran_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*-apple*) \
 	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*) \

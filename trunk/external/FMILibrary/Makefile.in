@@ -190,7 +190,6 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -209,9 +208,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu external/FMILibrary/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign external/FMILibrary/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu external/FMILibrary/Makefile
+	  $(AUTOMAKE) --foreign external/FMILibrary/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -329,7 +328,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-exec-local
+install-exec-am:
 
 install-html: install-html-am
 
@@ -376,13 +375,12 @@ uninstall-am:
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-exec-local install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
 
 # This is to ensure that the install target of the FMI Library
@@ -395,9 +393,9 @@ $(FMIL_BUILD_DIR):
 	cd $(FMIL_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32" -DCMAKE_SHARED_LINKER_FLAGS="-m32" -DCMAKE_EXE_LINKER_FLAGS="-m32" -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
   	*-mingw*) \
-	cmake -G "MSYS Makefiles" -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32" -DCMAKE_SHARED_LINKER_FLAGS="-m32" -DCMAKE_EXE_LINKER_FLAGS="-m32" -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
   	*-apple*) \
 	cmake -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
   	*) \
@@ -405,9 +403,6 @@ $(FMIL_BUILD_DIR):
 	esac
 
 all-local: $(FMIL_BUILD_DIR)
-	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS)
-
-install-exec-local: $(FMIL_BUILD_DIR)
 	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install
 
 check-local:
