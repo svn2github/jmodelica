@@ -108,10 +108,10 @@ def test_NegatedAliasAttributes():
     realVar3.setAttribute("nominal", attr4)
 
     # Check correctness for negated and non-negated alias. 
-    assert realVar1.getAttribute("min").isEqual(-attr2)
-    assert realVar1.getAttribute("max").isEqual(-attr1)
-    assert realVar1.getAttribute("start").isEqual(-attr3)
-    assert realVar1.getAttribute("nominal").isEqual(-attr4)
+    assert realVar1.getAttribute("min").isEqual(-attr2,1)
+    assert realVar1.getAttribute("max").isEqual(-attr1,1)
+    assert realVar1.getAttribute("start").isEqual(-attr3,1)
+    assert realVar1.getAttribute("nominal").isEqual(-attr4,1)
 
     assert realVar2.getAttribute("min").isEqual(attr1)
     assert realVar2.getAttribute("max").isEqual(attr2)
@@ -129,16 +129,16 @@ def test_NegatedAliasAttributes():
     assert realVar1.getAttribute("max").isEqual(attr2)
     assert realVar1.getAttribute("start").isEqual(attr3)
     assert realVar1.getAttribute("nominal").isEqual(attr4)
+    
+    assert realVar2.getAttribute("min").isEqual(-attr2,1)
+    assert realVar2.getAttribute("max").isEqual(-attr1,1)
+    assert realVar2.getAttribute("start").isEqual(-attr3,1)
+    assert realVar2.getAttribute("nominal").isEqual(-attr4,1)
 
-    assert realVar2.getAttribute("min").isEqual(-attr2)
-    assert realVar2.getAttribute("max").isEqual(-attr1)
-    assert realVar2.getAttribute("start").isEqual(-attr3)
-    assert realVar2.getAttribute("nominal").isEqual(-attr4)
-
-    assert realVar3.getAttribute("min").isEqual(-attr2)
-    assert realVar3.getAttribute("max").isEqual(-attr1)
-    assert realVar3.getAttribute("start").isEqual(-attr3)
-    assert realVar3.getAttribute("nominal").isEqual(-attr4)
+    assert realVar3.getAttribute("min").isEqual(-attr2,1)
+    assert realVar3.getAttribute("max").isEqual(-attr1,1)
+    assert realVar3.getAttribute("start").isEqual(-attr3,1)
+    assert realVar3.getAttribute("nominal").isEqual(-attr4,1)
 
     
 @testattr(casadi = True)    
@@ -339,7 +339,7 @@ def test_equationGetter():
     eq = Equation(lhs, rhs)
     assert( eq.getLhs().isEqual(lhs) )
     assert( eq.getRhs().isEqual(rhs) )
-    assert( eq.getResidual().isEqual(lhs - rhs) )
+    assert( eq.getResidual().isEqual(lhs - rhs,1) )
     
 @testattr(casadi = True)    
 def test_equationPrinting(): 
@@ -802,7 +802,7 @@ def test_ModelFunctionGetNameCall():
     arg = MX.sym("arg")
     argVec = MXVector()
     argVec.append(arg)
-    manualCall = function.call(argVec)[0]
+    manualCall = function.call([arg])[0]
     mfCall = modelFunction.call(argVec)
     assert( mfCall[0].getDep(0).getDep(0).isEqual(arg) )
     assert( str(manualCall) == str(mfCall[0]) )
@@ -853,17 +853,17 @@ def test_Constraint():
     # Equality constraint
     assert( equalityConstraint.getLhs().isEqual(lhs) )
     assert( equalityConstraint.getRhs().isEqual(rhs) )
-    assert( equalityConstraint.getResidual().isEqual(lhs - rhs) )
+    assert( equalityConstraint.getResidual().isEqual(lhs - rhs,1) )
     assert( equalityConstraint.getType() == Constraint.EQ)
     # Less than or equal to constraint
     assert( lessThanConstraint.getLhs().isEqual(lhs) )
     assert( lessThanConstraint.getRhs().isEqual(rhs) )
-    assert( equalityConstraint.getResidual().isEqual(lhs - rhs) )
+    assert( equalityConstraint.getResidual().isEqual(lhs - rhs,1) )
     assert( lessThanConstraint.getType() == Constraint.LEQ )
     # Greater than or equal to constraint
     assert( greaterThanConstraint.getLhs().isEqual(lhs) )
     assert( greaterThanConstraint.getRhs().isEqual(rhs) )
-    assert( greaterThanConstraint.getResidual().isEqual(lhs - rhs) )
+    assert( greaterThanConstraint.getResidual().isEqual(lhs - rhs,1) )
     assert( greaterThanConstraint.getType() == Constraint.GEQ )
 
 @testattr(casadi = True)    
@@ -920,10 +920,10 @@ def test_OptimizationProblemPathConstraints():
     
     assert( len(opt.getPathConstraints()) == 0 )
     opt.setPathConstraints(constraintsLessThan)
-    assert( opt.getPathConstraints()[0].getResidual().isEqual(lessThanConstraint.getResidual()) )
+    assert( opt.getPathConstraints()[0].getResidual().isEqual(lessThanConstraint.getResidual(),1) )
     
     opt.setPathConstraints(constraintsGreaterThan)
-    assert( opt.getPathConstraints()[0].getResidual().isEqual(greaterThanConstraint.getResidual()) )
+    assert( opt.getPathConstraints()[0].getResidual().isEqual(greaterThanConstraint.getResidual(),1) )
     assert( len(opt.getPathConstraints()) == 1)
     
 @testattr(casadi = True)    
@@ -941,10 +941,10 @@ def test_OptimizationProblemPointConstraints():
     
     assert( len(opt.getPointConstraints()) == 0 )
     opt.setPointConstraints(constraintsLessThan)
-    assert( opt.getPointConstraints()[0].getResidual().isEqual(lessThanConstraint.getResidual()) )
+    assert( opt.getPointConstraints()[0].getResidual().isEqual(lessThanConstraint.getResidual(),1) )
     
     opt.setPointConstraints(constraintsGreaterThan)
-    assert( opt.getPointConstraints()[0].getResidual().isEqual(greaterThanConstraint.getResidual()) )
+    assert( opt.getPointConstraints()[0].getResidual().isEqual(greaterThanConstraint.getResidual(),1) )
     assert( len(opt.getPointConstraints()) == 1)
     
 @testattr(casadi = True)    
@@ -1160,12 +1160,12 @@ def test_ModelEqutionFunctionality():
 
     # Should return an MX with a null node (default MX value 
     # for default/empty constructor), if there are no equations
-    assert( model.getDaeResidual().isNull() )
+    assert( model.getDaeResidual().isEmpty() )
      # Add equations and check residuals
     model.addDaeEquation(eq1)
     model.addDaeEquation(eq2)
     model.addInitialEquation(eq1)
-    assert( res1.isEqual(model.getInitialResidual()) )
+    assert( res1.isEqual(model.getInitialResidual(),1) )
     # Also test residuals with more than one residual equation
     res1.append(res2)
     # isEqual in the casadi namespace gives a false negative 
