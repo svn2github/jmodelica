@@ -800,12 +800,8 @@ def test_ModelFunctionGetNameCall():
     function.init()
     modelFunction = ModelFunction(function)
     arg = MX.sym("arg")
-    argVec = MXVector()
-    argVec.append(arg)
-    manualCall = function.call([arg])[0]
-    mfCall = modelFunction.call(argVec)
+    mfCall = modelFunction.getFunc().call([arg])
     assert( mfCall[0].getDep(0).getDep(0).isEqual(arg) )
-    assert( str(manualCall) == str(mfCall[0]) )
 
 @testattr(casadi = True)    
 def test_ModelFunctionCallAndUse():
@@ -816,9 +812,7 @@ def test_ModelFunctionCallAndUse():
     function.init()
     modelFunction = ModelFunction(function)
     arg = MX.sym("arg")
-    argVec = MXVector()
-    argVec.append(arg)
-    call = modelFunction.call(argVec)
+    call = modelFunction.getFunc().call([arg])
     evaluateCall = MXFunction([arg], [call[0]])
     evaluateCall.init()
     evaluateCall.setInput(0.0)

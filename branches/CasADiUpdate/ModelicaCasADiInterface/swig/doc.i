@@ -533,6 +533,15 @@ Parameters::
         
 "; 
 
+%feature("docstring") ModelicaCasADi::ModelFunction::getFunc"
+
+Returns::
+
+    MXFunction --
+        The underlying MXFunction
+        
+";
+
 %feature("docstring") ModelicaCasADi::ModelFunction::call "
 Call the MXFunction kept in this class with a vector of MX as arguments.  
 Returns an MXVector with MX representing the outputs of the function call.

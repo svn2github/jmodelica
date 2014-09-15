@@ -156,12 +156,6 @@ def _ensure_jvm():
         setUpJVM()
         JVM_SET_UP=True
 
-def _generate_StringVector(file_vec):
-    string_file_vec = StringVector()
-    for f_i in file_vec:
-        string_file_vec.push_back(f_i)
-    return string_file_vec
-
 def _transfer_modelica(model, class_name, files, options, log_level):
     return modelicacasadi_wrapper._transferModelicaModel(model, class_name, files, options, log_level)
     

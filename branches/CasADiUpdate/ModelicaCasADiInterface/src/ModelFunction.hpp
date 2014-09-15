@@ -31,6 +31,9 @@ class ModelFunction : public RefCountedNode {
          * @param A MXFunction 
          */
         ModelFunction(CasADi::MXFunction myFunction); 
+#ifndef SWIG
+        // We don't have a useable SWIG typemap to take in a vector of MX right now,
+        // the call can be done by going through getFunc instead.
         /**
          * Call the MXFunction kept in this class with a vector of MX as arguments.
          * Returns a vector of MX representing the outputs of the function call, if successful.
@@ -38,6 +41,9 @@ class ModelFunction : public RefCountedNode {
          * @return A vector of MX
          */
         std::vector<CasADi::MX> call(const std::vector<CasADi::MX> &arg);
+#endif
+        /** Return the underlying MXFunction */
+        CasADi::MXFunction getFunc() const;
         /** Returns the name of the MXFunction */
         std::string getName() const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
@@ -48,6 +54,7 @@ class ModelFunction : public RefCountedNode {
         CasADi::MXFunction myFunction;
 };
 inline ModelFunction::ModelFunction(CasADi::MXFunction myFunction) : myFunction(myFunction) {}
+inline CasADi::MXFunction ModelFunction::getFunc() const { return myFunction; }
 }; // End namespace
 #endif
 
