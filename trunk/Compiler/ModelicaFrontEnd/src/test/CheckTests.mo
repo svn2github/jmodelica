@@ -898,4 +898,19 @@ end Vectorized1;
 
 end Functional;
 
+model String1
+  equation
+    Modelica.Utilities.Streams.print(String(time*10));
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="CheckTests_String1",
+            description="Check error with continuous input to String()",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Compliance error at line 903, column 45:
+  String() operator cannot be applied to continuous values
+")})));
+end String1;
+
 end CheckTests;

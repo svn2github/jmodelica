@@ -65,6 +65,11 @@ aspect CADCodeGen {
             node.genTempVars_CAD(this, str, indent);
         }
         
+        @Override
+        public void printPostSteps(ASTNode node, CodeStream str, String indent) {
+            node.genTempFree_CAD(this, str, indent);
+        }
+        
         public TypePrinter_C createDeclPrinter(CodeStream str) {
             return new DeclPrinter_CAD(this, str);
         }
@@ -1148,11 +1153,13 @@ aspect CADCodeGen {
             str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] = ");
             solution.genDer_CAD(printer_CAD, str, indent);
             str.print(";\n");
+            printer_CAD.printPostSteps(solution, str, indent);
         } else {
             printer_CAD.printPreSteps(solution, str, indent);
             str.format("%s%s = ", indent, v.name_C());
             solution.genVar_CAD(printer_CAD, str, indent);
             str.print(";\n");
+            printer_CAD.printPostSteps(solution, str, indent);
         }
     }
 
@@ -1168,6 +1175,8 @@ aspect CADCodeGen {
                 l.setEquationIndex(i++);
                 l.genWriteBackAssignment_CAD(str, indent, new HashSet<FVariable>(forVariables));
             }
+            if (firstVisit)
+                printer_CAD.printPostSteps(this, str, indent);
         }
     }
 
@@ -1203,15 +1212,15 @@ aspect CADCodeGen {
 
     public void FIfWhenEquation.genBlock_CAD(String indent, CodeStream str, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
-        if (!isElse()) {
-            boolean firstVisit = visited == null ? true : visited.add(this);
-            if (firstVisit)
-                printer_CAD.printPreSteps(this, str, indent);
-        }
+        boolean firstVisit = visited == null ? true : visited.add(this);
+        if (!isElse() && firstVisit)
+            printer_CAD.printPreSteps(this, str, indent);
         super.genBlock_CAD(indent, str, visited, forVariables, forIndices);
         if (hasElse())
             getElse().genBlock_CAD(indent, str, visited, forVariables, forIndices);
         genIfEnd_C(printer_CAD, str, indent);
+        if (!isElse() && firstVisit)
+            printer_CAD.printPostSteps(this, str, indent);
     }
 
     /*
@@ -1523,6 +1532,12 @@ aspect CADCodeGen {
             p.printPreSteps(node, str, indent);
         }
     }
+    
+    public void ASTNode.genTempFree_CAD(CodePrinter p, CodeStream str, String indent) {
+        for (ASTNode node : this){
+            p.printPostSteps(node, str, indent);
+        }
+    }
 
     @Override
     public void FAbstractEquation.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
@@ -1531,12 +1546,27 @@ aspect CADCodeGen {
             if (node != attributeList)
                 p.printPreSteps(node, str, indent);
     }
+    
+    @Override
+    public void FAbstractEquation.genTempFree_CAD(CodePrinter p, CodeStream str, String indent) {
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this)
+            if (node != attributeList)
+                p.printPostSteps(node, str, indent);
+    }
 
     public void FIfWhenElseEquation.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {}
     public void FIfWhenEquation.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_CAD(p, str, indent);
         if (hasElse())
             p.printPreSteps(getElse(), str, indent);
+    }
+    
+    public void FIfWhenElseEquation.genTempFree_CAD(CodePrinter p, CodeStream str, String indent) {}
+    public void FIfWhenEquation.genTempFree_CAD(CodePrinter p, CodeStream str, String indent) {
+        super.genTempFree_CAD(p, str, indent);
+        if (hasElse())
+            p.printPostSteps(getElse(), str, indent);
     }
 
     /**
@@ -1553,12 +1583,14 @@ aspect CADCodeGen {
     public void FFunctionCall.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(getArgs(), str, indent);
         genADStatement_CAD(p, str, indent);
+        p.printPostSteps(getArgs(), str, indent);
     }
 
 	@Override
 	public void FAssert.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(getTest(), str, indent);
 		prettyPrint_C(p, str, indent);
+        p.printPostSteps(getTest(), str, indent);
 	}
 	
 	eq FAssert.getChild().inlineVar_CAD() = true;
