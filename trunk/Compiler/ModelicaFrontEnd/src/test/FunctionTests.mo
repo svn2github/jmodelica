@@ -9868,13 +9868,13 @@ end UnknownArray45;
 model UnknownArray46
     function f2
         input Real[:] x;
-        output Real[:] y;
+        output Real[size(x,1)] y;
       algorithm
         y := x;
     end f2;
     function f1
         input Real[:] x;
-        output Real[:] y;
+        output Real[size(x,1)] y;
       algorithm
         y := f2(if size(x,1) > 1 then x else x);
     end f1;
@@ -9895,7 +9895,7 @@ equation
 public
  function FunctionTests.UnknownArray46.f1
   input Real[:] x;
-  output Real[:] y;
+  output Real[size(x, 1)] y;
   Real[:] temp_1;
  algorithm
   size(temp_1) := {size(x, 1)};
@@ -9908,7 +9908,7 @@ public
 
  function FunctionTests.UnknownArray46.f2
   input Real[:] x;
-  output Real[:] y;
+  output Real[size(x, 1)] y;
  algorithm
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
@@ -12208,6 +12208,60 @@ end FunctionTests.MinOnInput1;
 end MinOnInput1;
 
 package UnknownSize
+
+package FuncCallInSize
+    package P
+        function f
+            input Integer n;
+            output Real[f2(n)] y = 1:n;
+          algorithm
+        end f;
+        function f2
+            input Integer n;
+            output Integer y = n;
+          algorithm
+        end f2;
+    end P;
+    
+    model FromOtherPackage
+        Real[2] y = P.f(2);
+        
+        annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_FuncCallInSize_FromOtherPackage",
+            description="Scalarization of functions: Function call from other package in declaration size",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = FunctionTests.UnknownSize.FuncCallInSize.P.f(2);
+
+public
+ function FunctionTests.UnknownSize.FuncCallInSize.P.f
+  input Integer n;
+  output Real[FunctionTests.UnknownSize.FuncCallInSize.P.f2(n)] y;
+ algorithm
+  for i1 in 1:n loop
+   y[i1] := i1;
+  end for;
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.P.f;
+
+ function FunctionTests.UnknownSize.FuncCallInSize.P.f2
+  input Integer n;
+  output Integer y;
+ algorithm
+  y := n;
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.P.f2;
+
+end FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage;
+")})));
+end FromOtherPackage;
+end FuncCallInSize;
 
 package Hidden
 

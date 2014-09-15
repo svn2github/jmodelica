@@ -1024,7 +1024,7 @@ aspect Arrays {
         MutableSize ms = new MutableSize(s.ndims());
         for (int j = 0; j < s.ndims(); j++) {
             try {
-                ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
+                ms.append(s.createSizeFExp(j, (HashMap) varMap.clone()));
             } catch (ConstantEvaluationException e) {
                 ms.append(dynamicFExp(new FUnknownSizeExp(unknownInstComponentDecl(), j)));
             }
@@ -3538,7 +3538,7 @@ aspect ArrayHelpers {
         public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
             evaluate(d);
             return (okExp(exps[d], true)) ?
-                    exps[d].createSizeFExp(varMap) :
+                    exps[d].dynamicFExp(exps[d].createSizeFExp(varMap)) :
                     super.createSizeFExp(d, varMap);
         }
 		
@@ -3550,7 +3550,7 @@ aspect ArrayHelpers {
 		public FExp createFExp(int d) {
 			evaluate(d);
             return (okExp(exps[d], true)) ?
-					exps[d].createSizeFExp() : 
+					exps[d].dynamicFExp(exps[d].createSizeFExp()) : 
 					super.createFExp(d);
 		}
 		
