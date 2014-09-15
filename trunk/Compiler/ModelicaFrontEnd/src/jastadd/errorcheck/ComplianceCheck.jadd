@@ -228,10 +228,6 @@ aspect ComplianceCheck {
 	
 	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-        if (!inDiscreteLocation() && !getValue().variability().discreteOrLess()) {
-            /* Allowing continuous inputs would change the discrete output without generating events */
-            getValue().compliance("String() operator cannot be applied to continuous values");
-        }
         if (hasMinimumLength()) {
             getMinimumLength().markAsStructuralParameter(checkType);
             if (!getMinimumLength().variability().parameterOrLess())
