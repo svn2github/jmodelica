@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "jni.h"
 
 // JCC wrappers
-#include "casadi/MX.h"
-#include "casadi/MXFunction.h"
-#include "casadi/MXVector.h"
+#include "ifcasadi/MX.h"
+#include "ifcasadi/MXFunction.h"
+#include "ifcasadi/MXVector.h"
 
 // The ModelicaCasADi program
 #include "Model.hpp"

@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-%module casadi
+%module ifcasadi
 
 // Expose the swig-generated function getCPtr as public in the proxy objects;
 // we need it to get back the underlying object.

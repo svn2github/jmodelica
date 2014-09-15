@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MXWRAP_HPP
 
 #include "symbolic/casadi.hpp"
-#include "casadi/MX.h"
+#include "ifcasadi/MX.h"
 
-typedef casadi::MX JMX;
+typedef ifcasadi::MX JMX;
 
 inline CasADi::MX toMX(const JMX &jmx) {
     jlong p = JMX::getCPtr(jmx);

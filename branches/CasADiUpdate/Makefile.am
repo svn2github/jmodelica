@@ -102,7 +102,7 @@ mc_modelica: ifcasadi
 
 mc_optimica: ifcasadi
 	mkdir -p $(OC_SRC)/src/java-generated
-	cp -pr $(MC_SRC)/src/java-generated/casadi $(OC_SRC)/src/java-generated
+	cp -pr $(MC_SRC)/src/java-generated/ifcasadi $(OC_SRC)/src/java-generated
 	cd $(OC_SRC); $(ANT_OPTS) $(ANT)
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
@@ -385,9 +385,9 @@ clean-casadi-interface:
 #	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 if HAVE_ANT
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/ifcasadi 
 	cd $(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/ifcasadi 
 endif
 	
 

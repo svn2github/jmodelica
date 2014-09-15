@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MXVECTORWRAP_HPP
 
 #include "symbolic/casadi.hpp"
-#include "casadi/MXVector.h"
+#include "ifcasadi/MXVector.h"
 
-typedef casadi::MXVector JMXVector;
+typedef ifcasadi::MXVector JMXVector;
 
 inline std::vector<CasADi::MX> toMXVector(const JMXVector &jmxvector) {
     jlong p = JMXVector::getCPtr(jmxvector);

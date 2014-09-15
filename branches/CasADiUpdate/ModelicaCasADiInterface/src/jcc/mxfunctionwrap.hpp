@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MXFUNCTIONWRAP_HPP
 
 #include "symbolic/casadi.hpp"
-#include "casadi/MXFunction.h"
+#include "ifcasadi/MXFunction.h"
 
-typedef casadi::MXFunction JMXFunction;
+typedef ifcasadi::MXFunction JMXFunction;
 
 inline CasADi::MXFunction toMXFunction(const JMXFunction &jmx) {
     jlong p = JMXFunction::getCPtr(jmx);

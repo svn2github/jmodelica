@@ -13,8 +13,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import casadi.casadi;
-import casadi.MX;
+import ifcasadi.MX;
 
 // This aspect defines CasADiInterface functionality unique to the OptimicaCompiler. Shared functionality is located in FExpToCasADi under ModelicaCompilerCasADi. 
 aspect CasADiInterface {
