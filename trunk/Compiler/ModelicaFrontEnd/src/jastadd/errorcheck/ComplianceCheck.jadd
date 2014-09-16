@@ -243,9 +243,6 @@ aspect ComplianceCheck {
             if (!getSignificantDigits().variability().parameterOrLess())
                getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
        }
-		if (hasFormat()) {
-			getFormat().compliance("format argument is not supported");
-		}
 	}
 		
 	public void InstPrimitive.complianceCheck(ErrorCheckType checkType) {

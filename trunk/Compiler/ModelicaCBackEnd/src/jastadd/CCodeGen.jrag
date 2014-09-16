@@ -2171,9 +2171,7 @@ aspect CCodeGen {
     
     public void FStringExp.genStringFormat_C(CodePrinter p, CodeStream str, String indent) {
         if (hasFormat()) {
-            str.print("\"");
             p.print(getFormat(), str, indent);
-            str.print("\"");
         } else {
             if (hasLeftJustified()) {
                 str.print("((");
@@ -2279,7 +2277,7 @@ aspect CCodeGen {
     syn boolean FExp.isKnownStringLength() = variability().knownParameterOrLess();
     eq FFunctionCall.isKnownStringLength() = false;
     eq FStringAddExp.isKnownStringLength() = getLeft().isKnownStringLength() && getRight().isKnownStringLength();
-    eq FStringExp.isKnownStringLength() = !hasFormat() && (!hasSignificantDigits() || getSignificantDigits().variability().knownParameterOrLess())
+    eq FStringExp.isKnownStringLength() = (!hasSignificantDigits() || getSignificantDigits().variability().knownParameterOrLess())
             && (!hasMinimumLength() || getMinimumLength().variability().knownParameterOrLess());
     
 	/**
@@ -2293,7 +2291,9 @@ aspect CCodeGen {
 	}
 	syn lazy int FStringAddExp.maxStringLength_C() = Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), MAX_STRING_LENGTH_C);
 	eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
-	eq FStringExp.maxStringLength_C()              = Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
+	eq FStringExp.maxStringLength_C()              =
+	        hasFormat() ? type().maxNumericStringLength_C(significantDigits()) :
+	        Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
 	
 	/**
 	 * The maximum length string representations of values of this type can have in C.
@@ -2312,7 +2312,7 @@ aspect CCodeGen {
 	}
 	
 	syn int FType.maxNumericStringLength_C(int precision) {
-	    return 7 + precision;
+	    return 10 + precision;
 	}
 	
 	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;

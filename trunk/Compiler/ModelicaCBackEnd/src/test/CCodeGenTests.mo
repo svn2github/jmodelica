@@ -759,6 +759,9 @@ equation
 	StringCompare("medium      ", String(enumVar, minimumLength=12));
 	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
 
+    StringCompare("42",           String(intVar, format="%d"));
+    StringCompare("3.1400000",    String(realVar, format="%f"));
+
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="CStringExp",
@@ -792,6 +795,8 @@ equation
     JMI_DEF_STR_STAT(tmp_22, 6)
     JMI_DEF_STR_STAT(tmp_23, 12)
     JMI_DEF_STR_STAT(tmp_24, 12)
+    JMI_DEF_STR_STAT(tmp_25, 16)
+    JMI_DEF_STR_STAT(tmp_26, 16)
     JMI_INI_STR_STAT(tmp_1)
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-d\", (int) _intVar_1);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"42\", tmp_1);
@@ -864,6 +869,12 @@ equation
     JMI_INI_STR_STAT(tmp_24)
     snprintf(JMI_STR_END(tmp_24), JMI_STR_LEFT(tmp_24), ((JMI_FALSE) ? (\"%-*s\") : (\"%*s\")), (int) AD_WRAP_LITERAL(12), E_0_e[(int) _enumVar_3]);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"      medium\", tmp_24);
+    JMI_INI_STR_STAT(tmp_25)
+    snprintf(JMI_STR_END(tmp_25), JMI_STR_LEFT(tmp_25), \"%d\", (int) _intVar_1);
+    func_CCodeGenTests_CStringExp_StringCompare_def0(\"42\", tmp_25);
+    JMI_INI_STR_STAT(tmp_26)
+    snprintf(JMI_STR_END(tmp_26), JMI_STR_LEFT(tmp_26), \"%f\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.1400000\", tmp_26);
     (*res)[0] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(12), AD_WRAP_LITERAL(42)) - (_intVar_1);
     (*res)[1] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, JMI_TRUE, JMI_FALSE) - (_boolVar_2);
     (*res)[2] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_enumVar_3);
@@ -14677,6 +14688,7 @@ model StringOperations9
         input Real x;
         input Integer i;
         input Boolean b;
+        input String fmt;
         output Real y;
         String s;
       algorithm
@@ -14686,17 +14698,19 @@ model StringOperations9
         + String(x, significantDigits=i, minimumLength=i, leftJustified=b)
         + String(x, significantDigits=i, leftJustified=b)
         + String(x)
+        + String(x, format=fmt)
         
         + String(i, minimumLength=2, leftJustified=b)
         + String(i, minimumLength=i, leftJustified=true)
         + String(i, minimumLength=i, leftJustified=b)
+        + String(i, format=fmt)
         
         + String(b, minimumLength=2, leftJustified=b)
         + String(b, minimumLength=i, leftJustified=true)
         + String(b, minimumLength=i, leftJustified=b);
     end f;
     
-    Real y = f(-time, 3, true);
+    Real y = f(-time, 3, true, "%g");
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -14706,21 +14720,23 @@ model StringOperations9
             variability_propagation=false,
             template="$C_functions$",
             generatedCode="
-void func_CCodeGenTests_StringOperations9_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_ad_var_t* y_o) {
+void func_CCodeGenTests_StringOperations9_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_string_t fmt_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_v;
     JMI_DEF_STR_DYNA(s_v)
     JMI_DEF_STR_DYNA(tmp_1)
-    JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + AD_WRAP_LITERAL(1), i_v) + jmi_max(7 + i_v, AD_WRAP_LITERAL(2)) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + jmi_max(10, AD_WRAP_LITERAL(2)) + jmi_max(10, i_v) + jmi_max(10, i_v) + jmi_max(5, AD_WRAP_LITERAL(2)) + jmi_max(5, i_v) + jmi_max(5, i_v))
+    JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + AD_WRAP_LITERAL(1), i_v) + jmi_max(7 + i_v, AD_WRAP_LITERAL(2)) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + 16 + jmi_max(10, AD_WRAP_LITERAL(2)) + jmi_max(10, i_v) + jmi_max(10, i_v) + 16 + jmi_max(5, AD_WRAP_LITERAL(2)) + jmi_max(5, i_v) + jmi_max(5, i_v))
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*.*g\") : (\"%*.*g\")), (int) i_v, (int) AD_WRAP_LITERAL(1), x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*.*g\") : (\"%*.*g\")), (int) AD_WRAP_LITERAL(2), (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((JMI_FALSE) ? (\"%-*.*g\") : (\"%*.*g\")), (int) i_v, (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*.*g\") : (\"%*.*g\")), (int) i_v, (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-.*g\") : (\"%.*g\")), (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*d\") : (\"%*d\")), (int) AD_WRAP_LITERAL(2), (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((JMI_TRUE) ? (\"%-*d\") : (\"%*d\")), (int) i_v, (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*d\") : (\"%*d\")), (int) i_v, (int) i_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*s\") : (\"%*s\")), (int) AD_WRAP_LITERAL(2), COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((JMI_TRUE) ? (\"%-*s\") : (\"%*s\")), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*s\") : (\"%*s\")), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
@@ -14731,9 +14747,9 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t 
     return;
 }
 
-jmi_ad_var_t func_CCodeGenTests_StringOperations9_f_exp0(jmi_ad_var_t x_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v) {
+jmi_ad_var_t func_CCodeGenTests_StringOperations9_f_exp0(jmi_ad_var_t x_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_string_t fmt_v) {
     jmi_ad_var_t y_v;
-    func_CCodeGenTests_StringOperations9_f_def0(x_v, i_v, b_v, &y_v);
+    func_CCodeGenTests_StringOperations9_f_def0(x_v, i_v, b_v, fmt_v, &y_v);
     return y_v;
 }
 
