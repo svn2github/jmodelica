@@ -50,7 +50,10 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 
 /* Size macro - gives the size of array arr for dimension d */
 #define jmi_array_size(arr, d) ((arr)->size[(int) d])
-    
+
+/* Frees strings in this array struct but not the array struct itself */
+void jmi_free_str_arr(jmi_string_array_t* arr);
+
 /* Array decl macro, delegates*/
 #define JMI_ARR(dyn, type, arr, name, ne, nd) \
     JMI_ARRAY_DECL_##dyn(type, arr, name, ne, nd)

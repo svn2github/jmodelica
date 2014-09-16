@@ -14756,6 +14756,160 @@ jmi_ad_var_t func_CCodeGenTests_StringOperations9_f_exp0(jmi_ad_var_t x_v, jmi_a
 ")})));
 end StringOperations9;
 
+model StringOperations10
+    function f1
+        input String[:] s;
+        output String[size(s,1)] o;
+      algorithm
+        o := s;
+    end f1;
+    
+    function f2
+        input Real x;
+        output Real y;
+        String[2] s;
+      algorithm
+        y := x;
+        s := {"str", "str"};
+        s := f1(s);
+    end f2;
+    
+    Real y = f2(-time);
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="StringOperations10",
+            description="String array return value in function call",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_functions$
+",
+            generatedCode="
+void func_CCodeGenTests_StringOperations10_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, s_a, 2, 1)
+    JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, s_a, 2, 1, 2)
+    y_v = x_v;
+    JMI_ASG(STR, jmi_array_ref_1(s_a, 1), \"str\")
+    JMI_ASG(STR, jmi_array_ref_1(s_a, 2), \"str\")
+    func_CCodeGenTests_StringOperations10_f1_def1(s_a, tmp_1);
+    JMI_ASG(STR, jmi_array_ref_1(s_a, 1), jmi_array_val_1(tmp_1, 1))
+    JMI_ASG(STR, jmi_array_ref_1(s_a, 2), jmi_array_val_1(tmp_1, 2))
+    jmi_free_str_arr(tmp_1);
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_StringOperations10_f2_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_StringOperations10_f2_def0(x_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_StringOperations10_f1_def1(jmi_string_array_t* s_a, jmi_string_array_t* o_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, o_an, -1, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    if (o_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, o_an, jmi_array_size(s_a, 0), 1, jmi_array_size(s_a, 0))
+        o_a = o_an;
+    }
+    i1_0ie = jmi_array_size(s_a, 0) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        JMI_ASG(STR, jmi_array_ref_1(o_a, i1_0i), jmi_array_val_1(s_a, i1_0i))
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end StringOperations10;
+
+model StringOperations11
+    function f1
+        input String[:] s;
+        output String[size(s,1)] o;
+      algorithm
+        o := s;
+    end f1;
+    
+    function f2
+        input Real x;
+        input Integer n;
+        output Real y;
+        String[n] s;
+      algorithm
+        y := x;
+        s := {"str" for i in 1:n};
+        s := f1(s);
+    end f2;
+    
+    Real y = f2(-time, 2);
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="StringOperations11",
+            description="Unknown size string array return value in function call",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_functions$
+",
+            generatedCode="
+void func_CCodeGenTests_StringOperations11_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t n_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, s_a, -1, 1)
+    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, temp_1_a, -1, 1)
+    jmi_ad_var_t i2_0i;
+    jmi_ad_var_t i2_0ie;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_1, -1, 1)
+    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, s_a, n_v, 1, n_v)
+    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, temp_1_a, n_v, 1, n_v)
+    y_v = x_v;
+    i2_0ie = n_v + 1 / 2.0;
+    for (i2_0i = 1; i2_0i < i2_0ie; i2_0i += 1) {
+        JMI_ASG(STR, jmi_array_ref_1(temp_1_a, i2_0i), \"str\")
+    }
+    i1_1ie = n_v + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        JMI_ASG(STR, jmi_array_ref_1(s_a, i1_1i), jmi_array_val_1(temp_1_a, i1_1i))
+    }
+    func_CCodeGenTests_StringOperations11_f1_def1(s_a, tmp_1);
+    jmi_free_str_arr(tmp_1);
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_StringOperations11_f2_exp0(jmi_ad_var_t x_v, jmi_ad_var_t n_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_StringOperations11_f2_def0(x_v, n_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_StringOperations11_f1_def1(jmi_string_array_t* s_a, jmi_string_array_t* o_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, o_an, -1, 1)
+    jmi_ad_var_t i1_2i;
+    jmi_ad_var_t i1_2ie;
+    if (o_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, o_an, jmi_array_size(s_a, 0), 1, jmi_array_size(s_a, 0))
+        o_a = o_an;
+    }
+    i1_2ie = jmi_array_size(s_a, 0) + 1 / 2.0;
+    for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
+        JMI_ASG(STR, jmi_array_ref_1(o_a, i1_2i), jmi_array_val_1(s_a, i1_2i))
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end StringOperations11;
 
 model TestTerminate1 // Test C code generation for terminate()
         Real x(start = 0);

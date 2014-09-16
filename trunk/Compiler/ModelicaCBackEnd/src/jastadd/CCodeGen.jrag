@@ -1610,7 +1610,7 @@ aspect CCodeGen {
     
     public void FFunctionCallLeft.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         if (hasFExp() && type().isString()) {
-            getFExp().type().printScalarFree_C(str, indent, false, getFExp().tempName_C());
+            getFExp().type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
     
@@ -2100,7 +2100,7 @@ aspect CCodeGen {
     
     public void FExp.genTopStringFree(CodePrinter p, CodeStream str, String indent) {
         if (isTopStringOp() && !isKnownStringLength()) {
-            type().printScalarFree_C(str, indent, false, tempName_C());
+            type().printFree_C(str, indent, false, tempName_C());
         }
     }
     
@@ -2766,7 +2766,7 @@ aspect CCodeGen {
     public void FFunctionCall.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         p.printPostSteps(getArgs(), str, indent);
         if (isStringExp()) {
-            type().printScalarFree_C(str, indent, false, tempName_C());
+            type().printFree_C(str, indent, false, tempName_C());
         }
     }
     
@@ -3758,8 +3758,12 @@ aspect CCodeGen {
         str.formatln("%sJMI_DEF_STR_DYNA(%s)", indent, name);
     }
     
-    public void FType.printScalarFree_C(CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%sJMI_FREE(%s)", indent, name);
+    public void FType.printFree_C(CodeStream str, String indent, boolean external, String name) {
+        if (isArray()) {
+            str.formatln("%sjmi_free_str_arr(%s);", indent, name);
+        } else {
+            str.formatln("%sJMI_FREE(%s)", indent, name);
+        }
     }
     
     /**
@@ -3941,7 +3945,11 @@ aspect CCodeGen {
 		if (forVariables != null && !forVariables.contains(myFV()))
 			return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
-            str.formatln("%sJMI_ASG(STR, %s, %s)", indent, myFV().name_C(), name);
+            str.format("%sJMI_ASG(STR, ", indent);
+            printer_C.print(getFIdUse(), str, "");
+            str.print(", ");
+            str.print(name);
+            str.println(")");
             return;
         }
 		str.print(indent);

@@ -79,8 +79,7 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
     JMI_SET_STR(*DEST, SRC)
 
 /* Free string */
-#define JMI_FREE(NAME) \
-    free(NAME);
+#define JMI_FREE(NAME) free(NAME);
 
 /* Length of string */
 #define JMI_LEN(NAME) \
