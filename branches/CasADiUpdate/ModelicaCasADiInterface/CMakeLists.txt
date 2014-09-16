@@ -105,6 +105,7 @@ link_directories(${IPOPT_HOME}/lib)
 
 include_directories(src src/jcc)
 include_directories(${CASADI_HOME})
+include_directories(${CASADI_BUILD_DIR})
 
 #JNI
 find_package(JNI REQUIRED)

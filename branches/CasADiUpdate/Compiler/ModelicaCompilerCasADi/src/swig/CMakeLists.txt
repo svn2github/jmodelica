@@ -36,6 +36,7 @@ set(MODULE_NAME ifcasadi)
 add_definitions(${CPPFLAGS})
 include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
+include_directories(${CASADI_BUILD_DIR})
 
 set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_LIST_DIR}/../java-generated/ifcasadi)
 
