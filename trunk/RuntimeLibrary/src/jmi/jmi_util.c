@@ -26,13 +26,14 @@
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_global.h"
+#include <stdio.h>
 #include <assert.h>
 
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
 void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[]) {
     if (func_name != NULL) {
         char buf[64];
-        snprintf(buf, sizeof buf, "%s%s", cathegory_name, "InFunc");
+        sprintf(buf, "%s%s", cathegory_name, "InFunc");
         jmi_log_node(jmi->log, logWarning, buf, "<func: %s, exp: %s>", func_name, msg);
     } else {
         jmi_log_node(jmi->log, logWarning, cathegory_name, "<exp:%s>", msg);
