@@ -62,3 +62,6 @@ using namespace std;
 namespace std {
    %template(MXVector) vector<casadi::MX>;
 };
+namespace casadi {
+   %template(GenericMatrixMX) GenericMatrix<MX>;
+};
