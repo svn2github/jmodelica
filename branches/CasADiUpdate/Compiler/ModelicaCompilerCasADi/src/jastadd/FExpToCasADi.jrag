@@ -303,7 +303,7 @@ aspect FExpToCasADi {
     eq FOrExp.toMX() = getLeft().toMX().logic_or(getRight().toMX());
     
     // Other expressions
-    syn lazy MX FClass.timeMX() = new MX.sym("time");
+    syn lazy MX FClass.timeMX() = ifcasadi.msym("time");
     eq FTimeExp.toMX() = myFClass().timeMX();
     /** @return A MX with the first output, and perhaps only output, for this function call */
     eq FFunctionCall.toMX() { 
@@ -445,7 +445,7 @@ aspect FExpToCasADi {
     // Literal expression
     eq FBooleanLitExpTrue.toMX() = new MX(1);
     eq FBooleanLitExpFalse.toMX() = new MX(0);
-    eq FStringLitExp.toMX() = new MX.sym(getString());
+    eq FStringLitExp.toMX() = ifcasadi.msym(getString());
     eq FRealLitExp.toMX() = new MX(getValue());
     eq FIntegerLitExp.toMX() = new MX((double)getValue());
     
@@ -477,13 +477,13 @@ aspect FExpToCasADi {
     }
     
     
-    eq FEnumVariable.asMXVariable() = new MX.sym("enum_" + getFQName().toString());
-    eq FVariable.asMXVariable() = new MX.sym(getFQName().toString());
-    eq FDerivativeVariable.asMXVariable() = new MX.sym("der(" + getFQName().toString() + ")");
-    eq FPreBooleanVariable.asMXVariable() = new MX.sym("pre(" + getFQName().toString() + ")");
-    eq FPreIntegerVariable.asMXVariable() = new MX.sym("pre(" + getFQName().toString() + ")");
-    eq FPreRealVariable.asMXVariable() = new MX.sym("pre(" + getFQName().toString() + ")");
-    eq FFunctionVariable.asMXVariable() = new MX.sym(getFQName().toString());
+    eq FEnumVariable.asMXVariable() = ifcasadi.msym("enum_" + getFQName().toString());
+    eq FVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
+    eq FDerivativeVariable.asMXVariable() = ifcasadi.msym("der(" + getFQName().toString() + ")");
+    eq FPreBooleanVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
+    eq FPreIntegerVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
+    eq FPreRealVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
+    eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
     
     eq FFunctionArray.asMXVector() {
         MXVector MXVec = new MXVector();
@@ -511,7 +511,7 @@ aspect FExpToCasADi {
                 myFlattenedVariables.add(name());
                 myFlattenedVariables = fvar.createFullNestedName(myFlattenedVariables);
                 for (String str : myFlattenedVariables) {
-                    MX mx = new MX.sym(str);
+                    MX mx = ifcasadi.msym(str);
                     MXVec.add(mx);
                     getParent().setMXVariableInFunctionDeclRecordVariableMap(str, mx);
                 }

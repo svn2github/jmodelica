@@ -60,8 +60,10 @@ using namespace std;
 %include "casadi/core/function/mx_function.hpp"
 
 namespace std {
-   %template(MXVector) vector<casadi::MX>;
+    %template(MXVector) vector<casadi::MX>;
 };
-namespace casadi {
-   %template(GenericMatrixMX) GenericMatrix<MX>;
-};
+
+%inline %{
+// Work around trouble with wrapping MX.sym
+casadi::MX msym(const std::string &name) { return casadi::MX::sym(name); }
+%}
