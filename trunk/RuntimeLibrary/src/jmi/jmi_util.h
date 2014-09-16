@@ -158,7 +158,8 @@ typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief
 #define snprintf sprintf_s
 #endif
 
-/*Some of these functions are a temporary remnants of CppAD*/
+/*Some of these functions return types are a temporary remnants of CppAD*/
+
 /**
  * Function to wrap division and report errors to the log, for use in functions.
  */
@@ -168,6 +169,76 @@ jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_
  * Function to wrap division and report errors to the log, for use in equations.
  */
 jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
+
+/**
+ * Function to wrap the C pow function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_pow_function(const char* name, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+
+/**
+ * Function to wrap the C pow function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_pow_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+
+/**
+ * Function to wrap the C exp function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_exp_function(const char* name, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C exp function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_exp_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C log function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_log_function(const char* name, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C log function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_log_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C log10 function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_log10_function(const char* name, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C log10 function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_log10_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C sinh function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_sinh_function(const char* name, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C sinh function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_sinh_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C cosh function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_cosh_function(const char* name, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C cosh function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_cosh_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C tan function and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_tan_function(const char* name, jmi_ad_var_t x, const char* msg);
+
+/**
+ * Function to wrap the C tan function and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_tan_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
 
 /**
  * Set the terminate flag and log message.
