@@ -4018,9 +4018,9 @@ class LocalDAECollocator(CasadiCollocator):
         nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx),
                                 casadi.nlpOut(f=self.cost, g=constraints))
         if self.solver == "IPOPT":
-            self.solver_object = casadi.IpoptSolver(nlp)
+            self.solver_object = casadi.NlpSolver("ipopt",nlp)
         elif self.solver == "WORHP":
-            self.solver_object = casadi.WorhpSolver(nlp)
+            self.solver_object = casadi.NlpSolver("worhp",nlp)
         else:
             raise CasadiCollocatorException(
                     "Unknown nonlinear programming solver %s." % self.solver)

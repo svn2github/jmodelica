@@ -15,7 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "OptimizationProblem.hpp"
-using std::ostream; using CasADi::MX;
+using std::ostream; using casadi::MX;
 
 namespace ModelicaCasADi{
 

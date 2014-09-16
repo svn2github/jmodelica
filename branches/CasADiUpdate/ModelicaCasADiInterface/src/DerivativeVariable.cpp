@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "DerivativeVariable.hpp"
 namespace ModelicaCasADi {
-using CasADi::MX;
+using casadi::MX;
 DerivativeVariable::DerivativeVariable(Model *owner, MX var, Ref<Variable> diffVar, 
                                        Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
   RealVariable(owner, var, Variable::INTERNAL, Variable::CONTINUOUS, declaredType) { 

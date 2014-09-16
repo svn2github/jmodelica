@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "transferOptimica.hpp"
 
 // CasADi
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 
 // Wrapped classes from the Optimica compiler
 #include "java/lang/System.h"
@@ -65,7 +65,7 @@ namespace oc = org::jmodelica::optimica::compiler;
 namespace jl = java::lang;
 using std::vector; using std::string;
 using org::jmodelica::util::OptionRegistry;
-using CasADi::MX;
+using casadi::MX;
 
 namespace ModelicaCasADi {
 

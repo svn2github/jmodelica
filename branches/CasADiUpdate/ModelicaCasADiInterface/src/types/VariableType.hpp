@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 //Other
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "boost/flyweight.hpp"
 
 //ModelicaCasADi
@@ -38,7 +38,7 @@ namespace ModelicaCasADi
 class VariableType : public RefCountedNode {
     public:
         typedef std::string AttributeKey; 
-        typedef CasADi::MX AttributeValue;
+        typedef casadi::MX AttributeValue;
     protected:
         typedef boost::flyweights::flyweight<std::string> AttributeKeyInternal; 
         typedef std::map<AttributeKeyInternal,AttributeValue> attributeMap;  

@@ -198,7 +198,7 @@ template <class FVar, class Comment>
 void transferCommentForVariable(ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv) {
     if(fv.hasFStringComment()) {
         Comment comment = Comment(fv.getFStringComment().this$);
-        var->setAttribute("comment", CasADi::MX(env->toString(comment.getComment().this$)));
+        var->setAttribute("comment", casadi::MX::sym(env->toString(comment.getComment().this$)));
     }
 }
 

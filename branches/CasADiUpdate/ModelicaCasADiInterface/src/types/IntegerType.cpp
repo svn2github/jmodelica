@@ -14,11 +14,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <utility>
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "types/IntegerType.hpp"
 namespace ModelicaCasADi 
 {
-using std::string; using CasADi::MX;
+using std::string; using casadi::MX;
 IntegerType::IntegerType(){
     // Default attributes for non parameter/constant Integer type, according to
     // Modelica specification.

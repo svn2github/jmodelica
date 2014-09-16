@@ -15,7 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Equation.hpp"
-using CasADi::MX;
+using casadi::MX;
 namespace ModelicaCasADi 
 {
 Equation::Equation(MX lhs, MX rhs) : lhs(lhs), rhs(rhs) {}

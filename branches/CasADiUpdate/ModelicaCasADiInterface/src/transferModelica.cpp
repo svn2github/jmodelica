@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "transferModelica.hpp"
 
 // CasADi
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 
 // Wrapped classes from the Modelica compiler
 #include "java/lang/System.h"

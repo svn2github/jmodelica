@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream> 
 #include <vector>
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "RefCountedNode.hpp"
 namespace ModelicaCasADi 
 {
@@ -30,7 +30,7 @@ class ModelFunction : public RefCountedNode {
          * that may be called and printed. 
          * @param A MXFunction 
          */
-        ModelFunction(CasADi::MXFunction myFunction); 
+        ModelFunction(casadi::MXFunction myFunction); 
 #ifndef SWIG
         // We don't have a useable SWIG typemap to take in a vector of MX right now,
         // the call can be done by going through getFunc instead.
@@ -40,10 +40,10 @@ class ModelFunction : public RefCountedNode {
          * @param A vector of MX
          * @return A vector of MX
          */
-        std::vector<CasADi::MX> call(const std::vector<CasADi::MX> &arg);
+        std::vector<casadi::MX> call(const std::vector<casadi::MX> &arg);
 #endif
         /** Return the underlying MXFunction */
-        CasADi::MXFunction getFunc() const;
+        casadi::MXFunction getFunc() const;
         /** Returns the name of the MXFunction */
         std::string getName() const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
@@ -51,10 +51,10 @@ class ModelFunction : public RefCountedNode {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        CasADi::MXFunction myFunction;
+        casadi::MXFunction myFunction;
 };
-inline ModelFunction::ModelFunction(CasADi::MXFunction myFunction) : myFunction(myFunction) {}
-inline CasADi::MXFunction ModelFunction::getFunc() const { return myFunction; }
+inline ModelFunction::ModelFunction(casadi::MXFunction myFunction) : myFunction(myFunction) {}
+inline casadi::MXFunction ModelFunction::getFunc() const { return myFunction; }
 }; // End namespace
 #endif
 

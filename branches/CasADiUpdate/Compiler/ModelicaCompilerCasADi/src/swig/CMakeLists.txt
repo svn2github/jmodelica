@@ -13,7 +13,7 @@ set(CASADI_HOME $ENV{CASADI_HOME})
 set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
 
 find_library(CASADI_DLL
-  NAMES libcasadi.so libcasadi.dll
+  NAMES libcasadi_control.so libcasadi_control.dll
   PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
