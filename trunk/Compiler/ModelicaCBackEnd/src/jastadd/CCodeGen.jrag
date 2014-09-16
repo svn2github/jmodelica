@@ -2106,11 +2106,11 @@ aspect CCodeGen {
     
     
     public void FExp.genStringExpWrite_C(CodePrinter p, CodeStream str, String indent, String dest) {
-        str.format("%sJMI_CAT(%s, ", indent, dest);
+        str.format("%ssnprintf(JMI_STR_END(%s), JMI_STR_LEFT(%s), ", indent, dest, dest);
         genStringFormat_C(p, str, indent);
         str.print(", ");
         genStringParts_C(p, str, indent);
-        str.println(")");
+        str.println(");");
     }
     
     public void FStringAddExp.genStringExpWrite_C(CodePrinter p, CodeStream str, String indent, String dest) {
@@ -2148,7 +2148,7 @@ aspect CCodeGen {
                 if (hasSignificantDigits()) {
                     p.print(getSignificantDigits(), str, indent);
                 } else {
-                    str.print(DEFAULT_PRECISION);
+                    str.print(significantDigits());
                 }
             }
             if (hasMinimumLength()) {
@@ -2162,7 +2162,10 @@ aspect CCodeGen {
     
     public void FExp.genStringFormat_C(CodePrinter p, CodeStream str, String indent) {
         str.print("\"");
-        str.print(formatString_C());
+        if (type().isString())
+            str.print("%s");
+        else
+            throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
         str.print("\"");
     }
     
@@ -2172,9 +2175,49 @@ aspect CCodeGen {
             p.print(getFormat(), str, indent);
             str.print("\"");
         } else {
-            super.genStringFormat_C(p, str, indent);
+            if (hasLeftJustified()) {
+                str.print("((");
+                p.print(getLeftJustified(), str, indent);
+                str.print(") ? (");
+            }
+            
+            genStringFormat_C(str, true);
+            
+            if (hasLeftJustified()) {
+                str.print(") : (");
+                genStringFormat_C(str, false);
+                str.print("))");
+            }
+            
+            if (hasMinimumLength()) {
+                str.print(", (int) ");
+                p.print(getMinimumLength(), str, indent);
+            }
+            
+            if (getValue().type().isReal()) {
+                str.print(", (int) ");
+                if (hasSignificantDigits()) {
+                    p.print(getSignificantDigits(), str, indent);
+                } else {
+                    str.print(significantDigits());
+                }
+            }
         }
     }
+    
+    public void FStringExp.genStringFormat_C(CodeStream str, boolean justifyLeft) {
+        str.print("\"%");
+        if (justifyLeft)
+            str.print("-");
+        if (hasMinimumLength())
+            str.print("*");
+        if (getValue().type().isReal())
+            str.print(".*");
+        str.print(getValue().type().formatSpecifier());
+        str.print("\"");
+    }
+    
+    
 
 	public void FExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
 		FType t = type();
@@ -2273,18 +2316,6 @@ aspect CCodeGen {
 	}
 	
 	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
-	
-    /**
-     * The format string to use for this expression with the printf family of functions in C.
-     */
-	syn String FExp.formatString_C() {
-		if (type().isString())
-			return "%s";
-		else
-			throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
-	}
-	eq FStringExp.formatString_C() = formatString();
-
 	
 	public void FEnumDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.format("%schar* %s[] = { \"\"", indent, name_C());

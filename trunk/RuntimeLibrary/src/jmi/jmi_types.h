@@ -42,11 +42,13 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 /* Max allowed length of strings */
 #define JMI_STR_MAX 16 * 1024 - 1
 
+/* Declaration for string */
 #define JMI_DEF_STR_STAT(NAME, LEN) \
     char NAME[JMI_MIN(LEN, JMI_STR_MAX) + 1];
 #define JMI_DEF_STR_DYNA(NAME) \
     jmi_string_t NAME;
 
+/* Initialization of string */
 #define JMI_INI_STR_STAT(NAME) \
     NAME[0] = '\0';
 #define JMI_INI_STR_DYNA(NAME, LEN) \
@@ -84,9 +86,11 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_LEN(NAME) \
     strlen(NAME)
     
-/* Append the string defined by FMT and VAR at the end of jmi_string_t NAME */
-#define JMI_CAT(DEST, FMT, VAR) \
-    snprintf(DEST + JMI_LEN(DEST), JMI_STR_MAX - JMI_LEN(DEST), FMT, VAR);
+/* Pointer to end of string */
+#define JMI_STR_END(DEST) DEST + JMI_LEN(DEST)
+    
+/* Number of empty bytes at end of string */
+#define JMI_STR_LEFT(DEST) JMI_STR_MAX - JMI_LEN(DEST)
 
 /* Temporary remains of CppAD*/            
 typedef jmi_real_t jmi_ad_var_t; 

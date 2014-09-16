@@ -765,9 +765,9 @@ equation
     if (_sw(0) == JMI_FALSE) {
         JMI_DEF_STR_STAT(tmp_1, 26)
         JMI_INI_STR_STAT(tmp_1)
-        JMI_CAT(tmp_1, \"%s\", \"Time (\")
-        JMI_CAT(tmp_1, \"%.6g\", _time)
-        JMI_CAT(tmp_1, \"%s\", \") > 0.5\")
+        snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"Time (\");
+        snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, _time);
+        snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \") > 0.5\");
         jmi_assert_failed(tmp_1, JMI_ASSERT_ERROR);
     }
 ")})));
