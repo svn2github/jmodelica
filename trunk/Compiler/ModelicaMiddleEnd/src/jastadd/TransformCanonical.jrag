@@ -4220,8 +4220,7 @@ aspect FunctionAndRecordCleanup {
     
     @Override
     public void FType.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
-        for (ASTNode node : this)
-            node.markUsedFunctionsAndRecords(type);
+        super.markUsedFunctionsAndRecords(type);
         getSize().markUsedFunctionsAndRecords(type);
     }
     
@@ -4229,6 +4228,7 @@ aspect FunctionAndRecordCleanup {
         
     }
     
+    @Override
     public void MutableSize.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
         for (FExp e : exps)
             if (e != null)

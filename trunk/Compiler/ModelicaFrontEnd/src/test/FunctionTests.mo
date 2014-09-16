@@ -12224,7 +12224,9 @@ package FuncCallInSize
     end P;
     
     model FromOtherPackage
-        Real[2] y = P.f(2);
+        Real[2] y1 = P.f(2);
+        constant Integer m = 2;
+        Real[:] y2 = P.f(m);
         
         annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -12234,10 +12236,14 @@ package FuncCallInSize
             inline_functions="none",
             flatModel="
 fclass FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage
- Real y[1];
- Real y[2];
+ Real y1[1];
+ Real y1[2];
+ constant Integer m = 2;
+ Real y2[1];
+ Real y2[2];
 equation
- ({y[1], y[2]}) = FunctionTests.UnknownSize.FuncCallInSize.P.f(2);
+ ({y1[1], y1[2]}) = FunctionTests.UnknownSize.FuncCallInSize.P.f(2);
+ ({y2[1], y2[2]}) = FunctionTests.UnknownSize.FuncCallInSize.P.f(2);
 
 public
  function FunctionTests.UnknownSize.FuncCallInSize.P.f
