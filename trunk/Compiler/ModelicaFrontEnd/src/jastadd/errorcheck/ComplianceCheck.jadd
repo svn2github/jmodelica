@@ -228,27 +228,21 @@ aspect ComplianceCheck {
 	
 	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (hasMinimumLength()) {
-			getMinimumLength().markAsStructuralParameter(checkType);
-			if (!getMinimumLength().variability().parameterOrLess())
-				getMinimumLength().compliance("minimumLength with higher than parameter variability is not supported");
-		}
-		if (hasLeftJustified()) {
-			getLeftJustified().markAsStructuralParameter(checkType);
-			if (!getLeftJustified().variability().parameterOrLess())
-				getLeftJustified().compliance("leftJustified with higher than parameter variability is not supported");
-		}
-		if (hasSignificantDigits()) {
-			getSignificantDigits().markAsStructuralParameter(checkType);
-			if (!getSignificantDigits().variability().parameterOrLess())
-				getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
-		}
-		if (hasFormat()) {
-			getFormat().compliance("format argument is not supported");
-//			getFormat().markAsStructuralParameter(checkType);
-//			if (!getSignificantDigits().variability().parameterOrLess())
-//				getFormat().compliance("format with higher than parameter variability is not supported");
-		}
+        if (hasMinimumLength()) {
+            getMinimumLength().markAsStructuralParameter(checkType);
+            if (!getMinimumLength().variability().parameterOrLess())
+                getMinimumLength().compliance("minimumLength with higher than parameter variability is not supported");
+        }
+        if (hasLeftJustified()) {
+            getLeftJustified().markAsStructuralParameter(checkType);
+           if (!getLeftJustified().variability().parameterOrLess())
+               getLeftJustified().compliance("leftJustified with higher than parameter variability is not supported");
+        }
+        if (hasSignificantDigits()) {
+            getSignificantDigits().markAsStructuralParameter(checkType);
+            if (!getSignificantDigits().variability().parameterOrLess())
+               getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
+       }
 	}
 		
 	public void InstPrimitive.complianceCheck(ErrorCheckType checkType) {

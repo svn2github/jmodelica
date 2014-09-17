@@ -104,6 +104,8 @@ aspect CCodeGen {
         public abstract void printVarDecls(ASTNode node, CodeStream str, String indent);
 
         public abstract void printPreSteps(ASTNode node, CodeStream str, String indent);
+        
+        public abstract void printPostSteps(ASTNode node, CodeStream str, String indent);
 
         public boolean insideBlock() {
             return false;
@@ -159,6 +161,11 @@ aspect CCodeGen {
         @Override
         public void printPreSteps(ASTNode node, CodeStream str, String indent) {
             node.genTempVars_C(this, str, indent);
+        }
+        
+        @Override
+        public void printPostSteps(ASTNode node, CodeStream str, String indent) {
+            node.genTempFree_C(this, str, indent);
         }
 
         public TypePrinter_C createDeclPrinter(CodeStream str) {
@@ -392,6 +399,14 @@ aspect CCodeGen {
 	}	
 	
     public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (isStringExp()) {
+            str.print(tempName_C());
+        } else {
+            prettyPrintCall_C(p, str, indent);
+        }
+    }
+    
+    public void FFunctionCall.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent) {
         myFCallable().prettyPrintCall_C(p, str, indent, this);
     }
     
@@ -1035,14 +1050,7 @@ aspect CCodeGen {
 	
 	public void FFunctionVariable.printReturnWrite_C(CodeStream str, String indent) {
 		if (!isRecord()) {
-			str.print(indent);
-			str.print("if (");
-			str.print(nameReturn_C());
-			str.print(" != NULL) *");
-			str.print(nameReturn_C());
-			str.print(" = ");
-			str.print(name_C());
-			str.print(";\n");
+			getType().printReturn_C(str, indent, nameReturn_C(), name_C(), true);
 		}
 	}
 	
@@ -1301,10 +1309,7 @@ aspect CCodeGen {
         }
         protected void printScalar(FType type) {
             if (print) {
-                if (type.isRecord())
-                    str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent(), type.nameScalar_C(external), name());
-                else
-                    str.formatln("%s%s %s;", indent(), type.nameScalar_C(external), name());
+                type.printScalarDecl_C(str, indent(), external, name());
             }
         }
         protected void printArray(FType type) {
@@ -1505,6 +1510,22 @@ aspect CCodeGen {
             super.genTempVars_C(p, str, indent, src);
         }
     }
+    
+    public void Size.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
+
+    @Override
+    public void MutableSize.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+        if (isUnknown()) {
+            for (int i = 0; i < size.length; i++) {
+                if (exps[i] != null) {
+                    FExp exp = src.dynamicFExp(exps[i]);
+                    p.printPostSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
+                }
+            }
+        } else {
+            super.genTempFree_C(p, str, indent, src);
+        }
+    }
 	
 	public void ASTNode.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
 		for (ASTNode node : this)
@@ -1559,8 +1580,13 @@ aspect CCodeGen {
         }
 		for (FExp arg : getArgs()) 
 			arg.genTempInputDecl_C(p, str, indent);
-	}
-	
+        if (isStringExp()) {
+            type().printScalarDecl_C(str, indent, false, tempName_C());
+        }
+    }
+    
+    syn boolean FFunctionCall.isStringExp() = functionCallIsExp() && type().isString();
+    
     public void FPartialFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         super.genVarDecls_C(p, str, indent);
         String fp = myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP);
@@ -1569,11 +1595,31 @@ aspect CCodeGen {
         }
         str.formatln("%s%s %s;", indent, fp, tempName_C());
     }
-	
-	public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		if (hasFExp() && !getFExp().keepAsArray())
-			getFExp().type().printDecl_C(p, str, indent, name_C(), getFExp());
-	}
+    
+    public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasFExp() && getFExp().replaceWithTemp(true)) {
+            getFExp().type().printDecl_C(p, str, indent, name_C(), getFExp());
+        }
+    }
+    
+    public void FFunctionCallLeft.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasFExp() && getFExp().replaceWithTemp(false)) {
+            getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), getFExp());
+        }
+    }
+    
+    public void FFunctionCallLeft.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasFExp() && type().isString()) {
+            getFExp().type().printFree_C(str, indent, false, getFExp().tempName_C());
+        }
+    }
+    
+    syn boolean FExp.replaceWithTemp(boolean str)      = !keepAsArray() || str && type().isString();
+    eq FFillExp.replaceWithTemp(boolean str)           = true;
+    eq FArray.replaceWithTemp(boolean str)             = true;
+    eq FRecordConstructor.replaceWithTemp(boolean str) = true;
+    
+    
 	
 	public void FExp.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) 
@@ -1656,6 +1702,7 @@ aspect CCodeGen {
 			for (FFunctionCallLeft l : getLefts()) {
 				l.genWriteBackAssignment_C(str, indent, null);
 			}
+            p.printPostSteps(this, str, indent);
 		}
 	}
 	
@@ -1663,6 +1710,7 @@ aspect CCodeGen {
 		if (!getCall().isIgnored()) {
 			p.printPreSteps(this, str, indent);
 			p.print(getCall(), str, indent);
+            p.printPostSteps(this, str, indent);
 		}
 	}
 	
@@ -1685,11 +1733,8 @@ aspect CCodeGen {
 
 	public void FAssignStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(this, str, indent);
-		str.print(indent);
-		p.print(getLeft(), str, indent);
-		str.print(" = ");
-		p.print(getRight(), str, indent);
-		str.print(";\n");
+        getLeft().type().printAssign_C(p, str, indent, getLeft(), getRight());
+        p.printPostSteps(this, str, indent);
 	}
 	
 	public void FReturnStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -1711,6 +1756,8 @@ aspect CCodeGen {
 		prettyPrintElse_C(p, str, indent);
 		str.print(indent);
 		str.print("}\n");
+        for (FIfWhenClause clause : getFIfWhenClauses())
+            p.printPostSteps(clause.getTest(), str, indent);
 	}
 	
 	protected void FIfWhenStmt.prettyPrintElse_C(CodePrinter p, CodeStream str, String indent) {}
@@ -1738,7 +1785,8 @@ aspect CCodeGen {
 		str.print(") {\n");
 		p.print(getWhileStmts(), str, p.indent(indent));
 		str.print(indent);
-		str.print("}\n");		
+		str.print("}\n");
+        p.printPostSteps(getTest(), str, indent);
 	}
 	
 	public void FForStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -1751,7 +1799,8 @@ aspect CCodeGen {
 		getIndex().printForArrayNext_C(p, str, p.indent(indent));
 		p.print(getForStmts(), str, p.indent(indent));
 		str.print(indent);		
-		str.print("}\n");		
+		str.print("}\n");
+        p.printPostSteps(getIndex(), str, indent);
 	}
 	
 	public void FForIndex.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
@@ -1876,6 +1925,7 @@ aspect CCodeGen {
 		p.print(getMsg(), str, indent);
 		boolean warning = hasLevel() && getLevel().ceval().intValue() == 2;
 		str.format(", JMI_ASSERT_%s);\n", warning ? "WARNING" : "ERROR");
+		p.printPostSteps(getMsg(), str, p.indent(indent));
 		str.print(indent);
 		str.print("}\n");
 	}
@@ -1888,6 +1938,11 @@ aspect CCodeGen {
     @Override
     public void FAssert.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(getTest(), str, indent);
+    }
+    
+    @Override
+    public void FAssert.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPostSteps(getTest(), str, indent);
     }
     
     public void FReinit.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
@@ -1982,43 +2037,187 @@ aspect CCodeGen {
     public void FStringAddExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(tempName_C());
     }
-	
-	public void FStringAddExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-		super.genTempVars_C(p, str, indent);
-		if (isTopStringOp()) {
-			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
-			genStringParts_C(p, str, indent);
-			str.print(");\n");
-		}
-	}
-	
-	public void FStringAddExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		super.genVarDecls_C(p, str, indent);
-		if (isTopStringOp())
-			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
-	}
-
-	public void FStringExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		str.print(tempName_C());
-	}
-	
-	public void FStringExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-		super.genTempVars_C(p, str, indent);
-		if (isTopStringOp()) {
-			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
-			genStringParts_C(p, str, indent);
-			str.print(");\n");
-		}
-	}
-	
-	public void FStringExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		super.genVarDecls_C(p, str, indent);
-		if (isTopStringOp())
-			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
-	}
+    
+    public void FStringAddExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        super.genVarDecls_C(p, str, indent);
+        genTopStringDecl(p, str, indent);
+    }
+    
+    public void FStringAddExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempVars_C(p, str, indent);
+        genTopStringInit(p, str, indent);
+    }
+    
+    public void FStringAddExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempFree_C(p, str, indent);
+        genTopStringFree(p, str, indent);
+    }
+    
+    
+    public void FStringExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(tempName_C());
+    }
+    
+    public void FStringExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        super.genVarDecls_C(p, str, indent);
+        genTopStringDecl(p, str, indent);
+    }
+    
+    public void FStringExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempVars_C(p, str, indent);
+        genTopStringInit(p, str, indent);
+    }
+    
+    public void FStringExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempFree_C(p, str, indent);
+        genTopStringFree(p, str, indent);
+    }
+    
+    
+    public void FExp.genTopStringDecl(CodePrinter p, CodeStream str, String indent) {
+        if (isTopStringOp()) {
+            boolean k = isKnownStringLength();
+            str.format("%sJMI_DEF_%s(%s", indent, k ? "STR_STAT" : "STR_DYNA", tempName_C());
+            if (k) {
+                str.format(", %d", maxStringLength_C());
+            }
+            str.println(")");
+        }
+    }
+    
+    public void FExp.genTopStringInit(CodePrinter p, CodeStream str, String indent) {
+        if (isTopStringOp()) {
+            boolean k = isKnownStringLength();
+            str.format("%sJMI_INI_%s(%s", indent, k ? "STR_STAT" : "STR_DYNA", tempName_C());
+            if (!k) {
+                str.print(", ");
+                genMaxStringLength_C(p, str, indent);
+            }
+            str.println(")");
+            genStringExpWrite_C(p, str, indent, tempName_C());
+        }
+    }
+    
+    public void FExp.genTopStringFree(CodePrinter p, CodeStream str, String indent) {
+        if (isTopStringOp() && !isKnownStringLength()) {
+            type().printFree_C(str, indent, false, tempName_C());
+        }
+    }
+    
+    
+    public void FExp.genStringExpWrite_C(CodePrinter p, CodeStream str, String indent, String dest) {
+        str.format("%ssnprintf(JMI_STR_END(%s), JMI_STR_LEFT(%s), ", indent, dest, dest);
+        genStringFormat_C(p, str, indent);
+        str.print(", ");
+        genStringParts_C(p, str, indent);
+        str.println(");");
+    }
+    
+    public void FStringAddExp.genStringExpWrite_C(CodePrinter p, CodeStream str, String indent, String dest) {
+        getLeft().genStringExpWrite_C(p, str, indent, dest);
+        getRight().genStringExpWrite_C(p, str, indent, dest);
+    }
+    
+    
+    public void FExp.genMaxStringLength_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("JMI_LEN(");
+        p.print(this, str, indent);
+        str.print(")");
+    }
+    
+    public void FStringLitExp.genMaxStringLength_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(maxStringLength_C());
+    }
+    
+    public void FStringAddExp.genMaxStringLength_C(CodePrinter p, CodeStream str, String indent) {
+        getLeft().genMaxStringLength_C(p, str, indent);
+        str.print(" + ");
+        getRight().genMaxStringLength_C(p, str, indent);
+    }
+    
+    public void FStringExp.genMaxStringLength_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasFormat()) {
+            str.print(getValue().type().maxNumericStringLength_C(DEFAULT_PRECISION));
+        } else {
+            if (hasMinimumLength()) {
+                str.print("jmi_max(");
+            }
+            str.print(getValue().type().maxStringLength_C(0));
+            if (getValue().type().isReal()) {
+                str.print(" + ");
+                if (hasSignificantDigits()) {
+                    p.print(getSignificantDigits(), str, indent);
+                } else {
+                    str.print(significantDigits());
+                }
+            }
+            if (hasMinimumLength()) {
+                str.print(", ");
+                p.print(getMinimumLength(), str, indent);
+                str.print(")");
+            }
+        }
+    }
+    
+    
+    public void FExp.genStringFormat_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("\"");
+        if (type().isString())
+            str.print("%s");
+        else
+            throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
+        str.print("\"");
+    }
+    
+    public void FStringExp.genStringFormat_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasFormat()) {
+            p.print(getFormat(), str, indent);
+        } else {
+            if (hasLeftJustified()) {
+                str.print("((");
+                p.print(getLeftJustified(), str, indent);
+                str.print(") ? (");
+            }
+            
+            genStringFormat_C(str, true);
+            
+            if (hasLeftJustified()) {
+                str.print(") : (");
+                genStringFormat_C(str, false);
+                str.print("))");
+            }
+            
+            if (hasMinimumLength()) {
+                str.print(", (int) ");
+                p.print(getMinimumLength(), str, indent);
+            }
+            
+            if (getValue().type().isReal()) {
+                str.print(", (int) ");
+                if (hasSignificantDigits()) {
+                    p.print(getSignificantDigits(), str, indent);
+                } else {
+                    str.print(significantDigits());
+                }
+            }
+        }
+    }
+    
+    public void FStringExp.genStringFormat_C(CodeStream str, boolean justifyLeft) {
+        str.print("\"%");
+        if (justifyLeft)
+            str.print("-");
+        if (hasMinimumLength())
+            str.print("*");
+        if (getValue().type().isReal())
+            str.print(".*");
+        str.print(getValue().type().formatSpecifier());
+        str.print("\"");
+    }
+    
+    
 
 	public void FExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
-		str.print(", ");
 		FType t = type();
 		if (t.isEnum()) {
 			str.print(t.enumNames_C());
@@ -2036,22 +2235,15 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FStringExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
-		getValue().genStringParts_C(p, str, indent);
-	}
-
-	public void FStringAddExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
-		getLeft().genStringParts_C(p, str, indent);
-		getRight().genStringParts_C(p, str, indent);
-	}
+    public void FStringExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {
+        getValue().genStringParts_C(p, str, indent);
+    }
 	
-	public void FStringLitExp.genStringParts_C(CodePrinter p, CodeStream str, String indent) {}
 	/**
 	 * Check if this string concatenation or String operator is the top node in an expression consisting of 
 	 * one or more string concatenations, i.e. returns true if parent is not an FStringAddExp.
 	 */
-	inh boolean FStringAddExp.isTopStringOp();
-	inh boolean FStringExp.isTopStringOp();
+	inh boolean FExp.isTopStringOp();
 	eq FStringAddExp.getChild().isTopStringOp() = false;
 	eq BaseNode.getChild().isTopStringOp()      = true;
 	
@@ -2082,6 +2274,12 @@ aspect CCodeGen {
 	    return buf.toString();
 	}
 	
+    syn boolean FExp.isKnownStringLength() = variability().knownParameterOrLess();
+    eq FFunctionCall.isKnownStringLength() = false;
+    eq FStringAddExp.isKnownStringLength() = getLeft().isKnownStringLength() && getRight().isKnownStringLength();
+    eq FStringExp.isKnownStringLength() = (!hasSignificantDigits() || getSignificantDigits().variability().knownParameterOrLess())
+            && (!hasMinimumLength() || getMinimumLength().variability().knownParameterOrLess());
+    
 	/**
 	 * The maximum length string the representation of the value of this expression can have in C.
 	 */
@@ -2093,7 +2291,9 @@ aspect CCodeGen {
 	}
 	syn lazy int FStringAddExp.maxStringLength_C() = Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), MAX_STRING_LENGTH_C);
 	eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
-	eq FStringExp.maxStringLength_C()              = Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
+	eq FStringExp.maxStringLength_C()              =
+	        hasFormat() ? type().maxNumericStringLength_C(significantDigits()) :
+	        Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
 	
 	/**
 	 * The maximum length string representations of values of this type can have in C.
@@ -2111,21 +2311,11 @@ aspect CCodeGen {
 		return res;
 	}
 	
-	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
-	
-    /**
-     * The format string to use for this expression with the printf family of functions in C.
-     */
-	syn String FExp.formatString_C() {
-		if (type().isString())
-			return "%s";
-		else
-			throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
+	syn int FType.maxNumericStringLength_C(int precision) {
+	    return 10 + precision;
 	}
-	syn lazy String FStringAddExp.formatString_C() = getLeft().formatString_C() + getRight().formatString_C();
-	eq FStringExp.formatString_C()                 = formatString();
-	eq FStringLitExp.formatString_C()              = string_C();
-
+	
+	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
 	
 	public void FEnumDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.format("%schar* %s[] = { \"\"", indent, name_C());
@@ -2520,6 +2710,11 @@ aspect CCodeGen {
 		for (ASTNode node : this)
 			p.printPreSteps(node, str, indent);
 	}
+	
+    public void ASTNode.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        for (ASTNode node : this)
+            p.printPostSteps(node, str, indent);
+    }
 
     @Override
     public void FAbstractEquation.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
@@ -2527,6 +2722,14 @@ aspect CCodeGen {
         for (ASTNode node : this)
             if (node != attributeList)
                 p.printPreSteps(node, str, indent);
+    }
+    
+    @Override
+    public void FAbstractEquation.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        ASTNode attributeList = getFAttributeList();
+        for (ASTNode node : this)
+            if (node != attributeList)
+                p.printPostSteps(node, str, indent);
     }
 
 	public void FExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
@@ -2536,6 +2739,13 @@ aspect CCodeGen {
 			super.genTempVars_C(p, str, indent);
 	}
 	
+    public void FExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (isArray() && !size().isUnknown())
+            p.printPostSteps(getArray(), str, indent);
+        else
+            super.genTempFree_C(p, str, indent);
+    }
+	
     public void FLoadResource.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         str.formatln("%sjmi_load_resource(jmi, %s, \"/%s\");", indent, tempName_C(), resourceName());
     }
@@ -2544,12 +2754,22 @@ aspect CCodeGen {
 		p.printPreSteps(getArgs(), str, indent);
 		for (FExp arg : getArgs()) 
 			arg.genTempInput_C(p, str, indent);
+        if (isStringExp()) {
+            str.print(indent);
+            str.print(tempName_C());
+            str.print(" = ");
+            myFCallable().prettyPrintCall_C(p, str, indent, this);
+            str.println(";");
+        }
 	}
 	
-	public void FFunctionCallLeft.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-		if (hasFExp())
-			getFExp().genTempOutput_C(p, str, indent);
-	}
+    public void FFunctionCall.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPostSteps(getArgs(), str, indent);
+        if (isStringExp()) {
+            type().printFree_C(str, indent, false, tempName_C());
+        }
+    }
+    
 	
     syn lazy String FExp.tempName_C()       = nextTempName_C();
     syn lazy String FAlgorithm.tempName_C() = nextTempName_C();
@@ -2663,22 +2883,8 @@ aspect CCodeGen {
     public FExp FRecordConstructor.extractRecordComponentExp(String name) {
         return myArgFExp(name);
     }
-	
-	public void FExp.genTempOutput_C(CodePrinter p, CodeStream str, String indent) {}
-	
-	public void FFillExp.genTempOutput_C(CodePrinter p, CodeStream str, String indent) {
-		type().printInit_C(p, str, indent, tempName_C(), this);
-	}
-	
-	public void FArray.genTempOutput_C(CodePrinter p, CodeStream str, String indent) {
-		type().printInit_C(p, str, indent, tempName_C(), this);
-	}
-	
-	public void FRecordConstructor.genTempOutput_C(CodePrinter p, CodeStream str, String indent) {
-		type().printInit_C(p, str, indent, tempName_C(), this);
-	}
-	
-
+    
+    
     public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
         if (getLabel() == null)
             return;
@@ -3027,6 +3233,7 @@ aspect CCodeGen {
                     str.format("%sresidual[%d] = ", innerIndent, rows * col + row);
                     p.print(jacobian[row][col], str, innerIndent);
                     str.format(";\n");
+                    p.printPostSteps(jacobian[row][col], str, innerIndent);
                 }
             }
         }
@@ -3061,6 +3268,7 @@ aspect CCodeGen {
                     str.format("%sQ1[%d] = ", indent, n1 * (col - n1) + row);
                     p.print(jacobian[row][col], str, indent);
                     str.format(";\n");
+                    p.printPostSteps(jacobian[row][col], str, indent);
                 }
             }
         }
@@ -3088,6 +3296,7 @@ aspect CCodeGen {
                     str.format("%sQ2[%d] = ", indent, n2 * col + (row - n1));
                     p.print(jacobian[row][col], str, indent);
                     str.format(";\n");
+                    p.printPostSteps(jacobian[row][col], str, indent);
                 }
             }
         }
@@ -3101,6 +3310,7 @@ aspect CCodeGen {
                     str.format("%sQ3[%d] = ", indent, n2 * (col - n1) + (row - n1));
                     p.print(jacobian[row][col], str, indent);
                     str.format(";\n");
+                    p.printPostSteps(jacobian[row][col], str, indent);
                 }
             }
         }
@@ -3235,6 +3445,8 @@ aspect CCodeGen {
             p.printPreSteps(relExp, str, indent);
         String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
         str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
+        for (FRelExp relExp : inactiveInitialSwitches_C())
+            p.printPostSteps(relExp, str, indent);
     }
 
     /**
@@ -3258,6 +3470,7 @@ aspect CCodeGen {
     public void MetaEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         ASTNode.printer_C.printPreSteps(equation(), str, indent);
         ASTNode.printer_C.print(equation(), str, indent);
+        ASTNode.printer_C.printPostSteps(equation(), str, indent);
     }
     
      public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
@@ -3287,6 +3500,7 @@ aspect CCodeGen {
         str.format("%s%s = ", indent, fv.name_C());
         p.print(sol, str, indent);
         str.print(";\n");
+        p.printPostSteps(sol, str, indent);
     }
     
     public void FFunctionCallEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
@@ -3306,6 +3520,7 @@ aspect CCodeGen {
             if (firstVisit) {
                 p.printPreSteps(this, str, indent);
                 p.print(getCall(), str, indent);
+                p.printPostSteps(this, str, indent);
             }
         }
    }
@@ -3329,6 +3544,7 @@ aspect CCodeGen {
                 p.print(this, str, indent);
             else
                 prettyPrintNoSideEffect_C(str, indent);
+            p.printPostSteps(this, str, indent);
         }
    }
     
@@ -3412,6 +3628,7 @@ aspect CCodeGen {
         str.print(" - (");
         p.print(getLeft(), str, "");
         str.print(");\n");
+        p.printPostSteps(this, str, indent);
     }
     
     @Override
@@ -3421,6 +3638,7 @@ aspect CCodeGen {
             if (firstVisit) {
                 p.printPreSteps(this, str, indent);
                 p.print(getCall(), str, indent);
+                p.printPostSteps(this, str, indent);
             }
             Enumerator indexCounter = new Enumerator();
             for (FFunctionCallLeft l : getLefts())
@@ -3462,6 +3680,7 @@ aspect CCodeGen {
             visited.add(this);
             p.printPreSteps(this, str, indent);
             prettyPrintNoSideEffect_C(str, indent);
+            p.printPostSteps(this, str, indent);
         }
         Enumerator indexCounter = new Enumerator();
         for (FIdUseExp use : uniqueFIdUseExpsInLHS())
@@ -3489,7 +3708,64 @@ aspect CCodeGen {
     public static void FStatement.printAssignStmt_C(CodeStream str, String indent, String dst, String src) {
         str.print(indent + dst + " = " + src + ";\n");
     }
-
+    
+    public void FType.printAssign_C(CodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
+        str.print(indent);
+        p.print(dst, str, indent);
+        str.print(" = ");
+        p.print(src, str, indent);
+        str.print(";\n");
+    }
+    
+    public void FStringType.printAssign_C(CodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
+        str.print(indent);
+        str.print("JMI_ASG(STR, ");
+        p.print(dst, str, indent);
+        str.print(", ");
+        p.print(src, str, indent);
+        str.print(")\n");
+    }
+    
+    public void FType.printReturn_C(CodeStream str, String indent, String dst, String src, boolean set) {
+        str.print(indent);
+        str.print("if (");
+        str.print(dst);
+        str.print(" != NULL) *");
+        str.print(dst);
+        str.print(" = ");
+        str.print(src);
+        str.print(";\n");
+    }
+    
+    public void FStringType.printReturn_C(CodeStream str, String indent, String dst, String src, boolean set) {
+        str.print(indent);
+        str.print("JMI_RET(STR, ");
+        str.print(dst);
+        str.print(", ");
+        str.print(src);
+        str.print(")\n");
+    }
+    
+    public void FType.printScalarDecl_C(CodeStream str, String indent, boolean external, String name) {
+        str.formatln("%s%s %s;", indent, nameScalar_C(external), name);
+    }
+    
+    public void FRecordType.printScalarDecl_C(CodeStream str, String indent, boolean external, String name) {
+        str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(external), name);
+    }
+    
+    public void FStringType.printScalarDecl_C(CodeStream str, String indent, boolean external, String name) {
+        str.formatln("%sJMI_DEF_STR_DYNA(%s)", indent, name);
+    }
+    
+    public void FType.printFree_C(CodeStream str, String indent, boolean external, String name) {
+        if (isArray()) {
+            str.formatln("%sjmi_free_str_arr(%s);", indent, name);
+        } else {
+            str.formatln("%sJMI_FREE(%s)", indent, name);
+        }
+    }
+    
     /**
      * Helper for printing if equations
      */
@@ -3550,6 +3826,7 @@ aspect CCodeGen {
 		if (left.myFV().isExternalObject()) {
 		    str.print(oldindent + "}\n");
 		}
+		p.printPostSteps(this, str, indent);
 	}
 
     @Override
@@ -3558,15 +3835,15 @@ aspect CCodeGen {
     }
     
     
+    syn String FFunctionCallLeft.name_C() {
+        if (hasFExp() && getFExp().replaceWithTemp(true)) {
+            return getFExp().tempName_C();
+        } else {
+            return ((FIdUseExp) getFExp()).getFIdUse().name_C();
+        }
+    }
     
-	syn String FFunctionCallLeft.name_C() {
-		if (getFExp().keepAsArray()) {
-			return ((FIdUseExp) getFExp()).getFIdUse().name_C();
-		} else {
-			return getFExp().tempName_C();
-		}
-	}
-	
+    
 	public void FFunctionCallLeft.genArgument_C(CodeStream str) {
 		if (hasFExp()) {
 			if (!getFExp().isComposite())
@@ -3630,7 +3907,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
-		if (hasFExp() && !getFExp().keepAsArray()) 
+		if (hasFExp() && getFExp().replaceWithTemp(true))
 			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), forVariables);
 	}
 	
@@ -3667,6 +3944,14 @@ aspect CCodeGen {
 	public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
 		if (forVariables != null && !forVariables.contains(myFV()))
 			return; // This variable is not in the set of variables to generate code for.
+        if (type().isString()) {
+            str.format("%sJMI_ASG(STR, ", indent);
+            printer_C.print(getFIdUse(), str, "");
+            str.print(", ");
+            str.print(name);
+            str.println(")");
+            return;
+        }
 		str.print(indent);
 		printer_C.print(getFIdUse(), str, "");
 		str.print(" = (");
@@ -3699,11 +3984,13 @@ aspect CCodeGen {
     }
     
 	public void FRelExp.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        getLeft().genTempVars_C(p, str, indent);
-        getRight().genTempVars_C(p, str, indent);
+        p.printPreSteps(getLeft(), str, indent);
+        p.printPreSteps(getRight(), str, indent);
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
 		printIndicator_C(p, str, indent);
 		str.print(";\n");
+        p.printPostSteps(getLeft(), str, indent);
+        p.printPostSteps(getRight(), str, indent);
 	}
 	
     private void FRelExp.printIndicator_C(CodePrinter p, CodeStream str, String indent) {
@@ -3739,6 +4026,7 @@ aspect CCodeGen {
 			str.print(name_C());
 			str.print(";\n");
 		}
+		p.printPostSteps(this, str, indent);
 	}
 	
     public void FRelExp.genRelExpKind(CodeStream genPrinter) {
@@ -3794,6 +4082,7 @@ aspect CCodeGen {
 		if (noExp)
 			setBindingExpOpt(new Opt());
 		str.print(";\n");
+        printer_C.printPostSteps(this, str, indent);
 	}
 	
 	public void FStringVariable.genStartValue_C(String indent, CodeStream str) {
@@ -3806,6 +4095,7 @@ aspect CCodeGen {
 		printer_C.printPreSteps(this, str, printer_C.indent(indent));
 		super.genStartValue_C(printer_C.indent(indent), str);
 		str.print(indent + "}\n");
+		printer_C.printPostSteps(this, str, printer_C.indent(indent));
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(CodeStream str) {
