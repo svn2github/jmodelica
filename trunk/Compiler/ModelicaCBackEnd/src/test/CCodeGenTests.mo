@@ -655,6 +655,89 @@ model CCodeGenTest19
 ")})));
 end CCodeGenTest19;
 
+model CCodeGenTest20
+    function mysum
+        input Real[:,:] x;
+        output Real y = sum(x);
+        algorithm
+    end mysum;
+    function f
+        input Real t;
+        output Real[1,1] y = {{t}};
+      algorithm
+    end f;
+    function fw
+        input Real[1,1] x;
+        output Real[1,1] y;
+        Real t;
+      algorithm
+        y := f(mysum(transpose(x)));
+    end fw;
+    Real[1,1] y = fw({{time}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest20",
+            description="Test generation of temporary variables",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CCodeGenTest20_fw_def0(jmi_array_t* x_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 1, 2)
+    jmi_ad_var_t t_v;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 2)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 1, 2, 1, 1)
+        y_a = y_an;
+    }
+    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 2, 1, 1)
+    jmi_array_ref_2(tmp_1, 1,1) = jmi_array_val_2(x_a, 1, 1);
+    func_CCodeGenTests_CCodeGenTest20_f_def1(func_CCodeGenTests_CCodeGenTest20_mysum_exp2(tmp_1), y_a);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_CCodeGenTest20_f_def1(jmi_ad_var_t t_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 1, 2)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 1, 2, 1, 1)
+        y_a = y_an;
+    }
+    jmi_array_ref_2(y_a, 1, 1) = t_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_CCodeGenTest20_mysum_def2(jmi_array_t* x_a, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    jmi_ad_var_t temp_1_v;
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i2_1i;
+    jmi_ad_var_t i2_1ie;
+    temp_1_v = 0.0;
+    i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        i2_1ie = jmi_array_size(x_a, 1) + 1 / 2.0;
+        for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
+            temp_1_v = temp_1_v + jmi_array_val_2(x_a, i1_0i, i2_1i);
+        }
+    }
+    y_v = temp_1_v;
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenTest20_mysum_exp2(jmi_array_t* x_a) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenTest20_mysum_def2(x_a, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenTest20;
 
 model CLogExp1
  Boolean x = true;

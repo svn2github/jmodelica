@@ -1574,7 +1574,7 @@ aspect CCodeGen {
     }
 	
 	public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		super.genVarDecls_C(p, str, indent);
+        p.printVarDecls(getArgs(), str, indent);
         if (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall()) {
             str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
         }
