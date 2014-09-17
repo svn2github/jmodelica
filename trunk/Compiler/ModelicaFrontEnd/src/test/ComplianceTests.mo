@@ -797,4 +797,28 @@ Compliance error at line 804, column 20:
 ")})));
 end ExtObjInFunction;
 
+model FortranStringArray
+    function f
+        input String[:] sx;
+        input Real t;
+        output Real y;
+        output String[:] sy;
+        external "FORTRAN 77";
+    end f;
+    Real y;
+  equation
+    (y,) = f({"str"},time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FortranStringArray",
+            description="Test compliance error for external object constructor in function",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Compliance error at line 801, column 5:
+  Passing string arrays to fortran functions is not supported
+")})));
+end FortranStringArray;
+
 end ComplianceTests;
