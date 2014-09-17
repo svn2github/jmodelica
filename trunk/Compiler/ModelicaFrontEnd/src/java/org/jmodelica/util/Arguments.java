@@ -43,6 +43,15 @@ public class Arguments {
         return arg.trim().startsWith("-");
     }
     
+    public String line() {
+        StringBuilder buf = new StringBuilder();
+        for (String arg : args) {
+            buf.append(arg);
+            buf.append(' ');
+        }
+        return buf.toString();
+    }
+    
     public boolean containsKey(String arg) {
         return programargs.containsKey(arg);
     }

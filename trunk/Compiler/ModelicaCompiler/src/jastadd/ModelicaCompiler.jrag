@@ -1499,6 +1499,12 @@ public class ModelicaCompiler {
 		
 		// set options
 		this.setOptions(programarguments);
+		
+		// Log compilation command
+		log.info("Compiler arguments:\n  "        + programarguments.line());
+		log.info("Current working directory:\n  " + currentWorkingDirecory());
+        log.info("Compiler version: "             + Version.parseVersion());
+		logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
 	}
 	
 	public static void main(String[] args) {
@@ -1579,6 +1585,27 @@ public class ModelicaCompiler {
 			if (!part.equals(""))
 				res.add(part);
 		return res.toArray(new String[res.size()]);
+	}
+
+	/**
+	 * Get the current working directory.
+	 */
+	protected String currentWorkingDirecory() {
+        try {
+            return new File(".").getCanonicalPath();
+        } catch (IOException e) {
+            return "< could not get current working directory >";
+        }
+    }
+
+	/**
+	 * Write environment variables to logger.
+	 */
+	protected void logEnvironment(String... names) {
+	    for (String name : names) {
+	        String val = System.getenv(name);
+	        log.info("%-15s = %s", name, (val == null) ? "" : val);
+	    }
 	}
 
     /**
