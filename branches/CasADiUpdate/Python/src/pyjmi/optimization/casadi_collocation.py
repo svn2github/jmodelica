@@ -560,7 +560,7 @@ class CasadiCollocator(object):
 
         # Solve the problem
         t0 = time.clock()
-        self.solver_object.solve()
+        self.solver_object.evaluate()
 
         # Get the result
         primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))

@@ -488,7 +488,8 @@ aspect FExpToCasADi {
     eq FFunctionArray.asMXVector() {
         MXVector MXVec = new MXVector();
         for (int i = 0; i < size().numElements(); ++i) {
-            MXVec.add(new MX.sym(getFQName().toString() + "_" +i));
+            MX mx = ifcasadi.msym(getFQName().toString() + "_" +i);
+            MXVec.add(mx);
         }
         return MXVec;
     }
