@@ -72,10 +72,3 @@ void jmi_dynamic_free(jmi_dynamic_list* jmi_dynamic_first) {
     free(jmi_dynamic_prev->data);
     free(jmi_dynamic_prev);
 }
-
-void jmi_free_str_arr(jmi_string_array_t* arr) {
-    int i;
-    for (i = 1; i <= arr->num_elems; i++) {
-        JMI_FREE(jmi_array_val_1(arr,i));
-    }
-}

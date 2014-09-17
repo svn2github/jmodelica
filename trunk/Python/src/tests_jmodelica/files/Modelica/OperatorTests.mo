@@ -121,7 +121,7 @@ model StringExpHelper
         assert(actual == expected, "Compare failed, expected: " + expected + ", actual: " + actual);
     end StringCompare;
     type E = enumeration(small, medium, large, xlarge);
-    discrete Real realVar;
+    Real realVar;
     Integer intVar = if realVar < 2.5 then 12 else 42;
     Boolean boolVar = if realVar < 2.5 then true else false;
     E enumVar = if realVar < 2.5 then E.small else E.medium;
