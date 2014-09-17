@@ -1386,7 +1386,7 @@ class LocalDAECollocator(CasadiCollocator):
                             new_var_index[varType][i][k+move_zero].append(counter_s)
                             if self.named_vars:
                                 named_xx.append(
-                                    casadi.ssym(name+'_%d_%d' % (i, k+move_zero)))
+                                    casadi.SX.sym(name+'_%d_%d' % (i, k+move_zero)))
                             counter_s+=1
             else:
                 # Handle the cases of empty variables
@@ -1422,7 +1422,7 @@ class LocalDAECollocator(CasadiCollocator):
                     new_var_index['u_cont'][i][k] = range(counter_s, new_index)
                     counter_s = new_index
                     if self.named_vars:
-                        named_xx += [casadi.ssym('%s_%d_%d' % (name, i, k)) for
+                        named_xx += [casadi.SX.sym('%s_%d_%d' % (name, i, k)) for
                                      name in u_cont_names] 
                         
             # Create index storage for inputs with blocking factors
@@ -1442,7 +1442,7 @@ class LocalDAECollocator(CasadiCollocator):
                         for k in xrange(1, self.n_cp + 1):
                             new_var_index['u_bf'][i][k].append(counter_s)
                     if self.named_vars:
-                        named_xx.append(casadi.ssym('%s_%d' % (name, element)))
+                        named_xx.append(casadi.SX.sym('%s_%d' % (name, element)))
                     counter_s += 1
                     element += factor
                     
@@ -1508,7 +1508,7 @@ class LocalDAECollocator(CasadiCollocator):
             cp_var_map['unelim_u'][1][0] = xx[new_var_index['unelim_u'][1][0]]
             if self.named_vars:
                 named_xx += [
-                    casadi.ssym(var.getName() + '_1_0') for
+                    casadi.SX.sym(var.getName() + '_1_0') for
                     var in mvar_vectors['unelim_u'] if
                     var.getName() not in self.blocking_factors.factors] 
 
@@ -1546,7 +1546,7 @@ class LocalDAECollocator(CasadiCollocator):
                               tmp_split[var_index]
                     new_var_index[varType][1][0].append(counter_s)
                     if self.named_vars:
-                        named_xx.append(casadi.ssym(name+'_1_0'))                        
+                        named_xx.append(casadi.SX.sym(name+'_1_0'))                        
                     counter_s+=1
             else:
                 cp_var_map[varType][1][0]['all']=xx[0:0]
@@ -1571,7 +1571,7 @@ class LocalDAECollocator(CasadiCollocator):
                         new_var_index[varType][ii][kk].append(counter_s)
                         if self.named_vars:
                             named_xx.append(
-                                casadi.ssym(name+'_%d_%d' % (ii, kk)))                             
+                                casadi.SX.sym(name+'_%d_%d' % (ii, kk)))                             
                         counter_s+=1
                 else:
                     cp_var_map[varType][ii][kk]['all']=xx[0:0]
@@ -1588,7 +1588,7 @@ class LocalDAECollocator(CasadiCollocator):
                 (var_index, _) = self.name_map[name] 
                 cp_var_map['p_opt'][var_index] = tmp_split[var_index]
                 if self.named_vars:
-                    named_xx.append(casadi.ssym(name))
+                    named_xx.append(casadi.SX.sym(name))
                 counter_s+=1
                                    
         # Indexing free elements
@@ -1601,7 +1601,7 @@ class LocalDAECollocator(CasadiCollocator):
             for i in range(self.n_e):
                 cp_var_map['h'][i+1] = tmp_split[i]
                 if self.named_vars:
-                    named_xx.append(casadi.ssym('h_%d' % i+1))
+                    named_xx.append(casadi.SX.sym('h_%d' % i+1))
                 counter_s+=1         
 
         # Update the map
