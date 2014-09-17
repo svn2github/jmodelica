@@ -1158,6 +1158,18 @@ aspect Scalarization {
     syn FIdTempExp FExp.tempExp() = new FIdTempExp(new FIdUse(tempFQName()));
     syn FIdTempExp FExp.tempExp(String name) = new FIdTempExp(new FIdUse(name));
     syn FIdTempExp FExp.tempExp(FArraySubscripts fas) = new FIdTempExp(new FIdUse(tempVarName(),fas));
+    syn FIdTempExp FExp.tempExp(FExp[] subs) {
+        if (subs.length > 0) {
+            List<FSubscript> l = new List<FSubscript>();
+            for (FExp e : subs) {
+                l.add(new FExpSubscript(e.fullCopy()));
+            }
+            FArraySubscripts fas = new FArraySubscripts(l);
+            return tempExp(fas);
+        } else {
+            return tempExp();
+        }
+    }
     syn FFunctionVariable FExp.unknownTempVar() = unknownTempVar(type());
     syn FFunctionVariable FExp.unknownTempVar(FType type) { 
         type = (FType) type.unboundCopy();
@@ -1692,12 +1704,7 @@ aspect Scalarization {
     public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         if (useTempVar) {
             if (isArray()) {
-                List<FSubscript> l = new List<FSubscript>();
-                for (FExp e : names) {
-                    l.add(new FExpSubscript(e.fullCopy()));
-                }
-                FArraySubscripts fas = new FArraySubscripts(l);
-                indexMap.put(tempVarName(), tempExp(fas));
+                indexMap.put(tempVarName(), tempExp(names));
             }
         } else {
             super.addArrayUsesToIndexMap(indexMap, names);

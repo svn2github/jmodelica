@@ -3809,6 +3809,79 @@ void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_ad_var_t m_v, R1_1_ra* o_a) {
 ")})));
 end CUnknownArray7;
 
+model CUnknownArray8
+    function l
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+    end l;
+    function f
+      input Real a[:];
+      input Real b[size(a, 1)];
+      output Real u[size(a, 1)];
+    algorithm
+      u := a*l(a + b);
+    end f;
+    Real[1] y = f({time}, {time});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray8",
+            description="Unknown size record array",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray8_f_def0(jmi_array_t* a_a, jmi_array_t* b_a, jmi_array_t* u_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, u_an, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    if (u_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, u_an, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
+        u_a = u_an;
+    }
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
+    i1_0ie = jmi_array_size(a_a, 0) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(temp_1_a, i1_0i) = jmi_array_val_1(a_a, i1_0i) + jmi_array_val_1(b_a, i1_0i);
+    }
+    i1_1ie = jmi_array_size(a_a, 0) + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        jmi_array_ref_1(u_a, i1_1i) = jmi_array_val_1(a_a, i1_1i) * func_CCodeGenTests_CUnknownArray8_l_exp1(temp_1_a);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_CUnknownArray8_l_def1(jmi_array_t* x_a, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    jmi_ad_var_t temp_1_v;
+    jmi_ad_var_t i1_2i;
+    jmi_ad_var_t i1_2ie;
+    temp_1_v = 0.0;
+    i1_2ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
+        temp_1_v = temp_1_v + jmi_array_val_1(x_a, i1_2i);
+    }
+    y_v = temp_1_v;
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CUnknownArray8_l_exp1(jmi_array_t* x_a) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CUnknownArray8_l_def1(x_a, &y_v);
+    return y_v;
+}
+")})));
+end CUnknownArray8;
+
 model CRecordDecl1
     record A
         Real a;
