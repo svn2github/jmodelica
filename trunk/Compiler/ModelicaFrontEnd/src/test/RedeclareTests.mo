@@ -3329,6 +3329,43 @@ end RedeclareTests.RedeclareTest42;
 end RedeclareTest42;
 
 
+model RedeclareTest43
+    package A
+        replaceable model B
+        end B;
+    end A;
+    
+    package C
+        package D
+            extends A;
+            redeclare model extends B
+                Real x = E.a;
+            end B;
+        end D;
+        
+        package E
+            constant Real a = 1;
+        end E;
+    end C;
+    
+    package F
+        extends C.D;
+    end F;
+    
+    F.B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest43",
+            description="Class lookup from inside redeclare class extends referring to class in surrounding package",
+            flatModel="
+fclass RedeclareTests.RedeclareTest43
+ Real b.x = 1.0;
+end RedeclareTests.RedeclareTest43;
+")})));
+end RedeclareTest43;
+
+
 model RedeclareElement1
   model A
     replaceable model B

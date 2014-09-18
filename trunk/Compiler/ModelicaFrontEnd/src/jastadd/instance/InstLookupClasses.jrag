@@ -49,10 +49,11 @@ aspect InstLookupClasses {
     eq InstArrayComponentDecl.getChild().lookupInstClass(String name)            = lookupInstClass(name);
     eq InstExternalObject.getDestructorCall().lookupInstClass(String name)       = lookupInstClass(name);
 
-    eq InstExtends.getInstClassDecl().lookupInstClass(String name)               = genericLookupInstClassInExtends(name);   
-    eq InstExtends.getInstComponentDecl().lookupInstClass(String name)           = genericLookupInstClassInExtends(name);   
-    eq InstExtends.getInstExtends().lookupInstClass(String name)                 = superLookupInstClassInExtends(name); 
-    eq InstExtends.getFAbstractEquation().lookupInstClass(String name)           = genericLookupInstClassInExtends(name); 
+    eq InstExtends.getInstClassDecl().lookupInstClass(String name)               = genericLookupInstClassInExtends(name);
+    eq InstExtends.getInstComponentDecl().lookupInstClass(String name)           = genericLookupInstClassInExtends(name);
+    eq InstExtends.getInstExtends().lookupInstClass(String name)                 = superLookupInstClassInExtends(name);
+    eq InstExtends.getRedeclaredInstClassDecl().lookupInstClass(String name)     = genericLookupInstClassInExtends(name);
+    eq InstExtends.getFAbstractEquation().lookupInstClass(String name)           = genericLookupInstClassInExtends(name);
     eq InstNormalExtends.getInstClassModification().lookupInstClass(String name) = lookupInstClassFromMod(name);
 
     inh InstLookupResult<InstClassDecl> InstExtends.lookupInstClassFromMod(String name);
