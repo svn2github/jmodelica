@@ -21,36 +21,53 @@ import java.util.Set;
 import java.util.HashSet;
 
 aspect FlatTree {
-	
-	/**
-	 * Create a correctly set up FClass.
-	 * 
-	 * Also creates a FlatRoot and sets its fields.
-	 * 
-	 * @param icl   the class being flattened
-	 * @param file  the path to the file to report errors on
-	 */
-	public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc) {
-		FlatRoot flatRoot = new FlatRoot(icl.createFClass());
-		flatRoot.setFileName(file);
-		flatRoot.setCompiler(mc);
-		FClass fc = flatRoot.getFClass(); // make FClass final
-		flatRoot.options = icl.root().options.copy();
-		// TODO: We should change how the checkErrors() method works, 
-		//       since it relies on the behaviour of DefaultErrorHandler
-		icl.root().getErrorHandler().connectTo(flatRoot);
-		return fc;
-	}
-	
-	/**
-	 * Create a new FClass object.
-	 * 
-	 * Override for subclasses needing a subclass of FClass.
-	 */
-	public FClass InstClassDecl.createFClass() {
-		return new FClass();
-	}
-	
+
+    /**
+     * Create a correctly set up FClass.
+     * 
+     * Also creates a FlatRoot and sets its fields.
+     * 
+     * @param icl   the class being flattened
+     * @param file  the path to the file to report errors on
+     */
+    public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc, String flatName) {
+        FlatRoot flatRoot = new FlatRoot(icl.createFClass());
+        flatRoot.setFileName(file);
+        flatRoot.setCompiler(mc);
+        FClass fc = flatRoot.getFClass(); // make FClass final
+        fc.userDefinedName = flatName;
+        flatRoot.options = icl.root().options.copy();
+        // TODO: We should change how the checkErrors() method works, 
+        //       since it relies on the behaviour of DefaultErrorHandler
+        icl.root().getErrorHandler().connectTo(flatRoot);
+        return fc;
+    }
+
+    /**
+     * Set the name of the FClass.
+     * 
+     * If a user-defined name has been set, use it, otherwise use the given name.
+     */
+    public void FClass.setName(String name) {
+        if (userDefinedName != null) 
+            name = userDefinedName;
+        setFQName(new FQNameString(name));
+    }
+
+    /**
+     * User-defined name for the flat class.
+     */
+    private String FClass.userDefinedName = null;
+
+    /**
+     * Create a new FClass object.
+     * 
+     * Override for subclasses needing a subclass of FClass.
+     */
+    public FClass InstClassDecl.createFClass() {
+        return new FClass();
+    }
+
 }
 
 aspect Flattening {
@@ -72,23 +89,23 @@ aspect Flattening {
     	
     	return icd;
     }
-    
+
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
-    	beginStep("flattenInstClassDecl()");
-		fc.setFQName(new FQNameString(qualifiedName()));
-		buildConnectionSets(fc);
-		root().breakOnErrors();
-		flatten(fc, false);
-		flattenUsedFuncsAndEnums(fc);
-		flattenInstClassDeclExtra(fc);
-		fc.updateVariablilityForVariablesInWhen();
-		fc.genConnectionEquations();
-		fc.createExperiment(annotation("experiment"));
-		root().breakOnErrors();
-    	endStep("flattenInstClassDecl()");
-    	fc.generateStepMof("flattening");
+        beginStep("flattenInstClassDecl()");
+        fc.setName(qualifiedName());
+        buildConnectionSets(fc);
+        root().breakOnErrors();
+        flatten(fc, false);
+        flattenUsedFuncsAndEnums(fc);
+        flattenInstClassDeclExtra(fc);
+        fc.updateVariablilityForVariablesInWhen();
+        fc.genConnectionEquations();
+        fc.createExperiment(annotation("experiment"));
+        root().breakOnErrors();
+        endStep("flattenInstClassDecl()");
+        fc.generateStepMof("flattening");
     }
-    
+
 
 	public void InstSimpleShortClassDecl.flattenInstClassDecl(FClass fc) {
 		actualInstClass().flattenInstClassDecl(fc);

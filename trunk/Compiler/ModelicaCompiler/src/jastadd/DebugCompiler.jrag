@@ -129,7 +129,7 @@ public class DebugCompiler extends javax.swing.JFrame {
                 
                 mc.setLogger(out);
                 ModelicaCompiler.TargetObject targ = (ModelicaCompiler.TargetObject) target.getSelectedItem();
-                mc.compileModel(new String[] { file.getAbsolutePath() }, name, targ);
+                mc.compileModel(new String[] { file.getAbsolutePath() }, name, targ, null);
             } catch (Exception ex) {
                 out.writeException(ex);
                 return;

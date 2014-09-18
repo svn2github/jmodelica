@@ -703,7 +703,7 @@ public class ModelicaCompiler {
      * @param className Name of model class in the model file to compile.
      * @param fileName Array of model file or library paths.
      * @param target Target object, contains information about the target, its unit suffix for example.
-     * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist..
+     * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist.
      * @return the path to the compiled unit, if successful 
      */
     protected String compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
@@ -730,7 +730,15 @@ public class ModelicaCompiler {
             }
             
             // compile mo-file + generate code for all templates that are not null
-            FClass fc = compileModel(fileName, className, target);
+            String flatName = null;
+            File compileToPath = new File(compileTo);
+            if (!compileToPath.isDirectory()) {
+                flatName = compileToPath.getName();
+                int i = flatName.lastIndexOf('.');
+                if (i > 0)
+                    flatName = flatName.substring(0, i);
+            }
+            FClass fc = compileModel(fileName, className, target, flatName);
             
             if (!target.getCodeGenFlag()) {
                 //No code have been generated.
@@ -903,74 +911,77 @@ public class ModelicaCompiler {
 		}
 	}
 
-	/**
-	 * Compiles a Modelica model. A model file name and class must be provided.
-	 * Prints an error and returns without completion if, for example, a file 
-	 * can not be found or if the parsing fails. Supports multiple model files.
-	 * 
-	 * @param name
-	 *            Array of model file or library paths.
-	 * @param cl
-	 *            The name of the class in the model file to compile.
-	 * @param target
-	 *            The target object for the compiler.
-	 * @throws beaver.Parser.Exception
-	 *             If there was an Beaver parsing exception.
-	 * @throws CompilerException
-	 *             If errors have been found during the parsing, instantiation
-	 *             or flattening.
-	 * @throws FileNotFoundException
-	 *             If the model file can not be found.
-	 * @throws IOException
-	 *             If there was an error reading the model file. (Beaver
-	 *             exception.)
-	 * @throws IOException
-	 *             If there was an error creating the .mof file.
-	 * @throws ModelicaClassNotFoundException
-	 *             If the Modelica class to parse, instantiate or flatten is not
-	 *             found.
-	 * 
-	 */
-	public FClass compileModel(String name[], String cl, TargetObject target)
-	  throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		log.info("======= Compiling model =======");
-		resetCompilationInfo();
-		
-		FClass fc = null;
-		try {
-			// compute instance tree
-			InstClassDecl icl = instantiateModel(name, cl, target);
-			
-			// flattening
-			// Throw away source and instance trees when they are not needed any more
-			PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
-			icl = null;
-			fc = flattenModel(buf.pass(), target);
+    /**
+     * Compiles a Modelica model. A model file name and class must be provided.
+     * Prints an error and returns without completion if, for example, a file 
+     * can not be found or if the parsing fails. Supports multiple model files.
+     * 
+     * @param name
+     *            Array of model file or library paths.
+     * @param cl
+     *            The name of the class in the model file to compile.
+     * @param target
+     *            The target object for the compiler.
+     * @param flatName
+     *            Name of the unit/flat model supplied by the user, if any.
+     * 
+     * @throws beaver.Parser.Exception
+     *             If there was an Beaver parsing exception.
+     * @throws CompilerException
+     *             If errors have been found during the parsing, instantiation
+     *             or flattening.
+     * @throws FileNotFoundException
+     *             If the model file can not be found.
+     * @throws IOException
+     *             If there was an error reading the model file. (Beaver
+     *             exception.)
+     * @throws IOException
+     *             If there was an error creating the .mof file.
+     * @throws ModelicaClassNotFoundException
+     *             If the Modelica class to parse, instantiate or flatten is not
+     *             found.
+     * 
+     */
+    public FClass compileModel(String name[], String cl, TargetObject target, String flatName)
+      throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        log.info("======= Compiling model =======");
+        resetCompilationInfo();
+        
+        FClass fc = null;
+        try {
+            // compute instance tree
+            InstClassDecl icl = instantiateModel(name, cl, target);
+            
+            // flattening
+            // Throw away source and instance trees when they are not needed any more
+            PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
+            icl = null;
+            fc = flattenModel(buf.pass(), target, flatName);
 
-			// Generate code 
-			if (target.getCodeGenFlag()) {
-				generateCode(fc, target);
-				dumpMemoryUseFile(fc, "generated", false);
-			}
-			
+            // Generate code 
+            if (target.getCodeGenFlag()) {
+                generateCode(fc, target);
+                dumpMemoryUseFile(fc, "generated", false);
+            }
+            
             fc.loadResources(new File(outDir, "resources"));
             removeCompiledExternals();
             
-		} finally {
+        } finally {
 //          logCompilationInfo();
-			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
+            // The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
 //          dumpNodeCountFile("node_count.txt");
-		}
+        }
 
-		if (options.getBooleanOption("generate_html_diagnostics")) {
-			getDiagnosticsGenerator().finalize();
-			setDiagnosticsGenerator(null);
-		}
+        if (options.getBooleanOption("generate_html_diagnostics")) {
+            getDiagnosticsGenerator().finalize();
+            setDiagnosticsGenerator(null);
+        }
 
-		log.info("====== Model compiled successfully =======");
-		
-		return fc;
-	}
+        log.info("====== Model compiled successfully =======");
+        
+        return fc;
+    }
 
 
     /**
@@ -1180,6 +1191,8 @@ public class ModelicaCompiler {
      *            A reference to the model instance node.
      * @param target
      *            The model represenation type the model should be compiled to.
+     * @param flatName
+     *            Name of the unit/flat model supplied by the user, if any.
      * 
      * @return FClass object representing the flattened model.
      * 
@@ -1190,14 +1203,14 @@ public class ModelicaCompiler {
      * @throws ModelicaClassNotFoundException
      *             If the Modelica class to flatten is not found.
      */
-    public FClass flattenModel(InstClassDecl icd, TargetObject target) 
+    public FClass flattenModel(InstClassDecl icd, TargetObject target, String flatName) 
             throws CompilerException, ModelicaClassNotFoundException, IOException {
         hookCheckAbort();
         ASTNode.beginStep("flattenModel()");
         
         String instName = icd.qualifiedName();
-        File flatFile = new File(sourceDir, instName + ".mof");
-        final FClass fc = FClass.create(icd, flatFile.getPath(), this);
+        File flatFile = new File(sourceDir, (flatName == null ? instName : flatName) + ".mof");
+        final FClass fc = FClass.create(icd, flatFile.getPath(), this, flatName);
         
         ASTNode.beginStep("flatten()");
         log.info("Flattening model...");
@@ -1464,133 +1477,133 @@ public class ModelicaCompiler {
         }
         options.addStringOption("MODELICAPATH", modelicapath);
     }
-	
-	protected void setArguments(Arguments programarguments) 
-		throws JModelicaHomeNotFoundException {
-		// check that JMODELICA_HOME exists
-		if (jmodelicaHome == null) 
-			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
-		
-		int arg = 0;
-		String modelicapath = null;
-		
-		//log option
-		try {
-			String logString = programarguments.get("log");
-			setLogger(logString);
-		} catch (IllegalLogStringException e) {
-			setLogger(e.getLogger());
-			log.error(e);
-			closeLogger();
-			System.exit(1);
-		}
-		
-		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
-		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
-		
-		if (programarguments.containsKey("debugSrcIsHome")) 
-		    debugSrcIsHome = true;
-		
-		// platform argument
-		String platforms = programarguments.get("platform");
-		if (platforms != null) {
-			targetPlatforms =  platforms.split(",");
-		}
-		
-		// set options
-		this.setOptions(programarguments);
-		
-		// Log compilation command
-		log.info("Compiler arguments:\n  "        + programarguments.line());
-		log.info("Current working directory:\n  " + currentWorkingDirecory());
+
+    protected void setArguments(Arguments programarguments) 
+            throws JModelicaHomeNotFoundException {
+        // check that JMODELICA_HOME exists
+        if (jmodelicaHome == null) 
+            throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
+        
+        int arg = 0;
+        String modelicapath = null;
+        
+        //log option
+        try {
+            String logString = programarguments.get("log");
+            setLogger(logString);
+        } catch (IllegalLogStringException e) {
+            setLogger(e.getLogger());
+            log.error(e);
+            closeLogger();
+            System.exit(1);
+        }
+        
+        setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
+        setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
+        
+        if (programarguments.containsKey("debugSrcIsHome")) 
+            debugSrcIsHome = true;
+        
+        // platform argument
+        String platforms = programarguments.get("platform");
+        if (platforms != null) {
+            targetPlatforms =  platforms.split(",");
+        }
+        
+        // set options
+        this.setOptions(programarguments);
+        
+        // Log compilation command
+        log.info("Compiler arguments:\n  "        + programarguments.line());
+        log.info("Current working directory:\n  " + currentWorkingDirecory());
         log.info("Compiler version: "             + Version.parseVersion());
-		logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
-	}
-	
-	public static void main(String[] args) {
-		// create an empty compiler
-		ModelicaCompiler mc = new ModelicaCompiler();
-		try {
+        logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
+    }
+
+    public static void main(String[] args) {
+        // create an empty compiler
+        ModelicaCompiler mc = new ModelicaCompiler();
+        try {
             // set arguments
             Arguments arguments = new Arguments("ModelicaCompiler", args);
             mc.setArguments(arguments);
             // Compile model
             mc.compileModelFromCommandLine(args, arguments);
-		} catch(Throwable e) {
-			log.error(e);
-			log.close();
-			System.exit(1);
-		}
-	}
-	
-	/**
-	 * Compile model given on command line options and print any error messages.
-	 */
-	protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
-		// Get files and class
-	    // TODO: move this into arguments class
-		int arg = programarguments.size();
-		String[] name = splitFiles(args[arg]);
-		String cl = (args.length > arg+1) ? args[arg+1] : null;
-		String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
-		
-		// Compile model
-		try {
-			if (programarguments.containsKey("target")) {
-				String targetType = programarguments.get("target");
+        } catch(Throwable e) {
+            log.error(e);
+            log.close();
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Compile model given on command line options and print any error messages.
+     */
+    protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
+        // Get files and class
+        // TODO: move this into arguments class
+        int arg = programarguments.size();
+        String[] name = splitFiles(args[arg]);
+        String cl = (args.length > arg+1) ? args[arg+1] : null;
+        String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
+        
+        // Compile model
+        try {
+            if (programarguments.containsKey("target")) {
+                String targetType = programarguments.get("target");
                 if (targetType.equals("fmume")) {
                     targetType = "me";
                 } else if (targetType.equals("fmucs")) {
                     targetType = "cs";
                 }
                 
-				if (targetType.equals("parse")) {
-					parseFiles(name);
-				} else if (targetType.equals("check")) {
+                if (targetType.equals("parse")) {
+                    parseFiles(name);
+                } else if (targetType.equals("check")) {
                     try {
                         instantiateModel(name, cl, TargetObject.CHECK);
                     } finally {
                         if (outDir != null)
                             deleteOutDir();
                     }
-				} else {
-					//Compile
-					compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
-				} 
-			} else {
+                } else {
+                    //Compile
+                    compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
+                } 
+            } else {
                 //If no target was set, assume jmu.
-				compileJMU(cl, name, compileTo);
-			}
-		} catch (CompilerException ce) {
-			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
-				getDiagnosticsGenerator().writeProblems(ce.getProblems());
-			log.logCompilerException(ce);
-			closeLogger();
-			System.exit(1);
-		} catch (Throwable e) {
-			log.error(e);
-			closeLogger();
-			System.exit(1);
-		} finally {
-			closeLogger();
-		}
-	}
-	
-	/**
-	 * Split the argument containing the list of files into an array of filenames.
-	 */
-	protected String[] splitFiles(String arg) {
-		ArrayList<String> res = new ArrayList<String>();
-		for (String part : arg.split(","))
-			if (!part.equals(""))
-				res.add(part);
-		return res.toArray(new String[res.size()]);
-	}
+                compileJMU(cl, name, compileTo);
+            }
+        } catch (CompilerException ce) {
+            if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+                getDiagnosticsGenerator().writeProblems(ce.getProblems());
+            log.logCompilerException(ce);
+            closeLogger();
+            System.exit(1);
+        } catch (Throwable e) {
+            log.error(e);
+            closeLogger();
+            System.exit(1);
+        } finally {
+            closeLogger();
+        }
+    }
 
-	/**
-	 * Get the current working directory.
-	 */
-	protected String currentWorkingDirecory() {
+    /**
+     * Split the argument containing the list of files into an array of filenames.
+     */
+    protected String[] splitFiles(String arg) {
+        ArrayList<String> res = new ArrayList<String>();
+        for (String part : arg.split(","))
+            if (!part.equals(""))
+                res.add(part);
+        return res.toArray(new String[res.size()]);
+    }
+
+    /**
+     * Get the current working directory.
+     */
+    protected String currentWorkingDirecory() {
         try {
             return new File(".").getCanonicalPath();
         } catch (IOException e) {

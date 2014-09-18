@@ -524,14 +524,14 @@ abstract public class TestAnnotationizerHelper {
 		return ipr.lookupInstClassQualified(className);
 	}
 
-	/**
-	 * Performs the flattening step of the compilation.
-	 */
-	protected FClass flatten(InstClassDecl icd) {
-		FClass fc = FClass.create(icd, filePath, null);
-		icd.flattenInstClassDecl(fc);
-		return fc;
-	}
+    /**
+     * Performs the flattening step of the compilation.
+     */
+    protected FClass flatten(InstClassDecl icd) {
+        FClass fc = FClass.create(icd, filePath, null, null);
+        icd.flattenInstClassDecl(fc);
+        return fc;
+    }
 
 	/**
 	 * Performs the transform canonical step of the compilation.
