@@ -511,8 +511,7 @@ void jmi_kinsol_error_handling(jmi_block_solver_t * block, int flag){
 /* initialize data on bounds */
 static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
-    jmi_log_t *log = block->log;
-    
+        
     int i,num_bounds = 0;
     
     if(!block->options->enforce_bounds_flag) {
