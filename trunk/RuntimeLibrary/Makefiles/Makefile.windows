@@ -71,6 +71,10 @@ FILE_NAME =
 # Platform name - controls what sub-directory the binary is placed in
 PLATFORM = 
 
+# Platform specific compiler flag
+PLATFORM_FLAG = -m32
+PLATFORM_64 = -m64
+
 # JModelica home
 JMODELICA_HOME = 
 
@@ -130,13 +134,16 @@ JMI_AD=JMI_AD_CPPAD
 # Flags for which FMU type, me, cs or me+cs.
 FMU_TYPES =
 
+# Extra compiler options
+EXT_OPTION = 
+
 # C++ Compiler options
-CXXFLAGS = -mincoming-stack-boundary=2 -m32 -g -DJMI_AD=${JMI_AD}
+CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = -mincoming-stack-boundary=2 -m32 -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES}
+CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES}
 
-SHARED_LDFLAGS = -m32 -shared
+SHARED_LDFLAGS = $(PLATFORM_FLAG) -shared
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
@@ -145,20 +152,24 @@ STANDARD_HEADER_INC_DIR = ${JMODELICA_HOME}/ThirdParty/FMI/2.0
 CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
-# Directory with jmi_cppad.a
+# Directories with libraries
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 RUNTIMELIBRARY_LIB_DIR = ${JMODELICA_HOME}/lib/RuntimeLibrary
+RUNTIMELIBRARY_LIB_DIR64 = ${JMODELICA_HOME}/lib/RuntimeLibrary64
 MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
+MINPACK_LIB_DIR64 = ${JMODELICA_HOME}/ThirdParty/Minpack/lib64
+SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
+SUNDIALS_LIB_DIR64 = $(SUNDIALS_HOME)/lib64
 
 # Flags needed for specific libs
 LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
 
 # Libraries necessary to link with jmi
-LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a $(LIB_MINPACK)
-LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
-LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
-LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
+LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a $(LIB_MINPACK)
+LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
+LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
+LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT)  -L$(SUNDIALS_LIB_DIR) -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
 LIBS_CEVAL = -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a 
 
 #LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
@@ -171,7 +182,11 @@ INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) -I${STANDARD_HEADER_INC_DIR} $(EXT_IN
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
 
 ceval:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE ceval_
+ifeq ($(PLATFORM),win32)
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 ceval_
+else
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64) MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64) SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64) ceval_
+endif
 
 ceval_: $(OBJS)
 	if not exist "$(BINARY_BASE_DIR)" mkdir $(BINARY_BASE_DIR)
@@ -179,7 +194,11 @@ ceval_: $(OBJS)
 	$(RM) $(OBJS)
 
 fmume10:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmume10_
+ifeq ($(PLATFORM),win32)
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 fmume10_
+else
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64) MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64) SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64) fmume10_
+endif
 
 fmume10_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
@@ -187,7 +206,11 @@ fmume10_: $(OBJS)
 	$(RM) $(OBJS)
 
 fmucs10:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmucs10_
+ifeq ($(PLATFORM),win32)
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 fmucs10_
+else
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64) MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64) SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64) fmucs10_
+endif
 
 fmucs10_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
@@ -195,24 +218,36 @@ fmucs10_: $(OBJS)
 	$(RM) $(OBJS)
 	
 fmume20:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUME20 fmume20_
+ifeq ($(PLATFORM),win32)
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUME20 fmume20_
+else
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64) MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64) SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64) FMU_TYPES+=-DFMUME20 fmume20_
+endif
 
 fmume20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20) -static-libstdc++
 	$(RM) $(OBJS)
-	
+
 fmucs20:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUCS20 fmucs20_
-	
+ifeq ($(PLATFORM),win32)
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUCS20 fmucs20_
+else
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64) MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64) SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64) FMU_TYPES+=-DFMUCS20 fmucs20_
+endif
+
 fmucs20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20) -static-libstdc++
 	$(RM) $(OBJS)
 	
 fmumecs20:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
-	
+ifeq ($(PLATFORM),win32)
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+else
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64) MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64) SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64) FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+endif
+
 fmumecs20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20) -static-libstdc++
