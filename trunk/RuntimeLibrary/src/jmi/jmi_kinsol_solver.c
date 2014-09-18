@@ -561,10 +561,6 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
         else {
             solver->range_limits[i] = BIG_REAL;
         }
-        if (block->callbacks->log_options.log_level >= 5) {
-            jmi_log_real_(log, solver->range_limits[i]);
-        }
-
     }
 
     return 0;
