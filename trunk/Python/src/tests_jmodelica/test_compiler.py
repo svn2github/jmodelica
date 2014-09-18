@@ -34,7 +34,7 @@ import pymodelica as pym
 
 
 class Test_Compiler:
-    """ This class tests the compiler module. """
+    """ This class tests the compiler class. """
     
     @classmethod
     def setUpClass(cls):
@@ -75,31 +75,6 @@ class Test_Compiler:
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."
         os.remove(fname+'.jmu')
-    
-    @testattr(stddist = True)
-    def test_compile_jmu(self):
-        """
-        Test that it is possible to compile a JMU from a .mop file with 
-        pymodelica.compile_jmu.
-        """
-        jmuname = compile_jmu(Test_Compiler.cpath_oc, Test_Compiler.fpath_oc)
-
-        assert os.access(jmuname, os.F_OK) == True, \
-               jmuname+" was not created."
-        os.remove(jmuname)
-    
-    @testattr(stddist = True)
-    def test_compile_jmu_separate_process(self):
-        """
-        Test that it is possible to compile a JMU from a .mop file with 
-        pymodelica.compile_jmu using separate process.
-        """
-        jmuname = compile_jmu(Test_Compiler.cpath_oc, Test_Compiler.fpath_oc, \
-            separate_process=True)
-
-        assert os.access(jmuname, os.F_OK) == True, \
-               jmuname+" was not created."
-        os.remove(jmuname)
     
     @testattr(stddist = True)
     def test_compile_FMUME10(self):
@@ -160,31 +135,6 @@ class Test_Compiler:
         assert os.access(fname+'.fmu',os.F_OK) == True, \
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
-               
-    @testattr(stddist = True)
-    def test_compile_fmu_mop(self):
-        """
-        Test that it is possible to compile an FMU from a .mop file with 
-        pymodelica.compile_fmu.
-        """
-        fmuname = compile_fmu(Test_Compiler.cpath_mc, Test_Compiler.fpath_oc)
-
-        assert os.access(fmuname, os.F_OK) == True, \
-               fmuname+" was not created."
-        os.remove(fmuname)
-
-    @testattr(stddist = True)
-    def test_compile_fmu_mop_separate_process(self):
-        """
-        Test that it is possible to compile an FMU from a .mop file with 
-        pymodelica.compile_fmu using separate process.
-        """
-        fmuname = compile_fmu(Test_Compiler.cpath_mc, Test_Compiler.fpath_oc, \
-            separate_process=True)
-
-        assert os.access(fmuname, os.F_OK) == True, \
-               fmuname+" was not created."
-        os.remove(fmuname)
 
     @testattr(stddist = True)
     def test_stepbystep(self):
@@ -211,28 +161,7 @@ class Test_Compiler:
         cl = 'CorruptCodeGenTests.CorruptTest1'
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.mc.compile_Unit, cl, [path], 'jmu', None, '.')
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_Unit, cl, [path], 'jmu', None, '.')
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path, separate_process=True)
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path, separate_process=True)
-    
-    @testattr(stddist = True)
-    def test_compiler_modification_error(self):
-        """ Test that a CompilerError is raised if compilation errors are found in the modification on the classname."""
-        path = os.path.join(get_files_path(), 'Modelica','Diode.mo')
-        err = pym.compiler_exceptions.CompilerError
-        nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(wrong_name=2)', path)
-        nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(===)', path)
-    
-    @testattr(stddist = True)
-    def test_compile_fmu_illegal_target_error(self):
-        """Test that an exception is raised when an incorrect target is given to compile_fmu"""
-        cl = Test_Compiler.cpath_mc 
-        path = Test_Compiler.fpath_mc
-        #Incorrect target.
-        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="notValidTarget")
-        #Incorrect target that contains the valid target 'me'.
-        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="men") 
-        #Incorrect version, correct target 'me'.
-        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="me", version="notValidVersion") 
+
     '''
     @testattr(stddist = True)
     def test_class_not_found_error(self):
@@ -403,4 +332,125 @@ class Test_Compiler:
             comp_res = 0
     
         assert comp_res==1, "Compilation failed in test_MODELICAPATH"
+        
+class Test_Compiler_functions:
+    """ This class tests the compiler functions. """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.fpath_mc = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack_no_opt.mo')
+        cls.cpath_mc = "Pendulum_pack.Pendulum"
+        cls.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack.mop')
+        cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
     
+    @testattr(stddist = True)
+    def test_compile_fmu_illegal_target_error(self):
+        """Test that an exception is raised when an incorrect target is given to compile_fmu"""
+        cl = Test_Compiler_functions.cpath_mc 
+        path = Test_Compiler_functions.fpath_mc
+        #Incorrect target.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="notValidTarget")
+        #Incorrect target that contains the valid target 'me'.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="men") 
+        #Incorrect version, correct target 'me'.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="me", version="notValidVersion") 
+               
+    @testattr(stddist = True)
+    def test_compile_fmu_mop(self):
+        """
+        Test that it is possible to compile an FMU from a .mop file with 
+        pymodelica.compile_fmu.
+        """
+        fmuname = compile_fmu(Test_Compiler_functions.cpath_mc, Test_Compiler_functions.fpath_oc, 
+            separate_process=False)
+
+        assert os.access(fmuname, os.F_OK) == True, \
+               fmuname+" was not created."
+        os.remove(fmuname)
+
+    @testattr(stddist = True)
+    def test_compile_fmu_mop_separate_process(self):
+        """
+        Test that it is possible to compile an FMU from a .mop file with 
+        pymodelica.compile_fmu using separate process.
+        """
+        fmuname = compile_fmu(Test_Compiler_functions.cpath_mc, Test_Compiler_functions.fpath_oc)
+
+        assert os.access(fmuname, os.F_OK) == True, \
+               fmuname+" was not created."
+        os.remove(fmuname)
+    
+    @testattr(stddist = True)
+    def test_compile_jmu(self):
+        """
+        Test that it is possible to compile a JMU from a .mop file with 
+        pymodelica.compile_jmu.
+        """
+        jmuname = compile_jmu(Test_Compiler_functions.cpath_oc, Test_Compiler_functions.fpath_oc, 
+            separate_process=False)
+
+        assert os.access(jmuname, os.F_OK) == True, \
+               jmuname+" was not created."
+        os.remove(jmuname)
+    
+    @testattr(stddist = True)
+    def test_compile_jmu_separate_process(self):
+        """
+        Test that it is possible to compile a JMU from a .mop file with 
+        pymodelica.compile_jmu using separate process.
+        """
+        jmuname = compile_jmu(Test_Compiler_functions.cpath_oc, Test_Compiler_functions.fpath_oc)
+
+        assert os.access(jmuname, os.F_OK) == True, \
+               jmuname+" was not created."
+        os.remove(jmuname)
+
+    @testattr(stddist = True)
+    def test_compiler_error(self):
+        """ Test that a CompilerError is raised if compilation errors are found in the model."""
+        path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
+        cl = 'CorruptCodeGenTests.CorruptTest1'
+        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path)
+        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path)
+    
+    @testattr(stddist = True)
+    def test_compiler_modification_error(self):
+        """ Test that a CompilerError is raised if compilation errors are found in the modification on the classname."""
+        path = os.path.join(get_files_path(), 'Modelica','Diode.mo')
+        err = pym.compiler_exceptions.CompilerError
+        nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(wrong_name=2)', path)
+        nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(===)', path)
+
+    @testattr(windows = True)
+    def test_compile_fmu_me_1_64bit(self):
+        """Test that it is possible to compile an FMU-ME 1.0 64bit FMU on Windows"""
+        cl = Test_Compiler_functions.cpath_mc 
+        path = Test_Compiler_functions.fpath_mc
+        pym.compile_fmu(cl, path, platform='win64')
+
+    @testattr(windows = True)
+    def test_compile_fmu_me_2_64bit(self):
+        """Test that it is possible to compile an FMU-ME 2.0 64bit FMU on Windows"""
+        cl = Test_Compiler_functions.cpath_mc 
+        path = Test_Compiler_functions.fpath_mc
+        pym.compile_fmu(cl, path, version='2.0', platform='win64')
+
+    @testattr(windows = True)
+    def test_compile_fmu_cs_1_64bit(self):
+        """Test that it is possible to compile an FMU-CS 1.0 64bit FMU on Windows"""
+        cl = Test_Compiler_functions.cpath_mc 
+        path = Test_Compiler_functions.fpath_mc
+        pym.compile_fmu(cl, path, target='cs', platform='win64')
+
+    @testattr(windows = True)
+    def test_compile_fmu_cs_2_64bit(self):
+        """Test that it is possible to compile an FMU-CS 2.0 64bit FMU on Windows"""
+        cl = Test_Compiler_functions.cpath_mc 
+        path = Test_Compiler_functions.fpath_mc
+        pym.compile_fmu(cl, path, target='cs', version='2.0', platform='win64')
+
