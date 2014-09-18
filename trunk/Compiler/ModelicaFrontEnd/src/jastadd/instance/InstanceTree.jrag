@@ -1993,6 +1993,10 @@ aspect InstanceAST_API {
     eq InstNode.getChild().containingInstNode() = this;
     eq InstRoot.getChild().containingInstNode() = null;
     eq Root.getChild().containingInstNode()     = null;
+    
+    inh InstNode FExternalStmt.containingInstClassDecl();
+    eq Root.getChild().containingInstClassDecl()          = null;
+    eq InstClassDecl.getChild().containingInstClassDecl() = this;
 
 }
 

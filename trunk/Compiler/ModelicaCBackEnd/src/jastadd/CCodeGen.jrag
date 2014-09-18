@@ -990,12 +990,6 @@ aspect CCodeGen {
 	syn String FAbstractVariable.type_C() = type().type_C();
 	syn String FFunctionCallLeft.type_C() = type().type_C();
 	
-	syn String FType.argType_C()  		= type_C();
-	eq FPrimitiveType.argType_C() 		= "jmi_ad_var_t";
-	eq FIntegerType.argType_C()   		= "jmi_int_t";
-	eq FBooleanType.argType_C()         = "jmi_int_t";
-	eq FEnumType.argType_C()            = "jmi_int_t";
-	eq FExternalObjectType.argType_C()	= "void*";
 	
     syn String FFunctionVariable.typeReturn_C() = isRecord() ? type_C() : (type_C() + "*");
     eq FFunctionArray.typeReturn_C()            = type_C();
@@ -1040,6 +1034,21 @@ aspect CCodeGen {
     eq FBooleanType.nameArrayExt_C()      = "jmi_int_array_t";
     eq FEnumType.nameArrayExt_C()         = "jmi_int_array_t";
     
+    
+    /* Corresponding external c representation */
+    syn String FExp.argType_C(boolean ref) = type().argType_C(ref);
+    
+    syn String FType.argType_C(boolean ref)        = argTypeBase_C() + (ref ? "*" : "");
+    eq FExternalObjectType.argType_C(boolean ref)  = argTypeBase_C();
+    eq FStringType.argType_C(boolean ref)          = argTypeBase_C();
+    
+    syn String FType.argTypeBase_C()        = type_C();
+    eq FPrimitiveType.argTypeBase_C()       = "double";
+    eq FIntegerType.argTypeBase_C()         = "int";
+    eq FBooleanType.argTypeBase_C()         = "int";
+    eq FEnumType.argTypeBase_C()            = "int";
+    eq FExternalObjectType.argTypeBase_C()  = "void*";
+    eq FStringType.argTypeBase_C()          = "char*";
     
 	
 	public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
@@ -2604,7 +2613,7 @@ aspect CCodeGen {
             if (writeback)
                 str.formatln("%s%s = %s;", indent, src, tempName);
             else
-                str.formatln("%s%s = (int)%s;", indent, tempName, src);
+                str.formatln("%s%s = (%s)%s;", indent, tempName, argType_C(false), src);
         }
     }
     
@@ -2646,7 +2655,7 @@ aspect CCodeGen {
 	}
 	
 	public void FExp.genExternalFortranFuncArgs(CodePrinter p, CodeStream str, String indent) {
-		if (!isArray()) {
+        if (!isArray() && !type().isString()) {
 			str.print("&");
 		}
         if (useTempVar) {
@@ -2686,21 +2695,18 @@ aspect CCodeGen {
 		str.print(indent);
 		str.print("extern ");
 		if (stmt.hasReturnVar()) {
-			FType type = stmt.getReturnVar().type();
-			String retType = type.argType_C();
-			str.print(retType + " ");
+            str.print(stmt.getReturnVar().type().argType_C(false));
 		} else {
-			str.print("void ");
+            str.print("void");
 		}
+        str.print(" ");
 
 		str.print(stmt.getName()+"_(");
 		
 		String prefix = "";
 		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
-			FType type = arg.type();
-			str.print(type.argType_C());			
-			str.print("*");
+            str.print(arg.argType_C(true));
 			prefix = ", ";
 		}
 		str.print(");\n");

@@ -304,18 +304,4 @@ aspect ComplianceCheck {
             compliance("Constructors for external objects is not supported in functions");
         }
     }
-    
-    public void FExternalStmt.complianceCheck(ErrorCheckType checkType) {
-        getFExternalLanguage().complianceCheck(checkType, this);
-    }
-    
-    public void FExternalLanguage.complianceCheck(ErrorCheckType checkType, FExternalStmt stmt) {
-        
-    }
-    
-    public void FFortran77ExternalLanguage.complianceCheck(ErrorCheckType checkType, FExternalStmt stmt) {
-        for (FExp arg : stmt.getArgs())
-            if (arg.type().isString() && arg.type().isArray())
-                compliance("Passing string arrays to fortran functions is not supported");
-    }
 }
