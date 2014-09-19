@@ -2183,17 +2183,17 @@ aspect CCodeGen {
             p.print(getFormat(), str, indent);
         } else {
             if (hasLeftJustified()) {
-                str.print("((");
+                str.print("COND_EXP_EQ(");
                 p.print(getLeftJustified(), str, indent);
-                str.print(") ? (");
+                str.print(", JMI_TRUE, ");
             }
             
             genStringFormat_C(str, true);
             
             if (hasLeftJustified()) {
-                str.print(") : (");
+                str.print(", ");
                 genStringFormat_C(str, false);
-                str.print("))");
+                str.print(")");
             }
             
             if (hasMinimumLength()) {

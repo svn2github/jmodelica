@@ -887,7 +887,7 @@ equation
     snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%-*d\", (int) AD_WRAP_LITERAL(12), (int) _intVar_1);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"42          \", tmp_2);
     JMI_INI_STR_STAT(tmp_3)
-    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), ((JMI_FALSE) ? (\"%-*d\") : (\"%*d\")), (int) AD_WRAP_LITERAL(12), (int) _intVar_1);
+    snprintf(JMI_STR_END(tmp_3), JMI_STR_LEFT(tmp_3), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*d\", \"%*d\"), (int) AD_WRAP_LITERAL(12), (int) _intVar_1);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"          42\", tmp_3);
     JMI_INI_STR_STAT(tmp_4)
     snprintf(JMI_STR_END(tmp_4), JMI_STR_LEFT(tmp_4), \"%-.*g\", (int) 6, _realVar_0);
@@ -896,7 +896,7 @@ equation
     snprintf(JMI_STR_END(tmp_5), JMI_STR_LEFT(tmp_5), \"%-*.*g\", (int) AD_WRAP_LITERAL(12), (int) 6, _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.14000     \", tmp_5);
     JMI_INI_STR_STAT(tmp_6)
-    snprintf(JMI_STR_END(tmp_6), JMI_STR_LEFT(tmp_6), ((JMI_FALSE) ? (\"%-*.*g\") : (\"%*.*g\")), (int) AD_WRAP_LITERAL(12), (int) 6, _realVar_0);
+    snprintf(JMI_STR_END(tmp_6), JMI_STR_LEFT(tmp_6), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) AD_WRAP_LITERAL(12), (int) 6, _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"     3.14000\", tmp_6);
     JMI_INI_STR_STAT(tmp_7)
     snprintf(JMI_STR_END(tmp_7), JMI_STR_LEFT(tmp_7), \"%-.*g\", (int) AD_WRAP_LITERAL(8), _realVar_0);
@@ -905,7 +905,7 @@ equation
     snprintf(JMI_STR_END(tmp_8), JMI_STR_LEFT(tmp_8), \"%-*.*g\", (int) AD_WRAP_LITERAL(12), (int) AD_WRAP_LITERAL(8), _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"3.1400000   \", tmp_8);
     JMI_INI_STR_STAT(tmp_9)
-    snprintf(JMI_STR_END(tmp_9), JMI_STR_LEFT(tmp_9), ((JMI_FALSE) ? (\"%-*.*g\") : (\"%*.*g\")), (int) AD_WRAP_LITERAL(12), (int) AD_WRAP_LITERAL(8), _realVar_0);
+    snprintf(JMI_STR_END(tmp_9), JMI_STR_LEFT(tmp_9), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) AD_WRAP_LITERAL(12), (int) AD_WRAP_LITERAL(8), _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"   3.1400000\", tmp_9);
     JMI_INI_STR_STAT(tmp_10)
     snprintf(JMI_STR_END(tmp_10), JMI_STR_LEFT(tmp_10), \"%-.*g\", (int) 6, - _realVar_0);
@@ -914,7 +914,7 @@ equation
     snprintf(JMI_STR_END(tmp_11), JMI_STR_LEFT(tmp_11), \"%-*.*g\", (int) AD_WRAP_LITERAL(12), (int) 6, - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"-3.14000    \", tmp_11);
     JMI_INI_STR_STAT(tmp_12)
-    snprintf(JMI_STR_END(tmp_12), JMI_STR_LEFT(tmp_12), ((JMI_FALSE) ? (\"%-*.*g\") : (\"%*.*g\")), (int) AD_WRAP_LITERAL(12), (int) 6, - _realVar_0);
+    snprintf(JMI_STR_END(tmp_12), JMI_STR_LEFT(tmp_12), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) AD_WRAP_LITERAL(12), (int) 6, - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"    -3.14000\", tmp_12);
     JMI_INI_STR_STAT(tmp_13)
     snprintf(JMI_STR_END(tmp_13), JMI_STR_LEFT(tmp_13), \"%-.*g\", (int) AD_WRAP_LITERAL(8), - _realVar_0);
@@ -923,7 +923,7 @@ equation
     snprintf(JMI_STR_END(tmp_14), JMI_STR_LEFT(tmp_14), \"%-*.*g\", (int) AD_WRAP_LITERAL(12), (int) AD_WRAP_LITERAL(8), - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"-3.1400000  \", tmp_14);
     JMI_INI_STR_STAT(tmp_15)
-    snprintf(JMI_STR_END(tmp_15), JMI_STR_LEFT(tmp_15), ((JMI_FALSE) ? (\"%-*.*g\") : (\"%*.*g\")), (int) AD_WRAP_LITERAL(12), (int) AD_WRAP_LITERAL(8), - _realVar_0);
+    snprintf(JMI_STR_END(tmp_15), JMI_STR_LEFT(tmp_15), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) AD_WRAP_LITERAL(12), (int) AD_WRAP_LITERAL(8), - _realVar_0);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"  -3.1400000\", tmp_15);
     JMI_INI_STR_STAT(tmp_16)
     snprintf(JMI_STR_END(tmp_16), JMI_STR_LEFT(tmp_16), \"%-s\", COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
@@ -932,7 +932,7 @@ equation
     snprintf(JMI_STR_END(tmp_17), JMI_STR_LEFT(tmp_17), \"%-*s\", (int) AD_WRAP_LITERAL(12), COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"false       \", tmp_17);
     JMI_INI_STR_STAT(tmp_18)
-    snprintf(JMI_STR_END(tmp_18), JMI_STR_LEFT(tmp_18), ((JMI_FALSE) ? (\"%-*s\") : (\"%*s\")), (int) AD_WRAP_LITERAL(12), COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_18), JMI_STR_LEFT(tmp_18), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) AD_WRAP_LITERAL(12), COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"       false\", tmp_18);
     JMI_INI_STR_STAT(tmp_19)
     snprintf(JMI_STR_END(tmp_19), JMI_STR_LEFT(tmp_19), \"%-s\", COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
@@ -941,7 +941,7 @@ equation
     snprintf(JMI_STR_END(tmp_20), JMI_STR_LEFT(tmp_20), \"%-*s\", (int) AD_WRAP_LITERAL(12), COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"true        \", tmp_20);
     JMI_INI_STR_STAT(tmp_21)
-    snprintf(JMI_STR_END(tmp_21), JMI_STR_LEFT(tmp_21), ((JMI_FALSE) ? (\"%-*s\") : (\"%*s\")), (int) AD_WRAP_LITERAL(12), COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_21), JMI_STR_LEFT(tmp_21), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) AD_WRAP_LITERAL(12), COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"        true\", tmp_21);
     JMI_INI_STR_STAT(tmp_22)
     snprintf(JMI_STR_END(tmp_22), JMI_STR_LEFT(tmp_22), \"%-s\", E_0_e[(int) _enumVar_3]);
@@ -950,7 +950,7 @@ equation
     snprintf(JMI_STR_END(tmp_23), JMI_STR_LEFT(tmp_23), \"%-*s\", (int) AD_WRAP_LITERAL(12), E_0_e[(int) _enumVar_3]);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"medium      \", tmp_23);
     JMI_INI_STR_STAT(tmp_24)
-    snprintf(JMI_STR_END(tmp_24), JMI_STR_LEFT(tmp_24), ((JMI_FALSE) ? (\"%-*s\") : (\"%*s\")), (int) AD_WRAP_LITERAL(12), E_0_e[(int) _enumVar_3]);
+    snprintf(JMI_STR_END(tmp_24), JMI_STR_LEFT(tmp_24), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) AD_WRAP_LITERAL(12), E_0_e[(int) _enumVar_3]);
     func_CCodeGenTests_CStringExp_StringCompare_def0(\"      medium\", tmp_24);
     JMI_INI_STR_STAT(tmp_25)
     snprintf(JMI_STR_END(tmp_25), JMI_STR_LEFT(tmp_25), \"%d\", (int) _intVar_1);
@@ -14970,20 +14970,20 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t 
     JMI_DEF_STR_DYNA(s_v)
     JMI_DEF_STR_DYNA(tmp_1)
     JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + AD_WRAP_LITERAL(1), i_v) + jmi_max(7 + i_v, AD_WRAP_LITERAL(2)) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + 16 + jmi_max(10, AD_WRAP_LITERAL(2)) + jmi_max(10, i_v) + jmi_max(10, i_v) + 16 + jmi_max(5, AD_WRAP_LITERAL(2)) + jmi_max(5, i_v) + jmi_max(5, i_v))
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*.*g\") : (\"%*.*g\")), (int) i_v, (int) AD_WRAP_LITERAL(1), x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*.*g\") : (\"%*.*g\")), (int) AD_WRAP_LITERAL(2), (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((JMI_FALSE) ? (\"%-*.*g\") : (\"%*.*g\")), (int) i_v, (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*.*g\") : (\"%*.*g\")), (int) i_v, (int) i_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-.*g\") : (\"%.*g\")), (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) AD_WRAP_LITERAL(1), x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) AD_WRAP_LITERAL(2), (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_FALSE, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) i_v, x_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-.*g\", \"%.*g\"), (int) i_v, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, x_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*d\") : (\"%*d\")), (int) AD_WRAP_LITERAL(2), (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((JMI_TRUE) ? (\"%-*d\") : (\"%*d\")), (int) i_v, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*d\") : (\"%*d\")), (int) i_v, (int) i_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) AD_WRAP_LITERAL(2), (int) i_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*d\", \"%*d\"), (int) i_v, (int) i_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), fmt_v, (int) i_v);
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*s\") : (\"%*s\")), (int) AD_WRAP_LITERAL(2), COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((JMI_TRUE) ? (\"%-*s\") : (\"%*s\")), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
-    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), ((b_v) ? (\"%-*s\") : (\"%*s\")), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) AD_WRAP_LITERAL(2), COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     JMI_ASG(STR, s_v, tmp_1)
     JMI_FREE(tmp_1)
     if (y_o != NULL) *y_o = y_v;
