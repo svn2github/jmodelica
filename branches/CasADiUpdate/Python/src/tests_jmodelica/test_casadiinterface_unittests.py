@@ -19,6 +19,13 @@ def MX_equal(x, y):
     eq = (x == y)
     return eq.isConstant() and eq.getValue() == 1
 
+def strnorm(StringnotNorm):
+    caracters = ['\n','\t',' ']
+    StringnotNorm = str(StringnotNorm)
+    for c in caracters:
+        StringnotNorm = StringnotNorm.replace(c, '')
+    return StringnotNorm
+
 @testattr(casadi = True)    
 def test_SharedNode_eq():
     m = Model()
@@ -52,8 +59,8 @@ def test_VariableAlias():
         realVar1.setNegated(True)
     except:
         errorString = sys.exc_info()[1].message 
-    assert errorString.replace('\n','') ==\
-           "Only alias variables may be negated".replace('\n','');
+    assert strnorm(errorString) ==\
+           strnorm("Only alias variables may be negated");
     
     
     # Make realVar1 an AliasVariables
@@ -267,7 +274,7 @@ def test_DisallowedChangedBindingExpression():
         r1.setAttribute("bindingExpression", MX.sym("var"))
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "It is not allowed to make independent parameters dependent".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("It is not allowed to make independent parameters dependent"));
 
     # Test dependent parameter, no changes to bindingExpression allowed
     # Try to set a constant bindingExpression
@@ -275,13 +282,13 @@ def test_DisallowedChangedBindingExpression():
         r2.setAttribute("bindingExpression", 5)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "It is not allowed to change binding expression of dependent parameters".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("It is not allowed to change binding expression of dependent parameters"));
     # Try to set a non constant bindingExpression
     try:
         r2.setAttribute("bindingExpression", MX.sym("var"))
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "It is not allowed to change binding expression of dependent parameters".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("It is not allowed to change binding expression of dependent parameters"));
     
 
 @testattr(casadi = True)    
@@ -351,11 +358,11 @@ def test_equationPrinting():
 def test_RealTypePrinting():
     realType = RealType()
     expectedPrint = ("Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );")
-    assert( str(realType).replace('\n','') == expectedPrint.replace('\n','') )
+    assert( strnorm(realType) == strnorm(expectedPrint) )
     assert( realType.getAttribute("start").getValue() == 0 )
     assert( realType.hasAttribute("quantity") )
     assert( not realType.hasAttribute("not") )
-    assert( realType.getName().replace('\n','') == "Real".replace('\n','') )
+    assert( strnorm(realType.getName()) == strnorm("Real") )
     
 @testattr(casadi = True)    
 def test_VariableDedicatedGettersAndSetters():
@@ -486,7 +493,7 @@ def test_RealVariableNonSymbolicError():
         realVar = RealVariable(m, MX(1), Variable.INTERNAL, Variable.CONTINUOUS)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "A variable must have a symbolic MX".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A variable must have a symbolic MX"));
     
 @testattr(casadi = True)    
 def test_RealVariableInvalidDerivativeVariable():
@@ -503,7 +510,7 @@ def test_RealVariableInvalidDerivativeVariable():
     except:
         errorString = sys.exc_info()[1].message 
     print errorString
-    assert(errorString.replace('\n','') == "A Variable that is set as a derivative variable must be a DerivativeVariable".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A Variable that is set as a derivative variable must be a DerivativeVariable"));
     
     errorString = ""
     try:
@@ -511,7 +518,7 @@ def test_RealVariableInvalidDerivativeVariable():
     except:
         errorString = sys.exc_info()[1].message 
     print errorString
-    assert(errorString.replace('\n','') == "A Variable that is set as a derivative variable must be a DerivativeVariable".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A Variable that is set as a derivative variable must be a DerivativeVariable"));
     
 @testattr(casadi = True)    
 def test_RealVariableInvalidAsStateVariable():
@@ -528,7 +535,7 @@ def test_RealVariableInvalidAsStateVariable():
     except:
         errorString = sys.exc_info()[1].message 
     print errorString
-    assert(errorString.replace('\n','') == "A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable.".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable."));
     
 @testattr(casadi = True)    
 def test_RealVariablePrinting():
@@ -536,7 +543,7 @@ def test_RealVariablePrinting():
     
     realVar = RealVariable(m, MX.sym("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     realVar.setAttribute("myAttribute", MX(2))
-    assert( str(realVar).replace('\n','') == "Real node(myAttribute = 2);".replace('\n','') );
+    assert( strnorm(realVar) == strnorm("Real node(myAttribute = 2);") );
     
 @testattr(casadi = True)    
 def test_DerivativeVariableAttributes():
@@ -552,7 +559,7 @@ def test_DerivativeVariableAttributes():
     assert( derVar.getAttribute("myAttribute").isEqual(attributeNode2) )
     assert( derVar.hasAttributeSet("myAttribute"))
     assert( not derVar.hasAttributeSet("iDontHaveThisAttribute"))
-    assert( derVar.getName().replace('\n','') == "node".replace('\n','') )
+    assert( strnorm(derVar.getName()) == strnorm("node") )
 
 @testattr(casadi = True)    
 def test_DerivativeVariableConstants():
@@ -607,13 +614,13 @@ def test_DerivativeVariableInvalidStateVariable():
         derVar = DerivativeVariable(m, MX.sym("node"), realVar)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "A state variable must have real type and continuous variability".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A state variable must have real type and continuous variability"));
     errorString = ""
     try:
         derVar = DerivativeVariable(m, MX.sym("node"), intVar)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "A state variable must have real type and continuous variability".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A state variable must have real type and continuous variability"));
 
 @testattr(casadi = True)    
 def test_DerivativeVariablePrinting():
@@ -621,7 +628,7 @@ def test_DerivativeVariablePrinting():
     
     derVar = DerivativeVariable(m, MX.sym("node"), None)
     derVar.setAttribute("myAttribute", MX(2))
-    assert( str(derVar).replace('\n','') == "Real node(myAttribute = 2);".replace('\n','') )
+    assert( strnorm(derVar) == strnorm("Real node(myAttribute = 2);") )
 
 @testattr(casadi = True)    
 def test_IntegerVariableAttributes():
@@ -675,7 +682,7 @@ def test_IntegerVariablePrinting():
     
     intVar = IntegerVariable(m, MX.sym("node"), Variable.INTERNAL, Variable.DISCRETE)
     intVar.setAttribute("myAttribute", MX(2))
-    assert( str(intVar).replace('\n','') == "discrete Integer node(myAttribute = 2);".replace('\n','') )
+    assert( strnorm(intVar) == strnorm("discrete Integer node(myAttribute = 2);") )
     
 @testattr(casadi = True)    
 def test_IntegerVariableContinuousError():
@@ -688,7 +695,7 @@ def test_IntegerVariableContinuousError():
         intVar = IntegerVariable(m, MX.sym("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "An integer variable can not have continuous variability".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("An integer variable can not have continuous variability"));
     
 @testattr(casadi = True)    
 def test_BooleanVariableAttributes():
@@ -747,7 +754,7 @@ def test_BooleanVariableContinuousError():
         boolVar = BooleanVariable(m, MX.sym("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "A boolean variable can not have continuous variability".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("A boolean variable can not have continuous variability"));
     
 @testattr(casadi = True)    
 def test_BooleanVariablePrinting():
@@ -755,7 +762,7 @@ def test_BooleanVariablePrinting():
     
     boolVar = BooleanVariable(m, MX.sym("node"), Variable.INTERNAL, Variable.DISCRETE)
     boolVar.setAttribute("myAttribute", MX(2))
-    assert( str(boolVar).replace('\n','') == "discrete Boolean node(myAttribute = 2);".replace('\n','') )
+    assert( strnorm(boolVar) == strnorm("discrete Boolean node(myAttribute = 2);") )
     
 @testattr(casadi = True)    
 def test_TimedVariable():
@@ -779,7 +786,7 @@ def test_TimedVariableInvalidBaseVarType():
         timedVar = TimedVariable(opt, MX.sym("var"), boolVar, MX.sym("ATimePointExpression"))
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Timed variables only supported for real variables".replace('\n',''));
+    assert(strnorm(errorString) == strnorm("Timed variables only supported for real variables"));
     
     
 @testattr(casadi = True)    
@@ -790,7 +797,7 @@ def test_ModelFunctionGetName():
     function.setOption("name", functionName)
     function.init()
     modelFunction = ModelFunction(function)
-    assert( modelFunction.getName().replace('\n','') == functionName.replace('\n','') )
+    assert( strnorm(modelFunction.getName()) == strnorm(functionName) )
 
 @testattr(casadi = True)    
 def test_ModelFunctionGetNameCall():
@@ -835,7 +842,7 @@ def test_ModelFunctionPrinting():
                     "@1 = input[0]\n" +
                     "@0 = (@0+@1)\n" +
                     "output[0] = @0\n")
-    assert( str(modelFunction).replace('\n','') == expectedPrint.replace('\n','') )
+    assert( strnorm(modelFunction) == strnorm(expectedPrint) )
 
 @testattr(casadi = True)    
 def test_Constraint():
@@ -869,7 +876,7 @@ def test_ConstraintPrinting():
     lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
     greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
     actual = str(equalityConstraint) + str(lessThanConstraint) + str(greaterThanConstraint)
-    assert( actual.replace('\n','') == "lhs = rhslhs <= rhslhs >= rhs".replace('\n','') )
+    assert( strnorm(actual) == strnorm("lhs = rhslhs <= rhslhs >= rhs") )
 
 
 @testattr(casadi = True)    
@@ -977,7 +984,7 @@ def test_OptimizationProblemPrinting():
                      "Start time = 0\nFinal time = 0\n\n\n" +
                      "-- Objective integrand term --\n0\n-- Objective term --\n0")
     print simpleOptProblem
-    assert( str(simpleOptProblem).replace('\n','') == expectedPrint.replace('\n','') )
+    assert( strnorm(simpleOptProblem) == strnorm(expectedPrint) )
 
 @testattr(casadi = True)    
 def test_ModelVariableKindsEmpty():
@@ -1193,7 +1200,7 @@ def test_ModelDefaultVariableTypeAssignment():
     realVar = RealVariable(model, MX.sym("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     model.addVariable(realVar)
     expectedPrint = ("Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );")
-    assert( str(model.getVariableType("Real")).replace('\n','') == expectedPrint.replace('\n','') )
+    assert( strnorm(model.getVariableType("Real")) == strnorm(expectedPrint) )
     
 @testattr(casadi = True)    
 def test_ModelDefaultVariableTypeAssignmentSingletons():
@@ -1243,7 +1250,7 @@ def test_ModelTrySettingExistingVariableType():
         model.addNewVariableType(varType2)
     except:
         errorMessage = sys.exc_info()[1].message 
-    assert( errorMessage.replace('\n','')==expectedErrorMessage.replace('\n','') )
+    assert( strnorm(errorMessage) == strnorm(expectedErrorMessage) )
        
 @testattr(casadi = True)    
 def test_ModelInvalidVariabilityRealVariable():
@@ -1256,7 +1263,7 @@ def test_ModelInvalidVariabilityRealVariable():
         model.getVariables(Model.REAL_ALGEBRAIC)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid variable variability when sorting for internal real variable: Real var;");
+    assert(strnorm(errorString) == strnorm("Invalid variable variability when sorting for internal real variable: Real var;"));
     
 @testattr(casadi = True)    
 def test_ModelInvalidVariabilityIntegerVariable():
@@ -1269,7 +1276,7 @@ def test_ModelInvalidVariabilityIntegerVariable():
         model.getVariables(Model.INTEGER_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid variable variability when sorting for internal integer variable: Integer var;");
+    assert(strnorm(errorString) == strnorm("Invalid variable variability when sorting for internal integer variable: Integer var;"));
     
 @testattr(casadi = True)    
 def test_ModelInvalidVariabilityBooleanVariable():
@@ -1282,7 +1289,7 @@ def test_ModelInvalidVariabilityBooleanVariable():
         model.getVariables(Model.BOOLEAN_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid variable variability when sorting for internal boolean variable: Boolean var;");
+    assert( strnorm(errorString) == strnorm("Invalid variable variability when sorting for internal boolean variable: Boolean var;"));
     
 @testattr(casadi = True)    
 def test_ModelInvalidCausalityRealVariable():
@@ -1295,7 +1302,7 @@ def test_ModelInvalidCausalityRealVariable():
         model.getVariables(Model.REAL_ALGEBRAIC)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid variable causality when sorting for variable: Real var;")
+    assert(strnorm(errorString) == strnorm("Invalid variable causality when sorting for variable: Real var;"))
     
 @testattr(casadi = True)    
 def test_ModelInvalidCausalityIntegerVariable():
@@ -1308,7 +1315,7 @@ def test_ModelInvalidCausalityIntegerVariable():
         model.getVariables(Model.INTEGER_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid variable causality when sorting for variable: Integer var;");
+    assert(strnorm(errorString) == strnorm("Invalid variable causality when sorting for variable: Integer var;"));
     
 @testattr(casadi = True)    
 def test_ModelInvalidCausalityBooleanVariable():
@@ -1321,7 +1328,7 @@ def test_ModelInvalidCausalityBooleanVariable():
         model.getVariables(Model.BOOLEAN_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid variable causality when sorting for variable: Boolean var;");
+    assert(strnorm(errorString) == strnorm("Invalid variable causality when sorting for variable: Boolean var;"));
  
 @testattr(casadi = True)    
 def test_ModelInvalidVariableKindInGetter():
@@ -1337,7 +1344,7 @@ def test_ModelInvalidVariableKindInGetter():
         model.getVariables(Model.NUM_OF_VARIABLE_KIND)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString.replace('\n','') == "Invalid VariableKind");
+    assert(strnorm(errorString) == strnorm("Invalid VariableKind"));
         
 @testattr(casadi = True)    
 def test_ModelPrinting():
@@ -1358,4 +1365,4 @@ def test_ModelPrinting():
                     " -- Initial equations -- \nnode3 = node4\n -- DAE equations -- \n" +
                     "node1 = node2\n\n")
     print model, expectedPrint
-    assert( str(model).replace('\n','') == expectedPrint.rstrip().replace('\n','') )
+    assert( strnorm(model) == strnorm(expectedPrint.rstrip()) )
