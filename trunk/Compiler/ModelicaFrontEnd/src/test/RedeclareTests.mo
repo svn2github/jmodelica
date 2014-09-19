@@ -616,7 +616,7 @@ Semantic error at line 651, column 32:
 end RedeclareTestOx116_Err;
 
 
-/* Does not work - the modification of y is reported as an error.*/
+/* Does not work - the modification of y is reported as an error.
 model RedeclareTestOx12 "Constraining clause example."
  
   model A
@@ -645,35 +645,8 @@ fclass RedeclareTests.RedeclareTestOx12
 end RedeclareTests.RedeclareTestOx12;
 ")})));
 end RedeclareTestOx12;
-
-
-model RedeclareTestOx121
-    model A
-        Real x;
-    end A;
-    
-    model B
-        extends A;
-        parameter Real y = 1;
-    end B;
-    
-    model C
-        replaceable B a(y = 2) constrainedby A;
-    end C;
-    
-    C c(redeclare A a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareTestOx121",
-            description="Modification to parameter that is not available in final component but valid at the point it is added",
-            flatModel="
-fclass RedeclareTests.RedeclareTestOx121
- Real c.a.x;
-end RedeclareTests.RedeclareTestOx121;
-")})));
-end RedeclareTestOx121;
-
+*/
+ 
 
 model RedeclareTestOx13 "Constraining clause example."
  
