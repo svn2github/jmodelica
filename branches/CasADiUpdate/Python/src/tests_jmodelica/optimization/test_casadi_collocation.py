@@ -200,7 +200,7 @@ class TestLocalDAECollocator(object):
         col = LocalDAECollocator(op, opts)
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
                 [435.4425832, 333.42862629], rtol=1e-4)
 
         # Check compute initial guess for minimum time
@@ -278,7 +278,7 @@ class TestLocalDAECollocator(object):
         col = res.solver
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
                 [0.85693481, 0.12910473])
 
         # #3509
