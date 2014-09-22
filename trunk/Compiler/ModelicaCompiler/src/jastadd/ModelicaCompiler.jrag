@@ -750,7 +750,7 @@ public class ModelicaCompiler {
             hookCheckAbort();
             if (target.getMakeFileFlag() != null) {
                 ASTNode.beginStep("compileCCode()");
-                String cFileName = FClass.convertClassNameToUnderscore(className);
+                String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
                 CCompilerDelegator ccompiler = getCCompiler();
                 ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
                 ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());

@@ -473,7 +473,7 @@ class ModelicaCompiler(object):
             Java classes.
         """
         try:
-            fclass = self._compiler.flattenModel(inst_class_decl, target)
+            fclass = self._compiler.flattenModel(inst_class_decl, target, None)
             return fclass    
         except jpype.JavaException as ex:
             self._handle_exception(ex)
