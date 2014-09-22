@@ -898,4 +898,30 @@ end Vectorized1;
 
 end Functional;
 
+model FortranStrings
+    function f
+        input String sx;
+        input Real t;
+        output Real y;
+        external "FORTRAN 77";
+    end f;
+    Real y;
+    Real[1] a;
+  equation
+    y = f("str",time);
+    a = Modelica.Math.Matrices.LAPACK.dgeev({{1}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FortranStrings",
+            description="Check error for strings to fortran. Should not trigger for MSL lapack functions",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 801, column 5:
+  Passing strings to external fortran functions is not allowed
+")})));
+end FortranStrings;
+
+
 end CheckTests;

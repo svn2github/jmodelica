@@ -176,6 +176,10 @@ class Model: public RefCountedNode {
          * @return A MX.
          */
         const casadi::MX getDaeResidual() const; 
+
+        std::vector< Ref< Equation> > getDaeEquations() const;
+        std::vector< Ref< Equation> > getInitialEquations() const;
+
         /** 
          * @param The name of the ModelFunction
          * @return A pointer to a ModelFunction. Returns NULL if not present 
@@ -256,5 +260,9 @@ inline Ref<ModelFunction> Model::getModelFunction(std::string name) const {
 }
 inline void Model::addInitialEquation(Ref<Equation>eq) { initialEquations.push_back(eq); }
 inline void Model::addDaeEquation(Ref<Equation>eq) { daeEquations.push_back(eq); }
+
+inline std::vector< Ref< Equation> > Model::getInitialEquations() const { return initialEquations; }
+inline std::vector< Ref< Equation> > Model::getDaeEquations() const { return daeEquations; }
+
 }; // End namespace
 #endif

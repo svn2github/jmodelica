@@ -4219,6 +4219,23 @@ aspect FunctionAndRecordCleanup {
     }
     
     @Override
+    public void FType.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        getSize().markUsedFunctionsAndRecords(type);
+    }
+    
+    public void Size.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        
+    }
+    
+    @Override
+    public void MutableSize.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        for (FExp e : exps)
+            if (e != null)
+                e.markUsedFunctionsAndRecords(type);
+    }
+    
+    @Override
     public void FRecordType.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
         super.markUsedFunctionsAndRecords(type);
         myFRecordDecl().markUsedFunctionsAndRecords(type);

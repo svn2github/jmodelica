@@ -5700,15 +5700,6 @@ equation
  ({ArrayTests.Constructors.Iterators.ArrayIterTest9.R(w[1].a, w[1].b), ArrayTests.Constructors.Iterators.ArrayIterTest9.R(w[2].a, w[2].b)}) = ArrayTests.Constructors.Iterators.ArrayIterTest9.f2({z[1], z[2]});
 
 public
- function ArrayTests.Constructors.Iterators.ArrayIterTest9.f1
-  input Real x;
-  output ArrayTests.Constructors.Iterators.ArrayIterTest9.R y;
- algorithm
-  y.a := x;
-  y.b := x + 1;
-  return;
- end ArrayTests.Constructors.Iterators.ArrayIterTest9.f1;
-
  function ArrayTests.Constructors.Iterators.ArrayIterTest9.f2
   input Real[2] x;
   output ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2] y;
@@ -5723,7 +5714,16 @@ public
   return;
  end ArrayTests.Constructors.Iterators.ArrayIterTest9.f2;
 
- record ArrayTests.Constructors.Iterators.ArrayIterTest9.R
+ function ArrayTests.Constructors.Iterators.ArrayIterTest9.f1
+  input Real x;
+  output ArrayTests.Constructors.Iterators.ArrayIterTest9.R y;
+ algorithm
+  y.a := x;
+  y.b := x + 1;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTest9.f1;
+
+  record ArrayTests.Constructors.Iterators.ArrayIterTest9.R
   Real a;
   Real b;
  end ArrayTests.Constructors.Iterators.ArrayIterTest9.R;

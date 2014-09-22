@@ -258,6 +258,25 @@ Returns::
 
 ";
         
+%feature("docstring") ModelicaCasADi::Model::getInitialEquations "
+Returns a vector of all initial equations, given by the Equation objects that represent them.
+
+Returns::
+    
+    ndarray --
+        A vector of Equation objects with the Model's initial equations.
+
+";
+%feature("docstring") ModelicaCasADi::Model::getDaeEquations "
+Returns a vector of all DAE equations, given by the Equation objects that represent them.
+
+Returns::
+    
+    ndarray --
+        A vector of Equation objects with the Model's DAE equations.
+
+";
+
 %feature("docstring") ModelicaCasADi::Model::getModelFunction "
 Retrieves a ModelFunction with a certain name. 
 

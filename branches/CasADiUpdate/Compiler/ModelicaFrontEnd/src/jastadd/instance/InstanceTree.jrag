@@ -1048,46 +1048,40 @@ aspect InstanceTreeConstruction {
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(
 			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr);
 
-	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(
-			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr) {
-		Opt fas_opt = new Opt();
-		if (replacingDecl.hasVarArraySubscripts()) 
-			fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(), 0);
-		Opt cond_attr_opt = new Opt();
-		if (originalDecl.hasConditionalAttribute()) 
-			cond_attr_opt.setChild(originalDecl.getConditionalAttribute().getExp().instantiate(), 0);
-
-		if (isOrExtendsPrimitive()) {
-			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(), 
-					fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-			if (originalDecl.hasModification()) //TODO: should this really be originalDecl?
-				icd.setInstModification(originalDecl.getModification().newInstModification());
-			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
-			icd.setLocation(originalDecl);
-			return icd;
-		} else if (isRecord()) {
-			InstReplacingRecord icd = new InstReplacingRecord(replacingDecl.newInstClassAccess(), 
-					fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-			if (originalDecl.hasModification()) //TODO: should this really be originalDecl?
-				icd.setInstModification(originalDecl.getModification().newInstModification());
-			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
-			icd.setLocation(originalDecl);
-			return icd;
-		} else {
-			InstReplacingComposite icd;
-			if (isExpandableConnector())
-			    icd = new InstReplacingExpandableConnectorDecl(replacingDecl.newInstClassAccess(), 
-			            fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-			else
-			    icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(), 
-			            fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-			if (originalDecl.hasModification()) //TODO: should this really be originalDecl?
-				icd.setInstModification(originalDecl.getModification().newInstModification());
-			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
-			icd.setLocation(originalDecl);
-			return icd;
-		}
-	}
+    public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(
+            ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr) {
+        Opt fas_opt = new Opt();
+        if (replacingDecl.hasVarArraySubscripts()) 
+            fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(), 0);
+        Opt cond_attr_opt = new Opt();
+        if (originalDecl.hasConditionalAttribute()) 
+            cond_attr_opt.setChild(originalDecl.getConditionalAttribute().getExp().instantiate(), 0);
+        
+        if (isOrExtendsPrimitive()) {
+            InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(), 
+                    fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+            icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
+            icd.setLocation(originalDecl);
+            return icd;
+        } else if (isRecord()) {
+            InstReplacingRecord icd = new InstReplacingRecord(replacingDecl.newInstClassAccess(), 
+                    fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+            icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
+            icd.setLocation(originalDecl);
+            return icd;
+        } else {
+            InstReplacingComposite icd;
+            if (isExpandableConnector())
+                icd = new InstReplacingExpandableConnectorDecl(replacingDecl.newInstClassAccess(), 
+                        fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+            else
+                icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(), 
+                        fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+            icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
+            icd.setLocation(originalDecl);
+            return icd;
+        }
+    }
 
 	// This cannot be done.
 	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(
@@ -1993,6 +1987,10 @@ aspect InstanceAST_API {
     eq InstNode.getChild().containingInstNode() = this;
     eq InstRoot.getChild().containingInstNode() = null;
     eq Root.getChild().containingInstNode()     = null;
+    
+    inh InstNode FExternalStmt.containingInstClassDecl();
+    eq Root.getChild().containingInstClassDecl()          = null;
+    eq InstClassDecl.getChild().containingInstClassDecl() = this;
 
 }
 

@@ -1317,7 +1317,8 @@ aspect Arrays {
     public FExp InstFunctionCall.createSizeFExp(Map<ASTNode, FExp> varMap) {
         if (onlyUsesSize()) 
             return size().createDummyFExp(varMap);
-        InstFunctionCall res = new InstFunctionCall(getName().fullCopy(), new List<InstFunctionArgument>());
+        InstAccess name = InstAccess.fromName(getName().myInstCallable().actualInstCallable().qualifiedName());
+        InstFunctionCall res = new InstFunctionCall(name, new List<InstFunctionArgument>());
         for (InstFunctionArgument arg : getArgs())
             res.addArg(arg.createSizeFExpArg(varMap));
         return res;

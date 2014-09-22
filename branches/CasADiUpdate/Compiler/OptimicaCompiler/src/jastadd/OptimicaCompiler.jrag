@@ -87,28 +87,6 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	}
 
 	/**
-	 * Computes the flattened model representation from a model instance node.
-	 * 
-	 * @param icd
-	 *            A reference to the model instance.
-     * @param target
-     *            The model represenation type the model should be compiled to.
-	 * 
-	 * @return FOptClass or FClass object representing the flattened model.
-	 * 
-	 * @throws CompilerException
-	 *             If errors have been found during the flattening.
-	 * @throws IOException
-	 *             If there was an error creating the .mof file.
-	 * @throws ModelicaClassNotFoundException
-	 *             If the Modelica class to flatten is not found.
-	 */
-	public FClass flattenModel(InstClassDecl icd, TargetObject target) 
-			throws CompilerException, ModelicaClassNotFoundException, IOException {
-		return super.flattenModel(icd, target);
-	}
-	
-	/**
 	 * Create a new OptimicaCGenerator object.
 	 */
 	protected CGenerator createCGenerator(FClass fc) {

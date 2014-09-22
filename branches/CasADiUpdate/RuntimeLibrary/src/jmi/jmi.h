@@ -243,8 +243,9 @@
  */
 /* @{ */
 
-#define JMI_INF 1e20                /**< \brief A Very Large Number denoting infinity.*/
-#define JMI_SMALL 1e-6              /**< \brief A Quite Small Number. */
+#define JMI_INF   1e20                    /**< \brief A Very Large Number denoting infinity.*/
+#define JMI_SMALL 1e-6                    /**< \brief A Quite Small Number. */
+#define JMI_PI    3.14159265358979323846  /**< \brief The constant pi. */
 
 /*The option JMI_DER_CPPAD is no longer used and should be removed.*/
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */

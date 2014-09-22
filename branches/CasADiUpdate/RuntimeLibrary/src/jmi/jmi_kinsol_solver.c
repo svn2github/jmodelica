@@ -52,6 +52,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     
     realtype *y, *f;
     jmi_block_solver_t *block = problem_data;
+    jmi_log_t *log = block->log;
     int i,n, ret;
     block->nb_fevals++;
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
@@ -63,8 +64,12 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     for (i=0;i<n;i++) {
         /* Unrecoverable error*/
         if (Ith(yy,i)- Ith(yy,i) != 0) {
-            jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in <input: #r%d#> to <block: %s>", 
+            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNInput", "Not a number in <input: #r%d#> to <block: %s>", 
                          block->value_references[i], block->label);
+            if (block->callbacks->log_options.log_level >= 3) {
+                jmi_log_reals(log, node, logWarning, "ivs", y, block->n);
+            }
+            jmi_log_leave(log, node);
             return -1;
         }
     }
@@ -73,25 +78,49 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     ret = block->F(block->problem_data,y,f,JMI_BLOCK_EVALUATE);
     
     if(ret) {
-        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %s>", 
-                     ret, block->label);
+        jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "ErrOutput", "<errorCode: %d> returned from function evaluation in <block: %s>", 
+            ret, block->label);
+        if (block->callbacks->log_options.log_level >= 3) {
+            jmi_log_reals(log, node, logWarning, "ivs", y, block->n);
+        }
+        jmi_log_leave(log, node);
+
         /* Always treat this as a recoverable error */
         return 1;
     }
 
     /* Test if output is OK (no -1.#IND) */
     n = NV_LENGTH_S(ff);
-    for (i=0;i<n;i++) {
-        double v = Ith(ff,i);
-        /* Recoverable error*/
-        if (v- v != 0) {
-            jmi_log_node(block->log, logWarning, "NaNOutput", 
-                         "Not a number in <output: %I> from <block: %s>", i, block->label);
-            ret = 1;
+    {
+        jmi_log_node_t node;
+
+        for (i=0;i<n;i++) {
+            double v = Ith(ff,i);
+            /* Recoverable error*/
+            if (v- v != 0) {
+                if(ret == 0) {
+                    ret = 1;
+                    node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", 
+                        "Not a number in <output: %I> from <block: %s>", i, block->label);
+                }
+                else {
+                    jmi_log_node(block->log, logWarning, "NaNOutput", 
+                        "Not a number in <output: %I> from <block: %s>", i, block->label);
+                }
+
 #if 0           
-            block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
+                block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
 #endif
+            }
         }
+        if (ret) { 
+            if(block->callbacks->log_options.log_level >= 3) {
+                   jmi_log_reals(log, node, logWarning, "ivs", y, block->n);
+                   jmi_log_reals(log, node, logWarning, "residuals", f, block->n);                   
+            }
+            jmi_log_leave(log, node);
+        }
+
     }
     /* record information for Brent search */
     if(!ret && (block->n == 1) && block->options->use_Brent_in_1d_flag) {
@@ -482,8 +511,7 @@ void jmi_kinsol_error_handling(jmi_block_solver_t * block, int flag){
 /* initialize data on bounds */
 static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
-    jmi_log_t *log = block->log;
-    
+        
     int i,num_bounds = 0;
     
     if(!block->options->enforce_bounds_flag) {
@@ -505,15 +533,6 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
         solver->active_bounds = (realtype*)calloc(block->n, sizeof(realtype));
         num_bounds = 0;
     }
-
-    /* 
-        step limit factor cannot be above one (that would take us outside bounds in one step)
-        Reset this to 0.2 as default.
-    */
-    if(block->options->step_limit_factor > 1) {
-        block->options->step_limit_factor = 0.2;
-    }
-
 
     for(i=0; i < block->n; ++i) {
         int hasMin = 0, hasMax = 0;
@@ -541,10 +560,6 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
         else {
             solver->range_limits[i] = BIG_REAL;
         }
-        if (block->callbacks->log_options.log_level >= 5) {
-            jmi_log_real_(log, solver->range_limits[i]);
-        }
-
     }
 
     return 0;
@@ -700,54 +715,55 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         Go over the iteration vars and reduce max_step_ratio
         based on step_limits
     */
-    if (block->callbacks->log_options.log_level >= 5) {
-        /* Print variables with long steps */
-        outer = jmi_log_enter_(log, logInfo, "StepLimits");
-        inner = jmi_log_enter_vector_(log, outer, logInfo, "range");
-    }
-
-    for( i=0; i<block->n; i++ ) {
-        double range_limit = solver->range_limits[i];
-        double step_limit = range_limit;
-        realtype pi = RAbs(xd[i]);            /* abs solved step length for the variable*/
-        double nom = RAbs(block->nominal[i]);
-        double nom_limit;
-        double ui =  RAbs(NV_Ith_S(kin_mem->kin_uu,i));  /* current variable value */
-        double step_ratio;
-
-        if(nom < ui) {  /* if nominal is below current - take current*/
-            nom = ui; 
+    if(block->options->step_limit_factor <= 1) {
+        if (block->callbacks->log_options.log_level >= 5) {
+            /* Print variables with long steps */
+            outer = jmi_log_enter_(log, logInfo, "StepLimits");
+            inner = jmi_log_enter_vector_(log, outer, logInfo, "range");
         }
-        /* step length limit based on max(nominal, |current|)*/
-        nom_limit = nom *  block->options->step_limit_factor;
-        if(range_limit > nom_limit) { /* if nominal based is tighter than range based update step factor */
-            step_limit = nom_limit;
+
+        for( i=0; i<block->n; i++ ) {
+            double range_limit = solver->range_limits[i];
+            double step_limit = range_limit;
+            realtype pi = RAbs(xd[i]);            /* abs solved step length for the variable*/
+            double nom = RAbs(block->nominal[i]);
+            double nom_limit;
+            double ui =  RAbs(NV_Ith_S(kin_mem->kin_uu,i));  /* current variable value */
+            double step_ratio;
+
+            if(nom < ui) {  /* if nominal is below current - take current*/
+                nom = ui; 
+            }
+            /* step length limit based on max(nominal, |current|)*/
+            nom_limit = nom *  block->options->step_limit_factor;
+            if(range_limit > nom_limit) { /* if nominal based is tighter than range based update step factor */
+                step_limit = nom_limit;
+            }
+
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_real_(log, step_limit);
+            }
+
+            if( pi < step_limit) {
+                solver->range_limited[i] = 0;
+                continue;
+            }
+            solver->last_bounding_index = i;
+            solver->range_limited[i] = 1;
+            rangeLimited = TRUE;
+
+            step_ratio = step_limit/RAbs(pi);
+
+            if(max_step_ratio > step_ratio) {
+                max_step_ratio = step_ratio;
+            }
         }
 
         if (block->callbacks->log_options.log_level >= 5) {
-            jmi_log_real_(log, step_limit);
-        }
-
-        if( pi < step_limit) {
-            solver->range_limited[i] = 0;
-            continue;
-        }
-        solver->last_bounding_index = i;
-        solver->range_limited[i] = 1;
-        rangeLimited = TRUE;
-
-        step_ratio = step_limit/RAbs(pi);
-
-        if(max_step_ratio > step_ratio) {
-            max_step_ratio = step_ratio;
+            jmi_log_leave(log, inner);
+            jmi_log_leave(log, outer);
         }
     }
-
-    if (block->callbacks->log_options.log_level >= 5) {
-        jmi_log_leave(log, inner);
-        jmi_log_leave(log, outer);
-    }
-
     /* 
         Go over the list of bounds and reduce "max_step_ratio" 
     */
@@ -1247,13 +1263,13 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             if(scale_ptr[i] < tol) {
                 scale_ptr[i] = 1/tol; /* Singular Jacobian? */
                 solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
-                jmi_log_node(block->log, logWarning, "Warning", "Using maximum scaling factor in <block: %s>, "
+                jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
                              "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
             }
             else if(scale_ptr[i] > 1/tol) {
                 scale_ptr[i] = tol;
                 solver->using_max_min_scaling_flag = 1; /* Using minimum scaling */
-                jmi_log_node(block->log, logWarning, "Warning", "Using minimal scaling factor in <block: %s>, "
+                jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
                              "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
             }
             else
@@ -1456,7 +1472,8 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     }
     
     /*Deallocate Kinsol */
-    KINFree(&(solver->kin_mem));
+    if(solver->kin_mem)
+        KINFree(&(solver->kin_mem));
     /*Deallocate struct */
     free(solver);
     block->solver = 0;
@@ -1554,7 +1571,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         */
         flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
         if(flag) {        
-            jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %s> "
+            jmi_log_node(log, logWarning, "ErrorReadingInitialGuess", "<errorCode: %d> returned from <block: %s> "
                          "when reading initial guess.", flag, block->label);
             return flag;
         }
@@ -1643,7 +1660,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
         if(flagNonscaled < 0) {
-            jmi_log_node(log, logWarning, "Warning", "The equations with initial scaling didn't converge to a "
+            jmi_log_node(log, logWarning, "NonConverge", "The equations with initial scaling didn't converge to a "
                          "solution in <block: %s>", block->label);
         }
         /* Update the scaling  */

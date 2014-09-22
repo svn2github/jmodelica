@@ -144,13 +144,13 @@ endif()
 
 #Install the libraries
 install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
-    DESTINATION "${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary")
+    DESTINATION "${RTLIB_LIB_DIR}")
 
 #Install header files
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-    DESTINATION "${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary"
+    DESTINATION "${RTLIB_INCLUDE_DIR}"
     FILES_MATCHING PATTERN "*.h")
     
 install(FILES "${MSLCSOURCES}/ModelicaStandardTables.h"
-    DESTINATION "${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary")
+    DESTINATION "${RTLIB_INCLUDE_DIR}")
 

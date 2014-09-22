@@ -28,7 +28,7 @@ aspect FExpToCasADi {
     public class ModelicaCompiler {
         public FClass compileModelNoCodeGen(String name[], String cl)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-            return compileModel(name, cl, createTargetObject("nocodegen", null));
+            return compileModel(name, cl, createTargetObject("nocodegen", null), null);
         }
     }
 

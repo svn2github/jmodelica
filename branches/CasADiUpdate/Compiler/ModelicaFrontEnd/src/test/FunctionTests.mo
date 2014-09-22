@@ -1373,14 +1373,6 @@ fclass FunctionTests.FunctionBinding22
  Real e.g = FunctionTests.FunctionBinding22.f1(time + 1, FunctionTests.FunctionBinding22.f2(time + 1 + 2));
 
 public
- function FunctionTests.FunctionBinding22.f2
-  input Real a;
-  output Real b;
- algorithm
-  b := a + 3;
-  return;
- end FunctionTests.FunctionBinding22.f2;
-
  function FunctionTests.FunctionBinding22.f1
   input Real a;
   input Real b := FunctionTests.FunctionBinding22.f2(a + 2);
@@ -1389,6 +1381,14 @@ public
   c := a + b;
   return;
  end FunctionTests.FunctionBinding22.f1;
+
+ function FunctionTests.FunctionBinding22.f2
+  input Real a;
+  output Real b;
+ algorithm
+  b := a + 3;
+  return;
+ end FunctionTests.FunctionBinding22.f2;
 
 end FunctionTests.FunctionBinding22;
 ")})));
@@ -6762,14 +6762,6 @@ equation
  x = FunctionTests.ArrayOutputScalarization11.f2();
 
 public
- function FunctionTests.ArrayOutputScalarization11.f1
-  output Real[2] x;
- algorithm
-  x[1] := 1;
-  x[2] := 2;
-  return;
- end FunctionTests.ArrayOutputScalarization11.f1;
-
  function FunctionTests.ArrayOutputScalarization11.f2
   output Real x;
   Real[2] y;
@@ -6778,6 +6770,14 @@ public
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization11.f2;
+
+ function FunctionTests.ArrayOutputScalarization11.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization11.f1;
 
 end FunctionTests.ArrayOutputScalarization11;
 ")})));
@@ -6811,14 +6811,6 @@ equation
  x = FunctionTests.ArrayOutputScalarization12.f2();
 
 public
- function FunctionTests.ArrayOutputScalarization12.f1
-  output Real[2] x;
- algorithm
-  x[1] := 1;
-  x[2] := 2;
-  return;
- end FunctionTests.ArrayOutputScalarization12.f1;
-
  function FunctionTests.ArrayOutputScalarization12.f2
   output Real x;
   Real[2] y;
@@ -6831,7 +6823,15 @@ public
   return;
  end FunctionTests.ArrayOutputScalarization12.f2;
 
-end FunctionTests.ArrayOutputScalarization12;
+ function FunctionTests.ArrayOutputScalarization12.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization12.f1;
+
+ end FunctionTests.ArrayOutputScalarization12;
 ")})));
 end ArrayOutputScalarization12;
 
@@ -6863,14 +6863,6 @@ equation
  x = FunctionTests.ArrayOutputScalarization13.f2();
 
 public
- function FunctionTests.ArrayOutputScalarization13.f1
-  output Real[2] x;
- algorithm
-  x[1] := 1;
-  x[2] := 2;
-  return;
- end FunctionTests.ArrayOutputScalarization13.f1;
-
  function FunctionTests.ArrayOutputScalarization13.f2
   output Real x;
   Real y;
@@ -6881,6 +6873,14 @@ public
   x := y;
   return;
  end FunctionTests.ArrayOutputScalarization13.f2;
+
+ function FunctionTests.ArrayOutputScalarization13.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization13.f1;
 
 end FunctionTests.ArrayOutputScalarization13;
 ")})));
@@ -7086,16 +7086,6 @@ equation
  x = FunctionTests.ArrayOutputScalarization18.f1({1, 2});
 
 public
- function FunctionTests.ArrayOutputScalarization18.f2
-  input Real[:] a2;
-  output Real[size(a2, 1)] x2;
- algorithm
-  for i1 in 1:size(a2, 1) loop
-   x2[i1] := 2 * a2[i1];
-  end for;
-  return;
- end FunctionTests.ArrayOutputScalarization18.f2;
-
  function FunctionTests.ArrayOutputScalarization18.f1
   input Real[:] a1;
   output Real x1;
@@ -7114,8 +7104,17 @@ public
   return;
  end FunctionTests.ArrayOutputScalarization18.f1;
 
+ function FunctionTests.ArrayOutputScalarization18.f2
+  input Real[:] a2;
+  output Real[size(a2, 1)] x2;
+ algorithm
+  for i1 in 1:size(a2, 1) loop
+   x2[i1] := 2 * a2[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayOutputScalarization18.f2;
+
 end FunctionTests.ArrayOutputScalarization18;
-			
 ")})));
 end ArrayOutputScalarization18;
 
@@ -7150,16 +7149,6 @@ equation
  x = FunctionTests.ArrayOutputScalarization19.f1({1, 2});
 
 public
- function FunctionTests.ArrayOutputScalarization19.f2
-  input Real[:] a2;
-  output Real[size(a2, 1)] x2;
- algorithm
-  for i1 in 1:size(a2, 1) loop
-   x2[i1] := 2 * a2[i1];
-  end for;
-  return;
- end FunctionTests.ArrayOutputScalarization19.f2;
-
  function FunctionTests.ArrayOutputScalarization19.f1
   input Real[:] a1;
   output Real x1;
@@ -7171,7 +7160,17 @@ public
   return;
  end FunctionTests.ArrayOutputScalarization19.f1;
 
-end FunctionTests.ArrayOutputScalarization19;
+ function FunctionTests.ArrayOutputScalarization19.f2
+  input Real[:] a2;
+  output Real[size(a2, 1)] x2;
+ algorithm
+  for i1 in 1:size(a2, 1) loop
+   x2[i1] := 2 * a2[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayOutputScalarization19.f2;
+
+ end FunctionTests.ArrayOutputScalarization19;
 ")})));
 end ArrayOutputScalarization19;
 
@@ -9868,13 +9867,13 @@ end UnknownArray45;
 model UnknownArray46
     function f2
         input Real[:] x;
-        output Real[:] y;
+        output Real[size(x,1)] y;
       algorithm
         y := x;
     end f2;
     function f1
         input Real[:] x;
-        output Real[:] y;
+        output Real[size(x,1)] y;
       algorithm
         y := f2(if size(x,1) > 1 then x else x);
     end f1;
@@ -9895,7 +9894,7 @@ equation
 public
  function FunctionTests.UnknownArray46.f1
   input Real[:] x;
-  output Real[:] y;
+  output Real[size(x, 1)] y;
   Real[:] temp_1;
  algorithm
   size(temp_1) := {size(x, 1)};
@@ -9908,7 +9907,7 @@ public
 
  function FunctionTests.UnknownArray46.f2
   input Real[:] x;
-  output Real[:] y;
+  output Real[size(x, 1)] y;
  algorithm
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
@@ -12208,6 +12207,66 @@ end FunctionTests.MinOnInput1;
 end MinOnInput1;
 
 package UnknownSize
+
+package FuncCallInSize
+    package P
+        function f
+            input Integer n;
+            output Real[f2(n)] y = 1:n;
+          algorithm
+        end f;
+        function f2
+            input Integer n;
+            output Integer y = n;
+          algorithm
+        end f2;
+    end P;
+    
+    model FromOtherPackage
+        Real[2] y1 = P.f(2);
+        constant Integer m = 2;
+        Real[:] y2 = P.f(m);
+        
+        annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_FuncCallInSize_FromOtherPackage",
+            description="Scalarization of functions: Function call from other package in declaration size",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage
+ Real y1[1];
+ Real y1[2];
+ constant Integer m = 2;
+ Real y2[1];
+ Real y2[2];
+equation
+ ({y1[1], y1[2]}) = FunctionTests.UnknownSize.FuncCallInSize.P.f(2);
+ ({y2[1], y2[2]}) = FunctionTests.UnknownSize.FuncCallInSize.P.f(2);
+
+public
+ function FunctionTests.UnknownSize.FuncCallInSize.P.f
+  input Integer n;
+  output Real[FunctionTests.UnknownSize.FuncCallInSize.P.f2(n)] y;
+ algorithm
+  for i1 in 1:n loop
+   y[i1] := i1;
+  end for;
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.P.f;
+
+ function FunctionTests.UnknownSize.FuncCallInSize.P.f2
+  input Integer n;
+  output Integer y;
+ algorithm
+  y := n;
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.P.f2;
+
+end FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage;
+")})));
+end FromOtherPackage;
+end FuncCallInSize;
 
 package Hidden
 

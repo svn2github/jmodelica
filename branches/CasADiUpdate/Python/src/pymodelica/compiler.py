@@ -23,7 +23,7 @@ option settings will be used.
 
 import os
 import sys
-import platform
+import platform as plt
 import logging
 from subprocess import Popen, PIPE
 from compiler_logging import CompilerLogHandler
@@ -35,9 +35,9 @@ from pymodelica.common import xmlparser
 from pymodelica.common.core import get_unit_name, list_to_string
 
 
-def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0',
-                compiler_options={}, compile_to='.', compiler_log_level='warning',
-                separate_process=True, jvm_args=''):
+def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
+                platform='auto', compiler_options={}, compile_to='.', 
+                compiler_log_level='warning', separate_process=True, jvm_args=''):
     """ 
     Compile a Modelica model to an FMU.
     
@@ -94,6 +94,16 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             The FMI version. Valid options are '1.0' and '2.0'.
             Default: '1.0'
             
+        platform --
+            Set platform, controls whether a 32 or 64 bit FMU is generated. This 
+            option is only available for Windows.
+            Valid options are:
+              - 'auto': platform is selected automatically. This is the only 
+                valid option for linux and darwin.
+              - 'win32': generate a 32 bit FMU
+              - 'win64': generate a 64 bit FMU
+            Default: 'auto'
+            
         compiler_options --
             Options for the compiler.
             Default: Empty dict.
@@ -136,7 +146,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
     if (target != "me" and target != "cs" and target != "me+cs"):
         raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")
     return _compile_unit(class_name, file_name, compiler, target, version,
-                compiler_options, compile_to, compiler_log_level,
+                platform, compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)       
 
 def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, 
@@ -216,7 +226,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
         created and a list of warnings that was raised.
     
     """
-    return _compile_unit(class_name, file_name, compiler, 'fmux', None,
+    return _compile_unit(class_name, file_name, compiler, 'fmux', None, 'auto',
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)
 
@@ -304,12 +314,12 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
         created and a list of warnings that was raised.
     
     """
-    return _compile_unit(class_name, file_name, compiler, 'jmu', None, 
+    return _compile_unit(class_name, file_name, compiler, 'jmu', None, 'auto',
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)
 
 def _compile_unit(class_name, file_name, compiler, target, version,
-                compiler_options, compile_to, compiler_log_level,
+                platform, compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args):
     """
     Helper function for compile_fmu, compile_jmu and compile_fmux.
@@ -321,7 +331,10 @@ def _compile_unit(class_name, file_name, compiler, target, version,
     if isinstance(file_name, basestring):
         file_name = [file_name]
         
-    if not separate_process:   
+    if platform == 'auto':
+        platform = _get_platform()
+        
+    if not separate_process:
         # get a compiler based on 'compiler' argument or files listed in file_name
         comp = _get_compiler(files=file_name, selected_compiler=compiler)
         # set compiler options
@@ -330,15 +343,19 @@ def _compile_unit(class_name, file_name, compiler, target, version,
         # set log level
         comp.set_compiler_logger(compiler_log_level)
         
+        # set platform
+        comp.set_target_platforms(platform)
+        
         # compile unit in java
         return comp.compile_Unit(class_name, file_name, target, version, compile_to)
 
     else:
-        return compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
-                                 compile_to, compiler_log_level, jvm_args)
+        return compile_separate_process(class_name, file_name, compiler, target, version, platform, 
+                                        compiler_options, compile_to, compiler_log_level, jvm_args)
 
-def compile_separate_process(class_name, file_name=[], compiler='auto', target='me', version='1.0', compiler_options={}, 
-                             compile_to='.', compiler_log_level='warning', jvm_args=''):
+def compile_separate_process(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
+                             platform='auto', compiler_options={}, compile_to='.', 
+                             compiler_log_level='warning', jvm_args=''):
     """
     Compile model in separate process.
     Requires environment variable SEPARATE_PROCESS_JVM to be set, otherwise defaults
@@ -370,6 +387,16 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             The FMI version. Valid options are '1.0' and '2.0'.
             Note: Must currently be set to '1.0'.
             
+        platform --
+            Set platform, controls whether a 32 or 64 bit FMU is generated. This 
+            option is only available for Windows.
+            Valid options are:
+              - 'auto': platform is selected automatically. This is the only 
+                valid option for linux and darwin.
+              - 'win32': generate a 32 bit FMU
+              - 'win64': generate a 64 bit FMU
+            Default: 'auto'
+
         compiler_options --
             Options for the compiler.
             Default: Empty dict.
@@ -410,6 +437,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     else:
         JVM_ARGS = pym.environ['JVM_ARGS']
         
+    if platform == 'auto':
+        platform = _get_platform()
+        
     LOG = '-log=' + _gen_log_level(compiler_log_level)
 
     OPTIONS = '-opt=' + _gen_compiler_options(compiler_options)
@@ -418,7 +448,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     VERSION = "-version=" + str(version) #In case it is None
     
-    PLATFORM = "-platform=" + _get_platform()
+    PLATFORM = "-platform=" + platform
     
     OUT = "-out=" + compile_to
     
@@ -572,7 +602,7 @@ def _get_platform():
         # assume linux
         _platform = 'linux'
     
-    (bits, linkage) =  platform.architecture()
+    (bits, linkage) =  plt.architecture()
     if bits == '32bit':
         _platform = _platform +'32'
     else:

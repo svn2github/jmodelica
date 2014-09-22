@@ -596,6 +596,35 @@ aspect ContentCheck {
         contentCheckAsOperator(checkType);
         super.contentCheck(checkType);
     }
+    
+    public void FExternalStmt.contentCheck(ErrorCheckType checkType) {
+        getFExternalLanguage().contentCheck(checkType, this);
+    }
+    
+    public void FExternalLanguage.contentCheck(ErrorCheckType checkType, FExternalStmt stmt) {
+        
+    }
+    
+    public void FFortran77ExternalLanguage.contentCheck(ErrorCheckType checkType, FExternalStmt stmt) {
+        for (FExp arg : stmt.getArgs()) {
+            arg.type().contentCheckFortranArg(checkType, stmt);
+        }
+        if (stmt.hasReturnVar()) {
+            stmt.getReturnVar().type().contentCheckFortranArg(checkType, stmt);
+        }
+    }
+    
+    public void FType.contentCheckFortranArg(ErrorCheckType checkType, FExternalStmt stmt) {
+        
+    }
+    
+    public void FStringType.contentCheckFortranArg(ErrorCheckType checkType, FExternalStmt stmt) {
+        String funcName = stmt.containingInstClassDecl().qualifiedName();
+        boolean islapack = funcName.startsWith("Modelica.Math.Matrices.LAPACK");
+        if (!islapack) {
+            stmt.error("Passing strings to external fortran functions is not allowed");
+        }
+    }
 
     /**
      * Get the class this restriction is attached to.

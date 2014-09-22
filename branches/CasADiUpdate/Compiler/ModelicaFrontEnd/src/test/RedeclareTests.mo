@@ -616,7 +616,7 @@ Semantic error at line 651, column 32:
 end RedeclareTestOx116_Err;
 
 
-/* Does not work - the modification of y is reported as an error.
+/* Does not work - the modification of y is reported as an error.*/
 model RedeclareTestOx12 "Constraining clause example."
  
   model A
@@ -645,8 +645,35 @@ fclass RedeclareTests.RedeclareTestOx12
 end RedeclareTests.RedeclareTestOx12;
 ")})));
 end RedeclareTestOx12;
-*/
- 
+
+
+model RedeclareTestOx121
+    model A
+        Real x;
+    end A;
+    
+    model B
+        extends A;
+        parameter Real y = 1;
+    end B;
+    
+    model C
+        replaceable B a(y = 2) constrainedby A;
+    end C;
+    
+    C c(redeclare A a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx121",
+            description="Modification to parameter that is not available in final component but valid at the point it is added",
+            flatModel="
+fclass RedeclareTests.RedeclareTestOx121
+ Real c.a.x;
+end RedeclareTests.RedeclareTestOx121;
+")})));
+end RedeclareTestOx121;
+
 
 model RedeclareTestOx13 "Constraining clause example."
  
@@ -3327,6 +3354,43 @@ fclass RedeclareTests.RedeclareTest42
 end RedeclareTests.RedeclareTest42;
 ")})));
 end RedeclareTest42;
+
+
+model RedeclareTest43
+    package A
+        replaceable model B
+        end B;
+    end A;
+    
+    package C
+        package D
+            extends A;
+            redeclare model extends B
+                Real x = E.a;
+            end B;
+        end D;
+        
+        package E
+            constant Real a = 1;
+        end E;
+    end C;
+    
+    package F
+        extends C.D;
+    end F;
+    
+    F.B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest43",
+            description="Class lookup from inside redeclare class extends referring to class in surrounding package",
+            flatModel="
+fclass RedeclareTests.RedeclareTest43
+ Real b.x = 1.0;
+end RedeclareTests.RedeclareTest43;
+")})));
+end RedeclareTest43;
 
 
 model RedeclareElement1
