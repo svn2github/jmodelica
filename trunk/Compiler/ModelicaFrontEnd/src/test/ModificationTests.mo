@@ -2434,4 +2434,57 @@ end ModificationTests.StartPropagation8;
 end StartPropagation8;
 
 
+model ModificationFlattening1
+    package A
+        type B = Real;
+    end A;
+    
+    package C
+        extends A(B(min = f(0)));
+    end C;
+    
+    record R
+        C.B x;
+    end R;
+    
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 1;
+    end f;
+    
+    R r;
+equation
+    r.x = time + 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ModificationFlattening1",
+            description="Flattening of functions used in modifications",
+            flatModel="
+fclass ModificationTests.ModificationFlattening1
+ ModificationTests.ModificationFlattening1.R r;
+equation
+ r.x = time + 2;
+
+public
+ function ModificationTests.ModificationFlattening1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end ModificationTests.ModificationFlattening1.f;
+
+ record ModificationTests.ModificationFlattening1.R
+  ModificationTests.ModificationFlattening1.C.B x(min = ModificationTests.ModificationFlattening1.f(0));
+ end ModificationTests.ModificationFlattening1.R;
+
+ type ModificationTests.ModificationFlattening1.C.B = Real(min = ModificationTests.ModificationFlattening1.f(0));
+end ModificationTests.ModificationFlattening1;
+")})));
+end ModificationFlattening1;
+
+
 end ModificationTests;

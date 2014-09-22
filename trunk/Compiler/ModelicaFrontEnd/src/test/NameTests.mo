@@ -1454,6 +1454,16 @@ model ConstantLookup26
 fclass NameTests.ConstantLookup26
  constant Real x[2] = {1, 2};
  Real y[2] = {1.0, 2.0};
+
+public
+ record NameTests.ExtraForConstantLookup26.F.G
+  Real a;
+ end NameTests.ExtraForConstantLookup26.F.G;
+
+ record NameTests.ExtraForConstantLookup26.E.C
+  Real a;
+ end NameTests.ExtraForConstantLookup26.E.C;
+
 end NameTests.ConstantLookup26;
 ")})));
 end ConstantLookup26;

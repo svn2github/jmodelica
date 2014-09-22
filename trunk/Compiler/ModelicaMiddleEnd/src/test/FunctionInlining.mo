@@ -1179,24 +1179,24 @@ public
 end FunctionInlining.ExternalInline2;
 ")})));
 	end ExternalInline2;
-	
-	model UninlinableFunction1
-		function f1
-			input Real x1;
-			input Real x2;
-			output Real y = f4(x1);
-		algorithm
+
+    model UninlinableFunction1
+        function f1
+            input Real x1;
+            input Real x2;
+            output Real y = f4(x1);
+        algorithm
             while y < x2 loop
-				y := y + f3(x1, x2);
+                y := y + f3(x1, x2);
             end while;
-		end f1;
-		
-		function f2
-			input Real x;
-			output Real y = x;
-		algorithm
-		end f2;
-		
+        end f1;
+        
+        function f2
+            input Real x;
+            output Real y = x;
+        algorithm
+        end f2;
+        
         function f3
             input Real x1;
             input Real x2;
@@ -1214,20 +1214,20 @@ end FunctionInlining.ExternalInline2;
         algorithm
         end f4;
         
-		Real z[3] = 1:size(z,1);
-		Real w[2];
-	equation
-		w[1] = f1(z[2], z[3]);
-		w[2] = f2(z[1]);
+        Real z[3] = 1:size(z,1);
+        Real w[2];
+    equation
+        w[1] = f1(z[2], z[3]);
+        w[2] = f2(z[1]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="UninlinableFunction1",
-			description="Make sure that only unused functions are removed",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UninlinableFunction1",
+            description="Make sure that only unused functions are removed",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.UninlinableFunction1
  Real z[1];
  Real z[2];
@@ -1242,14 +1242,6 @@ equation
  z[3] = 3;
 
 public
- function FunctionInlining.UninlinableFunction1.f4
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- end FunctionInlining.UninlinableFunction1.f4;
-
  function FunctionInlining.UninlinableFunction1.f1
   input Real x1;
   input Real x2;
@@ -1262,7 +1254,15 @@ public
   return;
  end FunctionInlining.UninlinableFunction1.f1;
 
- function FunctionInlining.UninlinableFunction1.f3
+ function FunctionInlining.UninlinableFunction1.f4
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end FunctionInlining.UninlinableFunction1.f4;
+
+  function FunctionInlining.UninlinableFunction1.f3
   input Real x1;
   input Real x2;
   output Real y;
@@ -1276,7 +1276,7 @@ public
 
 end FunctionInlining.UninlinableFunction1;
 ")})));
-	end UninlinableFunction1;
+    end UninlinableFunction1;
     
     
     model IfStatementInline1
