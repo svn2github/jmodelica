@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <map>
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "boost/flyweight.hpp"
 
 #include "types/VariableType.hpp"
@@ -43,7 +43,7 @@ class Model;
 class Variable : public OwnedNode {
     public:
         typedef std::string AttributeKey; 
-        typedef CasADi::MX AttributeValue;
+        typedef casadi::MX AttributeValue;
     protected:
         typedef boost::flyweights::flyweight<std::string> AttributeKeyInternal;
         typedef std::map<AttributeKeyInternal,AttributeValue> attributeMap;
@@ -74,7 +74,7 @@ class Variable : public OwnedNode {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        Variable(Model *owner, CasADi::MX var, Causality causality,
+        Variable(Model *owner, casadi::MX var, Causality causality,
                 Variability variability, 
                 Ref<VariableType> declaredType = Ref<VariableType>());
         
@@ -93,36 +93,36 @@ class Variable : public OwnedNode {
         
         /* Getters and setters for standard Modelica attributes */
         void setQuantity(std::string quantity);
-        void setQuantity(CasADi::MX quantity);
-        CasADi::MX* getQuantity();
+        void setQuantity(casadi::MX quantity);
+        casadi::MX* getQuantity();
         
         void setNominal(double nominal);
-        void setNominal(CasADi::MX nominal);
-        CasADi::MX* getNominal();
+        void setNominal(casadi::MX nominal);
+        casadi::MX* getNominal();
         
         void setUnit(std::string unit);
-        void setUnit(CasADi::MX unit);
-        CasADi::MX* getUnit();
+        void setUnit(casadi::MX unit);
+        casadi::MX* getUnit();
         
         void setDisplayUnit(std::string displayUnit);
-        void setDisplayUnit(CasADi::MX displayUnit);
-        CasADi::MX* getDisplayUnit();
+        void setDisplayUnit(casadi::MX displayUnit);
+        casadi::MX* getDisplayUnit();
         
         void setMin(double min);
-        void setMin(CasADi::MX min);
-        CasADi::MX* getMin();
+        void setMin(casadi::MX min);
+        casadi::MX* getMin();
         
         void setMax(double max);
-        void setMax(CasADi::MX max);
-        CasADi::MX* getMax();
+        void setMax(casadi::MX max);
+        casadi::MX* getMax();
         
         void setStart(double start);
-        void setStart(CasADi::MX start);
-        CasADi::MX* getStart();
+        void setStart(casadi::MX start);
+        casadi::MX* getStart();
         
         void setFixed(bool fixed);
-        void setFixed(CasADi::MX fixed);
-        CasADi::MX* getFixed();
+        void setFixed(casadi::MX fixed);
+        casadi::MX* getFixed();
         
         
         
@@ -134,7 +134,7 @@ class Variable : public OwnedNode {
         /**
          * @return A MX
          */        
-        const CasADi::MX getVar() const;
+        const casadi::MX getVar() const;
         /**
          * @return An enum for the primitive data type.
          */ 
@@ -199,7 +199,7 @@ class Variable : public OwnedNode {
         Ref<Variable> myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
         bool negated;
         Ref<VariableType> declaredType;
-        CasADi::MX var;
+        casadi::MX var;
         attributeMap attributes;
         AttributeValue* getAttributeForAlias(AttributeKey key);
         AttributeKey keyForAlias(AttributeKey key) const;
@@ -223,7 +223,7 @@ inline std::string Variable::getName() const { return var.getName(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 inline void Variable::setDeclaredType(Ref<VariableType> declaredType) { this->declaredType = declaredType; }
 inline Ref<VariableType> Variable::getDeclaredType() const { return declaredType; }
-inline const CasADi::MX Variable::getVar() const { return var; }
+inline const casadi::MX Variable::getVar() const { return var; }
 inline const Variable::Causality Variable::getCausality() const { return causality; }
 inline const Variable::Variability Variable::getVariability() const { return variability; }
 }; // End namespace

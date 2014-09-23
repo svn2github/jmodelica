@@ -200,7 +200,7 @@ class TestLocalDAECollocator(object):
         col = LocalDAECollocator(op, opts)
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
                 [435.4425832, 333.42862629], rtol=1e-4)
 
         # Check compute initial guess for minimum time
@@ -278,7 +278,7 @@ class TestLocalDAECollocator(object):
         col = res.solver
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
+                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
                 [0.85693481, 0.12910473])
 
         # #3509
@@ -1161,11 +1161,11 @@ class TestLocalDAECollocator(object):
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_10)),
-                 "Matrix<SX>((der(x1)_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
+                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
                  "-x2_1_1)+u_1_1)))")
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_20)),
-            "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
+            "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
             "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))")
 
     @testattr(casadi = True)

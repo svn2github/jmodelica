@@ -15,11 +15,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <utility>
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "types/RealType.hpp"
 namespace ModelicaCasADi 
 {
-using std::string; using CasADi::MX;
+using std::string; using casadi::MX;
 RealType::RealType(){
     // Default attributes for non parameter/constant Real type, according to
     // Modelica specification.

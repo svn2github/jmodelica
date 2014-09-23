@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "std_vector.i"
 %include "exception.i"
 
-%import "casadi.i"
+%import "casadi_core.i"
 
 
 %{

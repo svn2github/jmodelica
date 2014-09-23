@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 
 #include "ModelFunction.hpp"
 #include "types/VariableType.hpp"
@@ -72,7 +72,7 @@ class Model: public RefCountedNode {
                                   // variables may be explicitly defined with a number
         }; // End enum VariableKind
         /** Create a blank, uninitialized Model */
-    Model() { dirty = false; timeVar = CasADi::MX(0); /* todo: just create a time variable instead? */}
+    Model() { dirty = false; timeVar = casadi::MX(0); /* todo: just create a time variable instead? */}
         /** Initialize the Model, before populating it.
          * @param string identifier, typically <packagename>_<classname>, default empty string */
         void initializeModel(std::string identifier = "");
@@ -90,9 +90,9 @@ class Model: public RefCountedNode {
                  const std::vector<double> &values);
 
         /** @param A MX */
-        void setTimeVariable(CasADi::MX timeVar);
+        void setTimeVariable(casadi::MX timeVar);
         /** @return A MX, this Model's time variable */
-        CasADi::MX getTimeVariable();
+        casadi::MX getTimeVariable();
         
         /** 
          * Variables are assigned a default VariableType if they do not have one set. 
@@ -164,18 +164,18 @@ class Model: public RefCountedNode {
          * @param A MX
          * @return A double
          */
-        double evaluateExpression(CasADi::MX exp);        
+        double evaluateExpression(casadi::MX exp);        
         
         /** 
          * Returns all initial equations in a stacked MX on the form: lhs - rhs.
          * @return A MX.
          */
-        const CasADi::MX getInitialResidual() const; 
+        const casadi::MX getInitialResidual() const; 
         /** 
          * Returns all DAE equations in a stacked MX on the form: lhs - rhs.
          * @return A MX.
          */
-        const CasADi::MX getDaeResidual() const; 
+        const casadi::MX getDaeResidual() const; 
 
         std::vector< Ref< Equation> > getDaeEquations() const;
         std::vector< Ref< Equation> > getInitialEquations() const;
@@ -200,10 +200,10 @@ class Model: public RefCountedNode {
         /// Identifier, typically <packagename>_<classname>
         std::string identifier;
         /// The MX for independent parameters and constants. Filled by calculateValuesForDependentParameters.
-        std::vector<CasADi::MX> paramAndConstMXVec;
+        std::vector<casadi::MX> paramAndConstMXVec;
         /// The values for independent parameters and constants. Filled by calculateValuesForDependentParameters. 
         std::vector<double> paramAndConstValVec;
-        CasADi::MX timeVar;
+        casadi::MX timeVar;
         /// Vector containing pointers to all variables.
         std::vector< Variable * > z;  
         /// Vector containing pointers to DAE equations
@@ -232,7 +232,7 @@ class Model: public RefCountedNode {
         /// Adds the MX and their values for independent parameters and constants to paramAndConst(Val/MX)Vec
         void setUpValAndSymbolVecs();
         ///  Tries to evaluate the expression exp using values and nodes in paramAnd(ConstMX/Val)Vec
-        double evalMX(CasADi::MX exp);
+        double evalMX(casadi::MX exp);
                 
         typeMap typesInModel;
         void assignVariableTypeToRealVariable(Ref<Variable> var);
@@ -242,8 +242,8 @@ class Model: public RefCountedNode {
         void assignVariableTypeToVariable(Ref<Variable> var);
 };
 inline std::string Model::getIdentifier() { return identifier; }
-inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
-inline CasADi::MX Model::getTimeVariable() {return timeVar;}
+inline void Model::setTimeVariable(casadi::MX timeVar) {this->timeVar = timeVar;}
+inline casadi::MX Model::getTimeVariable() {return timeVar;}
 inline void Model::initializeModel(std::string identifier) {
         this->identifier = identifier;
 }

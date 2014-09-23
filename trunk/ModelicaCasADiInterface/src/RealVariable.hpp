@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_REAL_VAR
 #define _MODELICACASADI_REAL_VAR
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "types/VariableType.hpp"
 #include "Ref.hpp"
 #include "Variable.hpp"
@@ -35,7 +35,7 @@ class RealVariable : public Variable {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        RealVariable(Model *owner, CasADi::MX var, Causality causality, 
+        RealVariable(Model *owner, casadi::MX var, Causality causality, 
                      Variability variability,
                      Ref<VariableType> declaredType = Ref<VariableType>());
         /**

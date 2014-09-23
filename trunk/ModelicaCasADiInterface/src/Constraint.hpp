@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_CONSTRAINT
 #define _MODELICACASADI_CONSTRAINT
 #include <iostream>
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "RefCountedNode.hpp"
 namespace ModelicaCasADi{
 class Constraint : public RefCountedNode {
@@ -36,16 +36,16 @@ class Constraint : public RefCountedNode {
          * @param A MX
          * @param A Type enum
          */
-        Constraint(CasADi::MX lhs, CasADi::MX rhs, Type ct);
+        Constraint(casadi::MX lhs, casadi::MX rhs, Type ct);
         /** @return A MX */                   
-        const CasADi::MX getLhs() const;
+        const casadi::MX getLhs() const;
         /** @return A MX */
-        const CasADi::MX getRhs() const;
+        const casadi::MX getRhs() const;
         /**
          * Returns the residual of the constraint as: left-hand-side - right-hand-side.
          * @return A MX
          */
-        const CasADi::MX getResidual() const; 
+        const casadi::MX getResidual() const; 
         /** @return An enum Type */
         Type getType() const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
@@ -53,14 +53,14 @@ class Constraint : public RefCountedNode {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        CasADi::MX lhs;
-        CasADi::MX rhs;
+        casadi::MX lhs;
+        casadi::MX rhs;
         Type ct;
 };
 inline Constraint::Constraint() {}
-inline const CasADi::MX Constraint::getLhs() const{ return lhs; }
-inline const CasADi::MX Constraint::getRhs() const { return rhs; }
-inline const CasADi::MX Constraint::getResidual() const{ return lhs - rhs; }
+inline const casadi::MX Constraint::getLhs() const{ return lhs; }
+inline const casadi::MX Constraint::getRhs() const { return rhs; }
+inline const casadi::MX Constraint::getResidual() const{ return lhs - rhs; }
 inline Constraint::Type Constraint::getType() const{ return ct; }
 }; // End namespace
 #endif

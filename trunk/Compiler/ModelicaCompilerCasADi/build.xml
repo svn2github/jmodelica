@@ -32,7 +32,7 @@
 	
 	<property name="jars" value="ModelicaCompiler,util"/>
     <property name="ModelicaCompiler.jar.packages" value="${base_package}"/>
-    <property name="util.jar.packages" value="org.jmodelica.util,casadi"/>
+    <property name="util.jar.packages" value="org.jmodelica.util,ifcasadi"/>
 	
 	<import file="../build-base.xml"/>
 </project>

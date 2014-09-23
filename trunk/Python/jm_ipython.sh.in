@@ -8,6 +8,6 @@ IPOPT_HOME=@IPOPT_HOME@ \
 CPPAD_HOME=@prefix@/ThirdParty/CppAD/ \
 SUNDIALS_HOME=@prefix@/ThirdParty/Sundials \
 PYTHONPATH=:@prefix@/Python/:@CASADI_HOME@ \
-LD_LIBRARY_PATH=:@IPOPT_HOME@/lib/:@prefix@/ThirdParty/Sundials/lib \
+LD_LIBRARY_PATH=:@IPOPT_HOME@/lib/:@prefix@/ThirdParty/Sundials/lib:@prefix@/ThirdParty/CasADi/lib \
 SEPARATE_PROCESS_JVM=@_JAVA_HOME_@ \
 ipython $@
