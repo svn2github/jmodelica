@@ -854,16 +854,6 @@ fclass OperatorRecordTests.OperatorOverload16
  constant String s2 = \"1.00000 + 2.00000j\";
 
 public
- function OperatorRecordTests.Cplx.'constructor'
-  input Real re;
-  input Real im := 0;
-  output OperatorRecordTests.Cplx c;
- algorithm
-  c.re := re;
-  c.im := im;
-  return;
- end OperatorRecordTests.Cplx.'constructor';
-
  function OperatorRecordTests.Cplx.'String'
   input OperatorRecordTests.Cplx a;
   output String b;
@@ -877,6 +867,16 @@ public
   end if;
   return;
  end OperatorRecordTests.Cplx.'String';
+
+ function OperatorRecordTests.Cplx.'constructor'
+  input Real re;
+  input Real im := 0;
+  output OperatorRecordTests.Cplx c;
+ algorithm
+  c.re := re;
+  c.im := im;
+  return;
+ end OperatorRecordTests.Cplx.'constructor';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -994,6 +994,15 @@ fclass OperatorRecordTests.OperatorOverload19
  discrete Boolean b = OperatorRecordTests.Cplx.'=='(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'=='
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re == b.re and a.im == b.im;
+  return;
+ end OperatorRecordTests.Cplx.'==';
+
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -1003,15 +1012,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.Cplx.'=='
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output Boolean c;
- algorithm
-  c := a.re == b.re and a.im == b.im;
-  return;
- end OperatorRecordTests.Cplx.'==';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -1039,6 +1039,15 @@ fclass OperatorRecordTests.OperatorOverload20
  discrete Boolean b = OperatorRecordTests.Cplx.'<>'(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'<>'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re <> b.re or a.im <> b.im;
+  return;
+ end OperatorRecordTests.Cplx.'<>';
+
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -1048,15 +1057,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.Cplx.'<>'
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output Boolean c;
- algorithm
-  c := a.re <> b.re or a.im <> b.im;
-  return;
- end OperatorRecordTests.Cplx.'<>';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -1084,6 +1084,15 @@ fclass OperatorRecordTests.OperatorOverload21
  discrete Boolean b = OperatorRecordTests.Cplx.'<'(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'<'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 < b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'<';
+
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -1093,15 +1102,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.Cplx.'<'
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output Boolean c;
- algorithm
-  c := a.re ^ 2 + a.im ^ 2 < b.re ^ 2 + b.im ^ 2;
-  return;
- end OperatorRecordTests.Cplx.'<';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -1129,6 +1129,15 @@ fclass OperatorRecordTests.OperatorOverload22
  discrete Boolean b = OperatorRecordTests.Cplx.'>'(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'>'
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 > b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'>';
+
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -1138,15 +1147,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.Cplx.'>'
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output Boolean c;
- algorithm
-  c := a.re ^ 2 + a.im ^ 2 > b.re ^ 2 + b.im ^ 2;
-  return;
- end OperatorRecordTests.Cplx.'>';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -1174,6 +1174,15 @@ fclass OperatorRecordTests.OperatorOverload23
  discrete Boolean b = OperatorRecordTests.Cplx.'<='(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'<='
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 <= b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'<=';
+
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -1183,15 +1192,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.Cplx.'<='
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output Boolean c;
- algorithm
-  c := a.re ^ 2 + a.im ^ 2 <= b.re ^ 2 + b.im ^ 2;
-  return;
- end OperatorRecordTests.Cplx.'<=';
 
  record OperatorRecordTests.Cplx
   Real re;
@@ -1219,6 +1219,15 @@ fclass OperatorRecordTests.OperatorOverload24
  discrete Boolean b = OperatorRecordTests.Cplx.'>='(c1, c2);
 
 public
+ function OperatorRecordTests.Cplx.'>='
+  input OperatorRecordTests.Cplx a;
+  input OperatorRecordTests.Cplx b;
+  output Boolean c;
+ algorithm
+  c := a.re ^ 2 + a.im ^ 2 >= b.re ^ 2 + b.im ^ 2;
+  return;
+ end OperatorRecordTests.Cplx.'>=';
+
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
   input Real im := 0;
@@ -1228,15 +1237,6 @@ public
   c.im := im;
   return;
  end OperatorRecordTests.Cplx.'constructor';
-
- function OperatorRecordTests.Cplx.'>='
-  input OperatorRecordTests.Cplx a;
-  input OperatorRecordTests.Cplx b;
-  output Boolean c;
- algorithm
-  c := a.re ^ 2 + a.im ^ 2 >= b.re ^ 2 + b.im ^ 2;
-  return;
- end OperatorRecordTests.Cplx.'>=';
 
  record OperatorRecordTests.Cplx
   Real re;

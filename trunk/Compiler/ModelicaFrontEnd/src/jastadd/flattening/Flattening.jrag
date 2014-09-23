@@ -201,18 +201,18 @@ aspect Flattening {
     public void InstDefaultArgument.flattenUsedFuncsAndEnums(FClass fc) {
         getFExp().flattenUsedFuncsAndEnums(fc);
     }
-	
-	public void InstRecord.flattenUsedFuncsAndEnums(FClass fc) {
-		super.flattenUsedFuncsAndEnums(fc);
-		getClassName().myInstClassDecl().flattenRecord(fc);
-	}
-	
-	public void FInstAccessExp.flattenUsedFuncsAndEnums(FClass fc) {
-		super.flattenUsedFuncsAndEnums(fc);
-		InstAccess ia = getInstAccess();
-		if (ia.isAssignable() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
-		    ia.myInstComponentDecl().flattenUsedFuncsAndEnums(fc);
-	}
+
+    public void InstRecord.flattenUsedFuncsAndEnums(FClass fc) {
+        super.flattenUsedFuncsAndEnums(fc);
+        flattenMyType(fc);
+    }
+
+    public void FInstAccessExp.flattenUsedFuncsAndEnums(FClass fc) {
+        super.flattenUsedFuncsAndEnums(fc);
+        InstAccess ia = getInstAccess();
+        if (ia.myInstComponentDecl().isRecord() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
+            ((InstAssignable) ia.myInstComponentDecl()).flattenMyType(fc);
+    }
 
     public void FExp.flattenUsedFuncsAndEnums(FClass fc) {
         super.flattenUsedFuncsAndEnums(fc);
@@ -839,7 +839,6 @@ aspect Flattening {
 
     public void InstRecord.flattenMyType(FClass fc) {
         myInstClass().flattenRecord(fc);
-        flattenUsedFuncsAndEnums(fc);
     }
 
     public void InstEnum.flattenMyType(FClass fc) {
