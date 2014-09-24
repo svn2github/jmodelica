@@ -44,7 +44,7 @@ aspect OptimicaExpressions {
 	*/
 	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	
-	eq FStartTimeExp.cevalCalc() {
+	eq FStartTimeExp.cevalCalc(VariableEvaluator evaluator) {
 		if (myFOptClass().startTimeAttributeSet()) {
 			return myFOptClass().startTimeAttributeCValue();
 		} else if (myFOptClass().startTimeInitialGuessAttributeSet()) {
@@ -54,7 +54,7 @@ aspect OptimicaExpressions {
 		}
 	}
 
-	eq FFinalTimeExp.cevalCalc() {
+	eq FFinalTimeExp.cevalCalc(VariableEvaluator evaluator) {
 		if (myFOptClass().finalTimeAttributeSet()) {
 			return myFOptClass().finalTimeAttributeCValue();
 		} else if (myFOptClass().finalTimeInitialGuessAttributeSet()) {
@@ -65,8 +65,8 @@ aspect OptimicaExpressions {
 	}
 	
 	// TODO: Can the argument affect the constant value of a timed variable? Should only be constant if the variable is. 
-	eq FTimedVariable.cevalCalc()    = getName().ceval();
-	eq InstTimedVariable.cevalCalc() = getName().ceval();
+	eq FTimedVariable.cevalCalc(VariableEvaluator evaluator)    = getName().ceval(evaluator);
+	eq InstTimedVariable.cevalCalc(VariableEvaluator evaluator) = getName().ceval(evaluator);
 	
 	public void FTimedVariable.enableAliasRewrite() {
 		super.enableAliasRewrite();

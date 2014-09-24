@@ -228,7 +228,7 @@ aspect VariabilityPropagation {
 		
 		if (callVariability.constantVariability()) {
 			try {
-				CValue[] val = getCall().cevalFunction();
+				CValue[] val = getCall().cevalFunction(defaultVariableEvaluator());
 				literals = new FExp[val.length];
 				for (int i = 0; i < val.length && i < getNumLeft(); i++)
 					if (getLeft(i).hasFExp())
