@@ -17,14 +17,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MXVECTORWRAP_HPP
 #define MXVECTORWRAP_HPP
 
-#include "casadi/casadi.hpp"
-#include "ifcasadi/MXVector.h"
+#include "symbolic/casadi.hpp"
+#include "casadi/MXVector.h"
 
-typedef ifcasadi::MXVector JMXVector;
+typedef casadi::MXVector JMXVector;
 
-inline std::vector<casadi::MX> toMXVector(const JMXVector &jmxvector) {
+inline std::vector<CasADi::MX> toMXVector(const JMXVector &jmxvector) {
     jlong p = JMXVector::getCPtr(jmxvector);
-    return **(std::vector<casadi::MX> **)&p;
+    return **(std::vector<CasADi::MX> **)&p;
 }
 
 #endif

@@ -86,7 +86,7 @@ message(STATUS "THIRDPARTY_DIR=${THIRDPARTY_DIR}")
 message(STATUS "BEAVER_JAR=${BEAVER_JAR}")
 
 find_library(CASADI_DLL
-  NAMES libcasadi_core.so libcasadi_core.dll
+  NAMES libcasadi.so libcasadi.dll
   PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
@@ -105,7 +105,6 @@ link_directories(${IPOPT_HOME}/lib)
 
 include_directories(src src/jcc)
 include_directories(${CASADI_HOME})
-include_directories(${CASADI_BUILD_DIR})
 
 #JNI
 find_package(JNI REQUIRED)

@@ -34,7 +34,6 @@ JMODELICA_HOME="@prefix@"
 JMODELICA_SRC="@abs_top_srcdir@"
 IPOPT_HOME="@IPOPT_HOME@"
 SUNDIALS_HOME="@prefix@/ThirdParty/Sundials"
-CASADI_HOME="@prefix@/ThirdParty/CasADi"
 ECLIPSE_HOME="@ECLIPSE_HOME@"
 BUILD="@abs_builddir@"
 if [[ "${JAVA_HOME}" == "" ]]; then
@@ -63,9 +62,6 @@ if [[ "${SUNDIALS_HOME}" != "" ]]; then
 fi
 if [[ "${IPOPT_HOME}" != "" ]]; then
   LIB_PATH="$(merge_path "${LIB_PATH}" "${IPOPT_HOME}/lib")"
-fi
-if [[ "${CASADI_HOME}" != "" ]]; then
-  LIB_PATH="$(merge_path "${LIB_PATH}" "${CASADI_HOME}/lib")"
 fi
 if [[ "${LIB_PATH}" != "" ]]; then
   LD_LIBRARY_PATH="$(merge_path "${LD_LIBRARY_PATH}" "${LIB_PATH}" /lib)"

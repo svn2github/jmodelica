@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_DER_VAR
 #define _MODELICACASADI_DER_VAR
 
-#include "casadi/casadi.hpp"
+#include "symbolic/casadi.hpp"
 #include "types/VariableType.hpp"
 #include "Ref.hpp"
 #include "RealVariable.hpp"
@@ -35,7 +35,7 @@ class DerivativeVariable : public RealVariable {
          * @param A pointer to a Variable
          * @param A VariableType, default is a reference to NULL. 
          */
-        DerivativeVariable(Model *owner, casadi::MX var, Ref<Variable> diffVar, 
+        DerivativeVariable(Model *owner, CasADi::MX var, Ref<Variable> diffVar, 
                            Ref<VariableType> declaredType = Ref<VariableType>()); 
         /** @return A pointer to a Variable */
         const Ref<Variable> getMyDifferentiatedVariable() const;

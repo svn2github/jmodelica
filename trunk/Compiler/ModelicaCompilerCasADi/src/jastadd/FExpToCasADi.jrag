@@ -13,13 +13,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import ifcasadi.ifcasadi;
-import ifcasadi.GenericType;
-import ifcasadi.OptionsFunctionality;
-import ifcasadi.MX;
-import ifcasadi.SharedObject;
-import ifcasadi.MXFunction;
-import ifcasadi.MXVector;
+import casadi.casadi;
+import casadi.GenericType;
+import casadi.OptionsFunctionality;
+import casadi.MX;
+import casadi.SharedObject;
+import casadi.FX;
+import casadi.MXFunction;
+import casadi.MXVector;
 
 aspect FExpToCasADi {
 
@@ -166,7 +167,7 @@ aspect FExpToCasADi {
                 }
             }
         }
-        MXVector updatedRhsExpressions = ifcasadi.substitute(getCall().toMXVector(), allVars, expressions);
+        MXVector updatedRhsExpressions = casadi.substitute(getCall().toMXVector(), allVars, expressions);
         for (int i = 0; i < lhsVec.size(); ++i) {
             expressions.set(findIndexOfMXInMXVector(lhsVec.get(i), allVars), updatedRhsExpressions.get(i));    
         }
@@ -184,7 +185,7 @@ aspect FExpToCasADi {
         lhsVec.add(getLeft().toMX());
         MXVector rhsVec = getRight().toMXVector();
         
-        MX updatedRhsExpression = ifcasadi.substitute(rhsVec, allVars, expressions).get(0);
+        MX updatedRhsExpression = casadi.substitute(rhsVec, allVars, expressions).get(0);
         int indexInAllCurrVars = findIndexOfMXInMXVector(lhsVec.get(0), allVars);
         expressions.set(indexInAllCurrVars, updatedRhsExpression);
         return expressions;
@@ -197,7 +198,7 @@ aspect FExpToCasADi {
      */
     int FStatement.findIndexOfMXInMXVector(MX node, MXVector vec){
         for (int i = 0; i < vec.size(); ++i) {
-            if (vec.get(i).isEqual(node)) {
+            if (casadi.isEqual(vec.get(i), node)) {
                 return i;
             }
         }
@@ -292,7 +293,7 @@ aspect FExpToCasADi {
     eq FExpExp.toMX() = getFExp().toMX().exp();
     
     // Boolean expressions
-    eq FIfExp.toMX() =  ifcasadi.if_else(getIfExp().toMX(), getThenExp().toMX(), getElseExp().toMX());
+    eq FIfExp.toMX() =  casadi.if_else(getIfExp().toMX(), getThenExp().toMX(), getElseExp().toMX());
     eq FGeqExp.toMX() = getRight().toMX().__le__(getLeft().toMX());
     eq FGtExp.toMX() = getRight().toMX().__lt__(getLeft().toMX());
     eq FLeqExp.toMX() = getLeft().toMX().__le__(getRight().toMX());
@@ -303,7 +304,7 @@ aspect FExpToCasADi {
     eq FOrExp.toMX() = getLeft().toMX().logic_or(getRight().toMX());
     
     // Other expressions
-    syn lazy MX FClass.timeMX() = ifcasadi.msym("time");
+    syn lazy MX FClass.timeMX() = new MX("time");
     eq FTimeExp.toMX() = myFClass().timeMX();
     /** @return A MX with the first output, and perhaps only output, for this function call */
     eq FFunctionCall.toMX() { 
@@ -445,7 +446,7 @@ aspect FExpToCasADi {
     // Literal expression
     eq FBooleanLitExpTrue.toMX() = new MX(1);
     eq FBooleanLitExpFalse.toMX() = new MX(0);
-    eq FStringLitExp.toMX() = ifcasadi.msym(getString());
+    eq FStringLitExp.toMX() = new MX(getString());
     eq FRealLitExp.toMX() = new MX(getValue());
     eq FIntegerLitExp.toMX() = new MX((double)getValue());
     
@@ -477,19 +478,18 @@ aspect FExpToCasADi {
     }
     
     
-    eq FEnumVariable.asMXVariable() = ifcasadi.msym("enum_" + getFQName().toString());
-    eq FVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
-    eq FDerivativeVariable.asMXVariable() = ifcasadi.msym("der(" + getFQName().toString() + ")");
-    eq FPreBooleanVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
-    eq FPreIntegerVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
-    eq FPreRealVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
-    eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
+    eq FEnumVariable.asMXVariable() = new MX("enum_" + getFQName().toString());
+    eq FVariable.asMXVariable() = new MX(getFQName().toString());
+    eq FDerivativeVariable.asMXVariable() = new MX("der(" + getFQName().toString() + ")");
+    eq FPreBooleanVariable.asMXVariable() = new MX("pre(" + getFQName().toString() + ")");
+    eq FPreIntegerVariable.asMXVariable() = new MX("pre(" + getFQName().toString() + ")");
+    eq FPreRealVariable.asMXVariable() = new MX("pre(" + getFQName().toString() + ")");
+    eq FFunctionVariable.asMXVariable() = new MX(getFQName().toString());
     
     eq FFunctionArray.asMXVector() {
         MXVector MXVec = new MXVector();
         for (int i = 0; i < size().numElements(); ++i) {
-            MX mx = ifcasadi.msym(getFQName().toString() + "_" +i);
-            MXVec.add(mx);
+            MXVec.add(new MX(getFQName().toString() + "_" +i));
         }
         return MXVec;
     }
@@ -512,7 +512,7 @@ aspect FExpToCasADi {
                 myFlattenedVariables.add(name());
                 myFlattenedVariables = fvar.createFullNestedName(myFlattenedVariables);
                 for (String str : myFlattenedVariables) {
-                    MX mx = ifcasadi.msym(str);
+                    MX mx = new MX(str);
                     MXVec.add(mx);
                     getParent().setMXVariableInFunctionDeclRecordVariableMap(str, mx);
                 }
@@ -592,7 +592,7 @@ aspect FExpToCasADi {
                 if (fleft.hasFExp()) {
                     MXVector fleftExpAsMXVex = fleft.getFExp().toMXVector();
                     for (int i = 0; i < fleftExpAsMXVex.size(); ++i) {
-                        if (fleftExpAsMXVex.get(i).isEqual(asMXVariable())) {
+                        if (casadi.isEqual(fleftExpAsMXVex.get(i), asMXVariable())) {
                             return outs.get(myOutIndex);
                         }
                         myOutIndex++;

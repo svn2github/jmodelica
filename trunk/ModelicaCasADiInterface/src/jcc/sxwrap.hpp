@@ -14,28 +14,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MXWRAP_HPP
-#define MXWRAP_HPP
+#ifndef SXWRAP_HPP
+#define SXWRAP_HPP
 
 #include "symbolic/casadi.hpp"
-#include "casadi/MX.h"
+#include "casadi/SX.h"
 
-typedef casadi::MX JMX;
+typedef casadi::SX JSX;
 
-inline CasADi::MX toMX(const JMX &jmx) {
-    jlong p = JMX::getCPtr(jmx);
-    return **(CasADi::MX **)&p;
+inline CasADi::SX toSX(const JSX &jsx) {
+    jlong p = JSX::getCPtr(jsx);
+    return **(CasADi::SX **)&p;
 }
 #ifdef org_jmodelica_modelica_compiler_FExp_H  // if JCC-generated FExp.h included:
-inline CasADi::MX toMX(const org::jmodelica::modelica::compiler::FExp &ex) { return toMX(ex.toMX()); }
+inline CasADi::SX toSX(const org::jmodelica::modelica::compiler::FExp &ex) { return toSX(ex.toSX()); }
 #endif
 #ifdef org_jmodelica_optimica_compiler_FExp_H  // if JCC-generated FExp.h included:
-inline CasADi::MX toMX(const org::jmodelica::optimica::compiler::FExp &ex) { return toMX(ex.toMX()); }
+inline CasADi::SX toSX(const org::jmodelica::optimica::compiler::FExp &ex) { return toSX(ex.toSX()); }
 #endif
 
-inline JMX toJMX(const CasADi::MX &ex) {
-    CasADi::MX *px = new CasADi::MX(ex);
-    return JMX(*(jlong *)&px, (jboolean)true);
+inline JSX toJSX(const CasADi::SX &ex) {
+    CasADi::SX *px = new CasADi::SX(ex);
+    return JSX(*(jlong *)&px, true);
 }
 
 #endif

@@ -15,7 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Constraint.hpp"
-using std::ostream; using casadi::MX;
+using std::ostream; using CasADi::MX;
 namespace ModelicaCasADi{
 Constraint::Constraint(MX lhs, MX rhs,
                    Constraint::Type ct) : lhs(lhs), rhs(rhs), ct(ct){ }

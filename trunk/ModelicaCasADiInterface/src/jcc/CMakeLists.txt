@@ -22,9 +22,9 @@ set(CLASSES_common
   java.lang.System
   java.lang.Object
   java.util.ArrayList
-  ifcasadi.MX
-  ifcasadi.MXFunction
-  ifcasadi.MXVector
+  casadi.MX
+  casadi.MXFunction
+  casadi.MXVector
   org.jmodelica.util.OptionRegistry
 )
 

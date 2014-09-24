@@ -29,22 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Model.hpp"
 #include "CompilerOptionsWrapper.hpp"
 
-#include "OptimizationProblem.hpp"
 namespace ModelicaCasADi {
 
-void transferModelFromModelicaCompiler(Ref<Model> m, 
-                           std::string modelName, 
-                           const std::vector<std::string> &modelFiles,
-                           Ref<CompilerOptionsWrapper> options, 
-                           std::string log_level);
-                           
-void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
-                           std::string modelName, 
+void transferModelicaModel(Ref<Model> model,
+                           std::string modelName,
                            const std::vector<std::string> &modelFiles, 
                            Ref<CompilerOptionsWrapper> options, 
                            std::string log_level);
-                           
-                           
 
 }; // End namespace
 

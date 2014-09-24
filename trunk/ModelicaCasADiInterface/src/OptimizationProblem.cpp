@@ -15,7 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "OptimizationProblem.hpp"
-using std::ostream; using casadi::MX;
+using std::ostream; using CasADi::MX;
 
 namespace ModelicaCasADi{
 
@@ -50,14 +50,14 @@ void OptimizationProblem::print(ostream& os) const {
     Model::print(os);
     os << "----------------------- Optimization information ------------------------\n\n";
     os << "Start time = ";
-    if (startTime.isEmpty()) {
+    if (startTime.isNull()) {
         os << "not set";
     } else {
         startTime.print(os);
     }
     
     os << "\nFinal time = ";
-    if (finalTime.isEmpty()) {
+    if (finalTime.isNull()) {
         os << "not set";
     } else {
         finalTime.print(os);
@@ -84,14 +84,14 @@ void OptimizationProblem::print(ostream& os) const {
     }
     
     os << "\n-- Objective integrand term --\n";
-    if (objectiveIntegrand.isEmpty()) {
+    if (objectiveIntegrand.isNull()) {
         os << "not set";
     } else {
         objectiveIntegrand.print(os);
     }
     
     os << "\n-- Objective term --\n";
-    if (objective.isEmpty()) {
+    if (objective.isNull()) {
         os << "not set";
     } else {
         objective.print(os);

@@ -15,7 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "TimedVariable.hpp"
-using std::ostream; using casadi::MX;
+using std::ostream; using CasADi::MX;
 using ModelicaCasADi::Variable;
 namespace ModelicaCasADi 
 {

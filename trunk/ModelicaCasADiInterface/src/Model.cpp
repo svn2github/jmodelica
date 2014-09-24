@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "DerivativeVariable.hpp"
 #include "Model.hpp"
 
-using casadi::MX; using casadi::MXFunction; 
+using CasADi::MX; using CasADi::MXFunction; 
 using std::vector; using std::ostream;
 using std::string; using std::pair;
 
@@ -450,7 +450,7 @@ void Model::print(std::ostream& os) const {
 
     using std::endl;
     os << "------------------------------- Variables -------------------------------\n" << endl;
-    if (!timeVar.isEmpty()) {
+    if (!timeVar.isNull()) {
         os << "Time variable: ";
         timeVar.print(os);
         os << endl;

@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ModelFunction.hpp"
 using std::ostream; using std::vector; using std::string;
-using casadi::MX;  using casadi::MXFunction;
+using CasADi::MX;  using CasADi::MXFunction;
 
 namespace ModelicaCasADi 
 {

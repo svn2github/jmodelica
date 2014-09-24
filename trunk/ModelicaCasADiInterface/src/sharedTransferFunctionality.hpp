@@ -24,9 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "jni.h"
 
 // JCC wrappers
-#include "ifcasadi/MX.h"
-#include "ifcasadi/MXFunction.h"
-#include "ifcasadi/MXVector.h"
+#include "casadi/MX.h"
+#include "casadi/MXFunction.h"
+#include "casadi/MXVector.h"
 
 // The ModelicaCasADi program
 #include "Model.hpp"
@@ -198,7 +198,7 @@ template <class FVar, class Comment>
 void transferCommentForVariable(ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv) {
     if(fv.hasFStringComment()) {
         Comment comment = Comment(fv.getFStringComment().this$);
-        var->setAttribute("comment", casadi::MX::sym(env->toString(comment.getComment().this$)));
+        var->setAttribute("comment", CasADi::MX(env->toString(comment.getComment().this$)));
     }
 }
 
