@@ -738,10 +738,11 @@ aspect CCodeGen {
 		// TODO: Check if there are any dynamic declarations first
 		str.print(next + "JMI_DYNAMIC_INIT()\n");
 		genVarDecls_C(p, str, p.indent(indent));
-		for (FFunctionVariable ffv : myNonInputs())
-			p.print(ffv, str, next);
-		for (FFunctionVariable ffv : myOutputs())
-			ffv.printNullOutputReplacement_C(p, str, next);
+        for (FFunctionVariable ffv : myNonInputs()) {
+            if (!ffv.hasInitArrayStmt) {
+                p.print(ffv, str, next);
+            }
+        }
     	p.print(getFAlgorithm(), str, next);
     	str.print(indent);
     	str.print("}\n\n");
@@ -1088,27 +1089,24 @@ aspect CCodeGen {
         tp.print(this, name, indent);
     }
 	
-	public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (!isOutput() || !isRecord())
-            print(p.createInitPrinter(str), name_C(), indent);
-	}
-	
-	public void FFunctionArray.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (!isOutput()) 
-            print(p.createInitPrinter(str), name_C(), indent);
-	}
-	
-	public void FFunctionVariable.printNullOutputReplacement_C(CodePrinter p, CodeStream str, String indent) {
-		if (isComposite()) {
-			String name_C = name_C();
-			String name_r = name_C + C_SUFFIX_NULL;
-			String next = p.indent(indent);
-			str.print(indent + "if (" + name_C + " == NULL) {\n");
-            print(p.createInitPrinter(str), name_r, p.indent(indent));
-			str.print(next + name_C + " = " + name_r + ";\n");
-			str.print(indent + "}\n");
-		}
-	}
+    public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite()) {
+            if (isOutput()) {
+                prettyPrintInitOutput_C(p, str, indent, name_C());
+            } else {
+                print(p.createInitPrinter(str), name_C(), indent);
+            }
+        }
+    }
+    
+    public void FFunctionVariable.prettyPrintInitOutput_C(CodePrinter p, CodeStream str, String indent, String name) {
+        String next = p.indent(indent);
+        String iniName = name + C_SUFFIX_NULL;
+        str.print(indent + "if (" + name + " == NULL) {\n");
+        print(p.createInitPrinter(str), iniName, next);
+        str.print(next + name + " = " + iniName + ";\n");
+        str.print(indent + "}\n");
+    }
 	
     public final void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
         TypePrinter_C tp = p.createDeclPrinter(str);
@@ -1362,10 +1360,6 @@ aspect CCodeGen {
         }
         protected String acquireTemp(String key) {
             return src.recordChildTempNames().get(key);
-        }
-        public void print(FFunctionVariable fv, String name, String indent) {
-            if (!fv.hasInitArrayStmt)
-                super.print(fv, name, indent);
         }
         protected void printArray(FType type) {
             str.format("%sJMI_ARRAY_INIT_%d(%s, %s, %s, %s, ", indent(), type.ndims(), dynStr(type),
@@ -1695,13 +1689,7 @@ aspect CCodeGen {
 	}
 	
 	public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		FIdUseExp fexp = getFIdUseExp();
-		FType type = fexp.type();
-		// I know that myFV is an ffunctionvariable
-		FFunctionVariable fv = (FFunctionVariable) fexp.myFV();
-		fv.setDummyExp();
-		type.printInit_C(p, str, indent, fv.name_C(), fv.getBindingExp());
-		fv.resetDummyExp();
+        p.print((FFunctionVariable) getFIdUseExp().myFV(), str, indent);
 	}
 	
 	public void FFunctionCallStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {

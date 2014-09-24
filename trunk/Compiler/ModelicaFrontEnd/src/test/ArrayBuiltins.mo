@@ -1374,8 +1374,9 @@ equation
 public
  function ArrayBuiltins.Transpose.Transpose9.f
   input Real[:, :] a;
-  output Real[size(a, 2), size(a, 1)] b;
+  output Real[:,:] b;
  algorithm
+  size(b) := {size(a, 2), size(a, 1)};
   for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     b[i1,i2] := a[i2,i1];
@@ -1425,8 +1426,9 @@ equation
 public
  function ArrayBuiltins.Transpose.Transpose10.f
   input Real[:, :, :] a;
-  output Real[size(a, 2), size(a, 1), size(a, 3)] b;
+  output Real[:,:,:] b;
  algorithm
+  size(b) := {size(a, 2), size(a, 1), size(a, 3)};
   for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     for i3 in 1:size(a, 3) loop
@@ -1472,10 +1474,11 @@ equation
 public
  function ArrayBuiltins.Transpose.Transpose11.f
   input Real[:, :] a;
-  output Real[size(a, 2), size(a, 1)] b;
+  output Real[:,:] b;
   Real[:,:] temp_1;
   Real temp_2;
  algorithm
+  size(b) := {size(a, 2), size(a, 1)};
   size(temp_1) := {size(a, 1), size(a, 1)};
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
@@ -2688,8 +2691,9 @@ public
   input Integer x1;
   input Integer x2;
   input Integer n;
-  output Real[n] a;
+  output Real[:] a;
  algorithm
+  size(a) := {n};
   for i1 in 1:n loop
    a[i1] := x1 + (i1 - 1) * ((x2 - x1) / (n - 1));
   end for;
@@ -3109,8 +3113,9 @@ public
  function Modelica.Math.Vectors.normalize
   input Real[:] v;
   input Real eps;
-  output Real[size(v, 1)] result;
+  output Real[:] result;
  algorithm
+  size(result) := {size(v, 1)};
   for i1 in 1:size(v, 1) loop
    result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
   end for;

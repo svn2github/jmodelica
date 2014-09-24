@@ -1638,8 +1638,9 @@ public
   input Real x1;
   input Real x2;
   input Integer n;
-  output Real[n] y;
+  output Real[:] y;
  algorithm
+  size(y) := {n};
   for i in 1:n loop
    y[i] := i;
   end for;

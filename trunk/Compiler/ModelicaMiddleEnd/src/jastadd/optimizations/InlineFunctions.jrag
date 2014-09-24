@@ -874,6 +874,7 @@ aspect FunctionInlining {
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
     syn boolean FStatement.isOkTrivialInline(boolean last) = false;
+    eq FInitArrayStmt.isOkTrivialInline(boolean last)      = true;
     eq FAssignStmt.isOkTrivialInline(boolean last)         = true;
     eq FFunctionCallStmt.isOkTrivialInline(boolean last)   = getCall().isOkTrivialInline(last);
     eq FReturnStmt.isOkTrivialInline(boolean last)         = isLast();

@@ -5758,9 +5758,10 @@ equation
 public
  function ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f
   input Integer a;
-  output Real[max(integer(a / 2 - 1) + 1, 0)] x;
+  output Real[:] x;
   Real[:] temp_1;
  algorithm
+  size(x) := {max(integer(a / 2 - 1) + 1, 0)};
   size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
   for i2 in 1:max(integer(a / 2 - 1) + 1, 0) loop
    temp_1[i2] := i2 ^ 2;

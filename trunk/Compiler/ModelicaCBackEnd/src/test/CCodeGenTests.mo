@@ -3882,6 +3882,98 @@ jmi_ad_var_t func_CCodeGenTests_CUnknownArray8_l_exp1(jmi_array_t* x_a) {
 ")})));
 end CUnknownArray8;
 
+model CUnknownArray9
+    function f
+        input Integer n;
+        output Real[size(ba,1)] ab = ba;
+        output Real[n] ba = ones(n);
+      algorithm
+    end f;
+    Real[2] x = f(2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray9",
+            description="Sorted initialization",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray9_f_def0(jmi_ad_var_t n_v, jmi_array_t* ab_a, jmi_array_t* ba_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, ab_an, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, ba_an, -1, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    if (ba_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, ba_an, n_v, 1, n_v)
+        ba_a = ba_an;
+    }
+    if (ab_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, ab_an, jmi_array_size(ba_a, 0), 1, jmi_array_size(ba_a, 0))
+        ab_a = ab_an;
+    }
+    i1_0ie = n_v + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(ba_a, i1_0i) = 1;
+    }
+    i1_1ie = n_v + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        jmi_array_ref_1(ab_a, i1_1i) = jmi_array_val_1(ba_a, i1_1i);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end CUnknownArray9;
+
+model CUnknownArray10
+    function f
+        input Integer n;
+        Real t1[size(t3,1) + size(ab,1)];
+        output Real[size(ba,1)] ab;
+        Real t2[size(ba,1)];
+        output Real[n] ba;
+        Real t3[n];
+      algorithm
+    end f;
+    Real[2] x = f(2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray10",
+            description="Sorted initialization",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray10_f_def0(jmi_ad_var_t n_v, jmi_array_t* ab_a, jmi_array_t* ba_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, t1_a, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, ab_an, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, t2_a, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, ba_an, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, t3_a, -1, 1)
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, t3_a, n_v, 1, n_v)
+    if (ba_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, ba_an, n_v, 1, n_v)
+        ba_a = ba_an;
+    }
+    if (ab_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, ab_an, jmi_array_size(ba_a, 0), 1, jmi_array_size(ba_a, 0))
+        ab_a = ab_an;
+    }
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, t1_a, (jmi_array_size(t3_a, 0) + jmi_array_size(ab_a, 0)), 1, jmi_array_size(t3_a, 0) + jmi_array_size(ab_a, 0))
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, t2_a, jmi_array_size(ba_a, 0), 1, jmi_array_size(ba_a, 0))
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end CUnknownArray10;
+
+
 model CRecordDecl1
     record A
         Real a;
@@ -10182,13 +10274,13 @@ void func_CCodeGenTests_Algorithm9_fw_def1(R_0_r* r_v) {
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     r__v->a = tmp_1;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, 2, 1, 2)
     if (r_v == NULL) {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
         r_vn->a = tmp_2;
         r_v = r_vn;
     }
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(temp_1_a);
     jmi_array_ref_1(r_v->a, 1) = 2 * jmi_array_val_1(temp_1_a, 1);
     jmi_array_ref_1(r_v->a, 2) = 2 * jmi_array_val_1(temp_1_a, 2);

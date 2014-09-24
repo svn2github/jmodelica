@@ -742,9 +742,10 @@ public
  function Modelica.Math.Matrices.solve
   input Real[:, size(A, 1)] A;
   input Real[size(A, 1)] b;
-  output Real[size(b, 1)] x;
+  output Real[:] x;
   Integer info;
  algorithm
+  size(x) := {size(b, 1)};
   (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
   assert(info == 0, \"Solving a linear system of equations with function
 \\\"Matrices.solve\\\" is not possible, because the system has either
@@ -755,13 +756,14 @@ no or infinitely many solutions (A is singular).\");
  function Modelica.Math.Matrices.LAPACK.dgesv_vec
   input Real[:, size(A, 1)] A;
   input Real[size(A, 1)] b;
-  output Real[size(A, 1)] x;
+  output Real[:] x;
   output Integer info;
   Real[:,:] Awork;
   Integer lda;
   Integer ldb;
   Integer[:] ipiv;
  algorithm
+  size(x) := {size(A, 1)};
   size(Awork) := {size(A, 1), size(A, 1)};
   size(ipiv) := {size(A, 1)};
   for i1 in 1:size(A, 1) loop

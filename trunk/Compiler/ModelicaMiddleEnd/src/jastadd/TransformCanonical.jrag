@@ -757,7 +757,7 @@ aspect TransformCanonical {
 	public void FFunctionVariable.genInitArrayStatements(List<FStatement> stmts) {}
 	
 	public void FFunctionArray.genInitArrayStatements(List<FStatement> stmts) {
-		if (size().isUnknown() && !isInput() && !isOutput()) {
+		if (size().isUnknown() && !isInput()) {
 			FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
 			stmt.shouldBeSorted = true;
 			stmts.add(stmt);
