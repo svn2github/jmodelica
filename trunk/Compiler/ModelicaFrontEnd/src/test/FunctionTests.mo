@@ -1461,6 +1461,35 @@ Semantic error at line 1, column 1:
 ")})));
 end BadFunctionCall3;
 
+model BadFunctionCall4
+    package A
+    end A;
+  
+    package B
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+        end f;
+    end B;
+    
+    replaceable package C = B constrainedby A;
+    
+    Real x = C.f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadFunctionCall4",
+            description="Call to function in replaceable package that is not present in constraining type",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Semantic error at line 1479, column 16:
+  Cannot use function C.f(), because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
+")})));
+end BadFunctionCall4;
+
 model MultipleOutput1
   Real x;
   Real y;

@@ -83,10 +83,17 @@ aspect InstanceNameCheck {
         //log.debug("InstClassAccess.nameCheck(" + checkType + "): " + name() + " " + myInstClassDecl().name());
         if (myInstClassDecl().isUnknown()) {
             //getParent().dumpTree("");
-            lookupInstClass(name()).error(this, "class", qualifiedName());
+            classLookupError("class", qualifiedName());
         }
     }
 
+    public void InstAccess.classLookupError(String kind, String name) {
+        lookupInstClass(name()).error(this, kind, name);
+    }
+
+    public void InstDot.classLookupError(String kind, String name) {
+        getInstAccess(getNumInstAccess() - 1).classLookupError(kind, name);
+    }
 
     inh boolean InstAccess.isExpandableConnectorMemberInConnect();
     eq InstDot.getInstAccess(int i).isExpandableConnectorMemberInConnect() = 
