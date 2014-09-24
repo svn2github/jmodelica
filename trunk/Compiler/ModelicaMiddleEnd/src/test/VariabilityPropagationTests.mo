@@ -326,9 +326,9 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Output2
  output Real a;
- Real b;
+ constant Real b = 2;
 equation
- (a, b) = VariabilityPropagationTests.Output2.f();
+ (a, ) = VariabilityPropagationTests.Output2.f();
 
 public
  function VariabilityPropagationTests.Output2.f
@@ -725,6 +725,7 @@ equation
 Tests that parameters in function call equations are folded. 
 Also tests that when it is constant and can't evaluate, variability is propagated as parameter.
 ",
+            inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation4
  constant Real a[1,1] = 1;
@@ -802,6 +803,7 @@ model FunctionCallEquation5
 		TransformCanonicalTestCase(
 			name="FunctionCallEquation5",
 			description="Tests evaluation of matrix multiplication in function.",
+			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation5
  constant Real a[1,1] = 1;
@@ -815,6 +817,267 @@ fclass VariabilityPropagationTests.FunctionCallEquation5
 end VariabilityPropagationTests.FunctionCallEquation5;
 ")})));
 end FunctionCallEquation5;
+
+    function fp
+        input Real i1;
+        input Real i2;
+        output Real o1 = i1;
+        output Real o2 = i2;
+    algorithm
+    end fp;
+
+model FunctionCallEquationPartial1
+    Real x1,x2;
+  equation
+    (x1,x2) = fp(time,7);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial1",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial1
+ Real x1;
+ constant Real x2 = 7;
+equation
+ (x1, ) = VariabilityPropagationTests.fp(time, 7);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial1;
+")})));
+end FunctionCallEquationPartial1;
+
+model FunctionCallEquationPartial2
+    Real x1,x2,x3;
+  equation
+    x3 = 7;
+    (x1,x2) = fp(time,x3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial2",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial2
+ Real x1;
+ constant Real x2 = 7.0;
+ constant Real x3 = 7;
+equation
+ (x1, ) = VariabilityPropagationTests.fp(time, 7.0);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial2;
+")})));
+end FunctionCallEquationPartial2;
+
+model FunctionCallEquationPartial3
+    Real x1,x2,x3;
+  equation
+    (x1,x2) = fp(time,x3);
+    x3 = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial3",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial3
+ Real x1;
+ constant Real x2 = 7.0;
+ constant Real x3 = 7;
+equation
+ (x1, ) = VariabilityPropagationTests.fp(time, 7.0);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial3;
+")})));
+end FunctionCallEquationPartial3;
+
+model FunctionCallEquationPartial4
+    Real x1,x2,x3,x4,x5;
+  equation
+    (x1,x2) = fp(x4,x5);
+    (x3,x4) = fp(x1,x2);
+    x5 = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial4",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial4
+ constant Real x1 = 7.0;
+ constant Real x2 = 7.0;
+ constant Real x3 = 7.0;
+ constant Real x4 = 7.0;
+ constant Real x5 = 7;
+end VariabilityPropagationTests.FunctionCallEquationPartial4;
+")})));
+end FunctionCallEquationPartial4;
+
+model FunctionCallEquationPartial5
+    function fp
+        input Real i1;
+        input Real i2;
+        input Real i3;
+        input Real i4 = 13;
+        output Real o1 = i1;
+        output Real o2 = i2;
+        output Real o3 = i3;
+        output Real o4 = i4;
+    algorithm
+    end fp;
+    Real x1,x2,x3,x4,x5,x6;
+  equation
+    (x1,x2,x3) = fp(x4, x5, x6);
+    x4 = 3;
+    x5 = x4 + x1;
+    x6 = x4 + x1 + x2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial5",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial5
+ constant Real x1 = 3.0;
+ constant Real x2 = 6.0;
+ constant Real x3 = 12.0;
+ constant Real x4 = 3;
+ constant Real x5 = 6.0;
+ constant Real x6 = 12.0;
+end VariabilityPropagationTests.FunctionCallEquationPartial5;
+")})));
+end FunctionCallEquationPartial5;
+
+model FunctionCallEquationPartial6
+    Real x1,x2;
+    parameter Real x3;
+    Real x4;
+  equation
+    (x1,x2) = fp(x3,x4);
+    x4 = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial6",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial6
+ parameter Real x1;
+ constant Real x2 = 7.0;
+ parameter Real x3;
+ constant Real x4 = 7;
+parameter equation
+ (x1, ) = VariabilityPropagationTests.fp(x3, 7.0);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial6;
+")})));
+end FunctionCallEquationPartial6;
+
+model FunctionCallEquationPartial7
+    function fp
+        input Real i1;
+        input Real i2;
+        output Real o1 = i1;
+        output Real o2 = i2;
+        output Real o3 = i1;
+    algorithm
+    end fp;
+    
+    Real x1,x2,x3,x4,x5,c;
+    parameter Real p;
+  equation
+    (x3,x4,x5) = fp(x1,x2);
+    (x1,x2) = fp(p,c);
+    c = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial7",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial7
+ parameter Real x1;
+ constant Real x2 = 7.0;
+ parameter Real x3;
+ constant Real x4 = 7.0;
+ parameter Real x5;
+ constant Real c = 7;
+ parameter Real p;
+parameter equation
+ (x1, ) = VariabilityPropagationTests.FunctionCallEquationPartial7.fp(p, 7.0);
+ (x3, , x5) = VariabilityPropagationTests.FunctionCallEquationPartial7.fp(x1, 7.0);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquationPartial7.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+  output Real o3;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  o3 := i1;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial7.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial7;
+")})));
+end FunctionCallEquationPartial7;
 
 
 model ConstantRecord1

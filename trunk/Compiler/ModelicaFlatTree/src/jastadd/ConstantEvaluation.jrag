@@ -2776,6 +2776,47 @@ aspect ConstantEvaluation {
 	  }
 	  return res;
   }
+  
+    /**
+     * Perform constant evaluation of functions. Catches any ConstantEvaluationExceptions and
+     * provide CValue.UNKNOWN instead.
+     * 
+     * @return  constant values for the outputs
+     */
+    public CValue[] FAbstractFunctionCall.evaluateSafe(VariableEvaluator evaluator) {
+        Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
+        int i = 0;
+        CValue[] res = new CValue[myCallOutputs().size()];
+        try {
+            for (CommonVariableDecl var : myCallInputs()) {
+                var.prepareForFunctionEval();
+                FExp arg = argument(i++);
+                if (arg != null) {
+                    if (arg.variability().knownParameterOrLess()) {
+                        values.put(var, arg.ceval(evaluator));
+                    } else {
+                        values.put(var, CValue.UNKNOWN);
+                    }
+                } else {
+                    throw new ConstantEvaluationException();
+                }
+            }
+            
+            evaluate(values);
+            i = 0;
+            for (CommonVariableDecl var : myCallOutputs()) {
+                CValue val = values.get(var);
+                res[i] = (val == null) ? CValue.UNKNOWN : val;
+                i++;
+            }
+        } catch (ConstantEvaluationException e) {
+            for (int k = 0; k < res.length; k++) {
+                res[k] = CValue.UNKNOWN;
+            }
+        }
+        
+        return res;
+    }
     
     public void FAbstractFunctionCall.evaluate(Map<CommonVariableDecl, CValue> values) {
         evaluateCell(values);
