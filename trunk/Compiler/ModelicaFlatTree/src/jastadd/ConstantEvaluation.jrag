@@ -1578,7 +1578,22 @@ aspect ConstantEvaluation {
     public CValue FBooleanType.limitCValueScalar(boolean high) { return new CValueBoolean(   high ? true : false); }
     public CValue FEnumType.limitCValueScalar(boolean high)    { return new CValueEnum(this, high ? getNumFEnumLiteralType() : 1); }
 
-
+    public boolean CValue.isZero()        { return false; }
+    public boolean CValueReal.isZero()    { return value == 0; }
+    public boolean CValueInteger.isZero() { return value == 0; }
+    
+    public CValue FType.unknownCValue() {
+        if (isArray()) {
+            CValueArray arr = new CValueArray(size());
+            for (Index i : indices()) {
+                arr.setCell(i, CValue.UNKNOWN);
+            }
+            return arr;
+        } else {
+            return CValue.UNKNOWN;
+        }
+    }
+    
     /** 
      * \build Creates an FExp with literals from this Array.
      * 
@@ -1667,6 +1682,14 @@ aspect ConstantEvaluation {
         CValue resOver = cevalOverloaded(evaluator);
         return (resOver != null) ? resOver : cevalCalc(evaluator);
     }
+    
+    syn CValue FExp.cevalSafe(VariableEvaluator evaluator) {
+        try {
+            return ceval(evaluator);
+        } catch (ConstantEvaluationException e) {
+            return type().unknownCValue();
+        }
+    }
 
     /**
      * Like {@link #ceval()}, but in the case of an array, only calculate 
@@ -1750,7 +1773,7 @@ aspect ConstantEvaluation {
 
     eq FDotAddExp.cevalCalc(VariableEvaluator evaluator) = type().add(getLeft().ceval(evaluator), getRight().ceval(evaluator));
     eq FDotSubExp.cevalCalc(VariableEvaluator evaluator) = type().sub(getLeft().ceval(evaluator), getRight().ceval(evaluator));
-    eq FDotMulExp.cevalCalc(VariableEvaluator evaluator) = type().mul(getLeft().ceval(evaluator), getRight().ceval(evaluator));
+    eq FDotMulExp.cevalCalc(VariableEvaluator evaluator) = type().mul(getLeft().cevalSafe(evaluator), getRight().cevalSafe(evaluator));
     eq FDotDivExp.cevalCalc(VariableEvaluator evaluator) = type().div(getLeft().ceval(evaluator), getRight().ceval(evaluator));
     eq FDotPowExp.cevalCalc(VariableEvaluator evaluator) = type().pow(getLeft().ceval(evaluator), getRight().ceval(evaluator));
 
@@ -1760,8 +1783,8 @@ aspect ConstantEvaluation {
         
         FType t = type();
         CValue sum = new CValueInteger(0);
-        CValueArray l = getLeft().ceval(evaluator).array();
-        CValueArray r = getRight().ceval(evaluator).array();
+        CValueArray l = getLeft().cevalSafe(evaluator).array();
+        CValueArray r = getRight().cevalSafe(evaluator).array();
         for (Index i : l.indices())
           sum = t.add(sum, t.mul(l.getCell(i), r.getCell(i)));
         return sum;
@@ -2804,7 +2827,7 @@ aspect ConstantEvaluation {
                     if (arg.variability().knownParameterOrLess()) {
                         values.put(var, arg.ceval(evaluator));
                     } else {
-                        values.put(var, CValue.UNKNOWN);
+                        values.put(var, arg.type().unknownCValue());
                     }
                 } else {
                     throw new ConstantEvaluationException();
@@ -3781,10 +3804,16 @@ aspect ConstantEvaluation {
    */
   syn CValue FType.mul(CValue v1, CValue v2) = 
 	  CValue.UNKNOWN;
-  eq FRealType.mul(CValue v1, CValue v2) = 
-	  new CValueReal(v1.realValue()*v2.realValue());
-  eq FIntegerType.mul(CValue v1, CValue v2) = 
-	  new CValueInteger(v1.intValue()*v2.intValue());
+    eq FRealType.mul(CValue v1, CValue v2) {
+        if (v1.isZero() || v2.isZero())
+            return zeroCValue();
+        return new CValueReal(v1.realValue()*v2.realValue());
+    }
+    eq FIntegerType.mul(CValue v1, CValue v2) {
+        if (v1.isZero() || v2.isZero())
+            return zeroCValue();
+        return new CValueInteger(v1.intValue()*v2.intValue());
+    }
 
   /**
    * Division of constant values.

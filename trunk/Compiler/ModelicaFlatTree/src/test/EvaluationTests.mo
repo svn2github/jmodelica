@@ -2609,4 +2609,98 @@ end EvaluationTests.Functional9;
 ")})));
 end Functional9;
 
+// Checks evaluation of partially unknown expressions
+package Partial
+    model Mul1
+        function f
+            input Real x1;
+            input Real x2;
+            output Real y = x1 * x2 + x2 * x1;
+            output Real dummy;
+            algorithm
+        end f;
+        Real y;
+      equation
+       (y, ) = f(0,time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul1",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul1
+ constant Real y = 0.0;
+end EvaluationTests.Partial.Mul1;
+")})));
+    end Mul1;
+    
+    model Mul2
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real y = x1 * x2 + x2 * x1;
+            output Real dummy;
+            algorithm
+        end f;
+        Real y;
+      equation
+        (y, ) = f({0,0},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul2",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul2
+ constant Real y = 0.0;
+end EvaluationTests.Partial.Mul2;
+")})));
+    end Mul2;
+    
+    model Mul3
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real[size(x1,1)] y = x1 .* x2 + x2 .* x1;
+            algorithm
+        end f;
+        Real[2] y = f({0,0},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul3",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul3
+ constant Real y[1] = 0.0;
+ constant Real y[2] = 0.0;
+end EvaluationTests.Partial.Mul3;
+")})));
+    end Mul3;
+    
+    model Mul4
+        function f
+            input Real[:,:] x1;
+            input Real[:,:] x2;
+            output Real[size(x1,1),size(x2,2)] y = x1 * x2 + x2 * x1;
+            algorithm
+        end f;
+        Real[2,2] y = f({{0,0},{0,0}},{{time,time}, {time,time}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul4",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul4
+ constant Real y[1,1] = 0.0;
+ constant Real y[1,2] = 0.0;
+ constant Real y[2,1] = 0.0;
+ constant Real y[2,2] = 0.0;
+end EvaluationTests.Partial.Mul4;
+")})));
+    end Mul4;
+
+end Partial;
+
 end EvaluationTests;
