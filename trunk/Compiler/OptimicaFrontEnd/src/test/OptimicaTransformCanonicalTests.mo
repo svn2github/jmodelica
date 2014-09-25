@@ -577,7 +577,7 @@ end MinTimeTest3;
 			description="Fixed set from parameter with parameter equation",
 			flatModel="
 fclass OptimicaTransformCanonicalTests.DAETest1
- parameter Integer N = 5 \"Number of linear ODEs/DAEs\" /* 5 */;
+ structural parameter Integer N = 5 \"Number of linear ODEs/DAEs\" /* 5 */;
  parameter Integer N_states = 3 \"Number of states: < N\" /* 3 */;
  Real x[1](start = 3,fixed = dynamic[1]) \"States/algebraics\";
  Real x[2](start = 3,fixed = dynamic[2]) \"States/algebraics\";
@@ -586,11 +586,11 @@ fclass OptimicaTransformCanonicalTests.DAETest1
  Real x[5](start = 3,fixed = dynamic[5]) \"States/algebraics\";
  input Real u \"Control input\";
  output Real y \"Output\";
- parameter Real a[1] = 3.0 \"Time constants\" /* 3.0 */;
- parameter Real a[2] = 2.5 \"Time constants\" /* 2.5 */;
- parameter Real a[3] = 2.0 \"Time constants\" /* 2.0 */;
- parameter Real a[4] = 1.5 \"Time constants\" /* 1.5 */;
- parameter Real a[5] = 1.0 \"Time constants\" /* 1.0 */;
+ structural parameter Real a[1] = 3.0 \"Time constants\" /* 3.0 */;
+ structural parameter Real a[2] = 2.5 \"Time constants\" /* 2.5 */;
+ structural parameter Real a[3] = 2.0 \"Time constants\" /* 2.0 */;
+ structural parameter Real a[4] = 1.5 \"Time constants\" /* 1.5 */;
+ structural parameter Real a[5] = 1.0 \"Time constants\" /* 1.0 */;
  parameter Boolean dynamic[1] \"Switches for turning ODEs into DAEs\";
  parameter Boolean dynamic[2] \"Switches for turning ODEs into DAEs\";
  parameter Boolean dynamic[3] \"Switches for turning ODEs into DAEs\";

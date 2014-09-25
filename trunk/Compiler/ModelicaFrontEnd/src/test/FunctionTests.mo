@@ -7351,7 +7351,7 @@ model ArrayOutputScalarization22
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization22
- parameter Integer n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
  Real c[1,1];
  Real c[1,2];
  Real c[2,1];
@@ -7401,7 +7401,7 @@ equation
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization23
- parameter Integer n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
  Real c[1,1];
  Real c[1,2];
  Real c[2,1];
@@ -7674,7 +7674,7 @@ model ArrayOutputScalarization27
 			description="Function with array output in if exp",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization27
- parameter Boolean a = false /* false */;
+ structural parameter Boolean a = false /* false */;
  Real b[1];
  Real b[2];
 equation
@@ -10938,7 +10938,7 @@ model InputAsArraySize3
             inline_functions="none",
             flatModel="
 fclass FunctionTests.InputAsArraySize3
- parameter Integer n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
  Real x[1];
  Real x[2];
  Real x[3];

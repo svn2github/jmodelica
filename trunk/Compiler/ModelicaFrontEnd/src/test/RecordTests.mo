@@ -349,8 +349,8 @@ model RecordFlat10
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat10
- parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
- parameter Real r.x = 3 /* 3 */;
+ structural parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ structural parameter Real r.x = 3 /* 3 */;
 
 public
  function RecordTests.RecordFlat10.r.f
@@ -1009,9 +1009,9 @@ model RecordBinding11
 			description="Modification of string record member",
 			flatModel="
 fclass RecordTests.RecordBinding11
- parameter String r.s1 = \"foobar\" /* \"foobar\" */;
- parameter Boolean r.b1 = true /* true */;
- parameter Boolean r.b2 = true /* true */;
+ structural parameter String r.s1 = \"foobar\" /* \"foobar\" */;
+ structural parameter Boolean r.b1 = true /* true */;
+ structural parameter Boolean r.b2 = true /* true */;
 end RecordTests.RecordBinding11;
 ")})));
 end RecordBinding11;
@@ -1098,15 +1098,15 @@ model RecordBinding14
 fclass RecordTests.RecordBinding14
  constant Real rec.x1 = -1;
  constant Real rec.y = 2;
- parameter Real rec.z = 3 /* 3 */;
+ final parameter Real rec.z = 3 /* 3 */;
  constant Real rec.x2 = 4;
  constant Real recs[1].x1 = 1;
  constant Real recs[1].y = 2;
- parameter Real recs[1].z = 3 /* 3 */;
+ final parameter Real recs[1].z = 3 /* 3 */;
  constant Real recs[1].x2 = 4;
  constant Real recs[2].x1 = 1;
  constant Real recs[2].y = 2;
- parameter Real recs[2].z = 3 /* 3 */;
+ final parameter Real recs[2].z = 3 /* 3 */;
  constant Real recs[2].x2 = 4;
 end RecordTests.RecordBinding14;
 ")})));
@@ -1656,7 +1656,7 @@ model RecordArray7
             description="Parameter in record controlling size of array in same record: record constructor",
             flatModel="
 fclass RecordTests.RecordArray7
- parameter Integer m = 2 /* 2 */;
+ structural parameter Integer m = 2 /* 2 */;
  parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
  Real y[2] = a.x[1:2];
 
@@ -1694,7 +1694,7 @@ model RecordArray8
             description="Flattening of model with record that gets array size of member from function call that returns entire record",
             flatModel="
 fclass RecordTests.RecordArray8
- parameter Integer m = 2 /* 2 */;
+ structural parameter Integer m = 2 /* 2 */;
  parameter RecordTests.RecordArray8.A a = RecordTests.RecordArray8.f(2);
  Real y[2] = a.x[1:2];
 
@@ -1948,7 +1948,7 @@ model RecordConstructor9
 			flatModel="
 fclass RecordTests.RecordConstructor9
  parameter RecordTests.RecordConstructor9.A a = RecordTests.RecordConstructor9.A(1, 1 + 2) /* RecordTests.RecordConstructor9.A(1, 3) */;
- parameter Integer b = 3 /* 3 */;
+ structural parameter Integer b = 3 /* 3 */;
  Real z[3] = (1:3) * time;
 
 public
@@ -5046,7 +5046,7 @@ model RecordEval6
 fclass RecordTests.RecordEval6
  parameter Integer r.n1 = 2 /* 2 */;
  Real r.x;
- parameter Integer n2 = 2 /* 2 */;
+ structural parameter Integer n2 = 2 /* 2 */;
  Real y[1];
  Real y[2];
  Real z;
@@ -5149,7 +5149,7 @@ model ExternalObjectStructural1
             description="Check that external objects do not get converted to structural parameters",
             flatModel="
 fclass RecordTests.ExternalObjectStructural1
- parameter String b = \"abc\" /* \"abc\" */;
+ structural parameter String b = \"abc\" /* \"abc\" */;
  parameter RecordTests.ExternalObjectStructural1.A a = RecordTests.ExternalObjectStructural1.A.constructor(\"abc\") /* (unknown value) */;
  parameter Real c;
 parameter equation

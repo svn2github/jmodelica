@@ -246,7 +246,7 @@ end ExpandableConnectors.Expandable4;
 			description="Connecting to expandable connector in for loop",
 			flatModel="
 fclass ExpandableConnectors.Expandable5
- parameter Integer n = 4 /* 4 */;
+ structural parameter Integer n = 4 /* 4 */;
  Real ec[1].a;
  Real ec[2].a;
  Real ec[3].a;

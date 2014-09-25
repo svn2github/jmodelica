@@ -218,8 +218,8 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 			description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest7
- parameter Integer p1 = 2 /* 2 */;
- parameter Integer p2 = 2 /* 2 */;
+ structural parameter Integer p1 = 2 /* 2 */;
+ structural parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
  constant Real y = 2;
  constant Real x[2] = 2;
@@ -2406,7 +2406,7 @@ equation
 			state_initial_equations=true,
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest16
- parameter Boolean a = false /* false */;
+ structural parameter Boolean a = false /* false */;
  constant Real b(start = 1) = 1;
 end TransformCanonicalTests.InitialEqTest16;
 ")})));
@@ -3653,8 +3653,8 @@ fclass TransformCanonicalTests.IfEqu8
  constant Real x[1] = 4;
  constant Real x[2] = 5;
  constant Real x[3] = 6;
- parameter Boolean y[1] = false /* false */;
- parameter Boolean y[2] = true /* true */;
+ structural parameter Boolean y[1] = false /* false */;
+ structural parameter Boolean y[2] = true /* true */;
 end TransformCanonicalTests.IfEqu8;
 ")})));
 end IfEqu8;
@@ -3947,7 +3947,7 @@ end TransformCanonicalTests.IfEqu16;
 fclass TransformCanonicalTests.IfEqu17
  constant Real y1 = 1;
  constant Real y2 = 2;
- parameter Boolean p = false /* false */;
+ structural parameter Boolean p = false /* false */;
 end TransformCanonicalTests.IfEqu17;
 ")})));
   end IfEqu17;
@@ -4093,7 +4093,7 @@ model IfEqu22
       flatModel="
 fclass TransformCanonicalTests.IfEqu22
  constant Boolean b = true;
- parameter Integer nX = 2 /* 2 */;
+ structural parameter Integer nX = 2 /* 2 */;
  Real x[1];
  Real x[2];
 equation
@@ -4209,7 +4209,7 @@ equation
 			description="Check correct elimination of if equation branches.",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu24
- parameter Boolean use_delay = false /* false */;
+ structural parameter Boolean use_delay = false /* false */;
  Real x1(start = 1);
  Real x2(start = 1);
 initial equation 
@@ -5495,8 +5495,8 @@ model StringFuncTest
 			description="Test that string parameters and string parameters goes through front-end.",
 			flatModel="
 fclass TransformCanonicalTests.StringFuncTest
- parameter String p1 = \"a\" /* \"a\" */;
- parameter String p2 = \"a\" /* \"a\" */;
+ structural parameter String p1 = \"a\" /* \"a\" */;
+ structural parameter String p2 = \"a\" /* \"a\" */;
 end TransformCanonicalTests.StringFuncTest;
 ")})));
 

@@ -560,9 +560,9 @@ model String2
 			description="Make sure uses of String parameters are evaluated",
 			flatModel="
 fclass ComplianceTests.String2
- parameter String a = \"1\" /* \"1\" */;
- parameter String b = \"12\" /* \"12\" */;
- parameter String c = \"123\" /* \"123\" */;
+ structural parameter String a = \"1\" /* \"1\" */;
+ structural parameter String b = \"12\" /* \"12\" */;
+ structural parameter String c = \"123\" /* \"123\" */;
 end ComplianceTests.String2;
 ")})));
 end String2;

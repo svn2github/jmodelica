@@ -2660,7 +2660,7 @@ Semantic error at line 2525, column 21:
             description="",
             flatModel="
 fclass OperatorRecordTests.OperatorLimitations24
- parameter Integer n = 2 /* 2 */;
+ structural parameter Integer n = 2 /* 2 */;
  OperatorRecordTests.OperatorLimitations24.A a[2,2] = fill(OperatorRecordTests.OperatorLimitations24.A(time), 2, 2);
  OperatorRecordTests.OperatorLimitations24.A b[2,2] = fill(OperatorRecordTests.OperatorLimitations24.A(time + 1), 2, 2);
  OperatorRecordTests.OperatorLimitations24.A c[2,2] = {{OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,1]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,2]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,2])}, {OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,1]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,2]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,2])}};
@@ -2714,7 +2714,7 @@ end OperatorRecordTests.OperatorLimitations24;
             description="",
             flatModel="
 fclass OperatorRecordTests.OperatorLimitations25
- parameter Integer n = 0 /* 0 */;
+ structural parameter Integer n = 0 /* 0 */;
  OperatorRecordTests.OperatorLimitations25.A a[2,0] = fill(OperatorRecordTests.OperatorLimitations25.A(time), 2, 0);
  OperatorRecordTests.OperatorLimitations25.A b[0,2] = fill(OperatorRecordTests.OperatorLimitations25.A(time + 1), 0, 2);
  OperatorRecordTests.OperatorLimitations25.A c[2,2] = {{OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}, {OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}};
@@ -3189,7 +3189,7 @@ end OperatorRecordTests.OperatorLimitations39;
             description="Test of literal expressions for records built from constant evaluation in instance tree",
             flatModel="
 fclass OperatorRecordTests.BuildArrayInInst1
- parameter Integer n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
  OperatorRecordTests.Cplx x[3];
 equation
  x[1:3] = {OperatorRecordTests.Cplx.'*'.mul(OperatorRecordTests.Cplx(1, 0), OperatorRecordTests.Cplx.'constructor'(time, 0)), OperatorRecordTests.Cplx.'*'.mul(OperatorRecordTests.Cplx(2, 0), OperatorRecordTests.Cplx.'constructor'(time, 0)), OperatorRecordTests.Cplx.'*'.mul(OperatorRecordTests.Cplx(3, 0), OperatorRecordTests.Cplx.'constructor'(time, 0))};
