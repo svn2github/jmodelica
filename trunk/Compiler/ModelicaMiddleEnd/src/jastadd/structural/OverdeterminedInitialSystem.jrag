@@ -18,13 +18,46 @@ import java.util.Collections;
 
 aspect OverdeterminedInitialSystem {
     
+    /**
+     * Given a BiPGraph, this method remove all redundant unmatched initial
+     * equations.
+     * Returns a BiPGraph with no unmatched equations on success (might be the
+     * same as inputed to the method).
+     */
+    public BiPGraph FClass.overdeterminedInitialSystem(BiPGraph g) {
+        AbstractBiPGraph<Eq,Var>.OISResult res = g.overdeterminedInitialSystem();
+        if (res == null)
+            return g;
+        
+        Set<FAbstractEquation> eqnsToRemove = new HashSet<FAbstractEquation>();
+        for (Eq e : res.redundentEquations) {
+            g.removeEquation(e);
+            eqnsToRemove.add(e.getEquation());
+        }
+        
+        List<FAbstractEquation> newInitList = new List<FAbstractEquation>();
+        for (FAbstractEquation eqn : getFInitialEquations()) {
+            if (!eqnsToRemove.contains(eqn))
+                newInitList.add(eqn);
+        }
+        setFInitialEquationList(newInitList);
+        
+        for (FVariable var : res.visitedParameters) {
+            if (!var.isParameter())
+                continue;
+            var.setFTypePrefixVariability(new FStructParameter());
+        }
+        
+        return g;
+    }
+    
     public abstract class AbstractBiPGraph{
         /**
          * Goes through the list of unmatched equations and tries to determine
          * if it is redundant. Al list of equations that should be removed is
          * returned if all unmatched equations are found to be redundent.
          */
-        public Set<FAbstractEquation> overdeterminedInitialSystem() {
+        public OISResult overdeterminedInitialSystem() {
             ASTNode.log.info("Analysing initial system for redundant equations to remove.");
             OISVariableEvaluator evaluator = new OISVariableEvaluator();
             boolean allIsGood = true;
@@ -43,16 +76,21 @@ aspect OverdeterminedInitialSystem {
             }
             if (!allIsGood) {
                 ASTNode.log.info("Unable to verify all unmatched initial equations");
-                return Collections.emptySet();
+                return null;
             }
-            Set<FAbstractEquation> results = new HashSet<FAbstractEquation>();
-            ASTNode.log.info("All seems to be ok, removing:");
-            for (E eqn : unmatchedEquationsIterable()) {
-                ASTNode.log.info("  %s", eqn);
-                results.add(eqn.getEquation());
-                removeEquation(eqn);
+            Collection<E> results = new ArrayList<E>();
+            ASTNode.log.info("All seems to be ok!");
+            return new OISResult(getUnmatchedEquations(), evaluator.visitedParameters);
+        }
+        
+        public class OISResult{
+            public final Collection<E> redundentEquations;
+            public final Collection<FVariable> visitedParameters;
+            
+            private OISResult(Collection<E> redundentEquations, Collection<FVariable> visitedParameters) {
+                this.redundentEquations = redundentEquations;
+                this.visitedParameters = visitedParameters;
             }
-            return results;
         }
         
         /**
@@ -63,6 +101,7 @@ aspect OverdeterminedInitialSystem {
             
             private Set<CommonVariableDecl> evaluationStack = new HashSet<CommonVariableDecl>();
             private Map<CommonVariableDecl, CValue> evaluationCache = new LinkedHashMap<CommonVariableDecl, CValue>();
+            private Set<FVariable> visitedParameters = new LinkedHashSet<FVariable>();
             
             @Override
             public CValue ceval(CommonVariableDecl variable) {
@@ -76,8 +115,9 @@ aspect OverdeterminedInitialSystem {
                     try {
                         evaluationStack.add(variable);
                         V var = getVariable(variable.name());
-                        if (var == null) {
-                            val = CValue.UNKNOWN;
+                        if (var == null) { // Parameter or constant
+                            visitedParameters.add(variable.asFAbstractVariable().asFVariable());
+                            val = variable.ceval(this);
                         } else {
                             val = var.OIS_ceval(this);
                         }

@@ -93,4 +93,33 @@ end OverdeterminedInitialSystem.Basic3;
 ")})));
     end Basic3;
 
+    model Parameter1
+        Real x;
+        Real y;
+        parameter Real p1 = 3;
+    initial equation
+        x = p1 - 1;
+        y = p1;
+    equation
+        x + 1 = y;
+        der(x) = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Parameter1",
+            description="A basic test",
+            flatModel="
+fclass OverdeterminedInitialSystem.Parameter1
+ Real x;
+ Real y;
+ structural parameter Real p1 = 3 /* 3 */;
+initial equation 
+ x = p1 - 1;
+equation
+ x + 1 = y;
+ der(x) = time;
+end OverdeterminedInitialSystem.Parameter1;
+")})));
+    end Parameter1;
+
 end OverdeterminedInitialSystem;
