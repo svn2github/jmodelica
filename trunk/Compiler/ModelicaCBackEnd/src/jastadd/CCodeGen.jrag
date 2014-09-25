@@ -3489,7 +3489,7 @@ aspect CCodeGen {
     public void FEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         FVariable fv = forVariables.iterator().next();
-        FExp sol = solution(fv.name());
+        FExp sol = solution(fv);
         p.printPreSteps(sol, str, indent);
         str.format("%s%s = ", indent, fv.name_C());
         p.print(sol, str, indent);

@@ -48,7 +48,7 @@ aspect BLT{
             // Check if equation is solvable for all active variables (only if we want a solved block)
             Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
             for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
-                solvability = Solvability.least(solvability, e.isSolved(it.next().name(), producer.duringTearing()));
+                solvability = Solvability.least(solvability, e.isSolved(it.next(), producer.duringTearing()));
             return e.createSimpleEquationBlock(fvs, assignedIndices, solvability, producer, blockDependency);
         }
 
@@ -1454,7 +1454,7 @@ aspect BLT{
         }
 
         public FExp solution() {
-            return equation().solution(fv.name());
+            return equation().solution(fv);
         }
 
     }

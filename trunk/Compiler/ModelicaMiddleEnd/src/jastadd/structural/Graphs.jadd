@@ -985,7 +985,7 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar> {
     }
 
     public Solvability isSolved(SolvingEq e, SolvingVar v) {
-        return e.getEquation().isSolved(v.getName(), true);
+        return e.getEquation().isSolved(v.getVariable(), true);
     }
 
     @Override
@@ -1187,7 +1187,7 @@ public class SolvingVar extends AbstractVar<SolvingEq, SolvingVar> implements Co
 }
 
 
-public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
+public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
 
     private final String name;
     private final FAbstractEquation eqn;
@@ -1350,7 +1350,7 @@ public class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
 
 }
 
-public class AbstractVar<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
+public abstract class AbstractVar<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
 
     private final String name;
     private final FVariable v;

@@ -207,7 +207,7 @@ aspect VariabilityPropagation {
 			return;
 		}
 
-		solution = solution(fVariable.name());
+		solution = solution(fVariable);
 		solution.resetOriginalReferences();
 		
 		if (!solution.isValidExp()) {
