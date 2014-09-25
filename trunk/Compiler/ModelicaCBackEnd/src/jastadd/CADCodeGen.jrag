@@ -1144,7 +1144,7 @@ aspect CADCodeGen {
     public void FEquation.genBlock_CAD(String indent, CodeStream str, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         FVariable v = forVariables.iterator().next();
-        FExp solution = solution(v);
+        FExp solution = solution(v.name());
         if(v.shouldBeDifferentiated()){
             printer_CAD.printPreSteps(solution, str, indent);
             str.print(indent + v.name_C() + " = ");
