@@ -44,7 +44,7 @@ aspect VariabilityPropagation {
 	 * Checks if equation is eligible for var. prop.
 	 */
     syn boolean FAbstractEquation.canPropagate() =
-            !inConditionalClause() && !containsActiveAnnotations();
+            canPropagateContext() && !containsActiveAnnotations();
     eq FEquation.canPropagate() = super.canPropagate() && variables().size() == 1;
     eq FFunctionCallEquation.canPropagate() {
         getCall().flushAllRecursiveClearFinal();
@@ -53,10 +53,10 @@ aspect VariabilityPropagation {
                         || potentialPartialVariability().constantVariability());
     }
     
-    inh boolean FAbstractEquation.inConditionalClause();
-    eq Root.getChild().inConditionalClause() = false;
-    eq FClass.getFAbstractEquation().inConditionalClause() = false;
-    eq FIfWhenElseEquation.getChild().inConditionalClause() = true;
+    inh boolean FAbstractEquation.canPropagateContext();
+    eq Root.getChild().canPropagateContext() = false;
+    eq FClass.getFAbstractEquation().canPropagateContext() = true;
+    eq FIfWhenElseEquation.getChild().canPropagateContext() = false;
     
     /**
      * If any arg is constant return constant. Otherwise returns combined variability.

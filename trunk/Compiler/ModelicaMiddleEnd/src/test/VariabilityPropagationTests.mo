@@ -1183,6 +1183,39 @@ end VariabilityPropagationTests.InitialEquation2;
 ")})));
 end InitialEquation2;
 
+model InitialEquation3
+    Real x;
+    parameter Real p1 = 3;
+    Real p2 = p1;
+initial equation
+    x = p2;
+equation
+    when time > 1 then
+        x = time;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquation3",
+            description="Test no propagation of initial equations",
+            flatModel="
+fclass VariabilityPropagationTests.InitialEquation3
+ discrete Real x;
+ parameter Real p1 = 3 /* 3 */;
+ parameter Real p2;
+ discrete Boolean temp_1;
+initial equation 
+ x = p2;
+ pre(temp_1) = false;
+parameter equation
+ p2 = p1;
+equation
+ temp_1 = time > 1;
+ x = if temp_1 and not pre(temp_1) then time else pre(x);
+end VariabilityPropagationTests.InitialEquation3;
+")})));
+end InitialEquation3;
+
 model AliasVariabilities1
 	Real a,b,c,d;
 	parameter Real p1,p2;
