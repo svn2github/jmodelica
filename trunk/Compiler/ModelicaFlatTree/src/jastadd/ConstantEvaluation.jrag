@@ -2045,10 +2045,19 @@ aspect ConstantEvaluation {
     }
 
     eq FIdUseExp.cevalCalc(VariableEvaluator evaluator)      = getFIdUse().ceval(evaluator);
-    eq FDerExp.cevalCalc(VariableEvaluator evaluator) = 
-        getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
+    eq FDerExp.cevalCalc(VariableEvaluator evaluator) {
+        if (getFIdUse().variability().discreteOrLess())
+            return new CValueInteger(0);
+        FAbstractVariable decl = myFV();
+        return decl == null ? CValue.UNKNOWN : evaluator.ceval(decl);
+    }
     eq FInstAccessExp.cevalCalc(VariableEvaluator evaluator) = getInstAccess().ceval(evaluator);
-    eq FPreExp.cevalCalc(VariableEvaluator evaluator)  = variability().constantVariability() ? super.cevalCalc(evaluator)   : CValue.UNKNOWN;
+    eq FPreExp.cevalCalc(VariableEvaluator evaluator) {
+        if (variability().constantVariability())
+            return super.cevalCalc(evaluator);
+        FAbstractVariable decl = myFV();
+        return decl == null ? CValue.UNKNOWN : evaluator.ceval(decl);
+    }
 
     syn CValue InstAccess.ceval(VariableEvaluator evaluator)        = ceval(evaluator, Index.NULL);
     syn CValue InstAccess.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
