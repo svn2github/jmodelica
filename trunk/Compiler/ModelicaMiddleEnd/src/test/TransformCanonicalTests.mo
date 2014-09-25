@@ -2604,7 +2604,7 @@ model UnbalancedInitTest1
 	parameter Real x(fixed=false);
 	parameter Real y(fixed=false);
 initial equation
-	x = 0;
+	x = 1;
 	x = x * 3.14;
 	
 	annotation(__JModelica(UnitTesting(tests={

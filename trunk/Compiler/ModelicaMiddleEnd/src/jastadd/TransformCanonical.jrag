@@ -627,6 +627,15 @@ aspect TransformCanonical {
         log.info("Init BiPGraph matching");
         log.info(g.printMatchingObj());
 
+
+        Set<FAbstractEquation> eqsToRemove = g.overdeterminedInitialSystem();
+        List<FAbstractEquation> newInitList = new List<FAbstractEquation>();
+        for (FAbstractEquation eqn : getFInitialEquations()) {
+            if (!eqsToRemove.contains(eqn))
+                newInitList.add(eqn);
+        }
+        setFInitialEquationList(newInitList);
+
 		// Add initial equations if needed
 		if (g.getUnmatchedEquations().isEmpty() && root().options.getBooleanOption("automatic_add_initial_equations")) {
 			for (Var var : g.getUnmatchedVariables()) {	
