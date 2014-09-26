@@ -107,7 +107,7 @@ end OverdeterminedInitialSystem.Basic3;
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Parameter1",
-            description="A basic test",
+            description="A basic test with parameters",
             flatModel="
 fclass OverdeterminedInitialSystem.Parameter1
  Real x;
@@ -121,5 +121,61 @@ equation
 end OverdeterminedInitialSystem.Parameter1;
 ")})));
     end Parameter1;
+
+    model FunctionCall1
+        function F
+            input Real x;
+            output Integer a;
+            output Integer b;
+        algorithm
+            a := if x < 3.12 then 1 else 0;
+            b := if x > 42 then 1 else 0;
+            annotation(Inline=False);
+        end F;
+        
+        Integer a;
+        Integer b;
+        Integer c;
+    initial equation
+        (a,b) = F(6.28);
+        c = 0;
+    equation
+        a = c;
+        when time > pre(a) then
+            a = pre(a) + 1;
+            b = pre(b) * 2;
+        end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCall1",
+            description="A basic test with function call equation",
+            flatModel="
+fclass OverdeterminedInitialSystem.FunctionCall1
+ discrete Integer a;
+ discrete Integer b;
+ discrete Boolean temp_1;
+initial equation 
+ (a, b) = OverdeterminedInitialSystem.FunctionCall1.F(6.28);
+ pre(temp_1) = false;
+equation
+ temp_1 = time > pre(a);
+ a = if temp_1 and not pre(temp_1) then pre(a) + 1 else pre(a);
+ b = if temp_1 and not pre(temp_1) then pre(b) * 2 else pre(b);
+
+public
+ function OverdeterminedInitialSystem.FunctionCall1.F
+  input Real x;
+  output Integer a;
+  output Integer b;
+ algorithm
+  a := if x < 3.12 then 1 else 0;
+  b := if x > 42 then 1 else 0;
+  return;
+ end OverdeterminedInitialSystem.FunctionCall1.F;
+
+end OverdeterminedInitialSystem.FunctionCall1;
+")})));
+    end FunctionCall1;
 
 end OverdeterminedInitialSystem;

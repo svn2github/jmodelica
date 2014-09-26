@@ -158,6 +158,7 @@ aspect OverdeterminedInitialSystem {
      */
     syn CValue FAbstractEquation.OIS_ceval(VariableEvaluator evaluator, FVariable var) = CValue.UNKNOWN;
     eq FEquation.OIS_ceval(VariableEvaluator evaluator, FVariable var) = solution(var).ceval(evaluator);
+    eq FFunctionCallEquation.OIS_ceval(VariableEvaluator evaluator, FVariable var) = cevalParameter(evaluator, var);
     
     /**
      * Used for evaluation of equations during analyse of overdetermined
