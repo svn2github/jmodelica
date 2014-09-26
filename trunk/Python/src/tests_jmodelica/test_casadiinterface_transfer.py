@@ -502,7 +502,7 @@ class ModelicaTransfer(object):
 
     @testattr(casadi = True)
     def test_ConstructFunctionMatrix(self):
-        model = self.load_model("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none"})
+        model = self.load_model("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none","variability_propagation":False})
         expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"
                     " Inputs (4):\n"
                     "  0. 1-by-1 (dense)\n"
@@ -519,7 +519,7 @@ class ModelicaTransfer(object):
                     "@0 = input[0]\n"
                     "@1 = input[1]\n")
         assert str(model.getModelFunction("AtomicModelMatrix.f")) == expected
-        expected = "vertcat((vertcat(temp_1[1,1],temp_1[1,2])-vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1,0.3]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1,0.3]){1})),(der(A[1,1])+temp_1[1,1]),(der(A[1,2])+temp_1[1,2]),(vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])-vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})),(der(dx[1,1])+temp_2[1,1]),(der(dx[1,2])+temp_2[1,2]),(der(dx[2,1])+temp_2[2,1]),(der(dx[2,2])+temp_2[2,2]))"
+        expected = "vertcat((vertcat(temp_1[1,1],temp_1[1,2])-vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){1})),(der(A[1,1])+temp_1[1,1]),(der(A[1,2])+temp_1[1,2]),(vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])-vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})),(der(dx[1,1])+temp_2[1,1]),(der(dx[1,2])+temp_2[1,2]),(der(dx[2,1])+temp_2[2,1]),(der(dx[2,2])+temp_2[2,2]),(X[1,1]-0.1),(X[2,1]-0.3))"
         assert str(model.getDaeResidual()) == expected
 
     @testattr(casadi = True)
