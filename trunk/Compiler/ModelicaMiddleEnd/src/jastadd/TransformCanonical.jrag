@@ -973,6 +973,8 @@ aspect TransformCanonical {
 	 */
 	public boolean FStatement.shouldBeSorted = false;
 	
+    public boolean FFunctionVariable.hasBindingAssignment = false;
+	
     public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
         if (!isInput()) {
             if (hasBindingExp()) {
@@ -980,6 +982,7 @@ aspect TransformCanonical {
                 stmt.shouldBeSorted = true;
                 stmts.add(stmt);
                 setBindingExpOpt(new Opt());
+                hasBindingAssignment = true;
             } else if (hasFAttribute() && isRecord()) {
                 type().genBindingAssignments(stmts, getFQName().fullCopy(), getFAttributes());
             }

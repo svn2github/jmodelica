@@ -2759,7 +2759,7 @@ aspect ConstantEvaluation {
         public String  name_C();
         public boolean isInput();
         public boolean isOutput();
-        public boolean hasBindingExp();
+        public boolean canBeUnknown();
         
         public FAbstractVariable asFAbstractVariable();
     }
@@ -2770,6 +2770,9 @@ aspect ConstantEvaluation {
     syn FAbstractVariable FAbstractVariable.asFAbstractVariable() = this;
     syn FAbstractVariable InstComponentDecl.asFAbstractVariable() = null;
     
+    syn boolean InstComponentDecl.canBeUnknown() = !isInput() && !hasBindingExp();
+    syn boolean FAbstractVariable.canBeUnknown() = !isInput() && !hasBindingExp();
+    eq FFunctionVariable.canBeUnknown()          = super.canBeUnknown() && !hasBindingAssignment;
   
   syn FExp FAbstractFunctionCall.argument(int i) {
 	  for (FExp e : childFExps())
@@ -4321,8 +4324,9 @@ aspect ExternalCEval {
         ProcessCommunicator com = new ProcessCommunicator(proc, timeout);
         try {
             com.accept("START");
-            for (CommonVariableDecl cvd : varsToSerialize())
-                com.put(values.get(cvd), cvd.type(), !cvd.isInput() && !cvd.hasBindingExp());
+            for (CommonVariableDecl cvd : varsToSerialize()) {
+                com.put(values.get(cvd), cvd.type(), cvd.canBeUnknown());
+            }
             com.accept("CALC");
             com.accept("DONE");
             for (CommonVariableDecl cvd : varsToDeserialize())

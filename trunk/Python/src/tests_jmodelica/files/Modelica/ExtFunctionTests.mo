@@ -577,6 +577,23 @@ package CEval
         Obj3 o3 = Obj3(o1,{o2,o2});
         constant Real x = use3(o3); 
     end ExtObjTest3;
+    
+    model UnknownInput
+      // Should fail
+      function f
+        input  Real x;
+        input  Real t;
+        output Real y = t;
+        output Real dummy=1;
+      external "C" y=fRealScalar(x) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end f;
+     
+      Real y;
+    equation
+      (y, ) = f(3, time);
+    end UnknownInput;
   end Advanced;
 end CEval;
 
