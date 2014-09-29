@@ -38,17 +38,20 @@ eq FAlgorithm.lhsVarsAreSolved()                 = true;
 
 public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
 
+    private static final String DEFAULT_EQ_PREFIX = "eq";
+    
     protected Map<String, V> variableMap = new LinkedHashMap<String, V>();
     protected Map<String, E> equationMap = new LinkedHashMap<String, E>();
     protected Map<FAbstractEquation, java.util.List<E>> equationIndexMap = new LinkedHashMap<FAbstractEquation, java.util.List<E>>();
     private boolean initialSystem = false;
+    private Enumerator enumerator = new Enumerator(1);
 
     public AbstractBiPGraph() {
     }
 
     public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars) {
         for (E_OTHER oldE : eqs)
-            addEquation(oldE.getName(), oldE.getEquation(), oldE.groupNumber(), oldE.variability());
+            addEquation(oldE.getEquation(), oldE.groupNumber(), oldE.variability(), oldE.getName());
         for (V_OTHER oldV : vars)
             addVariable(oldV.getName(), oldV.getVariable());
         for (E_OTHER oldE : eqs) {
@@ -100,14 +103,28 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return (list == null) ? Collections.<E>emptyList() : list;
     }
 
-    public E addEquation(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
+    public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
+        return addEquation(eqn, groupNumber, variability, DEFAULT_EQ_PREFIX, enumerator);
+        
+    }
+    
+    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, String prefix, Enumerator enumerator) {
+        String name;
+        prefix = prefix + "_";
+        do {
+            name = prefix + enumerator.next();
+        } while (getEquation(name) != null);
+        return addEquation(eqn, groupNumber, variability, name);
+    }
+    
+    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, String name) {
         E e = equationMap.get(name);
-        if (e==null) {
-            e = createEq(name, eqn, groupNumber, variability);
-            e.addGroupMember(e);
-            equationMap.put(name,e);
-            insertIntoEquationIndexMap(eqn,e);
-        }
+        if (e != null)
+            throw new IllegalArgumentException("Equation with the name '" + name + "' already exists:\n" + e.getEquation() + "\nNew equation:\n" + eqn);
+        e = createEq(name, eqn, groupNumber, variability);
+        e.addGroupMember(e);
+        equationMap.put(name,e);
+        insertIntoEquationIndexMap(eqn,e);
         return e;
     }
 
@@ -211,11 +228,26 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 addVariable(fv.name(), fv);
     }
 
+    public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes) {
+        do_addEquations(eqns, variableTypes, DEFAULT_EQ_PREFIX, enumerator);
+    }
+
     public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
+        if (eqNamePrefix.equals(DEFAULT_EQ_PREFIX))
+            throw new IllegalArgumentException("The equation name prefix '" + eqNamePrefix + "' is reserved!");
+        do_addEquations(eqns, variableTypes, eqNamePrefix, enumerator);
+    }
+
+    private void do_addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, Enumerator enumerator) {
         Set<FVariable> emptySet = Collections.emptySet();
         for (FAbstractEquation e : eqns) {
             int n_eq = e.numScalarEquations();
-            LinkedHashSet<E> groupMembers = new LinkedHashSet<E>();
+            
+            Collection<E> groupMembers = getEquations(e);
+            int n_existing = groupMembers.size();
+            if (n_existing != 0 && n_existing != n_eq)
+                throw new IllegalArgumentException("Equation already exist in BiPGraph but with different number of scalars, previously " + n_existing + ", now " + n_eq + ", equation:\n" + e);
+            
             // For equations that counts as several scalar equations (function calls, algorithms), 
             // the left hand side variables depends on all the right-hand side ones, 
             // but not on the other left-hand side ones
@@ -229,29 +261,34 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 if (e.lhsVarsAreSolved())
                     rhsVars.removeAll(Arrays.asList(lhsVars));
             }
-            for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
-                                                  // need to reverse here to preserve the initial order.
-                FTypePrefixVariability variability = lhsVars[i] != null ? lhsVars[i].variability().combineDown(lhsVars[i].type().funcOutputVariability()) : e.variability();
-                boolean add = false;
-                for (VarType varType : variableTypes)
-                    if (varType.isOk(variability))
-                        add = true;
-                if (!add)
-                    continue;
-                E eqn = addEquation(eqNamePrefix + enumerator.next(), e, i, variability);
-                groupMembers.add(eqn);
-                
+            if (n_existing == 0) {
+                groupMembers = new ArrayList<E>();
+                for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
+                                                      // need to reverse here to preserve the initial order.
+                    FTypePrefixVariability variability = lhsVars[i] != null ? lhsVars[i].variability().combineDown(lhsVars[i].type().funcOutputVariability()) : e.variability();
+                    boolean add = false;
+                    for (VarType varType : variableTypes)
+                        if (varType.isOk(variability))
+                            add = true;
+                    if (!add)
+                        continue;
+                    E eqn = addEquation(e, i, variability, eqNamePrefix, enumerator);
+                    groupMembers.add(eqn);
+                }
+                for (E ee : groupMembers) {
+                    for (E eee : groupMembers) {
+                        ee.addGroupMember(eee);
+                    }
+                }
+            }
+            for (E eqn : groupMembers) {
                 for (FVariable fVar : ASTNode.lookupFVariablesInSet(e.findFIdUseExpsInTree())) {
                     V var = getVariable(fVar.name());
                     if (var == null)
                         continue;
+                    int i = eqn.groupNumber();
                     if (lhsVars[i] == null || lhsVars[i] == fVar || rhsVars.contains(fVar))
                         addEdge(eqn, var);
-                }
-            }
-            for (E ee : groupMembers) {
-                for (E eee : groupMembers) {
-                    ee.addGroupMember(eee);
                 }
             }
         }

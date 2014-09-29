@@ -93,6 +93,42 @@ end OverdeterminedInitialSystem.Basic3;
 ")})));
     end Basic3;
 
+    model Basic4
+        Integer a;
+        Integer b;
+        Integer c;
+        Integer d;
+    initial equation
+        pre(a) = 0;
+        pre(b) = 0;
+        pre(c) = 2;
+    equation
+        a = b;
+        b = if time > 0 then 1 else 0;
+        c = if time > 0 then 2 else -1;
+        d = if time > 0 then -2 else -1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Basic4",
+            description="A basic test with some additional initial equations, this caused problems in BiPGraph",
+            flatModel="
+fclass OverdeterminedInitialSystem.Basic4
+ discrete Integer a;
+ discrete Integer c;
+ discrete Integer d;
+initial equation 
+ pre(a) = 0;
+ pre(c) = 2;
+ pre(d) = 0;
+equation
+ a = if time > 0 then 1 else 0;
+ c = if time > 0 then 2 else -1;
+ d = if time > 0 then -2 else -1;
+end OverdeterminedInitialSystem.Basic4;
+")})));
+    end Basic4;
+
     model Parameter1
         Real x;
         Real y;
