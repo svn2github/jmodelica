@@ -214,4 +214,47 @@ end OverdeterminedInitialSystem.FunctionCall1;
 ")})));
     end FunctionCall1;
 
+    model HighIndex1
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+    initial equation
+        vx = -1;
+        vy = 1;
+    equation
+        der(vx) + der(vy) = 0;
+        vx = der(x);
+        vy = der(y);
+        x + y = 2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="HighIndex1",
+            description="Test so that ceval through dummy expressions are done correctly.",
+            flatModel="
+fclass OverdeterminedInitialSystem.HighIndex1
+ Real x;
+ Real y;
+ Real vx;
+ Real vy;
+ Real _der_vx;
+ Real _der_y;
+ Real _der_der_x;
+ Real _der_der_y;
+initial equation 
+ vy = 1;
+ x = 0.0;
+equation
+ _der_vx + der(vy) = 0;
+ vx = der(x);
+ vy = _der_y;
+ x + y = 2;
+ der(x) + _der_y = 0;
+ _der_vx = _der_der_x;
+ der(vy) = _der_der_y;
+ _der_der_x + _der_der_y = 0;
+end OverdeterminedInitialSystem.HighIndex1;
+")})));
+    end HighIndex1;
 end OverdeterminedInitialSystem;

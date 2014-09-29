@@ -30,8 +30,7 @@ aspect FlatNameBinding {
 	
 	syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
 	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
-	eq FDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
-	eq FDummyDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
+	eq FAbstractDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
 	syn FAbstractVariable FReinit.myFV() = getVar().myFVForUse();
 	
 	syn FAbstractVariable FExp.myFVForUse() = null;

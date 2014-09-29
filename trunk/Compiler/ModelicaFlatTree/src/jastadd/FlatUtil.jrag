@@ -328,8 +328,7 @@ aspect FlatNames {
 
     syn String FIdUse.name()           = getFQName().name();
     syn String FIdUseExp.name()        = getFIdUse().name();
-    eq FDerExp.name()                  = derName();
-    eq FDummyDerExp.name()             = derName();
+    eq FAbstractDerExp.name()          = derName();
     eq FHDerExp.name()                 = hDerName(getOrder());
     eq FHDummyDerExp.name()            = hDerName(getOrder());
     eq FPreExp.name()                  = preName();
@@ -408,8 +407,7 @@ aspect FlatNames {
 
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
-    eq FDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
-    eq FDummyDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
+    eq FAbstractDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
     eq FHDummyDerExp.nameUnderscore() = "der_" + getOrder() + "_" + getFIdUse().nameUnderscore();
     
     //syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();

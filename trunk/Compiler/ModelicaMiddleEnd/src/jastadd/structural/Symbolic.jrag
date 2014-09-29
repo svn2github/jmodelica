@@ -772,10 +772,6 @@ aspect Derivatives {
         }   
     }
 
-    public FExp FDerExp.diff(String name) { 
-        return dynamicFExp(diffUseOrDerExp(name, name()));
-    }
-
     public FExp InstDerExp.diff(String name) {  
         return dynamicFExp(diffUseOrDerExp(name, null));
     }

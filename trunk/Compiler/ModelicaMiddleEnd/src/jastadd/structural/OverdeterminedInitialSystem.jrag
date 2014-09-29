@@ -67,7 +67,7 @@ aspect OverdeterminedInitialSystem {
                 if (!equation.isInitial()) {
                     ASTNode.log.info("  Not an initial equation");
                     allIsGood = false;
-                } else if (eqn.getEquation().OIS_consistencyCheck(evaluator)) {
+                } else if (equation.OIS_consistencyCheck(evaluator)) {
                     ASTNode.log.info("  Consistent");
                 } else {
                     allIsGood = false;
@@ -171,7 +171,7 @@ aspect OverdeterminedInitialSystem {
         try {
             CValue left = getLeft().ceval(evaluator);
             CValue right = getRight().ceval(evaluator);
-            return type().equ(left, right).booleanValue();
+            return left.isValid() && right.isValid() && type().equ(left, right).booleanValue();
         } catch (ConstantEvaluationException e) {
             return false;
         }

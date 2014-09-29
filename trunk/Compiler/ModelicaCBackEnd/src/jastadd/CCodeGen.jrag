@@ -254,20 +254,8 @@ aspect CCodeGen {
 		p.print(getY(), str, indent);
 		str.print(")");
 	}
-		
-	public void FDerExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
-			str.print("(");
-			str.print(myFV().name_C());
-			str.print("*sf(");
-			str.print(myFV().valueReference());
-			str.print("))");
-		} else {
-			str.print(myFV().name_C());
-		}
-	}
-
-	public void FDummyDerExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+	
+	public void FAbstractDerExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		if (root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
 			str.print(myFV().name_C());

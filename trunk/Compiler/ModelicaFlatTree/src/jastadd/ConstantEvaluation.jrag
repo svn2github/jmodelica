@@ -355,6 +355,13 @@ aspect ConstantEvaluation {
         }
 
         /**
+         * Returns true if the constant value is NaN, infinity or unknown.
+         */
+        public boolean isValid() {
+            return false;
+        }
+
+        /**
          * Overloading of the toString() method.
          * 
          * @return The string.
@@ -621,6 +628,11 @@ aspect ConstantEvaluation {
             return value < 0;
         }
 
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
     
 	/**
@@ -706,6 +718,12 @@ aspect ConstantEvaluation {
         public boolean isNegative() {
             return value < 0;
         }
+
+        @Override
+        public boolean isValid() {
+            return !(Double.isInfinite(value) || Double.isNaN(value));
+        }
+
       }
     
 	/**
@@ -779,6 +797,11 @@ aspect ConstantEvaluation {
             return true;
         }
         
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
       }
       
 	/**
@@ -826,6 +849,11 @@ aspect ConstantEvaluation {
             return true;
         }
         
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
       }
     
 	/**
@@ -977,6 +1005,14 @@ aspect ConstantEvaluation {
                 else
                     res &= cvalue.isArray(pos + 1, dims);
             }
+            return res;
+        }
+
+        @Override
+        public boolean isValid() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isValid();
             return res;
         }
 
@@ -1386,6 +1422,11 @@ aspect ConstantEvaluation {
             return res;
         }
 
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
 
 
@@ -1475,6 +1516,12 @@ aspect ConstantEvaluation {
             }
             return new CValuePartialFunction(func, resValues);
         }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
     
     /**
@@ -1543,6 +1590,11 @@ aspect ConstantEvaluation {
 	    	return type.createLiteral(index);
 	    }
     	
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
 
 
@@ -2067,8 +2119,8 @@ aspect ConstantEvaluation {
         return res.record().getMember(last);
     }
 
-    eq FIdUseExp.cevalCalc(VariableEvaluator evaluator)      = getFIdUse().ceval(evaluator);
-    eq FDerExp.cevalCalc(VariableEvaluator evaluator) {
+    eq FIdUseExp.cevalCalc(VariableEvaluator evaluator) = getFIdUse().ceval(evaluator);
+    eq FAbstractDerExp.cevalCalc(VariableEvaluator evaluator) {
         if (getFIdUse().variability().discreteOrLess())
             return new CValueInteger(0);
         FAbstractVariable decl = myFV();
