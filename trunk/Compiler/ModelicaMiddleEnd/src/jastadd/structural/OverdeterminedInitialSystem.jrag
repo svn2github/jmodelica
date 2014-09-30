@@ -135,27 +135,6 @@ aspect OverdeterminedInitialSystem {
             public CValue ceval(CommonVariableDecl variable, Index i) {
                 return CValue.UNKNOWN;
             }
-            
-            @Override
-            public boolean isFunctionEvaluator() {
-                return false;
-            }
-            
-            @Override
-            public CValue evaluationValue(CommonVariableDecl variable) {
-                throw new UnsupportedOperationException();
-            }
-            
-            @Override
-            public void setEvaluationValue(CommonVariableDecl variable,
-                    CValue val) {
-                throw new UnsupportedOperationException();
-            }
-            
-            @Override
-            public boolean hasEvaluationValue(CommonVariableDecl variable) {
-                throw new UnsupportedOperationException();
-            }
         }
     }
     

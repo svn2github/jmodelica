@@ -1044,12 +1044,12 @@ aspect InstanceErrorCheck {
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         if (hasFExp()) {
             InstComponentDecl var = getInstPrimitive();
-            CValue oldVal = var.getLocalCachedEvaluationValue();
+            CValue oldVal = var.evaluationValue;
             boolean last = i == indices.getNumChild() - 1;
             CommonForIndex next = last ? null : indices.getChild(i + 1);
             CValueArray ivals = getFExp().ceval().array();
             for (Index j : ivals.indices()) {
-                var.setLocalCachedEvaluationValue(ivals.getCell(j));
+                var.setEvaluationValue(ivals.getCell(j));
                 if (last) {
                     child.resetCollectErrors();
                     child.collectErrors(checkType);
@@ -1058,7 +1058,7 @@ aspect InstanceErrorCheck {
                     next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
                 }
             }
-            var.setLocalCachedEvaluationValue(oldVal);
+            var.setEvaluationValue(oldVal);
         }
     }
 

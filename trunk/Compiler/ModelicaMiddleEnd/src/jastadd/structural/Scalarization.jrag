@@ -1339,7 +1339,7 @@ aspect Scalarization {
                 vars = null; // Only add variable in the first iteration
             }
             for (CommonForIndex fi : getForIndexs()) 
-                fi.setLocalCachedEvaluationValue(null);
+                fi.setEvaluationValue(null);
         } else {
             super.createArrayTemporaries(clauses, vars, indexMap, names);
         }
@@ -2078,7 +2078,7 @@ aspect Scalarization {
 				getForStmts().flushTempVarNames();
 			}
 			for (FForIndex fi : indexList) 
-				fi.setLocalCachedEvaluationValue(null);
+				fi.setEvaluationValue(null);
 		}
 		return false;
 	}
@@ -2477,7 +2477,7 @@ aspect Scalarization {
 			getFAbstractEquations().flushTempVarNames();
 		}
 		for (FForIndex fi : getFForIndexs()) 
-			fi.setLocalCachedEvaluationValue(null);
+			fi.setEvaluationValue(null);
 	}
 	
 	public void FIfWhenElseEquation.scalarize(List<FAbstractEquation> eqns, 

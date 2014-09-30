@@ -1019,14 +1019,14 @@ aspect Connections {
 			int j = 0;
 			int[] ii = indices.translate(i).index();
 			for (InstForIndex fi : getInstForIndexs()) {
-				fi.getInstPrimitive().setLocalCachedEvaluationValue(new CValueInteger(ii[j]));
+				fi.getInstPrimitive().setEvaluationValue(new CValueInteger(ii[j]), null);
 				j++;
 			}
 			for (FAbstractEquation equ : getFAbstractEquations())
 			    equ.buildConnectionSets(prefix, csm, connect);
 		}
 		for (InstForIndex fi : getInstForIndexs()) {
-			fi.getInstPrimitive().setLocalCachedEvaluationValue(null);
+			fi.getInstPrimitive().setEvaluationValue(null, null);
 			fi.buildConnectionSets(prefix, csm, connect);
 		}
 	}
