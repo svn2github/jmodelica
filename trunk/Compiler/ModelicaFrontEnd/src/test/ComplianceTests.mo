@@ -434,12 +434,12 @@ fclass ComplianceTests.HybridFMU1
  discrete Boolean temp_3;
  discrete Boolean temp_4;
 initial equation 
+ xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- xx = 2;
  pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
@@ -534,9 +534,9 @@ fclass ComplianceTests.HybridFMU2
  Real dummy;
  discrete Boolean temp_1;
 initial equation 
- pre(x) = 0.0;
  pre(y) = 0.0;
  dummy = 0.0;
+ pre(x) = 0.0;
  pre(temp_1) = false;
 equation
  der(dummy) = 0;

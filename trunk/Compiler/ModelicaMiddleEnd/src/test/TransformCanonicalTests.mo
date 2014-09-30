@@ -2325,10 +2325,10 @@ initial equation
  m.pre(x1) = 1;
  m.pre(b1) = false;
  m.pre(i1) = 4;
- m.pre(x2) = 2;
  m.t = 0;
  m.pre(ub1) = false;
  m.pre(ui1) = 0;
+ m.pre(x2) = 2;
  pre(temp_1) = false;
 equation
  m.der(t) = 1;
@@ -2774,12 +2774,12 @@ fclass TransformCanonicalTests.WhenEqu1
  discrete Boolean temp_6;
  discrete Boolean temp_7;
 initial equation 
- pre(x[1]) = 0.0;
- pre(x[2]) = 0.0;
- pre(x[3]) = 0.0;
  z[1] = 0.0;
  z[2] = 0.0;
  z[3] = 0.0;
+ pre(x[1]) = 0.0;
+ pre(x[2]) = 0.0;
+ pre(x[3]) = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
@@ -2847,12 +2847,12 @@ fclass TransformCanonicalTests.WhenEqu2
  discrete Boolean temp_3;
  discrete Boolean temp_4;
 initial equation 
+ xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- xx = 2;
  pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
@@ -2916,12 +2916,12 @@ fclass TransformCanonicalTests.WhenEqu3
  discrete Boolean temp_2;
  discrete Boolean temp_3;
 initial equation 
+ xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- xx = 2;
  pre(b1) = false;
  pre(temp_1) = false;
  pre(temp_2) = false;
@@ -2974,11 +2974,11 @@ fclass TransformCanonicalTests.WhenEqu4
  discrete Boolean temp_1;
  discrete Boolean temp_2;
 initial equation 
+ t = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(z) = 0.0;
  pre(v) = 0.0;
- t = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
 equation
@@ -3067,10 +3067,10 @@ fclass TransformCanonicalTests.WhenEqu5
  discrete Boolean h1;
  discrete Boolean h2;
 initial equation 
- pre(z) = false;
- pre(y) = false;
  x = 1;
  pre(a) = 1.0;
+ pre(z) = false;
+ pre(y) = false;
  pre(h1) = false;
  pre(h2) = false;
 equation
@@ -3106,8 +3106,8 @@ fclass TransformCanonicalTests.WhenEqu7
  Real dummy;
  discrete Boolean temp_1;
 initial equation 
- pre(x) = 0;
  dummy = 0.0;
+ pre(x) = 0;
  pre(temp_1) = false;
 equation
  der(dummy) = 0;
@@ -3144,9 +3144,9 @@ fclass TransformCanonicalTests.WhenEqu8
  discrete Boolean temp_1;
  discrete Boolean temp_2;
 initial equation 
+ dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
- dummy = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
 equation
@@ -3193,9 +3193,9 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real h = 0.05 /* 0.05 */;
  discrete Boolean temp_1;
 initial equation 
- pre(u) = 0.0;
  x = 0.0;
  pre(I) = 0.0;
+ pre(u) = 0.0;
  pre(temp_1) = false;
 equation
  der(x) = - x + u;
@@ -3314,9 +3314,9 @@ fclass TransformCanonicalTests.WhenEqu11
  discrete Boolean atInit;
 initial equation 
  x_c = pre(x_c);
- pre(u_c) = 0.0;
  x_p = 1;
  pre(sampleTrigger) = false;
+ pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
@@ -3429,8 +3429,8 @@ initial equation
  v3 = 0;
  v4 = 1;
  pre(y) = 1;
- pre(up) = true;
  pre(i) = 0;
+ pre(up) = true;
  pre(temp_1) = false;
 equation
  temp_1 = sample(0.1, 1);
@@ -3445,6 +3445,36 @@ end TransformCanonicalTests.WhenEqu13;
 			
 ")})));		
 end WhenEqu13;
+model WhenEqu14
+    Boolean a;
+initial equation
+    pre(a) = false;
+    a = if time > 1 then true else false;
+equation
+    when time > 2 then
+        a = true;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="WhenEqu14",
+            description="Test of when equation and initial equation assigning to pre variable",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Solved equation ---
+temp_1 := time > 2
+
+--- Solved equation ---
+pre(a) := false
+
+--- Solved equation ---
+a := if time > 1 then true else false
+
+--- Solved equation ---
+pre(temp_1) := false
+-------------------------------
+")})));
+end WhenEqu14;
 
 model IfEqu1
 	Real x[3];

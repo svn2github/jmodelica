@@ -343,16 +343,24 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     private static class VarMatchingComparator implements Comparator<AbstractVar<?,?>> {
+        private Set<FAbstractVariable> hasExtraStartConditions;
+        private VarMatchingComparator(Set<FAbstractVariable> hasExtraStartConditions) {
+            if (hasExtraStartConditions == null)
+                hasExtraStartConditions = Collections.emptySet();
+            this.hasExtraStartConditions = hasExtraStartConditions;
+        }
         @Override
         public int compare(AbstractVar<?,?> o1, AbstractVar<?,?> o2) {
-            int diff = (o1.getVariable().startAttributeSet() ? 1 : 0) - (o2.getVariable().startAttributeSet() ? 1 : 0);
+            boolean b1 = o1.getVariable().startAttributeSet() || hasExtraStartConditions.contains(o1.getVariable());
+            boolean b2 = o2.getVariable().startAttributeSet() || hasExtraStartConditions.contains(o2.getVariable());
+            int diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
             return o1.getName().compareTo(o2.getName());
         }
     }
 
-    public java.util.List<Map<V, Set<E>>> bfs(Collection<E> startingNodes) {
+    public java.util.List<Map<V, Set<E>>> bfs(Collection<E> startingNodes, Comparator<? super V> varComparator) {
         java.util.List<Map<V, Set<E>>> Lv = new ArrayList<Map<V, Set<E>>>();
         Set<E> Le_current = new LinkedHashSet<E>();
         Set<E> Le_next = new LinkedHashSet<E>();
@@ -369,7 +377,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             //System.out.println("*** layer: " + layer);
             //System.out.println(Lv);
             //System.out.println(Le_current);
-            Lv.add(new TreeMap<V, Set<E>>(new VarMatchingComparator()));
+            Lv.add(new TreeMap<V, Set<E>>(varComparator));
             
             for (E s : Le_current) {
                 //System.out.println(" eq: " + s);
@@ -460,11 +468,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     public void maximumMatching(boolean resetMatching) {
+        maximumMatching(resetMatching, null);
+    }
+
+    public void maximumMatching(boolean resetMatching, Set<FAbstractVariable> hasExtraStartConditions) {
         if (resetMatching) {
             reset();
             greedyMatching();
         }
-        //System.out.println(printMatching());
         
         // Initialize set of free equations
         Set<E> startingNodes = new LinkedHashSet<E>();
@@ -478,10 +489,11 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         java.util.List<Map<V, Set<E>>> Lv = null;
         java.util.List<java.util.List<Edge>> P = null;
+        Comparator<? super V> varComparator = new VarMatchingComparator(hasExtraStartConditions);
         
         while (unmatchedEquations.size()>0) {
             
-            Lv = bfs(unmatchedEquations);
+            Lv = bfs(unmatchedEquations, varComparator);
             P = dfs(Lv);
             
             if (Lv.get(Lv.size()-1).size()==0) {
