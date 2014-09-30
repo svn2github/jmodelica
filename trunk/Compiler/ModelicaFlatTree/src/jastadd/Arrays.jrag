@@ -1439,7 +1439,7 @@ aspect Arrays {
             fillSubset(arr, i, indexMap, scalarize);
 		}
 		for (CommonForIndex fi : forIndices) 
-			fi.setEvaluationValue(null);
+			fi.setLocalCachedEvaluationValue(null);
 		return arr;
 	}
 	
@@ -4375,7 +4375,7 @@ aspect ArrayHelpers {
 			int[] ii = translate(i).index();
 			for (CommonForIndex fi : forIndices) {
 				indexMap.put(fi.name(), new FIntegerLitExp(ii[j]));
-				fi.setEvaluationValue(new CValueInteger(ii[j]));
+				fi.setLocalCachedEvaluationValue(new CValueInteger(ii[j]));
 				j++;
 			}
 		}

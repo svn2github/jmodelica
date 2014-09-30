@@ -208,7 +208,7 @@ aspect OptimicaTransformCanonical {
 				c.scalarize(constr, eqns, vars, myIndexMap);
 		}
 		for (FForIndex fi : getFForIndexs()) 
-			fi.setEvaluationValue(null);
+			fi.setLocalCachedEvaluationValue(null);
 	}
 	
 	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 

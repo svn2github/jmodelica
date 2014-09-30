@@ -1188,8 +1188,8 @@ aspect FlatFunctionUtils {
      */
     public interface CommonCallable {
         public String name();
-        public void evaluate(Map<CommonVariableDecl, CValue> values);
         public ArrayList<? extends CommonVariableDecl> myInputs();
+        public ArrayList<? extends CommonVariableDecl> myNonInputs();
         public ArrayList<? extends CommonVariableDecl> myOutputs();
     }
     
@@ -1206,6 +1206,7 @@ aspect FlatFunctionUtils {
      */
     public interface FCallable {
         public ArrayList<FFunctionVariable> myInputs();
+        public ArrayList<FFunctionVariable> myNonInputs();
         public ArrayList<FFunctionVariable> myOutputs();
         public FFunctionVariable myInput(int i);
         public boolean hasOutputs();
@@ -1304,7 +1305,8 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs() = myFCallable().myInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs()    = myFCallable().myInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myNonInputs() = myFCallable().myNonInputs();
      
     /**
      * Returns the i:th FFunctionVariable that is  declared as "input".
