@@ -419,8 +419,8 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             Default: Empty string
         
     Returns::
-    
-        A list of warnings given by the compiler
+        A CompilerResult object with the name of the generated unit (or 'None' if no unit was generated) 
+        and a list of warnings given by the compiler.
     """
     JVM_PATH = _get_separate_JVM()
         
