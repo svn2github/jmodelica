@@ -1218,6 +1218,68 @@ end EvaluationTests.FunctionEval33;
 ")})));
 end FunctionEval33;
 
+model FunctionEval34
+    function f
+        input Real[n] x;
+        input Integer n;
+        output Real y;
+      algorithm
+        y := 0;
+        for i in 1:n loop
+            if x[i] > 1 then
+                y := y + x[i];
+            end if;
+        end for;
+    end f;
+    
+    constant Real y1 = f({1,2,4},3);
+    Real y2 = f({1,2,4},3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval34",
+            description="If statement in for statement",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.FunctionEval34
+ constant Real y1 = 6.0;
+ constant Real y2 = 6.0;
+end EvaluationTests.FunctionEval34;
+")})));
+end FunctionEval34;
+
+model FunctionEval35
+    function f
+        input Real[:,:] x;
+        output Real[size(x,1),size(x,2)] y = x;
+        output Real t = sum(x);
+        algorithm
+    end f;
+    
+    function fw
+        input Real[:,:] x;
+        output Real[size(x,1),size(x,2)] y;
+        Real t;
+      algorithm
+        y := x;
+        (y,t) := f(x);
+    end fw;
+    
+    Real[1,1] y = fw({{1}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval35",
+            description="Function call stmt assigning array with value",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.FunctionEval35
+ constant Real y[1,1] = 1;
+end EvaluationTests.FunctionEval35;
+")})));
+end FunctionEval35;
+
+
 
 model VectorFuncEval1
     function f

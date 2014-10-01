@@ -1939,7 +1939,7 @@ aspect ConstantEvaluation {
     eq FUnknownSizeExp.cevalCalc(VariableEvaluator evaluator) {
         if (getVariable() == null)
             return CValue.UNKNOWN;
-        CValue val = getVariable().evaluationValue();
+        CValue val = getVariable().evaluationValue(evaluator);
         return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
     }
 
@@ -2184,7 +2184,7 @@ aspect ConstantEvaluation {
         if (containingInstComponent() == var.containingInstComponent())
             return false;
         InstAccess first = getTopInstAccess().getFirstInstAccess();
-        return !first.myInstComponentDecl().evaluationValue().isUnknown();
+        return !first.myInstComponentDecl().evaluationValue(defaultVariableEvaluator()).isUnknown();
     }
 
     /**
@@ -2568,12 +2568,12 @@ aspect ConstantEvaluation {
     syn CValue FAbstractVariable.ceval() = ceval(defaultVariableEvaluator());
     
 	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator) = CValue.UNKNOWN;
-	eq FFunctionVariable.ceval(VariableEvaluator evaluator)         = evaluationValue();
+	eq FFunctionVariable.ceval(VariableEvaluator evaluator)         = evaluationValue(evaluator);
 	eq FVariable.ceval(VariableEvaluator evaluator)                 = ceval(evaluator, isParameter());
 	syn CValue FVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
 		CValue val;
 		if (isForIndex())
-			val = evaluationValue();
+			val = evaluationValue(evaluator);
 		else if (hasParameterEquation())
 			val = parameterEquation().cevalParameter(evaluator, this);
 		else if (hasBindingExp())
@@ -2600,14 +2600,14 @@ aspect ConstantEvaluation {
 	 *  @return The constant value.
 	 */
 	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
-	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue().array().getCell(i);
+	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
 	eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
 		if (!isConstant() && !isParameter() && !inRecord()) {
 			return CValue.UNKNOWN;
 		} else {
 			CValue val;
 			if (isForIndex())
-				val = evaluationValue();
+				val = evaluationValue(evaluator);
 			else if (hasParameterEquation())
 				val = parameterEquation().cevalParameter(evaluator, this, i);
 			else if (hasBindingExp())
@@ -2795,11 +2795,12 @@ aspect ConstantEvaluation {
      * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
-        public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
         public void readEvaluationValue(Map<CommonVariableDecl, CValue> map);
-        public void setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map);
+        public void setEvaluationValue(VariableEvaluator evaluator, CValue val);
+        public void setLocalCachedEvaluationValue(CValue val);
+        public CValue getLocalCachedEvaluationValue();
         public void prepareForFunctionEval();
-        public CValue evaluationValue();
+        public CValue evaluationValue(VariableEvaluator evaluator);
         public CValue ceval();
         public CValue ceval(VariableEvaluator evaluator);
         public CValue ceval(VariableEvaluator evaluator, Index i);
@@ -3037,7 +3038,7 @@ aspect ConstantEvaluation {
         Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
         currentEvaluationValues = values;
         for (FFunctionVariable var : getFFunctionVariables())
-            var.setEvaluationValue(null);
+            var.setLocalCachedEvaluationValue(null);
         fab.prepareForFunctionEval();
         for (FFunctionVariable var : myNonInputs())
             var.prepareForFunctionEval();
@@ -3048,10 +3049,10 @@ aspect ConstantEvaluation {
             for (FFunctionVariable var : myNonInputs())
                 var.readEvaluationValue(values);
         
-            fab.getFStatements().evaluateList(defaultVariableEvaluator(), values);
+            fab.getFStatements().evaluateList(new AlgorithmEvaluator(values));
         } finally {
             for (FFunctionVariable var : getFFunctionVariables())
-                var.setEvaluationValue(null);
+                var.setLocalCachedEvaluationValue(null);
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.readEvaluationValue(oldVal);
@@ -3119,7 +3120,7 @@ aspect ConstantEvaluation {
         Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
         currentEvaluationValues = values;
         for (InstComponentDecl var : allInstComponentDecls())
-          var.setEvaluationValue(null);
+          var.setLocalCachedEvaluationValue(null);
         fab.prepareForFunctionEval();
         for (InstComponentDecl var : myNonInputs())
             var.prepareForFunctionEval();
@@ -3130,10 +3131,10 @@ aspect ConstantEvaluation {
             for (InstComponentDecl var : myNonInputs())
               var.readEvaluationValue(values);
         
-            fab.getFStatements().evaluateList(defaultVariableEvaluator(), values);
+            fab.getFStatements().evaluateList(new AlgorithmEvaluator(values));
         } finally {
             for (InstComponentDecl var : allInstComponentDecls())
-                var.setEvaluationValue(null);
+                var.setLocalCachedEvaluationValue(null);
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.readEvaluationValue(oldVal);
@@ -3145,27 +3146,16 @@ aspect ConstantEvaluation {
     public void InstPartialFunction.evaluate(Map<CommonVariableDecl, CValue> values) {
         evaluationValue.evaluateFunction(myInstClass(), values);
     }
-    /**
-     * Save current function evaluation value to map.
-     */
-    public void FAbstractVariable.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-        map.put(this, evaluationValue);
-    }
-
-    /**
-     * Save current function evaluation value to map.
-     */
-    public void InstComponentDecl.saveEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-        map.put(this, evaluationValue);
-    }
-
+    
+    
+    
     /**
      * Read current function evaluation value from map.
      * 
      * If this variable isn't in the map, set to value of binding expression.
      */
     public void FAbstractVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
-        evaluationValue = map.get(this);
+        map.put(this, evaluationValue);
     }
 
     public void FFunctionVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
@@ -3253,52 +3243,35 @@ aspect ConstantEvaluation {
     /**
      * Set the current evaluation value.
      */
-    public void FAbstractVariable.setEvaluationValue(CValue val) {
-        evaluationValue = val;
+    public void CommonForIndex.setEvaluationValue(CValue val) {
+        setEvaluationValue(ASTNode.defaultVariableEvaluator(), val);
+    }
+    
+    public abstract void CommonForIndex.setEvaluationValue(VariableEvaluator evaluator, CValue val);
+
+    public void FForIndex.setEvaluationValue(VariableEvaluator evaluator, CValue val) {
+        getFVariable().setEvaluationValue(evaluator, val);
     }
 
-    /**
-     * Set the current evaluation value.
-     */
-    public void InstComponentDecl.setEvaluationValue(CValue val) {
-        evaluationValue = val;
-    }
-
-    /**
-     * Set the current evaluation value.
-     */
-    public abstract void CommonForIndex.setEvaluationValue(CValue val);
-
-    public void FForIndex.setEvaluationValue(CValue val) {
-        getFVariable().setEvaluationValue(val);
-    }
-
-    public void InstForIndex.setEvaluationValue(CValue val) {
-        getInstPrimitive().setEvaluationValue(val);
+    public void InstForIndex.setEvaluationValue(VariableEvaluator evaluator, CValue val) {
+        getInstPrimitive().setEvaluationValue(evaluator, val);
     }
 
   /**
    * Get the current evaluation value.
    */
-  public abstract CValue CommonForIndex.evaluationValue();
+    public CValue CommonForIndex.evaluationValue() {
+        return evaluationValue(ASTNode.defaultVariableEvaluator());
+    }
+    
+  public abstract CValue CommonForIndex.evaluationValue(VariableEvaluator evaluator);
   
-  public CValue FForIndex.evaluationValue() {
-	  return getFVariable().evaluationValue();
+  public CValue FForIndex.evaluationValue(VariableEvaluator evaluator) {
+	  return getFVariable().evaluationValue(evaluator);
   }
   
-  public CValue InstForIndex.evaluationValue() {
-	  return getInstPrimitive().evaluationValue();
-  }
-  
-  /**
-   * Set the current function evaluation value.
-   * 
-   * Also updates value map.
-   */
-  public void FAbstractVariable.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-	  evaluationValue = val;
-	  if (map != null)
-		  map.put(this, val);
+  public CValue InstForIndex.evaluationValue(VariableEvaluator evaluator) {
+	  return getInstPrimitive().evaluationValue(evaluator);
   }
   
   /**
@@ -3306,20 +3279,27 @@ aspect ConstantEvaluation {
    * 
    * Also updates value map.
    */
-  public void InstComponentDecl.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-	  evaluationValue = val;
-	  if (map != null)
-		  map.put(this, val);
-  }
+    public void FAbstractVariable.setEvaluationValue(VariableEvaluator evaluator, CValue val) {
+        evaluator.setEvaluationValue(this, val);
+    }
+  
+  /**
+   * Set the current function evaluation value.
+   * 
+   * Also updates value map.
+   */
+    public void InstComponentDecl.setEvaluationValue(VariableEvaluator evaluator, CValue val) {
+        evaluator.setEvaluationValue(this, val);
+    }
   
   /**
    * Set the current function evaluation value of referenced variable.
    * 
    * Also updates value map.
    */
-  public void FFunctionCallLeft.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
+  public void FFunctionCallLeft.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
 	  if (hasFExp())
-		  getFExp().setEvaluationValue(val, map);
+		  getFExp().setEvaluationValue(evaluator, val);
   }
   
   /**
@@ -3327,15 +3307,15 @@ aspect ConstantEvaluation {
    * 
    * Also updates value map.
    */
-  public void FExp.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
+  public void FExp.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
   }
   
-  public void FIdUseExp.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-	  getFIdUse().setEvaluationValue(val, map);
+  public void FIdUseExp.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
+	  getFIdUse().setEvaluationValue(evaluator, val);
   }
   
-    public void FInstAccessExp.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-        getInstAccess().assignToInFuncEval(map, val);
+    public void FInstAccessExp.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
+        getInstAccess().assignToInFuncEval(evaluator, val);
     }
   
   /**
@@ -3343,45 +3323,77 @@ aspect ConstantEvaluation {
    * 
    * Also updates value map.
    */
-  public void FIdUse.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
+  public void FIdUse.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
 	  if (myFV() instanceof FFunctionVariable)
-		  ((FFunctionVariable) myFV()).setEvaluationValue(val, map);
+		  ((FFunctionVariable) myFV()).setEvaluationValue(evaluator, val);
   }
   
-    public void FIdUseInstAccess.setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map) {
-        getInstAccess().assignToInFuncEval(map, val);
+    public void FIdUseInstAccess.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
+        getInstAccess().assignToInFuncEval(evaluator, val);
     }
   
   /**
    * Check if this variable has a current function evaluation value.
    */
-  public boolean FAbstractVariable.hasEvaluationValue() {
-	  return evaluationValue != null;
+  public boolean FAbstractVariable.hasEvaluationValue(VariableEvaluator evaluator) {
+	  return evaluator.hasEvaluationValue(this);
   }
   
   /**
    * Check if this variable has a current function evaluation value.
    */
-  public boolean InstComponentDecl.hasEvaluationValue() {
-	  return evaluationValue != null;
+  public boolean InstComponentDecl.hasEvaluationValue(VariableEvaluator evaluator) {
+	  return evaluator.hasEvaluationValue(this);
   }
   
   /**
    * Get the current evaluation value.
    */
-  public CValue FAbstractVariable.evaluationValue() {
-	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
+  public CValue FAbstractVariable.evaluationValue(VariableEvaluator evaluator) {
+	  return evaluator.evaluationValue(this);
   }
   
   /**
    * Get the current evaluation value.
    */
-  public CValue InstComponentDecl.evaluationValue() {
-	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
+  public CValue InstComponentDecl.evaluationValue(VariableEvaluator evaluator) {
+	  return evaluator.evaluationValue(this);
   }
   
   protected CValue FAbstractVariable.evaluationValue = null;
   protected CValue InstComponentDecl.evaluationValue = null;
+  
+    public CValue FAbstractVariable.getLocalCachedEvaluationValue() {
+        return evaluationValue;
+    }
+    
+    public CValue InstComponentDecl.getLocalCachedEvaluationValue() {
+        return evaluationValue;
+    }
+  
+    public void FAbstractVariable.setLocalCachedEvaluationValue(CValue value) {
+        evaluationValue = value;
+    }
+    
+    public void InstComponentDecl.setLocalCachedEvaluationValue(CValue value) {
+        evaluationValue = value;
+    }
+    
+    /**
+     * Kept for legacy reasons.
+     * @deprecated Use {@link #setLocalCachedEvaluationValue} instead.
+     */
+    public void FAbstractVariable.setEvaluationValue(CValue value) {
+        setLocalCachedEvaluationValue(value);
+    }
+    
+    /**
+     * Kept for legacy reasons.
+     * @deprecated Use {@link #setLocalCachedEvaluationValue} instead.
+     */
+    public void InstComponentDecl.setEvaluationValue(CValue value) {
+        setLocalCachedEvaluationValue(value);
+    }
   
 
     public class EvaluataionValueCache {
@@ -3397,10 +3409,10 @@ aspect ConstantEvaluation {
             if (values != null) {
                 old = new HashMap<CommonVariableDecl,CValue>();
                 for (CommonVariableDecl var : values.keySet()) {
-                    CValue prev = var.evaluationValue();
+                    CValue prev = var.evaluationValue(ASTNode.defaultVariableEvaluator());
                     if (!prev.isUnknown())
                         old.put(var, prev);
-                    var.setEvaluationValue(values.get(var), null);
+                    var.setEvaluationValue(ASTNode.defaultVariableEvaluator(), values.get(var));
                 }
             }
         }
@@ -3408,7 +3420,7 @@ aspect ConstantEvaluation {
         public void reset() {
             if (values != null)
                 for (CommonVariableDecl var : values.keySet())
-                    var.setEvaluationValue(old.get(var), null);
+                    var.setEvaluationValue(ASTNode.defaultVariableEvaluator(), old.get(var));
             old = null;
         }
 
@@ -3477,11 +3489,11 @@ aspect ConstantEvaluation {
    * 
    * @param values  constant values for the variables.
    */
-  public int List.evaluateList(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int List.evaluateList(AlgorithmEvaluator evaluator) {
 	  int res = FStatement.EVAL_CONT;
 	  Iterator<? extends FunctionEvalNode> it = (Iterator<? extends FunctionEvalNode>) iterator();
 	  while (it.hasNext() && res == FStatement.EVAL_CONT)
-		  res = it.next().evaluate(evaluator, values);
+		  res = it.next().evaluate(evaluator);
 	  return res;
   }
   
@@ -3489,7 +3501,7 @@ aspect ConstantEvaluation {
    * General contract for nodes that can be evaluated during a function evaluation.
    */
   public interface FunctionEvalNode {
-	  public int evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values);
+        public int evaluate(AlgorithmEvaluator evaluator);
   }
   FStatement implements FunctionEvalNode;
   FIfWhenClause implements FunctionEvalNode;
@@ -3499,17 +3511,17 @@ aspect ConstantEvaluation {
    * 
    * @param values  constant values for the variables. 
    */
-  public abstract int FStatement.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values);
+  public abstract int FStatement.evaluate(AlgorithmEvaluator evaluator);
   
   @Override
-  public int FAssignStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-	  getLeft().assignToInFuncEval(values, getRight().ceval(evaluator));
+  public int FAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  getLeft().assignToInFuncEval(evaluator, getRight().ceval(evaluator));
 	  return EVAL_CONT;
   }
 
   @Override
-  public int InstAssignStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-	  getLeft().getInstAccess().assignToInFuncEval(values, getRight().ceval(evaluator));
+  public int InstAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  getLeft().getInstAccess().assignToInFuncEval(evaluator, getRight().ceval(evaluator));
 	  return EVAL_CONT;
   }
 
@@ -3519,8 +3531,8 @@ aspect ConstantEvaluation {
    * @param values  constant values for the variables
    * @param right   the right hand side
    */
-  public void FIdUseExp.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
-	  getFIdUse().assignToInFuncEval(values, right);
+  public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+	  getFIdUse().assignToInFuncEval(evaluator, right);
   }
 
   /**
@@ -3529,8 +3541,8 @@ aspect ConstantEvaluation {
    * @param values  constant values for the variables
    * @param right   the right hand side
    */
-  public void FIdUse.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
-	  getFQName().assignToInFuncEval(values, right, this);
+  public void FIdUse.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+	  getFQName().assignToInFuncEval(evaluator, right, this);
   }
 
   /**
@@ -3540,20 +3552,20 @@ aspect ConstantEvaluation {
    * @param right    the right hand side
    * @param context  the use to look up names from
    */
-  public void FQName.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right, FIdUse context) {
+  public void FQName.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
 	  throw new UnsupportedOperationException();
   }
 
-  public void FQNameString.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right, FIdUse context) {
+  public void FQNameString.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
 	  FFunctionVariable var = (FFunctionVariable) context.lookupFV(this);
-	  var.setEvaluationValue(right, values);
+	  var.setEvaluationValue(evaluator, right);
   }
 
-  public void FQNameFull.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right, FIdUse context) {
+  public void FQNameFull.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
 	  FFunctionVariable var = (FFunctionVariable) context.lookupOutermostFV(this);
 	  FQNamePart firstPart = getFQNamePart(0);
-	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
-	  var.setEvaluationValue(val, values);
+	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
+	  var.setEvaluationValue(evaluator, val);
   }
 
   /**
@@ -3561,13 +3573,13 @@ aspect ConstantEvaluation {
    * 
    * @param values  constant values for the variables
    */
-  public void InstAccess.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
+  public void InstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
 	  InstAccess firstPart = getFirstInstAccess();
 	  InstComponentDecl comp = firstPart.myInstComponentDecl();
 	  if (comp instanceof InstAssignable) {
 		  InstAssignable var = (InstAssignable) firstPart.myInstComponentDecl();
-		  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
-		  var.setEvaluationValue(val, values);
+		  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
+		  var.setEvaluationValue(evaluator, val);
 	  }
   }
   
@@ -3705,86 +3717,86 @@ aspect ConstantEvaluation {
   }
   
   @Override
-  public int FExternalStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FExternalStmt.evaluate(AlgorithmEvaluator evaluator) {
       if (!canEvaluate()) {
-          values.clear();
+          evaluator.clear();
           return EVAL_RETURN;
       }
-      return evaluateExternal(values);
+      return evaluateExternal(evaluator.getValues());
   }
   
   @Override
-  public int FInitArrayStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
 	  return EVAL_CONT;
   }
 
   @Override
-  public int FFunctionCallStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FFunctionCallStmt.evaluate(AlgorithmEvaluator evaluator) {
 	  CValue[] vals = getCall().evaluate(evaluator);
 	  for (int i = 0, n = getNumLeft(); i < n; i++)
-		  getLeft(i).setEvaluationValue(vals[i], values);
+		  getLeft(i).assignToInFuncEval(evaluator, vals[i]);
 	  return EVAL_CONT;
   }
 
   @Override
-  public int FBreakStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FBreakStmt.evaluate(AlgorithmEvaluator evaluator) {
 	  return EVAL_BREAK;
   }
 
   @Override
-  public int FReturnStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FReturnStmt.evaluate(AlgorithmEvaluator evaluator) {
 	  return EVAL_RETURN;
   }
 
   @Override
-  public int FIfWhenStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-	  int res = getFIfWhenClauses().evaluateList(evaluator, values);
+  public int FIfWhenStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  int res = getFIfWhenClauses().evaluateList(evaluator);
 	  if (res == EVAL_CONT)
-		  res = evaluateElse(evaluator, values);
+		  res = evaluateElse(evaluator);
 	  return res & EVAL_MASK;
   }
 
-  public int FIfWhenStmt.evaluateElse(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FIfWhenStmt.evaluateElse(AlgorithmEvaluator evaluator) {
 	  return EVAL_CONT;
   }
 
   @Override
-  public int FIfStmt.evaluateElse(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-	  return getElseStmts().evaluateList(evaluator, values);
+  public int FIfStmt.evaluateElse(AlgorithmEvaluator evaluator) {
+	  return getElseStmts().evaluateList(evaluator);
   }
 
   @Override
-  public int FIfWhenClause.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FIfWhenClause.evaluate(AlgorithmEvaluator evaluator) {
 	  CValue test = getTest().ceval();
 	  if (test.reduceBooleanOr()) {
-		  int res = getFStatements().evaluateList(evaluator, values);
+		  int res = getFStatements().evaluateList(evaluator);
 		  return res | FStatement.EVAL_IFHIT;
 	  }
 	  return FStatement.EVAL_CONT;
   }
 
   @Override
-  public int FForStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FForStmt.evaluate(AlgorithmEvaluator evaluator) {
 	  FAbstractVariable ind = getIndex().getFVariable();
-	  CValue oldVal = ind.hasEvaluationValue() ? ind.evaluationValue() : null;
+	  CValue oldVal = ind.hasEvaluationValue(evaluator) ? ind.evaluationValue(evaluator) : null;
 	  
 	  CValueArray ivals = getIndex().getFExp().ceval().array();
 	  for (Index i : ivals.indices()) {
-		  ind.setEvaluationValue(ivals.getCell(i));
-		  int res = getForStmts().evaluateList(evaluator, values);
+		  ind.setEvaluationValue(defaultVariableEvaluator(), ivals.getCell(i));
+		  int res = getForStmts().evaluateList(evaluator);
 		  if (res != EVAL_CONT) {
-			  ind.setEvaluationValue(oldVal);
+			  ind.setEvaluationValue(defaultVariableEvaluator(), oldVal);
 			  return (res == EVAL_BREAK) ? EVAL_CONT : res;
 		  }
 	  }
 
-	  ind.setEvaluationValue(oldVal);
+	  ind.setEvaluationValue(defaultVariableEvaluator(), oldVal);
 	  return EVAL_CONT;
   }
 
   @Override
-  public int InstForStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-	  return getInstForIndex(0).evaluateInFunc(evaluator, values, getInstForIndexList(), 0, getForStmts());
+  public int InstForStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  return getInstForIndex(0).evaluateInFunc(evaluator, getInstForIndexList(), 0, getForStmts());
   }
   
   /**
@@ -3792,30 +3804,30 @@ aspect ConstantEvaluation {
    * 
    * @param values  constant values for the variables. 
    */
-  public int InstForIndex.evaluateInFunc(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values, 
+  public int InstForIndex.evaluateInFunc(AlgorithmEvaluator evaluator, 
 		  List<InstForIndex> indices, int i, List<FStatement> stmts) {
 	  InstComponentDecl var = getInstPrimitive();
-	  CValue oldVal = var.evaluationValue();
+	  CValue oldVal = var.evaluationValue(evaluator);
 	  boolean last = i == indices.getNumChild() - 1;
 	  CValueArray ivals = getFExp().ceval(evaluator).array();
 	  for (Index j : ivals.indices()) {
-		  var.setEvaluationValue(ivals.getCell(j), values);
-		  int res = last ? stmts.evaluateList(evaluator, values) : 
-				  indices.getChild(i + 1).evaluateInFunc(evaluator, values, indices, i + 1, stmts);
+		  var.setEvaluationValue(evaluator, ivals.getCell(j));
+		  int res = last ? stmts.evaluateList(evaluator) : 
+				  indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
 		  if (res != FStatement.EVAL_CONT) {
-			  var.setEvaluationValue(oldVal, values);
+			  var.setEvaluationValue(evaluator, oldVal);
 			  return (res == FStatement.EVAL_BREAK) ? FStatement.EVAL_CONT : res;
 		  }
 	  }
-	  var.setEvaluationValue(oldVal, values);
+	  var.setEvaluationValue(evaluator, oldVal);
 	  return FStatement.EVAL_CONT;
   }
 
   @Override
-  public int FWhileStmt.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+  public int FWhileStmt.evaluate(AlgorithmEvaluator evaluator) {
 	  int res = EVAL_CONT;
 	  while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue())
-		  res = getWhileStmts().evaluateList(evaluator, values);
+		  res = getWhileStmts().evaluateList(evaluator);
 	  return (res == EVAL_BREAK) ? EVAL_CONT : res;
   }
 
@@ -4681,11 +4693,14 @@ aspect VariableEvaluator {
     public interface VariableEvaluator {
         public CValue ceval(CommonVariableDecl variable);
         public CValue ceval(CommonVariableDecl variable, Index i);
+        public boolean hasEvaluationValue(CommonVariableDecl variable);
+        public void setEvaluationValue(CommonVariableDecl variable, CValue val);
+        public CValue evaluationValue(CommonVariableDecl variable);
     }
 
     public class DefaultVariableEvaluator implements VariableEvaluator {
         public static final DefaultVariableEvaluator instance = new DefaultVariableEvaluator();
-        private DefaultVariableEvaluator() {
+        protected DefaultVariableEvaluator() {
         }
 
         @Override
@@ -4697,9 +4712,43 @@ aspect VariableEvaluator {
         public CValue ceval(CommonVariableDecl variable, Index i) {
             return variable.ceval(this, i);
         }
+        
+        public boolean hasEvaluationValue(CommonVariableDecl variable) {
+            return variable.getLocalCachedEvaluationValue() != null;
+        }
+        
+        public void setEvaluationValue(CommonVariableDecl variable, CValue val) {
+            variable.setLocalCachedEvaluationValue(val);
+        }
+        
+        public CValue evaluationValue(CommonVariableDecl variable) {
+            CValue val = variable.getLocalCachedEvaluationValue();
+            return val == null ? CValue.UNKNOWN : val;
+        }
     }
     
     public static VariableEvaluator ASTNode.defaultVariableEvaluator() {
         return DefaultVariableEvaluator.instance;
+    }
+    
+    public class AlgorithmEvaluator extends DefaultVariableEvaluator {
+        protected Map<CommonVariableDecl, CValue> values;
+        
+        public AlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
+            this.values = values;
+        }
+        
+        public void setEvaluationValue(CommonVariableDecl variable, CValue val) {
+            super.setEvaluationValue(variable, val);
+            values.put(variable, val);
+        }
+        
+        public void clear() {
+            values.clear();
+        }
+        
+        public Map<CommonVariableDecl, CValue> getValues() {
+            return values;
+        }
     }
 }
