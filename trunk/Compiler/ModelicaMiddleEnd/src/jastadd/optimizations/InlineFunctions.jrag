@@ -299,7 +299,7 @@ aspect FunctionInlining {
             FExp[] exps = null;
             if (variability.constantVariability()) {
                 try {
-                    CValue[] values = call.evaluate(ASTNode.defaultVariableEvaluator());
+                    CValue[] values = ASTNode.defaultVariableEvaluator().evaluate(call);
                     exps = new FExp[values.length];
                     for (int i = 0; i < values.length; i++)
                         exps[i] = values[i].buildLiteral();
