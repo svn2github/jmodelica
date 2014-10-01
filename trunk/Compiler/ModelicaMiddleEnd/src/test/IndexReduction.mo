@@ -4612,4 +4612,65 @@ end IndexReduction.FunctionCallEquation3;
 ")})));
 end FunctionCallEquation3;
 
+model DoubleDifferentiationWithSS1
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g = 9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.never) "Cartesian x coordinate";
+    Real x2;
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+equation
+    der(x2) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+    x = x2 + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DoubleDifferentiationWithSS1",
+            description="Test double differentiation whit state select avoid or never during index reductio",
+            flatModel="
+fclass IndexReduction.DoubleDifferentiationWithSS1
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.never) \"Cartesian x coordinate\";
+ Real x2;
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real _der_x2;
+ Real _der_vx;
+ Real _der_x;
+ Real _der_der_x2;
+ Real _der_der_y;
+ Real _der_der_x;
+initial equation 
+ y = 0.0;
+ vy = 0.0;
+equation
+ _der_x2 = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ x = x2 + 1;
+ 2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_x = _der_x2;
+ _der_der_x2 = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ _der_der_x = _der_der_x2;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.DoubleDifferentiationWithSS1;
+")})));
+end DoubleDifferentiationWithSS1;
+
 end IndexReduction;

@@ -1588,6 +1588,20 @@ aspect FlatAPI {
         return fv;
     }
     
+    public class FAbstractVariable {
+        /**
+         * This method takes a variable and adds it to the tree. This is done by
+         * settings its parent to the same parent as this node.
+         * 
+         * This is a hack, and should be avoided, however this is necessary
+         * evil in order to reduce memory consumption. If used correctly, it
+         * shouldn't cause any problems.
+         */
+        public <V extends FAbstractVariable> V dynamicVariable(V var) {
+            var.parent = this.parent;
+            return var;
+        }
+    }
 }
 
 aspect ReferencedVariables {
