@@ -1188,6 +1188,7 @@ aspect FlatFunctionUtils {
      */
     public interface CommonCallable {
         public String name();
+        public void evaluate(Map<CommonVariableDecl, CValue> values);
         public ArrayList<? extends CommonVariableDecl> myInputs();
         public ArrayList<? extends CommonVariableDecl> myOutputs();
     }

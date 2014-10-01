@@ -263,13 +263,7 @@ aspect VariabilityPropagation {
         
         CValue[] val = null;
         if (eval) {
-            VariableEvaluator evaluator;
-            if (getCall().variability().constantVariability()) {
-                evaluator = new FunctionEvaluator(Collections.<CommonVariableDecl, CValue>emptyMap());
-            } else {
-                evaluator = new FunctionPartialEvaluator(Collections.<CommonVariableDecl, CValue>emptyMap());
-            }
-            val = getCall().evaluate(evaluator, true);
+            val = getCall().evaluateSafe(defaultVariableEvaluator());
         }
         
         boolean allRemoved = true;
