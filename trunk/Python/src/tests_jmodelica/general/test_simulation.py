@@ -492,6 +492,24 @@ class TestHybrid8(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x','y'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+        
+class TestHybrid9(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu12')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1e-9, time_step = 1e-11)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu12_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
 
 class TestInputInitializationFMU(SimulationTest):
     

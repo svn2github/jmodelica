@@ -140,12 +140,16 @@ typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           /**< \brief Macro for logical expression and <br> */
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         /**< \brief Macro for logical expression not <br> */
 
+/* Define the machine epsilon */
+#define JMI_EPS 2.2204460492503131e-16
+#define JMI_ALMOST_EPS (JMI_EPS*100)
+
 /*#define ALMOST_ZERO(op) (jmi_abs(op)<=1e-6? JMI_TRUE: JMI_FALSE)*/
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
-#define ALMOST_LT_ZERO(op) (op<=1e-6? JMI_TRUE: JMI_FALSE)
-#define ALMOST_GT_ZERO(op) (op>=-1e-6? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
+#define ALMOST_LT_ZERO(op) (op<=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define ALMOST_GT_ZERO(op) (op>=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 
 
 /* Record creation macro */
