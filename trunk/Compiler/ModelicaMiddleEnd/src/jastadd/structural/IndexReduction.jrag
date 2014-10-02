@@ -351,6 +351,7 @@ aspect IndexReduction {
     }
     
     public static final int IndexReductionBiPGraph.MAX_N_EQ_DIFFS = 5;
+    public static final int IndexReductionBiPGraph.MAX_N_FEXP_IN_EQ = 10000;
     
     private void IndexReductionBiPGraph.differentiateVariable(IndexReductionVar var, Collection<FVariable> newDiffedVars, Collection<IndexReductionVar> varsToRemove) {
         if (var.getMeDifferentiated() != null)
@@ -374,7 +375,10 @@ aspect IndexReduction {
         FAbstractEquation fEqn = eqn.getEquation();
         
         if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
-            throw new IndexReductionException("Maximum number of differentiations reached");
+            throw new IndexReductionException("Maximum number of differentiations has been reached");
+        
+        if (fEqn.numFExp() > MAX_N_FEXP_IN_EQ)
+            throw new IndexReductionException("Maximum number of expressions in a single equation has been reached");
         
         for (IndexReductionEq member : eqn.getGroupMembers())
             if (member.getMatching() != null)

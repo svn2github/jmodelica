@@ -921,7 +921,7 @@ P*V=m*R*T;
             errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed: Maximum number of differentiations reached
+  Index reduction failed: Maximum number of differentiations has been reached
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -4673,4 +4673,37 @@ end IndexReduction.DoubleDifferentiationWithSS1;
 ")})));
 end DoubleDifferentiationWithSS1;
 
+
+model MaxNumFExpError1
+    Real x1;
+    Real x2;
+equation
+    der(x1) + der(x2) = 1;
+    x1 + x2 = 1;
+    atan2(atan2(x1 * x2, sqrt(x1 ^ 2 + x2 ^ 2)), x1 / x2) = 2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="MaxNumFExpError1",
+            description="Test error check that prevents runaway index reduction",
+            errorMessage="
+2 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: Maximum number of expressions in a single equation has been reached
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    x1 + x2 = 1
+    atan2(atan2(x1 * x2, sqrt(x1 ^ 2 + x2 ^ 2)), x1 / x2) = 2
+
+")})));
+end MaxNumFExpError1;
+
 end IndexReduction;
+
