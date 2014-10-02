@@ -3870,6 +3870,9 @@ aspect CCodeGen {
 	public void FExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
+    public void FNoExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        
+    }
 	public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		int index = indexCounter.next();
 		if (forIndices == null || forIndices.contains(index)) {
@@ -3922,6 +3925,10 @@ aspect CCodeGen {
 	public void FExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
 		throw new UnsupportedOperationException();
 	}
+	
+    public void FNoExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+        
+    }
 	
 	public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
 		if (forVariables != null && !forVariables.contains(myFV()))

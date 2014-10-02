@@ -2302,6 +2302,10 @@ aspect TransformCanonical {
 		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
 	}
 	
+    public void FNoExp.insertTempsInLHS(FClass fClass) {
+        
+    }
+	
 	public void FIdUseExp.insertTempsInLHS(FClass fClass) {}
 	public void FArray.insertTempsInLHS(FClass fClass) {
 		for (FExp fExp : getFExps())

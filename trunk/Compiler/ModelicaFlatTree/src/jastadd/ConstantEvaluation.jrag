@@ -2211,8 +2211,8 @@ aspect ConstantEvaluation {
     }
 
     // TODO: if caching, use cevalFunction() instead
-    eq FFunctionCall.cevalCalc(VariableEvaluator evaluator)    = evaluator.evaluate(this)[0];
-    eq InstFunctionCall.cevalCalc(VariableEvaluator evaluator) = hasOutputs() ? evaluator.evaluate(this)[0] : CValue.UNKNOWN;
+    eq FFunctionCall.cevalCalc(VariableEvaluator evaluator)    = evaluate(evaluator)[0];
+    eq InstFunctionCall.cevalCalc(VariableEvaluator evaluator) = hasOutputs() ? evaluate(evaluator)[0] : CValue.UNKNOWN;
 
     eq FAbsExp.cevalCalc(VariableEvaluator evaluator)  = type().abs(getFExp().ceval(evaluator));
     eq FSignExp.cevalCalc(VariableEvaluator evaluator) = type().sign(getFExp().ceval(evaluator));
@@ -2780,8 +2780,8 @@ aspect ConstantEvaluation {
    * @return  constant values for the outputs
    */
   syn CValue[] FAbstractFunctionCall.cevalFunction(VariableEvaluator evaluator) = new CValue[] { ceval(evaluator) };
-  syn lazy CValue[] FFunctionCall.cevalFunction(VariableEvaluator evaluator)    = evaluator.evaluate(this);
-  syn lazy CValue[] InstFunctionCall.cevalFunction(VariableEvaluator evaluator) = evaluator.evaluate(this);
+  syn lazy CValue[] FFunctionCall.cevalFunction(VariableEvaluator evaluator)    = evaluate(evaluator);
+  syn lazy CValue[] InstFunctionCall.cevalFunction(VariableEvaluator evaluator) = evaluate(evaluator);
 
     /**
      * Interface for variable declarations in flat and instance trees.
@@ -2798,6 +2798,7 @@ aspect ConstantEvaluation {
         public CValue ceval(VariableEvaluator evaluator, Index i);
         public String name();
         public Size size();
+        public FTypePrefixVariability variability();
 
         // Added for codegeneration when evaluating external functions
         public FType   type();
@@ -2833,18 +2834,14 @@ aspect ConstantEvaluation {
    * 
    * @return  constant values for the outputs
    */
-  public CValue[] FAbstractFunctionCall.evaluate(VariableEvaluator evaluator, boolean checkVariability) {
+  public CValue[] FAbstractFunctionCall.evaluate(VariableEvaluator evaluator) {
 	  Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
 	  int i = 0;
 	  for (CommonVariableDecl var : myCallInputs()) {
 		  var.prepareForFunctionEval();
 		  FExp arg = argument(i++);
             if (arg != null) {
-                if (!checkVariability || arg.variability().knownParameterOrLess()) {
-                    values.put(var, evaluator.ceval(arg));
-                } else {
-                    values.put(var, arg.type().unknownCValue());
-                }
+                values.put(var, evaluator.ceval(arg));
             } else {
                 throw new ConstantEvaluationException();
             }
@@ -3696,7 +3693,7 @@ aspect ConstantEvaluation {
 
   @Override
   public int FFunctionCallStmt.evaluate(AlgorithmEvaluator evaluator) {
-	  CValue[] vals = evaluator.evaluate(getCall());
+	  CValue[] vals = getCall().evaluate(evaluator);
 	  for (int i = 0, n = getNumLeft(); i < n; i++)
 		  getLeft(i).assignToInFuncEval(evaluator, vals[i]);
 	  return EVAL_CONT;
@@ -4656,7 +4653,6 @@ aspect VariableEvaluator {
         public CValue ceval(CommonVariableDecl variable);
         public CValue ceval(CommonVariableDecl variable, Index i);
         public CValue ceval(FExp exp);
-        public CValue[] evaluate(FAbstractFunctionCall call);
         public FunctionEvaluator createFunctionEvaluator(Map<CommonVariableDecl, CValue> values);
         public boolean hasEvaluationValue(CommonVariableDecl variable);
         public void setEvaluationValue(CommonVariableDecl variable, CValue val);
@@ -4684,11 +4680,6 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public CValue[] evaluate(FAbstractFunctionCall call) {
-            return call.evaluate(this, false);
-        }
-        
-        @Override
         public FunctionEvaluator createFunctionEvaluator(Map<CommonVariableDecl, CValue> values) {
             return new FunctionEvaluator(values);
         }
@@ -4712,6 +4703,35 @@ aspect VariableEvaluator {
     
     public static VariableEvaluator ASTNode.defaultVariableEvaluator() {
         return DefaultVariableEvaluator.instance;
+    }
+    
+    public class PartialVariableEvaluator extends DefaultVariableEvaluator {
+        public PartialVariableEvaluator() {
+            
+        }
+        
+        @Override
+        public CValue ceval(CommonVariableDecl variable) {
+            if (variable.variability().knownParameterOrLess()) {
+                return variable.ceval(this);
+            } else {
+                return variable.type().unknownCValue();
+            }
+        }
+        
+        @Override
+        public CValue ceval(CommonVariableDecl variable, Index i) {
+            if (variable.variability().knownParameterOrLess()) {
+                return variable.ceval(this, i);
+            } else {
+                return variable.type().unknownCValue();
+            }
+        }
+        
+        @Override
+        public FunctionEvaluator createFunctionEvaluator(Map<CommonVariableDecl, CValue> values) {
+            return new FunctionPartialEvaluator(values);
+        }
     }
     
     public class AlgorithmEvaluator extends DefaultVariableEvaluator {

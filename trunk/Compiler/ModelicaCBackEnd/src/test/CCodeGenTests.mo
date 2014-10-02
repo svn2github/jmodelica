@@ -2163,6 +2163,50 @@ $C_DAE_initial_guess_equation_residuals$
 ")})));
 end CFunctionTest15;
 
+model CFunctionTest16
+        record R
+            Real a;
+            Real b;
+        end R;
+        function f
+            input Real x1;
+            input Real x2;
+            output R y1;
+            output Real[2] y2;
+          algorithm
+            y1.a := x1;
+            y1.b := x2;
+            y2 := {x1,x2};
+        end f;
+        R y1;
+        Real[2] y2;
+      equation
+        (y1,y2) = f(2,time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFunctionTest16",
+            description="Function call equation with partially propagated composite elements",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+    func_CCodeGenTests_CFunctionTest16_f_def0(AD_WRAP_LITERAL(2), _time, tmp_1, tmp_2);
+    _y1_b_1 = (tmp_1->b);
+    _y2_2_3 = (jmi_array_val_1(tmp_2, 2));
+/********* Write back reinits *******/
+")})));
+end CFunctionTest16;
+
 
 model CForLoop1
  function f

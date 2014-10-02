@@ -142,11 +142,6 @@ aspect OverdeterminedInitialSystem {
             }
             
             @Override
-            public CValue[] evaluate(FAbstractFunctionCall call) {
-                return call.evaluate(this, false);
-            }
-            
-            @Override
             public FunctionEvaluator createFunctionEvaluator(Map<CommonVariableDecl, CValue> values) {
                 return new FunctionEvaluator(values);
             }
@@ -155,13 +150,13 @@ aspect OverdeterminedInitialSystem {
             public boolean hasEvaluationValue(CommonVariableDecl variable) {
                 throw new UnsupportedOperationException();
             }
-
+            
             @Override
             public void setEvaluationValue(CommonVariableDecl variable,
                     CValue val) {
                 throw new UnsupportedOperationException();
             }
-
+            
             @Override
             public CValue evaluationValue(CommonVariableDecl variable) {
                 throw new UnsupportedOperationException();
