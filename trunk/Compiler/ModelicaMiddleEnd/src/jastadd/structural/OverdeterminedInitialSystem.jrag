@@ -137,6 +137,21 @@ aspect OverdeterminedInitialSystem {
             }
             
             @Override
+            public CValue ceval(FExp exp) {
+                return exp.ceval(this);
+            }
+            
+            @Override
+            public CValue[] evaluate(FAbstractFunctionCall call) {
+                return call.evaluate(this, false);
+            }
+            
+            @Override
+            public FunctionEvaluator createFunctionEvaluator(Map<CommonVariableDecl, CValue> values) {
+                return new FunctionEvaluator(values);
+            }
+            
+            @Override
             public boolean hasEvaluationValue(CommonVariableDecl variable) {
                 throw new UnsupportedOperationException();
             }

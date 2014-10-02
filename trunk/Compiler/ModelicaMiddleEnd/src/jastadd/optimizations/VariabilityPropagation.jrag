@@ -263,7 +263,19 @@ aspect VariabilityPropagation {
         
         CValue[] val = null;
         if (eval) {
-            val = getCall().evaluateSafe(defaultVariableEvaluator());
+            try {
+                VariableEvaluator evaluator;
+                boolean fullEval = getCall().variability().constantVariability();
+                if (fullEval) {
+                    evaluator = new FunctionEvaluator(Collections.<CommonVariableDecl, CValue>emptyMap());
+                } else {
+                    evaluator = new FunctionPartialEvaluator(Collections.<CommonVariableDecl, CValue>emptyMap());
+                }
+                val = getCall().evaluate(evaluator, !fullEval);
+            } catch (ConstantEvaluationException e) {
+                // If we can't evaluate right now, set it as parameter
+                variability = fParameter();
+            }
         }
         
         boolean allRemoved = true;
@@ -271,7 +283,7 @@ aspect VariabilityPropagation {
         for (FFunctionCallLeft left : getLefts()) {
             if (left.hasFExp()) {
                 if (left.getFExp().canPropagate()) {
-                    if (eval) {
+                    if (variability.constantVariability()) {
                         try {
                             left.getFExp().variabilityPropagation(worklist, variability, val[i].buildLiteral(), parameterEquations);
                             left.taggedForRemoval = true;
