@@ -1582,6 +1582,73 @@ At line 0, column 0:
 ")})));
 end AliasStateSelect2;
 
+model AliasStateSelect3
+    Real x(stateSelect=StateSelect.avoid) = time;
+    Real y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect3",
+            description="Test selection of system variables with state select",
+            flatModel="
+fclass TransformCanonicalTests.AliasStateSelect3
+ Real x(stateSelect = StateSelect.avoid);
+equation
+ x = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end TransformCanonicalTests.AliasStateSelect3;
+")})));
+end AliasStateSelect3;
+
+model AliasStateSelect4
+    model T = Real(stateSelect=StateSelect.avoid);
+    T x = time;
+    Real y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect4",
+            description="Test selection of system variables with state select",
+            flatModel="
+fclass TransformCanonicalTests.AliasStateSelect4
+ TransformCanonicalTests.AliasStateSelect4.T x;
+equation
+ x = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type TransformCanonicalTests.AliasStateSelect4.T = Real(stateSelect = StateSelect.avoid);
+end TransformCanonicalTests.AliasStateSelect4;
+")})));
+end AliasStateSelect4;
+
+model AliasStateSelect5
+    model T = Real(stateSelect=StateSelect.prefer);
+    Real x(stateSelect=StateSelect.avoid) = time;
+    T y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect5",
+            description="Test selection of system variables with state select",
+            flatModel="
+fclass TransformCanonicalTests.AliasStateSelect5
+ Real x(stateSelect = StateSelect.avoid);
+equation
+ x = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type TransformCanonicalTests.AliasStateSelect5.T = Real(stateSelect = StateSelect.prefer);
+end TransformCanonicalTests.AliasStateSelect5;
+")})));
+end AliasStateSelect5;
+
 
 model ParameterBindingExpTest3_Warn
 
