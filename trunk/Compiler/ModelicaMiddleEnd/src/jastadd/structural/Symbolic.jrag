@@ -529,6 +529,10 @@ aspect Derivatives {
 		throw new ExpressionDifferentiationException(this);
 	}
 	
+    public FExp FNoExp.diff(String name) {
+        return new FNoExp();
+    }
+	
 	public FExp FDotAddExp.diff(String name) {
 		FExp rd = dynamicFExp(getRight().diff(name));
 		FExp ld = dynamicFExp(getLeft().diff(name));

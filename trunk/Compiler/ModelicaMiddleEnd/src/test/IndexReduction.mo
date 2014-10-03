@@ -4705,5 +4705,70 @@ Semantic error at line 0, column 0:
 ")})));
 end MaxNumFExpError1;
 
+model PartiallyPropagatedComposite1
+    function f
+        input Real x1;
+        input Real x2;
+        output Real[2] y;
+      algorithm
+        y[1] := x1;
+        y[2] := x2;
+        annotation(smoothOrder = 1);
+    end f;
+    Real[2] y;
+    Real[2] x1;
+equation
+    y = f(2,time);
+    x1 = der(y);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyPropagatedComposite1",
+            description="Check that index reduction can handle FNoExp in LHS of function call equation",
+            inline_functions="none",
+            flatModel="
+fclass IndexReduction.PartiallyPropagatedComposite1
+ constant Real y[1] = 2;
+ Real y[2];
+ constant Real x1[1] = 0.0;
+ Real x1[2];
+ Real _der_y[2];
+equation
+ ({, y[2]}) = IndexReduction.PartiallyPropagatedComposite1.f(2, time);
+ x1[2] = _der_y[2];
+ ({, _der_y[2]}) = IndexReduction.PartiallyPropagatedComposite1._der_f(2, time, 0, 1.0);
+
+public
+ function IndexReduction.PartiallyPropagatedComposite1.f
+  input Real x1;
+  input Real x2;
+  output Real[2] y;
+ algorithm
+  y[1] := x1;
+  y[2] := x2;
+  return;
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.PartiallyPropagatedComposite1._der_f);
+ end IndexReduction.PartiallyPropagatedComposite1.f;
+
+ function IndexReduction.PartiallyPropagatedComposite1._der_f
+  input Real x1;
+  input Real x2;
+  input Real _der_x1;
+  input Real _der_x2;
+  output Real[2] _der_y;
+  Real[2] y;
+ algorithm
+  _der_y[1] := _der_x1;
+  y[1] := x1;
+  _der_y[2] := _der_x2;
+  y[2] := x2;
+  return;
+ annotation(smoothOrder = 0);
+ end IndexReduction.PartiallyPropagatedComposite1._der_f;
+
+end IndexReduction.PartiallyPropagatedComposite1;
+")})));
+end PartiallyPropagatedComposite1;
+
 end IndexReduction;
 
