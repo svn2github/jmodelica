@@ -1282,6 +1282,89 @@ fclass VariabilityPropagationTests.PartiallyKnownComposite5
 end VariabilityPropagationTests.PartiallyKnownComposite5;
 ")})));
     end PartiallyKnownComposite5;
+    
+    model PartiallyKnownComposite6
+        function f
+            input Real[:] x;
+            input Integer n;
+            output Real[size(x,1)] y;
+          algorithm
+            y := x;
+        end f;
+        Real[2] y = f({1,1-time}, 3);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite6",
+            description="Test evaluation of known components in partially known composite arg. (array)",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite6
+ constant Real y[1] = 1;
+ Real y[2];
+equation
+ ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite6.f({1, 1 - time}, 3);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite6.f
+  input Real[:] x;
+  input Integer n;
+  output Real[:] y;
+ algorithm
+  size(y) := {size(x, 1)};
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite6.f;
+
+end VariabilityPropagationTests.PartiallyKnownComposite6;
+")})));
+    end PartiallyKnownComposite6;
+    
+    model PartiallyKnownComposite7
+        record R
+            Real a;
+            Real b;
+        end R;
+        function f
+            input R x;
+            input Integer n;
+            output R y;
+          algorithm
+            y := x;
+        end f;
+        R y = f(R(1,1-time), 3);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite7",
+            description="Test evaluation of known components in partially known composite arg. (record)",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite7
+ constant Real y.a = 1;
+ Real y.b;
+equation
+ (VariabilityPropagationTests.PartiallyKnownComposite7.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite7.f(VariabilityPropagationTests.PartiallyKnownComposite7.R(1, 1 - time), 3);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite7.f
+  input VariabilityPropagationTests.PartiallyKnownComposite7.R x;
+  input Integer n;
+  output VariabilityPropagationTests.PartiallyKnownComposite7.R y;
+ algorithm
+  y.a := x.a;
+  y.b := x.b;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite7.f;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite7.R
+  Real a;
+  Real b;
+ end VariabilityPropagationTests.PartiallyKnownComposite7.R;
+
+end VariabilityPropagationTests.PartiallyKnownComposite7;
+")})));
+    end PartiallyKnownComposite7;
 
 model ConstantRecord1
 	record A

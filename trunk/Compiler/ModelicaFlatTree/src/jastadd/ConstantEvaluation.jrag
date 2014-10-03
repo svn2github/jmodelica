@@ -1794,9 +1794,9 @@ aspect ConstantEvaluation {
         Array arr = getArray();
         if (i == Index.NULL)
           for (Index j : arr.indices())
-              res.setCell(j, arr.get(j).ceval(evaluator));
+              res.setCell(j, evaluator.ceval(arr.get(j)));
         else if (size().isOKIndex(i))
-          res.setCell(i, arr.get(i).ceval(evaluator));
+          res.setCell(i, evaluator.ceval(arr.get(i)));
         else
           throw new ConstantEvaluationException();
         return res;
@@ -1862,7 +1862,7 @@ aspect ConstantEvaluation {
         CValueRecord res = new CValueRecord((FRecordType) type());
         int i = 0;
         for (FExp arg : getArgs())
-          res.setMember(i++, arg.ceval(evaluator));
+          res.setMember(i++, evaluator.ceval(arg));
         return res;
     }
 
@@ -1870,7 +1870,7 @@ aspect ConstantEvaluation {
         CValueRecord res = new CValueRecord((FRecordType) type());
         int i = 0;
         for (InstFunctionArgument arg : getArgs())
-            res.setMember(i++, arg.getFExp().ceval(evaluator));
+            res.setMember(i++, evaluator.ceval(arg.getFExp()));
         return res;
     }
 
@@ -4725,6 +4725,15 @@ aspect VariableEvaluator {
                 return variable.ceval(this, i);
             } else {
                 return variable.type().unknownCValue();
+            }
+        }
+        
+        @Override
+        public CValue ceval(FExp exp) {
+            try {
+                return super.ceval(exp);
+            } catch (ConstantEvaluationException e) {
+                return exp.type().unknownCValue();
             }
         }
         
