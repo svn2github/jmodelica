@@ -926,6 +926,21 @@ aspect BLT{
             return producer;
         }
         
+        public String printAllVariables() {
+            return printAllVariables(", ");
+        }
+        public String printAllVariables(String separator) {
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (FVariable var : allVariables()) {
+                if (!first)
+                    sb.append(separator);
+                first = false;
+                sb.append(var.name());
+            }
+            return sb.toString();
+        }
+        
     }
 
     /**
@@ -2348,6 +2363,9 @@ aspect AutomaticTearing {
             
             private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb) {
                 SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers());
+                
+                ASTNode.log.info("Starting automatic tearing");
+                ASTNode.log.info(g);
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
                 Collection<SolvingEq> SUME = g.greedyMatching();
