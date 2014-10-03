@@ -426,7 +426,7 @@ class ModelicaTransfer(object):
 
     @testattr(casadi = True)
     def test_ConstructArrayInOutFunctionCallEquation(self):
-        model = self.load_model("AtomicModelVector3", modelFile, compiler_options={"inline_functions":"none"})
+        model = self.load_model("AtomicModelVector3", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
         expected = ("ModelFunction : function(\"AtomicModelVector3.f\")\n"
                     " Inputs (4):\n"
                     "  0. 1-by-1 (dense)\n"
@@ -457,7 +457,7 @@ class ModelicaTransfer(object):
 
     @testattr(casadi = True)
     def test_FunctionCallEquationOmittedOuts(self):
-        model = self.load_model("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
+        model = self.load_model("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
         expected = "vertcat((der(x2)-(x1+x2)),(vertcat(x1,x2)-vertcat(function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){0},function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){2})))"
         assert str(model.getDaeResidual()) == expected  
 
