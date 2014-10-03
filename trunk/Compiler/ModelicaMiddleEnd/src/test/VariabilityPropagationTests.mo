@@ -395,11 +395,12 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Der2
  constant Real x = 0;
- constant Real y = 1.0;
+ Real y;
  Real z;
  Real _der_z;
 equation
  z = time;
+ y = 1;
  _der_z = 1.0;
 end VariabilityPropagationTests.Der2;
 ")})));
@@ -1497,31 +1498,5 @@ end VariabilityPropagationTests.AliasVariabilities1;
 		</ScalarVariable>
 ")})));
 end AliasVariabilities1;
-
-model SymbolicSimplification1
-    Real a,x,y,z,yc;
-  equation
-    a = time;
-    x = 0;
-    y = x*a;
-    yc = x*a + a*a;
-    z = y + 1;
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="SymbolicSimplification1",
-            description="Symbolic simplifications during variability propagation",
-            flatModel="
-fclass VariabilityPropagationTests.SymbolicSimplification1
- Real a;
- constant Real x = 0;
- constant Real y = 0.0;
- constant Real z = 1.0;
- Real yc;
-equation
- a = time;
- yc = a*a;
-end VariabilityPropagationTests.SymbolicSimplification1;
-")})));
-end SymbolicSimplification1;
 
 end VariabilityPropagationTests;

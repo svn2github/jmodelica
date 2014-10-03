@@ -362,11 +362,6 @@ aspect Variability {
                 total = total.combine(arg.getFExp().variability());
         return total;
     }
-    
-    eq FMulExp.expVariability() {
-        // Refined by variability propagation
-        return super.expVariability();
-    }
 
 
     // TODO: Maybe there should be a special variability for "no return value"
