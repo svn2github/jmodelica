@@ -473,22 +473,32 @@ aspect FlatTypeAnalysis {
     public FExp FReductionExp.iterExp() { return ((FIterExp) getFExp()).getFExp(); }
 
     eq FArray.type() {
-        if (getNumFExp() == 0)
-            return fUnknownType().arrayType(size());
         if (isIterArray())
             return getFExp(0).type();
         
         // Check that the types of the elements are consistent
-        FType t = getFExp(0).type();
+        FType t = null;
         boolean func = inFunction();
-        for (int i = 1; i < getNumFExp(); i++) {
-            if (!t.equivalentTo(getFExp(i).type(), func)) 
-                return fUnknownType();
-            if (t.isNumeric()) 
-                t = t.numericPromotion(getFExp(i).type(), func, null);
+        for (int i = 0; i < getNumFExp(); i++) {
+            if (getFExp(i).isNoExp())
+                continue;
+            if (t == null) {
+                t = getFExp(i).type();
+            } else {
+                if (!t.equivalentTo(getFExp(i).type(), func)) 
+                    return fUnknownType();
+                if (t.isNumeric()) 
+                    t = t.numericPromotion(getFExp(i).type(), func, null);
+            }
+        }
+        if (t == null) {
+            t = fUnknownType();
         }
         return t.arrayType(size());
     }
+    
+    syn boolean FExp.isNoExp() = false;
+    eq FNoExp.isNoExp() = true;
 
     eq FAbstractCat.type() {
         if (!dimensionIsOk())

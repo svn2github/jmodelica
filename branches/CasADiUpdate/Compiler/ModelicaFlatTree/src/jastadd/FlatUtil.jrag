@@ -328,8 +328,7 @@ aspect FlatNames {
 
     syn String FIdUse.name()           = getFQName().name();
     syn String FIdUseExp.name()        = getFIdUse().name();
-    eq FDerExp.name()                  = derName();
-    eq FDummyDerExp.name()             = derName();
+    eq FAbstractDerExp.name()          = derName();
     eq FHDerExp.name()                 = hDerName(getOrder());
     eq FHDummyDerExp.name()            = hDerName(getOrder());
     eq FPreExp.name()                  = preName();
@@ -408,8 +407,7 @@ aspect FlatNames {
 
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
-    eq FDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
-    eq FDummyDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
+    eq FAbstractDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
     eq FHDummyDerExp.nameUnderscore() = "der_" + getOrder() + "_" + getFIdUse().nameUnderscore();
     
     //syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
@@ -1190,7 +1188,6 @@ aspect FlatFunctionUtils {
      */
     public interface CommonCallable {
         public String name();
-        public void evaluate(Map<CommonVariableDecl, CValue> values);
         public ArrayList<? extends CommonVariableDecl> myInputs();
         public ArrayList<? extends CommonVariableDecl> myOutputs();
     }
@@ -1823,6 +1820,20 @@ aspect FlatExpressions {
     eq FUnsupportedExp.isValidExp(boolean allowUnknownSize)     = false;
     eq FUnsupportedBuiltIn.isValidExp(boolean allowUnknownSize) = false;
     eq FUnknownSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
+    
+    /**
+     * Counts the total number of FExp nodes in this ASTNode.
+     */
+    syn int ASTNode.numFExp() {
+        int n = 0;
+        for (int i=0;i<getNumChild();i++)
+            n += getChild(i).numFExp();
+        return n;
+    }
+    
+    eq FExp.numFExp() {
+        return super.numFExp() + 1;
+    }
     
 }
 

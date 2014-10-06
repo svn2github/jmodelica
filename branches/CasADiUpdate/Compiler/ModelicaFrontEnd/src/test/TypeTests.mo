@@ -1526,8 +1526,8 @@ model IfExpType1
 			description="If expression with branches with different array sizes",
 			flatModel="
 fclass TypeTests.IfExpType1
- parameter Integer n = 3 /* 3 */;
- parameter Integer m.n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
+ structural parameter Integer m.n = 3 /* 3 */;
  constant Real m.y[1] = 1;
  constant Real m.y[2] = 2;
  constant Real m.y[3] = 3;
@@ -1625,8 +1625,8 @@ model IfExpType5
 			variability_propagation=false,
 			flatModel="
 fclass TypeTests.IfExpType5
- parameter Integer n = 3 /* 3 */;
- parameter Integer m.n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
+ structural parameter Integer m.n = 3 /* 3 */;
  Real m.y[1];
  Real m.y[2];
  Real m.y[3];
@@ -1638,8 +1638,9 @@ public
   input Real x1;
   input Real x2;
   input Integer n;
-  output Real[n] y;
+  output Real[:] y;
  algorithm
+  size(y) := {n};
   for i in 1:n loop
    y[i] := i;
   end for;

@@ -3347,7 +3347,7 @@ model RedeclareTest42
             description="Redeclare that changes size of array of models",
             flatModel="
 fclass RedeclareTests.RedeclareTest42
- parameter Integer c.a.n = 3 /* 3 */;
+ structural parameter Integer c.a.n = 3 /* 3 */;
  Real c.a.d[1].x = 1;
  Real c.a.d[2].x = 2;
  Real c.a.d[3].x = 3;

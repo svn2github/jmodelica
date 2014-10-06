@@ -17,21 +17,97 @@
 
 aspect VariabilityPropagation {
 	
+    public boolean FFunctionCallEquation.taggedForCleanup = false;
 	public boolean FAbstractEquation.taggedForRemoval = false;
 	public boolean FAbstractVariable.taggedForRemoval = false;
+	public boolean FFunctionCallLeft.taggedForRemoval = false;
+	public boolean FExp.taggedForRemoval              = false;
+	
+    public void FAbstractEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
+        if (!taggedForRemoval) {
+            l.add(this);
+        }
+        taggedForRemoval = false;
+    }
+    public void FFunctionCallEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
+        super.cleanEquations(l);
+        if (taggedForCleanup) {
+            for (FFunctionCallLeft left : getLefts()) {
+                left.cleanEquations();
+            }
+            taggedForCleanup = false;
+        }
+    }
+    public void FFunctionCallLeft.cleanEquations() {
+        if (taggedForRemoval) {
+            setFExpOpt(new Opt());
+            taggedForRemoval = false;
+        } else if (hasFExp()){
+            setFExpOpt(new Opt(getFExp().cleanEquations()));
+        }
+    }
+    
+    public FExp FExp.cleanEquations() {
+        if (taggedForRemoval) {
+            return new FNoExp();
+        } else {
+            return this;
+        }
+    }
+    
+    @Override
+    public FExp FArray.cleanEquations() {
+        FArray res = new FArray();
+        for (FExp exp : getFExps()) {
+            res.addFExpNoTransform(exp.cleanEquations());
+        }
+        return res;
+    }
+    
+    @Override
+    public FExp FRecordConstructor.cleanEquations() {
+        FRecordConstructor res = new FRecordConstructor(getRecord().name());
+        for (FExp arg : getArgs()) {
+            res.addArgNoTransform(arg.cleanEquations());
+        }
+        return res;
+    }
+    
+    
 	
 	/**
 	 * Checks if equation is eligible for var. prop.
 	 */
-	inh boolean FAbstractEquation.canPropagate();
-	eq Root.getChild().canPropagate() = false;
-	eq FClass.getFAbstractEquation().canPropagate() = true;
-	eq FIfWhenElseEquation.getChild().canPropagate() = false;
-	
-	syn boolean FEquation.canPropagate() =
-			super.canPropagate() && variables().size() == 1 && !containsActiveAnnotations();
-	syn boolean FFunctionCallEquation.canPropagate() =
-			super.canPropagate() && variables().size() > 0 && variables().size() == numScalarEquations() && !containsActiveAnnotations();
+    syn boolean FAbstractEquation.canPropagate() =
+            canPropagateContext() && !containsActiveAnnotations();
+    eq FEquation.canPropagate() = super.canPropagate() && variables().size() == 1;
+    eq FFunctionCallEquation.canPropagate() {
+        getCall().flushAllRecursiveClearFinal();
+        return super.canPropagate() && variables().size() > 0 && numScalarEquations() > 0 && 
+                ((variables().size() == numScalarEquations() && getCall().variability().parameterOrLess()) 
+                        || potentialPartialVariability().constantVariability());
+    }
+    
+    inh boolean FAbstractEquation.canPropagateContext();
+    eq Root.getChild().canPropagateContext() = false;
+    eq FClass.getFAbstractEquation().canPropagateContext() = true;
+    eq FIfWhenElseEquation.getChild().canPropagateContext() = false;
+    
+    /**
+     * If any arg is constant return constant. Otherwise returns combined variability.
+     */
+    syn FTypePrefixVariability FFunctionCallEquation.potentialPartialVariability() {
+        FTypePrefixVariability res = fContinuous(); 
+        if (getCall() instanceof FFunctionCall) {
+            for (FExp exp : ((FFunctionCall)getCall()).getArgs()) {
+                if (exp.variability().constantVariability()) {
+                    return fConstant();
+                }
+            }
+            res = getCall().variability();
+        }
+        return res;
+    }
 	
 	/**
 	 * Checks if left hand side variable(s) is eligible for var. prop.
@@ -128,9 +204,7 @@ aspect VariabilityPropagation {
 		// Clean equations
 		ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
 		for (FAbstractEquation equation: equations) {
-			if (!equation.taggedForRemoval) {
-				newEquations.add(equation);
-			}
+			equation.cleanEquations(newEquations);
 		}
 		setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
 		
@@ -168,7 +242,7 @@ aspect VariabilityPropagation {
 			return;
 		}
 
-		solution = solution(fVariable.name());
+		solution = solution(fVariable);
 		solution.resetOriginalReferences();
 		
 		if (!solution.isValidExp()) {
@@ -208,106 +282,148 @@ aspect VariabilityPropagation {
 	public void FFunctionCallEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
 			List<FAbstractEquation> parameterEquations) {
-		
-		FTypePrefixVariability callVariability = getCall().variability();
-		FExp literals[] = null;
+        
+        if (!canPropagate()) {
+            return;
+        }
+        
+        boolean param = getCall().variability().parameterOrLess();
+        for (FFunctionCallLeft left : getLefts()) {
+            if (left.hasFExp() && !left.getFExp().canPropagate()) {
+                param = false;
+            }
+        }
+        FTypePrefixVariability variability = potentialPartialVariability();
+        boolean eval = variability.constantVariability();
+        
+        CValue[] val = null;
+        if (eval) {
+            try {
+                VariableEvaluator evaluator;
+                boolean fullEval = getCall().variability().constantVariability();
+                if (fullEval) {
+                    evaluator = defaultVariableEvaluator();
+                } else {
+                    evaluator = new PartialVariableEvaluator();
+                }
+                val = getCall().evaluate(evaluator);
+            } catch (ConstantEvaluationException e) {
+                eval = false;
+            }
+        }
+        
+        boolean allRemoved = true;
+        int i = 0;
+        for (FFunctionCallLeft left : getLefts()) {
+            if (left.hasFExp()) {
+                if (left.getFExp().canPropagate()) {
+                    left.taggedForRemoval = left.getFExp().variabilityPropagation(worklist,
+                            eval ? val[i] : CValue.UNKNOWN, param ? parameterEquations : null);
+                }
+                allRemoved &= left.taggedForRemoval;
+            }
+            i++;
+        }
+        
+        if (allRemoved) {
+            this.taggedForRemoval = true;
+        } else {
+            if (param) {
+                parameterEquations.add(this);
+                this.taggedForRemoval = true;
+            }
+        }
+        this.taggedForCleanup = true;
+    }
 	
-		if (!canPropagate()) {
-			return;
-		}
-		
-		for (FFunctionCallLeft left : getLefts()) {
-			if (left.hasFExp() && !left.getFExp().canPropagate()) {
-				return;
-			}
-		}
-		
-		if (!callVariability.parameterOrLess()) {
-			return;
-		}
-		
-		if (callVariability.constantVariability()) {
-			try {
-				CValue[] val = getCall().cevalFunction();
-				literals = new FExp[val.length];
-				for (int i = 0; i < val.length && i < getNumLeft(); i++)
-					if (getLeft(i).hasFExp())
-						literals[i] = val[i].buildLiteral();
-			} catch (ConstantEvaluationException e) {
-				// If we can't evaluate right now, set it as parameter
-				callVariability = fParameter();
-			}
-		}
-
-		if (callVariability.parameterVariability()) {
-			parameterEquations.add(this);
-		}
-		
-		this.taggedForRemoval = true;
-		int i = 0;
-		for (FFunctionCallLeft left : getLefts()) {
-			if (left.hasFExp()) {
-				left.getFExp().variabilityPropagation(worklist, callVariability, 
-						callVariability.constantVariability() ? literals[i] : null, parameterEquations);				
-			}
-			i++;
-		}		
-	}
-	
-	public void FExp.variabilityPropagation(
+	public boolean FExp.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-			FTypePrefixVariability variability,
-			FExp bindingExp,
+			CValue value,
 			List<FAbstractEquation> parameterEquations) {
 		
 		throw new UnsupportedOperationException();
 	}
 	
-	public void FRecordConstructor.variabilityPropagation(
+	public boolean FRecordConstructor.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-			FTypePrefixVariability variability,
-            FExp bindingExp,
+            CValue value,
             List<FAbstractEquation> parameterEquations) {
-
-		FRecordConstructor frc = null;
-		if (variability.constantVariability()) {
-			frc = (FRecordConstructor) bindingExp;
+	    boolean res = true;
+		CValueRecord frc = null;
+		if (!value.isUnknown()) {
+			frc = (CValueRecord) value;
 		}
 
 		for (int i = 0; i < getNumArg(); i++) {
-			getArg(i).variabilityPropagation(worklist, variability, 
-					variability.constantVariability() ? frc.getArg(i) : null, parameterEquations);
+			res &= getArg(i).variabilityPropagation(worklist, 
+					frc != null ? frc.getMember(i) : CValue.UNKNOWN, parameterEquations);
 		}
+		taggedForRemoval = res;
+		return res;
 	}
 	
-	public void FArray.variabilityPropagation(
+	public boolean FArray.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-			FTypePrefixVariability variability,
-            FExp bindingExp,
+            CValue value,
             List<FAbstractEquation> parameterEquations) {
 		
-		FArray a = null;
-		if (variability.constantVariability()) {
-			a = (FArray) bindingExp;
+		CValueArray a = null;
+		if (value != CValue.UNKNOWN) {
+			a = (CValueArray) value;
 		}
-		
-		for (int i = 0; i < getNumFExp(); i++) {
-			getFExp(i).variabilityPropagation(worklist, variability, 
-					variability.constantVariability() ? a.getFExp(i) : null, parameterEquations);
-		}
+		taggedForRemoval = this.variabilityPropagationArray(worklist, a, parameterEquations, new Enumerator());
+		return taggedForRemoval;
 	}
 	
+    public boolean FExp.variabilityPropagationArray(
+            LinkedHashSet<FAbstractEquation> worklist,
+            CValueArray value,
+            List<FAbstractEquation> parameterEquations,
+            Enumerator enumerator) {
+        return this.variabilityPropagation(worklist, 
+                    value == null ? CValue.UNKNOWN : value.values[enumerator.next()], parameterEquations);
+    }
+    
+    public boolean FArray.variabilityPropagationArray(
+            LinkedHashSet<FAbstractEquation> worklist,
+            CValueArray value,
+            List<FAbstractEquation> parameterEquations,
+            Enumerator enumerator) {
+        boolean res = true;
+        for (FExp exp : getFExps()) {
+            res &= exp.variabilityPropagationArray(worklist, value, parameterEquations, enumerator);
+        }
+        return res;
+    }
 	
-	public void FIdUseExp.variabilityPropagation(
-			LinkedHashSet<FAbstractEquation> worklist,
-			FTypePrefixVariability variability,
-            FExp bindingExp,
+	
+    public boolean FIdUseExp.variabilityPropagation(
+            LinkedHashSet<FAbstractEquation> worklist,
+            CValue value,
             List<FAbstractEquation> parameterEquations) {
-		
-		myFV().variabilityPropagation(worklist, variability, bindingExp, parameterEquations);
-	}
-	
-	
+        
+        FExp bexp = null;
+        FTypePrefixVariability variability = null;
+        if (!value.isUnknown()) {
+            try {
+                bexp = value.buildLiteral();
+                variability = fConstant();
+            } catch (ConstantEvaluationException e) {
+                variability = fParameter();
+            }
+        } else {
+            variability = fParameter();
+        }
+        
+        if (variability.constantVariability() || parameterEquations != null) {
+            myFV().variabilityPropagation(worklist, variability, bexp, parameterEquations);
+        }
+        
+        taggedForRemoval = variability.constantVariability();
+        return taggedForRemoval;
+    }
+    
+    
 	public void FAbstractVariable.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
 			FTypePrefixVariability variability,

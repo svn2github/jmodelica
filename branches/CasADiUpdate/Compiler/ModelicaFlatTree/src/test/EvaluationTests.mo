@@ -883,7 +883,7 @@ model FunctionEval25
 			flatModel="
 fclass EvaluationTests.FunctionEval25
  Real x = EvaluationTests.FunctionEval25.f(ones(3));
- parameter Integer n = 6 /* 6 */;
+ structural parameter Integer n = 6 /* 6 */;
  Real z[6];
 
 public
@@ -1201,9 +1201,9 @@ model FunctionEval33
             description="Evaluation of function with non-input with binding expression depending on unknown size",
             flatModel="
 fclass EvaluationTests.FunctionEval33
- parameter Integer n1 = 3 /* 3 */;
+ structural parameter Integer n1 = 3 /* 3 */;
  Real x1[3] = 1:3;
- parameter Integer n2 = 6 /* 6 */;
+ structural parameter Integer n2 = 6 /* 6 */;
  Real x2[6] = 1:6;
 
 public
@@ -1217,6 +1217,124 @@ public
 end EvaluationTests.FunctionEval33;
 ")})));
 end FunctionEval33;
+
+model FunctionEval34
+    function f
+        input Real[n] x;
+        input Integer n;
+        output Real y;
+      algorithm
+        y := 0;
+        for i in 1:n loop
+            if x[i] > 1 then
+                y := y + x[i];
+            end if;
+        end for;
+    end f;
+    
+    constant Real y1 = f({1,2,4},3);
+    Real y2 = f({1,2,4},3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval34",
+            description="If statement in for statement",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.FunctionEval34
+ constant Real y1 = 6.0;
+ constant Real y2 = 6.0;
+end EvaluationTests.FunctionEval34;
+")})));
+end FunctionEval34;
+
+model FunctionEval35
+    function f
+        input Real[:,:] x;
+        output Real[size(x,1),size(x,2)] y = x;
+        output Real t = sum(x);
+        algorithm
+    end f;
+    
+    function fw
+        input Real[:,:] x;
+        output Real[size(x,1),size(x,2)] y;
+        Real t;
+      algorithm
+        y := x;
+        (y,t) := f(x);
+    end fw;
+    
+    Real[1,1] y = fw({{1}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval35",
+            description="Function call stmt assigning array with value",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.FunctionEval35
+ constant Real y[1,1] = 1;
+end EvaluationTests.FunctionEval35;
+")})));
+end FunctionEval35;
+
+model FunctionEval36
+    record R
+        Real a;
+    end R;
+    
+    function f1
+        input Real x;
+        output Real y;
+    protected
+        R r;
+    algorithm
+        (r.a) := f2(x);
+        y := r.a + 1;
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input Real x;
+        output Real y;
+    protected
+        R r;
+    algorithm
+        y := x - 1;
+        annotation(Inline=true);
+    end f2;
+    
+    function f3
+        input Real x;
+        output Real y;
+        output Real z;
+    protected
+        R r;
+    algorithm
+        y := f1(x);
+        z := 1;
+        annotation(Inline=true);
+    end f3;
+    
+    Real x;
+    Real y;
+equation
+    (x, y) = f3(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval36",
+            description="Function call statement assigning record component",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.FunctionEval36
+ constant Real x = 1.0;
+ constant Real y = 1;
+end EvaluationTests.FunctionEval36;
+")})));
+end FunctionEval36;
+
 
 
 model VectorFuncEval1
@@ -1397,8 +1515,8 @@ model Structural1
             description="Partially structural array",
             flatModel="
 fclass EvaluationTests.Structural1
- parameter Integer y[2] = {2, 1} /* { 2, 1 } */;
- parameter Integer z = 2 /* 2 */;
+ structural parameter Integer y[2] = {2, 1} /* { 2, 1 } */;
+ structural parameter Integer z = 2 /* 2 */;
  Real a[2] = {1, 1};
 
 public
@@ -1424,8 +1542,8 @@ model EvaluateAnnotation1
 			description="Check that annotation(Evaluate=true) is honored",
 			flatModel="
 fclass EvaluationTests.EvaluateAnnotation1
- parameter Real a = 1.0 /* 1.0 */;
- parameter Real b = 1.0 /* 1.0 */;
+ structural parameter Real a = 1.0 /* 1.0 */;
+ structural parameter Real b = 1.0 /* 1.0 */;
  Real c = 1.0 + 1.0;
 end EvaluationTests.EvaluateAnnotation1;
 ")})));
@@ -1515,7 +1633,7 @@ model EvaluateAnnotation5
             description="Check that annotation(Evaluate=true) is honored for components of recors with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation5
- parameter EvaluationTests.EvaluateAnnotation5.R r = EvaluationTests.EvaluateAnnotation5.R(1) /* EvaluationTests.EvaluateAnnotation5.R(1) */;
+ structural parameter EvaluationTests.EvaluateAnnotation5.R r = EvaluationTests.EvaluateAnnotation5.R(1) /* EvaluationTests.EvaluateAnnotation5.R(1) */;
  Real x = 1.0;
 
 public
@@ -1548,8 +1666,8 @@ model EvaluateAnnotation6
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation6
- parameter EvaluationTests.EvaluateAnnotation6.R r1 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
- parameter EvaluationTests.EvaluateAnnotation6.R r2 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
+ structural parameter EvaluationTests.EvaluateAnnotation6.R r1 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
+ structural parameter EvaluationTests.EvaluateAnnotation6.R r2 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
  Real x = 1.0;
 
 public
@@ -1593,8 +1711,8 @@ model EvaluateAnnotation7
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation7
- parameter EvaluationTests.EvaluateAnnotation7.P r1 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
- parameter EvaluationTests.EvaluateAnnotation7.P r2 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
+ structural parameter EvaluationTests.EvaluateAnnotation7.P r1 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
+ structural parameter EvaluationTests.EvaluateAnnotation7.P r2 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
  Real x = 1.0;
 
 public
@@ -1629,7 +1747,7 @@ model EvaluateAnnotation8
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation8
- parameter EvaluationTests.EvaluateAnnotation8.R r(y = 2) = EvaluationTests.EvaluateAnnotation8.R(3, 3) /* EvaluationTests.EvaluateAnnotation8.R(3, 3) */;
+ structural parameter EvaluationTests.EvaluateAnnotation8.R r(y = 2) = EvaluationTests.EvaluateAnnotation8.R(3, 3) /* EvaluationTests.EvaluateAnnotation8.R(3, 3) */;
  Real x = 2.0;
 
 public
@@ -1664,8 +1782,8 @@ model EvaluateAnnotation9
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation9
- parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
- parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
+ structural parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
+ structural parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
  Real x = (-41.0 - 1) * time;
 
 public
@@ -1701,7 +1819,7 @@ model FinalParameterEval1
             description="Check that parameters with final modification are evaluated",
             flatModel="
 fclass EvaluationTests.FinalParameterEval1
- parameter Real a.p = 2 /* 2 */;
+ final parameter Real a.p = 2 /* 2 */;
 
  Real a.x = 2.0;
 end EvaluationTests.FinalParameterEval1;
@@ -1719,7 +1837,7 @@ model FinalParameterEval2
             description="Check that final parameters are evaluated",
             flatModel="
 fclass EvaluationTests.FinalParameterEval2
- parameter Real p = 1 /* 1 */;
+ final parameter Real p = 1 /* 1 */;
 
  Real x = 1.0;
 end EvaluationTests.FinalParameterEval2;
@@ -1741,7 +1859,7 @@ model FinalParameterEval3
             description="Check that members of final record parameters are evaluated",
             flatModel="
 fclass EvaluationTests.FinalParameterEval3
- parameter EvaluationTests.FinalParameterEval3.R r = EvaluationTests.FinalParameterEval3.R(1) /* EvaluationTests.FinalParameterEval3.R(1) */;
+ final parameter EvaluationTests.FinalParameterEval3.R r = EvaluationTests.FinalParameterEval3.R(1) /* EvaluationTests.FinalParameterEval3.R(1) */;
 
  Real x = 1.0;
 
@@ -1774,7 +1892,7 @@ model FinalParameterEval4
             description="Check that members of record parameters with final modification are evaluated",
             flatModel="
 fclass EvaluationTests.FinalParameterEval4
- parameter EvaluationTests.FinalParameterEval4.R a.r = EvaluationTests.FinalParameterEval4.R(1) /* EvaluationTests.FinalParameterEval4.R(1) */;
+ final parameter EvaluationTests.FinalParameterEval4.R a.r = EvaluationTests.FinalParameterEval4.R(1) /* EvaluationTests.FinalParameterEval4.R(1) */;
 
  Real a.x = 1.0;
 
@@ -1829,8 +1947,8 @@ model FinalParameterEval6
             description="Check that final parameters with fixed=false are not evaluated",
             flatModel="
 fclass EvaluationTests.FinalParameterEval6
- parameter EvaluationTests.FinalParameterEval6.R r1 = EvaluationTests.FinalParameterEval6.R(1) /* EvaluationTests.FinalParameterEval6.R(1) */;
- parameter EvaluationTests.FinalParameterEval6.R r2 = EvaluationTests.FinalParameterEval6.R(1) /* EvaluationTests.FinalParameterEval6.R(1) */;
+ final parameter EvaluationTests.FinalParameterEval6.R r1 = EvaluationTests.FinalParameterEval6.R(1) /* EvaluationTests.FinalParameterEval6.R(1) */;
+ final parameter EvaluationTests.FinalParameterEval6.R r2 = EvaluationTests.FinalParameterEval6.R(1) /* EvaluationTests.FinalParameterEval6.R(1) */;
  Real x = 1.0;
 
 public
@@ -1860,9 +1978,9 @@ model EvalNoBinding1
             description="Evaluate primitives without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding1
- parameter Real x(start = 1) = 1 /* 1 */;
- parameter Real y(start = 3) = 3 /* 3 */;
- parameter Real z = 4.0 /* 4.0 */;
+ structural parameter Real x(start = 1) = 1 /* 1 */;
+ structural parameter Real y(start = 3) = 3 /* 3 */;
+ structural parameter Real z = 4.0 /* 4.0 */;
 end EvaluationTests.EvalNoBinding1;
 ")})));
 end EvalNoBinding1;
@@ -1879,10 +1997,10 @@ model EvalNoBinding2
             description="Evaluate array primitives without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding2
- parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
- parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
- parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
- parameter Real z2 = 30.0 /* 30.0 */;
+ structural parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
+ structural parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
+ structural parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
+ structural parameter Real z2 = 30.0 /* 30.0 */;
 end EvaluationTests.EvalNoBinding2;
 ")})));
 end EvalNoBinding2;
@@ -1903,8 +2021,8 @@ model EvalNoBinding3
             description="Evaluate primitives in record without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding3
- parameter EvaluationTests.EvalNoBinding3.R r1 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
- parameter EvaluationTests.EvalNoBinding3.R r2 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
+ structural parameter EvaluationTests.EvalNoBinding3.R r1 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
+ structural parameter EvaluationTests.EvalNoBinding3.R r2 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
 
 public
  record EvaluationTests.EvalNoBinding3.R
@@ -1934,9 +2052,9 @@ model EvalNoBinding4
             description="Evaluate primitives in record array without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding4
- parameter EvaluationTests.EvalNoBinding4.R r[2,2] = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
- parameter Real x[2,2] = {{10.0, 11.0}, {12.0, 13.0}} /* { { 10.0, 11.0 }, { 12.0, 13.0 } } */;
- parameter Real y = 8.0 /* 8.0 */;
+ structural parameter EvaluationTests.EvalNoBinding4.R r[2,2] = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
+ structural parameter Real x[2,2] = {{10.0, 11.0}, {12.0, 13.0}} /* { { 10.0, 11.0 }, { 12.0, 13.0 } } */;
+ structural parameter Real y = 8.0 /* 8.0 */;
 
 public
  record EvaluationTests.EvalNoBinding4.R
@@ -1973,9 +2091,9 @@ model EvalColonSizeCell
             checkAll=true,
             flatModel="
 fclass EvaluationTests.EvalColonSizeCell
- parameter Real a[1] = {1} /* { 1 } */;
- parameter Real b[2] = {0.5, 1.5} /* { 0.5, 1.5 } */;
- parameter Real c[1] = {1} /* { 1 } */;
+ structural parameter Real a[1] = {1} /* { 1 } */;
+ structural parameter Real b[2] = {0.5, 1.5} /* { 0.5, 1.5 } */;
+ structural parameter Real c[1] = {1} /* { 1 } */;
 
 public
  function EvaluationTests.EvalColonSizeCell.f
@@ -2037,9 +2155,9 @@ equation
 			description="Test constant evaluation Evaluate parameter",
 			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation1
- parameter Real p1[1] = 1 /* 1 */;
- parameter Real p1[2] = 2 /* 2 */;
- parameter Real p1[3] = 3 /* 3 */;
+ structural parameter Real p1[1] = 1 /* 1 */;
+ structural parameter Real p1[2] = 2 /* 2 */;
+ structural parameter Real p1[3] = 3 /* 3 */;
  constant Real r[1] = 1.0;
  constant Real r[2] = 4.0;
  constant Real r[3] = 9.0;
@@ -2067,9 +2185,9 @@ model ParameterEvalAnnotation2
 fclass EvaluationTests.ParameterEvalAnnotation2
  parameter Real p;
  parameter Real dp;
- parameter Real p1 = 1 /* 1 */;
- parameter Real p2 = 2.0 /* 2.0 */;
- parameter Real p3 = 9.0 /* 9.0 */;
+ structural parameter Real p1 = 1 /* 1 */;
+ structural parameter Real p2 = 2.0 /* 2.0 */;
+ structural parameter Real p3 = 9.0 /* 9.0 */;
  parameter Real p4;
  parameter Real p5;
  constant Real c = 1;
@@ -2109,12 +2227,12 @@ equation
 fclass EvaluationTests.ParameterEvalAnnotation3
  constant Real c[1] = 1;
  constant Real c[2] = 2;
- parameter Real x[1] = 3 /* 3 */;
- parameter Real x[2] = 6 /* 6 */;
- parameter Real y[1] = 7 /* 7 */;
- parameter Real y[2] = 14 /* 14 */;
- parameter Real z[1] = 14 /* 14 */;
- parameter Real z[2] = 28 /* 28 */;
+ structural parameter Real x[1] = 3 /* 3 */;
+ structural parameter Real x[2] = 6 /* 6 */;
+ structural parameter Real y[1] = 7 /* 7 */;
+ structural parameter Real y[2] = 14 /* 14 */;
+ structural parameter Real z[1] = 14 /* 14 */;
+ structural parameter Real z[2] = 28 /* 28 */;
 end EvaluationTests.ParameterEvalAnnotation3;
 ")})));
 end ParameterEvalAnnotation3;
@@ -2200,12 +2318,12 @@ model FuncInArrayExpEval1
             variability_propagation=false,
             flatModel="
 fclass EvaluationTests.FuncInArrayExpEval1
- parameter Real a[1] = 1 /* 1 */;
- parameter Real a[2] = 2 /* 2 */;
- parameter Real b[1] = 3.0 /* 3.0 */;
- parameter Real b[2] = 3.0 /* 3.0 */;
- parameter Integer n = 3 /* 3 */;
- parameter Integer m = 2 /* 2 */;
+ structural parameter Real a[1] = 1 /* 1 */;
+ structural parameter Real a[2] = 2 /* 2 */;
+ structural parameter Real b[1] = 3.0 /* 3.0 */;
+ structural parameter Real b[2] = 3.0 /* 3.0 */;
+ structural parameter Integer n = 3 /* 3 */;
+ structural parameter Integer m = 2 /* 2 */;
  Real x[1];
  Real x[2];
  Real x[3];
@@ -2608,5 +2726,183 @@ fclass EvaluationTests.Functional9
 end EvaluationTests.Functional9;
 ")})));
 end Functional9;
+
+// Checks evaluation of partially unknown expressions
+package Partial
+    model Mul1
+        function f
+            input Real x1;
+            input Real x2;
+            output Real y = x1 * x2 + x2 * x1;
+            output Real dummy;
+            algorithm
+        end f;
+        Real y;
+      equation
+       (y, ) = f(0,time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul1",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul1
+ constant Real y = 0.0;
+end EvaluationTests.Partial.Mul1;
+")})));
+    end Mul1;
+    
+    model Mul2
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real y = x1 * x2 + x2 * x1;
+            output Real dummy;
+            algorithm
+        end f;
+        Real y;
+      equation
+        (y, ) = f({0,0},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul2",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul2
+ constant Real y = 0.0;
+end EvaluationTests.Partial.Mul2;
+")})));
+    end Mul2;
+    
+    model Mul3
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real[size(x1,1)] y = x1 .* x2 + x2 .* x1;
+            algorithm
+        end f;
+        Real[2] y = f({0,0},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul3",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul3
+ constant Real y[1] = 0.0;
+ constant Real y[2] = 0.0;
+end EvaluationTests.Partial.Mul3;
+")})));
+    end Mul3;
+    
+    model Mul4
+        function f
+            input Real[:,:] x1;
+            input Real[:,:] x2;
+            output Real[size(x1,1),size(x2,2)] y = x1 * x2 + x2 * x1;
+            algorithm
+        end f;
+        Real[2,2] y = f({{0,0},{0,0}},{{time,time}, {time,time}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Mul4",
+            description="Evaluation of multiplication with zero and unknown",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.Mul4
+ constant Real y[1,1] = 0.0;
+ constant Real y[1,2] = 0.0;
+ constant Real y[2,1] = 0.0;
+ constant Real y[2,2] = 0.0;
+end EvaluationTests.Partial.Mul4;
+")})));
+    end Mul4;
+    
+    model AssignStmt1
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real[size(x1,1)] y;
+          algorithm
+            y := x1;
+            y := x2;
+            y := x1 .* x2;
+            y := x1;
+        end f;
+        Real[2] y2 = f({1,2},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AssignStmt1",
+            description="Evaluation of failing assign stmt",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.AssignStmt1
+ constant Real y2[1] = 1;
+ constant Real y2[2] = 2;
+end EvaluationTests.Partial.AssignStmt1;
+")})));
+    end AssignStmt1;
+    
+    model FunctionCallStmt1
+        function f2
+            input Real[:] x1;
+            output Real[size(x1,1)] y = x1;
+            algorithm
+        end f2;
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real[size(x1,1)] y;
+          algorithm
+            (y) := f2(x1);
+            (y) := f2(x2);
+            (y) := f2(x1);
+        end f;
+        Real[2] y2 = f({1,2},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallStmt1",
+            description="Evaluation of function call stmt with unknown value",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.FunctionCallStmt1
+ constant Real y2[1] = 1;
+ constant Real y2[2] = 2;
+end EvaluationTests.Partial.FunctionCallStmt1;
+")})));
+    end FunctionCallStmt1;
+    
+    model FunctionCallStmt2
+        function f2
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real[size(x1,1)] y1 = x1;
+            output Real[size(x2,1)] y2 = x2;
+            algorithm
+        end f2;
+        function f
+            input Real[:] x1;
+            input Real[:] x2;
+            output Real[size(x1,1)] y;
+            Real[size(x1,1)] t;
+          algorithm
+            (y,t) := f2(x1,x2);
+        end f;
+        Real[2] y2 = f({1,2},{time,time});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallStmt2",
+            description="Evaluation of function call stmt with known and unknown values",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.FunctionCallStmt2
+ constant Real y2[1] = 1;
+ constant Real y2[2] = 2;
+end EvaluationTests.Partial.FunctionCallStmt2;
+")})));
+    end FunctionCallStmt2;
+
+end Partial;
 
 end EvaluationTests;

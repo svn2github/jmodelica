@@ -533,6 +533,18 @@ class TestAdvanced:
         resConst = model.simulate()
         nose.tools.assert_equals(resConst.final('x'), 32.67)
     
+    @testattr(stddist = True)
+    def testExtObjRecursive(self):
+        '''
+        Test failing of partial constant evaluation on external function
+        '''
+        cpath = "ExtFunctionTests.CEval.Advanced.UnknownInput"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        assert model.get_variable_variability("y") == 3, 'y should be continuous'
+        
+        
+    
 class TestUtilities:
     '''
     Test utility functions in external C functions.

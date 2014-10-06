@@ -1967,20 +1967,26 @@ aspect FlatPrettyPrint {
 		p.print(copiedFExp(), str, indent);
 	}
 	
-	syn String FTypePrefixInputOutput.toString();
-	eq FInput.toString()      = "input";
-	eq FOutput.toString()     = "output";
-	syn String FTypePrefixVariability.toString();
-	eq FParameter.toString()  = "parameter ";
-	eq FDiscrete.toString()   = "discrete ";
-	eq FConstant.toString()   = "constant ";
-	eq FContinuous.toString() = "";	
-	
-	syn String FTypePrefixVariability.toStringLiteral();
-	eq FParameter.toStringLiteral()  = "parameter";
-	eq FDiscrete.toStringLiteral()   = "discrete-time";
-	eq FConstant.toStringLiteral()   = "constant";
-	eq FContinuous.toStringLiteral() = "continuous-time";
+    syn String FTypePrefixInputOutput.toString();
+    eq FInput.toString()      = "input";
+    eq FOutput.toString()     = "output";
+    syn String FTypePrefixVariability.toString();
+    eq FParameter.toString()       = "parameter ";
+    eq FEvalParameter.toString()   = "eval parameter ";
+    eq FFinalParameter.toString()  = "final parameter ";
+    eq FStructParameter.toString() = "structural parameter ";
+    eq FDiscrete.toString()        = "discrete ";
+    eq FConstant.toString()        = "constant ";
+    eq FContinuous.toString()      = "";	
+
+    syn String FTypePrefixVariability.toStringLiteral();
+    eq FParameter.toStringLiteral()       = "parameter";
+    eq FEvalParameter.toStringLiteral()   = "eval parameter";
+    eq FFinalParameter.toStringLiteral()  = "final parameter";
+    eq FStructParameter.toStringLiteral() = "structural parameter";
+    eq FDiscrete.toStringLiteral()        = "discrete-time";
+    eq FConstant.toStringLiteral()        = "constant";
+    eq FContinuous.toStringLiteral()      = "continuous-time";
 
     syn String Restriction.toString();
     eq Model.toString()               = "model";

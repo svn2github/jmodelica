@@ -18,12 +18,12 @@ import org.jmodelica.util.Solvability;
 
 aspect EquationSolve {
 
-	syn Solvability FAbstractEquation.isSolved(String name) = isSolved(name, false);
+	syn Solvability FAbstractEquation.isSolved(FVariable var) = isSolved(var, false);
 	
-	syn Solvability FAbstractEquation.isSolved(String name, boolean duringTearing) = Solvability.UNSOLVABLE;
+	syn Solvability FAbstractEquation.isSolved(FVariable var, boolean duringTearing) = Solvability.UNSOLVABLE;
 	
-	eq FEquation.isSolved(String name, boolean duringTearing) {
-		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
+	eq FEquation.isSolved(FVariable var, boolean duringTearing) {
+		boolean solvable = !(solution(var, duringTearing) instanceof FNoExp);
 		if (solvable)
 			return Solvability.ANALYTICALLY_SOLVABLE;
 		else if (duringTearing && canUseLocalIteration())
@@ -32,12 +32,12 @@ aspect EquationSolve {
 			return Solvability.UNSOLVABLE;
 	}
 
-	eq FFunctionCallEquation.isSolved(String name, boolean duringTearing) {
+	eq FFunctionCallEquation.isSolved(FVariable var, boolean duringTearing) {
 		Set<FVariable> leftVars = referencedFVariablesInLHS();
 		
 		boolean inLeft = false;
 		for (FVariable fv : leftVars) {
-			if (fv.name().equals(name))
+			if (fv == var)
 				inLeft = true;
 		}
 		
@@ -45,7 +45,7 @@ aspect EquationSolve {
 
 		boolean inArgs = false;
 		for (FVariable fv : argVars) {
-			if (fv.name().equals(name))
+			if (fv == var)
 				inArgs = true;
 		}
 
@@ -57,12 +57,12 @@ aspect EquationSolve {
 			return Solvability.UNSOLVABLE;
 	}
 	
-	eq FAlgorithm.isSolved(String name, boolean duringTearing) {
+	eq FAlgorithm.isSolved(FVariable var, boolean duringTearing) {
 		Set<FVariable> leftVars = referencedFVariablesInLHS();
 		
 		boolean inLeft = false;
 		for (FVariable fv : leftVars) {
-			if (fv.name().equals(name))
+			if (fv == var)
 				inLeft = true;
 		}
 		
@@ -74,12 +74,12 @@ aspect EquationSolve {
 			return Solvability.UNSOLVABLE;
 	}
 
-    eq FIfWhenElseEquation.isSolved(String name, boolean duringTearing) {
+    eq FIfWhenElseEquation.isSolved(FVariable var, boolean duringTearing) {
         Set<FVariable> leftVars = referencedFVariablesInLHS();
         
         boolean inLeft = false;
         for (FVariable fv : leftVars) {
-            if (fv.name().equals(name))
+            if (fv == var)
                 inLeft = true;
         }
         
@@ -87,7 +87,7 @@ aspect EquationSolve {
 
         boolean inArgs = false;
         for (FVariable fv : argVars) {
-            if (fv.name().equals(name))
+            if (fv == var)
                 inArgs = true;
         }
 
@@ -97,11 +97,11 @@ aspect EquationSolve {
             return Solvability.UNSOLVABLE;
     }
     
-	syn FExp FEquation.solution(String name) {
-		return solution(name, false);
+	syn FExp FEquation.solution(FVariable var) {
+		return solution(var, false);
 	}
 	
-	syn nta FExp FEquation.solution(String name, boolean duringTearing) {
+	syn nta FExp FEquation.solution(FVariable var, boolean duringTearing) {
 		
 		// Get terms
 		ArrayList<FExp> t = terms();
@@ -112,10 +112,10 @@ aspect EquationSolve {
 		//System.out.println("Equation:\n" + prettyPrint(""));			
 		for (FExp e : t) {
 			//System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
-			if (e.nbrUses(name)==1) {
+			if (e.nbrUses(var.name())==1) {
 			    //System.out.println(" - active");
 				activeTerms.add(e);
-			} else if (e.nbrUses(name)==0) {
+			} else if (e.nbrUses(var.name())==0) {
 				//System.out.println(" - inactive");
 			    inactiveTerms.add(e);
 			} else {
@@ -157,18 +157,18 @@ aspect EquationSolve {
 			boolean negatedFactor = false;			
 			for (FExp ee : fac) {
 				//System.out.println("Factor" + (ee.isNegativeTerm()? "(-): ": "(+): ") + ee.prettyPrint(""));
-				if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
-				    (ee.isIdentifier(name) || // Identifier 
+				if (ee.nbrUses(var.name())==1 && !ee.isInvertedFactor() && 
+				    (ee.isIdentifier(var.name()) || // Identifier 
 				    (ee instanceof FPreExp))) { // pre expression 
 					//System.out.println(" - active"); 
 					activeFactors.add(ee);
-				} else if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
-				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(name))) { 
+				} else if (ee.nbrUses(var.name())==1 && !ee.isInvertedFactor() && 
+				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(var.name()))) { 
 				    // TODO: remove this branch since it is not general enough
 					//System.out.println(" - active"); 
 					activeFactors.add(((FNegExp)ee).getFExp());
 					negatedFactor = true;
-				} else if (ee.nbrUses(name)==0) {
+				} else if (ee.nbrUses(var.name())==0) {
 					//System.out.println(" - inactive"); 
 				    inactiveFactors.add(ee);
 				} else {
@@ -529,6 +529,10 @@ aspect Derivatives {
 		throw new ExpressionDifferentiationException(this);
 	}
 	
+    public FExp FNoExp.diff(String name) {
+        return new FNoExp();
+    }
+	
 	public FExp FDotAddExp.diff(String name) {
 		FExp rd = dynamicFExp(getRight().diff(name));
 		FExp ld = dynamicFExp(getLeft().diff(name));
@@ -770,10 +774,6 @@ aspect Derivatives {
         } else {
             return new FRealLitExp(0);
         }   
-    }
-
-    public FExp FDerExp.diff(String name) { 
-        return dynamicFExp(diffUseOrDerExp(name, name()));
     }
 
     public FExp InstDerExp.diff(String name) {  

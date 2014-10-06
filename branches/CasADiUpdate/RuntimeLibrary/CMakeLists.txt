@@ -51,7 +51,8 @@ set(RTLIB_INCLUDE_DIR ${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary)
 file(MAKE_DIRECTORY ${RTLIB_INCLUDE_DIR})
                 
 #Make the directory for lib files to be installed in.
-if(${CMAKE_C_FLAGS} STREQUAL "-m64")
+# Add spaces around CMAKE_C_FLAGS so that we can check for " -m64 " with spaces around it
+if(" ${CMAKE_C_FLAGS} " MATCHES " -m64 ")
     set(RTLIB_LIB_DIR ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary64)
 else()
     set(RTLIB_LIB_DIR ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary)

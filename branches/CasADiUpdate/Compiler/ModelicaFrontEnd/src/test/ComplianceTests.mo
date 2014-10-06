@@ -434,12 +434,12 @@ fclass ComplianceTests.HybridFMU1
  discrete Boolean temp_3;
  discrete Boolean temp_4;
 initial equation 
+ xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- xx = 2;
  pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
@@ -534,9 +534,9 @@ fclass ComplianceTests.HybridFMU2
  Real dummy;
  discrete Boolean temp_1;
 initial equation 
- pre(x) = 0.0;
  pre(y) = 0.0;
  dummy = 0.0;
+ pre(x) = 0.0;
  pre(temp_1) = false;
 equation
  der(dummy) = 0;
@@ -560,9 +560,9 @@ model String2
 			description="Make sure uses of String parameters are evaluated",
 			flatModel="
 fclass ComplianceTests.String2
- parameter String a = \"1\" /* \"1\" */;
- parameter String b = \"12\" /* \"12\" */;
- parameter String c = \"123\" /* \"123\" */;
+ structural parameter String a = \"1\" /* \"1\" */;
+ structural parameter String b = \"12\" /* \"12\" */;
+ structural parameter String c = \"123\" /* \"123\" */;
 end ComplianceTests.String2;
 ")})));
 end String2;

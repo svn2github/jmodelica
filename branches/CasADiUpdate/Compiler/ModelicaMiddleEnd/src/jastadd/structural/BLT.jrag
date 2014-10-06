@@ -48,7 +48,7 @@ aspect BLT{
             // Check if equation is solvable for all active variables (only if we want a solved block)
             Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
             for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
-                solvability = Solvability.least(solvability, e.isSolved(it.next().name(), producer.duringTearing()));
+                solvability = Solvability.least(solvability, e.isSolved(it.next(), producer.duringTearing()));
             return e.createSimpleEquationBlock(fvs, assignedIndices, solvability, producer, blockDependency);
         }
 
@@ -926,6 +926,21 @@ aspect BLT{
             return producer;
         }
         
+        public String printAllVariables() {
+            return printAllVariables(", ");
+        }
+        public String printAllVariables(String separator) {
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (FVariable var : allVariables()) {
+                if (!first)
+                    sb.append(separator);
+                first = false;
+                sb.append(var.name());
+            }
+            return sb.toString();
+        }
+        
     }
 
     /**
@@ -1454,7 +1469,7 @@ aspect BLT{
         }
 
         public FExp solution() {
-            return equation().solution(fv.name());
+            return equation().solution(fv);
         }
 
     }
@@ -2348,6 +2363,9 @@ aspect AutomaticTearing {
             
             private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb) {
                 SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers());
+                
+                ASTNode.log.info("Starting automatic tearing");
+                ASTNode.log.info(g);
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
                 Collection<SolvingEq> SUME = g.greedyMatching();

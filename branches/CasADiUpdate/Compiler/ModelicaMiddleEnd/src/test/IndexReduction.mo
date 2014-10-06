@@ -138,7 +138,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
  Modelica.Blocks.Interfaces.RealInput torque.tau(unit = \"N.m\") \"Accelerating torque acting at flange (= -flange.tau)\";
- parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ structural parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
  parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
@@ -148,7 +148,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
  Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
- parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ structural parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  Modelica.SIunits.Torque idealGear.flange_a.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
@@ -175,7 +175,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Modelica.SIunits.Torque damper.tau \"Torque between flanges (= flange_b.tau)\";
  parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\",min = 0.0) = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
- parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
+ structural parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
  parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
  parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
@@ -921,7 +921,7 @@ P*V=m*R*T;
             errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed: Maximum number of differentiations reached
+  Index reduction failed: Maximum number of differentiations has been reached
 
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -3453,11 +3453,11 @@ void func_IndexReduction_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_ra
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
     JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
     if (_der_y_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
         _der_y_a = _der_y_an;
     }
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
     jmi_array_rec_1(_der_y_a, 1)->x = jmi_array_rec_1(_der_x_a, 1)->x;
     jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
     JMI_DYNAMIC_FREE()
@@ -4612,4 +4612,163 @@ end IndexReduction.FunctionCallEquation3;
 ")})));
 end FunctionCallEquation3;
 
+model DoubleDifferentiationWithSS1
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g = 9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.never) "Cartesian x coordinate";
+    Real x2;
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+equation
+    der(x2) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+    x = x2 + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DoubleDifferentiationWithSS1",
+            description="Test double differentiation whit state select avoid or never during index reductio",
+            flatModel="
+fclass IndexReduction.DoubleDifferentiationWithSS1
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.never) \"Cartesian x coordinate\";
+ Real x2;
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real _der_x2;
+ Real _der_vx;
+ Real _der_x;
+ Real _der_der_x2;
+ Real _der_der_y;
+ Real _der_der_x;
+initial equation 
+ y = 0.0;
+ vy = 0.0;
+equation
+ _der_x2 = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ x = x2 + 1;
+ 2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_x = _der_x2;
+ _der_der_x2 = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ _der_der_x = _der_der_x2;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.DoubleDifferentiationWithSS1;
+")})));
+end DoubleDifferentiationWithSS1;
+
+
+model MaxNumFExpError1
+    Real x1;
+    Real x2;
+equation
+    der(x1) + der(x2) = 1;
+    x1 + x2 = 1;
+    atan2(atan2(x1 * x2, sqrt(x1 ^ 2 + x2 ^ 2)), x1 / x2) = 2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="MaxNumFExpError1",
+            description="Test error check that prevents runaway index reduction",
+            errorMessage="
+2 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: Maximum number of expressions in a single equation has been reached
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    x1 + x2 = 1
+    atan2(atan2(x1 * x2, sqrt(x1 ^ 2 + x2 ^ 2)), x1 / x2) = 2
+
+")})));
+end MaxNumFExpError1;
+
+model PartiallyPropagatedComposite1
+    function f
+        input Real x1;
+        input Real x2;
+        output Real[2] y;
+      algorithm
+        y[1] := x1;
+        y[2] := x2;
+        annotation(smoothOrder = 1);
+    end f;
+    Real[2] y;
+    Real[2] x1;
+equation
+    y = f(2,time);
+    x1 = der(y);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyPropagatedComposite1",
+            description="Check that index reduction can handle FNoExp in LHS of function call equation",
+            inline_functions="none",
+            flatModel="
+fclass IndexReduction.PartiallyPropagatedComposite1
+ constant Real y[1] = 2;
+ Real y[2];
+ constant Real x1[1] = 0.0;
+ Real x1[2];
+ Real _der_y[2];
+equation
+ ({, y[2]}) = IndexReduction.PartiallyPropagatedComposite1.f(2, time);
+ x1[2] = _der_y[2];
+ ({, _der_y[2]}) = IndexReduction.PartiallyPropagatedComposite1._der_f(2, time, 0, 1.0);
+
+public
+ function IndexReduction.PartiallyPropagatedComposite1.f
+  input Real x1;
+  input Real x2;
+  output Real[2] y;
+ algorithm
+  y[1] := x1;
+  y[2] := x2;
+  return;
+ annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.PartiallyPropagatedComposite1._der_f);
+ end IndexReduction.PartiallyPropagatedComposite1.f;
+
+ function IndexReduction.PartiallyPropagatedComposite1._der_f
+  input Real x1;
+  input Real x2;
+  input Real _der_x1;
+  input Real _der_x2;
+  output Real[2] _der_y;
+  Real[2] y;
+ algorithm
+  _der_y[1] := _der_x1;
+  y[1] := x1;
+  _der_y[2] := _der_x2;
+  y[2] := x2;
+  return;
+ annotation(smoothOrder = 0);
+ end IndexReduction.PartiallyPropagatedComposite1._der_f;
+
+end IndexReduction.PartiallyPropagatedComposite1;
+")})));
+end PartiallyPropagatedComposite1;
+
 end IndexReduction;
+

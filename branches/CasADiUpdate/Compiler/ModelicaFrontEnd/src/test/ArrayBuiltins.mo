@@ -92,7 +92,7 @@ model SizeExp5
 			description="Size operator: using parameter",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp5
- parameter Integer p = 1 /* 1 */;
+ structural parameter Integer p = 1 /* 1 */;
  constant Real x = 2;
 end ArrayBuiltins.Size.SizeExp5;
 ")})));
@@ -248,10 +248,10 @@ model SizeStructural1
 fclass ArrayBuiltins.Size.SizeStructural1
  Real x[1,1];
  Real y = 1 + p2[1:1] * p3[1:1] + 1;
- parameter Integer p1 = 1 /* 1 */;
+ structural parameter Integer p1 = 1 /* 1 */;
  parameter Real p2[1] = {1} /* { 1 } */;
  parameter Real p3[1] = {2} /* { 2 } */;
- parameter Integer p4 = 1 /* 1 */;
+ structural parameter Integer p4 = 1 /* 1 */;
 end ArrayBuiltins.Size.SizeStructural1;
 ")})));
 end SizeStructural1;
@@ -473,7 +473,7 @@ model MinExp3
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp3
  constant String x = \"bar\";
- parameter String y = \"bar\" /* \"bar\" */;
+ structural parameter String y = \"bar\" /* \"bar\" */;
 end ArrayBuiltins.Min.MinExp3;
 ")})));
 end MinExp3;
@@ -685,7 +685,7 @@ model MaxExp3
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
  constant String x = \"foo\";
- parameter String y = \"foo\" /* \"foo\" */;
+ structural parameter String y = \"foo\" /* \"foo\" */;
 end ArrayBuiltins.Max.MaxExp3;
 ")})));
 end MaxExp3;
@@ -944,7 +944,7 @@ equation
 			description="",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp6
- parameter Integer N = 3 /* 3 */;
+ structural parameter Integer N = 3 /* 3 */;
  constant Real wbar[1] = 3.5;
  constant Real wbar[2] = 7.0;
  constant Real wbar[3] = 11.5;
@@ -1374,8 +1374,9 @@ equation
 public
  function ArrayBuiltins.Transpose.Transpose9.f
   input Real[:, :] a;
-  output Real[size(a, 2), size(a, 1)] b;
+  output Real[:,:] b;
  algorithm
+  size(b) := {size(a, 2), size(a, 1)};
   for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     b[i1,i2] := a[i2,i1];
@@ -1425,8 +1426,9 @@ equation
 public
  function ArrayBuiltins.Transpose.Transpose10.f
   input Real[:, :, :] a;
-  output Real[size(a, 2), size(a, 1), size(a, 3)] b;
+  output Real[:,:,:] b;
  algorithm
+  size(b) := {size(a, 2), size(a, 1), size(a, 3)};
   for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     for i3 in 1:size(a, 3) loop
@@ -1472,10 +1474,11 @@ equation
 public
  function ArrayBuiltins.Transpose.Transpose11.f
   input Real[:, :] a;
-  output Real[size(a, 2), size(a, 1)] b;
+  output Real[:,:] b;
   Real[:,:] temp_1;
   Real temp_2;
  algorithm
+  size(b) := {size(a, 2), size(a, 1)};
   size(temp_1) := {size(a, 1), size(a, 1)};
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
@@ -2556,7 +2559,7 @@ model Linspace2
 fclass ArrayBuiltins.Linspace2
  Real a;
  Real b;
- parameter Integer c = 3 /* 3 */;
+ structural parameter Integer c = 3 /* 3 */;
  Real x[1];
  Real x[2];
  Real x[3];
@@ -2646,7 +2649,7 @@ model Linspace6
 fclass ArrayBuiltins.Linspace6
  parameter Real b = 1.5 /* 1.5 */;
  parameter Real c = 3 /* 3 */;
- parameter Integer d = 3 /* 3 */;
+ structural parameter Integer d = 3 /* 3 */;
  parameter Real a[1].x;
  parameter Real a[2].x;
  parameter Real a[3].x;
@@ -2688,8 +2691,9 @@ public
   input Integer x1;
   input Integer x2;
   input Integer n;
-  output Real[n] a;
+  output Real[:] a;
  algorithm
+  size(a) := {n};
   for i1 in 1:n loop
    a[i1] := x1 + (i1 - 1) * ((x2 - x1) / (n - 1));
   end for;
@@ -2753,7 +2757,7 @@ model NdimsStructural1
 fclass ArrayBuiltins.NdimsStructural1
  Real x[1,1];
  Real y = 1 + p2[1:1] * p3[1:1];
- parameter Integer p1 = 1 /* 1 */;
+ structural parameter Integer p1 = 1 /* 1 */;
  parameter Real p2[1] = {1} /* { 1 } */;
  parameter Real p3[1] = {2} /* { 2 } */;
 end ArrayBuiltins.NdimsStructural1;
@@ -2775,7 +2779,7 @@ equation
 			description="Array if expressions",
 			flatModel="
 fclass ArrayBuiltins.ArrayIfExp1
- parameter Integer N = 3 /* 3 */;
+ structural parameter Integer N = 3 /* 3 */;
  parameter Real A[1,1] = 1 /* 1 */;
  parameter Real A[1,2] = 0 /* 0 */;
  parameter Real A[1,3] = 0 /* 0 */;
@@ -2835,7 +2839,7 @@ equation
 fclass ArrayBuiltins.ArrayIfExp3
  parameter Real tableB[1,1] = 1.0 /* 1.0 */;
  parameter Real tableB[1,2] = 1.0 /* 1.0 */;
- parameter Boolean useTableA = false /* false */;
+ structural parameter Boolean useTableA = false /* false */;
  parameter Real y;
 parameter equation
  y = tableB[1,1];
@@ -3109,8 +3113,9 @@ public
  function Modelica.Math.Vectors.normalize
   input Real[:] v;
   input Real eps;
-  output Real[size(v, 1)] result;
+  output Real[:] result;
  algorithm
+  size(result) := {size(v, 1)};
   for i1 in 1:size(v, 1) loop
    result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
   end for;

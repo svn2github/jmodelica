@@ -840,9 +840,14 @@ aspect AliasVariables {
             score += 1;
         
         // Stateselect level
-        score *= 10;
-        if (isReal()) 
-            score += stateSelectAttribute().ordinal();
+        score *= 100;
+        FAttribute stateSelectAttribute = findAttribute(FAttribute.STATE_SELECT);
+        if (isReal() && stateSelectAttribute != null) {
+            if (!stateSelectAttribute.isInDerivedType())
+                score += stateSelectAttribute().ordinal() * 10;
+            else
+                score += stateSelectAttribute().ordinal();
+        }
         
         // Annotations
         score *= 10;

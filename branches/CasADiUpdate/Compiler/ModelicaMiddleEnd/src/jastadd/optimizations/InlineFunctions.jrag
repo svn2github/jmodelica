@@ -299,7 +299,7 @@ aspect FunctionInlining {
             FExp[] exps = null;
             if (variability.constantVariability()) {
                 try {
-                    CValue[] values = call.evaluate();
+                    CValue[] values = call.evaluate(ASTNode.defaultVariableEvaluator());
                     exps = new FExp[values.length];
                     for (int i = 0; i < values.length; i++)
                         exps[i] = values[i].buildLiteral();
@@ -874,6 +874,7 @@ aspect FunctionInlining {
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
     syn boolean FStatement.isOkTrivialInline(boolean last) = false;
+    eq FInitArrayStmt.isOkTrivialInline(boolean last)      = true;
     eq FAssignStmt.isOkTrivialInline(boolean last)         = true;
     eq FFunctionCallStmt.isOkTrivialInline(boolean last)   = getCall().isOkTrivialInline(last);
     eq FReturnStmt.isOkTrivialInline(boolean last)         = isLast();

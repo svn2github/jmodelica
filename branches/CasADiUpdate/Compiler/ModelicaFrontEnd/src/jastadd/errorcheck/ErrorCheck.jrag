@@ -1049,7 +1049,7 @@ aspect InstanceErrorCheck {
             CommonForIndex next = last ? null : indices.getChild(i + 1);
             CValueArray ivals = getFExp().ceval().array();
             for (Index j : ivals.indices()) {
-                var.setEvaluationValue(ivals.getCell(j));
+                var.setLocalCachedEvaluationValue(ivals.getCell(j));
                 if (last) {
                     child.resetCollectErrors();
                     child.collectErrors(checkType);
@@ -1058,49 +1058,51 @@ aspect InstanceErrorCheck {
                     next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
                 }
             }
-            var.setEvaluationValue(oldVal);
+            var.setLocalCachedEvaluationValue(oldVal);
         }
     }
-	
-    
-	public void InstFunctionCall.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-	    	errorChecked = true;
-	    	// Check that the function exists
+
+
+    public void InstFunctionCall.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            errorChecked = true;
+            // Check that the function exists
             InstCallable func = getName().myInstCallable();
-	    	if (!func.isCallable()) {
-	    		// Report that function does not exist
-		    	String name = getName().name();
-		    	if (func.isExternalObject()) {
-		    		name += ".constructor";
-		    		func = func.asInstClassDecl().myConstructor();
-		    	}
-		    	if (func.isUnknown()) 
-	    			error("Cannot find function declaration for " + name + "()");
-	    		else
-	    			error("The class " + name + " is not a function");
-	    	} else if (!func.isRecord() && !func.isCompleteFunction()) {
-	    		// TODO: add check if function is partial?
-	    	    if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func.asInstNode()))
-	    	        error("Calling function " + getName().name() + 
-	    	                "(): can only call functions that have one algorithm section or external function specification");
-	    	} else {
-	    		// Function exists, check everything
-	            errorChecked = false; // super also uses errorChecked
-	    		super.collectErrors(checkType);
-	    		
-	    		// We need to check the function definition as well.
-	    	    func.collectErrors(checkType);
-	    	    
-	    	    // Check if there were any unbindable args
-			    boolean pos = true;
-			    String desc = functionCallDecription();
-			    for (InstFunctionArgument arg : unbindableArgs) 
-			    	pos = arg.generateUnbindableError(desc, pos);
-	    	}
-	    }
-	}
-    
+            if (!func.isCallable()) {
+                // Report that function does not exist
+                String name = getName().name();
+                if (func.isExternalObject()) {
+                    name += ".constructor";
+                    func = func.asInstClassDecl().myConstructor();
+                    if (func.isUnknown()) 
+                        error("Cannot find function declaration for " + name + "()");
+                } else if (func.isUnknown()) {
+                    getName().classLookupError("function", name + "()");
+                } 
+                if (!func.isUnknown())
+                    error("The class " + name + " is not a function");
+            } else if (!func.isRecord() && !func.isCompleteFunction()) {
+                // TODO: add check if function is partial?
+                if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func.asInstNode()))
+                    error("Calling function " + getName().name() + 
+                            "(): can only call functions that have one algorithm section or external function specification");
+            } else {
+                // Function exists, check everything
+                errorChecked = false; // super also uses errorChecked
+                super.collectErrors(checkType);
+                
+                // We need to check the function definition as well.
+                func.collectErrors(checkType);
+                
+                // Check if there were any unbindable args
+                boolean pos = true;
+                String desc = functionCallDecription();
+                for (InstFunctionArgument arg : unbindableArgs) 
+                    pos = arg.generateUnbindableError(desc, pos);
+            }
+        }
+    }
+
     /**
      * Can <code>node</code> be replaced as seen from here?
      */

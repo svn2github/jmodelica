@@ -147,6 +147,17 @@ model WhenEqu11
 	end when;
 end WhenEqu11;
 
+
+model WhenEqu12
+ discrete Real x;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1e-10) then
+   x = pre(x) + 1;
+ end when;
+end WhenEqu12; 
+
 model ZeroOrderHold1
 
   Modelica.Blocks.Discrete.ZeroOrderHold sampler(samplePeriod=0.1);

@@ -326,9 +326,9 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Output2
  output Real a;
- Real b;
+ constant Real b = 2;
 equation
- (a, b) = VariabilityPropagationTests.Output2.f();
+ (a, ) = VariabilityPropagationTests.Output2.f();
 
 public
  function VariabilityPropagationTests.Output2.f
@@ -725,6 +725,7 @@ equation
 Tests that parameters in function call equations are folded. 
 Also tests that when it is constant and can't evaluate, variability is propagated as parameter.
 ",
+            inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation4
  constant Real a[1,1] = 1;
@@ -742,9 +743,10 @@ public
  function Modelica.Math.Matrices.solve
   input Real[:, size(A, 1)] A;
   input Real[size(A, 1)] b;
-  output Real[size(b, 1)] x;
+  output Real[:] x;
   Integer info;
  algorithm
+  size(x) := {size(b, 1)};
   (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
   assert(info == 0, \"Solving a linear system of equations with function
 \\\"Matrices.solve\\\" is not possible, because the system has either
@@ -755,13 +757,14 @@ no or infinitely many solutions (A is singular).\");
  function Modelica.Math.Matrices.LAPACK.dgesv_vec
   input Real[:, size(A, 1)] A;
   input Real[size(A, 1)] b;
-  output Real[size(A, 1)] x;
+  output Real[:] x;
   output Integer info;
   Real[:,:] Awork;
   Integer lda;
   Integer ldb;
   Integer[:] ipiv;
  algorithm
+  size(x) := {size(A, 1)};
   size(Awork) := {size(A, 1), size(A, 1)};
   size(ipiv) := {size(A, 1)};
   for i1 in 1:size(A, 1) loop
@@ -800,6 +803,7 @@ model FunctionCallEquation5
 		TransformCanonicalTestCase(
 			name="FunctionCallEquation5",
 			description="Tests evaluation of matrix multiplication in function.",
+			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation5
  constant Real a[1,1] = 1;
@@ -814,6 +818,553 @@ end VariabilityPropagationTests.FunctionCallEquation5;
 ")})));
 end FunctionCallEquation5;
 
+    function fp
+        input Real i1;
+        input Real i2;
+        output Real o1 = i1;
+        output Real o2 = i2;
+    algorithm
+    end fp;
+
+model FunctionCallEquationPartial1
+    Real x1,x2;
+  equation
+    (x1,x2) = fp(time,7);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial1",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial1
+ Real x1;
+ constant Real x2 = 7;
+equation
+ (x1, ) = VariabilityPropagationTests.fp(time, 7);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial1;
+")})));
+end FunctionCallEquationPartial1;
+
+model FunctionCallEquationPartial2
+    Real x1,x2,x3;
+  equation
+    x3 = 7;
+    (x1,x2) = fp(time,x3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial2",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial2
+ Real x1;
+ constant Real x2 = 7.0;
+ constant Real x3 = 7;
+equation
+ (x1, ) = VariabilityPropagationTests.fp(time, 7.0);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial2;
+")})));
+end FunctionCallEquationPartial2;
+
+model FunctionCallEquationPartial3
+    Real x1,x2,x3;
+  equation
+    (x1,x2) = fp(time,x3);
+    x3 = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial3",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial3
+ Real x1;
+ constant Real x2 = 7.0;
+ constant Real x3 = 7;
+equation
+ (x1, ) = VariabilityPropagationTests.fp(time, 7.0);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial3;
+")})));
+end FunctionCallEquationPartial3;
+
+model FunctionCallEquationPartial4
+    Real x1,x2,x3,x4,x5;
+  equation
+    (x1,x2) = fp(x4,x5);
+    (x3,x4) = fp(x1,x2);
+    x5 = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial4",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial4
+ constant Real x1 = 7.0;
+ constant Real x2 = 7.0;
+ constant Real x3 = 7.0;
+ constant Real x4 = 7.0;
+ constant Real x5 = 7;
+end VariabilityPropagationTests.FunctionCallEquationPartial4;
+")})));
+end FunctionCallEquationPartial4;
+
+model FunctionCallEquationPartial5
+    function fp
+        input Real i1;
+        input Real i2;
+        input Real i3;
+        input Real i4 = 13;
+        output Real o1 = i1;
+        output Real o2 = i2;
+        output Real o3 = i3;
+        output Real o4 = i4;
+    algorithm
+    end fp;
+    Real x1,x2,x3,x4,x5,x6;
+  equation
+    (x1,x2,x3) = fp(x4, x5, x6);
+    x4 = 3;
+    x5 = x4 + x1;
+    x6 = x4 + x1 + x2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial5",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial5
+ constant Real x1 = 3.0;
+ constant Real x2 = 6.0;
+ constant Real x3 = 12.0;
+ constant Real x4 = 3;
+ constant Real x5 = 6.0;
+ constant Real x6 = 12.0;
+end VariabilityPropagationTests.FunctionCallEquationPartial5;
+")})));
+end FunctionCallEquationPartial5;
+
+model FunctionCallEquationPartial6
+    Real x1,x2;
+    parameter Real x3;
+    Real x4;
+  equation
+    (x1,x2) = fp(x3,x4);
+    x4 = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial6",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial6
+ parameter Real x1;
+ constant Real x2 = 7.0;
+ parameter Real x3;
+ constant Real x4 = 7;
+parameter equation
+ (x1, ) = VariabilityPropagationTests.fp(x3, 7.0);
+
+public
+ function VariabilityPropagationTests.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  return;
+ end VariabilityPropagationTests.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial6;
+")})));
+end FunctionCallEquationPartial6;
+
+model FunctionCallEquationPartial7
+    function fp
+        input Real i1;
+        input Real i2;
+        output Real o1 = i1;
+        output Real o2 = i2;
+        output Real o3 = i1;
+    algorithm
+    end fp;
+    
+    Real x1,x2,x3,x4,x5,c;
+    parameter Real p;
+  equation
+    (x3,x4,x5) = fp(x1,x2);
+    (x1,x2) = fp(p,c);
+    c = 7;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial7",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial7
+ parameter Real x1;
+ constant Real x2 = 7.0;
+ parameter Real x3;
+ constant Real x4 = 7.0;
+ parameter Real x5;
+ constant Real c = 7;
+ parameter Real p;
+parameter equation
+ (x1, ) = VariabilityPropagationTests.FunctionCallEquationPartial7.fp(p, 7.0);
+ (x3, , x5) = VariabilityPropagationTests.FunctionCallEquationPartial7.fp(x1, 7.0);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquationPartial7.fp
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
+  output Real o3;
+ algorithm
+  o1 := i1;
+  o2 := i2;
+  o3 := i1;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial7.fp;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial7;
+")})));
+end FunctionCallEquationPartial7;
+
+    model PartiallyKnownComposite1
+        function f
+            input Real x1;
+            input Real x2;
+            output Real[2] y;
+          algorithm
+            y[1] := x1;
+            y[2] := x2;
+        end f;
+        Real[2] y = f(2,time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite1",
+            description="Partially propagated array",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite1
+ constant Real y[1] = 2;
+ Real y[2];
+equation
+ ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite1.f(2, time);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite1.f
+  input Real x1;
+  input Real x2;
+  output Real[2] y;
+ algorithm
+  y[1] := x1;
+  y[2] := x2;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite1.f;
+
+end VariabilityPropagationTests.PartiallyKnownComposite1;
+")})));
+    end PartiallyKnownComposite1;
+    
+    model PartiallyKnownComposite2
+        record R
+            Real a;
+            Real b;
+        end R;
+        function f
+            input Real x1;
+            input Real x2;
+            output R y;
+          algorithm
+            y.a := x1;
+            y.b := x2;
+        end f;
+        R y = f(2,time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite2",
+            description="Partially propagated record",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite2
+ constant Real y.a = 2;
+ Real y.b;
+equation
+ (VariabilityPropagationTests.PartiallyKnownComposite2.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite2.f(2, time);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite2.f
+  input Real x1;
+  input Real x2;
+  output VariabilityPropagationTests.PartiallyKnownComposite2.R y;
+ algorithm
+  y.a := x1;
+  y.b := x2;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite2.f;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite2.R
+  Real a;
+  Real b;
+ end VariabilityPropagationTests.PartiallyKnownComposite2.R;
+
+end VariabilityPropagationTests.PartiallyKnownComposite2;
+
+")})));
+    end PartiallyKnownComposite2;
+    
+        model PartiallyKnownComposite3
+        function f
+            input Real x1;
+            input Real x2;
+            output Real[2] y;
+          algorithm
+            y[1] := x1;
+            y[2] := x2;
+        end f;
+        parameter Real p = 2;
+        Real[2] y = f(2,p);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite3",
+            description="Partially propagated array, parameter",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite3
+ parameter Real p = 2 /* 2 */;
+ constant Real y[1] = 2;
+ parameter Real y[2];
+parameter equation
+ ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite3.f(2, p);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite3.f
+  input Real x1;
+  input Real x2;
+  output Real[2] y;
+ algorithm
+  y[1] := x1;
+  y[2] := x2;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite3.f;
+
+end VariabilityPropagationTests.PartiallyKnownComposite3;
+")})));
+    end PartiallyKnownComposite3;
+    
+    model PartiallyKnownComposite4
+        record R
+            Real a;
+            Real b;
+        end R;
+        function f
+            input Real x1;
+            input Real x2;
+            output R y;
+          algorithm
+            y.a := x1;
+            y.b := x2;
+        end f;
+        parameter Real p = 2;
+        R y = f(2,p);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite4",
+            description="Partially propagated record, parameter",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite4
+ parameter Real p = 2 /* 2 */;
+ constant Real y.a = 2;
+ parameter Real y.b;
+parameter equation
+ (VariabilityPropagationTests.PartiallyKnownComposite4.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite4.f(2, p);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite4.f
+  input Real x1;
+  input Real x2;
+  output VariabilityPropagationTests.PartiallyKnownComposite4.R y;
+ algorithm
+  y.a := x1;
+  y.b := x2;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite4.f;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite4.R
+  Real a;
+  Real b;
+ end VariabilityPropagationTests.PartiallyKnownComposite4.R;
+
+end VariabilityPropagationTests.PartiallyKnownComposite4;
+")})));
+    end PartiallyKnownComposite4;
+    
+        model PartiallyKnownComposite5
+        function f
+            input Integer n;
+            input Real[n] x;
+            output Real[n] y;
+          algorithm
+            y := x;
+        end f;
+        Real[4] y;
+        Real[4] z;
+      equation
+        z[1:3] = y[2:4] .+ 1;
+        y = f(4,z);
+        z[4] = 3.14;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite5",
+            description="Repeatedly partially propagated array",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite5
+ constant Real y[1] = 6.140000000000001;
+ constant Real y[2] = 5.140000000000001;
+ constant Real y[3] = 4.140000000000001;
+ constant Real y[4] = 3.14;
+ constant Real z[1] = 6.140000000000001;
+ constant Real z[2] = 5.140000000000001;
+ constant Real z[3] = 4.140000000000001;
+ constant Real z[4] = 3.14;
+end VariabilityPropagationTests.PartiallyKnownComposite5;
+")})));
+    end PartiallyKnownComposite5;
+    
+    model PartiallyKnownComposite6
+        function f
+            input Real[:] x;
+            input Integer n;
+            output Real[size(x,1)] y;
+          algorithm
+            y := x;
+        end f;
+        Real[2] y = f({1,1-time}, 3);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite6",
+            description="Test evaluation of known components in partially known composite arg. (array)",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite6
+ constant Real y[1] = 1;
+ Real y[2];
+equation
+ ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite6.f({1, 1 - time}, 3);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite6.f
+  input Real[:] x;
+  input Integer n;
+  output Real[:] y;
+ algorithm
+  size(y) := {size(x, 1)};
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite6.f;
+
+end VariabilityPropagationTests.PartiallyKnownComposite6;
+")})));
+    end PartiallyKnownComposite6;
+    
+    model PartiallyKnownComposite7
+        record R
+            Real a;
+            Real b;
+        end R;
+        function f
+            input R x;
+            input Integer n;
+            output R y;
+          algorithm
+            y := x;
+        end f;
+        R y = f(R(1,1-time), 3);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite7",
+            description="Test evaluation of known components in partially known composite arg. (record)",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite7
+ constant Real y.a = 1;
+ Real y.b;
+equation
+ (VariabilityPropagationTests.PartiallyKnownComposite7.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite7.f(VariabilityPropagationTests.PartiallyKnownComposite7.R(1, 1 - time), 3);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite7.f
+  input VariabilityPropagationTests.PartiallyKnownComposite7.R x;
+  input Integer n;
+  output VariabilityPropagationTests.PartiallyKnownComposite7.R y;
+ algorithm
+  y.a := x.a;
+  y.b := x.b;
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite7.f;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite7.R
+  Real a;
+  Real b;
+ end VariabilityPropagationTests.PartiallyKnownComposite7.R;
+
+end VariabilityPropagationTests.PartiallyKnownComposite7;
+")})));
+    end PartiallyKnownComposite7;
 
 model ConstantRecord1
 	record A
@@ -917,6 +1468,39 @@ end VariabilityPropagationTests.InitialEquation2;
 			
 ")})));
 end InitialEquation2;
+
+model InitialEquation3
+    Real x;
+    parameter Real p1 = 3;
+    Real p2 = p1;
+initial equation
+    x = p2;
+equation
+    when time > 1 then
+        x = time;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquation3",
+            description="Test no propagation of initial equations",
+            flatModel="
+fclass VariabilityPropagationTests.InitialEquation3
+ discrete Real x;
+ parameter Real p1 = 3 /* 3 */;
+ parameter Real p2;
+ discrete Boolean temp_1;
+initial equation 
+ x = p2;
+ pre(temp_1) = false;
+parameter equation
+ p2 = p1;
+equation
+ temp_1 = time > 1;
+ x = if temp_1 and not pre(temp_1) then time else pre(x);
+end VariabilityPropagationTests.InitialEquation3;
+")})));
+end InitialEquation3;
 
 model AliasVariabilities1
 	Real a,b,c,d;

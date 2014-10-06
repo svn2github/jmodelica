@@ -197,10 +197,10 @@ def linearize_dae(model):
     w0 = N.zeros(n_w)
     t0 = N.zeros(1)
 
-    dx0[:] = model.jmimodel.get_real_dx()
-    x0[:] = model.jmimodel.get_real_x()
-    u0[:] = model.jmimodel.get_real_u()
-    w0[:] = model.jmimodel.get_real_w()
+    dx0[:] = model.jmimodel.get_real_dx()*1/N.diag(sc_dx)#model.variable_scaling_factors[model._offs_real_dx.value:model._offs_real_dx.value+n_x]
+    x0[:] = model.jmimodel.get_real_x()*1/N.diag(sc_x)#model.variable_scaling_factors[model._offs_real_x.value:model._offs_real_x.value+n_x]
+    u0[:] = model.jmimodel.get_real_u()*1/N.diag(sc_u)#*model.variable_scaling_factors[model._offs_real_u.value:model._offs_real_u.value+n_u]
+    w0[:] = model.jmimodel.get_real_w()*1/N.diag(sc_w)#*model.variable_scaling_factors[model._offs_real_w.value:model._offs_real_w.value+n_w]
     t0[:] = model.jmimodel.get_t()
     t0 = t0[0]
     

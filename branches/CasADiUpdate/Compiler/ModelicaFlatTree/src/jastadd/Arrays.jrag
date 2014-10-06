@@ -789,6 +789,10 @@ aspect Arrays {
  		return type().wrapRangeSizeExp(fullCopy());
  	}
  	
+    public FExp FEndExp.makeRangeSizeExp() {
+        return type().wrapRangeSizeExp(mySize().createFExp(0));
+    }
+    
  	/**
  	 * Wrap the given expression so it is suitable for use in an expression 
  	 *        calculating the array size of a range expression.

@@ -470,7 +470,7 @@ aspect TransformCanonical {
     private BiPGraph FClass.computeMatchedDAEBiPGraph() {
         BiPGraph g = new BiPGraph();
         g.addVariables(this, VAR_TYPES_NORMAL);
-        g.addEquations(equations(), VAR_TYPES_NORMAL,"eq_", new Enumerator(1));
+        g.addEquations(equations(), VAR_TYPES_NORMAL);
         g.maximumMatching(true);
         daeUnmatchedVariables.clear();
         for (Var var : g.getUnmatchedVariables())
@@ -574,93 +574,109 @@ aspect TransformCanonical {
         } else {
             setDAEBLT(BLT.EMPTY_BLT);
         }
-
-		Enumerator enumerator = new Enumerator(1);
-		// Find matching for the initialization system
-		g.addVariables(this, VAR_TYPES_INIT);
-		g.addEquations(equations(), VAR_TYPES_INIT, "eq_", enumerator);
-		g.isInitialSystem();
-
-		// Replace when equations
-		java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
-		for (FAbstractEquation e : equations()) {
-			if (e.replacedAtInitialization()) {
-				equationsToReplace.add(e);
-			}
-		}		
-		
-		// Loop over all equations to replace
-		for (FAbstractEquation equationToReplace : equationsToReplace) {
-						
-			// How many equations are there in this when clause?
-			List<FAbstractEquation> newEquations = equationToReplace.getInitialEquations();
-		
-		    // Put the Equations in an ArrayList rather than a List
-		    // TODO: There are probably more elegant ways to do this...
-			java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation e : newEquations) {
-				newEquations_.add(e);	
-			}
-
-			 // - equationToReplace is an FAbstractEquation that should be replaced
-			 // - newEquations contains the new equations that replaces the equationToReplace
-			 // - Note that newEquations may contain several equations  
-			 
-			java.util.List<Eq> eq_list = new ArrayList<Eq>(g.getEquations(equationToReplace));
-			
-			for (Eq eqq : eq_list) {
-				g.removeEquation(eqq);	
-			}
-			
-			if (!eq_list.isEmpty())
-				g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_", new Enumerator(1));
-		}		
-	
-		log.info(g);
-		
-
-		g.addEquations(initialEquations(), VAR_TYPES_ALL, "eq_", enumerator);
-
-		g.maximumMatching(false);
+        
+        // Find matching for the initialization system
+        g.addVariables(this, VAR_TYPES_INIT);
+        g.addEquations(equations(), VAR_TYPES_INIT);
+        g.isInitialSystem();
+        
+        // Replace when equations
+        java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
+        for (FAbstractEquation e : equations()) {
+            if (e.replacedAtInitialization()) {
+                equationsToReplace.add(e);
+            }
+        }
+        
+        Map<FAbstractVariable, FAbstractEquation> prePropagationEquations = new HashMap<FAbstractVariable, FAbstractEquation>();
+        
+        // Loop over all equations to replace
+        for (FAbstractEquation equationToReplace : equationsToReplace) {
+            
+            // How many equations are there in this when clause?
+            List<FAbstractEquation> newEquations = equationToReplace.getInitialEquations();
+            
+            // Put the Equations in an ArrayList rather than a List
+            // TODO: There are probably more elegant ways to do this...
+            java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
+            for (FAbstractEquation e : newEquations) {
+                FAbstractVariable var = e.isPrePropagationEquation();
+                if (var == null)
+                    newEquations_.add(e);
+                else
+                    prePropagationEquations.put(var, e);
+            }
+            
+            // - equationToReplace is an FAbstractEquation that should be replaced
+            // - newEquations contains the new equations that replaces the equationToReplace
+            // - Note that newEquations may contain several equations
+            
+            java.util.List<Eq> eq_list = new ArrayList<Eq>(g.getEquations(equationToReplace));
+            
+            for (Eq eqq : eq_list) {
+                g.removeEquation(eqq);
+            }
+            
+            if (!eq_list.isEmpty())
+                g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName(), new Enumerator(1));
+        }
+        
+        log.info(g);
+        
+        g.addEquations(initialEquations(), VAR_TYPES_ALL);
+        
+        g.maximumMatching(false, prePropagationEquations.keySet());
         log.info("Init DAE BiPGraph");
         log.info(g);
         log.info("Init BiPGraph matching");
         log.info(g.printMatchingObj());
-
-		// Add initial equations if needed
-		if (g.getUnmatchedEquations().isEmpty() && root().options.getBooleanOption("automatic_add_initial_equations")) {
-			for (Var var : g.getUnmatchedVariables()) {	
-				FVariable fv = var.getVariable();
-				FIdUseExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
-				FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
-				FEquation fe = new FEquation(lhs, rhs);
-				addFInitialEquation(fe);
-				
-				Eq eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0, fe.variability());
-				Var v = g.getVariable(lhs.name());
-				g.addEdge(eqn,v);
-			}
-			root().flushAllRecursive();
-
+        
+        g = overdeterminedInitialSystem(g);
+        
+        // Add initial equations if needed
+        if (g.getUnmatchedEquations().isEmpty() && root().options.getBooleanOption("automatic_add_initial_equations")) {
+            for (Var var : g.getUnmatchedVariables()) {
+                FVariable fv = var.getVariable();
+                FAbstractEquation fe = prePropagationEquations.remove(fv);
+                if (fe == null && fv.isPreVariable())
+                    fe = prePropagationEquations.remove(fv.myNonPreVariable());
+                if (fe != null) {
+                    Eq eqn = g.addEquation(fe, 1, fe.variability());
+                    g.addEdge(eqn, g.getVariable(fv.name()));
+                    g.addEdge(eqn, g.getVariable(fv.myPreVariable().name()));
+                } else {
+                    FIdUseExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
+                    FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
+                    fe = new FEquation(lhs, rhs);
+                    addFInitialEquation(fe);
+                    
+                    Eq eqn = g.addEquation(fe, 0, fe.variability());
+                    Var v = g.getVariable(lhs.name());
+                    g.addEdge(eqn,v);
+                }
+            }
+            root().flushAllRecursive();
+            
             g.maximumMatching(false);
             log.info("Init DAE BiPGraph after addition of initial equations");
             log.info(g);
             log.info("Init BiPGraph matching after addition of initial equations");
             log.info(g.printMatchingObj());
-		}
-
-		for (Var var : g.getUnmatchedVariables()) {
-			daeInitUnmatchedVariables.add(var.getVariable());
-		}
-
-		for (Eq ee : g.getUnmatchedEquations()) {
-			daeInitUnmatchedEquations.add(ee.getEquation());
-		}
-		
-		// TODO: If no complete matching found, then try index reduction
-		collectErrors(ErrorCheckType.COMPILE);
-		breakOnErrors();
-		
+        }
+        
+        numIgnoredPrePropagationEquations = prePropagationEquations.size();
+        
+        for (Var var : g.getUnmatchedVariables()) {
+            daeInitUnmatchedVariables.add(var.getVariable());
+        }
+        
+        for (Eq ee : g.getUnmatchedEquations()) {
+            daeInitUnmatchedEquations.add(ee.getEquation());
+        }
+        
+        collectErrors(ErrorCheckType.COMPILE);
+        breakOnErrors();
+        
         if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
             g.tarjanReset();
             BLT daeInitBLT;
@@ -690,8 +706,15 @@ aspect TransformCanonical {
             setDAEInitBLT(BLT.EMPTY_BLT);
         }
     }
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
+    
+    syn FAbstractVariable FAbstractEquation.isPrePropagationEquation() = null;
+    eq FEquation.isPrePropagationEquation() {
+        FAbstractVariable left = getLeft().isAccess() ? getLeft().asFIdUse().myFV() : null;
+        FAbstractVariable right = getRight().isAccess() ? getRight().asFIdUse().myFV() : null;
+        return left == right ? left : null;
+    }
+    
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public void FClass.checkStructure() {
 		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
@@ -757,7 +780,7 @@ aspect TransformCanonical {
 	public void FFunctionVariable.genInitArrayStatements(List<FStatement> stmts) {}
 	
 	public void FFunctionArray.genInitArrayStatements(List<FStatement> stmts) {
-		if (size().isUnknown() && !isInput() && !isOutput()) {
+		if (size().isUnknown() && !isInput()) {
 			FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
 			stmt.shouldBeSorted = true;
 			stmts.add(stmt);
@@ -972,6 +995,8 @@ aspect TransformCanonical {
 	 */
 	public boolean FStatement.shouldBeSorted = false;
 	
+    public boolean FFunctionVariable.hasBindingAssignment = false;
+	
     public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
         if (!isInput()) {
             if (hasBindingExp()) {
@@ -979,6 +1004,7 @@ aspect TransformCanonical {
                 stmt.shouldBeSorted = true;
                 stmts.add(stmt);
                 setBindingExpOpt(new Opt());
+                hasBindingAssignment = true;
             } else if (hasFAttribute() && isRecord()) {
                 type().genBindingAssignments(stmts, getFQName().fullCopy(), getFAttributes());
             }
@@ -1464,6 +1490,7 @@ aspect TransformCanonical {
 	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy());
 	    fdv.setMeIntegrated(this);
 	    this.setMeDifferentiated(fdv);
+	    fdv = dynamicVariable(fdv);
         FAttribute ssAttr = findAttributeLocal(FAttribute.STATE_SELECT);
         if (ssAttr != null) {
             StateSelect ss = stateSelectAttribute();
@@ -1478,6 +1505,7 @@ aspect TransformCanonical {
 	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), order() + 1);
 	    fhdv.setMeIntegrated(this);
 	    this.setMeDifferentiated(fhdv);
+        fhdv = dynamicVariable(fhdv);
         FAttribute ssAttr = findAttributeLocal(FAttribute.STATE_SELECT);
         if (ssAttr != null) {
             StateSelect ss = stateSelectAttribute();
@@ -2273,6 +2301,10 @@ aspect TransformCanonical {
 		replaceMe(new FIdUseExp(tempName));
 		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
 	}
+	
+    public void FNoExp.insertTempsInLHS(FClass fClass) {
+        
+    }
 	
 	public void FIdUseExp.insertTempsInLHS(FClass fClass) {}
 	public void FArray.insertTempsInLHS(FClass fClass) {
@@ -3217,13 +3249,21 @@ aspect TransformCanonicalErrorCheck {
 		numAlgebraicContinousRealVariables() + 
 		numDifferentiatedRealVariables() + numDiscreteVariables();
 	
+    /**
+     * This field is populated by computeMatchingsAndBLT, there are some models
+     * where the initial system is defined so that pre propgation equations
+     * such as x = pre(x) can't be inserted. These equations are then ignored
+     * which must be accounted for during balance computations.
+     */
+    private int FClass.numIgnoredPrePropagationEquations = 0;
+
 	/**
 	 * The number of equations in the DAE initialization system is the 
 	 * number of scalar DAE equations plus the number of scalar initial
 	 * equations.
 	 */	
 	syn int FClass.numDAEInitEquations() = numDAEEquationsAtInitialization() + 
-        numInitialScalarEquations();
+        numInitialScalarEquations() - numIgnoredPrePropagationEquations;
 	
 	/**
 	 * The number of unknowns in the DAE initialization system is the 

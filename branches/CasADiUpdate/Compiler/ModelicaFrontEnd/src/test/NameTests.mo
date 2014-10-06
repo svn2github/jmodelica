@@ -1149,7 +1149,7 @@ model ConstantLookup18
 			description="Member of constant record, using record constructor, through inheritance and short class decl",
 			flatModel="
 fclass NameTests.ConstantLookup18
- parameter Integer b.n = 3 /* 3 */;
+ structural parameter Integer b.n = 3 /* 3 */;
  constant Real b.x[1] = 1;
  constant Real b.x[2] = 1;
  constant Real b.x[3] = 1;
@@ -1454,16 +1454,6 @@ model ConstantLookup26
 fclass NameTests.ConstantLookup26
  constant Real x[2] = {1, 2};
  Real y[2] = {1.0, 2.0};
-
-public
- record NameTests.ExtraForConstantLookup26.F.G
-  Real a;
- end NameTests.ExtraForConstantLookup26.F.G;
-
- record NameTests.ExtraForConstantLookup26.E.C
-  Real a;
- end NameTests.ExtraForConstantLookup26.E.C;
-
 end NameTests.ConstantLookup26;
 ")})));
 end ConstantLookup26;
@@ -2356,7 +2346,7 @@ fclass NameTests.ImportTest8
  Modelica.SIunits.ElectricCurrent r.p.i \"Current flowing into the pin\";
  Modelica.SIunits.ElectricPotential r.n.v \"Potential at the pin\";
  Modelica.SIunits.ElectricCurrent r.n.i \"Current flowing into the pin\";
- parameter Boolean r.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
+ structural parameter Boolean r.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
  Modelica.SIunits.Power r.LossPower \"Loss power leaving component via heatPort\";
  Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of heatPort\";
@@ -3477,7 +3467,7 @@ fclass NameTests.WhenInExtendsTest
  discrete Real b.x;
  discrete Real b.y;
  discrete Integer b.i;
- parameter Boolean b.b = false /* false */;
+ structural parameter Boolean b.b = false /* false */;
 equation
  b.i = 1;
  when initial() then

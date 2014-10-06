@@ -224,9 +224,9 @@ equation
 			description="Test of generation of connection equations.",
 			flatModel="
 fclass ConnectTests.ConnectTest5
- parameter Integer c1.n = 2 /* 2 */;
+ structural parameter Integer c1.n = 2 /* 2 */;
  Real c1.x[2];
- parameter Integer c2.n = 2 /* 2 */;
+ structural parameter Integer c2.n = 2 /* 2 */;
  Real c2.x[2];
 equation
  c1.x[1:2] = {1,2};
@@ -2505,7 +2505,7 @@ equation
 			description="",
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest1
- parameter Boolean on = false /* false */;
+ structural parameter Boolean on = false /* false */;
  Real x[1];
 end ConnectTests.ConditionalNoErrTest1;
 ")})));
@@ -2528,7 +2528,7 @@ equation
 			description="",
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest2
- parameter Boolean on = false /* false */;
+ structural parameter Boolean on = false /* false */;
  Real x[1];
 end ConnectTests.ConditionalNoErrTest2;
 ")})));
@@ -2555,7 +2555,7 @@ equation
 			description="",
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest3
- parameter Boolean on = false /* false */;
+ structural parameter Boolean on = false /* false */;
  Real x[1];
 end ConnectTests.ConditionalNoErrTest3;
 ")})));
@@ -2582,7 +2582,7 @@ equation
 			description="",
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest4
- parameter Boolean on = false /* false */;
+ structural parameter Boolean on = false /* false */;
  Real x[1];
 end ConnectTests.ConditionalNoErrTest4;
 ")})));
@@ -2605,7 +2605,7 @@ model ConditionalNoErrTest5
 			description="",
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest5
- parameter Boolean on = false /* false */;
+ structural parameter Boolean on = false /* false */;
  Real x[1];
 end ConnectTests.ConditionalNoErrTest5;
 ")})));
@@ -2660,7 +2660,7 @@ equation
             variability_propagation=false,
             flatModel="
 fclass ConnectTests.ConditionalConnectInIf1
- parameter Boolean use_x = false /* false */;
+ structural parameter Boolean use_x = false /* false */;
  Real y.c;
 equation
  y.c = 1;

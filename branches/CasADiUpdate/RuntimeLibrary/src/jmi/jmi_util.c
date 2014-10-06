@@ -277,7 +277,7 @@ jmi_real_t jmi_dround(jmi_real_t x) {
 
 jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y) {
         jmi_real_t res = fmod(x,y);
-        return (jmi_abs(res-y)<JMI_SMALL)? res-y : res;
+        return (jmi_abs(res-y)<JMI_ALMOST_EPS)? res-y : res;
 }
 
 

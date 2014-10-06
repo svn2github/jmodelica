@@ -1015,10 +1015,46 @@ aspect FlatAPI {
     eq FFunctionCallEquation.numScalarEquations() {
         int res = 0;
         for (FFunctionCallLeft l : getLefts())
-            if (l.hasFExp())
-                res += l.getFExp().type().numScalarElements();
-         return res;
+            res += l.numScalarElements();
+        return res;
     }
+    
+    syn int FFunctionCallLeft.numScalarElements() {
+        int res = 0;
+        if (hasFExp()) {
+            for (FExp exp : flatChildFExps()) {
+                res += exp.numScalarElements();
+            }
+        }
+        return res;
+    }
+    
+    syn int FExp.numScalarElements() = type().numScalarElements();
+    eq FNoExp.numScalarElements() = 0;
+    
+    public Iterable<FExp> FFunctionCallLeft.flatChildFExps() {
+        ArrayList<FExp> res = new ArrayList<FExp>();
+        getFExp().flatChildFExps(res);
+        return res;
+    }
+    
+    public void FExp.flatChildFExps(ArrayList<FExp> res) {
+        res.add(this);
+    }
+    
+    public void FArray.flatChildFExps(ArrayList<FExp> res) {
+        for (FExp exp : getFExps()) {
+            exp.flatChildFExps(res);
+        }
+    }
+    
+    public void FRecordConstructor.flatChildFExps(ArrayList<FExp> res) {
+        for (FExp exp : getArgs()) {
+            exp.flatChildFExps(res);
+        }
+    }
+    
+    
 
     protected static int FAbstractEquation.numForElems(List<? extends CommonForIndex> list) {
         int res = 1;
@@ -1588,6 +1624,20 @@ aspect FlatAPI {
         return fv;
     }
     
+    public class FAbstractVariable {
+        /**
+         * This method takes a variable and adds it to the tree. This is done by
+         * settings its parent to the same parent as this node.
+         * 
+         * This is a hack, and should be avoided, however this is necessary
+         * evil in order to reduce memory consumption. If used correctly, it
+         * shouldn't cause any problems.
+         */
+        public <V extends FAbstractVariable> V dynamicVariable(V var) {
+            var.parent = this.parent;
+            return var;
+        }
+    }
 }
 
 aspect ReferencedVariables {

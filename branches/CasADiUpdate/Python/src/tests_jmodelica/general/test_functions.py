@@ -156,3 +156,26 @@ class TestUnkRecArray(SimulationTest):
         Test that results match the expected ones.
         """
         self.assert_end_value('c[2,3].x[2].y[1]', -6)
+
+
+class TestLoadResource(SimulationTest):
+    """
+    Test of load resource function
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.LoadResource1', options={'inline_functions':'none', 'variability_propagation':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
+        self.run()
+        
+    @testattr(stddist = True)
+    def test_constantEvaluation(self):
+        """
+        Test that constant evaluated load resource compiles
+        """
+        

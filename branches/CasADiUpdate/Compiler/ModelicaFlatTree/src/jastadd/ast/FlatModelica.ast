@@ -1078,10 +1078,15 @@ FIdTempExp : FIdUseExp;
 InstDerExp : FUnaryExp; 
 
 /**
+ * Abstract super class for all der related expressions.
+ */
+
+abstract FAbstractDerExp : FIdUseExp; 
+/**
  * The built-in function der.
  */
 
-FDerExp : FIdUseExp; 
+FDerExp : FAbstractDerExp; 
 
 /**
  * Pre built-in function in the instance tree.
@@ -1096,7 +1101,7 @@ FPreExp : FIdUseExp;
 /**
  * The built-in function der converted into a dummy derivative.
  */
-FDummyDerExp : FIdUseExp; 
+FDummyDerExp : FAbstractDerExp; 
 
 /**
  * Higher order derivatives occurring as a result of index reduction.

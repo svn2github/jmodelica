@@ -218,8 +218,8 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 			description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest7
- parameter Integer p1 = 2 /* 2 */;
- parameter Integer p2 = 2 /* 2 */;
+ structural parameter Integer p1 = 2 /* 2 */;
+ structural parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
  constant Real y = 2;
  constant Real x[2] = 2;
@@ -1582,6 +1582,73 @@ At line 0, column 0:
 ")})));
 end AliasStateSelect2;
 
+model AliasStateSelect3
+    Real x(stateSelect=StateSelect.avoid) = time;
+    Real y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect3",
+            description="Test selection of system variables with state select",
+            flatModel="
+fclass TransformCanonicalTests.AliasStateSelect3
+ Real x(stateSelect = StateSelect.avoid);
+equation
+ x = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end TransformCanonicalTests.AliasStateSelect3;
+")})));
+end AliasStateSelect3;
+
+model AliasStateSelect4
+    model T = Real(stateSelect=StateSelect.avoid);
+    T x = time;
+    Real y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect4",
+            description="Test selection of system variables with state select",
+            flatModel="
+fclass TransformCanonicalTests.AliasStateSelect4
+ TransformCanonicalTests.AliasStateSelect4.T x;
+equation
+ x = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type TransformCanonicalTests.AliasStateSelect4.T = Real(stateSelect = StateSelect.avoid);
+end TransformCanonicalTests.AliasStateSelect4;
+")})));
+end AliasStateSelect4;
+
+model AliasStateSelect5
+    model T = Real(stateSelect=StateSelect.prefer);
+    Real x(stateSelect=StateSelect.avoid) = time;
+    T y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect5",
+            description="Test selection of system variables with state select",
+            flatModel="
+fclass TransformCanonicalTests.AliasStateSelect5
+ Real x(stateSelect = StateSelect.avoid);
+equation
+ x = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type TransformCanonicalTests.AliasStateSelect5.T = Real(stateSelect = StateSelect.prefer);
+end TransformCanonicalTests.AliasStateSelect5;
+")})));
+end AliasStateSelect5;
+
 
 model ParameterBindingExpTest3_Warn
 
@@ -2325,10 +2392,10 @@ initial equation
  m.pre(x1) = 1;
  m.pre(b1) = false;
  m.pre(i1) = 4;
- m.pre(x2) = 2;
  m.t = 0;
  m.pre(ub1) = false;
  m.pre(ui1) = 0;
+ m.pre(x2) = 2;
  pre(temp_1) = false;
 equation
  m.der(t) = 1;
@@ -2406,7 +2473,7 @@ equation
 			state_initial_equations=true,
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest16
- parameter Boolean a = false /* false */;
+ structural parameter Boolean a = false /* false */;
  constant Real b(start = 1) = 1;
 end TransformCanonicalTests.InitialEqTest16;
 ")})));
@@ -2604,7 +2671,7 @@ model UnbalancedInitTest1
 	parameter Real x(fixed=false);
 	parameter Real y(fixed=false);
 initial equation
-	x = 0;
+	x = 1;
 	x = x * 3.14;
 	
 	annotation(__JModelica(UnitTesting(tests={
@@ -2774,12 +2841,12 @@ fclass TransformCanonicalTests.WhenEqu1
  discrete Boolean temp_6;
  discrete Boolean temp_7;
 initial equation 
- pre(x[1]) = 0.0;
- pre(x[2]) = 0.0;
- pre(x[3]) = 0.0;
  z[1] = 0.0;
  z[2] = 0.0;
  z[3] = 0.0;
+ pre(x[1]) = 0.0;
+ pre(x[2]) = 0.0;
+ pre(x[3]) = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
@@ -2847,12 +2914,12 @@ fclass TransformCanonicalTests.WhenEqu2
  discrete Boolean temp_3;
  discrete Boolean temp_4;
 initial equation 
+ xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- xx = 2;
  pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
@@ -2916,12 +2983,12 @@ fclass TransformCanonicalTests.WhenEqu3
  discrete Boolean temp_2;
  discrete Boolean temp_3;
 initial equation 
+ xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- xx = 2;
  pre(b1) = false;
  pre(temp_1) = false;
  pre(temp_2) = false;
@@ -2974,11 +3041,11 @@ fclass TransformCanonicalTests.WhenEqu4
  discrete Boolean temp_1;
  discrete Boolean temp_2;
 initial equation 
+ t = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(z) = 0.0;
  pre(v) = 0.0;
- t = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
 equation
@@ -3067,10 +3134,10 @@ fclass TransformCanonicalTests.WhenEqu5
  discrete Boolean h1;
  discrete Boolean h2;
 initial equation 
- pre(z) = false;
- pre(y) = false;
  x = 1;
  pre(a) = 1.0;
+ pre(z) = false;
+ pre(y) = false;
  pre(h1) = false;
  pre(h2) = false;
 equation
@@ -3106,8 +3173,8 @@ fclass TransformCanonicalTests.WhenEqu7
  Real dummy;
  discrete Boolean temp_1;
 initial equation 
- pre(x) = 0;
  dummy = 0.0;
+ pre(x) = 0;
  pre(temp_1) = false;
 equation
  der(dummy) = 0;
@@ -3144,9 +3211,9 @@ fclass TransformCanonicalTests.WhenEqu8
  discrete Boolean temp_1;
  discrete Boolean temp_2;
 initial equation 
+ dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
- dummy = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
 equation
@@ -3193,9 +3260,9 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real h = 0.05 /* 0.05 */;
  discrete Boolean temp_1;
 initial equation 
- pre(u) = 0.0;
  x = 0.0;
  pre(I) = 0.0;
+ pre(u) = 0.0;
  pre(temp_1) = false;
 equation
  der(x) = - x + u;
@@ -3314,9 +3381,9 @@ fclass TransformCanonicalTests.WhenEqu11
  discrete Boolean atInit;
 initial equation 
  x_c = pre(x_c);
- pre(u_c) = 0.0;
  x_p = 1;
  pre(sampleTrigger) = false;
+ pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
@@ -3429,8 +3496,8 @@ initial equation
  v3 = 0;
  v4 = 1;
  pre(y) = 1;
- pre(up) = true;
  pre(i) = 0;
+ pre(up) = true;
  pre(temp_1) = false;
 equation
  temp_1 = sample(0.1, 1);
@@ -3445,6 +3512,36 @@ end TransformCanonicalTests.WhenEqu13;
 			
 ")})));		
 end WhenEqu13;
+model WhenEqu14
+    Boolean a;
+initial equation
+    pre(a) = false;
+    a = if time > 1 then true else false;
+equation
+    when time > 2 then
+        a = true;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="WhenEqu14",
+            description="Test of when equation and initial equation assigning to pre variable",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Solved equation ---
+temp_1 := time > 2
+
+--- Solved equation ---
+pre(a) := false
+
+--- Solved equation ---
+a := if time > 1 then true else false
+
+--- Solved equation ---
+pre(temp_1) := false
+-------------------------------
+")})));
+end WhenEqu14;
 
 model IfEqu1
 	Real x[3];
@@ -3653,8 +3750,8 @@ fclass TransformCanonicalTests.IfEqu8
  constant Real x[1] = 4;
  constant Real x[2] = 5;
  constant Real x[3] = 6;
- parameter Boolean y[1] = false /* false */;
- parameter Boolean y[2] = true /* true */;
+ structural parameter Boolean y[1] = false /* false */;
+ structural parameter Boolean y[2] = true /* true */;
 end TransformCanonicalTests.IfEqu8;
 ")})));
 end IfEqu8;
@@ -3947,7 +4044,7 @@ end TransformCanonicalTests.IfEqu16;
 fclass TransformCanonicalTests.IfEqu17
  constant Real y1 = 1;
  constant Real y2 = 2;
- parameter Boolean p = false /* false */;
+ structural parameter Boolean p = false /* false */;
 end TransformCanonicalTests.IfEqu17;
 ")})));
   end IfEqu17;
@@ -4093,7 +4190,7 @@ model IfEqu22
       flatModel="
 fclass TransformCanonicalTests.IfEqu22
  constant Boolean b = true;
- parameter Integer nX = 2 /* 2 */;
+ structural parameter Integer nX = 2 /* 2 */;
  Real x[1];
  Real x[2];
 equation
@@ -4209,7 +4306,7 @@ equation
 			description="Check correct elimination of if equation branches.",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu24
- parameter Boolean use_delay = false /* false */;
+ structural parameter Boolean use_delay = false /* false */;
  Real x1(start = 1);
  Real x2(start = 1);
 initial equation 
@@ -5495,8 +5592,8 @@ model StringFuncTest
 			description="Test that string parameters and string parameters goes through front-end.",
 			flatModel="
 fclass TransformCanonicalTests.StringFuncTest
- parameter String p1 = \"a\" /* \"a\" */;
- parameter String p2 = \"a\" /* \"a\" */;
+ structural parameter String p1 = \"a\" /* \"a\" */;
+ structural parameter String p2 = \"a\" /* \"a\" */;
 end TransformCanonicalTests.StringFuncTest;
 ")})));
 

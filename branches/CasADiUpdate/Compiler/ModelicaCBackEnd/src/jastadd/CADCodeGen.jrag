@@ -1144,7 +1144,7 @@ aspect CADCodeGen {
     public void FEquation.genBlock_CAD(String indent, CodeStream str, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         FVariable v = forVariables.iterator().next();
-        FExp solution = solution(v.name());
+        FExp solution = solution(v);
         if(v.shouldBeDifferentiated()){
             printer_CAD.printPreSteps(solution, str, indent);
             str.print(indent + v.name_C() + " = ");
@@ -2279,6 +2279,9 @@ aspect CADCodeGen {
     public void FExp.genWriteBack_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
         throw new UnsupportedOperationException();
     }
+    public void FNoExp.genWriteBack_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+        
+    }
     public void FIdUseExp.genWriteBack_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices.size() == 0 || forIndices.contains(index)) {
@@ -2304,6 +2307,9 @@ aspect CADCodeGen {
      */
     public void FExp.genWriteBack_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
         throw new UnsupportedOperationException();
+    }
+    public void FNoExp.genWriteBack_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+        
     }
     public void FIdUseExp.genWriteBack_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
@@ -2404,18 +2410,6 @@ aspect CADCodeGen {
             str.print(";\n");
         }
     }
-
-	public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
-		// I know that myFV is an ffunctionvariable
-        FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
-		FType type = fv.type();
-		fv.setDummyExp();
-		FExp bindingExp = fv.getBindingExp();
-		type.printInit_C(p, str, indent, fv.varName_CAD(), bindingExp);
-		type.printInit_C(p, str, indent, fv.derName_CAD(), bindingExp);
-		fv.resetDummyExp();
-	}
-
 	
 	/*-------------------------------------------------------------------------
 	 * END CAD code for statements
@@ -2554,10 +2548,11 @@ aspect CADCodeGen {
             genReturnStmt_CAD(p, str, indent);
         } else {
             genVarDecls_CAD(p, str, indent);
-            for (FFunctionVariable ffv : myNonInputs())
-                p.print(ffv, str, indent);
-            for (FFunctionVariable ffv : myOutputs())
-                ffv.printNullOutputReplacement_CAD(p, str, indent);
+            for (FFunctionVariable ffv : myNonInputs()) {
+                if (!ffv.hasInitArrayStmt) {
+                    p.print(ffv, str, indent);
+                }
+            }
             p.print(getFAlgorithm(), str, indent);
         }
         str.print(outerIndent + "}\n\n");
@@ -2569,31 +2564,17 @@ aspect CADCodeGen {
 		str.print(indent + "return;\n");
 	}
 	
-	public void FFunctionArray.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
-		if (!isOutput()) {
-            TypePrinter_C ip = p.createInitPrinter(str);
-            print(ip, varName_CAD(), indent);
-            print(ip, derName_CAD(), indent);
-		}
-	}
-	
-	public void FFunctionVariable.printNullOutputReplacement_CAD(CodePrinter p, CodeStream str, String indent) {
-		if (isComposite()) {
-		    String next = p.indent(indent);
-            TypePrinter_C ip = p.createInitPrinter(str);
-			String name_var_CAD = varName_CAD();
-			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
-			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
-            print(ip, name_var_r, next);
-			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
-			str.print(indent + "}\n");
-			String name_der_CAD = derName_CAD();
-			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
-			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
-            print(ip, name_der_r, next);
-			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
-			str.print(indent + "}\n");
-		}
+	public void FFunctionVariable.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite()) {
+            if (isOutput()) {
+                prettyPrintInitOutput_C(p, str, indent, varName_CAD());
+                prettyPrintInitOutput_C(p, str, indent, derName_CAD());
+            } else {
+                TypePrinter_C ip = p.createInitPrinter(str);
+                print(ip, varName_CAD(), indent);
+                print(ip, derName_CAD(), indent);
+            }
+        }
 	}
 
 

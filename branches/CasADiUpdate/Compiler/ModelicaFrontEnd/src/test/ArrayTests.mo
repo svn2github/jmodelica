@@ -67,7 +67,7 @@ end ArrayTests.General.ArrayTest1;
 			description="Flattening of arrays.",
 			flatModel=" 
 fclass ArrayTests.General.ArrayTest1b
- parameter Integer n = 2 /* 2 */;
+ structural parameter Integer n = 2 /* 2 */;
  Real x[2];
 equation 
  x[1] = 3;
@@ -243,9 +243,9 @@ end ArrayTests.General.ArrayTest7;
 			description="Test flattening of variables with sizes given in modifications",
 			flatModel="
 fclass ArrayTests.General.ArrayTest8
- parameter Integer m[1].n = 1 /* 1 */;
+ structural parameter Integer m[1].n = 1 /* 1 */;
  Real m[1].x[1] = ones(1);
- parameter Integer m[2].n = 2 /* 2 */;
+ structural parameter Integer m[2].n = 2 /* 2 */;
  Real m[2].x[2] = ones(2);
 
 end ArrayTests.General.ArrayTest8;
@@ -270,23 +270,23 @@ end ArrayTests.General.ArrayTest8;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest9
- parameter Integer nn.n2 = 2 /* 2 */;
- parameter Integer nn.m[1,1].n1 = 2 /* 2 */;
+ structural parameter Integer nn.n2 = 2 /* 2 */;
+ structural parameter Integer nn.m[1,1].n1 = 2 /* 2 */;
  constant Real nn.m[1,1].x[1] = 1;
  constant Real nn.m[1,1].x[2] = 1;
- parameter Integer nn.m[1,2].n1 = 2 /* 2 */;
+ structural parameter Integer nn.m[1,2].n1 = 2 /* 2 */;
  constant Real nn.m[1,2].x[1] = 1;
  constant Real nn.m[1,2].x[2] = 1;
- parameter Integer nn.m[1,3].n1 = 2 /* 2 */;
+ structural parameter Integer nn.m[1,3].n1 = 2 /* 2 */;
  constant Real nn.m[1,3].x[1] = 1;
  constant Real nn.m[1,3].x[2] = 1;
- parameter Integer nn.m[2,1].n1 = 2 /* 2 */;
+ structural parameter Integer nn.m[2,1].n1 = 2 /* 2 */;
  constant Real nn.m[2,1].x[1] = 1;
  constant Real nn.m[2,1].x[2] = 1;
- parameter Integer nn.m[2,2].n1 = 2 /* 2 */;
+ structural parameter Integer nn.m[2,2].n1 = 2 /* 2 */;
  constant Real nn.m[2,2].x[1] = 1;
  constant Real nn.m[2,2].x[2] = 1;
- parameter Integer nn.m[2,3].n1 = 2 /* 2 */;
+ structural parameter Integer nn.m[2,3].n1 = 2 /* 2 */;
  constant Real nn.m[2,3].x[1] = 1;
  constant Real nn.m[2,3].x[2] = 1;
 end ArrayTests.General.ArrayTest9;
@@ -335,7 +335,7 @@ end ArrayTests.General.ArrayTest95;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest10
- parameter Integer n = 0 /* 0 */;
+ structural parameter Integer n = 0 /* 0 */;
 end ArrayTests.General.ArrayTest10;
 ")})));
    end ArrayTest10;
@@ -413,7 +413,7 @@ end ArrayTests.General.ArrayTest12;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest13
- parameter Integer c.n = 2 /* 2 */;
+ structural parameter Integer c.n = 2 /* 2 */;
  parameter Integer cv[1].n = 2 /* 2 */;
  parameter Integer cv[2].n = 2 /* 2 */;
 
@@ -1032,7 +1032,7 @@ model ArrayTest38
 			description="Modification on variable in zero-size component array",
 			flatModel="
 fclass ArrayTests.General.ArrayTest38
- parameter Integer n = 0 /* 0 */;
+ structural parameter Integer n = 0 /* 0 */;
 end ArrayTests.General.ArrayTest38;
 ")})));
 end ArrayTest38;
@@ -1060,7 +1060,7 @@ model ArrayTest39
             description="Initial equation for size zero array",
             flatModel="
 fclass ArrayTests.General.ArrayTest39
- parameter Integer n = 0 /* 0 */;
+ structural parameter Integer n = 0 /* 0 */;
  parameter Real p = 1 /* 1 */;
 end ArrayTests.General.ArrayTest39;
 ")})));
@@ -1086,7 +1086,7 @@ model ArrayTest40
             description="Start value for size zero array",
             flatModel="
 fclass ArrayTests.General.ArrayTest40
- parameter Integer n = 0 /* 0 */;
+ structural parameter Integer n = 0 /* 0 */;
  parameter Real p = 1 /* 1 */;
 end ArrayTests.General.ArrayTest40;
 ")})));
@@ -1599,7 +1599,7 @@ model MixedTypes1
             description="Test subscripting with bools.",
             flatModel="
 fclass ArrayTests.Subscripts.MixedTypes1
- parameter Integer maxQuality = 1 /* 1 */;
+ structural parameter Integer maxQuality = 1 /* 1 */;
  constant Integer stock[1,1,1,1] = 1;
  constant Integer stock[1,1,1,2] = 0;
  constant Integer stock[1,1,2,1] = 2;
@@ -5371,17 +5371,17 @@ equation
 			description="Empty arrays, simple equation system",
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
- parameter Integer n = 0 /* 0 */;
- parameter Integer p = 2 /* 2 */;
- parameter Integer q = 2 /* 2 */;
+ structural parameter Integer n = 0 /* 0 */;
+ structural parameter Integer p = 2 /* 2 */;
+ structural parameter Integer q = 2 /* 2 */;
  input Real u[1];
  input Real u[2];
  Real y[1];
  Real y[2];
- parameter Real D[1,1] = 1 /* 1 */;
- parameter Real D[1,2] = 2 /* 2 */;
- parameter Real D[2,1] = 2 /* 2 */;
- parameter Real D[2,2] = 4 /* 4 */;
+ structural parameter Real D[1,1] = 1 /* 1 */;
+ structural parameter Real D[1,2] = 2 /* 2 */;
+ structural parameter Real D[2,1] = 2 /* 2 */;
+ structural parameter Real D[2,2] = 4 /* 4 */;
 equation
  y[1] = u[1] + 2.0 * u[2];
  y[2] = 2.0 * u[1] + 4.0 * u[2];
@@ -5758,9 +5758,10 @@ equation
 public
  function ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f
   input Integer a;
-  output Real[max(integer(a / 2 - 1) + 1, 0)] x;
+  output Real[:] x;
   Real[:] temp_1;
  algorithm
+  size(x) := {max(integer(a / 2 - 1) + 1, 0)};
   size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
   for i2 in 1:max(integer(a / 2 - 1) + 1, 0) loop
    temp_1[i2] := i2 ^ 2;
@@ -5831,10 +5832,10 @@ model ForEquation2
 			description="",
 			flatModel="
 fclass ArrayTests.For.ForEquation2
- parameter Integer a.N = 3 /* 3 */;
- parameter Integer a.rev[1] = 3 /* 3 */;
- parameter Integer a.rev[2] = 2 /* 2 */;
- parameter Integer a.rev[3] = 1 /* 1 */;
+ structural parameter Integer a.N = 3 /* 3 */;
+ structural parameter Integer a.rev[1] = 3 /* 3 */;
+ structural parameter Integer a.rev[2] = 2 /* 2 */;
+ structural parameter Integer a.rev[3] = 1 /* 1 */;
  constant Real a.x[1] = 1;
  constant Real a.x[2] = 2;
  constant Real a.x[3] = 3;
@@ -5866,7 +5867,7 @@ equation
 			description="Array expressions depending on for loop index",
 			flatModel="
 fclass ArrayTests.For.ForEquation3
- parameter Integer n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
  constant Real x[1] = 2.0;
  constant Real x[2] = 4.0;
  constant Real x[3] = 7.0;
@@ -5889,7 +5890,7 @@ equation
 			description="",
 			flatModel="
 fclass ArrayTests.For.ForEquation4
- parameter Integer N = 3 /* 3 */;
+ structural parameter Integer N = 3 /* 3 */;
  Real x[1];
  Real x[2];
  Real x[3];
@@ -5950,7 +5951,7 @@ equation
 			description="For equation in initial equation block",
 			flatModel="
 fclass ArrayTests.For.ForInitial1
- parameter Integer N = 3 /* 3 */;
+ structural parameter Integer N = 3 /* 3 */;
  Real x[1];
  Real x[2];
  Real x[3];
@@ -5985,7 +5986,7 @@ equation
 			description="Check that for indices aren't converted to structural parameters",
 			flatModel="
 fclass ArrayTests.For.ForStructural1
- parameter Boolean p[2] = {true, false} /* { true, false } */;
+ structural parameter Boolean p[2] = {true, false} /* { true, false } */;
  Real x[2];
 equation
  for i in 1:2 loop
@@ -6256,7 +6257,7 @@ model EmptySlice1
 			description="Slice in empty array of components",
 			flatModel="
 fclass ArrayTests.Slices.EmptySlice1
- parameter Integer n = 0 /* 0 */;
+ structural parameter Integer n = 0 /* 0 */;
  Real y[0] = a[1:0].x;
 end ArrayTests.Slices.EmptySlice1;
 ")})));
@@ -6917,7 +6918,7 @@ equation
 			description="Handle end in for loop",
 			flatModel="
 fclass ArrayTests.Other.ArraySize3
- parameter Integer n = 2 /* 2 */;
+ structural parameter Integer n = 2 /* 2 */;
  constant Real b[1].x[1] = 1;
  constant Real b[1].x[2] = 2;
  constant Real b[2].x[1] = 1;
@@ -6965,10 +6966,10 @@ equation
 			description="Test that array size errors lock if branches if possible",
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf1
- parameter Boolean a = false /* false */;
- parameter Integer b = 5 /* 5 */;
- parameter Integer c = 2 /* 2 */;
- parameter Integer d = 1 /* 1 */;
+ structural parameter Boolean a = false /* false */;
+ structural parameter Integer b = 5 /* 5 */;
+ structural parameter Integer c = 2 /* 2 */;
+ structural parameter Integer d = 1 /* 1 */;
  constant Real e[1] = 1;
  constant Real e[2] = 2;
  constant Real f[1] = 1;
@@ -7059,10 +7060,10 @@ equation
 			description="Test that array size errors lock if branches if possible",
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf3
- parameter Boolean a = true /* true */;
- parameter Integer b = 5 /* 5 */;
- parameter Integer c = 5 /* 5 */;
- parameter Integer d = 0 /* 0 */;
+ structural parameter Boolean a = true /* true */;
+ structural parameter Integer b = 5 /* 5 */;
+ structural parameter Integer c = 5 /* 5 */;
+ structural parameter Integer d = 0 /* 0 */;
  constant Real e[1] = 1;
  constant Real e[2] = 2;
  constant Real e[3] = 3;

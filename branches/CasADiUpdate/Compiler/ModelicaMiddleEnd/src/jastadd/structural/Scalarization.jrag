@@ -1345,6 +1345,10 @@ aspect Scalarization {
         }
     }
     
+    public void FSizeExp.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        
+    }
+    
     /**
      * Create clauses for and replace this known size expression with a temp variable.
      * Used in both functions and equations.
@@ -3018,7 +3022,7 @@ aspect Scalarization {
 	public FExp FSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
 		// Only the form with dim can be in the tree at this point
 		FExp exp = getFExp();
-		if (exp instanceof FIdUseExp && exp.size().isUnknown())
+		if (exp instanceof FIdUseExp && exp.size().isUnknown() && !((FIdUseExp)exp).hasFArraySubscripts())
 			return fullCopy();
 		else
 			return dynamicFExp(getFExp().size().createFExp(dimension())).scalarize(indexMap);

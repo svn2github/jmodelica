@@ -2143,7 +2143,7 @@ end FunctionInlining.IfEquationInline1;
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline2
- parameter Boolean b = true /* true */;
+ structural parameter Boolean b = true /* true */;
  Real y;
 equation
  y = 1;
@@ -2180,7 +2180,7 @@ end FunctionInlining.IfEquationInline2;
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline3
- parameter Boolean b = false /* false */;
+ structural parameter Boolean b = false /* false */;
  Real x;
  Real y;
 equation
