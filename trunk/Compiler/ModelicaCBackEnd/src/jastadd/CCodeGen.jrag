@@ -2589,7 +2589,7 @@ aspect CCodeGen {
             if (writeback)
                 str.formatln("%s%s = %s;", indent, src, tempName);
             else
-                str.formatln("%s%s = (%s)%s;", indent, tempName, argType_C(false), src);
+                type().printAssignExt_C(p, str, indent, tempName, src);
         }
     }
     
@@ -3699,6 +3699,7 @@ aspect CCodeGen {
         str.print(";\n");
     }
     
+    @Override
     public void FStringType.printAssign_C(CodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
         str.print(indent);
         str.print("JMI_ASG(STR, ");
@@ -3706,6 +3707,15 @@ aspect CCodeGen {
         str.print(", ");
         p.print(src, str, indent);
         str.print(")\n");
+    }
+    
+    public void FType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src) {
+        str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(false), src);
+    }
+    
+    @Override
+    public void FStringType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src) {
+        str.formatln("%sJMI_ASG(STR, %s, %s)", indent, dst, src);
     }
     
     public void FType.printReturn_C(CodeStream str, String indent, String dst, String src, boolean set) {

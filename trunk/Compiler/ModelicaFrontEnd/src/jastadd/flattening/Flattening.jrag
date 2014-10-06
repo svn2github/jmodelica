@@ -561,6 +561,8 @@ aspect Flattening {
     public void InstAssignable.addExternalArg(List<FExp> args, boolean flat) {
         FIdUseExp use = flat ? new FIdUseExp(name()) : new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
 		args.add(use);
+        if (variability().knownParameterOrLess())
+            functionConstantList().add(this);
 		for (int i = 0; i < ndims(); i++)
 			args.add(new FSizeExp(use.fullCopy(), new Opt(new FIntegerLitExp(i + 1))));
 	}
@@ -1682,7 +1684,7 @@ aspect FlatExpressions {
         InstAccess ia = iae.getInstAccess();
         if (variability().knownParameterOrLess()) {
             try {
-                if (!size().isEmpty()) {
+                if (!size().isEmpty() && iae.canInlineConstant()) {
                     // Check if we have non-constant array subscripts
                     if (ia.hasUnknownIndices()) {
                         // If this is a package constant, then the variable will not be available in the flattened model 
@@ -1709,6 +1711,10 @@ aspect FlatExpressions {
         }
         return super.flattenAccess(prefix, iae);
 	}
+	
+    inh boolean FInstAccessExp.canInlineConstant();
+    eq BaseNode.getChild().canInlineConstant() = true;
+    eq InstExternalCall.getArg().canInlineConstant() = false;
 	
 	/**
 	 * Flatten an access to this constant in a function.

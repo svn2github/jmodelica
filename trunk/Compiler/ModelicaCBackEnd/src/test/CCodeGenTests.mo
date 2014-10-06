@@ -5802,6 +5802,81 @@ jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp0() {
 ")})));
 end ExternalLiteral3;
 
+model ExternalConstant1
+    function f1
+        input Real x;
+        output Real y;
+        constant Real c = 3;
+        constant Real[1] d = {3};
+        external "C" y = f(x,c,d);
+    end f1;
+    function f2
+        input Real x;
+        output Real y;
+        constant Real c = 3;
+        constant Real[1] d = {3};
+        external "C";
+    end f2;
+    
+    Real y = f1(time) + f2(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ExternalConstant1",
+            description="Constants in external calls",
+            variability_propagation=false,
+            template="
+$C_function_headers$
+$C_functions$
+",
+            generatedCode="
+void func_CCodeGenTests_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f1_exp0(jmi_ad_var_t x_v);
+void func_CCodeGenTests_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f2_exp1(jmi_ad_var_t x_v);
+
+void func_CCodeGenTests_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
+    jmi_ad_var_t y_v;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
+    c_v = 3;
+    jmi_array_ref_1(d_a, 1) = 3;
+    y_v = f(x_v, c_v, d_a->var);
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f1_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_ExternalConstant1_f1_def0(x_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
+    jmi_ad_var_t y_v;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
+    c_v = 3;
+    jmi_array_ref_1(d_a, 1) = 3;
+    y_v = f2(x_v, c_v, d_a->var, jmi_array_size(d_a, 0));
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f2_exp1(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_ExternalConstant1_f2_def1(x_v, &y_v);
+    return y_v;
+}
+")})));
+end ExternalConstant1;
+
 model IntegerInFunc1
 	function f
 		input Integer i;
@@ -12351,8 +12426,8 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
     }
-    tmp_1 = (char*)\"N\";
-    tmp_2 = (char*)\"V\";
+    JMI_ASG(STR, tmp_1, \"N\")
+    JMI_ASG(STR, tmp_2, \"V\")
     tmp_3 = (int)n_v;
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
