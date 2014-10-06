@@ -2889,54 +2889,6 @@ aspect IfEquations {
 
 }
 
-aspect NonFixedParametersPropagation {
-	public class FClass {
-		/**
-		 * Propagate non-fixed parameters.
-		 * 
-		 * This transformation sets a parameter to fixed=false if it depends on
-		 * a parameter with fixed=false.
-		 */
-		public class propagateNonFixedParameters extends Transformation {
-			public void perform() {
-				Set<FAbstractEquation> newInitEqns = new LinkedHashSet<FAbstractEquation>();
-				Stack<FVariable> s = new Stack<FVariable>();
-				
-				// Add all parameters that depend on a non-fixed parameter
-				for (FVariable v : nonFixedParameters())
-					s.addAll(v.dependentParameters());
-				
-				// Go through all variables that depend on a parameter with fixed=false and do:
-				// - Add parameter equation to list of new initial equations
-				// - Add dependent variables to the stack
-				// - Set fixed=false
-				while (!s.empty()) {
-					FVariable fv = s.pop();
-					boolean visited = !newInitEqns.add(fv.parameterEquation());
-					if (visited)
-						continue;
-					s.addAll(fv.dependentParameters());
-					fv.setFixedAttribute(false);
-				}
-				
-				// Construct new parameter equation list and add all but the new initial equations
-				List<FAbstractEquation> newParameterEqns = new List<FAbstractEquation>();
-				for (FAbstractEquation eqn : getFParameterEquationList())
-					if (!newInitEqns.contains(eqn))
-						newParameterEqns.add(eqn);
-				setFParameterEquationList(newParameterEqns);
-				
-				// Add new initial equations to list of initial equations
-				getFInitialEquations().addAll(newInitEqns);
-				
-				// Flush tree if change has been made
-				if (!newInitEqns.isEmpty())
-					root().flushAllRecursive();
-			}
-		}
-	}
-}
-
 aspect ParameterSorting {
 
 	/**

@@ -1273,10 +1273,13 @@ aspect FlatAPI {
     */
     
     inh Set<FVariable> FExp.boundParameters();
-    eq FVariable.getBindingExp().boundParameters() = Collections.singleton(this);
-    eq Root.getChild().boundParameters()           = Collections.emptySet();
+    eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
+    eq Root.getChild().boundParameters()                 = Collections.emptySet();
+    eq FEquation.getRight().boundParameters()            = boundParameters();
+    eq FFunctionCallEquation.getCall().boundParameters() = boundParameters();
 
-    eq FEquation.getRight().boundParameters() {
+    syn Set<FVariable> FAbstractEquation.boundParameters() = Collections.emptySet();
+    eq FEquation.boundParameters() {
         if (isParameterEquation()) {
             return getLeft().referencedParametersInFExp();
         } else {
@@ -1284,7 +1287,7 @@ aspect FlatAPI {
         }
     }
         
-    eq FFunctionCallEquation.getCall().boundParameters() { 
+    eq FFunctionCallEquation.boundParameters() { 
         if (isParameterEquation()) { 
             return referencedParametersInLHS(); 
         } else {
