@@ -856,6 +856,74 @@ end FunctionTests.FunctionFlatten17;
 ")})));
 end FunctionFlatten17;
 
+model FunctionFlatten18
+    function f
+        input Real x[:];
+        output Real y;
+    algorithm
+        y := size(x[:],1);
+    end f;
+    
+    Real z = f({1, 2, 3} * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten18",
+            description="Scalarization of size exp containing unknown subscripts",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.FunctionFlatten18
+ Real z;
+equation
+ z = FunctionTests.FunctionFlatten18.f({time, 2 * time, 3 * time});
+
+public
+ function FunctionTests.FunctionFlatten18.f
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := size(x, 1);
+  return;
+ end FunctionTests.FunctionFlatten18.f;
+
+end FunctionTests.FunctionFlatten18;
+")})));
+end FunctionFlatten18;
+
+model FunctionFlatten19
+    function f
+        input Real x[:];
+        output Real y;
+    algorithm
+        y := size(x[2:size(x,1)],1);
+    end f;
+    
+    Real z = f({1, 2, 3} * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten19",
+            description="Scalarization of size exp containing unknown subscripts",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.FunctionFlatten19
+ Real z;
+equation
+ z = FunctionTests.FunctionFlatten19.f({time, 2 * time, 3 * time});
+
+public
+ function FunctionTests.FunctionFlatten19.f
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := max(integer(size(x, 1) - 2) + 1, 0);
+  return;
+ end FunctionTests.FunctionFlatten19.f;
+
+end FunctionTests.FunctionFlatten19;
+")})));
+end FunctionFlatten19;
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
