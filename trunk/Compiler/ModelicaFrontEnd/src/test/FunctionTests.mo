@@ -924,6 +924,45 @@ end FunctionTests.FunctionFlatten19;
 ")})));
 end FunctionFlatten19;
 
+model FunctionFlatten20
+    function f
+        input Real x[:];
+        output Real y;
+    algorithm
+        y := sum(x[2:end]);
+    end f;
+    
+    Real z = f({1, 2, 3} * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten20",
+            description="Scalarization of end",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.FunctionFlatten20
+ Real z;
+equation
+ z = FunctionTests.FunctionFlatten20.f({time, 2 * time, 3 * time});
+
+public
+ function FunctionTests.FunctionFlatten20.f
+  input Real[:] x;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:max(integer(size(x,1) - 2) + 1, 0) loop
+   temp_1 := temp_1 + x[2 + (i1 - 1)];
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.FunctionFlatten20.f;
+
+end FunctionTests.FunctionFlatten20;
+")})));
+end FunctionFlatten20;
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
