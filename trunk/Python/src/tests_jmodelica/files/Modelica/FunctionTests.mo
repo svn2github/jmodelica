@@ -283,5 +283,21 @@ model TestUnkRecArray
     R1[3,3] c = f(3);
 end TestUnkRecArray;
 
+model LoadResource1
+    parameter String s1 = Modelica.Utilities.Files.loadResource("C:\\a\\b\\file.txt");
+    parameter String s2 = Modelica.Utilities.Files.loadResource("a\\b\\file.txt");
+    parameter String s3 = Modelica.Utilities.Files.loadResource("/C:/a/b/file.txt");
+    parameter String s4 = Modelica.Utilities.Files.loadResource("a/b/file.txt");
+    parameter String s5 = Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt");
+    parameter String s6 = Modelica.Utilities.Files.loadResource("file:///C:/a/b/file.txt");
+  equation
+    assert(time < 2, s1);
+    assert(time < 2, s2);
+    assert(time < 2, s3);
+    assert(time < 2, s4);
+    assert(time < 2, s5);
+    assert(time < 2, s6);
+end LoadResource1;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;
