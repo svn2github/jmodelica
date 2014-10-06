@@ -1279,6 +1279,62 @@ end EvaluationTests.FunctionEval35;
 ")})));
 end FunctionEval35;
 
+model FunctionEval36
+    record R
+        Real a;
+    end R;
+    
+    function f1
+        input Real x;
+        output Real y;
+    protected
+        R r;
+    algorithm
+        (r.a) := f2(x);
+        y := r.a + 1;
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input Real x;
+        output Real y;
+    protected
+        R r;
+    algorithm
+        y := x - 1;
+        annotation(Inline=true);
+    end f2;
+    
+    function f3
+        input Real x;
+        output Real y;
+        output Real z;
+    protected
+        R r;
+    algorithm
+        y := f1(x);
+        z := 1;
+        annotation(Inline=true);
+    end f3;
+    
+    Real x;
+    Real y;
+equation
+    (x, y) = f3(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval36",
+            description="Function call statement assigning record component",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.FunctionEval36
+ constant Real x = 1.0;
+ constant Real y = 1;
+end EvaluationTests.FunctionEval36;
+")})));
+end FunctionEval36;
+
 
 
 model VectorFuncEval1

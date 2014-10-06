@@ -3254,46 +3254,6 @@ aspect ConstantEvaluation {
     }
   
   /**
-   * Set the current function evaluation value of referenced variable.
-   * 
-   * Also updates value map.
-   */
-  public void FFunctionCallLeft.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
-	  if (hasFExp())
-		  getFExp().setEvaluationValue(evaluator, val);
-  }
-  
-  /**
-   * Set the current function evaluation value of referenced variable.
-   * 
-   * Also updates value map.
-   */
-  public void FExp.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
-  }
-  
-  public void FIdUseExp.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
-	  getFIdUse().setEvaluationValue(evaluator, val);
-  }
-  
-    public void FInstAccessExp.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
-        getInstAccess().assignToInFuncEval(evaluator, val);
-    }
-  
-  /**
-   * Set the current function evaluation value of referenced variable.
-   * 
-   * Also updates value map.
-   */
-  public void FIdUse.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
-	  if (myFV() instanceof FFunctionVariable)
-		  ((FFunctionVariable) myFV()).setEvaluationValue(evaluator, val);
-  }
-  
-    public void FIdUseInstAccess.setEvaluationValue(AlgorithmEvaluator evaluator, CValue val) {
-        getInstAccess().assignToInFuncEval(evaluator, val);
-    }
-  
-  /**
    * Check if this variable has a current function evaluation value.
    */
   public boolean FAbstractVariable.hasEvaluationValue(VariableEvaluator evaluator) {
@@ -3467,44 +3427,90 @@ aspect ConstantEvaluation {
   FStatement implements FunctionEvalNode;
   FIfWhenClause implements FunctionEvalNode;
   
-  /**
-   * Evaluate statement during function evaluation.
-   * 
-   * @param values  constant values for the variables. 
-   */
-  public abstract int FStatement.evaluate(AlgorithmEvaluator evaluator);
-  
+    /**
+     * Evaluate statement during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     */
+    public abstract int FStatement.evaluate(AlgorithmEvaluator evaluator);
+    
+    /**
+     * Evaluate statement during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     */
     @Override
     public int FAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
         getLeft().assignToInFuncEval(evaluator, evaluator.ceval(getRight()));
         return EVAL_CONT;
     }
     
+    /**
+     * Evaluate statement during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     */
     @Override
     public int InstAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
         getLeft().getInstAccess().assignToInFuncEval(evaluator, evaluator.ceval(getRight()));
         return EVAL_CONT;
     }
-
-  /**
-   * Evaluate an assignment with this as the left side during function evaluation.
-   * 
-   * @param values  constant values for the variables
-   * @param right   the right hand side
-   */
-  public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-	  getFIdUse().assignToInFuncEval(evaluator, right);
-  }
-
-  /**
-   * Evaluate an assignment with this as the left side during function evaluation.
-   * 
-   * @param values  constant values for the variables
-   * @param right   the right hand side
-   */
-  public void FIdUse.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-	  getFQName().assignToInFuncEval(evaluator, right, this);
-  }
+    
+    
+    
+    /**
+     * Evaluate an assignment with this as the left side during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
+     */
+    public void FFunctionCallLeft.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
+        if (hasFExp()) {
+            getFExp().assignToInFuncEval(evaluator, val);
+        }
+    }
+    
+    /**
+     * Evaluate an assignment with this as the left side during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
+     */
+    public void FExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+        throw new ConstantEvaluationException();
+    }
+    
+    /**
+     * Evaluate an assignment with this as the left side during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
+     */
+    @Override
+    public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+        getFIdUse().assignToInFuncEval(evaluator, right);
+    }
+    
+    /**
+     * Evaluate an assignment with this as the left side during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
+     */
+    public void FIdUse.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+        getFQName().assignToInFuncEval(evaluator, right, this);
+    }
+    
+    /**
+     * Evaluate an assignment with this as the left side during function evaluation.
+     * 
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
+     */
+    @Override
+    public void FIdUseInstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
+        getInstAccess().assignToInFuncEval(evaluator, val);
+    }
 
   /**
    * Evaluate an assignment with this as the left side during function evaluation.
@@ -3659,12 +3665,14 @@ aspect ConstantEvaluation {
    * Handle the last part of the left access of an assignment during function evaluation.
    */
   public CValue FType.assignToLastInFuncEval(CommonNamePart name, CValue left, CValue right) {
-	  if (left.isUnknown() || !isArray()) {
-		  if (isArray() && name.hasFArraySubscripts())
-			  left = new CValueArray(size().ceval());
-		  else
-			  return right;
-	  }
+        if (!isArray() || !name.hasFArraySubscripts()) {
+            return right;
+        }
+        
+        if (left.isUnknown()) {
+            left = new CValueArray(size().ceval());
+        }
+        
 	  if (name.isArray()) {
 	  	  CValueArray al = left.array();
 		  CValueArray ar = right.array();
