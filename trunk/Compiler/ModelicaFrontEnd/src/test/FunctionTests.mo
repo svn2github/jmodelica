@@ -7557,6 +7557,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization24",
+			inline_functions="none",
 			description="Scalarize use of function returning array in initial equations",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization24

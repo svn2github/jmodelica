@@ -166,7 +166,7 @@ end OverdeterminedInitialSystem.Parameter1;
         algorithm
             a := if x < 3.12 then 1 else 0;
             b := if x > 42 then 1 else 0;
-            annotation(Inline=False);
+            annotation(Inline=false);
         end F;
         
         Integer a;

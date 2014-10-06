@@ -145,6 +145,7 @@ aspect FunctionInlining {
         private FClass fc;
         private FFunctionDecl func;
         private List<FVariable> vars;
+        private List<FAbstractEquation> initialEqns;
         private List<FAbstractEquation> normalEqns;
         private List<FAbstractEquation> paramEqns;
 
@@ -165,6 +166,7 @@ aspect FunctionInlining {
             this.level = level;
             this.late = late;
             vars = fc.getFVariables();
+            initialEqns = fc.getFInitialEquations();
             normalEqns = fc.getFAbstractEquations();
             paramEqns = fc.getFParameterEquations();
             // Make sure maps are calculated
@@ -176,6 +178,7 @@ aspect FunctionInlining {
          * Inline all function calls that we can.
          */
         public void inline() {
+            inline(initialEqns);
             inline(normalEqns);
             inline(paramEqns);
         }

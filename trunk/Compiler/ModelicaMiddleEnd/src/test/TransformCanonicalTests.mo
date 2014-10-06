@@ -2133,6 +2133,7 @@ end TransformCanonicalTests.InitialEqTest7;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InitialEqTest8",
+			inline_functions="none",
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest8
@@ -2203,6 +2204,7 @@ end TransformCanonicalTests.InitialEqTest9;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InitialEqTest10",
+			inline_functions="none",
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest10
@@ -2256,6 +2258,7 @@ end TransformCanonicalTests.InitialEqTest10;
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="InitialEqTest11",
+			inline_functions="none",
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest11

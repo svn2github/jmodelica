@@ -3255,5 +3255,29 @@ public
 end FunctionInlining.FunctionalInline1;
 ")})));
 end FunctionalInline1;
-	
+
+model InitialSystemInlining1
+        function f
+            input Real a;
+            output Real b;
+        algorithm
+            b := a;
+        end f;
+        
+        parameter Real x(fixed=false);
+    initial equation
+        x = f(time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemInlining1",
+            description="Test inlining in the initial system",
+            flatModel="
+fclass FunctionInlining.InitialSystemInlining1
+ parameter Real x(fixed = false);
+initial equation 
+ x = time;
+end FunctionInlining.InitialSystemInlining1;
+")})));
+end InitialSystemInlining1;
+
 end FunctionInlining;
