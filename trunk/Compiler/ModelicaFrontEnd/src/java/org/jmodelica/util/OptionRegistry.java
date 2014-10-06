@@ -472,7 +472,7 @@ abstract public class OptionRegistry {
         USE_BRENT_IN_1D
             ("use_Brent_in_1d",
                 runtime,
-                true,
+                false,
                 "Use Brent search to improve accuracy in solution of 1D non-linear equations."),
         BLOCK_SOLVER_EXPERIMENTAL_MODE
             ("block_solver_experimental_mode",
