@@ -164,6 +164,13 @@ aspect Variability {
         }
         return var;
     }
+    eq FFunctionType.funcOutputVariability() {
+        FTypePrefixVariability var = fConstant();
+        for (FRecordComponentType component : getOutputs()) {
+            var = var.combine(component.getFType().funcOutputVariability());
+        }
+        return var;
+    }
 
 
     /**

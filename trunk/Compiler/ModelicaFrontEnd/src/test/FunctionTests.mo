@@ -10189,6 +10189,76 @@ end FunctionTests.UnknownArray48;
 ")})));
 end UnknownArray48;
 
+model UnknownArray49
+    partial function part
+        input Real[3] x;
+        output Real[3] y;
+    end part;
+    
+    function full
+        extends part;
+        input Real z;
+      algorithm
+        y := x .+ z;
+    end full;
+
+    function f
+        input Real[:] x;
+        input part pf;
+        output Real[size(x,1)] y;
+      algorithm
+        y := pf(x);
+    end f;
+    
+    Real[3] y = f({1,2,3}, function full(z=time));
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray49",
+            description="Size asserts for partial function call",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray49
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ ({y[1], y[2], y[3]}) = FunctionTests.UnknownArray49.f({1, 2, 3}, function FunctionTests.UnknownArray49.full(time));
+
+public
+ function FunctionTests.UnknownArray49.f
+  input Real[:] x;
+  input ((Real[3] y) = FunctionTests.UnknownArray49.part(Real[3] x)) pf;
+  output Real[:] y;
+ algorithm
+  size(y) := {size(x, 1)};
+  assert(size(x, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray49.f\");
+  (y) := pf(x);
+  return;
+ end FunctionTests.UnknownArray49.f;
+
+ function FunctionTests.UnknownArray49.part
+  input Real[3] x;
+  output Real[3] y;
+ algorithm
+  return;
+ end FunctionTests.UnknownArray49.part;
+
+ function FunctionTests.UnknownArray49.full
+  input Real[3] x;
+  output Real[3] y;
+  input Real z;
+ algorithm
+  y[1] := x[1] .+ z;
+  y[2] := x[2] .+ z;
+  y[3] := x[3] .+ z;
+  return;
+ end FunctionTests.UnknownArray49.full;
+
+end FunctionTests.UnknownArray49;
+")})));
+end UnknownArray49;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
