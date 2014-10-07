@@ -15,5 +15,5 @@
 -->
 
 <project name="ModelicaCompilerCasADi">
-	<property name="ModelicaCompilerCasADi.pre_generated" value="casadi"/>
+	<property name="ModelicaCompilerCasADi.pre_generated" value="ifcasadi"/>
 </project>

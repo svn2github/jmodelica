@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_BOOLEAN_VAR
 #define _MODELICACASADI_BOOLEAN_VAR
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "types/VariableType.hpp"
 #include "Variable.hpp"
 #include "Ref.hpp"
@@ -36,7 +36,7 @@ class BooleanVariable : public Variable {
          * @param A Variability enum
          * @param A VariableType, default is a reference to NULL. 
          */
-        BooleanVariable(Model *owner, CasADi::MX var, Causality causality, 
+        BooleanVariable(Model *owner, casadi::MX var, Causality causality, 
                      Variability variability,
                       Ref<VariableType> declaredType = Ref<VariableType>());
         /** @return The Boolean Type enum */

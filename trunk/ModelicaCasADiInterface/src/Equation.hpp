@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _MODELICACASADI_EQUATION
 
 #include <iostream>
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "RefCountedNode.hpp"
 namespace ModelicaCasADi 
 {
@@ -29,28 +29,28 @@ class Equation: public RefCountedNode {
          * @param A MX
          * @param A MX
          */
-        Equation(CasADi::MX lhs, CasADi::MX rhs); 
+        Equation(casadi::MX lhs, casadi::MX rhs); 
         /** @return A MX */
-        const CasADi::MX getLhs() const;
+        const casadi::MX getLhs() const;
         /** @return A MX */
-        const CasADi::MX getRhs() const;
+        const casadi::MX getRhs() const;
         /** 
          * Returns the residual on the form: left-hand-side - right-hand-side
          * @return A MX 
          */
-        const CasADi::MX getResidual() const; 
+        const casadi::MX getResidual() const; 
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        CasADi::MX lhs;
-        CasADi::MX rhs;
+        casadi::MX lhs;
+        casadi::MX rhs;
 };
 
-inline const CasADi::MX Equation::getLhs() const { return lhs; }
-inline const CasADi::MX Equation::getRhs() const { return rhs; }
-inline const CasADi::MX Equation::getResidual() const { return lhs - rhs; }
+inline const casadi::MX Equation::getLhs() const { return lhs; }
+inline const casadi::MX Equation::getRhs() const { return rhs; }
+inline const casadi::MX Equation::getResidual() const { return lhs - rhs; }
 inline void Equation::print(std::ostream& os) const { 
     lhs.print(os);
     os << " = ";

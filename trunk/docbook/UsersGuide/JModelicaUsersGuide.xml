@@ -40,8 +40,6 @@
 
   <xi:include href="Simulation.xml" xpointer="element(/1)"/>
 
-  <xi:include href="Initialization.xml" xpointer="element(/1)"/>
-
   <xi:include href="Optimization.xml" xpointer="element(/1)"/>
 
   <xi:include href="GraphicalUserInterface.xml" xpointer="element(/1)"/>
@@ -53,6 +51,10 @@
   <xi:include href="Limitations.xml" xpointer="element(/1)"/>
 
   <xi:include href="ReleaseNotes.xml" xpointer="element(/1)"/>
+  
+  <xi:include href="Initialization.xml" xpointer="element(/1)"/>
+  
+  <xi:include href="DynamicOptimizationJMU.xml" xpointer="element(/1)"/>
 
   <bibliography>
     <title>Bibliography</title>

@@ -47,7 +47,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 %}
 
-%rename(_transferModelicaModel) transferModelicaModel;
 %rename(_transferOptimizationProblem) transferOptimizationProblem;
 %rename(print_) print;
 // __repr__ and __str__ are overloaded to be used from Python instead

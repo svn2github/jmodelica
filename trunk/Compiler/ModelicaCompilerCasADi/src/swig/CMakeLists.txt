@@ -13,7 +13,7 @@ set(CASADI_HOME $ENV{CASADI_HOME})
 set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
 
 find_library(CASADI_DLL
-  NAMES libcasadi.so libcasadi.dll
+  NAMES libcasadi_core.so libcasadi_core.dll
   PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
@@ -36,13 +36,14 @@ set(MODULE_NAME ifcasadi)
 add_definitions(${CPPFLAGS})
 include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
+include_directories(${CASADI_BUILD_DIR})
 
-set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_LIST_DIR}/../java-generated/casadi)
+set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_LIST_DIR}/../java-generated/ifcasadi)
 
 find_package(SWIG REQUIRED)
 include(UseSWIG)
 
-set(CMAKE_SWIG_FLAGS -package casadi)
+set(CMAKE_SWIG_FLAGS -package ifcasadi)
 
 set_source_files_properties(java_casadi.i PROPERTIES CPLUSPLUS ON)
 

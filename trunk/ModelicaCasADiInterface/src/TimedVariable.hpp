@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_TIMED_VAR
 #define _MODELICACASADI_TIMED_VAR
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "Ref.hpp"
 #include "Variable.hpp"
 
@@ -38,13 +38,13 @@ class TimedVariable : public Variable {
          * @param Ref<Variable> baseVariable, a reference to its base varible.
          * @param MX Timepoint, this variable's time point
          */
-        TimedVariable(Model *owner, CasADi::MX var, Ref<Variable> baseVariable, CasADi::MX timePoint);
+        TimedVariable(Model *owner, casadi::MX var, Ref<Variable> baseVariable, casadi::MX timePoint);
         
         /**
          * The time point for this TimedVariable
          * @return MX, a MX expression for the time point
          */
-        const CasADi::MX getTimePoint();
+        const casadi::MX getTimePoint();
         
         /**
          * The base variable for this variable, e.g. a reference to model variable for X 
@@ -61,10 +61,10 @@ class TimedVariable : public Variable {
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         Ref<Variable> baseVariable;
-        CasADi::MX timePoint;
+        casadi::MX timePoint;
 };
 inline const Variable::Type TimedVariable::getType() const { return Variable::REAL; }
 inline const Ref<Variable> TimedVariable::getBaseVariable() { return this->baseVariable; }
-inline const CasADi::MX TimedVariable::getTimePoint() { return this->timePoint; }
+inline const casadi::MX TimedVariable::getTimePoint() { return this->timePoint; }
 }; // End namespace
 #endif

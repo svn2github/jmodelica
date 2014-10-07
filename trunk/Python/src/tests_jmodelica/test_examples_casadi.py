@@ -17,13 +17,15 @@
 """ 
 Test module for testing the CASADI examples. 
 """
+import platform
 
 from tests_jmodelica import testattr
 from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
                             cstr_casadi, qt_par_est_casadi, vehicle_turn,
                             distillation4_opt)
+							
 
-@testattr(casadi = True)
+@testattr(casadi = True and platform.system() == "Linux")
 def test_ccpp():
     """Run the Combined Cycle Power Plant example."""
     ccpp.run_demo(False)

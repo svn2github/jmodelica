@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_INTEGER_VAR
 #define _MODELICACASADI_INTEGER_VAR
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 #include "types/VariableType.hpp"
 #include "Ref.hpp"
 #include "Variable.hpp"
@@ -36,7 +36,7 @@ class IntegerVariable : public Variable {
          * @param A Variability enum
          * @param A VariableType, default is a reference to NULL. 
          */ 
-        IntegerVariable(Model *owner, CasADi::MX var, Causality causality, 
+        IntegerVariable(Model *owner, casadi::MX var, Causality causality, 
                      Variability variability,
                      Ref<VariableType> declaredType = Ref<VariableType>());
         /** @param The Integer Type enum */

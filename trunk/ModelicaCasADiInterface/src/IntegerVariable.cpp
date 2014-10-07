@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "IntegerVariable.hpp"
 namespace ModelicaCasADi 
 {
-using CasADi::MX;
+using casadi::MX;
 IntegerVariable::IntegerVariable(Model *owner, MX var, Variable::Causality causality,
                            Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
   Variable(owner, var, causality, variability, declaredType) { 

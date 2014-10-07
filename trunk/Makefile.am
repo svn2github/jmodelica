@@ -34,12 +34,12 @@ casadi:
 	make -f Makefile CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB) CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)
 
 install_casadi: casadi
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
-	cp $(abs_builddir)/casadi_build/lib/*.* $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
+	cd $(abs_builddir)/ThirdParty/CasADi; \
+	make -f Makefile install CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB) CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)	
 	mkdir -p $(DESTDIR)$(prefix)/Python/
 	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
 	## temp fix
-	cp $(abs_builddir)/casadi_build/swig/casadi.py $(DESTDIR)$(prefix)/Python/casadi
+	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
 
 ## Install for CasADiInterface, Variables and targets. 
 ## MC_interface installs the system with Python. 
@@ -102,7 +102,7 @@ mc_modelica: ifcasadi
 
 mc_optimica: ifcasadi
 	mkdir -p $(OC_SRC)/src/java-generated
-	cp -pr $(MC_SRC)/src/java-generated/casadi $(OC_SRC)/src/java-generated
+	cp -pr $(MC_SRC)/src/java-generated/ifcasadi $(OC_SRC)/src/java-generated
 	cd $(OC_SRC); $(ANT_OPTS) $(ANT)
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
@@ -414,9 +414,9 @@ clean-casadi-interface:
 #	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 if HAVE_ANT
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/ifcasadi 
 	cd $(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/ifcasadi 
 endif
 	
 

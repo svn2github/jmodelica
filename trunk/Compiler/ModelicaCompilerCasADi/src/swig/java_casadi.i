@@ -14,20 +14,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-%module casadi
+%module ifcasadi
 
 // Expose the swig-generated function getCPtr as public in the proxy objects;
 // we need it to get back the underlying object.
-SWIG_JAVABODY_METHODS(protected, public, SWIGTYPE)
+SWIG_JAVABODY_METHODS(public, public, SWIGTYPE)
 
 %{
 #include <iostream>
 #include <cstdlib>
 #include "jni.h"
 
-#include "symbolic/casadi.hpp"
+#include "casadi/casadi.hpp"
 
-using namespace CasADi;
+using namespace casadi;
 using namespace std;
 %}
 
@@ -42,22 +42,28 @@ using namespace std;
 %include "std_pair.i"
 
 %rename(__neg__) operator-;
-%rename(_null) CasADi::CRSSparsity::null;
+%rename(_null) casadi::Sparsity::null;
 %rename(toString) __repr__;
-%rename(deref1)  CasADi::MXFunction::operator->;
-%rename(deref2)  CasADi::FX::operator->;
+%rename(deref1)  casadi::MXFunction::operator->;
+%rename(deref2)  casadi::Function::operator->;
 
-%include "symbolic/sx/sx.hpp"
-%include "symbolic/printable_object.hpp"
-%include "symbolic/shared_object.hpp"
-%include "symbolic/generic_type.hpp"
-%include "symbolic/options_functionality.hpp"
-%include "symbolic/matrix/crs_sparsity.hpp"
-%include "symbolic/mx/mx.hpp"
-%include "symbolic/mx/mx_tools.hpp"
-%include "symbolic/fx/fx.hpp"
-%include "symbolic/fx/mx_function.hpp"
+#define CASADI_CORE_EXPORT
+
+%include "casadi/core/printable_object.hpp"
+%include "casadi/core/shared_object.hpp"
+%include "casadi/core/generic_type.hpp"
+%include "casadi/core/options_functionality.hpp"
+%include "casadi/core/matrix/sparsity.hpp"
+%include "casadi/core/mx/mx.hpp"
+%include "casadi/core/mx/mx_tools.hpp"
+%include "casadi/core/function/function.hpp"
+%include "casadi/core/function/mx_function.hpp"
 
 namespace std {
-   %template(MXVector) vector<CasADi::MX>;
+    %template(MXVector) vector<casadi::MX>;
 };
+
+%inline %{
+// Work around trouble with wrapping MX.sym
+casadi::MX msym(const std::string &name) { return casadi::MX::sym(name); }
+%}
