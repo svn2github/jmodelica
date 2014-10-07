@@ -26,6 +26,7 @@
 #include "jmi.h"
 #include "jmi_block_residual.h"
 #include "jmi_log.h"
+#include "jmi_delay_impl.h"
 
 int jmi_init(jmi_t** jmi,
         int n_real_ci, int n_real_cd, int n_real_pi,
@@ -47,7 +48,8 @@ int jmi_init(jmi_t** jmi,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
         jmi_real_t* nominals,
-        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks,
+        int n_delays) {
     jmi_t* jmi_ ;
     int i;
     
@@ -239,6 +241,13 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->dae_init_block_residuals = (jmi_block_residual_t**)calloc(n_dae_init_blocks,
             sizeof(jmi_block_residual_t*));
+
+    jmi_->delay_event_mode = 0;
+    jmi_->n_delays = n_delays;
+    jmi_->delays = (jmi_delay_t *)calloc(n_delays, sizeof(jmi_delay_t));
+    for (i=0; i < n_delays; i++) {
+        jmi_delay_new(jmi_, i);
+    }
 
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
