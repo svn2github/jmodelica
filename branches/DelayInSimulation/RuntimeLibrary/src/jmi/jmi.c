@@ -313,6 +313,11 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
 
+    for (i=0; i < jmi->n_delays; i++) {
+        jmi_delay_delete(jmi, i);
+    }
+    free(jmi->delays);
+
     return 0;
 }
 

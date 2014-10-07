@@ -300,7 +300,8 @@ static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     while (index < second_last_index) {
         int rpos = index2pos(buffer, index+1);
         if (buf[rpos].right == index+1 && !at_event) break;
-        if (buf[rpos].t     >= tr) break;
+        /* We must use > so that we choose the rightmost allowable interval at time events triggered when t == buf[rpos].tr */
+        if (buf[rpos].t     >  tr) break;
         index++;
     }
     position->curr_interval = index;
