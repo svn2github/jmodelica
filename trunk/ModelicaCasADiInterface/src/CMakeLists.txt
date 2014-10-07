@@ -104,3 +104,9 @@ set_source_files_properties(${JCC_GEN_DIR}/__wrap__.cpp PROPERTIES
 add_library(ModelicaCasADi ${MC_CPP} ${MC_HPP})
 set_target_properties(ModelicaCasADi PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
 add_dependencies(ModelicaCasADi jcc_gen)
+
+add_executable(cInterface ${MC_CPP} ${MC_HPP} cInterface.cpp)
+set_target_properties(cInterface PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
+add_dependencies(cInterface jcc_gen)
+target_link_libraries(cInterface ModelicaCasADi ${PYTHON_LIBRARIES})
+target_link_libraries(cInterface ${CASADI_DLL})
