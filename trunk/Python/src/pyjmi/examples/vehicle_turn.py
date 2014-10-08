@@ -41,7 +41,7 @@ def run_demo(with_plots=True):
     op = transfer_optimization_problem('Turn', mop_path)
     opts = op.optimize_options()
     opts['IPOPT_options']['linear_solver'] = "ma27"
-    opts['IPOPT_options']['tol'] = 1e-10
+    opts['IPOPT_options']['tol'] = 1e-9
     opts['n_e'] = 60
 
     # Set blocking factors

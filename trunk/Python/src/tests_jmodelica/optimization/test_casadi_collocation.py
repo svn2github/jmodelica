@@ -983,6 +983,7 @@ class TestLocalDAECollocator(object):
         opts['discr'] = "LGR"
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        res_radau = res
         
         # Unscaled, Gauss
         opts['discr'] = "LG"
@@ -1002,6 +1003,13 @@ class TestLocalDAECollocator(object):
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         N.testing.assert_allclose(res['time'][[0, -1]], [5., 7.28128126],
                                   rtol=5e-3)
+
+        # Unscaled, nominal trajectories, Radau
+        opts['discr'] = "LGR"
+        opts['nominal_traj'] = res_radau
+        res = unscaled_op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
 
     @testattr(casadi = True)
     def test_cstr_minimum_time(self):

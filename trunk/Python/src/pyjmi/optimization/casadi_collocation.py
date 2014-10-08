@@ -1967,7 +1967,10 @@ class LocalDAECollocator(CasadiCollocator):
         """
         if self.variable_scaling and self.nominal_traj is not None:
             # Create nominal trajectories
-            nom_traj=self._create_nominal_trajectories()
+            nom_traj = self._create_nominal_trajectories()
+            if self._normalize_min_time:
+                t0_nom = self._denorm_t0_nom
+                tf_nom = self._denorm_tf_nom
 
             # Create storage for scaling factors
             time_points = self.get_time_points()
@@ -2010,8 +2013,7 @@ class LocalDAECollocator(CasadiCollocator):
                         for k in time_points[i]:
                             tp = time_points[i][k]
                             if self._normalize_min_time:
-                                tp = t_nom['startTime'] + (t_nom['finalTime'] -
-                                                           t_nom['startTime']) * tp
+                                tp = t0_nom + (tf_nom - t0_nom) * tp
                             val = float(nom_traj[vt][var_index].eval(tp))
                             values[i][k] = val
                             if val < traj_min:
@@ -2112,7 +2114,6 @@ class LocalDAECollocator(CasadiCollocator):
                         n_invariant_var += 1
                         invariant_d.append(d)
                         invariant_e.append(e)
-
 
             # Do not scaled eliminated inputs
             for var in self.mvar_vectors['elim_u']:
