@@ -1376,7 +1376,6 @@ class ModelicaTransfer(object):
 class TestModelicaTransfer(ModelicaTransfer):
     """Modelica transfer tests that use transfer_model to load the model"""
     def load_model(self, *args, **kwargs):
-        print "Hej!"
         model = Model()
         transfer_model(model, *args, **kwargs)
         return model
@@ -1384,7 +1383,6 @@ class TestModelicaTransfer(ModelicaTransfer):
 class TestModelicaTransferOpt(ModelicaTransfer):
     """Modelica transfer tests that use transfer_model to load the model"""
     def load_model(self, *args, **kwargs):
-        print "Hej!"
         model = OptimizationProblem()
         transfer_model(model, *args, **kwargs)
         return model
