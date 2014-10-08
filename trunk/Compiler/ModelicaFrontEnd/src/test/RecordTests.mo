@@ -1247,8 +1247,8 @@ model RecordBinding19
             description="String parameters in record with continuous part",
             flatModel="
 fclass RecordTests.RecordBinding19
- parameter String r1.x = \"A\" /* \"A\" */;
- parameter String r1.y = \"A\" /* \"A\" */;
+ structural parameter String r1.x = \"A\" /* \"A\" */;
+ structural parameter String r1.y = \"A\" /* \"A\" */;
  Real r1.z;
 equation
  r1.z = time;
@@ -1271,8 +1271,8 @@ model RecordBinding20
             description="Modified string parameters in record with continuous part",
             flatModel="
 fclass RecordTests.RecordBinding20
- parameter String r1.x = \"B\";
- parameter String r1.y = \"B\" /* \"B\" */;
+ structural parameter String r1.x = \"B\" /* \"B\" */;
+ structural parameter String r1.y = \"B\" /* \"B\" */;
  Real r1.z;
 equation
  r1.z = time;
@@ -1400,11 +1400,10 @@ model RecordBinding24
             flatModel="
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
- parameter Real r1.r2.y2 = 51 /* 51 */;
- parameter Real r1.r2.r3.x3;
+ final parameter Real r1.r2.y2 = 51 /* 51 */;
+ final parameter Real r1.r2.r3.x3 = 51.0 /* 51.0 */;
  parameter Real r1.r2.r3.y3;
 parameter equation
- r1.r2.r3.x3 = r1.r2.y2;
  r1.r2.r3.y3 = r1.y1;
 end RecordTests.RecordBinding24;
 ")})));
@@ -2998,12 +2997,12 @@ model RecordScalarize27
             description="Flattening of model with record that gets array size of member from function call that returns entire record",
             flatModel="
 fclass RecordTests.RecordScalarize27
- parameter Integer r1.n;
- parameter Integer r2.n = 0 /* 0 */;
- parameter Integer r3.n;
+ structural parameter Integer r1.n;
+ structural parameter Integer r2.n = 0 /* 0 */;
+ structural parameter Integer r3.n;
  constant Real r4.x[1] = 1;
  constant Real r4.x[2] = 2;
- parameter Integer r4.n = 2 /* 2 */;
+ structural parameter Integer r4.n = 2 /* 2 */;
 end RecordTests.RecordScalarize27;
 ")})));
 end RecordScalarize27;
@@ -3027,16 +3026,16 @@ model RecordScalarize28
             flatModel="
 fclass RecordTests.RecordScalarize28
  constant Real r1.x[1] = 1;
- parameter Integer r1.n = 1 /* 1 */;
+ structural parameter Integer r1.n = 1 /* 1 */;
  constant Real r2.x[1] = 1;
  constant Real r2.x[2] = 2;
- parameter Integer r2.n = 2 /* 2 */;
+ structural parameter Integer r2.n = 2 /* 2 */;
  constant Real r3.x[1] = 1;
- parameter Integer r3.n = 1 /* 1 */;
+ structural parameter Integer r3.n = 1 /* 1 */;
  constant Real r4.x[1] = 1;
  constant Real r4.x[2] = 3;
  constant Real r4.x[3] = 2;
- parameter Integer r4.n = 3 /* 3 */;
+ structural parameter Integer r4.n = 3 /* 3 */;
 end RecordTests.RecordScalarize28;
 ")})));
 end RecordScalarize28;

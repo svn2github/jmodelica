@@ -3333,6 +3333,8 @@ aspect CCodeGen {
 	eq FDiscrete.genJMIVariabilityConstant_C() = "JMI_DISCRETE_VARIABILITY";
 	eq FConstant.genJMIVariabilityConstant_C() = "JMI_CONSTANT_VARIABILITY";
 	eq FContinuous.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
+	/* Composite variabilities are removed during scalarization */
+	eq FCompositeVariability.genJMIVariabilityConstant_C() = null;
 	
     public String AbstractEquationBlock.genJMISolverConstant_C(String nleSolver) {
         if (isLinear())

@@ -74,6 +74,7 @@ aspect Variability {
     protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
     protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
     protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
+    protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
     protected static final int FConstant.VARIABILITY_LEVEL        = 0;
     protected static final int FStructParameter.VARIABILITY_LEVEL = 3;
     protected static final int FEvalParameter.VARIABILITY_LEVEL   = 4;
@@ -81,6 +82,33 @@ aspect Variability {
     protected static final int FParameter.VARIABILITY_LEVEL       = 10;
     protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
     protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
+    
+    /**
+     * Combines component variabilities to a single primitive variability.
+     */
+    syn FTypePrefixVariability FTypePrefixVariability.combine() {
+        return this;
+    }
+    
+    eq FCompositeVariability.combine() {
+        FTypePrefixVariability high = fConstant();
+        for (FTypePrefixVariability v : getComponents()) {
+            high = high.combine(v.combine());
+        }
+        return high;
+    }
+    
+    /**
+     * If this is a composite variability, return the i:th component, else this.
+     */
+    syn FTypePrefixVariability FTypePrefixVariability.getPart(int i) {
+        return this;
+    }
+    
+    eq FCompositeVariability.getPart(int i) {
+        return getComponent(i);
+    }
+    
 
     syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
     eq FEquation.variability() = isWhen() ? fDiscrete() : getLeft().variability().combine(getRight().variability());
@@ -432,9 +460,38 @@ aspect Variability {
     public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {
         return (other.combineLevel() > combineLevel()) ? other : this;
     }
+    
+    @Override
+    public FTypePrefixVariability FCompositeVariability.combine(FTypePrefixVariability other) {
+        return combine(other, false);
+    }
 
     public FTypePrefixVariability FTypePrefixVariability.combineDown(FTypePrefixVariability other) {
         return (other.combineLevel() < combineLevel()) ? other : this;
+    }
+    
+    @Override
+    public FTypePrefixVariability FCompositeVariability.combineDown(FTypePrefixVariability other) {
+        return combine(other, true);
+    }
+    
+    /**
+     * Combine each component variability with the assumed primitive variability other.
+     * Merges to a primitive variability if possible.
+     */
+    private FTypePrefixVariability FCompositeVariability.combine(FTypePrefixVariability other, boolean down) {
+        FTypePrefixVariability low = fContinuous();
+        FTypePrefixVariability high = fConstant();
+        ArrayList<FTypePrefixVariability> l = new ArrayList<FTypePrefixVariability>();
+        for (FTypePrefixVariability v : getComponents()) {
+            FTypePrefixVariability nv = down ? v.combineDown(other) : v.combine(other);
+            l.add(nv);
+            low = low.combineDown(nv);
+            high = high.combine(nv);
+        }
+        if (low.equals(high))
+            return low;
+        return new FCompositeVariability(new List<FTypePrefixVariability>(l));
     }
 
     syn FTypePrefixVariability FExp.indexVariability() {
