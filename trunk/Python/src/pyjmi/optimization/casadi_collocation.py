@@ -1659,6 +1659,8 @@ class LocalDAECollocator(CasadiCollocator):
             del keys[1]
             var_kinds = keys
         times=[self.time_points[i][k] for k in range(1, self.n_cp+1)]
+        if self._normalize_min_time:
+            times *= (self._denorm_tf-self._denorm_t0) 
         z=[casadi.MX(times)]
         for vk in var_kinds:
             if self.n_var[vk]>0:

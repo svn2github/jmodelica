@@ -194,6 +194,11 @@ class TestLocalDAECollocator(object):
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
+        # With checkpoints
+        opts['checkpoint'] = True
+        opts['expand_to_sx'] = "DAE"
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
         op.setObjectiveIntegrand(objInt)
         
     @testattr(casadi = True)
