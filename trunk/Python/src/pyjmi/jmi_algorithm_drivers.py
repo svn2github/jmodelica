@@ -53,8 +53,6 @@ if assimulo_present:
     from pyjmi.initialization.assimulo_interface import JMUAlgebraic
     from pyjmi.initialization.assimulo_interface import JMUAlgebraic_Exception
     from pyjmi.initialization.assimulo_interface import write_resdata
-    
-from pyjmi.optimization.casadi_collocation import *
 
 try:
     import pyjmi
@@ -1785,7 +1783,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
             Type: String
             Default: 'IPOPT'
-    
+
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()

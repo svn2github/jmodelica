@@ -1110,14 +1110,11 @@ class LocalDAECollocator(CasadiCollocator):
                     list_scaled_vars.append(scaled_vars[vk])
                     
                 # Check for zero nominal values
-                zero_sf_indices = N.where(sf[vk] == 0.0)[0]                
+                zero_sf_indices = N.where(sf[vk] == 0.0)[0]
                 if len(zero_sf_indices) > 0:
-                    zero_sf_names = [var.getName() for var
-                                     in self.mvar_vectors[vk][zero_sf_indices]]
                     names = ""
-                    for name in zero_sf_names[:-1]:
-                        names += name + ", "
-                    names += zero_sf_names[-1]
+                    for i in zero_sf_indices:
+                        names += self.mvar_vectors[vk][i].getName() + ", "
                     raise CasadiCollocatorException(
                         "Nominal value(s) for variable(s) %s is zero." %
                         names)
@@ -1618,7 +1615,10 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             del keys[1]
             var_kinds = keys
-        z=[self.time_points[i][k]]
+        if self._normalize_min_time:
+            z = [self.time_points[i][k]*(self._denorm_tf-self._denorm_t0)]
+        else:
+            z = [self.time_points[i][k]]
         for vk in var_kinds:
             if self.n_var[vk]>0:
                 if self.blocking_factors is None:
@@ -1855,6 +1855,12 @@ class LocalDAECollocator(CasadiCollocator):
             for t_name in ['startTime', 'finalTime']:
                 t_var = self.op.getVariable(t_name)
                 if self.op.get_attr(t_var, "free"):
+                    if t_name == 'startTime':
+                         t0_index = self.name_map.get('startTime')[0]
+                         self._denorm_t0 = self.var_map['p_opt'][t0_index]
+                    else:
+                        tf_index = self.name_map.get('finalTime')[0]
+                        self._denorm_tf = self.var_map['p_opt'][tf_index]
                     var_init_guess = self.op.get_attr(t_var, "initialGuess")
                     if self.init_traj is None:
                         t_init[t_name] = var_init_guess
@@ -1912,6 +1918,10 @@ class LocalDAECollocator(CasadiCollocator):
                 else:
                     t_init[t_name] = self.op.get_attr(t_var, "start")
                     t_nom[t_name] = self.op.get_attr(t_var, "start")
+                    if t_name == 'startTime':
+                        self._denorm_t0 = self.t0
+                    else: 
+                        self._denorm_tf = self.tf
             self._denorm_t0_init = t_init["startTime"]
             self._denorm_tf_init = t_init["finalTime"]
             self._denorm_t0_nom = t_nom["startTime"]
@@ -4198,7 +4208,7 @@ class LocalDAECollocator(CasadiCollocator):
                         xx_i_k = primal_opt[self.var_indices[var_type][i][k]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     u_i_k = self.var_map['elim_u'][i][k]['all']
-                    var_opt[var_type][t_index, :] = u_i_k.reshape(-1)
+                    var_opt['elim_u'][t_index, :] = u_i_k.reshape(-1)
                     t_index += 1
             elif self.discr == "LG":
                 for i in xrange(1, self.n_e + 1):
@@ -4261,7 +4271,8 @@ class LocalDAECollocator(CasadiCollocator):
             u_opt = var_opt['merged_u']
         else:
             t_index = 0
-            u_opt = N.empty([self.n_e * self.n_cp + 1, self.n_var['u']])
+            u_opt = N.empty([self.n_e * self.n_cp + 1 + self.is_gauss,
+                             self.n_var['u']])
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
                     unelim_u_i_k = primal_opt[self.var_indices['unelim_u'][i][k]]
@@ -4512,8 +4523,9 @@ class LocalDAECollocator(CasadiCollocator):
             self._hi = map(lambda h: self.horizon * h, self.h_opt)
         else:
             self._hi = map(lambda h: self.horizon * h, self.h)
-        self._xi = self._u_opt[1:].reshape(self.n_e, self.n_cp,
-                                           self.n_var['u'])
+        
+        xi = self._u_opt[1:self.n_e*self.n_cp+1]
+        self._xi = xi.reshape(self.n_e, self.n_cp, self.n_var['u'])
         self._ti = N.cumsum([self.t0] + self._hi[1:])
         input_names = tuple([u.getName() for u in self.mvar_vectors['u']])
         return (input_names, self._input_interpolator)

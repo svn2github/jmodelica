@@ -854,4 +854,3 @@ class CasadiModel(ModelBase):
         The CasadiPseudoSpectralAlg and LocalDAECollocationAlgOld \n \
         are no longer supported. to solve an optimization problem \n \
         with casadi use instead transfer_to_casadi_interface.')
-

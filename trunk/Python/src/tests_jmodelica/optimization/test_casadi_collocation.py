@@ -173,6 +173,135 @@ class TestLocalDAECollocator(object):
             return op.optimize_options(alg)
 
     @testattr(casadi = True)
+    def test_free_horizon_tdlagrange(self):
+        """
+        Test solving a minimum time problem with a time dependent Lagrange 
+        integrand.
+        """
+        
+        op = self.vdp_unscaled_min_time_op
+        objInt = op.getObjectiveIntegrand()
+        op.setObjectiveIntegrand(op.getTimeVariable())
+        
+        # References values
+        tf = 2.2811590707107996e0  # old cost_ref
+        cost_ref =  tf + (tf**2)/2
+        u_norm_ref = 9.991517452037317e-1
+
+        # Scaled, Radau
+        opts = self.optimize_options(op, self.algorithm)
+        opts['discr'] = "LGR"
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        op.setObjectiveIntegrand(objInt)
+        
+    @testattr(casadi = True)
+    def test_gauss_and_element_interpolation(self):
+        """
+        Test all combinations of discretization schemes and result modes.
+         
+        """
+        cost_ref = 1.8576873858261e3
+        u_norm_ref = 3.050971000653911e2
+        
+        op = self.cstr_lagrange_op
+
+        opts = self.optimize_options(op, self.algorithm)
+        
+        opts['discr'] = 'LG'
+        opts['result_mode'] = 'element_interpolation'
+        print 'LG + element_interpolation'
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LG'
+        opts['result_mode'] = 'collocation_points'
+        print 'LG + collocation_points'
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LG'
+        opts['result_mode'] = 'mesh_points'
+        print 'LG + mesh_points'
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LGR'
+        opts['result_mode'] = 'element_interpolation'
+        print 'LGR + element_interpolation'
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LGR'
+        opts['result_mode'] = 'collocation_points'
+        print 'LGR + collocation_points'
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LGR'
+        opts['result_mode'] = 'mesh_points'
+        print 'LGR + mesh_points'
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+       
+    @testattr(casadi = True)
+    def test_nominal_zero(self):
+        """
+        Test a parameter estimation example with a nominal trajectory equal to
+        zero and the same example with a nominal attribute equal to zero.
+        """
+        model = self.second_order_model
+        model.reset()
+        op = self.second_order_par_est_op
+        
+        # Simulate with initial guesses
+        model.set('w', 1.3)
+        model.set('z', 0)
+        sim_res = model.simulate(final_time=15.)
+        
+        # Reference values
+        w_ref = 1.048589
+        z_ref = 0.470934
+        
+        # Measurements  
+        y_meas = N.array([0.01463904, 0.35424225, 0.94776816, 1.20116167,
+                          1.17283905, 1.03631145, 1.0549561, 0.94827652,
+                          1.0317119, 1.04010453, 1.08012155])
+        t_meas = N.linspace(0., 10., num=len(y_meas))
+        data = N.vstack([t_meas, y_meas])
+        
+        # Measurement data
+        Q = N.array([[1.]])
+        unconstrained = OrderedDict()
+        unconstrained['y'] = data
+        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
+        
+        # Optimization options
+        opts = self.optimize_options(op, self.algorithm)
+        opts['measurement_data'] = measurement_data
+        opts['n_e'] = 16
+        
+        # Optimize with trajectories
+        opts['nominal_traj'] = sim_res
+        traj_res = op.optimize(self.algorithm, opts)
+        w_traj = traj_res.final('w')
+        z_traj = traj_res.final('z')
+        N.testing.assert_allclose(w_traj, w_ref, 1e-2)
+        N.testing.assert_allclose(z_traj, z_ref, 1e-2)
+        
+        # Set nominal attribute to zero
+        op.getVariable('z').setNominal(0)
+
+        # Optimize with scaling
+        opts = self.optimize_options(op, self.algorithm)
+        opts['measurement_data'] = measurement_data
+        opts['variable_scaling'] = True
+        N.testing.assert_raises(CasadiCollocatorException,
+                                op.optimize, self.algorithm, opts)
+        op.getVariable('z').setNominal(1)
+        
+    @testattr(casadi = True)
     def test_init_traj_sim(self):
         """Test initial trajectories based on an existing simulation."""
         model = self.cstr_model
@@ -963,7 +1092,7 @@ class TestLocalDAECollocator(object):
         unscaled_op = self.vdp_unscaled_min_time_op
         nonzero_start_op = \
                 self.vdp_min_time_nonzero_start_op
-        
+
         # References values
         cost_ref = 2.2811590707107996e0
         u_norm_ref = 9.991517452037317e-1
