@@ -338,6 +338,7 @@ aspect Scalarization {
                 Index nbi = bi.expand(i);
                 nbi = nbi.subIndex(nbi.ndims() - bexpDims);
                 nbexp = bexp.extractArrayCell(Collections.<String,FExp>emptyMap(), nbi);
+                nbexp = bexp.dynamicFExp(nbexp);
             }
             FQName name = prefix.copyAndAppend(getFQName(), i.createFArraySubscripts());
             scalarRecordCellFVariables(vars, equs, pEqus, name, last, nbexp, i, inParam, attrs, 0);

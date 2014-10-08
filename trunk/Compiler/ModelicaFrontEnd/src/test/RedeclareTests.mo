@@ -4617,12 +4617,12 @@ model RedeclareFunction2
 			description="Lookup in extending function with redeclared record",
 			flatModel="
 fclass RedeclareTests.RedeclareFunction2
- RedeclareTests.RedeclareFunction2.C.D x = RedeclareTests.RedeclareFunction2.C.B({1,2});
+ RedeclareTests.RedeclareFunction2.C.D x(a(size() = {2})) = RedeclareTests.RedeclareFunction2.C.B({1, 2});
 
 public
  function RedeclareTests.RedeclareFunction2.C.B
   input Real[2] i;
-  output RedeclareTests.RedeclareFunction2.C.D o;
+  output RedeclareTests.RedeclareFunction2.C.D o(a(size() = {2}));
  algorithm
   o.a := i;
   return;

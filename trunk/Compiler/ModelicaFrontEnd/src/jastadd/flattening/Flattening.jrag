@@ -958,7 +958,7 @@ aspect Flattening {
 			FAttribute a = findMatching(attr, icd.name());
 			boolean create = (a == null);
 			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
-			if (!icd.declaredSize().isComplete()) // TODO: use isUnknown instead?
+            if (icd.declaredSizeCalc().isUnknownNoEval())
 				list.add(new FInternalAttribute("size()", icd.size().createFExp()));
 			icd.generateSizeAttributes(list);
 			if (create && list.getNumChild() > 0) {

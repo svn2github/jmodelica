@@ -1657,7 +1657,7 @@ model RecordArray7
             flatModel="
 fclass RecordTests.RecordArray7
  structural parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ parameter RecordTests.RecordArray7.A a(x(size() = {2})) = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
  Real y[2] = a.x[1:2];
 
 public
@@ -1678,10 +1678,10 @@ model RecordArray8
     end A;
     
     function f
-        input Integer n;
-        output A a(n=n);
+        input Integer n2;
+        output A a(n=n2);
     algorithm
-        a.x := 1:n;
+        a.x := 1:n2;
     end f;
     
     parameter Integer m = 2;
@@ -1695,15 +1695,15 @@ model RecordArray8
             flatModel="
 fclass RecordTests.RecordArray8
  structural parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray8.A a = RecordTests.RecordArray8.f(2);
+ parameter RecordTests.RecordArray8.A a(x(size() = {2})) = RecordTests.RecordArray8.f(2);
  Real y[2] = a.x[1:2];
 
 public
  function RecordTests.RecordArray8.f
-  input Integer n;
-  output RecordTests.RecordArray8.A a(n = n);
+  input Integer n2;
+  output RecordTests.RecordArray8.A a(n = n2,x(size() = {n}));
  algorithm
-  a.x := 1:n;
+  a.x := 1:n2;
   return;
  end RecordTests.RecordArray8.f;
 
@@ -2980,6 +2980,66 @@ equation
 end RecordTests.RecordScalarize26;
 ")})));
 end RecordScalarize26;
+
+model RecordScalarize27
+    record R
+        Real[n] x;
+        parameter Integer n;
+    end R;
+    
+    R r1;
+    R r2(n = 0);
+    R r3(x = 1:0);
+    R r4(n = 2, x = {1,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize27",
+            description="Flattening of model with record that gets array size of member from function call that returns entire record",
+            flatModel="
+fclass RecordTests.RecordScalarize27
+ parameter Integer r1.n;
+ parameter Integer r2.n = 0 /* 0 */;
+ parameter Integer r3.n;
+ constant Real r4.x[1] = 1;
+ constant Real r4.x[2] = 2;
+ parameter Integer r4.n = 2 /* 2 */;
+end RecordTests.RecordScalarize27;
+")})));
+end RecordScalarize27;
+
+
+model RecordScalarize28
+    record R
+        Real[n] x = 1:n;
+        parameter Integer n = 1;
+    end R;
+    
+    R r1;
+    R r2(n = 2);
+    R r3(x = {1});
+    R r4(n = 3, x = {1,3,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize28",
+            description="Flattening of model with record that gets array size of member from function call that returns entire record",
+            flatModel="
+fclass RecordTests.RecordScalarize28
+ constant Real r1.x[1] = 1;
+ parameter Integer r1.n = 1 /* 1 */;
+ constant Real r2.x[1] = 1;
+ constant Real r2.x[2] = 2;
+ parameter Integer r2.n = 2 /* 2 */;
+ constant Real r3.x[1] = 1;
+ parameter Integer r3.n = 1 /* 1 */;
+ constant Real r4.x[1] = 1;
+ constant Real r4.x[2] = 3;
+ constant Real r4.x[3] = 2;
+ parameter Integer r4.n = 3 /* 3 */;
+end RecordTests.RecordScalarize28;
+")})));
+end RecordScalarize28;
 
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
