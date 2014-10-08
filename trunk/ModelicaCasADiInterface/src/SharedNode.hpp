@@ -34,7 +34,9 @@ namespace ModelicaCasADi
 {
 class SharedNode: public Printable {
     public:
+#ifdef MODELICACASADI_WITH_SWIG
         virtual void *_get_swig_p_type();
+#endif
 };
 
 inline void incRefNode(SharedNode *node) { 

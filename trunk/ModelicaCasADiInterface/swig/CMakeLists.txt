@@ -47,3 +47,5 @@ add_custom_target(modelicacasadi_wrapper
   DEPENDS ${SWIG_MODULE_${MODULE_NAME}_REAL_NAME})
 set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
   PROPERTIES LINK_FLAGS -shared)
+  set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME} 
+  PROPERTIES COMPILE_DEFINITIONS MODELICACASADI_WITH_SWIG)
