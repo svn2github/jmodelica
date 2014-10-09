@@ -165,7 +165,7 @@ static int reserve(jmi_delaybuffer_t *buffer, int capacity) {
     /* Allocate new buffer */
     new_capacity = buffer->capacity;
     while (new_capacity < capacity) new_capacity *= 2;
-    new_buf = (jmi_delay_point_t *)calloc(buffer->capacity, sizeof(jmi_delay_point_t));
+    new_buf = (jmi_delay_point_t *)calloc(new_capacity, sizeof(jmi_delay_point_t));
     if (new_buf == NULL) return -1;
 
     /* Transfer contents */
@@ -184,6 +184,7 @@ static int reserve(jmi_delaybuffer_t *buffer, int capacity) {
 
     /* Update buffer object */
     buffer->buf = new_buf;
+    buffer->capacity = new_capacity;
     buffer->head = 0;
 
     return 0;
@@ -349,7 +350,6 @@ static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolea
     jmi_real_t y;
     put(buffer, t_curr, y_curr, 0);
     y = evaluate(buffer, at_event, tr, position);
-    buffer->size--;
     return y;
 }
 
