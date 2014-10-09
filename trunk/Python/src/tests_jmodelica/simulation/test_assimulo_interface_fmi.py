@@ -244,6 +244,16 @@ class Test_Singular_Systems:
         file_name = os.path.join(get_files_path(), 'Modelica', 'Singular.mo')
 
         compile_fmu("Singular.LinearInf", file_name)
+        compile_fmu("Singular.Linear2", file_name)
+    
+    @testattr(stddist = True)
+    def test_linear_zero_hold(self):
+        model = load_fmu("Singular_Linear2.fmu", log_level=6)
+        model.set("_log_level", 6)
+        
+        model.set("a33", 0.0)
+        model.initialize()
+        assert model.get("z") == 5.0
     
     @testattr(stddist = True)
     def test_linear_inf_1(self):

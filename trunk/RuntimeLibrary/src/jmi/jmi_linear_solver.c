@@ -154,8 +154,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     
     /* Compute right hand side at initial x*/ 
-    /* info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE); */
-    info = block->F(block->problem_data,solver->zero_vector, block->res, JMI_BLOCK_EVALUATE);
+    if (solver->singular_jacobian == 1) {
+        /* In case of singular system, use the last point in the calculation of the b-vector */
+        info = block->F(block->problem_data,block->x, block->res, JMI_BLOCK_EVALUATE);
+    } else {
+        info = block->F(block->problem_data,solver->zero_vector, block->res, JMI_BLOCK_EVALUATE);
+    }
     if(info) {
 		/* Close the LinearSolve log node and generate the Error/Warning node and return. */
 		if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
@@ -232,15 +236,25 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         return -1;
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {
-        for (i=0;i<n_x;i++) {
-             /* block->x[i] = block->initial[i] + block->res[i] * solver->cScale[i]; */
-             block->x[i] = block->res[i] * solver->cScale[i];
+        if (solver->singular_jacobian == 1) {
+            for (i=0;i<n_x;i++) {
+                 block->x[i] = block->x[i] + block->res[i] * solver->cScale[i];
+            }
+
+        } else {
+            for (i=0;i<n_x;i++) {
+                 block->x[i] = block->res[i] * solver->cScale[i];
+            }
         }
-    }
-    else {
-        for (i=0;i<n_x;i++) {
-            /* block->x[i] = block->initial[i] + block->res[i] ; */
-            block->x[i] = block->res[i];
+    } else {
+        if (solver->singular_jacobian == 1) {
+            for (i=0;i<n_x;i++) {
+                block->x[i] = block->x[i] + block->res[i];
+            }
+        } else {
+            for (i=0;i<n_x;i++) {
+                block->x[i] = block->res[i];
+            }
         }
     }
     
