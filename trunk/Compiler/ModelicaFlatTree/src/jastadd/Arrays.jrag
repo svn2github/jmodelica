@@ -1143,8 +1143,6 @@ aspect Arrays {
 	 */
 	syn Size InstComponentDecl.declaredSize() = 
 		hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : Size.SCALAR;
-    syn Size InstComponentDecl.declaredSizeCalc() =
-        hasFArraySubscripts() ? getFArraySubscripts().declarationSize(getFArraySubscripts().getFSubscripts()) : Size.SCALAR;
 	
 	/**
 	 * Get the array sizes. 
@@ -2758,9 +2756,6 @@ aspect ArrayHelpers {
 					return true;
 			return false;
 		}
-		public boolean isUnknownNoEval() {
-		    return isUnknown();
-		}
         
         /**
          * Check if length in dimension d is unknown.
@@ -3692,11 +3687,6 @@ aspect ArrayHelpers {
 			evaluate();
 			return super.isUnknown();
 		}
-		
-        @Override
-        public boolean isUnknownNoEval() {
-            return super.isUnknown();
-        }
 		
 	}
 	

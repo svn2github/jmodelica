@@ -1978,7 +1978,6 @@ aspect FlatPrettyPrint {
     eq FDiscrete.toString()        = "discrete ";
     eq FConstant.toString()        = "constant ";
     eq FContinuous.toString()      = "";	
-    eq FCompositeVariability.toString() = combine().toString();
 
     syn String FTypePrefixVariability.toStringLiteral();
     eq FParameter.toStringLiteral()       = "parameter";
@@ -1988,7 +1987,6 @@ aspect FlatPrettyPrint {
     eq FDiscrete.toStringLiteral()        = "discrete-time";
     eq FConstant.toStringLiteral()        = "constant";
     eq FContinuous.toStringLiteral()      = "continuous-time";
-    eq FCompositeVariability.toStringLiteral() = combine().toStringLiteral();
 
     syn String Restriction.toString();
     eq Model.toString()               = "model";

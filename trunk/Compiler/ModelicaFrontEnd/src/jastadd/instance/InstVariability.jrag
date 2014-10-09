@@ -61,11 +61,10 @@ aspect InstVariability {
                 return fContinuous();
             rec = rec.getInstComponentDecl(0);
         }
-        List<FTypePrefixVariability> l = new List<FTypePrefixVariability>();
-        for (InstComponentDecl icd : rec.allInstComponentDecls()) {
-            l.add(icd.variability());
-        }
-        return new FCompositeVariability(l).combineDown(super.combinedVariability());
+        FTypePrefixVariability var = fConstant();
+        for (InstComponentDecl icd : rec.allInstComponentDecls()) 
+            var = var.combine(icd.variability());
+        return super.combinedVariability().combineDown(var);
     }
     
     // The actual calculating of variabilities. Depends on defined variabilities
@@ -104,7 +103,6 @@ aspect InstVariability {
                 v = v.combineDown(fFinalParameter());
             }
             
-            // TODO: check specific component
             InstValueModification ivm = myInstValueModTop();
             if (ivm != null && !ivm.getFExp().type().isUnknown() && ivm.getFExp().variability().parameterVariability())
                 v = v.combineDown(ivm.getFExp().variability());

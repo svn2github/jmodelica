@@ -182,12 +182,6 @@ FFinalParameter : FKnownParameter;
 FConstant : FTypePrefixVariability;
 
 /**
- * Composite variability. Represents variability of
- * records between flattening and scalarization.
- */
-FCompositeVariability : FTypePrefixVariability ::= Component:FTypePrefixVariability*;
-
-/**
  * Base class for causality type prefixes.
  */
 abstract FTypePrefixInputOutput : FTypePrefix;

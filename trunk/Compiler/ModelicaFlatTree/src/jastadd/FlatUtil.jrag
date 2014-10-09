@@ -655,7 +655,7 @@ aspect FlatNames {
         FQNameFull res = new FQNameFull(name);
         int n = res.getNumFQNamePart();
         for (int i = getNumFQNamePart() - 1; i >= 0; i--)
-            res.setFQNamePart(getFQNamePart(i).fullCopy(), i + n);
+            res.setFQNamePart(getFQNamePart(i), i + n);
         return res;
     }
     
