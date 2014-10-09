@@ -1803,6 +1803,41 @@ end EvaluationTests.EvaluateAnnotation9;
 ")})));
 end EvaluateAnnotation9;
 
+model EvaluateAnnotation10
+    record R
+        parameter Real a = 1;
+        parameter Real b = a;
+        constant Real p = 3;
+    end R;
+
+    parameter R r1(a = 2);
+    
+    model M
+        parameter R r2 annotation(Evaluate=true);
+    end m;
+    
+    M m(r2 = r1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation10",
+            description="Evaluate annotation on record with mixed variabilities",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation10
+ structural parameter EvaluationTests.EvaluateAnnotation10.R r1(a = 2) = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
+ structural parameter EvaluationTests.EvaluateAnnotation10.R m.r2 = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
+
+public
+ record EvaluationTests.EvaluateAnnotation10.R
+  parameter Real a = 1 /* 1 */;
+  parameter Real b = a;
+  constant Real p = 3;
+ end EvaluationTests.EvaluateAnnotation10.R;
+
+end EvaluationTests.EvaluateAnnotation10;
+")})));
+end EvaluateAnnotation10;
+
 
 
 model FinalParameterEval1

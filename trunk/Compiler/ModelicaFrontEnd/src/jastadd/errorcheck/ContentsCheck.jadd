@@ -710,7 +710,7 @@ aspect StructuralParams {
 	}
 
     public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
-        if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
+        if (isStructuralParam || !variability().combine().parameterVariability() || inFunction() || isForIndex())
             return;
         // TODO: hierarchical check for records?
         if (indices().numElements() > 0 && isPrimitive() && !fixedAttributeCValue().reduceBooleanOr()) {

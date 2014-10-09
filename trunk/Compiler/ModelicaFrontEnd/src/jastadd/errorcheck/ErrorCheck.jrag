@@ -721,7 +721,7 @@ aspect InstanceErrorCheck {
             }
             
             // Mark parameters with Evaluate=true as structural
-            if (isParameter() && annotation().forPath("Evaluate").bool()) {
+            if (variability().combine().parameterVariability() && annotation().forPath("Evaluate").bool()) {
                 if (canEvaluateAsStructural())
                     markAsStructuralParameter(checkType);
                 else

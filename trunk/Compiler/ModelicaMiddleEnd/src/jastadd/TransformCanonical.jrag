@@ -1039,7 +1039,7 @@ aspect TransformCanonical {
             FAssignStmt stmt = new FAssignStmt(new FIdUseExp(left), right.fullCopy());
             stmt.shouldBeSorted = true;
             stmts.add(stmt);
-        } else {
+        } else if (attr != null) {
             type().genBindingAssignments(stmts, left, attr.getFAttributes());
         }
     }

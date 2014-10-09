@@ -1247,8 +1247,8 @@ model RecordBinding19
             description="String parameters in record with continuous part",
             flatModel="
 fclass RecordTests.RecordBinding19
- parameter String r1.x = \"A\" /* \"A\" */;
- parameter String r1.y = \"A\" /* \"A\" */;
+ structural parameter String r1.x = \"A\" /* \"A\" */;
+ structural parameter String r1.y = \"A\" /* \"A\" */;
  Real r1.z;
 equation
  r1.z = time;
@@ -1271,8 +1271,8 @@ model RecordBinding20
             description="Modified string parameters in record with continuous part",
             flatModel="
 fclass RecordTests.RecordBinding20
- parameter String r1.x = \"B\";
- parameter String r1.y = \"B\" /* \"B\" */;
+ structural parameter String r1.x = \"B\" /* \"B\" */;
+ structural parameter String r1.y = \"B\" /* \"B\" */;
  Real r1.z;
 equation
  r1.z = time;
@@ -1400,11 +1400,10 @@ model RecordBinding24
             flatModel="
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
- parameter Real r1.r2.y2 = 51 /* 51 */;
- parameter Real r1.r2.r3.x3;
+ final parameter Real r1.r2.y2 = 51 /* 51 */;
+ final parameter Real r1.r2.r3.x3 = 51.0 /* 51.0 */;
  parameter Real r1.r2.r3.y3;
 parameter equation
- r1.r2.r3.x3 = r1.r2.y2;
  r1.r2.r3.y3 = r1.y1;
 end RecordTests.RecordBinding24;
 ")})));
@@ -1657,7 +1656,7 @@ model RecordArray7
             flatModel="
 fclass RecordTests.RecordArray7
  structural parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray7.A a = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ parameter RecordTests.RecordArray7.A a(x(size() = {2})) = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
  Real y[2] = a.x[1:2];
 
 public
@@ -1678,10 +1677,10 @@ model RecordArray8
     end A;
     
     function f
-        input Integer n;
-        output A a(n=n);
+        input Integer n2;
+        output A a(n=n2);
     algorithm
-        a.x := 1:n;
+        a.x := 1:n2;
     end f;
     
     parameter Integer m = 2;
@@ -1695,15 +1694,15 @@ model RecordArray8
             flatModel="
 fclass RecordTests.RecordArray8
  structural parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray8.A a = RecordTests.RecordArray8.f(2);
+ parameter RecordTests.RecordArray8.A a(x(size() = {2})) = RecordTests.RecordArray8.f(2);
  Real y[2] = a.x[1:2];
 
 public
  function RecordTests.RecordArray8.f
-  input Integer n;
-  output RecordTests.RecordArray8.A a(n = n);
+  input Integer n2;
+  output RecordTests.RecordArray8.A a(n = n2,x(size() = {n}));
  algorithm
-  a.x := 1:n;
+  a.x := 1:n2;
   return;
  end RecordTests.RecordArray8.f;
 
@@ -2980,6 +2979,110 @@ equation
 end RecordTests.RecordScalarize26;
 ")})));
 end RecordScalarize26;
+
+model RecordScalarize27
+    record R
+        Real[n] x;
+        parameter Integer n;
+    end R;
+    
+    R r1;
+    R r2(n = 0);
+    R r3(x = 1:0);
+    R r4(n = 2, x = {1,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize27",
+            description="Flattening of record with size determined by parameter component",
+            flatModel="
+fclass RecordTests.RecordScalarize27
+ structural parameter Integer r1.n;
+ structural parameter Integer r2.n = 0 /* 0 */;
+ structural parameter Integer r3.n;
+ constant Real r4.x[1] = 1;
+ constant Real r4.x[2] = 2;
+ structural parameter Integer r4.n = 2 /* 2 */;
+end RecordTests.RecordScalarize27;
+")})));
+end RecordScalarize27;
+
+
+model RecordScalarize28
+    record R
+        Real[n] x = 1:n;
+        parameter Integer n = 1;
+    end R;
+    
+    R r1;
+    R r2(n = 2);
+    R r3(x = {1});
+    R r4(n = 3, x = {1,3,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize28",
+            description="Flattening of record with size determined by parameter component",
+            flatModel="
+fclass RecordTests.RecordScalarize28
+ constant Real r1.x[1] = 1;
+ structural parameter Integer r1.n = 1 /* 1 */;
+ constant Real r2.x[1] = 1;
+ constant Real r2.x[2] = 2;
+ structural parameter Integer r2.n = 2 /* 2 */;
+ constant Real r3.x[1] = 1;
+ structural parameter Integer r3.n = 1 /* 1 */;
+ constant Real r4.x[1] = 1;
+ constant Real r4.x[2] = 3;
+ constant Real r4.x[3] = 2;
+ structural parameter Integer r4.n = 3 /* 3 */;
+end RecordTests.RecordScalarize28;
+")})));
+end RecordScalarize28;
+
+model RecordScalarize29
+    constant Integer n = 2;
+    record R
+        Real[n] x = 1:n;
+    end R;
+    
+    function f
+        output R r;
+        algorithm
+    end f;
+    
+    R r = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize29",
+            description="Scalarization of record in function with non literal size",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize29
+ constant Integer n = 2;
+ Real r.x[1];
+ Real r.x[2];
+equation
+ (RecordTests.RecordScalarize29.R({r.x[1], r.x[2]})) = RecordTests.RecordScalarize29.f();
+
+public
+ function RecordTests.RecordScalarize29.f
+  output RecordTests.RecordScalarize29.R r;
+ algorithm
+  r.x[1] := 1;
+  r.x[2] := 2;
+  return;
+ end RecordTests.RecordScalarize29.f;
+
+ record RecordTests.RecordScalarize29.R
+  Real x[2];
+ end RecordTests.RecordScalarize29.R;
+
+end RecordTests.RecordScalarize29;
+")})));
+end RecordScalarize29;
 
 // TODO: Add more complicated combinations of arrays, records and modifiers
 

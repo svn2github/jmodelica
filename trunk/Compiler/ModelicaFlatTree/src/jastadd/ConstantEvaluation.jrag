@@ -2327,7 +2327,7 @@ aspect ConstantEvaluation {
         CValue val = CValue.UNKNOWN;
         if (evaluationValue != null) {
             val = evaluationValue;
-        } else if ((isConstant() || isParameter() || (inFunction() && !isInput())) && !isForIndex()) {
+        } else if ((variability().parameterOrLess() || (inFunction() && !isInput())) && !isForIndex()) {
             boolean func = inFunction();
             i = func ? i : Index.NULL;
             if (hasBindingFExp()) {
