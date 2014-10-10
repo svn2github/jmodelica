@@ -40,7 +40,8 @@ FClass : BaseNode ::= FQName
                       /UnknownFVariable/
                       FResidualPair*
                       FAttribute*
-                      DummyVariable:FVariable*;
+                      DummyVariable:FVariable*
+                      /[FDynamicResolver]/;
 
 /**
  * A flattened user-defined function.
@@ -1685,3 +1686,18 @@ FUnsupportedBuiltIn : FBuiltInFunctionCall ::= <Name>;
  * Dummy node for built-in functions that are ignored with a warning.
  */
 FIgnoredBuiltIn : FUnsupportedBuiltIn;
+
+
+/**
+ * Base class for all dynamic resolvers. A dynamic resolver is used when
+ * temporary ASTNodes are created but there is a need to resolve variables
+ * and other references.
+ */
+abstract FDynamicResolver : BaseNode;
+
+/**
+ * Dynamic resolver used during index reduction. Variables and equations are
+ * temporarily inserted into this node.
+ */
+FIndexReductionResolver : FDynamicResolver ::= <FClass:FClass> /[FVariable]/ /[FAbstractEquation]/;
+

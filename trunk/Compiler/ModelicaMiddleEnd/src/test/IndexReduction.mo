@@ -4770,5 +4770,372 @@ end IndexReduction.PartiallyPropagatedComposite1;
 ")})));
 end PartiallyPropagatedComposite1;
 
+package FunctionInlining
+    model Test1
+        function F
+            input Real i;
+            output Real o1;
+        algorithm
+            o1 := i;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i;
+            input Real i_der;
+            output Real o1_der;
+        algorithm
+            o1_der := F(i_der);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real a;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a*x;
+        der(vy) = a*y;
+        x^2 + y^2 = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test1",
+            description="Test function inlining during index reduction",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test1
+ Real x;
+ Real y;
+ Real vx;
+ Real vy;
+ Real a;
+ Real _der_y;
+ Real _der_vy;
+ Real _der_der_x;
+ Real _der_der_y;
+initial equation 
+ x = 0.0;
+ vx = 0.0;
+equation
+ der(x) = vx;
+ _der_y = vy;
+ der(vx) = a * x;
+ _der_vy = a * y;
+ x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test1.F(time);
+ 2 * x * der(x) + 2 * y * _der_y = 1.0;
+ _der_der_x = der(vx);
+ _der_der_y = _der_vy;
+ 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+
+public
+ function IndexReduction.FunctionInlining.Test1.F
+  input Real i;
+  output Real o1;
+ algorithm
+  o1 := i;
+  return;
+ annotation(derivative = IndexReduction.FunctionInlining.Test1.F_der);
+ end IndexReduction.FunctionInlining.Test1.F;
+
+end IndexReduction.FunctionInlining.Test1;
+")})));
+    end Test1;
+    
+    model Test2
+    
+        function F
+            input Real i;
+            output Real o1[2];
+        algorithm
+            o1[1] := i;
+            o1[2] := -i;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i;
+            input Real i_der;
+            output Real o1_der[2];
+        algorithm
+            o1_der := F(i_der);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x[2];
+        Real y[2];
+        Real vx[2];
+        Real vy[2];
+        Real a[2];
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a.*x;
+        der(vy) = a.*y;
+        x.^2 .+ y.^2 = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test2",
+            description="Test function inlining during index reduction",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test2
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+ Real vx[1];
+ Real vx[2];
+ Real vy[1];
+ Real vy[2];
+ Real a[1];
+ Real a[2];
+ Real _der_y[1];
+ Real _der_y[2];
+ Real _der_vy[1];
+ Real _der_vy[2];
+ Real _der_der_x[1];
+ Real _der_der_y[1];
+ Real _der_der_x[2];
+ Real _der_der_y[2];
+ Real temp_1[1];
+ Real temp_1[2];
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+ vx[1] = 0.0;
+ vx[2] = 0.0;
+equation
+ der(x[1]) = vx[1];
+ der(x[2]) = vx[2];
+ _der_y[1] = vy[1];
+ _der_y[2] = vy[2];
+ der(vx[1]) = a[1] .* x[1];
+ der(vx[2]) = a[2] .* x[2];
+ _der_vy[1] = a[1] .* y[1];
+ _der_vy[2] = a[2] .* y[2];
+ ({temp_1[1], temp_1[2]}) = IndexReduction.FunctionInlining.Test2.F(time);
+ x[1] .^ 2 .+ y[1] .^ 2 = temp_1[1];
+ x[2] .^ 2 .+ y[2] .^ 2 = temp_1[2];
+ 2 .* x[1] .* der(x[1]) .+ 2 .* y[1] .* _der_y[1] = 1.0;
+ _der_der_x[1] = der(vx[1]);
+ _der_der_y[1] = _der_vy[1];
+ 2 .* x[1] .* _der_der_x[1] .+ 2 .* der(x[1]) .* der(x[1]) .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* _der_y[1] .* _der_y[1]) = 0.0;
+ 2 .* x[2] .* der(x[2]) .+ 2 .* y[2] .* _der_y[2] = -1.0;
+ _der_der_x[2] = der(vx[2]);
+ _der_der_y[2] = _der_vy[2];
+ 2 .* x[2] .* _der_der_x[2] .+ 2 .* der(x[2]) .* der(x[2]) .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* _der_y[2] .* _der_y[2]) = 0.0;
+
+public
+ function IndexReduction.FunctionInlining.Test2.F
+  input Real i;
+  output Real[2] o1;
+ algorithm
+  o1[1] := i;
+  o1[2] := - i;
+  return;
+ annotation(derivative = IndexReduction.FunctionInlining.Test2.F_der);
+ end IndexReduction.FunctionInlining.Test2.F;
+
+end IndexReduction.FunctionInlining.Test2;
+")})));
+    end Test2;
+    
+    model Test3
+    
+        function F
+            input Real i;
+            output Real o1;
+        algorithm
+            o1 := i;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i;
+            input Real i_der;
+            output Real o1_der;
+        algorithm
+            o1_der := F(i_der);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real a;
+        Real b;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a*x;
+        der(vy) = a*y;
+        x^2 + y^2 = F(b);
+        b = time;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test3",
+            description="Test function inlining during index reduction",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test3
+ Real x;
+ Real y;
+ Real vx;
+ Real vy;
+ Real a;
+ Real b;
+ Real _der_y;
+ Real _der_vy;
+ Real _der_b;
+ Real _der_der_x;
+ Real _der_der_y;
+ Real _der_der_b;
+ Real temp_3;
+initial equation 
+ x = 0.0;
+ vx = 0.0;
+equation
+ der(x) = vx;
+ _der_y = vy;
+ der(vx) = a * x;
+ _der_vy = a * y;
+ x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test3.F(b);
+ b = time;
+ temp_3 = IndexReduction.FunctionInlining.Test3.F(_der_b);
+ 2 * x * der(x) + 2 * y * _der_y = temp_3;
+ _der_b = 1.0;
+ _der_der_x = der(vx);
+ _der_der_y = _der_vy;
+ 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = temp_3;
+ _der_der_b = 0.0;
+
+public
+ function IndexReduction.FunctionInlining.Test3.F
+  input Real i;
+  output Real o1;
+ algorithm
+  o1 := i;
+  return;
+ annotation(derivative = IndexReduction.FunctionInlining.Test3.F_der);
+ end IndexReduction.FunctionInlining.Test3.F;
+
+end IndexReduction.FunctionInlining.Test3;
+")})));
+    end Test3;
+    
+    model Test4
+    
+        function F
+            input Real i;
+            output Real o1[2];
+        algorithm
+            o1[1] := i;
+            o1[2] := -i;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i;
+            input Real i_der;
+            output Real o1_der[2];
+        algorithm
+            o1_der := F(i_der);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x[2];
+        Real y[2];
+        Real vx[2];
+        Real vy[2];
+        Real a[2];
+        Real b;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a.*x;
+        der(vy) = a.*y;
+        x.^2 .+ y.^2 = F(b);
+        b = time;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test4",
+            description="Test function inlining during index reduction",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+ Real vx[1];
+ Real vx[2];
+ Real vy[1];
+ Real vy[2];
+ Real a[1];
+ Real a[2];
+ Real b;
+ Real _der_y[1];
+ Real _der_y[2];
+ Real _der_vy[1];
+ Real _der_vy[2];
+ Real _der_b;
+ Real _der_der_x[1];
+ Real _der_der_y[1];
+ Real _der_der_b;
+ Real _der_der_x[2];
+ Real _der_der_y[2];
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_4;
+ Real temp_5;
+ Real temp_8;
+ Real temp_9;
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+ vx[1] = 0.0;
+ vx[2] = 0.0;
+equation
+ der(x[1]) = vx[1];
+ der(x[2]) = vx[2];
+ _der_y[1] = vy[1];
+ _der_y[2] = vy[2];
+ der(vx[1]) = a[1] .* x[1];
+ der(vx[2]) = a[2] .* x[2];
+ _der_vy[1] = a[1] .* y[1];
+ _der_vy[2] = a[2] .* y[2];
+ ({temp_1[1], temp_1[2]}) = IndexReduction.FunctionInlining.Test4.F(b);
+ x[1] .^ 2 .+ y[1] .^ 2 = temp_1[1];
+ x[2] .^ 2 .+ y[2] .^ 2 = temp_1[2];
+ b = time;
+ ({temp_4, temp_5}) = IndexReduction.FunctionInlining.Test4.F(_der_b);
+ 2 .* x[1] .* der(x[1]) .+ 2 .* y[1] .* _der_y[1] = temp_4;
+ _der_b = 1.0;
+ _der_der_x[1] = der(vx[1]);
+ _der_der_y[1] = _der_vy[1];
+ ({temp_8, temp_9}) = IndexReduction.FunctionInlining.Test4.F(_der_der_b);
+ 2 .* x[1] .* _der_der_x[1] .+ 2 .* der(x[1]) .* der(x[1]) .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* _der_y[1] .* _der_y[1]) = temp_8;
+ _der_der_b = 0.0;
+ 2 .* x[2] .* der(x[2]) .+ 2 .* y[2] .* _der_y[2] = temp_5;
+ _der_der_x[2] = der(vx[2]);
+ _der_der_y[2] = _der_vy[2];
+ 2 .* x[2] .* _der_der_x[2] .+ 2 .* der(x[2]) .* der(x[2]) .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* _der_y[2] .* _der_y[2]) = temp_9;
+
+public
+ function IndexReduction.FunctionInlining.Test4.F
+  input Real i;
+  output Real[2] o1;
+ algorithm
+  o1[1] := i;
+  o1[2] := - i;
+  return;
+ annotation(derivative = IndexReduction.FunctionInlining.Test4.F_der);
+ end IndexReduction.FunctionInlining.Test4.F;
+
+end IndexReduction.FunctionInlining.Test4;
+")})));
+    end Test4;
+end FunctionInlining;
+
 end IndexReduction;
 

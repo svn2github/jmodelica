@@ -1973,3 +1973,69 @@ aspect AttributeUtil {
     }
 
 }
+
+/**
+* This aspect contains JastAdd hacks, and should be avoided, however this is
+* necessary evil in order to reduce memory consumption. If used correctly, it
+* shouldn't cause any problems.
+*/
+aspect JastAddHacks{
+    
+    public class FAbstractVariable {
+        /**
+         * This method takes a variable and adds it to the tree. This is done by
+         * settings its parent to the same parent as this node.
+         */
+        public <V extends FAbstractVariable> V dynamicVariable(V var) {
+            var.parent = this.parent;
+            return var;
+        }
+    }
+    
+    public class FClass {
+        public <V extends FDynamicResolver> V dynamicResolver(V res) {
+            getFDynamicResolverOpt().setChild(res, 0);
+            return (V) getFDynamicResolverOpt().getChild(0);
+        }
+    }
+    
+    syn nta Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
+    syn nta Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
+    syn nta Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
+    
+    /**
+     * Dynamic resolver used during index reduction to handle differentiated
+     * variables and equations.
+     */
+    public class FIndexReductionResolver {
+        
+        private final Map<String, FVariable> lookupMap = new HashMap<String, FVariable>();
+        /**
+         * This method takes a variable and adds it to the tree. This is done by
+         * settings its parent to the same parent as this node.
+         * It also adds it to the list of variables to resolve when myFV is called.
+         */
+        public <V extends FVariable> V dynamicVariable(V var) {
+            lookupMap.put(var.name(), var);
+            getFVariableOpt().setChild(var, 0);
+            return (V) getFVariableOpt().getChild(0);
+        }
+        
+        /**
+         * This method takes an equation and adds it to the tree. This is done by
+         * settings its parent to the same parent as this node.
+         */
+        public <V extends FAbstractEquation> V dynamicEquation(V eqn) {
+            getFAbstractEquationOpt().setChild(eqn, 0);
+            return (V) getFAbstractEquationOpt().getChild(0);
+        }
+    }
+    
+    eq FIndexReductionResolver.getChild().lookupFV(FQName fqn) {
+        FVariable var = lookupMap.get(fqn.name());
+        if (var != null)
+            return var;
+        return getFClass().lookupFV(fqn);
+    }
+    
+}
