@@ -364,6 +364,9 @@ aspect EquationSolve {
 	
 	public FRelExp FRelExp.originalFRelExp = null;
 	public FSampleExp FSampleExp.originalFSampleExp = null;
+	public FDelayExp FDelayExp.originalFDelayExp = null;
+	
+	syn FDelayExp FDelayExp.originalFDelayExp() = (originalFDelayExp == null) ? this : originalFDelayExp;
 	
     /**
      * This method is used when the original node has been discarded and the
@@ -390,24 +393,39 @@ aspect EquationSolve {
         originalFSampleExp = null;
         super.resetOriginalReferences();
     }
+    
+    @Override
+    protected void FDelayExp.resetOriginalReferences() {
+        originalFDelayExp = null;
+        super.resetOriginalReferences();
+    }
 
 	protected void ASTNode.traverseSymbolic(ASTNode e) {
 		for (int i = 0; i < getNumChildNoTransform(); i++) {
 			getChildNoTransform(i).traverseSymbolic(e.getChildNoTransform(i));
 		}
 	}
-
+    
+    @Override
 	protected void FRelExp.traverseSymbolic(ASTNode e) {
 		FRelExp re = (FRelExp) e;
 		originalFRelExp = (re.originalFRelExp == null) ? re : re.originalFRelExp;
 		super.traverseSymbolic(e);
 	}
-
+    
+    @Override
 	protected void FSampleExp.traverseSymbolic(ASTNode e) {
 		FSampleExp se = (FSampleExp) e;
 		originalFSampleExp = (se.originalFSampleExp == null) ? se : se.originalFSampleExp;
 		super.traverseSymbolic(e);
 	}
+	
+    @Override
+    protected void FDelayExp.traverseSymbolic(ASTNode e) {
+        FDelayExp de = (FDelayExp) e;
+        originalFDelayExp = de.originalFDelayExp();
+        super.traverseSymbolic(e);
+    }
 	
     public ASTNode ASTNode.copySymbolic() {
 		ASTNode res = fullCopy();

@@ -2377,11 +2377,6 @@ aspect CCodeGen {
 		str.print(")");
 	}
 
-    public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        getFExp().prettyPrint_C(p, str, indent);
-    }
-
-
 	public void FCeilFuncExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("ceil(");
 		p.print(getX(), str, indent);
@@ -2527,6 +2522,92 @@ aspect CCodeGen {
 	public void FBooleanLitExpFalse.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("JMI_FALSE");
 	}
+
+    /**
+     * Generate temp declarations for the initialization of delay blocks.
+     */
+    public void FDelayExp.genInitVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(getFExp(), str, indent);
+        p.printVarDecls(myMaxDelayExp(), str, indent);
+    }
+    
+    /**
+     * Generate the initialization of delay blocks.
+     */
+    public void FDelayExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
+        FExp maxDelayExp = myMaxDelayExp();
+        p.printPreSteps(getFExp(), str, indent);
+        p.printPreSteps(maxDelayExp, str, indent);
+        
+        str.format("%sjmi_delay_init(jmi, %d, ", indent, myDelayIndex());
+        str.print(getDelay().variability().parameterOrLess() ? "JMI_TRUE" : "JMI_FALSE"); // jmi_boolean fixed
+        str.print(", "); 
+        str.print(inEventGeneratingLocation() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
+        str.print(", "); 
+        p.print(maxDelayExp, str, indent); // jmi_real_t max_delay
+        str.print(", "); 
+        p.print(getFExp(), str, indent); // jmi_real_t y0
+        str.println(");");
+        
+        p.printPostSteps(getFExp(), str, indent);
+        p.printPostSteps(maxDelayExp, str, indent);
+    }
+    syn FExp FDelayExp.myMaxDelayExp() = hasMax() ? getMax() : getDelay();
+    
+    /**
+     * Generate temp declarations for the sampling of delay blocks.
+     */
+    public void FDelayExp.genSampleVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(getFExp(), str, indent);
+    }
+    
+    /**
+     * Generate the sampling of delay blocks.
+     */
+    public void FDelayExp.genSample_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(getFExp(), str, indent);
+        str.format("%sjmi_delay_record_sample(jmi, %d, ", indent, myDelayIndex());
+        p.print(getFExp(), str, indent);
+        str.println(");");
+        p.printPostSteps(getFExp(), str, indent);
+    }
+    
+    
+    public void FDelayExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printVarDecls(getFExp(), str, indent);
+        } else {
+            super.genVarDecls_C(p, str, indent);
+        }
+    }
+    
+    public void FDelayExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printPreSteps(getFExp(), str, indent);
+        } else {
+            super.genTempVars_C(p, str, indent);
+        }
+    }
+    
+    public void FDelayExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printPostSteps(getFExp(), str, indent);
+        } else {
+            super.genTempFree_C(p, str, indent);
+        }
+    }
+    
+    public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.print(getFExp(), str, indent);
+        } else {
+            str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
+            p.print(getFExp(), str, indent);
+            str.print(", ");
+            p.print(getDelay(), str, indent);
+            str.print(")");
+        }
+    }
 	
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
 		// Generate temp arrays for all array inputs and outputs

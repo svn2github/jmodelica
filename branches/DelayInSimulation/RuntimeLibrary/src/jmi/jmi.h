@@ -1471,4 +1471,17 @@ int jmi_with_cad_derivatives(jmi_t* jmi);
  */
 int jmi_set_start_values(jmi_t *jmi);
 
+/* Initialize delay interface 
+ * Called when initializing jmi struct */
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample);
+
+/* Initialize delay blocks 
+ * Called after model initalization */
+int jmi_init_delay_blocks(jmi_t* jmi);
+
+/* Sample delay blocks
+ * Called after each completed integrator step and event iteration.
+ * Expects event mode set with jmi_delay_set_event_mode */
+int jmi_sample_delay_blocks(jmi_t* jmi);
+
 #endif

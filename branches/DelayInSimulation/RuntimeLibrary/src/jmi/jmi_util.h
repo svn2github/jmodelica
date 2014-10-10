@@ -851,8 +851,7 @@ int jmi_init(jmi_t** jmi,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
         jmi_real_t* nominals,
-        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks,
-        int n_delays);
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -1035,6 +1034,9 @@ struct jmi_t {
 
     jmi_dae_t* dae;                      /**< \brief A jmi_dae_t struct pointer. */
     jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
+    
+    jmi_generic_func_t init_delay;       /**< \brief Function for initializing delay structures. */
+    jmi_generic_func_t sample_delay;       /**< \brief Function for initializing delay structures. */
 
     int n_real_ci;                       /**< \brief Number of independent constants. */
     int n_real_cd;                       /**< \brief Number of dependent constants. */
