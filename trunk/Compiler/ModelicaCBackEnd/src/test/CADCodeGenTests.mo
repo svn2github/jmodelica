@@ -2082,7 +2082,7 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest1_f_der_AD0(jmi_ad_var_t x_v
     jmi_ad_var_t i_v;
     /*Zero derivative function*/
     func_CADCodeGenTests_FunctionDiscreteOutputTest1_f_def0(x_var_v, &i_v);
-    if (i_o != NULL) *i_o = i_v;
+    JMI_RET(GEN, i_o, i_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -2143,7 +2143,7 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD1(jmi_ad_var_t* y
     jmi_ad_var_t y_v;
     /*Zero derivative function*/
     func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_def1(&y_v);
-    if (y_o != NULL) *y_o = y_v;
+    JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -2210,7 +2210,7 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD0(jmi_array_t* x_v
     jmi_ad_var_t i_v;
     /*Zero derivative function*/
     func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_def0(x_var_a, &i_v);
-    if (i_o != NULL) *i_o = i_v;
+    JMI_RET(GEN, i_o, i_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -2532,8 +2532,8 @@ void func_CADCodeGenTests_CADDerAnno2_f2_der_AD0(jmi_ad_var_t x1_var_v, jmi_ad_v
     /*Using specified derivative annotation instead of AD*/
     func_CADCodeGenTests_CADDerAnno2_f2_def0(x1_var_v, i_v, b_v, &i1_v, &b1_v, &y_var_v);
     func_CADCodeGenTests_CADDerAnno2_f_der_def1(x1_var_v, i_v, b_v, x1_der_v, &y_der_v);
-    if (i1_o != NULL) *i1_o = i1_v;
-    if (b1_o != NULL) *b1_o = b1_v;
+    JMI_RET(GEN, i1_o, i1_v)
+    JMI_RET(GEN, b1_o, b1_v)
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
     JMI_DYNAMIC_FREE()
@@ -2549,9 +2549,9 @@ void func_CADCodeGenTests_CADDerAnno2_f2_def0(jmi_ad_var_t x1_v, jmi_ad_var_t i_
     i1_v = 1;
     b1_v = JMI_TRUE;
     y_v = COND_EXP_EQ(b_v, JMI_TRUE, (1.0 * (x1_v) * (x1_v)), (1.0 * (x1_v) * (x1_v) * (x1_v)));
-    if (i1_o != NULL) *i1_o = i1_v;
-    if (b1_o != NULL) *b1_o = b1_v;
-    if (y_o != NULL) *y_o = y_v;
+    JMI_RET(GEN, i1_o, i1_v)
+    JMI_RET(GEN, b1_o, b1_v)
+    JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -2566,7 +2566,7 @@ void func_CADCodeGenTests_CADDerAnno2_f_der_def1(jmi_ad_var_t x1_v, jmi_ad_var_t
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t der_y1_v;
     der_y1_v = COND_EXP_EQ(b1_v, JMI_TRUE, AD_WRAP_LITERAL(2) * x1_v * der_x1_v, AD_WRAP_LITERAL(3) * (1.0 * (x1_v) * (x1_v)) * der_x1_v);
-    if (der_y1_o != NULL) *der_y1_o = der_y1_v;
+    JMI_RET(GEN, der_y1_o, der_y1_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -4781,7 +4781,7 @@ void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_constructor_def1(jmi_ad
     JMI_DYNAMIC_INIT()
     jmi_extobj_t eo_v;
     eo_v = init_myEO(i_v);
-    if (eo_o != NULL) *eo_o = eo_v;
+    JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -4796,7 +4796,7 @@ void func_CADCodeGenTests_TestExtObject1_f_def2(jmi_extobj_t eo_v, jmi_ad_var_t 
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t r_v;
     r_v = useMyEO(eo_v, x_v);
-    if (r_o != NULL) *r_o = r_v;
+    JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -4811,7 +4811,7 @@ void func_CADCodeGenTests_TestExtObject1_f_der_def3(jmi_extobj_t eo_v, jmi_ad_va
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t r_der_v;
     r_der_v = useMyEO_der(eo_v, x_v, x_der_v);
-    if (r_der_o != NULL) *r_der_o = r_der_v;
+    JMI_RET(GEN, r_der_o, r_der_v)
     JMI_DYNAMIC_FREE()
     return;
 }

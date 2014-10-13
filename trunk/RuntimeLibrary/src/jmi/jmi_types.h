@@ -63,6 +63,13 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
       JMI_SET_STR(DEST, SRC) \
       JMI_DYNAMIC_ADD_POINTER(DEST) \
     }
+#define JMI_ASG_STR_ARR(DEST, SRC) \
+    { \
+      int i; \
+      for (i = 1; i <= DEST->num_elems; i++) { \
+        JMI_ASG_STR(jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
+      }\
+    }
     
 #define JMI_SET_STR(DEST, SRC) \
     JMI_INI_STR_DYNA(DEST, JMI_LEN(SRC)) \
@@ -77,6 +84,13 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
     *DEST = SRC;
 #define JMI_RET_STR(DEST, SRC) \
     JMI_SET_STR(*DEST, SRC)
+#define JMI_RET_STR_ARR(DEST, SRC) \
+    { \
+      int i; \
+      for (i = 1; i <= DEST->num_elems; i++) { \
+        JMI_RET_STR(&jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
+      }\
+    }
 
 /* Free string */
 #define JMI_FREE(NAME) free(NAME);

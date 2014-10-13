@@ -980,6 +980,8 @@ aspect Arrays {
 	eq FSemiLinearExp.size()            = vectorizedSize();
 
     eq FDelayExp.size()                 = getFExp().size();
+    
+    eq FStringExp.size()                = getValue().size();
 
     syn Size FBuiltInFunctionCall.vectorizedSize() {
         for (FExp e : myArgs())

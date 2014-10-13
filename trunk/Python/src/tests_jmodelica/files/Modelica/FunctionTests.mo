@@ -299,5 +299,51 @@ model LoadResource1
     assert(time < 2, s6);
 end LoadResource1;
 
+model StringArray1
+    function strlen
+        input String s;
+        output Integer n;
+        external;
+    end strlen;
+    
+    function stringify
+        input Real[:] x;
+        output String[size(x,1)] y;
+      algorithm
+        for i in 1:size(x,1) loop
+            y[i] := String(x[i]);
+        end for;
+    end stringify;
+    
+    function stringcat
+        input String[:] x;
+        output String y;
+      algorithm
+        y := "";
+        for i in 1:size(x,1) loop
+            y := y + x[i];
+        end for;
+    end stringcat;
+    
+    function f
+        input Real[:] x;
+        output Integer n;
+      protected
+        String[:] sx = stringify(x);
+        String tx = stringcat(sx);
+      algorithm
+        Modelica.Utilities.Streams.print(tx);
+        n := strlen(tx);
+    end f;
+    
+    Integer n;
+    discrete Real t;
+  equation
+    when time > pre(t) + 0.2 then
+        n = f({1,2,3,4} .+ time);
+        t = pre(t) + 0.2;
+    end when;
+end StringArray1;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;

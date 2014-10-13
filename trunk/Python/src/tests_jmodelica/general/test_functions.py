@@ -179,3 +179,26 @@ class TestLoadResource(SimulationTest):
         Test that constant evaluated load resource compiles
         """
         
+    
+class TestStringArray(SimulationTest):
+    """
+    Test of string arrays in functions
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.StringArray1', options={'inline_functions':'none', 'variability_propagation':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
+        self.run()
+        
+    @testattr(stddist = True)
+    def test_stringArrayInFunction(self):
+        """
+        Test that string arrays in function compiles and simulates
+        """
+        self.assert_end_value('n', 12)
+        

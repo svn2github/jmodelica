@@ -248,6 +248,14 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
     type name##_rec;\
     type* name = &name##_rec;
 
+/* Handle return value */
+#define JMI_RET(TYPE, DEST, SRC) \
+    if (DEST != NULL) { JMI_RET_##TYPE(DEST, SRC) }
+    
+/* Put return value in return variable in function */
+#define JMI_RET_GEN(DEST, SRC) \
+    *DEST = SRC;
+
 #ifdef _MSC_VER
 /* Note: the return value isn't the same as for snprintf(). */
 #define snprintf sprintf_s
