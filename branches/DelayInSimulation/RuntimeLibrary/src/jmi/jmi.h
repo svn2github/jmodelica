@@ -233,6 +233,7 @@
 #include "jmi_util.h"
 #include "jmi_global.h"
 #include "jmi_block_solver.h"
+#include "jmi_delay.h"
 
 
 /* @{ */
