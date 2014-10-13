@@ -4612,6 +4612,168 @@ end IndexReduction.FunctionCallEquation3;
 ")})));
 end FunctionCallEquation3;
 
+model FunctionCallEquation4
+    function F2
+        input Real[2] a;
+        output Real[2] y;
+    algorithm
+        y[1] := a[1] + a[2];
+        y[2] := a[1] - a[2];
+        annotation(Inline=false,derivative(noDerivative=b)=F2_der);
+    end F2;
+
+    function F2_der
+        input Real[2] a;
+        input Real[2] a_der;
+        output Real[2] y_der;
+    algorithm
+        y_der[1] := a_der[1] + a_der[2];
+        y_der[2] := a_der[1] - a_der[2];
+        annotation(Inline=false);
+    end F2_der;
+
+    Real x[2];
+    Real y[2];
+    Real a;
+    
+equation
+    der(x) = der(y) * 2;
+    y[1] = a + 1;
+    ({a, y[2]}) = F2(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation4",
+            description="Test so that non scalar equations such as FunctionCallEquations are handled correctly. The equation \"y[1] = a + 1\" should be differentiated",
+            flatModel="
+fclass IndexReduction.FunctionCallEquation4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+ Real a;
+ Real _der_x[1];
+ Real _der_y[1];
+ Real _der_x[2];
+initial equation 
+ y[2] = 0.0;
+ a = 0.0;
+equation
+ _der_x[1] = _der_y[1] * 2;
+ _der_x[2] = der(y[2]) * 2;
+ y[1] = a + 1;
+ ({a, y[2]}) = IndexReduction.FunctionCallEquation4.F2({x[1], x[2]});
+ ({der(a), der(y[2])}) = IndexReduction.FunctionCallEquation4.F2_der({x[1], x[2]}, {_der_x[1], _der_x[2]});
+ _der_y[1] = der(a);
+
+public
+ function IndexReduction.FunctionCallEquation4.F2
+  input Real[2] a;
+  output Real[2] y;
+ algorithm
+  y[1] := a[1] + a[2];
+  y[2] := a[1] - a[2];
+  return;
+ annotation(derivative(noDerivative = b) = IndexReduction.FunctionCallEquation4.F2_der);
+ end IndexReduction.FunctionCallEquation4.F2;
+
+ function IndexReduction.FunctionCallEquation4.F2_der
+  input Real[2] a;
+  input Real[2] a_der;
+  output Real[2] y_der;
+ algorithm
+  y_der[1] := a_der[1] + a_der[2];
+  y_der[2] := a_der[1] - a_der[2];
+  return;
+ end IndexReduction.FunctionCallEquation4.F2_der;
+
+end IndexReduction.FunctionCallEquation4;
+")})));
+end FunctionCallEquation4;
+
+model FunctionCallEquation5
+    function F2
+        input Real[2] a;
+        output Real[2] y;
+    algorithm
+        y[1] := a[1] + a[2];
+        y[2] := a[1] - a[2];
+        annotation(Inline=false,derivative(noDerivative=b)=F2_der);
+    end F2;
+
+    function F2_der
+        input Real[2] a;
+        input Real[2] a_der;
+        output Real[2] y_der;
+    algorithm
+        y_der[1] := a_der[1] + a_der[2];
+        y_der[2] := a_der[1] - a_der[2];
+        annotation(Inline=false);
+    end F2_der;
+
+    Real x[2];
+    Real y[2];
+    Real a;
+    Real b;
+    
+equation
+    der(x) = der(y) * 2;
+    b = a + 1;
+    ({a, y[2]}) = F2(x);
+    y[1] = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation5",
+            description="Test so that non scalar equations such as FunctionCallEquations are handled correctly. The equation \"b = a + 1;\" should not be differentiated",
+            flatModel="
+fclass IndexReduction.FunctionCallEquation5
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+ Real a;
+ Real b;
+ Real _der_x[1];
+ Real _der_y[1];
+ Real _der_x[2];
+initial equation 
+ y[2] = 0.0;
+ a = 0.0;
+equation
+ _der_x[1] = _der_y[1] * 2;
+ _der_x[2] = der(y[2]) * 2;
+ b = a + 1;
+ ({a, y[2]}) = IndexReduction.FunctionCallEquation5.F2({x[1], x[2]});
+ y[1] = time;
+ ({der(a), der(y[2])}) = IndexReduction.FunctionCallEquation5.F2_der({x[1], x[2]}, {_der_x[1], _der_x[2]});
+ _der_y[1] = 1.0;
+
+public
+ function IndexReduction.FunctionCallEquation5.F2
+  input Real[2] a;
+  output Real[2] y;
+ algorithm
+  y[1] := a[1] + a[2];
+  y[2] := a[1] - a[2];
+  return;
+ annotation(derivative(noDerivative = b) = IndexReduction.FunctionCallEquation5.F2_der);
+ end IndexReduction.FunctionCallEquation5.F2;
+
+ function IndexReduction.FunctionCallEquation5.F2_der
+  input Real[2] a;
+  input Real[2] a_der;
+  output Real[2] y_der;
+ algorithm
+  y_der[1] := a_der[1] + a_der[2];
+  y_der[2] := a_der[1] - a_der[2];
+  return;
+ end IndexReduction.FunctionCallEquation5.F2_der;
+
+end IndexReduction.FunctionCallEquation5;
+")})));
+end FunctionCallEquation5;
+
 model DoubleDifferentiationWithSS1
     parameter Real L = 1 "Pendulum length";
     parameter Real g = 9.81 "Acceleration due to gravity";

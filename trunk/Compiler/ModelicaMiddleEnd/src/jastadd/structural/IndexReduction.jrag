@@ -457,9 +457,14 @@ aspect IndexReduction {
         if (fEqn.numFExp() > MAX_N_FEXP_IN_EQ)
             throw new IndexReductionException("Maximum number of expressions in a single equation has been reached");
         
-        for (IndexReductionEq member : eqn.getGroupMembers())
-            if (member.getMatching() != null)
-                differentiateVariable(member.getMatching(), newDiffedVars, varsToRemove);
+        // Handle nonscalar equations and LHS variables that needs to be differentiated
+        
+        for (IndexReductionVar variable : lookupVarsInSet(fEqn.FIdUseExpsInLHS())) {
+            if (variable.getMatching() != null && variable.getMatching() != eqn)
+                eqToMatchStack.add(variable.getMatching());
+            differentiateVariable(variable, newDiffedVars, varsToRemove);
+            
+        }
         
         Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
         if (diffedFEqns.size() != 1)
@@ -467,6 +472,7 @@ aspect IndexReduction {
                     " in a single equation when differentiating on time");
         FAbstractEquation diffedFEqn = diffedFEqns.iterator().next();
         
+        // Handle inlining of function calls
         Collection<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
         Set<FAbstractEquation> splitOriginalFEqn = null;
         FAbstractEquation inlinedDiffedFEqn = diffedFEqn;
@@ -486,7 +492,10 @@ aspect IndexReduction {
                     addVariable(var.name(), var);
             }
             
-            ASTNode.log.debug("Inlining done, got %s", inlinedDiffedFEqn);
+            if (inlinedDiffedFEqn == null)
+                ASTNode.log.debug("Inlining done, original equation has been split into multiple equations");
+            else
+                ASTNode.log.debug("Inlining done, got %s", inlinedDiffedFEqn);
             newEquations.addAll(inliner.getNewEquations());
         }
         
@@ -675,7 +684,8 @@ aspect IndexReduction {
                 // Remove variables that have been differentiated, Step 3b-1
                 for (IndexReductionVar var : varsToRemove) {
                     // Copy matching to differentiated var
-                    if (var.getMatching() != null && !match(var.getMatching().getMeDifferentiated(), var.getMeDifferentiated()))
+                    if (var.getMatching() != null && var.getMatching().getMeDifferentiated() != null
+                            && !match(var.getMatching().getMeDifferentiated(), var.getMeDifferentiated()))
                         // Or if that fails, add it to the list of equations to visit.
                         eqToMatchStack.add(var.getMatching().getMeDifferentiated());
                     // Remove var
