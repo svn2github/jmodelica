@@ -5135,6 +5135,163 @@ public
 end IndexReduction.FunctionInlining.Test4;
 ")})));
     end Test4;
+
+    model Test5
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o1;
+        algorithm
+            o1 := i1 * i2;
+            annotation(Inline=false,derivative(zeroDerivative=i2)=F_der);
+        end F;
+    
+        function F_der
+            input Real i1;
+            input Real i2;
+            input Real i1_der;
+            output Real o1_der;
+        algorithm
+            o1_der := F(i1_der, i2);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real b;
+        parameter Real p = 2;
+    equation
+        der(x) = der(y) * 2;
+        x^2 + y^2 = F(b, if p > 0 then p else 0);
+        b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test5",
+            description="Test function inlining during index reduction",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test5
+ Real x;
+ Real y;
+ Real b;
+ parameter Real p = 2 /* 2 */;
+ Real _der_x;
+ Real _der_b;
+ parameter Real temp_2;
+initial equation 
+ y = 0.0;
+parameter equation
+ temp_2 = if p > 0 then p else 0;
+equation
+ _der_x = der(y) * 2;
+ x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test5.F(b, if p > 0 then p else 0);
+ b = time;
+ 2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test5.F(_der_b, temp_2);
+ _der_b = 1.0;
+
+public
+ function IndexReduction.FunctionInlining.Test5.F
+  input Real i1;
+  input Real i2;
+  output Real o1;
+ algorithm
+  o1 := i1 * i2;
+  return;
+ annotation(derivative(zeroDerivative = i2) = IndexReduction.FunctionInlining.Test5.F_der);
+ end IndexReduction.FunctionInlining.Test5.F;
+
+end IndexReduction.FunctionInlining.Test5;
+")})));
+    end Test5;
+
+    model Test6
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o1;
+        algorithm
+            o1 := i1 * i2;
+            annotation(Inline=false,derivative(zeroDerivative=i2)=F_der);
+        end F;
+    
+        function F_der
+            input Real i1;
+            input Real i2;
+            input Real i1_der;
+            output Real o1_der;
+        algorithm
+            o1_der := F(i1_der, i2);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real a;
+        Real b;
+        constant Real p = 2;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a*x;
+        der(vy) = a*y;
+        x^2 + y^2 = F(b, if p > 0 then p else 0);
+        b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test6",
+            description="Test function inlining during index reduction",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test6
+ Real x;
+ Real y;
+ Real vx;
+ Real vy;
+ Real a;
+ Real b;
+ constant Real p = 2;
+ Real _der_y;
+ Real _der_vy;
+ Real _der_b;
+ Real _der_der_x;
+ Real _der_der_y;
+ Real _der_der_b;
+ Real temp_4;
+initial equation 
+ x = 0.0;
+ vx = 0.0;
+equation
+ der(x) = vx;
+ _der_y = vy;
+ der(vx) = a * x;
+ _der_vy = a * y;
+ x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test6.F(b, 2.0);
+ b = time;
+ temp_4 = IndexReduction.FunctionInlining.Test6.F(_der_b, 2.0);
+ 2 * x * der(x) + 2 * y * _der_y = temp_4;
+ _der_b = 1.0;
+ _der_der_x = der(vx);
+ _der_der_y = _der_vy;
+ 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = temp_4;
+ _der_der_b = 0.0;
+
+public
+ function IndexReduction.FunctionInlining.Test6.F
+  input Real i1;
+  input Real i2;
+  output Real o1;
+ algorithm
+  o1 := i1 * i2;
+  return;
+ annotation(derivative(zeroDerivative = i2) = IndexReduction.FunctionInlining.Test6.F_der);
+ end IndexReduction.FunctionInlining.Test6.F;
+
+end IndexReduction.FunctionInlining.Test6;
+")})));
+    end Test6;
+
 end FunctionInlining;
 
 end IndexReduction;

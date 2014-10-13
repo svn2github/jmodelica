@@ -113,7 +113,10 @@ aspect IndexReduction {
         // Replace selected dummy derivatives with algebraics
         // Enable rewrite of identifiers? (not necessary?)
         for (FAbstractEquation fe : result.getEquations()) {
-            addFEquation((FAbstractEquation)fe.fullCopy());
+            if (fe.variability().parameterOrLess())
+                addFParameterEquation(fe);
+            else
+                addFEquation(fe);
         }
         
         Collection<FVariable> l = new ArrayList<FVariable>();
@@ -479,7 +482,8 @@ aspect IndexReduction {
             
             for (FVariable var : inliner.getNewVariables()) {
                 newDiffedVars.add(var);
-                addVariable(var.name(), var);
+                if (var.variability().continuousVariability())
+                    addVariable(var.name(), var);
             }
             
             ASTNode.log.debug("Inlining done, got %s", inlinedDiffedFEqn);
@@ -498,6 +502,8 @@ aspect IndexReduction {
         // from the "orignal" equation so that we can add links later.
         for (FAbstractEquation newEqn : newEquations) {
             result.addEquation(newEqn);
+            if (!newEqn.isContinuous())
+                continue;
             // Sets that indicates the variables in the lhs and rhs.
             Set<IndexReductionVar> rhsVars = Collections.emptySet();
             Map<IndexReductionVar, Integer> lhsVars = Collections.emptyMap();
