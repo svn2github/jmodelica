@@ -291,10 +291,38 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             if(nomi == BIG_REAL) {
                 nominalOk = FALSE; /* no nominal set and heuristics is activated */
             } else if((nomi > maxi) || (nomi < mini)) { /* nominal outside min-max */
-                jmi_log_node(block_solver->log, logWarning, "NominalOutOfBounds",
-                             "Nominal value <nominal: %g> is not between <min: %g> and <max: %g> "
+                                
+                /* relax the condition when bounds have the same sign */
+                if((maxi >= 0) && (mini >= 0))
+                {
+                    nomi = fabs(nomi);
+                    if(nomi/10 > maxi) {
+                        nominalOk = FALSE;
+                    }
+                    else if (mini/10 > nomi) {
+                        nominalOk = FALSE;
+                    }
+                }
+                else if((maxi <= 0) && (mini <= 0))
+                {
+                    nomi = fabs(nomi);
+                    if(nomi/10 > -mini) {
+                        nominalOk = FALSE;
+                    }
+                    else if (-maxi/10 > nomi) {
+                        nominalOk = FALSE;                        
+                    }
+                }
+                else {
+                    nominalOk = FALSE;
+                }
+                if(nominalOk == FALSE) {
+                      jmi_log_node(block_solver->log, logWarning, "NominalOutOfBounds",
+                             "Nominal value <nominal: %g> may be unsuitable given bounds <min: %g> and <max: %g> "
                              "for the iteration variable <iv: #r%d#> in <block: %s>.",
                              nomi, mini, maxi, block_solver->value_references[i], block_solver->label);
+                      nominalOk = TRUE; /* only warning given in this case */
+                }
             }
             
             if(!nominalOk) {

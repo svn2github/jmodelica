@@ -1007,9 +1007,15 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     dgetrf_(  &N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
     
     if(info != 0 ) {
-        solver->J_is_singular_flag = 1;
-        jmi_log_node(block->log, logWarning, "Regularization", "Singular Jacobian detected when factorizing in linear solver. "
+        jmi_log_t *log = block->log;
+        jmi_log_node_t node = jmi_log_enter_fmt(log, logWarning, "Regularization", "Singular Jacobian detected when factorizing in linear solver. "
                      "Will try to regularize the equations in <block: %s>", block->label);
+        if (block->callbacks->log_options.log_level >= 3) {
+            jmi_log_reals(log, node, logWarning, "ivs",  N_VGetArrayPointer(solver->kin_y), N);
+        }
+        jmi_log_leave(log, node);
+
+        solver->J_is_singular_flag = 1;
         if(N > 1) {
             jmi_kinsol_reg_matrix(block);
             dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
@@ -1329,8 +1335,13 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             dgecon_(&norm, &N, solver->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
             
             if(tol * Jcond < UNIT_ROUNDOFF) {
-                jmi_log_node(block->log, logWarning, "IllConditionedJacobian",
-                             "<JacobianInverseConditionEstimate:%E> Solver may fail to converge.", Jcond);
+                jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
+                             "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
+                if (block->callbacks->log_options.log_level >= 4) {
+                    jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
+                }
+                jmi_log_leave(block->log, node);
+
             }
             else {
                 jmi_log_node(block->log, logInfo, "JacobianCondition",
