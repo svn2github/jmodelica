@@ -634,7 +634,7 @@ fclass FunctionInlining.RecordInline2
  Real x.a[3];
  discrete Integer x.b;
 initial equation 
- x.pre(b) = 0;
+ pre(x.b) = 0;
 equation
  x.a[1] = 1;
  x.a[2] = 2;
@@ -753,7 +753,7 @@ fclass FunctionInlining.RecordInline5
  Real x.a[3];
  discrete Integer x.b;
 initial equation 
- x.pre(b) = 0;
+ pre(x.b) = 0;
 equation
  y = 1;
  x.a[2] = 2 * y;
@@ -843,7 +843,7 @@ fclass FunctionInlining.RecordInline7
  discrete Integer temp_2;
 initial equation 
  pre(temp_2) = 0;
- x.pre(b) = 0;
+ pre(x.b) = 0;
 equation
  y[1] = 1;
  y[2] = 2;
@@ -893,7 +893,7 @@ fclass FunctionInlining.RecordInline8
  Real x.a[3];
  discrete Integer x.b;
 initial equation 
- x.pre(b) = 0;
+ pre(x.b) = 0;
 equation
  y = 1;
  x.a[1] = 2 / y;
@@ -936,7 +936,7 @@ fclass FunctionInlining.RecordInline9
  Real x.a[3];
  discrete Integer x.b;
 initial equation 
- x.pre(b) = 0;
+ pre(x.b) = 0;
 equation
  x.a[1] = 2.0;
  x.a[2] = 4;

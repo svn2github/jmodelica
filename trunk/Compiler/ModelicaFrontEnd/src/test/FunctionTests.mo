@@ -12257,8 +12257,8 @@ initial equation
  b1.z = 2;
  c1.z = 2;
 equation
- b1.der(z) = - b1.z;
- c1.der(z) = - c1.z;
+ der(b1.z) = - b1.z;
+ der(c1.z) = - c1.z;
  w = FunctionTests.ComponentFunc1.b1.f(v) + FunctionTests.ComponentFunc1.c1.f(v);
  v = 3;
 
@@ -12341,8 +12341,8 @@ fclass FunctionTests.ComponentFunc2
  Real ec.d.v = 3;
  Real ec.d.w = FunctionTests.ComponentFunc2.ec.a.f(ec.d.v);
 equation
- eb.a.der(z) = - eb.a.z;
- ec.a.der(z) = - ec.a.z;
+ der(eb.a.z) = - eb.a.z;
+ der(ec.a.z) = - ec.a.z;
 
 public
  function FunctionTests.ComponentFunc2.eb.a.f

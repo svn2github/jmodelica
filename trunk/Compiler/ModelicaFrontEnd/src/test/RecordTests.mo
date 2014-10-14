@@ -2703,8 +2703,8 @@ initial equation
  a1.x[1] = 1;
  a1.x[2] = 2;
 equation
- a1.der(x[1]) = - a1.x[1];
- a1.der(x[2]) = - a1.x[2];
+ der(a1.x[1]) = - a1.x[1];
+ der(a1.x[2]) = - a1.x[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2736,8 +2736,8 @@ initial equation
  a1.x[1] = 1;
  a1.x[2] = 2;
 equation
- a1.der(x[1]) = - a1.x[1];
- a1.der(x[2]) = - a1.x[2];
+ der(a1.x[1]) = - a1.x[1];
+ der(a1.x[2]) = - a1.x[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2944,7 +2944,7 @@ fclass RecordTests.RecordScalarize25
  Real b.x;
  discrete RecordTests.RecordScalarize25.A b.y;
 initial equation 
- b.pre(y) = RecordTests.RecordScalarize25.A.a1;
+ pre(b.y) = RecordTests.RecordScalarize25.A.a1;
 equation
  b.x = time;
  b.y = if b.x < 3 then RecordTests.RecordScalarize25.A.a1 else RecordTests.RecordScalarize25.A.a2;
@@ -4565,8 +4565,8 @@ initial equation
  a.x = 1;
  a.y = 0;
 equation
- a.der(x) = - a.y;
- a.der(y) = - a.x;
+ der(a.x) = - a.y;
+ der(a.y) = - a.x;
 end RecordTests.RecordDer1;
 ")})));
 end RecordDer1;

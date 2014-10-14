@@ -1900,18 +1900,18 @@ fclass TypeTests.AlgorithmType2
  discrete Integer i.innerInteger[2];
  discrete Integer i.innerInteger[3];
 initial equation 
- outerR[1].pre(r) = 0.0;
- outerR[2].pre(r) = 0.0;
- outerR[3].pre(r) = 0.0;
+ pre(outerR[1].r) = 0.0;
+ pre(outerR[2].r) = 0.0;
+ pre(outerR[3].r) = 0.0;
  pre(outerInteger[1]) = 0;
  pre(outerInteger[2]) = 0;
  pre(outerInteger[3]) = 0;
- i.innerR[1].pre(r) = 0.0;
- i.innerR[2].pre(r) = 0.0;
- i.innerR[3].pre(r) = 0.0;
- i.pre(innerInteger[1]) = 0;
- i.pre(innerInteger[2]) = 0;
- i.pre(innerInteger[3]) = 0;
+ pre(i.innerR[1].r) = 0.0;
+ pre(i.innerR[2].r) = 0.0;
+ pre(i.innerR[3].r) = 0.0;
+ pre(i.innerInteger[1]) = 0;
+ pre(i.innerInteger[2]) = 0;
+ pre(i.innerInteger[3]) = 0;
 algorithm
  outerInteger[1] := 1;
  outerInteger[2] := 2;

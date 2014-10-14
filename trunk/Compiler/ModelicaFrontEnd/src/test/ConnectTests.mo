@@ -1830,7 +1830,7 @@ equation
  r.v = r.p.v - r.n.v;
  0 = r.p.i + r.n.i;
  r.i = r.p.i;
- c.i = c.C * c.der(v);
+ c.i = c.C * der(c.v);
  c.v = c.p.v - c.n.v;
  0 = c.p.i + c.n.i;
  c.i = c.p.i;
@@ -1934,7 +1934,7 @@ equation
  f.r.v = f.r.p.v - f.r.n.v;
  0 = f.r.p.i + f.r.n.i;
  f.r.i = f.r.p.i;
- f.c.i = f.c.C * f.c.der(v);
+ f.c.i = f.c.C * der(f.c.v);
  f.c.v = f.c.p.v - f.c.n.v;
  0 = f.c.p.i + f.c.n.i;
  f.c.i = f.c.p.i;
@@ -2067,7 +2067,7 @@ fclass ConnectTests.ConnectorTest
 initial equation 
  c.b.firstOrder.y = c.b.firstOrder.y_start;
 equation
- c.b.firstOrder.der(y) = (c.b.firstOrder.k * c.b.firstOrder.u - c.b.firstOrder.y) / c.b.firstOrder.T;
+ der(c.b.firstOrder.y) = (c.b.firstOrder.k * c.b.firstOrder.u - c.b.firstOrder.y) / c.b.firstOrder.T;
  c.b.feedback.y = c.b.feedback.u1 - c.b.feedback.u2;
  c.const.y = c.const.k;
  c.b.u = c.const.y;

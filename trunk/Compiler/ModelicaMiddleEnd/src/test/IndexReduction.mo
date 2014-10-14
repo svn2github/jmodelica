@@ -230,14 +230,14 @@ equation
  inertia2.J * inertia2.a = - idealGear.flange_b.tau + inertia2.flange_b.tau;
  spring.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
  spring.phi_rel = inertia3.phi - inertia2.phi;
- inertia3.w = inertia3.der(phi);
- inertia3.a = inertia3.der(w);
+ inertia3.w = der(inertia3.phi);
+ inertia3.a = der(inertia3.w);
  inertia3.J * inertia3.a = - spring.tau;
  damper.tau = damper.d * damper.w_rel;
  damper.lossPower = damper.tau * damper.w_rel;
  damper.phi_rel = torque.phi_support - inertia2.phi;
- damper.w_rel = damper.der(phi_rel);
- damper.a_rel = damper.der(w_rel);
+ damper.w_rel = der(damper.phi_rel);
+ damper.a_rel = der(damper.w_rel);
  torque.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
  - damper.tau + inertia2.flange_b.tau + (- spring.tau) = 0;
  damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0;
@@ -250,8 +250,8 @@ equation
  idealGear._der_der_phi_a = inertia1._der_der_phi;
  idealGear._der_der_phi_b = inertia2._der_der_phi;
  idealGear._der_der_phi_a = idealGear.ratio * idealGear._der_der_phi_b;
- damper.der(phi_rel) = - inertia2._der_phi;
- damper.der(w_rel) = damper._der_der_phi_rel;
+ der(damper.phi_rel) = - inertia2._der_phi;
+ der(damper.w_rel) = damper._der_der_phi_rel;
  damper._der_der_phi_rel = - inertia2._der_der_phi;
 
 public
@@ -1284,13 +1284,13 @@ initial equation
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
- x1.der(a[1]) + x2.der(a[1]) = 2;
+ der(x1.a[1]) + der(x2.a[1]) = 2;
  x1._der_a[2] + x2._der_a[2] = 3;
  (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
  - x1.a[1] = temp_4;
  - x1.a[2] = temp_5;
- (IndexReduction.IndexReduction28_Record.R({_der_temp_4, _der_temp_5})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
- - x1.der(a[1]) = _der_temp_4;
+ (IndexReduction.IndexReduction28_Record.R({_der_temp_4, _der_temp_5})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
+ - der(x1.a[1]) = _der_temp_4;
  - x1._der_a[2] = _der_temp_5;
 
 public
@@ -1853,15 +1853,15 @@ initial equation
  m[1].x = 0.0;
  m[1].vx = 0.0;
 equation
- m[1].der(x) = m[1].vx;
+ der(m[1].x) = m[1].vx;
  m[1]._der_y = m[1].vy;
- m[1].der(vx) = m[1].lambda * m[1].x;
+ der(m[1].vx) = m[1].lambda * m[1].x;
  m[1]._der_vy = m[1].lambda * m[1].y - m[1].g;
  m[1].x ^ 2 + m[1].y ^ 2 = m[1].L;
- 2 * m[1].x * m[1].der(x) + 2 * m[1].y * m[1]._der_y = 0.0;
- m[1]._der_der_x = m[1].der(vx);
+ 2 * m[1].x * der(m[1].x) + 2 * m[1].y * m[1]._der_y = 0.0;
+ m[1]._der_der_x = der(m[1].vx);
  m[1]._der_der_y = m[1]._der_vy;
- 2 * m[1].x * m[1]._der_der_x + 2 * m[1].der(x) * m[1].der(x) + (2 * m[1].y * m[1]._der_der_y + 2 * m[1]._der_y * m[1]._der_y) = 0.0;
+ 2 * m[1].x * m[1]._der_der_x + 2 * der(m[1].x) * der(m[1].x) + (2 * m[1].y * m[1]._der_der_y + 2 * m[1]._der_y * m[1]._der_y) = 0.0;
 end IndexReduction.IndexReduction38_ComponentArray;
 
 ")})));
@@ -2968,9 +2968,9 @@ fclass IndexReduction.AlgorithmDifferentiation.RecordInput
 initial equation 
  x2.x[1] = 0.0;
 equation
- _der_x1 + x2.der(x[1]) = 1;
+ _der_x1 + der(x2.x[1]) = 1;
  x1 + IndexReduction.AlgorithmDifferentiation.RecordInput.F(IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.x[1]})) = 1;
- _der_x1 + IndexReduction.AlgorithmDifferentiation.RecordInput._der_F(IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.x[1]}), IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.der(x[1])})) = 0;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.RecordInput._der_F(IndexReduction.AlgorithmDifferentiation.RecordInput.R({x2.x[1]}), IndexReduction.AlgorithmDifferentiation.RecordInput.R({der(x2.x[1])})) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.RecordInput.F
@@ -3038,8 +3038,8 @@ equation
  _der_x1 + _der_x2 = 1;
  (IndexReduction.AlgorithmDifferentiation.RecordOutput.R({r.x[1]})) = IndexReduction.AlgorithmDifferentiation.RecordOutput.F(x2);
  x1 + r.x[1] = 1;
- (IndexReduction.AlgorithmDifferentiation.RecordOutput.R({r.der(x[1])})) = IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F(x2, _der_x2);
- _der_x1 + r.der(x[1]) = 0;
+ (IndexReduction.AlgorithmDifferentiation.RecordOutput.R({der(r.x[1])})) = IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F(x2, _der_x2);
+ _der_x1 + der(r.x[1]) = 0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.RecordOutput.F

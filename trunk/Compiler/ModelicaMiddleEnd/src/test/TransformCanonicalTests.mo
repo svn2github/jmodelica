@@ -2392,21 +2392,21 @@ fclass TransformCanonicalTests.InitialEqTest14
  discrete Real m.x2(start = 2);
  discrete Boolean temp_1;
 initial equation 
- m.pre(x1) = 1;
- m.pre(b1) = false;
- m.pre(i1) = 4;
+ pre(m.x1) = 1;
+ pre(m.b1) = false;
+ pre(m.i1) = 4;
  m.t = 0;
- m.pre(ub1) = false;
- m.pre(ui1) = 0;
- m.pre(x2) = 2;
+ pre(m.ub1) = false;
+ pre(m.ui1) = 0;
+ pre(m.x2) = 2;
  pre(temp_1) = false;
 equation
- m.der(t) = 1;
+ der(m.t) = 1;
  temp_1 = time > 1;
- m.b1 = if temp_1 and not pre(temp_1) then true else m.pre(b1);
- m.i1 = if temp_1 and not pre(temp_1) then 3 else m.pre(i1);
- m.x1 = if temp_1 and not pre(temp_1) then m.pre(x1) + 1 else m.pre(x1);
- m.x2 = if temp_1 and not pre(temp_1) then m.pre(x2) + 1 else m.pre(x2);
+ m.b1 = if temp_1 and not pre(temp_1) then true else pre(m.b1);
+ m.i1 = if temp_1 and not pre(temp_1) then 3 else pre(m.i1);
+ m.x1 = if temp_1 and not pre(temp_1) then pre(m.x1) + 1 else pre(m.x1);
+ m.x2 = if temp_1 and not pre(temp_1) then pre(m.x2) + 1 else pre(m.x2);
  m.ub1 = ub1;
  m.ui1 = ui1;
 end TransformCanonicalTests.InitialEqTest14;

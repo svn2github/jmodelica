@@ -131,7 +131,7 @@ aspect FlatNames {
      * 
      * @param n     the number of parts to include. If <code>n <= 0</code>, then 
      *              all but the last <code>-n</code> parts are included.
-     * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "a.der(b)")
+     * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "der(a.b)")
      * @param eval  if <code>true</code>, then evaluate all expressions first
      */
     private String FQNameFull.prefixName(int n, String op, boolean eval) {
@@ -139,13 +139,13 @@ aspect FlatNames {
         if (n <= 0)
             n = tot + n;
         StringBuilder str = new StringBuilder();
+        if (op != null) {
+            str.append(op);
+            str.append("(");
+        }
         for (int i = 0; i < n; i++) {
             FQNamePart part = getFQNamePart(i);
             boolean last = i == n - 1;
-            if (last && op != null) {
-                str.append(op);
-                str.append("(");
-            }
             str.append(part.getName());
             if ((!last || op != null || isScalarized()) && part.hasFArraySubscripts()) {
                 FArraySubscripts fas = part.getFArraySubscripts();
@@ -278,8 +278,7 @@ aspect FlatNames {
     protected static final String FQName.PRE = "pre";
     
     private String FQNameString.applyOpToName(String name, String op) {
-        int p = name.lastIndexOf('.') + 1;
-        return name.substring(0, p) + op + '(' + name.substring(p) + ')';
+        return op + '(' + name + ')';
     }
 
     syn String FQName.scalarName() = name();

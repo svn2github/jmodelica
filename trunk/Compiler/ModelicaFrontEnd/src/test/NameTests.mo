@@ -3746,7 +3746,7 @@ model DuplicateVariables2
 fclass NameTests.DuplicateVariables2
  Real a.x;
 equation
- a.der(x) = time;
+ der(a.x) = time;
 end NameTests.DuplicateVariables2;
 ")})));
 end DuplicateVariables2;

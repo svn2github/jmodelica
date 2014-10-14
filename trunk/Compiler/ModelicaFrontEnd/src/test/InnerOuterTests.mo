@@ -196,12 +196,12 @@ fclass InnerOuterTests.InnerOuterTest5
 initial equation 
  sys.subSystem.conditionalIntegrator.x = 1;
  sys.subSystem.conditionalIntegrator2.x = 1;
- sys.subSystem.pre(enableMe) = false;
- sys.subSystem.pre(isEnabled) = false;
- sys.pre(isEnabled) = false;
+ pre(sys.subSystem.enableMe) = false;
+ pre(sys.subSystem.isEnabled) = false;
+ pre(sys.isEnabled) = false;
 equation
- sys.subSystem.conditionalIntegrator.der(x) = if sys.subSystem.isEnabled then - sys.subSystem.conditionalIntegrator.x else 0;
- sys.subSystem.conditionalIntegrator2.der(x) = if sys.subSystem.isEnabled then - sys.subSystem.conditionalIntegrator2.x else 0;
+ der(sys.subSystem.conditionalIntegrator.x) = if sys.subSystem.isEnabled then - sys.subSystem.conditionalIntegrator.x else 0;
+ der(sys.subSystem.conditionalIntegrator2.x) = if sys.subSystem.isEnabled then - sys.subSystem.conditionalIntegrator2.x else 0;
  sys.subSystem.enableMe = time <= 1;
  sys.subSystem.isEnabled = sys.isEnabled and sys.subSystem.enableMe;
  sys.isEnabled = time >= 0.5;
