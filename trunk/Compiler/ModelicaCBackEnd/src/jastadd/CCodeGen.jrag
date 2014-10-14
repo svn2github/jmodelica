@@ -1406,7 +1406,6 @@ aspect CCodeGen {
             // TODO: this will fail if hasValue(i) == false
             if (size[i] == UNKNOWN) {
                 FExp exp = exps[i];
-                exp.parent = src;
                 if (printed)
                     str.print(" * ");
                 boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
@@ -1443,7 +1442,6 @@ aspect CCodeGen {
 					str.print(size[i]);
 				} else {
                     FExp exp = exps[i];
-                    exp.parent = src;
 					exp.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
 				}
 			}

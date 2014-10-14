@@ -1172,15 +1172,6 @@ aspect Scalarization {
             return tempExp();
         }
     }
-    syn FFunctionVariable FExp.unknownTempVar() = unknownTempVar(type());
-    syn FFunctionVariable FExp.unknownTempVar(FType type) { 
-        type = (FType) type.unboundCopy();
-        FFunctionVariable v = type.isArray() ?
-            new FFunctionArray(type, tempVarName()) :
-                new FFunctionVariable(type, tempVarName());
-        type.size().replaceUnknowns(v); // Repoints parents to new tree
-        return v;
-    }
     
     syn FQName FExp.tempFQName() {
         FQName fqn = new FQNameString(tempVarName());
@@ -1359,8 +1350,8 @@ aspect Scalarization {
      * @param indexMap Maps id uses to replacing expressions.
      */
     public void FExp.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
-        if (vars != null)
-            vars.add(unknownTempVar());
+        /* Assumes we are in function */
+        addFunctionTempVar(clauses, vars, type());
         Array arr = getArray();
         for (Index i : indices()) {
             FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
@@ -1376,7 +1367,7 @@ aspect Scalarization {
         FExp temp = func ? tempExp() : buildRecordConstructor(indexMap);
         createFunctionCallClause(clauses, indexMap, temp);
         if (vars != null)
-            addTemporaryVars(vars, !func);
+            addTemporaryVars(clauses, vars, !func);
     }
     
     public void FVectorFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
@@ -1389,8 +1380,7 @@ aspect Scalarization {
      * Performs some common operations
      */
     public void FExp.unknownFunctionArrayTemporaries_pre(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        if (vars != null)
-            vars.add(unknownTempVar());
+        addFunctionTempVar(clauses, vars, type());
         Map<String,FExp> localIndexMap = new HashMap<String,FExp>(indexMap);
         unknownFunctionArrayTemporaries(clauses, vars, localIndexMap, names);
         useTempVar = true;
@@ -1405,19 +1395,24 @@ aspect Scalarization {
      * @param names    Names to use for naming for loop indices.
      */
     public void FExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        FAbstractFunctionCall fc = myFunctionCall();
-        FIdUseExp left = tempExp();
-        FExp right;
+        /* Assumes exp is function call arg or left */
         boolean writeBack = inFunctionCallLeft();
-        setParent(null); // Force dynamicFExp
-        if (writeBack) {
-            right = left;
-            left  = (FIdUseExp) fc.dynamicFExp(this);
-        } else {
-            right = fc.dynamicFExp(this);
+        if (!writeBack || vars==null) {
+            FAbstractFunctionCall fc = myFunctionCall();
+            FIdUseExp left = tempExp();
+            FExp right;
+            setParent(null); // Force dynamicFExp
+            if (writeBack) {
+                right = left;
+                left  = (FIdUseExp) fc.dynamicFExp(this);
+            } else {
+                right = fc.dynamicFExp(this);
+            }
+            
+            useTempVar = false;
+            type().scalarizeAssignment(vars, clauses, indexMap, left, right);
+            useTempVar = true;
         }
-        
-        type().scalarizeAssignment(vars, clauses, indexMap, left, right);
     }
     
     public void FFunctionCall.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
@@ -2006,10 +2001,11 @@ aspect Scalarization {
 	
 	public boolean FFunctionCallStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 	    indexMap = new HashMap<String, FExp>(indexMap);
+	    FFunctionCallStmt stmt = new FFunctionCallStmt();
         getCall().createArrayTemporaries(stmts, vars, indexMap);
-        FFunctionCallStmt stmt = new FFunctionCallStmt();
-        stmts.add(stmt);
         getLefts().createArrayTemporaries(stmts, vars, indexMap);
+        stmts.add(stmt);
+        getLefts().createArrayTemporaries(stmts, null, indexMap);
         for (FFunctionCallLeft left : getLefts())
             stmt.addLeft(left.scalarize(indexMap));
         stmt.setCall((FAbstractFunctionCall) getCall().scalarizeExp(indexMap));
@@ -2591,15 +2587,17 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * Creates temporary variable(s) for this expression.
+     * Creates temporary variable for this expression and add to list. If needed,
+     * creates new clauses and adds to the clauses list.
 	 * 
 	 * This applies to expressions that may need temporaries anywhere, not only in 
 	 * expressions with unknown array sizes. Should be used from createArrayTemporaries().
 	 * 
+     * @param clauses   list of clauses to add the new clauses to
 	 * @param vars      list of variable to add the new variables to
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
 	 */
-	protected void FExp.addTemporaryVars(List vars, boolean equation) {
+    protected void FExp.addTemporaryVars(List clauses, List vars, boolean equation) {
 		FType type = type();
         if (equation || expandWithIterExp())
 			type = type.sizedType(expandSizeForIterExp(type.size()));
@@ -2612,27 +2610,32 @@ aspect Scalarization {
 			type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
 			notifyIfWhenEquationsOfTemporaryVar();
 		} else {
-    		if (type.isRecord()) 
-    			type.createRecordTemporaries(vars, tempVarName());
-			else 
-				vars.add(new FFunctionArray(type.fullCopy(), tempVarName()));
+            addFunctionTempVar(clauses, vars, type);
 		}
 	}
 	
-	/**
-	 * Creates temporary function variables for a record with the given name.
-	 * 
-	 * @param vars      list of variable to add the new variables to
-	 * @param name      the name of the record variable
-	 */
-	public void FType.createRecordTemporaries(List vars, String name) {}	
-	
-	public void FRecordType.createRecordTemporaries(List vars, String name) {
-		FFunctionVariable var = isArray() ? new FFunctionArray() : new FFunctionVariable();
-		var.setType(fullCopy());
-		var.setFQName(new FQNameString(name));
-		vars.add(var);
-	}	
+    /**
+     * Creates temporary variable for this expression situated in a function.
+     * 
+     * @see FExp#addTemporaryVars(List, List, boolean)
+     * 
+     * @param clauses   list of clauses to add the new clauses to
+     * @param vars      list of variable to add the new variables to
+     * @param type      type of the new variable
+     */
+    public void FExp.addFunctionTempVar(List clauses, List vars, FType type) {
+        if (vars != null) {
+            FFunctionVariable v = type.isArray() ?
+                    new FFunctionArray((FType)type.unboundCopy(), tempVarName()) :
+                    new FFunctionVariable((FType)type.unboundCopy(), tempVarName());
+            if (type.size().isUnknown()) {
+                v.parent = this; // Needed for genInitArrayStatements
+                ASTNode n = v.genInitArrayStatements(clauses, false);
+                type.size().replaceUnknowns(n);
+            }
+            vars.add(v);
+        }
+    }
 	
 	/**
 	 * Create a record constructor (or FArray of record constructors),  

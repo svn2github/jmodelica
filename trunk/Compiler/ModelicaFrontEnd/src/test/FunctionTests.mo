@@ -4778,15 +4778,15 @@ public
   Real[:] temp_2;
  algorithm
   size(o) := {size(i, 1)};
-  size(temp_1) := {size(i, 1)};
-  size(temp_2) := {size(i, 1)};
   dummy := 1;
   o[1] := 1;
   o[3] := 1;
   o[5] := 1;
+  size(temp_1) := {size(i, 1)};
   for i1 in 1:size(i, 1) loop
    temp_1[i1] := o[i[i1]];
   end for;
+  size(temp_2) := {size(i, 1)};
   (temp_2, ) := FunctionTests.ArrayExpInFunc18.f(temp_1);
   for i1 in 1:size(i, 1) loop
    o[i[i1]] := temp_2[i1];
@@ -4916,12 +4916,10 @@ public
   Real[:,:] temp_5;
  algorithm
   size(o) := {2, size(x1, 1) + 2};
+  assert(size(x1, 1) + 1 + 1 == 1 + size(x1, 1) + 1, \"Mismatching size in dimension 2 of expression [{x1}, 1, 2; 3, {x1}, 4] in function FunctionTests.ArrayExpInFunc20.f\");
   size(temp_1) := {2, size(x1, 1) + 1 + 1};
   size(temp_2) := {1, size(x1, 1) + 1 + 1};
   size(temp_3) := {1, size(x1, 1)};
-  size(temp_4) := {1, 1 + size(x1, 1) + 1};
-  size(temp_5) := {1, size(x1, 1)};
-  assert(size(x1, 1) + 1 + 1 == 1 + size(x1, 1) + 1, \"Mismatching size in dimension 2 of expression [{x1}, 1, 2; 3, {x1}, 4] in function FunctionTests.ArrayExpInFunc20.f\");
   for i8 in 1:size(x1, 1) loop
    temp_3[1,i8] := x1[i8];
   end for;
@@ -4937,7 +4935,9 @@ public
     temp_1[i3,i4] := temp_2[i3,i4];
    end for;
   end for;
+  size(temp_4) := {1, 1 + size(x1, 1) + 1};
   temp_4[1,1] := 3;
+  size(temp_5) := {1, size(x1, 1)};
   for i8 in 1:size(x1, 1) loop
    temp_5[1,i8] := x1[i8];
   end for;
@@ -5031,14 +5031,12 @@ public
   Real[:,:] temp_4;
  algorithm
   size(y) := {size(x1, 1) * 2 + size(x3, 1), size(x2, 2) + 1};
-  size(temp_1) := {size(x1, 1) + size(x2, 1) + size(x3, 1), 1 + size(x2, 2)};
-  size(temp_2) := {size(x1, 1), 1 + size(x2, 2)};
-  size(temp_3) := {size(x2, 1), size(x2, 2) + 1};
-  size(temp_4) := {size(x3, 1), size(x3, 2)};
   assert(1 + size(x2, 2) == size(x2, 2) + 1, \"Mismatching size in dimension 2 of expression [x1, x2; x2, x1; x3] in function FunctionTests.ArrayExpInFunc21.f\");
   assert(1 + size(x2, 2) == size(x3, 2), \"Mismatching size in dimension 2 of expression [x1, x2; x2, x1; x3] in function FunctionTests.ArrayExpInFunc21.f\");
   assert(size(x1, 1) == size(x2, 1), \"Mismatching size in dimension 1 of expression x1, x2 in function FunctionTests.ArrayExpInFunc21.f\");
   assert(size(x2, 1) == size(x1, 1), \"Mismatching size in dimension 1 of expression x2, x1 in function FunctionTests.ArrayExpInFunc21.f\");
+  size(temp_1) := {size(x1, 1) + size(x2, 1) + size(x3, 1), 1 + size(x2, 2)};
+  size(temp_2) := {size(x1, 1), 1 + size(x2, 2)};
   for i5 in 1:size(x1, 1) loop
    temp_2[i5,1] := x1[i5];
   end for;
@@ -5052,6 +5050,7 @@ public
     temp_1[i3,i4] := temp_2[i3,i4];
    end for;
   end for;
+  size(temp_3) := {size(x2, 1), size(x2, 2) + 1};
   for i5 in 1:size(x2, 1) loop
    for i6 in 1:size(x2, 2) loop
     temp_3[i5,i6] := x2[i5,i6];
@@ -5065,6 +5064,7 @@ public
     temp_1[i3 + size(x1, 1),i4] := temp_3[i3,i4];
    end for;
   end for;
+  size(temp_4) := {size(x3, 1), size(x3, 2)};
   for i5 in 1:size(x3, 1) loop
    for i6 in 1:size(x3, 2) loop
     temp_4[i5,i6] := x3[i5,i6];
@@ -5130,8 +5130,6 @@ public
   size(y) := {size(a, 1), size(a, 1)};
   size(temp_1) := {size(a, 1), size(a, 1)};
   size(temp_2) := {size(a, 1), size(a, 1)};
-  size(temp_3) := {size(a, 1), size(a, 1)};
-  size(temp_4) := {size(a, 1), size(a, 1)};
   for i5 in 1:size(a, 1) loop
    for i6 in 1:size(a, 1) loop
     temp_2[i5,i6] := x[a[i5],a[i6]];
@@ -5147,6 +5145,8 @@ public
     y[i1,i2] := temp_1[i2,i1];
    end for;
   end for;
+  size(temp_3) := {size(a, 1), size(a, 1)};
+  size(temp_4) := {size(a, 1), size(a, 1)};
   for i5 in 1:size(a, 1) loop
    for i6 in 1:size(a, 1) loop
     temp_4[i5,i6] := x[a[i5],b[i6]];
@@ -5423,11 +5423,11 @@ public
  algorithm
   size(o) := {size(a, 1), size(b, 2)};
   size(temp_1) := {size(a, 1), size(b, 2)};
-  size(temp_2) := {size(a, 1), size(b, 2)};
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
     temp_1[i3,i4] := 0.0;
     for i5 in 1:size(b, 2) loop
+     size(temp_2) := {size(a, 1), size(b, 2)};
      for i6 in 1:size(a, 1) loop
       for i7 in 1:size(b, 2) loop
        temp_3 := 0.0;
@@ -5487,11 +5487,11 @@ public
  algorithm
   size(o) := {size(a, 1), size(b, 2)};
   size(temp_1) := {size(b, 2), size(a, 1)};
-  size(temp_2) := {size(a, 1), size(b, 2)};
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(b, 2) loop
     temp_1[i3,i4] := 0.0;
     for i5 in 1:size(a, 1) loop
+     size(temp_2) := {size(a, 1), size(b, 2)};
      for i6 in 1:size(a, 1) loop
       for i7 in 1:size(b, 2) loop
        temp_3 := 0.0;
@@ -5548,8 +5548,8 @@ public
   Real[:,:] temp_1;
  algorithm
   size(o) := {size(a, 1) + size(b, 1), size(b, 2)};
-  size(temp_1) := {size(a, 1) + size(b, 1), size(a, 2)};
   assert(size(a, 2) == size(b, 2), \"Mismatching size in dimension 2 of expression cat(1, a, b) in function FunctionTests.ArrayExpInFunc29.f\");
+  size(temp_1) := {size(a, 1) + size(b, 1), size(a, 2)};
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 2) loop
     temp_1[i3,i4] := a[i3,i4];
@@ -5613,6 +5613,7 @@ public
   Real[:,:,:] temp_2;
  algorithm
   size(o) := {size(a, 1), size(a, 2) + size(b, 2), size(a, 3)};
+  assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(3, b, c) in function FunctionTests.ArrayExpInFunc30.f\");
   size(temp_1) := {size(a, 1), size(a, 2) + size(b, 2), size(b, 3) + size(c, 3)};
   size(temp_2) := {size(a, 1), size(b, 2), size(b, 3) + size(c, 3)};
   for i7 in 1:size(a, 1) loop
@@ -5629,7 +5630,6 @@ public
     end for;
    end for;
   end for;
-  assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(3, b, c) in function FunctionTests.ArrayExpInFunc30.f\");
   for i4 in 1:size(a, 1) loop
    for i5 in 1:size(a, 2) loop
     for i6 in 1:size(b, 3) + size(c, 3) loop
@@ -6049,8 +6049,8 @@ public
   Real[:] temp_1;
  algorithm
   size(b) := {size(a, 1) * size(a, 2) * size(a, 3)};
-  size(temp_1) := {size(a, 1) * size(a, 2) * size(a, 3)};
   assert(size(a, 1) * size(a, 2) * size(a, 3) <= size(a, 1) + size(a, 2) + size(a, 3) - 3 + 1, \"Mismatching size in expression vector(a) in function FunctionTests.ArrayExpInFunc37.f\");
+  size(temp_1) := {size(a, 1) * size(a, 2) * size(a, 3)};
   for i2 in 1:size(a, 1) loop
    for i3 in 1:size(a, 2) loop
     for i4 in 1:size(a, 3) loop
@@ -6189,8 +6189,8 @@ public
   Real[:,:] temp_1;
  algorithm
   size(b) := {size(a, 1), size(a, 2)};
-  size(temp_1) := {size(a, 1), size(a, 2)};
   assert(size(a, 3) == 1, \"Mismatching size in dimension 3 of expression matrix(a) in function FunctionTests.ArrayExpInFunc40.f\");
+  size(temp_1) := {size(a, 1), size(a, 2)};
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 2) loop
     for i5 in 1:size(a, 3) loop
@@ -6284,8 +6284,8 @@ public
   Real[:,:] temp_5;
  algorithm
   size(temp_2) := {size(a, 2)};
-  size(temp_5) := {size(a, 1), 1};
   for i2 in 1:size(a, 2) loop
+   size(temp_5) := {size(a, 1), 1};
    for i5 in 1:size(a, 1) loop
     temp_5[i5,1] := b[i5];
    end for;
@@ -9330,9 +9330,9 @@ public
   Real[:,:] temp_1;
  algorithm
   size(e) := {n, 3};
-  size(temp_1) := {3, size(d, 1)};
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
+  size(temp_1) := {3, size(d, 1)};
   for i4 in 1:size(d, 1) loop
    temp_1[1,i4] := d[i4];
   end for;
@@ -9561,13 +9561,9 @@ public
   Integer[3, 2] temp_7;
  algorithm
   size(e) := {n, 3};
-  size(temp_1) := {3, size(d, 1)};
-  size(temp_2) := {n, 1};
-  size(temp_3) := {n, 1};
-  size(temp_4) := {n};
-  size(temp_5) := {n, 2};
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
+  size(temp_1) := {3, size(d, 1)};
   for i4 in 1:size(d, 1) loop
    temp_1[1,i4] := d[i4];
   end for;
@@ -9583,6 +9579,10 @@ public
    end for;
   end for;
   assert(n == 1, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
+  size(temp_2) := {n, 1};
+  size(temp_3) := {n, 1};
+  size(temp_4) := {n};
+  size(temp_5) := {n, 2};
   temp_7[1,1] := 1;
   temp_7[1,2] := 2;
   temp_7[2,1] := 3;
@@ -9654,8 +9654,8 @@ public
   FunctionTests.UnknownArray39.R[:] temp_1;
  algorithm
   size(o) := {m, m};
-  size(temp_1) := {m};
   for i in 1:m loop
+   size(temp_1) := {m};
    for i2 in 1:m loop
     temp_1[i2].x := i * i2;
    end for;
@@ -9773,8 +9773,8 @@ public
   FunctionTests.UnknownArray41.R[:] temp_1;
  algorithm
   size(o) := {m, m};
-  size(temp_1) := {m};
   for i in 1:m loop
+   size(temp_1) := {m};
    for i2 in 1:m loop
     temp_1[i2].x := i * i2;
     temp_1[i2].y[1] := i;
@@ -12641,9 +12641,9 @@ public
   output Real[2] c;
   Real[:] temp_1;
  algorithm
-  size(temp_1) := {2 * size(a, 2)};
   assert(2 * size(a, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownSize.Hidden.Vector1.f\");
   assert(2 * size(a, 2) <= 2 + size(a, 2) - 2 + 1, \"Mismatching size in expression vector(a) in function FunctionTests.UnknownSize.Hidden.Vector1.f\");
+  size(temp_1) := {2 * size(a, 2)};
   for i2 in 1:2 loop
    for i3 in 1:size(a, 2) loop
     temp_1[(i2 - 1) * size(a, 2) + (i3 - 1) + 1] := a[i2,i3];

@@ -2860,7 +2860,7 @@ aspect ArrayHelpers {
         /**
          * Replace FUnknownSizeExps with equivalent FSizeExps
          */
-        public void replaceUnknowns(FFunctionVariable parent) {}
+        public void replaceUnknowns(ASTNode parent) {}
 		
 		/**
 		 * Return a Size that have the same lengths as this size where they are known, 
@@ -3373,7 +3373,7 @@ aspect ArrayHelpers {
         /**
          * Replace FUnknownSizeExps with equivalent FSizeExps
          */
-        public void replaceUnknowns(FFunctionVariable parent) {
+        public void replaceUnknowns(ASTNode parent) {
             for (int i = 0; i < exps.length; i++) {
                 if (exps[i] != null) {
                     exps[i] = exps[i].createSizeFExp();

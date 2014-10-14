@@ -39,6 +39,7 @@
         int* size;\
         int  num_dims;\
         int  num_elems;\
+        int  num_elems_alloced;\
         rec* var;\
     } arr;
 
@@ -71,23 +72,29 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
 
 /* Dynamic array declaration macro */
 #define JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd) \
-    arr* name;
+    arr* name = NULL;
 
 /* Static array initialization macros */
 #define JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd) \
     name->size = name##_size; \
     name->var  = name##_var;
 
-/* Dynamic array initialization macros */
+/* Dynamic array initialization macros.
+ * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
-    name            = (arr*)  calloc((int) 1, sizeof(arr)); \
-    name->size      = (int*)  calloc((int) (nd), sizeof(int));\
-    name->var       = (type*) calloc((int) (ne), sizeof(type));\
-    name->num_elems = (int)   (ne);\
-    name->num_dims  = (int)   (nd);\
-    JMI_DYNAMIC_ADD_POINTER(name)\
-    JMI_DYNAMIC_ADD_POINTER(name->var)\
-    JMI_DYNAMIC_ADD_POINTER(name->size)
+    if (name == NULL) {\
+        name            = (arr*) calloc((int) 1, sizeof(arr));\
+        name->num_dims  = (int)  (nd);\
+        name->size      = (int*) calloc(name->num_dims, sizeof(int));\
+        JMI_DYNAMIC_ADD_POINTER(name)\
+        JMI_DYNAMIC_ADD_POINTER(name->size)\
+    }\
+    name->num_elems = (int) (ne);\
+    if (name == NULL || name->num_elems > name->num_elems_alloced) { \
+        name->var = (type*) calloc(name->num_elems, sizeof(type));\
+        name->num_elems_alloced = name->num_elems;\
+        JMI_DYNAMIC_ADD_POINTER(name->var)\
+    }
 
 #define JMI_ARRAY_DECL_STATREAL(type, arr, name, ne, nd) \
     JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd)

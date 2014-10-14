@@ -769,7 +769,7 @@ aspect TransformCanonical {
 	public void FFunctionDecl.genInitArrayStatements() {
 		List<FStatement> stmts = new List<FStatement>();
 		for (FFunctionVariable ffv : getFFunctionVariables())
-			ffv.genInitArrayStatements(stmts);
+            ffv.genInitArrayStatements(stmts, true);
 		for (FStatement stmt : getFAlgorithm().getFStatements())
 			stmts.add(stmt);
 		getFAlgorithm().setFStatementList(stmts);
@@ -777,15 +777,20 @@ aspect TransformCanonical {
 
 	protected boolean FFunctionVariable.hasInitArrayStmt = false;
 
-	public void FFunctionVariable.genInitArrayStatements(List<FStatement> stmts) {}
-	
-	public void FFunctionArray.genInitArrayStatements(List<FStatement> stmts) {
-		if (size().isUnknown() && !isInput()) {
+    public ASTNode FFunctionVariable.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
+        return this;
+    }
+    
+    @Override
+    public ASTNode FFunctionArray.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
+        if (!hasInitArrayStmt && size().isUnknown() && !isInput()) {
 			FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
-			stmt.shouldBeSorted = true;
+            stmt.shouldBeSorted = sort;
 			stmts.add(stmt);
 			hasInitArrayStmt = true;
+			return stmt;
 		}
+        return this;
 	}
 
 	

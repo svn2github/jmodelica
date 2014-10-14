@@ -822,8 +822,7 @@ aspect Constructors {
 	 *        Extracts array subscripts from type.
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
-		this(new Opt(), type, new Opt(), 
-				new FQNameFull(name, type.size().flattenFArraySubscripts(new FQNameEmpty())));
+        this(new Opt(), type, new Opt(), new FQNameFull(name, type.size().createFArraySubscripts()));
 	}
 	
 	/**
