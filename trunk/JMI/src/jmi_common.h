@@ -208,6 +208,12 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 
 #define AD_WRAP_LITERAL(x) CppAD::AD<jmi_real_t>(x)
 
+/* Cast literal x to runtime representation */
+#define JMI_REAL(x) AD_WRAP_LITERAL(x)
+#define JMI_INT(x)  AD_WRAP_LITERAL(x)
+#define JMI_ENUM(x) AD_WRAP_LITERAL(x)
+#define JMI_BOOL(x) AD_WRAP_LITERAL(x)
+
 #define COND_EXP_EQ(op1,op2,th,el) (CppAD::CondExpEq(op1,op2,th,el))
 #define COND_EXP_LE(op1,op2,th,el) (CppAD::CondExpLe(op1,op2,th,el))
 #define COND_EXP_LT(op1,op2,th,el) (CppAD::CondExpLt(op1,op2,th,el))

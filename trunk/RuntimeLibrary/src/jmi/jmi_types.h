@@ -37,6 +37,13 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
                < representation used in the Runtime
                < Library. */
 
+/* Cast literal x to runtime representation */
+#define JMI_REAL(x) ((jmi_real_t)(x))
+#define JMI_INT(x)  JMI_REAL(x)
+#define JMI_ENUM(x) JMI_REAL(x)
+#define JMI_BOOL(x) JMI_REAL(x)
+#define JMI_STR(x)  ((jmi_string_t)(x))
+
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 /* Max allowed length of strings */
@@ -113,9 +120,9 @@ typedef int BOOL;
 #define TRUE  1
 #define FALSE 0
 
-#define JMI_REAL    0x00000000
-#define JMI_INTEGER 0x10000000
-#define JMI_BOOLEAN 0x20000000
+#define JMI_REAL_TYPE    0x00000000
+#define JMI_INTEGER_TYPE 0x10000000
+#define JMI_BOOLEAN_TYPE 0x20000000
 
 typedef char jmi_boolean;
 typedef const char* jmi_string;

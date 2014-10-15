@@ -114,7 +114,7 @@ aspect CADCodeGen {
 		if (inFunction())
 			return getFIdUse().derName_CAD();
 		else if (!shouldBeDifferentiated())
-			return "AD_WRAP_LITERAL(0)";
+			return "JMI_REAL(0)";
 		else
 			return String.format("%s[jmi_get_index_from_value_ref(%d)-jmi->offs_real_dx]", getSeedName(), myFV().valueReference());
 	}
@@ -325,7 +325,7 @@ aspect CADCodeGen {
 	 */
 	public void FExp.genDer_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (!shouldBeDifferentiated())
-			str.print("AD_WRAP_LITERAL(0)");
+			str.print("JMI_REAL(0)");
 		else if (inlineDer_CAD())
 			genDerExp_CAD(p, str, indent);
 		else

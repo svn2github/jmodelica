@@ -295,14 +295,6 @@ aspect CCodeGen {
 		str.print(')');
 	}
 	
-	public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (inIfCondition()) 
-			str.print("AD_WRAP_LITERAL(");
-		str.print(ceval().intValue());
-		if (inIfCondition()) 
-			str.print(")");
-	}
-	
 	public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		if (isArray() && keepAsArray()) {
 			str.print(getFIdUse().toString_C(p));
@@ -2505,29 +2497,22 @@ aspect CCodeGen {
 	}
 	
 	public void FRealLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		boolean wrap = inIfCondition();
-		if (wrap) 
-			str.print("AD_WRAP_LITERAL(");
+        str.print("JMI_REAL(");
 		str.print(getValue());
-		if (wrap) 
-			str.print(")");
+        str.print(")");
 	}
 
 	public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		boolean wrap = inIfCondition() || inFunctionArg();
-		if (wrap) 
-			str.print("AD_WRAP_LITERAL(");
+		str.print("JMI_INT(");
 		str.print(getValue());
-		if (wrap) 
-			str.print(")");
+		str.print(")");
 	}
 	
-	inh boolean FIntegerLitExp.inFunctionArg();
-	eq FAbstractFunctionCall.getChild().inFunctionArg() = true;
-	eq FArraySubscripts.getChild().inFunctionArg()      = false;
-	eq FAbstractVariable.getChild().inFunctionArg()     = false;
-	eq FAbstractEquation.getChild().inFunctionArg()     = false;
-	eq Root.getChild().inFunctionArg()                  = false;
+    public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("JMI_ENUM(");
+        str.print(ceval().intValue());
+        str.print(")");
+    }
 	
 	public void FBooleanLitExpTrue.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("JMI_TRUE");

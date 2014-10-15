@@ -831,9 +831,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 /* Extra logging of the discrete variables that has been changed) */
                 if (jmi->jmi_callbacks.log_options.log_level >= 5){
                     if (i < jmi->offs_boolean_d) {
-                        jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <value: %d> ", jmi_get_value_ref_from_index(i, JMI_INTEGER), (jmi_int_t)z[i]);
+                        jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <value: %d> ", jmi_get_value_ref_from_index(i, JMI_INTEGER_TYPE), (jmi_int_t)z[i]);
                     } else if (i < jmi->offs_sw) {
-                        jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <value: %d> ", jmi_get_value_ref_from_index(i, JMI_BOOLEAN), (jmi_int_t)z[i]);
+                        jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <value: %d> ", jmi_get_value_ref_from_index(i, JMI_BOOLEAN_TYPE), (jmi_int_t)z[i]);
                     } else if (i < jmi->offs_guards) {
                         jmi_log_node(jmi->log, logInfo, "Info", " <switch: %I> <value: %d> ", i-jmi->offs_sw, (jmi_int_t)z[i]);
                     }

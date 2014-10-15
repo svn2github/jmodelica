@@ -255,12 +255,12 @@ void jmi_flag_termination(jmi_t *jmi, const char* msg) {
 }
 
 jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {
-    return COND_EXP_GE(v, AD_WRAP_LITERAL(0), v, -v);
+    return COND_EXP_GE(v, JMI_REAL(0), v, -v);
 }
 
 jmi_ad_var_t jmi_sign(jmi_ad_var_t v) {
-    return COND_EXP_GT(v, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(1), 
-        COND_EXP_LT(v, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(-1), AD_WRAP_LITERAL(0)));
+    return COND_EXP_GT(v, JMI_REAL(0), JMI_REAL(1), 
+        COND_EXP_LT(v, JMI_REAL(0), JMI_REAL(-1), JMI_REAL(0)));
 }
 
 jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y) {
@@ -1693,11 +1693,11 @@ int jmi_get_value_ref_from_index(int index, jmi_int_t type) {
     /* Translates an index together with a type to a value reference */
     int valueref = -1;
     
-    if (type == JMI_REAL) {
+    if (type == JMI_REAL_TYPE) {
         valueref = REAL_TYPE_MASK+index;
-    }else if (type == JMI_INTEGER) {
+    }else if (type == JMI_INTEGER_TYPE) {
         valueref = INT_TYPE_MASK+index;
-    }else if (type == JMI_BOOLEAN) {
+    }else if (type == JMI_BOOLEAN_TYPE) {
         valueref = BOOL_TYPE_MASK+index;
     }
     
