@@ -1149,16 +1149,16 @@ aspect ExpressionSimplification {
     eq FNegExp.isLiteralMinusOne() = getFExpNoTransform().isLiteralOne();
  
     rewrite FDotMulExp {
-        when (getLeftNoTransform().isLiteralZero() && !isArray())  to FExp getLeft();
-        when (getLeftNoTransform().isLiteralOne())                 to FExp getRight();
-        when (getRightNoTransform().isLiteralZero() && !isArray()) to FExp getRight();
-        when (getRightNoTransform().isLiteralOne())                to FExp getLeft();
+        when (getLeftNoTransform().isLiteralZero())  to FExp getRight().size().createZeroFExp();
+        when (getLeftNoTransform().isLiteralOne())   to FExp getRight();
+        when (getRightNoTransform().isLiteralZero()) to FExp getLeft().size().createZeroFExp();
+        when (getRightNoTransform().isLiteralOne())  to FExp getLeft();
     }
 
     rewrite FDotDivExp {
-        when (getLeftNoTransform().isLiteralZero() && !isArray()) to FExp getLeft();
-        when (getRightNoTransform().isLiteralOne())               to FExp getLeft();
-        when (getRightNoTransform().isLiteralMinusOne())          to FExp getLeft().makeNegated();
+        when (getLeftNoTransform().isLiteralZero())       to FExp getRight().size().createZeroFExp();
+        when (getRightNoTransform().isLiteralOne())       to FExp getLeft();
+        when (getRightNoTransform().isLiteralMinusOne())  to FExp getLeft().makeNegated();
     }
 
     rewrite FDotSubExp {

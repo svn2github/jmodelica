@@ -663,16 +663,16 @@ aspect FlatTypeCheck {
 			  error("Test expression of when equation isn't Boolean scalar or vector expression");
 	  }
   }
-  
-  
-  public void FInfArgsFunctionCall.typeCheck(ErrorCheckType checkType) {
-      super.typeCheck(checkType);
-      if (getNumOriginalArg() < minNumArgs()) 
-    	  error("Too few arguments to " + builtInName() + "(), must have at least " + minNumArgs());
-      else 
-    	  typeCheckFExps();
-  }
-  
+
+
+    public void FInfArgsFunctionCall.typeCheck(ErrorCheckType checkType) {
+        super.typeCheck(checkType);
+        if (numArgs() < minNumArgs()) 
+            error("Too few arguments to " + builtInName() + "(), must have at least " + minNumArgs());
+        else 
+            typeCheckFExps();
+    }
+
   public void FInfArgsFunctionCall.typeCheckFExps() {
       for (FExp exp : getFExps()) {
           if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
@@ -697,12 +697,15 @@ aspect FlatTypeCheck {
   public void FAbstractCat.typeError() {
 	  error("Types do not match in array concatenation");	  
   }
-  
-  syn int FInfArgsFunctionCall.minNumArgs() = 1;
-  eq FFillExp.minNumArgs()     = 2;
-  eq FCatExp.minNumArgs()      = 2;
-  eq FAbstractCat.minNumArgs() = 0;
-  
+
+    syn int FInfArgsFunctionCall.minNumArgs() = 1;
+    eq FFillExp.minNumArgs()                  = 2;
+    eq FCatExp.minNumArgs()                   = 2;
+    eq FAbstractCat.minNumArgs()              = 0;
+
+    syn int FInfArgsFunctionCall.numArgs() = getNumFExp();
+    eq FFillExp.numArgs()                  = getNumFExp() + 1;
+
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = 
 		  fIntegerScalarType().typeCompatible(exp.type());
   syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = 
