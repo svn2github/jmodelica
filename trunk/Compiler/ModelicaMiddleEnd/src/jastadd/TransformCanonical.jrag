@@ -645,7 +645,7 @@ aspect TransformCanonical {
                     g.addEdge(eqn, g.getVariable(fv.name()));
                     g.addEdge(eqn, g.getVariable(fv.myPreVariable().name()));
                 } else {
-                    FIdUseExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
+                    FIdUseExp lhs = fv.isPreVariable() ? fv.createFPreExp() : fv.createUseExp();
                     FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
                     fe = new FEquation(lhs, rhs);
                     addFInitialEquation(fe);

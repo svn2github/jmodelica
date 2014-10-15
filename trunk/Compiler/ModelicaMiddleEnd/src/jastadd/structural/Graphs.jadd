@@ -356,6 +356,9 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             int diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
+            diff = (o1.getVariable().isPreVariable() ? 1 : 0) - (o2.getVariable().isPreVariable() ? 1 : 0);
+            if (diff != 0)
+                return diff;
             return o1.getName().compareTo(o2.getName());
         }
     }

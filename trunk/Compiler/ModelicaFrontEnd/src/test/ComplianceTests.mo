@@ -534,9 +534,9 @@ fclass ComplianceTests.HybridFMU2
  Real dummy;
  discrete Boolean temp_1;
 initial equation 
- pre(y) = 0.0;
  dummy = 0.0;
  pre(x) = 0.0;
+ pre(y) = 0.0;
  pre(temp_1) = false;
 equation
  der(dummy) = 0;

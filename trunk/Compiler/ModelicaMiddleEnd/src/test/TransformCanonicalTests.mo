@@ -3546,6 +3546,16 @@ pre(temp_1) := false
 ")})));
 end WhenEqu14;
 
+model IntialWhenAlgorithm1
+    Boolean a;
+    Boolean x;
+algorithm
+    when {time > 2, initial()} then
+        a := not pre(a);
+        x := not a;
+    end when;
+end IntialWhenAlgorithm1;
+
 model IfEqu1
 	Real x[3];
 equation

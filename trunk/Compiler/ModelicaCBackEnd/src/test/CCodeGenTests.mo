@@ -6436,8 +6436,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[1] = _x_c_3;
     } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 4 * sizeof(jmi_real_t));
-        residual[0] = - _a_c_8;
-        residual[1] = JMI_REAL(-1.0);
+        residual[0] = JMI_REAL(-1.0);
+        residual[1] = - _a_c_8;
         residual[2] = JMI_REAL(1.0);
         residual[3] = JMI_REAL(1.0);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -6446,8 +6446,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _x_c_3 = x[1];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _a_c_8 * pre_x_c_3 + _b_c_9 * _u_c_4 - (_x_c_3);
-            (*res)[1] = pre_x_c_3 - (_x_c_3);
+            (*res)[0] = pre_x_c_3 - (_x_c_3);
+            (*res)[1] = _a_c_8 * pre_x_c_3 + _b_c_9 * _u_c_4 - (_x_c_3);
         }
     }
     return ef;
