@@ -17,18 +17,13 @@
 package org.jmodelica.util;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * \brief Generates a test case annotation for a test model.
@@ -74,6 +69,7 @@ public class TestAnnotationizer {
 		Lang lang = Lang.none;
 		String opts = null;
         String checkType = null;
+        boolean all_models = false;
 		
 		for (String arg : args) {
 			String value = (arg.length() > 3) ? arg.substring(3) : "";
@@ -99,6 +95,8 @@ public class TestAnnotationizer {
 				lang = Lang.optimica;
 			else if (arg.equals("-m")) 
 				lang = Lang.modelica;
+			else if (arg.equals("--ALL"))
+			    all_models = true;
 			else if (arg.startsWith("-")) 
 				System.err.println("Unrecognized option: " + arg + "\nUse -h for help.");
 			else if (filePath == null)
@@ -119,10 +117,57 @@ public class TestAnnotationizer {
 			lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
 		boolean optimica = lang == Lang.optimica;
 		
+        ArrayList<String> models = new ArrayList<String>();
+        if (all_models) {
+            if (!regenerate) {
+                System.err.println("'--ALL' requires '-r'");
+                System.exit(1);
+            }
+            
+            HashSet<String> except = new HashSet<String>();
+            
+            ArrayList<String> packStack = new ArrayList<String>();
+            packStack.add("");
+            BufferedReader f = new BufferedReader(new FileReader(new File(filePath)));
+            String fullLine;
+            String[] line;
+            boolean inModel = false;
+            while((fullLine = f.readLine()) != null) {
+                line = fullLine.trim().split(" ");
+                if (!inModel && (line[0].equals("package") || line[0].equals("model"))) {
+                    String top = packStack.get(packStack.size()-1);
+                    if (top != "") {
+                        top += ".";
+                    }
+                    top += line[1];
+                    if (line[0].equals("model")) {
+                        inModel = true;
+                        if (!except.contains(top)) {
+                            models.add(top);
+                        }
+                    }
+                    packStack.add(top);
+                } else if (line[0].equals("end")){
+                    String[] t = packStack.get(packStack.size()-1).split("\\.");
+                    if (line[1].equals(t[t.length-1] + ";")) {
+                        packStack.remove(packStack.size()-1);
+                        inModel = false;
+                    }
+                }
+            }
+            f.close();
+        }
+        Iterator<String> allModelsIterator = models.iterator();
+        
 		boolean cont = true;
 		while (cont) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			if (!modelName.contains(".")) {
+            if (all_models) {
+                if (!allModelsIterator.hasNext()) {
+                    break;
+                }
+                modelName = allModelsIterator.next();
+            } else if (!modelName.contains(".")) {
 				System.out.print("Enter class name: ");
 				System.out.flush();
 				String given = in.readLine().trim();
@@ -134,7 +179,7 @@ public class TestAnnotationizer {
 			}
 			
 			if (regenerate) {
-				doRegenerate(optimica, filePath, modelName, write);
+			    doRegenerate(optimica, filePath, modelName, write);
 			} else {
 				if (testType == null) {
 					System.out.print("Enter type of test: ");
