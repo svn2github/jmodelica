@@ -259,9 +259,9 @@ aspect BLT{
     public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer) {
         ASTNode.beginStep("computeBLT()");
         try {
-            Collection<SCCBlock<E, V>> components = tarjan(options);
+            Collection<C> components = tarjan(options);
             BLT blt = new BLT();
-            for (SCCBlock<E, V> bl : components)
+            for (C bl : components)
                 blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
             blt.setLabels();
             return blt;
@@ -271,9 +271,9 @@ aspect BLT{
     }
 
     public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
-        Collection<SCCBlock<E, V>> components = tarjan(options);
+        Collection<C> components = tarjan(options);
         Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
-        for (SCCBlock<E, V> component : components) {
+        for (C component : components) {
             SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, producer, true);
             if (block == null) {
                 StringBuffer sb = new StringBuffer();

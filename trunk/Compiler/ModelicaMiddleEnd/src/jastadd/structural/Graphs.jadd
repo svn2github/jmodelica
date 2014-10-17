@@ -36,7 +36,7 @@ aspect Graphs {
 syn boolean FAbstractEquation.lhsVarsAreSolved() = false;
 eq FAlgorithm.lhsVarsAreSolved()                 = true;
 
-public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
+public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> {
 
     private static final String DEFAULT_EQ_PREFIX = "eq";
     
@@ -671,7 +671,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
          * 
          * Surounding BiPGraph is provided for convenience
          */
-        public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V> graph);
+        public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph);
 
         /**
          * This method returns a map that map an equation to a list of object
@@ -680,7 +680,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
          * 
          * Surounding BiPGraph is provided for convenience
          */
-        public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V> graph);
+        public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph);
     }
     
     private static final GroupMemberContributor GROUP_MEMBER_CONTRIBUTOR = addSCCContributor(new GroupMemberContributor());
@@ -692,25 +692,27 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     private static class GroupMemberContributor extends SCCContributor {
         
         @Override
-        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V> graph) {
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
             return equation.getGroupMembers();
         }
         
         @Override
-        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V> graph) {
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
             return Collections.emptyMap();
         }
     }
+    
+    protected abstract C createComponentBlock();
 
-    public Collection<SCCBlock<E, V>> tarjan() {
+    public Collection<C> tarjan() {
         return tarjan(null);
     }
     
 
-    public Collection<SCCBlock<E, V>> tarjan(OptionRegistry options) {
+    public Collection<C> tarjan(OptionRegistry options) {
         Enumerator indexer = new Enumerator();
         Stack<E> stack = new Stack<E>();
-        Collection<SCCBlock<E, V>> components = new ArrayList<SCCBlock<E, V>>();
+        Collection<C> components = new ArrayList<C>();
         tarjanReset();
 
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
@@ -751,7 +753,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return components;
     }
 
-    public void tarjan(Enumerator indexer, Stack<E> stack, Collection<SCCBlock<E, V>> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
+    public void tarjan(Enumerator indexer, Stack<E> stack, Collection<C> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
         int index = indexer.next();
         e.setTarjanNbr(index);
         e.setTarjanLowLink(index);
@@ -783,7 +785,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             }
         }
         if (e.getTarjanNbr() == e.getTarjanLowLink()) {
-            SCCBlock<E, V> component = new SCCBlock<E, V>();
+            C component = createComponentBlock();
             E ee;
             do {
                 ee = stack.pop();
@@ -979,7 +981,7 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> i
     }
 }
 
-public class BiPGraph extends AbstractBiPGraph<Eq, Var> {
+public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
 
     public BiPGraph() {
         super();
@@ -1002,6 +1004,11 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var> {
     protected Var createVar(String name, FVariable var) {
         return new Var(name, var);
     }
+    
+    @Override
+    protected SCCBlock<Eq, Var> createComponentBlock() {
+        return new SCCBlock<Eq, Var>();
+    }
 }
 
 public class Eq extends AbstractEq<Eq, Var> {
@@ -1021,7 +1028,7 @@ public class Var extends AbstractVar<Eq, Var> {
 }
 
 
-public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar> {
+public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCCBlock<SolvingEq, SolvingVar>> {
 
     public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars) {
         super(eqns, vars);
@@ -1078,6 +1085,10 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar> {
         super.removeVariable(v);
     }
 
+    @Override
+    protected SCCBlock<SolvingEq, SolvingVar> createComponentBlock() {
+        return new SCCBlock<SolvingEq, SolvingVar>();
+    }
 }
 
 public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comparable<SolvingEq> {

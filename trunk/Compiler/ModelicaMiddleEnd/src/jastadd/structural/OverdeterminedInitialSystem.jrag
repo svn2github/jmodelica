@@ -25,7 +25,7 @@ aspect OverdeterminedInitialSystem {
      * same as inputed to the method).
      */
     public BiPGraph FClass.overdeterminedInitialSystem(BiPGraph g) {
-        AbstractBiPGraph<Eq,Var>.OISResult res = g.overdeterminedInitialSystem();
+        AbstractBiPGraph<Eq, Var, ?>.OISResult res = g.overdeterminedInitialSystem();
         if (res == null)
             return g;
         

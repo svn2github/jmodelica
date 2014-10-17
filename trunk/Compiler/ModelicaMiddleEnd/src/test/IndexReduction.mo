@@ -45,23 +45,23 @@ fclass IndexReduction.IndexReduction1a_PlanarPendulum
  Real vx \"Velocity in x coordinate\";
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = lambda * x;
- _der_vy = lambda * y - g;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
- 2 * x * der(x) + 2 * y * _der_y = 0.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ 2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.IndexReduction1a_PlanarPendulum;
 
 ")})));
@@ -95,23 +95,23 @@ fclass IndexReduction.IndexReduction1b_PlanarPendulum
  Real vx \"Velocity in x coordinate\";
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = lambda * x;
- _der_vy = lambda * y - g;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
- 2 * x * der(x) + 2 * y * _der_y = 0.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ 2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.IndexReduction1b_PlanarPendulum;
 
 ")})));
@@ -319,9 +319,9 @@ fclass IndexReduction.IndexReduction3_Electrical
  Real _der_u0;
  Real _der_u1;
  Real _der_uL;
- Real _der_i2;
+ Real _der_i1;
 initial equation 
- i1 = 0.0;
+ i2 = 0.0;
 equation
  u0 = 220 * sin(time * omega);
  u1 = R[1] * i1;
@@ -333,11 +333,11 @@ equation
  i0 = i1 + iC;
  i1 = i2 + iL;
  _der_u0 = 220 * (cos(time * omega) * omega);
- _der_u1 = R[1] * der(i1);
- _der_uL = R[2] * _der_i2;
+ _der_u1 = R[1] * _der_i1;
+ _der_uL = R[2] * der(i2);
  _der_u0 = _der_u1 + _der_uL;
  _der_uC = _der_u1 + _der_uL;
- der(i1) = _der_i2 + _der_iL;
+ _der_i1 = der(i2) + _der_iL;
 end IndexReduction.IndexReduction3_Electrical;
 ")})));
   end IndexReduction3_Electrical;
@@ -1034,15 +1034,15 @@ fclass IndexReduction.IndexReduction25_DerFunc
  constant Real x1[2] = 0;
  Real x2[1];
  Real x2[2];
- Real _der_x2[2];
+ Real _der_x1[1];
 initial equation 
- x1[1] = 0.0;
  x2[1] = 0.0;
+ x2[2] = 0.0;
 equation
- der(x1[1]) + der(x2[1]) = 1;
- _der_x2[2] = 2;
+ _der_x1[1] + der(x2[1]) = 1;
+ der(x2[2]) = 2;
  x1[1] + IndexReduction.IndexReduction25_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}) = 0;
- der(x1[1]) + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), _der_x2[2]}, {{0.0, 0.0}, {0.0, 0.0}}) = 0;
+ _der_x1[1] + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}}) = 0;
 
 public
  function IndexReduction.IndexReduction25_DerFunc.f
@@ -1104,15 +1104,15 @@ fclass IndexReduction.IndexReduction26_DerFunc
  constant Real x1[2] = 0;
  Real x2[1];
  Real x2[2];
- Real _der_x2[2];
+ Real _der_x1[1];
 initial equation 
- x1[1] = 0.0;
  x2[1] = 0.0;
+ x2[2] = 0.0;
 equation
- der(x1[1]) + der(x2[1]) = 1;
- _der_x2[2] = 2;
+ _der_x1[1] + der(x2[1]) = 1;
+ der(x2[2]) = 2;
  x1[1] + IndexReduction.IndexReduction26_DerFunc.f({x2[1], x2[2]}) = 0;
- der(x1[1]) + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), _der_x2[2]}) = 0;
+ _der_x1[1] + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), der(x2[2])}) = 0;
 
 public
  function IndexReduction.IndexReduction26_DerFunc.f
@@ -1651,21 +1651,21 @@ fclass IndexReduction.IndexReduction32_PlanarPendulum_StateAvoidNever
  Real vy(stateSelect = StateSelect.avoid) \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  Real _der_x;
- Real _der_vy;
+ Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
- vx = 0.0;
+ vy = 0.0;
 equation
  _der_x = vx;
  der(y) = vy;
- der(vx) = lambda * x;
- _der_vy = lambda * y - g;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
  2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
@@ -1845,23 +1845,23 @@ fclass IndexReduction.IndexReduction38_ComponentArray
  Real m[1].vx \"Velocity in x coordinate\";
  Real m[1].vy \"Velocity in y coordinate\";
  Real m[1].lambda \"Lagrange multiplier\";
- Real m[1]._der_y;
- Real m[1]._der_vy;
+ Real m[1]._der_x;
+ Real m[1]._der_vx;
  Real m[1]._der_der_x;
  Real m[1]._der_der_y;
 initial equation 
- m[1].x = 0.0;
- m[1].vx = 0.0;
+ m[1].y = 0.0;
+ m[1].vy = 0.0;
 equation
- der(m[1].x) = m[1].vx;
- m[1]._der_y = m[1].vy;
- der(m[1].vx) = m[1].lambda * m[1].x;
- m[1]._der_vy = m[1].lambda * m[1].y - m[1].g;
+ m[1]._der_x = m[1].vx;
+ der(m[1].y) = m[1].vy;
+ m[1]._der_vx = m[1].lambda * m[1].x;
+ der(m[1].vy) = m[1].lambda * m[1].y - m[1].g;
  m[1].x ^ 2 + m[1].y ^ 2 = m[1].L;
- 2 * m[1].x * der(m[1].x) + 2 * m[1].y * m[1]._der_y = 0.0;
- m[1]._der_der_x = der(m[1].vx);
- m[1]._der_der_y = m[1]._der_vy;
- 2 * m[1].x * m[1]._der_der_x + 2 * der(m[1].x) * der(m[1].x) + (2 * m[1].y * m[1]._der_der_y + 2 * m[1]._der_y * m[1]._der_y) = 0.0;
+ 2 * m[1].x * m[1]._der_x + 2 * m[1].y * der(m[1].y) = 0.0;
+ m[1]._der_der_x = m[1]._der_vx;
+ m[1]._der_der_y = der(m[1].vy);
+ 2 * m[1].x * m[1]._der_der_x + 2 * m[1]._der_x * m[1]._der_x + (2 * m[1].y * m[1]._der_der_y + 2 * der(m[1].y) * der(m[1].y)) = 0.0;
 end IndexReduction.IndexReduction38_ComponentArray;
 
 ")})));
@@ -2260,18 +2260,18 @@ fclass IndexReduction.IndexReduction47_DotMul
  Real x1[2];
  Real x2[1];
  Real x2[2];
- Real _der_x2[1];
- Real _der_x2[2];
+ Real _der_x1[1];
+ Real _der_x1[2];
 initial equation 
- x1[1] = 0.0;
- x1[2] = 0.0;
+ x2[1] = 0.0;
+ x2[2] = 0.0;
 equation
- der(x1[1]) .+ _der_x2[1] = 1;
- der(x1[2]) .+ _der_x2[2] = 1;
+ _der_x1[1] .+ der(x2[1]) = 1;
+ _der_x1[2] .+ der(x2[2]) = 1;
  x1[1] .* x2[1] = 0;
  x1[2] .* x2[2] = 0;
- x1[1] .* _der_x2[1] .+ der(x1[1]) .* x2[1] = 0;
- x1[2] .* _der_x2[2] .+ der(x1[2]) .* x2[2] = 0;
+ x1[1] .* der(x2[1]) .+ _der_x1[1] .* x2[1] = 0;
+ x1[2] .* der(x2[2]) .+ _der_x1[2] .* x2[2] = 0;
 end IndexReduction.IndexReduction47_DotMul;
 ")})));
 end IndexReduction47_DotMul;
@@ -2513,7 +2513,7 @@ fclass IndexReduction.IndexReduction52
  Real b;
  Real _der_x;
  Real _der_y;
- Real _der_dx;
+ Real _der_dy;
  Real _der_a;
  Real _der_der_x;
  Real _der_der_y;
@@ -2526,13 +2526,13 @@ fclass IndexReduction.IndexReduction52
  Real _der_der_temp_1;
  Real _der_der_temp_4;
 initial equation 
- dy = 0.0;
+ dx = 0.0;
  b = 0.0;
 equation
  sin(_der_x) = dx;
  cos(_der_y) = dy;
- _der_dx = v * x;
- der(dy) = v * y;
+ der(dx) = v * x;
+ _der_dy = v * y;
  a * b = 1;
  a = temp_1 * temp_4 + 42;
  b = temp_1 * temp_4 + y;
@@ -2543,8 +2543,8 @@ equation
  der(b) = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + _der_y;
  _der_temp_1 = _der_x;
  _der_temp_4 = 1.0;
- cos(_der_x) * _der_der_x = _der_dx;
- - sin(_der_y) * _der_der_y = der(dy);
+ cos(_der_x) * _der_der_x = der(dx);
+ - sin(_der_y) * _der_der_y = _der_dy;
  a * _der_der_b + _der_a * der(b) + (_der_a * der(b) + _der_der_a * b) = 0;
  _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4);
  _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4) + _der_der_y;
@@ -3769,23 +3769,23 @@ fclass IndexReduction.AlgorithmDifferentiation.PlanarPendulum
  Real vx \"Velocity in x coordinate\";
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = lambda * x;
- _der_vy = lambda * y - g;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
  IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(y) = L;
- IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(x, der(x)) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(y, _der_y) = 0.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(x, der(x), _der_der_x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(y, _der_y, _der_der_y) = 0.0;
+ IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(x, _der_x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(y, der(y)) = 0.0;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(x, _der_x, _der_der_x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(y, der(y), _der_der_y) = 0.0;
 
 public
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square
@@ -4016,31 +4016,31 @@ fclass IndexReduction.AlgorithmVariability1
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  discrete Integer i;
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
  pre(i) = 0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = lambda * x;
- _der_vy = lambda * y - g;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
 algorithm
  if y < 3.12 then
   i := 1;
  else
-  i := - 1;
+  i := -1;
  end if;
 equation
- 2 * x * der(x) + 2 * y * _der_y = 0.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ 2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
@@ -4973,23 +4973,23 @@ fclass IndexReduction.FunctionInlining.Test1
  Real vx;
  Real vy;
  Real a;
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = a * x;
- _der_vy = a * y;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = a * x;
+ der(vy) = a * y;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test1.F(time);
- 2 * x * der(x) + 2 * y * _der_y = 1.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ 2 * x * _der_x + 2 * y * der(y) = 1.0;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  function IndexReduction.FunctionInlining.Test1.F
@@ -5052,10 +5052,10 @@ fclass IndexReduction.FunctionInlining.Test2
  Real vy[2];
  Real a[1];
  Real a[2];
- Real _der_y[1];
- Real _der_y[2];
- Real _der_vy[1];
- Real _der_vy[2];
+ Real _der_x[1];
+ Real _der_x[2];
+ Real _der_vx[1];
+ Real _der_vx[2];
  Real _der_der_x[1];
  Real _der_der_y[1];
  Real _der_der_x[2];
@@ -5063,30 +5063,30 @@ fclass IndexReduction.FunctionInlining.Test2
  Real temp_1[1];
  Real temp_1[2];
 initial equation 
- x[1] = 0.0;
- x[2] = 0.0;
- vx[1] = 0.0;
- vx[2] = 0.0;
+ y[1] = 0.0;
+ y[2] = 0.0;
+ vy[1] = 0.0;
+ vy[2] = 0.0;
 equation
- der(x[1]) = vx[1];
- der(x[2]) = vx[2];
- _der_y[1] = vy[1];
- _der_y[2] = vy[2];
- der(vx[1]) = a[1] .* x[1];
- der(vx[2]) = a[2] .* x[2];
- _der_vy[1] = a[1] .* y[1];
- _der_vy[2] = a[2] .* y[2];
+ _der_x[1] = vx[1];
+ _der_x[2] = vx[2];
+ der(y[1]) = vy[1];
+ der(y[2]) = vy[2];
+ _der_vx[1] = a[1] .* x[1];
+ _der_vx[2] = a[2] .* x[2];
+ der(vy[1]) = a[1] .* y[1];
+ der(vy[2]) = a[2] .* y[2];
  ({temp_1[1], temp_1[2]}) = IndexReduction.FunctionInlining.Test2.F(time);
  x[1] .^ 2 .+ y[1] .^ 2 = temp_1[1];
  x[2] .^ 2 .+ y[2] .^ 2 = temp_1[2];
- 2 .* x[1] .* der(x[1]) .+ 2 .* y[1] .* _der_y[1] = 1.0;
- _der_der_x[1] = der(vx[1]);
- _der_der_y[1] = _der_vy[1];
- 2 .* x[1] .* _der_der_x[1] .+ 2 .* der(x[1]) .* der(x[1]) .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* _der_y[1] .* _der_y[1]) = 0.0;
- 2 .* x[2] .* der(x[2]) .+ 2 .* y[2] .* _der_y[2] = -1.0;
- _der_der_x[2] = der(vx[2]);
- _der_der_y[2] = _der_vy[2];
- 2 .* x[2] .* _der_der_x[2] .+ 2 .* der(x[2]) .* der(x[2]) .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* _der_y[2] .* _der_y[2]) = 0.0;
+ 2 .* x[1] .* _der_x[1] .+ 2 .* y[1] .* der(y[1]) = 1.0;
+ _der_der_x[1] = _der_vx[1];
+ _der_der_y[1] = der(vy[1]);
+ 2 .* x[1] .* _der_der_x[1] .+ 2 .* _der_x[1] .* _der_x[1] .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* der(y[1]) .* der(y[1])) = 0.0;
+ 2 .* x[2] .* _der_x[2] .+ 2 .* y[2] .* der(y[2]) = -1.0;
+ _der_der_x[2] = _der_vx[2];
+ _der_der_y[2] = der(vy[2]);
+ 2 .* x[2] .* _der_der_x[2] .+ 2 .* _der_x[2] .* _der_x[2] .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* der(y[2]) .* der(y[2])) = 0.0;
 
 public
  function IndexReduction.FunctionInlining.Test2.F
@@ -5147,29 +5147,29 @@ fclass IndexReduction.FunctionInlining.Test3
  Real vy;
  Real a;
  Real b;
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_b;
  Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
  Real temp_3;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = a * x;
- _der_vy = a * y;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = a * x;
+ der(vy) = a * y;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test3.F(b);
  b = time;
  temp_3 = IndexReduction.FunctionInlining.Test3.F(_der_b);
- 2 * x * der(x) + 2 * y * _der_y = temp_3;
+ 2 * x * _der_x + 2 * y * der(y) = temp_3;
  _der_b = 1.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = temp_3;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = temp_3;
  _der_der_b = 0.0;
 
 public
@@ -5236,10 +5236,10 @@ fclass IndexReduction.FunctionInlining.Test4
  Real a[1];
  Real a[2];
  Real b;
- Real _der_y[1];
- Real _der_y[2];
- Real _der_vy[1];
- Real _der_vy[2];
+ Real _der_x[1];
+ Real _der_x[2];
+ Real _der_vx[1];
+ Real _der_vx[2];
  Real _der_b;
  Real _der_der_x[1];
  Real _der_der_y[1];
@@ -5253,35 +5253,35 @@ fclass IndexReduction.FunctionInlining.Test4
  Real temp_8;
  Real temp_9;
 initial equation 
- x[1] = 0.0;
- x[2] = 0.0;
- vx[1] = 0.0;
- vx[2] = 0.0;
+ y[1] = 0.0;
+ y[2] = 0.0;
+ vy[1] = 0.0;
+ vy[2] = 0.0;
 equation
- der(x[1]) = vx[1];
- der(x[2]) = vx[2];
- _der_y[1] = vy[1];
- _der_y[2] = vy[2];
- der(vx[1]) = a[1] .* x[1];
- der(vx[2]) = a[2] .* x[2];
- _der_vy[1] = a[1] .* y[1];
- _der_vy[2] = a[2] .* y[2];
+ _der_x[1] = vx[1];
+ _der_x[2] = vx[2];
+ der(y[1]) = vy[1];
+ der(y[2]) = vy[2];
+ _der_vx[1] = a[1] .* x[1];
+ _der_vx[2] = a[2] .* x[2];
+ der(vy[1]) = a[1] .* y[1];
+ der(vy[2]) = a[2] .* y[2];
  ({temp_1[1], temp_1[2]}) = IndexReduction.FunctionInlining.Test4.F(b);
  x[1] .^ 2 .+ y[1] .^ 2 = temp_1[1];
  x[2] .^ 2 .+ y[2] .^ 2 = temp_1[2];
  b = time;
  ({temp_4, temp_5}) = IndexReduction.FunctionInlining.Test4.F(_der_b);
- 2 .* x[1] .* der(x[1]) .+ 2 .* y[1] .* _der_y[1] = temp_4;
+ 2 .* x[1] .* _der_x[1] .+ 2 .* y[1] .* der(y[1]) = temp_4;
  _der_b = 1.0;
- _der_der_x[1] = der(vx[1]);
- _der_der_y[1] = _der_vy[1];
+ _der_der_x[1] = _der_vx[1];
+ _der_der_y[1] = der(vy[1]);
  ({temp_8, temp_9}) = IndexReduction.FunctionInlining.Test4.F(_der_der_b);
- 2 .* x[1] .* _der_der_x[1] .+ 2 .* der(x[1]) .* der(x[1]) .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* _der_y[1] .* _der_y[1]) = temp_8;
+ 2 .* x[1] .* _der_der_x[1] .+ 2 .* _der_x[1] .* _der_x[1] .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* der(y[1]) .* der(y[1])) = temp_8;
  _der_der_b = 0.0;
- 2 .* x[2] .* der(x[2]) .+ 2 .* y[2] .* _der_y[2] = temp_5;
- _der_der_x[2] = der(vx[2]);
- _der_der_y[2] = _der_vy[2];
- 2 .* x[2] .* _der_der_x[2] .+ 2 .* der(x[2]) .* der(x[2]) .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* _der_y[2] .* _der_y[2]) = temp_9;
+ 2 .* x[2] .* _der_x[2] .+ 2 .* y[2] .* der(y[2]) = temp_5;
+ _der_der_x[2] = _der_vx[2];
+ _der_der_y[2] = der(vy[2]);
+ 2 .* x[2] .* _der_der_x[2] .+ 2 .* _der_x[2] .* _der_x[2] .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* der(y[2]) .* der(y[2])) = temp_9;
 
 public
  function IndexReduction.FunctionInlining.Test4.F
@@ -5414,29 +5414,29 @@ fclass IndexReduction.FunctionInlining.Test6
  Real a;
  Real b;
  constant Real p = 2;
- Real _der_y;
- Real _der_vy;
+ Real _der_x;
+ Real _der_vx;
  Real _der_b;
  Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
  Real temp_4;
 initial equation 
- x = 0.0;
- vx = 0.0;
+ y = 0.0;
+ vy = 0.0;
 equation
- der(x) = vx;
- _der_y = vy;
- der(vx) = a * x;
- _der_vy = a * y;
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = a * x;
+ der(vy) = a * y;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test6.F(b, 2.0);
  b = time;
  temp_4 = IndexReduction.FunctionInlining.Test6.F(_der_b, 2.0);
- 2 * x * der(x) + 2 * y * _der_y = temp_4;
+ 2 * x * _der_x + 2 * y * der(y) = temp_4;
  _der_b = 1.0;
- _der_der_x = der(vx);
- _der_der_y = _der_vy;
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = temp_4;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = temp_4;
  _der_der_b = 0.0;
 
 public
