@@ -428,7 +428,7 @@ abstract public class OptionRegistry {
         // Runtime options
         /*
          * Note: Two JUnit tests are affected by changes to runtime options:
-         * ModelicaCompiler : TeansformCanonicalTests.mo : TestRuntimeOptions1
+         * ModelicaCompiler : TransformCanonicalTests.mo : TestRuntimeOptions1
          * ModelicaCBackEnd : CCodeGenTests.mo : TestRuntimeOptions1
          */
         RUNTIME_LOG_LEVEL
@@ -440,7 +440,7 @@ abstract public class OptionRegistry {
         ENFORCE_BOUNDS
             ("enforce_bounds",
             runtime,
-            false,
+            true,
             "Enforce min-max bounds on variables in the equation blocks."),
         USE_JACOBIAN_EQUILIBRATION
             ("use_jacobian_equilibration",
