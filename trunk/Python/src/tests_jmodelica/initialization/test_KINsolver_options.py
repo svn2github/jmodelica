@@ -52,7 +52,7 @@ class TestInitOptions:
         """
         test if model options are correctly initialized
         """
-        nose.tools.assert_false(self.model.get('_enforce_bounds'))
+        nose.tools.assert_true(self.model.get('_enforce_bounds'))
         nose.tools.assert_equals(self.model.get('_iteration_variable_scaling'), 1)
         nose.tools.assert_equals(self.model.get('_residual_equation_scaling'), 1)
         nose.tools.assert_true(self.model.get('_rescale_after_singular_jac'))

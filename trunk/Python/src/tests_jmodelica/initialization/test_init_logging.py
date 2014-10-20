@@ -35,6 +35,7 @@ def load_model(classname, log_file_name):
     log_level = 4
     options = {'generate_only_initial_system': True}
     options['log_level'] = log_level
+    options['enforce_bounds'] = False
 
     name = compile_fmu(classname, fpath, compiler_options=options)
 
