@@ -531,9 +531,9 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(states[-1], 5.000000)
 
         n_states=coupled._get_nominal_continuous_states()
-        nose.tools.assert_almost_equal(n_states[0], 1.000000)
+        nose.tools.assert_almost_equal(n_states[0], 0.0001)
         n_states=coupled.nominal_continuous_states
-        nose.tools.assert_almost_equal(n_states[0], 1.000000)
+        nose.tools.assert_almost_equal(n_states[0], 0.0001)
 
     @testattr(fmi = True)
     def test_get_derivatives(self):
