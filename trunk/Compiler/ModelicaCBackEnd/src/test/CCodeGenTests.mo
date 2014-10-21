@@ -18101,4 +18101,340 @@ jmi_ad_var_t func_CCodeGenTests_Functional5_fullFunc_exp2(jmi_ad_var_t x1_v, jmi
 ")})));
 end Functional5;
 
+model Delay1
+    Real x1,x2;
+  equation
+    x1 = delay(time, 1);
+    x2 = noEvent(delay(time, 1));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay1",
+            description="Delay operator code gen: Basic",
+            generate_ode=true,
+            equation_sorting=true,
+            template="
+N_delays = $n_delays$;
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+",
+            generatedCode="
+N_delays = 2;
+
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+    jmi_delay_init(jmi, 1, JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(1), _time);
+
+    jmi_delay_record_sample(jmi, 0, _time);
+    jmi_delay_record_sample(jmi, 1, _time);
+
+    model_ode_guards(jmi);
+    _x1_0 = _time;
+    _x2_1 = (_time);
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x1_0 = jmi_delay_evaluate(jmi, 0, _time, AD_WRAP_LITERAL(1));
+    _x2_1 = (jmi_delay_evaluate(jmi, 1, _time, AD_WRAP_LITERAL(1)));
+/********* Write back reinits *******/
+")})));
+end Delay1;
+
+model Delay2
+    Real x1,x2,x3;
+    parameter Real p = 10;
+  equation
+    x1 = delay(time, 1) + delay(time, 2);
+    x2 = delay(x1, 3);
+    x3 = delay(x1, x2, p);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay2",
+            description="Delay operator code gen: Several",
+            generate_ode=true,
+            equation_sorting=true,
+            template="
+N_delays = $n_delays$;
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+",
+            generatedCode="
+N_delays = 4;
+
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+    jmi_delay_init(jmi, 1, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(2), _time);
+    jmi_delay_init(jmi, 2, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(3), _x1_0);
+    jmi_delay_init(jmi, 3, JMI_FALSE, JMI_FALSE, _p_3, _x1_0);
+
+    jmi_delay_record_sample(jmi, 0, _time);
+    jmi_delay_record_sample(jmi, 1, _time);
+    jmi_delay_record_sample(jmi, 2, _x1_0);
+    jmi_delay_record_sample(jmi, 3, _x1_0);
+
+    model_ode_guards(jmi);
+    _x1_0 = _time + _time;
+    _x2_1 = _x1_0;
+    _x3_2 = _x1_0;
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x1_0 = jmi_delay_evaluate(jmi, 0, _time, AD_WRAP_LITERAL(1)) + jmi_delay_evaluate(jmi, 1, _time, AD_WRAP_LITERAL(2));
+    _x2_1 = jmi_delay_evaluate(jmi, 2, _x1_0, AD_WRAP_LITERAL(3));
+    _x3_2 = jmi_delay_evaluate(jmi, 3, _x1_0, _x2_1);
+/********* Write back reinits *******/
+")})));
+end Delay2;
+
+model Delay3
+    Real x1,x2,x3;
+    parameter Real p(fixed=false);
+  initial equation
+    p = x3;
+  equation
+    x1 = delay(time, 1) + delay(time, 2);
+    x2 = delay(x1, 3);
+    x3 = delay(x1, x2, p);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay3",
+            description="Delay operator code gen: Initial system loop",
+            generate_ode=true,
+            equation_sorting=true,
+            template="
+N_delays = $n_delays$;
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+N_delays = 4;
+
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+    jmi_delay_init(jmi, 1, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(2), _time);
+    jmi_delay_init(jmi, 2, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(3), _x1_0);
+    jmi_delay_init(jmi, 3, JMI_FALSE, JMI_FALSE, _p_3, _x1_0);
+
+    jmi_delay_record_sample(jmi, 0, _time);
+    jmi_delay_record_sample(jmi, 1, _time);
+    jmi_delay_record_sample(jmi, 2, _x1_0);
+    jmi_delay_record_sample(jmi, 3, _x1_0);
+
+    model_ode_guards(jmi);
+    _x1_0 = _time + _time;
+    _x2_1 = _x1_0;
+    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x1_0 = jmi_delay_evaluate(jmi, 0, _time, AD_WRAP_LITERAL(1)) + jmi_delay_evaluate(jmi, 1, _time, AD_WRAP_LITERAL(2));
+    _x2_1 = jmi_delay_evaluate(jmi, 2, _x1_0, AD_WRAP_LITERAL(3));
+    _x3_2 = jmi_delay_evaluate(jmi, 3, _x1_0, _x2_1);
+/********* Write back reinits *******/
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Init block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _p_3;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _p_3 = x[0];
+        }
+        _x3_2 = _x1_0;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _x3_2 - (_p_3);
+        }
+    }
+    return ef;
+}
+")})));
+end Delay3;
+
+model Delay4
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+      algorithm
+      annotation(Inline=false);
+    end f;
+
+    Real x1,x2,t;
+    parameter Real p = 3;
+  equation
+    t = time;
+    x1 = delay(f({t,t}), f({p,p}));
+    x2 = delay(f({t,t}), f({t,t}), f({p,p}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay4",
+            description="Delay operator code gen: Array temp generation",
+            generate_ode=true,
+            equation_sorting=true,
+            template="
+N_delays = $n_delays$;
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+",
+            generatedCode="
+N_delays = 2;
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _t_2;
+    jmi_array_ref_1(tmp_1, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = _p_3;
+    jmi_array_ref_1(tmp_2, 2) = _p_3;
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, func_CCodeGenTests_Delay4_f_exp0(tmp_2), func_CCodeGenTests_Delay4_f_exp0(tmp_1));
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_ref_1(tmp_3, 1) = _t_2;
+    jmi_array_ref_1(tmp_3, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1, 2)
+    jmi_array_ref_1(tmp_4, 1) = _p_3;
+    jmi_array_ref_1(tmp_4, 2) = _p_3;
+    jmi_delay_init(jmi, 1, JMI_FALSE, JMI_FALSE, func_CCodeGenTests_Delay4_f_exp0(tmp_4), func_CCodeGenTests_Delay4_f_exp0(tmp_3));
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _t_2;
+    jmi_array_ref_1(tmp_1, 2) = _t_2;
+    jmi_delay_record_sample(jmi, 0, func_CCodeGenTests_Delay4_f_exp0(tmp_1));
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_ref_1(tmp_3, 1) = _t_2;
+    jmi_array_ref_1(tmp_3, 2) = _t_2;
+    jmi_delay_record_sample(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_3));
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1)
+    model_ode_guards(jmi);
+    _t_2 = _time;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
+    jmi_array_ref_1(tmp_5, 1) = _t_2;
+    jmi_array_ref_1(tmp_5, 2) = _t_2;
+    _x1_0 = func_CCodeGenTests_Delay4_f_exp0(tmp_5);
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1, 2)
+    jmi_array_ref_1(tmp_6, 1) = _t_2;
+    jmi_array_ref_1(tmp_6, 2) = _t_2;
+    _x2_1 = func_CCodeGenTests_Delay4_f_exp0(tmp_6);
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_7, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_8, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_9, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _t_2 = _time;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
+    jmi_array_ref_1(tmp_5, 1) = _t_2;
+    jmi_array_ref_1(tmp_5, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_7, 2, 1, 2)
+    jmi_array_ref_1(tmp_7, 1) = _p_3;
+    jmi_array_ref_1(tmp_7, 2) = _p_3;
+    _x1_0 = jmi_delay_evaluate(jmi, 0, func_CCodeGenTests_Delay4_f_exp0(tmp_5), func_CCodeGenTests_Delay4_f_exp0(tmp_7));
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1, 2)
+    jmi_array_ref_1(tmp_6, 1) = _t_2;
+    jmi_array_ref_1(tmp_6, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_8, 2, 1, 2)
+    jmi_array_ref_1(tmp_8, 1) = _t_2;
+    jmi_array_ref_1(tmp_8, 2) = _t_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_9, 2, 1, 2)
+    jmi_array_ref_1(tmp_9, 1) = _p_3;
+    jmi_array_ref_1(tmp_9, 2) = _p_3;
+    _x2_1 = jmi_delay_evaluate(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_6), func_CCodeGenTests_Delay4_f_exp0(tmp_8));
+/********* Write back reinits *******/
+")})));
+end Delay4;
+
+model Delay5
+    Real x;
+  equation
+    x = delay(if time > 1 then time else time + 1, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay5",
+            description="Delay operator code gen: Event generation",
+            generate_ode=true,
+            equation_sorting=true,
+            template="
+N_delays = $n_delays$;
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+",
+            generatedCode="
+N_delays = 1;
+
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(2), COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)));
+
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    jmi_delay_record_sample(jmi, 0, COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)));
+
+    model_ode_guards(jmi);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    _x_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1));
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    _x_0 = jmi_delay_evaluate(jmi, 0, COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(2));
+/********* Write back reinits *******/
+")})));
+end Delay5;
+
 end CCodeGenTests;

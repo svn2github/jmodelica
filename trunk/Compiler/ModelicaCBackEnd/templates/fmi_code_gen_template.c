@@ -89,6 +89,8 @@ static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_initial_switches$;
 static const int N_guards_init = $n_guards_init$;
 
+static const int N_delays = $n_delays$;
+
 static const int Scaling_method = $C_DAE_scaling_method$;
 
 #define sf(i) (jmi->variable_scaling_factors[i])
@@ -257,6 +259,16 @@ $C_DAE_initial_event_indicator_residuals$
     return 0;
 }
 
+static int model_init_delay(jmi_t* jmi) {
+$C_delay_init$
+    return 0;
+}
+
+static int model_sample_delay(jmi_t* jmi) {
+$C_delay_sample$
+    return 0;
+}
+
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
 
     jmi_init(jmi, N_real_ci, N_real_cd,  N_real_pi,    N_real_pi_s,    N_real_pi_f,    N_real_pi_e,    N_real_pd,
@@ -304,6 +316,9 @@ $CAD_dae_init_add_blocks_residual_functions$
                   *model_init_eval_parameters,
                   *model_init_R0, N_eq_R0, NULL,
                   0, NULL, NULL);
+    
+    /* Initialize the delay interface */
+    jmi_init_delay_if(*jmi, N_delays, *model_init_delay, *model_sample_delay);
 
     return 0;
 }

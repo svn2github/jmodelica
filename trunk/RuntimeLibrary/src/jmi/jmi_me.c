@@ -18,6 +18,7 @@
 */
 
 #include "jmi_me.h"
+#include "jmi_delay.h"
 
 #define indexmask  0x07FFFFFF
 #define negatemask 0x08000000
@@ -177,6 +178,17 @@ int jmi_initialize(jmi_t* jmi) {
     jmi_save_last_successful_values(jmi);
     
     jmi->is_initialized = 1;
+    
+    /* Initialize delay blocks */
+    retval = jmi_init_delay_blocks(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Failed to initialize delay blocks.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 4){
+            jmi_log_leave(jmi->log, top_node);
+        }
+        return -1;
+    }
+    
     
     if (jmi->jmi_callbacks.log_options.log_level >= 4){
         jmi_log_leave(jmi->log, top_node);
@@ -653,6 +665,17 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
                                 "Completed integrator step was called at <t:%g> indicating a successful step.", jmi_get_t(jmi)[0]);
     }
     
+    /* Sample delay blocks */
+    jmi_delay_set_event_mode(jmi, JMI_FALSE);
+    retval = jmi_sample_delay_blocks(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Delay sampling after completed integrator step failed.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            jmi_log_leave(jmi->log, node);
+        }
+        return -1;
+    }
+    
     /* Save the z values to the z_last vector */
     jmi_save_last_successful_values(jmi);
     /* Block completed step */
@@ -931,6 +954,15 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             return -1;
         }
         jmi->recomputeVariables = 0; /* The variables are computed. End of event iteration. */
+        
+        /* Sample delay blocks */
+        jmi_delay_set_event_mode(jmi, JMI_TRUE);
+        retval = jmi_sample_delay_blocks(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Delay sampling after event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
         
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);

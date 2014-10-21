@@ -26,6 +26,7 @@
 #include "jmi.h"
 #include "jmi_block_residual.h"
 #include "jmi_log.h"
+#include "jmi_delay_impl.h"
 
 int jmi_init(jmi_t** jmi,
         int n_real_ci, int n_real_cd, int n_real_pi,
@@ -304,8 +305,31 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
 
+    for (i=0; i < jmi->n_delays; i++) {
+        jmi_delay_delete(jmi, i);
+    }
+    free(jmi->delays);
+
     return 0;
 }
+
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample) {
+    
+    int i;
+    
+    jmi->init_delay = init;
+    jmi->sample_delay = sample;
+    
+    jmi->delay_event_mode = 0;
+    jmi->n_delays = n_delays;
+    jmi->delays = (jmi_delay_t *)calloc(n_delays, sizeof(jmi_delay_t));
+    for (i=0; i < n_delays; i++) {
+        jmi_delay_new(jmi, i);
+    }
+    
+    return 0;
+}
+
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;
@@ -821,4 +845,12 @@ int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
     jmi_func_F(jmi,jmi->init->R0,res);
 
     return 0;
+}
+
+int jmi_init_delay_blocks(jmi_t* jmi) {
+    return jmi_generic_func(jmi, jmi->init_delay);
+}
+
+int jmi_sample_delay_blocks(jmi_t* jmi) {
+    return jmi_generic_func(jmi, jmi->sample_delay);
 }

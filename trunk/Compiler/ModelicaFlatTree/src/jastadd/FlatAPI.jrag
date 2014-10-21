@@ -649,6 +649,12 @@ aspect FlatAPI {
         [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartialCalled() for myFClass();
 
+    coll ArrayList<FDelayExp> FClass.myDelayExps()
+        [new ArrayList<FDelayExp>()] with add root FlatRoot;
+    FDelayExp contributes this to FClass.myDelayExps() for myFClass();
+    
+    syn lazy int FDelayExp.myDelayIndex() = myFClass().myDelayExps().indexOf(originalFDelayExp());
+    
     inh boolean FExp.inDeadIfBranch();
     eq FIfEquation.getFAbstractEquation().inDeadIfBranch() = getTest().inDeadIfBranchTest(false);
     eq FIfEquation.getElse().inDeadIfBranch()              = getTest().inDeadIfBranchTest(true);

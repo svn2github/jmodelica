@@ -114,6 +114,7 @@ typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward de
 typedef struct jmi_ode_problem_t jmi_ode_problem_t;       /**< \brief Forward declaration of struct. */
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
+typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
 
 
 /* Masks for maping vref to indices. */               
@@ -1031,6 +1032,9 @@ struct jmi_t {
 
     jmi_dae_t* dae;                      /**< \brief A jmi_dae_t struct pointer. */
     jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
+    
+    jmi_generic_func_t init_delay;       /**< \brief Function for initializing delay structures. */
+    jmi_generic_func_t sample_delay;       /**< \brief Function for initializing delay structures. */
 
     int n_real_ci;                       /**< \brief Number of independent constants. */
     int n_real_cd;                       /**< \brief Number of dependent constants. */
@@ -1084,6 +1088,8 @@ struct jmi_t {
     
     int n_dae_blocks;                    /**< \brief Number of BLT blocks. */
     int n_dae_init_blocks;               /**< \brief Number of initial BLT blocks. */
+
+    int n_delays;                        /**< \brief Number of (fixed and variable time) delay blocks. */
 
     /* Offset variables in the z vector, for convenience. */
     /* Structural, final, and evaluated parameters "_pi_s", "_ip_f", and
@@ -1170,6 +1176,9 @@ struct jmi_t {
     jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
     jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
     int cached_block_jacobians;                       /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
+
+    jmi_delay_t *delays;                 /**< \brief Delay blocks (fixed and variable time) */
+    jmi_boolean delay_event_mode;        /**< \brief Controls operation of `jmi_delay_record_sample` */
 
     jmi_int_t n_initial_relations;       /**< \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
     jmi_int_t* initial_relations;        /**< \brief Kind of relational operators used in the event indicators for the initialization system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */

@@ -1109,6 +1109,62 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 	
+    /**
+     * Prints number of delay blocks.
+     */
+    public class DAETag_n_delays extends DAETag {
+        
+        public DAETag_n_delays(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_delays", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.myDelayExps().size());
+        }
+    }
+	
+    /**
+     * Generates statements to initialize delay blocks.
+     */
+    public class DAETag_C_delay_init extends DAETag {
+        
+        public DAETag_C_delay_init(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_delay_init", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            CodePrinter p = ASTNode.printer_C;
+            String indent = p.indent("");
+            for (FDelayExp delay : fclass.myDelayExps()) {
+                delay.genInitVarDecls_C(p, genPrinter, indent);
+            }
+            for (FDelayExp delay : fclass.myDelayExps()) {
+                delay.genInit_C(p, genPrinter, indent);
+            }
+        }
+    }
+    
+    /**
+     * Generates statements to sample delay blocks.
+     */
+    public class DAETag_C_delay_sample extends DAETag {
+        
+        public DAETag_C_delay_sample(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_delay_sample", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            CodePrinter p = ASTNode.printer_C;
+            String indent = p.indent("");
+            for (FDelayExp delay : fclass.myDelayExps()) {
+                delay.genSampleVarDecls_C(p, genPrinter, indent);
+            }
+            for (FDelayExp delay : fclass.myDelayExps()) {
+                delay.genSample_C(p, genPrinter, indent);
+            }
+        }
+    }
+	
 	/**
 	 * Returns the string denoting the beginning of the copyright blurb.
 	 */
