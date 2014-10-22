@@ -198,7 +198,7 @@ static int index2pos(jmi_delaybuffer_t *buffer, int index) {
 }
 
 
-/* Note: jmi_delaybuffer_evaluate assumes that put will increase size with exactly one. */
+/* Note: jmi_delaybuffer_evaluate may reverse the effects of put by restoring the value of buffer->size from before the invocation. */
 static int put(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean event_occurred) {
     jmi_delay_point_t *buf;
     int tail;
@@ -348,8 +348,10 @@ static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolea
                                            jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr) {
     /* todo: more efficient handling of (t_curr, y_curr)? */
     jmi_real_t y;
-    put(buffer, t_curr, y_curr, 0);
+    int orig_size = buffer->size;
+    put(buffer, t_curr, y_curr, 0); /* Temporarily put (t_curr, y_curr) in the delay buffer */
     y = evaluate(buffer, at_event, tr, position);
+    buffer->size = orig_size;       /* Remove (t_curr, y_curr) from the delay buffer again */
     return y;
 }
 
