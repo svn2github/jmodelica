@@ -219,7 +219,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
           if(sqrt_relfunc > 0) 
               inc *= sqrt_relfunc;
           u_data[j] += inc;
-      
+          /* make sure we're inside bounds*/
+          if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
+              inc = -inc;
+              u_data[j] = ujsaved + inc;
+          }
           ret = kin_f(u, ftemp, block);
           if(ret > 0) {
               /* try to recover by stepping in the opposite direction */
