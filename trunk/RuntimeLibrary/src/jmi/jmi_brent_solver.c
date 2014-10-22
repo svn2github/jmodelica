@@ -194,7 +194,7 @@ static int jmi_brent_try_bracket(jmi_block_solver_t * block,
 int jmi_brent_solver_solve(jmi_block_solver_t * block){
     int flag;
     jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
-    double f;
+    double f, init;
 
     jmi_log_node_t topnode;
     jmi_log_t *log = block->log; 
@@ -203,13 +203,14 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 
     if (block->init) {
         jmi_brent_init(block);
+        init = block->x[0];
     }
     else {
         /* Read initial values and bounds for iteration variables from variable vector.
         * This is needed if the user has changed initial guesses in between calls to
         * the solver.
         */
-        double init, nom, min, max;
+        double nom, min, max;
         flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
         init = block->x[0];
         if (flag ||(init != init)) {        
@@ -282,7 +283,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
                      "<block: %s>", block->label);
         jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_FIRST_SYSFUNC_ERR);
-        return JMI_BRENT_FIRST_SYSFUNC_ERR;
+        if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error)
+            return JMI_BRENT_SUCCESS;
+        else
+            return JMI_BRENT_FIRST_SYSFUNC_ERR;
     }
 
     /* bracket the root */
@@ -373,7 +377,13 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             else {
                 jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
-                return JMI_BRENT_ROOT_BRACKETING_FAILED;
+                if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error) {
+                    block->x[0] = init;
+                    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+                    return JMI_BRENT_SUCCESS;
+                }
+                else
+                    return JMI_BRENT_ROOT_BRACKETING_FAILED;
             }
             if (flag > 0) { 
                 break; /* bracketing done*/

@@ -80,7 +80,8 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_none = 0,
     jmi_block_solver_experimental_steepest_descent = 1,
     jmi_block_solver_experimental_steepest_descent_first = 2,
-    jmi_block_solver_experimental_Brent = 4
+    jmi_block_solver_experimental_Brent = 4,
+    jmi_block_solver_experimental_Brent_ignore_error = 8
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
