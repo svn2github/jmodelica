@@ -2095,7 +2095,7 @@ aspect TransformCanonical {
 	}
 	
 	public void FIdUseExp.removeFromUses() {
-		FAbstractVariable var = getFIdUse().myFV();
+		FAbstractVariable var = myFV();
 		var.uses().remove(this);
 		var.definingUses().remove(this);
 		var.nonDefiningUses().remove(this);

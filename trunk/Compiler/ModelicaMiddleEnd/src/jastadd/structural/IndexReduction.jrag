@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.Stack;
 
@@ -276,14 +277,14 @@ aspect IndexReduction {
 
         private IndexReductionEq meDifferentiated = null;
         private IndexReductionEq meIntegrated = null;
-        private Map<IndexReductionVar, Boolean> nonDiffUseMap;
+        private Map<String, Boolean> nonDiffUseMap;
 
         public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
             super(name, eqn, groupNumber, variability);
         }
 
         public int numDifferentiations() {
-            return getMeIntegrated()==null? 0: getMeIntegrated().numDifferentiations() + 1; 
+            return getMeIntegrated() == null ? 0: getMeIntegrated().numDifferentiations() + 1; 
         }
 
         public void setMeDifferentiated(IndexReductionEq e) {
@@ -305,20 +306,23 @@ aspect IndexReduction {
         }
 
         public boolean isNonDiffUse(IndexReductionVar var) {
-            if (nonDiffUseMap == null)
-                nonDiffUseMap = new HashMap<IndexReductionVar, Boolean>();
-            Boolean res = nonDiffUseMap.get(var);
-            if (res != null)
-                return res;
-            Set<FIdUseExp> uses = getEquation().referencedFIdUseExps();
-            res = true;
-            for (FIdUseExp use : uses) {
-                if (!use.name().equals(var.getName()))
-                    continue;
-                res &= use.inNonDiffArg();
+            if (nonDiffUseMap == null) {
+                nonDiffUseMap = new HashMap<String, Boolean>();
+                for (FAbstractEquation eqn : new ChainedIterable<FAbstractEquation>(Collections.singletonList(getEquation()),extraEquations)) {
+                    Set<FIdUseExp> uses = getEquation().referencedFIdUseExps();
+                    for (FIdUseExp use : uses) {
+                        Boolean val = nonDiffUseMap.get(use.name());
+                        if (val == null)
+                            val = true;
+                        nonDiffUseMap.put(use.name(), val & use.inNonDiffArg());
+                    }
+                }
             }
-            nonDiffUseMap.put(var, res);
-            return res;
+            Boolean val = nonDiffUseMap.get(var.getName());
+            if (val == null)
+                return false;
+            else
+                return val;
         }
         
         public int numDiffableVars() {
@@ -329,8 +333,18 @@ aspect IndexReduction {
             return n;
         }
 
+        private Collection<FAbstractEquation> extraEquations = Collections.emptyList();
+
+        public void setExtraEquations(Collection<FAbstractEquation> extraEquations) {
+            this.extraEquations = extraEquations;
+        }
+
+        public Collection<FAbstractEquation> getExtraEquations() {
+            return extraEquations;
+        }
+
     }
-    
+
     public class IndexReductionVar extends AbstractVar<IndexReductionEq, IndexReductionVar> {
 
         private IndexReductionVar meDifferentiated = null; // A reference to this variable differentiated once
@@ -448,127 +462,210 @@ aspect IndexReduction {
         }
     }
     
-    private void IndexReductionBiPGraph.differentiateEquation(IndexReductionEq eqn,
-            Collection<FVariable> newDiffedVars,Collection<IndexReductionVar> varsToRemove,
-            IndexReductionResult result, Stack<IndexReductionEq> eqToMatchStack,
-            IndexReductionFunctionInliner inliner) {
-        
-        if (eqn.getMeDifferentiated() != null)
-            return;
-        
-        FAbstractEquation fEqn = eqn.getEquation();
-        
-        if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
-            throw new IndexReductionException("Maximum number of differentiations has been reached");
-        
+    private static FAbstractEquation IndexReductionBiPGraph.differentiateEquation(FAbstractEquation fEqn) {
         if (fEqn.numFExp() > MAX_N_FEXP_IN_EQ)
             throw new IndexReductionException("Maximum number of expressions in a single equation has been reached");
-        
-        // Handle nonscalar equations and LHS variables that needs to be differentiated
-        
-        for (IndexReductionVar variable : lookupVarsInSet(fEqn.FIdUseExpsInLHS())) {
-            if (variable.getMatching() != null && variable.getMatching() != eqn)
-                eqToMatchStack.add(variable.getMatching());
-            differentiateVariable(variable, newDiffedVars, varsToRemove);
-            
-        }
         
         Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
         if (diffedFEqns.size() != 1)
             throw new UnsupportedOperationException("Differentiation of equations should result" +
                     " in a single equation when differentiating on time");
-        FAbstractEquation diffedFEqn = diffedFEqns.iterator().next();
+        return diffedFEqns.iterator().next();
+    }
+    
+    /**
+     * This method is big and complex due to that function inlining has to be
+     * done on the differentiated equation. This results in additional
+     * equations and variables are spawned by the inlining algorithm. None
+     * of these equations or variables are inserted into the index reduction
+     * problem, there is no need for it. Instead they are hidden inside the 
+     * original equation or variable. There are situations where the original
+     * equation (function call equation) is split into several equations. This
+     * is hanled by introducing the equations into the index reduction problem
+     * as normal but keeping them as group members so that all are
+     * differentiated if one is differentiated. The referenced variables are 
+     * derived from all of the equations in this case.
+     * 
+     * All of these special cases makes this method complex.
+     * 
+     */
+    private void IndexReductionBiPGraph.differentiateEquation(IndexReductionEq baseEqn,
+            Collection<FVariable> newDiffedVars,Collection<IndexReductionVar> varsToRemove,
+            IndexReductionResult result, Stack<IndexReductionEq> eqToMatchStack,
+            IndexReductionFunctionInliner inliner, Map<String, FVariable> temporaryVarsMap) {
+        if (baseEqn.getMeDifferentiated() != null)
+            return;
         
-        // Handle inlining of function calls
-        Collection<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
-        Set<FAbstractEquation> splitOriginalFEqn = null;
-        FAbstractEquation inlinedDiffedFEqn = diffedFEqn;
+        // Go through all group members and collect all unique AST equations.
+        // There might be several equations the second time an inlined
+        // equation is differentiated.
+        Set<FAbstractEquation> originalFEqns = new HashSet<FAbstractEquation>();
+        for (IndexReductionEq eqn : baseEqn.getGroupMembers())
+            originalFEqns.add(eqn.getEquation());
         
-        if (inlinedDiffedFEqn.hasInlinableFunctions(inliner)) {
-            inliner.reset();
-            
-            ASTNode.log.debug("Differentiated equation has inlinable functions");
-            while (inlinedDiffedFEqn != null && inlinedDiffedFEqn.hasInlinableFunctions(inliner)) {
-                ASTNode.log.debug("  Performing function inlining on %s", inlinedDiffedFEqn);
-                inlinedDiffedFEqn = inlinedDiffedFEqn.inlineFunctions(inliner);
+        if (baseEqn.numDifferentiations() > MAX_N_EQ_DIFFS)
+            throw new IndexReductionException("Maximum number of differentiations has been reached");
+        
+        // Handle nonscalar equations and LHS variables that needs to be differentiated
+        for (FAbstractEquation originalFEqn : originalFEqns) {
+            for (IndexReductionVar variable : lookupVarsInSet(originalFEqn.FIdUseExpsInLHS())) {
+                if (variable.getMatching() != null && variable.getMatching() != baseEqn)
+                    eqToMatchStack.add(variable.getMatching());
+                differentiateVariable(variable, newDiffedVars, varsToRemove);
             }
-            
-            for (FVariable var : inliner.getNewVariables()) {
-                newDiffedVars.add(var);
-                if (var.variability().continuousVariability())
-                    addVariable(var.name(), var);
-            }
-            
-            if (inlinedDiffedFEqn == null)
-                ASTNode.log.debug("Inlining done, original equation has been split into multiple equations");
-            else
-                ASTNode.log.debug("Inlining done, got %s", inlinedDiffedFEqn);
-            newEquations.addAll(inliner.getNewEquations());
         }
         
-        if (inlinedDiffedFEqn == null)
-            splitOriginalFEqn = new HashSet<FAbstractEquation>(inliner.getLastSplitFFCE());
-        else if (inlinedDiffedFEqn == diffedFEqn)
-            newEquations.add(diffedFEqn);
+        
+        // Differentiate equations
+        Collection<FAbstractEquation> fEqns = new ArrayList<FAbstractEquation>();
+        fEqns.addAll(originalFEqns);
+        
+        java.util.List<FAbstractEquation> diffedFEqns = new ArrayList<FAbstractEquation>();
+        Set<FAbstractEquation> originalDiffedFEqns = new HashSet<FAbstractEquation>();
+        for (FAbstractEquation originalFEqn : originalFEqns) {
+            FAbstractEquation originalDiffedFEqn = differentiateEquation(originalFEqn);
+            originalDiffedFEqns.add(originalDiffedFEqn);
+            diffedFEqns.add(originalDiffedFEqn);
+        }
+        for (FAbstractEquation fEqn : baseEqn.getExtraEquations()) {
+            fEqns.add(fEqn);
+            diffedFEqns.add(differentiateEquation(fEqn));
+        }
+        
+        // Handle inlining of function calls
+        Collection<FAbstractEquation> newExtraEquations = new ArrayList<FAbstractEquation>();
+        Stack<FAbstractEquation> inlineStack = new Stack<FAbstractEquation>();
+        for (FAbstractEquation fEqn : diffedFEqns) {
+            if (fEqn.hasInlinableFunctions(inliner))
+                inlineStack.push(fEqn);
+            else if (!originalDiffedFEqns.contains(fEqn))
+                newExtraEquations.add(fEqn);
+            for (FIdUseExp use : fEqn.findFIdUseExpsInTree()) {
+                String baseName = use.getFIdUse().name();
+                FVariable topTempDerivative = temporaryVarsMap.get(baseName);
+                if (topTempDerivative == null)
+                    continue;
+                if (topTempDerivative.order() >= use.order())
+                    continue;
+                for (int i = topTempDerivative.order(); i <= use.order(); i++) {
+                    topTempDerivative = topTempDerivative.createFDerivativeVariable();
+                    newDiffedVars.add(topTempDerivative);
+                    result.addDummyDerivative(topTempDerivative);
+                }
+                temporaryVarsMap.put(baseName, topTempDerivative);
+            }
+        }
+        
+        if (inlineStack.size() > 0) {
+            
+            ASTNode.log.debug("Differentiated equation has inlinable functions");
+            while (!inlineStack.isEmpty()) {
+                inliner.reset();
+                FAbstractEquation fEqn = inlineStack.pop();
+                ASTNode.log.debug("  Performing function inlining on %s", fEqn);
+                FAbstractEquation inlinedFEqn = fEqn.inlineFunctions(inliner);
+                
+                for (FAbstractEquation spawnedFExp : inliner.getNewEquations()) {
+                    ASTNode.log.debug("Additional equation introduced, %s", spawnedFExp);
+                    if (spawnedFExp.hasInlinableFunctions(inliner))
+                        inlineStack.add(spawnedFExp);
+                    else
+                        newExtraEquations.add(spawnedFExp);
+                }
+                
+                for (FVariable var : inliner.getNewVariables()) {
+                    newDiffedVars.add(var);
+                    temporaryVarsMap.put(var.name(), var);
+                }
+                
+                if (inlinedFEqn == null) {
+                    if (originalDiffedFEqns.contains(fEqn)) {
+                        ASTNode.log.debug("Inlining done, original equation has been split into multiple equations");
+                        originalDiffedFEqns.remove(fEqn); // Remove the original equation if it has been split
+                        originalDiffedFEqns.addAll(inliner.getLastSplitFFCE());
+                        newExtraEquations.removeAll(inliner.getLastSplitFFCE());
+                    } else {
+                        ASTNode.log.debug("Inlining done, equation has been split into multiple equations");
+                    }
+                    
+                } else {
+                    ASTNode.log.debug("Equation inlined, got %s", inlinedFEqn);
+                    if (inlinedFEqn.hasInlinableFunctions(inliner)) {
+                        inlineStack.add(inlinedFEqn);
+                    } else if (!originalDiffedFEqns.contains(inlinedFEqn)) {
+                        newExtraEquations.add(inlinedFEqn);
+                    }
+                }
+            }
+        }
+        
+        for (FAbstractEquation extraFEqn : newExtraEquations)
+            result.addEquation(extraFEqn);
+        
+        // Construct a list of all the variables that should be common in all
+        // of the equations.
+        Set<IndexReductionVar> rhsVars = Collections.emptySet();
+        boolean multipleEqns = originalDiffedFEqns.size() > 1 || baseEqn.getEquation().numScalarEquations() > 1;
+        if (multipleEqns) {
+            rhsVars = new HashSet<IndexReductionVar>();
+            for (FAbstractEquation extraFEqn : newExtraEquations)
+                rhsVars.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
+            for (FAbstractEquation eqn : originalDiffedFEqns)
+                rhsVars.addAll(lookupVarsInSet(eqn.FIdUseExpsInRHS()));
+        } else {
+            rhsVars = new HashSet<IndexReductionVar>();
+            for (FAbstractEquation eqn : originalDiffedFEqns)
+                rhsVars.addAll(lookupVarsInSet(eqn.findFIdUseExpsInTree()));
+        }
         
         Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         
-        // Go through all the new equations and add corresponding BiPGraph
-        // equations. We need to remember equations that are differentiated
-        // from the "orignal" equation so that we can add links later.
-        for (FAbstractEquation newEqn : newEquations) {
+        // Go through differentiated equations that corresponds to the original
+        // equations. Add all of these equations to the BiPGraph. We need to
+        // remember equations that are differentiated from the "orignal"
+        // equation so that we can add links later.
+        for (FAbstractEquation newEqn : originalDiffedFEqns) {
             result.addEquation(newEqn);
-            if (!newEqn.isContinuous())
-                continue;
-            // Sets that indicates the variables in the lhs and rhs.
-            Set<IndexReductionVar> rhsVars = Collections.emptySet();
-            Map<IndexReductionVar, Integer> lhsVars = Collections.emptyMap();
-            if (newEqn.numScalarEquations() > 1) {
-                rhsVars = lookupVarsInSet(newEqn.FIdUseExpsInRHS());
-                lhsVars = new HashMap<IndexReductionVar, Integer>();
+            // Create list of variables that are unique for each BiP equation
+            Map<Integer, IndexReductionVar> lhsVars = Collections.emptyMap();
+            if (multipleEqns) {
+                lhsVars = new HashMap<Integer, IndexReductionVar>();
                 int i = 0;
                 for (IndexReductionVar var : lookupVarsInSet(newEqn.FIdUseExpsInLHS()))
-                    lhsVars.put(var, i++);
+                    lhsVars.put(i++, var);
                 if (newEqn.lhsVarsAreSolved())
-                    rhsVars.removeAll(lhsVars.keySet());
+                    rhsVars.removeAll(lhsVars.values());
             }
-            Collection<IndexReductionVar> variables = lookupVarsInSet(newEqn.findFIdUseExpsInTree());
             
-            Collection<IndexReductionEq> members = new ArrayList<IndexReductionEq>();
-            
-            // Build new differentiated BiP equations for all group members.
-            for (int i = 0; i < newEqn.numScalarEquations(); i++) { //IndexReductionEq member : eqn.getGroupMembers()) {
+            // Build new differentiated BiP equations for each scalar.
+            for (int i = 0; i < newEqn.numScalarEquations(); i++) {
                 ASTNode.log.info("About to add equation: %s", newEqn);
                 // Add the differentiated equation
                 IndexReductionEq diffedEqn = addEquation(newEqn, i, newEqn.variability());
                 
-                // Add edges
-                for (IndexReductionVar var : variables) {
-                    Integer pos = lhsVars.get(var);
-                    if (var != null && (pos == null || pos == i || rhsVars.contains(var))) {
-                        ASTNode.log.info("*** %s", var);
-                        addEdge(diffedEqn, var);
-                    }
+                // Add special edges
+                IndexReductionVar var = lhsVars.get(i);
+                if (var != null) {
+                    ASTNode.log.info("*** %s", var);
+                    addEdge(diffedEqn, var);
                 }
-                members.add(diffedEqn);
-                if (splitOriginalFEqn != null && splitOriginalFEqn.contains(newEqn) || newEqn == diffedFEqn)
-                    diffedOriginalEqs.add(diffedEqn);
-                else
-                    eqToMatchStack.add(diffedEqn);
+                // Add common edges
+                for (IndexReductionVar rhsVar : rhsVars) {
+                    ASTNode.log.info("*** %s", rhsVar);
+                    addEdge(diffedEqn, rhsVar);
+                }
+                diffedOriginalEqs.add(diffedEqn);
+                diffedEqn.setExtraEquations(newExtraEquations);
             }
-            for (IndexReductionEq groupMember1 : members)
-                for (IndexReductionEq groupMember2 : members)
-                    groupMember1.addGroupMember(groupMember2);
-            
             ASTNode.log.info("Equation added");
         }
         
         // Check so that the differentiated equation has the same number of
         // members as the original.
-        if (eqn.getGroupMembers().size() != diffedOriginalEqs.size())
-            throw new IndexReductionException("Number of scalar equations in differentiated equation(" + diffedOriginalEqs.size() + ") does not match the number in original equation(" + eqn.getGroupMembers().size() + "). Original equation:\n" + eqn.getEquation());
+        if (baseEqn.getGroupMembers().size() != diffedOriginalEqs.size())
+            throw new IndexReductionException("Number of scalar equations in differentiated equation(" + diffedOriginalEqs.size() + ") does not match the number in original equation(" + baseEqn.getGroupMembers().size() + "). Original equation:\n" + baseEqn.getEquation());
         
-        Iterator<IndexReductionEq> eqnIt = eqn.getGroupMembers().iterator();
+        Iterator<IndexReductionEq> eqnIt = baseEqn.getGroupMembers().iterator();
         Iterator<IndexReductionEq> diffedEqnIt = diffedOriginalEqs.iterator();
         // Add links between differentiated equation and the original equation.
         while (eqnIt.hasNext() && diffedEqnIt.hasNext()) {
@@ -583,6 +680,11 @@ aspect IndexReduction {
                 eqToMatchStack.add(diffedMember);
             }
         }
+        
+        // Link all BiP equations
+        for (IndexReductionEq member : diffedOriginalEqs)
+            for (IndexReductionEq otherMember : diffedOriginalEqs)
+                member.addGroupMember(otherMember);
     }
     
     public Set<FVariable> IndexReductionBiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
@@ -636,6 +738,10 @@ aspect IndexReduction {
             throw new IndexReductionException("No continuous equations was given");
         
         java.util.List<FVariable> newDiffedVars = new ArrayList<FVariable>();
+        // This map is used to ensure that all temporary variables that are
+        // introduced during inlining can be marked as dummy derivatives
+        Map<String, FVariable> temporaryVarsMap = new HashMap<String, FVariable>();
+        
         // Algoritm step numbering from the original Pantelides paper
         // Loop over all equations (step 3)
         while (!eqToMatchStack.empty() ){
@@ -686,7 +792,7 @@ aspect IndexReduction {
                 }
                 for (IndexReductionEq eqn : visitedEquations) { // Step 3b-5ii
                     // Differentiate equation
-                    differentiateEquation(eqn, newDiffedVars, varsToRemove, result, eqToMatchStack, inliner);
+                    differentiateEquation(eqn, newDiffedVars, varsToRemove, result, eqToMatchStack, inliner, temporaryVarsMap);
                 }
                 // Remove variables that have been differentiated, Step 3b-1
                 for (IndexReductionVar var : varsToRemove) {
@@ -1055,7 +1161,8 @@ aspect IndexReduction {
             opt_cost.add(cost[result[i][0]][result[i][1]]);
             E eqn = eqs.get(result[i][0]);
             V var = vars.get(result[i][1]);
-            match(eqn, var);
+            if (!match(eqn, var))
+                throw new MunkresException("Munkres was unable to match " + eqn + " to " + var);
             ASTNode.log.info("%s: %s %s", eqn, var, cost[result[i][0]][result[i][1]]);
         }
         ASTNode.log.info("Optimal cost: %s", opt_cost);

@@ -5454,6 +5454,120 @@ end IndexReduction.FunctionInlining.Test6;
 ")})));
     end Test6;
 
+    model Test7
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o1;
+        algorithm
+            o1 := if i1 > i2 then i1 else i2;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i1;
+            input Real i2;
+            input Real i1_der;
+            input Real i2_der;
+            output Real o1_der;
+        algorithm
+            o1_der := if i1 > i2 then i1_der else i2_der;
+            annotation(Inline=false,derivative(order=2)=F_der2);
+        end F_der;
+    
+        function F_der2
+            input Real i1;
+            input Real i2;
+            input Real i1_der;
+            input Real i2_der;
+            input Real i1_der2;
+            input Real i2_der2;
+            output Real o1_der2;
+        algorithm
+            o1_der2 := if i1 > i2 then i1_der2 else i2_der2;
+            annotation(Inline=true);
+        end F_der2;
+    
+        Real x(stateSelect=StateSelect.prefer);
+        Real y(stateSelect=StateSelect.prefer);
+        Real vx(stateSelect=StateSelect.prefer);
+        Real vy(stateSelect=StateSelect.prefer);
+        Real a;
+        Real b;
+        constant Real p = 2;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a*x;
+        der(vy) = a*y;
+        x^2 + y^2 = b;
+        b = F(x, y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test7",
+            description="Test function inlining during index reduction. This test requires that temporary equations and variables (introduced during index reduction) are hidden from munkres.",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test7
+ Real x(stateSelect = StateSelect.prefer);
+ Real y(stateSelect = StateSelect.prefer);
+ Real vx(stateSelect = StateSelect.prefer);
+ Real vy(stateSelect = StateSelect.prefer);
+ Real a;
+ Real b;
+ constant Real p = 2;
+ Real _der_x;
+ Real _der_vx;
+ Real _der_b;
+ Real _der_der_x;
+ Real _der_der_y;
+ Real _der_der_b;
+initial equation 
+ y = 0.0;
+ vy = 0.0;
+equation
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = a * x;
+ der(vy) = a * y;
+ x ^ 2 + y ^ 2 = b;
+ b = IndexReduction.FunctionInlining.Test7.F(x, y);
+ 2 * x * _der_x + 2 * y * der(y) = _der_b;
+ _der_b = IndexReduction.FunctionInlining.Test7.F_der(x, y, _der_x, der(y));
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = _der_der_b;
+ _der_der_b = noEvent(if x > y then _der_der_x else _der_der_y);
+
+public
+ function IndexReduction.FunctionInlining.Test7.F
+  input Real i1;
+  input Real i2;
+  output Real o1;
+ algorithm
+  o1 := if i1 > i2 then i1 else i2;
+  return;
+ annotation(derivative = IndexReduction.FunctionInlining.Test7.F_der);
+ end IndexReduction.FunctionInlining.Test7.F;
+
+ function IndexReduction.FunctionInlining.Test7.F_der
+  input Real i1;
+  input Real i2;
+  input Real i1_der;
+  input Real i2_der;
+  output Real o1_der;
+ algorithm
+  o1_der := if i1 > i2 then i1_der else i2_der;
+  return;
+ annotation(derivative(order = 2) = IndexReduction.FunctionInlining.Test7.F_der2);
+ end IndexReduction.FunctionInlining.Test7.F_der;
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.FunctionInlining.Test7;
+")})));
+    end Test7;
+
 end FunctionInlining;
 
 end IndexReduction;
