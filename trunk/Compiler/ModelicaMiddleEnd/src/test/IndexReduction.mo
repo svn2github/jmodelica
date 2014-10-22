@@ -5568,6 +5568,99 @@ end IndexReduction.FunctionInlining.Test7;
 ")})));
     end Test7;
 
+    model Test8
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o1;
+            output Integer o2;
+        algorithm
+            o1 := i1 + i2;
+            o2 := 1;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i1;
+            input Real i2;
+            input Real i1_der;
+            input Real i2_der;
+            output Real o1_der;
+        algorithm
+            (o1_der, ) := F(i1_der, i2_der);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real a;
+        Real b;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a*x;
+        der(vy) = a*y;
+        (b,) = F(x, y);
+        b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test8",
+            description="Test function inlining during index reduction. This test requires that temporary equations and variables (introduced during index reduction) are hidden from munkres.",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test8
+ Real x;
+ Real y;
+ Real vx;
+ Real vy;
+ Real a;
+ Real b;
+ Real _der_x;
+ Real _der_vx;
+ Real _der_b;
+ Real _der_der_x;
+ Real _der_der_y;
+ Real _der_der_b;
+ Real temp_5;
+ Real temp_10;
+initial equation 
+ y = 0.0;
+ vy = 0.0;
+equation
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = a * x;
+ der(vy) = a * y;
+ (b, ) = IndexReduction.FunctionInlining.Test8.F(x, y);
+ b = time;
+ (temp_5, ) = IndexReduction.FunctionInlining.Test8.F(_der_x, der(y));
+ _der_b = temp_5;
+ _der_b = 1.0;
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ (temp_10, ) = IndexReduction.FunctionInlining.Test8.F(_der_der_x, _der_der_y);
+ _der_der_b = temp_10;
+ _der_der_b = 0.0;
+
+public
+ function IndexReduction.FunctionInlining.Test8.F
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Integer o2;
+ algorithm
+  o1 := i1 + i2;
+  o2 := 1;
+  return;
+ annotation(derivative = IndexReduction.FunctionInlining.Test8.F_der);
+ end IndexReduction.FunctionInlining.Test8.F;
+
+end IndexReduction.FunctionInlining.Test8;
+")})));
+    end Test8;
+
 end FunctionInlining;
 
 end IndexReduction;

@@ -604,16 +604,15 @@ aspect IndexReduction {
         
         // Construct a list of all the variables that should be common in all
         // of the equations.
-        Set<IndexReductionVar> rhsVars = Collections.emptySet();
+        // Always add variables from extra equations
+        Set<IndexReductionVar> rhsVars = new HashSet<IndexReductionVar>();
+        for (FAbstractEquation extraFEqn : newExtraEquations)
+            rhsVars.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
         boolean multipleEqns = originalDiffedFEqns.size() > 1 || baseEqn.getEquation().numScalarEquations() > 1;
         if (multipleEqns) {
-            rhsVars = new HashSet<IndexReductionVar>();
-            for (FAbstractEquation extraFEqn : newExtraEquations)
-                rhsVars.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
             for (FAbstractEquation eqn : originalDiffedFEqns)
                 rhsVars.addAll(lookupVarsInSet(eqn.FIdUseExpsInRHS()));
         } else {
-            rhsVars = new HashSet<IndexReductionVar>();
             for (FAbstractEquation eqn : originalDiffedFEqns)
                 rhsVars.addAll(lookupVarsInSet(eqn.findFIdUseExpsInTree()));
         }
