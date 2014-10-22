@@ -1290,10 +1290,8 @@ aspect ConstantEvaluation {
     		members = new HashMap<String,Integer>(n * 4 / 3 + 1);
     		values = new CValue[n];
     		int i = 0;
-            for (FRecordComponentType mtype : type.getComponents()) {
-                values[i] = CValue.UNKNOWN;
-                members.put(mtype.getName(), i++);
-            }
+    		for (FRecordComponentType mtype : type.getComponents())
+    			members.put(mtype.getName(), i++);
     	}
 	    
 	    public CValueRecord clone() {
@@ -1648,84 +1646,6 @@ aspect ConstantEvaluation {
         }
     }
     
-    
-    public boolean CValue.equals(CValue other) {
-        return super.equals(other);
-    }
-    
-    public boolean CValueUnknown.equals(CValue other) {
-        if (other instanceof CValueUnknown) {
-            return true;
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueReal.equals(CValue other) {
-        if (other instanceof CValueReal || 
-                other instanceof CValueInteger) {
-            return realValue() == other.realValue();
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueInteger.equals(CValue other) {
-        if (other instanceof CValueReal || 
-                other instanceof CValueInteger) {
-            return realValue() == other.realValue();
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueBoolean.equals(CValue other) {
-        if (other instanceof CValueBoolean) {
-            return booleanValue() == other.booleanValue();
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueEnum.equals(CValue other) {
-        if (other instanceof CValueEnum) {
-            return intValue() == other.intValue();
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueString.equals(CValue other) {
-        if (other instanceof CValueString) {
-            return stringValue() == other.stringValue();
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueRecord.equals(CValue other) {
-        if (other instanceof CValueRecord) {
-            CValueRecord o = (CValueRecord) other;
-            for (int i = 0; i < values.length; i++) {
-                if (!values[i].equals(o.values[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return super.equals(other);
-    }
-    
-    public boolean CValueArray.equals(CValue other) {
-        if (other instanceof CValueArray) {
-            CValueArray o = (CValueArray) other;
-            if (values.length != o.values.length)
-                return false;
-            for (int i = 0; i < values.length; i++) {
-                if (!values[i].equals(o.values[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return super.equals(other);
-    }
-    
-    
     /** 
      * \build Creates an FExp with literals from this Array.
      * 
@@ -1894,8 +1814,6 @@ aspect ConstantEvaluation {
      * This needs to be overridden for subclasses of FExp.
      */
     syn CValue FExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
-    
-    syn CValue FTimeExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNKNOWN;
 
     eq FDotAddExp.cevalCalc(VariableEvaluator evaluator) = type().add(getLeft().ceval(evaluator), getRight().ceval(evaluator));
     eq FDotSubExp.cevalCalc(VariableEvaluator evaluator) = type().sub(getLeft().ceval(evaluator), getRight().ceval(evaluator));
@@ -3799,17 +3717,13 @@ aspect ConstantEvaluation {
 	  return EVAL_RETURN;
   }
 
-    @Override
-    public int FIfWhenStmt.evaluate(AlgorithmEvaluator evaluator) {
-        evaluator.startIf();
-        int res = getFIfWhenClauses().evaluateList(evaluator);
-        if (res == EVAL_CONT) {
-            res = evaluateElse(evaluator);
-            evaluator.branchIf(res);
-        }
-        evaluator.endIf();
-        return res & EVAL_MASK;
-    }
+  @Override
+  public int FIfWhenStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  int res = getFIfWhenClauses().evaluateList(evaluator);
+	  if (res == EVAL_CONT)
+		  res = evaluateElse(evaluator);
+	  return res & EVAL_MASK;
+  }
 
   public int FIfWhenStmt.evaluateElse(AlgorithmEvaluator evaluator) {
 	  return EVAL_CONT;
@@ -3820,19 +3734,15 @@ aspect ConstantEvaluation {
 	  return getElseStmts().evaluateList(evaluator);
   }
 
-    @Override
-    public int FIfWhenClause.evaluate(AlgorithmEvaluator evaluator) {
-        CValue test = evaluator.ceval(getTest());
-        boolean unknown = test.isPartlyUnknown();
-        if (unknown || test.reduceBooleanOr()) {
-            int res = getFStatements().evaluateList(evaluator);
-            evaluator.branchIf(res);
-            if (!unknown) {
-                return res | FStatement.EVAL_IFHIT;
-            }
-        }
-        return FStatement.EVAL_CONT;
-    }
+  @Override
+  public int FIfWhenClause.evaluate(AlgorithmEvaluator evaluator) {
+	  CValue test = getTest().ceval();
+	  if (test.reduceBooleanOr()) {
+		  int res = getFStatements().evaluateList(evaluator);
+		  return res | FStatement.EVAL_IFHIT;
+	  }
+	  return FStatement.EVAL_CONT;
+  }
 
   @Override
   public int FForStmt.evaluate(AlgorithmEvaluator evaluator) {
@@ -4861,22 +4771,6 @@ aspect VariableEvaluator {
         public Map<CommonVariableDecl, CValue> getValues() {
             return values;
         }
-        
-        /**
-         * Called when an if statement evaluation is started.
-         */
-        public void startIf() {}
-        
-        /**
-         * Called when an if statement evaluation is finished.
-         */
-        public void endIf() {}
-        
-        /**
-         * Called when an if branch evaluation is finished.
-         */
-        public void branchIf(int res) {}
-        
     }
     
     public class FunctionEvaluator extends AlgorithmEvaluator {
@@ -4890,11 +4784,8 @@ aspect VariableEvaluator {
     }
     
     public class FunctionPartialEvaluator extends FunctionEvaluator {
-        protected ArrayList<IfEvaluation> ifStack;
-        
         public FunctionPartialEvaluator(Map<CommonVariableDecl, CValue> values) {
             super(values);
-            ifStack = new ArrayList<IfEvaluation>();
         }
         
         @Override
@@ -4916,104 +4807,6 @@ aspect VariableEvaluator {
             values.clear();
             for (CommonVariableDecl cvd : outputs) {
                 values.put(cvd, cvd.type().unknownCValue());
-            }
-        }
-        
-        @Override
-        public void startIf() {
-            ifStack.add(new IfEvaluation());
-        }
-        
-        @Override
-        public void endIf() {
-            ifStack.remove(ifStack.size()-1).zip();
-        }
-        
-        @Override
-        public void branchIf(int res) {
-            ifStack.get(ifStack.size()-1).restore(res);
-        }
-        
-        /**
-         * Stores several sets of values evaluated from different if-branches
-         */
-        private class IfEvaluation {
-            protected Map<CommonVariableDecl, CValue> valuesBefore;
-            protected ArrayList<IfBranchEvaluated> branches;
-            
-            public IfEvaluation() {
-                valuesBefore = new HashMap<CommonVariableDecl, CValue>();
-                for (CommonVariableDecl cvd : values.keySet()) {
-                    valuesBefore.put(cvd, values.get(cvd).clone());
-                }
-                branches = new ArrayList<IfBranchEvaluated>();
-            }
-            
-            /**
-             * Called when if branch has been evaluated. Will store the evaluators current
-             * value set and restore that set as it was before this if-clause was entered.
-             */
-            public void restore(int res) {
-                IfBranchEvaluated lastBranch = new IfBranchEvaluated(res);
-                branches.add(lastBranch);
-                
-                for (CommonVariableDecl cvd : values.keySet()) {
-                    cvd.setEvaluationValue(FunctionPartialEvaluator.this, CValue.UNKNOWN);
-                }
-                for (CommonVariableDecl cvd : valuesBefore.keySet()) {
-                    cvd.setEvaluationValue(FunctionPartialEvaluator.this, valuesBefore.get(cvd));
-                }
-            }
-            
-            /**
-             * Merge all evaluated branches and write result to evaluators current value set.
-             */
-            public void zip() {
-                IfBranchEvaluated res = branches.get(0);
-                for (int i = 1 ; i < branches.size(); i++) {
-                    res.zip(branches.get(i));
-                }
-                res.restore();
-            }
-            
-            /**
-             * Stores values evaluated from an if-branch.
-             */
-            private class IfBranchEvaluated {
-                Map<CommonVariableDecl, CValue> values;
-                int res;
-                
-                public IfBranchEvaluated(int res) {
-                    this.res = res;
-                    values = new HashMap<CommonVariableDecl, CValue>();
-                    for (CommonVariableDecl cvd : FunctionPartialEvaluator.this.values.keySet()) {
-                        values.put(cvd, FunctionPartialEvaluator.this.values.get(cvd).clone());
-                    }
-                }
-                
-                /**
-                 * Merge values from other branch into this. Differing values results in unknown values.
-                 */
-                public void zip(IfBranchEvaluated other) {
-                    if (res != other.res) {
-                        throw new ConstantEvaluationException(null, "Partial constant evaluation of if statements with "
-                                + "differing return statuses is not possible");
-                    }
-                    for (CommonVariableDecl cvd : other.values.keySet()) {
-                        if (values.get(cvd) == null || !values.get(cvd).equals(other.values.get(cvd))) {
-                            values.put(cvd, cvd.type().unknownCValue());
-                        }
-                    }
-                }
-                
-                /**
-                 * Write this branch into the value set used by the evaluator.
-                 */
-                public void restore() {
-                    for (CommonVariableDecl cvd : values.keySet()) {
-                        cvd.setEvaluationValue(FunctionPartialEvaluator.this, values.get(cvd));
-                    }
-                }
             }
         }
     }
