@@ -801,53 +801,53 @@ aspect Connections {
     }
 
 
-	/**
-	 * Connect the variables referenced in a connect or branch statement in the connection set manager.
-	 * 
-	 * @param right   the other access
-	 * @param prefix  the prefix to use when flattening names
-	 * @param csm     the connection set manager to add variables to
-	 * @param source  the originating connect or branch statement
-	 */
-	public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm, ConnectionEdge source) {
-		FQName leftName  = flattenAndResolveIndices(prefix);
-		FQName rightName = right.flattenAndResolveIndices(prefix);
-		
-		boolean leftOutside  = isOutsideConnector();
-		boolean rightOutside = right.isOutsideConnector();
-		InstComponentDecl leftComp  = lookupEvaluatingIndices();
-		InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-		
-		boolean handleExpandable = !csm.isExpandableConnectorsDone();
-		if (handleExpandable && (isExpandableConnectorPart() || right.isExpandableConnectorPart())) {
-		    if (isExpandableConnectorPart())
-		        csm.getExpandable().addIntroducingConnection(this, right, prefix, source);
-		    else
+    /**
+     * Connect the variables referenced in a connect or branch statement in the connection set manager.
+     * 
+     * @param right   the other access
+     * @param prefix  the prefix to use when flattening names
+     * @param csm     the connection set manager to add variables to
+     * @param source  the originating connect or branch statement
+     */
+    public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm, ConnectionEdge source) {
+        FQName leftName  = flattenAndResolveIndices(prefix);
+        FQName rightName = right.flattenAndResolveIndices(prefix);
+        
+        boolean leftOutside  = isOutsideConnector();
+        boolean rightOutside = right.isOutsideConnector();
+        InstComponentDecl leftComp  = lookupEvaluatingIndices();
+        InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+        
+        boolean handleExpandable = !csm.isExpandableConnectorsDone();
+        if (handleExpandable && (isExpandableConnectorPart() || right.isExpandableConnectorPart())) {
+            if (isExpandableConnectorPart())
+                csm.getExpandable().addIntroducingConnection(this, right, prefix, source);
+            if (right.isExpandableConnectorPart())
                 csm.getExpandable().addIntroducingConnection(right, this, prefix, source);
-		} else if (handleExpandable && leftComp.isExpandableConnector()) {
-		    csm.getExpandable().addSpanningConnection(leftComp, rightComp, prefix, source);
-		} else if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
-			Indices leftInd = indices();
-			Indices rightInd = right.indices();
-			Iterator<Index> leftIter = leftInd.iterator();
-			Iterator<Index> rightIter = rightInd.iterator();
-			while (leftIter.hasNext()) {
-				Index leftI = leftInd.translate(leftIter.next());
-				Index rightI = rightInd.translate(rightIter.next());
-				FQName leftCellName = leftName.copyReplacingSubscripts(leftI);
-				FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
-				InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
-				InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
-				ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftCompCell, leftOutside, leftCellName);
-				ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);	
-				leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
-			}
-		} else {
-			ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, leftOutside, leftName);
-			ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, rightOutside, rightName);	
-			leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
-		}
-	}
+        } else if (handleExpandable && leftComp.isExpandableConnector()) {
+            csm.getExpandable().addSpanningConnection(leftComp, rightComp, prefix, source);
+        } else if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
+            Indices leftInd = indices();
+            Indices rightInd = right.indices();
+            Iterator<Index> leftIter = leftInd.iterator();
+            Iterator<Index> rightIter = rightInd.iterator();
+            while (leftIter.hasNext()) {
+                Index leftI = leftInd.translate(leftIter.next());
+                Index rightI = rightInd.translate(rightIter.next());
+                FQName leftCellName = leftName.copyReplacingSubscripts(leftI);
+                FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
+                InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
+                InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
+                ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftCompCell, leftOutside, leftCellName);
+                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);  
+                leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
+            }
+        } else {
+            ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, leftOutside, leftName);
+            ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, rightOutside, rightName);  
+            leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
+        }
+    }
 
     /**
      * Connect the variables referenced in a connect or branch statement in the connection set manager.

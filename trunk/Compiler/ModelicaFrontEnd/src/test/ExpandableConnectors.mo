@@ -1243,8 +1243,8 @@ equation
 end ExpandableConnectors.Expandable33;
 ")})));
     end Expandable33;
-	
-	
+
+
     model Expandable34
         expandable connector EC
         end EC;
@@ -1287,6 +1287,36 @@ equation
 end ExpandableConnectors.Expandable34;
 ")})));
     end Expandable34;
+
+
+    model Expandable35
+        connector C = Real;
+        
+        expandable connector EC
+            C x;
+        end EC;
+        
+        EC ec1, ec2;
+        C x = time;
+    equation
+        connect(ec1.x, ec2.x);
+        connect(ec1.x, x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable35",
+            description="Connecting two declared members of expandable connectors",
+            flatModel="
+fclass ExpandableConnectors.Expandable35
+ Real ec1.x;
+ Real ec2.x;
+ Real x = time;
+equation
+ ec1.x = ec2.x;
+ ec2.x = x;
+end ExpandableConnectors.Expandable35;
+")})));
+    end Expandable35;
 
     
     
