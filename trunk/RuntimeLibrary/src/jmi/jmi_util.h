@@ -124,6 +124,8 @@ typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward de
 #define INT_TYPE_MASK    0x10000000
 #define BOOL_TYPE_MASK   0x20000000
 
+/* These are a temporary remnants of CppAD*/            
+#define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
 
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) /**< \brief Macro for conditional expression == <br> */
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) /**< \brief Macro for conditional expression <= <br> */
@@ -1330,7 +1332,7 @@ int jmi_get_type_from_value_ref(int vref);
  * \brief Translates an index together with a type to a value reference
  * 
  * @param index An index in the z-vector
- * @param type An variable type (JMI_REAL_TYPE, JMI_INTEGER_TYPE, ...)
+ * @param type An variable type (JMI_REAL, JMI_INT, ...)
  * @return Value Reference
  */
 int jmi_get_value_ref_from_index(int index, jmi_int_t type);

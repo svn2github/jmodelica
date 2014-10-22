@@ -174,11 +174,11 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
             if (pre_non_reals[i] != non_reals[i]) {
                 type = jmi_get_type_from_value_ref(block->nr_vref[i]);
                 
-                if (type == JMI_INTEGER_TYPE) {
+                if (type == JMI_INTEGER) {
                         jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <value: %d> ", block->nr_vref[i], (jmi_int_t)non_reals[i]);
-                } else if (type == JMI_BOOLEAN_TYPE) {
+                } else if (type == JMI_BOOLEAN) {
                         jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <value: %d> ", block->nr_vref[i], (jmi_int_t)non_reals[i]);
-                } else if (type == JMI_REAL_TYPE) {
+                } else if (type == JMI_REAL) {
                         jmi_log_node(jmi->log, logInfo, "Info", " <real: #r%d#> <value: %E> ", block->nr_vref[i], non_reals[i]);
                 }
             }

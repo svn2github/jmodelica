@@ -56,7 +56,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _b_1 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _c_2 * _b_1 - (JMI_INT(23));
+            (*res)[0] = _c_2 * _b_1 - (23);
         }
     }
     return ef;
@@ -84,7 +84,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
         _a_0 = - (- _c_2 + _b_1);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _c_2 * _a_0 - (JMI_INT(20));
+            (*res)[0] = _c_2 * _a_0 - (20);
         }
     }
     return ef;
@@ -142,8 +142,8 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         return -1;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        (*res)[0] = _c_2 * _b_1 - (JMI_INT(23));
-        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _b_1 + _c_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (JMI_REAL(0));
+        (*res)[0] = _c_2 * _b_1 - (23);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _b_1 + _c_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));
         (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
     }
     return ef;
@@ -182,8 +182,8 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     _a_0 = - v_0;
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = - (d_0);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        (*res)[0] = _c_2 * _a_0 - (JMI_INT(20));
-        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _a_0 + _c_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - (JMI_REAL(0));
+        (*res)[0] = _c_2 * _a_0 - (20);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _a_0 + _c_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));
         (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
     }
     return ef;
