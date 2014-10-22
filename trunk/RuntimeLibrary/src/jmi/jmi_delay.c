@@ -109,7 +109,7 @@ jmi_real_t jmi_delay_next_time_event(jmi_t *jmi) {
     for (index = 0; index < jmi->n_delays; index++) {
         jmi_delay_t *delay = &(jmi->delays[index]);
         if (delay->fixed && !delay->no_event) {
-            jmi_real_t t = jmi_delaybuffer_next_event_time(&(delay->buffer), &(delay->position));
+            jmi_real_t t = jmi_delaybuffer_next_event_time(&(delay->buffer), &(delay->position)) + delay->buffer.max_delay;
             if (t < t_event) t_event = t;
         }
     }

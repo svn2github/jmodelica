@@ -916,17 +916,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             return -1;
         }
 
-        /* If there is an upcoming time event, then set the event information
-         * accordingly.
-         */
-        if (!(next_event_time == JMI_INF)) {
-            event_info->next_event_time_defined = TRUE;
-            event_info->next_event_time = next_event_time;
-            /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
-        } else {
-            event_info->next_event_time_defined = FALSE;
-        }
-
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
@@ -962,6 +951,24 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_comment(jmi->log, logError, "Delay sampling after event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
+        }
+
+        /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
+           if the next event is caused by a delay of the current one. */
+        {
+            jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
+            if (next_event_time > t_delay) next_event_time = t_delay;
+        }
+
+        /* If there is an upcoming time event, then set the event information
+         * accordingly.
+         */
+        if (!(next_event_time == JMI_INF)) {
+            event_info->next_event_time_defined = TRUE;
+            event_info->next_event_time = next_event_time;
+            /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
+        } else {
+            event_info->next_event_time_defined = FALSE;
         }
         
         /* Save the z values to the z_last vector */

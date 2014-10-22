@@ -551,17 +551,11 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
     int return_status;
 
     jmi_set_current(jmi);
-    if (jmi_try(jmi))
+    if (jmi_try(jmi)) {
 		return_status = -1;
+    }
 	else {
-        jmi_real_t t_event, t_delay;
-		return_status = jmi->dae->ode_next_time_event(jmi, &t_event);
-        if (return_status >= 0) {
-            t_delay = jmi_delay_next_time_event(jmi);
-            if (t_delay < t_event) t_event = t_delay;
-
-            *nextTime = t_event;
-        }
+        return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
     }
     jmi_set_current(NULL);
 
