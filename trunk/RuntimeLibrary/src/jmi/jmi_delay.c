@@ -61,13 +61,22 @@ static void init_delay(jmi_delay_t *delay, jmi_boolean fixed, jmi_boolean no_eve
     jmi_delay_position_init(&(delay->position));
 }
 
+/*  For fixed delays, we use the delay time as an offset already when recording into the buffer.
+    We do this to make sure that update_position will advance to the new interval when triggered
+    exactly at a time event.
+    This also means that we don't offset the event time when reading it out in jmi_delay_next_time_event.
+    
+    If we want to reuse the same jmi_delaybuffer_t struct with different delay times,
+    we will have to fix this issue in update_position instead. */
+static jmi_real_t get_time_offset(jmi_delay_t *delay) { return delay->fixed ? delay->buffer.max_delay : 0; }
+
 
 int jmi_delay_new(jmi_t *jmi, int index) {
     jmi_delay_t *delay = &(jmi->delays[index]);
     if (index < 0 || index >= jmi->n_delays) return -1;
 
     /* Initialize with sensible default values to be safe. The proper initialization is done in jmi_delay_init. */
-    init_delay(delay, 0, 0);
+    init_delay(delay, FALSE, FALSE);
     /* Initialize the delay buffer */
     return jmi_delaybuffer_new(&(jmi->delays[index].buffer));
 }
@@ -81,21 +90,34 @@ int jmi_delay_init(jmi_t *jmi, int index, jmi_boolean fixed, jmi_boolean no_even
     if (index < 0 || index >= jmi->n_delays) return -1;
 
     init_delay(delay, fixed, no_event);
-    return jmi_delaybuffer_init(&(delay->buffer), max_delay, get_t(jmi), y0);
+    /* Note: cannot use get_time_offset below since the buffer hasn't been initialized yet */
+    return jmi_delaybuffer_init(&(delay->buffer), max_delay, get_t(jmi) + (fixed ? max_delay : 0), y0);
 }
 
 jmi_real_t jmi_delay_evaluate(jmi_t *jmi, int index, jmi_real_t y_in, jmi_real_t delay_time) {
     jmi_delay_t *delay = &(jmi->delays[index]);
     jmi_real_t t = get_t(jmi);
+    jmi_real_t t_delayed, t_curr;
     if (index < 0 || index >= jmi->n_delays) return -1; /* todo: better way to handle the error? */
 
+    if (delay->fixed) {
+        /* Ignore the delay time if fixed, then it has already been used when putting data into the buffer. */
+        t_delayed = t;
+        /* Adjust the current time in the same way instead */ 
+        t_curr = t + delay->buffer.max_delay; /* max_delay is the fixed delay */
+    } else {
+        t_delayed = t - delay_time;
+        t_curr = t;
+    }
+
     /* If delay->no_event, evaluate should always think that we are at an event so that it can cross events in the buffer */
-    return jmi_delaybuffer_evaluate(&(delay->buffer), jmi->atEvent || delay->no_event, t - delay_time, &(delay->position), t, y_in);
+    return jmi_delaybuffer_evaluate(&(delay->buffer), jmi->atEvent || delay->no_event, t_delayed, &(delay->position), t_curr, y_in);
 }
 
 int jmi_delay_record_sample(jmi_t *jmi, int index, jmi_real_t y_in) {
+    jmi_delay_t *delay = &(jmi->delays[index]);
     if (index < 0 || index >= jmi->n_delays) return -1;
-    return jmi_delaybuffer_record_sample(&(jmi->delays[index].buffer), get_t(jmi), y_in, jmi->delay_event_mode);
+    return jmi_delaybuffer_record_sample(&(delay->buffer), get_t(jmi) + get_time_offset(delay), y_in, jmi->delay_event_mode);
 }
 
 int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event) {
@@ -109,7 +131,8 @@ jmi_real_t jmi_delay_next_time_event(jmi_t *jmi) {
     for (index = 0; index < jmi->n_delays; index++) {
         jmi_delay_t *delay = &(jmi->delays[index]);
         if (delay->fixed && !delay->no_event) {
-            jmi_real_t t = jmi_delaybuffer_next_event_time(&(delay->buffer), &(delay->position)) + delay->buffer.max_delay;
+            jmi_real_t t = jmi_delaybuffer_next_event_time(&(delay->buffer), &(delay->position));
+            /* Don't add the delay time here since it has already been added when recording for fixed delays. */
             if (t < t_event) t_event = t;
         }
     }
@@ -145,10 +168,10 @@ static int jmi_delay_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_tim
 }
 
 int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator) {
-    return jmi_delay_event_indicator(jmi, index, delay_time, event_indicator, 1);
+    return jmi_delay_event_indicator(jmi, index, delay_time, event_indicator, TRUE);
 }
 int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator) {
-    return jmi_delay_event_indicator(jmi, index, delay_time, event_indicator, 0);
+    return jmi_delay_event_indicator(jmi, index, delay_time, event_indicator, FALSE);
 }
 
 
@@ -267,7 +290,7 @@ static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer) {
 
 static int jmi_delaybuffer_init(jmi_delaybuffer_t *buffer, jmi_real_t max_delay, jmi_real_t t0, jmi_real_t y0) {
     clear(buffer, max_delay);
-    return put(buffer, t0, y0, 0);
+    return put(buffer, t0, y0, FALSE);
 }
 
 static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
@@ -349,7 +372,7 @@ static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolea
     /* todo: more efficient handling of (t_curr, y_curr)? */
     jmi_real_t y;
     int orig_size = buffer->size;
-    put(buffer, t_curr, y_curr, 0); /* Temporarily put (t_curr, y_curr) in the delay buffer */
+    put(buffer, t_curr, y_curr, FALSE); /* Temporarily put (t_curr, y_curr) in the delay buffer */
     y = evaluate(buffer, at_event, tr, position);
     buffer->size = orig_size;       /* Remove (t_curr, y_curr) from the delay buffer again */
     return y;
@@ -411,7 +434,7 @@ static jmi_real_t jmi_delaybuffer_prev_event_time(jmi_delaybuffer_t *buffer, jmi
 }
 
 static int jmi_delaybuffer_update_position_at_event(jmi_delaybuffer_t *buffer, jmi_real_t tr, jmi_delay_position_t *position) {
-    return update_position(buffer, 1, tr, position);
+    return update_position(buffer, TRUE, tr, position);
 }
 
 static void jmi_delay_position_init(jmi_delay_position_t *position) {
