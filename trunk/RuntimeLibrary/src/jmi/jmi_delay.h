@@ -66,6 +66,10 @@
 
 #include "jmi_types.h"
 
+/** \brief Initial value for state event switches */
+#define JMI_DELAY_INITIAL_EVENT_SW  1.0
+/** \brief Initial value for state event residuals */
+#define JMI_DELAY_INITIAL_EVENT_RES 1.0
 
 /** \brief Allocate buffers for the delay block with the given index. Do this before `jmi_delay_init`. */
 int jmi_delay_new(jmi_t *jmi, int index);

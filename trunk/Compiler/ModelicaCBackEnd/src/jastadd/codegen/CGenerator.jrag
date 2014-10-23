@@ -112,7 +112,7 @@ public class CGenerator extends GenericGenerator {
 		}
         
         protected Collection<FRelExp> elements() {
-            return fclass.relExpInInitialEquations();
+            return fclass.eventExpInInitialEquations();
         }
         
         protected void generateFor(FRelExp e, CodeStream genPrinter) {
@@ -124,22 +124,22 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * C: relational operator kind, <, >, <=, <=
 	 */
-	public class DAETag_C_relations extends DAEArrayTag<FRelExp> {
+    public class DAETag_C_relations extends DAEArrayTag<FExp> {
 		
 		public DAETag_C_relations(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_DAE_relations", myGenerator, fclass, "relations", "int", "-1");
 		}
         
-        protected Collection<FRelExp> elements() {
-            return fclass.relExpInEquations();
+        protected Collection<FExp> elements() {
+            return fclass.eventExpInEquations();
         }
         
-        protected void generateFor(FRelExp e, CodeStream genPrinter) {
+        protected void generateFor(FExp e, CodeStream genPrinter) {
             e.genRelExpKind(genPrinter);
         }
-	
-	}
-
+        
+    }
+    
     /**
      * C: nominal values
      */
@@ -191,11 +191,11 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(CodeStream genPrinter) {
 			if (!fclass.onlyInitBLT()) {
-				for (FRelExp e : fclass.relExpInEquations()) 
-					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+                for (FExp e : fclass.eventExpInEquations()) 
+                    e.genEventResidualVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				Enumerator enumerator = new Enumerator();
-				for (FRelExp e : fclass.relExpInEquations())
-					e.genResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator);
+                for (FExp e : fclass.eventExpInEquations())
+                    e.genEventResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator);
 			} else {
 				genPrinter.print("  model_init_R0(jmi, res);\n");
 			}
@@ -238,15 +238,15 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(CodeStream genPrinter) {
             CodePrinter printer = ASTNode.printer_C.initialSystemPrinter();
-			for (FRelExp e : fclass.relExpInEquations()) 
-				e.genVarDecls_C(printer, genPrinter, INDENT);
-			for (FRelExp e : fclass.relExpInInitialEquations()) 
-				e.genVarDecls_C(printer, genPrinter, INDENT);
+            for (FExp e : fclass.eventExpInEquations()) 
+                e.genEventResidualVarDecls_C(printer, genPrinter, INDENT);
+            for (FExp e : fclass.eventExpInInitialEquations()) 
+                e.genEventResidualVarDecls_C(printer, genPrinter, INDENT);
 			Enumerator enumerator = new Enumerator();
-			for (FRelExp e : fclass.relExpInEquations())
-				e.genResidual_C(printer, genPrinter, INDENT, enumerator);
-			for (FRelExp e : fclass.relExpInInitialEquations())
-				e.genResidual_C(printer, genPrinter, INDENT, enumerator);
+            for (FExp e : fclass.eventExpInEquations())
+                e.genEventResidual_C(printer, genPrinter, INDENT, enumerator);
+            for (FExp e : fclass.eventExpInInitialEquations())
+                e.genEventResidual_C(printer, genPrinter, INDENT, enumerator);
 		}
 	}
 	

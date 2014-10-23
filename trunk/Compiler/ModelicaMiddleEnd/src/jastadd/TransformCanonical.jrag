@@ -1348,7 +1348,7 @@ aspect TransformCanonical {
 	 * A reference to the FVariable set as indicator for a FRelExp
 	 * Only used in algorithms
 	 */
-	syn nta Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
+    syn nta Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
 	
 	/**
 	 * Creates an indicator for this FRelExp
@@ -1362,9 +1362,8 @@ aspect TransformCanonical {
 	/**
 	 * Creates an initial assign statement for the indicator
 	 */
-	syn FStatement FRelExp.indicatorInitStmt() = 
-			new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
-	
+    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
+    
 	/**
 	 * Creates an assign statement for the indicator
 	 */
@@ -4004,9 +4003,9 @@ aspect EliminateEqualSwitches{
         public class eliminateEqualSwitches extends Transformation {
             public void perform() {
                 Map<String, Collection<FRelExp>> candidates = new HashMap<String, Collection<FRelExp>>();
-                for (FRelExp exp : relExpInEquations())
+                for (FExp exp : eventExpInEquations())
                     exp.collectEqualSwitches(candidates);
-                for (FRelExp exp : relExpInInitialEquations())
+                for (FExp exp : eventExpInInitialEquations())
                     exp.collectEqualSwitches(candidates);
                 for (Map.Entry<String, Collection<FRelExp>> entry : candidates.entrySet()) {
                     if (entry.getValue().size() < 2)
@@ -4023,6 +4022,10 @@ aspect EliminateEqualSwitches{
                 root().flushAllRecursive();
             }
         }
+    }
+    
+    public void FExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
+        
     }
     
     public void FRelExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {

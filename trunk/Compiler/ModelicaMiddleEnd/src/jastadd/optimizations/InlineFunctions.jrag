@@ -559,8 +559,8 @@ aspect FunctionInlining {
     syn boolean FAbstractEquation.generatesEvents() = false;
     eq FEquation.generatesEvents()                  = getLeft().generatesEvents() || getRight().generatesEvents();
     eq FFunctionCallEquation.generatesEvents()      = getCall().generatesEvents();
-    eq FAlgorithm.generatesEvents()                 = relExpInEquation().size() > 0;
-
+    eq FAlgorithm.generatesEvents()                 = relExpInEquation().size() + delayExpInEquation().size() > 0;
+    
     /**
      * Check if an equation contains any calls to functions that we can inline.
      */

@@ -18120,6 +18120,9 @@ $C_delay_init$
 $C_delay_sample$
 $C_ode_initialization$
 $C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 2;
@@ -18166,6 +18169,9 @@ $C_delay_init$
 $C_delay_sample$
 $C_ode_initialization$
 $C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 4;
@@ -18194,6 +18200,12 @@ N_delays = 4;
     _x2_1 = jmi_delay_evaluate(jmi, 2, _x1_0, AD_WRAP_LITERAL(3));
     _x3_2 = jmi_delay_evaluate(jmi, 3, _x1_0, _x2_1);
 /********* Write back reinits *******/
+
+    jmi_delay_first_event_indicator(jmi, 3, _x2_1, &(*res)[0]);
+    jmi_delay_second_event_indicator(jmi, 3, _x2_1, &(*res)[1]);
+
+    (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
+    (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
 ")})));
 end Delay2;
 
@@ -18221,6 +18233,9 @@ $C_delay_sample$
 $C_ode_initialization$
 $C_ode_derivatives$
 $C_dae_init_blocks_residual_functions$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 4;
@@ -18276,6 +18291,12 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     }
     return ef;
 }
+
+    jmi_delay_first_event_indicator(jmi, 3, _x2_1, &(*res)[0]);
+    jmi_delay_second_event_indicator(jmi, 3, _x2_1, &(*res)[1]);
+
+    (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
+    (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
 ")})));
 end Delay3;
 
@@ -18307,6 +18328,9 @@ $C_delay_init$
 $C_delay_sample$
 $C_ode_initialization$
 $C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 2;
@@ -18383,13 +18407,24 @@ N_delays = 2;
     jmi_array_ref_1(tmp_9, 2) = _p_3;
     _x2_1 = jmi_delay_evaluate(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_6), func_CCodeGenTests_Delay4_f_exp0(tmp_8));
 /********* Write back reinits *******/
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_10, 2, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_10, 2, 1, 2)
+    jmi_array_ref_1(tmp_10, 1) = _t_2;
+    jmi_array_ref_1(tmp_10, 2) = _t_2;
+    jmi_delay_first_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_10), &(*res)[0]);
+    jmi_delay_second_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_10), &(*res)[1]);
+
+    (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
+    (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
 ")})));
 end Delay4;
 
 model Delay5
-    Real x;
+    Real x,y;
   equation
-    x = delay(if time > 1 then time else time + 1, 2);
+    y = time + 2;
+    x = delay(if time > 1 then time else time + 1, y, 10);
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -18404,6 +18439,9 @@ $C_delay_init$
 $C_delay_sample$
 $C_ode_initialization$
 $C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 1;
@@ -18411,7 +18449,7 @@ N_delays = 1;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(2), COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)));
+    jmi_delay_init(jmi, 0, JMI_FALSE, JMI_FALSE, AD_WRAP_LITERAL(10), COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)));
 
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
@@ -18419,6 +18457,7 @@ N_delays = 1;
     jmi_delay_record_sample(jmi, 0, COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)));
 
     model_ode_guards(jmi);
+    _y_1 = _time + 2;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
@@ -18429,11 +18468,20 @@ N_delays = 1;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+    _y_1 = _time + 2;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _x_0 = jmi_delay_evaluate(jmi, 0, COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(2));
+    _x_0 = jmi_delay_evaluate(jmi, 0, COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _time + AD_WRAP_LITERAL(1)), _y_1);
 /********* Write back reinits *******/
+
+    (*res)[0] = _time - (AD_WRAP_LITERAL(1));
+    jmi_delay_first_event_indicator(jmi, 0, _y_1, &(*res)[1]);
+    jmi_delay_second_event_indicator(jmi, 0, _y_1, &(*res)[2]);
+
+    (*res)[0] = _time - (AD_WRAP_LITERAL(1));
+    (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
+    (*res)[2] = JMI_DELAY_INITIAL_EVENT_RES;
 ")})));
 end Delay5;
 
