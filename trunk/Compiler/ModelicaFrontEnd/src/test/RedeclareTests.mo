@@ -3393,6 +3393,57 @@ end RedeclareTests.RedeclareTest43;
 end RedeclareTest43;
 
 
+model RedeclareTest44
+    package A
+        replaceable model B
+              Real x;
+          equation
+              x = time;
+        end B;
+    end A;
+    
+    package C
+        extends A;
+        
+        redeclare replaceable model extends B
+              Real y;
+          equation
+              y = time;
+        end B;
+    end C;
+    
+    package D = C;
+    
+    package E
+        extends D;
+        
+        redeclare model extends B
+              Real z;
+          equation
+              z = time;
+        end B;
+    end E;
+    
+    E.B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest44",
+            description="Redeclares before and after short class decl",
+            flatModel="
+fclass RedeclareTests.RedeclareTest44
+ Real b.z;
+ Real b.y;
+ Real b.x;
+equation
+ b.z = time;
+ b.y = time;
+ b.x = time;
+end RedeclareTests.RedeclareTest44;
+")})));
+end RedeclareTest44;
+
+
 model RedeclareElement1
   model A
     replaceable model B

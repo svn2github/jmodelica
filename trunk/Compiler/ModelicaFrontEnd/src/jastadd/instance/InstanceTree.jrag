@@ -568,9 +568,6 @@ aspect Environments {
 		return (res == null) ? lookupReplacingClass(name) : res;
 	}
 	
-	syn InstRedeclareClassNode InstExtendsShortClass.lookupReplacingClass(String name) = null;
-	syn InstRedeclareClassNode InstReplacingExtendsShortClass.lookupReplacingClass(String name) = null;
-	
 	inh InstRedeclareClassNode InstExtends.lookupReplacingClass(String name);
 	eq InstNode.getInstExtends().lookupReplacingClass(String name) {
 		for (InstClassDecl icd : getRedeclaredInstClassDecls())
