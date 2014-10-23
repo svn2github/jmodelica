@@ -36,6 +36,7 @@
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
+
 const double jmi_block_solver_canari = 3.14159;
 
 /**
@@ -158,6 +159,13 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->nb_jevals  = 0;
     block_solver->nb_fevals = 0;
     block_solver->time_spent  = 0;             /**< \brief Total time spent in non-linear solver */
+#ifdef JMI_PROFILE_RUNTIME 
+	block_solver->parent_block = 0;
+	block_solver->time_df = 0;
+	block_solver->time_f = 0;
+	block_solver->time_in_brent = 0;
+	block_solver->is_init_block = -1;
+#endif
     block_solver->message_buffer = 0 ; /**< \brief Message buffer used for debugging purposes */
     return 0;
 }

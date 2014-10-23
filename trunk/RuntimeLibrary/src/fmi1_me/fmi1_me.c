@@ -16,7 +16,6 @@
     see <http://www.gnu.org/licenses/> or
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
-
 #ifdef _WIN32
   #include <windows.h>
 #else
@@ -328,7 +327,9 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     fmiInteger retval;
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
-    
+#ifdef JMI_PROFILE_RUNTIME 
+	clock_t t;
+#endif
     /* For debugging Jacobians */
 /*
     int n_states;
@@ -339,14 +340,16 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     if (c == NULL) {
 		return fmiFatal;
     }
-
+#ifdef JMI_PROFILE_RUNTIME 
+	t = clock();
+#endif
     jmi_setup_experiment(jmi, toleranceControlled, relativeTolerance);
-    
+	
     retval = jmi_initialize(jmi);
     if (retval != 0) {
         return fmiError;
     }
-    
+	
     /* Initialization is now complete, but we also need to handle events
      * at the start of the integration.
      */
@@ -372,8 +375,13 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     free(jac);
 */
 
-
-
+#ifdef JMI_PROFILE_RUNTIME 
+	{
+		char message[256];
+		sprintf(message, "Time spent during initialize %f", ((double)clock() - t) / CLOCKS_PER_SEC);
+		jmi_log_comment(jmi->log, logError, message);
+	}
+#endif
     return fmiOK;
 }
 

@@ -31,11 +31,11 @@
 #include "jmi_block_solver_impl.h"
 
 #include "jmi_brent_search.h"
-
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
 #define ONE RCONST(1.0)
 #define Ith(v,i)    NV_Ith_S(v,i)
 #define UROUND 1e-15
+
 
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
 static void jmi_update_f_scale(jmi_block_solver_t *block);
@@ -49,7 +49,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     @param problem_data - solver object propagated as opaque data
 */
 int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
-    
+#ifdef JMI_PROFILE_RUNTIME 
+	clock_t t;
+#endif
     realtype *y, *f;
     jmi_block_solver_t *block = problem_data;
     jmi_log_t *log = block->log;
@@ -57,7 +59,11 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     block->nb_fevals++;
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
     f = NV_DATA_S(ff); /*f is now a vector of realtype*/
-
+#ifdef JMI_PROFILE_RUNTIME 
+	if (block->n > 1) {
+		t = clock();
+	}
+#endif
 
     /* Test if input is OK (no -1.#IND) */
     n = NV_LENGTH_S(yy);
@@ -140,7 +146,11 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
             }    
         }
     }
-
+ #ifdef JMI_PROFILE_RUNTIME 
+	if (block->n > 1) {
+		block->time_f += ((double)clock() - t) / CLOCKS_PER_SEC;
+	}
+#endif
     /*
     realtype* y = NV_DATA_S(yy); */ /*y is now a vector of realtype*/
     /* printf("f = N.array([\n");
@@ -168,17 +178,24 @@ static void kin_char_log(jmi_kinsol_solver_t* solver, char c) {
         solver->char_log[JMI_KINSOL_SOLVER_MAX_CHAR_LOG_LENGTH-1] = '?';
     }
 }
-
 /* Wrapper function to Jacobian evaluation as needed by standard KINSOL solvers */
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2){
-    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
+ #ifdef JMI_PROFILE_RUNTIME 
+	clock_t t;
+#endif
+	jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
     struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
     realtype *jac_fd = NULL;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
-    
+ #ifdef JMI_PROFILE_RUNTIME 
+	if (block->n > 1) {
+		t = clock();
+	}
+#endif
+
     kin_char_log(solver, 'J');
     if((block->callbacks->log_options.log_level >= 6)) {
         char message[256];
@@ -299,7 +316,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         }
         jmi_log_leave(block->log, node);
     }
-    
+ #ifdef JMI_PROFILE_RUNTIME 
+	if (block->n > 1) {
+		block->time_df += ((double)clock() - t) / CLOCKS_PER_SEC;
+	}
+#endif
     return ret;
 }
 
@@ -1359,12 +1380,17 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* block) {
     jmi_kinsol_solver_t* solver;
     int flag, n = block->n;
+	
     
     struct KINMemRec * kin_mem = KINCreate();
     if(!kin_mem) return -1;
     solver = (jmi_kinsol_solver_t*)calloc(1,sizeof(jmi_kinsol_solver_t));
     if(!solver ) return -1;
     solver->kin_mem = kin_mem;
+#ifdef JMI_PROFILE_RUNTIME 
+	block->time_f = 0;
+	block->time_df = 0;
+#endif
     
     /*Initialize work vectors.*/
 
@@ -1461,7 +1487,22 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
 
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     jmi_kinsol_solver_t* solver = block->solver;
-    
+#ifdef JMI_PROFILE_RUNTIME 
+	if (block->n > 1) {
+		char message[256];
+		sprintf(message, "Time in df: %g, BlockLabel: %s, is_init_block: %d", block->time_df, block->label, block->is_init_block);
+		jmi_log_node(block->log, logError, "ACC_TIME_IN_KIN_DF", message);
+
+		sprintf(message, "Time in f: %g, BlockLabel: %s, is_init_block: %d", block->time_f, block->label, block->is_init_block);
+		jmi_log_node(block->log, logError, "ACC_TIME_IN_KIN_F", message);
+
+		if (block->options->use_Brent_in_1d_flag) {
+			sprintf(message, "Time in brent: %g, BlockLabel: %s", block->time_in_brent, block->label);
+			jmi_log_node(block->log, logError, "ACC_TIME_IN_BRENT", message); /**/
+		}
+	}
+#endif
+
     /*Deallocate Kinsol work vectors.*/
     N_VDestroy_Serial(solver->kin_y);
     N_VDestroy_Serial(solver->kin_y_scale);
@@ -1486,6 +1527,8 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
         free(solver->active_bounds);
     }
     
+	
+
     /*Deallocate Kinsol */
     if(solver->kin_mem)
         KINFree(&(solver->kin_mem));
@@ -1544,6 +1587,7 @@ const char *jmi_kinsol_flag_to_name(int flag) {
 void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log_node_t *node, int flag) {
     long int nniters;
     jmi_kinsol_solver_t* solver = block->solver;
+	
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
 
     /* NB: must match the condition in jmi_kinsol_solver_print_solve_start exactly! */
@@ -1559,6 +1603,9 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
 
 int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     int flag;
+#ifdef JMI_PROFILE_RUNTIME 
+	clock_t t = clock();
+#endif
     jmi_kinsol_solver_t* solver = block->solver;
     realtype curtime = block->cur_time;
     long int nniters = 0;
@@ -1760,7 +1807,14 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);    
      
     /* Store debug information */
-    block->nb_iters += nniters;
+	block->nb_iters += nniters;
+#ifdef JMI_PROFILE_RUNTIME
+	{
+		char message[256];
+		sprintf(message, "Time in kinsol.solve: %g, label: %s, is_init_block: %d, block size: %d", ((double) clock() - t)/CLOCKS_PER_SEC, block->label, block->is_init_block, block->n);
+		jmi_log_node(block->log, logError, "ACC_TIME_IN_KINSOL_SOLVE", message);
+	}
+#endif
         
     return flag;
 }

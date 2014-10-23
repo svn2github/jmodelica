@@ -24,7 +24,6 @@
 
 #ifndef _JMI_BLOCK_SOLVER_IMPL_H
 #define _JMI_BLOCK_SOLVER_IMPL_H
-
 #include "jmi_block_solver.h"
 /**
     \brief Main data structure used in the block solver.
@@ -45,6 +44,13 @@ struct jmi_block_solver_t {
     jmi_real_t* dres;              /**< \brief Work vector for the directional derivative that corresponds to dx */
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
+#ifdef JMI_PROFILE_RUNTIME
+	jmi_block_solver_t * parent_block;
+	int is_init_block;
+	double time_in_brent;
+	double time_f;
+	double time_df;
+#endif
 
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */

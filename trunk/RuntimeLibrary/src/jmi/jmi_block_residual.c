@@ -40,6 +40,12 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
     int flag;
     flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_sw, jacobian_variability, index, label);
     jmi->dae_block_residuals[index] = b;
+#ifdef JMI_PROFILE_RUNTIME
+	if (b != 0) {
+		b->parent_index = parent_index;
+		b->is_init_block = 0;
+	}
+#endif
     return flag;
 }
 
@@ -47,6 +53,12 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
     jmi_block_residual_t* b;
     int flag;
     flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_sw, jacobian_variability, index, label);
+#ifdef JMI_PROFILE_RUNTIME
+	if (b != 0) {
+		b->parent_index = parent_index;
+		b->is_init_block = 1;
+	}
+#endif
     jmi->dae_init_block_residuals[index] = b;
     return flag;
 }
@@ -241,6 +253,10 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->n_nr = n_nr;
     b->n_sw = n_sw;
     b->index = index;
+#ifdef JMI_PROFILE_RUNTIME
+	b->parent_index = -1;
+	b->is_init_block = -1;
+#endif
     b->label = (jmi_string_t) calloc(strlen(label) + 1, sizeof(char));
     strcpy(b->label, label);
     b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -314,7 +330,6 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     return flag;
 }
 
-
 int jmi_solve_block_residual(jmi_block_residual_t * block) {
     int ef, i;
     clock_t c0,c1; /*timers*/
@@ -324,13 +339,25 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 
     jmi->block_level++;
     block->event_iter = 0;
+	
     if(block->init) {
-        /* Get the switch indexes and non-real valuereferences. */
-        jmi_real_t* nr_vref_tmp = (jmi_real_t*)calloc(block->n_nr,sizeof(jmi_real_t));
-        jmi_real_t* sw_index_tmp = (jmi_real_t*)calloc(block->n_sw,sizeof(jmi_real_t));
-        block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_NON_REAL_VALUE_REFERENCE);
-        block->F(jmi, sw_index_tmp, NULL, JMI_BLOCK_ACTIVE_SWITCH_INDEX);
+		/* Get the switch indexes and non-real valuereferences. */
+		jmi_real_t* nr_vref_tmp = (jmi_real_t*)calloc(block->n_nr, sizeof(jmi_real_t));
+		jmi_real_t* sw_index_tmp = (jmi_real_t*)calloc(block->n_sw, sizeof(jmi_real_t));
+#ifdef JMI_PROFILE_RUNTIME
+		if (block->parent_index != -1) {
+			if (block->is_init_block) {
+				block->block_solver->parent_block = jmi->dae_init_block_residuals[block->parent_index]->block_solver;
+			} else {
+				block->block_solver->parent_block = jmi->dae_block_residuals[block->parent_index]->block_solver;
+			}
+		} 
+		block->block_solver->is_init_block = block->is_init_block;
+#endif
 
+        block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_NON_REAL_VALUE_REFERENCE);
+		block->F(jmi, sw_index_tmp, NULL, JMI_BLOCK_ACTIVE_SWITCH_INDEX); 
+			
         for (i = 0; i < block->n_sw; i++) {
             block->sw_index[i] = (jmi_int_t)sw_index_tmp[i];
         }
@@ -425,7 +452,6 @@ int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t del
     free(fn);
     return flag;
 }
-
 
 int jmi_delete_block_residual(jmi_block_residual_t* b){
     jmi_delete_block_solver(&b->block_solver);

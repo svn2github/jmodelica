@@ -193,11 +193,20 @@ static int jmi_brent_try_bracket(jmi_block_solver_t * block,
 
 int jmi_brent_solver_solve(jmi_block_solver_t * block){
     int flag;
+#ifdef JMI_PROFILE_RUNTIME
+	clock_t t;
+#endif
     jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
     double f, init;
+	jmi_log_node_t topnode;
+	jmi_log_t *log = block->log;
+#ifdef JMI_PROFILE_RUNTIME
+	if (block->parent_block) {
+		t = clock();
+	}
+#endif
 
-    jmi_log_node_t topnode;
-    jmi_log_t *log = block->log; 
+
 
     jmi_brent_solver_print_solve_start(block, &topnode);
 
@@ -218,6 +227,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             jmi_log_node(log, logWarning, "ErrorReadingInitialGuess", "<errorCode: %d> returned from <block: %s> "
                          "when reading initial guess.", flag, block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, flag);
+#ifdef JMI_PROFILE_RUNTIME
+			if (block->parent_block) {
+				block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+			}
+#endif
             return flag;
         }
 
@@ -229,6 +243,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 jmi_log_node(log, logWarning, "ErrorReadingNominal", "<errorCode: %d> returned to <block: %s> "
                     "when reading nominal value.", flag, block->label);
                 jmi_brent_solver_print_solve_end(block, &topnode, flag);
+#ifdef JMI_PROFILE_RUNTIME
+				if (block->parent_block) {
+					block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+				}
+#endif
                 return flag;
             }
         }
@@ -241,6 +260,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             jmi_log_node(log, logWarning, "ErrorReadingMin", "<errorCode: %d> returned to <block: %s> "
                 "when reading  min bound value.", flag, block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, flag);
+#ifdef JMI_PROFILE_RUNTIME
+			if (block->parent_block) {
+				block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+			}
+#endif
             return flag;
         }
 
@@ -251,6 +275,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             jmi_log_node(log, logWarning, "ErrorReadingMax", "<errorCode: %d> returned to <block: %s> "
                 "when reading max bound value.", flag, block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, flag);
+#ifdef JMI_PROFILE_RUNTIME
+			if (block->parent_block) {
+				block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+			}
+#endif
             return flag;
         }
 
@@ -283,6 +312,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
                      "<block: %s>", block->label);
         jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_FIRST_SYSFUNC_ERR);
+#ifdef JMI_PROFILE_RUNTIME
+		if (block->parent_block) {
+			block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+		}
+#endif
         if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error)
             return JMI_BRENT_SUCCESS;
         else
@@ -377,6 +411,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             else {
                 jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
+#ifdef JMI_PROFILE_RUNTIME
+				if (block->parent_block) {
+					block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+				}
+#endif
                 if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error) {
                     block->x[0] = init;
                     block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
@@ -392,12 +431,22 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         if (flag == 2) {
             /* root found while in bracketing */
             jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
+#ifdef JMI_PROFILE_RUNTIME
+			if (block->parent_block) {
+				block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+			}
+#endif
             return JMI_BRENT_SUCCESS;
         }
     }
     else {
         jmi_log_node(log, BRENT_EXTENDED_LOG_LEVEL, "BrentBracketExact", "Initial guess has zero residual");
         jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
+#ifdef JMI_PROFILE_RUNTIME
+		if (block->parent_block) {
+			block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+		}
+#endif
         return JMI_BRENT_SUCCESS;
     }
     jmi_log_node(log, BRENT_EXTENDED_LOG_LEVEL, "BrentBracket", 
@@ -413,6 +462,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         if (flag) {
             jmi_log_node(log, logError, "Error", "Function evaluation failed while iterating in <block: %s>", block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SYSFUNC_FAIL);
+#ifdef JMI_PROFILE_RUNTIME
+			if (block->parent_block) {
+				block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+			}
+#endif
             return JMI_BRENT_SYSFUNC_FAIL;
         }
         else {
@@ -422,6 +476,11 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     }   
         
     jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
+#ifdef JMI_PROFILE_RUNTIME
+	if (block->parent_block) {
+		block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
+	}
+#endif
     return JMI_BRENT_SUCCESS;
 }
 

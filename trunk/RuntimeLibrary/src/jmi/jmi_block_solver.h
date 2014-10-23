@@ -24,7 +24,6 @@
 
 #ifndef _JMI_BLOCK_SOLVER_H
 #define _JMI_BLOCK_SOLVER_H
-
 #include "jmi_log.h"
 
 /** \brief Evaluation modes for the residual function.*/

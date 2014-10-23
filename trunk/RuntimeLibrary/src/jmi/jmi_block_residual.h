@@ -125,6 +125,10 @@ struct jmi_block_residual_t {
     jmi_real_t* dx;                 /**< \brief Work vector for the seed vector */
     jmi_real_t* dv;                 /**< \brief Work vector for (dF/dv)*dv */
     int index;                      /**< \brief Block integer index, used for internal representation of the block */
+#ifdef JMI_PROFILE_RUNTIME
+	int parent_index; /*Used for profiling*/
+	int is_init_block; /*Used for profiling*/
+#endif
     jmi_string_t label;             /**< \brief Block string label, used for external representation of the block */
 
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
@@ -141,7 +145,7 @@ struct jmi_block_residual_t {
                                          JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 
     int* value_references; /**< \brief Iteration variable value references. **/
-
+	
     jmi_block_solver_t* block_solver;
 
     void * solver;
