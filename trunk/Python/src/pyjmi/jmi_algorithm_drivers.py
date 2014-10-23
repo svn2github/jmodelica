@@ -1966,7 +1966,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             return J_fcn.call([self.solver.xx, []],True)[0]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        J_fcn.setInput([], 1)
+        J_fcn.setInput(self.solver._par_vals, 1)
         J_fcn.evaluate()
         return J_fcn.output(0).toArray()
     
@@ -2011,7 +2011,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             dual = N.zeros(self.solver.c_e.numel() +
                            self.solver.c_i.numel())
             H_fcn.setInput(x, 0)
-            H_fcn.setInput([], 1)
+            H_fcn.setInput(self.solver._par_vals, 1)
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "opt":
@@ -2019,7 +2019,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             sigma = self._compute_sigma()
             dual = self.solver.dual_opt
             H_fcn.setInput(x, 0)
-            H_fcn.setInput([], 1)
+            H_fcn.setInput(self.solver._par_vals, 1)
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "sym":
@@ -2103,7 +2103,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         """
         grad_fcn = self.solver.solver_object.gradF()
         grad_fcn.setInput(self.solver.xx_init, 0)
-        grad_fcn.setInput([], 1)
+        grad_fcn.setInput(self.solver._par_vals, 1)
         grad_fcn.evaluate()
         grad = grad_fcn.output(0).toArray()
         sigma_inv = N.linalg.norm(grad, N.inf)
@@ -2111,3 +2111,26 @@ class LocalDAECollocationAlgResult(JMResultBase):
             return 1.
         else:
             return 1. / sigma_inv
+            
+class MPCAlgResult(JMResultBase):
+    def __init__(self, model=None, result_file_name=None, solver=None, 
+                 result_data=None, options=None, times=None, nbr_samp=None):
+        super(MPCAlgResult, self).__init__(
+                model, result_file_name, solver, result_data, options)
+
+              
+        #Print times 
+        
+        print("\nTotal time for %s samples (averege time in parenthesis)." 
+                %(nbr_samp))
+        print("\nInitialization time: %.2f seconds" %times['init'])
+        print("\nTotal time: %.2f seconds             (%.3f)" % (times['tot'], 
+                times['tot']/(nbr_samp)))
+        print("Update time: %.2f seconds            (%.3f)" % (times['update'],
+                times['update']/(nbr_samp)))
+        print("Solution time: %.2f seconds          (%.3f)" % (times['sol'], 
+                times['sol']/(nbr_samp)))
+        print("Post-processing time: %.2f seconds   (%.3f)" % 
+                (times['post_processing'], times['post_processing']/(nbr_samp)))
+        print("\nLargest total time for one sample (nbr %s): %.2f seconds" %
+                (times['maxSample'], times['maxTime']))

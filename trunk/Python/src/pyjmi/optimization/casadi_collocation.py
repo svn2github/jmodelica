@@ -537,10 +537,36 @@ class CasadiCollocator(object):
                 Type: float
         """
         # Initialize solver
+        if self.warm_start:
+            #Update initial condition
+            self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
+            self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
+            #Update dual variables
+            self.solver_object.setInput(self.dual_opt, casadi.NLP_SOLVER_LAM_G0)
+            self.solver_object.setInput(self.dual_opt2, casadi.NLP_SOLVER_LAM_X0)
+        else:
+            self._set_solver_inputs()
+
+        # Solve the problem
+        t0 = time.clock()
+        self.solver_object.evaluate()
+
+        # Get the result
+        primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
+        self.primal_opt = primal_opt.reshape(-1)
+        dual_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
+        self.dual_opt = dual_opt.reshape(-1)
+        dual_opt2 = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_X))
+        self.dual_opt2 = dual_opt2.reshape(-1)
+        sol_time = time.clock() - t0
+        return sol_time
+        
+    def _set_solver_inputs(self):
         self.solver_object.init()
 
         # Initial condition
         self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
+        self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
 
         # Bounds on x
         self.solver_object.setInput(self.get_xx_lb(), casadi.NLP_SOLVER_LBX)
@@ -557,19 +583,7 @@ class CasadiCollocator(object):
 
         self.solver_object.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
         self.solver_object.setInput(self.glub, casadi.NLP_SOLVER_UBG)
-
-        # Solve the problem
-        t0 = time.clock()
-        self.solver_object.evaluate()
-
-        # Get the result
-        primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
-        self.primal_opt = primal_opt.reshape(-1)
-        dual_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
-        self.dual_opt = dual_opt.reshape(-1)
-        sol_time = time.clock() - t0
-        return sol_time
-
+        
 class MeasurementData(object):
 
     """
@@ -874,7 +888,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise CasadiCollocatorException("Unknown discretization scheme %s."
                                             % self.discr)
-
+        self.warm_start = False
         # Get to work
         self._create_nlp()
 
@@ -883,10 +897,10 @@ class LocalDAECollocator(CasadiCollocator):
         Wrapper for creating the NLP.
         """
         self._create_model_variable_structures()
-        self._eliminate_nonfree_parameters()
         self._scale_variables()
         self._define_collocation()
         self._create_nlp_variables()
+        self._create_nlp_parameters()
         self._create_constraints_and_cost()
         self._create_blocking_factors_constraints_and_cost()
         self._compute_bounds_and_init()
@@ -1066,25 +1080,6 @@ class LocalDAECollocator(CasadiCollocator):
         self.n_var = n_var
         self.name_map = name_map
 
-    def _eliminate_nonfree_parameters(self):
-        """
-        Substitute non-free parameters in expressions for their values.
-        """
-        # Get parameter values
-        par_vars = [par.getVar() for par in self.mvar_vectors['p_fixed']]
-        par_vals = [self.op.get_attr(par, "_value")
-                    for par in self.mvar_vectors['p_fixed']]
-
-        # Update optimization expressions
-        op_expressions = [self.initial, self.dae, self.path, self.point,
-                          self.mterm, self.lterm]
-        [self.initial,
-         self.dae,
-         self.path,
-         self.point,
-         self.mterm,
-         self.lterm] = casadi.substitute(op_expressions, par_vars, par_vals)
-
     def _scale_variables(self):
         """
         Traditional variables scaling if there are no nominal trajectories.
@@ -1136,7 +1131,7 @@ class LocalDAECollocator(CasadiCollocator):
             [self.initial, self.dae, self.path, self.point, 
              self.mterm, self.lterm] = casadi.substitute(
                  op_expressions,
-                 list_struct,list_scaled_vars)            
+                 list_struct,list_scaled_vars)          
 
     def _define_collocation(self):
         """
@@ -1582,6 +1577,49 @@ class LocalDAECollocator(CasadiCollocator):
         self.n_xx = n_xx
         self.var_map = var_map
         self.var_indices = var_indices
+        
+    def _create_nlp_parameters(self):
+        """
+        Substitute parameter symbols in expressions for new parameter symbols,
+        and save their values.
+        """
+        # Get parameter values and symbols
+        par_vars = [par.getVar() for par in self.mvar_vectors['p_fixed']]
+        par_vals = [self.op.get_attr(par, "_value")
+                    for par in self.mvar_vectors['p_fixed']]
+        self._par_vals = N.array(par_vals).reshape(-1)
+
+        #Create parameter symbols        
+        self.pp = casadi.MX.sym("par", len(par_vars), 1)
+        self.pp_list = []
+
+        #Add parameters to variable dictionaries and create list with parameter 
+        #symbols (the list is needed for the substitution below).
+        #Note: For parameters the var_indices dictionary gives the index in 
+        #self.pp (and not self.xx).  
+        i=0
+        for para in par_vars:
+            self.pp_list.append(self.pp[i])
+            self.var_indices[para.getName()] = i
+            self.var_map[para.getName()] = self.pp[i]
+            i+=1
+
+        #Create list of parameter names
+        if self.named_vars:
+            named_pp = []
+            for para in par_vars:
+                named_pp.append(casadi.SX.sym(para.getName()))
+            self.named_pp = casadi.vertcat(named_pp)
+
+        #Substitute old parameter symbols for new parameter symbols
+        op_expressions = [self.initial, self.dae, self.path, self.point,
+                        self.mterm, self.lterm]
+        [self.initial,
+         self.dae,
+         self.path,
+         self.point,
+         self.mterm,
+         self.lterm] = casadi.substitute(op_expressions, par_vars, self.pp_list)
 
     def _get_z_l0(self,i,k,with_der=True):
         """
@@ -1619,6 +1657,7 @@ class LocalDAECollocator(CasadiCollocator):
             z = [self.time_points[i][k]*(self._denorm_tf-self._denorm_t0)]
         else:
             z = [self.time_points[i][k]]
+        z.append(self.pp)
         for vk in var_kinds:
             if self.n_var[vk]>0:
                 if self.blocking_factors is None:
@@ -1662,6 +1701,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self._normalize_min_time:
             times *= (self._denorm_tf-self._denorm_t0) 
         z=[casadi.MX(times)]
+        z.append(self.pp)
         for vk in var_kinds:
             if self.n_var[vk]>0:
                 z.append(self.var_map[vk][i]['all'])
@@ -2306,6 +2346,8 @@ class LocalDAECollocator(CasadiCollocator):
         #defines the symbolic input
         s_sym_input = [self.mvar_struct["time"]]
         s_sym_input_no_der = [self.mvar_struct["time"]]
+        s_sym_input.append(self.pp)
+        s_sym_input_no_der.append(self.pp)
         var_kinds_ordered =copy.copy(self.mvar_struct.keys())
         del var_kinds_ordered[0]
         for vk in var_kinds_ordered:
@@ -2454,7 +2496,7 @@ class LocalDAECollocator(CasadiCollocator):
                                  self.mterm, self.lterm]
             s_scaled_expressions = casadi.substitute(s_ocp_expressions,
                                                      s_unscaled_var,
-                                                     s_scaled_var)            
+                                                     s_scaled_var)
             # Scale variables in expressions
             if self.eliminate_der_var:
                 print "TODO scaling for the additional constraints elim_der_var"
@@ -2499,7 +2541,7 @@ class LocalDAECollocator(CasadiCollocator):
 
                 if self.n_variant_var>0:
                     dae_fcn = self._FXFunction(
-                        s_sym_input + [sym_sf], [self.dae]) 
+                        s_sym_input + [sym_sf], [self.dae])
                 else:
                     dae_fcn = self._FXFunction(
                         s_sym_input, [self.dae])
@@ -2582,6 +2624,8 @@ class LocalDAECollocator(CasadiCollocator):
         #Define cost terms
         s_sym_input = [self.mvar_struct["time"]]
         s_sym_input_no_der = [self.mvar_struct["time"]]
+        s_sym_input.append(self.pp)
+        s_sym_input_no_der.append(self.pp)
         for vk in ["x", "dx", "unelim_u", "w",  "elim_u",  "p_opt"]:
             if self.n_var[vk]>0:
                 s_sym_input.append(self.mvar_struct[vk])
@@ -2657,12 +2701,16 @@ class LocalDAECollocator(CasadiCollocator):
         inputs_order_map_no_der=OrderedDict()
         s_sym_input_l1 = [l1_mvar_struct["time"]]
         s_sym_input_l1_no_der = [l1_mvar_struct["time"]]
+        s_sym_input_l1.append(self.pp)
+        s_sym_input_l1_no_der.append(self.pp)
         inputs_order_map["time"]=0
         inputs_order_map_no_der["time"]=0
+        inputs_order_map["parameters"]=1
+        inputs_order_map_no_der["parameters"]=1
         var_kinds_ordered =copy.copy(l1_mvar_struct.keys())
         del var_kinds_ordered[0]
-        counter=1
-        counter2=1
+        counter=2
+        counter2=2
         for vk in var_kinds_ordered:
             if self.n_var[vk]>0:
                 s_sym_input_l1.append(l1_mvar_struct[vk])
@@ -2738,7 +2786,7 @@ class LocalDAECollocator(CasadiCollocator):
                 lagTerms = list()
                 for k in range(self.n_cp):
                     # Call level0 DAEResidual
-                    input_l0_fcn = time_col[k]+no_boundaries_x_col[k]\
+                    input_l0_fcn = time_col[k]+[self.pp]+no_boundaries_x_col[k]\
                         +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_opt
                     [dae_k] = self.dae_l0_fcn.call(input_l0_fcn)
                     output_dae_element.append(dae_k)
@@ -2981,7 +3029,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             [dae_t0_constr] = self.dae_l0_fcn.call(s_fcn_input)
         c_e.append(dae_t0_constr)
-        
+
         if self.blocking_factors is None:
             # Evaluate u_1_0 based on polynomial u_1
             u_1_0 = 0
@@ -2992,7 +3040,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Add residual for u_1_0 as constraint
             u_1_0_constr = self.var_map['unelim_u'][1][0]['all'] - u_1_0
             c_e.append(u_1_0_constr)
-            
+
         # Continuity constraints for x_{i, n_cp + 1}
         if self.is_gauss:
             if self.quadrature_constraint:
@@ -3018,7 +3066,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # Add residual for x_i_np1 as constraint
                     quad_constr = self.var_map['x'][i][self.n_cp + 1]['all'] - x_i_np1
                     c_e.append(quad_constr)
-                    
+
         # Constraints for terminal values
         if self.is_gauss:
             for var_type in ['unelim_u', 'w']:
@@ -3044,7 +3092,7 @@ class LocalDAECollocator(CasadiCollocator):
                 term_constr_dx = (self.var_map['dx'][self.n_e][self.n_cp + 1]['all'] -
                                   dx_ne_np1)
                 c_e.append(term_constr_dx)
-                
+
         # Element length constraints
         if self.hs == "free":
             h_constr = casadi.sumRows(self.h[1:]) - 1
@@ -3939,7 +3987,7 @@ class LocalDAECollocator(CasadiCollocator):
         constraints = casadi.vertcat([self.c_e, self.c_i])
 
         # Create solver object
-        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx),
+        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp),
                                 casadi.nlpOut(f=self.cost, g=constraints))
         if self.solver == "IPOPT":
             self.solver_object = casadi.NlpSolver("ipopt",nlp)
@@ -4316,7 +4364,7 @@ class LocalDAECollocator(CasadiCollocator):
             return None
 
     def export_result_dymola(self, file_name='', format='txt', 
-                             write_scaled_result=False):
+                             write_scaled_result=False, result=None):
         """
         Export an optimization or simulation result to file in Dymolas result file 
         format. The parameter values are read from the z vector of the model object 
@@ -4342,12 +4390,22 @@ class LocalDAECollocator(CasadiCollocator):
                 is False, then the variable scaling factors of the model are
                 used to reproduced the unscaled variable values.
                 Default: False
+                
+            result --
+                If a result is given, that result is the one that gets exported
+                to a dymola file. Otherwise this function will call 
+                self.get_result() and export the result from the last 
+                optimization/sample.
+                Default: None 
 
         Limitations::
 
             Currently only textual format is supported.
         """
-        (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
+        if result is None:
+            (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
+        else:
+            (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = result
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
 
         if (format=='txt'):
@@ -4539,11 +4597,9 @@ class LocalDAECollocator(CasadiCollocator):
         Only works if named_vars == True.
         """
         if self.named_vars:
-            f = casadi.MXFunction([self.xx], [expr])
+            f = casadi.MXFunction([self.xx, self.pp], [expr])
             f.init()
-            return f.call([self.named_xx],True)[0]
+            return f.call([self.named_xx, self.named_pp],True)[0]
         else:
             raise CasadiCollocatorException(
                 "named_var_expr only works if named_vars is enabled.")
-
-
