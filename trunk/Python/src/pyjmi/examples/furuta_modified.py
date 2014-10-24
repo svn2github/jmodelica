@@ -42,7 +42,7 @@ def furuta_dfo_cost(x):
     armFrictionCoefficient = x[0]/1e3
     pendulumFrictionCoefficient = x[1]/1e3
     
-    model = FMUModelME1(os.path.join(curr_dir, 'files', 'FMUs', 'Furuta.fmu'), enable_logging=False)
+    model = FMUModelME1(os.path.join(curr_dir, 'files', 'FMUs', 'Furuta.fmu'))
 
     # Set new parameter values into the model 
     model.set('armFriction', armFrictionCoefficient)
@@ -52,6 +52,7 @@ def furuta_dfo_cost(x):
     opts = model.simulate_options()
     opts['CVode_options']['verbosity'] = 50
     opts['ncp'] = 800
+    opts['filter'] = ['armJoint.phi', 'pendulumJoint.phi'] 
     
     # Simulate model response with new parameter values
     res = model.simulate(start_time=0., final_time=40, options=opts)
@@ -89,6 +90,9 @@ def run_demo(with_plots=True):
     # Set optimal parameter values into the model
     model.set('armFriction', armFrictionCoefficient_opt)
     model.set('pendulumFriction', pendulumFrictionCoefficient_opt)
+    
+    opts = model.simulate_options()
+    opts['filter'] = ['armJoint.phi', 'pendulumJoint.phi']
     
     # Simulate model response with optimal parameter values
     res = model.simulate(start_time=0., final_time=40)
