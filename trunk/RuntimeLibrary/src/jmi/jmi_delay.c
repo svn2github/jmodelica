@@ -309,7 +309,7 @@ static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     }
 
     /* Make sure index is within bounds */
-    if (index >= buffer->size + buffer->head_index) index = buffer->size + buffer->head_index - 1;
+    if (index > second_last_index) index = second_last_index;
     else if (index < buffer->head_index) index = buffer->head_index;
 
     /* Search to the left */
