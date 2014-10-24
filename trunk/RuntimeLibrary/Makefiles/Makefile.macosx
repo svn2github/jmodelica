@@ -118,7 +118,7 @@ FMU_TYPES =
 CXXFLAGS = -g  -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -fPIC -march=pentium4 -mtune=generic -mfpmath=sse
+CFLAGS = -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -fPIC
 
 SHARED_LDFLAGS = -dynamiclib -Wl,-rpath,@loader_path/ -pthread
 

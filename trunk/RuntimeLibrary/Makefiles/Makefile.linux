@@ -119,7 +119,7 @@ CXXFLAGS += -DJMI_AD=${JMI_AD} -fPIC
 
 # C Compiler options
 CFLAGS = -g
-CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -fPIC -march=pentium4 -mtune=generic -mfpmath=sse
+CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -fPIC
 
 SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined -pthread
 

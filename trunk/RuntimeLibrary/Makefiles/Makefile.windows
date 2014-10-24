@@ -141,7 +141,7 @@ EXT_OPTION =
 CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -march=pentium4 -mtune=generic -mfpmath=sse
+CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES}
 
 SHARED_LDFLAGS = $(PLATFORM_FLAG) -shared
 
