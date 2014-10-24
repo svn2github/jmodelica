@@ -1189,7 +1189,8 @@ aspect FlatAPI {
     
     syn boolean FDelayExp.generatesStateEvents() = !getDelay().variability().parameterOrLess();
     
-    syn int FClass.numEventIndicators() = numRelExpInEquations() + 2*numDelayExpInEquations();
+    syn int FClass.numEventIndicators() = numRelExpInEquations() + numDelayEventIndicators();
+    syn int FClass.numDelayEventIndicators() = 2*numDelayExpInEquations();
     
     syn ArrayList<FExp> FClass.eventExpInEquations() {
         ArrayList<FExp> res = new ArrayList<FExp>();

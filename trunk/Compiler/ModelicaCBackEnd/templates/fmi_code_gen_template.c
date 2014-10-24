@@ -75,6 +75,7 @@ static const int N_string_u = $n_string_u$;
 static const int N_ext_objs = $n_ext_objs$;
 
 static const int N_sw = $n_switches$;
+static const int N_delay_sw = $n_delay_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
 
@@ -318,7 +319,7 @@ $CAD_dae_init_add_blocks_residual_functions$
                   0, NULL, NULL);
     
     /* Initialize the delay interface */
-    jmi_init_delay_if(*jmi, N_delays, *model_init_delay, *model_sample_delay);
+    jmi_init_delay_if(*jmi, N_delays, *model_init_delay, *model_sample_delay, N_delay_sw);
 
     return 0;
 }

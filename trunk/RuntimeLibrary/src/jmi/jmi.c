@@ -313,7 +313,7 @@ int jmi_delete(jmi_t* jmi){
     return 0;
 }
 
-int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample) {
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches) {
     
     int i;
     jmi_real_t* switches;
@@ -329,7 +329,7 @@ int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_gen
     }
     
     switches = jmi_get_sw(jmi);
-    for (i = jmi->n_sw - jmi->n_delays; i < jmi->n_sw; i++) {
+    for (i = jmi->n_sw - n_delay_switches; i < jmi->n_sw; i++) {
         switches[i] = JMI_DELAY_INITIAL_EVENT_SW;
     }
     

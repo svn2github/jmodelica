@@ -4161,7 +4161,7 @@ aspect CCodeGen {
     }
     
     public void FDelayExp.genRelExpKind(CodeStream genPrinter) {
-        genPrinter.print("JMI_REL_GEQ");
+        genPrinter.print("JMI_REL_GEQ, JMI_REL_GEQ");
     }
     
     public void FRelExp.genRelExpKind(CodeStream genPrinter) {

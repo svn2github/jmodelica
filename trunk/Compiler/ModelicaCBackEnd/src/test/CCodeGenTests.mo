@@ -18115,6 +18115,7 @@ model Delay1
             equation_sorting=true,
             template="
 N_delays = $n_delays$;
+$C_DAE_relations$
 
 $C_delay_init$
 $C_delay_sample$
@@ -18126,6 +18127,8 @@ $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 2;
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
 
     jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
     jmi_delay_init(jmi, 1, JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(1), _time);
@@ -18164,6 +18167,7 @@ model Delay2
             equation_sorting=true,
             template="
 N_delays = $n_delays$;
+$C_DAE_relations$
 
 $C_delay_init$
 $C_delay_sample$
@@ -18175,6 +18179,8 @@ $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 4;
+static const int N_relations = 2;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 
     jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
     jmi_delay_init(jmi, 1, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(2), _time);
@@ -18227,6 +18233,7 @@ model Delay3
             equation_sorting=true,
             template="
 N_delays = $n_delays$;
+$C_DAE_relations$
 
 $C_delay_init$
 $C_delay_sample$
@@ -18239,6 +18246,8 @@ $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 4;
+static const int N_relations = 2;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 
     jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
     jmi_delay_init(jmi, 1, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(2), _time);
@@ -18323,6 +18332,7 @@ model Delay4
             equation_sorting=true,
             template="
 N_delays = $n_delays$;
+$C_DAE_relations$
 
 $C_delay_init$
 $C_delay_sample$
@@ -18334,6 +18344,8 @@ $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 2;
+static const int N_relations = 2;
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
@@ -18434,6 +18446,7 @@ model Delay5
             equation_sorting=true,
             template="
 N_delays = $n_delays$;
+$C_DAE_relations$
 
 $C_delay_init$
 $C_delay_sample$
@@ -18445,6 +18458,8 @@ $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
 N_delays = 1;
+static const int N_relations = 3;
+static const int DAE_relations[] = { JMI_REL_GT, JMI_REL_GEQ, JMI_REL_GEQ };
 
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->events_epsilon, JMI_REL_GT);

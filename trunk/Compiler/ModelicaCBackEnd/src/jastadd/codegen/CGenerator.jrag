@@ -78,7 +78,7 @@ public class CGenerator extends GenericGenerator {
         
         public void generate(CodeStream genPrinter) {
             Collection<T> elems = elements();
-            int n = elems.size();
+            int n = numElements(elems);
             genPrinter.format("static const int N_%s = %d;\n", varName, n);
             genPrinter.format("static const %s DAE_%s[] = { ", type, varName);
             if (n == 0) {
@@ -94,6 +94,10 @@ public class CGenerator extends GenericGenerator {
                 }
             }
             genPrinter.print(" };");
+        }
+        
+        protected int numElements(Collection<T> elems) {
+            return elems.size();
         }
         
         protected abstract Collection<T> elements();
@@ -130,8 +134,14 @@ public class CGenerator extends GenericGenerator {
 			super("C_DAE_relations", myGenerator, fclass, "relations", "int", "-1");
 		}
         
+        @Override
         protected Collection<FExp> elements() {
             return fclass.eventExpInEquations();
+        }
+        
+        @Override
+        protected int numElements(Collection<FExp> elems) {
+            return fclass.numEventIndicators();
         }
         
         protected void generateFor(FExp e, CodeStream genPrinter) {
@@ -1121,6 +1131,21 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodeStream genPrinter) {
             genPrinter.print(fclass.myDelayExps().size());
         }
+    }
+    
+    /**
+     * Prints number of delay switches needed.
+     */
+    public class DAETag_numSwitchingFunctions extends DAETag {
+        
+        public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_delay_switches", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numDelayEventIndicators());
+        }
+    
     }
 	
     /**
