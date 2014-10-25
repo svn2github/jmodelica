@@ -663,15 +663,14 @@ class MeasurementData(object):
 
                 Type: rank 2 ndarray
                 Default: None
-<<<<<<< .working
+
 
         Limitations::
 
             Variable names for constrained and eliminated inputs do not take
             aliases into account; these variables have to be referenced by the
             name used in CasadiModel.
-=======
->>>>>>> .merge-right.r6197
+
         """
         # Check dimension of Q
         Q_len = ((0 if constrained is None else len(constrained)) + 
@@ -1031,10 +1030,11 @@ class LocalDAECollocator(CasadiCollocator):
 
 
 
-        # Substitute named variables with vector variables in expressions
+        # Append name of variables into a list
         named_vars = reduce(list.__add__, named_mvar_struct.values() +
                             [named_mvar_struct_dx])           
 
+        # Create data structure to handle different type of variables of the dynamic problem
         mvar_struct = OrderedDict()
         mvar_struct["time"] = casadi.MX.sym("time")
         mvar_struct["x"] = casadi.MX.sym("x", n_var['x'])
@@ -1043,6 +1043,8 @@ class LocalDAECollocator(CasadiCollocator):
         mvar_struct["w"] = casadi.MX.sym("w", n_var['w'])
         mvar_struct["elim_u"] = casadi.MX.sym("elim_u", n_var['elim_u'])
         mvar_struct["p_opt"] = casadi.MX.sym("p_opt", n_var['p_opt'])
+        
+        # Handy ordered structure for substitution
         svector_vars=[mvar_struct["time"]]
 
 
@@ -1056,6 +1058,7 @@ class LocalDAECollocator(CasadiCollocator):
                 svector_vars.append(mvar_struct[vt][i])
                 i = i + 1
 
+        # Substitute named variables with vector variables in expressions
         s_op_expressions = [initial, dae, path, mterm, lterm]
         [initial, dae, path, mterm, lterm] = casadi.substitute(
             s_op_expressions
@@ -1200,9 +1203,9 @@ class LocalDAECollocator(CasadiCollocator):
         # Create NLP variables
         xx = casadi.MX.sym("xx", n_xx)
             
-        # Map with new indices of variables
+        # Map with indices of variables
         var_indices=dict()
-        # Map with different levels of packing mx variables
+        # Map with different levels of packed mx variables
         var_map=dict()
 
         if self.named_vars:
@@ -1213,7 +1216,7 @@ class LocalDAECollocator(CasadiCollocator):
         # [0, all_x, all_dx, all_w, all_unelimu, initial_final_points, popt, h_free]
         global_split_indices=[0]
         
-        # Map with split order
+        # Map with splited order
         split_map = dict()
         split_map['x'] = 0
         split_map['dx'] = 1
@@ -1223,6 +1226,7 @@ class LocalDAECollocator(CasadiCollocator):
         split_map['p_opt'] = 5
         split_map['h'] = 6
 
+        # Fill in global_split_indices structure
         for varType in ['x', 'dx', 'w', 'unelim_u']:
             if varType=='x':
                 if self.discr == "LGR":
@@ -1252,7 +1256,7 @@ class LocalDAECollocator(CasadiCollocator):
                 global_split_indices.append(
                     global_split_indices[-1]+\
                     nlp_n_var[varType]*(self.n_cp)*self.n_e)
-        # Initial and final points
+        # Append split index for final points 
         if self.discr == "LGR":
             if self.blocking_factors is not None:
                 global_split_indices.append(
@@ -1280,12 +1284,13 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise CasadiCollocatorException(
                 "Unknown discretization scheme %s." % self.discr)                
-        # Index for the free parameters 
+        # Append split index for the free parameters 
         global_split_indices.append(global_split_indices[-1]+n_popt)
         n_freeh2 = self.n_e if self.hs == "free" else 0
-        # Index for the free elements
+        # Append index for the free elements
         global_split_indices.append(global_split_indices[-1]+n_freeh2) 
-        # Tuple with the splitted mx variables
+        
+        # Split MX variables accordingly
         global_split=casadi.vertsplit(xx,global_split_indices)
         counter_s = 0
         
@@ -1468,7 +1473,7 @@ class LocalDAECollocator(CasadiCollocator):
                     var in mvar_vectors['unelim_u'] if
                     var.getName() not in self.blocking_factors.factors] 
 
-        # Creates map entry for initial points
+        # Creates check_point map entry for initial points
         split_indices=[0,nlp_n_var['dx']]
         if self.blocking_factors is not None:
             varType='w'
@@ -1507,7 +1512,7 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 var_map[varType][1][0]['all']=xx[0:0]
                            
-        # Creates map entry for final points
+        # Creates check_point map entry for final points
         if self.discr == "LG":
             split_end=casadi.vertsplit(inter_split[1], split_indices)
             ii=self.n_e
@@ -1532,7 +1537,7 @@ class LocalDAECollocator(CasadiCollocator):
                 else:
                     var_map[varType][ii][kk]['all']=xx[0:0]
 
-        # Indexing parameters
+        # Creates check_point map entry parameters
         var_map['p_opt'] = dict()
         var_map['p_opt']['all'] = \
                   global_split[split_map['p_opt']]
@@ -1547,7 +1552,7 @@ class LocalDAECollocator(CasadiCollocator):
                     named_xx.append(casadi.SX.sym(name))
                 counter_s+=1
                                    
-        # Indexing free elements
+        # Creates check_point map entry free elements
         var_map['h'] = dict()
         var_map['h']['all'] = \
                   global_split[split_map['h']]
@@ -2682,7 +2687,7 @@ class LocalDAECollocator(CasadiCollocator):
         collocation points of a certain element by calling a single function per 
         element.
         """     
-        # Define the symbolic input
+        # Define the symbolic input for level 1 functions
         l1_mvar_struct = OrderedDict()
         l1_mvar_struct["time"] = casadi.MX.sym("timel1", self.n_cp)
         additional_p = 2 if self.is_gauss else 1
@@ -2721,7 +2726,7 @@ class LocalDAECollocator(CasadiCollocator):
                 inputs_order_map[vk]=counter
                 counter+=1  
 
-        # Build list of collocation point variables
+        # Build lists of collocation point variables
         empty_list = [[] for i in range(self.n_cp)]
         x_col = casadi.vertsplit(s_sym_input_l1[inputs_order_map["x"]], 
                                  self.n_var['x'])
@@ -2752,13 +2757,13 @@ class LocalDAECollocator(CasadiCollocator):
         time_col = casadi.vertsplit(s_sym_input_l1[inputs_order_map["time"]])
         time_col = [[time_col[k]] for k in range(self.n_cp)]
 
-        # Gauss quadrature weights
+        # Create gauss quadrature weights symbolic variable
         sym_g_weights = casadi.MX.sym("Gauss_wj", self.n_cp)
 
-        # Parameters
+        # Create parameters symbolic variable
         p_opt=[l1_mvar_struct["p_opt"]] if self.n_var['p_opt']>0 else []
 
-        # Prepare input for collocation equation
+        # Prepare input for collocation equation (level 0 functions)
         no_rboundary_x = casadi.vertsplit(
             s_sym_input_l1[inputs_order_map["x"]], 
             self.n_var['x']*(self.n_cp+1))
@@ -2777,8 +2782,8 @@ class LocalDAECollocator(CasadiCollocator):
 
         if not self.variable_scaling or self.nominal_traj is None:
             if self.eliminate_der_var:
-                print "TODO define input for no derivative mode daeresidual"
-                raise NotImplementedError("eliminate_der_ver not supported yet")
+                print "TODO define input for no derivative mode daeresidual with check_point"
+                raise NotImplementedError("eliminate_der_ver not supported yet with check_point")
             else:
                 # Define functions output
                 output_dae_element = list()

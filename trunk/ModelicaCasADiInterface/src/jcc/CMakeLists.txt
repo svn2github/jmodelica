@@ -25,6 +25,7 @@ set(CLASSES_common
   ifcasadi.MX
   ifcasadi.MXFunction
   ifcasadi.MXVector
+  ifcasadi.ifcasadi
   org.jmodelica.util.OptionRegistry
 )
 
