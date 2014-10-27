@@ -1725,6 +1725,48 @@ aspect ConstantEvaluation {
         return super.equals(other);
     }
     
+    /**
+     * Modifies <code>this</code> CValue so that components that do not match to
+     * <code>other</code> are replaced with <code>CValue.UNKNOWN</code>.
+     * @param other CValue to merge from
+     * @return Possibly modified <code>this</code> if composite or equals 
+     *         <code>other</code>, else <code>CValue.UNKNOWN</code>
+     */
+    public CValue CValue.merge(CValue other) {
+        if (equals(other)) {
+            return this;
+        }
+        return CValue.UNKNOWN;
+    }
+    
+    @Override
+    public CValue CValueArray.merge(CValue other) {
+        if (other instanceof CValueArray) {
+            CValueArray o = (CValueArray) other;
+            if (values.length != o.values.length)
+                return CValue.UNKNOWN;
+            for (int i = 0; i < values.length; i++) {
+                values[i] = values[i].merge(o.values[i]);
+            }
+            return this;
+        }
+        return CValue.UNKNOWN;
+    }
+    
+    @Override
+    public CValue CValueRecord.merge(CValue other) {
+        if (other instanceof CValueRecord) {
+            CValueRecord o = (CValueRecord) other;
+            if (values.length != o.values.length)
+                return CValue.UNKNOWN;
+            for (int i = 0; i < values.length; i++) {
+                values[i] = values[i].merge(o.values[i]);
+            }
+            return this;
+        }
+        return CValue.UNKNOWN;
+    }
+    
     
     /** 
      * \build Creates an FExp with literals from this Array.
@@ -4926,7 +4968,7 @@ aspect VariableEvaluator {
         
         @Override
         public void endIf() {
-            ifStack.remove(ifStack.size()-1).zip();
+            ifStack.remove(ifStack.size()-1).merge();
         }
         
         @Override
@@ -4968,10 +5010,10 @@ aspect VariableEvaluator {
             /**
              * Merge all evaluated branches and write result to evaluators current value set.
              */
-            public void zip() {
+            public void merge() {
                 IfBranchEvaluated res = branches.get(0);
                 for (int i = 1 ; i < branches.size(); i++) {
-                    res.zip(branches.get(i));
+                    res.merge(branches.get(i));
                 }
                 res.restore();
             }
@@ -4994,14 +5036,16 @@ aspect VariableEvaluator {
                 /**
                  * Merge values from other branch into this. Differing values results in unknown values.
                  */
-                public void zip(IfBranchEvaluated other) {
+                public void merge(IfBranchEvaluated other) {
                     if (res != other.res) {
                         throw new ConstantEvaluationException(null, "Partial constant evaluation of if statements with "
                                 + "differing return statuses is not possible");
                     }
                     for (CommonVariableDecl cvd : other.values.keySet()) {
-                        if (values.get(cvd) == null || !values.get(cvd).equals(other.values.get(cvd))) {
+                        if (values.get(cvd) == null) {
                             values.put(cvd, cvd.type().unknownCValue());
+                        } else {
+                            values.put(cvd, values.get(cvd).merge(other.values.get(cvd)));
                         }
                     }
                 }

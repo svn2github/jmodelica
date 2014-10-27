@@ -3461,13 +3461,13 @@ end EvaluationTests.Partial.IfStmt11;
             flatModel="
 fclass EvaluationTests.Partial.IfStmt12
  Real y1[1];
- Real y1[2];
+ constant Real y1[2] = 0.0;
  Real y1[3];
  Real y1[4];
  Real y2;
  Real y3;
 equation
- ({y1[1], y1[2], y1[3], y1[4]}, y2, y3) = EvaluationTests.Partial.IfStmt12.f({time, 1, 2, 3}, 0);
+ ({y1[1], , y1[3], y1[4]}, y2, y3) = EvaluationTests.Partial.IfStmt12.f({time, 1, 2, 3}, 0);
 
 public
  function EvaluationTests.Partial.IfStmt12.f
@@ -3531,6 +3531,113 @@ fclass EvaluationTests.Partial.IfStmt13
 end EvaluationTests.Partial.IfStmt13;
 ")})));
     end IfStmt13;
+    
+    model IfStmt14
+        record R
+            Real a,b;
+        end R;
+        
+        function f
+            input Real x1;
+            input Real x2;
+            output R r;
+          algorithm
+            if x1 < x2 then
+                r.a := x1;
+                r.b := x1;
+            else
+                r.a := x1;
+                r.b := x2;
+            end if;
+        end f;
+        
+        R y = f(1, time);
+        
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfStmt14",
+            description="Partial evaluation of if stmt. Part of record assigned different values per branch, other part assigned same",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.IfStmt14
+ constant Real y.a = 1;
+ Real y.b;
+equation
+ (EvaluationTests.Partial.IfStmt14.R(, y.b)) = EvaluationTests.Partial.IfStmt14.f(1, time);
+
+public
+ function EvaluationTests.Partial.IfStmt14.f
+  input Real x1;
+  input Real x2;
+  output EvaluationTests.Partial.IfStmt14.R r;
+ algorithm
+  if x1 < x2 then
+   r.a := x1;
+   r.b := x1;
+  else
+   r.a := x1;
+   r.b := x2;
+  end if;
+  return;
+ end EvaluationTests.Partial.IfStmt14.f;
+
+ record EvaluationTests.Partial.IfStmt14.R
+  Real a;
+  Real b;
+ end EvaluationTests.Partial.IfStmt14.R;
+
+end EvaluationTests.Partial.IfStmt14;
+")})));
+    end IfStmt14;
+    
+    model IfStmt15
+        function f
+            input Real x1;
+            input Real x2;
+            output Real[2] r;
+          algorithm
+            if x1 < x2 then
+                r[1] := x1;
+                r[2] := x1;
+            else
+                r[1] := x1;
+                r[2] := x2;
+            end if;
+        end f;
+        
+        Real[2] y = f(1, time);
+        
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfStmt15",
+            description="Partial evaluation of if stmt. Part of array assigned different values per branch, other part assigned same",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.Partial.IfStmt15
+ constant Real y[1] = 1;
+ Real y[2];
+equation
+ ({, y[2]}) = EvaluationTests.Partial.IfStmt15.f(1, time);
+
+public
+ function EvaluationTests.Partial.IfStmt15.f
+  input Real x1;
+  input Real x2;
+  output Real[2] r;
+ algorithm
+  if x1 < x2 then
+   r[1] := x1;
+   r[2] := x1;
+  else
+   r[1] := x1;
+   r[2] := x2;
+  end if;
+  return;
+ end EvaluationTests.Partial.IfStmt15.f;
+
+end EvaluationTests.Partial.IfStmt15;
+")})));
+    end IfStmt15;
     
 end Partial;
 
