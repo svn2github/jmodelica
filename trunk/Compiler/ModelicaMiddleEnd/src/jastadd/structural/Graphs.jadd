@@ -265,7 +265,16 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 groupMembers = new ArrayList<E>();
                 for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
                                                       // need to reverse here to preserve the initial order.
-                    FTypePrefixVariability variability = lhsVars[i] != null ? lhsVars[i].variability().combineDown(lhsVars[i].type().funcOutputVariability()) : e.variability();
+                    FTypePrefixVariability variability;
+                    if (lhsVars[i] != null) {
+                        variability = lhsVars[i].variability();
+                        if (variability.parameterOrLess())
+                            variability = lhsVars[i].type().funcOutputVariability();
+                        else
+                            variability = lhsVars[i].variability().combineDown(variability);
+                    } else {
+                        variability = e.variability();
+                    }
                     boolean add = false;
                     for (VarType varType : variableTypes)
                         if (varType.isOk(variability))

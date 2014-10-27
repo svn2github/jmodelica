@@ -4044,6 +4044,70 @@ equation
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
+    model Variability1
+        function F1
+            input Real a;
+            output Real b;
+            output Real c;
+        algorithm
+            b := a * 2;
+            c := -a;
+            annotation(Inline=false,derivative=F1_der);
+        end F1;
+        function F1_der
+            input Real a;
+            input Real a_der;
+            output Real b;
+            output Real c;
+        algorithm
+            (b,c) := F1(a * a_der);
+            annotation(Inline=true);
+        end F1_der;
+        parameter Real p = 2;
+        Real x,y,a;
+    equation
+        (x, p) = F1(y + a);
+        der(x) = der(y) * 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Variability1",
+            description="Test so that variability calculations are done propperly for function call equations with parameters in left hand side",
+            flatModel="
+fclass IndexReduction.Variability1
+ parameter Real p = 2 /* 2 */;
+ Real x;
+ Real y;
+ Real a;
+ Real _der_x;
+ Real _der_y;
+ Real temp_3;
+ Real temp_4;
+initial equation 
+ a = 0.0;
+equation
+ (x, p) = IndexReduction.Variability1.F1(y + a);
+ _der_x = _der_y * 2;
+ (temp_3, temp_4) = IndexReduction.Variability1.F1((y + a) * (_der_y + der(a)));
+ _der_x = temp_3;
+ 0.0 = temp_4;
+
+public
+ function IndexReduction.Variability1.F1
+  input Real a;
+  output Real b;
+  output Real c;
+ algorithm
+  b := a * 2;
+  c := - a;
+  return;
+ annotation(derivative = IndexReduction.Variability1.F1_der);
+ end IndexReduction.Variability1.F1;
+
+end IndexReduction.Variability1;
+")})));
+    end Variability1;
+
 model Functional1
     partial function partFunc
         output Real y;

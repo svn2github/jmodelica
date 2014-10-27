@@ -521,7 +521,7 @@ aspect IndexReduction {
         fEqns.addAll(originalFEqns);
         
         java.util.List<FAbstractEquation> diffedFEqns = new ArrayList<FAbstractEquation>();
-        Set<FAbstractEquation> originalDiffedFEqns = new HashSet<FAbstractEquation>();
+        Set<FAbstractEquation> originalDiffedFEqns = new LinkedHashSet<FAbstractEquation>();
         for (FAbstractEquation originalFEqn : originalFEqns) {
             FAbstractEquation originalDiffedFEqn = differentiateEquation(originalFEqn);
             originalDiffedFEqns.add(originalDiffedFEqn);
