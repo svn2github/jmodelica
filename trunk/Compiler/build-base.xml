@@ -106,7 +106,7 @@
             </if>
         </sequential>
     </for>
-    <propertyregex property="modules" input="${modules_temp}" regexp="(^|,)[,]*" replace="\1" global="true" />
+    <propertyregex property="modules" input="${modules_temp}" regexp="(^)[,]*|[,]+($|,)" replace="\1" global="true" />
     
     <!-- import module build files -->
     <for list="${modules}" param="module">
