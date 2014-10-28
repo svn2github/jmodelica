@@ -1432,7 +1432,7 @@ aspect TransformCanonical {
          */
         public class setFDerivativeVariables extends Transformation {
             protected Set<FVariable> variablesToVisit() {
-                return new LinkedHashSet<FVariable>(differentiatedRealVariablesSet());
+                return new LinkedHashSet<FVariable>(differentiatedRealVariablesFilteredSet());
             }
             
             public void perform() {

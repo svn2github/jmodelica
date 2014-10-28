@@ -280,7 +280,8 @@ aspect FlatAPI {
         numDiscreteBooleanVariables();
 
     syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
-    eq FDerivativeVariable.shouldContribute() = super.shouldContribute() && (myDifferentiatedVariable().stateSelectAttributeSet() || uses().size() > 0);
+    
+    syn boolean FDerivativeVariable.shouldContributeFiltered() = shouldContribute() && (myDifferentiatedVariable().stateSelectAttributeSet() || uses().size() > 0);
     
     public class FClass {
         public static <T extends FVariable, C extends Collection<T>> C intersectFVColl(
@@ -632,6 +633,18 @@ aspect FlatAPI {
     to FClass.differentiatedRealVariablesSet() for myFClass();
     syn int FVariable.differentiatedRealVariableIndex() =
         myFClass().differentiatedRealVariables().indexOf(this);
+    
+    /**
+     * Returns the same set as differentiatedRealVariablesSet, except derivatives with no
+     * uses that were not introduced because of stateselect.
+     */
+    coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesFilteredSet() 
+      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
+    FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
+    to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
+    FDerivativeVariable contributes
+        myDifferentiatedVariable() when (shouldContributeFiltered())
+    to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     
     /**
      * \brief Collection of all callables called by a partial function call
