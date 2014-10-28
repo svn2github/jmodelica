@@ -2114,13 +2114,13 @@ class LocalDAECollocationAlgResult(JMResultBase):
             
 class MPCAlgResult(JMResultBase):
     def __init__(self, model=None, result_file_name=None, solver=None, 
-                 result_data=None, options=None, times=None, nbr_samp=None):
+                 result_data=None, options=None, times=None, nbr_samp=None, 
+                 sample_period = None):
         super(MPCAlgResult, self).__init__(
                 model, result_file_name, solver, result_data, options)
 
               
         #Print times 
-        
         print("\nTotal time for %s samples (averege time in parenthesis)." 
                 %(nbr_samp))
         print("\nInitialization time: %.2f seconds" %times['init'])
@@ -2134,3 +2134,4 @@ class MPCAlgResult(JMResultBase):
                 (times['post_processing'], times['post_processing']/(nbr_samp)))
         print("\nLargest total time for one sample (nbr %s): %.2f seconds" %
                 (times['maxSample'], times['maxTime']))
+        print("The sample period is %.2f seconds" %sample_period)

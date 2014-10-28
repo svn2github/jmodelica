@@ -22,7 +22,7 @@ import platform
 from tests_jmodelica import testattr
 from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
                             cstr_casadi, qt_par_est_casadi, vehicle_turn,
-                            distillation4_opt)
+                            distillation4_opt, cstr_mpc_casadi)
 							
 
 @testattr(casadi = True and platform.system() == "Linux")
@@ -59,3 +59,10 @@ def test_vehicle_turn():
 def test_distillation4_opt():
     """Run the large istillation optimization example."""
     distillation4_opt.run_demo(False)
+    
+@testattr(ma27 = True)
+def test_cstr_mpc_casadi():
+    """Run the cstr mpc optimization example."""
+    cstr_mpc_casadi.run_demo(False)
+    
+
