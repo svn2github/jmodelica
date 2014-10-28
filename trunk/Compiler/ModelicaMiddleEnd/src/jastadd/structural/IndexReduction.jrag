@@ -343,6 +343,19 @@ aspect IndexReduction {
             return extraEquations;
         }
 
+        @Override
+        public String printEquation() {
+            if (extraEquations.size() == 0)
+                return super.printEquation();
+            StringBuilder sb = new StringBuilder();
+            sb.append(super.printEquation());
+            for (FAbstractEquation eqn : extraEquations) {
+                sb.append("\n    Extra: ");
+                sb.append(eqn.toString());
+            }
+            return sb.toString();
+        }
+
     }
 
     public class IndexReductionVar extends AbstractVar<IndexReductionEq, IndexReductionVar> {
@@ -769,19 +782,18 @@ aspect IndexReduction {
             Collection<IndexReductionVar> visitedVariables = getVisitedVariables();
             ASTNode.log.info("*************");
             ASTNode.log.info("Looking for augmented path starting in equation: %s", eqToMatch);
-            if (pathFound) {
+            if (pathFound)
                 ASTNode.log.info("Path found!");
-            } else {
+            else
                 ASTNode.log.info("Path not found!");
-            }
+            
             ASTNode.log.info("Visisted equations:");
-            for (IndexReductionEq ee : visitedEquations) {
-                ASTNode.log.info("  %s", ee.getEquation());
-            }
+            for (IndexReductionEq ee : visitedEquations)
+                ASTNode.log.info("  %s", ee.printEquation());
+            
             ASTNode.log.info("Visisted variables:");
-            for (IndexReductionVar vv : visitedVariables) {
-                ASTNode.log.info("  %s", vv.toString());
-            }
+            for (IndexReductionVar vv : visitedVariables)
+                ASTNode.log.info("  %s", vv);
             
             if (!pathFound) { // Step 3b-5
                 Collection<IndexReductionVar> varsToRemove = new ArrayList<IndexReductionVar>();
@@ -831,6 +843,9 @@ aspect IndexReduction {
         ASTNode.log.info(this);
         ASTNode.log.info("Matching:");
         ASTNode.log.info(printMatchingObj());
+        
+        if (getUnmatchedEquations().size() > 0 || getUnmatchedVariables().size() > 0)
+            throw new IndexReductionException("There were unmatched equations and/or variables left after index reduction.");
         
         if (result.getEquations().isEmpty()) {
             ASTNode.log.info("Index reduction did not change the system. Munkres is skipped.");

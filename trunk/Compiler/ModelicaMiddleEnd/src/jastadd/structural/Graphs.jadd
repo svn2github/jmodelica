@@ -903,7 +903,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             for (V v : e.getVariables()) {
                 str.append(v + (canMatch(e, v) ? "¤ " : "# "));
             }
-            str.append("// " + e.getEquation() + "\n");
+            str.append("// " + e.printEquation() + "\n");
         }
         return str.toString();
     }
@@ -1372,6 +1372,10 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
 
     public String toString() {
         return getName();
+    }
+
+    public String printEquation() {
+        return getEquation().toString();
     }
 
     public boolean isReal() {
