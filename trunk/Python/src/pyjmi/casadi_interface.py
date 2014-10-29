@@ -35,6 +35,7 @@ except ImportError:
     
 if modelicacasadi_present:
     from modelicacasadi_wrapper import OptimizationProblem as CI_OP
+    from modelicacasadi_wrapper import Model as CI_Model
     from modelicacasadi_transfer import transfer_model as _transfer_model
     from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
 
@@ -90,7 +91,7 @@ def transfer_model(class_name, file_name=[],
         A Model representing the class given by class_name.
 
 """
-    model = modelicacasadi_wrapper.Model() # no wrapper exists for Model yet
+    model = Model() # no wrapper exists for Model yet
     _transfer_model(model, class_name=class_name, file_name=file_name,
                     compiler_options=compiler_options,
                     compiler_log_level=compiler_log_level)
@@ -153,12 +154,12 @@ def transfer_optimization_problem(class_name, file_name=[],
         An OptimizationProblem representing the class given by class_name.
 
     """
-    model = OptimizationProblem()
-    _transfer_optimization_problem(model, class_name=class_name, file_name=file_name,
+    op = OptimizationProblem()
+    _transfer_optimization_problem(op, class_name=class_name, file_name=file_name,
                                    compiler_options=compiler_options,
                                    compiler_log_level=compiler_log_level,
                                    accept_model=accept_model)
-    return model
+    return op
 
 def transfer_to_casadi_interface(*args, **kwargs):
     return transfer_optimization_problem(*args, **kwargs)
@@ -701,43 +702,14 @@ if not modelicacasadi_present:
     # todo: exclude OptimizationProblem instead?
     class CI_OP:
         pass
+    class CI_Model:
+        pass
 
-class OptimizationProblem(CI_OP, ModelBase):
+class Model(CI_Model):
 
     """
-    Python wrapper for the CasADi interface class OptimizationProblem.
+    Python wrapper for the CasADi Interface class Model.
     """
-        
-    def _default_options(self, algorithm):
-        """ 
-        Help method. Gets the options class for the algorithm specified in 
-        'algorithm'.
-        """
-        base_path = 'pyjmi.jmi_algorithm_drivers'
-        algdrive = __import__(base_path)
-        algdrive = getattr(algdrive, 'jmi_algorithm_drivers')
-        algorithm = getattr(algdrive, algorithm)
-        return algorithm.get_default_options()
-
-    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
-        """
-        Returns an instance of the optimize options class containing options 
-        default values. If called without argument then the options class for 
-        the default optimization algorithm will be returned.
-        
-        Parameters::
-        
-            algorithm --
-                The algorithm for which the options class should be returned. 
-                Possible values are: 'LocalDAECollocationAlg' and
-                'CasadiPseudoSpectralAlg'
-                Default: 'LocalDAECollocationAlg'
-                
-        Returns::
-        
-            Options class for the algorithm specified with default values.
-        """
-        return self._default_options(algorithm)
 
     def get_attr(self, var, attr):
         """
@@ -796,6 +768,43 @@ class OptimizationProblem(CI_OP, ModelBase):
                     raise ValueError("Variable %s does not have attribute %s."
                                      % (var.getName(), attr))
             return self.evaluateExpression(val_expr)
+
+class OptimizationProblem(CI_OP, ModelBase, Model):
+
+    """
+    Python wrapper for the CasADi Interface class OptimizationProblem.
+    """
+
+    def _default_options(self, algorithm):
+        """ 
+        Help method. Gets the options class for the algorithm specified in 
+        'algorithm'.
+        """
+        base_path = 'pyjmi.jmi_algorithm_drivers'
+        algdrive = __import__(base_path)
+        algdrive = getattr(algdrive, 'jmi_algorithm_drivers')
+        algorithm = getattr(algdrive, algorithm)
+        return algorithm.get_default_options()
+
+    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
+        """
+        Returns an instance of the optimize options class containing options 
+        default values. If called without argument then the options class for 
+        the default optimization algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be returned. 
+                Possible values are: 'LocalDAECollocationAlg' and
+                'CasadiPseudoSpectralAlg'
+                Default: 'LocalDAECollocationAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options(algorithm)
     
     def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
         """
@@ -846,11 +855,11 @@ class OptimizationProblem(CI_OP, ModelBase):
 class CasadiModel(ModelBase):
     
     """
-    This class was deprecated
+    This class is obsolete.
     """
     
     def __init__(self, name, path='.', verbose=True, ode=False):
-        raise NotImplementedError('CasadiModel was deprecated. \n \
+        raise NotImplementedError('CasadiModel is obsolete. \n \
         The CasadiPseudoSpectralAlg and LocalDAECollocationAlgOld \n \
-        are no longer supported. to solve an optimization problem \n \
-        with casadi use instead transfer_to_casadi_interface.')
+        are no longer supported. To solve an optimization problem \n \
+        with CasADi use pyjmi.transfer_optimization_problem instead.')
