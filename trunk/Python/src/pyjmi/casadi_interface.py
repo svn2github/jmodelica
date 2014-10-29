@@ -769,7 +769,7 @@ class Model(CI_Model):
                                      % (var.getName(), attr))
             return self.evaluateExpression(val_expr)
 
-class OptimizationProblem(CI_OP, ModelBase, Model):
+class OptimizationProblem(Model, CI_OP, ModelBase):
 
     """
     Python wrapper for the CasADi Interface class OptimizationProblem.
