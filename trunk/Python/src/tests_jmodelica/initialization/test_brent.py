@@ -44,7 +44,7 @@ def load_model(classname):
     fmu.set('_log_level', log_level)
     return fmu
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_cubic():
     model = load_model('TestBrent.Cubic')
     for t in N.linspace(0,1,101):
@@ -59,7 +59,7 @@ def test_cubic():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_logarithmic():
     model = load_model('TestBrent.Logarithmic')
     for t in N.linspace(0,1,101):
@@ -74,7 +74,7 @@ def test_logarithmic():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_xlogx():
     model = load_model('TestBrent.XLogX')
 
@@ -101,7 +101,7 @@ def test_xlogx():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_xlogx_neg():
     model = load_model('TestBrent.XLogXNeg')
 
@@ -128,7 +128,7 @@ def test_xlogx_neg():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_arcsin():
     model = load_model('TestBrent.Arcsin')
 

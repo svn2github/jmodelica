@@ -57,7 +57,7 @@ class Test_FMUModelCS2:
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0")
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0")
     
-    @testattr(fmi = True)
+    @testattr(windows = True)
     def test_init(self):
         """
         Test the method __init__ in FMUModelCS2
@@ -242,7 +242,7 @@ class Test_FMUModelCS2:
             nose.tools.assert_almost_equal(sim_time[0], 0.1)
             nose.tools.assert_almost_equal(sim_time[-1],1.0)
             assert sim_time.all() >= sim_time[0] - 1e-4   #Check that the time is increasing
-            assert sim_time.all() <= sim_time[-1] + 1e+4  #Give it some marginal
+            assert sim_time.all() <= sim_time[-1] + 1e-4  #Give it some marginal
             height = res['h']
             assert height.all() >= -1e-4 #The height of the ball should be non-negative
             nose.tools.assert_almost_equal(res.final('h'), 6.0228998448008104, 4)
@@ -267,7 +267,7 @@ class Test_FMUModelCS2:
             nose.tools.assert_almost_equal(sim_time_coupled[0], 0.0)
             nose.tools.assert_almost_equal(sim_time_coupled[-1],2.0)
             assert sim_time_coupled.all() >= sim_time_coupled[0] - 1e-4   #Check that the time is increasing
-            assert sim_time_coupled.all() <= sim_time_coupled[-1] + 1e+4  #Give it some marginal
+            assert sim_time_coupled.all() <= sim_time_coupled[-1] + 1e-4  #Give it some marginal
 
             #val_J1 = res_coupled['J1.w']
             #val_J2 = res_coupled['J2.w']
@@ -349,7 +349,7 @@ class Test_FMUModelME2:
         coupled = load_fmu(self.coupled_name)
         assert coupled.get_version() == "2.0"
     
-    @testattr(fmi = True)
+    @testattr(windows = True)
     def test_init(self):
         """
         Test the method __init__ in FMUModelME2
@@ -666,7 +666,7 @@ class Test_FMUModelME2:
             nose.tools.assert_almost_equal(sim_time[0], 0.1)
             nose.tools.assert_almost_equal(sim_time[-1],1.0)
             assert sim_time.all() >= sim_time[0] - 1e-4   #Check that the time is increasing
-            assert sim_time.all() <= sim_time[-1] + 1e+4  #Give it some marginal
+            assert sim_time.all() <= sim_time[-1] + 1e-4  #Give it some marginal
             height = res['h']
             assert height.all() >= -1e-4 #The height of the ball should be non-negative
             nose.tools.assert_almost_equal(res.final('h'), 6.0228998448008104, 4)
@@ -690,7 +690,7 @@ class Test_FMUModelME2:
             nose.tools.assert_almost_equal(sim_time_coupled[0], 0.0)
             nose.tools.assert_almost_equal(sim_time_coupled[-1],2.0)
             assert sim_time_coupled.all() >= sim_time_coupled[0] - 1e-4   #Check that the time is increasing
-            assert sim_time_coupled.all() <= sim_time_coupled[-1] + 1e+4  #Give it some marginal
+            assert sim_time_coupled.all() <= sim_time_coupled[-1] + 1e-4  #Give it some marginal
 
             #val_J1 = res_coupled['J1.w']
             #val_J2 = res_coupled['J2.w']
@@ -778,41 +778,32 @@ class Test_load_fmu2:
     """
     This test the functionality of load_fmu method.
     """
-    @testattr(fmi = True)
+    @testattr(windows = True)
     def test_raise_exception(self):
         """
         This method tests the error-handling of load_fmu
         """
-        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_fmu.txt', path_to_fmus)          #loading non-fmu file
-        nose.tools.assert_raises(FMUException, load_fmu, 'not_existing_file.fmu', path_to_fmus_me2)  #loading non-existing file
-        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_.fmu', path_to_fmus)             #loading a non-real fmu
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='Teo') #loading fmu with wrong argument
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME1, path=path_to_fmus_me1, kind='CS')  #loading ME1-model as a CS-model
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS1, path=path_to_fmus_cs1, kind='ME')  #loading CS1-model as ME-model
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='CS')  #loading ME2-model as a CS-model
-        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS2, path=path_to_fmus_cs2, kind='ME')  #loading CS2-model as ME-model
+        nose.tools.assert_raises(FMUException, load_fmu, 'not_an_fmu.txt', path_to_fmus)                      #loading non-fmu file
+        nose.tools.assert_raises(FMUException, load_fmu, 'not_existing_file.fmu', path_to_fmus_me2)           #loading non-existing file
+        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_.fmu', path_to_fmus)                          #loading a non-real fmu
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='invalid_kind') #loading fmu with wrong argument
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME1, path=path_to_fmus_me1, kind='CS')           #loading ME1-model as a CS-model
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS1, path=path_to_fmus_cs1, kind='ME')           #loading CS1-model as ME-model
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='CS')           #loading ME2-model as a CS-model
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS2, path=path_to_fmus_cs2, kind='ME')           #loading CS2-model as ME-model
 
-#    @testattr(fmi = True)
-#    def test_correct_loading(self):
-#        """
-#        This method tests the correct loading of FMUs
-#        """
-#        model = load_fmu(fmu = ME1, path = path_to_fmus_me1, kind = 'auto') #loading ME1-model correct
-#        assert isinstance(model, FMUModelME1)
-#        model = load_fmu(fmu = ME1, path = path_to_fmus_me1, kind = 'ME')   #loading ME1-model correct
-#        assert isinstance(model, FMUModelME1)
-#        model = load_fmu(fmu = CS1, path = path_to_fmus_cs1, kind = 'auto') #loading CS1-model correct
-#        assert isinstance(model, FMUModelCS1)
-#        model = load_fmu(fmu = CS1, path = path_to_fmus_cs1, kind = 'CS')   #loading CS1-model correct
-#        assert isinstance(model, FMUModelCS1)
-#
-#        model = load_fmu(fmu = ME2, path = path_to_fmus_me2, kind = 'Auto') #loading ME2-model correct
-#        assert isinstance(model, FMUModelME2)
-#        model = load_fmu(fmu = ME2, path = path_to_fmus_me2, kind = 'me')   #loading ME2-model correct
-#        assert isinstance(model, FMUModelME2)
-#        model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'AUTO') #loading CS2-model correct
-#        assert isinstance(model, FMUModelCS2)
-#        model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'cs')   #loading CS2-model correct
-#        assert isinstance(model, FMUModelCS2)
+    #@testattr(windows = True)
+    #def test_correct_loading(self):
+        #"""
+        #This method tests the correct loading of FMUs
+        #"""
+        #model = load_fmu(fmu=ME2, path=path_to_fmus_me2, kind='auto') #loading ME2-model correct
+        #assert isinstance(model, FMUModelME2)
+        #model = load_fmu(fmu=ME2, path=path_to_fmus_me2, kind='me')   #loading ME2-model correct
+        #assert isinstance(model, FMUModelME2)
+        #model = load_fmu(fmu=CS2, path=path_to_fmus_cs2, kind='auto') #loading CS2-model correct
+        #assert isinstance(model, FMUModelCS2)
+        #model = load_fmu(fmu=CS2, path=path_to_fmus_cs2, kind='cs')   #loading CS2-model correct
+        #assert isinstance(model, FMUModelCS2)
 
 

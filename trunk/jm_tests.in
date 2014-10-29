@@ -80,7 +80,7 @@ test_set_o="optimica"
 test_set_p="python"
 
 # Standard set of tags
-TAGS="-a stddist"
+TAGS="-a stddist -a fmi"
 if [[ "${IPOPT_HOME}" != "" ]]; then
   TAGS="${TAGS} -a ipopt"
   if [[ "${SYS}" == Win ]]; then

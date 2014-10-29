@@ -45,7 +45,7 @@ def load_model(classname, log_file_name):
     model.set('_log_level', log_level)
     return model
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_bounds_warnings():
     model = load_model('TestInit', log_file_name)
 
