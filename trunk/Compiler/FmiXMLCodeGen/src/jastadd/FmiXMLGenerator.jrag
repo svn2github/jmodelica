@@ -1519,9 +1519,6 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                         derivatives.add(var);
                     }
                 }
-                //Sort the outputs.
-                VariableNameComparator comp = new VariableNameComparator();
-                Collections.sort(derivatives, comp);
 			}
 			
 			public String[] children() { return new String[] {"unknownForRegular"}; }
