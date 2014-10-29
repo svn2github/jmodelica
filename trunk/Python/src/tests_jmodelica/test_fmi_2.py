@@ -296,6 +296,36 @@ class Test_FMUModelCS2:
         nose.tools.assert_almost_equal(abs(diff3), 0.000, 1)
         nose.tools.assert_almost_equal(abs(diff4), 0.000, 1)
         """
+        
+    @testattr(windows = True)
+    def test_simulate_extern(self):
+        """
+        Test the method simulate in FMUModelCS2 on FMU SDK bouncing ball
+        """
+        bounce  = load_fmu(fmu=CS2, path=path_to_fmus_cs2)
+
+        #Try simulate the bouncing ball
+        res = bounce.simulate()
+        sim_time = res['time']
+        nose.tools.assert_almost_equal(sim_time[0], 0.0)
+        nose.tools.assert_almost_equal(sim_time[-1], 1.0)
+        bounce.reset()
+
+        for i in range(5):
+            res = bounce.simulate(start_time=0.1, final_time=1.0, options={'ncp':500})
+            sim_time = res['time']
+            nose.tools.assert_almost_equal(sim_time[0], 0.1)
+            nose.tools.assert_almost_equal(sim_time[-1],1.0)
+            assert sim_time.all() >= sim_time[0] - 1e-4   #Check that the time is increasing
+            assert sim_time.all() <= sim_time[-1] + 1e-4  #Give it some marginal
+            height = res['h']
+            assert height.all() >= -1e-4 #The height of the ball should be non-negative
+            nose.tools.assert_almost_equal(res.final('h'), 0.40479334288121899, 4)
+            if i>0: #check that the results stays the same
+                diff = height_old - height
+                nose.tools.assert_almost_equal(diff[-1],0.0)
+            height_old = height
+            bounce.reset()
 
     @testattr(fmi = True)
     def test_simulate_options(self):
@@ -719,6 +749,41 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(abs(diff3), 0.0000, 2)
         nose.tools.assert_almost_equal(abs(diff4), 0.0000, 2)
         """
+        
+    @testattr(windows = True)
+    def test_simulate_extern(self):
+        """
+        Test the method simulate in FMUModelME2 on FMU SDK bouncing ball
+        """
+        bounce  = load_fmu(fmu=ME2, path=path_to_fmus_me2)
+
+        #Try simulate the bouncing ball
+        res = bounce.simulate()
+        sim_time = res['time']
+        nose.tools.assert_almost_equal(sim_time[0], 0.0)
+        nose.tools.assert_almost_equal(sim_time[-1], 1.0)
+        bounce.reset()
+
+        opts = bounce.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["atol"] = 1e-6
+        opts["ncp"] = 500
+
+        for i in range(5):
+            res=bounce.simulate(start_time=0.1, final_time=1.0, options=opts)
+            sim_time = res['time']
+            nose.tools.assert_almost_equal(sim_time[0], 0.1)
+            nose.tools.assert_almost_equal(sim_time[-1],1.0)
+            assert sim_time.all() >= sim_time[0] - 1e-4   #Check that the time is increasing
+            assert sim_time.all() <= sim_time[-1] + 1e-4  #Give it some marginal
+            height = res['h']
+            assert height.all() >= -1e-4 #The height of the ball should be non-negative
+            nose.tools.assert_almost_equal(res.final('h'), 0.40400192742719998, 4)
+            if i>0: #check that the results stays the same
+                diff = height_old - height
+                nose.tools.assert_almost_equal(diff[-1],0.0)
+            height_old = height
+            bounce.reset()
 
 
 class Test_Result_Writing:
@@ -792,18 +857,18 @@ class Test_load_fmu2:
         nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='CS')           #loading ME2-model as a CS-model
         nose.tools.assert_raises(FMUException, load_fmu, fmu=CS2, path=path_to_fmus_cs2, kind='ME')           #loading CS2-model as ME-model
 
-    #@testattr(windows = True)
-    #def test_correct_loading(self):
-        #"""
-        #This method tests the correct loading of FMUs
-        #"""
-        #model = load_fmu(fmu=ME2, path=path_to_fmus_me2, kind='auto') #loading ME2-model correct
-        #assert isinstance(model, FMUModelME2)
-        #model = load_fmu(fmu=ME2, path=path_to_fmus_me2, kind='me')   #loading ME2-model correct
-        #assert isinstance(model, FMUModelME2)
-        #model = load_fmu(fmu=CS2, path=path_to_fmus_cs2, kind='auto') #loading CS2-model correct
-        #assert isinstance(model, FMUModelCS2)
-        #model = load_fmu(fmu=CS2, path=path_to_fmus_cs2, kind='cs')   #loading CS2-model correct
-        #assert isinstance(model, FMUModelCS2)
+    @testattr(windows = True)
+    def test_correct_loading(self):
+        """
+        This method tests the correct loading of FMUs
+        """
+        model = load_fmu(fmu=ME2, path=path_to_fmus_me2, kind='auto') #loading ME2-model correct
+        assert isinstance(model, FMUModelME2)
+        model = load_fmu(fmu=ME2, path=path_to_fmus_me2, kind='me')   #loading ME2-model correct
+        assert isinstance(model, FMUModelME2)
+        model = load_fmu(fmu=CS2, path=path_to_fmus_cs2, kind='auto') #loading CS2-model correct
+        assert isinstance(model, FMUModelCS2)
+        model = load_fmu(fmu=CS2, path=path_to_fmus_cs2, kind='cs')   #loading CS2-model correct
+        assert isinstance(model, FMUModelCS2)
 
 
