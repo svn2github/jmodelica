@@ -277,7 +277,8 @@ aspect IndexReduction {
 
         private IndexReductionEq meDifferentiated = null;
         private IndexReductionEq meIntegrated = null;
-        private Map<String, Boolean> nonDiffUseMap;
+        private Set<String> nonDiffVars;
+        private Set<FAbstractEquation> nonDiffEqns;
 
         public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
             super(name, eqn, groupNumber, variability);
@@ -306,31 +307,21 @@ aspect IndexReduction {
         }
 
         public boolean isNonDiffUse(IndexReductionVar var) {
-            if (nonDiffUseMap == null) {
-                nonDiffUseMap = new HashMap<String, Boolean>();
-                for (FAbstractEquation eqn : new ChainedIterable<FAbstractEquation>(Collections.singletonList(getEquation()),extraEquations)) {
-                    Set<FIdUseExp> uses = getEquation().referencedFIdUseExps();
-                    for (FIdUseExp use : uses) {
-                        Boolean val = nonDiffUseMap.get(use.name());
-                        if (val == null)
-                            val = true;
-                        nonDiffUseMap.put(use.name(), val & use.inNonDiffArg());
-                    }
-                }
-            }
-            Boolean val = nonDiffUseMap.get(var.getName());
-            if (val == null)
-                return false;
-            else
-                return val;
+            computeNonDiffCache();
+            return nonDiffVars.contains(var.getName());
         }
-        
+
         public int numDiffableVars() {
             int n = 0;
             for (IndexReductionVar var : getVariables())
                 if (!isNonDiffUse(var))
                     n++;
             return n;
+        }
+        
+        public boolean diffExtraEqn(FAbstractEquation eqn) {
+            computeNonDiffCache();
+            return !nonDiffEqns.contains(eqn);
         }
 
         private Collection<FAbstractEquation> extraEquations = Collections.emptyList();
@@ -341,6 +332,97 @@ aspect IndexReduction {
 
         public Collection<FAbstractEquation> getExtraEquations() {
             return extraEquations;
+        }
+
+        /**
+         * This method computes which equations and variables that shouldn't be
+         * differentiated. This is done by visiting the original equations,
+         * following referenced variables and visiting extra equations where
+         * they are referenced. This is done recursivly through all extra
+         * equations. If we enter a functioncall argument that is "noDerivtive"
+         * or "zeroDerivative", then week keep track of that and referenced
+         * variables and equations are makred as nondiff.
+         * 
+         * This method sets the same cache lists to all group members.
+         */
+        private void computeNonDiffCache() {
+            if (nonDiffVars != null && nonDiffEqns != null)
+                return;
+            Map<String, Collection<FAbstractEquation>> varToEqnMap = new HashMap<String, Collection<FAbstractEquation>>();
+            
+            Collection<FAbstractEquation> mainEqns = new LinkedHashSet<FAbstractEquation>();
+            Stack<WorklistPair> worklist = new Stack<WorklistPair>();
+            for (IndexReductionEq member : getGroupMembers()) {
+                worklist.add(new WorklistPair(member.getEquation(), false));
+                mainEqns.add(member.getEquation());
+            }
+            
+            for (FAbstractEquation eqn : new ChainedIterable<FAbstractEquation>(mainEqns, extraEquations)) {
+                for (FIdUseExp use : eqn.referencedFIdUseExps()) {
+                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(use.name());
+                    if (eqnList == null) {
+                        eqnList = new HashSet<FAbstractEquation>();
+                        varToEqnMap.put(use.name(), eqnList);
+                    }
+                    eqnList.add(eqn);
+                }
+            }
+            
+            
+            Map<String, Boolean> varNonDiffMap = new HashMap<String, Boolean>();
+            Map<FAbstractEquation, Boolean> eqnNonDiffMap = new HashMap<FAbstractEquation, Boolean>();
+            while (!worklist.isEmpty()) {
+                WorklistPair pair = worklist.pop();
+                FAbstractEquation eqn = pair.eqn;
+                boolean nonDiff = pair.value;
+                Boolean currentNonDiffValue = eqnNonDiffMap.get(eqn);
+                // If we already have visited and concluded that it should be diffed or if we are checking nondiff and already visited, then skip
+                if (currentNonDiffValue != null && (!currentNonDiffValue || nonDiff))
+                    continue;
+                eqnNonDiffMap.put(eqn, nonDiff);
+                for (FIdUseExp use : eqn.referencedFIdUseExps()) {
+                    Boolean oldValue = varNonDiffMap.get(use.name());
+                    boolean value = (oldValue == null || oldValue) && (nonDiff || use.inNonDiffArg());
+                    varNonDiffMap.put(use.name(), value);
+                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(use.name());
+                    if (eqnList == null)
+                        continue;
+                    for (FAbstractEquation otherEqn : eqnList)
+                        worklist.add(new WorklistPair(otherEqn, value));
+                }
+            }
+            
+            Set<String> nonDiffVars = Collections.emptySet();
+            for (Map.Entry<String, Boolean> entry : varNonDiffMap.entrySet()) {
+                if (entry.getValue()) {
+                    if (nonDiffVars.isEmpty())
+                        nonDiffVars = new HashSet<String>();
+                    nonDiffVars.add(entry.getKey());
+                }
+            }
+            
+            Set<FAbstractEquation> nonDiffEqns = Collections.emptySet();
+            for (Map.Entry<FAbstractEquation, Boolean> entry : eqnNonDiffMap.entrySet()) {
+                if (entry.getValue()) {
+                    if (nonDiffEqns.isEmpty())
+                        nonDiffEqns = new HashSet<FAbstractEquation>();
+                    nonDiffEqns.add(entry.getKey());
+                }
+            }
+            
+            for (IndexReductionEq member : getGroupMembers()) {
+                member.nonDiffVars = nonDiffVars;
+                member.nonDiffEqns = nonDiffEqns;
+            }
+        }
+
+        private static class WorklistPair {
+            public final FAbstractEquation eqn;
+            public final boolean value;
+            public WorklistPair(FAbstractEquation eqn, boolean value) {
+                this.eqn = eqn;
+                this.value = value;
+            }
         }
 
         @Override
@@ -355,7 +437,6 @@ aspect IndexReduction {
             }
             return sb.toString();
         }
-
     }
 
     public class IndexReductionVar extends AbstractVar<IndexReductionEq, IndexReductionVar> {
@@ -439,9 +520,13 @@ aspect IndexReduction {
             newVariables.add(var);
         }
 
+        public <V extends FAbstractEquation> V dynamicEquation(V eqn) {
+            return resolver.dynamicEquation(eqn);
+        }
+
         @Override
         protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
-            resolver.dynamicEquation(eqn);
+            dynamicEquation(eqn);
             newEquations.add(eqn);
         }
 
@@ -475,7 +560,7 @@ aspect IndexReduction {
         }
     }
     
-    private static FAbstractEquation IndexReductionBiPGraph.differentiateEquation(FAbstractEquation fEqn) {
+    private static FAbstractEquation IndexReductionBiPGraph.differentiateEquation(FAbstractEquation fEqn, IndexReductionFunctionInliner inliner) {
         if (fEqn.numFExp() > MAX_N_FEXP_IN_EQ)
             throw new IndexReductionException("Maximum number of expressions in a single equation has been reached");
         
@@ -483,7 +568,7 @@ aspect IndexReduction {
         if (diffedFEqns.size() != 1)
             throw new UnsupportedOperationException("Differentiation of equations should result" +
                     " in a single equation when differentiating on time");
-        return diffedFEqns.iterator().next();
+        return inliner.dynamicEquation(diffedFEqns.iterator().next());
     }
     
     /**
@@ -530,19 +615,19 @@ aspect IndexReduction {
         
         
         // Differentiate equations
-        Collection<FAbstractEquation> fEqns = new ArrayList<FAbstractEquation>();
-        fEqns.addAll(originalFEqns);
-        
         java.util.List<FAbstractEquation> diffedFEqns = new ArrayList<FAbstractEquation>();
         Set<FAbstractEquation> originalDiffedFEqns = new LinkedHashSet<FAbstractEquation>();
         for (FAbstractEquation originalFEqn : originalFEqns) {
-            FAbstractEquation originalDiffedFEqn = differentiateEquation(originalFEqn);
+            FAbstractEquation originalDiffedFEqn = differentiateEquation(originalFEqn, inliner);
             originalDiffedFEqns.add(originalDiffedFEqn);
             diffedFEqns.add(originalDiffedFEqn);
         }
+        Collection<FAbstractEquation> extraEquations = new ArrayList<FAbstractEquation>();
         for (FAbstractEquation fEqn : baseEqn.getExtraEquations()) {
-            fEqns.add(fEqn);
-            diffedFEqns.add(differentiateEquation(fEqn));
+            if (baseEqn.diffExtraEqn(fEqn))
+                diffedFEqns.add(differentiateEquation(fEqn, inliner));
+            else
+                extraEquations.add(fEqn);
         }
         
         // Handle inlining of function calls
@@ -612,14 +697,16 @@ aspect IndexReduction {
             }
         }
         
-        for (FAbstractEquation extraFEqn : newExtraEquations)
+        for (FAbstractEquation extraFEqn : newExtraEquations) {
             result.addEquation(extraFEqn);
+            extraEquations.add(extraFEqn);
+        }
         
         // Construct a list of all the variables that should be common in all
         // of the equations.
         // Always add variables from extra equations
         Set<IndexReductionVar> rhsVars = new HashSet<IndexReductionVar>();
-        for (FAbstractEquation extraFEqn : newExtraEquations)
+        for (FAbstractEquation extraFEqn : extraEquations)
             rhsVars.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
         boolean multipleEqns = originalDiffedFEqns.size() > 1 || baseEqn.getEquation().numScalarEquations() > 1;
         if (multipleEqns) {
@@ -667,7 +754,7 @@ aspect IndexReduction {
                     addEdge(diffedEqn, rhsVar);
                 }
                 diffedOriginalEqs.add(diffedEqn);
-                diffedEqn.setExtraEquations(newExtraEquations);
+                diffedEqn.setExtraEquations(extraEquations);
             }
             ASTNode.log.info("Equation added");
         }

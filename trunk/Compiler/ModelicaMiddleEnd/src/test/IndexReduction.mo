@@ -5217,7 +5217,6 @@ fclass IndexReduction.FunctionInlining.Test3
  Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
- Real temp_3;
 initial equation 
  y = 0.0;
  vy = 0.0;
@@ -5228,12 +5227,11 @@ equation
  der(vy) = a * y;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test3.F(b);
  b = time;
- temp_3 = IndexReduction.FunctionInlining.Test3.F(_der_b);
- 2 * x * _der_x + 2 * y * der(y) = temp_3;
+ 2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test3.F(_der_b);
  _der_b = 1.0;
  _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = temp_3;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = IndexReduction.FunctionInlining.Test3.F(_der_der_b);
  _der_der_b = 0.0;
 
 public
@@ -5484,7 +5482,6 @@ fclass IndexReduction.FunctionInlining.Test6
  Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
- Real temp_4;
 initial equation 
  y = 0.0;
  vy = 0.0;
@@ -5495,12 +5492,11 @@ equation
  der(vy) = a * y;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test6.F(b, 2.0);
  b = time;
- temp_4 = IndexReduction.FunctionInlining.Test6.F(_der_b, 2.0);
- 2 * x * _der_x + 2 * y * der(y) = temp_4;
+ 2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test6.F(_der_b, 2.0);
  _der_b = 1.0;
  _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = temp_4;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = IndexReduction.FunctionInlining.Test6.F(_der_der_b, 2.0);
  _der_der_b = 0.0;
 
 public
