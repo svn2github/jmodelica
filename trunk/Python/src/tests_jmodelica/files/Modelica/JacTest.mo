@@ -1,5 +1,15 @@
 package JacFuncTests
 
+    model BasicJacobianTest
+      Real x1;
+      Real x2;
+      
+      equation
+        der(x1) = x1     + 2 * x2 + 7 * x2^2;
+        der(x2) = x1 * 3 + 4 * x2 + 11 * x1^1;
+        
+    end BasicJacobianTest;
+
 	model sparseFunc1
 		function F1
       		input Real x1[3];

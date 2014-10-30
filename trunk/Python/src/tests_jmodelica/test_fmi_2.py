@@ -56,6 +56,7 @@ class Test_FMUModelCS2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0")
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0")
+        cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="cs", version="2.0", compiler_options={'generate_ode_jacobian':True})
     
     @testattr(windows = True)
     def test_init(self):
@@ -221,6 +222,49 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(FMUException, coupled.get_output_derivatives, 578, 0)
 
     @testattr(fmi = True)
+    def test_get_directional_derivative_capability(self):
+        """
+        Test the method get_directional_derivative in FMUModelCS2
+        """
+        
+        # Setup
+        bounce = load_fmu(self.bouncing_name)
+        bounce.setup_experiment()
+        bounce.initialize()
+        
+        # Bouncing ball don't have the capability, check that this is handled
+        nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
+        
+    @testattr(fmi = True)
+    def test_get_directional_derivative(self):
+        """
+        Test the method get_directional_derivative in FMUModelCS2
+        """
+        
+        # Setup
+        jacobian = load_fmu(self.jacobian_name)
+        jacobian.setup_experiment()
+        jacobian.initialize()
+        
+        jacobian.set('x1', 1.0)
+        jacobian.set('x2', 1.0)
+        
+        states_list = jacobian.get_states_list()
+        der_list    = jacobian.get_derivatives_list()
+        states_ref  = [s.value_reference for s in states_list.values()]
+        der_ref     = [s.value_reference for s in der_list.values()]
+
+        dir_der1 = jacobian.get_directional_derivative(states_ref, der_ref, [1, 0])
+        assert len(dir_der1) == 2
+        nose.tools.assert_almost_equal(dir_der1[0], 1.)
+        nose.tools.assert_almost_equal(dir_der1[1], 14.)
+        
+        dir_der2 = jacobian.get_directional_derivative(states_ref, der_ref, [0, 1])
+        assert len(dir_der2) == 2
+        nose.tools.assert_almost_equal(dir_der2[0], 16.)
+        nose.tools.assert_almost_equal(dir_der2[1], 4.)
+
+    @testattr(fmi = True)
     def test_simulate(self):
         """
         Test the main features of the method simulate() in FMUmodelCS2
@@ -370,6 +414,7 @@ class Test_FMUModelME2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0")
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0")
+        cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
     
     @testattr(fmi = True)
     def test_version(self):
@@ -478,8 +523,8 @@ class Test_FMUModelME2:
         assert event.nominalsOfContinuousStatesChanged == False
         assert event.valuesOfContinuousStatesChanged   == True
         assert event.terminateSimulation               == False
-        assert event.nextEventTimeDefined           == False
-        assert event.nextEventTime               == 0.0
+        assert event.nextEventTimeDefined              == False
+        assert event.nextEventTime                     == 0.0
 
     @testattr(fmi = True)
     def test_get_event_indicators(self):
@@ -597,43 +642,48 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(N.sum(diff), 0.)
 
     @testattr(fmi = True)
+    def test_get_directional_derivative_capability(self):
+        """
+        Test the method get_directional_derivative in FMUModelME2
+        """
+        
+        # Setup
+        bounce = load_fmu(self.bouncing_name)
+        bounce.setup_experiment()
+        bounce.initialize()
+        
+        # Bouncing ball don't have the capability, check that this is handled
+        nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
+        
+    @testattr(fmi = True)
     def test_get_directional_derivative(self):
         """
         Test the method get_directional_derivative in FMUModelME2
         """
-        pass
-        """
-        bounce = load_fmu(self.bouncing_name)
-
-        coupled = load_fmu(self.coupled_name)
         
-        bounce.setup_experiment()
-        bounce.initialize()
+        # Setup
+        jacobian = load_fmu(self.jacobian_name)
+        jacobian.setup_experiment()
+        jacobian.initialize()
         
-        coupled.setup_experiment()
-        coupled.initialize()
-
-        nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
-        nose.tools.assert_raises(FMUException, coupled.get_directional_derivative, [1], [1], [1,2])
-
-        states_list = coupled.get_states_list()
-        der_list    = coupled.get_derivatives_list()
+        jacobian.set('x1', 1.0)
+        jacobian.set('x2', 1.0)
+        
+        states_list = jacobian.get_states_list()
+        der_list    = jacobian.get_derivatives_list()
         states_ref  = [s.value_reference for s in states_list.values()]
         der_ref     = [s.value_reference for s in der_list.values()]
 
-        nose.tools.assert_raises(FMUException, coupled.get_directional_derivative, [1], [der_ref[0]], [1])
-
-        dir_der = coupled.get_directional_derivative(states_ref, der_ref, [1]*len(states_ref))
-        assert len(dir_der) == len(der_list)
-        nose.tools.assert_almost_equal(dir_der[1], 0)
-        nose.tools.assert_almost_equal(dir_der[2], 1.000000)
-
-        dir_der2 = coupled.get_directional_derivative(states_ref, der_ref, [2]*len(states_ref))
-        assert len(dir_der) == len(der_list)
-        diff = dir_der2 - 2*dir_der
-        nose.tools.assert_almost_equal(sum(diff), 0)
-        """
-
+        dir_der1 = jacobian.get_directional_derivative(states_ref, der_ref, [1, 0])
+        assert len(dir_der1) == 2
+        nose.tools.assert_almost_equal(dir_der1[0], 1.)
+        nose.tools.assert_almost_equal(dir_der1[1], 14.)
+        
+        dir_der2 = jacobian.get_directional_derivative(states_ref, der_ref, [0, 1])
+        assert len(dir_der2) == 2
+        nose.tools.assert_almost_equal(dir_der2[0], 16.)
+        nose.tools.assert_almost_equal(dir_der2[1], 4.)
+        
     @testattr(fmi = True)
     def test_simulate_options(self):
         """
