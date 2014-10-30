@@ -466,6 +466,10 @@ aspect IndexReduction {
             return this.meIntegrated;
         }
 
+        public int numDifferentiations() {
+            return getVariable().order();
+        }
+
     }
     
     public static final int IndexReductionBiPGraph.MAX_N_EQ_DIFFS = 5;
@@ -921,7 +925,7 @@ aspect IndexReduction {
         // Remove equations that are not connected
         java.util.List<IndexReductionEq> eqToRemove = new ArrayList<IndexReductionEq>();
         for (IndexReductionEq e : getEquations())
-            if (e.numDiffableVars() == 0)
+            if (e.getMeDifferentiated() != null)
                 eqToRemove.add(e);
         for (IndexReductionEq e : eqToRemove)
             removeEquation(e);
@@ -1235,7 +1239,7 @@ aspect IndexReduction {
         }
     }
 
-    public void AbstractBiPGraph.matchMunkres(Map<V, IndexReductionCost> weights) {
+    public void IndexReductionBiPGraph.matchMunkres(Map<IndexReductionVar, IndexReductionCost> weights) {
 
         if (equationMap.size()==0 || variableMap.size()==0) {
             throw new MunkresException("Empty set of equations or variables was given to the munkres algorithm");
@@ -1245,10 +1249,10 @@ aspect IndexReduction {
 
         int i = 0;
         
-        for (E e : getEquations()) {
+        for (IndexReductionEq eqn : getEquations()) {
             int j = 0;
-            for (V var : variableMap.values())
-                cost[i][j++] = e.getVariables().contains(var) ? weights.get(var) : IndexReductionCost.UNMATCHED_WEIGHT;
+            for (IndexReductionVar var : variableMap.values())
+                cost[i][j++] = eqn.getVariables().contains(var) && var.numDifferentiations() >= eqn.numDifferentiations() ? weights.get(var) : IndexReductionCost.UNMATCHED_WEIGHT;
             i++;
         }
         
@@ -1256,12 +1260,12 @@ aspect IndexReduction {
         int[][] result = munk.solve();
         IndexReductionCost opt_cost = IndexReductionCost.zeroCost();
         ASTNode.log.info("Munkres result:");
-        java.util.List<E> eqs = new ArrayList<E>(equationMap.values());
-        java.util.List<V> vars = new ArrayList<V>(variableMap.values());
+        java.util.List<IndexReductionEq> eqs = new ArrayList<IndexReductionEq>(equationMap.values());
+        java.util.List<IndexReductionVar> vars = new ArrayList<IndexReductionVar>(variableMap.values());
         for (i=0;i<result.length;i++) {
             opt_cost.add(cost[result[i][0]][result[i][1]]);
-            E eqn = eqs.get(result[i][0]);
-            V var = vars.get(result[i][1]);
+            IndexReductionEq eqn = eqs.get(result[i][0]);
+            IndexReductionVar var = vars.get(result[i][1]);
             if (!match(eqn, var))
                 throw new MunkresException("Munkres was unable to match " + eqn + " to " + var);
             ASTNode.log.info("%s: %s %s", eqn, var, cost[result[i][0]][result[i][1]]);
@@ -1271,7 +1275,7 @@ aspect IndexReduction {
             throw new MunkresException("Munkres algorithm was unable to find a matching");
         }
     }
-    
+
     public class IndexReductionResult {
 
         private java.util.List<FAbstractEquation> addedEquations;
