@@ -136,6 +136,17 @@ class Test_FMUModelCS2:
         
         bounce.setup_experiment()
         bounce.initialize()
+        
+    @testattr(fmi = True)
+    def test_terminate(self):
+        """
+        Test the method terminate in FMUModelME2
+        """
+        coupled = load_fmu(self.coupled_name)
+        
+        coupled.setup_experiment()
+        coupled.initialize()
+        coupled.terminate()
 
     @testattr(fmi = True)
     def test_the_time(self):
