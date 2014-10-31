@@ -4064,14 +4064,12 @@ class LocalDAECollocator(CasadiCollocator):
                 t_opt.append(t_opt[-1] + h)
             t_opt = N.array(t_opt).reshape([-1, 1])
         elif self.result_mode == "element_interpolation":
-            t_opt = []
-            t_start = 0.
+            t_opt = [self.time[0]]
             for i in xrange(1, self.n_e + 1):
-                t_end = t_start + h_scaled[i]
-                t_i = N.linspace(t_start, t_end, self.n_eval_points)
-                t_opt = N.hstack([t_opt, t_i])
-                t_start = t_opt[-1]
-            t_opt = t_opt.reshape([-1, 1])
+                t_end = t_opt[-1] + h_scaled[i]
+                t_i = N.linspace(t_opt[-1], t_end, self.n_eval_points)
+                t_opt.extend(t_i)
+            t_opt = N.array(t_opt[1:]).reshape([-1, 1])
         else:
             raise CasadiCollocatorException("Unknown result mode %s." %
                                             self.result_mode)

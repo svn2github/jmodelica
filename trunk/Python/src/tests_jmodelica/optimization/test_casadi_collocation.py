@@ -202,53 +202,74 @@ class TestLocalDAECollocator(object):
         op.setObjectiveIntegrand(objInt)
         
     @testattr(casadi = True)
-    def test_gauss_and_element_interpolation(self):
+    def test_result_modes(self):
         """
         Test all combinations of discretization schemes and result modes.
-         
         """
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.050971000653911e2
         
         op = self.cstr_lagrange_op
+        
+        # Shift time horizon
+        t0 = op.get('startTime')
+        tf = op.get('finalTime')
+        dt = 5.
+        op.set('startTime', t0 + dt)
+        op.set('finalTime', tf + dt)
+
+        # Define function for checking time horizon
+        def assert_time(res):
+            N.testing.assert_allclose(res['time'][[0, -1]], [t0 + dt, tf + dt])
 
         opts = self.optimize_options(op, self.algorithm)
-        
-        opts['discr'] = 'LG'
-        opts['result_mode'] = 'element_interpolation'
-        print 'LG + element_interpolation'
-        res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LG'
         opts['result_mode'] = 'collocation_points'
         print 'LG + collocation_points'
         res = op.optimize(self.algorithm, opts)
+        assert_time(res)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LG'
+        opts['result_mode'] = 'element_interpolation'
+        print 'LG + element_interpolation'
+        res = op.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(res['time'][[0, -1]], [t0 + dt, tf + dt])
+        assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LG'
         opts['result_mode'] = 'mesh_points'
         print 'LG + mesh_points'
         res = op.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
-        
-        opts['discr'] = 'LGR'
-        opts['result_mode'] = 'element_interpolation'
-        print 'LGR + element_interpolation'
-        res = op.optimize(self.algorithm, opts)
+        assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LGR'
         opts['result_mode'] = 'collocation_points'
         print 'LGR + collocation_points'
         res = op.optimize(self.algorithm, opts)
+        assert_time(res)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        
+        opts['discr'] = 'LGR'
+        opts['result_mode'] = 'element_interpolation'
+        print 'LGR + element_interpolation'
+        res = op.optimize(self.algorithm, opts)
+        assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
         opts['discr'] = 'LGR'
         opts['result_mode'] = 'mesh_points'
         print 'LGR + mesh_points'
         res = op.optimize(self.algorithm, opts)
+        assert_time(res)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+        # Reset time horizon
+        op.set('startTime', t0 - dt)
+        op.set('finalTime', tf - dt)
        
     @testattr(casadi = True)
     def test_nominal_zero(self):
