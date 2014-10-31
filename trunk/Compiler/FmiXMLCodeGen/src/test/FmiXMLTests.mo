@@ -25,6 +25,7 @@ model DisplayUnit1
         FmiXMLCodeGenTestCase(
             name="DisplayUnit1",
             description="Check that offset & gain are not generated incorrectly for units",
+            fmi_version="1.0",
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
@@ -37,6 +38,73 @@ model DisplayUnit1
 </UnitDefinitions>
 ")})));
 end DisplayUnit1;
+
+model DisplayUnit2
+	type A = Real(unit="N", displayUnit="kN");
+	A a = time;
+	Real b(unit="J") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit2",
+            description="Check that base units without display units are generated",
+            fmi_version="1.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+	<BaseUnit unit=\"N\">
+		<DisplayUnitDefinition displayUnit=\"kN\" />
+	</BaseUnit>
+	<BaseUnit unit=\"J\">
+	</BaseUnit>
+</UnitDefinitions>
+")})));
+end DisplayUnit2;
+
+model DisplayUnit3
+	type A = Real(unit="N", displayUnit="kN");
+	A a = time;
+	Real b(unit="J", displayUnit="kWh") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit3",
+            description="Check that offset & gain are not generated incorrectly for units",
+            fmi_version="2.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+	<Unit name=\"N\">
+		<DisplayUnit name=\"kN\" />
+	</Unit>
+	<Unit name=\"J\">
+		<DisplayUnit name=\"kWh\" />
+	</Unit>
+</UnitDefinitions>
+")})));
+end DisplayUnit3;
+
+model DisplayUnit4
+	type A = Real(unit="N", displayUnit="kN");
+	A a = time;
+	Real b(unit="J") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit4",
+            description="Check that base units without display units are generated",
+            fmi_version="2.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+	<Unit name=\"N\">
+		<DisplayUnit name=\"kN\" />
+	</Unit>
+	<Unit name=\"J\">
+	</Unit>
+</UnitDefinitions>
+")})));
+end DisplayUnit4;
 
 model SortingStates
     Real y,b,x,a;
