@@ -140,7 +140,7 @@ class Test_FMUModelCS2:
     @testattr(fmi = True)
     def test_terminate(self):
         """
-        Test the method terminate in FMUModelME2
+        Test the method terminate in FMUModelCS2
         """
         coupled = load_fmu(self.coupled_name)
         
