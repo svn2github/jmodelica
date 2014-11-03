@@ -30,12 +30,6 @@
         </listitem>
 
         <listitem>
-          <para>Functions with array inputs with sizes declared as ':' are
-          only partially supported (there are some operations on such arrays
-          that are not supported).</para>
-        </listitem>
-
-        <listitem>
           <para>Partial support for external functions; records are not
           supported as arguments or return values.</para>
         </listitem>
@@ -97,11 +91,6 @@
               </tr>
             </informaltable></para>
         </listitem>
-
-        <listitem>
-          <para>Stream connections with more than two connectors are not
-          supported.</para>
-        </listitem>
       </itemizedlist>
     </listitem>
 
@@ -147,13 +136,16 @@
 
       <itemizedlist>
         <listitem>
-          <para>The FMI interface only supports FMUs distributed with
-          binaries, not source code.</para>
+          <para>Source code FMUs can not be generated, only binary FMUs.</para>
         </listitem>
 
         <listitem>
           <para>Functions for setting and getting string variables do not
           work.</para>
+        </listitem>
+
+        <listitem>
+          <para>When generating FMI 2.0 FMUs, the InitialUnknowns tag is not generated.</para>
         </listitem>
       </itemizedlist>
     </listitem>

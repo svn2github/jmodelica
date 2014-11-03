@@ -11,6 +11,40 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.15</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>FMI export supporting FMI 2.0</para>
+          </listitem>
+
+          <listitem>
+            <para>FMI import supporting FMI 2.0 with PyFMI</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved MSL compliance</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for over-constrained initialization systems</para>
+          </listitem>
+
+          <listitem>
+            <para>Dynamic optimization framework based on CasADi 2.0</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved numerical algorithms in FMU runtime</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.14</title>
 
     <section>
