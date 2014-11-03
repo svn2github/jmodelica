@@ -25,10 +25,10 @@
     <section>
       <title>The different model objects in JModelica.org</title>
 
-      <para>There are three different kinds of model objects that can be
-      created with JModelica.org: <literal>FMUModel(ME/CS)1</literal>,
+      <para>There are five different kinds of model objects that can be
+      created with JModelica.org: <literal>FMUModel(ME/CS)(1/2)</literal>,
       <literal>JMUModel</literal> and <literal>OptimizationProblem</literal>.
-      The <literal>FMUModel(ME/CS)1</literal> is created by loading an
+      The <literal>FMUModel(ME/CS)(1/2)</literal> is created by loading an
       <emphasis>FMU</emphasis> (Functional Mock-up Unit), which is a
       compressed file compliant with the FMI (Functional Mock-up Interface)
       standard. The <literal>JMUModel</literal> is created by loading a
@@ -42,7 +42,7 @@
       <para>FMUs are created by compiling Modelica models with JModelica.org,
       or any other tool supporting FMU export. JModelica.org supports both
       export and import of FMUs for Model Exchange (FMU-ME) and FMUs for
-      Co-Simulation (FMU-CS), version 1.0 and 2.0 RC2. Generated FMUs can be
+      Co-Simulation (FMU-CS), version 1.0 and 2.0. Generated FMUs can be
       loaded in an <literal>FMUModel(ME/CS)1</literal> object in Python and
       then be used for simulation purposes. Optimica models can not be
       compiled into FMUs.</para>
@@ -119,9 +119,9 @@ my_fmu = compile_fmu(model_name, mo_file)
       default is to compile an FMU-ME, so <literal>target</literal> must not
       be set in this example. The compiler parameter
       <literal>version</literal> specifies if the model should be exported as
-      a FMU 1.0 or 2.0 RC2. As the default is to compile a FMU 1.0,
+      a FMU 1.0 or 2.0. As the default is to compile a FMU 1.0,
       <literal>version</literal> must not be set either in this example. To
-      compile an FMU 2.0 RC2, <literal>version</literal> should be set to
+      compile an FMU 2.0, <literal>version</literal> should be set to
       <literal>'2.0'</literal>.</para>
 
       <para>Once compilation has completed successfully, an FMU-ME 1.0 will
@@ -1161,8 +1161,8 @@ mc.generate_code(flat_rep, target)
       a Co-Simulation FMU, the integrator for solving the system is contained
       in the model while in an Model Exchange FMU, an external integrator is
       needed to solve the system. JModelica.org supports export and import of
-      FMU-ME and FMU-CS version 1.0 and 2.0 RC2. The solvers supported for
-      FMU-CS are CVode and Explicit Euler.</para>
+      FMU-ME and FMU-CS version 1.0 and 2.0. The solvers supported for FMU-CS
+      are CVode and Explicit Euler.</para>
     </section>
 
     <section xml:id="models_sec_the_jmu_file">
