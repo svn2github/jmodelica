@@ -28,13 +28,104 @@ import pyfmi.fmi_algorithm_drivers as ad
 
 from pymodelica import compile_fmu
 from pyfmi.fmi_deprecated import FMUModel2
+from pyfmi import load_fmu
 from tests_jmodelica import testattr, get_files_path
 from pyfmi.common.core import get_platform_dir
 path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
 
 
+class Test_FMI_Jaobians_base:
 
-class Test_FMI_Jaobians_operators:
+    def jac_analytic(self, model):
+        """
+        The jacobian function calculated analytically with directional derivatives.
+        """
+
+        # Evaluating the jacobian
+        
+        # If there are no states return a dummy jacobian.
+        states = model.get_states_list()
+        if len(states) == 0:
+            return N.array([[0.0]])
+        
+        # Matrix that holds the information, first y elements is the first column of the Jac
+        Jac = N.zeros(len(states)**2) 
+
+        # Compute Jac
+        derivatives = model.get_derivatives_list()
+        states_ref  = [s.value_reference for s in states.values()]
+        deriv_ref   = [s.value_reference for s in derivatives.values()]
+        v           = [0]*len(states_ref)
+
+        for i in range(len(v)):
+            v[i-1]=0
+            v[i]=1
+            Jac[i*len(v):(i+1)*len(v)] = model.get_directional_derivative(var_ref=states_ref, func_ref=deriv_ref, v=v)
+
+        # Vector manipulation
+        Jac = Jac.reshape(len(states),len(states)).transpose() # Reshape to a matrix
+        return Jac
+        
+    def jac_fin_diff(self, model, h=1e-6):
+        """
+        The jacobian function calculated as an finite approximation.
+        """
+
+        # Evaluating the jacobian
+        
+        # If there are no states return a dummy jacobian.
+        state_orig = model.continuous_states
+        if len(state_orig) == 0:
+            return N.array([[0.0]])
+        
+        # Matrix that holds the information, first y elements is the first column of the Jac
+        Jac = N.zeros(len(state_orig)**2) 
+
+        # Compute Jacobian
+        der_orig = model.get_derivatives()
+        v        = [0]*len(state_orig)
+        
+        for i in range(len(state_orig)):
+            v[i-1]=0
+            v[i]=h
+            model.continuous_states = model.continuous_states + v
+            der_pert = model.get_derivatives()
+            
+            Jac[i*len(v):(i+1)*len(v)] = (der_pert - der_orig) / h
+            model.continuous_states = state_orig # reset the states
+            
+        # Vector manipulation
+        Jac = Jac.reshape(len(state_orig),len(state_orig)).transpose() # Reshape to a matrix
+        return Jac
+
+    def check_jacobian(self, model, tol_check=1e-4):
+        """
+        Checks the jacobians by comparing a finite difference and an analytical
+        jacobian with each other.
+        """
+        
+        errors = abs(self.jac_analytic(model) - self.jac_fin_diff(model))
+        
+        if errors.max() < tol_check:
+            return True
+        else:
+            print 'Check of Jacobian failed, max error: ', errors.max()
+            print '==== Analytical matrix ===='
+            print self.jac_analytic(model)
+            print '=== Finitie diff matrix ==='
+            print self.jac_fin_diff(model)
+            return False
+            
+    def basic_initialize_test(self, cname, fname):
+        fn = compile_fmu(cname, fname, version="2.0", 
+                         compiler_options={'generate_ode_jacobian':True})
+        m = load_fmu(fn)
+        m.set_debug_logging(True)
+        m.setup_experiment()
+        m.initialize()
+        assert self.check_jacobian(m)
+
+class Test_FMI_Jaobians_operators(Test_FMI_Jaobians_base):
     
     """
     Test for arithmetic operators, as listed in section 3.4 of the Modelica specification 3.2. 3.2
@@ -93,7 +184,7 @@ class Test_FMI_Jaobians_operators:
         assert n_errs ==0 
 
     
-class Test_FMI_Jaobians_functions:
+class Test_FMI_Jaobians_functions(Test_FMI_Jaobians_base):
     """
     This class tests the elemenary functions that Jmodelica.org has implemented according to
     Petter Lindhomlms thesis "Efficient implementation of Jacobians using automatic differentiation", p. 35
@@ -291,7 +382,7 @@ class Test_FMI_Jaobians_functions:
         assert n_errs ==0 
     
     
-class Test_FMI_Jaobians_Whencases:
+class Test_FMI_Jaobians_Whencases(Test_FMI_Jaobians_base):
     
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -363,7 +454,7 @@ class Test_FMI_Jaobians_Whencases:
         assert n_errs ==0 
     """
     
-class Test_FMI_Jaobians_Ifcases:
+class Test_FMI_Jaobians_Ifcases(Test_FMI_Jaobians_base):
     
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -465,7 +556,7 @@ class Test_FMI_Jaobians_Ifcases:
 ##      Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 ##      assert n_errs ==0       
 
-class Test_FMI_Jaobians_Functions:
+class Test_FMI_Jaobians_Functions(Test_FMI_Jaobians_base):
 
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -565,7 +656,7 @@ class Test_FMI_Jaobians_Functions:
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
-class Test_FMI_Jacobians_Simulation:
+class Test_FMI_Jacobians_Simulation(Test_FMI_Jaobians_base):
 
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -596,7 +687,7 @@ class Test_FMI_Jacobians_Simulation:
         assert n_errs ==0           
 
 
-class Test_FMI_Jaobians_Unsolved_blocks:
+class Test_FMI_Jaobians_Unsolved_blocks(Test_FMI_Jaobians_base):
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
 
@@ -704,7 +795,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
         #Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         #assert n_errs ==0       
         
-class Test_FMI_Jaobians_Miscellaneous:
+class Test_FMI_Jaobians_Miscellaneous(Test_FMI_Jaobians_base):
 
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -726,18 +817,10 @@ class Test_FMI_Jaobians_Miscellaneous:
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
-#   There is a problem with this test on Win while it works on Linux. To be investigated.
     @testattr(stddist = True)
     def test_Record1(self):
-        cname = "JacGenTests.JacTestRecord1"
-        fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-            'eliminate_alias_variables':False}, version="2.0alpha")
-        m = FMUModel2(fn)
-        m.set_debug_logging(True)
-        m.initialize()
-        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
-        assert n_errs ==0    
-
+        self.basic_initialize_test("JacGenTests.JacTestRecord1", self.fname)
+        
     @testattr(stddist = True)
     def test_Array1(self):
         cname = "JacGenTests.JacTestArray1"
