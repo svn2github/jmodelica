@@ -21,7 +21,30 @@ Test module for testing the FMI examples.
 
 from tests_jmodelica import testattr
 from pyfmi.examples import *
-from pyjmi.examples import *
+from pyjmi.examples import (crane,
+                            distillation_fmu,
+                            distillation1_fmu,
+                            distillation2_fmu,
+                            distillation4_fmu,
+                            furuta_modified,
+                            furuta_dfo,
+                            extfunctions,
+                            extFunctions_arrays,
+                            extFunctions_matrix,
+                            if_example_1,
+                            if_example_2,
+                            mechanical_rotational_examples_coupled_clutches,
+                            mechanical_rotational_examples_first,
+                            planar_pendulum,
+                            QR,
+                            qt_par_est_dfo,
+                            RLC,
+                            robertson_fmu,
+                            simulation_with_input,
+                            simulation_with_input_function,
+                            SolAng,
+                            vdp_pp,
+                            VDP_sim)
 
 
 @testattr(stddist = True)

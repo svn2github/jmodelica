@@ -19,7 +19,35 @@
 """
 
 from tests_jmodelica import testattr
-from pyjmi.examples import *
+from pyjmi.examples import (ast_example,
+                            bang_control,
+                            blood_glucose,
+                            blood_glucose_opt,
+                            blood_glucose_opt_scaled,
+                            catalytic_cracking,
+                            catalyst_mixing,
+                            coloumb_friction,
+                            cont_state,
+                            crystallizer,
+                            cstr,
+                            cstr_mpc,
+                            cstr2,
+                            dist1_init_sim,
+                            distillation,
+                            distillation1_opt,
+                            lagrange_cost,
+                            leadtransport,
+                            moon_lander,
+                            parameter_estimation_1,
+                            pendulum,
+                            qt_par_est,
+                            quadtank,
+                            quadtank_static_opt,
+                            RLC_linearization,
+                            vdp,
+                            vdp_minimum_time,
+                            vdp_minimum_time_interpolation,
+                            bounds_kinsol)
 
 @testattr(stddist = True)
 def test_ast_example():

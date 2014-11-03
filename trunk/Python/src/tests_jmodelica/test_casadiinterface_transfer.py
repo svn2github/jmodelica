@@ -14,7 +14,16 @@
 
 import os
 from tests_jmodelica import testattr, get_files_path
-from modelicacasadi_transfer import *
+try:
+    from modelicacasadi_transfer import *
+    # Common variables used in the tests
+    x1 = MX.sym("x1")
+    x2 = MX.sym("x2")
+    x3 = MX.sym("x3")
+    der_x1 = MX.sym("der(x1)")
+except (NameError, ImportError):
+    pass
+
 modelFile = os.path.join(get_files_path(), 'Modelica', 'TestModelicaModels.mo')
 optproblemsFile = os.path.join(get_files_path(), 'Modelica', 'TestOptimizationProblems.mop')
 import platform
@@ -27,12 +36,6 @@ def load_optimization_problem(*args, **kwargs):
     ocp = OptimizationProblem()
     transfer_optimization_problem(ocp, *args, **kwargs)
     return ocp
-
-# Common variables used in the tests
-x1 = MX.sym("x1")
-x2 = MX.sym("x2")
-x3 = MX.sym("x3")
-der_x1 = MX.sym("der(x1)")
 
 def strnorm(StringnotNorm):
     caracters = ['\n','\t',' ']

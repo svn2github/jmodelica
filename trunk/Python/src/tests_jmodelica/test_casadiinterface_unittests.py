@@ -13,7 +13,10 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from tests_jmodelica import testattr
-from modelicacasadi_transfer import *
+try:
+    from modelicacasadi_transfer import *
+except (NameError, ImportError):
+    pass
 
 def MX_equal(x, y):
     eq = (x == y)

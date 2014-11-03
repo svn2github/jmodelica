@@ -20,10 +20,13 @@ Test module for testing the CASADI examples.
 import platform
 
 from tests_jmodelica import testattr
-from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
+# Will catch import errors in the examples.
+try:
+    from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
                             cstr_casadi, qt_par_est_casadi, vehicle_turn,
                             distillation4_opt, cstr_mpc_casadi)
-							
+except (NameError, ImportError):
+    pass
 
 @testattr(casadi = True and platform.system() == "Linux")
 def test_ccpp():

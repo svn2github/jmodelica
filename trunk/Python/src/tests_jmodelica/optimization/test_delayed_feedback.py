@@ -25,7 +25,10 @@ import nose
 import numpy as np
 
 from tests_jmodelica import testattr, get_files_path
-from pyjmi import transfer_optimization_problem
+try:
+    from pyjmi import transfer_optimization_problem
+except (NameError, ImportError):
+    pass
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
