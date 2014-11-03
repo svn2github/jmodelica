@@ -8,7 +8,7 @@ contains all the tools necessary to build the platform. If the
 JModelica.org-SDK is used to build the platform, please see the User's Guide
 at http://www.jmodelica.org for building instructions. 
 
-This file describes the build procedure for Linux and Mac systems.
+This file describes the build procedure for Linux systems.
 
 0. Requirements.
 
@@ -32,9 +32,7 @@ on Ubuntu it is required to install Python with headers (python-dev) while the h
 usually follow a normal installation on Windows.
 
 The dependencies can be installed manually or through a package manager such as apt-get 
-on Ubuntu systems or mac ports on Mac OS X systems. Note that on Mac OS X systems, 
-it is possible to install a new Python distribution using the mac ports system and 
-then install all the reuired dependencies using mac ports, including the Python packages.
+on Ubuntu systems.
 
 1. Get JModelica.org
 
@@ -91,9 +89,6 @@ installation directory.
 In order to also build and install CasADi, use the command
  
  > make install_casadi
-
-Note that CasADi currently does not work on Mac systems: 
-<http://sourceforge.net/apps/trac/casadi/ticket/201>.
 
 5. Generate documentation.
 
