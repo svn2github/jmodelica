@@ -1089,22 +1089,66 @@ aspect FlatAPI {
             res += e.numScalarEquations();
         return res;
     }
-
-    syn int FClass.numSamplers() = 
-        samplers().size();
-
-    coll ArrayList<FSampleExp> FClass.samplers() 
-      [new ArrayList<FSampleExp>()] with add root FlatRoot;
     
-    FSampleExp contributes
-        this when originalFSampleExp==null
-    to FClass.samplers() for myFClass();    
-        
-    public int FSampleExp.samplersIndex() {
-        return myFClass().samplers().
-            indexOf(this.originalFSampleExp==null? this: this.originalFSampleExp);
+    
+    
+    syn boolean FRelExp.isTimeEventGenerating() = root().options.getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
+    eq FEqRelExp.isTimeEventGenerating() = false;
+    syn boolean FDelayExp.isTimeEventGenerating() = getDelay().variability().parameterOrLess();
+    
+    protected int FExp.checkIndex(int i) {
+        if (i < 0) {
+            throw new UnsupportedOperationException("Unknown switch index for relational operator, not in list of switches.");
+        }
+        return i;
     }
-
+    
+    syn int FClass.numSwitches() = numEventIndicators() + relExpsWithTimeEvent().size();
+    syn lazy ArrayList<FExp> FClass.switchExps() {
+        ArrayList<FExp> res = new ArrayList<FExp>();
+        res.addAll(stateEventExps());
+        res.addAll(relExpsWithTimeEvent());
+        return res;
+    }
+    
+    syn lazy int FRelExp.mySwitchIndex()   = isTimeEventGenerating() ?
+            checkIndex(myFClass().switchExps().indexOf(originalFExp())) + myFClass().delayExpsWithStateEvent().size() :
+            myEventIndicatorIndex();
+    syn int FDelayExp.mySwitchIndex() = myEventIndicatorIndex();
+    
+    
+    syn int FClass.numEventIndicators() = relExpsWithStateEvent().size() + numDelayEventIndicators();
+    syn lazy ArrayList<FExp> FClass.stateEventExps() {
+        ArrayList<FExp> res = new ArrayList<FExp>();
+        res.addAll(relExpsWithStateEvent());
+        res.addAll(delayExpsWithStateEvent());
+        return res;
+    }
+    
+    syn lazy int FRelExp.myEventIndicatorIndex()   = checkIndex(myFClass().stateEventExps().indexOf(originalFExp()));
+    syn lazy int FDelayExp.myEventIndicatorIndex() = myFClass().relExpsWithStateEvent().size() + myDelayEventIndicatorIndex();
+    
+    syn lazy ArrayList<FExp> FClass.timeEventExps() {
+        ArrayList<FExp> res = new ArrayList<FExp>();
+        res.addAll(sampleExpsWithTimeEvent());
+        res.addAll(relExpsWithTimeEvent());
+        return res;
+    }
+    
+    coll ArrayList<FSampleExp> FClass.sampleExpsWithTimeEvent() 
+        [new ArrayList<FSampleExp>()] with add root FlatRoot;
+    FSampleExp contributes this when generatesEventInDAE()
+        to FClass.sampleExpsWithTimeEvent() for myFClass();
+    
+    syn int FClass.numDelayEventIndicators() = 2*delayExpsWithStateEvent().size();
+    coll ArrayList<FDelayExp> FClass.delayExpsWithStateEvent() 
+        [new ArrayList<FDelayExp>()] with add root FlatRoot;
+    FDelayExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
+        to FClass.delayExpsWithStateEvent() for myFClass();
+    
+    syn int FDelayExp.myDelayEventIndicatorIndex() = 2*checkIndex(myFClass().delayExpsWithStateEvent().indexOf(originalFExp()));
+    
+    
     syn int FClass.numGuardExpInEquations() = guardExpInEquations().size();
     syn int FClass.numGuardExpInInitialEquations() = guardExpInInitialEquations().size();
     syn int FExp.guardExpInEquationsIndex() = myFClass().guardExpInEquations().indexOf(this);
@@ -1189,55 +1233,54 @@ aspect FlatAPI {
     syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
 
     syn boolean FExp.hasEventGeneratingType() = false;
-    eq FRelExp.hasEventGeneratingType() = isRealComparison();
-    eq FEventGenExp.hasEventGeneratingType() = argType().isReal();
-    eq FDelayExp.hasEventGeneratingType() = true;
+    eq FRelExp.hasEventGeneratingType()       = isRealComparison();
+    eq FEventGenExp.hasEventGeneratingType()  = argType().isReal();
+    eq FDelayExp.hasEventGeneratingType()     = true;
+    eq FSampleExp.hasEventGeneratingType()    = true;
     
     syn boolean FExp.generatesEventInDAE() = inEquationSection() && originalFExp()==this && generatesEvent(false);
     syn boolean FRelExp.generatesEventInInitDAE() =
             (inInitialEquationSection() || inEquationSection() && containsNonFixedParameter())
             && originalFExp()==this && generatesEvent(true);
     
-    syn boolean FExp.generatesStateEventInDAE() = generatesEventInDAE();
-    eq FDelayExp.generatesStateEventInDAE() = super.generatesStateEventInDAE() && generatesStateEvents();
+    coll ArrayList<FRelExp> FClass.relExpsWithEvent() 
+        [new ArrayList<FRelExp>()] with add root FlatRoot;
+    FRelExp contributes this when generatesEventInDAE() 
+        to FClass.relExpsWithEvent() for myFClass();
     
-    syn boolean FDelayExp.generatesStateEvents() = !getDelay().variability().parameterOrLess();
-    
-    syn int FClass.numEventIndicators() = numRelExpInEquations() + numDelayEventIndicators();
-    syn int FClass.numDelayEventIndicators() = 2*numDelayExpInEquations();
-    
-    syn ArrayList<FExp> FClass.eventExpInEquations() {
-        ArrayList<FExp> res = new ArrayList<FExp>();
-        res.addAll(relExpInEquations());
-        res.addAll(delayExpInEquations());
+    syn ArrayList<FRelExp> FClass.relExpsWithStateEvent() {
+        ArrayList<FRelExp> res = new ArrayList<FRelExp>();
+        for (FRelExp exp : relExpsWithEvent()) {
+            if (!exp.isTimeEventGenerating()) {
+                res.add(exp);
+            }
+        }
         return res;
     }
     
-    syn int FClass.numRelExpInEquations() = relExpInEquations().size();
-    coll ArrayList<FRelExp> FClass.relExpInEquations() 
-        [new ArrayList<FRelExp>()] with add root FlatRoot;
-    FRelExp contributes this when generatesEventInDAE() 
-    to FClass.relExpInEquations() for myFClass();
+    syn ArrayList<FRelExp> FClass.relExpsWithTimeEvent() {
+        ArrayList<FRelExp> res = new ArrayList<FRelExp>();
+        for (FRelExp exp : relExpsWithEvent()) {
+            if (exp.isTimeEventGenerating()) {
+                res.add(exp);
+            }
+        }
+        return res;
+    }
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInDAE() 
+    FRelExp contributes this when generatesEventInDAE() && !isTimeEventGenerating() 
     to FAbstractEquation.relExpInEquation() for myFEquation();
 
     coll ArrayList<FRelExp> FStatement.relExpInStmt() 
         [new ArrayList<FRelExp>()] with add root FStatement;
-    FRelExp contributes this when generatesEventInDAE() 
+    FRelExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
     to FStatement.relExpInStmt() for myFStatement();
-    
-    syn int FClass.numDelayExpInEquations() = delayExpInEquations().size();
-    coll ArrayList<FDelayExp> FClass.delayExpInEquations() 
-        [new ArrayList<FDelayExp>()] with add root FlatRoot;
-    FDelayExp contributes this when generatesStateEventInDAE() 
-    to FClass.delayExpInEquations() for myFClass();
     
     coll ArrayList<FDelayExp> FAbstractEquation.delayExpInEquation() 
         [new ArrayList<FDelayExp>()] with add root FAbstractEquation;
-    FDelayExp contributes this when generatesStateEventInDAE() 
+    FDelayExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
     to FAbstractEquation.delayExpInEquation() for myFEquation();
     
     inh FStatement FExp.myFStatement();
@@ -1246,9 +1289,6 @@ aspect FlatAPI {
     eq FStatement.getChild().myFStatement()        = this;
     eq FAbstractEquation.getChild().myFStatement() = null;
     eq Root.getChild().myFStatement()              = null;
-    
-    syn int FRelExp.myEventIndicatorIndex()   = myFClass().relExpInEquations().indexOf(originalFExp());
-    syn int FDelayExp.myEventIndicatorIndex() = myFClass().relExpInEquations().size() + 2*myFClass().delayExpInEquations().indexOf(originalFExp());
     
     syn int FClass.numInitialEquations() = initialEquations().size(); 
     syn lazy int FClass.numInitialScalarEquations() {
@@ -1287,10 +1327,10 @@ aspect FlatAPI {
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInInitialEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInInitDAE() 
+    FRelExp contributes this when generatesEventInInitDAE()
     to FAbstractEquation.relExpInInitialEquation() for myFEquation();
     
-    syn int FRelExp.relExpInInitialEquationsIndex()  = myFClass().relExpInInitialEquations().indexOf(originalFExp());
+    syn int FRelExp.relExpInInitialEquationsIndex()  = checkIndex(myFClass().relExpInInitialEquations().indexOf(originalFExp()));
 /*  
 
     coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
@@ -2801,7 +2841,7 @@ aspect FlatDiagnostics {
                 numInitialEquations() + "\n");
 
         str.append("Number of event indicators in equations:      " + 
-                numRelExpInEquations() + "\n");
+                numEventIndicators() + "\n");
 
         str.append("Number of event indicators in init equations: " + 
                 numRelExpInInitialEquations() + "\n");

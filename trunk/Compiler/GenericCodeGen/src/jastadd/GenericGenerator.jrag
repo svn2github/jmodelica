@@ -624,7 +624,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numEventIndicators());
+			genPrinter.print(fclass.numSwitches());
 		}
 	
 	}
