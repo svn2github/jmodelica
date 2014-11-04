@@ -136,7 +136,7 @@ public class CGenerator extends GenericGenerator {
         
         @Override
         protected Collection<FExp> elements() {
-            return fclass.stateEventExps();
+            return fclass.eventExpInEquations();
         }
         
         @Override
@@ -201,10 +201,10 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(CodeStream genPrinter) {
 			if (!fclass.onlyInitBLT()) {
-                for (FExp e : fclass.stateEventExps()) 
+                for (FExp e : fclass.eventExpInEquations()) 
                     e.genEventResidualVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				Enumerator enumerator = new Enumerator();
-                for (FExp e : fclass.stateEventExps())
+                for (FExp e : fclass.eventExpInEquations())
                     e.genEventResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator);
 			} else {
 				genPrinter.print("  model_init_R0(jmi, res);\n");
@@ -248,12 +248,12 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(CodeStream genPrinter) {
             CodePrinter printer = ASTNode.printer_C.initialSystemPrinter();
-            for (FExp e : fclass.stateEventExps()) 
+            for (FExp e : fclass.eventExpInEquations()) 
                 e.genEventResidualVarDecls_C(printer, genPrinter, INDENT);
             for (FExp e : fclass.eventExpInInitialEquations()) 
                 e.genEventResidualVarDecls_C(printer, genPrinter, INDENT);
 			Enumerator enumerator = new Enumerator();
-            for (FExp e : fclass.stateEventExps())
+            for (FExp e : fclass.eventExpInEquations())
                 e.genEventResidual_C(printer, genPrinter, INDENT, enumerator);
             for (FExp e : fclass.eventExpInInitialEquations())
                 e.genEventResidual_C(printer, genPrinter, INDENT, enumerator);
@@ -616,31 +616,111 @@ public class CGenerator extends GenericGenerator {
         public boolean isActive() {
             return !fclass.onlyInitBLT() && super.isActive();
         }
-        
-        public void generate(CodeStream str) {
-            CodePrinter p = ASTNode.printer_C;
-            String indent = p.indent("");
-            for (FExp e : fclass.timeEventExps()) 
-                e.genVarDecls_C(p, str, INDENT);
-            
-            str.formatln("%sjmi_real_t nextTimeEvent;", indent);
-            str.formatln("%sjmi_real_t nextTimeEventTmp;", indent);
-            str.formatln("%sjmi_real_t nSamp;", indent);
-            str.formatln("%snextTimeEvent = JMI_INF;", indent);
-            
-//            str.print("  printf(\"sample function called at time %f\\n\",_t);\n");	
-            for (FExp e : fclass.timeEventExps()) {
-                e.genTimeEventCalc_C(p, str, indent, "nextTimeEventTmp");
-                str.formatln("%sif (nextTimeEventTmp<nextTimeEvent) {", indent);
-                str.formatln("%snextTimeEvent = nextTimeEventTmp;", p.indent(indent));
-                str.formatln("%s}", indent);
-            }
-//            str.print("printf(\"Happ: %12.12f\\n\",nextTimeEvent);\n");
-            
-            str.formatln("%s*nextTime = nextTimeEvent;\n", indent);
-        }
-    }
-    
+
+		public void generate(CodeStream genPrinter) {
+			for (FSampleExp e : fclass.samplers()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			genPrinter.print("  jmi_real_t nextTimeEvent;\n");
+			genPrinter.print("  jmi_real_t nextTimeEventTmp;\n");				
+			genPrinter.print("  jmi_real_t nSamp;\n");	
+			genPrinter.print("  nextTimeEvent = JMI_INF;\n");
+			
+			
+			/*
+				There are three cases to consider for each sampler:
+				 1) The current time is (surely) before the offset of 
+				    the sampler. In this case, the next time event occurs
+				    at time offset.
+				 2) The current time is a sample instant of the sampler
+				    in which case next time event is the next sample
+				    instant.
+				 3) If neither of the above holds true, then the current
+				    time is in between two sample instants of the sampler.
+				    In this case, the next time event is the next sample
+				    instant.
+			
+			*/
+			
+//			genPrinter.print("  printf(\"sample function called at time %f\\n\",_t);\n");	
+			for (FSampleExp s : fclass.samplers()) {
+				genPrinter.print("  nextTimeEventTmp = JMI_INF;\n");
+				// Case 1: time is before offset 
+				genPrinter.print("  if (SURELY_LT_ZERO(_t - (");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print("))) {\n");
+				genPrinter.print("    nextTimeEventTmp = ");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print(";\n");
+				//genPrinter.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
+			    genPrinter.print("  } ");	
+			    // Case 2: we are at a sample			    					
+				genPrinter.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - (");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print("), ");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("))) {\n");
+				// nSamp should be almost an integer - round to get it exact
+				genPrinter.print("    nSamp = jmi_dround((_t - (");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(")) / (");
+			    s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("));\n");
+				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0) * (");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print(") + (");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(");\n");
+/*----*//*
+					genPrinter.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
+					genPrinter.print("(_t-");
+				    s.getOffset().prettyPrint_C(genPrinter,"");
+				    genPrinter.print(")/(");
+				    s.getInterval().prettyPrint_C(genPrinter,"");
+					genPrinter.print("));\n");
+
+*//*---*/
+			    genPrinter.print("  } ");
+
+				// Case 3: Neither of the above: in between samples
+				genPrinter.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - (");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print("), ");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("))) {\n");
+				// User the floor function to get the number of previous
+				// samples
+				genPrinter.print("    nSamp = floor((_t - (");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(")) / (");
+			    s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("));\n");
+				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0) * (");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print(") + (");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(");\n");
+/*----*//*
+					genPrinter.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
+					genPrinter.print("(_t-");
+				    s.getOffset().prettyPrint_C(genPrinter,"");
+				    genPrinter.print(")/(");
+				    s.getInterval().prettyPrint_C(genPrinter,"");
+					genPrinter.print("));\n");
+
+*//*---*/
+			    genPrinter.print("  }\n ");
+
+
+			    genPrinter.print("  if (nextTimeEventTmp<nextTimeEvent) {\n");
+			    genPrinter.print("    nextTimeEvent = nextTimeEventTmp;\n");
+			    genPrinter.print("  }\n");				    						
+			}
+//			genPrinter.print("printf(\"Happ: %12.12f\\n\",nextTimeEvent);\n");
+
+			genPrinter.print("  *nextTime = nextTimeEvent;\n");
+		}
+	}
+
 	/**
 	 * Generates code for solving the BLT blocks
 	 */
@@ -1056,9 +1136,9 @@ public class CGenerator extends GenericGenerator {
     /**
      * Prints number of delay switches needed.
      */
-    public class DAETag_numDelaySwitchingFunctions extends DAETag {
+    public class DAETag_numSwitchingFunctions extends DAETag {
         
-        public DAETag_numDelaySwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+        public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
             super("n_delay_switches", myGenerator, fclass);
         }
     

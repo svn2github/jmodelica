@@ -243,7 +243,6 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
-    jmi_->eventPhase = 1;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
@@ -330,7 +329,7 @@ int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_gen
     }
     
     switches = jmi_get_sw(jmi);
-    for (i = jmi->n_relations - n_delay_switches; i < jmi->n_relations; i++) {
+    for (i = jmi->n_sw - n_delay_switches; i < jmi->n_sw; i++) {
         switches[i] = JMI_DELAY_INITIAL_EVENT_SW;
     }
     
@@ -677,7 +676,7 @@ int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res){
     
     switches = jmi_get_sw(jmi);
     
-    for (i = 0; i < jmi->n_relations; i=i+1){
+    for (i = 0; i < jmi->n_sw; i=i+1){
         if (switches[i] == 1.0){
             if (jmi->relations[i] == JMI_REL_GEQ){
                 res[i] = res[i]+jmi->events_epsilon;

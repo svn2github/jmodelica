@@ -1189,7 +1189,6 @@ struct jmi_t {
 
     jmi_real_t atEvent;                  /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
-    int eventPhase;                      /**< \brief Zero if in first phase of event iteration, non zero if in second phase */
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
 	

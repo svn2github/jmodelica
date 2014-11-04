@@ -566,7 +566,9 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
         node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDerivatives", 
                                 "Call to get derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
         if (jmi->jmi_callbacks.log_options.log_level >= 6){
-            jmi_log_reals(jmi->log, node, logInfo, "switches", jmi_get_sw(jmi), jmi->n_sw);
+            int nF, nR;
+            jmi_dae_get_sizes(jmi, &nF, &nR);
+            jmi_log_reals(jmi->log, node, logInfo, "switches", jmi_get_sw(jmi), nR);
             jmi_log_reals(jmi->log, node, logInfo, "booleans", jmi_get_boolean_d(jmi), jmi->n_boolean_d);
             jmi_log_reals(jmi->log, node, logInfo, "integers", jmi_get_integer_d(jmi), jmi->n_integer_d);
         }
@@ -763,6 +765,7 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
+    jmi_int_t nF, nR;
     jmi_int_t retval;
     jmi_int_t i, max_iterations;
     jmi_real_t next_event_time;
@@ -773,6 +776,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_log_node_t discrete_node;
 
     /* Used for logging */
+    jmi_dae_get_sizes(jmi, &nF, &nR);
     switches = jmi_get_sw(jmi);
     
     jmi->model_terminate = 0;  /* Reset terminate flag. */
@@ -793,8 +797,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
                                  "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
         
-        if (jmi->n_sw > 0) {
-            jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, jmi->n_sw);
+        if (nR > 0) {
+            jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, nR);
         }
 
         /* Initial evaluation of model so that we enter the event iteration with correct values. */
@@ -903,6 +907,15 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi->events_epsilon = jmi->tmp_events_epsilon;
         }
 
+        /* Compute the next time event */
+        retval = jmi_ode_next_time_event(jmi,&next_event_time);
+
+        if(retval != 0) { /* Error check */
+            jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
+
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
@@ -939,15 +952,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
-        
-        /* Compute the next time event */
-        retval = jmi_ode_next_time_event(jmi,&next_event_time);
-        if(retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
+
         /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
            if the next event is caused by a delay of the current one. */
         {
@@ -973,8 +978,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         jmi_log_leave(jmi->log, final_node);
 
-        if (jmi->n_sw > 0) {
-            jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, jmi->n_sw);
+        if (nR > 0) {
+            jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, nR);
         }
         jmi_log_leave(jmi->log, top_node);
 

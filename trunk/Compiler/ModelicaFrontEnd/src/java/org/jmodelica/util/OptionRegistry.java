@@ -418,11 +418,6 @@ abstract public class OptionRegistry {
             true,
             "Controls whether event generating expressions should generate switches in the c-code. " +
             "Setting this option to false can give unexpected results. Default is true."),
-        RELATIONAL_TIME_EVENTS
-            ("relational_time_events",
-            compiler,
-            true,
-            "Controls whether relational operators should be able to generate time events. Default is true."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
             compiler,

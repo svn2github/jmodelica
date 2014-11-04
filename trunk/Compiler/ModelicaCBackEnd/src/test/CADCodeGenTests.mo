@@ -4863,8 +4863,8 @@ jmi_ad_var_t tmp_der_1;
     (*dF)[0] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = _time * 2 - (_b_3);
     (*dF)[1] = (*dz)[jmi->offs_t] * 2 + _time * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
-    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
-        _sw(0) = jmi_turn_switch(_time - (1), _sw(0), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (1), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
     (*res)[2] = _sw(0) - (_temp_1_4);
     if (LOG_EXP_OR(v_0, v_1)) {
@@ -5082,7 +5082,7 @@ equation
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(_time - (2), _sw(0), JMI_ALMOST_EPS, JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch(_time - (2), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
     }
     (*res)[0] = _sw(0) - (_temp_1_2);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, pre_x_0, pre_z_1) - (_z_1);
