@@ -30,7 +30,7 @@ __all__ = ['general', 'initialization', 'optimization', 'simulation',
            'test_examples_casadi_new', 'test_examples_fmi',
            'test_examples_jmi', 'test_fmi', 'test_fmi_jacobians', 'test_init',
            'test_io', 'test_jmi', 'test_linearization', 'test_xmlparser',
-           'test_fmi_2']
+           'test_fmi_2', 'test_delay']
 
 #create working directory for tests
 if sys.platform == 'win32':
