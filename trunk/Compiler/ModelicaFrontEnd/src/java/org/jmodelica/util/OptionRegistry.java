@@ -463,7 +463,20 @@ abstract public class OptionRegistry {
             ("residual_equation_scaling",
              runtime,
              1,
-             "Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling"),
+             "Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling, 3-hybrid",
+			 0,3),
+        NLE_SOLVER_MIN_RESIDUAL_SCALING_FACTOR
+            ("nle_solver_min_residual_scaling_factor",
+                runtime,
+                1e-10,
+             "Minimal scaling factor used by automatic and hybrid residual scaling algorithm.",
+             1e-32, 1),
+        NLE_SOLVER_MAX_RESIDUAL_SCALING_FACTOR
+            ("nle_solver_max_residual_scaling_factor",
+                runtime,
+                1e10,
+             "Maximal scaling factor used by automatic and hybrid residual scaling algorithm.",
+             1, 1e32),
         RESCALE_EACH_STEP
             ("rescale_each_step",
                runtime,
