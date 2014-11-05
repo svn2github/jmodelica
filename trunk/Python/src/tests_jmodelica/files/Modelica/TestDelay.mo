@@ -44,6 +44,12 @@ equation
     der(x) = -Modelica.Constants.pi/2*delay(x, 1);
 end TestSinusoid;
 
+model TestSinusoidNoEvent
+    Real x(start = 1, fixed = true);
+equation
+    der(x) = -Modelica.Constants.pi/2*noEvent(delay(x, 1));
+end TestSinusoidNoEvent;
+
 model TestShortDelay
     parameter Real d=1;
     Real x(start = 1, fixed = true);
@@ -71,6 +77,13 @@ equation
     x = if time < d then time else delay(x, d);
 end TestRepeatingEvents;
 
+model TestRepeatNoEvent
+    parameter Real d=1;
+    Real x(start=0);
+equation
+    x = if time < d then time else noEvent(delay(x, d));
+end TestRepeatNoEvent;
+
 model TestVariablyDelayedTime
     Real x;
 equation
@@ -88,6 +101,12 @@ model TestDelayStartingAtZero
 equation
     der(x) = -delay(x, time/2, 1e2)^2;
 end TestDelayStartingAtZero;
+
+model TestDelayStartingAtZeroNoEvent
+    Real x(start = 1, fixed = true);
+equation
+    der(x) = -noEvent(delay(x, time/2, 1e2))^2;
+end TestDelayStartingAtZeroNoEvent;
 
 model TestVariableDelayEvents
     Real x, y;
@@ -107,3 +126,9 @@ model TestZenoRepeat
 equation
     x = if time <= 0 then 0 else if time < 1-sqrt(0.5) then 1 else delay(x, if time < 1 then 1-time else 0, 1);
 end TestZenoRepeat;
+
+model TestZenoRepeatNoEvent
+    Real x(start=0);
+equation
+    x = if time <= 0 then 0 else if time < 1-sqrt(0.5) then 1 else noEvent(delay(x, if time < 1 then 1-time else 0, 1));
+end TestZenoRepeatNoEvent;

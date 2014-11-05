@@ -46,6 +46,7 @@ def compile_and_simulate(class_name, final_time, maxh = None):
     return simulate(fmu, final_time, maxh)
 
 def assert_close(x, y, abstol):
+    assert len(x) == len(y)
     d = N.abs(x-y).max()
     assert d <= abstol, ("Signals differ by " + str(d) + " which is more than abstol = " + str(abstol) )
 
@@ -63,9 +64,6 @@ def test_delay_quadratic():
     res = simulate(fmu, final_time = 5, maxh = 0.5)
     t, x = res['time'], res['x']
     x_expected = N.maximum(0, t-1)**2 + 1
-    # print t
-    # print x
-    # print x_expected
 
     assert_close(x, x_expected, 1e-3)
 
@@ -93,6 +91,15 @@ def test_integrate_delayed_quadratic():
 @testattr(stddist = True)
 def test_sinusoid():
     res = compile_and_simulate('TestSinusoid', final_time = 20)
+    t, x = res['time'], res['x']
+    x_expected = 1.03*N.cos((t+0.35)*N.pi/2)
+    inds = (t >= 0.5)
+    assert_close(x[inds], x_expected[inds], 0.1)
+
+@testattr(stddist = True)
+def test_sinusoid_noevent():
+    # Check that we get the same answer as above with noEvent
+    res = compile_and_simulate('TestSinusoidNoEvent', final_time = 20)
     t, x = res['time'], res['x']
     x_expected = 1.03*N.cos((t+0.35)*N.pi/2)
     inds = (t >= 0.5)
@@ -134,14 +141,28 @@ def test_repeating_events():
         if k > 0: fmu.reset()
 
         fmu.set('d', d)
-        res = simulate(fmu, final_time = 5, maxh = 1/2.5)  
+        res = simulate(fmu, final_time = 5.5, maxh = 1/2.5)  
         t, x = res['time'], res['x']
         x_expected = N.mod(t, d)
         (inds,) = N.nonzero(N.diff(t) == 0)
         x_expected[inds] = d
         x_expected[inds+1] = 0
 
+        assert_close(t[inds], [1,2,3,4,5], 1e-15)
         assert_close(x, x_expected, 1e-8)
+
+@testattr(stddist = True)
+def test_repeat_noevent():
+    res = compile_and_simulate('TestRepeatNoEvent', final_time = 5.5, maxh = 1/10.5)
+    t, x = res['time'], res['x']
+    x_expected = N.mod(t, 1)
+    (inds,) = N.nonzero(N.diff(t) == 0)
+    x_expected[inds] = 1
+    x_expected[inds+1] = 0
+
+    assert len(inds) == 1
+    assert N.abs(t[inds]-[1]) <= 1e-8
+    assert sum(N.abs(x-x_expected) > 1e-8) <= 6
 
 @testattr(stddist = True)
 def test_variably_delayed_time():
@@ -162,6 +183,14 @@ def test_state_dependent_delay_time():
 @testattr(stddist = True)
 def test_delay_starting_at_zero():
     res = compile_and_simulate('TestDelayStartingAtZero', final_time = 5, maxh = 0.1)
+    t, x = res['time'], res['x']
+    x_expected = N.exp(-t)
+    assert_close(x, x_expected, 1e-2)
+
+@testattr(stddist = True)
+def test_delay_starting_at_zero_no_event():
+    # Check that we get the same answer as above with noEvent
+    res = compile_and_simulate('TestDelayStartingAtZeroNoEvent', final_time = 5, maxh = 0.1)
     t, x = res['time'], res['x']
     x_expected = N.exp(-t)
     assert_close(x, x_expected, 1e-2)
@@ -198,3 +227,15 @@ def test_zeno_repeat():
     assert all((x[sw]!=x[sw+1]) | (N.abs(t[sw]-1)<1e-7))
     tau = 1-t[sw]
     assert_close(tau[1:], N.sqrt(0.5)*tau[0:-1], 1e-7)
+
+@testattr(stddist = True)
+def test_zeno_repeat_noevent():
+    res = compile_and_simulate('TestZenoRepeatNoEvent', final_time = 0.75, maxh = 1/20.5)
+    t, x = res['time'], res['x']
+    xe1 = N.mod(N.log2(1-(t-1e-8)),1) > 0.5;
+    xe2 = N.mod(N.log2(1-(t+1e-8)),1) > 0.5;
+    (inds,) = N.nonzero(N.diff(t) == 0)
+
+    assert_close(t[inds], [0, 1-N.sqrt(0.5)], 1e-7)
+    assert all(N.minimum(xe1, xe2) <= x)
+    assert all(x <= N.maximum(xe1, xe2))
