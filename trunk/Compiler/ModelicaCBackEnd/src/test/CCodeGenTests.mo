@@ -14723,6 +14723,132 @@ $C_DAE_initial_event_indicator_residuals$
 ")})));
 end TestRelationalOp7;
 
+model TestRelationalOp8
+  Real x;
+equation
+  x = if time>=1 and 1>=time or time>1 and 1>time or time<=1 and 1<=time or time<1 and 1<time then 1 else 0; 
+  
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp8",
+            description="Test correct event generation.",
+            variability_propagation=false,
+            relational_time_events=true,
+            template="
+$C_DAE_relations$
+static const int N_sw = $n_switches$;
+
+C_ode_time_events
+$C_ode_time_events$
+
+C_ode_derivatives
+$C_ode_derivatives$
+",
+            generatedCode="
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
+static const int N_sw = 8;
+
+C_ode_time_events
+    jmi_real_t nextTimeEvent;
+    jmi_real_t nextTimeEventTmp;
+    jmi_real_t nSamp;
+    nextTimeEvent = JMI_INF;
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1)))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time)) || (!jmi->eventPhase && ALMOST_ZERO(AD_WRAP_LITERAL(1) - (_time)))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (AD_WRAP_LITERAL(1))))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (AD_WRAP_LITERAL(1))))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1)))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    nextTimeEventTmp = JMI_INF;
+    if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time)) || (!jmi->eventPhase && ALMOST_ZERO(AD_WRAP_LITERAL(1) - (_time)))) {
+        nextTimeEventTmp = AD_WRAP_LITERAL(1);
+    }
+    if (nextTimeEventTmp<nextTimeEvent) {
+        nextTimeEvent = nextTimeEventTmp;
+    }
+    *nextTime = nextTimeEvent;
+
+
+
+C_ode_derivatives
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
+        _sw(1) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(1), JMI_ALMOST_EPS, JMI_REL_GT);
+    }
+    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
+        _sw(2) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(2), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(3) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(3), JMI_ALMOST_EPS, JMI_REL_GT);
+    }
+    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
+        _sw(4) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(4), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(5) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(5), JMI_ALMOST_EPS, JMI_REL_LEQ);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(6) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(6), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
+        _sw(7) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(7), JMI_ALMOST_EPS, JMI_REL_LEQ);
+    }
+    _x_0 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3))), LOG_EXP_AND(_sw(4), _sw(5))), LOG_EXP_AND(_sw(6), _sw(7))), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0));
+/********* Write back reinits *******/
+")})));
+end TestRelationalOp8;
+
 model StringOperations1
 	type E = enumeration(a, bb, ccc);
 	

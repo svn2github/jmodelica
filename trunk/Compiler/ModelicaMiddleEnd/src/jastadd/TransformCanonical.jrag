@@ -4003,7 +4003,7 @@ aspect EliminateEqualSwitches{
         public class eliminateEqualSwitches extends Transformation {
             public void perform() {
                 Map<String, Collection<FRelExp>> candidates = new HashMap<String, Collection<FRelExp>>();
-                for (FExp exp : eventExpInEquations())
+                for (FExp exp : relExpsWithEvent())
                     exp.collectEqualSwitches(candidates);
                 for (FExp exp : eventExpInInitialEquations())
                     exp.collectEqualSwitches(candidates);

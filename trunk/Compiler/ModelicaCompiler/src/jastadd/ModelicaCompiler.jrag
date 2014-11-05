@@ -1977,6 +1977,7 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_me_xml", false);
                     options.setBooleanOption("generate_fmi_cs_xml", false);
                     options.setBooleanOption("generate_xml_equations", false);
+                    options.setBooleanOption("relational_time_events", false);
                     options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
                     break;
                 case FMUX:
