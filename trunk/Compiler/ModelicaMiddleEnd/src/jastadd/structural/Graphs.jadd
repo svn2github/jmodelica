@@ -117,7 +117,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return addEquation(eqn, groupNumber, variability, name);
     }
     
-    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, String name) {
         E e = equationMap.get(name);
         if (e != null)
             throw new IllegalArgumentException("Equation with the name '" + name + "' already exists:\n" + e.getEquation() + "\nNew equation:\n" + eqn);

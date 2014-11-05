@@ -723,10 +723,20 @@ aspect IndexReduction {
         
         Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         
+        // Check so that the differentiated equation has the same number of
+        // members as the original.
+        int numScalarsInDiffed = 0;
+        for (FAbstractEquation newEqn : originalDiffedFEqns)
+            numScalarsInDiffed += newEqn.numScalarEquations();
+        if (baseEqn.getGroupMembers().size() != numScalarsInDiffed)
+            throw new IndexReductionException("Number of scalar equations in differentiated equation(" + numScalarsInDiffed + ") does not match the number in original equation(" + baseEqn.getGroupMembers().size() + "). Original equation:\n" + baseEqn.getEquation());
+        
         // Go through differentiated equations that corresponds to the original
         // equations. Add all of these equations to the BiPGraph. We need to
         // remember equations that are differentiated from the "orignal"
-        // equation so that we can add links later.
+        // equation so that we can add links later. Also add links between
+        // differentiated equation and the original equation.
+        Iterator<IndexReductionEq> eqnIt = baseEqn.getGroupMembers().iterator();
         for (FAbstractEquation newEqn : originalDiffedFEqns) {
             result.addEquation(newEqn);
             // Create list of variables that are unique for each BiP equation
@@ -742,9 +752,10 @@ aspect IndexReduction {
             
             // Build new differentiated BiP equations for each scalar.
             for (int i = 0; i < newEqn.numScalarEquations(); i++) {
+                IndexReductionEq original = eqnIt.next();
                 ASTNode.log.info("About to add equation: %s", newEqn);
                 // Add the differentiated equation
-                IndexReductionEq diffedEqn = addEquation(newEqn, i, newEqn.variability());
+                IndexReductionEq diffedEqn = addEquation(newEqn, i, newEqn.variability(), original.getName() + "_d");
                 
                 // Add special edges
                 IndexReductionVar var = lhsVars.get(i);
@@ -759,29 +770,16 @@ aspect IndexReduction {
                 }
                 diffedOriginalEqs.add(diffedEqn);
                 diffedEqn.setExtraEquations(extraEquations);
+                
+                // Set a reference from the visited equation to
+                // its differentiated counterpart
+                original.setMeDifferentiated(diffedEqn);
+                diffedEqn.setMeIntegrated(original);
+                
+                if (original.getMatching() != null && !match(diffedEqn, original.getMatching().getMeDifferentiated()))
+                    eqToMatchStack.add(diffedEqn);
             }
             ASTNode.log.info("Equation added");
-        }
-        
-        // Check so that the differentiated equation has the same number of
-        // members as the original.
-        if (baseEqn.getGroupMembers().size() != diffedOriginalEqs.size())
-            throw new IndexReductionException("Number of scalar equations in differentiated equation(" + diffedOriginalEqs.size() + ") does not match the number in original equation(" + baseEqn.getGroupMembers().size() + "). Original equation:\n" + baseEqn.getEquation());
-        
-        Iterator<IndexReductionEq> eqnIt = baseEqn.getGroupMembers().iterator();
-        Iterator<IndexReductionEq> diffedEqnIt = diffedOriginalEqs.iterator();
-        // Add links between differentiated equation and the original equation.
-        while (eqnIt.hasNext() && diffedEqnIt.hasNext()) {
-            IndexReductionEq member = eqnIt.next();
-            IndexReductionEq diffedMember = diffedEqnIt.next();
-            // Set a reference from the visited equation to
-            // its differentiated counterpart
-            member.setMeDifferentiated(diffedMember);
-            diffedMember.setMeIntegrated(member);
-            
-            if (member.getMatching() != null && !match(diffedMember, member.getMatching().getMeDifferentiated())) {
-                eqToMatchStack.add(diffedMember);
-            }
         }
         
         // Link all BiP equations
