@@ -189,6 +189,14 @@ int jmi_initialize(jmi_t* jmi) {
         return -1;
     }
     
+    retval = jmi_calculate_time_event(jmi);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Computation of next time event failed after initialization.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 4){
+            jmi_log_leave(jmi->log, top_node);
+        }
+        return -1;
+    }
     
     if (jmi->jmi_callbacks.log_options.log_level >= 4){
         jmi_log_leave(jmi->log, top_node);
@@ -765,7 +773,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                             
     jmi_int_t retval;
     jmi_int_t i, max_iterations;
-    jmi_real_t next_event_time;
     jmi_real_t* z = jmi_get_z(jmi);
     jmi_real_t* switches;
     jmi_log_node_t top_node;
@@ -941,26 +948,19 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         }
         
         /* Compute the next time event */
-        retval = jmi_ode_next_time_event(jmi,&next_event_time);
+        retval = jmi_calculate_time_event(jmi);
         if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
         
-        /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
-           if the next event is caused by a delay of the current one. */
-        {
-            jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
-            if (next_event_time > t_delay) next_event_time = t_delay;
-        }
-
         /* If there is an upcoming time event, then set the event information
          * accordingly.
          */
-        if (!(next_event_time == JMI_INF)) {
+        if (jmi->nextTimeEvent.defined) {
             event_info->next_event_time_defined = TRUE;
-            event_info->next_event_time = next_event_time;
+            event_info->next_event_time = jmi->nextTimeEvent.time;
             /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
         } else {
             event_info->next_event_time_defined = FALSE;
@@ -985,6 +985,26 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 	/* If everything went well, check if termination of simulation was requested. */
 	event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
     
+    
+    return 0;
+}
+
+int jmi_calculate_time_event(jmi_t* jmi) {
+    int retval;
+    
+    retval = jmi_ode_next_time_event(jmi, &jmi->nextTimeEvent);
+    if(retval != 0) {
+        return -1;
+    }
+    
+    /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
+       if the next event is caused by a delay of the current one. */
+    {
+        jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
+        if (t_delay != JMI_INF) {
+            JMI_MIN_TIME_EVENT(jmi->nextTimeEvent, 1, 0, t_delay)
+        }
+    }
     
     return 0;
 }

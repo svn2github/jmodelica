@@ -4150,23 +4150,29 @@ aspect CCodeGen {
         throw new UnsupportedOperationException();
     }
     
+    @Override
     public void FRelExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
-        str.formatln("%s%s = JMI_INF;", indent, res);
+        boolean phased = isPhased();
         str.format("%sif (SURELY_LT_ZERO(", indent);
         printIndicator_C(p, str, indent);
         str.print(")");
-        if (isPhased()) {
+        if (phased) {
             str.print(" || (!jmi->eventPhase && ALMOST_ZERO(");
             printIndicator_C(p, str, indent);
             str.print("))");
         }
         str.println(") {");
-        str.format("%s%s = ", p.indent(indent), res);
+        
+        str.format("%snextTimeEventTmp = ", p.indent(indent));
         p.print(solutionForTime(), str, indent);
         str.println(";");
+        
+        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, %s, nextTimeEventTmp)", p.indent(indent), res, phased ? "1" : "0");
+        
         str.formatln("%s}", indent);
     }
     
+    @Override
     public void FSampleExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
         /*
             There are three cases to consider for each sampler:
@@ -4181,8 +4187,6 @@ aspect CCodeGen {
                 In this case, the next time event is the next sample
                 instant.
         */
-        
-        str.print("  nextTimeEventTmp = JMI_INF;\n");
         // Case 1: time is before offset 
         str.print("  if (SURELY_LT_ZERO(_t - (");
         getOffset().prettyPrint_C(str,"");
@@ -4190,6 +4194,7 @@ aspect CCodeGen {
         str.print("    nextTimeEventTmp = ");
         getOffset().prettyPrint_C(str,"");
         str.print(";\n");
+        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, 0, nextTimeEventTmp)", indent, res);
         //str.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
         str.print("  } ");   
         // Case 2: we are at a sample                                   
@@ -4209,6 +4214,7 @@ aspect CCodeGen {
         str.print(") + (");
         getOffset().prettyPrint_C(str,"");
         str.print(");\n");
+        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, 0, nextTimeEventTmp)", indent, res);
 /*----*//*
         str.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
         str.print("(_t-");
@@ -4238,6 +4244,7 @@ aspect CCodeGen {
         str.print(") + (");
         getOffset().prettyPrint_C(str,"");
         str.print(");\n");
+        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, 0, nextTimeEventTmp)", indent, res);
 /*----*//*
         str.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
         str.print("(_t-");
@@ -4247,7 +4254,7 @@ aspect CCodeGen {
         str.print("));\n");
 
 *//*---*/
-        str.print("  }\n ");
+        str.print("  }\n");
     }
 
 	public void FRealVariable.genStartAttributeResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {

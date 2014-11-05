@@ -244,6 +244,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
     jmi_->eventPhase = 1;
+    jmi_->nextTimeEvent.defined = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
@@ -553,7 +554,7 @@ int jmi_ode_guards_init(jmi_t* jmi) {
     return return_status;
 }
 
-int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
 
     int return_status;
 
@@ -562,7 +563,7 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 		return_status = -1;
     }
 	else {
-        return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
+        return_status = jmi->dae->ode_next_time_event(jmi, event);
     }
     jmi_set_current(NULL);
 

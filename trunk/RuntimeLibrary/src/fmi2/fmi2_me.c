@@ -358,7 +358,7 @@ fmi2Status fmi2_reset(fmi2Component c) {
 
         fmi2_cs = (fmi2_cs_t*)c;
         jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
-                            jmi->n_sw, jmi->n_real_u, jmi->log);
+                            jmi->n_relations, jmi->n_real_u, jmi->log);
         fmi2_cs -> ode_problem = ode_problem;
     }
     

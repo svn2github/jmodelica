@@ -609,15 +609,18 @@ int jmi_ode_guards_init(jmi_t* jmi) {
 int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 
     int i, return_status;
+    jmi_time_event_t event;
     for (i=0;i<jmi->n_z;i++) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
     jmi_set_current(jmi);
-    if (jmi_try(jmi))
+    if (jmi_try(jmi)) {
 		return_status = -1;
-	else
-		return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
+    } else {
+        return_status = jmi->dae->ode_next_time_event(jmi, &event);
+        *nextTime = event.defined ? event.time : JMI_INF;
+    }
     jmi_set_current(NULL);
 
     return return_status;

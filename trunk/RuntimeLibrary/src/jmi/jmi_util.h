@@ -116,6 +116,16 @@ typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward de
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
 
+typedef struct _jmi_time_event_t {
+    int defined;
+    int phase;
+    jmi_real_t time;
+} jmi_time_event_t;
+
+#define JMI_MIN_TIME_EVENT(EVENT, DEF, PHASE, TIME) \
+    if (!EVENT.defined || (EVENT.time > TIME) || ((EVENT.time == TIME) && (EVENT.phase > PHASE))) { \
+        EVENT.defined = DEF; EVENT.phase = PHASE; EVENT.time = TIME; \
+    }
 
 /* Masks for maping vref to indices. */               
 #define VREF_INDEX_MASK  0x0FFFFFFF
@@ -315,10 +325,10 @@ typedef int (*jmi_generic_func_t)(jmi_t* jmi);
  * \brief A function signature for computation of the next time event.
  *
  * @param jmi A jmi_t struct.
- * @param nextTime (Output) The time instant of the next time event.
+ * @param event (Output) Information about the next time event.
  * @return Error code.
  */
-typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
+typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_time_event_t* event);
 
 /**
  * \brief Function signature for evaluation of a residual function in
@@ -1190,6 +1200,8 @@ struct jmi_t {
     jmi_real_t atEvent;                  /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
     int eventPhase;                      /**< \brief Zero if in first phase of event iteration, non zero if in second phase */
+    
+    jmi_time_event_t nextTimeEvent;
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
 	

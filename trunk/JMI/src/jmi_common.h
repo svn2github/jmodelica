@@ -341,14 +341,25 @@ jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y);
  */
 typedef int (*jmi_generic_func_t)(jmi_t* jmi);
 
+typedef struct _jmi_time_event_t {
+    int defined;
+    int phase;
+    jmi_real_t time;
+} jmi_time_event_t;
+
+#define JMI_MIN_TIME_EVENT(EVENT, DEF, PHASE, TIME) \
+    if (!EVENT.defined || (EVENT.time > TIME) || ((EVENT.time == TIME) && (EVENT.phase > PHASE))) { \
+        EVENT.defined = DEF; EVENT.phase = PHASE; EVENT.time = TIME; \
+    }
+
 /**
  * \brief A function signature for computation of the next time event.
  *
  * @param jmi A jmi_t struct.
- * @param nextTime (Output) The time instant of the next time event.
+ * @param event (Output) Information of the next time event.
  * @return Error code.
  */
-typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
+typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_time_event_t* event);
 
 /**
  * \brief Function signature for evaluation of a residual function in

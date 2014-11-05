@@ -623,21 +623,17 @@ public class CGenerator extends GenericGenerator {
             for (FExp e : fclass.timeEventExps()) 
                 e.genVarDecls_C(p, str, INDENT);
             
-            str.formatln("%sjmi_real_t nextTimeEvent;", indent);
+            str.formatln("%sjmi_time_event_t nextEvent = {0};", indent);
             str.formatln("%sjmi_real_t nextTimeEventTmp;", indent);
             str.formatln("%sjmi_real_t nSamp;", indent);
-            str.formatln("%snextTimeEvent = JMI_INF;", indent);
             
 //            str.print("  printf(\"sample function called at time %f\\n\",_t);\n");	
             for (FExp e : fclass.timeEventExps()) {
-                e.genTimeEventCalc_C(p, str, indent, "nextTimeEventTmp");
-                str.formatln("%sif (nextTimeEventTmp<nextTimeEvent) {", indent);
-                str.formatln("%snextTimeEvent = nextTimeEventTmp;", p.indent(indent));
-                str.formatln("%s}", indent);
+                e.genTimeEventCalc_C(p, str, indent, "nextEvent");
             }
 //            str.print("printf(\"Happ: %12.12f\\n\",nextTimeEvent);\n");
             
-            str.formatln("%s*nextTime = nextTimeEvent;\n", indent);
+            str.formatln("%s*event = nextEvent;\n", indent);
         }
     }
     

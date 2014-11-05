@@ -6272,25 +6272,22 @@ $C_ode_guards$
                    $C_ode_time_events$
 ",
             generatedCode="
-
-                     jmi_real_t nextTimeEvent;
-  jmi_real_t nextTimeEventTmp;
-  jmi_real_t nSamp;
-  nextTimeEvent = JMI_INF;
-  nextTimeEventTmp = JMI_INF;
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nextTimeEventTmp;
+    jmi_real_t nSamp;
   if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(0)))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), _h_6))) {
     nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(0))) / (_h_6));
     nextTimeEventTmp = (nSamp + 1.0) * (_h_6) + (AD_WRAP_LITERAL(0));
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), _h_6))) {
     nSamp = floor((_t - (AD_WRAP_LITERAL(0))) / (_h_6));
     nextTimeEventTmp = (nSamp + 1.0) * (_h_6) + (AD_WRAP_LITERAL(0));
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }
-   if (nextTimeEventTmp<nextTimeEvent) {
-    nextTimeEvent = nextTimeEventTmp;
-  }
-  *nextTime = nextTimeEvent;
+    *event = nextEvent;
 ")})));
 end WhenTest2; 
 
@@ -6321,37 +6318,34 @@ $C_ode_time_events$
                    $C_ode_initialization$
 ",
             generatedCode="
-  jmi_real_t nextTimeEvent;
-  jmi_real_t nextTimeEventTmp;
-  jmi_real_t nSamp;
-  nextTimeEvent = JMI_INF;
-  nextTimeEventTmp = JMI_INF;
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nextTimeEventTmp;
+    jmi_real_t nSamp;
   if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(0)))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
     nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
     nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")) + (AD_WRAP_LITERAL(0));
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
     nSamp = floor((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
     nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")) + (AD_WRAP_LITERAL(0));
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }
-   if (nextTimeEventTmp<nextTimeEvent) {
-    nextTimeEvent = nextTimeEventTmp;
-  }
-  nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(0)))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
     nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
     nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")) + (AD_WRAP_LITERAL(0));
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
     nSamp = floor((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
     nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")) + (AD_WRAP_LITERAL(0));
+    JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
   }
-   if (nextTimeEventTmp<nextTimeEvent) {
-    nextTimeEvent = nextTimeEventTmp;
-  }
-  *nextTime = nextTimeEvent;
+    *event = nextEvent;
  
                        model_ode_guards(jmi);
 /************* ODE section *********/
@@ -14756,67 +14750,42 @@ static const int DAE_relations[] = { -1 };
 static const int N_sw = 8;
 
 C_ode_time_events
-    jmi_real_t nextTimeEvent;
+    jmi_time_event_t nextEvent = {0};
     jmi_real_t nextTimeEventTmp;
     jmi_real_t nSamp;
-    nextTimeEvent = JMI_INF;
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1)))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time)) || (!jmi->eventPhase && ALMOST_ZERO(AD_WRAP_LITERAL(1) - (_time)))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 1, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (AD_WRAP_LITERAL(1))))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 1, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (AD_WRAP_LITERAL(1))))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 1, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1)))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 0, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    nextTimeEventTmp = JMI_INF;
     if (SURELY_LT_ZERO(AD_WRAP_LITERAL(1) - (_time)) || (!jmi->eventPhase && ALMOST_ZERO(AD_WRAP_LITERAL(1) - (_time)))) {
         nextTimeEventTmp = AD_WRAP_LITERAL(1);
+        JMI_MIN_TIME_EVENT(nextEvent, 1, 1, nextTimeEventTmp)
     }
-    if (nextTimeEventTmp<nextTimeEvent) {
-        nextTimeEvent = nextTimeEventTmp;
-    }
-    *nextTime = nextTimeEvent;
+    *event = nextEvent;
 
 
 

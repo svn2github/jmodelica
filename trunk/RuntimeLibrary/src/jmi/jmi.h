@@ -969,10 +969,10 @@ int jmi_ode_guards_init(jmi_t* jmi);
  * \brief Computes the next time event.
  *
  * @param jmi A jmi_t struct.
- * @param nextTime (Output) The time instant of the next time event.
+ * @param event (Output) Information of the next time event.
  * @return Error code.
  */
-int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime);
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event);
 
 
 /* @} */

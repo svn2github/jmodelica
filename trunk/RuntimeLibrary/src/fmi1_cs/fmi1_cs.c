@@ -266,7 +266,7 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     jmi_new_ode_problem(&ode_problem, &(fmi1_me->jmi.jmi_callbacks),
                         fmi1_me,
                         jmi->n_real_x,
-                        jmi->n_sw,
+                        jmi->n_relations,
                         jmi->n_real_u,
                         jmi->log);
     /* In case fmi1_me_instantiate_model was not called, log struct have to
