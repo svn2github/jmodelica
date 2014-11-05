@@ -749,7 +749,10 @@ aspect BLT{
 			for (FAbstractEquation e : allEquations()) {
 				s.addAll(e.inputs());
 				s.addAll(e.differentiatedRealVariables());
-				s.addAll(e.discretePreVariables());	
+                s.addAll(e.discretePreVariables());
+                s.addAll(e.parameters());
+                for (FVariable vv: e.dependentParameters())
+                    s.addAll(vv.myParameterDependencies());
 			}
 			return s;
 		}
