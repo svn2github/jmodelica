@@ -122,13 +122,23 @@ equation
 end TestDelayGoingToZero;
 
 model TestZenoRepeat
+    parameter Real d=1;
     Real x(start=0);
 equation
-    x = if time <= 0 then 0 else if time < 1-sqrt(0.5) then 1 else delay(x, if time < 1 then 1-time else 0, 1);
+    x = if time <= 0 then 0 else if time < d*(1-sqrt(0.5)) then 1 else delay(x, if time < d then d-time else 0, d);
 end TestZenoRepeat;
 
 model TestZenoRepeatNoEvent
+    parameter Real d=1;
     Real x(start=0);
 equation
-    x = if time <= 0 then 0 else if time < 1-sqrt(0.5) then 1 else noEvent(delay(x, if time < 1 then 1-time else 0, 1));
+    x = if time <= 0 then 0 else if time < d*(1-sqrt(0.5)) then 1 else noEvent(delay(x, if time < d then d-time else 0, d));
 end TestZenoRepeatNoEvent;
+
+model TestMultipleDelays
+    parameter Real phi = (1+sqrt(5))/2;
+    TestRepeatingEvents rep;
+    TestRepeatNoEvent rep_ne(d = phi);
+    TestZenoRepeat zeno(d = 5);
+    TestZenoRepeatNoEvent zeno_ne(d = 5*phi);
+end TestMultipleDelays;

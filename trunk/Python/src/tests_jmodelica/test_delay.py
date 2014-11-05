@@ -133,6 +133,13 @@ def test_sinusoid():
     assert_close(x_delay, x_expected, 1e-2)
     assert_close(delay_x, x_expected, 1e-2)
 
+def sol_repeating_events(t, d=1):
+    x_expected = N.mod(t, d)
+    (inds,) = N.nonzero(N.diff(t) == 0)
+    x_expected[inds] = d
+    x_expected[inds+1] = 0
+    return x_expected
+
 @testattr(stddist = True)
 def test_repeating_events():
     fmu = compile_and_load('TestRepeatingEvents')
@@ -143,10 +150,8 @@ def test_repeating_events():
         fmu.set('d', d)
         res = simulate(fmu, final_time = 5.5, maxh = 1/2.5)  
         t, x = res['time'], res['x']
-        x_expected = N.mod(t, d)
         (inds,) = N.nonzero(N.diff(t) == 0)
-        x_expected[inds] = d
-        x_expected[inds+1] = 0
+        x_expected = sol_repeating_events(t, d)
 
         assert_close(t[inds], [1,2,3,4,5], 1e-15)
         assert_close(x, x_expected, 1e-8)
@@ -155,10 +160,8 @@ def test_repeating_events():
 def test_repeat_noevent():
     res = compile_and_simulate('TestRepeatNoEvent', final_time = 5.5, maxh = 1/10.5)
     t, x = res['time'], res['x']
-    x_expected = N.mod(t, 1)
     (inds,) = N.nonzero(N.diff(t) == 0)
-    x_expected[inds] = 1
-    x_expected[inds+1] = 0
+    x_expected = sol_repeating_events(t)
 
     assert len(inds) == 1
     assert N.abs(t[inds]-[1]) <= 1e-8
@@ -216,26 +219,58 @@ def test_delay_going_to_zero():
     x_expected = 0.22981923*N.exp(1-t)    
     assert_close(x[t >= 1], x_expected[t >= 1], 1e-3)
 
-@testattr(stddist = True)
-def test_zeno_repeat():
-    res = compile_and_simulate('TestZenoRepeat', final_time = 2, maxh = 0.1)
-    t, x = res['time'], res['x']
+def check_zeno_repeat(t, x, ownevents=True):
     (sw,)=N.nonzero(N.diff(t) == 0)
     (nosw,)=N.nonzero(N.diff(t) > 0)
     assert all((x==0) | (x == 1))
     assert all(x[nosw]==x[nosw+1])
-    assert all((x[sw]!=x[sw+1]) | (N.abs(t[sw]-1)<1e-7))
+    if ownevents: assert all((x[sw]!=x[sw+1]) | (N.abs(t[sw]-1)<1e-7))
     tau = 1-t[sw]
-    assert_close(tau[1:], N.sqrt(0.5)*tau[0:-1], 1e-7)
+    if ownevents: assert_close(tau[1:], N.sqrt(0.5)*tau[0:-1], 1e-7)    
+
+@testattr(stddist = True)
+def test_zeno_repeat():
+    res = compile_and_simulate('TestZenoRepeat', final_time = 2, maxh = 0.1)
+    t, x = res['time'], res['x']
+    check_zeno_repeat(t, x)
+
+def check_zeno_repeat_noevent(t, x, ownevents=True):
+    points = t < 0.78
+    t, x = t[points], x[points]
+    xe1 = N.mod(N.log2(1-(t-1e-8)),1) > 0.5;
+    xe2 = N.mod(N.log2(1-(t+1e-8)),1) > 0.5;
+    (inds,) = N.nonzero(N.diff(t) == 0)
+
+    if ownevents: assert_close(t[inds], [0, 1-N.sqrt(0.5)], 1e-7)
+    assert all(N.minimum(xe1, xe2) <= x)
+    assert all(x <= N.maximum(xe1, xe2))
 
 @testattr(stddist = True)
 def test_zeno_repeat_noevent():
     res = compile_and_simulate('TestZenoRepeatNoEvent', final_time = 0.75, maxh = 1/20.5)
     t, x = res['time'], res['x']
-    xe1 = N.mod(N.log2(1-(t-1e-8)),1) > 0.5;
-    xe2 = N.mod(N.log2(1-(t+1e-8)),1) > 0.5;
-    (inds,) = N.nonzero(N.diff(t) == 0)
+    check_zeno_repeat_noevent(t, x)
 
-    assert_close(t[inds], [0, 1-N.sqrt(0.5)], 1e-7)
-    assert all(N.minimum(xe1, xe2) <= x)
-    assert all(x <= N.maximum(xe1, xe2))
+def sol_repeating_events2(t, d=1):
+    x_expected = N.mod(t, d)
+    (inds,) = N.nonzero(N.diff(t) == 0)
+    x_expected[inds]   = N.mod(t[inds]-1e-7, d)
+    x_expected[inds+1] = N.mod(t[inds]+1e-7, d)
+    return x_expected
+
+@testattr(stddist = True)
+def test_multiple_delays():
+    res = compile_and_simulate('TestMultipleDelays', final_time = 10)
+    t   = res['time']
+    xr  = res['rep.x']
+    xrn = res['rep_ne.x']
+    xz  = res['zeno.x']
+    xzn = res['zeno_ne.x']
+
+    phi = (1 + N.sqrt(5))/2
+
+    assert sum(N.abs(xr-sol_repeating_events2(t)) > 1e-6) <= 8
+    assert sum(N.abs(xrn-sol_repeating_events2(t, phi)) > 0.2) <= 30
+    check_zeno_repeat(t/5, xz, False)
+    check_zeno_repeat_noevent(t/(5*phi), xzn, False)
+
