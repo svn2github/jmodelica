@@ -82,8 +82,12 @@ class Variable : public OwnedNode {
         bool isAlias() const;
         /** @return True if this variable is negated */
         bool isNegated() const;
+        /** @return True if this variable is an eliminatable variable */
+        bool isEliminatable() const;
         /** @param Bool negated . Only possible for Alias variables*/
         void setNegated(bool negated);
+        /** @param none. */
+        void setAsEliminatable();        
         /** @param Sets an alias for this variable, making this an alias variable */
         void setAlias(Ref<Variable> var);
         /** @return This variable's model variable if it is an alias, or itself otherwise */
@@ -198,6 +202,7 @@ class Variable : public OwnedNode {
     protected:
         Ref<Variable> myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
         bool negated;
+        bool eliminatable;
         Ref<VariableType> declaredType;
         casadi::MX var;
         attributeMap attributes;
@@ -217,6 +222,8 @@ inline void Variable::setNegated(bool negated) {
     }
     this->negated = negated; 
 }
+inline bool Variable::isEliminatable() const {return eliminatable;}
+inline void Variable::setAsEliminatable() {eliminatable=true;}
 inline void Variable::setAlias(Ref<Variable> modelVariable) { this->myModelVariable = modelVariable; }
 inline Ref<Variable> Variable::getModelVariable() { return isAlias() ? myModelVariable : this; }
 inline std::string Variable::getName() const { return var.getName(); }

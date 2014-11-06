@@ -52,6 +52,8 @@ set(MC_CPP
   transferModelica.cpp
   transferOptimica.cpp
   Variable.cpp
+  Block.cpp
+  BLTHandler.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -81,6 +83,8 @@ set(MC_HPP
   transferModelica.hpp
   transferOptimica.hpp
   Variable.hpp
+  Block.hpp
+  BLTHandler.hpp
   ${TYPES_HPP}
   jcc/initjcc.h
   jcc/jccutils.h
@@ -93,6 +97,11 @@ set(MC_HPP
 )
 
 set(DE_CPP 
+  CompilerOptionsWrapper.cpp
+  Equation.cpp
+  Variable.cpp
+  Block.cpp
+  BLTHandler.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -102,6 +111,15 @@ set(DE_CPP
 )
 
 set(DE_HPP
+  Ref.hpp
+  SharedNode.hpp
+  RefCountedNode.hpp
+  OwnedNode.hpp
+  CompilerOptionsWrapper.hpp
+  Equation.hpp
+  Variable.hpp
+  Block.hpp
+  BLTHandler.hpp
   jcc/initjcc.h
   jcc/jccutils.h
   jcc/mxwrap.hpp
