@@ -132,9 +132,12 @@ aspect TransformCanonical {
             transformations.add(new genInitialEquations());
             transformations.add(new setFDerivativeVariablesPreBLT());
             transformations.add(new propagateNonFixedParameters());
+            transformations.add(new indexReduction());
+            transformations.add(new LateFunctionInliningIfSet());
+            transformations.add(new addFPreVariables());
+            transformations.add(new aliasEliminationIfSet());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
-            transformations.add(new indexReduction());
             transformations.add(new computeMatchingsAndBLT());
         }
 
@@ -1529,11 +1532,13 @@ aspect TransformCanonical {
             public void perform() {
                 ArrayList<FVariable> l = new ArrayList<FVariable>();
                 for (FVariable fv : discreteVariables()) 
-                    l.add(fv.createPreVariable());
+                    if (fv.myPreVariable().isUnknown())
+                        l.add(fv.createPreVariable());
                 for (FVariable fv : continuousVariablesUsedInPreInInitial())
-                    l.add(fv.createPreVariable());
+                    if (fv.myPreVariable().isUnknown())
+                        l.add(fv.createPreVariable());
                 for (FVariable fv : l) 
-                    addFVariable(fv);
+                    addFVariableNoTransform(fv);
                 root().flushAllRecursive();
             }
         }
@@ -1617,7 +1622,7 @@ aspect TransformCanonical {
                     
                     if (generate) {
                         FExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
-                        FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
+                        FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp().fullCopy() : fv.type().zeroLiteral();
                         addFInitialEquation(new FEquation(lhs, rhs));
                     }
                 }

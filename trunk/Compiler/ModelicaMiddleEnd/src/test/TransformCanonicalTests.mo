@@ -5434,15 +5434,15 @@ equation
 w[1] := time
 
 --- Solved function call equation ---
-({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
-  Assigned variables: temp_4
-                      temp_5
+({temp_6, temp_7}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  Assigned variables: temp_6
+                      temp_7
 
 --- Solved equation ---
-z[1] := - temp_4
+z[1] := - temp_6
 
 --- Solved equation ---
-z[2] := - temp_5
+z[2] := - temp_7
 -------------------------------
 ")})));
 end BlockTest10;

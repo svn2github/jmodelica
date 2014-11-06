@@ -433,6 +433,7 @@ equation
             generate_dae=false,
             equation_sorting=true,
             variability_propagation=false,
+            inline_functions="none",
             template="$C_ode_derivatives$",
             generatedCode="
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
