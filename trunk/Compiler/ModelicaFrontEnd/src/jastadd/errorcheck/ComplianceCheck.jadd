@@ -101,11 +101,6 @@ aspect ComplianceCheck {
         compliance("The " + getName() + "() function-like operator is not supported");
     }
 
-    public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
-        if (!lockBranch(checkType))
-            compliance("The delay() function-like operator is not supported");
-    }
-
 	public void FSampleExp.complianceCheck(ErrorCheckType checkType) {
 	    complianceOnlyFMU("The sample() function-like operator is");
 	}

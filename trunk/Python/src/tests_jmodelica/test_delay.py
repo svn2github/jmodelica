@@ -23,7 +23,7 @@ from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr, get_files_path
 
 
-compiler_options={'compliance_as_warning':True}
+compiler_options={}
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 path_to_mo  = os.path.join(path_to_mos, 'TestDelay.mo')
