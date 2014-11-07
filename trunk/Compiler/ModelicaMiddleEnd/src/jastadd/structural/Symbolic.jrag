@@ -1207,5 +1207,51 @@ aspect ExpressionSimplification {
         when (getFExpNoTransform() instanceof FNegExp) to FExp getFExp().makeNegated();
         when (getFExpNoTransform().isLiteralExp())     to FExp getFExp().makeNegated();
     }
- 
+    
+    rewrite FIfExp {
+        when (getThenExpNoTransform().equalsSymbolic(getElseExpNoTransform())) to FExp getThenExp();
+    }
+    
+    syn boolean FExp.equalsSymbolic(FExp other) {
+        return super.equals(other);
+    }
+    
+    eq FIdUseExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FIdUseExp))
+            return false;
+        FIdUseExp o = (FIdUseExp) other;
+        return name().equals(o.name());
+    }
+    
+    eq FRealLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FRealLitExp))
+            return false;
+        FRealLitExp o = (FRealLitExp) other;
+        return getValue() == o.getValue(); 
+    }
+    
+    eq FIntegerLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FIntegerLitExp))
+            return false;
+        FIntegerLitExp o = (FIntegerLitExp) other;
+        return getValue() == o.getValue(); 
+    }
+    
+    eq FBooleanLitExpTrue.equalsSymbolic(FExp other)  = other instanceof FBooleanLitExpTrue;
+    eq FBooleanLitExpFalse.equalsSymbolic(FExp other) = other instanceof FBooleanLitExpFalse;
+    
+    eq FStringLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FStringLitExp))
+            return false;
+        FStringLitExp o = (FStringLitExp) other;
+        return getString().equals(o.getString()); 
+    }
+    
+    eq FEnumLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FEnumLitExp))
+            return false;
+        FEnumLitExp o = (FEnumLitExp) other;
+        return getValue() == o.getValue(); 
+    }
+    
  }

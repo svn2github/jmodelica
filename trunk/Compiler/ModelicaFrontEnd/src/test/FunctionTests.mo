@@ -2621,7 +2621,7 @@ function f
 	input Real[2] i;
 	output Real[2] o;
 algorithm
-	o := if i * i > 1.0E-6 then i else i;
+    o := if i * i > 1.0E-6 then i else i .+ 1;
 end f;
 
 Real[2] x = f({time,time*2});
@@ -2644,8 +2644,8 @@ public
   input Real[2] i;
   output Real[2] o;
 algorithm
-  o[1] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[1] else i[1];
-  o[2] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[2] else i[2];
+  o[1] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[1] else i[1] .+ 1;
+  o[2] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[2] else i[2] .+ 1;
   return;
  end FunctionTests.AlgorithmFlatten7.f;
 end FunctionTests.AlgorithmFlatten7;
@@ -10037,7 +10037,7 @@ model UnknownArray46
         input Real[:] x;
         output Real[size(x,1)] y;
       algorithm
-        y := f2(if size(x,1) > 1 then x else x);
+        y := f2(if size(x,1) > 1 then x else x .+ 1);
     end f1;
     Real[1] y = f1({1});
     
@@ -10062,7 +10062,7 @@ public
   size(y) := {size(x, 1)};
   size(temp_1) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
-   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1];
+   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1] .+ 1;
   end for;
   (y) := FunctionTests.UnknownArray46.f2(temp_1);
   return;
