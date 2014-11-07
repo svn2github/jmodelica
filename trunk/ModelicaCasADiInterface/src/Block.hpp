@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi 
 {
 
-class Block {
+class Block : public RefCountedNode{
     public:
     //Default constructor
     Block(): simple_flag(false),linear_flag(false),solve_flag(false){ nRowsJac=0; nColsJac=0;};
@@ -47,6 +47,8 @@ class Block {
         delete [] prettyPrintJacobian;
       }
     }
+    
+#ifndef SWIG
     /** 
      * Set a Block from optimica o modelica compiler
      * @param JBlock optimica or modelica block
@@ -207,7 +209,7 @@ class Block {
         solveLinearSystem();
       }    
     }
-    
+#endif    
     
     bool& isSimple();
     bool& isLinear();

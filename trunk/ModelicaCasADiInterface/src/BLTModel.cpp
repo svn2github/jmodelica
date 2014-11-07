@@ -22,8 +22,34 @@ using std::string; using std::pair;
 
 namespace ModelicaCasADi{
 
+bool BLTModel::isBLTEliminateable(casadi::MX var, int depth/*=0*/) const{
+    std::vector<casadi::MX> eliminateables = blt->getAllEliminatableVariables();
+    for(std::vector<casadi::MX>::const_iterator it=eliminateables.begin(); 
+        it!=eliminateables.end();++it){
+        if(it->isEqual(var,depth)){
+            return 1;        
+        }
+    }
+    return 0;
+}
+
+bool BLTModel::isBLTEliminateable(const std::string& varName) const{
+    std::vector<casadi::MX> eliminateables = blt->getAllEliminatableVariables();
+    for(std::vector<casadi::MX>::const_iterator it=eliminateables.begin(); 
+        it!=eliminateables.end();++it){
+        if(it->getName()==varName){
+            return 1;        
+        }
+    }
+    return 0;
+}
+
 const MX BLTModel::getDaeResidual() const {
     MX daeRes;
+    std::vector< Ref<Equation> > DAEfromBLT =blt->getAllEquations4Model();
+    for (vector< Ref<Equation> >::const_iterator it = DAEfromBLT.begin(); it != DAEfromBLT.end(); ++it) {
+        daeRes.append((*it)->getResidual());
+    }
     for (vector< Ref<Equation> >::const_iterator it = addedDAEEquations.begin(); it != addedDAEEquations.end(); ++it) {
         daeRes.append((*it)->getResidual());
     }
@@ -62,9 +88,9 @@ void BLTModel::print(std::ostream& os) const {
         os << " -- Initial equations -- \n";
         printVectorBLT(os, initialEquations);
     }
-    if (!addedDAEEquations.empty()) {
+    if (!getDaeEquations().empty()) {
         os << " -- DAE equations -- \n";
-        printVectorBLT(os, addedDAEEquations);
+        printVectorBLT(os, getDaeEquations());
     }
     os << endl;
 }

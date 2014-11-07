@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Equation.hpp"
 #include "RefCountedNode.hpp"
 #include "Ref.hpp"
+#include "BLTHandler.hpp"
 
 namespace ModelicaCasADi 
 {  
@@ -181,6 +182,8 @@ class BaseModel: public RefCountedNode {
         * @return A MX.
         */
     virtual const casadi::MX getDaeResidual() const = 0; 
+    
+    
 
     virtual std::vector< Ref< Equation> > getDaeEquations() const =0;
     std::vector< Ref< Equation> > getInitialEquations() const;
@@ -199,6 +202,9 @@ class BaseModel: public RefCountedNode {
 
     /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
     void setDirty() { dirty = true; }
+    
+    /** Notify the Model if it has a BLT for DAE equations **/
+    virtual bool hasBLT(){return 0;}
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:

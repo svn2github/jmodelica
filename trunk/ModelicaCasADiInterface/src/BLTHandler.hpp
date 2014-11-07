@@ -29,15 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
-class BLTHandler{
+class BLTHandler : public RefCountedNode{
     public:
     BLTHandler(){}
-    ~BLTHandler(){
-        for(std::vector<Block*>::iterator it=blt.begin();it!= blt.end();++it){
-            delete *it;
-            *it = NULL;
-        }
-    }
+    ~BLTHandler(){}
+    
+#ifndef SWIG
     template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ >
@@ -58,6 +55,7 @@ class BLTHandler{
            delete block;
         }
     }
+#endif
     
     void printBLT(std::ostream& out, bool with_details=false) const;
     int getNumberOfBlocks() const;
@@ -65,13 +63,14 @@ class BLTHandler{
     std::vector< Ref<Equation> > getAllEquations4Model() const;
     std::vector<casadi::MX> getSubstitues(const std::vector<casadi::MX>& eliminateables) const;
     void substituteAllEliminateables();
-    //This is dangerous...use just for testing
-    Block* getBlock(int i) const; 
+    
+    Ref<Block> getBlock(int i) const;
+    MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-    std::vector<Block*> blt;
+    std::vector< Ref<Block> > blt;
 };
 
 inline int BLTHandler::getNumberOfBlocks() const {return blt.size();}
-inline Block* BLTHandler::getBlock(int i) const {return blt[i];}
+inline Ref<Block> BLTHandler::getBlock(int i) const {return blt[i];}
 }; // End namespace
 #endif

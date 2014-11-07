@@ -11,6 +11,7 @@
 
 #include "Ref.hpp"
 #include "CompilerOptionsWrapper.hpp"
+#include "sharedTransferFunctionality.hpp"
 
 // Wrapped classes from the Modelica compiler
 #include "java/lang/String.h"
@@ -92,21 +93,6 @@ namespace jl = java::lang;
 using org::jmodelica::util::OptionRegistry;
 
 
-void setUpJVM() {
-   std::cout << "Creating JVM" << std::endl;
-   jint version = initJVM();
-   std::cout << "Created JVM, JNI version " << (version>>16) << "." << (version&0xffff) << '\n' << std::endl;
-}
-
-void tearDownJVM() {
-   // Make sure that no JCC proxy objects live in this scope, as they will then  
-   // try to free their java objects after the JVM has been destroyed. 
-   std::cout << "\nDestroying JVM" << std::endl;
-   destroyJVM();
-   std::cout << "Destroyed JVM" << std::endl;
-}
-
-
 int main(int argc, char ** argv)
 {
    //Class
@@ -174,7 +160,7 @@ int main(int argc, char ** argv)
       }
       
       /*blocksHandler.printBLT(std::cout, true);
-      ModelicaCasADi::Block* b1 = blockHandler.getBlock(1);
+      ModelicaCasADi::Ref<Block> b1 = blockHandler.getBlock(1);
       b1->printBlock(std::cout,true);
       casadi::MX toSubstitute = b1->getInactiveVarByName("der(x3)");
       std::vector<casadi::MX> v(1,toSubstitute);

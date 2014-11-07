@@ -44,6 +44,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "BooleanVariable.hpp"
 #include "IntegerVariable.hpp"
 #include "Ref.hpp"
+//#include "BLTHandler.hpp"
+//#include "Block.hpp"
 
 #include "initjcc.h" // for env
 #include "JCCEnv.h"
@@ -59,9 +61,36 @@ void setUpJVM();
 void tearDownJVM();
 
 
+/************************
+ *                      *
+ *         BLT          *
+ *                      *
+ ************************/
 
-
-
+/* 
+template<typename FClass,typename JBLT, typename JBlock, typename JCollection, typename JIterator,
+            typename FVar, typename FAbstractEquation, typename FEquation,
+            typename FExp, template<typename Ty> class ArrayJ >
+void transferBLT(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, FClass fclass, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
+    //Check if the model has BLT capabilities
+    if(m->hasBLT()){
+        ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler > blt = m->getBLT();
+	JBLT jblt = fclass.getDAEBLT();
+	blt->setBLT<JBLT,
+		    JBlock,
+		    JCollection,
+		    JIterator,
+		    FVar,
+		    FAbstractEquation,
+		    FEquation,
+		    FExp,
+		    ArrayJ>(blt, jacobian_no_casadi, solve_with_casadi);
+    }
+    else{
+	std::cout<<"\nThe model does not have a blt.\n";
+    }
+}
+*/
 /************************
  *                      *
  *      Equations       *
