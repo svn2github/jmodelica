@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Model.hpp"
+#include "BLTModel.hpp"
 
 using casadi::MX; using casadi::MXFunction; 
 using std::vector; using std::ostream;
@@ -22,23 +22,23 @@ using std::string; using std::pair;
 
 namespace ModelicaCasADi{
 
-const MX Model::getDaeResidual() const {
+const MX BLTModel::getDaeResidual() const {
     MX daeRes;
-    for (vector< Ref<Equation> >::const_iterator it = daeEquations.begin(); it != daeEquations.end(); ++it) {
+    for (vector< Ref<Equation> >::const_iterator it = addedDAEEquations.begin(); it != addedDAEEquations.end(); ++it) {
         daeRes.append((*it)->getResidual());
     }
     return daeRes;
 }
 
 template <class T> 
-void printVector(std::ostream& os, const std::vector<T> &makeStringOf) {
+void printVectorBLT(std::ostream& os, const std::vector<T> &makeStringOf) {
     typename std::vector<T>::const_iterator it;
     for ( it = makeStringOf.begin(); it < makeStringOf.end(); ++it) {
          os << **it << "\n";
     }
 }
 
-void Model::print(std::ostream& os) const {
+void BLTModel::print(std::ostream& os) const {
 //    os << "Model<" << this << ">"; return;
 
     using std::endl;
@@ -48,23 +48,23 @@ void Model::print(std::ostream& os) const {
         timeVar.print(os);
         os << endl;
     }
-    printVector(os, z);
+    printVectorBLT(os, z);
     os << "\n---------------------------- Variable types  ----------------------------\n" << endl;
-    for (Model::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {
+    for (BLTModel::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {
             os << it->second << endl;
     }
     os << "\n------------------------------- Functions -------------------------------\n" << endl;
-    for (Model::functionMap::const_iterator it = modelFunctionMap.begin(); it != modelFunctionMap.end(); ++it){
+    for (BLTModel::functionMap::const_iterator it = modelFunctionMap.begin(); it != modelFunctionMap.end(); ++it){
             os << it->second << endl;
     }
     os << "\n------------------------------- Equations -------------------------------\n" << endl;
     if (!initialEquations.empty()) {
         os << " -- Initial equations -- \n";
-        printVector(os, initialEquations);
+        printVectorBLT(os, initialEquations);
     }
-    if (!daeEquations.empty()) {
+    if (!addedDAEEquations.empty()) {
         os << " -- DAE equations -- \n";
-        printVector(os, daeEquations);
+        printVectorBLT(os, addedDAEEquations);
     }
     os << endl;
 }

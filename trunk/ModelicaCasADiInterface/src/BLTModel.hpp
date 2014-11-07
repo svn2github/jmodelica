@@ -35,10 +35,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi 
 {  
-class Model: public BaseModel {
+class BLTModel: public BaseModel {
     public:
         /** Create a blank, uninitialized Model */
-        Model() : BaseModel(){}
+        BLTModel() : BaseModel(){}
         
         /** @param A pointer to an equation */ 
         void addDaeEquation(Ref<Equation> eq);
@@ -52,12 +52,12 @@ class Model: public BaseModel {
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         /// Vector containing pointers to DAE equations
-        std::vector< Ref<Equation> > daeEquations; 
+        std::vector< Ref<Equation> > addedDAEEquations;
 };
 
-inline void Model::addDaeEquation(Ref<Equation>eq) { daeEquations.push_back(eq); }
+inline void BLTModel::addDaeEquation(Ref<Equation>eq) { addedDAEEquations.push_back(eq); }
 
-inline std::vector< Ref< Equation> > Model::getDaeEquations() const { return daeEquations; }
+inline std::vector< Ref< Equation> > BLTModel::getDaeEquations() const { return addedDAEEquations; }
 
 }; // End namespace
 #endif
