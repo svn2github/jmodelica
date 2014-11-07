@@ -39,6 +39,9 @@ class CompilerOptionsWrapper: public RefCountedNode {
         void addIntegerOption(std::string opt, int val);
         void addRealOption(std::string opt, double val);
         
+        void printCompilerOptions(std::ostream& out);
+        void printOpts();
+        
         org::jmodelica::util::OptionRegistry getOptionRegistry();
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
@@ -50,5 +53,6 @@ class CompilerOptionsWrapper: public RefCountedNode {
 };
 inline CompilerOptionsWrapper::CompilerOptionsWrapper() : optr(org::jmodelica::modelica::compiler::ModelicaCompiler::createOptions()) {}
 inline org::jmodelica::util::OptionRegistry CompilerOptionsWrapper::getOptionRegistry() { return optr; }
+inline void CompilerOptionsWrapper::printOpts() {printCompilerOptions(std::cout);}
 }; // End namespace
 #endif

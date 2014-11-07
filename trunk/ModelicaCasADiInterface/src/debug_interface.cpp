@@ -127,6 +127,7 @@ int main(int argc, char ** argv)
       ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options = new ModelicaCasADi::CompilerOptionsWrapper();
       options->setStringOption("inline_functions", "none");
       options->setBooleanOption("automatic_tearing", false);      
+      //options->printCompilerOptions(std::cout);
       //Compiler      
       mc::ModelicaCompiler compiler(options->getOptionRegistry());
       java::lang::String fileVecJava[modelFiles.size()];

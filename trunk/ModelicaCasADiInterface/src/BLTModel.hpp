@@ -51,7 +51,7 @@ class BLTModel: public BaseModel {
         virtual void print(std::ostream& os) const;
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        /// Vector containing pointers to DAE equations
+        /// Vector containing pointers to DAE equations added beside blt ones
         std::vector< Ref<Equation> > addedDAEEquations;
 };
 

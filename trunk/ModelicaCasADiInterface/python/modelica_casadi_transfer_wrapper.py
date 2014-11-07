@@ -211,6 +211,11 @@ def _get_options(compiler_options):
             options_wrapper.setStringOption(key, _list_to_string(value))
     return options_wrapper
 
+def printCompilerOptions():
+    _ensure_jvm()
+    options_wrapper = CompilerOptionsWrapper()
+    options_wrapper.printOpts()
+
 def has_mop_file(files):
     for f in files:
         basename, ext = os.path.splitext(f)
