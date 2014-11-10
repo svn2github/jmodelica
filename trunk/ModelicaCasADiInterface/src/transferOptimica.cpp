@@ -52,6 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // The ModelicaCasADi program
 #include "Model.hpp"
+#include "BaseModel.hpp"
 #include "Constraint.hpp"
 #include "TimedVariable.hpp"
 
@@ -172,7 +173,7 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(optProblem, fclass);
         
         // Variables template
-        transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (optProblem, fclass.allVariables());
+        transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment > (optProblem, fclass.allVariables());
         // Transfer timed variables. Depends on that other variables are transferred. 
         transferTimedVariables(optProblem, fclass);
         

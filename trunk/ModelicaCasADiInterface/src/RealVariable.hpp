@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
-class Model;
+class BaseModel;
 
 class RealVariable : public Variable {
     public:
@@ -35,7 +35,7 @@ class RealVariable : public Variable {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        RealVariable(Model *owner, casadi::MX var, Causality causality, 
+        RealVariable(BaseModel *owner, casadi::MX var, Causality causality, 
                      Variability variability,
                      Ref<VariableType> declaredType = Ref<VariableType>());
         /**

@@ -108,7 +108,7 @@ class BaseModel: public RefCountedNode {
     /** @param A pointer to an equation */    
     void addInitialEquation(Ref<Equation> eq);
     /** @param A pointer to an equation */ 
-    virtual void addDaeEquation(Ref<Equation> eq)=0;
+    virtual void addDaeEquation(Ref<Equation> eq){std::cout<<"BaseModel addDaeEquation should not be called\n.";}
     /** @param A pointer to a ModelFunction */
     void setModelFunctionByItsName(Ref<ModelFunction> mf);
     /** 
@@ -181,11 +181,11 @@ class BaseModel: public RefCountedNode {
         * Returns all DAE equations in a stacked MX on the form: lhs - rhs.
         * @return A MX.
         */
-    virtual const casadi::MX getDaeResidual() const = 0; 
+    virtual const casadi::MX getDaeResidual() const {std::cout<<"BaseModel getDaeResidual should not be called\n.";}
     
     
 
-    virtual std::vector< Ref< Equation> > getDaeEquations() const =0;
+    virtual std::vector< Ref< Equation> > getDaeEquations() const {std::cout<<"BaseModel getDaeEquations should not be called\n.";}
     std::vector< Ref< Equation> > getInitialEquations() const;
 
     /** 
@@ -198,7 +198,17 @@ class BaseModel: public RefCountedNode {
     std::string getIdentifier();
 
     /** Allows the use of operator << to print this class, through Printable. */
-    virtual void print(std::ostream& os) const =0;
+    virtual void print(std::ostream& os) const {std::cout<<"BaseModel print should not be called\n.";}
+    
+    /** Allows the use of operator << to print this class, through Printable. */
+    virtual std::vector<casadi::MX> getBLTEliminateables() const {return std::vector<casadi::MX>();}
+    
+    /*virtual void eliminateVariable(const std::string& varName){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
+    virtual void eliminateVariables(std::vector<std::string>& varNames){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
+    virtual void eliminateVariable(Ref<Variable> var){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
+    virtual void eliminateVariables(std::vector< Ref<Variable> >& vars){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
+    */
+    virtual void setBLT(Ref<BLTHandler> nblt){std::cout<<"BaseModel setBLT should not be called\n.";}
 
     /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
     void setDirty() { dirty = true; }

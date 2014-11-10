@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
-class Model;
+class BaseModel;
 
 class DerivativeVariable : public RealVariable {
     public:
@@ -35,7 +35,7 @@ class DerivativeVariable : public RealVariable {
          * @param A pointer to a Variable
          * @param A VariableType, default is a reference to NULL. 
          */
-        DerivativeVariable(Model *owner, casadi::MX var, Ref<Variable> diffVar, 
+        DerivativeVariable(BaseModel *owner, casadi::MX var, Ref<Variable> diffVar, 
                            Ref<VariableType> declaredType = Ref<VariableType>()); 
         /** @return A pointer to a Variable */
         const Ref<Variable> getMyDifferentiatedVariable() const;

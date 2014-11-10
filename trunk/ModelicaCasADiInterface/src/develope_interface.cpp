@@ -7,11 +7,11 @@
 #include "jccutils.h"
 #include "ifcasadi/MX.h"
 #include "ifcasadi/ifcasadi.h"
-#include "mxwrap.hpp"
 
 #include "Ref.hpp"
 #include "CompilerOptionsWrapper.hpp"
 #include "sharedTransferFunctionality.hpp"
+#include "casadi/casadi.hpp"
 
 // Wrapped classes from the Modelica compiler
 #include "java/lang/String.h"
@@ -88,6 +88,15 @@
 #include <iterator>
 #include <algorithm>
 
+#include "BaseModel.hpp"
+#include "BLTModel.hpp"
+
+// For transforming output from JCC-wrapped classes to CasADi objects. 
+// Must be included after FExp.h
+#include "mxwrap.hpp" 
+#include "mxfunctionwrap.hpp" 
+#include "mxvectorwrap.hpp" 
+
 namespace mc = org::jmodelica::modelica::compiler;
 namespace jl = java::lang;
 using org::jmodelica::util::OptionRegistry;
@@ -123,44 +132,105 @@ int main(int argc, char ** argv)
       mc::FClass fclass = compiler.compileModelNoCodeGen(
          new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
          StringFromUTF(modelName.c_str()));
-         
+       
+      std::string identfier = env->toString(fclass.nameUnderscore().this$);
+      
    
+      ModelicaCasADi::Ref<ModelicaCasADi::BLTModel> BLTModel = new ModelicaCasADi::BLTModel();
+      BLTModel->initializeModel(identfier);
+      // Transfer time variable
+      transferTime<mc::FClass>(BLTModel, fclass);
+      
+      
+      
+      // Variables template
+      transferVariables<java::util::ArrayList,
+                        mc::FVariable,
+                        mc::FDerivativeVariable,
+                        mc::FRealVariable,
+                        mc::List,
+                        mc::FAttribute,
+                        mc::FStringComment>(BLTModel, fclass.allVariables());
+                        
+      // Transfer user defined types (also generates base types for the user types). 
+      transferUserDefinedTypes<mc::FClass,
+                              mc::List,
+                              mc::FDerivedType,
+                              mc::FAttribute,
+                              mc::FType>(BLTModel, fclass);
       
       //Plain BLT
-      mc::BLT blt = fclass.getDAEBLT();
+      mc::BLT jblt =fclass.getDAEBLT();
       
-      ModelicaCasADi::BLTHandler blocksHandler = ModelicaCasADi::BLTHandler();
+      transferBLT2Model<mc::BLT,
+                        mc::AbstractEquationBlock,
+                        java::util::Collection,
+                        java::util::Iterator,
+                        mc::FVariable,
+                        mc::FAbstractEquation,
+                        mc::FEquation,
+                        mc::FExp,
+                        JArray>(&jblt, BLTModel, false, false);
+                        
+      BLTModel->setEliminateableVariables();
       
-      blocksHandler.setBLT<mc::BLT,
-                          mc::AbstractEquationBlock,
-                          java::util::Collection,
-                          java::util::Iterator,
-                          mc::FVariable,
-                          mc::FAbstractEquation,
-                          mc::FEquation,
-                          mc::FExp,
-                          JArray>(blt, true, false);
-      blocksHandler.printBLT(std::cout, true);
+      //Initial Equations
+      transferInitialEquations<java::util::ArrayList,
+                              mc::FAbstractEquation>(BLTModel, fclass.initialEquations());
+      
+      // Functions
+      transferFunctions<mc::FClass,
+                        mc::List,
+                        mc::FFunctionDecl>(BLTModel, fclass);
+      
+      BLTModel->print(std::cout);
+      
+      BLTModel->eliminateAlgebraics();
+      
+      BLTModel->print(std::cout);
+      
+      BLTModel->substituteAllEliminateableVariables();
+      
+      BLTModel->print(std::cout);
+      
+      
+      ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> blocksHandler = new ModelicaCasADi::BLTHandler();
+      transferBLT<mc::BLT,
+                  mc::AbstractEquationBlock,
+                  java::util::Collection,
+                  java::util::Iterator,
+                  mc::FVariable,
+                  mc::FAbstractEquation,
+                  mc::FEquation,
+                  mc::FExp,
+                  JArray>(&jblt, blocksHandler, false, false);
+      //blocksHandler->printBLT(std::cout, true);
+      
       
       std::cout<<"\nModel Eliminatable Variables\n";                    
-      std::vector<casadi::MX> eliminateables = blocksHandler.getAllEliminatableVariables();      
+      std::vector<casadi::MX> eliminateables = blocksHandler->getAllEliminatableVariables();      
       std::copy(eliminateables.begin(), eliminateables.end(), std::ostream_iterator<casadi::MX>(std::cout, " "));
       std::cout<<"\n\nModel Equations\n";
-      std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelDAEequations = blocksHandler.getAllEquations4Model();      
+      std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelDAEequations = blocksHandler->getAllEquations4Model();      
       for(std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::const_iterator it=modelDAEequations.begin(); 
         it != modelDAEequations.end();++it){
            std::cout<< (*it)->getLhs() <<" = "<< (*it)->getRhs() << "\n";
       }
-      std::cout<<"\n Model Equations After substitution of all eliminateables\n";
-      blocksHandler.substituteAllEliminateables();
-      modelDAEequations = blocksHandler.getAllEquations4Model();      
+      std::cout<<"\nModel Equations After substitution of all eliminateables\n";
+      blocksHandler->substituteAllEliminateables();
+      modelDAEequations = blocksHandler->getAllEquations4Model();      
       for(std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::const_iterator it=modelDAEequations.begin(); 
         it != modelDAEequations.end();++it){
            std::cout<< (*it)->getLhs() <<" = "<< (*it)->getRhs() << "\n";
       }
       
-      /*blocksHandler.printBLT(std::cout, true);
-      ModelicaCasADi::Ref<Block> b1 = blockHandler.getBlock(1);
+      
+      
+      
+      
+      
+      /*blocksHandler->printBLT(std::cout, true);
+      ModelicaCasADi::Ref<Block> b1 = blockHandler->getBlock(1);
       b1->printBlock(std::cout,true);
       casadi::MX toSubstitute = b1->getInactiveVarByName("der(x3)");
       std::vector<casadi::MX> v(1,toSubstitute);
@@ -172,17 +242,17 @@ int main(int argc, char ** argv)
       {
          //Block
          mc::AbstractEquationBlock* block = new mc::AbstractEquationBlock(blt.get(i).this$);
-         ModelicaCasADi::Block* blockCI = new ModelicaCasADi::Block();
+         ModelicaCasADi::Ref<ModelicaCasADi::Block> blockCI = new ModelicaCasADi::Block();
          
          std::cout<<"BlockType "<<env->toString(block->getClass().this$)<<"\n";
-         blockCI->setBlock<mc::AbstractEquationBlock,
+         transferBlock<mc::AbstractEquationBlock,
                               java::util::Collection,
                               java::util::Iterator,
                               mc::FVariable,
                               mc::FAbstractEquation,
                               mc::FEquation,
-                              mc::FExp,
-                              JArray>(block,false);
+                              mc::FExp>(block,blockCI,false);        
+         
          blockCI->printBlock(std::cout,true);
          
          //Equations
@@ -249,7 +319,7 @@ int main(int argc, char ** argv)
             std::cout<<"\n\tisSolvableBlock\n";
          }
          delete block;
-         delete blockCI;
+         
       }*/
       /*mc::AbstractEquationBlock* block = new mc::AbstractEquationBlock(blt.get(1).this$);
       ModelicaCasADi::Block* blockCI2 = new ModelicaCasADi::Block();

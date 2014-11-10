@@ -52,8 +52,29 @@ namespace ModelicaCasADi
         }
         return modelEquations;
     }
+    
+    void BLTHandler::removeSolutionOfVariable(std::string varName){
+        bool found=0;
+        for(std::vector< Ref<Block> >::iterator it=blt.begin();
+            it!=blt.end() && !found ;++it){
+            if((*it)->hasSolution(varName)){
+               (*it)->removeSolutionOfVariable(varName);               
+               found=1;         
+            }
+        }
+        if(!found){std::cout<<"The variable "<<varName<<" does not have a solution in BLT.\n";}
+    }
+    
+    void BLTHandler::substitute(const std::vector<casadi::MX>& vars, const std::vector<casadi::MX>& subs){
+        for(std::vector< Ref<Block> >::iterator it=blt.begin();
+            it!=blt.end();++it){
+            (*it)->substituteVariablesInExpressions(vars,subs);
+        }   
+    }
+    
     std::vector<casadi::MX> BLTHandler::getSubstitues(const std::vector<casadi::MX>& eliminateables) const{
-        std::vector<casadi::MX> subs;
+        
+        /*std::vector<casadi::MX> subs;
         for(std::vector<casadi::MX>::const_iterator it_e = eliminateables.begin(); 
               it_e != eliminateables.end(); ++it_e){
             bool found=0;
@@ -70,6 +91,53 @@ namespace ModelicaCasADi
                 std::cout<<"Warning: The variable "<< *it_e << "is not eliminateable. It will be ignore at the substitution.\n";
                 subs.push_back(casadi::MX()); 
             }
+        }
+        return subs;*/        
+        
+        std::vector<casadi::MX> subs;
+        int k=0;
+        std::vector<casadi::MX> inner_subs;
+        std::vector<casadi::MX> inner_elim;
+        for(std::vector<casadi::MX>::const_iterator it_e = eliminateables.begin(); 
+              it_e != eliminateables.end(); ++it_e){
+            bool found=0;
+            casadi::MX tmp_subs;
+            for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
+                it!=blt.end() && !found;++it){
+                if((*it)->hasSolution(it_e->getName())){
+                   casadi::MX exp = (*it)->getSolutionOfVariable(it_e->getName());
+                   tmp_subs=exp;
+                   found=1;
+                }
+            }
+            
+            //substitute previous variables in eliminateables
+            if(k>0){
+                if(found){
+                    for(int r=k;r>=0;--r){
+                        int ndeps =tmp_subs.getNdeps();
+                        for(int j=0;j<ndeps;++j){
+                            if(tmp_subs.getDep(j).isEqual(eliminateables[r],0) && !subs[r].isEmpty()){
+                                 inner_subs.push_back(subs[r]);
+                                 inner_elim.push_back(eliminateables[r]); 
+                            }
+                        }
+                    }
+                    std::vector<casadi::MX> subExp = casadi::substitute(std::vector<casadi::MX>(1,tmp_subs),inner_elim,inner_subs);
+                    subs.push_back(subExp.front());
+                    inner_subs.clear();
+                    inner_elim.clear();
+                }
+            }
+            else{
+               if(found){subs.push_back(tmp_subs);} 
+            }
+            if(!found){
+                //If the variable is empty the substitution in the block will be ignored
+                std::cout<<"Warning: The variable "<< *it_e << "is not eliminateable. It will be ignore at the substitution.\n";
+                subs.push_back(casadi::MX()); 
+            }
+            ++k;
         }
         return subs;
     }

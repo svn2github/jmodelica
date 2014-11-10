@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "RealVariable.hpp"
 namespace ModelicaCasADi 
 {
-RealVariable::RealVariable(Model *owner, casadi::MX var, Variable::Causality causality,
+RealVariable::RealVariable(BaseModel *owner, casadi::MX var, Variable::Causality causality,
                            Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
   Variable(owner, var, causality, variability, declaredType) { 
     myDerivativeVariable = NULL;

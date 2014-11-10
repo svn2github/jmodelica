@@ -17,13 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_BLTMODEL 
 #define _MODELICACASADI_BLTMODEL
 #include <iostream>
-#include <map>
 #include <string>
 #include <vector>
 
 #include "casadi/casadi.hpp"
 
-#include "ModelFunction.hpp"
 #include "types/VariableType.hpp"
 #include "Variable.hpp"
 #include "RealVariable.hpp"
@@ -38,27 +36,38 @@ namespace ModelicaCasADi
 {  
 class BLTModel: public BaseModel {
     public:
-        /** Create a blank, uninitialized Model */
-        BLTModel() : BaseModel(){blt=new BLTHandler();}
+    /** Create a blank, uninitialized Model */
+    BLTModel() : BaseModel(){blt=new BLTHandler();}
 
     ~BLTModel(){}
     /** @param A pointer to an equation */ 
-    void addDaeEquation(Ref<Equation> eq);
+    virtual void addDaeEquation(Ref<Equation> eq);
 
-    const casadi::MX getDaeResidual() const; 
+    virtual const casadi::MX getDaeResidual() const; 
 
-    std::vector< Ref<Equation> > getDaeEquations() const;
-    
-    //To decide
-    //Ref<BLTHandler>& getBLT();
-    
+    virtual std::vector< Ref<Equation> > getDaeEquations() const;
+   
     /** @param An MX from a CasadiInterface variable  */ 
     bool isBLTEliminateable(casadi::MX var, int depth=0) const;
     /** @param Name of an MX from a CasadiInterface variable  */
     bool isBLTEliminateable(const std::string& varName) const;
     
     /** Notify the Model if it has a BLT for DAE equations **/
-    bool hasBLT(){return 1;}
+    virtual bool hasBLT(){return 1;}
+    
+    virtual std::vector<casadi::MX> getBLTEliminateables() const;
+    
+    virtual void eliminateVariable(const std::string& varName);
+    virtual void eliminateVariables(std::vector<std::string>& varNames);
+    virtual void eliminateVariable(Ref<Variable> var);
+    virtual void eliminateVariables(std::vector< Ref<Variable> >& vars);
+    virtual void eliminateAlgebraics();
+    virtual void substituteAllEliminateableVariables(){blt->substituteAllEliminateables();}
+    
+    void setBLT(Ref<BLTHandler> nblt){blt=nblt;}
+    void setEliminateableVariables();
+    
+    int getNumBLTBlocks(){return blt->getNumberOfBlocks();}
 
     /** Allows the use of operator << to print this class, through Printable. */
     virtual void print(std::ostream& os) const;
@@ -78,7 +87,9 @@ inline std::vector< Ref< Equation> > BLTModel::getDaeEquations() const {
     return DAEfromBLT; 
 }
 
-//inline Ref<BLTHandler>& BLTModel::getBLT(){return blt;}
+inline std::vector<casadi::MX> BLTModel::getBLTEliminateables() const{
+    return blt->getAllEliminatableVariables();
+}
 
 }; // End namespace
 #endif

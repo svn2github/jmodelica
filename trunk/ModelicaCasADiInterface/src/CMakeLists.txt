@@ -46,7 +46,7 @@ set(MC_CPP
   IntegerVariable.cpp
   BaseModel.cpp
   Model.cpp
-  # BLTModel.cpp
+  BLTModel.cpp
   ModelFunction.cpp
   OptimizationProblem.cpp
   RealVariable.cpp
@@ -75,7 +75,7 @@ set(MC_HPP
   ModelFunction.hpp
   BaseModel.hpp
   Model.hpp
-  # BLTModel.hpp
+  BLTModel.hpp
   OptimizationProblem.hpp
   Printable.hpp
   RealVariable.hpp

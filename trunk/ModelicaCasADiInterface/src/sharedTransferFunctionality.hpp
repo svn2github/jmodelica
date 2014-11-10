@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // The ModelicaCasADi program
 #include "Model.hpp"
+#include "BaseModel.hpp"
 #include "types/VariableType.hpp"
 #include "types/UserType.hpp"
 #include "types/PrimitiveType.hpp"
@@ -44,8 +45,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "BooleanVariable.hpp"
 #include "IntegerVariable.hpp"
 #include "Ref.hpp"
-//#include "BLTHandler.hpp"
-//#include "Block.hpp"
+#include "BLTHandler.hpp"
+#include "Block.hpp"
 
 #include "initjcc.h" // for env
 #include "JCCEnv.h"
@@ -66,31 +67,201 @@ void tearDownJVM();
  *         BLT          *
  *                      *
  ************************/
+#ifndef SWIG
 
-/* 
-template<typename FClass,typename JBLT, typename JBlock, typename JCollection, typename JIterator,
+template<typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
-            typename FExp, template<typename Ty> class ArrayJ >
-void transferBLT(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, FClass fclass, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
-    //Check if the model has BLT capabilities
-    if(m->hasBLT()){
-        ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler > blt = m->getBLT();
-	JBLT jblt = fclass.getDAEBLT();
-	blt->setBLT<JBLT,
-		    JBlock,
-		    JCollection,
+            typename FExp, template<typename Ty> class ArrayJ>
+void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBlock,bool jacobian_no_casadi = false, bool solve_with_casadi = true)
+{
+  JCollection block_equations(block->allEquations().this$);
+  JCollection block_variables(block->allVariables().this$);
+  JCollection unsolved_eq(block->unsolvedEquations().this$);
+  JCollection unsolved_vars(block->unsolvedVariables().this$);
+  JCollection block_inactive_var(block->inactiveVariables().this$);
+  JCollection block_independent_var(block->independentVariables().this$);
+  JCollection block_trajectories_var(block->dependsOn().this$);
+  
+  //Adding equations to block
+  JIterator iter1(block_equations.iterator().this$);
+  JIterator iter2(unsolved_eq.iterator().this$);
+  bool found=false;
+  while(iter1.hasNext()){
+    found=false;
+    FAbstractEquation f1(iter1.next().this$);
+    casadi::MX lhs1 = toMX(f1.toMXForLhs()); 
+    casadi::MX rhs1 = toMX(f1.toMXForRhs());
+    while(iter2.hasNext() && !found){
+      FAbstractEquation f2(iter2.next().this$);
+      casadi::MX lhs2 = toMX(f2.toMXForLhs()); 
+      casadi::MX rhs2 = toMX(f2.toMXForRhs());
+      if(lhs1.getRepresentation()==lhs2.getRepresentation() && 
+	  rhs1.getRepresentation()==rhs2.getRepresentation()){
+	found=true;
+      }
+    }
+    if(!found){
+      ciBlock->addEquation(new ModelicaCasADi::Equation(lhs1,rhs1),true);
+    }
+    else{
+      ciBlock->addEquation(new ModelicaCasADi::Equation(lhs1,rhs1),false);
+    }
+  }
+  
+  //Adding variables to block
+  JIterator iter3(block_variables.iterator().this$);
+  JIterator iter4(unsolved_vars.iterator().this$); 
+  while(iter3.hasNext()){
+    found=false;
+    FVar jv1(iter3.next().this$);
+    casadi::MX v1 = toMX(jv1.asMXVariable());
+    while(iter4.hasNext() && !found){
+      FVar jv2(iter4.next().this$);
+      casadi::MX v2 = toMX(jv2.asMXVariable());
+      if(v1.isEqual(v2)){
+	found=true;          
+      }
+    }
+    if(!found){
+      ciBlock->addBlockVariable(v1,true);
+    }
+    else{
+      ciBlock->addBlockVariable(v1,false);
+    }
+  }
+  
+  JIterator iter5(block_inactive_var.iterator().this$);
+  while(iter5.hasNext()){
+    found=false;
+    FVar jvi(iter5.next().this$);
+    casadi::MX vi = toMX(jvi.asMXVariable());
+    ciBlock->addInactivVariable(vi);
+  }
+  
+  JIterator iter6(block_independent_var.iterator().this$); 
+  while(iter6.hasNext()){
+    found=false;
+    FVar jvp(iter6.next().this$);
+    casadi::MX vp = toMX(jvp.asMXVariable());
+    ciBlock->addIndependentVariable(vp);
+     
+  }
+  
+  JIterator iter7(block_trajectories_var.iterator().this$); 
+  while(iter7.hasNext()){
+    found=false;
+    FVar jvt(iter7.next().this$);
+    casadi::MX vt = toMX(jvt.asMXVariable());
+    ciBlock->addTrajectoryVariable(vt);
+  }
+  if(block->isSimple() && block->isSolvable()){
+    JIterator iter8(block_equations.iterator().this$);
+    JIterator iter9(block_variables.iterator().this$);
+    FVar fvs(iter9.next().this$);
+    FEquation feq(iter8.next().this$);
+    casadi::MX var = toMX(fvs.asMXVariable());
+    casadi::MX sol = toMX(feq.solution(fvs).toMX());
+    ciBlock->addSolutionToVariable(var.getName(),sol);        
+  }
+  
+  //Setting Jacobian
+  
+  if(!jacobian_no_casadi){
+    casadi::MX jaco = casadi::MX::sym("Jacobian",ciBlock->getNumEquations(),ciBlock->getNumVariables());
+    std::vector<casadi::MX> residuals;
+    //append equations
+    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > equations =ciBlock->allEquations();
+    for(std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it=equations.begin(); 
+	    it != equations.end(); ++it){
+	residuals.push_back((*it)->getLhs()-(*it)->getRhs());
+    }
+    casadi::MXFunction f(ciBlock->allBlockVariables(),residuals);
+    f.init();
+    for (int i=0;i<ciBlock->getNumVariables();++i){
+	for(int j=0;j<ciBlock->getNumEquations();++j){
+	  casadi::MX jacotmp=f.jac(i,j);
+	  jaco(j,i)=jacotmp;
+	}
+    }
+    ciBlock->setJacobian(jaco);
+  }
+  else{
+    if(block->computeJacobian()){
+      ArrayJ< ArrayJ< FExp > > Jjacobian(block->jacobian().this$);
+      casadi::MX jaco = casadi::MX::sym("Jacobian",ciBlock->getNumEquations(),ciBlock->getNumVariables());
+      if(ciBlock->getNumEquations()!=Jjacobian.length){
+	std::cout<<"WARNING: The jacobian coming from the compiler does not have the same number of rows as global equations";
+      }
+      if(ciBlock->getNumEquations()!=Jjacobian[0].length){
+	std::cout<<"WARNING: The jacobian coming from the compiler does not have the same number of cols as global variables";
+      }
+      for(int i=0;i<ciBlock->getNumEquations();++i)
+      {
+	for(int j=0;j<ciBlock->getNumVariables();++j)
+	{
+	  jaco(i,j)= toMX(Jjacobian[i][j].toMX());
+	}
+      }
+      ciBlock->setJacobian(jaco);
+    }
+    std::cout<<"TODO\n";
+  }
+  
+  ciBlock->setasSimple(block->isSimple());
+  ciBlock->setasLinear(block->isLinear());
+  ciBlock->setasSolvable(block->isSolvable());
+  
+  ciBlock->checkLinearityWithJacobian();
+  //To ask if we do this
+  if(solve_with_casadi){
+    ciBlock->solveLinearSystem();
+  }    
+}
+
+template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
+            typename FVar, typename FAbstractEquation, typename FEquation,
+            typename FExp, template<typename Ty> class ArrayJ>
+void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT, bool jacobian_no_casadi = false, bool solve_with_casadi = true){
+    
+    for(int i=0;i<javablt->size();++i)
+    {
+       JBlock* block = new JBlock(javablt->get(i).this$);
+       ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBloc = new ModelicaCasADi::Block();
+       transferBlock<JBlock, 
+		    JCollection, 
 		    JIterator,
 		    FVar,
 		    FAbstractEquation,
 		    FEquation,
 		    FExp,
-		    ArrayJ>(blt, jacobian_no_casadi, solve_with_casadi);
-    }
-    else{
-	std::cout<<"\nThe model does not have a blt.\n";
+		    ArrayJ>(block, ciBloc, jacobian_no_casadi, solve_with_casadi);
+       ciBLT->addBlock(ciBloc);
+       delete block;
     }
 }
-*/
+
+template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
+            typename FVar, typename FAbstractEquation, typename FEquation,
+            typename FExp, template<typename Ty> class ArrayJ>
+void transferBLT2Model(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, bool jacobian_no_casadi = false, bool solve_with_casadi = true){
+    
+    ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT = new ModelicaCasADi::BLTHandler();
+    transferBLT<JBLT,
+		JBlock, 
+		JCollection, 
+		JIterator,
+		FVar,
+		FAbstractEquation,
+		FEquation,
+		FExp,
+		ArrayJ>(javablt, ciBLT, jacobian_no_casadi, solve_with_casadi);
+    if(m->hasBLT()){
+	m->setBLT(ciBLT);    
+    }
+}
+
+#endif
+
 /************************
  *                      *
  *      Equations       *
@@ -136,10 +307,15 @@ template <class ArrayList, class AbstractEquation>
  * @param A pointer to a Model
  * @param An ArrayList with FAbstractEquation
  */
-static void transferDaeEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ArrayList modelEquationsInJM){
-    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(modelEquationsInJM);
-    for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = modelEqs.begin(); it != modelEqs.end(); ++it){
-        m->addDaeEquation(*it);
+static void transferDaeEquations(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, ArrayList modelEquationsInJM){
+    if(!m->hasBLT()){
+	std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(modelEquationsInJM);
+	for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = modelEqs.begin(); it != modelEqs.end(); ++it){
+	    m->addDaeEquation(*it);
+	}
+    }
+    else{
+	std::cout<<"The model has BLT. DAE equations are transfered from the BLT.\n";
     }
 }
 
@@ -149,7 +325,7 @@ template <class ArrayList, class AbstractEquation>
  * @param A pointer to a Model
  * @param An ArrayList with FAbstractEquation
  */
-static void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList initialEqsInJM){
+static void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, ArrayList initialEqsInJM){
     std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > initialEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(initialEqsInJM);
     for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = initialEqs.begin(); it != initialEqs.end(); ++it){
         m->addInitialEquation(*it);
@@ -172,7 +348,7 @@ template <class FlatClass, class List, class FunctionDecl>
  * @param A pointer to a Model
  * @param An FClass
  */
-void transferFunctions(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FlatClass &fc) {
+void transferFunctions(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FlatClass &fc) {
     List fl = fc.getFFunctionDeclList();
     for (int i = 0; i < fl.getNumChild(); ++i) {
         m->setModelFunctionByItsName(createModelFunction(FunctionDecl(fl.getChild(i).this$)));
@@ -305,7 +481,7 @@ ModelicaCasADi::Variable::Variability getVariability(const FVar &fVar) {
  * @param A pointer to a Model.
  * @param A string base type name. 
  */
-static ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseTypeForDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, std::string baseTypeName) {
+static ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseTypeForDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, std::string baseTypeName) {
     if( m->getVariableType(baseTypeName).getNode() == NULL ) {
 		if (baseTypeName == "Real") {
 			m->addNewVariableType(new ModelicaCasADi::RealType());
@@ -324,7 +500,7 @@ template <class List, class DerivedType, class Attribute, class Type>
  * @param A pointer to a Model
  * @param An FDerivedType
  */
-void transferDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, DerivedType derivedType) {
+void transferDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, DerivedType derivedType) {
     List attributeList = derivedType.getFAttributes();
     Attribute  attr;
     std::string typeName = env->toString(derivedType.getName().this$);
@@ -345,7 +521,7 @@ template <class FlatClass, class List, class DerivedType, class Attribute, class
  * @param A pointer to a Model
  * @param An FClass
  */
-void transferUserDefinedTypes(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, FlatClass &fc) {
+void transferUserDefinedTypes(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, FlatClass &fc) {
     List derivedTypeList = fc.getFDerivedTypeList();
     DerivedType derivedType;
     for (int i = 0; i < derivedTypeList.getNumChild(); ++i) {
@@ -366,12 +542,12 @@ void transferUserDefinedTypes(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, Flat
  *                        *
  **************************/
 template <class FClass> 
-void transferTime(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, FClass fc) {
+void transferTime(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, FClass fc) {
     m->setTimeVariable(toMX(fc.timeMX()));
 }
  
 template <class FVar>
-ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv) {
+ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv) {
     ModelicaCasADi::Ref<ModelicaCasADi::UserType> userType;
     if (!std::string(env->toString(fv.getDerivedType().this$)).empty()) {
         userType = (ModelicaCasADi::UserType*) m->getVariableType(env->toString(fv.getDerivedType().this$)).getNode();
@@ -384,7 +560,7 @@ ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<Mo
 
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv) {
+void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv) {
     JMDerivativeVariable fDer = JMDerivativeVariable(fv.myDerivativeVariable().this$);
     JMRealVariable fDiff = JMRealVariable(fv.this$);
     ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), toMX(fDiff.asMXVariable()), getCausality(fDiff),
@@ -401,7 +577,7 @@ void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<Modelica
 }
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
+void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
     if (fv.isDerivativeVariable()) {
         return; // Derivative variables are transferred together with their differentiated variables. 
     }
@@ -418,7 +594,7 @@ void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &f
 
 
 template <class FVar, class List, class Attribute, class Comment>
-void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
+void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
     ModelicaCasADi::Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(intVar, fv);
@@ -428,7 +604,7 @@ void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar
 
 
 template <class FVar, class List, class Attribute, class Comment>
-void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
+void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
     ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(boolVar, fv);
@@ -437,7 +613,7 @@ void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar
 }
 
 template <class FVar>
-void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv) {
+void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv) {
     if (!fv.isAlias()) {
         return;
     }
@@ -446,7 +622,7 @@ void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaC
 }  
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar fv) {
+void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar fv) {
     if (fv.isReal()) {
         transferRealVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv);
     } else if (fv.isInteger()) {
@@ -457,7 +633,7 @@ void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar fv) {
 }
 
 template <class ArrayList, class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList vars){
+static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, ArrayList vars){
     for (int i = 0; i < vars.size(); i++) {
         FVar var = FVar(vars.get(i).this$);
         if (var.type().isEnum()) {

@@ -21,6 +21,85 @@ using std::vector; using std::ostream;
 using std::string; using std::pair;
 
 namespace ModelicaCasADi{
+    
+void BLTModel::setEliminateableVariables(){
+    std::cout<<"\nEliminateables: ";
+    for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
+        if(isBLTEliminateable((*it)->getVar())){
+            (*it)->setAsEliminatable();
+            std::cout<<(*it)->getName()<<" ";
+        }
+    }
+    std::cout<<"\n";
+}
+    
+void BLTModel::eliminateAlgebraics(){
+    std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
+    eliminateVariables(algebraics);
+}
+    
+void BLTModel::eliminateVariable(const std::string& varName){
+    Ref<Variable> var = getVariable(varName);
+    if(var->isEliminatable())
+    {
+        std::vector<casadi::MX> toEliminate(1,var->getVar());
+        std::vector<casadi::MX> toSubstitute = blt->getSubstitues(toEliminate);
+        blt->substitute(toEliminate, toSubstitute);
+        blt->removeSolutionOfVariable(var->getName());
+    }
+}
+
+
+
+void BLTModel::eliminateVariables(std::vector<std::string>& varNames){
+    Ref<Variable> var;
+    std::vector<casadi::MX> toEliminate;
+    for(std::vector<std::string>::const_iterator it=varNames.begin();it!=varNames.end();++it){
+        var = getVariable(*it);
+        if(var->isEliminatable()){
+            toEliminate.push_back(var->getVar());
+        }
+    }
+    std::vector<casadi::MX> toSubstitute = blt->getSubstitues(toEliminate);
+    blt->substitute(toEliminate, toSubstitute);
+    
+    for(std::vector<std::string>::iterator it=varNames.begin();it!=varNames.end();++it){
+        var = getVariable(*it);
+        if(var->isEliminatable()){
+            blt->removeSolutionOfVariable(var->getName());
+        }
+    }
+    
+}
+
+void BLTModel::eliminateVariable(Ref<Variable> var){
+    if(var->isEliminatable())
+    {
+        std::vector<casadi::MX> toEliminate(1,var->getVar());
+        std::vector<casadi::MX> toSubstitute = blt->getSubstitues(toEliminate);
+        blt->substitute(toEliminate, toSubstitute);
+        blt->removeSolutionOfVariable(var->getName());
+    }
+}
+
+void BLTModel::eliminateVariables(std::vector< Ref<Variable> >& vars){
+    std::vector<casadi::MX> toEliminate;
+    for(std::vector< Ref<Variable> >::const_iterator it=vars.begin();it!=vars.end();++it){
+        if((*it)->isEliminatable()){
+            toEliminate.push_back((*it)->getVar());
+        }
+    }
+    
+    std::vector<casadi::MX> toSubstitute = blt->getSubstitues(toEliminate);
+    blt->substitute(toEliminate, toSubstitute);
+    
+    for(std::vector< Ref<Variable> >::iterator it=vars.begin();it!=vars.end();++it){
+        if((*it)->isEliminatable()){
+            blt->removeSolutionOfVariable((*it)->getName());
+        }
+    }
+    
+}
 
 bool BLTModel::isBLTEliminateable(casadi::MX var, int depth/*=0*/) const{
     std::vector<casadi::MX> eliminateables = blt->getAllEliminatableVariables();

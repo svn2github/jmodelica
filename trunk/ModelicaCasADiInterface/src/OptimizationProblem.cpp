@@ -29,7 +29,7 @@ OptimizationProblem::~OptimizationProblem() {
 
 void OptimizationProblem::initializeProblem(std::string identifier /* = "" */, 
                                             bool normalizedTime /* = true */ ) {
-    initializeModel(identifier);
+    Model::initializeModel(identifier);
     this->normalizedTime = normalizedTime;
 }
 
@@ -47,6 +47,12 @@ void OptimizationProblem::print(ostream& os) const {
 
     using namespace std;
     os << "Model contained in OptimizationProblem:\n" << endl;
+    /*if(this->hasBLT()){
+        BLTModel::print(os);
+    }
+    else{
+        Model::print(os);
+    }*/
     Model::print(os);
     os << "----------------------- Optimization information ------------------------\n\n";
     os << "Start time = ";

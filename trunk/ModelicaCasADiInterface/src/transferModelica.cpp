@@ -119,7 +119,7 @@ typedef struct OCStruct
 }OCStruct;
 
 template <typename CStruct, typename TModel>
-void transferModel(TModel m, string modelName, const vector<string> &modelFiles,
+void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelFiles,
                         Ref<CompilerOptionsWrapper> options, string log_level)
 {
       typename CStruct::TCompiler compiler(options->getOptionRegistry());
@@ -160,7 +160,7 @@ void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vec
         {
            jl::System::initializeClass(false);
            mc::ModelicaCompiler::initializeClass(false);
-           transferModel<MCStruct,Ref<Model> >(m,modelName,modelFiles,options,log_level);     
+           transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level);     
         }
         catch (JavaError e) {
                 rethrowJavaException(e);
@@ -175,7 +175,7 @@ void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
         {
            jl::System::initializeClass(false);
            oc::ModelicaCompiler::initializeClass(false);
-           transferModel<OCStruct,Ref<OptimizationProblem> >(m,modelName,modelFiles,options,log_level);     
+           transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level);     
         }
         catch (JavaError e) {
                 rethrowJavaException(e);

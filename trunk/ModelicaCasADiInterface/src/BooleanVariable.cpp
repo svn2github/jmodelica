@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "BooleanVariable.hpp"
 namespace ModelicaCasADi 
 {
-BooleanVariable::BooleanVariable(Model *owner, casadi::MX var, Variable::Causality causality,
+BooleanVariable::BooleanVariable(BaseModel *owner, casadi::MX var, Variable::Causality causality,
                            Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
   Variable(owner, var, causality, variability, declaredType) { 
     if (variability == Variable::CONTINUOUS) {

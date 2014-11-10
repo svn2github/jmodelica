@@ -37,187 +37,15 @@ namespace ModelicaCasADi
 class Block : public RefCountedNode{
     public:
     //Default constructor
-    Block(): simple_flag(false),linear_flag(false),solve_flag(false){ nRowsJac=0; nColsJac=0;};
-    ~Block(){
-      //Temporal while improve jacobian computation and printing 
-      if(nRowsJac!=0 && nColsJac!=0){
-        for(int i=0;i<nRowsJac;++i){
-          delete [] prettyPrintJacobian[i];      
-        }
-        delete [] prettyPrintJacobian;
-      }
-    }
+    Block(): simple_flag(false),linear_flag(false),solve_flag(false){}
     
-#ifndef SWIG
-    /** 
-     * Set a Block from optimica o modelica compiler
-     * @param JBlock optimica or modelica block
-     */
-    template<typename JBlock, typename JCollection, typename JIterator,
-            typename FVar, typename FAbstractEquation, typename FEquation,
-            typename FExp, template<typename Ty> class ArrayJ >
-    void setBlock(JBlock* block,bool jacobian_no_casadi = true, bool solve_with_casadi = true)
-    {
-      JCollection block_equations(block->allEquations().this$);
-      JCollection block_variables(block->allVariables().this$);
-      JCollection unsolved_eq(block->unsolvedEquations().this$);
-      JCollection unsolved_vars(block->unsolvedVariables().this$);
-      JCollection block_inactive_var(block->inactiveVariables().this$);
-      JCollection block_independent_var(block->independentVariables().this$);
-      JCollection block_trajectories_var(block->dependsOn().this$);
-      
-      //Adding equations to block
-      JIterator iter1(block_equations.iterator().this$);
-      JIterator iter2(unsolved_eq.iterator().this$);
-      bool found=false;
-      while(iter1.hasNext()){
-        found=false;
-        FAbstractEquation f1(iter1.next().this$);
-        casadi::MX lhs1 = toMX(f1.toMXForLhs()); 
-        casadi::MX rhs1 = toMX(f1.toMXForRhs());
-        while(iter2.hasNext() && !found){
-          FAbstractEquation f2(iter2.next().this$);
-          casadi::MX lhs2 = toMX(f2.toMXForLhs()); 
-          casadi::MX rhs2 = toMX(f2.toMXForRhs());
-          if(lhs1.getRepresentation()==lhs2.getRepresentation() && 
-              rhs1.getRepresentation()==rhs2.getRepresentation()){
-            found=true;
-          }
-        }
-        if(!found){
-          addEquation(new Equation(lhs1,rhs1),true);
-        }
-        else{
-          addEquation(new Equation(lhs1,rhs1),false);
-        }
-      }
-      
-      //Adding variables to block
-      JIterator iter3(block_variables.iterator().this$);
-      JIterator iter4(unsolved_vars.iterator().this$); 
-      while(iter3.hasNext()){
-        found=false;
-        FVar jv1(iter3.next().this$);
-        casadi::MX v1 = toMX(jv1.asMXVariable());
-        while(iter4.hasNext() && !found){
-          FVar jv2(iter4.next().this$);
-          casadi::MX v2 = toMX(jv2.asMXVariable());
-          if(v1.isEqual(v2)){
-            found=true;          
-          }
-        }
-        if(!found){
-          addBlockVariable(v1,true);
-        }
-        else{
-          addBlockVariable(v1,false);
-        }
-      }
-      
-      JIterator iter5(block_inactive_var.iterator().this$);
-      while(iter5.hasNext()){
-        found=false;
-        FVar jvi(iter5.next().this$);
-        casadi::MX vi = toMX(jvi.asMXVariable());
-        addInactivVariable(vi);
-      }
-      
-      JIterator iter6(block_independent_var.iterator().this$); 
-      while(iter6.hasNext()){
-        found=false;
-        FVar jvp(iter6.next().this$);
-        casadi::MX vp = toMX(jvp.asMXVariable());
-        addIndependentVariable(vp);
-         
-      }
-      
-      JIterator iter7(block_trajectories_var.iterator().this$); 
-      while(iter7.hasNext()){
-        found=false;
-        FVar jvt(iter7.next().this$);
-        casadi::MX vt = toMX(jvt.asMXVariable());
-        addTrajectoryVariable(vt);
-      }
-      
-      if(block->isSimple() && block->isSolvable()){
-        JIterator iter8(block_equations.iterator().this$);
-        JIterator iter9(block_variables.iterator().this$);
-        FVar fvs(iter9.next().this$);
-        FEquation feq(iter8.next().this$);
-        casadi::MX var = toMX(fvs.asMXVariable());
-        casadi::MX sol = toMX(feq.solution(fvs).toMX());
-        addSolutionToVariable(var.getName(),sol);        
-      }
-      
-      //Setting Jacobian
-      //For printing
-      nRowsJac = equations.size();
-      nColsJac = variables.size();
-      prettyPrintJacobian = new casadi::MX*[nRowsJac];
-      for(int i=0;i<nRowsJac;++i){
-        prettyPrintJacobian[i]=new casadi::MX[nColsJac];
-      }
-      
-      if(!jacobian_no_casadi){
-        jacobian = casadi::MX::sym("Jacobian",equations.size(),variables.size());
-        nRowsJac = equations.size();
-        nColsJac = variables.size();
-        std::vector<casadi::MX> residuals;
-        //append equations
-        for(std::vector< Ref<Equation> >::iterator it=equations.begin(); 
-                it != equations.end(); ++it){
-            residuals.push_back((*it)->getLhs()-(*it)->getRhs());
-        }
-        casadi::MXFunction f(variables,residuals);
-        f.init();
-        for (int i=0;i<variables.size();++i){
-            for(int j=0;j<equations.size();++j){
-              casadi::MX jacotmp=f.jac(i,j);
-              jacobian(j,i)=jacotmp;
-              prettyPrintJacobian[j][i] = jacotmp;
-            }
-        }
-      }
-      else{
-        if(block->computeJacobian()){
-          ArrayJ< ArrayJ< FExp > > Jjacobian(block->jacobian().this$);
-          jacobian = casadi::MX::sym("Jacobian",equations.size(),variables.size());
-          if(nRowsJac!=Jjacobian.length){
-            std::cout<<"WARNING: The jacobian coming from the compiler does not have the same number of rows as global equations";
-          }
-          if(nRowsJac!=Jjacobian[0].length){
-            std::cout<<"WARNING: The jacobian coming from the compiler does not have the same number of cols as global variables";
-          }
-          for(int i=0;i<nRowsJac;++i)
-          {
-            for(int j=0;j<nColsJac;++j)
-            {
-              jacobian(i,j)= toMX(Jjacobian[i][j].toMX());
-              prettyPrintJacobian[i][j] = toMX(Jjacobian[i][j].toMX());
-            }
-          }
-        }
-      }
-      
-      simple_flag = block->isSimple();
-      solve_flag = block->isSolvable();
-      linear_flag = block->isLinear();
-      
-      checkLinearityWithJacobian();
-      //To ask if we do this
-      if(solve_with_casadi){
-        solveLinearSystem();
-      }    
-    }
-#endif    
+    bool isSimple() const;
+    bool isLinear() const;
+    bool isSolvable() const;
     
-    bool& isSimple();
-    bool& isLinear();
-    bool& isSolvable();
-    
-    const bool& isSimple() const;
-    const bool& isLinear() const;
-    const bool& isSolvable() const;
+    bool setasSimple(bool flag){simple_flag=flag;}
+    bool setasLinear(bool flag){linear_flag=flag;}
+    bool setasSolvable(bool flag){solve_flag=flag;}
     
     bool isInactive(const casadi::MX& var, int depth=0) const;
     bool isInactive(const std::string& varName) const;
@@ -226,8 +54,15 @@ class Block : public RefCountedNode{
     bool isTrajectoryVar(const casadi::MX& var, int depth=0) const;
     bool isTrajectoryVar(const std::string& varName) const;
     
+    int getNumEquations() const {return equations.size();}
+    int getNumVariables()const {return variables.size();}
+    int getNumUnsolvedEquations() const {return unSolvedEquations.size();}
+    int getNumUnsolvedVariables() const {return unSolvedVariables.size();}
+    int getNumInactiveVariables() const {return inactiveVariables.size();}
+    int getNumIndependentVariables() const {return independentVariables.size();}
+    int getNumTrajectoryVariables() const {return trajectoryVariables.size();}
+    
     std::vector< casadi::MX > allBlockVariables() const;
-    std::vector< casadi::MX > getSolvedVariables() const;
     std::vector< casadi::MX > getUnsolvedVariables() const;
     std::vector< casadi::MX > getIndependentVariables() const;
     std::vector< casadi::MX > getInactiveVariables() const;
@@ -242,6 +77,7 @@ class Block : public RefCountedNode{
     bool hasSolution(const std::string& name) const;
     
     
+    void setJacobian(const casadi::MX& jac);
     std::vector< Ref<Equation> > allEquations() const;
     std::vector< Ref<Equation> > notSolvedEquations() const;
     
@@ -249,6 +85,7 @@ class Block : public RefCountedNode{
     
     void addEquation(Ref<Equation> eq, bool solvable);
     void addSolutionToVariable(std::string varName, casadi::MX sol);
+    void removeSolutionOfVariable(std::string varName);
     
     void addBlockVariable(casadi::MX var, bool solvable);
     void addIndependentVariable(casadi::MX var);
@@ -295,10 +132,6 @@ class Block : public RefCountedNode{
     
     //The jacobian stuff must be more efficiently implemented
     casadi::MX jacobian;
-    int nRowsJac;
-    int nColsJac;
-    //Temporal
-    casadi::MX** prettyPrintJacobian;
     
     //Simple flag
     bool simple_flag;
@@ -307,13 +140,11 @@ class Block : public RefCountedNode{
 
 };
 
-inline bool& Block::isSimple(){return simple_flag;}
-inline bool& Block::isLinear(){return linear_flag;}
-inline bool& Block::isSolvable(){return solve_flag;}
+inline void Block::setJacobian(const casadi::MX& jac){jacobian = jac;}
+inline bool Block::isSimple() const {return simple_flag;}
+inline bool Block::isLinear() const {return linear_flag;}
+inline bool Block::isSolvable() const {return solve_flag;}
 
-inline const bool& Block::isSimple() const{return simple_flag;}
-inline const bool& Block::isLinear() const{return linear_flag;}
-inline const bool& Block::isSolvable() const{return solve_flag;}
 
 inline bool Block::isInactive(const casadi::MX& var,int depth/*=0*/) const{
   bool found=false;  
@@ -383,7 +214,7 @@ inline bool Block::isTrajectoryVar(const std::string& varName) const{
 
 inline void Block::checkLinearityWithJacobian(){
   if(!jacobian.isEmpty()){
-    Block::isLinear() = !casadi::dependsOn(jacobian,variables);
+    linear_flag = !casadi::dependsOn(jacobian,variables);
   }
 }
 

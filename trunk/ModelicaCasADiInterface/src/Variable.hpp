@@ -28,7 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 namespace ModelicaCasADi
 {
+class BaseModel;
 class Model;
+
 
 /** 
  * Abstract class for Variables, using symolic MX. A variable holds data 
@@ -65,7 +67,7 @@ class Variable : public OwnedNode {
             DISCRETE,
             CONTINUOUS
         };
-        Variable(Model *owner);
+        Variable(BaseModel *owner);
         /**
          * The Variable class should not be used, use subclasses such 
          * as RealVariable instead.
@@ -74,7 +76,7 @@ class Variable : public OwnedNode {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        Variable(Model *owner, casadi::MX var, Causality causality,
+        Variable(BaseModel *owner, casadi::MX var, Causality causality,
                 Variability variability, 
                 Ref<VariableType> declaredType = Ref<VariableType>());
         
@@ -209,7 +211,7 @@ class Variable : public OwnedNode {
         AttributeValue* getAttributeForAlias(AttributeKey key);
         AttributeKey keyForAlias(AttributeKey key) const;
         void setAttributeForAlias(AttributeKey key, AttributeValue val);
-        Model &myModel() { return *((Model *)owner); }
+        BaseModel &myModel() { return *((BaseModel *)owner); }
     private:
         Causality causality;
         Variability variability;

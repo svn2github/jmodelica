@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "casadi/casadi.hpp"
 
 #include "Model.hpp"
+#include "BLTModel.hpp"
 #include "Constraint.hpp"
 #include "SharedNode.hpp"
 #include "TimedVariable.hpp"
 #include "Ref.hpp"
 namespace ModelicaCasADi 
 {
-class OptimizationProblem : public Model {
+class OptimizationProblem : public Model/*, public BLTModel*/ {
     public:
         /** Create a blank, uninitialized OptimizationProblem */
         OptimizationProblem() { normalizedTime = false; startTime = finalTime = objective = objectiveIntegrand = casadi::MX(0); }
@@ -88,6 +89,13 @@ class OptimizationProblem : public Model {
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
+        
+        /** @param A pointer to an equation */ 
+        /*void addDaeEquation(Ref<Equation> eq);
+        const casadi::MX getDaeResidual() const;
+        std::vector< Ref<Equation> > getDaeEquations() const;
+        bool hasBLT();
+        std::vector<casadi::MX> getBLTEliminateables() const;*/
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
@@ -115,5 +123,52 @@ inline void OptimizationProblem::setPointConstraints(const std::vector< Ref<Cons
 inline void OptimizationProblem::setObjectiveIntegrand(casadi::MX objectiveIntegrand) { this->objectiveIntegrand = objectiveIntegrand; } 
 inline void OptimizationProblem::setObjective(casadi::MX objective) { this->objective = objective; } 
 inline void OptimizationProblem::addTimedVariable(Ref<TimedVariable> var) { assert(var->isOwnedBy(this)); timedVariables.push_back(var.getNode()); }
+
+
+/*inline bool OptimizationProblem::hasBLT(){
+ if(this->hasBLT()){
+  return BLTModel::hasBLT();
+ }
+ else{
+  return Model::hasBLT();
+ }
+}
+
+inline void OptimizationProblem::addDaeEquation(Ref<Equation> eq){
+ if(this->hasBLT()){
+  BLTModel::addDaeEquation(eq);
+ }
+ else{
+  Model::addDaeEquation(eq);
+ }
+}
+
+inline const casadi::MX OptimizationProblem::getDaeResidual() const {
+ if(this->hasBLT()){
+  return BLTModel::getDaeResidual();
+ }
+ else{
+  return Model::getDaeResidual();
+ }
+}
+
+inline std::vector< Ref<Equation> > OptimizationProblem::getDaeEquations() const{
+ if(this->hasBLT()){
+  return BLTModel::getDaeEquations();
+ }
+ else{
+  return Model::getDaeEquations();
+ }
+}
+
+inline std::vector< casadi::MX > OptimizationProblem::getBLTEliminateables() const{
+ if(this->hasBLT()){
+  return BLTModel::getBLTEliminateables();
+ }
+ else{
+  return Model::getBLTEliminateables();
+ }
+}*/
+
 }; // End namespace
 #endif

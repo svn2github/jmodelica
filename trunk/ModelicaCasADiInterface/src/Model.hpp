@@ -41,11 +41,18 @@ class Model: public BaseModel {
         Model() : BaseModel(){}
         
         /** @param A pointer to an equation */ 
-        void addDaeEquation(Ref<Equation> eq);
+        virtual void addDaeEquation(Ref<Equation> eq);
         
-        const casadi::MX getDaeResidual() const; 
+        virtual const casadi::MX getDaeResidual() const; 
 
         std::vector< Ref< Equation> > getDaeEquations() const;
+        
+        virtual bool hasBLT(){return 0;}
+        
+        virtual std::vector<casadi::MX> getBLTEliminateables() const {
+                std::vector<casadi::MX> empty;
+                return empty;
+        };  
         
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;

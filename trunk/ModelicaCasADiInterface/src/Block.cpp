@@ -141,13 +141,13 @@ namespace ModelicaCasADi
   
   void Block::printBlock(std::ostream& out,bool withData/*=false*/) const{
     out<<"----------------------------------------\n";
-    out << "Number of variables z = (der(x),w): " << std::right << std::setw(10) << variables.size() << "\n";
-    out << "Number of unsolved variables: " << std::right<< std::setw(16) << unSolvedVariables.size() << "\n";
-    out << "Number of equations: " << std::right << std::setw(25) << equations.size() << "\n";
-    out << "Number of unsolved equations: " << std::right << std::setw(16) << unSolvedEquations.size() << "\n";
-    out << "Number of inactive variables: " << std::right << std::setw(16) << inactiveVariables.size() << "\n";
-    out << "Number of trajectory variables v = (t,x,u): " << std::right << std::setw(2) << trajectoryVariables.size() << "\n";
-    out << "Number of independent variables: " << std::right << std::setw(13) << independentVariables.size() << "\n";
+    out << "Number of variables z = (der(x),w): " << std::right << std::setw(10) << getNumVariables() << "\n";
+    out << "Number of unsolved variables: " << std::right<< std::setw(16) << getNumUnsolvedVariables() << "\n";
+    out << "Number of equations: " << std::right << std::setw(25) << getNumEquations() << "\n";
+    out << "Number of unsolved equations: " << std::right << std::setw(16) << getNumUnsolvedEquations() << "\n";
+    out << "Number of inactive variables: " << std::right << std::setw(16) << getNumInactiveVariables() << "\n";
+    out << "Number of trajectory variables v = (t,x,u): " << std::right << std::setw(2) << getNumTrajectoryVariables() << "\n";
+    out << "Number of independent variables: " << std::right << std::setw(13) << getNumIndependentVariables() << "\n";
     out << "--------Flags---------\n";
     out << "BlockType: " << std::right << std::setw(20) << (isSimple() ? "SimpleBlock\n" : "EquationBlock\n");
     //if(!isSimple()){
@@ -222,16 +222,7 @@ namespace ModelicaCasADi
     }
     
     //std::cout<<"Jacobian: \n"<<jacobian<<"\n";
-    std::cout<<"Jacobian\n";
-    for(int i=0;i<nRowsJac;++i)
-    {
-       std::cout<<"|";
-       for(int j=0;j<nColsJac;++j)
-       {
-         std::cout<< prettyPrintJacobian[i][j] << " ";
-       }
-       std::cout<<"|\n";
-    }
+    std::cout<<"Jacobian\n"<<jacobian<<"\n";
     out<<"---------------------------------------\n";
     
   }
@@ -265,7 +256,7 @@ namespace ModelicaCasADi
         }
         unSolvedEquations.clear();
         unSolvedVariables.clear();
-        isSolvable() = true;
+        solve_flag = true;
     }
   }
   
@@ -330,6 +321,16 @@ namespace ModelicaCasADi
           }
     }
     return vars;
+  }
+  
+  void Block::removeSolutionOfVariable(std::string varName){
+    std::map<std::string, casadi::MX>::iterator it = variableToSolution.find(varName);
+    if(it!=variableToSolution.end()){
+      variableToSolution.erase(it);    
+    }
+    else{
+      std::cout<<"The variable "<<varName<<" does not have a solution thus it cannot be removed.\n";    
+    }
   }
   
   std::vector< Ref<Equation> > Block::getEquations4Model() const{

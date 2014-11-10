@@ -31,38 +31,17 @@ namespace ModelicaCasADi
 {
 class BLTHandler : public RefCountedNode{
     public:
-    BLTHandler(){}
-    ~BLTHandler(){}
     
-#ifndef SWIG
-    template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
-            typename FVar, typename FAbstractEquation, typename FEquation,
-            typename FExp, template<typename Ty> class ArrayJ >
-    void setBLT(JBLT javablt, bool jacobian_no_casadi = true, bool solve_with_casadi = true){
-        for(int i=0;i<javablt.size();++i)
-        {
-           //Block
-           JBlock* block = new JBlock(javablt.get(i).this$);
-           blt.push_back(new ModelicaCasADi::Block());
-           blt[i]->setBlock<JBlock,
-                            JCollection,
-                            JIterator,
-                            FVar, 
-                            FAbstractEquation, 
-                            FEquation,
-                            FExp,
-                            ArrayJ>(block,jacobian_no_casadi,solve_with_casadi);
-           delete block;
-        }
-    }
-#endif
-    
+    //CopyConstructor or assignment operator by default
     void printBLT(std::ostream& out, bool with_details=false) const;
+    void addBlock(Ref<Block> block);
     int getNumberOfBlocks() const;
     std::vector<casadi::MX> getAllEliminatableVariables() const;
     std::vector< Ref<Equation> > getAllEquations4Model() const;
     std::vector<casadi::MX> getSubstitues(const std::vector<casadi::MX>& eliminateables) const;
     void substituteAllEliminateables();
+    void substitute(const std::vector<casadi::MX>& vars, const std::vector<casadi::MX>& subs);
+    void removeSolutionOfVariable(std::string varName);
     
     Ref<Block> getBlock(int i) const;
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
@@ -72,5 +51,6 @@ class BLTHandler : public RefCountedNode{
 
 inline int BLTHandler::getNumberOfBlocks() const {return blt.size();}
 inline Ref<Block> BLTHandler::getBlock(int i) const {return blt[i];}
+inline void BLTHandler::addBlock(Ref<Block> block){blt.push_back(block);}
 }; // End namespace
 #endif
