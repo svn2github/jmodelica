@@ -619,6 +619,17 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
 
     memcpy (derivatives, jmi_get_real_dx(jmi), nx*sizeof(jmi_real_t));
     
+    /* Verify that output is free from NANs */
+    {
+        int index_of_nan = 0;
+        retval = jmi_check_nan(jmi, derivatives, nx, &index_of_nan);
+        if (retval != 0) {
+            jmi_log_node(jmi->log, logError, "Error",
+                    "Evaluating the derivatives failed at <t:%g>. Produced NaN in <index:%I>", jmi_get_t(jmi)[0], index_of_nan);
+            return -1;
+        }
+    }
+    
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         jmi_log_leave(jmi->log, node);
     }

@@ -40,6 +40,17 @@ void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const ch
     }
 }
 
+int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of_nan) {
+    int i = 0;
+    for (i = 0; i < n_val; i++) {
+        if ( val[i] - val[i] != 0) {
+            *index_of_nan = i;
+            return JMI_ERROR;
+        }
+    }
+    return JMI_OK;
+}
+
 /*Some of these functions return types are a temporary remnant of CppAD*/
 jmi_ad_var_t static jmi_divide(jmi_t *jmi, const char func_name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
     if (den==0) {

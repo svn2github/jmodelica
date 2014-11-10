@@ -176,6 +176,11 @@ typedef struct _jmi_time_event_t {
 /*Some of these functions return types are a temporary remnants of CppAD*/
 
 /**
+ * Function for checking if a vector contains NAN values. Returns the
+ * index of the NAN (if found) in the parameter index_of_nan
+ */
+int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of_nan);
+/**
  * Function to wrap division and report errors to the log, for use in functions.
  */
 jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);

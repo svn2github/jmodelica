@@ -247,6 +247,9 @@
 #define JMI_INF   1e20                    /**< \brief A Very Large Number denoting infinity.*/
 #define JMI_PI    3.14159265358979323846  /**< \brief The constant pi. */
 
+#define JMI_OK     0                 /**< \brief Everything is OK. */
+#define JMI_ERROR -1                 /**< \brief An ERROR occurred. */
+
 /*The option JMI_DER_CPPAD is no longer used and should be removed.*/
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
