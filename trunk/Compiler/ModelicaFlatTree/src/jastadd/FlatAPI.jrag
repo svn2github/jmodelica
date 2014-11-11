@@ -1391,11 +1391,11 @@ aspect FlatAPI {
         HashSet<FVariable> varSet = new HashSet<FVariable>();
         if (hasParameterEquation()) {
             for (FVariable vv: parameterEquation().RHSVariables()) {
-                varSet.add(vv);
                 varSet.addAll(vv.myParameterDependencies());
             }
             return varSet;
         } else { //Base case
+            varSet.add(this);
             return varSet;
         }
     }

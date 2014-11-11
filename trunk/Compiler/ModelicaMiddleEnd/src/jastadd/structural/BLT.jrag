@@ -750,8 +750,8 @@ aspect BLT{
 				s.addAll(e.inputs());
 				s.addAll(e.differentiatedRealVariables());
                 s.addAll(e.discretePreVariables());
-                s.addAll(e.parameters());
-                for (FVariable vv: e.dependentParameters())
+                //Add all independent parameters the block depends on
+                for (FVariable vv: e.parameters())
                     s.addAll(vv.myParameterDependencies());
 			}
 			return s;

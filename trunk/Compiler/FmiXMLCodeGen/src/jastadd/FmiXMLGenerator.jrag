@@ -1613,7 +1613,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
             
             protected Set<FVariable> dependentVariables(FVariable var) {
-                if (var.isDependentParameter() && var.hasParameterEquation())
+                if (var.hasParameterEquation())
                     return var.myParameterDependencies();
                 else
                     return var.initDependsOn();
