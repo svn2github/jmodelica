@@ -973,10 +973,8 @@ public class ModelicaCompiler {
 //          dumpNodeCountFile("node_count.txt");
         }
 
-        if (options.getBooleanOption("generate_html_diagnostics")) {
-            getDiagnosticsGenerator().finalize();
+        if (options.getBooleanOption("generate_html_diagnostics"))
             setDiagnosticsGenerator(null);
-        }
 
         log.info("====== Model compiled successfully =======");
         
@@ -1293,15 +1291,15 @@ public class ModelicaCompiler {
             ASTNode.endStep("writeIterationVariables()");
         }
         
+        fc.errorCheck(target.getCheckType());
+        handleCompilerWarnings(fc.collectWarnings());
+        
         if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);
             ASTNode.endStep("htmlDiagnostics()");
         }
-        
-        fc.errorCheck(target.getCheckType());
-        handleCompilerWarnings(fc.collectWarnings());
 
         hookFlatModelChecked(fc);
         ASTNode.endStep("flattenModel()");
