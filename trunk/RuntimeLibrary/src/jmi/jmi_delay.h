@@ -18,20 +18,27 @@
 */
 
 /** \file jmi_delay.h
-    \brief Interface to simulation of delay blocks.
+    \brief Interface to simulation of delay and spatialDistribution blocks.
 
-    Delay blocks are kept in the `jmi_t` struct and are indexed from 0 to `n_delays - 1`.
-    Each delay block represents a use of the `delay` operator with fixed or variable time delay.
-    The functions below that take an index operate on a single delay block,
-    those that don't operate on all delay blocks at once.
+    Delay blocks are kept in the `jmi_t` struct and are indexed from 0 to `n_delays - 1`;
+    spatialDistribution blocks are indexed from 0 to `n_spatialdists - 1`.
+    Each block represents a use of the `delay` operator with fixed or variable time delay,
+    or the `spatialDistribution` operator, respectively.
+    The functions below that take an index operate on a single delay or spatialDistribution block,
+    those that don't operate on all relevant blocks at once.
+
+    The total number of delay and spatialDistribution blocks is specified upon model initialization,
+    aftern which `jmi_delay_new` and `jmi_spatialdist_new` respectively is called on each block.
+    Correspondingly, `jmi_delete` deallocates the blocks with the aid of `jmi_delay_delete` and
+    `jmi_spatialdist_delete`.
+
+
+    Delay blocks
+    ------------
     Most functions need the current time value, which they take implicitly from the `jmi_t` struct.
     
-    The total number of delay blocks `n_delays` is specified in the call to `jmi_init`,
-    which allocates space for the blocks and calls `jmi_delay_new` on them.
-    Correspondingly, `jmi_delete` deallocates the blocks with the aid of `jmi_delay_delete`.
-
     Before using a delay block in simulation, it must be initialized with `jmi_delay_init`.
-    This will specify the properties of the delay block and provide an initial value for it's output,
+    This will specify the properties of the delay block and provide an initial value for its output,
     to be used until the elapsed simulation time exceeds the delay time.
 
     Delay blocks are evaluated using the `jmi_delay_evaluate`, which uses the current time and input
@@ -59,6 +66,16 @@
 
     Delay blocks with state events have two event indicators (forward and backward), both with a >= 0 relation,
     queried with `jmi_delay_first_event_indicator` and `jmi_delay_second_event_indicator`.
+
+
+    spatialDistribution blocks
+    --------------------------
+    spatialDistribution blocks are quite similar to delay blocks, but there are some differences:
+      * They cannot be fixed-delay, and can only trigger time events, not state events.
+      * They are initialized with full contents for 0 <= x <= 1 using `jmi_spatialdist_init`.
+      * The position `x` must be explicitly supplied to most functions.
+      * They only use one event indicator, for the next event in the direction indicated by `positiveVelocity`.
+
  */
 
 #ifndef _JMI_DELAY_H
