@@ -85,16 +85,35 @@ jmi_real_t jmi_delay_evaluate(jmi_t *jmi, int index, jmi_real_t y_in, jmi_real_t
 /** \brief Record a sample for the delay with given index. Call at each completed integrator step. Time is taken from the `jmi` struct. */
 int jmi_delay_record_sample(jmi_t *jmi, int index, jmi_real_t y_in);
 
-/** \brief Call with `event_mode` set to true before recording samples that follow an event, then with `event_mode` set to false before recording regular samples */
+/** \brief Call with `event_mode` set to true before recording samples that follow an event, then with `event_mode` set to false before recording regular samples.
+           Use also for recording into spatialDistributions. */
 int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event);
 
 /** \brief Return the next time event caused by any delay block, or JMI_INF if there is no next time event */
 jmi_real_t jmi_delay_next_time_event(jmi_t *jmi);
 
-/** \brief Return the first (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
+/** \brief Compute the first (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);
-/** \brief Return the second (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
+/** \brief Compute the second (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);
+
+
+/** \brief Allocate buffers for the spatialdist block with the given index. Do this before `jmi_spatialdist_init`. */
+int jmi_spatialdist_new(jmi_t *jmi, int index);
+/** \brief Free the memory for the buffers of the spatialdist block with the given index. It may then be reallocated with `jmi_spatialdist_new`. */
+int jmi_spatialdist_delete(jmi_t *jmi, int index);
+
+/** \brief Initialize the spatialdist block with given index and provide initial contents (linearly interpolated). */
+int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
+
+/** \brief Evaluate the output of the spatialdist block with given index, current input values, and position `x`. */
+int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
+
+/** \brief Record a sample for the spatialdist with given index. Call at each completed integrator step. */
+int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
+
+/** \brief Return the event indicator >= 0 for a spatialdist block in *event_indicator. Return -1 on failure, 0 otherwise. */
+int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity, jmi_real_t *event_indicator);
 
 
 #endif 

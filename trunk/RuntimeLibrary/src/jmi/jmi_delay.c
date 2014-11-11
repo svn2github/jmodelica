@@ -45,13 +45,19 @@ static int jmi_delaybuffer_init(jmi_delaybuffer_t *buffer, jmi_real_t max_delay)
 /** \brief position is an inout argument */ 
 static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
                                            jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr);
+static jmi_real_t jmi_delaybuffer_evaluate_left(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
+                                                jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr);
 
 static int jmi_delaybuffer_record_sample(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event);
+static int jmi_delaybuffer_record_sample_left(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event);
 
 static jmi_real_t jmi_delaybuffer_next_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position);
 static jmi_real_t jmi_delaybuffer_prev_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position);
 
 static int jmi_delaybuffer_update_position_at_event(jmi_delaybuffer_t *buffer, jmi_real_t tr, jmi_delay_position_t *position);
+
+static int jmi_delaybuffer_truncate_left( jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *position);
+static int jmi_delaybuffer_truncate_right(jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *position);
 
 static void jmi_delay_position_init(jmi_delay_position_t *position);
 
@@ -178,6 +184,113 @@ int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time
 }
 int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator) {
     return jmi_delay_event_indicator(jmi, index, delay_time, event_indicator, FALSE);
+}
+
+
+
+ /* Implementation of jmi_spatialdist API, based on jmi_delaybuffer_t */
+
+static void init_spatialdist(jmi_spatialdist_t *spatialdist, jmi_boolean no_event, jmi_real_t x0) {
+    spatialdist->no_event = no_event;
+    spatialdist->last_x   = x0;
+    jmi_delay_position_init(&(spatialdist->lposition));
+    jmi_delay_position_init(&(spatialdist->rposition));
+}
+
+int jmi_spatialdist_new(jmi_t *jmi, int index) {
+    jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
+    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+
+    /* Initialize with sensible default values to be safe. The proper initialization is done in jmi_spatialdist_init. */
+    init_spatialdist(spatialdist, FALSE, 0);
+    /* Initialize the delay buffer */
+    return jmi_delaybuffer_new(&(spatialdist->buffer));
+}
+int jmi_spatialdist_delete(jmi_t *jmi, int index) {
+    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+    return jmi_delaybuffer_delete(&(jmi->spatialdists[index].buffer));
+}
+
+int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init) {
+    int i;
+    jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
+    jmi_delaybuffer_t *buffer = &(spatialdist->buffer);
+    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+
+    init_spatialdist(spatialdist, no_event, x0);    
+    if (jmi_delaybuffer_init(buffer, 1.0) < 0) return -1; 
+    for (i = 0; i < n_init; i++) {
+        if (jmi_delaybuffer_record_sample(buffer, x_init[i], y_init[i], FALSE) < 0) return -1;
+    }
+    return 0;
+}
+
+int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity) {
+    jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
+    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+    if (positiveVelocity) {
+        *out0 = in0;
+        *out1 = jmi_delaybuffer_evaluate_left(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
+                                              1-x, &(spatialdist->rposition),
+                                               -x, in0);
+    } else {
+        *out1 = in1;
+        *out0 = jmi_delaybuffer_evaluate(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
+                                          -x, &(spatialdist->lposition),
+                                         1-x, in1);
+    }
+    return 0;
+}
+
+int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity) {
+    jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
+    jmi_delaybuffer_t *buffer = &(spatialdist->buffer);
+    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+
+    spatialdist->last_x = x;
+    if (x > spatialdist->last_x || (x == spatialdist->last_x && positiveVelocity) ) {
+        /* Contents moving right */
+        if (jmi_delaybuffer_truncate_left(     buffer, -spatialdist->last_x, &(spatialdist->lposition)) < 0) return -1;
+        if (jmi_delaybuffer_record_sample_left(buffer, -x, in0, jmi->delay_event_mode) < 0) return -1;
+    } else {
+        /* Contents moving right */
+        if (jmi_delaybuffer_truncate_right(buffer, 1-spatialdist->last_x, &(spatialdist->rposition)) < 0) return -1;
+        if (jmi_delaybuffer_record_sample( buffer, 1-x, in1, jmi->delay_event_mode) < 0) return -1;
+    }
+    if (jmi->delay_event_mode) {
+        if (jmi_delaybuffer_update_position_at_event(buffer,  -x, &(spatialdist->lposition)) < 0) return 0;
+        if (jmi_delaybuffer_update_position_at_event(buffer, 1-x, &(spatialdist->rposition)) < 0) return 0;
+    }
+    return 0;
+}
+
+int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boolean positiveVelocity, jmi_real_t *event_indicator) {
+    jmi_real_t t_event;
+    jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
+    jmi_delaybuffer_t *buffer = &(spatialdist->buffer);
+    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+    if (spatialdist->no_event) return -1;
+    
+    if (positiveVelocity) {
+        /* Contents moving right */
+        if (jmi->atEvent) jmi_delaybuffer_update_position_at_event(buffer, 1-x, &(spatialdist->rposition));
+        t_event = jmi_delaybuffer_prev_event_time(buffer, &(spatialdist->rposition));
+        if (t_event <= -JMI_INF) {
+            *event_indicator = 1; 
+            return 0;
+        }
+        *event_indicator = (1-x) - t_event;
+    } else {
+        /* Contents moving left */
+        if (jmi->atEvent) jmi_delaybuffer_update_position_at_event(buffer,  -x, &(spatialdist->lposition));
+        t_event = jmi_delaybuffer_next_event_time(buffer, &(spatialdist->lposition));
+        if (t_event >= JMI_INF) {
+            *event_indicator = 1; 
+            return 0;
+        }
+        *event_indicator = t_event - (-x);
+    }
+    return 0;
 }
 
 
@@ -416,6 +529,17 @@ static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolea
     return y;
 }
 
+static jmi_real_t jmi_delaybuffer_evaluate_left(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
+                                                jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr) {
+    /* todo: more efficient handling of (t_curr, y_curr)? */
+    jmi_real_t y;
+    int orig_size = buffer->size;
+    put(buffer, t_curr, y_curr, FALSE, FALSE); /* Temporarily put (t_curr, y_curr) in the delay buffer */
+    y = evaluate(buffer, at_event, tr, position);
+    /* Remove (t_curr, y_curr) from the delay buffer again */
+    if (buffer->size > orig_size) discard_left(buffer);
+    return y;
+}
 
 static void discard_samples_left(jmi_delaybuffer_t *buffer, jmi_real_t t_limit) {
     jmi_delay_point_t *buf = buffer->buf;    
@@ -426,9 +550,23 @@ static void discard_samples_left(jmi_delaybuffer_t *buffer, jmi_real_t t_limit) 
     }
 }
 
+static void discard_samples_right(jmi_delaybuffer_t *buffer, jmi_real_t t_limit) {
+    jmi_delay_point_t *buf = buffer->buf;    
+    const int offset = JMI_DELAY_MAX_INTERPOLATION_POINTS-1;
+    while (offset < buffer->size && buf[index2pos(buffer, buffer->head_index + buffer->size - 1 - offset)].t > t_limit) {
+        /* Remove the rightmost point */
+        discard_right(buffer);
+    }
+}
+
 static int jmi_delaybuffer_record_sample(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event) {
     if (put(buffer, t, y, TRUE, at_event) < 0) return -1;
     discard_samples_left(buffer, t - buffer->max_delay);
+    return 0;
+}
+static int jmi_delaybuffer_record_sample_left(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event) {
+    if (put(buffer, t, y, FALSE, at_event) < 0) return -1;
+    discard_samples_right(buffer, t + buffer->max_delay);
     return 0;
 }
 
@@ -483,6 +621,25 @@ static jmi_real_t jmi_delaybuffer_prev_event_time(jmi_delaybuffer_t *buffer, jmi
 
 static int jmi_delaybuffer_update_position_at_event(jmi_delaybuffer_t *buffer, jmi_real_t tr, jmi_delay_position_t *position) {
     return update_position(buffer, TRUE, tr, position);
+}
+
+static int jmi_delaybuffer_truncate_left(jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *position) {
+    jmi_delay_point_t *buf = buffer->buf;
+    if ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index)].t < t_limit)) {
+        jmi_real_t y = evaluate(buffer, FALSE, t_limit, position);
+        while ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index)].t <= t_limit)) discard_left(buffer);
+        put(buffer, t_limit, y, FALSE, FALSE);
+    }
+    return 0;
+}
+static int jmi_delaybuffer_truncate_right(jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *position) {
+    jmi_delay_point_t *buf = buffer->buf;
+    if ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index + buffer->size - 1)].t > t_limit)) {
+        jmi_real_t y = evaluate(buffer, FALSE, t_limit, position);
+        while ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index + buffer->size - 1)].t >= t_limit)) discard_right(buffer);
+        put(buffer, t_limit, y, TRUE, FALSE);
+    }
+    return 0;
 }
 
 static void jmi_delay_position_init(jmi_delay_position_t *position) {

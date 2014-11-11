@@ -59,5 +59,14 @@ struct jmi_delay_t {
     jmi_delay_position_t position;  /**< \brief Current buffer position, including state needed to trigger events. */
 };
 
+/** \brief Represents a single spatialDistribution block. Wraps a delaybuffer_t with the contents and adds additional state. */
+struct jmi_spatialdist_t {
+    jmi_delaybuffer_t buffer;        /**< \brief The actual history. */
+    jmi_boolean no_event;            /**< \brief True if this spatialDistribution should not generate any events - it will cross events in the history anyway. */
+    jmi_delay_position_t lposition;  /**< \brief Current buffer position for the left endpoint, including state needed to trigger events. */
+    jmi_delay_position_t rposition;  /**< \brief Current buffer position for the right endpoint, including state needed to trigger events. */
+    jmi_real_t last_x;               /**< \brief Last recorded x position. */
+};
+
 
 #endif
