@@ -360,7 +360,7 @@ static void undiscard_left(jmi_delaybuffer_t *buffer) {
     buffer->head_index--;
 }
 
-static void unlink(jmi_delay_point_t buf[], int left_pos, int left_index, int right_pos, int right_index) {
+static void delink(jmi_delay_point_t buf[], int left_pos, int left_index, int right_pos, int right_index) {
     buf[left_pos].right = left_index;
     buf[right_pos].left = right_index;
 }
@@ -412,7 +412,7 @@ static int put(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolea
             buffer->size++;
             dest_pos = index2pos(buffer, dest_index);
 
-            if (event_occurred) unlink(buf, end_pos, end_index, dest_pos, dest_index);
+            if (event_occurred) delink(buf, end_pos, end_index, dest_pos, dest_index);
             else                  link(buf, end_pos, end_index, dest_pos, dest_index);
             /* Don't link beyond the existing buffer */
             buf[dest_pos].right = dest_index;
@@ -421,7 +421,7 @@ static int put(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolea
             undiscard_left(buffer);
             dest_pos = index2pos(buffer, dest_index);
 
-            if (event_occurred) unlink(buf, dest_pos, dest_index, end_pos, end_index);
+            if (event_occurred) delink(buf, dest_pos, dest_index, end_pos, end_index);
             else                  link(buf, dest_pos, dest_index, end_pos, end_index);
             /* Don't link beyond the existing buffer */
             buf[dest_pos].left = dest_index;
