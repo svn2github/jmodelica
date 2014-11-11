@@ -809,14 +809,22 @@ aspect FlatNames {
     public FQName FQName.removeFArraySubscripts() {
         return this;
     }
-   
+
     public FQNameFull FQNameFull.removeFArraySubscripts() {
         int i = getNumFQNamePart() - 1;
         if (getFQNamePart(i).hasFArraySubscripts())
             setFQNamePart(new FQNamePart(getFQNamePart(i).getName()), i);
         return this;
     }
-   
+
+    /**
+     * Return the prefix name of the name this part belongs to, up to and including this part.
+     * 
+     * Creates a copy only if needed.
+     */
+    inh FQName FQNamePart.partialName();
+    eq FQNameFull.getFQNamePart(int i).partialName() = (i == getNumFQNamePart() - 1) ? this : copyPrefix();
+
     /**
      * Create a copy of the name excluding the first part.
      */

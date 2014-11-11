@@ -2743,14 +2743,14 @@ aspect ArrayHelpers {
 				fas.addFSubscript(rangeFSubscript(i));
 			return fas;
 		}
-		
-		/**
-		 * Create a new FSubscript for dimension <code>i</code>.
-		 */
-		protected FSubscript rangeFSubscript(int i) {
-			return size[i] == UNKNOWN ? new FColonSubscript() : new FExpSubscript(new FRangeExp(1, size[i]));
-		}
-		
+
+        /**
+         * Create a new FSubscript for dimension <code>i</code>.
+         */
+        public FSubscript rangeFSubscript(int i) {
+            return size[i] == UNKNOWN ? new FColonSubscript() : new FExpSubscript(new FRangeExp(1, size[i]));
+        }
+
 		/**
 		 * Check if any lengths are unknown.
 		 */
@@ -3626,16 +3626,16 @@ aspect ArrayHelpers {
 			return exps[i] == null ? super.flattenFSubscript(i, prefix) : 
 				new FExpSubscript(exps[i].flatten(prefix));
 		}
-		
-		/**
-		 * Create a new FSubscript with a range spanning dimension <code>i</code>.
-		 */
-		protected FSubscript rangeFSubscript(int i) {
-			evaluate(i);
-			return !okExp(exps[i]) ? super.rangeFSubscript(i) : 
-				new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), exps[i].fullCopy()));
-		}
-		
+
+        /**
+         * Create a new FSubscript with a range spanning dimension <code>i</code>.
+         */
+        public FSubscript rangeFSubscript(int i) {
+            evaluate(i);
+            return !okExp(exps[i]) ? super.rangeFSubscript(i) : 
+                new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), exps[i].fullCopy()));
+        }
+
 		/**
 		 * Returns a string representation of a single length.
 		 */
