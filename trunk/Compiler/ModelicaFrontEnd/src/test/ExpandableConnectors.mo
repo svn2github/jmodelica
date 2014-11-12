@@ -1318,6 +1318,40 @@ end ExpandableConnectors.Expandable35;
 ")})));
     end Expandable35;
 
+
+    model Expandable36
+        connector C = Real[2];
+        
+        expandable connector EC
+        end EC;
+        
+        EC ec1, ec2;
+        C x = { time, 2 * time };
+    equation
+        connect(ec1.x, x);
+        connect(ec1, ec2.ec);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable36",
+            description="Array in nested expandable connector",
+            flatModel="
+fclass ExpandableConnectors.Expandable36
+ ExpandableConnectors.Expandable36.C ec1.x[2];
+ ExpandableConnectors.Expandable36.C ec2.ec.x[2];
+ ExpandableConnectors.Expandable36.C x[2] = {time, 2 * time};
+equation
+ ec1.x[1] = ec2.ec.x[1];
+ ec2.ec.x[1] = x[1];
+ ec1.x[2] = ec2.ec.x[2];
+ ec2.ec.x[2] = x[2];
+
+public
+ type ExpandableConnectors.Expandable36.C = Real;
+end ExpandableConnectors.Expandable36;
+")})));
+    end Expandable36;
+
     
     
     model ExpandableErr1
