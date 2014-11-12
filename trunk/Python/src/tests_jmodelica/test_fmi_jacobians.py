@@ -34,7 +34,7 @@ from pyfmi.common.core import get_platform_dir
 path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
 
 
-class Test_FMI_Jaobians_base:
+class Test_FMI_Jacobians_base:
 
     def jac_analytic(self, model):
         """
@@ -125,7 +125,7 @@ class Test_FMI_Jaobians_base:
         m.initialize()
         assert self.check_jacobian(m)
 
-class Test_FMI_Jaobians_operators(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_operators(Test_FMI_Jacobians_base):
     
     """
     Test for arithmetic operators, as listed in section 3.4 of the Modelica specification 3.2. 3.2
@@ -180,11 +180,17 @@ class Test_FMI_Jaobians_operators(Test_FMI_Jaobians_base):
         fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False}, version="2.0alpha")
         m = FMUModel2(fn)
         m.set_debug_logging(True)
-        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        m.set("_log_level", 6)
+        try:
+            Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        except:
+            print m.continuous_states
+            print m._log
+            raise Exception
         assert n_errs ==0 
 
     
-class Test_FMI_Jaobians_functions(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_functions(Test_FMI_Jacobians_base):
     """
     This class tests the elemenary functions that Jmodelica.org has implemented according to
     Petter Lindhomlms thesis "Efficient implementation of Jacobians using automatic differentiation", p. 35
@@ -382,7 +388,7 @@ class Test_FMI_Jaobians_functions(Test_FMI_Jaobians_base):
         assert n_errs ==0 
     
     
-class Test_FMI_Jaobians_Whencases(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_Whencases(Test_FMI_Jacobians_base):
     
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -454,7 +460,7 @@ class Test_FMI_Jaobians_Whencases(Test_FMI_Jaobians_base):
         assert n_errs ==0 
     """
     
-class Test_FMI_Jaobians_Ifcases(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_Ifcases(Test_FMI_Jacobians_base):
     
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -556,7 +562,7 @@ class Test_FMI_Jaobians_Ifcases(Test_FMI_Jaobians_base):
 ##      Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
 ##      assert n_errs ==0       
 
-class Test_FMI_Jaobians_Functions(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_Functions(Test_FMI_Jacobians_base):
 
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -656,7 +662,7 @@ class Test_FMI_Jaobians_Functions(Test_FMI_Jaobians_base):
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
-class Test_FMI_Jacobians_Simulation(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_Simulation(Test_FMI_Jacobians_base):
 
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
@@ -687,7 +693,7 @@ class Test_FMI_Jacobians_Simulation(Test_FMI_Jaobians_base):
         assert n_errs ==0           
 
 
-class Test_FMI_Jaobians_Unsolved_blocks(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_Unsolved_blocks(Test_FMI_Jacobians_base):
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")
 
@@ -795,7 +801,7 @@ class Test_FMI_Jaobians_Unsolved_blocks(Test_FMI_Jaobians_base):
         #Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         #assert n_errs ==0       
         
-class Test_FMI_Jaobians_Miscellaneous(Test_FMI_Jaobians_base):
+class Test_FMI_Jacobians_Miscellaneous(Test_FMI_Jacobians_base):
 
     def setUp(self):
         self.fname = os.path.join(path_to_mofiles,"JacGenTests.mo")

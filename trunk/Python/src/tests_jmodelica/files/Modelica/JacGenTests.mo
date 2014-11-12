@@ -74,9 +74,9 @@ package JacGenTests
   
   
   model JacTestPow
-    Real x1(start=0);
+    Real x1(start=1);
     Real x2(start=5);
-	Real x3(start=-5);
+	Real x3(start=2);
     input Real u;
     output Real y;
   equation
@@ -127,7 +127,7 @@ package JacGenTests
   end JacTestMax;  
   
   model JacTestSqrt
-    Real x1(start=0);
+    Real x1(start=0.5);
     Real x2(start=5);
 	Real x3(start=1);
     input Real u;
@@ -192,9 +192,9 @@ package JacGenTests
   end JacTestCoTan;
   
   model JacTestAsin
-	Real x1(start=-1);
+	Real x1(start=-0.9);
     Real x2(start=0);
-	Real x3(start=1);
+	Real x3(start=0.9);
     input Real u;
     output Real y;
   equation
@@ -205,9 +205,9 @@ package JacGenTests
   end JacTestAsin;
   
   model JacTestAcos
-    Real x1(start=-1);
+    Real x1(start=-0.9);
     Real x2(start=0);
-	Real x3(start=1);
+	Real x3(start=0.9);
     input Real u;
     output Real y;
   equation
