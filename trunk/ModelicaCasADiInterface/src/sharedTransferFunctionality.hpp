@@ -72,7 +72,9 @@ void tearDownJVM();
 template<typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ>
-void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBlock,bool jacobian_no_casadi = false, bool solve_with_casadi = true)
+void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBlock, 
+		    const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars ,
+		    bool jacobian_no_casadi = true, bool solve_with_casadi = false)
 {
   JCollection block_equations(block->allEquations().this$);
   JCollection block_variables(block->allVariables().this$);
@@ -111,6 +113,8 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
   //Adding variables to block
   JIterator iter3(block_variables.iterator().this$);
   JIterator iter4(unsolved_vars.iterator().this$); 
+  const casadi::SharedObjectNode* node;
+  std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* >::const_iterator it;
   while(iter3.hasNext()){
     found=false;
     FVar jv1(iter3.next().this$);
@@ -122,11 +126,18 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
 	found=true;          
       }
     }
-    if(!found){
-      ciBlock->addBlockVariable(v1,true);
+    node = v1.get();
+    it = mapVars.find(node);
+    if(it!=mapVars.end()){
+	if(!found){
+	  ciBlock->addVariable(it->second, true);
+	}
+	else{
+	  ciBlock->addVariable(it->second, false);
+	}
     }
     else{
-      ciBlock->addBlockVariable(v1,false);
+	std::cout<<"Error: the variable "<<v1<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
     }
   }
   
@@ -135,7 +146,14 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
     found=false;
     FVar jvi(iter5.next().this$);
     casadi::MX vi = toMX(jvi.asMXVariable());
-    ciBlock->addInactivVariable(vi);
+    node = vi.get();
+    it = mapVars.find(node);
+    if(it!=mapVars.end()){
+	ciBlock->addExternalVariable(it->second);
+    }
+    else{
+	std::cout<<"Error: the variable "<<vi<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
+    }
   }
   
   JIterator iter6(block_independent_var.iterator().this$); 
@@ -143,8 +161,14 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
     found=false;
     FVar jvp(iter6.next().this$);
     casadi::MX vp = toMX(jvp.asMXVariable());
-    ciBlock->addIndependentVariable(vp);
-     
+    node = vp.get();
+    it = mapVars.find(node);
+    if(it!=mapVars.end()){
+	ciBlock->addExternalVariable(it->second);
+    }
+    else{
+	std::cout<<"Error: the variable "<<vp<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
+    }
   }
   
   JIterator iter7(block_trajectories_var.iterator().this$); 
@@ -152,7 +176,14 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
     found=false;
     FVar jvt(iter7.next().this$);
     casadi::MX vt = toMX(jvt.asMXVariable());
-    ciBlock->addTrajectoryVariable(vt);
+    node = vt.get();
+    it = mapVars.find(node);
+    if(it!=mapVars.end()){
+	ciBlock->addExternalVariable(it->second);
+    }
+    else{
+	std::cout<<"Error: the variable "<<vt<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
+    }
   }
   if(block->isSimple() && block->isSolvable()){
     JIterator iter8(block_equations.iterator().this$);
@@ -161,29 +192,18 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
     FEquation feq(iter8.next().this$);
     casadi::MX var = toMX(fvs.asMXVariable());
     casadi::MX sol = toMX(feq.solution(fvs).toMX());
-    ciBlock->addSolutionToVariable(var.getName(),sol);        
+    node = var.get();
+    it = mapVars.find(node);
+    if(it!=mapVars.end()){
+	ciBlock->addSolutionToVariable(it->second, sol);
+    }
+    else{
+	std::cout<<"Error: the variable "<<it->second->getVar()<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
+    }
   }
-  
-  //Setting Jacobian
-  
+  //Setting Jacobian 
   if(!jacobian_no_casadi){
-    casadi::MX jaco = casadi::MX::sym("Jacobian",ciBlock->getNumEquations(),ciBlock->getNumVariables());
-    std::vector<casadi::MX> residuals;
-    //append equations
-    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > equations =ciBlock->allEquations();
-    for(std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it=equations.begin(); 
-	    it != equations.end(); ++it){
-	residuals.push_back((*it)->getLhs()-(*it)->getRhs());
-    }
-    casadi::MXFunction f(ciBlock->allBlockVariables(),residuals);
-    f.init();
-    for (int i=0;i<ciBlock->getNumVariables();++i){
-	for(int j=0;j<ciBlock->getNumEquations();++j){
-	  casadi::MX jacotmp=f.jac(i,j);
-	  jaco(j,i)=jacotmp;
-	}
-    }
-    ciBlock->setJacobian(jaco);
+    ciBlock->computeJacobianCasADi();
   }
   else{
     if(block->computeJacobian()){
@@ -204,7 +224,6 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
       }
       ciBlock->setJacobian(jaco);
     }
-    std::cout<<"TODO\n";
   }
   
   ciBlock->setasSimple(block->isSimple());
@@ -221,7 +240,9 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ>
-void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT, bool jacobian_no_casadi = false, bool solve_with_casadi = true){
+void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT,
+		const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars,
+		bool jacobian_no_casadi = true, bool solve_with_casadi = false){
     
     for(int i=0;i<javablt->size();++i)
     {
@@ -234,7 +255,7 @@ void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> 
 		    FAbstractEquation,
 		    FEquation,
 		    FExp,
-		    ArrayJ>(block, ciBloc, jacobian_no_casadi, solve_with_casadi);
+		    ArrayJ>(block, ciBloc, mapVars, jacobian_no_casadi, solve_with_casadi);
        ciBLT->addBlock(ciBloc);
        delete block;
     }
@@ -243,7 +264,7 @@ void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> 
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ>
-void transferBLT2Model(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, bool jacobian_no_casadi = false, bool solve_with_casadi = true){
+void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
     
     ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT = new ModelicaCasADi::BLTHandler();
     transferBLT<JBLT,
@@ -254,7 +275,7 @@ void transferBLT2Model(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseMo
 		FAbstractEquation,
 		FEquation,
 		FExp,
-		ArrayJ>(javablt, ciBLT, jacobian_no_casadi, solve_with_casadi);
+		ArrayJ>(javablt, ciBLT, m->getNodeToVariableMap(), jacobian_no_casadi, solve_with_casadi);
     if(m->hasBLT()){
 	m->setBLT(ciBLT);    
     }
@@ -607,6 +628,7 @@ template <class FVar, class List, class Attribute, class Comment>
 void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
     ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
+				
     transferAttributes<FVar, List, Attribute, Comment>(boolVar, fv);
     handleAliasVariable(m, boolVar, fv);
     m->addVariable(boolVar);

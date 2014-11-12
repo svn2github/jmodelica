@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "casadi/casadi.hpp"
 
@@ -201,7 +202,7 @@ class BaseModel: public RefCountedNode {
     virtual void print(std::ostream& os) const {std::cout<<"BaseModel print should not be called\n.";}
     
     /** Allows the use of operator << to print this class, through Printable. */
-    virtual std::vector<casadi::MX> getBLTEliminateables() const {return std::vector<casadi::MX>();}
+    virtual std::set<const Variable*> getBLTEliminateables() const {return std::set<const Variable*>();}
     
     /*virtual void eliminateVariable(const std::string& varName){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
     virtual void eliminateVariables(std::vector<std::string>& varNames){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
@@ -215,6 +216,11 @@ class BaseModel: public RefCountedNode {
     
     /** Notify the Model if it has a BLT for DAE equations **/
     virtual bool hasBLT(){return 0;}
+    
+    void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
+    {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
+    
+    const std::map<const casadi::SharedObjectNode*, const Variable* >& getNodeToVariableMap() const {return mxnodeToVariable;}
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:
@@ -259,6 +265,9 @@ class BaseModel: public RefCountedNode {
     void assignVariableTypeToBooleanVariable(Ref<Variable> var);
     void handleVariableTypeForAddedVariable(Ref<Variable> var);
     void assignVariableTypeToVariable(Ref<Variable> var);
+    
+    //Map to build the blocks with CasADiInterface Variables 
+    std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
 };
 inline void BaseModel::initializeModel(std::string identifier) {
     this->identifier = identifier;

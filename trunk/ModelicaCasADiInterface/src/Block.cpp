@@ -58,96 +58,13 @@ namespace ModelicaCasADi
     }
   }
   
-  void Block::addSolutionToVariable(std::string varName, casadi::MX sol){
-    bool found=false;
-    for(std::map<std::string,casadi::MX>::iterator it=variableToSolution.begin();
-      it!=variableToSolution.end() && !found;++it){
-        if(it->first==varName){
-          found=true;        
-        }
-    }
-    if(found){
-      std::cout<<"Warning: the variable "<<varName<<" has already a solution: ";
-      std::cout<<variableToSolution[varName]<<"\n";
-    }
-    else{  
-      variableToSolution[varName]=sol;
-    }
-  }
-  
-  void Block::addBlockVariable(casadi::MX var, bool solvable){
-    bool found=false;
-    for (std::vector<casadi::MX>::iterator it = variables.begin(); it != variables.end() && !found; ++it){
-      if(it->isEqual(var)){found=true;}
-    }
-    if(!found){
-      variables.push_back(var);
-      variableToIndex[var.getName()]=variables.size();
-    }
-    else{
-      std::cout<<"Warning: the variable "<< var.getName() <<" was already in Variables\n";
-    }
-    if(!solvable){
-       found=false;
-       for (std::vector<casadi::MX>::iterator it = unSolvedVariables.begin(); it != unSolvedVariables.end() && !found; ++it){
-          if(it->isEqual(var)){found=true;}
-       }
-       if(!found){
-         unSolvedVariables.push_back(var);
-       }
-       else{
-         std::cout<<"Warning: the variable "<< var.getName() <<" was already in unSolvedVariables\n";
-       }
-    }
-  }
-  
-  void Block::addIndependentVariable(casadi::MX var){
-    bool found=false;
-    for (std::vector<casadi::MX>::iterator it = independentVariables.begin(); it != independentVariables.end() && !found; ++it){
-      if(it->isEqual(var)){found=true;}
-    }
-    if(!found){
-      independentVariables.push_back(var);
-    }
-    else
-    {
-      std::cout<<"Warning: the variable "<< var.getName() <<" was already in independentVariables\n";
-    }
-  }
-  void Block::addInactivVariable(casadi::MX var){
-    bool found=false;
-    for (std::vector<casadi::MX>::iterator it = inactiveVariables.begin(); it != inactiveVariables.end() && !found; ++it){
-      if(it->isEqual(var)){found=true;}
-    }
-    if(!found){
-      inactiveVariables.push_back(var);
-    }
-    else{
-      std::cout<<"Warning: the variable "<< var.getName() <<" was already in inactiveVariables\n";
-    }
-  }
-  void Block::addTrajectoryVariable(casadi::MX var){
-    bool found=false;
-    for (std::vector<casadi::MX>::iterator it = trajectoryVariables.begin(); it != trajectoryVariables.end() && !found; ++it){
-      if(it->isEqual(var)){found=true;}
-    }
-    if(!found){
-      trajectoryVariables.push_back(var);
-    }
-    else{
-      std::cout<<"Warning: the variable "<< var.getName() <<" was already in trajectoryVariables\n";
-    }  
-  }
-  
   void Block::printBlock(std::ostream& out,bool withData/*=false*/) const{
     out<<"----------------------------------------\n";
     out << "Number of variables z = (der(x),w): " << std::right << std::setw(10) << getNumVariables() << "\n";
     out << "Number of unsolved variables: " << std::right<< std::setw(16) << getNumUnsolvedVariables() << "\n";
     out << "Number of equations: " << std::right << std::setw(25) << getNumEquations() << "\n";
     out << "Number of unsolved equations: " << std::right << std::setw(16) << getNumUnsolvedEquations() << "\n";
-    out << "Number of inactive variables: " << std::right << std::setw(16) << getNumInactiveVariables() << "\n";
-    out << "Number of trajectory variables v = (t,x,u): " << std::right << std::setw(2) << getNumTrajectoryVariables() << "\n";
-    out << "Number of independent variables: " << std::right << std::setw(13) << getNumIndependentVariables() << "\n";
+    out << "Number of external variables: " << std::right << std::setw(16) << getNumExternalVariables() << "\n";
     out << "--------Flags---------\n";
     out << "BlockType: " << std::right << std::setw(20) << (isSimple() ? "SimpleBlock\n" : "EquationBlock\n");
     //if(!isSimple()){
@@ -156,66 +73,51 @@ namespace ModelicaCasADi
     if(isSimple()){
     out << "Solvability: " << std::right << std::setw(15) << (isSolvable() ? "Solvable\n" : "Unsolvable\n");
     }
-    if(variableToSolution.size()>0){
+    if(variableToSolution_.size()>0){
       out<<"Solutions:\n";
-      for(std::map<std::string,casadi::MX>::const_iterator it=variableToSolution.begin();
-      it!=variableToSolution.end();++it){
-        out<< getVariableByName(it->first) << " = " <<it->second<<"\n";
-      }    
+      for(std::map<const Variable*,casadi::MX>::const_iterator it=variableToSolution_.begin();
+      it!=variableToSolution_.end();++it){
+        out<< (it->first)->getVar() << " = " <<it->second<<"\n";
+      }
     }
     out << "--------Details-------\n";    
     if(withData){
-      if(variables.size()>0){
+      if(getNumVariables()>0){
         out<< "Variables:\n";
-        for (std::vector<casadi::MX>::const_iterator it = variables.begin(); 
-              it != variables.end(); ++it){
-          out << (*it) << " ";      
+        for (std::set<const Variable*>::const_iterator it = variables_.begin(); 
+              it != variables_.end(); ++it){
+          out << (*it)->getVar() << " ";      
         }
+        
         out<<"\n";
       }
-      if(unSolvedVariables.size()>0){
+      if(getNumUnsolvedVariables()>0){
         out<< "\nUnsolved variables:\n";
-        for (std::vector<casadi::MX>::const_iterator it = unSolvedVariables.begin(); 
-              it != unSolvedVariables.end(); ++it){
-          out << (*it) << " ";      
+        for (std::set<const Variable*>::const_iterator it = unSolvedVariables_.begin(); 
+              it != unSolvedVariables_.end(); ++it){
+          out << (*it)->getVar() << " ";      
         }
         out<<"\n";
       }
-      if(equations.size()>0){
+      if(getNumEquations()>0){
         out << "\nEquations:\n";
         for(std::vector< Ref<Equation> >::const_iterator it=equations.begin(); 
               it != equations.end(); ++it){
           out<<(*it)->getLhs()<<" = "<<(*it)->getRhs()<<"\n";
         }
       }
-      if(unSolvedEquations.size()>0){
+      if(getNumUnsolvedEquations()>0){
         out << "Unsolved equations:\n";
         for(std::vector< Ref<Equation> >::const_iterator it=unSolvedEquations.begin(); 
               it != unSolvedEquations.end(); ++it){
           out<<(*it)->getLhs()<<" = "<<(*it)->getRhs()<<"\n";
         }
       }
-      if(inactiveVariables.size()>0){
-        out<< "\nInactive variables:\n";
-        for (std::vector<casadi::MX>::const_iterator it = inactiveVariables.begin(); 
-              it != inactiveVariables.end(); ++it){
-          out << (*it) << " ";      
-        }
-        out<<"\n";
-      }
-      if(trajectoryVariables.size()>0){
-        out<< "\nTrajectory variables:\n";
-        for (std::vector<casadi::MX>::const_iterator it = trajectoryVariables.begin(); 
-              it != trajectoryVariables.end(); ++it){
-          out << (*it) << " ";      
-        }
-        out<<"\n";
-      }
-      if(independentVariables.size()>0){
-        out<< "\nIndependent variables:\n";
-        for (std::vector<casadi::MX>::const_iterator it = independentVariables.begin(); 
-              it != independentVariables.end(); ++it){
-          out << (*it) << " ";      
+      if(getNumExternalVariables()>0){
+        out<< "\nExternal variables:\n";
+        for (std::set<const Variable*>::const_iterator it = externalVariables_.begin(); 
+              it != externalVariables_.end(); ++it){
+          out << (*it)->getVar() << " ";      
         }
         out<<"\n";
       }
@@ -227,6 +129,35 @@ namespace ModelicaCasADi
     
   }
   
+  casadi::MX Block::computeJacobianCasADi(){
+    symbolicVariables = casadi::MX::sym("symVars",variables_.size());
+    std::vector<casadi::MX> vars;
+    std::vector<casadi::MX> varsSubstitue;
+    std::vector<casadi::MX> residuals;
+    for(std::vector< Ref<Equation> >::iterator it=equations.begin(); 
+                it != equations.end(); ++it){
+            residuals.push_back((*it)->getLhs()-(*it)->getRhs());
+    }
+    for (std::map<const Variable*,int>::const_iterator it = variableToIndex_.begin(); 
+              it != variableToIndex_.end(); ++it){
+          vars.push_back(it->first->getVar());
+          varsSubstitue.push_back(symbolicVariables(it->second));
+    }
+    
+    std::vector<casadi::MX> Expressions = casadi::substitute(residuals,
+                                         vars,
+                                         varsSubstitue);
+    casadi::MX symbolicResidual;
+    for(std::vector< casadi::MX >::iterator it=Expressions.begin(); 
+                it != Expressions.end(); ++it){
+            symbolicResidual.append(*it);
+    }
+    
+    casadi::MXFunction f(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,symbolicResidual));
+    f.init();
+    jacobian=f.jac();
+  }
+  
   void Block::solveLinearSystem(){
     if(isLinear() && !isSolvable()){
         //get the residuals
@@ -236,9 +167,9 @@ namespace ModelicaCasADi
                 it != equations.end(); ++it){
             residuals.push_back((*it)->getLhs()-(*it)->getRhs());
         }
-        std::vector<casadi::MX> zeros(variables.size(),casadi::MX(0.0));
+        std::vector<casadi::MX> zeros(getNumVariables(),casadi::MX(0.0));
         std::vector<casadi::MX> b_ = casadi::substitute(residuals,
-                                         variables,
+                                         variablesVector(),
                                          zeros);
         casadi::MX b;        
         for(std::vector<casadi::MX>::iterator it=b_.begin();
@@ -248,42 +179,36 @@ namespace ModelicaCasADi
         //std::cout<<"b "<<b<<"\n";
         casadi::MX xsolution = casadi::solve(jacobian,-b);
         //std::cout<<"x "<<xsolution<<"\n";
-        int i=0;
-        for(std::vector<casadi::MX>::const_iterator it = variables.begin(); 
-              it != variables.end(); ++it){
-          addSolutionToVariable(it->getName(), xsolution[i]);
-          ++i;
+        for(std::set<const Variable*>::const_iterator it = variables_.begin(); 
+              it != variables_.end(); ++it){
+            addSolutionToVariable(*it, xsolution[variableToIndex_[*it]]);
         }
         unSolvedEquations.clear();
-        unSolvedVariables.clear();
+        unSolvedVariables_.clear();
         solve_flag = true;
     }
   }
   
-  void Block::substituteVariablesInExpressions(const std::vector<casadi::MX>& vars, const std::vector<casadi::MX>& subs){
-    
-    assert (vars.size()==subs.size());
-
+  void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToExpression){
     std::vector<casadi::MX> varstoSubstitute;
-    std::vector<casadi::MX> substoSubstitute;
-    for(int i=0;i<vars.size();++i){
-      if(isInactive(vars[i].getName()) || isIndependent(vars[i].getName()) || isTrajectoryVar(vars[i].getName()))
-      {
-        if(!subs[i].isEmpty() && !vars[i].isEmpty()){
-          varstoSubstitute.push_back(vars[i]);
-          substoSubstitute.push_back(subs[i]);
-        }
-      }
-    }
+    std::vector<casadi::MX> expforsubstitutition;
     std::vector<casadi::MX> Expressions;
-    //Necesary because order is not determined
-    std::vector<std::string> keys;
-    for(std::map<std::string,casadi::MX>::iterator it=variableToSolution.begin();
-        it!=variableToSolution.end();++it){
+    for(std::map<const Variable*, casadi::MX>::const_iterator it = variableToExpression.begin();
+        it!=variableToExpression.end();++it){
+          if(isExternal(it->first) && !it->first->getVar().isEmpty() && !it->second.isEmpty()){
+            varstoSubstitute.push_back(it->first->getVar());
+            expforsubstitutition.push_back(it->second);
+          }
+    }
+    //Get expresions from variableToSolution map
+    std::vector<const Variable*> keys; //Necesary because order is not determined
+    for(std::map<const Variable*,casadi::MX>::iterator it=variableToSolution_.begin();
+        it!=variableToSolution_.end();++it){
       keys.push_back(it->first);
       Expressions.push_back(it->second);
     }
-    //Not solved equations
+    
+    //Get expresions from equations
     if(!isSolvable()){
       for(std::vector< Ref<Equation> >::iterator it=unSolvedEquations.begin(); 
         it != unSolvedEquations.end();++it){
@@ -292,10 +217,10 @@ namespace ModelicaCasADi
       }
     }
     //Make the substitutions
-    std::vector<casadi::MX> subExpressions = casadi::substitute(Expressions,varstoSubstitute,substoSubstitute);
-    //retrive substitutions to constainers      
+    std::vector<casadi::MX> subExpressions = casadi::substitute(Expressions,varstoSubstitute,expforsubstitutition);
+    //retrive substitutions to constainers 
     for(int i=0;i<keys.size();++i){
-      variableToSolution[keys[i]]=subExpressions[i];      
+      variableToSolution_[keys[i]]=subExpressions[i];      
     }
     if(!isSolvable()){
       int j=0;
@@ -305,42 +230,23 @@ namespace ModelicaCasADi
         ++j;
       }
     }
-    /*unSolvedEquations.clear();
-    for(int i=keys.size();i<subExpressions.size();i+=2){
-      unSolvedEquations.push_back(new Equation(subExpressions[i],subExpressions[i+1]));    
-    }*/
+    
   }
   
-  std::vector<casadi::MX> Block::getEliminateableVariables() const {
-    std::vector<casadi::MX> vars;  
-    for(std::map<std::string, casadi::MX>::const_iterator it = variableToSolution.begin();
-        it!=variableToSolution.end();++it){
-          casadi::MX v = getVariableByName(it->first);
-          if(!v.isEmpty()){
-            vars.push_back(v);
-          }
+  std::set<const Variable*> Block::eliminateableVariables() const{
+    std::set<const Variable*> keys;
+    for(std::map<const Variable*, casadi::MX>::const_iterator it = variableToSolution_.begin();
+        it!=variableToSolution_.end();++it){
+          keys.insert(it->first);
     }
-    return vars;
+    return keys;
   }
   
-  void Block::removeSolutionOfVariable(std::string varName){
-    std::map<std::string, casadi::MX>::iterator it = variableToSolution.find(varName);
-    if(it!=variableToSolution.end()){
-      variableToSolution.erase(it);    
-    }
-    else{
-      std::cout<<"The variable "<<varName<<" does not have a solution thus it cannot be removed.\n";    
-    }
-  }
-  
-  std::vector< Ref<Equation> > Block::getEquations4Model() const{
+  std::vector< Ref<Equation> > Block::getEquationsforModel() const{
     std::vector< Ref<Equation> > modelEqs;
-    for(std::map<std::string, casadi::MX>::const_iterator it = variableToSolution.begin();
-        it!=variableToSolution.end();++it){
-      casadi::MX v = getVariableByName(it->first);
-      if(!v.isEmpty()){
-        modelEqs.push_back(new Equation(v,it->second));
-      }
+    for(std::map<const Variable*, casadi::MX>::const_iterator it = variableToSolution_.begin();
+        it!=variableToSolution_.end();++it){
+        modelEqs.push_back(new Equation(it->first->getVar(),it->second));
     }
      
     for(std::vector< Ref<Equation> >::const_iterator it=unSolvedEquations.begin(); 

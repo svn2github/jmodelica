@@ -267,6 +267,7 @@ void BaseModel::addVariable(Ref<Variable> var) {
     dirty = true; // todo: only if (dependent) parameter, or with dependent attributes?
     handleVariableTypeForAddedVariable(var);
     z.push_back(var.getNode());
+    addEntryToNodeVariableMap(var->getVar().get(), var.getNode());
 }
 
 vector< Ref<Variable> > BaseModel::getVariables(VariableKind kind) {

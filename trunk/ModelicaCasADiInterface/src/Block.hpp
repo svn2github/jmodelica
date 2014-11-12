@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Equation.hpp"
 #include "RefCountedNode.hpp"
 #include <vector>
+#include <set>
 #include <map>
 #include <utility>
 #include <string>
@@ -39,71 +40,59 @@ class Block : public RefCountedNode{
     //Default constructor
     Block(): simple_flag(false),linear_flag(false),solve_flag(false){}
     
+    /***************************TO BE REMOVE*******************************/
+    //Might be kept
+    std::vector< casadi::MX > variablesVector() const;
+    /**********************************************************************/
+    
+    
+    /**************VariablesMethods*************/
+    int getNumVariables()const {return variables_.size();}
+    int getNumUnsolvedVariables() const {return unSolvedVariables_.size();}
+    int getNumExternalVariables() const {return externalVariables_.size();}
+    int getVariableIndex(const Variable* var);
+    const std::set<const Variable*>& variables() const;
+    const std::set<const Variable*>& unsolvedVariables() const;
+    const std::set<const Variable*>& externalVariables() const;
+    bool isExternal(const Variable* var) const;
+    bool removeSolutionOfVariable(const Variable* var);
+    std::map<const Variable*, casadi::MX> getSolutionMap() const;
+    casadi::MX getSolutionOfVariable(const Variable* var) const;
+    bool hasSolution(const Variable*) const;
+    void addVariable(const Variable* var, bool solvable);
+    void addExternalVariable(const Variable* var);
+    std::set<const Variable*> eliminateableVariables() const;
+    void addSolutionToVariable(const Variable* var, casadi::MX sol);
+    /*******************************************/
+    
+    /**************EquationMethods*************/
+    int getNumEquations() const {return equations.size();}
+    int getNumUnsolvedEquations() const {return unSolvedEquations.size();}
+    std::vector< Ref<Equation> > allEquations() const;
+    std::vector< Ref<Equation> > notSolvedEquations() const;
+    void addEquation(Ref<Equation> eq, bool solvable);
+    std::vector< Ref<Equation> > getEquationsforModel() const;
+    /*******************************************/
+    
+    
+    /**************AuxiliaryMethods*************/
+    void setJacobian(const casadi::MX& jac);
+    casadi::MX computeJacobianCasADi();
+    void printBlock(std::ostream& out, bool withData=false) const;
+    void checkLinearityWithJacobian();
+    
     bool isSimple() const;
     bool isLinear() const;
     bool isSolvable() const;
-    
     bool setasSimple(bool flag){simple_flag=flag;}
     bool setasLinear(bool flag){linear_flag=flag;}
     bool setasSolvable(bool flag){solve_flag=flag;}
     
-    bool isInactive(const casadi::MX& var, int depth=0) const;
-    bool isInactive(const std::string& varName) const;
-    bool isIndependent(const casadi::MX& var, int depth=0) const;
-    bool isIndependent(const std::string& varName) const;
-    bool isTrajectoryVar(const casadi::MX& var, int depth=0) const;
-    bool isTrajectoryVar(const std::string& varName) const;
-    
-    int getNumEquations() const {return equations.size();}
-    int getNumVariables()const {return variables.size();}
-    int getNumUnsolvedEquations() const {return unSolvedEquations.size();}
-    int getNumUnsolvedVariables() const {return unSolvedVariables.size();}
-    int getNumInactiveVariables() const {return inactiveVariables.size();}
-    int getNumIndependentVariables() const {return independentVariables.size();}
-    int getNumTrajectoryVariables() const {return trajectoryVariables.size();}
-    
-    std::vector< casadi::MX > allBlockVariables() const;
-    std::vector< casadi::MX > getUnsolvedVariables() const;
-    std::vector< casadi::MX > getIndependentVariables() const;
-    std::vector< casadi::MX > getInactiveVariables() const;
-    std::vector< casadi::MX > getTrajectoryVariables() const;
-    //returns empty variable if not found
-    casadi::MX getVariableByName(const std::string& name) const;
-    casadi::MX getInactiveVarByName(const std::string& name) const;
-    casadi::MX getIndependentVarByName(const std::string& name) const;
-    casadi::MX getTrajectoryVarByName(const std::string& name) const;
-    int getVariableIndex(const std::string& name) const;
-    casadi::MX getSolutionOfVariable(const std::string& name) const;    
-    bool hasSolution(const std::string& name) const;
-    
-    
-    void setJacobian(const casadi::MX& jac);
-    std::vector< Ref<Equation> > allEquations() const;
-    std::vector< Ref<Equation> > notSolvedEquations() const;
-    
-    std::map<std::string, casadi::MX> getSolutionsMap() const;
-    
-    void addEquation(Ref<Equation> eq, bool solvable);
-    void addSolutionToVariable(std::string varName, casadi::MX sol);
-    void removeSolutionOfVariable(std::string varName);
-    
-    void addBlockVariable(casadi::MX var, bool solvable);
-    void addIndependentVariable(casadi::MX var);
-    void addInactivVariable(casadi::MX var);
-    void addTrajectoryVariable(casadi::MX var);
-    
-    void printBlock(std::ostream& out, bool withData=false) const;
-    
-    void checkLinearityWithJacobian();
-    //solves if it is not solvable and append solutions to variableToSolution
     //Requires the jacobian to be computed in beforehand
     void solveLinearSystem();
-    
-    void substituteVariablesInExpressions(const std::vector<casadi::MX>& vars, const std::vector<casadi::MX>& subs);
-    
-    std::vector<casadi::MX> getEliminateableVariables() const;
-    
-    std::vector< Ref<Equation> > getEquations4Model() const; 
+    void substitute(const std::map<const Variable*, casadi::MX>& mapVariableToExpression);
+    /*******************************************/
+
     
         
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
@@ -113,25 +102,26 @@ class Block : public RefCountedNode{
     std::vector< Ref<Equation> > equations;
     // Vector containing pointers to block unsolved equations
     std::vector< Ref<Equation> > unSolvedEquations;
-    // Vector containing pointers to block solved variables
-    std::vector< casadi::MX > variables;
-    // Vector containing pointers to block unsolved variables
-    std::vector< casadi::MX > unSolvedVariables;
     
-    //This are not consider as variables in the block but more like parameters
-    // Vector containing pointers to block independent variables
-    std::vector< casadi::MX > independentVariables; 
-    // Vector containing pointers to block \upsion trajectory variables
-    std::vector< casadi::MX > trajectoryVariables;
-    // Vector containing pointers to block inactive variables (under diagonal)
-    std::vector< casadi::MX > inactiveVariables;
+    // Vector containing pointers to block solved variables
+    std::set< const Variable* > variables_;
+    // Vector containing pointers to block unsolved variables
+    std::set< const Variable* > unSolvedVariables_;
+    //External variables
+    std::set< const Variable* > externalVariables_;
+    
     // Map with solution of variables
-    std::map<std::string,casadi::MX> variableToSolution;
-    // Map with variable names to index
-    std::map<std::string,int> variableToIndex;
+    std::map< const Variable* ,casadi::MX> variableToSolution_;
+    
+    // Map with variable names to index for jacobian computation
+    std::map<const Variable*,int> variableToIndex_;
+    void addIndexToVariable(const Variable* var);
+    
     
     //The jacobian stuff must be more efficiently implemented
     casadi::MX jacobian;
+    //For handling jacobian with casadi
+    casadi::MX symbolicVariables; 
     
     //Simple flag
     bool simple_flag;
@@ -145,167 +135,94 @@ inline bool Block::isSimple() const {return simple_flag;}
 inline bool Block::isLinear() const {return linear_flag;}
 inline bool Block::isSolvable() const {return solve_flag;}
 
-
-inline bool Block::isInactive(const casadi::MX& var,int depth/*=0*/) const{
-  bool found=false;  
-  for (std::vector<casadi::MX>::const_iterator it = inactiveVariables.begin(); 
-      it != inactiveVariables.end(); ++it){
-        if(it->isEqual(var,depth)){
-          return 1;      
-        }
-  }
-  return 0;
+inline void Block::addVariable(const Variable* var, bool solvable){
+  addIndexToVariable(var);
+  variables_.insert(var);
+  if(!solvable){unSolvedVariables_.insert(var);}
 }
 
+inline void Block::addExternalVariable(const Variable* var){externalVariables_.insert(var);}
 
-inline bool Block::isInactive(const std::string& varName) const{
-  bool found = false;  
-  for (std::vector<casadi::MX>::const_iterator it = inactiveVariables.begin(); 
-    it != inactiveVariables.end(); ++it){
-    if(it->getName()==varName){
-      return 1;    
-    }
+inline void Block::addSolutionToVariable(const Variable* var, casadi::MX sol){
+  std::map< const Variable* ,casadi::MX>::iterator it =variableToSolution_.find(var);
+  if(it==variableToSolution_.end()){
+    variableToSolution_.insert(std::pair<const Variable*, casadi::MX>(var,sol));
   }
-  return 0;
+  else{
+    std::cout<<"Warning: The variable "<<(it->first)->getVar()<<" has already a solution "<<it->second;
+  }
 }
 
-inline bool Block::isIndependent(const casadi::MX& var,int depth/*=0*/) const{
-  bool found=false;  
-  for (std::vector<casadi::MX>::const_iterator it = independentVariables.begin(); 
-      it != independentVariables.end(); ++it){
-        if(it->isEqual(var,depth)){
-          return 1;      
-        }
+inline bool Block::removeSolutionOfVariable(const Variable* var){
+  std::map< const Variable* ,casadi::MX>::iterator it =variableToSolution_.find(var);
+  if(it!=variableToSolution_.end()){
+      variableToSolution_.erase(it);
+      return 1;
   }
-  return 0;
+  return 0;  
 }
 
-
-inline bool Block::isIndependent(const std::string& varName) const{  
-  for (std::vector<casadi::MX>::const_iterator it = independentVariables.begin(); 
-    it != independentVariables.end(); ++it){
-    if(it->getName()==varName){
-      return 1;    
-    }
-  }
-  return 0;
+inline std::map<const Variable*, casadi::MX> Block::getSolutionMap() const{
+  return std::map<const Variable*, casadi::MX>(variableToSolution_);
 }
 
-inline bool Block::isTrajectoryVar(const casadi::MX& var,int depth/*=0*/) const{ 
-  for (std::vector<casadi::MX>::const_iterator it = trajectoryVariables.begin(); 
-      it != trajectoryVariables.end(); ++it){
-        if(it->isEqual(var,depth)){
-          return 1;      
-        }
-  }
-  return 0;
+inline bool Block::hasSolution(const Variable* var) const{
+  std::map<const Variable*, casadi::MX>::const_iterator it = variableToSolution_.find(var);
+  return ((it!=variableToSolution_.end()) ? 1 : 0);
 }
 
+inline const std::set< const Variable* >& Block::variables() const{
+  return variables_;
+}  
 
-inline bool Block::isTrajectoryVar(const std::string& varName) const{  
-  for (std::vector<casadi::MX>::const_iterator it = trajectoryVariables.begin(); 
-    it != trajectoryVariables.end(); ++it){
-    if(it->getName()==varName){
-      return 1;    
-    }
-  }
-  return 0;
+inline const std::set< const Variable* >& Block::unsolvedVariables() const{
+  return unSolvedVariables_;  
+}
+
+inline const std::set< const Variable* >& Block::externalVariables() const{
+  return externalVariables_;  
+}
+
+inline bool Block::isExternal(const Variable* var) const{ 
+  std::set< const Variable* >::iterator it = externalVariables_.find(var);
+  if(it!=externalVariables_.end()){return 1;}
+  else{return 0;}
 }
 
 inline void Block::checkLinearityWithJacobian(){
   if(!jacobian.isEmpty()){
-    linear_flag = !casadi::dependsOn(jacobian,variables);
+    std::vector< casadi::MX > vars;
+    for (std::set<const Variable*>::const_iterator it = variables_.begin(); 
+        it != variables_.end(); ++it){
+        vars.push_back((*it)->getVar());      
+    }
+    linear_flag = !casadi::dependsOn(jacobian,vars);
+    if(!symbolicVariables.isEmpty()){
+      linear_flag = !casadi::dependsOn(jacobian,std::vector< casadi::MX >(1,symbolicVariables));
+    }
   }
 }
 
-inline std::vector< casadi::MX > Block::allBlockVariables() const{
-  std::vector< casadi::MX > vars(variables);
+inline std::vector< casadi::MX > Block::variablesVector() const{
+  std::vector< casadi::MX > vars;
+  for (std::set<const Variable*>::const_iterator it = variables_.begin(); 
+      it != variables_.end(); ++it){
+      vars.push_back((*it)->getVar());      
+  }
   return vars;
 }  
 
-inline std::vector< casadi::MX > Block::getUnsolvedVariables() const{
-  std::vector< casadi::MX > vars(unSolvedVariables);
-  return vars;  
-}
-  
-inline std::vector< casadi::MX > Block::getIndependentVariables() const{
-  std::vector< casadi::MX > vars(independentVariables);
-  return vars;  
-}
-  
-inline std::vector< casadi::MX > Block::getInactiveVariables() const{
-  std::vector< casadi::MX > vars(inactiveVariables);
-  return vars;  
-}
-  
-inline std::vector< casadi::MX > Block::getTrajectoryVariables() const{
-  std::vector< casadi::MX > vars(trajectoryVariables);
-  return vars;  
-}
-  
 inline std::vector< Ref<Equation> > Block::allEquations() const{
-  std::vector< Ref<Equation> > eqs(equations);
-  return eqs;  
+  return std::vector< Ref<Equation> >(equations);  
 }  
 
 inline std::vector< Ref<Equation> > Block::notSolvedEquations() const{
-  std::vector< Ref<Equation> > eqs(unSolvedEquations);
-  return eqs;  
+  return std::vector< Ref<Equation> >(unSolvedEquations);  
 } 
-  
-inline std::map<std::string, casadi::MX> Block::getSolutionsMap() const{
-  std::map<std::string, casadi::MX> solutions(variableToSolution);
-  return solutions;
-}
 
-inline casadi::MX Block::getVariableByName(const std::string& name) const{
-  for (std::vector<casadi::MX>::const_iterator it = variables.begin(); it != variables.end(); ++it){
-    if(it->getName()==name){
-      return (*it);    
-    }
-  }
-  //To change later
-  std::cout<<"Warning The variable was not found returning empty\n";
-  return casadi::MX();
-}
-
-
-inline casadi::MX Block::getInactiveVarByName(const std::string& name) const{
-  for (std::vector<casadi::MX>::const_iterator it = inactiveVariables.begin(); it != inactiveVariables.end(); ++it){
-    if(it->getName()==name){
-      return (*it);    
-    }
-  }
-  //To change later
-  std::cout<<"Warning The variable was not found returning empty\n";
-  return casadi::MX();
-}
-
-inline casadi::MX Block::getIndependentVarByName(const std::string& name) const{
-  for (std::vector<casadi::MX>::const_iterator it = independentVariables.begin(); it != independentVariables.end(); ++it){
-    if(it->getName()==name){
-      return (*it);    
-    }
-  }
-  //To change later
-  std::cout<<"Warning The variable was not found returning empty\n";
-  return casadi::MX();
-}
-
-inline casadi::MX Block::getTrajectoryVarByName(const std::string& name) const{
-  for (std::vector<casadi::MX>::const_iterator it = trajectoryVariables.begin(); it != trajectoryVariables.end(); ++it){
-    if(it->getName()==name){
-      return (*it);    
-    }
-  }
-  //To change later
-  std::cout<<"Warning The variable was not found returning empty\n";
-  return casadi::MX();
-}
-
-inline int Block::getVariableIndex(const std::string& name) const{
-  std::map<std::string,int>::const_iterator it = variableToIndex.find(name);
-  if(it!=variableToIndex.end()){
+inline int Block::getVariableIndex(const Variable* var) {
+  std::map<const Variable*,int>::iterator it = variableToIndex_.find(var);
+  if(it!=variableToIndex_.end()){
     return it->second;   
   }
   else{
@@ -315,22 +232,24 @@ inline int Block::getVariableIndex(const std::string& name) const{
   }
 }
 
-inline casadi::MX Block::getSolutionOfVariable(const std::string& name) const{
-  std::map<std::string,casadi::MX>::const_iterator it = variableToSolution.find(name);
-  if(it!=variableToSolution.end()){
+inline void Block::addIndexToVariable(const Variable* var){
+  std::set<const Variable*>::iterator it = variables_.find(var);
+  if(it==variables_.end()){
+      variableToIndex_.insert(std::pair<const Variable*, int>(var,variables_.size()));
+  }
+}
+
+inline casadi::MX Block::getSolutionOfVariable(const Variable* var) const{
+  std::map<const Variable*,casadi::MX>::const_iterator it = variableToSolution_.find(var);
+  if(it!=variableToSolution_.end()){
     return it->second;   
   }
   else{
-    //To change later
-    std::cout<<"The variable was not found returning -1\n";
+    // Returns empty variable (check nonEmpty at substitutions)
     return casadi::MX();
   }
 }
 
-inline bool Block::hasSolution(const std::string& name) const{
-  std::map<std::string, casadi::MX>::const_iterator it = variableToSolution.find(name);
-  return ((it!=variableToSolution.end()) ? 1 : 0);
-}
 
 }; // End namespace
 #endif

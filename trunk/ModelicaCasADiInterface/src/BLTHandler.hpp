@@ -32,18 +32,23 @@ namespace ModelicaCasADi
 class BLTHandler : public RefCountedNode{
     public:
     
-    //CopyConstructor or assignment operator by default
-    void printBLT(std::ostream& out, bool with_details=false) const;
+    /**************BlockMethods*************/
     void addBlock(Ref<Block> block);
     int getNumberOfBlocks() const;
-    std::vector<casadi::MX> getAllEliminatableVariables() const;
-    std::vector< Ref<Equation> > getAllEquations4Model() const;
-    std::vector<casadi::MX> getSubstitues(const std::vector<casadi::MX>& eliminateables) const;
-    void substituteAllEliminateables();
-    void substitute(const std::vector<casadi::MX>& vars, const std::vector<casadi::MX>& subs);
-    void removeSolutionOfVariable(std::string varName);
-    
     Ref<Block> getBlock(int i) const;
+    /***************************************/
+    
+    /**************AuxiliaryMethods*************/
+    void printBLT(std::ostream& out, bool with_details=false) const;
+    std::set<const Variable*> eliminatableVariables() const;
+    void getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const;
+    
+    std::vector< Ref<Equation> > writeEquationsforModel() const;
+    void substituteAllEliminateables();
+    void removeSolutionOfVariable(const Variable* var);
+    void substitute(const std::map<const Variable*,casadi::MX>& substituteMap);
+    /*******************************************/
+    
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
     std::vector< Ref<Block> > blt;

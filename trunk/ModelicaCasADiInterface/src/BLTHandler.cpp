@@ -31,151 +31,116 @@ namespace ModelicaCasADi
         }
     }
     
-    std::vector<casadi::MX> BLTHandler::getAllEliminatableVariables() const{
-        std::vector<casadi::MX> vars;
+    //With variables
+    std::set<const Variable*> BLTHandler::eliminatableVariables() const{
+        std::set<const Variable*> vars;
         for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
             it!=blt.end();++it){
-            std::vector<casadi::MX> blockVars = (*it)->getEliminateableVariables();
-            vars.reserve( vars.size() + blockVars.size() ); 
-            vars.insert( vars.end(), blockVars.begin(), blockVars.end() );
+            std::set<const Variable*> blockVars = (*it)->eliminateableVariables();
+            vars.insert(blockVars.begin(), blockVars.end());
         }
         return vars;
     }
     
-    std::vector< Ref<Equation> > BLTHandler::getAllEquations4Model() const{
+    std::vector< Ref<Equation> > BLTHandler::writeEquationsforModel() const{
         std::vector< Ref<Equation> > modelEquations;
         for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
             it!=blt.end();++it){
-            std::vector< Ref<Equation> > blockEqs = (*it)->getEquations4Model();
+            std::vector< Ref<Equation> > blockEqs = (*it)->getEquationsforModel();
             modelEquations.reserve( modelEquations.size() + blockEqs.size() ); 
             modelEquations.insert( modelEquations.end(), blockEqs.begin(), blockEqs.end() );
         }
         return modelEquations;
     }
     
-    void BLTHandler::removeSolutionOfVariable(std::string varName){
+    void BLTHandler::removeSolutionOfVariable(const Variable* var){
         bool found=0;
         for(std::vector< Ref<Block> >::iterator it=blt.begin();
             it!=blt.end() && !found ;++it){
-            if((*it)->hasSolution(varName)){
-               (*it)->removeSolutionOfVariable(varName);               
+            if((*it)->removeSolutionOfVariable(var)){              
                found=1;         
             }
         }
-        if(!found){std::cout<<"The variable "<<varName<<" does not have a solution in BLT.\n";}
+        if(!found){std::cout<<"The variable "<<var->getName()<<" does not have a solution in BLT.\n";}
     }
     
-    void BLTHandler::substitute(const std::vector<casadi::MX>& vars, const std::vector<casadi::MX>& subs){
+    
+    void BLTHandler::substitute(const std::map<const Variable*,casadi::MX>& substituteMap){
         for(std::vector< Ref<Block> >::iterator it=blt.begin();
             it!=blt.end();++it){
-            (*it)->substituteVariablesInExpressions(vars,subs);
-        }   
+            (*it)->substitute(substituteMap);
+        } 
     }
     
-    std::vector<casadi::MX> BLTHandler::getSubstitues(const std::vector<casadi::MX>& eliminateables) const{
+    void BLTHandler::getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const{
         
-        /*std::vector<casadi::MX> subs;
-        for(std::vector<casadi::MX>::const_iterator it_e = eliminateables.begin(); 
-              it_e != eliminateables.end(); ++it_e){
-            bool found=0;
-            for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
-                it!=blt.end() && !found;++it){
-                if((*it)->hasSolution(it_e->getName())){
-                   casadi::MX exp = (*it)->getSolutionOfVariable(it_e->getName());
-                   subs.push_back(exp);
-                   found=1;
-                }
-            }
-            if(!found){
-                //If the variable is empty the substitution in the block will be ignored
-                std::cout<<"Warning: The variable "<< *it_e << "is not eliminateable. It will be ignore at the substitution.\n";
-                subs.push_back(casadi::MX()); 
-            }
-        }
-        return subs;*/        
-        
-        std::vector<casadi::MX> subs;
-        int k=0;
-        std::vector<casadi::MX> inner_subs;
-        std::vector<casadi::MX> inner_elim;
-        for(std::vector<casadi::MX>::const_iterator it_e = eliminateables.begin(); 
+        for(std::set<const Variable*>::const_iterator it_e = eliminateables.begin(); 
               it_e != eliminateables.end(); ++it_e){
             bool found=0;
             casadi::MX tmp_subs;
             for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
                 it!=blt.end() && !found;++it){
-                if((*it)->hasSolution(it_e->getName())){
-                   casadi::MX exp = (*it)->getSolutionOfVariable(it_e->getName());
+                if((*it)->hasSolution(*it_e)){
+                   casadi::MX exp = (*it)->getSolutionOfVariable(*it_e);
                    tmp_subs=exp;
                    found=1;
                 }
             }
             
             //substitute previous variables in eliminateables
-            if(k>0){
+            if(storageMap.size()>0){
                 if(found){
-                    for(int r=k;r>=0;--r){
+                    std::vector<casadi::MX> inner_subs;
+                    std::vector<casadi::MX> inner_elim;
+                    for(std::map<const Variable*,casadi::MX>::const_iterator it_prev=storageMap.begin(); it_prev!=storageMap.end();++it_prev){
                         int ndeps =tmp_subs.getNdeps();
                         for(int j=0;j<ndeps;++j){
-                            if(tmp_subs.getDep(j).isEqual(eliminateables[r],0) && !subs[r].isEmpty()){
-                                 inner_subs.push_back(subs[r]);
-                                 inner_elim.push_back(eliminateables[r]); 
+                            if(tmp_subs.getDep(j).isEqual(it_prev->first->getVar(),0) && !it_prev->second.isEmpty()){
+                                 inner_subs.push_back(it_prev->second);
+                                 inner_elim.push_back(it_prev->first->getVar()); 
                             }
                         }
                     }
                     std::vector<casadi::MX> subExp = casadi::substitute(std::vector<casadi::MX>(1,tmp_subs),inner_elim,inner_subs);
-                    subs.push_back(subExp.front());
+                    storageMap.insert(std::pair<const Variable*,casadi::MX>(*it_e,subExp.front()));
                     inner_subs.clear();
                     inner_elim.clear();
                 }
             }
             else{
-               if(found){subs.push_back(tmp_subs);} 
+               if(found){storageMap.insert(std::pair<const Variable*,casadi::MX>(*it_e,tmp_subs));} 
             }
             if(!found){
                 //If the variable is empty the substitution in the block will be ignored
-                std::cout<<"Warning: The variable "<< *it_e << "is not eliminateable. It will be ignore at the substitution.\n";
-                subs.push_back(casadi::MX()); 
+                std::cout<<"Warning: The variable "<< (*it_e)->getName() << "is not eliminateable. It will be ignore at the substitution.\n";
+                storageMap.insert(std::pair<const Variable*,casadi::MX>(*it_e,casadi::MX()));
             }
-            ++k;
         }
-        return subs;
     }
     
-    
     void BLTHandler::substituteAllEliminateables(){
-        //This is not efficient.. it does not use the blt order for the substitutions. TO BE improved
-        /*std::vector<casadi::MX> vars = getAllEliminatableVariables();
-        std::vector<casadi::MX> subs = getSubstitues(vars);
-        for(std::vector< Ref<Block> >::iterator it=blt.begin();
-            it!=blt.end();++it){
-            (*it)->substituteVariablesInExpressions(vars,subs);
-            subs = getSubstitues(vars);
-        }*/
-        
-        std::vector<casadi::MX> inactives;
-        std::vector<casadi::MX> blockSubstitutes;
+        std::set<const Variable*> externalVars;
+        std::map<const Variable*,casadi::MX> substitutionMap;
         for(std::vector< Ref<Block> >::iterator fit=blt.begin()+1;
             fit!=blt.end();++fit){
-            inactives = (*fit)->getInactiveVariables();
-            for(std::vector<casadi::MX>::const_iterator it_e = inactives.begin(); 
-              it_e != inactives.end(); ++it_e){
+            externalVars = (*fit)->externalVariables();
+            for(std::set<const Variable*>::const_iterator it_e = externalVars.begin(); 
+              it_e != externalVars.end(); ++it_e){
                 bool found =0;
                 for(std::vector< Ref<Block> >::reverse_iterator rit(fit);rit!=blt.rend() && !found;++rit){
-                    if((*rit)->hasSolution(it_e->getName())){
-                        casadi::MX exp = (*rit)->getSolutionOfVariable(it_e->getName());
-                        blockSubstitutes.push_back(exp);
+                    if((*rit)->hasSolution((*it_e))){
+                        casadi::MX exp = (*rit)->getSolutionOfVariable((*it_e));
+                        substitutionMap.insert(std::pair<const Variable*,casadi::MX>((*it_e),exp));
                         found=1;
                     }
                 }
                 if(!found){
                     //If the variable is empty the substitution in the block will be ignored
-                    //std::cout<<"The variable "<< *it_e << "was not found. It will be ignore at the substitution.\n";
-                    blockSubstitutes.push_back(casadi::MX()); 
+                    substitutionMap.insert(std::pair<const Variable*,casadi::MX>((*it_e),casadi::MX()));
                 }
             }
-            (*fit)->substituteVariablesInExpressions(inactives,blockSubstitutes);
-            blockSubstitutes.clear();
+            (*fit)->substitute(substitutionMap);
+            substitutionMap.clear();
         }
     }
 }; //End namespace

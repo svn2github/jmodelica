@@ -49,11 +49,6 @@ class Model: public BaseModel {
         
         virtual bool hasBLT(){return 0;}
         
-        virtual std::vector<casadi::MX> getBLTEliminateables() const {
-                std::vector<casadi::MX> empty;
-                return empty;
-        };  
-        
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
