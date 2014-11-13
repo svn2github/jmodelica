@@ -56,6 +56,9 @@ set(MC_CPP
   Variable.cpp
   Block.cpp
   BLTHandler.cpp
+  EquationContainer.cpp
+  FlatEquationList.cpp
+  BLTContainer.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -89,6 +92,9 @@ set(MC_HPP
   Variable.hpp
   Block.hpp
   BLTHandler.hpp
+  EquationContainer.hpp
+  FlatEquationList.hpp
+  BLTContainer.hpp
   ${TYPES_HPP}
   jcc/initjcc.h
   jcc/jccutils.h

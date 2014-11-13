@@ -36,6 +36,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Block.hpp"
 #include "BLTHandler.hpp"
 
+#include "EquationContainer.hpp"
+#include "FlatEquationList.hpp"
+#include "BLTContainer.hpp"
+
 #include "BaseModel.hpp"
 #include "Model.hpp"
 #include "BLTModel.hpp"
@@ -102,6 +106,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %instantiate_Ref(ModelicaCasADi, Block)
 %instantiate_Ref(ModelicaCasADi, BLTHandler)
 
+%instantiate_Ref(ModelicaCasADi, EquationContainer)
+%instantiate_Ref(ModelicaCasADi, FlatEquationList)
+%instantiate_Ref(ModelicaCasADi, BLTContainer)
+
 %instantiate_Ref(ModelicaCasADi, BaseModel)
 %instantiate_Ref(ModelicaCasADi, Model)
 %instantiate_Ref(ModelicaCasADi, BLTModel)
@@ -135,6 +143,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %include "Block.hpp"
 %include "BLTHandler.hpp"
+
+%include "EquationContainer.hpp"
+%include "FlatEquationList.hpp"
+%include "BLTContainer.hpp"
 
 %include "BaseModel.hpp"
 %include "Model.hpp"

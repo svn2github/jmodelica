@@ -89,7 +89,9 @@
 #include <algorithm>
 
 #include "BaseModel.hpp"
-#include "BLTModel.hpp"
+#include "EquationContainer.hpp"
+#include "FlatEquationList.hpp"
+#include "BLTContainer.hpp"
 
 // For transforming output from JCC-wrapped classes to CasADi objects. 
 // Must be included after FExp.h
@@ -136,13 +138,10 @@ int main(int argc, char ** argv)
        
       std::string identfier = env->toString(fclass.nameUnderscore().this$);
       
-   
-      ModelicaCasADi::Ref<ModelicaCasADi::BLTModel> BLTModel = new ModelicaCasADi::BLTModel();
-      BLTModel->initializeModel(identfier);
+      ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> model = new ModelicaCasADi::BaseModel();
+      model->initializeModel(identfier);
       // Transfer time variable
-      transferTime<mc::FClass>(BLTModel, fclass);
-      
-      
+      transferTime<mc::FClass>(model, fclass);
       
       // Variables template
       transferVariables<java::util::ArrayList,
@@ -151,20 +150,20 @@ int main(int argc, char ** argv)
                         mc::FRealVariable,
                         mc::List,
                         mc::FAttribute,
-                        mc::FStringComment>(BLTModel, fclass.allVariables());
+                        mc::FStringComment>(model, fclass.allVariables());
                         
       // Transfer user defined types (also generates base types for the user types). 
       transferUserDefinedTypes<mc::FClass,
                               mc::List,
                               mc::FDerivedType,
                               mc::FAttribute,
-                              mc::FType>(BLTModel, fclass);
+                              mc::FType>(model, fclass);
+                              
+      ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer = new ModelicaCasADi::BLTContainer();
       
-      //Plain BLT
-      mc::BLT jblt =fclass.getDAEBLT();
-      
-      //Must be done after transfering variables
-      transferBLTToModel<mc::BLT,
+      if(eqContainer->hasBLT()){
+            mc::BLT jblt =fclass.getDAEBLT();
+            transferBLTToContainer<mc::BLT,
                         mc::AbstractEquationBlock,
                         java::util::Collection,
                         java::util::Iterator,
@@ -172,149 +171,33 @@ int main(int argc, char ** argv)
                         mc::FAbstractEquation,
                         mc::FEquation,
                         mc::FExp,
-                        JArray>(&jblt, BLTModel, true, false);
-                        
-      //BLTModel->setEliminateableVariables();
+                        JArray>(&jblt, eqContainer, model->getNodeToVariableMap(), true, false);
+      }
+      else{
+            transferDaeEquationsToContainer<java::util::ArrayList, mc::FAbstractEquation>(eqContainer, fclass.equations());
+      }
       
-      //Initial Equations
+      model->setEquationContainer(eqContainer);
+      
       transferInitialEquations<java::util::ArrayList,
-                              mc::FAbstractEquation>(BLTModel, fclass.initialEquations());
-      
+                              mc::FAbstractEquation>(model, fclass.initialEquations());
+                              
       // Functions
       transferFunctions<mc::FClass,
                         mc::List,
-                        mc::FFunctionDecl>(BLTModel, fclass);
+                        mc::FFunctionDecl>(model, fclass);
                         
-      //BLTModel->printBLT(std::cout,true);
+      model->print(std::cout);
       
-      BLTModel->print(std::cout);
+      model->eliminateAlgebraics();
       
-      BLTModel->eliminateAlgebraics();
-      
-      BLTModel->print(std::cout);
-      
-      BLTModel->substituteAllEliminateableVariables();
-      
-      BLTModel->print(std::cout);
-      
-      
-      /*blocksHandler->printBLT(std::cout, true);
-      ModelicaCasADi::Ref<Block> b1 = blockHandler->getBlock(1);
-      b1->printBlock(std::cout,true);
-      casadi::MX toSubstitute = b1->getInactiveVarByName("der(x3)");
-      std::vector<casadi::MX> v(1,toSubstitute);
-      std::vector<casadi::MX> s(1,casadi::MX(3));
-      b1->substituteVariablesInExpressions(v,s);
-      b1->printBlock(std::cout,true);*/
-      
-      /*for(int i=0;i<blt.size();++i)
-      {
-         //Block
-         mc::AbstractEquationBlock* block = new mc::AbstractEquationBlock(blt.get(i).this$);
-         ModelicaCasADi::Ref<ModelicaCasADi::Block> blockCI = new ModelicaCasADi::Block();
-         
-         std::cout<<"BlockType "<<env->toString(block->getClass().this$)<<"\n";
-         transferBlock<mc::AbstractEquationBlock,
-                              java::util::Collection,
-                              java::util::Iterator,
-                              mc::FVariable,
-                              mc::FAbstractEquation,
-                              mc::FEquation,
-                              mc::FExp>(block,blockCI,false);        
-         
-         blockCI->printBlock(std::cout,true);
-         
-         //Equations
-         java::util::Collection block_equations(block->allEquations().this$);
-         java::util::Collection block_variables(block->allVariables().this$);
-         std::cout<<"Block_"<<i<<"\n";//<<env->toString(block->toString().this$)<<"\n";
-         std::cout<<"BlockType "<<env->toString(block->getClass().this$)<<"\n";
-         
-         //Help iterator         
-         java::util::Iterator iter(block_equations.iterator().this$);
-         int k=0;
-         while(iter.hasNext()){
-            std::cout<<"\tEquation_"<<k<<":\t"<<env->toString(iter.next().toString().this$)<<"\n";
-            k=k+1;
-         } 
-         
-         k=0;
-         java::util::Collection unsolved_eq(block->unsolvedEquations().this$);
-         iter = java::util::Iterator(unsolved_eq.iterator().this$);
-         while(iter.hasNext()){
-            std::cout<<"\tUnsolved_Equation_"<<k<<":\t"<<env->toString(iter.next().toString().this$)<<"\n";
-            k=k+1;
-         }  
-         
-         iter = java::util::Iterator(block_variables.iterator().this$);
-         std::cout<<"\n\tVariables: ";
-         while(iter.hasNext()){
-              std::cout<<env->toString(iter.next().toString().this$)<<" ";
-         }
-         std::cout<<std::endl;
-         
-         java::util::Collection unsolved_vars(block->unsolvedVariables().this$);
-         iter = java::util::Iterator(unsolved_vars.iterator().this$);
-         std::cout<<"\n\tUnsolved variables: ";
-         while(iter.hasNext()){
-              std::cout<<env->toString(iter.next().toString().this$)<<" ";
-         }
-         
-         java::util::Collection block_inactive_var(block->inactiveVariables().this$);
-         iter = java::util::Iterator(block_inactive_var.iterator().this$);
-         std::cout<<"\n\tInactive variables: ";
-         while(iter.hasNext()){
-              std::cout<<env->toString(iter.next().toString().this$)<<" ";
-         }
-         std::cout<<std::endl;
-         
-         java::util::Collection block_trajectories_var(block->dependsOn().this$);
-         iter = java::util::Iterator(block_trajectories_var.iterator().this$);
-         std::cout<<"\n\tTrajectory variables: ";
-         while(iter.hasNext()){
-              std::cout<<env->toString(iter.next().toString().this$)<<" ";
-         }
-         std::cout<<std::endl;
-         
-         java::util::Collection block_independent_var(block->independentVariables().this$);
-         iter = java::util::Iterator(block_independent_var.iterator().this$);
-         std::cout<<"\n\tIndependent variables: ";
-         while(iter.hasNext()){
-              std::cout<<env->toString(iter.next().toString().this$)<<" ";
-         }
-         std::cout<<std::endl;
-         
-         if(block->isSolvable()){
-            std::cout<<"\n\tisSolvableBlock\n";
-         }
-         delete block;
-         
-      }*/
-      /*mc::AbstractEquationBlock* block = new mc::AbstractEquationBlock(blt.get(1).this$);
-      ModelicaCasADi::Block* blockCI2 = new ModelicaCasADi::Block();
-      blockCI2->setBlock<mc::AbstractEquationBlock,
-                              java::util::Collection,
-                              java::util::Iterator,
-                              mc::FVariable,
-                              mc::FAbstractEquation,
-                              mc::FEquation,
-                              mc::FExp>(block);
-      
-      blockCI2->setBlock<mc::AbstractEquationBlock,
-                              java::util::Collection,
-                              java::util::Iterator,
-                              mc::FVariable,
-                              mc::FAbstractEquation,
-                              mc::FEquation
-                              mc::FExp>(block);*/
-      
-      //std::cout<<"\nBLT_Printed\n "<<blt.size()<<"\n"<<env->toString(fclass.printDAEBLT().this$)<<"\n";
-      
-      
-      //Structured
-      //mc::StructuredBLT structured_blt = fclass.getDAEStructuredBLT();
-      //std::cout<<"Structured_BLT\n "<<env->toString(fclass.getDAEStructuredBLT().this$)<<"\n";
-      
+      std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminated = model->getEliminatedVariables();
+      std::cout<<"Eliminated Variables:\n";      
+      for(int i=0;i<eliminated.size();++i){
+            std::cout<<eliminated[i]->getVar()<<"  ";
+      }
+      std::cout<<std::endl;
+      model->print(std::cout);      
       
 
    }

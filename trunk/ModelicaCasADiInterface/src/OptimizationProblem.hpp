@@ -89,13 +89,6 @@ class OptimizationProblem : public Model/*, public BLTModel*/ {
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
-        
-        /** @param A pointer to an equation */ 
-        /*void addDaeEquation(Ref<Equation> eq);
-        const casadi::MX getDaeResidual() const;
-        std::vector< Ref<Equation> > getDaeEquations() const;
-        bool hasBLT();
-        std::vector<casadi::MX> getBLTEliminateables() const;*/
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
@@ -123,52 +116,6 @@ inline void OptimizationProblem::setPointConstraints(const std::vector< Ref<Cons
 inline void OptimizationProblem::setObjectiveIntegrand(casadi::MX objectiveIntegrand) { this->objectiveIntegrand = objectiveIntegrand; } 
 inline void OptimizationProblem::setObjective(casadi::MX objective) { this->objective = objective; } 
 inline void OptimizationProblem::addTimedVariable(Ref<TimedVariable> var) { assert(var->isOwnedBy(this)); timedVariables.push_back(var.getNode()); }
-
-
-/*inline bool OptimizationProblem::hasBLT(){
- if(this->hasBLT()){
-  return BLTModel::hasBLT();
- }
- else{
-  return Model::hasBLT();
- }
-}
-
-inline void OptimizationProblem::addDaeEquation(Ref<Equation> eq){
- if(this->hasBLT()){
-  BLTModel::addDaeEquation(eq);
- }
- else{
-  Model::addDaeEquation(eq);
- }
-}
-
-inline const casadi::MX OptimizationProblem::getDaeResidual() const {
- if(this->hasBLT()){
-  return BLTModel::getDaeResidual();
- }
- else{
-  return Model::getDaeResidual();
- }
-}
-
-inline std::vector< Ref<Equation> > OptimizationProblem::getDaeEquations() const{
- if(this->hasBLT()){
-  return BLTModel::getDaeEquations();
- }
- else{
-  return Model::getDaeEquations();
- }
-}
-
-inline std::vector< casadi::MX > OptimizationProblem::getBLTEliminateables() const{
- if(this->hasBLT()){
-  return BLTModel::getBLTEliminateables();
- }
- else{
-  return Model::getBLTEliminateables();
- }
-}*/
 
 }; // End namespace
 #endif

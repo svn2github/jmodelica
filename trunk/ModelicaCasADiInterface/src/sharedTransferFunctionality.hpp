@@ -47,6 +47,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 #include "BLTHandler.hpp"
 #include "Block.hpp"
+#include "EquationContainer.hpp"
+#include "FlatEquationList.hpp"
+#include "BLTContainer.hpp"
 
 #include "initjcc.h" // for env
 #include "JCCEnv.h"
@@ -240,10 +243,11 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ>
-void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT,
+std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > transferBLT(JBLT* javablt,
 		const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars,
 		bool jacobian_no_casadi = true, bool solve_with_casadi = false){
     
+    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > nblt;
     for(int i=0;i<javablt->size();++i)
     {
        JBlock* block = new JBlock(javablt->get(i).this$);
@@ -256,7 +260,7 @@ void transferBLT(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> 
 		    FEquation,
 		    FExp,
 		    ArrayJ>(block, ciBloc, mapVars, jacobian_no_casadi, solve_with_casadi);
-       ciBLT->addBlock(ciBloc);
+       nblt.push_back(ciBloc);
        delete block;
     }
 }
@@ -266,8 +270,9 @@ template<typename JBLT, typename JBlock, typename JCollection, typename JIterato
             typename FExp, template<typename Ty> class ArrayJ>
 void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
     
-    ModelicaCasADi::Ref<ModelicaCasADi::BLTHandler> ciBLT = new ModelicaCasADi::BLTHandler();
-    transferBLT<JBLT,
+    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > nblt; 
+    m->setEquationContainer(new ModelicaCasADi::BLTContainer());
+    nblt=transferBLT<JBLT,
 		JBlock, 
 		JCollection, 
 		JIterator,
@@ -275,9 +280,37 @@ void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseM
 		FAbstractEquation,
 		FEquation,
 		FExp,
-		ArrayJ>(javablt, ciBLT, m->getNodeToVariableMap(), jacobian_no_casadi, solve_with_casadi);
-    if(m->hasBLT()){
-	m->setBLT(ciBLT);    
+		ArrayJ>(javablt, m->getNodeToVariableMap(), jacobian_no_casadi, solve_with_casadi);
+    m->transferBLT(nblt);    
+    
+}
+
+template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
+            typename FVar, typename FAbstractEquation, typename FEquation,
+            typename FExp, template<typename Ty> class ArrayJ>
+void transferBLTToContainer(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> container,
+		const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars,
+		bool jacobian_no_casadi = true, bool solve_with_casadi = false){
+    
+    if(container->hasBLT()){
+	for(int i=0;i<javablt->size();++i)
+	{
+	   JBlock* block = new JBlock(javablt->get(i).this$);
+	   ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBloc = new ModelicaCasADi::Block();
+	   transferBlock<JBlock, 
+			JCollection, 
+			JIterator,
+			FVar,
+			FAbstractEquation,
+			FEquation,
+			FExp,
+			ArrayJ>(block, ciBloc, mapVars, jacobian_no_casadi, solve_with_casadi);
+	   container->addBlock(ciBloc);
+	   delete block;
+	}
+    }
+    else{
+	std::cout<<"The container does not have a BLT. Equations must be transfered from Arraylist of equations\n.";
     }
 }
 
@@ -333,6 +366,24 @@ static void transferDaeEquations(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> 
 	std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(modelEquationsInJM);
 	for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = modelEqs.begin(); it != modelEqs.end(); ++it){
 	    m->addDaeEquation(*it);
+	}
+    }
+    else{
+	std::cout<<"The model has BLT. DAE equations are transfered from the BLT.\n";
+    }
+}
+
+template <class ArrayList, class AbstractEquation>
+/**
+ * Transfer the given list of equations to the DAE equations of the Model.
+ * @param A pointer to a Model
+ * @param An ArrayList with FAbstractEquation
+ */
+static void transferDaeEquationsToContainer(ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> container, ArrayList modelEquationsInJM){
+    if(!container->hasBLT()){
+	std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(modelEquationsInJM);
+	for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = modelEqs.begin(); it != modelEqs.end(); ++it){
+	    container->addDaeEquation(*it);
 	}
     }
     else{

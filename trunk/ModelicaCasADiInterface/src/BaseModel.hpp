@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "RefCountedNode.hpp"
 #include "Ref.hpp"
 #include "BLTHandler.hpp"
+#include "EquationContainer.hpp"
+#include "FlatEquationList.hpp"
 
 namespace ModelicaCasADi 
 {  
@@ -74,7 +76,12 @@ class BaseModel: public RefCountedNode {
         // variables may be explicitly defined with a number
 }; // End enum VariableKind
     /** Create a blank, uninitialized Model */
-    BaseModel() { dirty = false; timeVar = casadi::MX(0); /* todo: just create a time variable instead? */}
+    BaseModel() { 
+        dirty = false; 
+        timeVar = casadi::MX(0);
+        equationContainer_ = new FlatEquationList(); //The default container is flat
+        /* todo: just create a time variable instead? */
+    }
     /** Initialize the Model, before populating it.
     * @param string identifier, typically <packagename>_<classname>, default empty string */
     void initializeModel(std::string identifier = "");
@@ -84,6 +91,11 @@ class BaseModel: public RefCountedNode {
             delete *it;
             *it = NULL;
         }
+        // Delete all the Model's variables that were moved to the eliminated container, since they are OwnedNodes with the Model as owner.
+        for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
+            delete *it;
+            *it = NULL;
+        }         
     }        
     /** Evaluate the value of a parameter */
     double get(std::string varName);
@@ -109,7 +121,7 @@ class BaseModel: public RefCountedNode {
     /** @param A pointer to an equation */    
     void addInitialEquation(Ref<Equation> eq);
     /** @param A pointer to an equation */ 
-    virtual void addDaeEquation(Ref<Equation> eq){std::cout<<"BaseModel addDaeEquation should not be called\n.";}
+    virtual void addDaeEquation(Ref<Equation> eq);
     /** @param A pointer to a ModelFunction */
     void setModelFunctionByItsName(Ref<ModelFunction> mf);
     /** 
@@ -182,11 +194,11 @@ class BaseModel: public RefCountedNode {
         * Returns all DAE equations in a stacked MX on the form: lhs - rhs.
         * @return A MX.
         */
-    virtual const casadi::MX getDaeResidual() const {std::cout<<"BaseModel getDaeResidual should not be called\n.";}
+    virtual const casadi::MX getDaeResidual() const;
     
     
 
-    virtual std::vector< Ref< Equation> > getDaeEquations() const {std::cout<<"BaseModel getDaeEquations should not be called\n.";}
+    virtual std::vector< Ref< Equation> > getDaeEquations() const;
     std::vector< Ref< Equation> > getInitialEquations() const;
 
     /** 
@@ -199,28 +211,32 @@ class BaseModel: public RefCountedNode {
     std::string getIdentifier();
 
     /** Allows the use of operator << to print this class, through Printable. */
-    virtual void print(std::ostream& os) const {std::cout<<"BaseModel print should not be called\n.";}
+    virtual void print(std::ostream& os) const;
     
     /** Allows the use of operator << to print this class, through Printable. */
-    virtual std::set<const Variable*> getBLTEliminateables() const {return std::set<const Variable*>();}
+    virtual std::set<const Variable*> getBLTEliminateables() const;
     
-    /*virtual void eliminateVariable(const std::string& varName){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
-    virtual void eliminateVariables(std::vector<std::string>& varNames){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
-    virtual void eliminateVariable(Ref<Variable> var){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
-    virtual void eliminateVariables(std::vector< Ref<Variable> >& vars){std::cout<<"The eliminate Variables Feature is only available for BLTModels\n";}
-    */
+    virtual void substituteAllEliminateables();
+    
+    virtual void eliminateAlgebraics();
+    virtual std::vector< Ref<Variable> >  getEliminatedVariables();
+    
     virtual void setBLT(Ref<BLTHandler> nblt){std::cout<<"BaseModel setBLT should not be called\n.";}
+    
+    virtual void transferBLT(const std::vector< Ref<Block> >& nblt){equationContainer_->transferBLT(nblt);}
 
     /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
     void setDirty() { dirty = true; }
     
     /** Notify the Model if it has a BLT for DAE equations **/
-    virtual bool hasBLT(){return 0;}
+    virtual bool hasBLT() const;
     
     void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
     {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
     
     const std::map<const casadi::SharedObjectNode*, const Variable* >& getNodeToVariableMap() const {return mxnodeToVariable;}
+    
+    virtual void setEquationContainer(Ref<EquationContainer> eqCont);
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:
@@ -232,7 +248,9 @@ class BaseModel: public RefCountedNode {
     std::vector<double> paramAndConstValVec;
     casadi::MX timeVar;
     /// Vector containing pointers to all variables.
-    std::vector< Variable * > z;  
+    std::vector< Variable * > z; 
+    /// Vector containing pointers to all variables.
+    std::vector< Variable * > eliminated_z;
     /// Vector containing pointers to all initial equations
     std::vector< Ref<Equation> > initialEquations; 
     /// A map for ModelFunction, key is ModelFunction's name.
@@ -268,6 +286,7 @@ class BaseModel: public RefCountedNode {
     
     //Map to build the blocks with CasADiInterface Variables 
     std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
+    Ref<EquationContainer> equationContainer_;
 };
 inline void BaseModel::initializeModel(std::string identifier) {
     this->identifier = identifier;

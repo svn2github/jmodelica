@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "types/BooleanType.hpp"
 #include "DerivativeVariable.hpp"
 #include "BaseModel.hpp"
+#include <algorithm>
 
 using casadi::MX; using casadi::MXFunction; 
 using std::vector; using std::ostream;
@@ -420,6 +421,107 @@ const MX BaseModel::getInitialResidual() const {
         intialRes.append((*it)->getResidual());
     }
     return intialRes;
+}
+
+template <class T> 
+void printVectorModel(std::ostream& os, const std::vector<T> &makeStringOf) {
+    typename std::vector<T>::const_iterator it;
+    for ( it = makeStringOf.begin(); it < makeStringOf.end(); ++it) {
+         os << **it << "\n";
+    }
+}
+
+void BaseModel::print(std::ostream& os) const {
+//    os << "Model<" << this << ">"; return;
+
+    using std::endl;
+    os << "------------------------------- Variables -------------------------------\n" << endl;
+    if (!timeVar.isEmpty()) {
+        os << "Time variable: ";
+        timeVar.print(os);
+        os << endl;
+    }
+    printVectorModel(os, z);
+    os << "\n---------------------------- Variable types  ----------------------------\n" << endl;
+    for (BaseModel::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {
+            os << it->second << endl;
+    }
+    os << "\n------------------------------- Functions -------------------------------\n" << endl;
+    for (BaseModel::functionMap::const_iterator it = modelFunctionMap.begin(); it != modelFunctionMap.end(); ++it){
+            os << it->second << endl;
+    }
+    os << "\n------------------------------- Equations -------------------------------\n" << endl;
+    if (!initialEquations.empty()) {
+        os << " -- Initial equations -- \n";
+        printVectorModel(os, initialEquations);
+    }
+    std::vector< Ref<Equation> > daeEquations = equationContainer_->getDaeEquations();
+    if (!daeEquations.empty()) {
+        os << " -- DAE equations -- \n";
+        printVectorModel(os, daeEquations);
+    }
+    os << endl;
+}
+
+bool BaseModel::hasBLT() const{
+  return equationContainer_->hasBLT();
+}
+
+std::set<const Variable*> BaseModel::getBLTEliminateables() const {
+  return equationContainer_->eliminatableVariables();
+}
+
+std::vector< Ref< Equation> > BaseModel::getDaeEquations() const {
+  return equationContainer_->getDaeEquations();
+}
+
+const casadi::MX BaseModel::getDaeResidual() const {
+  return equationContainer_->getDaeResidual();
+}
+
+void BaseModel::addDaeEquation(Ref<Equation> eq){
+  equationContainer_->addDaeEquation(eq);
+}
+
+void BaseModel::setEquationContainer(Ref<EquationContainer> eqCont){
+   equationContainer_ = eqCont; 
+   if(equationContainer_->hasBLT()){
+    std::cout<<"\nEliminateables: ";
+     for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
+	 if(equationContainer_->isBLTEliminateable((*it))){
+	     (*it)->setAsEliminatable();
+	     std::cout<<(*it)->getName()<<" ";
+	 }
+     }
+     std::cout<<"\n";
+   }
+}
+
+void BaseModel::substituteAllEliminateables(){
+    equationContainer_->substituteAllEliminateables();
+}
+
+void BaseModel::eliminateAlgebraics(){
+    std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
+    //Remove the variable from the equations
+    equationContainer_->eliminateVariables(algebraics);
+    //Remove the variable from the list of variables and move it to eliminated_z    
+    std::vector< Variable* >::iterator fit;
+    for(std::vector< Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it){
+	if((*it)->isEliminatable()){
+		eliminated_z.push_back((*it).getNode());
+		fit = std::find(z.begin(), z.end(),(*it).getNode());
+		z.erase(fit);
+	}
+    }
+}
+
+std::vector< Ref<Variable> > BaseModel::getEliminatedVariables(){
+    std::vector< Ref<Variable> > elimVars;
+    for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
+	elimVars.push_back(*it);    
+    }
+    return elimVars;
 }
 
 }; // End namespace
