@@ -380,38 +380,49 @@ aspect LightProfiling {
 }
 
 aspect MemoryUse {
-	
-	private static Map<Class,Counter> ASTNode.buildNodeCountMap = null;
-	
-	/**
-	 * Output a list of the number of instances of each node class.
-	 */
-	public static void ASTNode.dumpNodeCount(String file) 
-			throws FileNotFoundException {
-		ArrayList<Counter> list = new ArrayList<Counter>();
-		list.addAll(buildNodeCountMap.values());
-		Collections.sort(list);
-		CodeStream out = new CodeStream(file);
-		for (Counter c : list)
-			out.println(c);
-		out.close();
-	}
-	
-	public void ASTNode.buildNodeCount() {
-		if (buildNodeCountMap == null)
-			buildNodeCountMap = new HashMap<Class,Counter>();
-		buildNodeCount(buildNodeCountMap);
-	}
-	
-	private void ASTNode.buildNodeCount(Map<Class,Counter> map) {
-		addToNodeCount(map, getClass());
-		
-		if (children != null)
-			for (int i = children.length - 1; i >= 0; i--) 
-				if (children[i] != null)
-					children[i].buildNodeCount(map);
-	}
-	
+
+    private static Map<Class,Counter> ASTNode.buildNodeCountMap = null;
+
+    private static NodeCountExtra[] ASTNode.nodeCountExtra = new NodeCountExtra[] { };
+
+    public interface NodeCountExtra {
+        public void count(ASTNode n);
+        public void printResult(CodeStream out);
+    }
+
+    /**
+     * Output a list of the number of instances of each node class.
+     */
+    public static void ASTNode.dumpNodeCount(String file) 
+            throws FileNotFoundException {
+        ArrayList<Counter> list = new ArrayList<Counter>();
+        list.addAll(buildNodeCountMap.values());
+        Collections.sort(list);
+        CodeStream out = new CodeStream(file);
+        for (Counter c : list)
+            out.println(c);
+        for (NodeCountExtra nce : nodeCountExtra)
+            nce.printResult(out);
+        out.close();
+    }
+
+    public void ASTNode.buildNodeCount() {
+        if (buildNodeCountMap == null)
+            buildNodeCountMap = new HashMap<Class,Counter>();
+        buildNodeCount(buildNodeCountMap);
+    }
+
+    private void ASTNode.buildNodeCount(Map<Class,Counter> map) {
+        addToNodeCount(map, getClass());
+        for (NodeCountExtra nce : nodeCountExtra)
+            nce.count(this);
+        
+        if (children != null)
+            for (int i = children.length - 1; i >= 0; i--) 
+                if (children[i] != null)
+                    children[i].buildNodeCount(map);
+    }
+
 	private void ASTNode.addToNodeCount(Map<Class,Counter> map, Class cls) {
 		if (map.containsKey(cls))
 			map.get(cls).inc();
