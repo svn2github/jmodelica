@@ -113,28 +113,21 @@ constraint
   u<=370;
 end CSTR_Opt_MPC;
 
-optimization CSTR_Opt_MPC_casadi(objective=(cost(finalTime)),
-                      startTime=0.0,
-                      finalTime=150)
- 
-  input Real u(start = 350,initialGuess=350)=cstr.Tc;
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
+model CSTR_MPC_Model
+  extends CSTR;
+  input Real epsilon;
+  parameter Real c_ref = 338.775766; 
+  parameter Real T_ref = 280.099198;
+  parameter Real Tc_ref = 280;
+end CSTR_MPC_Model;
 
-  Real cost(start=0,fixed=true,initialGuess=500);
-  parameter Real c_ref = 500;
-  parameter Real T_ref = 320;
-  parameter Real Tc_ref = 300;
-  parameter Real q_c = 1;
-  parameter Real q_T = 1;
-  parameter Real q_Tc = 1;	
-equation
-  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2+
-		1000*(noEvent(if cstr.T <= 350 then 0 else (cstr.T-350)^4));
+optimization CSTR_MPC(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + (Tc_ref-Tc)^2 + 1e10*epsilon^2,
+    				startTime=0.0, finalTime=150)
+
+extends CSTR_MPC_Model(Tc(min=230, max=370),T(min=0), epsilon(min=0, nominal=0.01));
 constraint
-  u>=230;
-  u<=370;
-end CSTR_Opt_MPC_casadi;
+  T <= 350 + epsilon;
+end CSTR_MPC;
 
 
 end CSTR;

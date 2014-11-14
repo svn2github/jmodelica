@@ -541,12 +541,13 @@ class CasadiCollocator(object):
             #Update initial condition
             self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
             self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
+    
             #Update dual variables
             self.solver_object.setInput(self.dual_opt, casadi.NLP_SOLVER_LAM_G0)
             self.solver_object.setInput(self.dual_opt2, casadi.NLP_SOLVER_LAM_X0)
         else:
-            self._set_solver_inputs()
-
+            self._init_and_set_solver_inputs()
+        
         # Solve the problem
         t0 = time.clock()
         self.solver_object.evaluate()
@@ -561,7 +562,7 @@ class CasadiCollocator(object):
         sol_time = time.clock() - t0
         return sol_time
         
-    def _set_solver_inputs(self):
+    def _init_and_set_solver_inputs(self):
         self.solver_object.init()
 
         # Initial condition

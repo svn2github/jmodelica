@@ -1871,7 +1871,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         
         # Print times
         print("\nTotal time: %.2f seconds" % times['tot'])
-        print("Initialization time: %.2f seconds" % times['init'])
+        print("Pre-processing time: %.2f seconds" % times['init'])
         print("Solution time: %.2f seconds" % times['sol'])
         print("Post-processing time: %.2f seconds\n" %
               times['post_processing'])
@@ -2126,7 +2126,7 @@ class MPCAlgResult(JMResultBase):
         print("\nInitialization time: %.2f seconds" %times['init'])
         print("\nTotal time: %.2f seconds             (%.3f)" % (times['tot'], 
                 times['tot']/(nbr_samp)))
-        print("Update time: %.2f seconds            (%.3f)" % (times['update'],
+        print("Pre-processing time: %.2f seconds    (%.3f)" % (times['update'],
                 times['update']/(nbr_samp)))
         print("Solution time: %.2f seconds          (%.3f)" % (times['sol'], 
                 times['sol']/(nbr_samp)))
@@ -2134,4 +2134,4 @@ class MPCAlgResult(JMResultBase):
                 (times['post_processing'], times['post_processing']/(nbr_samp)))
         print("\nLargest total time for one sample (nbr %s): %.2f seconds" %
                 (times['maxSample'], times['maxTime']))
-        print("The sample period is %.2f seconds" %sample_period)
+        print("The sample period is %.2f seconds\n" %sample_period)

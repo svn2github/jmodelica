@@ -17,48 +17,82 @@
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.jmi_algorithm_drivers import MPCAlgResult, LocalDAECollocationAlg
 from pyjmi.optimization.casadi_collocation import BlockingFactors
-import time
+import time, types
 import numpy as N
-#~ from IPython.core.debugger import Tracer; dh = Tracer()
 
 class MPC(object):
+
     """
     Creates an MPC-object which allows a dynamic optimization problem to be 
-    updated with measurements of the states.  
+    updated with estimates of the states (through measurements).  
     """
-    
-    def __init__(self, op, options, sample_period, nbr_samp):
+
+    def __init__(self, op, options, sample_period, horizon, 
+                 noise_seed=None):
+        """
+        Creates the NLP that corresponds to the op we want to solve with MPC.
+
+        Parameters::
+
+            op --
+                The optimization problem we want to solve.
+
+            options --
+                The collocation options we want to use while solving.
+
+            sample_period --
+                The sample period i.e. the time between each optimization.
+
+            horizon --
+                The number of samples on the horizon. This is used to define
+                the horizon_time. 
+
+            noise_seed --
+                The seed to use for adding noise.
+                Default: None
+        """
 
         self._create_clock()
         self.op = op
-        self.collocator_options = options
-        self.sample_period = sample_period  
-        self.nbr_samp = nbr_samp
+        self.options = options
+        self.sample_period = sample_period
+        self.horizon = horizon
+        self.horizon_time = horizon*sample_period   
 
-        #Create complete result lists
+        # Create complete result lists
         self.res_t = []
         self.res_dx = []
         self.res_x = []
         self.res_u = []
         self.res_w = []
         self.res_p = []
-        
-        #Define some things
-        self._sample_nbr = 1
-        self._result_file_name_complete = "MPC_results"
+
+        # Define some things
+        self._sample_nbr = 0
+        self._mpc_result_file_name = op.getIdentifier()+'_mpc_result.txt'
         self._start_index = 0
-        N.random.seed([7])
+        self.test_warm_start = 0
         
-        #Transcribe the DOP to a nlp
+        if noise_seed:
+            N.random.seed([noise_seed])
+
+        # Check if horizon_time equals finalTime
+        if N.abs(op.get('finalTime')-op.get('startTime')-self.horizon_time) >\
+                                                                        1e-6:
+			self.op.set('finalTime', self.op.get('startTime')+\
+                                                            self.horizon_time)
+
+        # Transcribe the DOP to a nlp
         self._create_nlp_object()
-        
-        #Save the initialization time
+
+        # Save the initialization time
         self.times['init'] = time.clock() - self._startTime
+        self.times['tot'] += self.times['init']
         self.t0_update = time.clock()
 
     def _create_clock(self):
         """
-        Create a dictionary where times for different operations are stored.
+        Creates a dictionary where times for different operations are stored.
         """
         self._startTime = time.clock()
         self.times = {}
@@ -76,129 +110,111 @@ class MPC(object):
         """
         self._set_blocking_options()
         self.extra_init = time.clock() - self._startTime
-        self.alg = LocalDAECollocationAlg(self.op, self.collocator_options)
+        self.alg = LocalDAECollocationAlg(self.op, self.options)
         self.collocator = self.alg.nlp
         self._get_states_and_initial_value_parameters()
-        if not self.collocator._normalize_min_time:
-            self._calculate_nbr_values_sample()
 
     def _set_blocking_options(self):
         """
         Creates blocking factors for the input. Default blocking factors are:
-        Constant input through each sample with quadratic penalty 500. 
+        Constant input through each sample.
         """
-        if self.collocator_options['blocking_factors'] is None:
-            n_e = self.collocator_options['n_e']
-            value = n_e/self.nbr_samp
-            bl_list = [value for i in range(n_e/value)]
+ 
+        if self.options['blocking_factors'] is None:
+            n_e = self.options['n_e']
+            bf_value = n_e/self.horizon
+            bl_list = [bf_value]*(n_e/bf_value)
             inputs = self.op.getVariables(self.op.REAL_INPUT)
+            factors = {}
             for i in range(len(inputs)):
                 name = inputs[i].getName()
-                factors = {name: bl_list}
-                du_quad_pen = {name: 500} #Change to a factor*nominal/initialGuess?
-            bf = BlockingFactors(factors = factors, du_quad_pen = du_quad_pen)
-            self.collocator_options['blocking_factors'] = bf
-                
+                factors[name] = bl_list
+            bf = BlockingFactors(factors = factors)
+            self.options['blocking_factors'] = bf
+        else: 
+            bl_factors = self.options['blocking_factors'].factors
+            keys = bl_factors.keys()
+            key = keys[0]
+            for key2 in keys:
+                if bl_factors[key] != bl_factors[key2]:
+                    raise Exception("MPC does not support inputs with" +
+                                    "different blocking factors")
+
+        self._nbr_values_sample = self.options['n_e']/self.horizon*\
+                                  self.options['n_cp']+1
+
     def _get_states_and_initial_value_parameters(self):
         """
-        Save the indices in the collocators _par_vals vector for the initial 
+        Saves the indices in the collocators _par_vals vector for the initial 
         values of the measured states + start and final times.
         """
-        #Retrieve the names of all the states (excluding cost)
-        states = self.collocator.mvar_vectors['x']
-        self.state_names = []
-        for i in range(len(states)):
-            name = states[i].getName()
-            if name != 'cost':
-                self.state_names.append(name)
-                
-        #Find and save the indices for each states initial value + startTime 
-        #and finalTime. (For min time problems only the startTime is saved)
+
+        # Retrieve the names of all the states 
+        self.state_names = self.op.get_state_names()
+
+        # Find and save the indices for each states initial value + startTime 
+        # and finalTime. 
         self.index = {}    
         for name in self.state_names:
             name_init = "_start_"+name
             self.index[name_init] = self.collocator.var_indices[name_init]
-        
-        if self.collocator._normalize_min_time:
-            self.index['startTime'] = self.collocator.var_indices['startTime']
-        else:
-            for par in ['startTime', 'finalTime']:
+
+        for par in ['startTime', 'finalTime']:
                 self.index[par] = self.collocator.var_indices[par]
-            
+
     def _set_warm_start_options(self):
         """
         Sets the warm start options for Ipopt if they have not already been set
-        by the user. Default warm start options are:
-        'warm_start_init_point' = 'yes'
-        'mu_init' = 1e-4
+        by the user. 
+        
+        Default warm start options are:
+            'warm_start_init_point' = 'yes'
+            'mu_init' = 1e-4
+            'print_level' = 0
         """  
-        if self.collocator_options['IPOPT_options'].get('warm_start_init_point') == None:
-            self.collocator.set_solver_option('warm_start_init_point','yes')
-        if self.collocator_options['IPOPT_options'].get('mu_init') == None:
-            self.collocator.set_solver_option('mu_init',1e-4)
-        self.collocator.set_solver_option('expand',False)
 
-    def update_nlp_state(self, state_dict = None):
-        """ 
-        Updates the initial value for the next sample based on the values in
-        state_dict. Moves the optimization time one sample_period forward.
+        if self.options['solver'] is 'IPOPT':
+            self.options['expand_to_sx'] = 'no'
+            if self.options['IPOPT_options'].get('warm_start_init_point')\
+                                                                    is None:
+                self.collocator.solver_object.\
+                                    setOption('warm_start_init_point', 'yes')
+            if self.options['IPOPT_options'].get('mu_init') is None:
+                self.collocator.solver_object.setOption('mu_init', 1e-4)
+            if self.options['IPOPT_options'].get('print_level') is None:
+                self.collocator.solver_object.setOption('print_level', 0)
+            
+            
+            if self.test_warm_start:
+                push = self.push
+                self.collocator.solver_object.setOption('warm_start_bound_push', push)
+                self.collocator.solver_object.setOption('warm_start_mult_bound_push', push)
+                self.collocator.solver_object.setOption('warm_start_bound_frac', push)
+                self.collocator.solver_object.setOption('warm_start_slack_bound_frac', push)
+                self.collocator.solver_object.setOption('warm_start_slack_bound_push', push)
+                self.collocator.solver_object.setOption('print_level', 3)
+        else:
+
+            self.collocator.solver_object.setOption('NLPprint', 0)
+            self.collocator.solver_object.setOption('InitialLMest', False)
+
+            
+    def _create_state_dict(self, sim_res):
+        """
+        Extracts the last value from the simulation result object and puts them
+        in a dictionary.
         
         Parameters::
             
-            state_dict --
-                A dictionary containing the measurements of the states in this
-                sample. The measurements will be put through an estimator to 
-                estimate their value in the next sample. 
-                If None measurements will be generated automatically 
-                based on the prediction (previous result) of the state in the 
-                next sample.
-                Default: None 
-        """  
-        #Update times and sample number
-        self.t0_update = time.clock()
-        self.alg._t0 = time.clock()
-        self._sample_nbr+=1
-        
-        #Either send the measurements to a predictor or generate measurements.
-        if state_dict is None:
-            state_dict = self._generate_measurements()
-        else:
-            state_dict = self._state_estimation(state_dict)
-
-        #Updates states
-        for key in state_dict.keys():
-            if not self.index.has_key(key):
-                raise Exception("You are not allowed to change %s" %key)
-            else:
-                self.collocator._par_vals[self.index[key]] = state_dict[key]
-
-    def sample(self):
+            sim_res --
+                The simulation result object from which the states are to be 
+                extracted. 
         """
-        Redefines the initial trajectories (for all but the first sample) and 
-        solves the NLP. 
-        Warm start is initiated the second time sample is called.  
-        """
-        if self._sample_nbr > 2:
-            self._redefine_initial_trajectories()
-        elif self._sample_nbr == 2: #Initiate the warm start
-            self.collocator.warm_start = True
-            self._set_warm_start_options()
-            self._redefine_initial_trajectories()
-            self.collocator._set_solver_inputs()
-        
-        #Solve the nlp    
-        self.time_update = time.clock() - self.t0_update
-        t0_sol = time.clock()
-        self.alg.solve()
-        self.time_sol = time.clock() - t0_sol
-        self.t0_post = time.clock()
-        
-        #Get the results and extract the results for this 
-        self._result_object = self.alg.get_result()
-        self._extract_results()
-        self._append_to_result_file()
-        self._add_times()
-        return self.get_opt_input()
+
+        states = {}   
+        for name in self.state_names:
+            states["_start_"+name] = sim_res[name][-1]
+        return states
 
     def _redefine_initial_trajectories(self):
         """
@@ -211,69 +227,17 @@ class MPC(object):
             self.collocator.init_traj = self.collocator.init_traj.result_data
         except AttributeError:
             pass
-            
-        self.collocator._par_vals[self.index['startTime']] +=\
-                                                        self.sample_period
-        
-        if self.collocator._normalize_min_time:
-            #Something is very wrong..
-            self.collocator.t0 += self.sample_period /(self.result[0][-1]-self.result[0][0])
-            self.collocator.tf += self.sample_period /(self.result[0][-1]-self.result[0][0])
-            self.collocator.horizon = self.collocator.tf - self.collocator.t0
-            time = self.collocator._compute_time_points()
-            self.collocator._denormalize_times()
-            self.collocator._create_initial_trajectories()        
-            self.collocator.time = N.array(time)
-            self.collocator._compute_bounds_and_init()
-        else:
-            self.collocator._par_vals[self.index['finalTime']] +=\
-                                                        self.sample_period
-            self.collocator.t0 += self.sample_period
-            self.collocator.tf += self.sample_period
-            time = self.collocator._compute_time_points()
-            self.collocator._create_initial_trajectories()        
-            self.collocator.time = N.array(time)
-            self.collocator._compute_bounds_and_init()
-            
 
-    def get_complete_results(self):
-        """
-        Creates and returns the patched together resultfile from all 
-        optimizations.
-        """
-        self.res_t = N.array(self.res_t).reshape([-1, 1])
-        self.res_dx = N.array(self.res_dx).reshape([-1, len(self.res_dx[0])])
-        self.res_x = N.array(self.res_x).reshape([-1, len(self.res_x[0])])
-        self.res_u = N.array(self.res_u).reshape([-1, len(self.res_u[0])])
-        if len(self.res_w[0] >= 1):
-            self.res_w = N.array(self.res_w).reshape([-1, len(self.res_w[0])])
-        else:
-            self.res_w = N.array(self.res_w)
-        self.res_p = N.array(self.res_p).reshape([-1, 1])
-        
-        
-        res = (self.res_t, self.res_dx, self.res_x, self.res_u, 
-                        self.res_w, self.res_p)
-
-        self.collocator.export_result_dymola(self._result_file_name_complete, 
-                                                result=res)
-
-        complete_res = ResultDymolaTextual(self._result_file_name_complete)
-
-        # Create and return result object
-        self._result_object_complete = MPCAlgResult(self.op, 
-                                self._result_file_name_complete, self.collocator,
-                                complete_res, self.collocator_options,
-                                self.times, self.nbr_samp, self.sample_period)
-        return self._result_object_complete
+        time = self.collocator._compute_time_points()
+        self.collocator._create_initial_trajectories()        
+        self.collocator.time = N.array(time)
+        self.collocator._compute_bounds_and_init()
 
     def _extract_results(self):
         """
-        Extracts the results for the current timeframe from the result file.
+        Extracts the results for the current sample_period from the result file.
         """
         self.result = self.collocator.get_result()
-        if self.collocator._normalize_min_time:
-            self._calculate_nbr_values_sample()
 
         t_opt = self.result[0][:self._nbr_values_sample]
         dx_opt = self.result[1][:self._nbr_values_sample][:]
@@ -281,12 +245,11 @@ class MPC(object):
         u_opt = self.result[3][:self._nbr_values_sample][:]
         w_opt = self.result[4][:self._nbr_values_sample][:]
         p_opt = self.result[5]
-
         self.result_sample = (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
 
     def _append_to_result_file(self):
         """
-        Appends the results from this optimizations first timeframe to the 
+        Appends the results from this samples first sample_period to the 
         complete results.
         """
 
@@ -298,17 +261,21 @@ class MPC(object):
             self.res_w.append(self.result_sample[4][i])
         self.res_p.append(self.result_sample[5])
         self._start_index = 1
-        
+
     def _add_times(self):
         """
         Adds each samples times to the total times. Also keeps track of the 
         largest total time for one sample. 
         """
-        self.times['update'] += self.time_update
-        self.times['sol'] += self.time_sol
 
-        time_post = time.clock() - self.t0_post
-        self.time_tot = self.time_update + self.time_sol + time_post
+        sol_time = self.alg.times['sol']
+        update_time = self.alg.times['init']
+        post_time = self.alg.times['post_processing']
+        self.times['update'] += update_time
+        self.times['sol'] += sol_time
+
+        time_post = time.clock() - self.t0_post + post_time
+        self.time_tot = update_time + sol_time + time_post
 
         if  self.time_tot > self.times['maxTime']:
             self.times['maxTime'] = self.time_tot
@@ -316,7 +283,141 @@ class MPC(object):
 
         self.times['tot'] += self.time_tot
         self.times['post_processing'] += time_post
+
+    def _get_opt_input(self):
+        """
+        Returns the optimal inputs for the current sample_period.
+        """
+
+        names = []
+        inputs =[]
+
+        for inp in self.collocator.mvar_vectors['unelim_u']:
+            names.append(inp.getName())
+            inputs.append(self._result_object[inp.getName()][0])
+
+        def input_function(t):
+            return N.array(inputs)
+
+        return (names,input_function)
+
+    def _extract_estimates_prev_opt(self):   
+        """
+        Returns an estimated value of the states, based on the result
+        of the previous optimization. 
+        """
+
+        measurements = {} 
+        if self._sample_nbr == 1:
+            return measurements
+        else:
+            for name in self.state_names:
+                name_init = "_start_"+name
+                measurements[name_init] = self._result_object[name]\
+                                    [self._nbr_values_sample-1]
+        return measurements
+
+    def update_state(self, sim_res=None):
+        """ 
+        Updates the initial value for the next sample based on the estimates in
+        state_dict which is defined based on sim_res. 
+        Moves the optimization time one sample_period forward.
+
+        Parameters::
+
+            sim_res --
+                Either a dictionary containing the estimates of the states in 
+                this sample or a simulation result object from which estimates
+                of the states are extracted.  
+                If None estimates of the states will be extracted automatically 
+                from the previous optimization result.
+                Default: None 
+        """  
+
+        # Update times and sample number
+        self.alg._t0 = time.clock()
+        self._sample_nbr+=1
+
+        # Check the type of sim_res and do accordingly
+        if isinstance(sim_res, dict):
+            state_dict = sim_res
+        elif sim_res == None:
+            state_dict = self._extract_estimates_prev_opt()
+        else:
+            state_dict = self._create_state_dict(sim_res)
+
+        # Updates states
+        for key in state_dict.keys():
+            if not self.index.has_key(key):
+                raise Exception("You are not allowed to change %s" %key)
+            else:
+                self.collocator._par_vals[self.index[key]] = state_dict[key]
+
+        # Update times
+        if self._sample_nbr > 1:
+            self.collocator._par_vals[self.index['startTime']] +=\
+                                                        self.sample_period
+            self.collocator._par_vals[self.index['finalTime']] +=\
+                                                        self.sample_period
+            self.collocator.t0 += self.sample_period
+            self.collocator.tf += self.sample_period
+
+    def sample(self):
+        """
+        Redefines the initial trajectories (for all but the first sample) and 
+        solves the NLP. 
+        Warm start is initiated the second time sample is called.  
+        """
+
+        if self._sample_nbr > 2:
+            self._redefine_initial_trajectories()
+        elif self._sample_nbr == 2:          # Initiate the warm start
+            self.collocator.warm_start = True
+            self._set_warm_start_options()
+            self._redefine_initial_trajectories()
+            self.collocator._init_and_set_solver_inputs()
+
+        # Solve the NLP
+        self.alg.solve()
         
+        # Get the results and extract the results for this sample
+        self._result_object = self.alg.get_result()
+        self.t0_post = time.clock()
+
+        self._extract_results()
+        self._append_to_result_file()
+        self._add_times()
+        return self._get_opt_input()
+
+    def extract_states_add_noise(self, sim_res, mean=0, st_dev=0.005):
+        """
+		Extracts the last value of the states from a simulation result object 
+        and adds a noise with mean and variance as defined.
+
+        Parameters::
+
+            sim_res --
+                The simulation result object from which the states are to be 
+                extracted. 
+
+            mean --
+                Mean value of the noise.
+                Default: 0
+
+            st_dev --
+                Factor to be multiplied with the nominal value of each state to
+                define the stanard deviation of the noise.
+                Default: 0.005
+		"""
+
+        states = {}
+        for name in self.state_names:
+            states["_start_"+name] = sim_res[name][-1]
+            val = self.op.get_attr(self.op.getVariable(name), "nominal")
+            states["_start_"+name] += N.random.normal(mean, st_dev*val, 1)
+
+        return states
+
     def get_results_this_sample(self, full_result=False):
         """
         Returns the results for the current sample. 
@@ -324,12 +425,12 @@ class MPC(object):
         Parameters::
             
             full_result --
-            If True the complete resultfile from this sample is returned,
-            (a LocalDAECollocationAlgResult-object).        
-            If False the results from just this timeframe are extracted from
-            the result-object and returned. Note: The returned data is not
-            a LocalDAECollocationAlgResult-object.
-            Default: False
+                If True the complete resultfile from this sample is returned,
+                (a LocalDAECollocationAlgResult-object).        
+                If False the results from just this sample are extracted from
+                the result-object and returned. Note: The returned data is not
+                a LocalDAECollocationAlgResult-object.
+                Default: False
         """
 
         if full_result:
@@ -337,61 +438,40 @@ class MPC(object):
         else:
             return self.result_sample
 
-    def get_opt_input(self): 
+    def get_complete_results(self):
         """
-        Returns the optimal inputs for the current timeframe.
+        Creates and returns the patched together resultfile from all 
+        optimizations.
         """
-        inputs = {}
-        for inp in self.collocator.mvar_vectors['unelim_u']:
-            inputs[inp.getName()] = self._result_object[inp.getName()][0]
-            
-        return inputs
 
-    def _generate_measurements(self):   
-        """
-        Returns an estimated value of the next measurement, based on the result
-        of the last optimization. 
-        """
-        measurements = {}   
-        for name in self.state_names:
-            name_init = "_start_"+name
-            measurements[name_init] = self._result_object[name]\
-                                [self._nbr_values_sample-1]*\
-                                 N.random.normal(1.0, 0.01, 1)
-        return measurements
-
-    def _state_estimation(self, state_dict):
-        """ 
-        Returns an estimation of the states in the next sample based on the
-        measurement of the states in this sample.
-        
-        Parameters::
-            state_dict --
-            A dictionary with the measurements for this sample.
-        """
-        return state_dict
-         #Not yet supported
-    def _calculate_nbr_values_sample(self):
-        """
-        Returns the number of values for each timeframe.
-        """
-        timepoints_sample = []
-        i = 0
-        if not self.collocator._normalize_min_time:
-            timepoints = self.collocator.time
-            time = timepoints[i]
-            while time <= self.sample_period:
-                timepoints_sample.append(time)
-                i +=1
-                time = timepoints[i]
-            self._nbr_values_sample = len(timepoints_sample)
+        # Convert the complete restults lists to arrays
+        self.res_t = N.array(self.res_t).reshape([-1, 1])
+        self.res_dx = N.array(self.res_dx).reshape([-1, len(self.res_dx[0])])
+        self.res_x = N.array(self.res_x).reshape([-1, len(self.res_x[0])])
+        self.res_u = N.array(self.res_u).reshape([-1, len(self.res_u[0])])
+        if len(self.res_w[0] >= 1):
+            self.res_w = N.array(self.res_w).reshape([-1, len(self.res_w[0])])
         else:
-            time = self.result[0][i]
-            while time <= self.sample_period:
-                timepoints_sample.append(time)
-                i +=1
-                time = self.result[0][i]
-            self._nbr_values_sample = len(timepoints_sample)
-            
-    def get_nbr_values_sample(self):
-        return self._nbr_values_sample
+            self.res_w = N.array(self.res_w)
+        self.res_p = N.array(self.res_p).reshape([-1, 1])
+
+        res = (self.res_t, self.res_dx, self.res_x, self.res_u, 
+                        self.res_w, self.res_p)
+
+        self.collocator.export_result_dymola(self._mpc_result_file_name, 
+                                                result=res)
+
+        complete_res = ResultDymolaTextual(self._mpc_result_file_name)
+
+        # Create and return result object
+        self._result_object_complete = MPCAlgResult(self.op, 
+                                self._mpc_result_file_name, self.collocator,
+                                complete_res, self.options,
+                                self.times, self._sample_nbr,
+                                self.sample_period)
+
+        return self._result_object_complete
+        
+    def def_warm_start(self, push):
+        self.test_warm_start = True
+        self.push = push

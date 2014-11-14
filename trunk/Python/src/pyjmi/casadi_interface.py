@@ -851,7 +851,10 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
                              "algorithm.")
         return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
                                     algorithm, options)
-    
+    def get_state_names(self):
+        return [var.getName() for var in self.getVariables(self.DIFFERENTIATED)\
+         if not var.isAlias()]
+         
 class CasadiModel(ModelBase):
     
     """
