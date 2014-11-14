@@ -408,31 +408,4 @@ class TestLoadResource(SimulationTest):
         self.assert_end_value('x', 110)
         self.assert_end_value('y', 110)
         self.assert_end_value('z', 110)
-
-class TestOutOfRangeOps(SimulationTest):
-    """
-    Tests out of range on exp,log,log10,sinh,cosh,tan
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('OperatorTests.mo', 'OperatorTests.OutOfRange')
-
-    @testattr(stddist = True)
-    def setUp(self):
-        self.setup_base(final_time=1.0)
-        self.run()
-
-    @testattr(stddist = True)
-    def test_trajectories(self):
-        """
-        Test that results match the expected ones.
-        """
-        self.assert_end_value('x1', 1e20)
-        self.assert_end_value('x2', -1e20)
-        self.assert_end_value('x3', -1e20)
-        self.assert_end_value('x4', 1e20)
-        self.assert_end_value('x5', 1e20)
-        self.assert_end_value('x6', 1e20)
-        self.assert_end_value('x7', 1e20)
         

@@ -239,73 +239,13 @@ aspect CCodeGen {
 			}
 			str.print(")");
 		} else {
-            prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+			str.print("pow(");
+			p.print(getLeft(),str,indent); 
+			str.print(",");
+			p.print(getRight(),str,indent);
+			str.print(")");
 		}
 	}
-	
-    public void FExp.prettyPrintGuarded_C(CodePrinter p, CodeStream str, String indent, FExp left, FExp right) {
-        boolean func = inFunction();
-        str.print("jmi_");
-        str.print(guardedFunctionName_C());
-        str.print(func ? "_function(" : "_equation(");
-        str.print(func ? "\"" + containingFFunctionDecl().name() + "\", ": "jmi, ");
-        p.print(left,str,indent);
-        str.print(","); 
-        p.print(right,str,indent);
-        str.print(",\""); 
-        CStringCodeStream tstr = new CStringCodeStream(str);
-        prettyPrint(tstr, "");
-        tstr.close();
-        str.print("\")");
-    }
-    
-    public void FExp.prettyPrintGuarded_C(CodePrinter p, CodeStream str, String indent, FExp exp) {
-        boolean func = inFunction();
-        str.print("jmi_");
-        str.print(guardedFunctionName_C());
-        str.print(func ? "_function(" : "_equation(");
-        str.print(func ? "\"" + containingFFunctionDecl().name() + "\", ": "jmi, ");
-        p.print(exp,str,indent);
-        str.print(",\""); 
-        CStringCodeStream tstr = new CStringCodeStream(str);
-        prettyPrint(tstr, "");
-        tstr.close();
-        str.print("\")");
-    }
-    
-    syn String FExp.guardedFunctionName_C() { throw new UnsupportedOperationException(); }
-    eq FDotDivExp.guardedFunctionName_C() = "divide";
-    eq FDotPowExp.guardedFunctionName_C() = "pow";
-    eq FExpExp.guardedFunctionName_C()    = "exp";
-    eq FLogExp.guardedFunctionName_C()    = "log";
-    eq FLog10Exp.guardedFunctionName_C()  = "log10";
-    eq FSinhExp.guardedFunctionName_C()   = "sinh";
-    eq FCoshExp.guardedFunctionName_C()   = "cosh";
-    eq FTanExp.guardedFunctionName_C()    = "tan";
-    
-    public void FExpExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FLogExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FLog10Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FSinhExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FCoshExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
-    
-    public void  FTanExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
-    }
 	
 	public void FMinMaxExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("jmi_" + builtInName() + "(");
@@ -2067,7 +2007,19 @@ aspect CCodeGen {
 	eq FDotDivExp.op_C() = " / ";
 
 	public void FDotDivExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+		if (inFunction()) {
+			str.format("jmi_divide_function(\"%s\", ", containingFFunctionDecl().name());
+		} else {
+			str.print("jmi_divide_equation(jmi, ");
+		}
+        p.print(getLeft(),str,indent);
+        str.print(","); 
+        p.print(getRight(),str,indent);
+        str.print(",\""); 
+        CStringCodeStream tstr = new CStringCodeStream(str);
+        prettyPrint(tstr, "");
+        tstr.close();
+        str.print("\")");
 	}
 	
     public void FStringLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {

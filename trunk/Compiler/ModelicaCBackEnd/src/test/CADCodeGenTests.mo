@@ -59,7 +59,7 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
-    (*res)[0] = jmi_tan_equation(jmi, _x1_1,\"tan(x1)\") - (_y_0);
+    (*res)[0] = tan(_x1_1) - (_y_0);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (cos(_x1_1) * cos(_x1_1)) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 1 - (_x1_1);
     (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
@@ -178,7 +178,7 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
-    (*res)[0] = jmi_sinh_equation(jmi, _x1_1,\"sinh(x1)\") - (_y_0);
+    (*res)[0] = sinh(_x1_1) - (_y_0);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cosh(_x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 1 - (_x1_1);
     (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
@@ -201,7 +201,7 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
-    (*res)[0] = jmi_cosh_equation(jmi, _x1_1,\"cosh(x1)\") - (_y_0);
+    (*res)[0] = cosh(_x1_1) - (_y_0);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * sinh(_x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 1 - (_x1_1);
     (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
@@ -252,7 +252,7 @@ equation
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
     jmi_ad_var_t v_0;
-    v_0 = jmi_exp_equation(jmi, _x1_1,\"exp(x1)\");
+    v_0 = exp(_x1_1);
     (*res)[0] = v_0 - (_y_0);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * v_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 1 - (_x1_1);
@@ -277,7 +277,7 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
-    (*res)[0] = jmi_log_equation(jmi, _x1_1,\"log(x1)\") - (_y_0);
+    (*res)[0] = log(_x1_1) - (_y_0);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 2 - (_x1_1);
     (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
@@ -301,7 +301,7 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
-    (*res)[0] = jmi_log10_equation(jmi, _x1_1,\"log10(x1)\") - (_y_0);
+    (*res)[0] = log10(_x1_1) - (_y_0);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * log10(exp(1)) / _x1_1 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 1 - (_x1_1);
     (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
@@ -465,7 +465,7 @@ equation
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
     jmi_ad_var_t v_0;
-    v_0 = jmi_pow_equation(jmi, _x1_1,_x2_2,\"x1 ^ x2\");
+    v_0 = pow(_x1_1,_x2_2);
     (*res)[0] = v_0 - (_y_0);
     (*dF)[0] = _x1_1 == 0 ? 0 : (v_0 * ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1)) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 2 - (_x1_1);
@@ -1737,7 +1737,7 @@ jmi_ad_var_t tmp_der_1;
     (*dF)[1] = tmp_der_1 - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
     v_0 = _x_0 * _y_1;
     d_0 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-    (*res)[2] = jmi_log_equation(jmi, v_0,\"log(x * y)\") - (_der_a_3);
+    (*res)[2] = log(v_0) - (_der_a_3);
     (*dF)[2] = d_0 / v_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
   end CADFunction7;
@@ -2798,14 +2798,14 @@ jmi_real_t** dz = jmi->dz;
     jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     v_1 = _x_0 + AD_WRAP_LITERAL(1);
     d_1 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
-    v_0 = jmi_log_equation(jmi, v_1,\"log(x + 1)\");
+    v_0 = log(v_1);
     d_0 = d_1 / v_1;
     _der_a_4 = v_0 * _a_2;
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 * _a_2 + v_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
     jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
     v_3 = _y_1 + AD_WRAP_LITERAL(2);
     d_3 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
-    v_2 = jmi_log_equation(jmi, v_3,\"log(y + 2)\");
+    v_2 = log(v_3);
     d_2 = d_3 / v_3;
     _der_b_5 = v_2 * _b_3;
     (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_2 * _b_3 + v_2 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
@@ -2921,7 +2921,7 @@ jmi_real_t** dz = jmi->dz;
     d_1 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
     v_0 = v_1 + AD_WRAP_LITERAL(1);
     d_0 = d_1 + AD_WRAP_LITERAL(0);
-    _der_a_4 = jmi_log_equation(jmi, v_0,\"log(x * y + 1)\");
+    _der_a_4 = log(v_0);
     (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_0 / v_0;
     /*********** Real outputs **********/
     /*** Integer and boolean outputs ***/
@@ -3055,7 +3055,7 @@ jmi_real_t** dz = jmi->dz;
     d_2 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
     v_1 = v_2 + AD_WRAP_LITERAL(1);
     d_1 = d_2 + AD_WRAP_LITERAL(0);
-    v_0 = jmi_log_equation(jmi, v_1,\"log(x1 * x2 + 1)\");
+    v_0 = log(v_1);
     d_0 = d_1 / v_1;
     _der_e_8 = v_0 * _e_4;
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 * _e_4 + v_0 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
@@ -3075,7 +3075,7 @@ jmi_real_t** dz = jmi->dz;
     d_10 = d_11 * _x4_3 + v_11 * (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
     v_9 = v_10 + AD_WRAP_LITERAL(3);
     d_9 = d_10 + AD_WRAP_LITERAL(0);
-    v_8 = jmi_log_equation(jmi, v_9,\"log(x1 * x2 * x3 * x4 + 3)\");
+    v_8 = log(v_9);
     d_8 = d_9 / v_9;
     v_7 = v_8 * _g_6;
     d_7 = d_8 * _g_6 + v_8 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
@@ -3940,7 +3940,7 @@ void func_CADCodeGenTests_TestLiteralFuncArg1_F_der_AD0(jmi_ad_var_t x_var_v, jm
     jmi_ad_var_t z_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-    v_0 = jmi_pow_function(\"CADCodeGenTests.TestLiteralFuncArg1.F\", x_var_v,y_var_v,\"x ^ y\");
+    v_0 = pow(x_var_v,y_var_v);
     d_0 = x_var_v == 0 ? 0 : (v_0 * (y_der_v * log(jmi_abs(x_var_v)) + y_var_v * x_der_v / x_var_v));
     z_var_v = v_0 + i_v;
     z_der_v = d_0 + AD_WRAP_LITERAL(0);
