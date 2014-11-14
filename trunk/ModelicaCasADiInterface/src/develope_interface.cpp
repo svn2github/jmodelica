@@ -192,12 +192,10 @@ int main(int argc, char ** argv)
       model->eliminateAlgebraics();
       
       std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminated = model->getEliminatedVariables();
-      std::cout<<"Eliminated Variables:\n";      
-      for(int i=0;i<eliminated.size();++i){
-            std::cout<<eliminated[i]->getVar()<<"  ";
-      }
       std::cout<<std::endl;
       model->print(std::cout);      
+      model->BaseModel::substituteAllEliminateables();
+      model->print(std::cout);  
       
 
    }

@@ -223,7 +223,7 @@ class BaseModel: public RefCountedNode {
     
     virtual void setBLT(Ref<BLTHandler> nblt){std::cout<<"BaseModel setBLT should not be called\n.";}
     
-    virtual void transferBLT(const std::vector< Ref<Block> >& nblt){equationContainer_->transferBLT(nblt);}
+    virtual void transferBLT(const std::vector< Ref<Block> >& nblt);
 
     /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
     void setDirty() { dirty = true; }
@@ -287,6 +287,7 @@ class BaseModel: public RefCountedNode {
     //Map to build the blocks with CasADiInterface Variables 
     std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
     Ref<EquationContainer> equationContainer_;
+    std::map<const Variable*,casadi::MX> eliminatedVariableToSolution;
 };
 inline void BaseModel::initializeModel(std::string identifier) {
     this->identifier = identifier;

@@ -98,4 +98,30 @@ void OptimizationProblem::print(ostream& os) const {
     }
 }
 
+void OptimizationProblem::eliminateAlgebraics(){
+    Model::eliminateAlgebraics();
+    std::vector<casadi::MX> eliminatedMXs;
+    std::vector<casadi::MX> subtitutes;
+    for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
+	it!=eliminatedVariableToSolution.end();++it){
+	    eliminatedMXs.push_back(it->first->getVar());
+	    subtitutes.push_back(it->second);
+    }
+    std::vector<casadi::MX> expressions;
+    expressions.push_back(startTime);
+    expressions.push_back(finalTime);
+    expressions.push_back(objectiveIntegrand);
+    expressions.push_back(objective);
+
+    std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
+    
+    std::vector<casadi::MX>::const_iterator it =subtitutedExpressions.begin();
+    startTime = *(it++);
+    finalTime = *(it++);
+    objectiveIntegrand = *(it++);
+    objective = *(it++);
+    //Still missing path and point constraints
+    
+}
+
 }; // End namespace

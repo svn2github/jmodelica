@@ -461,6 +461,14 @@ void BaseModel::print(std::ostream& os) const {
         printVectorModel(os, daeEquations);
     }
     os << endl;
+    if (!eliminatedVariableToSolution.empty()){
+	os << "\n-------------------------- Eliminated Variables ---------------------------\n" << endl;
+	for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
+	    it!=eliminatedVariableToSolution.end();++it){
+		os << it->first->getName() << " = " << it->second<<"\n";
+	}
+    }
+    os << endl;
 }
 
 bool BaseModel::hasBLT() const{
@@ -468,7 +476,7 @@ bool BaseModel::hasBLT() const{
 }
 
 std::set<const Variable*> BaseModel::getBLTEliminateables() const {
-  return equationContainer_->eliminatableVariables();
+  return equationContainer_->eliminateableVariables();
 }
 
 std::vector< Ref< Equation> > BaseModel::getDaeEquations() const {
@@ -486,14 +494,14 @@ void BaseModel::addDaeEquation(Ref<Equation> eq){
 void BaseModel::setEquationContainer(Ref<EquationContainer> eqCont){
    equationContainer_ = eqCont; 
    if(equationContainer_->hasBLT()){
-    std::cout<<"\nEliminateables: ";
+    //std::cout<<"\nEliminateables: ";
      for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
 	 if(equationContainer_->isBLTEliminateable((*it))){
 	     (*it)->setAsEliminatable();
-	     std::cout<<(*it)->getName()<<" ";
+	     //std::cout<<(*it)->getName()<<" ";
 	 }
      }
-     std::cout<<"\n";
+     //std::cout<<"\n";
    }
 }
 
@@ -503,17 +511,27 @@ void BaseModel::substituteAllEliminateables(){
 
 void BaseModel::eliminateAlgebraics(){
     std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
-    //Remove the variable from the equations
-    equationContainer_->eliminateVariables(algebraics);
     //Remove the variable from the list of variables and move it to eliminated_z    
     std::vector< Variable* >::iterator fit;
+    std::set< const Variable* > tmpSet;
     for(std::vector< Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it){
 	if((*it)->isEliminatable()){
 		eliminated_z.push_back((*it).getNode());
+		tmpSet.insert((*it).getNode());
 		fit = std::find(z.begin(), z.end(),(*it).getNode());
 		z.erase(fit);
+		
 	}
     }
+    //Add solutions of eliminated variables to solutions map
+    std::map<const Variable*,casadi::MX> tmpMap;
+    equationContainer_->getSubstitues(tmpSet, tmpMap);
+    for(std::map<const Variable*,casadi::MX>::iterator it=tmpMap.begin();it!=tmpMap.end();++it){
+	eliminatedVariableToSolution.insert(std::pair<const Variable*,casadi::MX>(it->first,it->second));
+    }
+    
+    //Remove the variable from the equations
+    equationContainer_->eliminateVariables(algebraics);
 }
 
 std::vector< Ref<Variable> > BaseModel::getEliminatedVariables(){
@@ -523,5 +541,23 @@ std::vector< Ref<Variable> > BaseModel::getEliminatedVariables(){
     }
     return elimVars;
 }
+
+void BaseModel::transferBLT(const std::vector< Ref<Block> >& nblt){
+    if(equationContainer_->hasBLT()){    
+	equationContainer_->transferBLT(nblt);
+	//std::cout<<"\nEliminateables: ";
+	for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
+	    if(equationContainer_->isBLTEliminateable((*it))){
+		(*it)->setAsEliminatable();
+		//std::cout<<(*it)->getName()<<" ";
+	    }
+	}
+	//std::cout<<"\n";
+    }
+    else{
+	std::cout<<"The Equation container does not have a BLT. Set the Equation Container instead with a BLTContainer.\n";    
+    }
+}
+
 
 }; // End namespace

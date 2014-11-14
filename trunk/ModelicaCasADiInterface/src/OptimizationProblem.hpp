@@ -22,14 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "casadi/casadi.hpp"
 
 #include "Model.hpp"
-#include "BLTModel.hpp"
 #include "Constraint.hpp"
 #include "SharedNode.hpp"
 #include "TimedVariable.hpp"
 #include "Ref.hpp"
 namespace ModelicaCasADi 
 {
-class OptimizationProblem : public Model/*, public BLTModel*/ {
+class OptimizationProblem : public Model{
     public:
         /** Create a blank, uninitialized OptimizationProblem */
         OptimizationProblem() { normalizedTime = false; startTime = finalTime = objective = objectiveIntegrand = casadi::MX(0); }
@@ -89,6 +88,8 @@ class OptimizationProblem : public Model/*, public BLTModel*/ {
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
+        
+        void eliminateAlgebraics();
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:

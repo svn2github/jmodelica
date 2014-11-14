@@ -29,7 +29,7 @@ namespace ModelicaCasADi
         }
     }
     
-    std::set<const Variable*> BLTContainer::eliminatableVariables() const{
+    std::set<const Variable*> BLTContainer::eliminateableVariables() const{
         std::set<const Variable*> vars;
         for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
             it!=blt.end();++it){
@@ -150,7 +150,7 @@ namespace ModelicaCasADi
     }
     
     bool BLTContainer::isBLTEliminateable(Ref<Variable> var) const{
-        std::set<const Variable*> eliminateables = eliminatableVariables();
+        std::set<const Variable*> eliminateables = eliminateableVariables();
         std::set<const Variable*>::const_iterator it = eliminateables.find(var.getNode());
         if(it!=eliminateables.end()){
             return 1;    

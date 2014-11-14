@@ -46,7 +46,7 @@ class BLTContainer: public EquationContainer {
         
         /**************AuxiliaryMethods*************/
         void printBLT(std::ostream& out, bool with_details=false) const;
-        std::set<const Variable*> eliminatableVariables() const;
+        std::set<const Variable*> eliminateableVariables() const;
         void getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const;
         
         void substituteAllEliminateables();

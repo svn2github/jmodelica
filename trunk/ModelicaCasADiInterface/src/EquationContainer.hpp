@@ -33,7 +33,7 @@ namespace ModelicaCasADi
 class EquationContainer: public RefCountedNode {
     public:
         virtual bool hasBLT() const {return 0;};
-        virtual std::set<const Variable*> eliminatableVariables() const{            
+        virtual std::set<const Variable*> eliminateableVariables() const{            
             return std::set<const Variable*>();
         };
         virtual const casadi::MX getDaeResidual() const {
@@ -69,6 +69,10 @@ class EquationContainer: public RefCountedNode {
         
         virtual void transferBLT(const std::vector< Ref<Block> >& nblt){
              std::cout<<"Abstract Container transferBLT(block) must not be called.\n";       
+        }
+        
+        virtual void getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const{
+            std::cout<<"Abstract Container getSubstitues(variables, storageMap) must not be called.\n";  
         }
         
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
