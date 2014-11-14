@@ -44,7 +44,6 @@ set(MC_CPP
   TimedVariable.cpp
   Equation.cpp
   IntegerVariable.cpp
-  BaseModel.cpp
   Model.cpp
   ModelFunction.cpp
   OptimizationProblem.cpp
@@ -74,7 +73,6 @@ set(MC_HPP
   Equation.hpp
   IntegerVariable.hpp
   ModelFunction.hpp
-  BaseModel.hpp
   Model.hpp
   OptimizationProblem.hpp
   Printable.hpp

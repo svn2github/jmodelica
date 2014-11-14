@@ -88,7 +88,6 @@
 #include <iterator>
 #include <algorithm>
 
-#include "BaseModel.hpp"
 #include "EquationContainer.hpp"
 #include "FlatEquationList.hpp"
 #include "BLTContainer.hpp"
@@ -98,7 +97,7 @@
 #include "mxwrap.hpp" 
 #include "mxfunctionwrap.hpp" 
 #include "mxvectorwrap.hpp" 
-
+#include <stdlib.h>
 namespace mc = org::jmodelica::modelica::compiler;
 namespace jl = java::lang;
 using org::jmodelica::util::OptionRegistry;
@@ -106,6 +105,10 @@ using org::jmodelica::util::OptionRegistry;
 
 int main(int argc, char ** argv)
 {
+  int with_blt=0;
+  if(argc>1){
+    with_blt=atoi(argv[1]);
+  }
    //Class
    std::string modelName("BLTExample");
    //std::string modelName("CombinedCycle.Substances.Gas");
@@ -138,7 +141,7 @@ int main(int argc, char ** argv)
        
       std::string identfier = env->toString(fclass.nameUnderscore().this$);
       
-      ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> model = new ModelicaCasADi::BaseModel();
+      ModelicaCasADi::Ref<ModelicaCasADi::Model> model = new ModelicaCasADi::Model();
       model->initializeModel(identfier);
       // Transfer time variable
       transferTime<mc::FClass>(model, fclass);
@@ -159,7 +162,13 @@ int main(int argc, char ** argv)
                               mc::FAttribute,
                               mc::FType>(model, fclass);
                               
-      ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer = new ModelicaCasADi::BLTContainer();
+      ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer;
+      if(with_blt){                        
+            eqContainer = new ModelicaCasADi::BLTContainer();
+      }
+      else{
+            eqContainer = new ModelicaCasADi::FlatEquationList();
+      }
       
       if(eqContainer->hasBLT()){
             mc::BLT jblt =fclass.getDAEBLT();
@@ -178,7 +187,7 @@ int main(int argc, char ** argv)
       }
       
       model->setEquationContainer(eqContainer);
-      
+
       transferInitialEquations<java::util::ArrayList,
                               mc::FAbstractEquation>(model, fclass.initialEquations());
                               
@@ -194,7 +203,7 @@ int main(int argc, char ** argv)
       std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminated = model->getEliminatedVariables();
       std::cout<<std::endl;
       model->print(std::cout);      
-      model->BaseModel::substituteAllEliminateables();
+      model->substituteAllEliminateables();
       model->print(std::cout);  
       
 

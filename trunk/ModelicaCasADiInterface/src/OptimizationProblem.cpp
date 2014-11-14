@@ -136,7 +136,7 @@ void OptimizationProblem::substituteAllEliminateables(){
 	    subtitutes.push_back(it->second);
     }
     //Substitutes in DAE    
-    BaseModel::substituteAllEliminateables();
+    Model::substituteAllEliminateables();
     
     //Substitutes in the optimization expressions
     std::vector<casadi::MX> expressions;

@@ -15,20 +15,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Variable.hpp"
-#include "BaseModel.hpp"
 #include "Model.hpp"
 
 
 using std::ostream; using casadi::MX;
 namespace ModelicaCasADi 
 {
-Variable::Variable(BaseModel *owner) : negated(false), OwnedNode(owner) {
+Variable::Variable(Model *owner) : negated(false), OwnedNode(owner) {
     var = MX();
     myModelVariable = Ref<Variable>(NULL);
     declaredType = Ref<VariableType>(NULL);
 }
 
-Variable::Variable(BaseModel *owner, MX var, Variable::Causality causality, 
+Variable::Variable(Model *owner, MX var, Variable::Causality causality, 
                    Variable::Variability variability,
                    Ref<VariableType> declaredType /* Ref<VariableType>() */) : 
   causality(causality), variability(variability), negated(false), OwnedNode(owner) {

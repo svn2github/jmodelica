@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 namespace ModelicaCasADi
 {
-class BaseModel;
 class Model;
 
 
@@ -67,7 +66,7 @@ class Variable : public OwnedNode {
             DISCRETE,
             CONTINUOUS
         };
-        Variable(BaseModel *owner);
+        Variable(Model *owner);
         /**
          * The Variable class should not be used, use subclasses such 
          * as RealVariable instead.
@@ -76,7 +75,7 @@ class Variable : public OwnedNode {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        Variable(BaseModel *owner, casadi::MX var, Causality causality,
+        Variable(Model *owner, casadi::MX var, Causality causality,
                 Variability variability, 
                 Ref<VariableType> declaredType = Ref<VariableType>());
         
@@ -211,7 +210,7 @@ class Variable : public OwnedNode {
         AttributeValue* getAttributeForAlias(AttributeKey key);
         AttributeKey keyForAlias(AttributeKey key) const;
         void setAttributeForAlias(AttributeKey key, AttributeValue val);
-        BaseModel &myModel() { return *((BaseModel *)owner); }
+        Model &myModel() { return *((Model *)owner); }
     private:
         Causality causality;
         Variability variability;

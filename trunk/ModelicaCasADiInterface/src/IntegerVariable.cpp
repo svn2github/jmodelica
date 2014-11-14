@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi 
 {
 using casadi::MX;
-IntegerVariable::IntegerVariable(BaseModel *owner, MX var, Variable::Causality causality,
+IntegerVariable::IntegerVariable(Model *owner, MX var, Variable::Causality causality,
                            Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
   Variable(owner, var, causality, variability, declaredType) { 
     if (variability == Variable::CONTINUOUS) {

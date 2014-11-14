@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // The ModelicaCasADi program
 #include "Model.hpp"
-#include "BaseModel.hpp"
 #include "types/VariableType.hpp"
 #include "types/UserType.hpp"
 #include "types/PrimitiveType.hpp"
@@ -245,7 +244,7 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
   }    
 }
 
-template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
+/*template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ>
 std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > transferBLT(JBLT* javablt,
@@ -273,10 +272,11 @@ std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > transferBLT(JBLT* java
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
             typename FExp, template<typename Ty> class ArrayJ>
-void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
+void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::Model> m, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
     
     std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > nblt; 
-    m->setEquationContainer(new ModelicaCasADi::BLTContainer());
+    ModelicaCasADi::Ref<ModelicaCasADi::BLTContainer> container = new ModelicaCasADi::BLTContainer();    
+    m->setEquationContainer(container);
     nblt=transferBLT<JBLT,
 		JBlock, 
 		JCollection, 
@@ -288,7 +288,7 @@ void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::BaseM
 		ArrayJ>(javablt, m->getNodeToVariableMap(), jacobian_no_casadi, solve_with_casadi);
     m->transferBLT(nblt);    
     
-}
+}*/
 
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,
@@ -366,7 +366,7 @@ template <class ArrayList, class AbstractEquation>
  * @param A pointer to a Model
  * @param An ArrayList with FAbstractEquation
  */
-static void transferDaeEquations(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, ArrayList modelEquationsInJM){
+static void transferDaeEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ArrayList modelEquationsInJM){
     if(!m->hasBLT()){
 	std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(modelEquationsInJM);
 	for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = modelEqs.begin(); it != modelEqs.end(); ++it){
@@ -402,7 +402,7 @@ template <class ArrayList, class AbstractEquation>
  * @param A pointer to a Model
  * @param An ArrayList with FAbstractEquation
  */
-static void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, ArrayList initialEqsInJM){
+static void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList initialEqsInJM){
     std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > initialEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(initialEqsInJM);
     for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = initialEqs.begin(); it != initialEqs.end(); ++it){
         m->addInitialEquation(*it);
@@ -425,7 +425,7 @@ template <class FlatClass, class List, class FunctionDecl>
  * @param A pointer to a Model
  * @param An FClass
  */
-void transferFunctions(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FlatClass &fc) {
+void transferFunctions(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FlatClass &fc) {
     List fl = fc.getFFunctionDeclList();
     for (int i = 0; i < fl.getNumChild(); ++i) {
         m->setModelFunctionByItsName(createModelFunction(FunctionDecl(fl.getChild(i).this$)));
@@ -558,7 +558,7 @@ ModelicaCasADi::Variable::Variability getVariability(const FVar &fVar) {
  * @param A pointer to a Model.
  * @param A string base type name. 
  */
-static ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseTypeForDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, std::string baseTypeName) {
+static ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseTypeForDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, std::string baseTypeName) {
     if( m->getVariableType(baseTypeName).getNode() == NULL ) {
 		if (baseTypeName == "Real") {
 			m->addNewVariableType(new ModelicaCasADi::RealType());
@@ -577,7 +577,7 @@ template <class List, class DerivedType, class Attribute, class Type>
  * @param A pointer to a Model
  * @param An FDerivedType
  */
-void transferDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, DerivedType derivedType) {
+void transferDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, DerivedType derivedType) {
     List attributeList = derivedType.getFAttributes();
     Attribute  attr;
     std::string typeName = env->toString(derivedType.getName().this$);
@@ -598,7 +598,7 @@ template <class FlatClass, class List, class DerivedType, class Attribute, class
  * @param A pointer to a Model
  * @param An FClass
  */
-void transferUserDefinedTypes(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, FlatClass &fc) {
+void transferUserDefinedTypes(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, FlatClass &fc) {
     List derivedTypeList = fc.getFDerivedTypeList();
     DerivedType derivedType;
     for (int i = 0; i < derivedTypeList.getNumChild(); ++i) {
@@ -619,12 +619,12 @@ void transferUserDefinedTypes(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, 
  *                        *
  **************************/
 template <class FClass> 
-void transferTime(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, FClass fc) {
+void transferTime(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, FClass fc) {
     m->setTimeVariable(toMX(fc.timeMX()));
 }
  
 template <class FVar>
-ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv) {
+ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv) {
     ModelicaCasADi::Ref<ModelicaCasADi::UserType> userType;
     if (!std::string(env->toString(fv.getDerivedType().this$)).empty()) {
         userType = (ModelicaCasADi::UserType*) m->getVariableType(env->toString(fv.getDerivedType().this$)).getNode();
@@ -637,7 +637,7 @@ ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<Mo
 
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv) {
+void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv) {
     JMDerivativeVariable fDer = JMDerivativeVariable(fv.myDerivativeVariable().this$);
     JMRealVariable fDiff = JMRealVariable(fv.this$);
     ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), toMX(fDiff.asMXVariable()), getCausality(fDiff),
@@ -654,7 +654,7 @@ void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<Modelica
 }
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
+void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
     if (fv.isDerivativeVariable()) {
         return; // Derivative variables are transferred together with their differentiated variables. 
     }
@@ -671,7 +671,7 @@ void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVa
 
 
 template <class FVar, class List, class Attribute, class Comment>
-void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
+void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
     ModelicaCasADi::Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(intVar, fv);
@@ -681,7 +681,7 @@ void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, 
 
 
 template <class FVar, class List, class Attribute, class Comment>
-void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar &fv){
+void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
     ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
 				
@@ -691,7 +691,7 @@ void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, 
 }
 
 template <class FVar>
-void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv) {
+void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv) {
     if (!fv.isAlias()) {
         return;
     }
@@ -700,7 +700,7 @@ void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel> m, Model
 }  
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar fv) {
+void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar fv) {
     if (fv.isReal()) {
         transferRealVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv);
     } else if (fv.isInteger()) {
@@ -711,7 +711,7 @@ void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, FVar f
 }
 
 template <class ArrayList, class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::BaseModel>  m, ArrayList vars){
+static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList vars){
     for (int i = 0; i < vars.size(); i++) {
         FVar var = FVar(vars.get(i).this$);
         if (var.type().isEnum()) {

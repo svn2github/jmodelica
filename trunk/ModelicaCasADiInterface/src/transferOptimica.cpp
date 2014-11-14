@@ -52,7 +52,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // The ModelicaCasADi program
 #include "Model.hpp"
-#include "BaseModel.hpp"
 #include "Constraint.hpp"
 #include "TimedVariable.hpp"
 

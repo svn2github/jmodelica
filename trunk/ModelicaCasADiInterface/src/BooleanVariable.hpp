@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
-class BaseModel;
+class Model;
 
 class BooleanVariable : public Variable {
     public:
@@ -36,7 +36,7 @@ class BooleanVariable : public Variable {
          * @param A Variability enum
          * @param A VariableType, default is a reference to NULL. 
          */
-        BooleanVariable(BaseModel *owner, casadi::MX var, Causality causality, 
+        BooleanVariable(Model *owner, casadi::MX var, Causality causality, 
                      Variability variability,
                       Ref<VariableType> declaredType = Ref<VariableType>());
         /** @return The Boolean Type enum */

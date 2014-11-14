@@ -37,6 +37,28 @@ class FlatEquationList : public EquationContainer {
         /** @param A pointer to an equation */ 
         virtual void addDaeEquation(Ref<Equation> eq);
         
+        void substituteAllEliminateables(){
+            std::cout<<"A FlatListEquation container cannot substitute variables. Use BLTContainer instead.\n";
+        };
+        void eliminateVariable(Ref<Variable> var){
+            std::cout<<"A FlatListEquation container cannot eliminate variables. Use BLTContainer instead.\n";
+        };
+        void eliminateVariables(std::vector< Ref<Variable> >& vars){
+            std::cout<<"A FlatListEquation container cannot eliminate variables. Use BLTContainer instead.\n";
+        };
+        
+        void addBlock(Ref<Block> block){
+            std::cout<<"A FlatListEquation container cannot add blocks. Use BLTContainer instead.\n";
+        };
+        
+        void transferBLT(const std::vector< Ref<Block> >& nblt){
+             std::cout<<"A FlatListEquation container cannot transferBLT. Use BLTContainer instead.\n";      
+        }
+        
+        void getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const{
+            std::cout<<"A FlatListEquation container cannot get subtitutes. Use BLTContainer instead.\n";  
+        }
+        
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         std::vector< Ref<Equation> > daeEquations;

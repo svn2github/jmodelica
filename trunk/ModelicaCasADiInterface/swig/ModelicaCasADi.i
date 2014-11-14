@@ -40,9 +40,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "FlatEquationList.hpp"
 #include "BLTContainer.hpp"
 
-#include "BaseModel.hpp"
-#include "Model.hpp"
 
+#include "Model.hpp"
 #include "OptimizationProblem.hpp"
 
 #include "transferModelica.hpp"
@@ -110,7 +109,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %instantiate_Ref(ModelicaCasADi, FlatEquationList)
 %instantiate_Ref(ModelicaCasADi, BLTContainer)
 
-%instantiate_Ref(ModelicaCasADi, BaseModel)
 %instantiate_Ref(ModelicaCasADi, Model)
 
 %instantiate_Ref(ModelicaCasADi, OptimizationProblem)
@@ -148,9 +146,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "FlatEquationList.hpp"
 %include "BLTContainer.hpp"
 
-%include "BaseModel.hpp"
 %include "Model.hpp"
-
 %include "OptimizationProblem.hpp"
 
 %include "sharedTransferFunctionality.hpp"
@@ -229,9 +225,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   std::string __repr__() { return $self->repr(); }
 }
 %extend ModelicaCasADi::IntegerVariable {
-  std::string __repr__() { return $self->repr(); }
-}
-%extend ModelicaCasADi::BaseModel {
   std::string __repr__() { return $self->repr(); }
 }
 %extend ModelicaCasADi::Model {
