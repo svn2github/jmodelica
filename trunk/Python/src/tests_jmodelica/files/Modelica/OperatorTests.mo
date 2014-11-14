@@ -198,4 +198,16 @@ int fileLength(const char* name) {
      
 end LoadResource;
 
+model OutOfRange
+    Real t1 = time*1e300;
+    Real t2 = 1 - time;
+    Real x1 = exp(t1);
+    Real x2 = log(t2);
+    Real x3 = log10(t2);
+    Real x4 = sinh(t1);
+    Real x5 = cosh(t1);
+    Real x6 = t1^t1;
+    Real x7 = 1 / t2;
+end OutOfRange;
+
 end OperatorTests;

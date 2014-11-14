@@ -275,6 +275,21 @@ jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_
  */
 jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
 
+#define jmi_pow_function(DUMMY1, X, Y, DUMMY2) pow(X,Y)
+#define jmi_pow_equation(DUMMY1, X, Y, DUMMY2) pow(X,Y)
+#define jmi_exp_function(DUMMY1, X, DUMMY2) exp(X)
+#define jmi_exp_equation(DUMMY1, X, DUMMY2) exp(X)
+#define jmi_log_function(DUMMY1, X, DUMMY2) log(X)
+#define jmi_log_equation(DUMMY1, X, DUMMY2) log(X)
+#define jmi_log10_function(DUMMY1, X, DUMMY2) log10(X)
+#define jmi_log10_equation(DUMMY1, X, DUMMY2) log10(X)
+#define jmi_sinh_function(DUMMY1, X, DUMMY2) sinh(X)
+#define jmi_sinh_equation(DUMMY1, X, DUMMY2) sinh(X)
+#define jmi_cosh_function(DUMMY1, X, DUMMY2) cosh(X)
+#define jmi_cosh_equation(DUMMY1, X, DUMMY2) cosh(X)
+#define jmi_tan_function(DUMMY1, X, DUMMY2) tan(X)
+#define jmi_tan_equation(DUMMY1, X, DUMMY2) tan(X)
+
 /**
  * Set the terminate flag and log message.
  */

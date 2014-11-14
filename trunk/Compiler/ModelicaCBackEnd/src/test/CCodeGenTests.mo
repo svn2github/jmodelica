@@ -361,7 +361,7 @@ equation
             generate_dae=true,
             template="$C_DAE_equation_residuals$",
             generatedCode="
-    (*res)[0] = pow((_x_0 - 0.3),0.3) + (1.0 * ((_x_0 - 0.3)) * ((_x_0 - 0.3)) * ((_x_0 - 0.3))) - (_der_x_1);
+    (*res)[0] = jmi_pow_equation(jmi, (_x_0 - 0.3),0.3,\"(x - 0.3) ^ 0.3\") + (1.0 * ((_x_0 - 0.3)) * ((_x_0 - 0.3)) * ((_x_0 - 0.3))) - (_der_x_1);
 ")})));
 end CCodeGenTest12;
 
@@ -1254,10 +1254,10 @@ model CCodeGenDotOp
             generate_dae=true,
             template="$C_DAE_equation_residuals$",
             generatedCode="
-    (*res)[0] = jmi_divide_equation(jmi, _y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
-    (*res)[1] = jmi_divide_equation(jmi, _y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
-    (*res)[2] = jmi_divide_equation(jmi, _y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
-    (*res)[3] = jmi_divide_equation(jmi, _y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
+    (*res)[0] = jmi_divide_equation(jmi, _y_1_1_4 * _y_1_1_4,jmi_pow_equation(jmi, (_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4,\"(y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\"),\"y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
+    (*res)[1] = jmi_divide_equation(jmi, _y_1_2_5 * _y_1_2_5,jmi_pow_equation(jmi, (_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5,\"(y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\"),\"y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
+    (*res)[2] = jmi_divide_equation(jmi, _y_2_1_6 * _y_2_1_6,jmi_pow_equation(jmi, (_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6,\"(y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\"),\"y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
+    (*res)[3] = jmi_divide_equation(jmi, _y_2_2_7 * _y_2_2_7,jmi_pow_equation(jmi, (_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7,\"(y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\"),\"y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
     (*res)[4] = 1 - (_y_1_1_4);
     (*res)[5] = 2 - (_y_1_2_5);
     (*res)[6] = 3 - (_y_2_1_6);
@@ -1265,6 +1265,263 @@ model CCodeGenDotOp
 ")})));
 end CCodeGenDotOp;
 
+model CCodeGenExpOp
+    function f
+        input Real x;
+        output Real y = exp(x);
+      algorithm
+    end f;
+    Real y = exp(time) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenExpOp",
+            description="C code generation of exp operator",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            inline_functions="none",
+            generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = jmi_exp_equation(jmi, _time,\"exp(time)\") + func_CCodeGenTests_CCodeGenExpOp_f_exp0(_time);
+/********* Write back reinits *******/
+
+void func_CCodeGenTests_CCodeGenExpOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_exp_function(\"CCodeGenTests.CCodeGenExpOp.f\", x_v,\"exp(x)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenExpOp_f_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenExpOp_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenExpOp;
+
+model CCodeGenLogOp
+    function f
+        input Real x;
+        output Real y = log(x);
+      algorithm
+    end f;
+    Real y = log(time) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenLogOp",
+            description="C code generation of log operator",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            inline_functions="none",
+            generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = jmi_log_equation(jmi, _time,\"log(time)\") + func_CCodeGenTests_CCodeGenLogOp_f_exp0(_time);
+/********* Write back reinits *******/
+
+void func_CCodeGenTests_CCodeGenLogOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_log_function(\"CCodeGenTests.CCodeGenLogOp.f\", x_v,\"log(x)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenLogOp_f_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenLogOp_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenLogOp;
+
+model CCodeGenLog10Op
+    function f
+        input Real x;
+        output Real y = log10(x);
+      algorithm
+    end f;
+    Real y = log10(time) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenLog10Op",
+            description="C code generation of log10 operator",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            inline_functions="none",
+            generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = jmi_log10_equation(jmi, _time,\"log10(time)\") + func_CCodeGenTests_CCodeGenLog10Op_f_exp0(_time);
+/********* Write back reinits *******/
+
+void func_CCodeGenTests_CCodeGenLog10Op_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_log10_function(\"CCodeGenTests.CCodeGenLog10Op.f\", x_v,\"log10(x)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenLog10Op_f_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenLog10Op_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenLog10Op;
+
+model CCodeGenSinhOp
+    function f
+        input Real x;
+        output Real y = sinh(x);
+      algorithm
+    end f;
+    Real y = sinh(time) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenSinhOp",
+            description="C code generation of sinh operator",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            inline_functions="none",
+            generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = jmi_sinh_equation(jmi, _time,\"sinh(time)\") + func_CCodeGenTests_CCodeGenSinhOp_f_exp0(_time);
+/********* Write back reinits *******/
+
+void func_CCodeGenTests_CCodeGenSinhOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_sinh_function(\"CCodeGenTests.CCodeGenSinhOp.f\", x_v,\"sinh(x)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenSinhOp_f_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenSinhOp_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenSinhOp;
+
+model CCodeGenCoshOp
+    function f
+        input Real x;
+        output Real y = cosh(x);
+      algorithm
+    end f;
+    Real y = cosh(time) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenCoshOp",
+            description="C code generation of cosh operator",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            inline_functions="none",
+            generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = jmi_cosh_equation(jmi, _time,\"cosh(time)\") + func_CCodeGenTests_CCodeGenCoshOp_f_exp0(_time);
+/********* Write back reinits *******/
+
+void func_CCodeGenTests_CCodeGenCoshOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_cosh_function(\"CCodeGenTests.CCodeGenCoshOp.f\", x_v,\"cosh(x)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenCoshOp_f_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenCoshOp_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenCoshOp;
+
+model CCodeGenTanOp
+    function f
+        input Real x;
+        output Real y = tan(x);
+      algorithm
+    end f;
+    Real y = tan(time) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTanOp",
+            description="C code generation of tan operator",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            inline_functions="none",
+            generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_0 = jmi_tan_equation(jmi, _time,\"tan(time)\") + func_CCodeGenTests_CCodeGenTanOp_f_exp0(_time);
+/********* Write back reinits *******/
+
+void func_CCodeGenTests_CCodeGenTanOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_tan_function(\"CCodeGenTests.CCodeGenTanOp.f\", x_v,\"tan(x)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenTanOp_f_exp0(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_CCodeGenTanOp_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenTanOp;
 
 
 model CCodeGenMinMax
@@ -6001,7 +6258,7 @@ model CIntegerExp4
             generate_dae=true,
             template="$C_DAE_equation_residuals$",
             generatedCode="
-    (*res)[0] = pow(10,10) - (_x_0);
+    (*res)[0] = jmi_pow_equation(jmi, 10,10,\"10 ^ 10\") - (_x_0);
 ")})));
 end CIntegerExp4;
 
@@ -6018,7 +6275,7 @@ model CIntegerExp5
             generate_dae=true,
             template="$C_DAE_equation_residuals$",
             generatedCode="
-    (*res)[0] = pow(10,-10) - (_x_0);
+    (*res)[0] = jmi_pow_equation(jmi, 10,-10,\"10 ^ -10\") - (_x_0);
 ")})));
 end CIntegerExp5;
 
