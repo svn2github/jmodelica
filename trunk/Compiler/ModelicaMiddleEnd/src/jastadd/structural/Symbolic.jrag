@@ -1220,7 +1220,7 @@ aspect ExpressionSimplification {
         if (!(other instanceof FIdUseExp))
             return false;
         FIdUseExp o = (FIdUseExp) other;
-        return name().equals(o.name());
+        return toString().equals(o.toString());
     }
     
     eq FRealLitExp.equalsSymbolic(FExp other) {
