@@ -130,7 +130,7 @@ class Block : public RefCountedNode{
 
 };
 
-inline void Block::setJacobian(const casadi::MX& jac){jacobian = jac;}
+inline void Block::setJacobian(const casadi::MX& jac){jacobian = jac; symbolicVariables = casadi::MX::sym("symVars",variables_.size());}
 inline bool Block::isSimple() const {return simple_flag;}
 inline bool Block::isLinear() const {return linear_flag;}
 inline bool Block::isSolvable() const {return solve_flag;}

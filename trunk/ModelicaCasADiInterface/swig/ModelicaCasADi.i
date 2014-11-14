@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "IntegerVariable.hpp"
 
 #include "Block.hpp"
-#include "BLTHandler.hpp"
+
 
 #include "EquationContainer.hpp"
 #include "FlatEquationList.hpp"
@@ -104,7 +104,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %instantiate_Ref(ModelicaCasADi, IntegerVariable)
 
 %instantiate_Ref(ModelicaCasADi, Block)
-%instantiate_Ref(ModelicaCasADi, BLTHandler)
+
 
 %instantiate_Ref(ModelicaCasADi, EquationContainer)
 %instantiate_Ref(ModelicaCasADi, FlatEquationList)
@@ -142,7 +142,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "IntegerVariable.hpp"
 
 %include "Block.hpp"
-%include "BLTHandler.hpp"
+
 
 %include "EquationContainer.hpp"
 %include "FlatEquationList.hpp"
@@ -241,9 +241,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %extend ModelicaCasADi::Block {
   std::string __repr__() { return $self->repr(); }
 }
-%extend ModelicaCasADi::BLTHandler {
-  std::string __repr__() { return $self->repr(); }
-  }*/
+*/
 %extend ModelicaCasADi::OptimizationProblem {
   std::string __repr__() { return $self->repr(); }
 }

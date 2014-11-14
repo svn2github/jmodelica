@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Equation.hpp"
 #include "RefCountedNode.hpp"
 #include "Ref.hpp"
-#include "BLTHandler.hpp"
+
 #include "EquationContainer.hpp"
 #include "FlatEquationList.hpp"
 
@@ -220,8 +220,6 @@ class BaseModel: public RefCountedNode {
     
     virtual void eliminateAlgebraics();
     virtual std::vector< Ref<Variable> >  getEliminatedVariables();
-    
-    virtual void setBLT(Ref<BLTHandler> nblt){std::cout<<"BaseModel setBLT should not be called\n.";}
     
     virtual void transferBLT(const std::vector< Ref<Block> >& nblt);
 

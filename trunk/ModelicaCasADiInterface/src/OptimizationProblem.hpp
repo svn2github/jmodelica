@@ -90,6 +90,7 @@ class OptimizationProblem : public Model{
         virtual void print(std::ostream& os) const;
         
         void eliminateAlgebraics();
+        void substituteAllEliminateables();
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:

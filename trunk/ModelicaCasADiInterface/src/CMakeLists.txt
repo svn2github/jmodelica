@@ -54,7 +54,6 @@ set(MC_CPP
   transferOptimica.cpp
   Variable.cpp
   Block.cpp
-  BLTHandler.cpp
   EquationContainer.cpp
   FlatEquationList.cpp
   BLTContainer.cpp
@@ -89,7 +88,6 @@ set(MC_HPP
   transferOptimica.hpp
   Variable.hpp
   Block.hpp
-  BLTHandler.hpp
   EquationContainer.hpp
   FlatEquationList.hpp
   BLTContainer.hpp

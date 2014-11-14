@@ -45,7 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "BooleanVariable.hpp"
 #include "IntegerVariable.hpp"
 #include "Ref.hpp"
-#include "BLTHandler.hpp"
+
 #include "Block.hpp"
 #include "EquationContainer.hpp"
 #include "FlatEquationList.hpp"
@@ -227,6 +227,11 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
       }
       ciBlock->setJacobian(jaco);
     }
+  }
+  
+  //Temporal check
+  if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())){
+    std::cout<<"ERROR: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. DEACTIVATE TEARING!\n";
   }
   
   ciBlock->setasSimple(block->isSimple());
