@@ -6913,6 +6913,125 @@ end ArrayTests.VariableIndex.Slice3;
 ")})));
 end Slice3;
 
+
+model Slice4
+    model A
+        Real z;
+    end A;
+
+    Real y;
+    A[2] x(z = {1, 2} * time);
+    input Integer i;
+equation
+    y = x[i].z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Slice4",
+            description="Using variable index in slice over models",
+            flatModel="
+fclass ArrayTests.VariableIndex.Slice4
+ Real y;
+ Real x[1].z;
+ Real x[2].z;
+ discrete input Integer i;
+equation
+ y = temp_1(i, {x[1].z, x[2].z});
+ x[1].z = time;
+ x[2].z = 2 * time;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ end temp_1;
+
+end ArrayTests.VariableIndex.Slice4;
+")})));
+end Slice4;
+
+
+model Slice5
+    model A
+        Real z;
+    end A;
+
+    model B
+        A a[2,2];
+    end B;
+
+    Real y[2];
+    B b[2,2](a(z = fill(time, 2, 2, 2, 2)));
+    input Integer i;
+    input Integer j;
+equation
+    y = b[:, i].a[j, 1].z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Slice5",
+            description="Using variable index in slice over models, complex example",
+            flatModel="
+fclass ArrayTests.VariableIndex.Slice5
+ Real y[1];
+ Real y[2];
+ Real b[1,1].a[1,1].z;
+ Real b[1,1].a[1,2].z;
+ Real b[1,1].a[2,1].z;
+ Real b[1,1].a[2,2].z;
+ Real b[1,2].a[1,1].z;
+ Real b[1,2].a[1,2].z;
+ Real b[1,2].a[2,1].z;
+ Real b[1,2].a[2,2].z;
+ Real b[2,1].a[1,1].z;
+ Real b[2,1].a[1,2].z;
+ Real b[2,1].a[2,1].z;
+ Real b[2,1].a[2,2].z;
+ Real b[2,2].a[1,1].z;
+ Real b[2,2].a[1,2].z;
+ Real b[2,2].a[2,1].z;
+ Real b[2,2].a[2,2].z;
+ discrete input Integer i;
+ discrete input Integer j;
+equation
+ ({y[1], y[2]}) = temp_1(i, j, {{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}});
+ b[1,1].a[1,1].z = time;
+ b[1,1].a[1,2].z = time;
+ b[1,1].a[2,1].z = time;
+ b[1,1].a[2,2].z = time;
+ b[1,2].a[1,1].z = time;
+ b[1,2].a[1,2].z = time;
+ b[1,2].a[2,1].z = time;
+ b[1,2].a[2,2].z = time;
+ b[2,1].a[1,1].z = time;
+ b[2,1].a[1,2].z = time;
+ b[2,1].a[2,1].z = time;
+ b[2,1].a[2,2].z = time;
+ b[2,2].a[1,1].z = time;
+ b[2,2].a[1,2].z = time;
+ b[2,2].a[2,1].z = time;
+ b[2,2].a[2,2].z = time;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Integer i_1;
+  input Real[2, 2, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0,i_1];
+  y[2] := x[2,i_0,i_1];
+  return;
+ end temp_1;
+
+end ArrayTests.VariableIndex.Slice5;
+")})));
+end Slice5;
+
 end VariableIndex;
 
 

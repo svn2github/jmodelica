@@ -498,8 +498,10 @@ aspect Variability {
         throw new UnsupportedOperationException();
     }
     eq FSubscriptedExp.indexVariability() = getFArraySubscripts().variability();
-    eq FIdUseExp.indexVariability() {
-        FQName fqn = getFIdUse().getFQName();
+    eq FIdUseExp.indexVariability()       = getFIdUse().indexVariability();
+
+    syn FTypePrefixVariability FIdUse.indexVariability() {
+        FQName fqn = getFQName();
         FTypePrefixVariability variability = fConstant();
         if (fqn.isSimple())
             return variability;

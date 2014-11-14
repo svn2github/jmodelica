@@ -233,14 +233,21 @@ aspect FlatNames {
             res.addFSubscript(fs.createEvaluated());
         return res;
     }
-    
+
     public FSubscript FSubscript.createEvaluated() {
         return (FSubscript) fullCopy();
     }
-    
+
+    public FSubscript FColonSubscript.createEvaluated() {
+        return new FIntegerSubscript(1);
+    }
+
     public FSubscript FExpSubscript.createEvaluated() {
         try {
-            return getFExp().ceval().createFSubscript();
+            CValue val = getFExp().ceval();
+            if (val.isArray())
+                val = val.array().getCell(0);
+            return val.createFSubscript();
         } catch (ConstantEvaluationException e) {
             return fullCopy();
         }

@@ -1615,51 +1615,58 @@ aspect FlatExpressions {
         flat.setFAttributeList(flatAttrs);
         return flat;
     }
-    
-	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
-		List l = new List();
-		for (int i=0;i<getNumFSubscript();i++)
-			l.add(getFSubscript(i).flatten(prefix));
-		return new FArraySubscripts(l);
-	}
-	
-	abstract public FSubscript FSubscript.flatten(FQName prefix);
-	public FSubscript FColonSubscript.flatten(FQName prefix) { 
-		return new FColonSubscript();
-	}
-	
-	public FSubscript FIntegerSubscript.flatten(FQName prefix) { 
-		return new FIntegerSubscript(getValue());
-	}
-	
-	public FSubscript FExpSubscript.flatten(FQName name) {
-		return new FExpSubscript(getFExp().flatten(name));
-	}
-	
-	public FExp FExp.flatten(FQName prefix) {
-		throw new UnsupportedOperationException();
-	}
-	
-	public FIgnoredBuiltIn FIgnoredBuiltIn.flatten(FQName prefix) {
-		return new FIgnoredBuiltIn();
-	}
+
+    public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
+        List l = new List();
+        for (FSubscript fs : getFSubscripts())
+            l.add(fs.flatten(prefix));
+        return new FArraySubscripts(l);
+    }
+
+    abstract public FSubscript FSubscript.flatten(FQName prefix);
+
+    public FSubscript FColonSubscript.flatten(FQName prefix) { 
+        return expandedSubscript();
+    }
+
+    public FSubscript FIntegerSubscript.flatten(FQName prefix) { 
+        return new FIntegerSubscript(getValue());
+    }
+
+    public FSubscript FExpSubscript.flatten(FQName name) {
+        return new FExpSubscript(getFExp().flatten(name));
+    }
+
+    public FExp FExp.flatten(FQName prefix) {
+        throw new UnsupportedOperationException();
+    }
+
+    public FIgnoredBuiltIn FIgnoredBuiltIn.flatten(FQName prefix) {
+        return new FIgnoredBuiltIn();
+    }
 
     public FIdUse FIdUse.flatten(FQName prefix) {
-    	return (FIdUse)fullCopy();
-    }
-    
-    public FExp FIdUseExp.flatten(FQName prefix) {
-    	// TODO: Replace with constant exp for constants? Do this for FExp in general instead?
-		return new FIdUseExp(getFIdUse().flatten(prefix));
+        return (FIdUse)fullCopy();
     }
 
-	public FExp FInstAccessExp.flatten(FQName prefix) {
+    public FExp FIdUseExp.flatten(FQName prefix) {
+        // TODO: Replace with constant exp for constants? Do this for FExp in general instead?
+        return new FIdUseExp(getFIdUse().flatten(prefix));
+    }
+
+    public FExp FInstAccessExp.flatten(FQName prefix) {
         InstComponentDecl var = getInstAccess().myInstComponentDecl();
         if (inDefaultArgument()) { // TODO: Handle default arguments of constructor args
             InstClassDecl parent = (InstClassDecl) var.containingEntity();
             int i = parent.myCallInputs().indexOf(var);
             int d = findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
+        } else if (!inFunction() && !getInstAccess().indexVariability().parameterOrLess()) {
+            FInstAccessExp copy = (FInstAccessExp) dynamicFExp(fullCopy());
+            List<FSubscript> sub = new List<FSubscript>();
+            copy.getInstAccess().extractNonParameterIndexes(sub);
+            FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
+            return res.flatten(prefix);
         } else {
             return var.flattenAccess(prefix, this);
         }
@@ -1676,7 +1683,7 @@ aspect FlatExpressions {
         return new FIdUseExp(fqn);
     }
 
-	public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
+    public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
         // If the FInstAccess refers to a constant or string parameter, then inline expression
         // Checks in the instance tree ensures that constants always
         // have binding expressions, however, array subscripts may need to be 
@@ -1710,17 +1717,17 @@ aspect FlatExpressions {
                 return ia.topInstAssignable().flattenAccessToConstInFunction(prefix, ia);
         }
         return super.flattenAccess(prefix, iae);
-	}
-	
+    }
+
     inh boolean FInstAccessExp.canInlineConstant();
     eq BaseNode.getChild().canInlineConstant() = true;
     eq InstExternalCall.getArg().canInlineConstant() = false;
-	
-	/**
-	 * Flatten an access to this constant in a function.
-	 * 
-	 * Used when the access can't be constant evaluated. The constant is added to the function.
-	 */
+
+    /**
+     * Flatten an access to this constant in a function.
+     * 
+     * Used when the access can't be constant evaluated. The constant is added to the function.
+     */
     public FExp InstAssignable.flattenAccessToConstInFunction(FQName prefix, InstAccess ia) {
         ia.functionConstantList().add(this);
         FQName name = getFQName();
@@ -1733,7 +1740,37 @@ aspect FlatExpressions {
         }
         return new FIdUseExp(use);
     }
-	
+
+
+    /**
+     * Move any non-parameter indexes to given list and replace with colon.
+     * Copy any parameter non-scalar indices to given list.
+     */
+    public void InstAccess.extractNonParameterIndexes(List<FSubscript> sub) {}
+
+    public void InstArrayAccess.extractNonParameterIndexes(List<FSubscript> sub) {
+        FArraySubscripts fas = getFArraySubscripts();
+        for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
+            FSubscript fs = fas.getFSubscript(i);
+            if (!fs.variability().parameterOrLess()) {
+                sub.add(fs);
+                fas.setFSubscript(new FColonSubscript(), i);
+            } else if (fs.ndims() == 1) {
+                sub.add(fs.size().rangeFSubscript(0));
+            }
+        }
+    }
+
+    public void InstComponentAccess.extractNonParameterIndexes(List<FSubscript> sub) {
+        if (isArray())
+            for (int i = 0, n = ndims(); i < n; i++)
+                sub.add(size().rangeFSubscript(i));
+    }
+
+    public void InstDot.extractNonParameterIndexes(List<FSubscript> sub) {
+        for (InstAccess ia : getInstAccesss())
+            ia.extractNonParameterIndexes(sub);
+    }
 
 	/**
 	 * Check if this access is in the binding expression of an input to a function 

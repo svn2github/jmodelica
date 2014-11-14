@@ -1115,7 +1115,16 @@ aspect ConstantEvaluation {
         		return UNKNOWN;
         	return values[i.internal(indices)];
         }
-        
+
+        /**
+         * Get the value of a specific cell of an array constant value.
+         */
+        public CValue getCell(int i) {
+            if (i < 0 || i >= values.length)
+                return UNKNOWN;
+            return values[i];
+        }
+
         /**
          * Get the part of this array corresponding to the given index.
          */
