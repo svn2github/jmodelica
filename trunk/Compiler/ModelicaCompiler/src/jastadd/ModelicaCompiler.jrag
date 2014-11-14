@@ -968,9 +968,6 @@ public class ModelicaCompiler {
             removeCompiledExternals();
             
         } finally {
-//          logCompilationInfo();
-            // The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
-//          dumpNodeCountFile("node_count.txt");
         }
 
         if (options.getBooleanOption("generate_html_diagnostics"))
