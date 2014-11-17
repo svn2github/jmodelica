@@ -96,10 +96,10 @@ aspect UnknownDeclarations {
 	syn UnknownInstComponentDecl ASTNode.unknownInstComponentDecl() = root().unknownInstComponentDecl();
 	eq SourceRoot.unknownInstComponentDecl() = getUnknownInstComponentDecl();
 
-	syn lazy boolean InstClassDecl.isUnknown() = false;
+	syn boolean InstClassDecl.isUnknown() = false;
 	eq UnknownInstClassDecl.isUnknown() = true;
 
-	syn lazy boolean InstComponentDecl.isUnknown() = false;
+	syn boolean InstComponentDecl.isUnknown() = false;
 	eq UnknownInstComponentDecl.isUnknown() = true;
 	
 	syn boolean InstNode.isPrimitive()      = false;
