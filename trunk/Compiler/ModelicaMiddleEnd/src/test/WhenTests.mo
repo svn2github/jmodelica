@@ -171,7 +171,7 @@ end ReinitErr7;
 model ReinitErr8
     Integer x;
 equation
-    der(x) = 1;
+    x = 1;
     when time > 2 then
         reinit(x, 1);
     end when;

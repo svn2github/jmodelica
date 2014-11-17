@@ -799,6 +799,12 @@ aspect FlatTypeCheck {
     }
   }
   
+    public void InstDerExp.typeCheck(ErrorCheckType checkType) {
+        FType type = getFExp().type();
+        if (!(type.isReal() && (type.isScalar() || type.isArray())))
+            error("Only real typed expressions are allowed in der() operator");
+    }
+  
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
   eq FIgnoredBuiltIn.builtInHasOutput() = false;
   eq FConnectionsOp.builtInHasOutput()  = false;
