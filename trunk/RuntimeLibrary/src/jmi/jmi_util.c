@@ -73,7 +73,7 @@ jmi_ad_var_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = pow(x, y);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
     
         /* Check that the inputs are in the domain of the function*/
@@ -109,7 +109,7 @@ jmi_ad_var_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = exp(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
 
         /* Will always be a Range problem, will return JMI_INF */
@@ -132,7 +132,7 @@ jmi_ad_var_t static jmi_log(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = log(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
         
         if (x == 0) {
@@ -160,7 +160,7 @@ jmi_ad_var_t static jmi_log10(jmi_t *jmi, const char func_name[], jmi_ad_var_t x
 
     jmi_ad_var_t to_return = log10(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
         
         if (x == 0) {
@@ -188,7 +188,7 @@ jmi_ad_var_t static jmi_sinh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x,
 
     jmi_ad_var_t to_return = sinh(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
 
         /* Will always be a Range problem, will return JMI_INF or -JMI_INF */
@@ -210,7 +210,7 @@ jmi_ad_var_t static jmi_cosh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x,
 
     jmi_ad_var_t to_return = cosh(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
 
         /* Will always be a Range problem, will return JMI_INF */
@@ -232,7 +232,7 @@ jmi_ad_var_t static jmi_tan(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = tan(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
 
         /* Map the value of x to the interval [-pi/2, pi/2] */
