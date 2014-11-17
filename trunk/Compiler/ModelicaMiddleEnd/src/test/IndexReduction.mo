@@ -2098,7 +2098,7 @@ model IndexReduction44_Order2Arg
         output Real dy;
     algorithm
         dy := x1 * x1;
-        dy := y * x2;
+        dy := dy * x2;
         annotation(derivative(order=2)=ddf);
     end df;
 
@@ -2112,7 +2112,7 @@ model IndexReduction44_Order2Arg
         output Real ddy;
     algorithm
         ddy := x1 * x1;
-        ddy := y * x2;
+        ddy := ddy * x2;
     end ddf;
     
     Real x;
@@ -2172,7 +2172,7 @@ public
   output Real dy;
  algorithm
   dy := x1 * x1;
-  dy := y * x2;
+  dy := dy * x2;
   return;
  annotation(derivative(order = 2) = IndexReduction.IndexReduction44_Order2Arg.ddf);
  end IndexReduction.IndexReduction44_Order2Arg.df;
@@ -2187,7 +2187,7 @@ public
   output Real ddy;
  algorithm
   ddy := x1 * x1;
-  ddy := y * x2;
+  ddy := ddy * x2;
   return;
  end IndexReduction.IndexReduction44_Order2Arg.ddf;
 
@@ -4683,7 +4683,7 @@ model FunctionCallEquation4
     algorithm
         y[1] := a[1] + a[2];
         y[2] := a[1] - a[2];
-        annotation(Inline=false,derivative(noDerivative=b)=F2_der);
+        annotation(Inline=false,derivative=F2_der);
     end F2;
 
     function F2_der
@@ -4738,7 +4738,7 @@ public
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
- annotation(derivative(noDerivative = b) = IndexReduction.FunctionCallEquation4.F2_der);
+ annotation(derivative = IndexReduction.FunctionCallEquation4.F2_der);
  end IndexReduction.FunctionCallEquation4.F2;
 
  function IndexReduction.FunctionCallEquation4.F2_der
@@ -4762,7 +4762,7 @@ model FunctionCallEquation5
     algorithm
         y[1] := a[1] + a[2];
         y[2] := a[1] - a[2];
-        annotation(Inline=false,derivative(noDerivative=b)=F2_der);
+        annotation(Inline=false,derivative=F2_der);
     end F2;
 
     function F2_der
@@ -4821,7 +4821,7 @@ public
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
- annotation(derivative(noDerivative = b) = IndexReduction.FunctionCallEquation5.F2_der);
+ annotation(derivative = IndexReduction.FunctionCallEquation5.F2_der);
  end IndexReduction.FunctionCallEquation5.F2;
 
  function IndexReduction.FunctionCallEquation5.F2_der

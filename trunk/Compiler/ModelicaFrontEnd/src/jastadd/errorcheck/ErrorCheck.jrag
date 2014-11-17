@@ -584,6 +584,69 @@ aspect InstanceErrorCheck {
             super.collectErrors(checkType);
             errorChecked = true;
             getInstExternalOpt().collectErrors(checkType);
+            if (isFunction())
+                errorCheckDerivativeAnnotations(checkType);
+        }
+    }
+
+    public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
+        errorCheckDerivativeAnnotations(checkType, annotation());
+        InstExternal ie = findFunctionExternal();
+        if (ie != null)
+            errorCheckDerivativeAnnotations(checkType, ie.annotation());
+    }
+    
+    private void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType, AnnotationNode src) {
+        for (AnnotationNode derivative : src)
+            if ("derivative".equals(derivative.name()))
+                errorCheckDerivativeAnnotation(checkType, derivative);
+    }
+
+    private void InstBaseClassDecl.errorCheckDerivativeAnnotation(ErrorCheckType checkType, AnnotationNode derivative) {
+        if (!derivative.isValue()) {
+            derivative.ast().error("Function name is missing in derivative annotation declaration");
+            return;
+        }
+        String name = derivative.string();
+        if (name == null) {
+            derivative.ast().error("Invalid derivative function reference");
+            return;
+        }
+        InstClassDecl icd = lookupInstClassQualified(name);
+        if (icd.isUnknown()) {
+            derivative.ast().error("Cannot find function declaration for " + name);
+            return;
+        }
+        if (!icd.isFunction()) {
+            derivative.ast().error("The class " + name + " is not a function");
+            return;
+        }
+        icd.collectErrors(checkType);
+        boolean orderFound = false;
+        Set<String> noAndZeroDerivatives = new HashSet<String>();
+        for (AnnotationNode attrNode : derivative) {
+            if ("noDerivative".equals(attrNode.name()) || "zeroDerivative".equals(attrNode.name())) {
+                if (!attrNode.isStringValue()) {
+                    attrNode.ast().error("Expecting variable reference for " + attrNode.name() + " annotation");
+                    continue;
+                }
+                String varName = attrNode.string();
+                if (!noAndZeroDerivatives.add(varName))
+                    attrNode.ast().error("Multiple noDerivative or zeroDerivative declarations for " + varName);
+                InstLookupResult<InstComponentDecl> res = genericLookupInstComponent(varName);
+                if (res.isNotFound())
+                    attrNode.ast().error("Unable to find " + varName);
+                else if (!res.target().isInput())
+                    attrNode.ast().error(attrNode.name() + " annotation may only reference input variables");
+            } else if ("order".equals(attrNode.name())) {
+                if (orderFound)
+                    attrNode.ast().error("Multiple declarations of the order attribute");
+                orderFound = true;
+                if (!attrNode.isIntegerValue())
+                    attrNode.ast().error("Expecting integer typed expression for order attribute");
+                else if (attrNode.integer() < 1)
+                    attrNode.ast().error("Order attribute must be greater or equal to one");
+            }
         }
     }
 

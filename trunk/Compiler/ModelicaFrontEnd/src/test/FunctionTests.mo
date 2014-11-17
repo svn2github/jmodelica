@@ -14598,6 +14598,453 @@ end EventRel;
 
 end FunctionLike;
 
+package DerivativeAnnotation
+    model MissingReference1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative);
+        end F;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_MissingReference1",
+            description="Test error message given when there is no derivative function reference",
+            errorMessage="
+1 errors found:
 
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Function name is missing in derivative annotation declaration
+")})));
+    end MissingReference1;
+
+    model MissingDecl1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative=notAFunction);
+        end F;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_MissingDecl1",
+            description="Test error message given when referencing missing derivative function",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Cannot find function declaration for notAFunction
+")})));
+    end MissingDecl1;
+
+    model InvalidDecl1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative=1+2);
+        end F;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidDecl1",
+            description="Test error message given for invalid derivative function reference",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Invalid derivative function reference
+")})));
+    end InvalidDecl1;
+
+    model InvalidDecl2
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative=B);
+        end F;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidDecl2",
+            description="Test error message given when giving derivative function reference to non-function class",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  The class B is not a function
+")})));
+    end InvalidDecl2;
+
+    model MultipleOrder1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(order=1, order=1)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_MultipleOrder1",
+            description="Test error message given when there are multiple order attributes supplied",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Multiple declarations of the order attribute
+")})));
+    end MultipleOrder1;
+
+    model InvalidOrder1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(order=1.1)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidOrder1",
+            description="Test error message given when order argument is of non-integer type",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Expecting integer typed expression for order attribute
+")})));
+    end InvalidOrder1;
+
+    model InvalidOrder2
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(order=0)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidOrder2",
+            description="Test error message given when order argument is invalid number (0 or less)",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Order attribute must be greater or equal to one
+")})));
+    end InvalidOrder2;
+
+    model MultipleVariableRestrictions1
+        function F
+            input Real x;
+            input Real x2;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(noDerivative=x2, noDerivative=x2)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time, 2);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_MultipleVariableRestrictions1",
+            description="Test error message given when there are multiple noDerivative attributes for the same variable",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Multiple noDerivative or zeroDerivative declarations for x2
+")})));
+    end MultipleVariableRestrictions1;
+
+    model MultipleVariableRestrictions2
+        function F
+            input Real x;
+            input Real x2;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(zeroDerivative=x2, zeroDerivative=x2)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time, 2);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_MultipleVariableRestrictions2",
+            description="Test error message given when there are multiple zeroDerivative attributes for the same variable",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Multiple noDerivative or zeroDerivative declarations for x2
+")})));
+    end MultipleVariableRestrictions2;
+
+    model MultipleVariableRestrictions3
+        function F
+            input Real x;
+            input Real x2;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(noDerivative=x2, zeroDerivative=x2)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time, 2);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_MultipleVariableRestrictions3",
+            description="Test error message given when there are one noDerivative and one zeroDerivative attribute for the same variable",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Multiple noDerivative or zeroDerivative declarations for x2
+")})));
+    end MultipleVariableRestrictions3;
+
+    model InvalidVariable1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(noDerivative=1 + 1)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidVariable1",
+            description="Test error message given when noDerivative attribute isn't a variable reference",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Expecting variable reference for noDerivative annotation
+")})));
+    end InvalidVariable1;
+
+    model InvalidVariable2
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(zeroDerivative=1 + 1)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidVariable2",
+            description="Test error message given when zeroDerivative attribute isn't a variable reference",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Expecting variable reference for zeroDerivative annotation
+")})));
+    end InvalidVariable2;
+
+    model InvalidVariable3
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(noDerivative=notAVar)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidVariable3",
+            description="Test error message given when noDerivative attribute point to missing variable",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Unable to find notAVar
+")})));
+    end InvalidVariable3;
+
+    model InvalidVariable4
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(zeroDerivative=notAVar)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_InvalidVariable4",
+            description="Test error message given when zeroDerivative attribute point to missing variable",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  Unable to find notAVar
+")})));
+    end InvalidVariable4;
+
+    model NonInputVariable1
+        function F
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+            annotation(Inline=false, derivative(noDerivative=y)=F_der);
+        end F;
+        function F_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        end F_der;
+        model B
+            Real y;
+        end B;
+        Real x = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_NonInputVariable1",
+            description="Test error message given when a noDerivative attribute references a non-input variable",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1, column 1:
+  noDerivative annotation may only reference input variables
+")})));
+    end NonInputVariable1;
+
+end DerivativeAnnotation;
 
 end FunctionTests;
