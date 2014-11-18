@@ -488,11 +488,11 @@ aspect InstanceErrorCheck {
     // We don't want to error check an entire model, just the classes
     //   that are used. 
     public void InstProgramRoot.checkErrorsInInstClass(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
-        InstClassDecl icd = lookupInstClassQualified(className);
-        if (icd.isUnknown()) 
-            throw new ModelicaClassNotFoundException(className);
+        InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
+        if (icd.successful()) 
+            icd.target().errorCheck(checkType);
         else
-            icd.errorCheck(checkType);
+            throw new ModelicaClassNotFoundException(className);
     }
 
     public void InstClassDecl.checkErrorsInModelInstance(String className, ErrorCheckType checkType) throws ModelicaClassNotFoundException {
@@ -612,11 +612,12 @@ aspect InstanceErrorCheck {
             derivative.ast().error("Invalid derivative function reference");
             return;
         }
-        InstClassDecl icd = lookupInstClassQualified(name);
-        if (icd.isUnknown()) {
-            derivative.ast().error("Cannot find function declaration for " + name);
+        InstLookupResult<InstClassDecl> lr = lookupInstClassQualified(name);
+        if (!lr.successful()) {
+            lr.error(derivative.ast(), "function declaration", name);
             return;
         }
+        InstClassDecl icd = lr.target();
         if (!icd.isFunction()) {
             derivative.ast().error("The class " + name + " is not a function");
             return;

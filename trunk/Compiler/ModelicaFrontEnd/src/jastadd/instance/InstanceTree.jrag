@@ -651,9 +651,9 @@ aspect InstanceTreeConstruction {
         int p = className.indexOf('(');
         if (p >= 0) {
             String targetName = className.substring(0, p);
-            InstClassDecl icd = lookupInstClassQualified(targetName);
-            if (!icd.isUnknown()) {
-                Restriction restriction = ((BaseClassDecl) icd.getClassDecl()).getRestriction();
+            InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(targetName);
+            if (icd.successful()) {
+                Restriction restriction = ((BaseClassDecl) icd.target().getClassDecl()).getRestriction();
                 ClassDecl cl = sourceRoot().getProgram().anonymousClass(className, restriction, targetName);
                 if (cl != null) {
                     addInstAnonymousClass(createInstClassDecl(cl));
@@ -662,7 +662,8 @@ aspect InstanceTreeConstruction {
             }
             return unknownInstClassDecl();
         } else {
-            return lookupInstClassQualified(className);
+            InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
+            return icd.successful() ? icd.target() : unknownInstClassDecl();
         }
     }
 

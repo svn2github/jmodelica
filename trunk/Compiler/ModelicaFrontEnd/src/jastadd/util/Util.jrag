@@ -653,8 +653,8 @@ aspect Names {
   inh String ASTNode.packagePath(String name);
   eq Root.getChild().packagePath(String name) = null;
   eq InstNode.getChild().packagePath(String name) {
-	  InstClassDecl icd = lookupInstClassDotted(name);
-	  return (icd == null) ? null : icd.dirName();
+      InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(name);
+      return icd.successful() ? icd.target().dirName() : null;
   }
   eq FullClassDecl.getChild().packagePath(String name) {
 	  ClassDecl cd = simpleLookupClassDotted(name);

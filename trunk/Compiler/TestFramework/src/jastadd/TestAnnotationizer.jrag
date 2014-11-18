@@ -430,7 +430,7 @@ abstract public class TestAnnotationizerHelper {
 	 * Writes the resulting test annotation directly in the Modelica file.
 	 */
 	public void writeAnnotation() throws Exception {
-		InstClassDecl icd = root.getProgram().getInstProgramRoot().lookupInstClassQualified(className);
+		InstClassDecl icd = root.getProgram().getInstProgramRoot().lookupInstClassQualified(className).target();
 		int start = icd.beginLine();
 		int end = icd.endLine();
 		File old = new File(filePath);
@@ -521,7 +521,7 @@ abstract public class TestAnnotationizerHelper {
 			problems = e.getProblems();
 		}
 		handleCompilerProblems(problems);
-		return ipr.lookupInstClassQualified(className);
+		return ipr.lookupInstClassQualified(className).target();
 	}
 
     /**

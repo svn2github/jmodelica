@@ -1130,14 +1130,15 @@ aspect OverconstrainedConnections {
      */
     syn InstClassDecl InstComponentDecl.equalityConstraint()  = null;
     syn lazy InstClassDecl InstAssignable.equalityConstraint() {
-        InstClassDecl res = memberInstClass(EQUALITY_CONSTRAINT_NAME).target();
-        if (res == null)
-            res = myInstClass().memberInstClass(EQUALITY_CONSTRAINT_NAME).target();
-        if (res != null)
-            res = res.actualInstClass();
-        if (res != null && !res.isEqualityConstraint(type()))
-            res = null;
-        return res;
+        InstLookupResult<InstClassDecl> res = memberInstClass(EQUALITY_CONSTRAINT_NAME);
+        if (!res.successful())
+            res = myInstClass().memberInstClass(EQUALITY_CONSTRAINT_NAME);
+        if (res.successful()) {
+            InstClassDecl icd = res.target().actualInstClass();
+            if (icd.isEqualityConstraint(type()))
+                return icd;
+        }
+        return null;
     }
 
 	/**
@@ -2104,7 +2105,7 @@ aspect ExpandableConnectors {
                 
                 private boolean checkNonExisting(InstComponentDecl parentTemplate) {
                     boolean res = true;
-                    InstComponentDecl myTemplate = (parentTemplate != null) ? parentTemplate.memberInstComponent(name).target() : null;
+                    InstComponentDecl myTemplate = (parentTemplate != null) ? parentTemplate.memberInstComponent(name).targetOrNull() : null;
                     if (myTemplate == null) {
                         for (Source s : sources)
                             s.errorNode().error("Can not connect to non-existing member of non-expandable connector in expandable connector");

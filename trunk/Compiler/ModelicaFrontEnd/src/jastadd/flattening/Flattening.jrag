@@ -71,23 +71,21 @@ aspect FlatTree {
 }
 
 aspect Flattening {
-    
-	/**
-	 * \ingroup aspect_Flattening
-	 * 
-	 * Generic traversal method used to find a particular class instance
-	 * in the instance tree, and if so, flatten it.
-	 */
+
+    /**
+     * Generic traversal method used to find a particular class instance
+     * in the instance tree, and if so, flatten it.
+     */
     public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
-    	
-    	InstClassDecl icd = lookupInstClassQualified(className);
-    	if (!icd.isUnknown()) {
-    		icd.flattenInstClassDecl(fc);
-    	} else {
-        	throw new ModelicaClassNotFoundException(className);
-    	}
-    	
-    	return icd;
+        
+        InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(className);
+        if (icd.successful()) {
+            icd.target().flattenInstClassDecl(fc);
+        } else {
+            throw new ModelicaClassNotFoundException(className);
+        }
+        
+        return icd.target();
     }
 
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
@@ -336,9 +334,7 @@ aspect Flattening {
             if (!"derivative".equals(derSrcNode.name()))
                 continue;
             String derName = derSrcNode.string();
-            InstClassDecl fd_decl = lookupInstClassQualified(derName);
-            if (fd_decl.isUnknown())
-                continue;
+            InstClassDecl fd_decl = lookupInstClassQualified(derName).target();
             AnnotationNode derDestNode = dest.addNode("derivative");
             fd_decl.flattenFunction(fc);
             FExp derNameExp = new FIdUseExp(new FQNameString(fd_decl.qualifiedName()));

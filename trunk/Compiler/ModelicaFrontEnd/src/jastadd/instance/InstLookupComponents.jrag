@@ -68,8 +68,17 @@ aspect InstLookupComponents {
          * 
          * Returns <code>null</code> if lookup was not successful.
          */
-        public T target() {
+        public T targetOrNull() {
             return null;
+        }
+
+        /**
+         * Get the found class or component, if any.
+         * 
+         * @throws UnsupportedOperationException  if lookup was not successful.
+         */
+        public T target() {
+            throw new UnsupportedOperationException("Trying to use result of failed name lookup");
         }
 
         /**
@@ -121,6 +130,10 @@ aspect InstLookupComponents {
             }
 
             public T target() {
+                return target;
+            }
+
+            public T targetOrNull() {
                 return target;
             }
         }
@@ -252,7 +265,7 @@ aspect InstLookupComponents {
         InstAccess next = cur.getNextInstAccess();
         while (next != null && icd != null && !icd.isUnknown()) {
             icd = cur.lookupArrayElement(icd);
-            icd = icd.memberInstComponent(next.name()).target();
+            icd = icd.memberInstComponent(next.name()).targetOrNull();
             cur = next;
             next = next.getNextInstAccess();
         }

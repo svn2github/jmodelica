@@ -503,21 +503,6 @@ aspect InstLookupClasses {
     eq InstExtends.myInstClass()              = getClassName().myInstClassDecl();
     eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();
 
-    syn InstClassDecl InstNode.lookupInstClassDotted(String name) {
-        String[] parts = name.split("\\.");
-        InstNode icd = this;
-        InstLookupResult<InstClassDecl> res = null;
-        boolean first = true;
-        for (String part : parts) {
-            res = first ? icd.lookupInstClass(part) : icd.memberInstClass(part);
-            if (!res.successful())
-                return unknownInstClassDecl();
-            icd = res.target();
-            first = false;
-        }
-        return res.target();
-    }
-
 }
 
 aspect InstLookupImport {
@@ -601,22 +586,24 @@ aspect SimpleInstClassLookup {
      * 
      * @param name A string containing a qualified name, for example 'A.B.C'.
      */
-    syn InstClassDecl InstNode.lookupInstClassQualified(String name) = lookupInstClassQualified(name, true);
-
-    syn InstClassDecl InstNode.lookupInstClassQualified(String name, boolean first) {
-        String[] parts = name.split("\\.", 2);
-        InstClassDecl icd = lookupInstClassQualifiedPart(parts[0], first).target();
-        if (icd == null)
-            return unknownInstClassDecl();
-        if (parts.length > 1)
-            return icd.lookupInstClassQualified(parts[1], false);
-        else
-            return icd;
+    syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualified(String name) {
+        String[] parts = name.split("\\.");
+        InstNode icd = this;
+        InstLookupResult<InstClassDecl> res = null;
+        boolean first = true;
+        for (String part : parts) {
+            res = icd.lookupInstClassQualifiedPart(part, first);
+            if (!res.successful())
+                return res;
+            icd = res.target();
+            first = false;
+        }
+        return res;
     }
 
     syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualifiedPart(String name, boolean first) = 
         first ? lookupInstClass(name) : memberInstClass(name);
-    eq InstProgramRoot.lookupInstClassQualifiedPart(String name, boolean first)         = 
+    eq InstProgramRoot.lookupInstClassQualifiedPart(String name, boolean first)                           = 
         genericLookupInstClass(name);
 
 }

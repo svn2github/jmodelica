@@ -39,8 +39,8 @@ aspect InnerOuterComponents {
     inh InstComponentDecl InstNode.lookupInInnerInstComponent(String name);
     eq InstRoot.getChild().lookupInInnerInstComponent(String name)          = null;
     eq Root.getChild().lookupInInnerInstComponent(String name)              = null;
-    eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) = myInnerInstComponentDecl().memberInstComponent(name).target();
-    eq InstClassDecl.getChild().lookupInInnerInstComponent(String name)     = myInnerInstClassDecl().memberInstComponent(name).target();
+    eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) = myInnerInstComponentDecl().memberInstComponent(name).targetOrNull();
+    eq InstClassDecl.getChild().lookupInInnerInstComponent(String name)     = myInnerInstClassDecl().memberInstComponent(name).targetOrNull();
 
 }
 
@@ -76,7 +76,7 @@ aspect InnerOuterClasses {
     inh InstClassDecl InstNode.lookupInInnerInstClass(String name);
     eq InstRoot.getChild().lookupInInnerInstClass(String name)          = null;
     eq Root.getChild().lookupInInnerInstClass(String name)              = null;
-    eq InstComponentDecl.getChild().lookupInInnerInstClass(String name) = myInnerInstComponentDecl().memberInstClass(name).target();
-    eq InstClassDecl.getChild().lookupInInnerInstClass(String name)     = myInnerInstClassDecl().memberInstClass(name).target();
+    eq InstComponentDecl.getChild().lookupInInnerInstClass(String name) = myInnerInstComponentDecl().memberInstClass(name).targetOrNull();
+    eq InstClassDecl.getChild().lookupInInnerInstClass(String name)     = myInnerInstClassDecl().memberInstClass(name).targetOrNull();
 
 }
