@@ -75,6 +75,8 @@ class EquationContainer: public RefCountedNode {
             std::cout<<"Abstract Container getSubstitues(variables, storageMap) must not be called.\n";  
         }
         
+        virtual void printBLT(std::ostream& out, bool with_details=false) const{}
+        
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
         
 };

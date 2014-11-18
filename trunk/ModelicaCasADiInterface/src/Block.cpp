@@ -129,6 +129,19 @@ namespace ModelicaCasADi
     
   }
   
+  void Block::moveAllEquationsToUnsolvable(){
+    unSolvedEquations.clear();
+    for(std::vector< Ref<Equation> >::const_iterator it=equations.begin(); 
+              it != equations.end(); ++it){
+          unSolvedEquations.push_back(*it);
+        }
+    unSolvedVariables_.clear();
+    for (std::set<const Variable*>::const_iterator it = variables_.begin(); 
+              it != variables_.end(); ++it){
+          unSolvedVariables_.insert(*it);      
+        }
+  }
+  
   casadi::MX Block::computeJacobianCasADi(){
     symbolicVariables = casadi::MX::sym("symVars",variables_.size());
     std::vector<casadi::MX> vars;
@@ -157,6 +170,8 @@ namespace ModelicaCasADi
     f.init();
     jacobian=f.jac();
   }
+  
+  
   
   void Block::solveLinearSystem(){
     if(isLinear() && !isSolvable()){

@@ -23,7 +23,7 @@ JVM_SET_UP=False
 
 def transfer_model(model, class_name, file_name=[],
                    compiler_options={}, 
-                   compiler_log_level='warning'):
+                   compiler_log_level='warning', with_blt=False):
     """ 
     Compiles and transfers a model to the ModelicaCasADi interface. 
     
@@ -78,13 +78,13 @@ def transfer_model(model, class_name, file_name=[],
     else: 
         files = file_name
     return modelicacasadi_wrapper.transferModelFromModelicaCompiler(model, class_name, files,
-                              _get_options(compiler_options), compiler_log_level)
+                              _get_options(compiler_options), compiler_log_level, with_blt)
 
 def transfer_optimization_problem(ocp, class_name, 
                                   file_name=[],
                                   compiler_options={}, 
                                   compiler_log_level='warning',
-                                  accept_model=False):
+                                  accept_model=False, with_blt=False):
     """ 
     Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
     
@@ -145,17 +145,17 @@ def transfer_optimization_problem(ocp, class_name,
     if has_mop_file(files):
         if not accept_model:
             return _transfer_optimica(ocp, class_name, files,
-                                      _get_options(compiler_options), compiler_log_level)
+                                      _get_options(compiler_options), compiler_log_level,with_blt)
         else:
             return modelicacasadi_wrapper.transferModelFromOptimicaCompiler(ocp, class_name, files,
-                               _get_options(compiler_options), compiler_log_level)            
+                               _get_options(compiler_options), compiler_log_level,with_blt)            
         
     else:
         if not accept_model:
             raise JError("Trying to transfer optimization problem, but no .mop files given.\n" +
                          "Use accept_model=True if you want to create an optimization problem from a model.")
         return modelicacasadi_wrapper.transferModelFromModelicaCompiler(ocp, class_name, files,
-                                  _get_options(compiler_options), compiler_log_level)
+                                  _get_options(compiler_options), compiler_log_level,with_blt)
         
 
 def _ensure_jvm():
@@ -164,11 +164,11 @@ def _ensure_jvm():
         setUpJVM()
         JVM_SET_UP=True
 
-def _transfer_modelica(model, class_name, files, options, log_level):
-    return modelicacasadi_wrapper._transferModelicaModel(model, class_name, files, options, log_level)
+def _transfer_modelica(model, class_name, files, options, log_level, with_blt=False):
+    return modelicacasadi_wrapper._transferModelicaModel(model, class_name, files, options, log_level, with_blt)
     
-def _transfer_optimica(ocp, class_name, files, options, log_level):
-    return modelicacasadi_wrapper._transferOptimizationProblem(ocp, class_name, files, options, log_level)
+def _transfer_optimica(ocp, class_name, files, options, log_level, with_blt=False):
+    return modelicacasadi_wrapper._transferOptimizationProblem(ocp, class_name, files, options, log_level, with_blt)
 
 
 def _get_options(compiler_options):

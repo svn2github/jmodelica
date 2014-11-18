@@ -494,14 +494,11 @@ void Model::addDaeEquation(Ref<Equation> eq){
 void Model::setEquationContainer(Ref<EquationContainer> eqCont){
    equationContainer_ = eqCont; 
    if(equationContainer_->hasBLT()){
-    //std::cout<<"\nEliminateables: ";
      for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
 	 if(equationContainer_->isBLTEliminateable((*it))){
 	     (*it)->setAsEliminatable();
-	     //std::cout<<(*it)->getName()<<" ";
 	 }
      }
-     //std::cout<<"\n";
    }
 }
 

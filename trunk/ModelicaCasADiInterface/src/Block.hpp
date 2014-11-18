@@ -43,6 +43,7 @@ class Block : public RefCountedNode{
     /***************************TO BE REMOVE*******************************/
     //Might be kept
     std::vector< casadi::MX > variablesVector() const;
+    void moveAllEquationsToUnsolvable();
     /**********************************************************************/
     
     

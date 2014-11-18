@@ -187,7 +187,7 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
 	std::cout<<"Error: the variable "<<vt<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
     }
   }
-  if(block->isSimple() && block->isSolvable()){
+  if(block->isSimple() && block->isSolvable() ){
     JIterator iter8(block_equations.iterator().this$);
     JIterator iter9(block_variables.iterator().this$);
     FVar fvs(iter9.next().this$);
@@ -231,6 +231,7 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
   //Temporal check
   if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())){
     std::cout<<"ERROR: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. DEACTIVATE TEARING!\n";
+    ciBlock->moveAllEquationsToUnsolvable();
   }
   
   ciBlock->setasSimple(block->isSimple());
@@ -243,52 +244,6 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
     ciBlock->solveLinearSystem();
   }    
 }
-
-/*template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
-            typename FVar, typename FAbstractEquation, typename FEquation,
-            typename FExp, template<typename Ty> class ArrayJ>
-std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > transferBLT(JBLT* javablt,
-		const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars,
-		bool jacobian_no_casadi = true, bool solve_with_casadi = false){
-    
-    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > nblt;
-    for(int i=0;i<javablt->size();++i)
-    {
-       JBlock* block = new JBlock(javablt->get(i).this$);
-       ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBloc = new ModelicaCasADi::Block();
-       transferBlock<JBlock, 
-		    JCollection, 
-		    JIterator,
-		    FVar,
-		    FAbstractEquation,
-		    FEquation,
-		    FExp,
-		    ArrayJ>(block, ciBloc, mapVars, jacobian_no_casadi, solve_with_casadi);
-       nblt.push_back(ciBloc);
-       delete block;
-    }
-}
-
-template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
-            typename FVar, typename FAbstractEquation, typename FEquation,
-            typename FExp, template<typename Ty> class ArrayJ>
-void transferBLTToModel(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::Model> m, bool jacobian_no_casadi = true, bool solve_with_casadi = false){
-    
-    std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Block> > nblt; 
-    ModelicaCasADi::Ref<ModelicaCasADi::BLTContainer> container = new ModelicaCasADi::BLTContainer();    
-    m->setEquationContainer(container);
-    nblt=transferBLT<JBLT,
-		JBlock, 
-		JCollection, 
-		JIterator,
-		FVar,
-		FAbstractEquation,
-		FEquation,
-		FExp,
-		ArrayJ>(javablt, m->getNodeToVariableMap(), jacobian_no_casadi, solve_with_casadi);
-    m->transferBLT(nblt);    
-    
-}*/
 
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
             typename FVar, typename FAbstractEquation, typename FEquation,

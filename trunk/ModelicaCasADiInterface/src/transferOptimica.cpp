@@ -26,6 +26,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Wrapped classes from the Optimica compiler
 #include "java/lang/System.h"
 #include "java/util/ArrayList.h"
+#include "java/util/Collection.h"
+#include "java/util/LinkedHashMap.h"
+#include "java/util/Set.h"
+#include "java/util/Iterator.h"
 #include "org/jmodelica/optimica/compiler/AliasManager.h"
 #include "org/jmodelica/optimica/compiler/OptimicaCompiler.h"
 #include "org/jmodelica/optimica/compiler/FStringComment.h"
@@ -49,6 +53,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/Root.h"
 #include "org/jmodelica/optimica/compiler/BaseNode.h"
 #include "org/jmodelica/util/OptionRegistry.h"
+#include "org/jmodelica/optimica/compiler/BLT.h"
+#include "org/jmodelica/optimica/compiler/StructuredBLT.h"
+#include "org/jmodelica/optimica/compiler/FEquation.h"
+#include "org/jmodelica/optimica/compiler/AbstractEquationBlock.h"
+#include "org/jmodelica/optimica/compiler/SimpleEquationBlock.h"
+#include "org/jmodelica/optimica/compiler/ScalarEquationBlock.h"
+#include "org/jmodelica/optimica/compiler/SolvedScalarEquationBlock.h"
+#include "org/jmodelica/optimica/compiler/EquationBlock.h"
+#include "org/jmodelica/optimica/compiler/TornEquationBlock.h"
 
 // The ModelicaCasADi program
 #include "Model.hpp"
@@ -130,13 +143,19 @@ void transferTimedVariables(Ref<OptimizationProblem> m, oc::FOptClass &fc) {
 }
 
 void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level)
+    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/)
 {
     try {
         // initalizeClass is needed on classes where static variables are acessed. 
         // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
         jl::System::initializeClass(false);
         oc::OptimicaCompiler::initializeClass(false);
+        
+        if(with_blt){
+            options->setBooleanOption("automatic_tearing", false);
+            options->setBooleanOption("equation_sorting", true);
+            //options->setBooleanOption("generate_html_diagnostics", true);
+        }
         
         // Create Optimica compiler and compile to flat class
         oc::OptimicaCompiler compiler(options->getOptionRegistry());
@@ -162,8 +181,6 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         }
         
         
-        
-        
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable
         transferTime<oc::FClass>(optProblem, fclass);
@@ -175,9 +192,42 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment > (optProblem, fclass.allVariables());
         // Transfer timed variables. Depends on that other variables are transferred. 
         transferTimedVariables(optProblem, fclass);
+        ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer;
+        oc::BLT jblt;
+        if(with_blt){
+            jblt =fclass.getDAEBLT();
+            if(jblt.size()>0){
+                eqContainer = new ModelicaCasADi::BLTContainer();
+            }
+            else{
+                std::cout<<"The Model does not have a BLT. Transfering list of equations.\n";
+                eqContainer = new ModelicaCasADi::FlatEquationList();            
+            }
+        }
+        else{
+            eqContainer = new ModelicaCasADi::FlatEquationList();
+        }
         
+        if(eqContainer->hasBLT()){
+              //std::cout<<"DAE_TRANSFERED_WITH_BLT\n";
+              transferBLTToContainer<oc::BLT,
+                          oc::AbstractEquationBlock,
+                          java::util::Collection,
+                          java::util::Iterator,
+                          oc::FVariable,
+                          oc::FAbstractEquation,
+                          oc::FEquation,
+                          oc::FExp,
+                          JArray>(&jblt, eqContainer, optProblem->getNodeToVariableMap(), false, false);
+        }
+        else{
+            //std::cout<<"DAE_TRANSFERED_WITH_LIST_OF_EQUATIONS\n";
+              transferDaeEquationsToContainer<java::util::ArrayList, oc::FAbstractEquation>(eqContainer, fclass.equations());
+        }
+        
+        optProblem->setEquationContainer(eqContainer);
         // Equations
-        transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.equations());
+        //transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.equations());
         transferInitialEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.initialEquations());
         
         // Functions
@@ -195,6 +245,7 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         optProblem->setFinalTime(MX(fclass.finalTimeAttribute()));
         optProblem->setObjectiveIntegrand(objectiveIntegrand);
         optProblem->setObjective(objective);
+        
     }
     catch (JavaError e) {
         rethrowJavaException(e);

@@ -134,9 +134,8 @@ void OptimizationProblem::substituteAllEliminateables(){
 	it!=tmpMap.end();++it){
 	    eliminatedMXs.push_back(it->first->getVar());
 	    subtitutes.push_back(it->second);
+	    std::cout<<it->first->getVar()<<"  "<<it->second<<"\n";
     }
-    //Substitutes in DAE    
-    Model::substituteAllEliminateables();
     
     //Substitutes in the optimization expressions
     std::vector<casadi::MX> expressions;
@@ -146,11 +145,14 @@ void OptimizationProblem::substituteAllEliminateables(){
     expressions.push_back(objective);
 
     std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
-    std::vector<casadi::MX>::const_iterator it =subtitutedExpressions.begin();
-    startTime = *(it++);
-    finalTime = *(it++);
-    objectiveIntegrand = *(it++);
-    objective = *(it++);
+    startTime = subtitutedExpressions[0];
+    finalTime = subtitutedExpressions[1];
+    objectiveIntegrand = subtitutedExpressions[2];
+    objective = subtitutedExpressions[3];
+    
+    std::cout<<objectiveIntegrand<<"  "<<objective<<"\n";
+    //Substitutes in DAE    
+    equationContainer_->substituteAllEliminateables();
     //Still missing path and point constraints
 }
 
