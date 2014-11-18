@@ -1854,9 +1854,6 @@ aspect ReferencedVariables {
     syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());
     syn Set<FVariable> FVariable.referencedFVariablesInBindingExp()  = lookupFVariablesInSet(getBindingExp().findFIdUseExpsInTree());
     syn lazy Set<FVariable> FAbstractEquation.referencedFVariables() = lookupFVariablesInSet(referencedFIdUseExps());
-    
-    syn Set<FVariable> FStatement.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
-    syn Set<FVariable> FStatement.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
 
     public static Set<FVariable> ASTNode.parametersInSet(Set<? extends FVariable> set) {
         Set<FVariable> res = new LinkedHashSet<FVariable>();

@@ -51,6 +51,23 @@ int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of
     return JMI_OK;
 }
 
+jmi_real_t jmi_inf_cap(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_t res) {
+    if (((res - res) != 0)) {
+        if (res > 0) {
+            /* res is +inf */
+            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+            res = JMI_INF;
+        } else if (res < 0){
+            /* res is -inf */
+            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+            res = -JMI_INF;
+        } else {
+            /* res is NAN, return NAN */
+        }
+    }
+    return res;
+}
+
 /*Some of these functions return types are a temporary remnant of CppAD*/
 jmi_ad_var_t static jmi_divide(jmi_t *jmi, const char func_name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
     if (den==0) {
@@ -73,7 +90,7 @@ jmi_ad_var_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = pow(x, y);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
     
         /* Check that the inputs are in the domain of the function*/
@@ -85,15 +102,13 @@ jmi_ad_var_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
             } else {
                 return -JMI_INF;
             }
+        } else if (x == 0 && y < 0) {
+            /* Pole error */
+            jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
+            return JMI_INF;
         }
-    } else if (x == 0 && y < 0) {
-        /* Pole error */
-        jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
-        return JMI_INF;
-    } else {
-        /* Domain problem, will return 'not a number' */
-        return to_return;
     }
+    to_return = jmi_inf_cap(jmi, func_name, msg, to_return);
     return to_return;
 }
 
@@ -108,15 +123,7 @@ jmi_ad_var_t jmi_pow_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const 
 jmi_ad_var_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = exp(x);
-    
-    if (to_return != to_return) {
-        /* The returned value is not a number */
-
-        /* Will always be a Range problem, will return JMI_INF */
-        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        return JMI_INF;
-    
-    }
+    to_return = jmi_inf_cap(jmi, func_name, msg, to_return);
     return to_return;
 }
 
@@ -132,16 +139,19 @@ jmi_ad_var_t static jmi_log(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
 
     jmi_ad_var_t to_return = log(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
             jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg);
             return -JMI_INF;
+        } else if (x > 0) {
+            /* Range problem, will return JMI_INF */
+            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg);
+            return JMI_INF;
         } else {
             /* Domain problem, will return 'not a number' */
-            assert(x < 0);
             return to_return;
         }
     }
@@ -160,16 +170,19 @@ jmi_ad_var_t static jmi_log10(jmi_t *jmi, const char func_name[], jmi_ad_var_t x
 
     jmi_ad_var_t to_return = log10(x);
     
-    if (to_return != to_return) {
+    if ((to_return - to_return) != 0) {
         /* The returned value is not a number */
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
             jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg);
             return -JMI_INF;
+        } else if (x > 0) {
+            /* Infinity problem, will return JMI_INF */
+            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg);
+            return JMI_INF;
         } else {
             /* Domain problem, will return 'not a number' */
-            assert(x < 0);
             return to_return;
         }
     }
@@ -187,14 +200,7 @@ jmi_ad_var_t jmi_log10_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_sinh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = sinh(x);
-    
-    if (to_return != to_return) {
-        /* The returned value is not a number */
-
-        /* Will always be a Range problem, will return JMI_INF or -JMI_INF */
-        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        return (x > 0)? JMI_INF: -JMI_INF;
-    }
+    to_return = jmi_inf_cap(jmi, func_name, msg, to_return);
     return to_return;
 }
 
@@ -209,14 +215,7 @@ jmi_ad_var_t jmi_sinh_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_cosh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = cosh(x);
-    
-    if (to_return != to_return) {
-        /* The returned value is not a number */
-
-        /* Will always be a Range problem, will return JMI_INF */
-        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        return JMI_INF;
-    }
+    to_return = jmi_inf_cap(jmi, func_name, msg, to_return);
     return to_return;
 }
 
@@ -231,23 +230,7 @@ jmi_ad_var_t jmi_cosh_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_tan(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = tan(x);
-    
-    if (to_return != to_return) {
-        /* The returned value is not a number */
-
-        /* Map the value of x to the interval [-pi/2, pi/2] */
-        if (x > 0) {
-            x = fmod(x + JMI_PI / 2.0, JMI_PI) - JMI_PI / 2.0;
-        } else {
-            x = fmod(x - JMI_PI / 2.0, JMI_PI) + JMI_PI / 2.0;
-        }
-
-        /* Will always be a Range/Pole problem, will return JMI_INF or -JMI_INF
-         * Note: the pole case is mean because small pertubations give very different
-         * results, this is probably a modeling error if it occurs */
-        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
-        return (x > 0)? JMI_INF: -JMI_INF;
-    }
+    to_return = jmi_inf_cap(jmi, func_name, msg, to_return);
     return to_return;
 }
 
