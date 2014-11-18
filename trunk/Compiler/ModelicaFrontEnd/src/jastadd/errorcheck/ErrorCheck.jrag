@@ -612,9 +612,9 @@ aspect InstanceErrorCheck {
             derivative.ast().error("Invalid derivative function reference");
             return;
         }
-        InstLookupResult<InstClassDecl> lr = lookupInstClassQualified(name);
+        InstLookupResult<InstClassDecl> lr = lookupDerivativeFunction(name);
         if (!lr.successful()) {
-            lr.error(derivative.ast(), "function declaration", name);
+            lr.error(derivative.ast(), "function", name);
             return;
         }
         InstClassDecl icd = lr.target();
@@ -650,6 +650,11 @@ aspect InstanceErrorCheck {
             }
         }
     }
+
+    syn InstLookupResult<InstClassDecl> InstBaseClassDecl.lookupDerivativeFunction(String name)  = lookupInstClassQualified(name);
+    eq InstReplacingFullClassDecl.lookupDerivativeFunction(String name)        = getInstClassRedeclare().lookupInstClassQualified(name);
+    eq InstReplacingShortClassDecl.lookupDerivativeFunction(String name)       = getInstClassRedeclare().lookupInstClassQualified(name);
+    eq InstReplacingSimpleShortClassDecl.lookupDerivativeFunction(String name) = getInstClassRedeclare().lookupInstClassQualified(name);
 
     public void InstSimpleShortClassDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {

@@ -606,6 +606,7 @@ aspect SimpleInstClassLookup {
     eq InstProgramRoot.lookupInstClassQualifiedPart(String name, boolean first)                           = 
         genericLookupInstClass(name);
 
+    syn InstLookupResult<InstClassDecl> InstModification.lookupInstClassQualified(String name) = myInstNode().lookupInstClassQualified(name);
 }
 
 

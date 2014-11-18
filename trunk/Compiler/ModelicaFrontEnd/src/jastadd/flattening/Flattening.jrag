@@ -334,7 +334,7 @@ aspect Flattening {
             if (!"derivative".equals(derSrcNode.name()))
                 continue;
             String derName = derSrcNode.string();
-            InstClassDecl fd_decl = lookupInstClassQualified(derName).target();
+            InstClassDecl fd_decl = lookupDerivativeFunction(derName).target();
             AnnotationNode derDestNode = dest.addNode("derivative");
             fd_decl.flattenFunction(fc);
             FExp derNameExp = new FIdUseExp(new FQNameString(fd_decl.qualifiedName()));

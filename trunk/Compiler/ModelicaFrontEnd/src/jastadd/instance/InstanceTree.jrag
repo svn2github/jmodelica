@@ -894,6 +894,7 @@ aspect InstanceTreeConstruction {
 
      public interface InstRedeclareClassNode {
          public InstLookupResult<InstClassDecl> lookupInstClass(String name);
+         public InstLookupResult<InstClassDecl> lookupInstClassQualified(String name);
          public ClassDecl redeclaringClassDecl();
      }
     InstClassDecl implements InstRedeclareClassNode;

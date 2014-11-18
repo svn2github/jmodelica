@@ -15045,6 +15045,71 @@ Semantic error at line 1, column 1:
 ")})));
     end NonInputVariable1;
 
+    model ExtendsTest1
+        package P1
+            replaceable partial function F
+                input Real x;
+                output Real y;
+            end F;
+        end P1;
+        
+        package P2
+            extends P1;
+            redeclare function extends F
+            algorithm
+                y := x;
+                annotation(Inline=false, derivative=F_der);
+            end F;
+            
+            function F_der
+                input Real x;
+                input Real x_der;
+                output Real y_der;
+            algorithm
+                y_der := x_der;
+                annotation(Inline=false);
+            end F_der;
+        end P2;
+        P2 p2;
+        Real x, y;
+    equation
+        x = p2.F(time);
+        der(x) * der(y) = 1;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DerivativeAnnotation_ExtendsTest1",
+            description="Ensure that derivative function is found when using derivative equations in redeclaring packages/functions",
+            flatModel="
+fclass FunctionTests.DerivativeAnnotation.ExtendsTest1
+ Real x;
+ Real y;
+equation
+ x = FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F(time);
+ der(x) * der(y) = 1;
+
+public
+ function FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ annotation(derivative = FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der);
+ end FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F;
+
+ function FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der
+  input Real x;
+  input Real x_der;
+  output Real y_der;
+ algorithm
+  y_der := x_der;
+  return;
+ end FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der;
+
+end FunctionTests.DerivativeAnnotation.ExtendsTest1;
+")})));
+    end ExtendsTest1;
+
 end DerivativeAnnotation;
 
 end FunctionTests;
