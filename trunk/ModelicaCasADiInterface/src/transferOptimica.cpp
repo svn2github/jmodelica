@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "java/util/ArrayList.h"
 #include "java/util/Collection.h"
 #include "java/util/LinkedHashMap.h"
+#include "java/util/LinkedHashSet.h"
 #include "java/util/Set.h"
 #include "java/util/Iterator.h"
 #include "org/jmodelica/optimica/compiler/AliasManager.h"

@@ -227,7 +227,7 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
                 }
                 ciBlock->setJacobian(jaco);
             }*/
-            std::cout<<"TODO";
+            std::cout<<"TODO_DISABLED_SINCE_r7021_due_to_changes_in_BLT.jrag\n";
         }
     
         //Temporal check

@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "java/util/LinkedHashMap.h"
 #include "java/util/Set.h"
 #include "java/util/Iterator.h"
+#include "java/util/LinkedHashSet.h"
 #include "org/jmodelica/modelica/compiler/AliasManager.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/modelica/compiler/FDerivedType.h"

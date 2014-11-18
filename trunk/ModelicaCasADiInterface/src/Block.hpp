@@ -188,10 +188,9 @@ class Block : public RefCountedNode{
     */
     void setJacobian(const casadi::MX& jac);
     /**
-    * Compute the jacobian of the block with casadi 
-    * @return An MX 
+    * Compute the jacobian of the block with casadi  
     */
-    casadi::MX computeJacobianCasADi();
+    void computeJacobianCasADi();
     /**
     * Print to a stream the information of the block 
     * @param A std::ostream 

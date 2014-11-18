@@ -142,7 +142,7 @@ namespace ModelicaCasADi
         }
   }
   
-  casadi::MX Block::computeJacobianCasADi(){
+  void Block::computeJacobianCasADi(){
     symbolicVariables = casadi::MX::sym("symVars",variables_.size());
     std::vector<casadi::MX> vars;
     std::vector<casadi::MX> varsSubstitue;
@@ -156,7 +156,6 @@ namespace ModelicaCasADi
           vars.push_back(it->first->getVar());
           varsSubstitue.push_back(symbolicVariables(it->second));
     }
-    
     std::vector<casadi::MX> Expressions = casadi::substitute(residuals,
                                          vars,
                                          varsSubstitue);
@@ -165,7 +164,6 @@ namespace ModelicaCasADi
                 it != Expressions.end(); ++it){
             symbolicResidual.append(*it);
     }
-    
     casadi::MXFunction f(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,symbolicResidual));
     f.init();
     jacobian=f.jac();
