@@ -474,9 +474,19 @@ void Model::print(std::ostream& os) const {
 bool Model::hasBLT() const{
   return equationContainer_->hasBLT();
 }
+#ifndef SWIG
+std::set<const Variable*> Model::getBLTEliminables() const {
+  return equationContainer_->eliminableVariables();
+}
+#endif
 
-std::set<const Variable*> Model::getBLTEliminateables() const {
-  return equationContainer_->eliminateableVariables();
+std::vector< Ref<Variable> > Model::getEliminableVariables() const {
+    std::set<const Variable*> vars = getBLTEliminables();
+    std::vector< Ref<Variable> > rVec;    
+    for(std::set<const Variable*>::const_iterator it=vars.begin();it!=vars.end();++it){
+	rVec.push_back(const_cast<Variable*>(*it));    
+    }
+    return rVec;
 }
 
 std::vector< Ref< Equation> > Model::getDaeEquations() const {
@@ -495,40 +505,118 @@ void Model::setEquationContainer(Ref<EquationContainer> eqCont){
    equationContainer_ = eqCont; 
    if(equationContainer_->hasBLT()){
      for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
-	 if(equationContainer_->isBLTEliminateable((*it))){
-	     (*it)->setAsEliminatable();
+	 if(equationContainer_->isBLTEliminable((*it))){
+	     (*it)->setAsEliminable();
 	 }
      }
    }
 }
 
-void Model::substituteAllEliminateables(){
-    equationContainer_->substituteAllEliminateables();
+void Model::substituteAllEliminables(){
+    equationContainer_->substituteAllEliminables();
+}
+
+bool Model::hasAnAlias(Ref<Variable> var){
+    std::vector< Ref<Variable> > alias_vars = getAliases();
+    std::vector< Ref<Variable> > vars_with_alias;
+    for(std::vector< Ref<Variable> >::iterator it=alias_vars.begin();it!=alias_vars.end();++it){
+	vars_with_alias.push_back((*it)->getModelVariable());
+    }
+    
+    for(std::vector< Ref<Variable> >::iterator it=vars_with_alias.begin();it!=vars_with_alias.end();++it){
+	if(var.getNode()==it->getNode()){
+	    return 1;	
+	}
+    }
+    return 0;
 }
 
 void Model::eliminateAlgebraics(){
-    std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
-    //Remove the variable from the list of variables and move it to eliminated_z    
-    std::vector< Variable* >::iterator fit;
-    std::set< const Variable* > tmpSet;
-    for(std::vector< Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it){
-	if((*it)->isEliminatable()){
-		eliminated_z.push_back((*it).getNode());
-		tmpSet.insert((*it).getNode());
-		fit = std::find(z.begin(), z.end(),(*it).getNode());
+    if(hasBLT()){
+	std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
+	
+	//Remove the variable from the list of variables and move it to eliminated_z    
+	std::vector< Variable* >::iterator fit;
+	std::set< const Variable* > tmpSet;
+	for(std::vector< Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it){
+	    if((*it)->isEliminable() && !hasAnAlias(*it)){
+		    eliminated_z.push_back((*it).getNode());
+		    tmpSet.insert((*it).getNode());
+		    fit = std::find(z.begin(), z.end(),(*it).getNode());
+		    z.erase(fit);
+		    
+	    }
+	}
+	//Add solutions of eliminated variables to solutions map
+	std::map<const Variable*,casadi::MX> tmpMap;
+	equationContainer_->getSubstitues(tmpSet, tmpMap);
+	for(std::map<const Variable*,casadi::MX>::iterator it=tmpMap.begin();it!=tmpMap.end();++it){
+	    eliminatedVariableToSolution.insert(std::pair<const Variable*,casadi::MX>(it->first,it->second));
+	}
+	
+	//Remove the variable from the equations
+	equationContainer_->eliminateVariables(algebraics);
+    }
+    else{
+	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
+    }
+}
+
+void Model::eliminateVariables(std::vector< Ref<Variable> > toEliminate){
+    if(hasBLT()){
+	std::vector< Variable* >::iterator fit;
+	std::set< const Variable* > tmpSet;
+	std::vector< Ref<Variable> > tmpVec;
+	for(std::vector< Ref<Variable> >::iterator it=toEliminate.begin();it!=toEliminate.end();++it){
+	    if((*it)->isEliminable() && !hasAnAlias(*it)){
+		    eliminated_z.push_back((*it).getNode());
+		    tmpSet.insert((*it).getNode());
+		    tmpVec.push_back((*it));
+		    fit = std::find(z.begin(), z.end(),(*it).getNode());
+		    z.erase(fit);
+		    
+	    }
+	}
+	//Add solutions of eliminated variables to solutions map
+	std::map<const Variable*,casadi::MX> tmpMap;
+	equationContainer_->getSubstitues(tmpSet, tmpMap);
+	for(std::map<const Variable*,casadi::MX>::iterator it=tmpMap.begin();it!=tmpMap.end();++it){
+	    eliminatedVariableToSolution.insert(std::pair<const Variable*,casadi::MX>(it->first,it->second));
+	}
+	//Remove the variable from the equations
+	equationContainer_->eliminateVariables(tmpVec);
+    }
+    else{
+	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
+    }
+}
+
+void Model::eliminateVariables(Ref<Variable> var){
+    if(hasBLT()){
+	std::vector< Variable* >::iterator fit;
+	std::set< const Variable* > tmpSet;
+	bool valid=false;
+	if(var->isEliminable() && !hasAnAlias(var)){
+		eliminated_z.push_back(var.getNode());
+		tmpSet.insert(var.getNode());
+		fit = std::find(z.begin(), z.end(),var.getNode());
 		z.erase(fit);
-		
+		valid=true;
+	}
+	//Add solutions of eliminated variables to solutions map
+	std::map<const Variable*,casadi::MX> tmpMap;
+	equationContainer_->getSubstitues(tmpSet, tmpMap);
+	for(std::map<const Variable*,casadi::MX>::iterator it=tmpMap.begin();it!=tmpMap.end();++it){
+	    eliminatedVariableToSolution.insert(std::pair<const Variable*,casadi::MX>(it->first,it->second));
+	}
+	//Remove the variable from the equations
+	if(valid){
+	    equationContainer_->eliminateVariables(var);
 	}
     }
-    //Add solutions of eliminated variables to solutions map
-    std::map<const Variable*,casadi::MX> tmpMap;
-    equationContainer_->getSubstitues(tmpSet, tmpMap);
-    for(std::map<const Variable*,casadi::MX>::iterator it=tmpMap.begin();it!=tmpMap.end();++it){
-	eliminatedVariableToSolution.insert(std::pair<const Variable*,casadi::MX>(it->first,it->second));
+    else{
+	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
     }
-    
-    //Remove the variable from the equations
-    equationContainer_->eliminateVariables(algebraics);
 }
 
 std::vector< Ref<Variable> > Model::getEliminatedVariables(){
@@ -537,23 +625,6 @@ std::vector< Ref<Variable> > Model::getEliminatedVariables(){
 	elimVars.push_back(*it);    
     }
     return elimVars;
-}
-
-void Model::transferBLT(const std::vector< Ref<Block> >& nblt){
-    if(equationContainer_->hasBLT()){    
-	equationContainer_->transferBLT(nblt);
-	//std::cout<<"\nEliminateables: ";
-	for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
-	    if(equationContainer_->isBLTEliminateable((*it))){
-		(*it)->setAsEliminatable();
-		//std::cout<<(*it)->getName()<<" ";
-	    }
-	}
-	//std::cout<<"\n";
-    }
-    else{
-	std::cout<<"The Equation container does not have a BLT. Set the Equation Container instead with a BLTContainer.\n";    
-    }
 }
 
 

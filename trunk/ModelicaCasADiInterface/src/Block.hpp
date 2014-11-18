@@ -42,55 +42,193 @@ class Block : public RefCountedNode{
     
     /***************************TO BE REMOVE*******************************/
     //Might be kept
+    /**
+    * @return A vector with the MX representation of the block variables. 
+    */ 
     std::vector< casadi::MX > variablesVector() const;
+    /**
+    * Set the block as unsolvable. Used when tearing is activated
+    */ 
     void moveAllEquationsToUnsolvable();
     /**********************************************************************/
     
     
     /**************VariablesMethods*************/
+    /**
+    * The number of block's solved variables.
+    * @return An Integer
+    */
     int getNumVariables()const {return variables_.size();}
+    /**
+    * The number of block's unsolved variables.
+    * @return An Integer
+    */
     int getNumUnsolvedVariables() const {return unSolvedVariables_.size();}
+    /**
+    * Gives the number of block's external variables.
+    * @return  An integer
+    */
     int getNumExternalVariables() const {return externalVariables_.size();}
+    /**
+    * The index of a variable within the block.
+    * The index is used for casadi operations like computing the jacobian or solving a linear system.
+    * @return An integer
+    * @param A pointer to a Variable
+    */
     int getVariableIndex(const Variable* var);
+    /**
+    * Gives block's variables
+    * @return A std::set of variable 
+    */
     const std::set<const Variable*>& variables() const;
+    /**
+    * Gives block's unsolved variables
+    * @return A std::set of variable  
+    */
     const std::set<const Variable*>& unsolvedVariables() const;
+    /**
+    * Gives block's external variables
+    * @return A std::set of variable  
+    */
     const std::set<const Variable*>& externalVariables() const;
+    /**
+    * Check if a variable is external variable of the block
+    * @return A boolean 
+    * @param A pointer to a Variable
+    */
     bool isExternal(const Variable* var) const;
+    /**
+    * Delete a Variable from Block's map of variables solution
+    * @return A boolean 
+    * @param A pointer to a Variable
+    */
     bool removeSolutionOfVariable(const Variable* var);
+    /**
+    * Gives the map of symbolic solutions of Block's variables
+    * @return A std::map<Variable*, MX> 
+    */
     std::map<const Variable*, casadi::MX> getSolutionMap() const;
+    /**
+    * Gives the symbolic solution of a variable if exists
+    * @return A MX
+    * @param Pointer to a Variable
+    */
     casadi::MX getSolutionOfVariable(const Variable* var) const;
+    /**
+    * Check if a variable is has a symbolic solution
+    * @return A boolean 
+    * @param A pointer to a Variable
+    */
     bool hasSolution(const Variable*) const;
+    /**
+    * Add a variable to the set of block variables 
+    * @param A pointer to a Variable.
+    * @param A boolean specifying if the variable is solvable or not.
+    */
     void addVariable(const Variable* var, bool solvable);
+    /**
+    * Add a variable to the set of block's external variables 
+    * @param A pointer to a Variable.
+    */
     void addExternalVariable(const Variable* var);
-    std::set<const Variable*> eliminateableVariables() const;
+    /**
+    * Gives the set of variable that can be eliminated in the block.
+    * These are the external variables of the block that have a symbolic solution.
+    * @return A std::set of Variable
+    */
+    std::set<const Variable*> eliminableVariables() const;
+    /**
+    * Add an entry to the map of solutions of variables
+    * This has to be consistent with BLT. For internal use.
+    * @param A pointer to Variable
+    * @param An MX
+    */
     void addSolutionToVariable(const Variable* var, casadi::MX sol);
     /*******************************************/
     
     /**************EquationMethods*************/
+    /**
+    * Gives the number of block's equations
+    * @return  An integer
+    */
     int getNumEquations() const {return equations.size();}
+    /**
+    * Gives the number of block's unsolvable equations.
+    * @return  An integer
+    */
     int getNumUnsolvedEquations() const {return unSolvedEquations.size();}
+    /**
+    * Gives block's equations
+    * @return A std::vector of Equation 
+    */
     std::vector< Ref<Equation> > allEquations() const;
+    /**
+    * Gives block's unsolved equations
+    * @return A std::vector of Equation 
+    */
     std::vector< Ref<Equation> > notSolvedEquations() const;
+    /**
+    * Add an equation to the block
+    * @param An Equation.
+    * @param A boolean specifying if the equation is solvable or not.
+    */
     void addEquation(Ref<Equation> eq, bool solvable);
+    /**
+    * Gives equations with symbolic manipulations. (substitutions and eliminations) 
+    * @return A std::vector of Equation 
+    */
     std::vector< Ref<Equation> > getEquationsforModel() const;
     /*******************************************/
     
     
     /**************AuxiliaryMethods*************/
+    /**
+    * Set the jacobian of the block 
+    * @param An MX 
+    */
     void setJacobian(const casadi::MX& jac);
+    /**
+    * Compute the jacobian of the block with casadi 
+    * @return An MX 
+    */
     casadi::MX computeJacobianCasADi();
+    /**
+    * Print to a stream the information of the block 
+    * @param A std::ostream 
+    * @param An optional flag to include details in the output
+    */
     void printBlock(std::ostream& out, bool withData=false) const;
     void checkLinearityWithJacobian();
     
+    /**
+    * Check if the block is simple block. A simple block has only one equation.
+    * @return A boolean 
+    */
     bool isSimple() const;
+    /**
+    * Check if the block is linear block. 
+    * @return A boolean 
+    */
     bool isLinear() const;
+    /**
+    * Check if the block is Solvable block. 
+    * @return A boolean 
+    */
     bool isSolvable() const;
     bool setasSimple(bool flag){simple_flag=flag;}
     bool setasLinear(bool flag){linear_flag=flag;}
     bool setasSolvable(bool flag){solve_flag=flag;}
     
     //Requires the jacobian to be computed in beforehand
+    /**
+    * Solve the a linear system symbolically with casadi. 
+    * The Jacobian must have been set in beforehand
+    */
     void solveLinearSystem();
+    /**
+    * Make substitutions in Block equations. 
+    * Only external variables of the block are substituted.
+    */
     void substitute(const std::map<const Variable*, casadi::MX>& mapVariableToExpression);
     /*******************************************/
 
@@ -99,9 +237,9 @@ class Block : public RefCountedNode{
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
     
-    // Vector containing pointers to block equations
+    // Vector containing block's equations
     std::vector< Ref<Equation> > equations;
-    // Vector containing pointers to block unsolved equations
+    // Vector containing block's unsolved equations
     std::vector< Ref<Equation> > unSolvedEquations;
     
     // Vector containing pointers to block solved variables
@@ -119,9 +257,9 @@ class Block : public RefCountedNode{
     void addIndexToVariable(const Variable* var);
     
     
-    //The jacobian stuff must be more efficiently implemented
+    //The jacobian 
     casadi::MX jacobian;
-    //For handling jacobian with casadi
+    //For handling casadi operations
     casadi::MX symbolicVariables; 
     
     //Simple flag

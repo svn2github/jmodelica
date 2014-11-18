@@ -961,6 +961,10 @@ aspect BLT{
             return sb.toString();
         }
         
+        public boolean isMeta() {
+            return false;
+        }
+        
     }
 
     /**
@@ -1445,6 +1449,11 @@ aspect BLT{
 
         @Override
         public boolean isSolvable() {
+            return true;
+        }
+        
+        @Override
+        public boolean isMeta() {
             return true;
         }
 

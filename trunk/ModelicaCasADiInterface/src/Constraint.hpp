@@ -41,6 +41,10 @@ class Constraint : public RefCountedNode {
         const casadi::MX getLhs() const;
         /** @return A MX */
         const casadi::MX getRhs() const;
+        
+        void setLhs(casadi::MX nLhs);
+        void setRhs(casadi::MX nRhs);
+        
         /**
          * Returns the residual of the constraint as: left-hand-side - right-hand-side.
          * @return A MX
@@ -60,6 +64,8 @@ class Constraint : public RefCountedNode {
 inline Constraint::Constraint() {}
 inline const casadi::MX Constraint::getLhs() const{ return lhs; }
 inline const casadi::MX Constraint::getRhs() const { return rhs; }
+inline void Constraint::setLhs(casadi::MX nLhs) { lhs=nLhs; }
+inline void Constraint::setRhs(casadi::MX nRhs) { rhs=nRhs; }
 inline const casadi::MX Constraint::getResidual() const{ return lhs - rhs; }
 inline Constraint::Type Constraint::getType() const{ return ct; }
 }; // End namespace

@@ -31,31 +31,52 @@ namespace ModelicaCasADi
 {
 class FlatEquationList : public EquationContainer {
     public:
-
-        const casadi::MX getDaeResidual() const; 
+        /**
+        * Give the DAE residual of all equations.
+        * @return An MX
+        */
+        const casadi::MX getDaeResidual() const;
+        /**
+        * Give the list of equations.
+        * @return A std::vector of Equation
+        */
         std::vector< Ref< Equation> > getDaeEquations() const;
         /** @param A pointer to an equation */ 
         virtual void addDaeEquation(Ref<Equation> eq);
-        
-        void substituteAllEliminateables(){
+        /**
+        * Substitute all variables that have a solution from BLT. 
+        * Variables are not eliminated after substitution, it just inline the symbolic solutions.
+        */
+        void substituteAllEliminables(){
             std::cout<<"A FlatListEquation container cannot substitute variables. Use BLTContainer instead.\n";
         };
-        void eliminateVariable(Ref<Variable> var){
+        /**
+        * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
+        * @param A pointer to a Variable
+        */
+        void eliminateVariables(Ref<Variable> var){
             std::cout<<"A FlatListEquation container cannot eliminate variables. Use BLTContainer instead.\n";
         };
+        /**
+        * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
+        * @param A pointer to a Variable
+        */
         void eliminateVariables(std::vector< Ref<Variable> >& vars){
             std::cout<<"A FlatListEquation container cannot eliminate variables. Use BLTContainer instead.\n";
         };
-        
+	/**
+        * Add a block to BLT
+        * @param A pointer to a Block.
+        */
         void addBlock(Ref<Block> block){
             std::cout<<"A FlatListEquation container cannot add blocks. Use BLTContainer instead.\n";
         };
-        
-        void transferBLT(const std::vector< Ref<Block> >& nblt){
-             std::cout<<"A FlatListEquation container cannot transferBLT. Use BLTContainer instead.\n";      
-        }
-        
-        void getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const{
+        /**
+        * Fills a map with variable -> solution from BLT information
+        * @param A std::set of Variable
+        * @param A reference to a std::map<Variable,MX>
+        */
+        void getSubstitues(const std::set<const Variable*>& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const{
             std::cout<<"A FlatListEquation container cannot get subtitutes. Use BLTContainer instead.\n";  
         }
         

@@ -248,7 +248,7 @@ namespace ModelicaCasADi
     
   }
   
-  std::set<const Variable*> Block::eliminateableVariables() const{
+  std::set<const Variable*> Block::eliminableVariables() const{
     std::set<const Variable*> keys;
     for(std::map<const Variable*, casadi::MX>::const_iterator it = variableToSolution_.begin();
         it!=variableToSolution_.end();++it){

@@ -213,15 +213,53 @@ class Model: public RefCountedNode {
     /** Allows the use of operator << to print this class, through Printable. */
     virtual void print(std::ostream& os) const;
     
-    /** Allows the use of operator << to print this class, through Printable. */
-    virtual std::set<const Variable*> getBLTEliminateables() const;
+    #ifndef SWIG
+    /** 
+    *Gives all variables that have a symbolic solution in the BLT
+    * @return std::set of Variable pointer
+    **/
+    virtual std::set<const Variable*> getBLTEliminables() const;
+    #endif
     
-    virtual void substituteAllEliminateables();
+    /** 
+    *Check if a variable has any alias
+    * @return Boolean
+    * @param Pointer to a variable
+    **/
+    bool hasAnAlias(Ref<Variable> var);
     
+    /** 
+    *Gives all variables that have a symbolic solution in the BLT
+    * @return std::vector of Variable 
+    **/
+    virtual std::vector< Ref<Variable> > getEliminableVariables() const;
+    
+    /** 
+    *Make substitutions off all symbolic solutions of BLT in model equations.
+    *Equations of the form z=f(z) are not removed as in the case of variable elimination.
+    **/
+    virtual void substituteAllEliminables();
+    
+    /** 
+    *Subtitute algebraic variables with corresponding BLT symbolic solution in equations.
+    *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
+    **/
     virtual void eliminateAlgebraics();
+    /** 
+    *Subtitute a set of variables with corresponding BLT symbolic solution in equations.
+    *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
+    **/
+    virtual void eliminateVariables(std::vector< Ref<Variable> > toEliminate);
+    /** 
+    *Subtitute a variable with corresponding BLT symbolic solution in equations.
+    *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
+    **/
+    virtual void eliminateVariables(Ref<Variable> var);
+    /** 
+    * Gives all variables that are marked as eliminated
+    * @return std::vector of Variable
+    **/
     virtual std::vector< Ref<Variable> >  getEliminatedVariables();
-    
-    virtual void transferBLT(const std::vector< Ref<Block> >& nblt);
 
     /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
     void setDirty() { dirty = true; }

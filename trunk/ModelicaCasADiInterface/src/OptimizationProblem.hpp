@@ -88,9 +88,16 @@ class OptimizationProblem : public Model{
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
-        
+        /** 
+        *Subtitute algebraic variables with corresponding BLT symbolic solution in equations.
+        *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
+        **/
         void eliminateAlgebraics();
-        void substituteAllEliminateables();
+        /** 
+        *Make substitutions off all symbolic solutions of BLT in model equations.
+        *Equations of the form z=f(z) are not removed as in the case of variable elimination.
+        **/
+        void substituteAllEliminables();
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:

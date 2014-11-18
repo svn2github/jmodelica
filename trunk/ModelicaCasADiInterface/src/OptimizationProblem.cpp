@@ -99,61 +99,87 @@ void OptimizationProblem::print(ostream& os) const {
 }
 
 void OptimizationProblem::eliminateAlgebraics(){
-    Model::eliminateAlgebraics();
-    std::vector<casadi::MX> eliminatedMXs;
-    std::vector<casadi::MX> subtitutes;
-    for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
-	it!=eliminatedVariableToSolution.end();++it){
-	    eliminatedMXs.push_back(it->first->getVar());
-	    subtitutes.push_back(it->second);
-    }
-    std::vector<casadi::MX> expressions;
-    expressions.push_back(startTime);
-    expressions.push_back(finalTime);
-    expressions.push_back(objectiveIntegrand);
-    expressions.push_back(objective);
-
-    std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
+    if(hasBLT()){
+	std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
+	std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
+	std::vector< Ref<Variable> > toEliminate_;
+	for(std::vector< Ref<Variable> >::const_iterator ait=algebraics.begin();ait!=algebraics.end();++ait){
+	    bool isTimed=false;	    
+	    for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit){
+		Ref<Variable> base = (*tit)->getBaseVariable();		
+		if(ait->getNode()==base.getNode()){
+		    isTimed=true;	
+		}
+	    }
+	    if(!isTimed){
+		toEliminate_.push_back(*ait);	    
+	    }
+	}
     
-    std::vector<casadi::MX>::const_iterator it =subtitutedExpressions.begin();
-    startTime = *(it++);
-    finalTime = *(it++);
-    objectiveIntegrand = *(it++);
-    objective = *(it++);
-    //Still missing path and point constraints
+	Model::eliminateVariables(toEliminate_);	
+	
+	std::vector<casadi::MX> eliminatedMXs;
+	std::vector<casadi::MX> subtitutes;
+	for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
+	    it!=eliminatedVariableToSolution.end();++it){
+		eliminatedMXs.push_back(it->first->getVar());
+		subtitutes.push_back(it->second);
+	}
+	std::vector<casadi::MX> expressions;
+	expressions.push_back(startTime);
+	expressions.push_back(finalTime);
+	expressions.push_back(objectiveIntegrand);
+	expressions.push_back(objective);
+    
+	std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
+	
+	startTime = subtitutedExpressions[0];
+	finalTime = subtitutedExpressions[1];
+	objectiveIntegrand = subtitutedExpressions[2];
+	objective = subtitutedExpressions[3];
+	//Still missing path and point constraints
+    }
+    else{
+	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
+    }
     
 }
 
-void OptimizationProblem::substituteAllEliminateables(){
-    std::set<const Variable*> eliminateables = equationContainer_->eliminateableVariables();
-    std::map<const Variable*,casadi::MX> tmpMap;
-    equationContainer_->getSubstitues(eliminateables, tmpMap);
-    std::vector<casadi::MX> eliminatedMXs;
-    std::vector<casadi::MX> subtitutes;
-    for(std::map<const Variable*,casadi::MX>::const_iterator it=tmpMap.begin();
-	it!=tmpMap.end();++it){
-	    eliminatedMXs.push_back(it->first->getVar());
-	    subtitutes.push_back(it->second);
-	    std::cout<<it->first->getVar()<<"  "<<it->second<<"\n";
+void OptimizationProblem::substituteAllEliminables(){
+    if(hasBLT()){
+	std::set<const Variable*> eliminateables = equationContainer_->eliminableVariables();
+	std::map<const Variable*,casadi::MX> tmpMap;
+	equationContainer_->getSubstitues(eliminateables, tmpMap);
+	std::vector<casadi::MX> eliminatedMXs;
+	std::vector<casadi::MX> subtitutes;
+	for(std::map<const Variable*,casadi::MX>::const_iterator it=tmpMap.begin();
+	    it!=tmpMap.end();++it){
+		eliminatedMXs.push_back(it->first->getVar());
+		subtitutes.push_back(it->second);
+		std::cout<<it->first->getVar()<<"  "<<it->second<<"\n";
+	}
+	
+	//Substitutes in the optimization expressions
+	std::vector<casadi::MX> expressions;
+	expressions.push_back(startTime);
+	expressions.push_back(finalTime);
+	expressions.push_back(objectiveIntegrand);
+	expressions.push_back(objective);
+    
+	std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
+	startTime = subtitutedExpressions[0];
+	finalTime = subtitutedExpressions[1];
+	objectiveIntegrand = subtitutedExpressions[2];
+	objective = subtitutedExpressions[3];
+	
+	std::cout<<objectiveIntegrand<<"  "<<objective<<"\n";
+	//Substitutes in DAE    
+	equationContainer_->substituteAllEliminables();
+	//Still missing path and point constraints
     }
-    
-    //Substitutes in the optimization expressions
-    std::vector<casadi::MX> expressions;
-    expressions.push_back(startTime);
-    expressions.push_back(finalTime);
-    expressions.push_back(objectiveIntegrand);
-    expressions.push_back(objective);
-
-    std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
-    startTime = subtitutedExpressions[0];
-    finalTime = subtitutedExpressions[1];
-    objectiveIntegrand = subtitutedExpressions[2];
-    objective = subtitutedExpressions[3];
-    
-    std::cout<<objectiveIntegrand<<"  "<<objective<<"\n";
-    //Substitutes in DAE    
-    equationContainer_->substituteAllEliminateables();
-    //Still missing path and point constraints
+    else{
+	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
+    }
 }
 
 }; // End namespace

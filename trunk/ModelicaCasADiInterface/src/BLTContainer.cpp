@@ -29,20 +29,20 @@ namespace ModelicaCasADi
         }
     }
     
-    std::set<const Variable*> BLTContainer::eliminateableVariables() const{
+    std::set<const Variable*> BLTContainer::eliminableVariables() const{
         std::set<const Variable*> vars;
         for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
             it!=blt.end();++it){
-            std::set<const Variable*> blockVars = (*it)->eliminateableVariables();
+            std::set<const Variable*> blockVars = (*it)->eliminableVariables();
             vars.insert(blockVars.begin(), blockVars.end());
         }
         return vars;
     }
     
-    void BLTContainer::getSubstitues(const std::set<const Variable*>& eliminateables, std::map<const Variable*,casadi::MX>& storageMap) const{
+    void BLTContainer::getSubstitues(const std::set<const Variable*>& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const{
         
-        for(std::set<const Variable*>::const_iterator it_e = eliminateables.begin(); 
-              it_e != eliminateables.end(); ++it_e){
+        for(std::set<const Variable*>::const_iterator it_e = eliminables.begin(); 
+              it_e != eliminables.end(); ++it_e){
             bool found=0;
             casadi::MX tmp_subs;
             for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
@@ -54,7 +54,7 @@ namespace ModelicaCasADi
                 }
             }
             
-            //substitute previous variables in eliminateables
+            //substitute previous variables in eliminables
             if(storageMap.size()>0){
                 if(found){
                     std::vector<casadi::MX> inner_subs;
@@ -79,7 +79,7 @@ namespace ModelicaCasADi
             }
             if(!found){
                 //If the variable is empty the substitution in the block will be ignored
-                std::cout<<"Warning: The variable "<< (*it_e)->getName() << "is not eliminateable. It will be ignore at the substitution.\n";
+                std::cout<<"Warning: The variable "<< (*it_e)->getName() << "is not eliminable. It will be ignore at the substitution.\n";
                 storageMap.insert(std::pair<const Variable*,casadi::MX>(*it_e,casadi::MX()));
             }
         }
@@ -105,7 +105,7 @@ namespace ModelicaCasADi
         return residual;
     }
     
-    void BLTContainer::substituteAllEliminateables(){
+    void BLTContainer::substituteAllEliminables(){
         std::set<const Variable*> externalVars;
         std::map<const Variable*,casadi::MX> substitutionMap;
         for(std::vector< Ref<Block> >::iterator fit=blt.begin()+1;
@@ -149,8 +149,8 @@ namespace ModelicaCasADi
         } 
     }
     
-    bool BLTContainer::isBLTEliminateable(Ref<Variable> var) const{
-        std::set<const Variable*> eliminateables = eliminateableVariables();
+    bool BLTContainer::isBLTEliminable(Ref<Variable> var) const{
+        std::set<const Variable*> eliminateables = eliminableVariables();
         std::set<const Variable*>::const_iterator it = eliminateables.find(var.getNode());
         if(it!=eliminateables.end()){
             return 1;    
@@ -158,8 +158,8 @@ namespace ModelicaCasADi
         return 0;    
     }
     
-    void BLTContainer::eliminateVariable(Ref<Variable> var){
-        if(var->isEliminatable())
+    void BLTContainer::eliminateVariables(Ref<Variable> var){
+        if(var->isEliminable())
         {
             std::set<const Variable*> eliminateVar; 
             eliminateVar.insert(var.getNode());
@@ -173,7 +173,7 @@ namespace ModelicaCasADi
     void BLTContainer::eliminateVariables(std::vector< Ref<Variable> >& vars){
         std::set<const Variable*> toEliminate;
         for(std::vector< Ref<Variable> >::iterator it=vars.begin();it!=vars.end();++it){
-            if((*it)->isEliminatable()){
+            if((*it)->isEliminable()){
                 toEliminate.insert((*it).getNode());
             }
         }
@@ -183,7 +183,7 @@ namespace ModelicaCasADi
         substitute(storageMap);
         
         for(std::set<const Variable*>::iterator it=toEliminate.begin();it!=toEliminate.end();++it){
-            if((*it)->isEliminatable()){
+            if((*it)->isEliminable()){
                 removeSolutionOfVariable((*it));
             }
         }

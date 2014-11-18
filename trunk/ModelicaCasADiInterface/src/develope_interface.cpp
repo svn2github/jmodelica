@@ -110,15 +110,15 @@ int main(int argc, char ** argv)
     with_blt=atoi(argv[1]);
   }
    //Class
-   std::string modelName("BLTExample");
+   //std::string modelName("BLTExample");
    //std::string modelName("CombinedCycle.Substances.Gas");
-   //std::string modelName("Modelica.Mechanics.Rotational.Examples.CoupledClutches");
+   std::string modelName("Modelica.Mechanics.Rotational.Examples.CoupledClutches");
    //Files
    std::vector<std::string> modelFiles;
-   modelFiles.push_back("./example_blt.mo");
+   //modelFiles.push_back("./example_blt.mo");
    //modelFiles.push_back("./CombinedCycle.mo");   
-   //modelFiles.push_back("./MSL/Modelica");
-   //modelFiles.push_back("./MSL/ModelicaServices");
+   modelFiles.push_back("./MSL/Modelica");
+   modelFiles.push_back("./MSL/ModelicaServices");
 
    // Start java vitual machine  
    setUpJVM();
