@@ -938,20 +938,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
 
     }
-    
-    public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<V, Collection<E>> computeVarToEqMap(Collection<E> eqns) {
-        Map<V, Collection<E>> map = new HashMap<V, Collection<E>>();
-        for (E eqn : eqns)
-            map.put(eqn.getMatching(), new ArrayList<E>());
-        for (E eqn : eqns) {
-            for (V var : eqn.getVariables()) {
-                Collection<E> list = map.get(var);
-                if (list != null)
-                    list.add(eqn);
-            }
-        }
-        return map;
-    }
 }
 
 /**
