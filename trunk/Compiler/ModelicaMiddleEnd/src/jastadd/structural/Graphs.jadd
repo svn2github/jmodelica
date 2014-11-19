@@ -33,9 +33,6 @@ import org.jmodelica.util.FilteredIterator;
 
 aspect Graphs {
 
-syn boolean FAbstractEquation.lhsVarsAreSolved() = false;
-eq FAlgorithm.lhsVarsAreSolved()                 = true;
-
 public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> {
 
     private static final String DEFAULT_EQ_PREFIX = "eq";
@@ -248,33 +245,13 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             if (n_existing != 0 && n_existing != n_eq)
                 throw new IllegalArgumentException("Equation already exist in BiPGraph but with different number of scalars, previously " + n_existing + ", now " + n_eq + ", equation:\n" + e);
             
-            // For equations that counts as several scalar equations (function calls, algorithms), 
-            // the left hand side variables depends on all the right-hand side ones, 
-            // but not on the other left-hand side ones
-            Set<FVariable> rhsVars = emptySet;
-            FVariable lhsVars[] = new FVariable[n_eq];
-            if (n_eq > 1) {
-                rhsVars = e.referencedFVariablesInRHS();
-                int i = 0;
-                for (FVariable fv : e.referencedFVariablesInLHS())
-                    lhsVars[i++] = fv;
-                if (e.lhsVarsAreSolved())
-                    rhsVars.removeAll(Arrays.asList(lhsVars));
-            }
+            IncidenceMap incMap = createIncidenceMap(e, Collections.<V>emptySet());
+            
             if (n_existing == 0) {
                 groupMembers = new ArrayList<E>();
                 for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
                                                       // need to reverse here to preserve the initial order.
-                    FTypePrefixVariability variability;
-                    if (lhsVars[i] != null) {
-                        variability = lhsVars[i].variability();
-                        if (variability.parameterOrLess())
-                            variability = lhsVars[i].type().funcOutputVariability();
-                        else
-                            variability = lhsVars[i].variability().combineDown(variability);
-                    } else {
-                        variability = e.variability();
-                    }
+                    FTypePrefixVariability variability = incMap.variability(i);
                     boolean add = false;
                     for (VarType varType : variableTypes)
                         if (varType.isOk(variability))
@@ -291,18 +268,95 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 }
             }
             for (E eqn : groupMembers) {
-                for (FVariable fVar : ASTNode.lookupFVariablesInSet(e.findFIdUseExpsInTree())) {
-                    V var = getVariable(fVar.name());
-                    if (var == null)
-                        continue;
-                    int i = eqn.groupNumber();
-                    if (lhsVars[i] == null || lhsVars[i] == fVar || rhsVars.contains(fVar))
-                        addEdge(eqn, var);
+                incMap.addEdges(eqn);
+            }
+        }
+    }
+    
+    protected IncidenceMap createIncidenceMap(FAbstractEquation e, Set<V> additionalDependencies) {
+        if (e.numScalarEquations() > 1) {
+            return new MultiIncidenceMap(e, additionalDependencies);
+        } else {
+            return new IncidenceMap(e, additionalDependencies);
+        }
+    }
+    
+    /**
+     * Handles incidences between variables in an FAbstractEquation.
+     * The base case is a scalar equation where all variables are 
+     * dependent on each other.
+     */
+    protected class IncidenceMap {
+        protected Set<V> vars;
+        protected FAbstractEquation equation;
+        
+        public IncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
+            equation = e;
+            vars = lookupVarsInSet(equation.findFIdUseExpsInTree());
+            vars.addAll(additionalDeps);
+        }
+        
+        public FTypePrefixVariability variability(int i) {
+            return equation.variability();
+        }
+        
+        public void addEdges(E eqn) {
+            for (V var : vars) {
+                addEdge(eqn, var);
+            }
+        }
+    }
+    
+    /**
+     * Handles incidences between variables in a non-scalar FAbstractEquation.
+     * Isolates LHS variables from each other.
+     */
+    protected class MultiIncidenceMap extends IncidenceMap {
+        protected Map<Integer, V> lhs;
+        protected Set<V> rhs;
+        
+        public MultiIncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
+            super(e, additionalDeps);
+            Set<V> lhsSet = lookupVarsInSet(equation.FIdUseExpsInLHS());
+            rhs = lookupVarsInSet(equation.FIdUseExpsInRHS());
+            if (equation instanceof FAlgorithm) {
+                rhs.removeAll(lhsSet);
+            }
+            rhs.addAll(additionalDeps);
+            
+            lhs = new HashMap<Integer, V>();
+            int i = 0;
+            for (V var : lhsSet) {
+                lhs.put(i++, var);
+            }
+        }
+        
+        @Override
+        public FTypePrefixVariability variability(int i) {
+            V var = lhs.get(i);
+            if (var == null) {
+                return super.variability(i);
+            }
+            FTypePrefixVariability v = var.getVariable().variability();
+            if (v.parameterOrLess()) {
+                v = var.getVariable().type().funcOutputVariability();
+            }
+            return v;
+        }
+        
+        @Override
+        public void addEdges(E eqn) {
+            int i = eqn.groupNumber();
+            V lhsVar = lhs.get(i);
+            for (V var : vars) {
+                if (var == lhsVar || rhs.contains(var)) {
+                    addEdge(eqn, var);
                 }
             }
         }
     }
-
+    
+    
     public boolean match(E e, V v) {
         if (!canMatch(e, v))
             return false;

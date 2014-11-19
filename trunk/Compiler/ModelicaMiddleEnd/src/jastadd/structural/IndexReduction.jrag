@@ -709,17 +709,9 @@ aspect IndexReduction {
         // Construct a list of all the variables that should be common in all
         // of the equations.
         // Always add variables from extra equations
-        Set<IndexReductionVar> rhsVars = new HashSet<IndexReductionVar>();
+        Set<IndexReductionVar> additionalDependencies = new HashSet<IndexReductionVar>();
         for (FAbstractEquation extraFEqn : extraEquations)
-            rhsVars.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
-        boolean multipleEqns = originalDiffedFEqns.size() > 1 || baseEqn.getEquation().numScalarEquations() > 1;
-        if (multipleEqns) {
-            for (FAbstractEquation eqn : originalDiffedFEqns)
-                rhsVars.addAll(lookupVarsInSet(eqn.FIdUseExpsInRHS()));
-        } else {
-            for (FAbstractEquation eqn : originalDiffedFEqns)
-                rhsVars.addAll(lookupVarsInSet(eqn.findFIdUseExpsInTree()));
-        }
+            additionalDependencies.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
         
         Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         
@@ -739,35 +731,18 @@ aspect IndexReduction {
         Iterator<IndexReductionEq> eqnIt = baseEqn.getGroupMembers().iterator();
         for (FAbstractEquation newEqn : originalDiffedFEqns) {
             result.addEquation(newEqn);
-            // Create list of variables that are unique for each BiP equation
-            Map<Integer, IndexReductionVar> lhsVars = Collections.emptyMap();
-            if (multipleEqns) {
-                lhsVars = new HashMap<Integer, IndexReductionVar>();
-                int i = 0;
-                for (IndexReductionVar var : lookupVarsInSet(newEqn.FIdUseExpsInLHS()))
-                    lhsVars.put(i++, var);
-                if (newEqn.lhsVarsAreSolved())
-                    rhsVars.removeAll(lhsVars.values());
-            }
+            
+            IncidenceMap incMap = createIncidenceMap(newEqn, additionalDependencies);
             
             // Build new differentiated BiP equations for each scalar.
             for (int i = 0; i < newEqn.numScalarEquations(); i++) {
                 IndexReductionEq original = eqnIt.next();
                 ASTNode.log.info("About to add equation: %s", newEqn);
                 // Add the differentiated equation
-                IndexReductionEq diffedEqn = addEquation(newEqn, i, newEqn.variability(), original.getName() + "_d");
+                IndexReductionEq diffedEqn = addEquation(newEqn, i, incMap.variability(i), original.getName() + "_d");
                 
-                // Add special edges
-                IndexReductionVar var = lhsVars.get(i);
-                if (var != null) {
-                    ASTNode.log.info("*** %s", var);
-                    addEdge(diffedEqn, var);
-                }
-                // Add common edges
-                for (IndexReductionVar rhsVar : rhsVars) {
-                    ASTNode.log.info("*** %s", rhsVar);
-                    addEdge(diffedEqn, rhsVar);
-                }
+                incMap.addEdges(diffedEqn);
+                
                 diffedOriginalEqs.add(diffedEqn);
                 diffedEqn.setExtraEquations(extraEquations);
                 
