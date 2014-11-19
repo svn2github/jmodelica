@@ -32,8 +32,10 @@ endif(WIN32)
 
 
 set(MODULE_NAME ifcasadi)
+set(IFCASADI_DEPS casadi_wrap.i ifcasadi.hpp ifcasadi.cpp)
 
 add_definitions(${CPPFLAGS})
+include_directories(.)
 include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
 include_directories(${CASADI_BUILD_DIR})
@@ -46,6 +48,7 @@ include(UseSWIG)
 set(CMAKE_SWIG_FLAGS -package ifcasadi)
 
 set_source_files_properties(java_casadi.i PROPERTIES CPLUSPLUS ON)
+set(SWIG_MODULE_${MODULE_NAME}_EXTRA_DEPS ${IFCASADI_DEPS})
 
 swig_add_module(${MODULE_NAME} java java_casadi.i)
 swig_link_libraries(${MODULE_NAME} ${CASADI_DLL})

@@ -37,6 +37,9 @@ using namespace std;
     }
 %}
 
+%include "casadi_wrap.i"
+
+
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_pair.i"
@@ -49,6 +52,14 @@ using namespace std;
 
 #define CASADI_CORE_EXPORT
 
+%casadi_wrap(casadi::PrintableObject)
+%casadi_wrap(casadi::SharedObject)
+%casadi_wrap(casadi::GenericType)
+%casadi_wrap(casadi::OptionsFunctionality)
+%casadi_wrap(casadi::MX)
+%casadi_wrap(casadi::Function)
+%casadi_wrap(casadi::MXFunction)
+
 %include "casadi/core/printable_object.hpp"
 %include "casadi/core/shared_object.hpp"
 %include "casadi/core/generic_type.hpp"
@@ -59,6 +70,9 @@ using namespace std;
 %include "casadi/core/function/function.hpp"
 %include "casadi/core/function/mx_function.hpp"
 
+
+%include "ifcasadi.hpp"
+
 namespace std {
     %template(MXVector) vector<casadi::MX>;
 };
@@ -66,4 +80,9 @@ namespace std {
 %inline %{
 // Work around trouble with wrapping MX.sym
 casadi::MX msym(const std::string &name) { return casadi::MX::sym(name); }
+%}
+
+%{
+    // To avoid having to set up separate compilation of ifcasadi.cpp
+    #include "ifcasadi.cpp"
 %}

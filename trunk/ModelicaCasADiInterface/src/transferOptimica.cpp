@@ -64,6 +64,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/EquationBlock.h"
 #include "org/jmodelica/optimica/compiler/TornEquationBlock.h"
 
+#include "ifcasadi/ifcasadi.h"
+
 // The ModelicaCasADi program
 #include "Model.hpp"
 #include "Constraint.hpp"
@@ -166,6 +168,9 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
     }
     compiler.setLogger(StringFromUTF(log_level.c_str()));
+    // NB: It is assumed that no other fclass is created or used between this point and
+    // the call to `ifcasadi_free_instances();`, and that the ifcasadi instance list
+    // is empty at this point; or too many instances will be deleted by it.
     oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
         new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
         StringFromUTF(modelName.c_str())).this$);
@@ -247,8 +252,13 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
     optProblem->setObjectiveIntegrand(objectiveIntegrand);
     optProblem->setObjective(objective);
 
+
+        // Done with fclass; release all CasADi resources that it has been given
+        ifcasadi::ifcasadi::ifcasadi_free_instances();
     }
     catch (JavaError e) {
+        // Done with fclass; release all CasADi resources that it has been given
+        ifcasadi::ifcasadi::ifcasadi_free_instances();
         rethrowJavaException(e);
     }
 }

@@ -91,6 +91,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/EquationBlock.h"
 #include "org/jmodelica/optimica/compiler/TornEquationBlock.h"
 
+#include "ifcasadi/ifcasadi.h"
+
 #include "EquationContainer.hpp"
 #include "FlatEquationList.hpp"
 #include "BLTContainer.hpp"
@@ -166,6 +168,9 @@ void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelF
             fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
       }
       compiler.setLogger(StringFromUTF(log_level.c_str()));
+      // NB: It is assumed that no other fclass is created or used between this point and
+      // the call to `ifcasadi_free_instances();`, and that the ifcasadi instance list
+      // is empty at this point; or too many instances will be deleted by it.
       typename CStruct::FClass fclass = compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
@@ -222,6 +227,9 @@ void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelF
       
       // Functions
       transferFunctions<typename CStruct::FClass, typename CStruct::List, typename CStruct::FFunctionDecl>(m, fclass);
+
+      // Done with fclass; release all CasADi resources that it has been given
+      ifcasadi::ifcasadi::ifcasadi_free_instances();
 }
 
 void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vector<string> &modelFiles,
@@ -234,7 +242,9 @@ void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vec
            transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level,with_blt);     
         }
         catch (JavaError e) {
-                rethrowJavaException(e);
+            // Release all CasADi resources that it has been given
+            ifcasadi::ifcasadi::ifcasadi_free_instances();
+            rethrowJavaException(e);
         }        
         
 }
@@ -249,7 +259,9 @@ void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
            transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level,with_blt);     
         }
         catch (JavaError e) {
-                rethrowJavaException(e);
+            // Release all CasADi resources that it has been given
+            ifcasadi::ifcasadi::ifcasadi_free_instances();
+            rethrowJavaException(e);
         }             
 }
 
