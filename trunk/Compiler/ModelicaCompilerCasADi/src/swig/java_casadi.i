@@ -39,6 +39,15 @@ using namespace std;
 
 %include "casadi_wrap.i"
 
+%casadi_wrap(casadi::PrintableObject)
+%casadi_wrap(casadi::SharedObject)
+%casadi_wrap(casadi::GenericType)
+%casadi_wrap(casadi::OptionsFunctionality)
+%casadi_wrap(casadi::MX)
+%casadi_wrap(casadi::Function)
+%casadi_wrap(casadi::MXFunction)
+
+%casadi_wrap( std::vector<casadi::MX> )
 
 %include "std_string.i"
 %include "std_vector.i"
@@ -51,14 +60,6 @@ using namespace std;
 %rename(deref2)  casadi::Function::operator->;
 
 #define CASADI_CORE_EXPORT
-
-%casadi_wrap(casadi::PrintableObject)
-%casadi_wrap(casadi::SharedObject)
-%casadi_wrap(casadi::GenericType)
-%casadi_wrap(casadi::OptionsFunctionality)
-%casadi_wrap(casadi::MX)
-%casadi_wrap(casadi::Function)
-%casadi_wrap(casadi::MXFunction)
 
 %include "casadi/core/printable_object.hpp"
 %include "casadi/core/shared_object.hpp"

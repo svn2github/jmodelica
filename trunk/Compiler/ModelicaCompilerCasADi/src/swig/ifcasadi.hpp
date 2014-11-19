@@ -17,9 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _IFCASADI_HPP
 #define _IFCASADI_HPP
 
-//#include "casadi/casadi.hpp"
+#include <vector>
 #include "casadi/core/shared_object.hpp"
+#include "casadi/casadi.hpp"
 
+void ifcasadi_register_instance(std::vector<casadi::MX> *newobject, int source);
 void ifcasadi_register_instance(casadi::SharedObject *newobject, int source);
 void ifcasadi_free_instances(int verbosity=0);
 

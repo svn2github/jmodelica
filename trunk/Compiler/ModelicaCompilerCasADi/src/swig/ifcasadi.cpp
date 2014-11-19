@@ -24,8 +24,10 @@ using casadi::SharedObject;
 #include <iostream>
 using std::cout; using std::endl; using std::flush;
 
+typedef std::vector<casadi::MX> MXVector;
 
 static std::vector<casadi::SharedObject *> instances;
+static std::vector<MXVector *> mxvector_instances;
 
 void ifcasadi_register_instance(casadi::SharedObject *newobject, int source) {
     /*
@@ -40,6 +42,11 @@ void ifcasadi_register_instance(casadi::SharedObject *newobject, int source) {
     */
     instances.push_back(newobject);
 }
+
+void ifcasadi_register_instance(std::vector<casadi::MX> *newobject, int source) {
+    mxvector_instances.push_back(newobject);    
+}
+
 
 void ifcasadi_free_instances(int verbosity) {
     if (verbosity >= 3) {
@@ -75,4 +82,9 @@ void ifcasadi_free_instances(int verbosity) {
         }
     }
     instances.clear();
+
+    for(std::vector<MXVector *>::iterator it = mxvector_instances.begin(); it != mxvector_instances.end(); ++it) {
+        delete(*it);
+    }
+    mxvector_instances.clear();
 }
