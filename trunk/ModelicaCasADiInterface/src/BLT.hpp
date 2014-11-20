@@ -14,8 +14,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MODELICACASADI_BLTCONTAINER
-#define _MODELICACASADI_BLTCONTAINER
+#ifndef _MODELICACASADI_BLT
+#define _MODELICACASADI_BLT
 
 #include <iostream>
 #include "casadi/casadi.hpp"
@@ -23,14 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "RefCountedNode.hpp"
 #include "Block.hpp"
 #include "Ref.hpp"
-#include "EquationContainer.hpp"
+#include "Equations.hpp"
 #include <vector>
 #include <map>
 #include <string>
 
 namespace ModelicaCasADi 
 {
-class BLTContainer: public EquationContainer {
+class BLT: public Equations {
     public:
         /**
         * Check if equations object has a BLT
@@ -89,6 +89,7 @@ class BLTContainer: public EquationContainer {
         * @param A reference to a std::map<Variable,MX>
         */
         void getSubstitues(const std::set<const Variable*>& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const;
+        void getSubstitues(const Variable* eliminable, std::map<const Variable*,casadi::MX>& storageMap) const;
         
         /**
         * Substitute all variables that have a solution from BLT. 
@@ -121,6 +122,8 @@ class BLTContainer: public EquationContainer {
         * @param A std::vector of Variable
         */
         void eliminateVariables(std::vector< Ref<Variable> >& vars);
+        
+        void propagateExternals();
         /*******************************************/
         
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
@@ -129,14 +132,14 @@ class BLTContainer: public EquationContainer {
         
         
 };
-inline bool BLTContainer::hasBLT() const {return 1;}
-inline void BLTContainer::addDaeEquation(Ref<Equation>eq) { 
+inline bool BLT::hasBLT() const {return 1;}
+inline void BLT::addDaeEquation(Ref<Equation>eq) { 
    Ref<Block> nBlock = new Block();
    nBlock->addEquation(eq,false);
    addBlock(nBlock);
 }
-inline int BLTContainer::getNumberOfBlocks() const {return blt.size();}
-inline void BLTContainer::addBlock(Ref<Block> block){blt.push_back(block);}
-inline Ref<Block> BLTContainer::getBlock(int i) const {return blt[i];}
+inline int BLT::getNumberOfBlocks() const {return blt.size();}
+inline void BLT::addBlock(Ref<Block> block){blt.push_back(block);}
+inline Ref<Block> BLT::getBlock(int i) const {return blt[i];}
 }; // End namespace
 #endif

@@ -920,16 +920,16 @@ class LocalDAECollocator(CasadiCollocator):
                      'w': op.REAL_ALGEBRAIC}
         mvar_vectors = {'dx': N.array([var for var in
                                        op.getVariables(var_kinds['dx'])
-                                       if not var.isAlias()]),
+                                       if (not var.isAlias())]),
                         'x': N.array([var for var in
                                       op.getVariables(var_kinds['x'])
-                                      if not var.isAlias()]),
+                                      if (not var.isAlias())]),
                         'u': N.array([var for var in
                                       op.getVariables(var_kinds['u'])
-                                      if not var.isAlias()]),
+                                      if (not var.isAlias())]),
                         'w': N.array([var for var in
                                       op.getVariables(var_kinds['w'])
-                                      if not var.isAlias()])}
+                                      if (not var.isAlias())])}
 
         # Count variables (uneliminated inputs and free parameters are counted
         # later)

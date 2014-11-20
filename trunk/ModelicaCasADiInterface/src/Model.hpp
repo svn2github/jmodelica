@@ -32,8 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "RefCountedNode.hpp"
 #include "Ref.hpp"
 
-#include "EquationContainer.hpp"
-#include "FlatEquationList.hpp"
+#include "Equations.hpp"
+#include "FlatEquations.hpp"
 
 namespace ModelicaCasADi 
 {  
@@ -79,7 +79,7 @@ class Model: public RefCountedNode {
     Model() { 
         dirty = false; 
         timeVar = casadi::MX(0);
-        equationContainer_ = new FlatEquationList(); //The default container is flat
+        equations_ = new FlatEquations(); //The default container is flat
         /* todo: just create a time variable instead? */
     }
     /** Initialize the Model, before populating it.
@@ -267,12 +267,14 @@ class Model: public RefCountedNode {
     /** Notify the Model if it has a BLT for DAE equations **/
     virtual bool hasBLT() const;
     
+    virtual bool markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars);
+    
     void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
     {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
     
     const std::map<const casadi::SharedObjectNode*, const Variable* >& getNodeToVariableMap() const {return mxnodeToVariable;}
     
-    virtual void setEquationContainer(Ref<EquationContainer> eqCont);
+    virtual void setEquations(Ref<Equations> eqCont);
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:
@@ -322,7 +324,7 @@ class Model: public RefCountedNode {
     
     //Map to build the blocks with CasADiInterface Variables 
     std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
-    Ref<EquationContainer> equationContainer_;
+    Ref<Equations> equations_;
     std::map<const Variable*,casadi::MX> eliminatedVariableToSolution;
 };
 inline void Model::initializeModel(std::string identifier) {

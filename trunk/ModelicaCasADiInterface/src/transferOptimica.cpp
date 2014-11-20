@@ -198,20 +198,20 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
     transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment > (optProblem, fclass.allVariables());
     // Transfer timed variables. Depends on that other variables are transferred. 
     transferTimedVariables(optProblem, fclass);
-    ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer;
+    ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
     oc::BLT jblt;
     if(with_blt){
         jblt =fclass.getDAEBLT();
         if(jblt.size()>0){
-            eqContainer = new ModelicaCasADi::BLTContainer();
+            eqContainer = new ModelicaCasADi::BLT();
         }
         else{
             std::cout<<"The Model does not have a BLT. Transfering list of equations instead.\n";
-            eqContainer = new ModelicaCasADi::FlatEquationList();            
+            eqContainer = new ModelicaCasADi::FlatEquations();            
         }
     }
     else{
-        eqContainer = new ModelicaCasADi::FlatEquationList();
+        eqContainer = new ModelicaCasADi::FlatEquations();
     }
 
     if(eqContainer->hasBLT()){
@@ -231,7 +231,7 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         transferDaeEquationsToContainer<java::util::ArrayList, oc::FAbstractEquation>(eqContainer, fclass.equations());
     }
 
-    optProblem->setEquationContainer(eqContainer);
+    optProblem->setEquations(eqContainer);
     // Equations
     //transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.equations());
     transferInitialEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.initialEquations());

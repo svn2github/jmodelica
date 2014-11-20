@@ -92,10 +92,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/TornEquationBlock.h"
 
 #include "ifcasadi/ifcasadi.h"
-
-#include "EquationContainer.hpp"
-#include "FlatEquationList.hpp"
-#include "BLTContainer.hpp"
+#include "Equations.hpp"
+#include "FlatEquations.hpp"
+#include "BLT.hpp"
 
 // For transforming output from JCC-wrapped classes to CasADi objects. 
 // Must be included after FExp.h
@@ -188,20 +187,20 @@ void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelF
       transferVariables<java::util::ArrayList, typename CStruct::FVariable, typename CStruct::FDerivativeVariable, 
         typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables());
 
-      ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer;
+      ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
       typename CStruct::TBLT jblt;
       if(with_blt){
             jblt =fclass.getDAEBLT();
             if(jblt.size()>0){
-                eqContainer = new ModelicaCasADi::BLTContainer();
+                eqContainer = new ModelicaCasADi::BLT();
             }
             else{
                 std::cout<<"The Model does not have a BLT. Transfering list of equations.\n";
-                eqContainer = new ModelicaCasADi::FlatEquationList();            
+                eqContainer = new ModelicaCasADi::FlatEquations();            
             }
       }
       else{
-            eqContainer = new ModelicaCasADi::FlatEquationList();
+            eqContainer = new ModelicaCasADi::FlatEquations();
       }
       
       if(eqContainer->hasBLT()){
@@ -220,7 +219,7 @@ void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelF
             transferDaeEquationsToContainer<java::util::ArrayList, typename CStruct::FAbstractEquation>(eqContainer, fclass.equations());
       }
       
-      m->setEquationContainer(eqContainer);
+      m->setEquations(eqContainer);
       // Equations
       //transferDaeEquations<java::util::ArrayList, typename CStruct::FAbstractEquation>(m, fclass.equations());
       transferInitialEquations<java::util::ArrayList, typename CStruct::FAbstractEquation>(m, fclass.initialEquations());

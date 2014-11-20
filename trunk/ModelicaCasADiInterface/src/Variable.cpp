@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using std::ostream; using casadi::MX;
 namespace ModelicaCasADi 
 {
-Variable::Variable(Model *owner) : negated(false), OwnedNode(owner) {
+Variable::Variable(Model *owner) : negated(false), eliminable(false), eliminated(false), OwnedNode(owner) {
     var = MX();
     myModelVariable = Ref<Variable>(NULL);
     declaredType = Ref<VariableType>(NULL);
@@ -30,7 +30,7 @@ Variable::Variable(Model *owner) : negated(false), OwnedNode(owner) {
 Variable::Variable(Model *owner, MX var, Variable::Causality causality, 
                    Variable::Variability variability,
                    Ref<VariableType> declaredType /* Ref<VariableType>() */) : 
-  causality(causality), variability(variability), negated(false), OwnedNode(owner) {
+  causality(causality), variability(variability), negated(false), eliminable(false), eliminated(false), OwnedNode(owner) {
     if (var.isConstant()) {
         throw std::runtime_error("A variable must have a symbolic MX");
     }

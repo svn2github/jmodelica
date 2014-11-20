@@ -46,9 +46,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 
 #include "Block.hpp"
-#include "EquationContainer.hpp"
-#include "FlatEquationList.hpp"
-#include "BLTContainer.hpp"
+#include "Equations.hpp"
+#include "FlatEquations.hpp"
+#include "BLT.hpp"
 
 #include "initjcc.h" // for env
 #include "JCCEnv.h"
@@ -112,7 +112,6 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
                 ciBlock->addEquation(new ModelicaCasADi::Equation(lhs1,rhs1),false);
             }
         }
-    
         //Adding variables to block
         JIterator iter3(block_variables.iterator().this$);
         JIterator iter4(unsolved_vars.iterator().this$); 
@@ -139,11 +138,7 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
                     ciBlock->addVariable(it->second, false);
                 }
             }
-            else{
-                std::cout<<"Error: the variable "<<v1<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
-            }
         }
-    
         JIterator iter5(block_inactive_var.iterator().this$);
         while(iter5.hasNext()){
             found=false;
@@ -153,9 +148,6 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
             it = mapVars.find(node);
             if(it!=mapVars.end()){
                 ciBlock->addExternalVariable(it->second);
-            }
-            else{
-                std::cout<<"Error: the variable "<<vi<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
             }
         }
     
@@ -169,9 +161,6 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
             if(it!=mapVars.end()){
                 ciBlock->addExternalVariable(it->second);
             }
-            else{
-                std::cout<<"Error: the variable "<<vp<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
-            }
         }
     
         JIterator iter7(block_trajectories_var.iterator().this$); 
@@ -184,26 +173,26 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
             if(it!=mapVars.end()){
                 ciBlock->addExternalVariable(it->second);
             }
-            else{
-                std::cout<<"Error: the variable "<<vt<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
-            }
         }
         if(block->isSimple() && block->isSolvable() ){
-            JIterator iter8(block_equations.iterator().this$);
-            JIterator iter9(block_variables.iterator().this$);
-            FVar fvs(iter9.next().this$);
-            FEquation feq(iter8.next().this$);
-            casadi::MX var = toMX(fvs.asMXVariable());
-            casadi::MX sol = toMX(feq.solution(fvs).toMX());
-            node = var.get();
-            it = mapVars.find(node);
-            if(it!=mapVars.end()){
-                ciBlock->addSolutionToVariable(it->second, sol);
+            if(block->isScalar()){
+                JIterator iter8(block_equations.iterator().this$);
+                JIterator iter9(block_variables.iterator().this$);
+                FVar fvs(iter9.next().this$);
+                FEquation feq(iter8.next().this$);
+                casadi::MX var = toMX(fvs.asMXVariable());
+                casadi::MX sol = toMX(feq.solution(fvs).toMX());
+                node = var.get();
+                it = mapVars.find(node);
+                if(it!=mapVars.end()){
+                    ciBlock->addSolutionToVariable(it->second, sol);
+                }
             }
             else{
-                std::cout<<"Error: the variable "<<it->second->getVar()<<" is not a variable of the model\n. Variables should be transfered before the BLT\n.";    
+                ciBlock->moveAllEquationsToUnsolvable();
             }
         }
+        
         //Setting Jacobian 
         if(!jacobian_no_casadi){
             ciBlock->computeJacobianCasADi();
@@ -227,12 +216,12 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
                 }
                 ciBlock->setJacobian(jaco);
             }*/
-            std::cout<<"TODO_DISABLED_SINCE_r7021_due_to_changes_in_BLT.jrag\n";
+            std::cout<<"TODO_r7021\n";
         }
     
         //Temporal check
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())){
-            std::cout<<"ERROR: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. DEACTIVATE TEARING!\n";
+            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. DEACTIVATE TEARING!\n";
             ciBlock->moveAllEquationsToUnsolvable();
         }
     
@@ -254,10 +243,13 @@ void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciB
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
     typename FVar, typename FAbstractEquation, typename FEquation,
     typename FExp, template<typename Ty> class ArrayJ>
-void transferBLTToContainer(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> container,
+void transferBLTToContainer(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::Equations> container,
     const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars,
     bool jacobian_no_casadi = true, bool solve_with_casadi = false){
 
+    if(mapVars.size()==0){
+        throw std::runtime_error("Variables must be transfered before transfering BLT.");
+    }
     if(container->hasBLT()){
         for(int i=0;i<javablt->size();++i)
         {
@@ -345,7 +337,7 @@ template <class ArrayList, class AbstractEquation>
     * @param A pointer to a Model
     * @param An ArrayList with FAbstractEquation
     */
-static void transferDaeEquationsToContainer(ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> container, ArrayList modelEquationsInJM){
+static void transferDaeEquationsToContainer(ModelicaCasADi::Ref<ModelicaCasADi::Equations> container, ArrayList modelEquationsInJM){
     if(!container->hasBLT()){
         std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > modelEqs = createModelEquationVectorFromEquationArrayList<ArrayList, AbstractEquation>(modelEquationsInJM);
         for (std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> >::iterator it = modelEqs.begin(); it != modelEqs.end(); ++it){

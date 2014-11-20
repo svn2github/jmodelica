@@ -53,9 +53,9 @@ set(MC_CPP
   transferOptimica.cpp
   Variable.cpp
   Block.cpp
-  EquationContainer.cpp
-  FlatEquationList.cpp
-  BLTContainer.cpp
+  Equations.cpp
+  FlatEquations.cpp
+  BLT.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -86,9 +86,9 @@ set(MC_HPP
   transferOptimica.hpp
   Variable.hpp
   Block.hpp
-  EquationContainer.hpp
-  FlatEquationList.hpp
-  BLTContainer.hpp
+  Equations.hpp
+  FlatEquations.hpp
+  BLT.hpp
   ${TYPES_HPP}
   jcc/initjcc.h
   jcc/jccutils.h

@@ -85,10 +85,14 @@ class Variable : public OwnedNode {
         bool isNegated() const;
         /** @return True if this variable is an eliminable variable */
         bool isEliminable() const;
+        /** @return True if this variable was marked as eliminated variable */
+        bool wasEliminated() const;
         /** @param Bool negated . Only possible for Alias variables*/
         void setNegated(bool negated);
         /** @param none. */
-        void setAsEliminable();        
+        void setAsEliminable();       
+        /** @param none. */
+        void setAsEliminated();
         /** @param Sets an alias for this variable, making this an alias variable */
         void setAlias(Ref<Variable> var);
         /** @return This variable's model variable if it is an alias, or itself otherwise */
@@ -204,6 +208,7 @@ class Variable : public OwnedNode {
         Ref<Variable> myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
         bool negated;
         bool eliminable;
+        bool eliminated;
         Ref<VariableType> declaredType;
         casadi::MX var;
         attributeMap attributes;
@@ -223,7 +228,14 @@ inline void Variable::setNegated(bool negated) {
     }
     this->negated = negated; 
 }
+inline void Variable::setAsEliminated() { 
+    if (!isEliminable() && !isAlias()) {
+        throw std::runtime_error("Only eliminable and alias variables may be eliminated. Eliminable variables are set from BLT information.");
+    }
+    this->eliminated = true; 
+}
 inline bool Variable::isEliminable() const {return eliminable;}
+inline bool Variable::wasEliminated() const {return eliminated;}
 inline void Variable::setAsEliminable() {eliminable=true;}
 inline void Variable::setAlias(Ref<Variable> modelVariable) { this->myModelVariable = modelVariable; }
 inline Ref<Variable> Variable::getModelVariable() { return isAlias() ? myModelVariable : this; }

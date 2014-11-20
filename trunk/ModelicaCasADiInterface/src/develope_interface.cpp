@@ -88,9 +88,9 @@
 #include <iterator>
 #include <algorithm>
 
-#include "EquationContainer.hpp"
-#include "FlatEquationList.hpp"
-#include "BLTContainer.hpp"
+#include "Equations.hpp"
+#include "FlatEquations.hpp"
+#include "BLT.hpp"
 
 // For transforming output from JCC-wrapped classes to CasADi objects. 
 // Must be included after FExp.h
@@ -162,12 +162,12 @@ int main(int argc, char ** argv)
                               mc::FAttribute,
                               mc::FType>(model, fclass);
                               
-      ModelicaCasADi::Ref<ModelicaCasADi::EquationContainer> eqContainer;
+      ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
       if(with_blt){                        
-            eqContainer = new ModelicaCasADi::BLTContainer();
+            eqContainer = new ModelicaCasADi::BLT();
       }
       else{
-            eqContainer = new ModelicaCasADi::FlatEquationList();
+            eqContainer = new ModelicaCasADi::FlatEquations();
       }
       
       if(eqContainer->hasBLT()){
@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
             transferDaeEquationsToContainer<java::util::ArrayList, mc::FAbstractEquation>(eqContainer, fclass.equations());
       }
       
-      model->setEquationContainer(eqContainer);
+      model->setEquations(eqContainer);
 
       transferInitialEquations<java::util::ArrayList,
                               mc::FAbstractEquation>(model, fclass.initialEquations());

@@ -948,6 +948,10 @@ aspect BLT{
             return false;
         }
         
+        public boolean isScalar() {
+            return false;
+        }
+        
     }
 
     /**
@@ -1462,6 +1466,11 @@ aspect BLT{
         @Override
         public Collection<FVariable> allLocalVariables() {
             return Arrays.asList(fv);
+        }
+        
+        @Override
+        public boolean isScalar() {
+            return true;
         }
 
     }

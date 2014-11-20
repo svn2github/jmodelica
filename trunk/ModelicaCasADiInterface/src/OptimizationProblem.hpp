@@ -98,6 +98,12 @@ class OptimizationProblem : public Model{
         *Equations of the form z=f(z) are not removed as in the case of variable elimination.
         **/
         void substituteAllEliminables();
+        
+        void eliminateVariables(std::vector< Ref<Variable> > toEliminate);
+        
+        void eliminateVariables(Ref<Variable> var);
+        
+        //bool markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars);
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:

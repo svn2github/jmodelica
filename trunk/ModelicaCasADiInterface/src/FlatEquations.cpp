@@ -14,11 +14,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FlatEquationList.hpp"
+#include "FlatEquations.hpp"
 
 namespace ModelicaCasADi
 {
-    const casadi::MX FlatEquationList::getDaeResidual() const {
+    const casadi::MX FlatEquations::getDaeResidual() const {
         casadi::MX daeRes;
         for (std::vector< Ref<Equation> >::const_iterator it = daeEquations.begin(); it != daeEquations.end(); ++it) {
             daeRes.append((*it)->getResidual());

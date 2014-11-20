@@ -98,6 +98,12 @@ class Block : public RefCountedNode{
     */
     bool isExternal(const Variable* var) const;
     /**
+    * Check if a variable belongs to the block 
+    * @return A boolean 
+    * @param A pointer to a Variable
+    */
+    bool isBlockVariable(const Variable* var) const;
+    /**
     * Delete a Variable from Block's map of variables solution
     * @return A boolean 
     * @param A pointer to a Variable
@@ -324,6 +330,12 @@ inline const std::set< const Variable* >& Block::externalVariables() const{
 inline bool Block::isExternal(const Variable* var) const{ 
   std::set< const Variable* >::iterator it = externalVariables_.find(var);
   if(it!=externalVariables_.end()){return 1;}
+  else{return 0;}
+}
+
+inline bool Block::isBlockVariable(const Variable* var) const{
+  std::set< const Variable* >::iterator it = variables_.find(var);
+  if(it!=variables_.end()){return 1;}
   else{return 0;}
 }
 

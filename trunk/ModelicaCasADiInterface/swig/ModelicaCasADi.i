@@ -36,9 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Block.hpp"
 
 
-#include "EquationContainer.hpp"
-#include "FlatEquationList.hpp"
-#include "BLTContainer.hpp"
+#include "Equations.hpp"
+#include "FlatEquations.hpp"
+#include "BLT.hpp"
 
 
 #include "Model.hpp"
@@ -105,9 +105,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %instantiate_Ref(ModelicaCasADi, Block)
 
 
-%instantiate_Ref(ModelicaCasADi, EquationContainer)
-%instantiate_Ref(ModelicaCasADi, FlatEquationList)
-%instantiate_Ref(ModelicaCasADi, BLTContainer)
+%instantiate_Ref(ModelicaCasADi, Equations)
+%instantiate_Ref(ModelicaCasADi, FlatEquations)
+%instantiate_Ref(ModelicaCasADi, BLT)
 
 %instantiate_Ref(ModelicaCasADi, Model)
 
@@ -142,9 +142,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "Block.hpp"
 
 
-%include "EquationContainer.hpp"
-%include "FlatEquationList.hpp"
-%include "BLTContainer.hpp"
+%include "Equations.hpp"
+%include "FlatEquations.hpp"
+%include "BLT.hpp"
 
 %include "Model.hpp"
 %include "OptimizationProblem.hpp"

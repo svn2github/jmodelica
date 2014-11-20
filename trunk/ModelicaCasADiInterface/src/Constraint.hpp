@@ -38,9 +38,9 @@ class Constraint : public RefCountedNode {
          */
         Constraint(casadi::MX lhs, casadi::MX rhs, Type ct);
         /** @return A MX */                   
-        const casadi::MX getLhs() const;
+        casadi::MX getLhs() const;
         /** @return A MX */
-        const casadi::MX getRhs() const;
+        casadi::MX getRhs() const;
         
         void setLhs(casadi::MX nLhs);
         void setRhs(casadi::MX nRhs);
@@ -49,7 +49,7 @@ class Constraint : public RefCountedNode {
          * Returns the residual of the constraint as: left-hand-side - right-hand-side.
          * @return A MX
          */
-        const casadi::MX getResidual() const; 
+        casadi::MX getResidual() const; 
         /** @return An enum Type */
         Type getType() const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
@@ -62,11 +62,11 @@ class Constraint : public RefCountedNode {
         Type ct;
 };
 inline Constraint::Constraint() {}
-inline const casadi::MX Constraint::getLhs() const{ return lhs; }
-inline const casadi::MX Constraint::getRhs() const { return rhs; }
+inline casadi::MX Constraint::getLhs() const{ return lhs; }
+inline casadi::MX Constraint::getRhs() const { return rhs; }
 inline void Constraint::setLhs(casadi::MX nLhs) { lhs=nLhs; }
 inline void Constraint::setRhs(casadi::MX nRhs) { rhs=nRhs; }
-inline const casadi::MX Constraint::getResidual() const{ return lhs - rhs; }
+inline casadi::MX Constraint::getResidual() const{ return lhs - rhs; }
 inline Constraint::Type Constraint::getType() const{ return ct; }
 }; // End namespace
 #endif

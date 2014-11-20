@@ -14,8 +14,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MODELICACASADI_EQUATIONCONTAINER
-#define _MODELICACASADI_EQUATIONCONTAINER
+#ifndef _MODELICACASADI_EQUATIONS
+#define _MODELICACASADI_EQUATIONS
 
 #include <iostream>
 #include "casadi/casadi.hpp"
@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi 
 {
-class EquationContainer: public RefCountedNode {
+class Equations: public RefCountedNode {
     public:
         /**
         * Check if equations object has a BLT
@@ -50,7 +50,7 @@ class EquationContainer: public RefCountedNode {
         * @return An MX
         */
         virtual const casadi::MX getDaeResidual() const {
-            std::cout<<"Abstract Container getDaeResidual() must not be called.\n";            
+            std::cout<<"Abstract Equations getDaeResidual() must not be called.\n";            
             return casadi::MX();
         }; 
         /**
@@ -58,12 +58,12 @@ class EquationContainer: public RefCountedNode {
         * @return A std::vector of Equation
         */
         virtual std::vector< Ref<Equation> > getDaeEquations() const {
-            std::cout<<"Abstract Container getDaeEquations() must not be called.\n";            
+            std::cout<<"Abstract Equations getDaeEquations() must not be called.\n";            
             return std::vector< Ref<Equation> >();
         };
         /** @param A pointer to an equation */ 
         virtual void addDaeEquation(Ref<Equation> eq) {
-            std::cout<<"Abstract Container addDaeEquation(equation) must not be called.\n";            
+            std::cout<<"Abstract Equations addDaeEquation(equation) must not be called.\n";            
         };
         
         /**
@@ -71,28 +71,28 @@ class EquationContainer: public RefCountedNode {
         * Variables are not eliminated after substitution, it just inline the symbolic solutions.
         */
         virtual void substituteAllEliminables(){
-            std::cout<<"Abstract Container substituteAllEliminables() must not be called.\n";
+            std::cout<<"Abstract Equations substituteAllEliminables() must not be called.\n";
         };
         /**
         * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
         * @param A pointer to a Variable
         */
         virtual void eliminateVariables(Ref<Variable> var){
-            std::cout<<"Abstract Container eliminateVariable(variable) must not be called.\n";
+            std::cout<<"Abstract Equations eliminateVariable(variable) must not be called.\n";
         };
         /**
         * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
         * @param A std::vector of Variable
         */
         virtual void eliminateVariables(std::vector< Ref<Variable> >& vars){
-            std::cout<<"Abstract Container eliminatableVariables(std::vector<variable> vars) must not be called.\n";
+            std::cout<<"Abstract Equations eliminatableVariables(std::vector<variable> vars) must not be called.\n";
         };
         /**
         * Add a block to BLT
         * @param A pointer to a Block.
         */
         virtual void addBlock(Ref<Block> block){
-            std::cout<<"Abstract Container addBlock(block) must not be called.\n";
+            std::cout<<"Abstract Equations addBlock(block) must not be called.\n";
         };
         
         /**
@@ -112,12 +112,20 @@ class EquationContainer: public RefCountedNode {
         virtual void getSubstitues(const std::set<const Variable*>& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const{
             std::cout<<"Abstract Container getSubstitues(variables, storageMap) must not be called.\n";  
         }
+        virtual void getSubstitues(const Variable* eliminable, std::map<const Variable*,casadi::MX>& storageMap) const{
+            std::cout<<"Abstract Container getSubstitues(variables, storageMap) must not be called.\n";  
+        }
         /**
         * Print the BLT
         * @param A std::ostream
         * @param A Boolean 
         */
         virtual void printBLT(std::ostream& out, bool with_details=false) const{}
+        
+        //Experimental
+        virtual void propagateExternals(){
+            std::cout<<"Abstract Container propagateExternals() must not be called.\n";  
+        }
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 
