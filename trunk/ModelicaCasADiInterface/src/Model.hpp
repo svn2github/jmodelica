@@ -222,13 +222,6 @@ class Model: public RefCountedNode {
     #endif
     
     /** 
-    *Check if a variable has any alias
-    * @return Boolean
-    * @param Pointer to a variable
-    **/
-    bool hasAnAlias(Ref<Variable> var);
-    
-    /** 
     *Gives all variables that have a symbolic solution in the BLT
     * @return std::vector of Variable 
     **/
@@ -245,16 +238,7 @@ class Model: public RefCountedNode {
     *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
     **/
     virtual void eliminateAlgebraics();
-    /** 
-    *Subtitute a set of variables with corresponding BLT symbolic solution in equations.
-    *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
-    **/
-    virtual void eliminateVariables(std::vector< Ref<Variable> > toEliminate);
-    /** 
-    *Subtitute a variable with corresponding BLT symbolic solution in equations.
-    *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
-    **/
-    virtual void eliminateVariables(Ref<Variable> var);
+    virtual void eliminateVariables();
     /** 
     * Gives all variables that are marked as eliminated
     * @return std::vector of Variable
@@ -267,7 +251,7 @@ class Model: public RefCountedNode {
     /** Notify the Model if it has a BLT for DAE equations **/
     virtual bool hasBLT() const;
     
-    virtual bool markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars);
+    virtual const std::map<const Variable*,casadi::MX>& eliminatedTosolutions(){return eliminatedVariableToSolution;}
     
     void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
     {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
@@ -275,6 +259,11 @@ class Model: public RefCountedNode {
     const std::map<const casadi::SharedObjectNode*, const Variable* >& getNodeToVariableMap() const {return mxnodeToVariable;}
     
     virtual void setEquations(Ref<Equations> eqCont);
+    
+    /**********************Experimental*************************/
+    virtual void markVariablesForElimination(Ref<Variable> var);
+    virtual void markVariablesForElimination(std::vector< Ref<Variable> >& vars);
+    /***********************************************************/
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:
@@ -326,6 +315,7 @@ class Model: public RefCountedNode {
     std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
     Ref<Equations> equations_;
     std::map<const Variable*,casadi::MX> eliminatedVariableToSolution;
+    std::list< std::pair<int, Variable*> > listToEliminate;
 };
 inline void Model::initializeModel(std::string identifier) {
     this->identifier = identifier;

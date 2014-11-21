@@ -505,7 +505,7 @@ void Model::setEquations(Ref<Equations> eqCont){
    equations_ = eqCont; 
    if(equations_->hasBLT()){
      for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it){
-	 if(equations_->isBLTEliminable((*it))){
+	 if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")){
 	     (*it)->setAsEliminable();
 	 }
      }
@@ -517,66 +517,10 @@ void Model::substituteAllEliminables(){
     equations_->substituteAllEliminables();
 }
 
-bool Model::hasAnAlias(Ref<Variable> var){
-    std::vector< Ref<Variable> > alias_vars = getAliases();
-    std::vector< Ref<Variable> > vars_with_alias;
-    for(std::vector< Ref<Variable> >::iterator it=alias_vars.begin();it!=alias_vars.end();++it){
-	vars_with_alias.push_back((*it)->getModelVariable());
-    }
-    
-    for(std::vector< Ref<Variable> >::iterator it=vars_with_alias.begin();it!=vars_with_alias.end();++it){
-	if(var.getNode()==it->getNode()){
-	    return 1;	
-	}
-    }
-    return 0;
-}
-
 void Model::eliminateAlgebraics(){
-    if(hasBLT()){
-	std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
-	std::vector< Ref<Variable> > alias_vars = getAliases();
-	std::vector< Ref<Variable> > tmpVec;
-	for(std::vector< Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it){
-	    if(markVaribaleAsEliminated(*it,alias_vars)){
-		tmpVec.push_back((*it));
-	    }
-	}
-	//Remove the variable from the equations
-	equations_->eliminateVariables(tmpVec);
-    }
-    else{
-	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
-    }
-}
-
-void Model::eliminateVariables(std::vector< Ref<Variable> > toEliminate){
-    if(hasBLT()){
-	std::vector< Ref<Variable> > alias_vars = getAliases();
-	std::vector< Ref<Variable> > tmpVec;
-	for(std::vector< Ref<Variable> >::iterator it=toEliminate.begin();it!=toEliminate.end();++it){
-	    if(markVaribaleAsEliminated(*it,alias_vars)){
-		tmpVec.push_back((*it));
-	    }
-	}
-	//Remove the variable from the equations
-	equations_->eliminateVariables(tmpVec);
-    }
-    else{
-	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
-    }
-}
-
-void Model::eliminateVariables(Ref<Variable> var){
-    if(hasBLT()){
-	std::vector< Ref<Variable> > alias_vars = getAliases();
-	if(markVaribaleAsEliminated(var,alias_vars)){
-	    equations_->eliminateVariables(var);
-	}
-    }
-    else{
-	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
-    }
+    std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
+    markVariablesForElimination(algebraics);
+    eliminateVariables();
 }
 
 std::vector< Ref<Variable> > Model::getEliminatedVariables(){
@@ -587,31 +531,94 @@ std::vector< Ref<Variable> > Model::getEliminatedVariables(){
     return elimVars;
 }
 
-bool Model::markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars){
-    
-    if(var->isEliminable()){
-	bool hasAlias=false;
-	for(std::vector< Ref<Variable> >::iterator it_alias = aliasVars.begin();
-	    it_alias!=aliasVars.end() && !hasAlias;++it_alias){
-	    if(var==(*it_alias)->getModelVariable()){
-		hasAlias=true;
-	    }
-	}
-	if(!hasAlias){ 
-	    var->setAsEliminated();
-	    std::vector< Variable* >::iterator fit;
-	    fit = std::find(z.begin(), z.end(),var.getNode());
-	    z.erase(fit);
-	    equations_->getSubstitues(var.getNode(), eliminatedVariableToSolution);
-	    return 1;	
-	}
-	return 0;
-    }
-    else{
-	return 0;
-    } 
-    
+bool compareFunction(const std::pair<int, Variable*>& a, const std::pair<int, Variable*>& b) {
+    return a.first < b.first; 
 }
 
+void Model::eliminateVariables(){
+    //Sort the list first
+    
+    /*for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+	it_var!=listToEliminate.end();++it_var){
+	std::cout<<it_var->first<<"   "<<it_var->second->getName()<<"\n";    
+    }*/
+    
+    listToEliminate.sort(compareFunction);
+    /*for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+	it_var!=listToEliminate.end();++it_var){
+	std::cout<<it_var->first<<"   "<<it_var->second->getName()<<"\n";    
+    }*/
+    
+    //Mark variables as Eliminated
+    std::vector< Variable* >::iterator fit;
+    for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+	it_var!=listToEliminate.end();++it_var){
+	it_var->second->setAsEliminated();
+	//Remove variables from variables vector
+	eliminated_z.push_back(it_var->second);
+	fit = std::find(z.begin(), z.end(),it_var->second);
+	z.erase(fit);
+    }
+    equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
+    equations_->eliminateVariables(eliminatedVariableToSolution);
+}
+
+void Model::markVariablesForElimination(std::vector< Ref<Variable> >& vars){
+    if(hasBLT()){
+	std::vector< Ref<Variable> > alias_vars = getAliases();
+	bool hasAlias=false;
+	for(std::vector< Ref<Variable> >::iterator it=vars.begin();it!=vars.end();++it){    
+	    if((*it)->isEliminable()){
+		hasAlias=false;
+		for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
+		    it_alias!=alias_vars.end() && !hasAlias;++it_alias){
+		    if((*it)==(*it_alias)->getModelVariable()){
+			hasAlias=true;
+		    }
+		}
+		if(!hasAlias){ 
+		    int id_block = equations_->getBlockIDWithSolutionOf(*it);
+		    if(id_block>=0){
+			listToEliminate.push_back(std::pair<int, Variable*>(id_block,(*it).getNode()));
+		    }
+		}
+	    }
+	    else{
+		std::cout<<"Variable <<< "<<(*it)->getName()<<" >>> is not Eliminable.\n";    
+	    }
+	}
+    }
+    else{
+	std::cout<<"Only Models with BLT can eliminate variables.\n";
+    }
+}
+
+void Model::markVariablesForElimination(Ref<Variable> var){
+    if(hasBLT()){
+	if(var->isEliminable()){
+	    bool hasAlias=false;
+	    //This should be an attribute of the class perhaps
+	    std::vector< Ref<Variable> > alias_vars = getAliases();
+	    for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
+		it_alias!=alias_vars.end() && !hasAlias;++it_alias){
+		if(var==(*it_alias)->getModelVariable()){
+		    hasAlias=true;
+		}
+	    }
+	    if(!hasAlias){ 
+		int id_block = equations_->getBlockIDWithSolutionOf(var);
+		if(id_block>=0){
+		    listToEliminate.push_back(std::pair<int, Variable*>(id_block,var.getNode()));
+		}
+	    }
+	}
+	else{
+	    std::cout<<"Variable <<< "<<var->getName()<<" >>> is not Eliminable.\n";    
+	}
+    }
+    else{
+	std::cout<<"Only Models with BLT can eliminate variables.\n";
+    }
+}
 
 }; // End namespace

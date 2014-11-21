@@ -74,20 +74,6 @@ class Equations: public RefCountedNode {
             std::cout<<"Abstract Equations substituteAllEliminables() must not be called.\n";
         };
         /**
-        * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
-        * @param A pointer to a Variable
-        */
-        virtual void eliminateVariables(Ref<Variable> var){
-            std::cout<<"Abstract Equations eliminateVariable(variable) must not be called.\n";
-        };
-        /**
-        * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
-        * @param A std::vector of Variable
-        */
-        virtual void eliminateVariables(std::vector< Ref<Variable> >& vars){
-            std::cout<<"Abstract Equations eliminatableVariables(std::vector<variable> vars) must not be called.\n";
-        };
-        /**
         * Add a block to BLT
         * @param A pointer to a Block.
         */
@@ -115,6 +101,10 @@ class Equations: public RefCountedNode {
         virtual void getSubstitues(const Variable* eliminable, std::map<const Variable*,casadi::MX>& storageMap) const{
             std::cout<<"Abstract Container getSubstitues(variables, storageMap) must not be called.\n";  
         }
+        //This one consider order
+        virtual void getSubstitues(const std::list< std::pair<int, Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const{
+            std::cout<<"Abstract Container getSubstitues(variable_list, storageMap) must not be called.\n";  
+        }
         /**
         * Print the BLT
         * @param A std::ostream
@@ -126,6 +116,19 @@ class Equations: public RefCountedNode {
         virtual void propagateExternals(){
             std::cout<<"Abstract Container propagateExternals() must not be called.\n";  
         }
+        
+        //Return -1 if the variable does not have a solution
+        virtual int getBlockIDWithSolutionOf(Ref<Variable> var){
+            std::cout<<"Abstract Container getBlockIDWithSolutionOf(Ref<Variable> var) must not be called.\n"; 
+        }
+        /**
+        * Substitute Variable for it's corresponding solution from BLT, and remove the equation from the BLT.
+        * @param A map from variable to solution
+        */
+        virtual void eliminateVariables(const std::map<const Variable*,casadi::MX>& substituteMap){
+            std::cout<<"Abstract Container eliminateVariables(substituteMap) must not be called.\n"; 
+        }
+        
 
     MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 

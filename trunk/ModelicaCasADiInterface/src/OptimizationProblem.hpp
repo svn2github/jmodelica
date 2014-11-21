@@ -93,15 +93,15 @@ class OptimizationProblem : public Model{
         *Equations of the form z=f(z) are removed from DAE and variables are marked as eliminated.
         **/
         void eliminateAlgebraics();
+        void eliminateVariables();
         /** 
         *Make substitutions off all symbolic solutions of BLT in model equations.
         *Equations of the form z=f(z) are not removed as in the case of variable elimination.
         **/
         void substituteAllEliminables();
         
-        void eliminateVariables(std::vector< Ref<Variable> > toEliminate);
-        
-        void eliminateVariables(Ref<Variable> var);
+        void markVariablesForElimination(Ref<Variable> var);
+        void markVariablesForElimination(std::vector< Ref<Variable> >& vars);
         
         //bool markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars);
 

@@ -86,47 +86,63 @@ namespace ModelicaCasADi
     }
     
     void BLT::getSubstitues(const Variable* eliminable, std::map<const Variable*,casadi::MX>& storageMap) const{
-        
-
-            bool found=0;
-            casadi::MX tmp_subs;
-            for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
-                it!=blt.end() && !found;++it){
-                if((*it)->hasSolution(eliminable)){
-                   casadi::MX exp = (*it)->getSolutionOfVariable(eliminable);
-                   tmp_subs=exp;
-                   found=1;
-                }
+        bool found=0;
+        casadi::MX tmp_subs;
+        for(std::vector< Ref<Block> >::const_iterator it=blt.begin();
+            it!=blt.end() && !found;++it){
+            if((*it)->hasSolution(eliminable)){
+               casadi::MX exp = (*it)->getSolutionOfVariable(eliminable);
+               tmp_subs=exp;
+               found=1;
             }
-            
-            //substitute previous variables in eliminables
-            if(storageMap.size()>0){
-                if(found){
-                    std::vector<casadi::MX> inner_subs;
-                    std::vector<casadi::MX> inner_elim;
-                    for(std::map<const Variable*,casadi::MX>::const_iterator it_prev=storageMap.begin(); it_prev!=storageMap.end();++it_prev){
-                        int ndeps =tmp_subs.getNdeps();
-                        for(int j=0;j<ndeps;++j){
-                            if(tmp_subs.getDep(j).isEqual(it_prev->first->getVar(),0) && !it_prev->second.isEmpty()){
-                                 inner_subs.push_back(it_prev->second);
-                                 inner_elim.push_back(it_prev->first->getVar()); 
-                            }
+        }
+        
+        //substitute previous variables in eliminables
+        if(storageMap.size()>0){
+            if(found){
+                std::vector<casadi::MX> inner_subs;
+                std::vector<casadi::MX> inner_elim;
+                for(std::map<const Variable*,casadi::MX>::const_iterator it_prev=storageMap.begin(); it_prev!=storageMap.end();++it_prev){
+                    int ndeps =tmp_subs.getNdeps();
+                    for(int j=0;j<ndeps;++j){
+                        if(tmp_subs.getDep(j).isEqual(it_prev->first->getVar(),0) && !it_prev->second.isEmpty()){
+                             inner_subs.push_back(it_prev->second);
+                             inner_elim.push_back(it_prev->first->getVar()); 
                         }
                     }
-                    std::vector<casadi::MX> subExp = casadi::substitute(std::vector<casadi::MX>(1,tmp_subs),inner_elim,inner_subs);
-                    storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,subExp.front()));
-                    inner_subs.clear();
-                    inner_elim.clear();
                 }
+                std::vector<casadi::MX> subExp = casadi::substitute(std::vector<casadi::MX>(1,tmp_subs),inner_elim,inner_subs);
+                storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,subExp.front()));
+                inner_subs.clear();
+                inner_elim.clear();
             }
-            else{
-               if(found){storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,tmp_subs));} 
+        }
+        else{
+           if(found){storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,tmp_subs));} 
+        }
+        if(!found){
+            //If the variable is empty the substitution in the block will be ignored
+            std::cout<<"Warning: The variable "<< eliminable->getName() << "is not eliminable. It will be ignore at the substitution.\n";
+            storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,casadi::MX()));
+        }
+    }
+    
+    
+    void BLT::getSubstitues(const std::list< std::pair<int, Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const{
+        
+        for(std::list< std::pair<int, Variable*> >::const_reverse_iterator it_var=eliminables.rbegin();
+            it_var!=eliminables.rend();++it_var){
+            casadi::MX solution = blt[it_var->first]->getSolutionOfVariable(it_var->second); 
+            for(std::list< std::pair<int, Variable*> >::const_reverse_iterator it_var2(it_var);
+                it_var2!=eliminables.rend();++it_var2){
+                casadi::MX tmp = solution;
+                
+                solution = casadi::substitute(tmp,
+                                              it_var2->second->getVar(),
+                                              blt[it_var2->first]->getSolutionOfVariable(it_var2->second));        
             }
-            if(!found){
-                //If the variable is empty the substitution in the block will be ignored
-                std::cout<<"Warning: The variable "<< eliminable->getName() << "is not eliminable. It will be ignore at the substitution.\n";
-                storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,casadi::MX()));
-            }
+            storageMap[it_var->second]=solution;
+        }
     }
     
     std::vector< Ref<Equation> > BLT::getDaeEquations() const{
@@ -202,38 +218,14 @@ namespace ModelicaCasADi
         return 0;    
     }
     
-    void BLT::eliminateVariables(Ref<Variable> var){
-        if(var->isEliminable())
-        {
-            std::set<const Variable*> eliminateVar; 
-            eliminateVar.insert(var.getNode());
-            std::map<const Variable*,casadi::MX> storageMap;
-            getSubstitues(eliminateVar,storageMap);
-            substitute(storageMap);
-            removeSolutionOfVariable(var.getNode());
+    void BLT::eliminateVariables(const std::map<const Variable*,casadi::MX>& substituteMap){
+        substitute(substituteMap);    
+        for(std::map<const Variable*,casadi::MX>::const_iterator it=substituteMap.begin();it!=substituteMap.end();++it){
+            removeSolutionOfVariable(it->first);
         }
-    }
-
-    void BLT::eliminateVariables(std::vector< Ref<Variable> >& vars){
-        std::set<const Variable*> toEliminate;
-        for(std::vector< Ref<Variable> >::iterator it=vars.begin();it!=vars.end();++it){
-            if((*it)->isEliminable()){
-                toEliminate.insert((*it).getNode());
-            }
-        }
-        
-        std::map<const Variable*,casadi::MX> storageMap;
-        getSubstitues(toEliminate,storageMap);
-        substitute(storageMap);
-        
-        for(std::set<const Variable*>::iterator it=toEliminate.begin();it!=toEliminate.end();++it){
-            if((*it)->isEliminable()){
-                removeSolutionOfVariable((*it));
-            }
-        }
-        
     }
     
+    //Experimental
     void BLT::propagateExternals(){
         std::vector< Ref<Block> >::iterator previous;
         for(std::vector< Ref<Block> >::iterator it=blt.begin()+1;
@@ -255,5 +247,17 @@ namespace ModelicaCasADi
                 }
             }
         }
+    }
+    
+    int BLT::getBlockIDWithSolutionOf(Ref<Variable> var){
+        int counter=0;
+        for(std::vector< Ref<Block> >::iterator fit=blt.begin();
+            fit!=blt.end();++fit){
+            if((*fit)->hasSolution(var.getNode())){
+                return counter;                
+            }
+            ++counter;
+        }
+        return -1;
     }
 }; //End namespace

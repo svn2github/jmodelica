@@ -90,6 +90,8 @@ class BLT: public Equations {
         */
         void getSubstitues(const std::set<const Variable*>& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const;
         void getSubstitues(const Variable* eliminable, std::map<const Variable*,casadi::MX>& storageMap) const;
+        //This one consider order
+        void getSubstitues(const std::list< std::pair<int, Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const;
         
         /**
         * Substitute all variables that have a solution from BLT. 
@@ -113,17 +115,15 @@ class BLT: public Equations {
         /**
         * Substitute variable to the corresponding solution gotten from BLT.
         * After the substitution the solution equation z=f(z) is removed from BLT.
-        * @param A pointer to a Variable.
+        * @param A std::map of Variable to solution
         */
-        void eliminateVariables(Ref<Variable> var);
-        /**
-        * Substitute variable to the corresponding solution gotten from BLT.
-        * After the substitution the solution equation z=f(z) is removed from BLT.
-        * @param A std::vector of Variable
-        */
-        void eliminateVariables(std::vector< Ref<Variable> >& vars);
+        void eliminateVariables(const std::map<const Variable*,casadi::MX>& substituteMap);
         
+        //Experimental
         void propagateExternals();
+        
+        //Return -1 if the variable does not have a solution
+        int getBlockIDWithSolutionOf(Ref<Variable> var);
         /*******************************************/
         
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS

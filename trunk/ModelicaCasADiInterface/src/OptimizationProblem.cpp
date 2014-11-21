@@ -99,230 +99,9 @@ void OptimizationProblem::print(ostream& os) const {
 }
 
 void OptimizationProblem::eliminateAlgebraics(){
-    if(hasBLT()){
 	std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
-	std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
-	std::vector< Ref<Variable> > toEliminate_;
-	for(std::vector< Ref<Variable> >::const_iterator ait=algebraics.begin();ait!=algebraics.end();++ait){
-	    bool isTimed=false;	    
-	    for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit){	
-		if(*ait==(*tit)->getBaseVariable()){
-		    isTimed=true;	
-		}
-	    }
-	    if(!isTimed){
-		toEliminate_.push_back(*ait);	    
-	    }
-	}
-    
-	Model::eliminateVariables(toEliminate_);	
-	
-	std::vector<casadi::MX> eliminatedMXs;
-	std::vector<casadi::MX> subtitutes;
-	for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
-	    it!=eliminatedVariableToSolution.end();++it){
-		eliminatedMXs.push_back(it->first->getVar());
-		subtitutes.push_back(it->second);
-	}
-	std::vector<casadi::MX> expressions;
-	expressions.push_back(startTime);
-	expressions.push_back(finalTime);
-	expressions.push_back(objectiveIntegrand);
-	expressions.push_back(objective);
-	
-	if(pathConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin(); 
-		path_it!=pathConstraints.end();++path_it){
-		expressions.push_back((*path_it)->getLhs());
-		expressions.push_back((*path_it)->getRhs());
-	    }
-	}
-	if(pointConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::const_iterator point_it = pointConstraints.begin(); 
-		point_it!=pointConstraints.end();++point_it){
-		expressions.push_back((*point_it)->getLhs());
-		expressions.push_back((*point_it)->getRhs());
-	    }
-	}
-    
-	std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
-	
-	int counter=0;
-	startTime = subtitutedExpressions[counter++];
-	finalTime = subtitutedExpressions[counter++];
-	objectiveIntegrand = subtitutedExpressions[counter++];
-	objective = subtitutedExpressions[counter++];
-	
-	if(pathConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin(); 
-		path_it!=pathConstraints.end();++path_it){
-		(*path_it)->setLhs(subtitutedExpressions[counter++]);
-		(*path_it)->setRhs(subtitutedExpressions[counter++]);
-	    }
-	}
-	if(pointConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::iterator point_it = pointConstraints.begin(); 
-		point_it!=pointConstraints.end();++point_it){
-		(*point_it)->setLhs(subtitutedExpressions[counter++]);
-		(*point_it)->setRhs(subtitutedExpressions[counter++]);
-	    }
-	}
-	
-	
-    }
-    else{
-	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
-    }
-    
-}
-
-void OptimizationProblem::eliminateVariables(std::vector< Ref<Variable> > toEliminate){
-    if(hasBLT()){
-	std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
-	std::vector< Ref<Variable> > toEliminate_;
-	for(std::vector< Ref<Variable> >::const_iterator ait=toEliminate.begin();ait!=toEliminate.end();++ait){
-	    bool isTimed=false;	    
-	    for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit){	
-		if(*ait==(*tit)->getBaseVariable()){
-		    isTimed=true;	
-		}
-	    }
-	    if(!isTimed){
-		toEliminate_.push_back(*ait);	    
-	    }
-	}
-    
-	Model::eliminateVariables(toEliminate_);	
-	
-	std::vector<casadi::MX> eliminatedMXs;
-	std::vector<casadi::MX> subtitutes;
-	for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
-	    it!=eliminatedVariableToSolution.end();++it){
-		eliminatedMXs.push_back(it->first->getVar());
-		subtitutes.push_back(it->second);
-	}
-	std::vector<casadi::MX> expressions;
-	expressions.push_back(startTime);
-	expressions.push_back(finalTime);
-	expressions.push_back(objectiveIntegrand);
-	expressions.push_back(objective);
-	
-	if(pathConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin(); 
-		path_it!=pathConstraints.end();++path_it){
-		expressions.push_back((*path_it)->getLhs());
-		expressions.push_back((*path_it)->getRhs());
-	    }
-	}
-	if(pointConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::const_iterator point_it = pointConstraints.begin(); 
-		point_it!=pointConstraints.end();++point_it){
-		expressions.push_back((*point_it)->getLhs());
-		expressions.push_back((*point_it)->getRhs());
-	    }
-	}
-    
-	std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
-	
-	int counter=0;
-	startTime = subtitutedExpressions[counter++];
-	finalTime = subtitutedExpressions[counter++];
-	objectiveIntegrand = subtitutedExpressions[counter++];
-	objective = subtitutedExpressions[counter++];
-	
-	if(pathConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin(); 
-		path_it!=pathConstraints.end();++path_it){
-		(*path_it)->setLhs(subtitutedExpressions[counter++]);
-		(*path_it)->setRhs(subtitutedExpressions[counter++]);
-	    }
-	}
-	if(pointConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::iterator point_it = pointConstraints.begin(); 
-		point_it!=pointConstraints.end();++point_it){
-		(*point_it)->setLhs(subtitutedExpressions[counter++]);
-		(*point_it)->setRhs(subtitutedExpressions[counter++]);
-	    }
-	}
-	
-	
-    }
-    else{
-	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
-    }
-    
-}
-
-void OptimizationProblem::eliminateVariables(Ref<Variable> var){
-    if(hasBLT()){
-	std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
-	bool isTimed=false;	    
-	for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit){	
-	    if(var==(*tit)->getBaseVariable()){
-		isTimed=true;	
-	    }
-	}
-	
-	if(!isTimed){
-	    Model::eliminateVariables(var);	
-	}
-	
-	std::vector<casadi::MX> eliminatedMXs;
-	std::vector<casadi::MX> subtitutes;
-	for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
-	    it!=eliminatedVariableToSolution.end();++it){
-		eliminatedMXs.push_back(it->first->getVar());
-		subtitutes.push_back(it->second);
-	}
-	std::vector<casadi::MX> expressions;
-	expressions.push_back(startTime);
-	expressions.push_back(finalTime);
-	expressions.push_back(objectiveIntegrand);
-	expressions.push_back(objective);
-	
-	if(pathConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin(); 
-		path_it!=pathConstraints.end();++path_it){
-		expressions.push_back((*path_it)->getLhs());
-		expressions.push_back((*path_it)->getRhs());
-	    }
-	}
-	if(pointConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::const_iterator point_it = pointConstraints.begin(); 
-		point_it!=pointConstraints.end();++point_it){
-		expressions.push_back((*point_it)->getLhs());
-		expressions.push_back((*point_it)->getRhs());
-	    }
-	}
-    
-	std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
-	
-	int counter=0;
-	startTime = subtitutedExpressions[counter++];
-	finalTime = subtitutedExpressions[counter++];
-	objectiveIntegrand = subtitutedExpressions[counter++];
-	objective = subtitutedExpressions[counter++];
-	
-	if(pathConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin(); 
-		path_it!=pathConstraints.end();++path_it){
-		(*path_it)->setLhs(subtitutedExpressions[counter++]);
-		(*path_it)->setRhs(subtitutedExpressions[counter++]);
-	    }
-	}
-	if(pointConstraints.size()>0){
-	    for(std::vector< Ref<Constraint> >::iterator point_it = pointConstraints.begin(); 
-		point_it!=pointConstraints.end();++point_it){
-		(*point_it)->setLhs(subtitutedExpressions[counter++]);
-		(*point_it)->setRhs(subtitutedExpressions[counter++]);
-	    }
-	}
-	
-    }
-    else{
-	std::cout<<"The Model does not have symbolic manipulation capabilities. Try with BLT\n.";    
-    }
-    
+	markVariablesForElimination(algebraics);
+	eliminateVariables();	
 }
 
 void OptimizationProblem::substituteAllEliminables(){
@@ -393,9 +172,164 @@ void OptimizationProblem::substituteAllEliminables(){
     }
 }
 
-/*bool OptimizationProblem::markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars){
-    std::cout<<"TODO_OVERRIDE_MODEL_VERSION\n";
-    return 1;
-}*/
+void OptimizationProblem::markVariablesForElimination(std::vector< Ref<Variable> >& vars){
+    if(hasBLT()){
+	std::vector< Ref<Variable> > alias_vars = getAliases();
+	std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
+	bool hasAlias=false;
+	for(std::vector< Ref<Variable> >::iterator it=vars.begin();it!=vars.end();++it){    
+	    if((*it)->isEliminable()){
+		hasAlias=false;
+		for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
+		    it_alias!=alias_vars.end() && !hasAlias;++it_alias){
+		    if((*it)==(*it_alias)->getModelVariable()){
+			hasAlias=true;
+		    }
+		}
+		bool isTimed=false;	    
+		for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit){	
+		    if(*it==(*tit)->getBaseVariable()){
+			isTimed=true;	
+		    }
+		}
+		if(!isTimed && !hasAlias){ 
+		    int id_block = equations_->getBlockIDWithSolutionOf(*it);
+		    if(id_block>=0){
+			listToEliminate.push_back(std::pair<int, Variable*>(id_block,(*it).getNode()));
+		    }
+		}
+	    }
+	    else{
+		std::cout<<"Variable <<< "<<(*it)->getName()<<" >>> is not Eliminable.\n";    
+	    }
+	}
+    }
+    else{
+	std::cout<<"Only Models with BLT can eliminate variables.\n";
+    }
+}
+
+void OptimizationProblem::markVariablesForElimination(Ref<Variable> var){
+    if(hasBLT()){
+	if(var->isEliminable()){
+	    //This should be an attribute of the class perhaps
+	    std::vector< Ref<Variable> > alias_vars = getAliases();
+	    std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
+	    bool hasAlias=false;
+	    for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
+		it_alias!=alias_vars.end() && !hasAlias;++it_alias){
+		if(var==(*it_alias)->getModelVariable()){
+		    hasAlias=true;
+		}
+	    }
+	    bool isTimed=false;	    
+	    for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit){	
+		if(var==(*tit)->getBaseVariable()){
+		    isTimed=true;	
+		}
+	    }
+	    if(!isTimed && !hasAlias){ 
+		int id_block = equations_->getBlockIDWithSolutionOf(var);
+		if(id_block>=0){
+		    listToEliminate.push_back(std::pair<int, Variable*>(id_block,var.getNode()));
+		}
+	    }
+	}
+	else{
+	    std::cout<<"Variable <<< "<<var->getName()<<" >>> is not Eliminable.\n";    
+	}
+    }
+    else{
+	std::cout<<"Only Models with BLT can eliminate variables.\n";
+    }
+}
+
+bool compareFunction2(const std::pair<int, Variable*>& a, const std::pair<int, Variable*>& b) {
+    return a.first < b.first; 
+}
+
+void OptimizationProblem::eliminateVariables(){
+    /*for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+	it_var!=listToEliminate.end();++it_var){
+	std::cout<<it_var->first<<"   "<<it_var->second->getName()<<"\n";    
+    }*/
+    
+    //Sort the list first
+    listToEliminate.sort(compareFunction2);
+    /*for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+	it_var!=listToEliminate.end();++it_var){
+	std::cout<<it_var->first<<"   "<<it_var->second->getName()<<"\n";    
+    }*/
+    
+    equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
+    equations_->eliminateVariables(eliminatedVariableToSolution);
+    
+    //Mark variables as Eliminated
+    std::vector< Variable* >::iterator fit;
+    for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+	it_var!=listToEliminate.end();++it_var){
+	it_var->second->setAsEliminated();
+	//Remove variables from variables vector
+	eliminated_z.push_back(it_var->second);
+	fit = std::find(z.begin(), z.end(),it_var->second);
+	z.erase(fit);
+    }
+    
+    
+	std::vector<casadi::MX> eliminatedMXs;
+	std::vector<casadi::MX> subtitutes;
+	for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
+	    it!=eliminatedVariableToSolution.end();++it){
+		if(!it->second.isEmpty()){
+		    eliminatedMXs.push_back(it->first->getVar());
+		    subtitutes.push_back(it->second);
+		}
+	}
+	std::vector<casadi::MX> expressions;
+	expressions.push_back(startTime);
+	expressions.push_back(finalTime);
+	expressions.push_back(objectiveIntegrand);
+	expressions.push_back(objective);
+	
+	if(pathConstraints.size()>0){
+	    for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin(); 
+		path_it!=pathConstraints.end();++path_it){
+		expressions.push_back((*path_it)->getLhs());
+		expressions.push_back((*path_it)->getRhs());
+	    }
+	}
+	if(pointConstraints.size()>0){
+	    for(std::vector< Ref<Constraint> >::const_iterator point_it = pointConstraints.begin(); 
+		point_it!=pointConstraints.end();++point_it){
+		expressions.push_back((*point_it)->getLhs());
+		expressions.push_back((*point_it)->getRhs());
+	    }
+	}
+    
+	std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes); 
+	
+	int counter=0;
+	startTime = subtitutedExpressions[counter++];
+	finalTime = subtitutedExpressions[counter++];
+	objectiveIntegrand = subtitutedExpressions[counter++];
+	objective = subtitutedExpressions[counter++];
+	
+	if(pathConstraints.size()>0){
+	    for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin(); 
+		path_it!=pathConstraints.end();++path_it){
+		(*path_it)->setLhs(subtitutedExpressions[counter++]);
+		(*path_it)->setRhs(subtitutedExpressions[counter++]);
+	    }
+	}
+	if(pointConstraints.size()>0){
+	    for(std::vector< Ref<Constraint> >::iterator point_it = pointConstraints.begin(); 
+		point_it!=pointConstraints.end();++point_it){
+		(*point_it)->setLhs(subtitutedExpressions[counter++]);
+		(*point_it)->setRhs(subtitutedExpressions[counter++]);
+	    }
+	}
+    
+}
+
 
 }; // End namespace
