@@ -4838,6 +4838,122 @@ end IndexReduction.FunctionCallEquation5;
 ")})));
 end FunctionCallEquation5;
 
+model FunctionCallEquation6
+    function f
+        input Real x;
+        output Integer a1;
+        output Real a2;
+      algorithm
+        a1 := 3;
+        a2 := x;
+        annotation(smoothOrder=1);
+    end f;
+    Integer a;
+    Real b,c,d;
+  equation
+    (a,b) = f(time);
+    der(c) = der(d);
+    d = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation6",
+            description="Test so that non scalar equations such as FunctionCallEquations are handled correctly. The equation \"b = a + 1;\" should not be differentiated",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass IndexReduction.FunctionCallEquation6
+ discrete Integer a;
+ Real b;
+ Real c;
+ Real d;
+ Real _der_d;
+initial equation 
+ c = 0.0;
+ pre(a) = 0;
+equation
+ (a, b) = IndexReduction.FunctionCallEquation6.f(time);
+ der(c) = _der_d;
+ d = time;
+ _der_d = 1.0;
+
+public
+ function IndexReduction.FunctionCallEquation6.f
+  input Real x;
+  output Integer a1;
+  output Real a2;
+ algorithm
+  a1 := 3;
+  a2 := x;
+  return;
+ annotation(smoothOrder = 1);
+ end IndexReduction.FunctionCallEquation6.f;
+
+end IndexReduction.FunctionCallEquation6;
+")})));
+end FunctionCallEquation6;
+
+model FunctionCallEquation7
+    function f
+        input Real x;
+        input Real e;
+        output Integer a1;
+        output Real a2;
+      algorithm
+        a1 := 3;
+        a2 := x + e;
+        annotation(smoothOrder=1);
+    end f;
+    Integer a;
+    Real b,c,d;
+    Real e;
+  equation
+    (a,b) = f(time, e);
+    der(c) = der(d);
+    d = time;
+    e = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation7",
+            description="Test so that non scalar equations such as FunctionCallEquations are handled correctly. The equation \"b = a + 1;\" should not be differentiated",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass IndexReduction.FunctionCallEquation7
+ discrete Integer a;
+ Real b;
+ Real c;
+ Real d;
+ Real e;
+ Real _der_d;
+initial equation 
+ c = 0.0;
+ pre(a) = 0;
+equation
+ (a, b) = IndexReduction.FunctionCallEquation7.f(time, e);
+ der(c) = _der_d;
+ d = time;
+ e = time;
+ _der_d = 1.0;
+
+public
+ function IndexReduction.FunctionCallEquation7.f
+  input Real x;
+  input Real e;
+  output Integer a1;
+  output Real a2;
+ algorithm
+  a1 := 3;
+  a2 := x + e;
+  return;
+ annotation(smoothOrder = 1);
+ end IndexReduction.FunctionCallEquation7.f;
+
+end IndexReduction.FunctionCallEquation7;
+")})));
+end FunctionCallEquation7;
+
 model DoubleDifferentiationWithSS1
     parameter Real L = 1 "Pendulum length";
     parameter Real g = 9.81 "Acceleration due to gravity";
