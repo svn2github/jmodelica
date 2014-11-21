@@ -15,9 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ifcasadi.ifcasadi;
 import ifcasadi.GenericType;
-import ifcasadi.OptionsFunctionality;
 import ifcasadi.MX;
-import ifcasadi.SharedObject;
 import ifcasadi.MXFunction;
 import ifcasadi.MXVector;
 
