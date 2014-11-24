@@ -1031,4 +1031,79 @@ $modelStructure$",
 ")})));
 end SortingStates;
 
+model StructuralStartValueBase
+    parameter Integer n = 3;
+    Real[n] x = 1:n;
+    parameter Real a = 3 annotation(Evaluate=true);
+    final parameter Real b = 3;
+end StructuralStartValue;
+
+model StructuralStartValue1
+    extends StructuralStartValueBase;
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="StructuralStartValue1",
+            description="Check that structural parameters does not generate a start value.",
+            fmi_version="1.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"b\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"n\" valueReference=\"268435461\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+        <Integer />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"2.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end StructuralStartValue1;
+
+model StructuralStartValue2
+    extends StructuralStartValueBase;
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="StructuralStartValue2",
+            description="Check that structural parameters does not generate a start value.",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"b\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"n\" valueReference=\"268435461\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <Integer />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[2]\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"2.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[3]\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end StructuralStartValue2;
+
 end FmiXMLTests;
