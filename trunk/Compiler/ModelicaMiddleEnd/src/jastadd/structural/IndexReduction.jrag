@@ -732,7 +732,7 @@ aspect IndexReduction {
         for (FAbstractEquation newEqn : originalDiffedFEqns) {
             result.addEquation(newEqn);
             
-            IncidenceMap incMap = createIncidenceMap(newEqn, additionalDependencies);
+            IncidenceMap incMap = createIncidenceMap(newEqn, additionalDependencies, null);
             
             // Build new differentiated BiP equations for each scalar.
             for (int i = 0; i < newEqn.numScalarEquations(); i++) {
@@ -741,7 +741,7 @@ aspect IndexReduction {
                 // Add the differentiated equation
                 IndexReductionEq diffedEqn = addEquation(newEqn, i, incMap.variability(i), original.getName() + "_d");
                 
-                incMap.addEdges(diffedEqn);
+                incMap.addEdges(diffedEqn, true);
                 
                 diffedOriginalEqs.add(diffedEqn);
                 diffedEqn.setExtraEquations(extraEquations);

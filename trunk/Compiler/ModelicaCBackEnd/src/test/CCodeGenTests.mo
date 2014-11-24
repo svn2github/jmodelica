@@ -9859,6 +9859,63 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end BlockTest17;
 
+model BlockTest18
+    function f
+        input Real x;
+        output Real a2;
+        output Integer a1;
+      algorithm
+        a1 := 3;
+        a2 := x;
+        annotation(smoothOrder=1,Inline=false);
+    end f;
+    Integer a;
+    parameter Real b = 1;
+    Real x;
+  equation
+    (b,a) = f(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest18",
+            description="Mixed function call equation in block",
+            inline_functions="none",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435459;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_2 = x[0];
+        }
+        func_CCodeGenTests_BlockTest18_f_def0(_x_2, &tmp_1, &tmp_2);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _a_0 = (tmp_2);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = tmp_1 - (_b_1);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest18;
 
 
 model Algorithm1

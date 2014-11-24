@@ -239,8 +239,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         Set<FVariable> emptySet = Collections.emptySet();
         for (FAbstractEquation e : eqns) {
             
-            IncidenceMap incMap = createIncidenceMap(e, Collections.<V>emptySet());
-            int n_eq = incMap.numEqs(variableTypes);
+            IncidenceMap incMap = createIncidenceMap(e, Collections.<V>emptySet(), variableTypes);
+            int n_eq = incMap.numEqs();
             
             Collection<E> groupMembers = getEquations(e);
             int n_existing = groupMembers.size();
@@ -261,14 +261,15 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 }
             }
             for (E eqn : groupMembers) {
-                incMap.addEdges(eqn);
+                incMap.addEdges(eqn, false);
             }
         }
     }
     
-    protected IncidenceMap createIncidenceMap(FAbstractEquation e, Set<V> additionalDependencies) {
+    
+    protected IncidenceMap createIncidenceMap(FAbstractEquation e, Set<V> additionalDependencies, EnumSet<VarType> variableTypes) {
         if (e.numScalarEquations() > 1) {
-            return new MultiIncidenceMap(e, additionalDependencies);
+            return new MultiIncidenceMap(e, additionalDependencies, variableTypes);
         } else {
             return new IncidenceMap(e, additionalDependencies);
         }
@@ -282,25 +283,30 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     protected class IncidenceMap {
         protected Set<V> vars;
         protected FAbstractEquation equation;
+        protected int neq;
         
         public IncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
             equation = e;
             vars = lookupVarsInSet(equation.findFIdUseExpsInTree());
             vars.addAll(additionalDeps);
+            neq = equation.numScalarEquations();
         }
         
         public FTypePrefixVariability variability(int i) {
             return equation.variability();
         }
         
-        public void addEdges(E eqn) {
+        public void addEdges(E eqn, boolean log) {
             for (V var : vars) {
+                if (log) {
+                    ASTNode.log.info("*** %s", var);
+                }
                 addEdge(eqn, var);
             }
         }
         
-        public int numEqs(EnumSet<VarType> variableTypes) {
-            return equation.numScalarEquations();
+        public int numEqs() {
+            return neq;
         }
     }
     
@@ -312,20 +318,52 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         protected Map<Integer, V> lhs;
         protected Set<V> rhs;
         
-        public MultiIncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
+        public MultiIncidenceMap(FAbstractEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
             super(e, additionalDeps);
-            Set<V> lhsSet = lookupVarsInSet(equation.FIdUseExpsInLHS());
+            Set<FIdUseExp> lhsUses = equation.FIdUseExpsInLHS();
+            Set<V> lhsSet = lookupVarsInSet(lhsUses);
             rhs = lookupVarsInSet(equation.FIdUseExpsInRHS());
             if (equation instanceof FAlgorithm) {
                 rhs.removeAll(lhsSet);
             }
             rhs.addAll(additionalDeps);
             
+            if (equation instanceof FFunctionCallEquation) {
+                buildLhsFunction(variableTypes, lhsUses);
+            } else {
+                lhs = new HashMap<Integer, V>();
+                int i = 0;
+                for (V var : lhsSet) {
+                    lhs.put(i++, var);
+                }
+                neq = equation.numScalarEquations();
+            }
+        }
+        
+        private void buildLhsFunction(EnumSet<VarType> variableTypes, Set<FIdUseExp> lhsUses) {
             lhs = new HashMap<Integer, V>();
             int i = 0;
-            for (V var : lhsSet) {
+            for (FIdUseExp use : lhsUses) {
+                if (variableTypes != null) {
+                    FAbstractVariable fv = use.myFV();
+                    if (fv != null) {
+                        boolean add = false;
+                        for (VarType t : variableTypes) {
+                            if (t.isOk(variability(fv))) {
+                                add = true;
+                                break;
+                            }
+                        }
+                        if (!add) {
+                            continue;
+                        }
+                    }
+                }
+                
+                V var = getVariable(use.name());
                 lhs.put(i++, var);
             }
+            neq = lhs.size();
         }
         
         @Override
@@ -337,7 +375,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return variability(var.getVariable());
         }
         
-        private FTypePrefixVariability variability(FVariable fv) {
+        private FTypePrefixVariability variability(FAbstractVariable fv) {
             FTypePrefixVariability v = fv.variability();
             if (v.parameterOrLess()) {
                 v = fv.type().funcOutputVariability();
@@ -346,30 +384,17 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         @Override
-        public void addEdges(E eqn) {
+        public void addEdges(E eqn, boolean log) {
             int i = eqn.groupNumber();
             V lhsVar = lhs.get(i);
             for (V var : vars) {
                 if (var == lhsVar || rhs.contains(var)) {
+                    if (log) {
+                        ASTNode.log.info("*** %s", var);
+                    }
                     addEdge(eqn, var);
                 }
             }
-        }
-        
-        @Override
-        public int numEqs(EnumSet<VarType> variableTypes) {
-            int n = 0;
-            Set<FVariable> fvs = ASTNode.lookupFVariablesInSet(equation.FIdUseExpsInLHS());
-            for (FVariable fv : fvs) {
-                for (VarType t : variableTypes) {
-                    if (t.isOk(variability(fv))) {
-                        n++;
-                        break;
-                    }
-                }
-            }
-            n += equation.numScalarEquations() - fvs.size();
-            return n;
         }
     }
     
