@@ -265,6 +265,9 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param FVariable A variable class.
      */
     protected boolean generateStartAttribute(FVariable var) {
+        if (var.variability().knownParameterVariability()) {
+            return false;
+        }
         FExp startExp = getStartExp(var);
         return startExp != null && startExp.isConstantExp();
     }
