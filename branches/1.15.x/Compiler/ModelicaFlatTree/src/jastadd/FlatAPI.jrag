@@ -1328,12 +1328,35 @@ aspect FlatAPI {
             return Collections.emptySet();
         }
     }
+    
+    syn Set<FVariable> FAbstractEquation.RHSVariables() = Collections.emptySet();
+    eq FEquation.RHSVariables() {
+        if (isParameterEquation()) {
+            return getRight().referencedParametersInFExp();
+        } else {
+            return Collections.emptySet();
+        }
+    }
         
     eq FFunctionCallEquation.boundParameters() { 
         if (isParameterEquation()) { 
             return referencedParametersInLHS(); 
         } else {
             return Collections.emptySet();
+        }
+    }
+    
+    syn Set<FVariable> FAbstractVariable.myParameterDependencies() = Collections.emptySet();
+    syn lazy Set<FVariable> FVariable.myParameterDependencies() {
+        HashSet<FVariable> varSet = new HashSet<FVariable>();
+        if (hasParameterEquation()) {
+            for (FVariable vv: parameterEquation().RHSVariables()) {
+                varSet.addAll(vv.myParameterDependencies());
+            }
+            return varSet;
+        } else { //Base case
+            varSet.add(this);
+            return varSet;
         }
     }
     
@@ -1362,9 +1385,11 @@ aspect FlatAPI {
     syn lazy boolean FVariable.isIndependentConstant() = isConstant();
     syn lazy boolean FVariable.isDependentConstant() = false;
     
+    syn boolean FAbstractVariable.isDependentParameter() = false;
     syn lazy boolean FVariable.isDependentParameter() = 
         isParameter() && !isIndependentParameter();
     
+    syn boolean FAbstractVariable.isIndependentParameter() = false;
     syn lazy boolean FVariable.isIndependentParameter() =
             isParameter() && !isNonFixedParameter() && !hasParameterEquation() && 
             (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
@@ -2450,6 +2475,26 @@ aspect FVariableUses {
 
     FIdUseExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() to 
         FAbstractEquation.differentiatedRealVariables() for myFEquation();
+
+    /**
+     * Collection attribute returning all independent parameter variables (FVariables)
+     * referenced in an equation.
+     */
+    coll LinkedHashSet<FVariable> FAbstractEquation.dependentParameters() 
+        [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDependentParameter() to 
+        FAbstractEquation.dependentParameters() for myFEquation();
+        
+    /**
+     * Collection attribute returning all dependent parameter variables (FVariables)
+     * referenced in an equation.
+     */
+    coll LinkedHashSet<FVariable> FAbstractEquation.parameters() 
+        [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+    FIdUseExp contributes (FVariable) myFV() when myFV().isParameter() to 
+        FAbstractEquation.parameters() for myFEquation();
 
     /**
      * Collection attribute returning all discrete variables (FVariables)
