@@ -3084,7 +3084,34 @@ end RecordTests.RecordScalarize29;
 ")})));
 end RecordScalarize29;
 
-// TODO: Add more complicated combinations of arrays, records and modifiers
+
+model RecordScalarize30
+    record A
+        parameter Real x;
+        constant Real y;
+    end A;
+    
+    record B
+        parameter A a;
+        parameter Real x;
+        parameter Real y;
+    end B;
+    
+    B b(a(x = 1, y = 2), x = 3, y = 4);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize30",
+            description="Variability of nested records, case that caused crash",
+            flatModel="
+fclass RecordTests.RecordScalarize30
+ parameter Real b.a.x = 1 /* 1 */;
+ constant Real b.a.y = 2;
+ parameter Real b.x = 3 /* 3 */;
+ parameter Real b.y = 4 /* 4 */;
+end RecordTests.RecordScalarize30;
+")})));
+end RecordScalarize30;
 
 
 

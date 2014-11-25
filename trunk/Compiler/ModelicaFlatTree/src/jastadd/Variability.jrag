@@ -36,6 +36,8 @@ aspect Variability {
     eq FDiscrete.discreteVariability() = true;	
     syn boolean FTypePrefixVariability.continuousVariability() = false;
     eq FContinuous.continuousVariability() = true;	
+    syn boolean FTypePrefixVariability.compositeVariability() = false;
+    eq FCompositeVariability.compositeVariability() = true;  
 
 
     syn int FTypePrefixVariability.compareTo(FTypePrefixVariability other)
@@ -482,14 +484,16 @@ aspect Variability {
     private FTypePrefixVariability FCompositeVariability.combine(FTypePrefixVariability other, boolean down) {
         FTypePrefixVariability low = fContinuous();
         FTypePrefixVariability high = fConstant();
+        boolean containsComposite = false;
         ArrayList<FTypePrefixVariability> l = new ArrayList<FTypePrefixVariability>();
         for (FTypePrefixVariability v : getComponents()) {
             FTypePrefixVariability nv = down ? v.combineDown(other) : v.combine(other);
             l.add(nv);
             low = low.combineDown(nv);
             high = high.combine(nv);
+            containsComposite = containsComposite || nv.compositeVariability();
         }
-        if (low.equals(high))
+        if (!containsComposite && low.equals(high))
             return low;
         return new FCompositeVariability(new List<FTypePrefixVariability>(l));
     }
