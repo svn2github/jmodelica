@@ -4954,6 +4954,47 @@ end IndexReduction.FunctionCallEquation7;
 ")})));
 end FunctionCallEquation7;
 
+model Algorithm1
+    Integer a;
+    Real b;
+    Real x,y;
+  algorithm
+    a := 3;
+    a := a + 1;
+    b := y;
+  equation
+    der(x) = der(y);
+    y = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm1",
+            description="Test so that non scalar equations such as Algorithms are handled correctly.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass IndexReduction.Algorithm1
+ discrete Integer a;
+ Real b;
+ Real x;
+ Real y;
+ Real _der_y;
+initial equation 
+ x = 0.0;
+ pre(a) = 0;
+equation
+ der(x) = _der_y;
+ y = time;
+algorithm
+ a := 3;
+ a := a + 1;
+ b := y;
+equation
+ _der_y = 1.0;
+end IndexReduction.Algorithm1;
+")})));
+end Algorithm1;
+
 model DoubleDifferentiationWithSS1
     parameter Real L = 1 "Pendulum length";
     parameter Real g = 9.81 "Acceleration due to gravity";

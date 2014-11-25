@@ -328,42 +328,52 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             }
             rhs.addAll(additionalDeps);
             
+            lhs = new HashMap<Integer, V>();
             if (equation instanceof FFunctionCallEquation) {
                 buildLhsFunction(variableTypes, lhsUses);
             } else {
-                lhs = new HashMap<Integer, V>();
-                int i = 0;
-                for (V var : lhsSet) {
-                    lhs.put(i++, var);
-                }
-                neq = equation.numScalarEquations();
+                buildLhsOther(variableTypes, lhsUses);
             }
+            neq = lhs.size();
         }
         
         private void buildLhsFunction(EnumSet<VarType> variableTypes, Set<FIdUseExp> lhsUses) {
-            lhs = new HashMap<Integer, V>();
             int i = 0;
             for (FIdUseExp use : lhsUses) {
                 if (variableTypes != null) {
                     FAbstractVariable fv = use.myFV();
-                    if (fv != null) {
-                        boolean add = false;
-                        for (VarType t : variableTypes) {
-                            if (t.isOk(variability(fv))) {
-                                add = true;
-                                break;
-                            }
-                        }
-                        if (!add) {
-                            continue;
-                        }
+                    if (fv != null && !addLhs(fv, variableTypes)) {
+                        continue;
                     }
                 }
                 
                 V var = getVariable(use.name());
                 lhs.put(i++, var);
             }
-            neq = lhs.size();
+            
+        }
+        
+        private void buildLhsOther(EnumSet<VarType> variableTypes, Set<FIdUseExp> lhsUses) {
+            int i = 0;
+            for (FAbstractVariable fv : ASTNode.lookupFVariablesInSet(lhsUses)) {
+                if (variableTypes != null) {
+                    if (!addLhs(fv, variableTypes)) {
+                        continue;
+                    }
+                }
+                
+                V var = getVariable(fv.name());
+                lhs.put(i++, var);
+            }
+        }
+        
+        private boolean addLhs(FAbstractVariable fv, EnumSet<VarType> variableTypes) {
+            for (VarType t : variableTypes) {
+                if (t.isOk(variability(fv))) {
+                    return true;
+                }
+            }
+            return false;
         }
         
         @Override
