@@ -446,7 +446,7 @@ class ModelicaTransfer(object):
                     "@0 = (-@0)\n"
                     "output[1] = @0\n")
         assert strnorm(model.getModelFunction("AtomicModelVector1.f")) == strnorm(expected)
-        expected = ("vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector1.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector1.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2]))")
+        expected = ("MX(vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector1.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector1.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2])))")
         assert strnorm(model.getDaeResidual()) == strnorm(expected)
 
     @testattr(casadi = True)
@@ -465,7 +465,7 @@ class ModelicaTransfer(object):
                     "output[0] = @2\n"
                     "output[1] = @3\n")
         assert strnorm(model.getModelFunction("AtomicModelVector2.f")) == strnorm(expected)
-        expected = "vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector2.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector2.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2]))"
+        expected = "MX(vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector2.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector2.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2])))"
         assert strnorm(model.getDaeResidual()) == strnorm(expected)
 
 
@@ -497,14 +497,14 @@ class ModelicaTransfer(object):
                     "@0 = (2.*@0)\n"
                     "output[3] = @0\n")
         assert str(model.getModelFunction("AtomicModelVector3.f")).replace('\n','') == expected.replace('\n','')
-        expected = "(vertcat(A[1], A[2], B[1], B[2])-vertcat(function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){0}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){1}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){2}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){3}))"
+        expected = "MX((vertcat(A[1], A[2], B[1], B[2])-vertcat(function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){0}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){1}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){2}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){3})))"
         assert str(model.getDaeResidual()).replace('\n','') == expected.replace('\n','')
 
 
     @testattr(casadi = True)
     def test_FunctionCallEquationOmittedOuts(self):
         model = self.load_model("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
-        expected = "vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){0}, function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){2})))"
+        expected = "MX(vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){0}, function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){2}))))"
         assert strnorm(model.getDaeResidual()) == strnorm(expected)  
 
     @testattr(casadi = True)
@@ -540,7 +540,7 @@ class ModelicaTransfer(object):
                                 "output[3] = @5\n"
                                 "output[4] = @6\n"
                                 "output[5] = @7\n")
-        expectedResidualPrint = "(vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){2}, function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){5}))"
+        expectedResidualPrint = "MX((vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){2}, function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){5})))"
         assert strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2")) ==\
                strnorm(expectedFunctionPrint)
         assert strnorm(model.getDaeResidual()) ==\
@@ -567,7 +567,7 @@ class ModelicaTransfer(object):
 
         assert strnorm(model.getModelFunction("AtomicModelMatrix.f")) ==\
                strnorm(expected)
-        expected = "vertcat((vertcat(temp_1[1,1],temp_1[1,2])-vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){1})),(der(A[1,1])+temp_1[1,1]),(der(A[1,2])+temp_1[1,2]),(vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])-vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})),(der(dx[1,1])+temp_2[1,1]),(der(dx[1,2])+temp_2[1,2]),(der(dx[2,1])+temp_2[2,1]),(der(dx[2,2])+temp_2[2,2]),(X[1,1]-0.1),(X[2,1]-0.3))"
+        expected = "MX(vertcat((vertcat(temp_1[1,1],temp_1[1,2])-vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){1})),(der(A[1,1])+temp_1[1,1]),(der(A[1,2])+temp_1[1,2]),(vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])-vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})),(der(dx[1,1])+temp_2[1,1]),(der(dx[1,2])+temp_2[1,2]),(der(dx[2,1])+temp_2[2,1]),(der(dx[2,2])+temp_2[2,2]),(X[1,1]-0.1),(X[2,1]-0.3)))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected)
 
@@ -609,7 +609,7 @@ class ModelicaTransfer(object):
                     "@0 = input[5]\n")
         assert strnorm(model.getModelFunction("AtomicModelLargerThanTwoDimensionArray.f")) ==\
                strnorm(expected)
-        expected = "vertcat((vertcat(temp_1[1,1,1], temp_1[1,1,2], temp_1[1,1,3], temp_1[1,2,1], temp_1[1,2,2], temp_1[1,2,3])-vertcat(function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){0}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){1}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){2}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){3}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){4}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){5})), (der(A[1,1,1])-temp_1[1,1,1]), (der(A[1,1,2])-temp_1[1,1,2]), (der(A[1,1,3])-temp_1[1,1,3]), (der(A[1,2,1])-temp_1[1,2,1]), (der(A[1,2,2])-temp_1[1,2,2]), (der(A[1,2,3])-temp_1[1,2,3]))"
+        expected = "MX(vertcat((vertcat(temp_1[1,1,1], temp_1[1,1,2], temp_1[1,1,3], temp_1[1,2,1], temp_1[1,2,2], temp_1[1,2,3])-vertcat(function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){0}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){1}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){2}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){3}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){4}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){5})), (der(A[1,1,1])-temp_1[1,1,1]), (der(A[1,1,2])-temp_1[1,1,2]), (der(A[1,1,3])-temp_1[1,1,3]), (der(A[1,2,1])-temp_1[1,2,1]), (der(A[1,2,2])-temp_1[1,2,2]), (der(A[1,2,3])-temp_1[1,2,3])))"
         assert strnorm(model.getDaeResidual()).replace('\n','') ==\
                strnorm(expected)
 
@@ -643,7 +643,7 @@ class ModelicaTransfer(object):
                     "output[7] = @1\n")
         assert strnorm(model.getModelFunction("AtomicModelRecordNestedArray.generateCurves")) ==\
                strnorm(expected)
-        expected ="vertcat((vertcat(compCurve.curves[1].path[1].point[1], compCurve.curves[1].path[1].point[2], compCurve.curves[1].path[2].point[1], compCurve.curves[1].path[2].point[2], compCurve.curves[2].path[1].point[1], compCurve.curves[2].path[1].point[2], compCurve.curves[2].path[2].point[1], compCurve.curves[2].path[2].point[2])-vertcat(function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){0}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){1}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){2}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){3}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){4}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){5}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){6}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){7})), (der(a)-compCurve.curves[1].path[1].point[2]))"
+        expected ="MX(vertcat((vertcat(compCurve.curves[1].path[1].point[1], compCurve.curves[1].path[1].point[2], compCurve.curves[1].path[2].point[1], compCurve.curves[1].path[2].point[2], compCurve.curves[2].path[1].point[1], compCurve.curves[2].path[1].point[2], compCurve.curves[2].path[2].point[1], compCurve.curves[2].path[2].point[2])-vertcat(function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){0}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){1}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){2}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){3}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){4}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){5}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){6}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){7})), (der(a)-compCurve.curves[1].path[1].point[2])))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected)
 
@@ -676,7 +676,7 @@ class ModelicaTransfer(object):
         funcStr = str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f1")) + str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f2"))
         assert strnorm(funcStr) == strnorm(expected)
         assert strnorm(model.getDaeResidual()) ==\
-               strnorm("(der(a)+function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})")
+               strnorm("MX((der(a)+function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0}))")
 
 
 
@@ -712,7 +712,7 @@ class ModelicaTransfer(object):
                     "output[7] = @0\n")
         assert strnorm(model.getModelFunction("AtomicModelRecordArbitraryDimension.f")) ==\
                strnorm(expected)
-        expected = "vertcat((der(a)+a), (vertcat(r.A[1,1,1], r.A[1,1,2], r.A[1,2,1], r.A[1,2,2], r.A[2,1,1], r.A[2,1,2], r.A[2,2,1], r.A[2,2,2])-vertcat(function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){0}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){1}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){2}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){3}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){4}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){5}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){6}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){7})))"
+        expected = "MX(vertcat((der(a)+a), (vertcat(r.A[1,1,1], r.A[1,1,2], r.A[1,2,1], r.A[1,2,2], r.A[2,1,1], r.A[2,1,2], r.A[2,2,1], r.A[2,2,2])-vertcat(function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){0}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){1}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){2}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){3}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){4}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){5}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){6}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){7}))))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected)
 
@@ -777,7 +777,7 @@ class ModelicaTransfer(object):
                     "output[9] = @0\n")
         assert strnorm(model.getModelFunction("AtomicModelRecordSeveralVars.f")).replace('\n','') ==\
                strnorm(expected)
-        expected = "vertcat((der(a)+a), (vertcat(r.r1.A, r.r1.B, r.rArr[1].A, r.rArr[1].B, r.rArr[2].A, r.rArr[2].B, r.matrix[1,1], r.matrix[1,2], r.matrix[2,1], r.matrix[2,2])-vertcat(function(\"AtomicModelRecordSeveralVars.f\").call([a]){0}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){1}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){2}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){3}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){4}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){5}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){6}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){7}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){8}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){9})))"
+        expected = "MX(vertcat((der(a)+a), (vertcat(r.r1.A, r.r1.B, r.rArr[1].A, r.rArr[1].B, r.rArr[2].A, r.rArr[2].B, r.matrix[1,1], r.matrix[1,2], r.matrix[2,1], r.matrix[2,2])-vertcat(function(\"AtomicModelRecordSeveralVars.f\").call([a]){0}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){1}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){2}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){3}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){4}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){5}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){6}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){7}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){8}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){9}))))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected)
 
@@ -786,19 +786,19 @@ class ModelicaTransfer(object):
     @testattr(casadi = True)
     def test_ConstructFunctionsInRhs(self):
         model = self.load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"})
-        expected = "vertcat((der(x1)-sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})), (der(x2)-function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1, x2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){0}, function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){1})), (der(x7)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\").call([x7]){0}), (der(x8)-function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\").call([x8]){0}), (der(x9)-function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\").call([x9]){0}), (der(x10)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\").call([x10]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){1})))"
+        expected = "MX(vertcat((der(x1)-sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})), (der(x2)-function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1, x2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){0}, function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){1})), (der(x7)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\").call([x7]){0}), (der(x8)-function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\").call([x8]){0}), (der(x9)-function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\").call([x9]){0}), (der(x10)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\").call([x10]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){1}))))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected)
 
 
         model = self.load_model("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"})
-        expected = "vertcat((x1-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([u1]){0}), (x2-function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\").call([u1, u2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1, u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1, u2]){1})), (x7-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\").call([u1]){0}), (x8-function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\").call([u2]){0}), (x9-function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\").call([u1]){0}), (x10-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\").call([u2]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1, u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1, u2]){1})))"
+        expected = "MX(vertcat((x1-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([u1]){0}), (x2-function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\").call([u1, u2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1, u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1, u2]){1})), (x7-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\").call([u1]){0}), (x8-function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\").call([u2]){0}), (x9-function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\").call([u1]){0}), (x10-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\").call([u2]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1, u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1, u2]){1}))))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected) 
 
 
         model = self.load_model("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"})
-        expected = "vertcat((x1-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([u1]){0}), (x2-function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([u1, u2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1, u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1, u2]){1})), (x7-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\").call([u1]){0}), (x8-function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\").call([u2]){0}), (x9-function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\").call([u1]){0}), (x10-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\").call([u2]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1, u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1, u2]){1})))"
+        expected = "MX(vertcat((x1-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([u1]){0}), (x2-function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([u1, u2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1, u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1, u2]){1})), (x7-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\").call([u1]){0}), (x8-function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\").call([u2]){0}), (x9-function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\").call([u1]){0}), (x10-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\").call([u2]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1, u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1, u2]){1}))))"
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected) 
 
@@ -1407,57 +1407,57 @@ def computeStringRepresentationForContainer(myContainer):
 @testattr(casadi = True)    
 def test_OptimicaLessThanPathConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQ", optproblemsFile)
-    expected = str(x1) + " <= " + str(MX(1.0))
+    expected = str(x1.getName()) + " <= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expected))
 
 @testattr(casadi = True)
 def test_OptimicaGreaterThanPathConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQ", optproblemsFile)
-    expected = str(x1) + " >= " + str(MX(1.0))
+    expected = str(x1.getName()) + " >= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expected))
     
 @testattr(casadi = True)    
 def test_OptimicaSevaralPathConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQ", optproblemsFile)
-    expected = str(x2) + " <= " + str(MX(1.0)) +  str(x1) + " >= " + str(MX(1.0)) 
+    expected = str(x2.getName()) + " <= " + str(1) +  str(x1.getName()) + " >= " + str(1) 
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expected))    
 
 @testattr(casadi = True)
 def test_OptimicaEqualityPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationEQpoint", optproblemsFile)
-    expected = str(MX.sym("x1(finalTime)")) + " = " + str(MX(1.0))
+    expected = str(MX.sym("x1(finalTime)").getName()) + " = " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
     
 @testattr(casadi = True)    
 def test_OptimicaLessThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQpoint", optproblemsFile)
-    expected = str(MX.sym("x1(finalTime)")) + " <= " + str(MX(1.0))
+    expected = str(MX.sym("x1(finalTime)").getName()) + " <= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
 
 @testattr(casadi = True)
 def test_OptimicaGreaterThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQpoint", optproblemsFile)
-    expected = str(MX.sym("x1(finalTime)")) + " >= " + str(MX(1.0))
+    expected = str(MX.sym("x1(finalTime)").getName()) + " >= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
     
 @testattr(casadi = True)    
 def test_OptimicaSevaralPointConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQandEQpoint", optproblemsFile)
-    expected = str(MX.sym("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX.sym("x1(startTime + 1)")) + " >= " + str(MX(1.0)) + str(MX.sym("x2(finalTime + 1)")) + " = " + str(MX(1.0))
+    expected = str(MX.sym("x2(startTime + 1)").getName()) + " <= " + str(1) +  str(MX.sym("x1(startTime + 1)").getName()) + " >= " + str(1) + str(MX.sym("x2(finalTime + 1)").getName()) + " = " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
     
 @testattr(casadi = True)    
 def test_OptimicaMixedConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationMixedConstraints", optproblemsFile)
-    expectedPath = str(MX.sym("x3(startTime + 1)")) + " <= " + str(x1)
-    expectedPoint =  str(MX.sym("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX.sym("x1(startTime + 1)")) + " >= " + str(MX(1.0)) 
+    expectedPath = str(MX.sym("x3(startTime + 1)").getName()) + " <= " + str(x1.getName())
+    expectedPoint =  str(MX.sym("x2(startTime + 1)").getName()) + " <= " + str(1) +  str(MX.sym("x1(startTime + 1)").getName()) + " >= " + str(1) 
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expectedPath))
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
