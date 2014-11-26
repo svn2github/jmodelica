@@ -97,7 +97,7 @@ aspect OverdeterminedInitialSystem {
          * Variable evaluator that is used during analyse of overdetermined
          * initial system.
          */
-        public class OISVariableEvaluator implements VariableEvaluator {
+        public class OISVariableEvaluator extends VariableEvaluator {
             
             private Set<CommonVariableDecl> evaluationStack = new HashSet<CommonVariableDecl>();
             private Map<CommonVariableDecl, CValue> evaluationCache = new LinkedHashMap<CommonVariableDecl, CValue>();
@@ -134,32 +134,6 @@ aspect OverdeterminedInitialSystem {
             @Override
             public CValue ceval(CommonVariableDecl variable, Index i) {
                 return CValue.UNKNOWN;
-            }
-            
-            @Override
-            public CValue ceval(FExp exp) {
-                return exp.ceval(this);
-            }
-            
-            @Override
-            public FunctionEvaluator createFunctionEvaluator(Map<CommonVariableDecl, CValue> values) {
-                return new FunctionEvaluator(values);
-            }
-            
-            @Override
-            public boolean hasEvaluationValue(CommonVariableDecl variable) {
-                throw new UnsupportedOperationException();
-            }
-            
-            @Override
-            public void setEvaluationValue(CommonVariableDecl variable,
-                    CValue val) {
-                throw new UnsupportedOperationException();
-            }
-            
-            @Override
-            public CValue evaluationValue(CommonVariableDecl variable) {
-                throw new UnsupportedOperationException();
             }
         }
     }

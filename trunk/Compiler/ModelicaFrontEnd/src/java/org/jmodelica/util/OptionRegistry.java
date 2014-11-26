@@ -429,6 +429,13 @@ abstract public class OptionRegistry {
             false,
             "Looks for function calls in blocks. If a function call in a block doesn't depend on"
             + "the block in question, it is extracted."),
+        FUNCTION_INCIDENCE_CALC
+            ("function_incidence_computation",
+            compiler,
+            "none",
+            "Controls how matching algorithm computes incidences for function call equations."
+            + " Possible values: 'none', 'all'. With 'none' all outputs are assumed to depend"
+            + " on all inputs. With 'all' the compiler analyses the function to determine dependencies."),
 
         // Runtime options
         /*

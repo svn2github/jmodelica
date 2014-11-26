@@ -3132,6 +3132,10 @@ aspect FlatDiagnostics {
     public String FClass.printDAEInitBLT() {
         return getDAEInitBLT().toString();
     }
+    
+    public String FClass.printMatchedDAE() {
+        return computeMatchedDAEBiPGraph().toString();
+    }
 
 
     syn String FClass.attributeLevels() {
