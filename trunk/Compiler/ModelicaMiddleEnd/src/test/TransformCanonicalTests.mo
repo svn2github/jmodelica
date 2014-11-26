@@ -5670,6 +5670,78 @@ eq_6 : c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({
 ")})));
 end IncidenceComputation5;
 
+model IncidenceComputation6
+    function func
+        input Real[3] x;
+        input Real n;
+        output Real[3] y;
+      algorithm
+        y := func(x,n);
+    end func;
+    Real a,b,c,d,e,f;
+equation
+    der(d) = time;
+    der(e) = time;
+    der(f) = time;
+    ({d,b,f}) = func({a,e,c},0);
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="IncidenceComputation6",
+            description="Incidence computation in function call equation. Test recursive function.",
+            equation_sorting=true,
+            inline_functions="none",
+            function_incidence_computation="all",
+            methodName="printMatchedDAE",
+            methodResult="
+BiPGraph (6 equations, 6 variables)
+Variables: {der(d) der(e) der(f) a b c }
+eq_1 : der(d)¤ // der(d) = time
+eq_2 : der(e)¤ // der(e) = time
+eq_3 : der(f)¤ // der(f) = time
+eq_4 : a¤ c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+eq_5 : b¤ a¤ c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+eq_6 : a¤ c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+")})));
+end IncidenceComputation6;
+
+model IncidenceComputation7
+    function func
+        input Real[3] x;
+        input Real n;
+        output Real[3] y;
+      algorithm
+        if x[1] > x[2] then
+            y := x;
+        else
+            y := x;
+        end if;
+    end func;
+    Real a,b,c,d,e,f;
+equation
+    der(d) = time;
+    der(e) = time;
+    der(f) = time;
+    ({d,b,f}) = func({a,e,c},0);
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="IncidenceComputation7",
+            description="Incidence computation in function call equation. Test if stmt.",
+            equation_sorting=true,
+            inline_functions="none",
+            function_incidence_computation="all",
+            methodName="printMatchedDAE",
+            methodResult="
+BiPGraph (6 equations, 6 variables)
+Variables: {der(d) der(e) der(f) a b c }
+eq_1 : der(d)¤ // der(d) = time
+eq_2 : der(e)¤ // der(e) = time
+eq_3 : der(f)¤ // der(f) = time
+eq_4 : a¤ c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+eq_5 : b¤ a¤ c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+eq_6 : a¤ c¤ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+")})));
+end IncidenceComputation7;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];

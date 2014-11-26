@@ -3228,12 +3228,17 @@ aspect ConstantEvaluation {
         
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
-            for (FFunctionVariable var : myInputs())
+            ArrayList<FFunctionVariable> inputs = myInputs();
+            ArrayList<FFunctionVariable> outputs = myOutputs();
+            
+            for (FFunctionVariable var : inputs)
                 var.readEvaluationValue(values);
-            for (FFunctionVariable var : myNonInputs())
+            for (FFunctionVariable var : outputs)
                 var.readEvaluationValue(values);
-        
-            fab.getFStatements().evaluateList(algoEvaluator);
+            
+            if (oldVal == null || algoEvaluator.recursive(inputs, outputs)) {
+                fab.getFStatements().evaluateList(algoEvaluator);
+            }
         } catch (ConstantEvaluationException e) {
             algoEvaluator.failed(myOutputs(), e);
         } finally {
@@ -4980,6 +4985,10 @@ aspect VariableEvaluator {
             }
             return exp.cevalEval(val);
         }
+        
+        public boolean isDependencyEvaluator() {
+            return false;
+        }
     }
     
     public class DependencyVariableEvaluator extends PartialVariableEvaluator {
@@ -5014,11 +5023,15 @@ aspect VariableEvaluator {
             }
             return res;
         }
+        
+        @Override
+        public boolean isDependencyEvaluator() {
+            return true;
+        }
     }
     
     public void FExp.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
-//        res.add(val.getDependencies());
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Unsupported FExp in LHS");
     }
     
     public void FArray.mapComponents(Map<FIdUseExp, Set<FIdUseExp>> res, CValue val) {
@@ -5087,6 +5100,10 @@ aspect VariableEvaluator {
             throw e;
         }
         
+        public boolean recursive(Iterable<? extends CommonVariableDecl> inputs, Iterable<? extends CommonVariableDecl> outputs) {
+            return true;
+        }
+        
         /**
          * Called when an if statement evaluation is started.
          */
@@ -5138,7 +5155,26 @@ aspect VariableEvaluator {
         }
         
         @Override
+        public boolean recursive(Iterable<? extends CommonVariableDecl> inputs, Iterable<? extends CommonVariableDecl> outputs) {
+            if (variableEvaluator.isDependencyEvaluator()) {
+                CValueUnknownUse val = new CValueUnknownUse();
+                for (CommonVariableDecl cvd : inputs) {
+                    val.merge(values.get(cvd));
+                }
+                for (CommonVariableDecl cvd : outputs) {
+                    values.put(cvd, val);
+                }
+                return false;
+            } else {
+                throw new ConstantEvaluationException(null, "Partial evaluation of recursive functions not supported.");
+            }
+        }
+        
+        @Override
         public void startIf() {
+            if (variableEvaluator.isDependencyEvaluator()) {
+                throw new ConstantEvaluationException(null, "Dependency evaluation of if statements not supported.");
+            }
             ifStack.add(new IfEvaluation());
         }
         
