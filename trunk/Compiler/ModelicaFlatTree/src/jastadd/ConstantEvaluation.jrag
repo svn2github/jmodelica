@@ -2346,7 +2346,7 @@ aspect ConstantEvaluation {
     }
     eq FPreExp.cevalUse(VariableEvaluator evaluator) {
         if (variability().constantVariability())
-            return super.cevalCalc(evaluator);
+            return super.cevalUse(evaluator);
         FAbstractVariable decl = myFV();
         return decl == null ? CValue.UNKNOWN : evaluator.ceval(decl);
     }

@@ -2370,6 +2370,21 @@ end EvaluationTests.FuncInArrayExpEval1;
 ")})));
 end FuncInArrayExpEval1;
 
+model PreExp1
+    Integer x = 1;
+    Integer y = pre(x);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PreExp1",
+            description="Constant evaluation of pre exp.",
+            flatModel="
+fclass EvaluationTests.PreExp1
+ constant Integer x = 1;
+ constant Integer y = 1;
+end EvaluationTests.PreExp1;
+")})));
+end PreExp1;
+
 model Functional1
     partial function partFunc
         output Real y;
