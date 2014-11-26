@@ -113,7 +113,7 @@ class ModelicaTransfer(object):
         assert strnorm(diffs[0].getAttribute("quantity")) ==\
                strnorm(MX.sym("kg")) 
 
-    @testattr(casadi = True and platform.system() == "Linux")
+    @testattr(casadi = True)
     def test_ModelicaDisplayUnit(self):
         model =  self.load_model("AtomicModelAttributeDisplayUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)

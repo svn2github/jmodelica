@@ -18,7 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
-    const casadi::MX FlatEquations::getDaeResidual() const {
+    const casadi::MX FlatEquations::getDaeResidual() const
+    {
         casadi::MX daeRes;
         for (std::vector< Ref<Equation> >::const_iterator it = daeEquations.begin(); it != daeEquations.end(); ++it) {
             daeRes.append((*it)->getResidual());

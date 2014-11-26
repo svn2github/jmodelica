@@ -96,11 +96,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "FlatEquations.hpp"
 #include "BLT.hpp"
 
-// For transforming output from JCC-wrapped classes to CasADi objects. 
+// For transforming output from JCC-wrapped classes to CasADi objects.
 // Must be included after FExp.h
-#include "mxwrap.hpp" 
-#include "mxfunctionwrap.hpp" 
-#include "mxvectorwrap.hpp" 
+#include "mxwrap.hpp"
+#include "mxfunctionwrap.hpp"
+#include "mxvectorwrap.hpp"
 
 namespace mc = org::jmodelica::modelica::compiler;
 namespace jl = java::lang;
@@ -110,10 +110,11 @@ using std::vector;
 
 namespace oc = org::jmodelica::optimica::compiler;
 
-namespace ModelicaCasADi {
-
-typedef struct MCStruct
+namespace ModelicaCasADi
 {
+
+    typedef struct MCStruct
+    {
         typedef mc::FClass FClass;
         typedef mc::List List;
         typedef mc::FDerivedType FDerivedType;
@@ -130,11 +131,11 @@ typedef struct MCStruct
         typedef mc::FExp FExp;
         typedef mc::AbstractEquationBlock TBlock;
         typedef mc::BLT TBLT;
-        
-}MCStruct;
 
-typedef struct OCStruct
-{
+    }MCStruct;
+
+    typedef struct OCStruct
+    {
         typedef oc::FClass FClass;
         typedef oc::List List;
         typedef oc::FDerivedType FDerivedType;
@@ -151,117 +152,114 @@ typedef struct OCStruct
         typedef oc::FEquation FEquation;
         typedef oc::AbstractEquationBlock TBlock;
         typedef oc::BLT TBLT;
-        
-}OCStruct;
 
-template <typename CStruct, typename TModel>
-void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelFiles,
-                        Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt=false)
-{
-      if(with_blt){
+    }OCStruct;
+
+    template <typename CStruct, typename TModel>
+        void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelFiles,
+    Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt=false) {
+        if(with_blt) {
             options->setBooleanOption("automatic_tearing", false);
-      }
-      typename CStruct::TCompiler compiler(options->getOptionRegistry());
-      java::lang::String fileVecJava[modelFiles.size()];
-      for (int i = 0; i < modelFiles.size(); ++i) {
+        }
+        typename CStruct::TCompiler compiler(options->getOptionRegistry());
+        java::lang::String fileVecJava[modelFiles.size()];
+        for (int i = 0; i < modelFiles.size(); ++i) {
             fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
-      }
-      compiler.setLogger(StringFromUTF(log_level.c_str()));
-      // NB: It is assumed that no other fclass is created or used between this point and
-      // the call to `ifcasadi_free_instances();`, and that the ifcasadi instance list
-      // is empty at this point; or too many instances will be deleted by it.
-      typename CStruct::FClass fclass = compiler.compileModelNoCodeGen(
+        }
+        compiler.setLogger(StringFromUTF(log_level.c_str()));
+        // NB: It is assumed that no other fclass is created or used between this point and
+        // the call to `ifcasadi_free_instances();`, and that the ifcasadi instance list
+        // is empty at this point; or too many instances will be deleted by it.
+        typename CStruct::FClass fclass = compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
-        
-      std::string identfier = env->toString(fclass.nameUnderscore().this$);
-      // Initialize the model with the model identfier.
-      m->initializeModel(identfier);
-      /***** ModelicaCasADi::Model *****/
-      // Transfer time variable
-      transferTime<typename CStruct::FClass>(m, fclass);
-      // Transfer user defined types (also generates base types for the user types). 
-      transferUserDefinedTypes<typename CStruct::FClass, typename CStruct::List, typename CStruct::FDerivedType, 
-                               typename CStruct::FAttribute, typename CStruct::FType>(m, fclass);
-      // Variables
-      transferVariables<java::util::ArrayList, typename CStruct::FVariable, typename CStruct::FDerivativeVariable, 
-        typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables());
 
-      ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
-      typename CStruct::TBLT jblt;
-      if(with_blt){
+        std::string identfier = env->toString(fclass.nameUnderscore().this$);
+        // Initialize the model with the model identfier.
+        m->initializeModel(identfier);
+        /***** ModelicaCasADi::Model *****/
+        // Transfer time variable
+        transferTime<typename CStruct::FClass>(m, fclass);
+        // Transfer user defined types (also generates base types for the user types).
+        transferUserDefinedTypes<typename CStruct::FClass, typename CStruct::List, typename CStruct::FDerivedType,
+            typename CStruct::FAttribute, typename CStruct::FType>(m, fclass);
+        // Variables
+        transferVariables<java::util::ArrayList, typename CStruct::FVariable, typename CStruct::FDerivativeVariable,
+            typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables());
+
+        ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
+        typename CStruct::TBLT jblt;
+        if(with_blt) {
             jblt =fclass.getDAEBLT();
-            if(jblt.size()>0){
+            if(jblt.size()>0) {
                 eqContainer = new ModelicaCasADi::BLT();
             }
-            else{
+            else {
                 std::cout<<"The Model does not have a BLT. Transfering list of equations.\n";
-                eqContainer = new ModelicaCasADi::FlatEquations();            
+                eqContainer = new ModelicaCasADi::FlatEquations();
             }
-      }
-      else{
+        }
+        else {
             eqContainer = new ModelicaCasADi::FlatEquations();
-      }
-      
-      if(eqContainer->hasBLT()){
-            
+        }
+
+        if(eqContainer->hasBLT()) {
+
             transferBLTToContainer<typename CStruct::TBLT,
-                        typename CStruct::TBlock,
-                        java::util::Collection,
-                        java::util::Iterator,
-                        typename CStruct::FVariable,
-                        typename CStruct::FAbstractEquation,
-                        typename CStruct::FEquation,
-                        typename CStruct::FExp,
-                        JArray>(&jblt, eqContainer, m->getNodeToVariableMap(), false, false);
-      }
-      else{
+                typename CStruct::TBlock,
+                java::util::Collection,
+                java::util::Iterator,
+                typename CStruct::FVariable,
+                typename CStruct::FAbstractEquation,
+                typename CStruct::FEquation,
+                typename CStruct::FExp,
+                JArray>(&jblt, eqContainer, m->getNodeToVariableMap(), false, false);
+        }
+        else {
             transferDaeEquationsToContainer<java::util::ArrayList, typename CStruct::FAbstractEquation>(eqContainer, fclass.equations());
-      }
-      
-      m->setEquations(eqContainer);
-      // Equations
-      //transferDaeEquations<java::util::ArrayList, typename CStruct::FAbstractEquation>(m, fclass.equations());
-      transferInitialEquations<java::util::ArrayList, typename CStruct::FAbstractEquation>(m, fclass.initialEquations());
-      
-      // Functions
-      transferFunctions<typename CStruct::FClass, typename CStruct::List, typename CStruct::FFunctionDecl>(m, fclass);
+        }
 
-      // Done with fclass; release all CasADi resources that it has been given
-      ifcasadi::ifcasadi::ifcasadi_free_instances();
-}
+        m->setEquations(eqContainer);
+        // Equations
+        //transferDaeEquations<java::util::ArrayList, typename CStruct::FAbstractEquation>(m, fclass.equations());
+        transferInitialEquations<java::util::ArrayList, typename CStruct::FAbstractEquation>(m, fclass.initialEquations());
 
-void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vector<string> &modelFiles,
-        Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/)
-{
+        // Functions
+        transferFunctions<typename CStruct::FClass, typename CStruct::List, typename CStruct::FFunctionDecl>(m, fclass);
+
+        // Done with fclass; release all CasADi resources that it has been given
+        ifcasadi::ifcasadi::ifcasadi_free_instances();
+    }
+
+    void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vector<string> &modelFiles,
+    Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/) {
         try
         {
-           jl::System::initializeClass(false);
-           mc::ModelicaCompiler::initializeClass(false);
-           transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level,with_blt);     
+            jl::System::initializeClass(false);
+            mc::ModelicaCompiler::initializeClass(false);
+            transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level,with_blt);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given
             ifcasadi::ifcasadi::ifcasadi_free_instances();
             rethrowJavaException(e);
-        }        
-        
-}
+        }
 
-void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/)
-{
+    }
+
+    void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
+    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/) {
         try
         {
-           jl::System::initializeClass(false);
-           oc::ModelicaCompiler::initializeClass(false);
-           transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level,with_blt);     
+            jl::System::initializeClass(false);
+            oc::ModelicaCompiler::initializeClass(false);
+            transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level,with_blt);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given
             ifcasadi::ifcasadi::ifcasadi_free_instances();
             rethrowJavaException(e);
-        }             
-}
+        }
+    }
 
 }; // End namespace

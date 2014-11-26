@@ -28,7 +28,7 @@ try:
 except (NameError, ImportError):
     pass
 
-@testattr(casadi = True and platform.system() == "Linux")
+@testattr(casadi = True)
 def test_ccpp():
     """Run the Combined Cycle Power Plant example."""
     ccpp.run_demo(False)
