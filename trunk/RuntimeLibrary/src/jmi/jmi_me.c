@@ -189,7 +189,7 @@ int jmi_initialize(jmi_t* jmi) {
         return -1;
     }
     
-    retval = jmi_calculate_time_event(jmi);
+    retval = jmi_next_time_event(jmi);
     if(retval != 0) {
         jmi_log_comment(jmi->log, logError, "Computation of next time event failed after initialization.");
         if (jmi->jmi_callbacks.log_options.log_level >= 4){
@@ -825,6 +825,15 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
+        /* We are at an time event -> set atTimeEvent to true. */
+        if (jmi->nextTimeEvent.defined) {
+            jmi->atTimeEvent = ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
+            jmi->eventPhase = jmi->nextTimeEvent.phase;
+        }else{
+            jmi->atTimeEvent = JMI_FALSE;
+            jmi->eventPhase = JMI_TIME_GREATER;
+        }
+        
     } else if (intermediate_results) {
         top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
                                  "Continuing global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
@@ -959,7 +968,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         }
         
         /* Compute the next time event */
-        retval = jmi_calculate_time_event(jmi);
+        retval = jmi_next_time_event(jmi);
         if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
             jmi_log_unwind(jmi->log, top_node);
@@ -996,11 +1005,17 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 	/* If everything went well, check if termination of simulation was requested. */
 	event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
     
+    if (jmi->model_terminate == FALSE && jmi->atTimeEvent && 
+        jmi->eventPhase == JMI_TIME_EXACT && jmi->nextTimeEvent.defined 
+        && ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) &&
+        event_info->iteration_converged == TRUE) {
+        return jmi_event_iteration(jmi, intermediate_results, event_info);
+    }
     
     return 0;
 }
 
-int jmi_calculate_time_event(jmi_t* jmi) {
+int jmi_next_time_event(jmi_t* jmi) {
     int retval;
     
     retval = jmi_ode_next_time_event(jmi, &jmi->nextTimeEvent);

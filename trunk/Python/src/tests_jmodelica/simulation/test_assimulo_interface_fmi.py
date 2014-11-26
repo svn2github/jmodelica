@@ -60,6 +60,141 @@ def input_linear(t):
         
 input_object = (["u"],input_linear)
 
+
+class Test_Time_Events:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
+
+        compile_fmu("TimeEvents.Basic1", file_name, compiler_options={"relational_time_events":True}, compiler_log_level="debug:log.txt")
+        compile_fmu("TimeEvents.Basic2", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Basic3", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Basic4", file_name, compiler_options={"relational_time_events":True})
+        
+        compile_fmu("TimeEvents.Advanced1", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Advanced2", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Advanced3", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True})
+        
+        compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
+    
+    @testattr(stddist = True)
+    def test_time_event_basic_1(self):
+        model = load_fmu("TimeEvents_Basic1.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_basic_2(self):
+        model = load_fmu("TimeEvents_Basic2.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 2
+        assert ev.nextEventTime == model.get("p")
+        
+    @testattr(stddist = True)
+    def test_time_event_basic_3(self):
+        model = load_fmu("TimeEvents_Basic3.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 1.5
+        
+    @testattr(stddist = True)
+    def test_time_event_basic_4(self):
+        model = load_fmu("TimeEvents_Basic4.fmu")
+        
+        model.initialize()
+        ev = model.get_event_info()
+        assert ev.upcomingTimeEvent == False
+        assert model.get("x")== 2
+        
+        model.reset()
+        model.time = 1
+        model.initialize()
+        
+        assert ev.upcomingTimeEvent == False
+        assert model.get("x") == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced1(self):
+        model = load_fmu("TimeEvents_Advanced1.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 2): ", model.get("i") 
+        assert model.get("i") == 2
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced2(self):
+        model = load_fmu("TimeEvents_Advanced2.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 2): ", model.get("i") 
+        assert model.get("i") == 2
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced3(self):
+        model = load_fmu("TimeEvents_Advanced3.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 2): ", model.get("i") 
+        print "j (should be 1): ", model.get("j") 
+        assert model.get("i") == 2
+        assert model.get("j") == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced4(self):
+        model = load_fmu("TimeEvents_Advanced4.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 1): ", model.get("i") 
+        print "j (should be 1): ", model.get("j") 
+        assert model.get("i") == 1
+        assert model.get("j") == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_mixed1(self):
+        model = load_fmu("TimeEvents_Mixed1.fmu")
+        model.initialize()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 1.5
+        
+        res = model.simulate(final_time=4, options={"initialize":False})
+        
+        print "x: ", res["x"]
+        print "dx: ", res["der(x)"]
+        
+        assert res.solver.statistics["ntimeevents"] == 2
+        assert res.solver.statistics["nstateevents"] == 2
+        
+
 class Test_Events:
     @classmethod
     def setUpClass(cls):

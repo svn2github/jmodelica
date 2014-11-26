@@ -250,6 +250,9 @@
 #define JMI_OK     0                 /**< \brief Everything is OK. */
 #define JMI_ERROR -1                 /**< \brief An ERROR occurred. */
 
+#define JMI_TIME_EXACT 0            /**< \brief Time events that are exact shall be handled. */
+#define JMI_TIME_GREATER 1          /**< \brief Time events should be handled as time has passed the exact. */
+
 /*The option JMI_DER_CPPAD is no longer used and should be removed.*/
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
@@ -781,6 +784,26 @@ int jmi_get_output_vrefs(jmi_t *jmi, int *output_vrefs);
  *
  */
 jmi_real_t* jmi_get_sw(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the first switching function (state) in the DAE \$fF\$f.
+ * A switch value of 1 corresponds to true and 0 corresponds to false.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the vector of switching functions.
+ *
+ */
+jmi_real_t* jmi_get_state_sw(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the first switching function (time) in the DAE \$fF\$f.
+ * A switch value of 1 corresponds to true and 0 corresponds to false.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the vector of switching functions.
+ *
+ */
+jmi_real_t* jmi_get_time_sw(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the first switching function in the initialization system \$fF_0\$f.

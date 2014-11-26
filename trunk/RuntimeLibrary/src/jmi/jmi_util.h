@@ -862,7 +862,7 @@ int jmi_init(jmi_t** jmi,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
-        int n_sw, int n_sw_init,
+        int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
@@ -1097,6 +1097,8 @@ struct jmi_t {
 
     int n_sw;                            /**< \brief Number of switching functions in the DAE \f$F\f$. */
     int n_sw_init;                       /**< \brief Number of switching functions in the DAE initialization system\f$F_0\f$. */
+    int n_time_sw;                       /**< \brief Number of switches related to time events in the DAE \f$F\f$. */
+    int n_state_sw;                      /**< \brief Number of switches related to state events in the DAE \f$F\f$. */
 
     int n_guards;                        /**< \brief Number of guards in the DAE \f$F\f$. */
     int n_guards_init;                   /**< \brief Number of guards in the DAE initialization system\f$F_0\f$. */
@@ -1155,6 +1157,8 @@ struct jmi_t {
 
     int offs_sw;                         /**< \brief  Offset of the first switching function in the DAE \f$F\f$ */
     int offs_sw_init;                    /**< \brief  Offset of the first switching function in the DAE initialization system \f$F_0\f$ */
+    int offs_state_sw;                   /**< \brief  Offset of the first switching function (state) in the DAE \f$F\f$ */
+    int offs_time_sw;                    /**< \brief  Offset of the first switching function (time) in the DAE \f$F\f$ */
 
     int offs_guards;                     /**< \brief  Offset of the first guard \f$F\f$ */
     int offs_guards_init;                /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
@@ -1208,6 +1212,7 @@ struct jmi_t {
 
     jmi_real_t atEvent;                  /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
+    jmi_real_t atTimeEvent;              /**< \brief A boolean variable indicating if the model equations are evaluated at an time event time */
     int eventPhase;                      /**< \brief Zero if in first phase of event iteration, non zero if in second phase */
     
     jmi_time_event_t nextTimeEvent;

@@ -74,7 +74,9 @@ static const int N_string_u = $n_string_u$;
 
 static const int N_ext_objs = $n_ext_objs$;
 
-static const int N_sw = $n_state_switches$ + $n_time_switches$;
+static const int N_time_sw = $n_time_switches$;
+static const int N_state_sw = $n_state_switches$;
+static const int N_sw = $n_time_switches$ + $n_state_switches$;
 static const int N_delay_sw = $n_delay_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
@@ -279,7 +281,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
              N_real_dx, N_real_x, N_real_u, N_real_w,
              N_real_d, N_integer_d, N_integer_u, N_boolean_d, N_boolean_u,
              N_string_d, N_string_u, N_outputs, (int (*))Output_vrefs,
-             N_sw, N_sw_init, N_guards, N_guards_init,
+             N_sw, N_sw_init, N_time_sw,N_state_sw, N_guards, N_guards_init,
              N_dae_blocks, N_dae_init_blocks,
              N_initial_relations, (int (*))DAE_initial_relations,
              N_relations, (int (*))DAE_relations,

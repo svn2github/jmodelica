@@ -106,7 +106,7 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
 
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results, jmi_event_info_t* event_info);
 
-int jmi_calculate_time_event(jmi_t* jmi);
+int jmi_next_time_event(jmi_t* jmi);
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event);
 

@@ -42,7 +42,7 @@ int jmi_init(jmi_t** jmi,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
-        int n_sw, int n_sw_init,
+        int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
@@ -104,6 +104,8 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->n_sw = n_sw;
     jmi_->n_sw_init = n_sw_init;
+    jmi_->n_time_sw = n_time_sw;
+    jmi_->n_state_sw = n_state_sw;
 
     jmi_->n_guards = n_guards;
     jmi_->n_guards_init = n_guards_init;
@@ -154,6 +156,8 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->offs_sw = jmi_->offs_boolean_u + n_boolean_u;
     jmi_->offs_sw_init = jmi_->offs_sw + n_sw;
+    jmi_->offs_state_sw = jmi_->offs_sw;
+    jmi_->offs_time_sw = jmi_->offs_sw+n_state_sw;
 
     jmi_->offs_guards = jmi_->offs_sw_init + n_sw_init;
     jmi_->offs_guards_init = jmi_->offs_guards + n_guards;

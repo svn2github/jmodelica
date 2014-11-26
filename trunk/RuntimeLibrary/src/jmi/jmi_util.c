@@ -1582,6 +1582,14 @@ jmi_real_t* jmi_get_sw(jmi_t* jmi) {
     return *(jmi->z) + jmi->offs_sw;
 }
 
+jmi_real_t* jmi_get_state_sw(jmi_t* jmi) {
+    return *(jmi->z) + jmi->offs_state_sw;
+}
+
+jmi_real_t* jmi_get_time_sw(jmi_t* jmi) {
+    return *(jmi->z) + jmi->offs_time_sw;
+}
+
 jmi_real_t* jmi_get_sw_init(jmi_t* jmi) {
     return *(jmi->z) + jmi->offs_sw_init;
 }
