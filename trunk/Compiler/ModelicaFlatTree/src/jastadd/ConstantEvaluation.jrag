@@ -3674,7 +3674,7 @@ aspect ConstantEvaluation {
      */
     @Override
     public int FAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
-        getLeft().assignToInFuncEval(evaluator, getRight().ceval(evaluator));
+        getLeft().assignToInFuncEval(evaluator, evaluator.ceval(getRight()));
         return EVAL_CONT;
     }
     
@@ -4965,6 +4965,10 @@ aspect VariableEvaluator {
             return use.type().unknownCValue();
         }
         
+        protected CValue createUnknownCValue(FExp exp) {
+            return exp.type().unknownCValue();
+        }
+        
         @Override
         public AlgorithmEvaluator createAlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
             return new PartialAlgorithmEvaluator(this, values);
@@ -4989,6 +4993,7 @@ aspect VariableEvaluator {
         public boolean isDependencyEvaluator() {
             return false;
         }
+        
     }
     
     public class DependencyVariableEvaluator extends PartialVariableEvaluator {
@@ -5005,6 +5010,15 @@ aspect VariableEvaluator {
         @Override
         protected CValue createUnknownCValue(FIdUseExp use) {
             return new CValueUnknownUse(use);
+        }
+        
+        @Override
+        protected CValue createUnknownCValue(FExp exp) {
+            CValue val = new CValueUnknownUse();
+            for (FIdUseExp use : exp.findFIdUseExpsInTree()) {
+                val = val.merge(use.cevalUse(this));
+            }
+            return val;
         }
         
         @Override
@@ -5082,6 +5096,10 @@ aspect VariableEvaluator {
             this.values = values;
         }
         
+        public CValue ceval(FExp exp) {
+            return exp.ceval(this);
+        }
+        
         @Override
         public void setEvaluationValue(CommonVariableDecl variable, CValue val) {
             super.setEvaluationValue(variable, val);
@@ -5129,6 +5147,15 @@ aspect VariableEvaluator {
             super(values);
             this.variableEvaluator = variableEvaluator;
             ifStack = new ArrayList<IfEvaluation>();
+        }
+        
+        @Override
+        public CValue ceval(FExp exp) {
+            try {
+                return exp.ceval(this);
+            } catch (ConstantEvaluationException e) {
+                return variableEvaluator.createUnknownCValue(exp);
+            }
         }
         
         @Override
