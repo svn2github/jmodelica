@@ -624,7 +624,6 @@ public class CGenerator extends GenericGenerator {
                 e.genVarDecls_C(p, str, INDENT);
             
             str.formatln("%sjmi_time_event_t nextEvent = {0};", indent);
-            str.formatln("%sjmi_real_t nextTimeEventTmp;", indent);
             str.formatln("%sjmi_real_t nSamp;", indent);
             
 //            str.print("  printf(\"sample function called at time %f\\n\",_t);\n");	

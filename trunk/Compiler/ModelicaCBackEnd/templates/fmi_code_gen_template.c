@@ -74,7 +74,7 @@ static const int N_string_u = $n_string_u$;
 
 static const int N_ext_objs = $n_ext_objs$;
 
-static const int N_sw = $n_switches$;
+static const int N_sw = $n_state_switches$ + $n_time_switches$;
 static const int N_delay_sw = $n_delay_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;

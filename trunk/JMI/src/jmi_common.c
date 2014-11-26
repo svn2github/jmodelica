@@ -27,6 +27,13 @@
 #include "jmi_log.h"
 #include "jmi_global.h"
 
+void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_t time) {
+    if (JMI_TRUE == LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_NOT(AD_WRAP_LITERAL(event->defined)), SURELY_GT_ZERO(event->time - time)), LOG_EXP_AND(ALMOST_ZERO(event->time - time), SURELY_GT_ZERO(event->phase - phase)))) {
+        event->defined = def;
+        event->phase = phase;
+        event->time = time;
+    }
+}
 
 jmi_ad_var_t jmi_divide_function(const char name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
   if (den==0) {

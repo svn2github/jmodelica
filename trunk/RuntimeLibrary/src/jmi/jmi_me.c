@@ -1013,7 +1013,7 @@ int jmi_calculate_time_event(jmi_t* jmi) {
     {
         jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
         if (t_delay != JMI_INF) {
-            JMI_MIN_TIME_EVENT(jmi->nextTimeEvent, 1, 0, t_delay)
+            jmi_min_time_event(&jmi->nextTimeEvent, 1, 0, t_delay);
         }
     }
     

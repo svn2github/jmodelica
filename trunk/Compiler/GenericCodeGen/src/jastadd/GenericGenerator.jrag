@@ -614,20 +614,35 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	/**
-	 * Number switching functions
-	 */
-	public class DAETag_numSwitchingFunctions extends DAETag {
-		
-		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
-			super("n_switches", myGenerator, fclass);
-		}
-	
-		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numSwitches());
-		}
-	
-	}
+    /**
+     * Number switching functions
+     */
+    public class DAETag_numStateSwitchingFunctions extends DAETag {
+        
+        public DAETag_numStateSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_state_switches", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numStateSwitches());
+        }
+        
+    }
+    
+    /**
+     * Number switching functions
+     */
+    public class DAETag_numTimeSwitchingFunctions extends DAETag {
+        
+        public DAETag_numTimeSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_time_switches", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numTimeSwitches());
+        }
+    
+    }
 
 	/**
 	 * Number switching functions in the initial equations

@@ -4211,13 +4211,9 @@ aspect CCodeGen {
         }
         str.println(") {");
         
-        str.format("%snextTimeEventTmp = ", p.indent(indent));
+        str.format("%sjmi_min_time_event(&%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
         p.print(solutionForTime(), str, indent);
-        str.println(";");
-        
-        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, %s, nextTimeEventTmp)", p.indent(indent), res, phased ? "1" : "0");
-        
-        str.formatln("%s}", indent);
+        str.formatln(");\n%s}", indent);
     }
     
     @Override
@@ -4239,10 +4235,9 @@ aspect CCodeGen {
         str.print("  if (SURELY_LT_ZERO(_t - (");
         getOffset().prettyPrint_C(str,"");
         str.print("))) {\n");
-        str.print("    nextTimeEventTmp = ");
+        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
         getOffset().prettyPrint_C(str,"");
-        str.print(";\n");
-        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, 0, nextTimeEventTmp)", indent, res);
+        str.println(");");
         //str.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
         str.print("  } ");   
         // Case 2: we are at a sample                                   
@@ -4257,12 +4252,12 @@ aspect CCodeGen {
         str.print(")) / (");
         getInterval().prettyPrint_C(str,"");
         str.print("));\n");
-        str.print("    nextTimeEventTmp = (nSamp + 1.0) * (");
+        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
+        str.print("(nSamp + 1.0) * (");
         getInterval().prettyPrint_C(str,"");
         str.print(") + (");
         getOffset().prettyPrint_C(str,"");
-        str.print(");\n");
-        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, 0, nextTimeEventTmp)", indent, res);
+        str.println("));");
 /*----*//*
         str.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
         str.print("(_t-");
@@ -4287,12 +4282,12 @@ aspect CCodeGen {
         str.print(")) / (");
         getInterval().prettyPrint_C(str,"");
         str.print("));\n");
-        str.print("    nextTimeEventTmp = (nSamp + 1.0) * (");
+        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
+        str.print("(nSamp + 1.0) * (");
         getInterval().prettyPrint_C(str,"");
         str.print(") + (");
         getOffset().prettyPrint_C(str,"");
-        str.print(");\n");
-        str.formatln("%sJMI_MIN_TIME_EVENT(%s, 1, 0, nextTimeEventTmp)", indent, res);
+        str.println("));");
 /*----*//*
         str.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
         str.print("(_t-");

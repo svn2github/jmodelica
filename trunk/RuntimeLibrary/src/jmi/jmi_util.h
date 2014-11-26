@@ -120,13 +120,14 @@ typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward de
 typedef struct _jmi_time_event_t {
     int defined;
     int phase;
-    jmi_real_t time;
+    jmi_ad_var_t time;
 } jmi_time_event_t;
 
-#define JMI_MIN_TIME_EVENT(EVENT, DEF, PHASE, TIME) \
-    if (!EVENT.defined || (EVENT.time > TIME) || ((EVENT.time == TIME) && (EVENT.phase > PHASE))) { \
-        EVENT.defined = DEF; EVENT.phase = PHASE; EVENT.time = TIME; \
-    }
+/**
+ * If the time event T2 defined by <code>def</code>, <code>phase</code>, and <code>time</code>
+ * is before the time event T1 defined by <code>event</code> then T1 is updated to T2.
+ */
+void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time);
 
 /* Masks for maping vref to indices. */               
 #define VREF_INDEX_MASK  0x0FFFFFFF

@@ -1103,7 +1103,12 @@ aspect FlatAPI {
         return i;
     }
     
-    syn int FClass.numSwitches() = numEventIndicators() + relExpsWithTimeEvent().size();
+    syn int FClass.numSwitches() = numStateSwitches() + numTimeSwitches();
+    syn int FClass.numStateSwitches() = relExpsWithStateEvent().size() + numDelayEventIndicators();
+    syn int FClass.numTimeSwitches() = relExpsWithTimeEvent().size();
+    
+    syn int FClass.numEventIndicators() = numStateSwitches();
+    
     syn lazy ArrayList<FExp> FClass.switchExps() {
         ArrayList<FExp> res = new ArrayList<FExp>();
         res.addAll(stateEventExps());
@@ -1116,8 +1121,6 @@ aspect FlatAPI {
             myEventIndicatorIndex();
     syn int FDelayExp.mySwitchIndex() = myEventIndicatorIndex();
     
-    
-    syn int FClass.numEventIndicators() = relExpsWithStateEvent().size() + numDelayEventIndicators();
     syn lazy ArrayList<FExp> FClass.stateEventExps() {
         ArrayList<FExp> res = new ArrayList<FExp>();
         res.addAll(relExpsWithStateEvent());
