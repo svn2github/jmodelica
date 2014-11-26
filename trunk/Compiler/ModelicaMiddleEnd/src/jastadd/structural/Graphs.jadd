@@ -1056,7 +1056,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             str.append(e);
             str.append(" : ");
             for (V v : e.getVariables()) {
-                str.append(v + (canMatch(e, v) ? "¤ " : "# "));
+                str.append(v + (canMatch(e, v) ? "@ " : "# "));
             }
             str.append("// " + e.printEquation() + "\n");
         }
