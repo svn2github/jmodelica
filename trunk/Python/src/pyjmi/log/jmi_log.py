@@ -47,8 +47,8 @@ def gather_solves(log):
     for solve in solves:
         block_solves = []
 
-        for bl_node in solve.find(('NewtonSolve', 'JacobianUpdated', 'ResidualScalingUpdated')):
-            if bl_node.type == 'NewtonSolve':
+        for bl_node in solve.find(('BrentSolve', 'NewtonSolve', 'JacobianUpdated', 'ResidualScalingUpdated')):
+            if bl_node.type == 'NewtonSolve' or bl_node.type == 'BrentSolve':
                 block_solve = bl_node
                 block_solves.append(block_solve)
                 block_solve['iterations'] = iterations = []

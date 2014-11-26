@@ -744,7 +744,7 @@ model JacTestDiscreteFunction1
 	algorithm
 		a := x ^ f;
 	end F;
-	Real x(start=5);
+	Real x(start=5,min=0);
 	Real y(start=10);
 	Real a(start=15);
 equation
@@ -787,7 +787,7 @@ equation
 	algorithm
 		a := x^2;
 	end F;
-	Real x(start=5);
+	Real x(start=5,min=0);
 	Real y(start=10);
 	Real a(start=15);
 	equation
@@ -807,7 +807,7 @@ equation
 		a := x*2*x;
 		b := y*4*x;
 	end F;
-	Real x(start=5);
+	Real x(start=5,min=0);
 	Real y(start=10);
 	Real a(start=15);
 	equation
@@ -828,7 +828,7 @@ equation
 		b := y*4*x;
 		c := y*4*x;
 	end F;
-	Real x(start=5);
+	Real x(start=5,min=0);
 	Real y(start=10);
 	Real a(start=15);
 	equation
