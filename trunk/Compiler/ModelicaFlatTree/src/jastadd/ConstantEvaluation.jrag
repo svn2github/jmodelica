@@ -3229,14 +3229,14 @@ aspect ConstantEvaluation {
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
             ArrayList<FFunctionVariable> inputs = myInputs();
-            ArrayList<FFunctionVariable> outputs = myOutputs();
+            ArrayList<FFunctionVariable> nonInputs = myNonInputs();
             
             for (FFunctionVariable var : inputs)
                 var.readEvaluationValue(values);
-            for (FFunctionVariable var : outputs)
+            for (FFunctionVariable var : nonInputs)
                 var.readEvaluationValue(values);
             
-            if (oldVal == null || algoEvaluator.recursive(inputs, outputs)) {
+            if (oldVal == null || algoEvaluator.recursive(inputs, nonInputs)) {
                 fab.getFStatements().evaluateList(algoEvaluator);
             }
         } catch (ConstantEvaluationException e) {
