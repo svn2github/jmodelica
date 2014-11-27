@@ -421,7 +421,7 @@ abstract public class OptionRegistry {
         RELATIONAL_TIME_EVENTS
             ("relational_time_events",
             compiler,
-            false,
+            true,
             "Controls whether relational operators should be able to generate time events. Default is true."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
