@@ -4785,6 +4785,34 @@ Semantic error at line 4684, column 21:
 end StateInitialPars7;
 
 
+model StateInitialPars8
+    Real x(start = 1);
+	Real y(stateSelect = StateSelect.always) = x;
+equation 
+    der(x) = -x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StateInitialPars8",
+            description="Alias eliminating differentiated variable with state_initial_equations active",
+            state_initial_equations=true,
+            flatModel="
+fclass TransformCanonicalTests.StateInitialPars8
+ Real y(stateSelect = StateSelect.always,start = 1);
+ parameter Real _start_y = 1 /* 1 */;
+initial equation 
+ y = _start_y;
+equation
+ der(y) = - y;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end TransformCanonicalTests.StateInitialPars8;
+")})));
+end StateInitialPars8;
+
+
   model SolveEqTest1
     Real x, y, z;
   equation

@@ -108,7 +108,6 @@ aspect TransformCanonical {
                 return;
             transformations = new ArrayList<Transformation>();
             transformations.add(new enableIfEquationElimination());
-            transformations.add(new addStateInitialEquationsIfSet());
             transformations.add(new enableArrayAccessRewrite());
             transformations.add(new genAlgorithmFunctionsIfSet());
             transformations.add(new genBindingAssignments());
@@ -130,6 +129,7 @@ aspect TransformCanonical {
             transformations.add(new enableSemiLinearRewrite());
             transformations.add(new eliminateEqualSwitches());
             transformations.add(new genInitialEquations());
+            transformations.add(new addStateInitialEquationsIfSet());
             transformations.add(new setFDerivativeVariablesPreBLT());
             transformations.add(new propagateNonFixedParameters());
             transformations.add(new indexReduction());
@@ -3327,6 +3327,8 @@ aspect StateInitialEquations {
 
     public class FClass {
         public class addStateInitialEquationsIfSet extends Transformation {
+            // Constraints: after alias elimination (see #), before BLT
+            
             public addStateInitialEquationsIfSet() {
                 super("state_initial_equations");
             }
