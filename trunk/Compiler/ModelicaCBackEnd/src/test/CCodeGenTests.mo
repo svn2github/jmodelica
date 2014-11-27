@@ -14348,6 +14348,50 @@ equation
 ")})));
 end TestExtObject6;
 
+model TestExtObject7
+    record R
+        parameter ExtObject eo = ExtObject();
+        parameter ExtObject[2] eos = {ExtObject(), ExtObject()};
+    end R;
+    R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestExtObject7",
+            description="Test that constructor and destructor calls are generated for external objects in records.",
+            variability_propagation=false,
+            template="
+$C_set_start_values$
+$C_destruct_external_object$
+",
+            generatedCode="
+    if (!jmi->indep_extobjs_initialized) { 
+        _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    }
+    if (!jmi->indep_extobjs_initialized) { 
+        _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    }
+    if (!jmi->indep_extobjs_initialized) { 
+        _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    }
+    model_init_eval_parameters(jmi);
+    jmi->indep_extobjs_initialized = 1;
+
+    if (_r_eo_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def0(_r_eo_0);
+        _r_eo_0 = NULL;
+    }
+    if (_r_eos_1_1 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def0(_r_eos_1_1);
+        _r_eos_1_1 = NULL;
+    }
+    if (_r_eos_2_2 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def0(_r_eos_2_2);
+        _r_eos_2_2 = NULL;
+    }
+")})));
+end TestExtObject7;
+
 model TestExtObjectArray1
     ExtObject myEOs[2] = { ExtObject(), ExtObject() };
     Real z;

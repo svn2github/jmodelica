@@ -666,7 +666,22 @@ aspect Scalarization {
     public FExternalObjectVariable FExternalObjectVariable.copyForName(FQName name) {
         FExternalObjectVariable fv = (FExternalObjectVariable) super.copyForName(name);
         fv.setConstructor(getConstructor().fullCopy());
+        if (hasDestructorCall()) {
+            fv.setDestructorCall(getDestructorCall().scalarizeDestructor(name));
+        }
         return fv;
+    }
+    
+    public FFunctionCallStmt FFunctionCallStmt.scalarizeDestructor(FQName name) {
+        FFunctionCall call = (FFunctionCall) getCall().reflatten(name.copyPrefix());
+        if (name.hasFArraySubscripts()) {
+            Index i = name.getFArraySubscripts().asIndex();
+            call.setArg(call.getArg(0).getArray().get(i).scalarize(Collections.<String,FExp>emptyMap()), 0);
+        }
+        
+        FFunctionCallStmt stmt = fullCopy();
+        stmt.setCall(call);
+        return stmt;
     }
 
 	/**
