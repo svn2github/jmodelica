@@ -344,6 +344,11 @@ static int index2pos(jmi_delaybuffer_t *buffer, int index) {
 
 static void discard_right(jmi_delaybuffer_t *buffer) {
     buffer->size--;
+    if (buffer->size > 0) {
+        /* Don't link beyond buffer */
+        int tail_index = buffer->head_index + buffer->size - 1;
+        buffer->buf[index2pos(buffer, tail_index)].right = tail_index;
+    }
 }
 
 static void discard_left(jmi_delaybuffer_t *buffer) {
@@ -351,6 +356,10 @@ static void discard_left(jmi_delaybuffer_t *buffer) {
     buffer->head++;
     if (buffer->head >= buffer->capacity) buffer->head = 0;
     buffer->head_index++;
+    if (buffer->size > 0) {
+        /* Don't link beyond buffer */
+        buffer->buf[buffer->head].left = buffer->head_index;
+    }
 }
 
 static void undiscard_left(jmi_delaybuffer_t *buffer) {
