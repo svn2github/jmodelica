@@ -4848,7 +4848,6 @@ equation
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
-            relational_time_events=false,
             generate_dae_jacobian=true,
             inline_functions="none",
             template="$C_DAE_equation_directional_derivative$",
@@ -5078,7 +5077,6 @@ equation
             equation_sorting=true,
             generate_ode=true,
             generate_dae_jacobian=true,
-            relational_time_events=false,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
     jmi_ad_var_t v_0;
