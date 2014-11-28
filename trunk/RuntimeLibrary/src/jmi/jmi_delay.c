@@ -504,6 +504,35 @@ static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     return 0;
 }
 
+/* Interpolate the minimum degree polynomial through the given points using Neville's Algorithm */
+#define MAX_NEVILLE_PTS 16
+static jmi_real_t neville_evaluate(jmi_delaybuffer_t *buffer, jmi_real_t t, int first_index, int n_points) {
+    jmi_real_t work[MAX_NEVILLE_PTS];
+    jmi_real_t ts[MAX_NEVILLE_PTS];
+    jmi_delay_point_t *buf = buffer->buf;
+    int i, n;
+    if (n_points > MAX_NEVILLE_PTS) return -1; /* todo: error */
+
+    /* Copy the initial points */
+    for (i=0; i < n_points; i++) {
+        int pos = index2pos(buffer, i + first_index);
+        work[i] = buf[pos].y;
+        ts[i] = buf[pos].t;
+    }
+
+    /* Evaluate the intermediate results */
+    /* Loop over the polynomial order n */
+    for (n=1; n < n_points; n++) {
+        /* Loop over the interpolating polynomials of order n */
+        /* work[i] contains p[i:i+n-1](t) before this, and p[i:i+n](t) after */
+        for (i=0; i < n_points-n; i++) {
+            int j = i+n; 
+            work[i] = ((ts[j] - t)*work[i] + (t-ts[i])*work[i+1])/(ts[j]-ts[i]);
+        }
+    }
+    return work[0];
+}
+
 static jmi_real_t evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
                            jmi_real_t tr, jmi_delay_position_t *position) {
     jmi_delay_point_t *buf = buffer->buf;
@@ -513,7 +542,17 @@ static jmi_real_t evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     }
     if (update_position(buffer, at_event, tr, position) < 0) return -1; /* todo: error */
 
-    /* Linear interpolation */
+    /* Clamp to initial value if before initial time. Todo: better way? */
+    
+    if ((position->curr_interval == buffer->head_index) && (tr < buf[buffer->head].t)) {
+        return buf[buffer->head].y;
+    }
+    
+
+    return neville_evaluate(buffer, tr, position->curr_interval, 2);
+
+    /* Linear interpolation. Todo: remove / use as special case? */
+    /*
     {
         int lpos = index2pos(buffer, position->curr_interval);
         int rpos = index2pos(buffer, position->curr_interval+1);
@@ -525,6 +564,7 @@ static jmi_real_t evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
 
         return y0 + (y1-y0)*(tr-t0)/(t1-t0);
     }
+    */
 }
 
 static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
