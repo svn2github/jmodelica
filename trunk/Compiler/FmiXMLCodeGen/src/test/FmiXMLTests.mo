@@ -912,13 +912,13 @@ $modelStructure$",
     <ScalarVariable name=\"t2\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"u1\" valueReference=\"9\" causality=\"input\" variability=\"continuous\" initial=\"approx\">
+    <ScalarVariable name=\"u1\" valueReference=\"9\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"u2\" valueReference=\"10\" causality=\"input\" variability=\"continuous\" initial=\"approx\">
+    <ScalarVariable name=\"u2\" valueReference=\"10\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"u3\" valueReference=\"11\" causality=\"input\" variability=\"continuous\" initial=\"approx\">
+    <ScalarVariable name=\"u3\" valueReference=\"11\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
     <ScalarVariable name=\"x1\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
@@ -1105,5 +1105,25 @@ $modelVariables$
 </ModelVariables>
 ")})));
 end StructuralStartValue2;
+
+model NoInitialTypeForInputs
+    input Real myInput;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="NoInitialTypeForInputs",
+            description="Check that input variables does not generate an initial type.",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"myInput\" valueReference=\"0\" causality=\"input\" variability=\"continuous\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end NoInitialTypeForInputs;
 
 end FmiXMLTests;
