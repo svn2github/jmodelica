@@ -428,11 +428,11 @@ class TestOutOfRangeOps(SimulationTest):
         """
         Test that results match the expected ones.
         """
-        self.assert_end_value('x1', 1e20)
-        self.assert_end_value('x2', -1e20)
-        self.assert_end_value('x3', -1e20)
-        self.assert_end_value('x4', 1e20)
-        self.assert_end_value('x5', 1e20)
-        self.assert_end_value('x6', 1e20)
-        self.assert_end_value('x7', 1e20)
+        self.assert_end_value('x1', float('Inf'))
+        self.assert_end_value('x2', -float('Inf'))
+        self.assert_end_value('x3', -float('Inf'))
+        self.assert_end_value('x4', float('Inf'))
+        self.assert_end_value('x5', float('Inf'))
+        self.assert_end_value('x6', float('Inf'))
+        self.assert_end_value('x7', float('Inf'))
         
