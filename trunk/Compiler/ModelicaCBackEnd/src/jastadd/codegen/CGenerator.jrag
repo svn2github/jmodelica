@@ -1058,7 +1058,36 @@ public class CGenerator extends GenericGenerator {
         }
     
         public void generate(CodeStream genPrinter) {
-            genPrinter.print(fclass.numDelayEventIndicators());
+            genPrinter.print(fclass.numDelaySwitches());
+        }
+    
+    }
+    
+    /**
+     * Prints number of spatialDistribution blocks.
+     */
+    public class DAETag_n_spatialdists extends DAETag {
+        
+        public DAETag_n_spatialdists(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_spatialdist", myGenerator, fclass);
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.mySpatialDistExps().size());
+        }
+    }
+    
+    /**
+     * Prints number of spatialDistribution switches needed.
+     */
+    public class DAETag_numSpatialDistSwitchingFunctions extends DAETag {
+        
+        public DAETag_numSpatialDistSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_spatialdist_switches", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.numSpatialDistSwitches());
         }
     
     }
@@ -1075,11 +1104,17 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodeStream genPrinter) {
             CodePrinter p = ASTNode.printer_C;
             String indent = p.indent("");
-            for (FDelayExp delay : fclass.myDelayExps()) {
-                delay.genInitVarDecls_C(p, genPrinter, indent);
+            for (FDelayExp d : fclass.myDelayExps()) {
+                d.genInitVarDecls_C(p, genPrinter, indent);
             }
-            for (FDelayExp delay : fclass.myDelayExps()) {
-                delay.genInit_C(p, genPrinter, indent);
+            for (FSpatialDistExp d : fclass.mySpatialDistExps()) {
+                d.genInitVarDecls_C(p, genPrinter, indent);
+            }
+            for (FDelayExp d : fclass.myDelayExps()) {
+                d.genInit_C(p, genPrinter, indent);
+            }
+            for (FSpatialDistExp d : fclass.mySpatialDistExps()) {
+                d.genInit_C(p, genPrinter, indent);
             }
         }
     }
@@ -1096,11 +1131,17 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodeStream genPrinter) {
             CodePrinter p = ASTNode.printer_C;
             String indent = p.indent("");
-            for (FDelayExp delay : fclass.myDelayExps()) {
-                delay.genSampleVarDecls_C(p, genPrinter, indent);
+            for (FDelayExp d : fclass.myDelayExps()) {
+                d.genSampleVarDecls_C(p, genPrinter, indent);
             }
-            for (FDelayExp delay : fclass.myDelayExps()) {
-                delay.genSample_C(p, genPrinter, indent);
+            for (FSpatialDistExp d : fclass.mySpatialDistExps()) {
+                d.genSampleVarDecls_C(p, genPrinter, indent);
+            }
+            for (FDelayExp d : fclass.myDelayExps()) {
+                d.genSample_C(p, genPrinter, indent);
+            }
+            for (FSpatialDistExp d : fclass.mySpatialDistExps()) {
+                d.genSample_C(p, genPrinter, indent);
             }
         }
     }

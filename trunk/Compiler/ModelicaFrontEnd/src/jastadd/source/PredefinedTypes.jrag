@@ -322,7 +322,16 @@ aspect PredefinedTypes {
             + "  input Real delayMax = delayTime;\n"
             + "  output Real y;\n"       // Type not used
             + "end delay;\n"
-            + "function spatialDistribution end spatialDistribution;\n"
+            + "function spatialDistribution"
+            + "  input Real in0;\n"
+            + "  input Real in1;\n"
+            + "  input Real x;\n"
+            + "  input Boolean positiveVelocity;\n"
+            + "  input Real[2] initialPoints = {0.0, 1.0};\n"
+            + "  input Real[2] initialValues = {0.0, 0.0};\n"
+            + "  output Real out0;\n"
+            + "  output Real out1;\n"
+            + "end spatialDistribution;\n"
             + "function cardinality"
             + "  input Real x;\n"      // Type not used
             + "  output Integer y;\n"  // Type not used

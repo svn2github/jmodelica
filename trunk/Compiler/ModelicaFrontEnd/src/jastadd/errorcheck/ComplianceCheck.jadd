@@ -143,6 +143,14 @@ aspect ComplianceCheck {
 			compliance("The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()");
     }
 	
+    public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
+        complianceOnlyFMU("The delay() function-like operator is");
+    }
+    
+    public void FSpatialDistExp.complianceCheck(ErrorCheckType checkType) {
+        compliance("The spatialDistribution() function-like operator is not supported");
+    }
+    
 	syn boolean FExp.isAccessToInnerOrOuter()  = false;
 	eq FInstAccessExp.isAccessToInnerOrOuter() = 
         getInstAccess().myInstComponentDecl().isInner() || getInstAccess().myInstComponentDecl().isOuter();

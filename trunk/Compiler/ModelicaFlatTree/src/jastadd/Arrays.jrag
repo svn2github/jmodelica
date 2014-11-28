@@ -229,7 +229,8 @@ aspect Arrays {
 	eq FHomotopyExp.ndims()   = getActual().ndims();
 	eq FSemiLinearExp.ndims() = size().ndims();
 
-    eq FDelayExp.ndims()      = getFExp().ndims();
+    eq FDelayExp.ndims()       = getFExp().ndims();
+    eq FSpatialDistExp.ndims() = getIn0().ndims();
 
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -980,6 +981,7 @@ aspect Arrays {
 	eq FSemiLinearExp.size()            = vectorizedSize();
 
     eq FDelayExp.size()                 = getFExp().size();
+    eq FSpatialDistExp.size()           = getIn0().size();
     
     eq FStringExp.size()                = getValue().size();
 
@@ -2031,6 +2033,20 @@ aspect Arrays {
         Array max = hasMax() ? getMax().getArray() : null;
         for (Index i : arr.indices()) 
             arr.set(i, new FDelayExp(exp.get(i), delay.get(i), (max == null) ? new Opt() : new Opt(max.get(i))));
+        return arr;
+    }
+    
+    eq FSpatialDistExp.getArray() {
+        if (!getIn0().isArray())
+            return super.getArray();
+        
+        Array arr = new Array(getIn0().indices());
+        Array in0Arr = getIn0().getArray();
+        Array in1Arr = getIn1().getArray();
+        for (Index i : arr.indices()) {
+            arr.set(i, new FSpatialDistExp(in0Arr.get(i), in1Arr.get(i), getX().fullCopy(),
+                    getPositiveVelocity().fullCopy(), new Opt(getInitialPoints().fullCopy()), new Opt(getInitialValues().fullCopy())));
+        }
         return arr;
     }
 

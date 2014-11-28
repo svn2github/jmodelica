@@ -2139,7 +2139,26 @@ aspect ConstantEvaluation {
     }
 
     eq FDelayExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator);
-
+    eq FSpatialDistExp.cevalCalc(VariableEvaluator evaluator) = evaluate(evaluator)[0];
+    
+    public CValue[] FSpatialDistExp.evaluate(VariableEvaluator evaluator) {
+        CValue[] res = new CValue[2];
+        if (hasInitialValues()) {
+            CValueArray vals = getInitialValues().ceval(evaluator).array();
+            if (getPositiveVelocity().ceval(evaluator).booleanValue()) {
+                res[1] = vals.getCell(vals.values.length-1);
+                res[0] = vals.getCell(0);
+            } else {
+                res[0] = vals.getCell(vals.values.length-1);
+                res[1] = vals.getCell(0);
+            }
+        } else {
+            res[0] = new CValueInteger(0);
+            res[1] = new CValueInteger(0);
+        }
+        return res;
+    }
+    
     /**
      * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
      */

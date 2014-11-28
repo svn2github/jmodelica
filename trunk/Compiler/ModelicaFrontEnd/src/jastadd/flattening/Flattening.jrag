@@ -2207,6 +2207,33 @@ aspect FlatExpressions {
     public FSemiLinearExp FSemiLinearExp.flatten(FQName prefix)   { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
     public FDelayExp      FDelayExp.flatten(FQName prefix)        { return new FDelayExp(getFExp().flatten(prefix), getDelay().flatten(prefix), hasMax() ? new Opt(getMax().flatten(prefix)) : new Opt()); }
     public FExp           FGetInstanceName.flatten(FQName prefix) { return new FStringLitExp(surroundingInstClass().name() + "." + prefix.name()); }
+    public FSpatialDistExp FSpatialDistExp.flatten(FQName prefix)     {
+        FExp points;
+        if (hasInitialPoints()) {
+            points = getInitialPoints().flatten(prefix);
+        } else {
+            FArray a = new FArray();
+            a.addFExp(new FIntegerLitExp(0));
+            a.addFExp(new FIntegerLitExp(1));
+            points = a;
+        }
+        
+        FExp values;
+        if (hasInitialValues()) {
+            values = getInitialValues().flatten(prefix);
+        } else {
+            FArray a = new FArray();
+            a.addFExp(new FIntegerLitExp(0));
+            a.addFExp(new FIntegerLitExp(0));
+            values = a;
+        }
+        
+        return new FSpatialDistExp(
+            getIn0().flatten(prefix), getIn1().flatten(prefix), 
+            getX().flatten(prefix), getPositiveVelocity().flatten(prefix),
+            new Opt(points), new Opt(values)
+        );
+    }
 
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	

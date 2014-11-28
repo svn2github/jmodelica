@@ -718,7 +718,7 @@ aspect FlatTypeCheck {
   public void FBuiltInFunctionCall.typeCheck(ErrorCheckType checkType) {
 	  if (checkTypeAsExpression())
 		  super.typeCheck(checkType);
-	  int n = builtInHasOutput() ? 1 : 0;
+	  int n = builtInNumOutput();
 	  if (myLefts().size() > n)
 		  error("Too many components assigned from function call: " + builtInName() + 
 				  "() has " + n + " output(s)");
@@ -805,10 +805,11 @@ aspect FlatTypeCheck {
             error("Only real typed expressions are allowed in der() operator");
     }
   
-  syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
-  eq FIgnoredBuiltIn.builtInHasOutput() = false;
-  eq FConnectionsOp.builtInHasOutput()  = false;
-  eq FConnBoolOp.builtInHasOutput()     = true;
+  syn int FBuiltInFunctionCall.builtInNumOutput() = 1;
+  eq FIgnoredBuiltIn.builtInNumOutput() = 0;
+  eq FConnectionsOp.builtInNumOutput()  = 0;
+  eq FConnBoolOp.builtInNumOutput()     = 1;
+  eq FSpatialDistExp.builtInNumOutput() = 2;
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression()     = true;

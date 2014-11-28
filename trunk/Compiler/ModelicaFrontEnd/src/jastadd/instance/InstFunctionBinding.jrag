@@ -319,6 +319,7 @@ aspect InstFunctionBinding {
                 map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
                 map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
                 map.put("delay",           new VarArgsBuiltInCreator(new FDelayExp(),  2, 3));
+                map.put("spatialDistribution", new VarArgsBuiltInCreator(new FSpatialDistExp(), 4, 6));
                 //       name                                    math       node              # args
                 map.put("Connections.branch", new BuiltInCreator(BIT.NONE, new FConnBranch(),    2));
                 map.put("Connections.root",   new BuiltInCreator(BIT.NONE, new FConnRoot(),      1));

@@ -434,6 +434,7 @@ aspect FlatTypeAnalysis {
     eq FGetInstanceName.type() = fStringScalarType();
 
     eq FDelayExp.type() = getFExp().type();
+    eq FSpatialDistExp.type() = getIn0().type();
 
     /**
      * The scalar type of the expression.

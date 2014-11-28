@@ -479,20 +479,23 @@ aspect CCodeGen {
             sep = ", ";
         }
         if (!exp) {
-            int tot = myOutputs().size();
-            int lefts = call.myLefts().size();
-            for (int i = 0; i < tot; i++) {
-                str.print(sep);
-                if (i < lefts)
-                    call.myLefts().get(i).genArgument_C(str);
-                else
-                    str.print("NULL");
-                sep = ", ";
-            }
+            call.prettyPrintCallOutputs_C(p, str, indent, myOutputs().size(), sep);
         }
         str.print(")");
         if (!exp)
             str.print(";\n");
+    }
+    
+    public void FAbstractFunctionCall.prettyPrintCallOutputs_C(CodePrinter p, CodeStream str, String indent, int outputs, String sep) {
+        int lefts = myLefts().size();
+        for (int i = 0; i < outputs; i++) {
+            str.print(sep);
+            if (i < lefts)
+                myLefts().get(i).genArgument_C(str);
+            else
+                str.print("NULL");
+            sep = ", ";
+        }
     }
     
     @Override
@@ -2686,6 +2689,179 @@ aspect CCodeGen {
             str.print(")");
         }
     }
+    
+    /**
+     * Generate temp declarations for the initialization of spatialDistribution blocks.
+     */
+    public void FSpatialDistExp.genInitVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(getX(), str, indent);
+        p.printVarDecls(getInitialPoints(), str, indent);
+        p.printVarDecls(getInitialValues(), str, indent);
+    }
+    
+    /**
+     * Generate the initialization of spatialDistribution blocks.
+     */
+    public void FSpatialDistExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
+        
+        //int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event,
+        // jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
+        
+        p.printPreSteps(getX(), str, indent);
+        p.printPreSteps(getInitialPoints(), str, indent);
+        getInitialPoints().genTempInput_C(p, str, indent);
+        p.printPreSteps(getInitialValues(), str, indent);
+        getInitialValues().genTempInput_C(p, str, indent);
+        
+        str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
+        str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
+        str.print(", "); 
+        p.print(getX(), str, indent); // jmi_real_t x0,
+        str.print(", "); 
+        getInitialPoints().genArgument_C(p, str, indent); // jmi_real_t *x_init
+        str.print(", ");
+        getInitialValues().genArgument_C(p, str, indent); // jmi_real_t *y_init
+        str.print(", ");
+        getInitialPoints().size().printNumElements_C(p, str, indent, getInitialPoints()); // int n_init
+        str.println(");");
+        
+        p.printPostSteps(getX(), str, indent);
+        p.printPostSteps(getInitialPoints(), str, indent);
+        p.printPostSteps(getInitialValues(), str, indent);
+    }
+    
+    /**
+     * Generate temp declarations for the sampling of spatialDistribution blocks.
+     */
+    public void FSpatialDistExp.genSampleVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(getIn0(), str, indent);
+        p.printVarDecls(getIn1(), str, indent);
+        p.printVarDecls(getX(), str, indent);
+        p.printVarDecls(getPositiveVelocity(), str, indent);
+    }
+    
+    /**
+     * Generate the sampling of spatialDistribution blocks.
+     */
+    public void FSpatialDistExp.genSample_C(CodePrinter p, CodeStream str, String indent) {
+//        int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0,
+//              jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
+        
+        p.printPreSteps(getIn0(), str, indent);
+        p.printPreSteps(getIn1(), str, indent);
+        p.printPreSteps(getX(), str, indent);
+        p.printPreSteps(getPositiveVelocity(), str, indent);
+            
+        str.format("%sjmi_spatialdist_record_sample(jmi, %d, ", indent, mySpatialDistIndex());
+        p.print(getIn0(), str, indent);
+        str.print(", ");
+        p.print(getIn1(), str, indent);
+        str.print(", ");
+        p.print(getX(), str, indent);
+        str.print(", ");
+        p.print(getPositiveVelocity(), str, indent);
+        str.println(");");
+        
+        p.printPostSteps(getIn0(), str, indent);
+        p.printPostSteps(getIn1(), str, indent);
+        p.printPostSteps(getX(), str, indent);
+        p.printPostSteps(getPositiveVelocity(), str, indent);
+    }
+    
+    
+    public void FSpatialDistExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printVarDecls(getPositiveVelocity(), str, indent);
+            p.printVarDecls(getInitialValues(), str, indent);
+        } else {
+            p.printVarDecls(getIn0(), str, indent);
+            p.printVarDecls(getIn1(), str, indent);
+            p.printVarDecls(getX(), str, indent);
+        }
+    }
+    
+    public void FSpatialDistExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printPreSteps(getPositiveVelocity(), str, indent);
+            p.printPreSteps(getInitialValues(), str, indent);
+        } else {
+            p.printPreSteps(getIn0(), str, indent);
+            p.printPreSteps(getIn1(), str, indent);
+            p.printPreSteps(getX(), str, indent);
+        }
+    }
+    
+    public void FSpatialDistExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            p.printPostSteps(getPositiveVelocity(), str, indent);
+            p.printPostSteps(getInitialValues(), str, indent);
+        } else {
+            p.printPostSteps(getIn0(), str, indent);
+            p.printPostSteps(getIn1(), str, indent);
+            p.printPostSteps(getX(), str, indent);
+        }
+    }
+    
+    public void FSpatialDistExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+//        int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0,
+//            jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, 
+//            jmi_boolean positiveVelocity);
+        
+        boolean exp = functionCallIsExp();
+        
+        if (p.inInitialSystem()) {
+            if (exp) {
+                prettyPrintInitial_C(p, str, indent, false);
+            } else {
+                if (myLefts().get(0).hasFExp()) {
+                    str.print(indent);
+                    str.print(myLefts().get(0).name_C());
+                    str.print(" = ");
+                    prettyPrintInitial_C(p, str, indent, false);
+                    str.println(";");
+                }
+                if (myLefts().get(1).hasFExp()) {
+                    str.print(indent);
+                    str.print(myLefts().get(1).name_C());
+                    str.print(" = ");
+                    prettyPrintInitial_C(p, str, indent, true);
+                    str.println(";");
+                }
+            }
+        } else {
+            if (!exp) {
+                str.print(indent);
+            }
+            str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
+            if (exp) {
+                str.print("NULL, NULL");
+            } else {
+                prettyPrintCallOutputs_C(p, str, indent, 2, "");
+            }
+            str.print(", ");
+            p.print(getIn0(), str, indent);
+            str.print(", ");
+            p.print(getIn1(), str, indent);
+            str.print(", ");
+            p.print(getX(), str, indent);
+            str.print(")");
+            
+            if (!exp) {
+                str.println(";");
+            }
+        }
+    }
+    
+    public void FSpatialDistExp.prettyPrintInitial_C(CodePrinter p, CodeStream str, String indent, boolean second) {
+        int size = getInitialValues().getArray().length;
+        str.print("COND_EXP_EQ(");
+        p.print(getPositiveVelocity(), str, indent);
+        str.print(", JMI_TRUE, ");
+        p.print(getInitialValues().getArray().get(second ? size : 1), str, indent);
+        str.print(", ");
+        p.print(getInitialValues().getArray().get(second ? 1 : size), str, indent);
+        str.print(")");
+    }
 	
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
 		// Generate temp arrays for all array inputs and outputs
@@ -4152,6 +4328,13 @@ aspect CCodeGen {
         }
     }
     
+    public void FSpatialDistExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.inInitialSystem()) {
+            p.printVarDecls(getX(), str, indent);
+            p.printVarDecls(getPositiveVelocity(), str, indent);
+        }
+    }
+    
     public void FExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
         throw new UnsupportedOperationException();
     }
@@ -4180,6 +4363,25 @@ aspect CCodeGen {
             p.print(getDelay(), str, indent);
             str.print(", &(*res)[" + enumerator.next() + "]);\n");
             p.printPostSteps(getDelay(), str, indent);
+        }
+    }
+    
+    public void FSpatialDistExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
+//        int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, 
+//              jmi_boolean positiveVelocity, jmi_real_t *event_indicator);
+        if (p.inInitialSystem()) {
+            str.formatln("%s(*res)[%d] = JMI_SPATIALDIST_INITIAL_EVENT_RES;", indent, enumerator.next());
+        } else {
+            p.printPreSteps(getX(), str, indent);
+            p.printPreSteps(getPositiveVelocity(), str, indent);
+            int index = mySpatialDistIndex();
+            str.format("%sjmi_specialdist_event_indicator(jmi, %d, ", indent, index);
+            p.print(getX(), str, indent);
+            str.print(", ");
+            p.print(getPositiveVelocity(), str, indent);
+            str.print(", &(*res)[" + enumerator.next() + "]);\n");
+            p.printPostSteps(getX(), str, indent);
+            p.printPostSteps(getPositiveVelocity(), str, indent);
         }
     }
 	
@@ -4332,6 +4534,10 @@ aspect CCodeGen {
     public void FDelayExp.genRelExpKind(CodeStream str) {
         str.print(FRelExp.GEQ_C);
         str.print(", ");
+        str.print(FRelExp.GEQ_C);
+    }
+    
+    public void FSpatialDistExp.genRelExpKind(CodeStream str) {
         str.print(FRelExp.GEQ_C);
     }
     

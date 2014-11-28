@@ -375,11 +375,13 @@ aspect EquationSolve {
     public FRelExp FRelExp.originalFRelExp          = null;
     public FSampleExp FSampleExp.originalFSampleExp = null;
     public FDelayExp FDelayExp.originalFDelayExp    = null;
+    public FSpatialDistExp FSpatialDistExp.originalFSpatialDistExp = null;
     
     syn FExp FExp.originalFExp() { throw new UnsupportedOperationException(); }
     eq FRelExp.originalFExp()    = (originalFRelExp == null)    ? this : originalFRelExp;
     eq FSampleExp.originalFExp() = (originalFSampleExp == null) ? this : originalFSampleExp;
     eq FDelayExp.originalFExp()  = (originalFDelayExp == null)  ? this : originalFDelayExp;
+    eq FSpatialDistExp.originalFExp() = (originalFSpatialDistExp == null)  ? this : originalFSpatialDistExp;
     
     /**
      * This method is used when the original node has been discarded and the
@@ -412,6 +414,12 @@ aspect EquationSolve {
         originalFDelayExp = null;
         super.resetOriginalReferences();
     }
+    
+    @Override
+    protected void FSpatialDistExp.resetOriginalReferences() {
+        originalFSpatialDistExp = null;
+        super.resetOriginalReferences();
+    }
 
 	protected void ASTNode.traverseSymbolic(ASTNode e) {
 		for (int i = 0; i < getNumChildNoTransform(); i++) {
@@ -437,6 +445,13 @@ aspect EquationSolve {
     protected void FDelayExp.traverseSymbolic(ASTNode e) {
         FDelayExp de = (FDelayExp) e;
         originalFDelayExp = (de.originalFDelayExp == null) ? de : de.originalFDelayExp;
+        super.traverseSymbolic(e);
+    }
+    
+    @Override
+    protected void FSpatialDistExp.traverseSymbolic(ASTNode e) {
+        FSpatialDistExp de = (FSpatialDistExp) e;
+        originalFSpatialDistExp = (de.originalFSpatialDistExp == null) ? de : de.originalFSpatialDistExp;
         super.traverseSymbolic(e);
     }
 	

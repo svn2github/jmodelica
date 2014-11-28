@@ -96,19 +96,19 @@ aspect VariabilityPropagation {
     /**
      * If any arg is constant return constant. Otherwise returns combined variability.
      */
-    syn FTypePrefixVariability FFunctionCallEquation.potentialPartialVariability() {
-        FTypePrefixVariability res = fContinuous(); 
-        if (getCall() instanceof FFunctionCall) {
-            for (FExp exp : ((FFunctionCall)getCall()).getArgs()) {
-                if (exp.variability().constantVariability()) {
-                    return fConstant();
-                }
+    syn FTypePrefixVariability FFunctionCallEquation.potentialPartialVariability()
+        = getCall().potentialPartialVariability();
+    
+    syn FTypePrefixVariability FAbstractFunctionCall.potentialPartialVariability() = variability();
+    eq FFunctionCall.potentialPartialVariability() {
+        for (FExp exp : getArgs()) {
+            if (exp.variability().constantVariability()) {
+                return fConstant();
             }
-            res = getCall().variability();
         }
-        return res;
+        return super.potentialPartialVariability();
     }
-	
+    
 	/**
 	 * Checks if left hand side variable(s) is eligible for var. prop.
 	 */

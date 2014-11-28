@@ -2385,6 +2385,39 @@ end EvaluationTests.PreExp1;
 ")})));
 end PreExp1;
 
+model Delay1
+    constant Real x1 = delay(1,1);
+    Real x2 = delay(2,1);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Delay1",
+            description="Constant evaluation of delay operator.",
+            flatModel="
+fclass EvaluationTests.Delay1
+ constant Real x1 = 1;
+ constant Real x2 = 2;
+end EvaluationTests.Delay1;
+")})));
+end Delay1;
+
+model SpatialDistribution1
+    constant Real x1 = spatialDistribution(1,1,1,false);
+    Real x2,x3;
+  equation
+    (x2,x3) = spatialDistribution(2,1,1,true, {0,1}, {3,4});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SpatialDistribution1",
+            description="Constant evaluation of spatialDistribution operator",
+            flatModel="
+fclass EvaluationTests.SpatialDistribution1
+ constant Real x1 = 0;
+ constant Real x2 = 3;
+ constant Real x3 = 4;
+end EvaluationTests.SpatialDistribution1;
+")})));
+end SpatialDistribution1;
+
 model Functional1
     partial function partFunc
         output Real y;

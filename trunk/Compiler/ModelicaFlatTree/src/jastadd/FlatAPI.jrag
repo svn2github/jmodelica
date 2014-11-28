@@ -669,6 +669,13 @@ aspect FlatAPI {
     
     syn lazy int FDelayExp.myDelayIndex() = myFClass().myDelayExps().indexOf(originalFExp());
     
+    coll ArrayList<FSpatialDistExp> FClass.mySpatialDistExps()
+        [new ArrayList<FSpatialDistExp>()] with add root FlatRoot;
+    FSpatialDistExp contributes this to FClass.mySpatialDistExps() for myFClass();
+    
+    syn lazy int FSpatialDistExp.mySpatialDistIndex() = myFClass().mySpatialDistExps().indexOf(originalFExp());
+    
+    
     inh boolean FExp.inDeadIfBranch();
     eq FIfEquation.getFAbstractEquation().inDeadIfBranch() = getTest().inDeadIfBranchTest(false);
     eq FIfEquation.getElse().inDeadIfBranch()              = getTest().inDeadIfBranchTest(true);
@@ -1104,7 +1111,7 @@ aspect FlatAPI {
     }
     
     syn int FClass.numSwitches() = numStateSwitches() + numTimeSwitches();
-    syn int FClass.numStateSwitches() = relExpsWithStateEvent().size() + numDelayEventIndicators();
+    syn int FClass.numStateSwitches() = relExpsWithStateEvent().size() + numSpatialDistSwitches() + numDelaySwitches();
     syn int FClass.numTimeSwitches() = relExpsWithTimeEvent().size();
     
     syn int FClass.numEventIndicators() = numStateSwitches();
@@ -1124,11 +1131,13 @@ aspect FlatAPI {
     syn lazy ArrayList<FExp> FClass.stateEventExps() {
         ArrayList<FExp> res = new ArrayList<FExp>();
         res.addAll(relExpsWithStateEvent());
+        res.addAll(spatialDistExpsWithStateEvent());
         res.addAll(delayExpsWithStateEvent());
         return res;
     }
     
     syn lazy int FRelExp.myEventIndicatorIndex()   = checkIndex(myFClass().stateEventExps().indexOf(originalFExp()));
+    syn lazy int FSpatialDistExp.myEventIndicatorIndex() = checkIndex(myFClass().stateEventExps().indexOf(originalFExp()));
     syn lazy int FDelayExp.myEventIndicatorIndex() = myFClass().relExpsWithStateEvent().size() + myDelayEventIndicatorIndex();
     
     syn lazy ArrayList<FExp> FClass.timeEventExps() {
@@ -1143,11 +1152,18 @@ aspect FlatAPI {
     FSampleExp contributes this when generatesEventInDAE()
         to FClass.sampleExpsWithTimeEvent() for myFClass();
     
-    syn int FClass.numDelayEventIndicators() = 2*delayExpsWithStateEvent().size();
+    syn int FClass.numSpatialDistSwitches() = spatialDistExpsWithStateEvent().size();
+    coll ArrayList<FSpatialDistExp> FClass.spatialDistExpsWithStateEvent() 
+        [new ArrayList<FSpatialDistExp>()] with add root FlatRoot;
+    FSpatialDistExp contributes this when generatesEventInDAE()
+        to FClass.spatialDistExpsWithStateEvent() for myFClass();
+    
+    syn int FClass.numDelaySwitches() = 2*delayExpsWithStateEvent().size();
     coll ArrayList<FDelayExp> FClass.delayExpsWithStateEvent() 
         [new ArrayList<FDelayExp>()] with add root FlatRoot;
     FDelayExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
         to FClass.delayExpsWithStateEvent() for myFClass();
+    
     
     syn int FDelayExp.myDelayEventIndicatorIndex() = 2*checkIndex(myFClass().delayExpsWithStateEvent().indexOf(originalFExp()));
     
@@ -1238,6 +1254,7 @@ aspect FlatAPI {
     syn boolean FExp.hasEventGeneratingType() = false;
     eq FRelExp.hasEventGeneratingType()       = isRealComparison();
     eq FEventGenExp.hasEventGeneratingType()  = argType().isReal();
+    eq FSpatialDistExp.hasEventGeneratingType() = true;
     eq FDelayExp.hasEventGeneratingType()     = true;
     eq FSampleExp.hasEventGeneratingType()    = true;
     
