@@ -1320,11 +1320,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                     generateAttribute("variability", "discrete", genPrinter);
                 else //default
                     generateAttribute("variability", "continuous", genPrinter);
-				
-				//Generate the initial attribute.
-				generateAttribute("initial", initialType, genPrinter);
-			}
-		}
+
+                //Generate the initial attribute.
+                if (!variable.isInput()) //Except for inputs, see FMI 2.0 spec p.47
+                    generateAttribute("initial", initialType, genPrinter);
+            }
+        }
 
 		public class XMLTag_real extends XMLTag {
 
