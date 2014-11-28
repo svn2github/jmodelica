@@ -222,7 +222,7 @@ namespace ModelicaCasADi
                     oc::FAbstractEquation,
                     oc::FEquation,
                     oc::FExp,
-                    JArray>(&jblt, eqContainer, optProblem->getNodeToVariableMap(), false, false);
+                    JArray>(&jblt, eqContainer, optProblem->getNodeToVariableMap());
             }
             else {
                 transferDaeEquationsToContainer<java::util::ArrayList, oc::FAbstractEquation>(eqContainer, fclass.equations());

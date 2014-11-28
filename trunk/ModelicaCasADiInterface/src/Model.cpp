@@ -508,10 +508,11 @@ namespace ModelicaCasADi
 
     std::vector< Ref<Variable> > Model::getEliminableVariables() const
     {
-        std::set<const Variable*> vars = getBLTEliminables();
         std::vector< Ref<Variable> > rVec;
-        for(std::set<const Variable*>::const_iterator it=vars.begin();it!=vars.end();++it) {
-            rVec.push_back(const_cast<Variable*>(*it));
+        for(std::vector<Variable*>::const_iterator it=z.begin();it!=z.end();++it) {
+            if((*it)->isEliminable()){
+                rVec.push_back((*it));
+            }        
         }
         return rVec;
     }
@@ -541,7 +542,7 @@ namespace ModelicaCasADi
         }
     }
     
-    bool compareFunction(const std::pair<int, Variable*>& a, const std::pair<int, Variable*>& b) {
+    bool compareFunction(const std::pair<int, const Variable*>& a, const std::pair<int, const Variable*>& b) {
         return a.first < b.first;
     }
 
@@ -549,7 +550,7 @@ namespace ModelicaCasADi
         if(hasBLT()) {
             std::set<const Variable*> eliminateables = equations_->eliminableVariables();
             std::vector< Ref<Variable> > alias_vars = getAliases();
-            std::list< std::pair<int, Variable*> > toSubstituteList;
+            std::list< std::pair<int, const Variable*> > toSubstituteList;
             bool hasAlias=false;
             for(std::set<const Variable*>::iterator it=eliminateables.begin();it!=eliminateables.end();++it) {
                 hasAlias=false;
@@ -563,7 +564,7 @@ namespace ModelicaCasADi
                     Ref<Variable> var = const_cast<Variable*>(*it);
                     int id_block = equations_->getBlockIDWithSolutionOf(var);
                     if(id_block>=0) {
-                        toSubstituteList.push_back(std::pair<int, Variable*>(id_block,var.getNode()));
+                        toSubstituteList.push_back(std::pair<int, const Variable*>(id_block,var.getNode()));
                     }
                 }
                 
@@ -598,23 +599,24 @@ namespace ModelicaCasADi
 
         //Mark variables as Eliminated
         std::vector< Variable* >::iterator fit;
-        for(std::list< std::pair<int, Variable*> >::iterator it_var=listToEliminate.begin();
+        for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
         it_var!=listToEliminate.end();++it_var) {
-            it_var->second->setAsEliminated();
+            //it_var->second->setAsEliminated();
             //Removes variables from variables vector
-            eliminated_z.push_back(it_var->second);
+            eliminated_z.push_back(const_cast<Variable*>(it_var->second));
             fit = std::find(z.begin(), z.end(),it_var->second);
+            (*fit)->setAsEliminated();
             z.erase(fit);
         }
         equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
         equations_->eliminateVariables(eliminatedVariableToSolution);
     }
 
-    void Model::markVariablesForElimination(std::vector< Ref<Variable> >& vars) {
+    void Model::markVariablesForElimination(const std::vector< Ref<Variable> >& vars) {
         if(hasBLT()) {
             std::vector< Ref<Variable> > alias_vars = getAliases();
             bool hasAlias=false;
-            for(std::vector< Ref<Variable> >::iterator it=vars.begin();it!=vars.end();++it) {
+            for(std::vector< Ref<Variable> >::const_iterator it=vars.begin();it!=vars.end();++it) {
                 if((*it)->isEliminable()) {
                     hasAlias=false;
                     for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
@@ -626,7 +628,7 @@ namespace ModelicaCasADi
                     if(!hasAlias) {
                         int id_block = equations_->getBlockIDWithSolutionOf(*it);
                         if(id_block>=0) {
-                            listToEliminate.push_back(std::pair<int, Variable*>(id_block,(*it).getNode()));
+                            listToEliminate.push_back(std::pair<int, const Variable*>(id_block,(*it).getNode()));
                         }
                     }
                 }
@@ -655,7 +657,7 @@ namespace ModelicaCasADi
                 if(!hasAlias) {
                     int id_block = equations_->getBlockIDWithSolutionOf(var);
                     if(id_block>=0) {
-                        listToEliminate.push_back(std::pair<int, Variable*>(id_block,var.getNode()));
+                        listToEliminate.push_back(std::pair<int, const Variable*>(id_block,var.getNode()));
                     }
                 }
             }

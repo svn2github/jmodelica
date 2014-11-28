@@ -166,11 +166,19 @@ void Block::computeJacobianCasADi() {
     casadi::MXFunction f(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,symbolicResidual));
     f.init();
     jacobian=f.jac();
+    
+    //Make the substitution back to variables.This will only matter if the block is nonlinear
+    /*if(!isLinear()){
+        Expressions = casadi::substitute(std::vector<casadi::MX>(1,jacobian),
+            varsSubstitue,
+            vars);
+        jacobian = Expressions.front();
+    }*/
 }
 
 
 void Block::solveLinearSystem() {
-    if(isLinear() && !isSolvable()) {
+    if(isLinear() && !isSolvable() && !isSimple() /*no simple for now*/) {
         //get the residuals
         std::vector<casadi::MX> residuals;
         //append equations
@@ -193,6 +201,7 @@ void Block::solveLinearSystem() {
         for(std::set<const Variable*>::const_iterator it = variables_.begin();
         it != variables_.end(); ++it) {
             addSolutionToVariable(*it, xsolution[variableToIndex_[*it]]);
+            std::cout<<"Variable:  "<<(*it)->getName()<<"  =  "<< xsolution[variableToIndex_[*it]] << "\n";
         }
         unSolvedEquations.clear();
         unSolvedVariables_.clear();

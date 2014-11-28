@@ -72,8 +72,7 @@ template<typename JBlock, typename JCollection, typename JIterator,
 typename FVar, typename FAbstractEquation, typename FEquation,
 typename FExp, template<typename Ty> class ArrayJ>
 void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBlock,
-const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars ,
-bool jacobian_no_casadi = true, bool solve_with_casadi = false)
+const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars)
 {
     if(!block->isMeta()) {
         JCollection block_equations(block->allEquations().this$);
@@ -187,39 +186,18 @@ bool jacobian_no_casadi = true, bool solve_with_casadi = false)
             }
             else {
                 ciBlock->moveAllEquationsToUnsolvable();
+                ciBlock->setasSolvable(false);
             }
         }
 
-        //Setting Jacobian
-        if(!jacobian_no_casadi) {
-            ciBlock->computeJacobianCasADi();
-        }
-        else {
-            /*if(block->computeJacobian()){
-                ArrayJ< ArrayJ< FExp > > Jjacobian(block->jacobian().this$);
-                casadi::MX jaco = casadi::MX::sym("Jacobian",ciBlock->getNumEquations(),ciBlock->getNumVariables());
-                if(ciBlock->getNumEquations()!=Jjacobian.length){
-                    std::cout<<"WARNING: The jacobian coming from the compiler does not have the same number of rows as global equations";
-                }
-                if(ciBlock->getNumEquations()!=Jjacobian[0].length){
-                    std::cout<<"WARNING: The jacobian coming from the compiler does not have the same number of cols as global variables";
-                }
-                for(int i=0;i<ciBlock->getNumEquations();++i)
-                {
-                    for(int j=0;j<ciBlock->getNumVariables();++j)
-                    {
-                        jaco(i,j)= toMX(Jjacobian[i][j].toMX());
-                    }
-                }
-                ciBlock->setJacobian(jaco);
-            }*/
-            std::cout<<"TODO_r7021\n";
-        }
+        //Setting Jacobian always with casadi
+        ciBlock->computeJacobianCasADi();
 
         //Temporal check
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())) {
             std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. DEACTIVATE TEARING!\n";
             ciBlock->moveAllEquationsToUnsolvable();
+            ciBlock->setasSolvable(false);
         }
 
         ciBlock->setasSimple(block->isSimple());
@@ -227,10 +205,6 @@ bool jacobian_no_casadi = true, bool solve_with_casadi = false)
         ciBlock->setasSolvable(block->isSolvable());
 
         ciBlock->checkLinearityWithJacobian();
-        //To ask if we do this
-        if(solve_with_casadi) {
-            ciBlock->solveLinearSystem();
-        }
     }
     else {
         std::cout<<"Warning: a Meta block is ignored in the BLT transference.\n";
@@ -242,8 +216,7 @@ template<typename JBLT, typename JBlock, typename JCollection, typename JIterato
 typename FVar, typename FAbstractEquation, typename FEquation,
 typename FExp, template<typename Ty> class ArrayJ>
 void transferBLTToContainer(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::Equations> container,
-const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars,
-bool jacobian_no_casadi = true, bool solve_with_casadi = false)
+const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars)
 {
 
     if(mapVars.size()==0) {
@@ -260,7 +233,7 @@ bool jacobian_no_casadi = true, bool solve_with_casadi = false)
                 FAbstractEquation,
                 FEquation,
                 FExp,
-                ArrayJ>(block, ciBloc, mapVars, jacobian_no_casadi, solve_with_casadi);
+                ArrayJ>(block, ciBloc, mapVars);
             container->addBlock(ciBloc);
             delete block;
         }

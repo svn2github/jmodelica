@@ -97,7 +97,7 @@ namespace ModelicaCasADi
              * @param A std::list of pairs <id_block, Variable*>
              * @param A reference to a std::map<Variable,MX> 
              */
-            void getSubstitues(const std::list< std::pair<int, Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const;
+            void getSubstitues(const std::list< std::pair<int, const Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const;
 
             /**
              * Delete the symbolic solution of a variable in the BLT.
@@ -122,6 +122,8 @@ namespace ModelicaCasADi
 
             ///Return -1 if the variable does not have a solution
             int getBlockIDWithSolutionOf(Ref<Variable> var);
+            
+            void solveBlocksWithLinearSystems();
             /*******************************************/
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS

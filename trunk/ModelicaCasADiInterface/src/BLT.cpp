@@ -82,13 +82,13 @@ namespace ModelicaCasADi
         }
     }
 
-    void BLT::getSubstitues(const std::list< std::pair<int, Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const
+    void BLT::getSubstitues(const std::list< std::pair<int, const Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const
     {
 
-        for(std::list< std::pair<int, Variable*> >::const_reverse_iterator it_var=eliminables.rbegin();
+        for(std::list< std::pair<int, const Variable*> >::const_reverse_iterator it_var=eliminables.rbegin();
         it_var!=eliminables.rend();++it_var) {
             casadi::MX solution = blt[it_var->first]->getSolutionOfVariable(it_var->second);
-            for(std::list< std::pair<int, Variable*> >::const_reverse_iterator it_var2(it_var);
+            for(std::list< std::pair<int, const Variable*> >::const_reverse_iterator it_var2(it_var);
             it_var2!=eliminables.rend();++it_var2) {
                 casadi::MX tmp = solution;
 
@@ -167,5 +167,12 @@ namespace ModelicaCasADi
             ++counter;
         }
         return -1;
+    }
+    
+    void BLT::solveBlocksWithLinearSystems(){
+        for(std::vector< Ref<Block> >::iterator it=blt.begin();
+        it!=blt.end();++it) {
+            (*it)->solveLinearSystem();
+        }    
     }
 }; //End namespace

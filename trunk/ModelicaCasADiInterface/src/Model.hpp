@@ -283,7 +283,20 @@ namespace ModelicaCasADi
              * Append a variable to the list of variables to eliminate
              * @Param std::vector of Variable
              **/
-            virtual void markVariablesForElimination(std::vector< Ref<Variable> >& vars);
+            virtual void markVariablesForElimination(const std::vector< Ref<Variable> >& vars);
+            
+            //Experimental...not to use yet
+            virtual void solveLinearSystemsInBLT()
+            {
+                if(equations_->hasBLT()) {
+                    equations_->solveBlocksWithLinearSystems();
+                    for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it) {
+                        if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")) {
+                            (*it)->setAsEliminable();
+                        }
+                    }
+                }
+            }
             
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
@@ -339,7 +352,7 @@ namespace ModelicaCasADi
             /// Map with solutions of eliminated variables 
             std::map<const Variable*,casadi::MX> eliminatedVariableToSolution;
             /// list of pairs block_id, variables to be eliminated
-            std::list< std::pair<int, Variable*> > listToEliminate;
+            std::list< std::pair<int, const Variable*> > listToEliminate;
     };
     inline void Model::initializeModel(std::string identifier) {
         this->identifier = identifier;

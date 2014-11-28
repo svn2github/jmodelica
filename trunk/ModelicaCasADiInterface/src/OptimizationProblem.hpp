@@ -102,7 +102,7 @@ namespace ModelicaCasADi
             void substituteAllEliminables();
 
             void markVariablesForElimination(Ref<Variable> var);
-            void markVariablesForElimination(std::vector< Ref<Variable> >& vars);
+            void markVariablesForElimination(const std::vector< Ref<Variable> >& vars);
 
             //bool markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars);
 

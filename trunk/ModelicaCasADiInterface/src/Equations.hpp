@@ -104,7 +104,7 @@ namespace ModelicaCasADi
              * @param A std::list of pairs <id_block, Variable*>
              * @param A reference to a std::map<Variable,MX>
              */
-            virtual void getSubstitues(const std::list< std::pair<int, Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const
+            virtual void getSubstitues(const std::list< std::pair<int, const Variable*> >& eliminables, std::map<const Variable*,casadi::MX>& storageMap) const
             {
                 throw std::runtime_error("Abstract Equations does not support getSubstitues(variable_list, storageMap). Use BLT.\n");
             }
@@ -136,6 +136,11 @@ namespace ModelicaCasADi
              */
             virtual void eliminateVariables(const std::map<const Variable*,casadi::MX>& substituteMap) {
                 throw std::runtime_error("Abstract Equations does not support eliminateVariables(substituteMap). Use BLT.\n");
+            }
+            
+            //Experimental
+            virtual void solveBlocksWithLinearSystems(){
+                throw std::runtime_error("Abstract Equations does not support solveBlocksWithLinearSystems(). Use BLT.\n");
             }
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
