@@ -3070,6 +3070,12 @@ aspect FlatDiagnostics {
             
             str.append("Variable dependencies:\n");
             
+            if (getNumFVariable() > root().options.getIntegerOption("diagnostics_limit")) {
+                str.append("Oh dear, the model has way to many variables (" + getNumFVariable() + ")!\n");
+                str.append("Current limit is set to " + root().options.getIntegerOption("diagnostics_limit") + ", you can change this by changing the option 'diagnostics_limit'.\n");
+                return str.toString();
+            }
+            
             str.append("Derivative variables: \n");
             for (FVariable fv : derivativeVariables()) {
                 str.append(" " + fv.name() + "\n");

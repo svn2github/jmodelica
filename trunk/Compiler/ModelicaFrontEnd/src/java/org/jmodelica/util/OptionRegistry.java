@@ -316,6 +316,13 @@ abstract public class OptionRegistry {
              false, 
              "When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
              "This includes the flattened model, connection sets, alias sets and BLT form."), 
+        DIAGNOSTICS_LIMIT 
+        ("diagnostics_limit", 
+             compiler, 
+             500, 
+             "This option specifies the maximum size of the equation system before the compiler will start to reduce " +
+             "model diagnostics. This option only affect diagnostic output which grows in non-linear fashion.",
+             0, Integer.MAX_VALUE), 
         EXPORT_FUNCS 
             ("export_functions", 
              compiler, 
