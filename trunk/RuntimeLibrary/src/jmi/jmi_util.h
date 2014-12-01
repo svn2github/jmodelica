@@ -175,6 +175,10 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define snprintf sprintf_s
 #endif
 
+
+/** Use for internal hard errors. Does not return. */
+void jmi_internal_error(jmi_t *jmi, const char msg[]);
+
 /*Some of these functions return types are a temporary remnants of CppAD*/
 
 /**

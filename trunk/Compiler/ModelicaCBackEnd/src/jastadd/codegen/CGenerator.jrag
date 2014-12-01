@@ -1069,7 +1069,7 @@ public class CGenerator extends GenericGenerator {
     public class DAETag_n_spatialdists extends DAETag {
         
         public DAETag_n_spatialdists(AbstractGenerator myGenerator, FClass fclass) {
-            super("n_spatialdist", myGenerator, fclass);
+            super("n_spatialdists", myGenerator, fclass);
         }
         
         public void generate(CodeStream genPrinter) {

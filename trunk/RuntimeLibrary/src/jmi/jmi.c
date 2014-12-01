@@ -319,26 +319,32 @@ int jmi_delete(jmi_t* jmi){
     return 0;
 }
 
-int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches) {
-    
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches) {
+
     int i;
     jmi_real_t* switches;
     
     jmi->init_delay = init;
     jmi->sample_delay = sample;
-    
     jmi->delay_event_mode = 0;
+
     jmi->n_delays = n_delays;
     jmi->delays = (jmi_delay_t *)calloc(n_delays, sizeof(jmi_delay_t));
     for (i=0; i < n_delays; i++) {
         jmi_delay_new(jmi, i);
     }
-    
+
+    jmi->n_spatialdists = n_spatialdists;
+    jmi->spatialdists = (jmi_spatialdist_t *)calloc(n_spatialdists, sizeof(jmi_spatialdist_t));
+    for (i=0; i < n_spatialdists; i++) {
+        jmi_spatialdist_new(jmi, i);
+    }
+
     switches = jmi_get_sw(jmi);
-    for (i = jmi->n_relations - n_delay_switches; i < jmi->n_relations; i++) {
+    for (i = jmi->n_state_sw - n_spatialdists - n_delay_switches; i < jmi->n_state_sw; i++) {
         switches[i] = JMI_DELAY_INITIAL_EVENT_SW;
     }
-    
+
     return 0;
 }
 

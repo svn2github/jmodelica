@@ -2143,18 +2143,13 @@ aspect ConstantEvaluation {
     
     public CValue[] FSpatialDistExp.evaluate(VariableEvaluator evaluator) {
         CValue[] res = new CValue[2];
-        if (hasInitialValues()) {
-            CValueArray vals = getInitialValues().ceval(evaluator).array();
-            if (getPositiveVelocity().ceval(evaluator).booleanValue()) {
-                res[1] = vals.getCell(vals.values.length-1);
-                res[0] = vals.getCell(0);
-            } else {
-                res[0] = vals.getCell(vals.values.length-1);
-                res[1] = vals.getCell(0);
-            }
+        CValueArray vals = getInitialValues().ceval(evaluator).array();
+        if (getPositiveVelocity().ceval(evaluator).booleanValue()) {
+            res[1] = vals.getCell(vals.values.length-1);
+            res[0] = vals.getCell(0);
         } else {
-            res[0] = new CValueInteger(0);
-            res[1] = new CValueInteger(0);
+            res[0] = vals.getCell(vals.values.length-1);
+            res[1] = vals.getCell(0);
         }
         return res;
     }

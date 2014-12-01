@@ -93,6 +93,7 @@ static const int N_sw_init = $n_initial_switches$;
 static const int N_guards_init = $n_guards_init$;
 
 static const int N_delays = $n_delays$;
+static const int N_spatialdists = $n_spatialdists$;
 
 static const int Scaling_method = $C_DAE_scaling_method$;
 
@@ -321,7 +322,7 @@ $CAD_dae_init_add_blocks_residual_functions$
                   0, NULL, NULL);
     
     /* Initialize the delay interface */
-    jmi_init_delay_if(*jmi, N_delays, *model_init_delay, *model_sample_delay, N_delay_sw);
+    jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay, *model_sample_delay, N_delay_sw);
 
     return 0;
 }

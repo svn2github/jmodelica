@@ -2411,12 +2411,31 @@ model SpatialDistribution1
             description="Constant evaluation of spatialDistribution operator",
             flatModel="
 fclass EvaluationTests.SpatialDistribution1
- constant Real x1 = 0;
+ constant Real x1 = 0.0;
  constant Real x2 = 3;
  constant Real x3 = 4;
 end EvaluationTests.SpatialDistribution1;
 ")})));
 end SpatialDistribution1;
+
+model SpatialDistribution2
+    constant Real[3] x1 = spatialDistribution({1,2,3},{1,2,3},1,false);
+    constant Real[3] x2 = spatialDistribution({2,3,4},{2,3,4},1,true,{0,0.5,1},{{0,1,2},{3,4,5},{6,7,8}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SpatialDistribution2",
+            description="Constant evaluation of vectorized spatialDistribution operator",
+            flatModel="
+fclass EvaluationTests.SpatialDistribution2
+ constant Real x1[1] = 0.0;
+ constant Real x1[2] = 0.0;
+ constant Real x1[3] = 0.0;
+ constant Real x2[1] = 0;
+ constant Real x2[2] = 3;
+ constant Real x2[3] = 6;
+end EvaluationTests.SpatialDistribution2;
+")})));
+end SpatialDistribution2;
 
 model Functional1
     partial function partFunc

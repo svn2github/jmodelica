@@ -18952,7 +18952,7 @@ model SpatialDist1
             generate_ode=true,
             equation_sorting=true,
             template="
-N_spatialdists = $n_spatialdist$;
+N_spatialdists = $n_spatialdists$;
 $C_DAE_relations$
 
 $C_delay_init$
@@ -18968,27 +18968,33 @@ N_spatialdists = 3;
 static const int N_relations = 2;
 static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(3);
     jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(4);
-    jmi_spatialdist_init(jmi, 0, JMI_FALSE, _time + AD_WRAP_LITERAL(3), tmp_1, tmp_2, 2);
+    jmi_spatialdist_init(jmi, 0, JMI_FALSE, _time + AD_WRAP_LITERAL(3), tmp_1, tmp_2);
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
     jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1, 2)
     jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(3);
     jmi_array_ref_1(tmp_4, 2) = AD_WRAP_LITERAL(4);
-    jmi_spatialdist_init(jmi, 1, JMI_FALSE, _time + AD_WRAP_LITERAL(3), tmp_3, tmp_4, 2);
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
-    jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(tmp_5, 2) = AD_WRAP_LITERAL(1);
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1, 2)
-    jmi_array_ref_1(tmp_6, 1) = AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(tmp_6, 2) = AD_WRAP_LITERAL(0);
-    jmi_spatialdist_init(jmi, 2, JMI_TRUE, _time + AD_WRAP_LITERAL(3), tmp_5, tmp_6, 2);
+    jmi_spatialdist_init(jmi, 1, JMI_FALSE, _time + AD_WRAP_LITERAL(3), tmp_3, tmp_4);
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
+    jmi_array_ref_1(tmp_5, 1) = 0.0;
+    jmi_array_ref_1(tmp_5, 2) = 1.0;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1, 2)
+    jmi_array_ref_1(tmp_6, 1) = 0.0;
+    jmi_array_ref_1(tmp_6, 2) = 0.0;
+    jmi_spatialdist_init(jmi, 2, JMI_TRUE, _time + AD_WRAP_LITERAL(3), tmp_5, tmp_6);
 
     jmi_spatialdist_record_sample(jmi, 0, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_TRUE);
     jmi_spatialdist_record_sample(jmi, 1, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_FALSE);
@@ -19004,7 +19010,7 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
     _x2_1 = (tmp_8);
     tmp_9 = COND_EXP_EQ(JMI_FALSE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
     _x3_2 = (tmp_9);
-    _x4_3 = (COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0)));
+    _x4_3 = (COND_EXP_EQ(JMI_TRUE, JMI_TRUE, 0.0, 0.0));
 
     jmi_ad_var_t tmp_7;
     jmi_ad_var_t tmp_8;
@@ -19014,20 +19020,20 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    jmi_spatialdist_evaluate(jmi, 0, &tmp_7, &tmp_8, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3));
+    jmi_spatialdist_evaluate(jmi, 0, &tmp_7, &tmp_8, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_TRUE);
     _x1_0 = (tmp_7);
     _x2_1 = (tmp_8);
-    jmi_spatialdist_evaluate(jmi, 1, NULL, &tmp_9, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3));
+    jmi_spatialdist_evaluate(jmi, 1, NULL, &tmp_9, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_FALSE);
     _x3_2 = (tmp_9);
-    _x4_3 = (jmi_spatialdist_evaluate(jmi, 2, NULL, NULL, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3)));
+    _x4_3 = (jmi_spatialdist_evaluate(jmi, 2, NULL, NULL, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_TRUE));
 /********* Write back reinits *******/
 
 
-    jmi_specialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
-    jmi_specialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
+    jmi_spatialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
+    jmi_spatialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
 
-    (*res)[0] = JMI_SPATIALDIST_INITIAL_EVENT_RES;
-    (*res)[1] = JMI_SPATIALDIST_INITIAL_EVENT_RES;
+    (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
+    (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
 ")})));
 end SpatialDist1;
 
@@ -19072,7 +19078,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x1_0 = x[1];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            jmi_spatialdist_evaluate(jmi, 0, &tmp_1, &tmp_2, _x1_0, _x2_1, _time + AD_WRAP_LITERAL(3));
+            jmi_spatialdist_evaluate(jmi, 0, &tmp_1, &tmp_2, _x1_0, _x2_1, _time + AD_WRAP_LITERAL(3), JMI_TRUE);
             (*res)[0] = tmp_1 - (_x3_2);
             (*res)[1] = tmp_2 - (_x3_2);
         }

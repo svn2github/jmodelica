@@ -1500,7 +1500,7 @@ int jmi_set_start_values(jmi_t *jmi);
 
 /* Initialize delay interface 
  * Called when initializing jmi struct */
-int jmi_init_delay_if(jmi_t* jmi, int n_delays, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches);
+int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches);
 
 /* Initialize delay blocks 
  * Called after model initalization */

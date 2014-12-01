@@ -121,10 +121,10 @@ int jmi_spatialdist_new(jmi_t *jmi, int index);
 int jmi_spatialdist_delete(jmi_t *jmi, int index);
 
 /** \brief Initialize the spatialdist block with given index and provide initial contents (linearly interpolated). */
-int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
+int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_array_t *x_init, jmi_array_t *y_init);
 
 /** \brief Evaluate the output of the spatialdist block with given index, current input values, and position `x`. */
-int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
+jmi_real_t jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);
 
 /** \brief Record a sample for the spatialdist with given index. Call at each completed integrator step. */
 int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity);

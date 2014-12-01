@@ -319,7 +319,7 @@ aspect InstFunctionBinding {
                 map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
                 map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
                 map.put("delay",           new VarArgsBuiltInCreator(new FDelayExp(),  2, 3));
-                map.put("spatialDistribution", new VarArgsBuiltInCreator(new FSpatialDistExp(), 4, 6));
+                map.put("spatialDistribution", new VarArgsBuiltInCreator(new FSpatialDistExp(), 4, 6, true));
                 //       name                                    math       node              # args
                 map.put("Connections.branch", new BuiltInCreator(BIT.NONE, new FConnBranch(),    2));
                 map.put("Connections.root",   new BuiltInCreator(BIT.NONE, new FConnRoot(),      1));
@@ -331,7 +331,6 @@ aspect InstFunctionBinding {
                 
                 String[] unsupported = new String[] { 
                         // Ticket 664: Support all function-like operators
-                        "delay", "spatialDistribution"
                     };
                 for (String name : unsupported)
                     if (!map.containsKey(name))
@@ -405,20 +404,29 @@ aspect InstFunctionBinding {
 			}
 			
 			private static class VarArgsBuiltInCreator extends BuiltInCreator {
-				
-				private int maxArgs;
-				
-				public VarArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
-					super(BIT.NONE, tmpl, minArgs);
-					this.maxArgs = maxArgs;
-				}
-				
-				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
-					super.setArguments(res, args);
-					for (int i = numArgs; i < maxArgs; i++)
-						res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i);
-				}
-				
+                private int maxArgs;
+                public boolean generateMissing = false;
+                
+                public VarArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
+                    this(tmpl, minArgs, maxArgs, false);
+                }
+                
+                public VarArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs, boolean generateMissing) {
+                    super(BIT.NONE, tmpl, minArgs);
+                    this.maxArgs = maxArgs;
+                    this.generateMissing = generateMissing;
+                }
+                
+                protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
+                    super.setArguments(res, args);
+                    for (int i = numArgs; i < maxArgs; i++) {
+                        if (generateMissing) {
+                            res.setChild(extractFExp(args[i]), i);
+                        } else {
+                            res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i);
+                        }
+                    }
+                }
 			}
 			
 			private static class UnsupportedBuiltInCreator extends InfArgsBuiltInCreator {
@@ -825,6 +833,7 @@ aspect InstFunctionBinding {
 	inh boolean InstFunctionArgument.inVectorizedCall();
 	eq FAbstractFunctionCall.getChild().inVectorizedCall()  = false;
 	eq InstVectorFunctionCall.getChild().inVectorizedCall() = true;
+	eq FSpatialDistExp.getChild().inVectorizedCall() = size().ndims() > 0;
 	
 	/**
 	 * Check if this argument is vectorized.

@@ -110,7 +110,9 @@ jmi_real_t jmi_delay_evaluate(jmi_t *jmi, int index, jmi_real_t y_in, jmi_real_t
     jmi_delay_t *delay = &(jmi->delays[index]);
     jmi_real_t t = get_t(jmi);
     jmi_real_t t_delayed, t_curr;
-    if (index < 0 || index >= jmi->n_delays) return -1; /* todo: better way to handle the error? */
+    if (index < 0 || index >= jmi->n_delays) {
+    	jmi_internal_error(jmi, "Delay index out of bounds");
+    }
 
     if (delay->fixed) {
         /* Ignore the delay time if fixed, then it has already been used when putting data into the buffer. */
@@ -211,7 +213,7 @@ int jmi_spatialdist_delete(jmi_t *jmi, int index) {
     return jmi_delaybuffer_delete(&(jmi->spatialdists[index].buffer));
 }
 
-int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init) {
+int jmi_spatialdist_init_(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init) {
     int i;
     jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
     jmi_delaybuffer_t *buffer = &(spatialdist->buffer);
@@ -225,9 +227,27 @@ int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t
     return 0;
 }
 
-int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity) {
+int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_array_t *x_init, jmi_array_t *y_init) {
+    return jmi_spatialdist_init_(jmi, index, no_event, x0, x_init->var, y_init->var, x_init->num_elems);
+}
+
+
+jmi_real_t jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t *out1, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity) {
+    jmi_real_t out0dummy;
+    jmi_real_t out1dummy;
     jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
-    if (index < 0 || index >= jmi->n_spatialdists) return -1;
+    if (index < 0 || index >= jmi->n_spatialdists) {
+        jmi_internal_error(jmi, "Spatial distribution index out of bounds");
+    }
+
+    if (out0 == NULL) {
+        out0 = &out0dummy;
+    }
+
+    if (out1 == NULL) {
+        out1 = &out1dummy;
+    }
+
     if (positiveVelocity) {
         *out0 = in0;
         *out1 = jmi_delaybuffer_evaluate_left(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
@@ -239,7 +259,7 @@ int jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi_real_t
                                           -x, &(spatialdist->lposition),
                                          1-x, in1);
     }
-    return 0;
+    return *out0;
 }
 
 int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_real_t in1, jmi_real_t x, jmi_boolean positiveVelocity) {

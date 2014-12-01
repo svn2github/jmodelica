@@ -981,7 +981,7 @@ aspect Arrays {
 	eq FSemiLinearExp.size()            = vectorizedSize();
 
     eq FDelayExp.size()                 = getFExp().size();
-    eq FSpatialDistExp.size()           = getIn0().size();
+    eq FSpatialDistExp.size()           = vectorizedSize();
     
     eq FStringExp.size()                = getValue().size();
 
@@ -990,6 +990,9 @@ aspect Arrays {
             if (e.isArray())
                 return e.size();
         return Size.SCALAR;
+    }
+    eq FSpatialDistExp.vectorizedSize() {
+        return getIn0().size();
     }
     
     syn FExp[] FBuiltInFunctionCall.myArgs() = null;
@@ -1080,6 +1083,7 @@ aspect Arrays {
 	inh Size InstFunctionArgument.vectorizedSize();
 	eq FAbstractFunctionCall.getChild().vectorizedSize() = Size.SCALAR;
 	eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
+	eq FSpatialDistExp.getChild().vectorizedSize()       = vectorizedSize();
 	
 	/**
 	 * Get array sizes of function argument.
@@ -2041,14 +2045,23 @@ aspect Arrays {
             return super.getArray();
         
         Array arr = new Array(getIn0().indices());
-        Array in0Arr = getIn0().getArray();
-        Array in1Arr = getIn1().getArray();
+        boolean vecPoints = getInitialPoints().ndims() > 1;
+        boolean vecValues = getInitialValues().ndims() > 1;
+        FExp points = getInitialPoints();
+        FExp values = getInitialValues();
         for (Index i : arr.indices()) {
-            arr.set(i, new FSpatialDistExp(in0Arr.get(i), in1Arr.get(i), getX().fullCopy(),
-                    getPositiveVelocity().fullCopy(), new Opt(getInitialPoints().fullCopy()), new Opt(getInitialValues().fullCopy())));
+            if (vecPoints) {
+                points = getInitialPoints().getArray().subArrayFExp(i);
+            }
+            if (vecValues) {
+                values = getInitialValues().getArray().subArrayFExp(i);
+            }
+            arr.set(i, new FSpatialDistExp(getIn0().getArray().subArrayFExp(i), getIn1().getArray().subArrayFExp(i), getX().fullCopy(),
+                    getPositiveVelocity().fullCopy(), points, values));
         }
         return arr;
     }
+    
 
 	/**
 	 * Add a copy of this expression to arr at position i. 

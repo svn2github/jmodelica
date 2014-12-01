@@ -37,6 +37,11 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_
     }
 }
 
+void jmi_internal_error(jmi_t *jmi, const char msg[]) {
+    jmi_log_node(jmi->log, logError, "Error", "Internal error <msg:%s>", msg);
+    jmi_throw();
+}
+
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
 void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[]) {
     if (func_name != NULL) {

@@ -1359,7 +1359,7 @@ FDelayExp : FBuiltInFunctionCall ::= FExp Delay:FExp [Max:FExp];
 /**
  * The spatialDistribution() operator.
  */
-FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp In1:FExp X:FExp PositiveVelocity:FExp [InitialPoints:FExp] [InitialValues:FExp];
+FSpatialDistExp : FBuiltInFunctionCall ::= In0:FExp In1:FExp X:FExp PositiveVelocity:FExp InitialPoints:FExp InitialValues:FExp;
 
 /**
  * Sample built-in function.
