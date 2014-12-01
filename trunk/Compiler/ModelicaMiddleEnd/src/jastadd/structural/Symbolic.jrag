@@ -845,9 +845,14 @@ aspect Derivatives {
     public FExp FDelayExp.diff(String name) {
         Opt max = hasMax() ? new Opt(getMax().copySymbolic()) : new Opt();
         FExp res = new FDelayExp(getFExp().diff(name), getDelay().copySymbolic(), max);
-        if (getDelay().isContinuousExp())
+        if (getDelay().isContinuousExp()) {
             res = new FMulExp(getDelay().diff(name), res);
+        }
         return res;
+    }
+    
+    public FExp FSpatialDistExp.diff(String name) {
+        throw new FunctionDifferentiationException(this);
     }
 
     public FExp FExp.diffUseOrDerExp(String name, String myName) {

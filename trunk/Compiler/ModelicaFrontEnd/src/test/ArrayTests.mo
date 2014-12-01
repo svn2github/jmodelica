@@ -7412,4 +7412,61 @@ end ScalarizingPre;
 
 end Other;
 
+
+model Delay1
+    Real[2] y1;
+    Real[2] y2;
+    Real[2] x;
+  equation
+    y1 = delay(x,{1,2},2);
+    y2 = delay(x,{1,2});
+    x = {time,time};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Delay1",
+            description="Test scalarizing of vectorized delay",
+            flatModel="
+fclass ArrayTests.Delay1
+ Real y1[1];
+ Real y1[2];
+ Real y2[1];
+ Real y2[2];
+ Real x[1];
+ Real x[2];
+equation
+ y1[1] = delay(x[1], 1, 2);
+ y1[2] = delay(x[2], 2, 2);
+ y2[1] = delay(x[1], 1);
+ y2[2] = delay(x[2], 2);
+ x[1] = time;
+ x[2] = time;
+end ArrayTests.Delay1;
+")})));
+end Delay1;
+
+model SpatialDistribution1
+    Real[2] y;
+    Real[2] x;
+  equation
+    y = spatialDistribution(x,{1,2},1,true,{{0,0.5,1.0}, {0,0.6,1.0}}, {1,2,3});
+    x = {time,time};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SpatialDistribution1",
+            description="Test scalarizing of vectorized delay",
+            flatModel="
+fclass ArrayTests.SpatialDistribution1
+ Real y[1];
+ Real y[2];
+ Real x[1];
+ Real x[2];
+equation
+ y[1] = spatialDistribution(x[1], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
+ y[2] = spatialDistribution(x[2], 2, 1, true, {0, 0.6, 1.0}, {1, 2, 3});
+ x[1] = time;
+ x[2] = time;
+end ArrayTests.SpatialDistribution1;
+")})));
+end SpatialDistribution1;
+
 end ArrayTests;

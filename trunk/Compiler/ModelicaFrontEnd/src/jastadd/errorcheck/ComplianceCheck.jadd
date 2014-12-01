@@ -149,6 +149,10 @@ aspect ComplianceCheck {
     
     public void FSpatialDistExp.complianceCheck(ErrorCheckType checkType) {
         compliance("The spatialDistribution() function-like operator is not supported");
+        FAbstractEquation equation = myFEquation();
+        if (isArray() && equation != null && equation instanceof FFunctionCallEquation) {
+            compliance("The spatialDistribution() function-like operator is not supported vectorized in function call equations");
+        }
     }
     
 	syn boolean FExp.isAccessToInnerOrOuter()  = false;

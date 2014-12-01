@@ -833,7 +833,8 @@ aspect InstFunctionBinding {
 	inh boolean InstFunctionArgument.inVectorizedCall();
 	eq FAbstractFunctionCall.getChild().inVectorizedCall()  = false;
 	eq InstVectorFunctionCall.getChild().inVectorizedCall() = true;
-	eq FSpatialDistExp.getChild().inVectorizedCall() = size().ndims() > 0;
+	eq FDelayExp.getChild().inVectorizedCall() = isArray();
+	eq FSpatialDistExp.getChild().inVectorizedCall() = isArray();
 	
 	/**
 	 * Check if this argument is vectorized.

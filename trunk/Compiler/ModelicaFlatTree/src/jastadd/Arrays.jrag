@@ -229,8 +229,8 @@ aspect Arrays {
 	eq FHomotopyExp.ndims()   = getActual().ndims();
 	eq FSemiLinearExp.ndims() = size().ndims();
 
-    eq FDelayExp.ndims()       = getFExp().ndims();
-    eq FSpatialDistExp.ndims() = getIn0().ndims();
+    eq FDelayExp.ndims()       = vectorizedNdims();
+    eq FSpatialDistExp.ndims() = vectorizedNdims();
 
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -980,7 +980,7 @@ aspect Arrays {
 	eq FHomotopyExp.size()              = getActual().size();
 	eq FSemiLinearExp.size()            = vectorizedSize();
 
-    eq FDelayExp.size()                 = getFExp().size();
+    eq FDelayExp.size()                 = vectorizedSize();
     eq FSpatialDistExp.size()           = vectorizedSize();
     
     eq FStringExp.size()                = getValue().size();
@@ -995,10 +995,29 @@ aspect Arrays {
         return getIn0().size();
     }
     
+    syn int FBuiltInFunctionCall.vectorizedNdims() {
+        for (FExp e : myArgs())
+            if (e.isArray())
+                return e.ndims();
+        return 0;
+    }
+    eq FSpatialDistExp.vectorizedNdims() {
+        return getIn0().ndims();
+    }
+    
     syn FExp[] FBuiltInFunctionCall.myArgs() = null;
     eq FSemiLinearExp.myArgs() {
         FExp[] e = {getX(), getPosSlope(), getNegSlope()};
         return e;
+    }
+    eq FDelayExp.myArgs() {
+        if (hasMax()) {
+            FExp[] e = {getFExp(), getDelay(), getMax()};
+            return e;
+        } else {
+            FExp[] e = {getFExp(), getDelay()};
+            return e;
+        }
     }
     
 	
@@ -1083,6 +1102,7 @@ aspect Arrays {
 	inh Size InstFunctionArgument.vectorizedSize();
 	eq FAbstractFunctionCall.getChild().vectorizedSize() = Size.SCALAR;
 	eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
+	eq FDelayExp.getChild().vectorizedSize()             = vectorizedSize();
 	eq FSpatialDistExp.getChild().vectorizedSize()       = vectorizedSize();
 	
 	/**
@@ -2028,23 +2048,22 @@ aspect Arrays {
     }
 
     eq FDelayExp.getArray() {
-        if (!getFExp().isArray())
+        if (!isArray()) {
             return super.getArray();
-        
-        Array arr = new Array(getFExp().indices());
-        Array exp = getFExp().getArray();
-        Array delay = getDelay().getArray();
-        Array max = hasMax() ? getMax().getArray() : null;
-        for (Index i : arr.indices()) 
-            arr.set(i, new FDelayExp(exp.get(i), delay.get(i), (max == null) ? new Opt() : new Opt(max.get(i))));
+        }
+        Array arr = new Array(indices());
+        for (Index i : arr.indices()) {
+            arr.set(i, new FDelayExp(getFExp().getArray().get(i), getDelay().getArray().get(i), 
+                    hasMax() ? new Opt(getMax().getArray().get(i)) : new Opt()));
+        }
         return arr;
     }
     
     eq FSpatialDistExp.getArray() {
-        if (!getIn0().isArray())
+        if (!isArray()) {
             return super.getArray();
-        
-        Array arr = new Array(getIn0().indices());
+        }
+        Array arr = new Array(indices());
         boolean vecPoints = getInitialPoints().ndims() > 1;
         boolean vecValues = getInitialValues().ndims() > 1;
         FExp points = getInitialPoints();

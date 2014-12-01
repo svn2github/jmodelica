@@ -924,4 +924,27 @@ Semantic error at line 801, column 5:
 end FortranStrings;
 
 
+model SpatialDist1
+    Real x1,x2,x3,x4,x5,x6,x7;
+  equation
+    x1 = spatialDistribution(1, 2, 3, true, {9,9});
+    x2 = spatialDistribution(1, 2, 3, true, initialPoints={9,9});
+    x3 = spatialDistribution(1, 2, 3, true, initialValues={9,9});
+    x4 = spatialDistribution(1, 2, 3, true, {9,9}, {9,9});
+    x5 = spatialDistribution(1, 2, 3, true, {9,9}, initialValues={9,9});
+    x6 = spatialDistribution(1, 2, 3, true, initialPoints={9,9}, initialValues={9,9});
+    x7 = spatialDistribution(1, 2, 3, initialPoints={1,2}, initialValues={3,4});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="SpatialDist1",
+            description="Check named arguments for spatialDistribution().",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 936, column 10:
+  Calling function spatialDistribution(): missing argument for required input positiveVelocity
+")})));
+end SpatialDist1;
+
 end CheckTests;

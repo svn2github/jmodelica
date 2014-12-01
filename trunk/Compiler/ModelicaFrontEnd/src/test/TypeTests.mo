@@ -2355,4 +2355,71 @@ Semantic error at line 2274, column 71:
 ")})));
 end Functional7;
 
+model Delay1
+    Real x1 = sin(time);
+    Real d;
+  equation
+    {x1} = delay({x1}, {d,d}, 2);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Delay1",
+            description="Check type error for delay().",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 2362, column 24:
+  Calling function delay(): types of positional argument 2 and input delayTime are not compatible
+    type of '{d, d}' is Real[2]
+")})));
+end Delay1;
+
+model SpatialDist1
+    Real x = sin(time);
+    Real d;
+  equation
+    {x} = spatialDistribution({x}, d, {2}, {true}, {{0,0},{0,0}});
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="SpatialDist1",
+            description="Check type error for spatialDistribution().",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 2381, column 11:
+  Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes
+Error: in file '...':
+Semantic error at line 2381, column 11:
+  Calling function spatialDistribution(): fourth argument 'positiveVelocity' cannot be vectorized
+Error: in file '...':
+Semantic error at line 2381, column 11:
+  Calling function spatialDistribution(): third argument 'x' cannot be vectorized
+Error: in file '...':
+Semantic error at line 2381, column 50:
+  Calling function spatialDistribution(): types of positional argument 5 and input initialPoints are not compatible
+    type of '{{0, 0}, {0, 0}}' is Integer[2, 2]
+")})));
+end SpatialDist1;
+
+model SpatialDist2
+    Real[2] y1;
+    Real[2] y2;
+  equation
+    (y1,y2) = spatialDistribution({1,2}, {3,4}, 2, true);
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="SpatialDist2",
+            description="Check type error for spatialDistribution().",
+            errorMessage="
+2 errors found:
+Error: in file '...':
+Compliance error at line 2408, column 15:
+  The spatialDistribution() function-like operator is not supported
+Error: in file '...':
+Compliance error at line 2408, column 15:
+  The spatialDistribution() function-like operator is not supported vectorized in function call equations
+
+")})));
+end SpatialDist2;
+
 end TypeTests;

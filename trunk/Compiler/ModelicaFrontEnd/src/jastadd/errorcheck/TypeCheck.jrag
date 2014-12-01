@@ -784,6 +784,21 @@ aspect FlatTypeCheck {
         if (!(hasMax() ? getMax() : getDelay()).variability().parameterOrLess())
             error("Calling function delay(): last argument supplied must be of parameter variability");
     }
+    
+    public void FSpatialDistExp.typeCheck(ErrorCheckType checkType) {
+        super.typeCheck(checkType);
+        if (!getIn0().size().equivalent(getIn1().size(), true)) {
+            error("Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes");
+        }
+        if (isArray()) {
+            if (getX().isArray()) {
+                error("Calling function spatialDistribution(): third argument 'x' cannot be vectorized");
+            }
+            if (getPositiveVelocity().isArray()) {
+                error("Calling function spatialDistribution(): fourth argument 'positiveVelocity' cannot be vectorized");
+            }
+        }
+    }
 
 	public void FStringExp.typeCheck(ErrorCheckType checkType) {
 		FType valueType = getValue().type();
@@ -1027,7 +1042,6 @@ aspect FlatTypeCheck {
     eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
     eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
     eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
-    eq FDelayExp.getOriginalArg(int i).argumentDefinedTypeValid()            = i > 0;
     eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
     eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
     eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
@@ -1056,7 +1070,6 @@ aspect FlatTypeCheck {
     eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type)     = 
         hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
     eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
-    eq FDelayExp.getChild().argumentTypeValid(FType type)                 = type.isNumeric();
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
     eq FCardinality.getChild().argumentTypeValid(FType type)              = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 

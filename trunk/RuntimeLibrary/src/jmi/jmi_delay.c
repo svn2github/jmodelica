@@ -219,8 +219,8 @@ int jmi_spatialdist_init_(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_
     jmi_delaybuffer_t *buffer = &(spatialdist->buffer);
     if (index < 0 || index >= jmi->n_spatialdists) return -1;
 
-    init_spatialdist(spatialdist, no_event, x0);    
-    if (jmi_delaybuffer_init(buffer, 1.0) < 0) return -1; 
+    init_spatialdist(spatialdist, no_event, x0);
+    if (jmi_delaybuffer_init(buffer, 1.0) < 0) return -1;
     for (i = 0; i < n_init; i++) {
         if (jmi_delaybuffer_record_sample(buffer, x_init[i], y_init[i], FALSE) < 0) return -1;
     }
