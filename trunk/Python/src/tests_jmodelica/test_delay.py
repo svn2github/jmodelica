@@ -21,6 +21,7 @@ import numpy as N
 
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr, get_files_path
+from nose.tools import nottest
 
 
 compiler_options={}
@@ -258,7 +259,8 @@ def sol_repeating_events2(t, d=1):
     x_expected[inds+1] = N.mod(t[inds]+1e-7, d)
     return x_expected
 
-@testattr(stddist = True)
+#@testattr(stddist = True)
+@nottest
 def test_multiple_delays():
     res = compile_and_simulate('TestMultipleDelays', final_time = 10)
     t   = res['time']

@@ -120,7 +120,7 @@ int jmi_spatialdist_new(jmi_t *jmi, int index);
 /** \brief Free the memory for the buffers of the spatialdist block with the given index. It may then be reallocated with `jmi_spatialdist_new`. */
 int jmi_spatialdist_delete(jmi_t *jmi, int index);
 
-/** \brief Initialize the spatialdist block with given index and provide initial contents (linearly interpolated). */
+/** \brief Initialize the spatialdist block with given index and provide initial contents (linearly interpolated, 0 <= x_init <= 1). */
 int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t x0, jmi_array_t *x_init, jmi_array_t *y_init);
 
 /** \brief Evaluate the output of the spatialdist block with given index, current input values, and position `x`. */
