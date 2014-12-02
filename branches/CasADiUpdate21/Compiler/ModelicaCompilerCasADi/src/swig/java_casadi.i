@@ -59,7 +59,7 @@ using namespace std;
 %rename(deref1)  casadi::MXFunction::operator->;
 %rename(deref2)  casadi::Function::operator->;
 
-#define CASADI_CORE_EXPORT
+#define CASADI_EXPORT
 
 %include "casadi/core/printable_object.hpp"
 %include "casadi/core/shared_object.hpp"
