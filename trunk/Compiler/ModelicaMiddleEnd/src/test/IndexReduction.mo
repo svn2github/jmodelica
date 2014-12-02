@@ -2628,6 +2628,7 @@ public
  algorithm
   o := i * 42;
   return;
+ annotation(Inline = false);
  end IndexReduction.IndexReduction53b.F;
 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2700,6 +2701,7 @@ public
  algorithm
   d := a + b;
   return;
+ annotation(Inline = false);
  end IndexReduction.SSPreferBackoff1.f;
 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2920,7 +2922,7 @@ public
  algorithm
   y := sin(x);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Simple._der_F);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Simple._der_F);
  end IndexReduction.AlgorithmDifferentiation.Simple.F;
 
  function IndexReduction.AlgorithmDifferentiation.Simple._der_F
@@ -2979,7 +2981,7 @@ public
  algorithm
   y := sin(x.x[1]);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.RecordInput._der_F);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.RecordInput._der_F);
  end IndexReduction.AlgorithmDifferentiation.RecordInput.F;
 
  function IndexReduction.AlgorithmDifferentiation.RecordInput._der_F
@@ -3048,7 +3050,7 @@ public
  algorithm
   y.x[1] := sin(x);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F);
  end IndexReduction.AlgorithmDifferentiation.RecordOutput.F;
 
  function IndexReduction.AlgorithmDifferentiation.RecordOutput._der_F
@@ -3123,7 +3125,7 @@ public
   end for;
   y := sin(x);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.For._der_F);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.For._der_F);
  end IndexReduction.AlgorithmDifferentiation.For.F;
 
  function IndexReduction.AlgorithmDifferentiation.For._der_F
@@ -3205,7 +3207,7 @@ public
   (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   y := a + b;
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1);
  end IndexReduction.AlgorithmDifferentiation.FunctionCall.F1;
 
  function IndexReduction.AlgorithmDifferentiation.FunctionCall.F2
@@ -3311,7 +3313,7 @@ public
   end if;
   y := sin(x);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.If._der_F);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.If._der_F);
  end IndexReduction.AlgorithmDifferentiation.If.F;
 
  function IndexReduction.AlgorithmDifferentiation.If._der_F
@@ -3382,7 +3384,7 @@ public
   end for;
   y := a[1];
   return;
- annotation(smoothOrder = 3,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.InitArray._der_F);
+ annotation(Inline = false,smoothOrder = 3,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.InitArray._der_F);
  end IndexReduction.AlgorithmDifferentiation.InitArray.F;
 
  function IndexReduction.AlgorithmDifferentiation.InitArray._der_F
@@ -3512,7 +3514,7 @@ public
   end while;
   y := sin(x);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.While._der_F);
+ annotation(Inline = false, smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.While._der_F);
  end IndexReduction.AlgorithmDifferentiation.While.F;
 
  function IndexReduction.AlgorithmDifferentiation.While._der_F
@@ -3598,7 +3600,7 @@ public
   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   y := a + b;
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Recursive._der_F1);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.Recursive._der_F1);
  end IndexReduction.AlgorithmDifferentiation.Recursive.F1;
 
  function IndexReduction.AlgorithmDifferentiation.Recursive.F2
@@ -3710,7 +3712,7 @@ public
   c := c + 23;
   y := sin(x);
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F);
  end IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F;
 
  function IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F
@@ -3794,7 +3796,7 @@ public
  algorithm
   y := x ^ 2;
   return;
- annotation(smoothOrder = 2,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square);
+ annotation(Inline = false,smoothOrder = 2,derivative(order = 1) = IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square);
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square;
 
  function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square
@@ -4101,7 +4103,7 @@ public
   b := a * 2;
   c := - a;
   return;
- annotation(derivative = IndexReduction.Variability1.F1_der);
+ annotation(derivative = IndexReduction.Variability1.F1_der,Inline = false);
  end IndexReduction.Variability1.F1;
 
 end IndexReduction.Variability1;
@@ -4204,7 +4206,7 @@ public
   end for;
   y := x + temp_1;
   return;
- annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization1.F1_der);
+ annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization1.F1_der,Inline = false);
  end IndexReduction.FunctionAttributeScalarization1.F1;
 
  function IndexReduction.FunctionAttributeScalarization1.F1_der
@@ -4215,6 +4217,7 @@ public
  algorithm
   y_der := x_der;
   return;
+ annotation(Inline = false);
  end IndexReduction.FunctionAttributeScalarization1.F1_der;
 
 end IndexReduction.FunctionAttributeScalarization1;
@@ -4274,7 +4277,7 @@ public
  algorithm
   y := x + (a[1] + a[2]);
   return;
- annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization2.F1_der);
+ annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization2.F1_der,Inline = false);
  end IndexReduction.FunctionAttributeScalarization2.F1;
 
  function IndexReduction.FunctionAttributeScalarization2.F1_der
@@ -4285,6 +4288,7 @@ public
  algorithm
   y_der := x_der;
   return;
+ annotation(Inline = false);
  end IndexReduction.FunctionAttributeScalarization2.F1_der;
 
 end IndexReduction.FunctionAttributeScalarization2;
@@ -4355,6 +4359,7 @@ public
  algorithm
   r := x;
   return;
+ annotation(Inline = false);
  end IndexReduction.NonDiffArgsTest1.F2;
 
  function IndexReduction.NonDiffArgsTest1.F1
@@ -4364,7 +4369,7 @@ public
  algorithm
   y := x + r;
   return;
- annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest1.F1_der);
+ annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest1.F1_der,Inline = false);
  end IndexReduction.NonDiffArgsTest1.F1;
 
  function IndexReduction.NonDiffArgsTest1.F1_der
@@ -4375,6 +4380,7 @@ public
  algorithm
   y_der := x_der;
   return;
+ annotation(Inline = false);
  end IndexReduction.NonDiffArgsTest1.F1_der;
 
 end IndexReduction.NonDiffArgsTest1;
@@ -4449,6 +4455,7 @@ public
  algorithm
   r.a := x;
   return;
+ annotation(Inline = false);
  end IndexReduction.NonDiffArgsTest2.F2;
 
  function IndexReduction.NonDiffArgsTest2.F1
@@ -4458,7 +4465,7 @@ public
  algorithm
   y := x + r.a;
   return;
- annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest2.F1_der);
+ annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest2.F1_der,Inline = false);
  end IndexReduction.NonDiffArgsTest2.F1;
 
  function IndexReduction.NonDiffArgsTest2.F1_der
@@ -4469,6 +4476,7 @@ public
  algorithm
   y_der := x_der;
   return;
+ annotation(Inline = false);
  end IndexReduction.NonDiffArgsTest2.F1_der;
 
  record IndexReduction.NonDiffArgsTest2.R
@@ -4525,7 +4533,7 @@ public
   y[1] := x;
   y[2] := - x;
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation1._der_f);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation1._der_f);
  end IndexReduction.FunctionCallEquation1.f;
 
  function IndexReduction.FunctionCallEquation1._der_f
@@ -4588,7 +4596,7 @@ public
   y := x;
   z := x;
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation2._der_f);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation2._der_f);
  end IndexReduction.FunctionCallEquation2.f;
 
  function IndexReduction.FunctionCallEquation2._der_f
@@ -4653,7 +4661,7 @@ public
   y := x;
   z := x;
   return;
- annotation(smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation3._der_f);
+ annotation(Inline = false,smoothOrder = 1,derivative(order = 1) = IndexReduction.FunctionCallEquation3._der_f);
  end IndexReduction.FunctionCallEquation3.f;
 
  function IndexReduction.FunctionCallEquation3._der_f
@@ -4738,7 +4746,7 @@ public
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
- annotation(derivative = IndexReduction.FunctionCallEquation4.F2_der);
+ annotation(derivative = IndexReduction.FunctionCallEquation4.F2_der,Inline = false);
  end IndexReduction.FunctionCallEquation4.F2;
 
  function IndexReduction.FunctionCallEquation4.F2_der
@@ -4749,6 +4757,7 @@ public
   y_der[1] := a_der[1] + a_der[2];
   y_der[2] := a_der[1] - a_der[2];
   return;
+ annotation(Inline = false);
  end IndexReduction.FunctionCallEquation4.F2_der;
 
 end IndexReduction.FunctionCallEquation4;
@@ -4821,7 +4830,7 @@ public
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
- annotation(derivative = IndexReduction.FunctionCallEquation5.F2_der);
+ annotation(derivative = IndexReduction.FunctionCallEquation5.F2_der,Inline = false);
  end IndexReduction.FunctionCallEquation5.F2;
 
  function IndexReduction.FunctionCallEquation5.F2_der
@@ -4832,6 +4841,7 @@ public
   y_der[1] := a_der[1] + a_der[2];
   y_der[2] := a_der[1] - a_der[2];
   return;
+ annotation(Inline = false);
  end IndexReduction.FunctionCallEquation5.F2_der;
 
 end IndexReduction.FunctionCallEquation5;
@@ -5219,7 +5229,7 @@ public
  algorithm
   o1 := i;
   return;
- annotation(derivative = IndexReduction.FunctionInlining.Test1.F_der);
+ annotation(derivative = IndexReduction.FunctionInlining.Test1.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test1.F;
 
 end IndexReduction.FunctionInlining.Test1;
@@ -5317,7 +5327,7 @@ public
   o1[1] := i;
   o1[2] := - i;
   return;
- annotation(derivative = IndexReduction.FunctionInlining.Test2.F_der);
+ annotation(derivative = IndexReduction.FunctionInlining.Test2.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test2.F;
 
 end IndexReduction.FunctionInlining.Test2;
@@ -5398,7 +5408,7 @@ public
  algorithm
   o1 := i;
   return;
- annotation(derivative = IndexReduction.FunctionInlining.Test3.F_der);
+ annotation(derivative = IndexReduction.FunctionInlining.Test3.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test3.F;
 
 end IndexReduction.FunctionInlining.Test3;
@@ -5510,7 +5520,7 @@ public
   o1[1] := i;
   o1[2] := - i;
   return;
- annotation(derivative = IndexReduction.FunctionInlining.Test4.F_der);
+ annotation(derivative = IndexReduction.FunctionInlining.Test4.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test4.F;
 
 end IndexReduction.FunctionInlining.Test4;
@@ -5578,7 +5588,7 @@ public
  algorithm
   o1 := i1 * i2;
   return;
- annotation(derivative(zeroDerivative = i2) = IndexReduction.FunctionInlining.Test5.F_der);
+ annotation(derivative(zeroDerivative = i2) = IndexReduction.FunctionInlining.Test5.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test5.F;
 
 end IndexReduction.FunctionInlining.Test5;
@@ -5664,7 +5674,7 @@ public
  algorithm
   o1 := i1 * i2;
   return;
- annotation(derivative(zeroDerivative = i2) = IndexReduction.FunctionInlining.Test6.F_der);
+ annotation(derivative(zeroDerivative = i2) = IndexReduction.FunctionInlining.Test6.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test6.F;
 
 end IndexReduction.FunctionInlining.Test6;
@@ -5764,7 +5774,7 @@ public
  algorithm
   o1 := if i1 > i2 then i1 else i2;
   return;
- annotation(derivative = IndexReduction.FunctionInlining.Test7.F_der);
+ annotation(derivative = IndexReduction.FunctionInlining.Test7.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test7.F;
 
  function IndexReduction.FunctionInlining.Test7.F_der
@@ -5776,7 +5786,7 @@ public
  algorithm
   o1_der := if i1 > i2 then i1_der else i2_der;
   return;
- annotation(derivative(order = 2) = IndexReduction.FunctionInlining.Test7.F_der2);
+ annotation(derivative(order = 2) = IndexReduction.FunctionInlining.Test7.F_der2,Inline = false);
  end IndexReduction.FunctionInlining.Test7.F_der;
 
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -5871,7 +5881,7 @@ public
   o1 := i1 + i2;
   o2 := 1;
   return;
- annotation(derivative = IndexReduction.FunctionInlining.Test8.F_der);
+ annotation(derivative = IndexReduction.FunctionInlining.Test8.F_der,Inline = false);
  end IndexReduction.FunctionInlining.Test8.F;
 
 end IndexReduction.FunctionInlining.Test8;

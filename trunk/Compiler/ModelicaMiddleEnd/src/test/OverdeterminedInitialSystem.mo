@@ -208,6 +208,7 @@ public
   a := if x < 3.12 then 1 else 0;
   b := if x > 42 then 1 else 0;
   return;
+ annotation(Inline = false);
  end OverdeterminedInitialSystem.FunctionCall1.F;
 
 end OverdeterminedInitialSystem.FunctionCall1;

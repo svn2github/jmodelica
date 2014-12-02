@@ -2936,6 +2936,7 @@ public
    b := b - a;
   end while;
   return;
+ annotation(Inline = true);
  end FunctionInlining.InlineAnnotation2.f;
 
 end FunctionInlining.InlineAnnotation2;
@@ -3033,6 +3034,7 @@ public
  algorithm
   b := a * a;
   return;
+ annotation(Inline = false);
  end FunctionInlining.InlineAnnotation5.f;
 
 end FunctionInlining.InlineAnnotation5;
@@ -3070,6 +3072,7 @@ public
  algorithm
   b := a * a;
   return;
+ annotation(LateInline = false);
  end FunctionInlining.InlineAnnotation6.f;
 
 end FunctionInlining.InlineAnnotation6;
@@ -3107,6 +3110,7 @@ public
  algorithm
   b := a * a;
   return;
+ annotation(InlineAfterIndexReduction = false);
  end FunctionInlining.InlineAnnotation7.f;
 
 end FunctionInlining.InlineAnnotation7;

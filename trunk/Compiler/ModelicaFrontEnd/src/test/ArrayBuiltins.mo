@@ -3120,6 +3120,7 @@ public
    result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
   end for;
   return;
+ annotation(Inline = true);
  end Modelica.Math.Vectors.normalize;
 
  function Modelica.Math.Vectors.length
@@ -3135,6 +3136,7 @@ public
   temp_1 := temp_2;
   result := sqrt(temp_1);
   return;
+ annotation(Inline = true);
  end Modelica.Math.Vectors.length;
 
 end ArrayBuiltins.NonVectorizedSalarization3;

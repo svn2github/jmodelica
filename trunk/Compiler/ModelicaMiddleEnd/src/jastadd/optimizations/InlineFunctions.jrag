@@ -113,23 +113,35 @@ aspect FunctionInlining {
 
         }
 
-        private InlineAnnotation inlineAnnotation = InlineAnnotation.DEFAULT;
-
-        public void readInlineAnnotation(AnnotationNode a) {
-            AnnotationNode inline = a.forPath("Inline");
-            AnnotationNode late = a.forPath("LateInline");
-            AnnotationNode index = a.forPath("InlineAfterIndexReduction");
-            if (late.isBoolValue())
-                inlineAnnotation = late.bool() ? InlineAnnotation.LATE : InlineAnnotation.NONE;
-            if (inline.isBoolValue() && !(late.isBoolValue() && late.bool()))
-                inlineAnnotation = inline.bool() ? InlineAnnotation.INLINE : InlineAnnotation.NONE;
-            if (index.isBoolValue())
-                inlineAnnotation = index.bool() ? InlineAnnotation.AFTER_INDEX : InlineAnnotation.NONE;
-        }
-
-        public void setInlineAnnotation(InlineAnnotation ia) {
-            inlineAnnotation = ia;
-        }
+    }
+    private InlineAnnotation FFunctionDecl.inlineAnnotationCache = null;
+    
+    public InlineAnnotation FFunctionDecl.inlineAnnotation() {
+        if (inlineAnnotationCache != null)
+            return inlineAnnotationCache;
+        AnnotationNode inline = annotation().forPath("Inline");
+        AnnotationNode late = annotation().forPath("LateInline");
+        AnnotationNode index = annotation().forPath("InlineAfterIndexReduction");
+        inlineAnnotationCache = InlineAnnotation.DEFAULT;
+        if (late.isBoolValue())
+            inlineAnnotationCache = late.bool() ? InlineAnnotation.LATE : InlineAnnotation.NONE;
+        if (inline.isBoolValue() && !(late.isBoolValue() && late.bool()))
+            inlineAnnotationCache =  inline.bool() ? InlineAnnotation.INLINE : InlineAnnotation.NONE;
+        if (index.isBoolValue())
+            inlineAnnotationCache = index.bool() ? InlineAnnotation.AFTER_INDEX : InlineAnnotation.NONE;
+        return inlineAnnotationCache;
+    }
+    
+    public void FFunctionDecl.copyInlineAnnotation(AnnotationNode src) {
+        copyInlineAnnotation(src, "Inline");
+        copyInlineAnnotation(src, "LateInline");
+        copyInlineAnnotation(src, "InlineAfterIndexReduction");
+    }
+    
+    private void FFunctionDecl.copyInlineAnnotation(AnnotationNode src, String type) {
+        src = src.forPath(type);
+        if (src.exists() && src.isBoolValue())
+            annotation().forPath(type).setValue(FBooleanLitExp.create(src.bool()));
     }
 
     /**
@@ -869,7 +881,7 @@ aspect FunctionInlining {
      * Check if we can inline this function.
      */
     syn lazy boolean FFunctionDecl.isInlinable(boolean late) =
-        inlineAnnotation.may() && (late || !inlineAnnotation.late()) && 
+        inlineAnnotation().may() && (late || !inlineAnnotation().late()) && 
         isAllInlinable(getFAlgorithm().getFStatements()) && hasInlinableIO();
     // TODO: Add warning if a function where user suggests inlining can't be inlined?
 
@@ -877,11 +889,11 @@ aspect FunctionInlining {
      * Check if this function falls under the "trivial" inlining category.
      */
     syn lazy boolean FFunctionDecl.isTrivialInlinable(boolean late) {
-        if (!inlineAnnotation.may())
+        if (!inlineAnnotation().may())
             return false;
-        if (!late && inlineAnnotation.late())
+        if (!late && inlineAnnotation().late())
             return false;
-        if (inlineAnnotation.always())
+        if (inlineAnnotation().always())
             return isInlinable(late);
         if (myProtected().size() > 0)
             return false;

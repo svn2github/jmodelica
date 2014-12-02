@@ -645,6 +645,7 @@ public
  algorithm
   r.x := a;
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten13.f;
 
  record FunctionTests.FunctionFlatten13.R
@@ -694,6 +695,7 @@ public
   r.r2.x := a + a;
   r.y := 3;
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten14.f;
 
  record FunctionTests.FunctionFlatten14.R2
@@ -743,6 +745,7 @@ public
  algorithm
   r.r2.x := 3;
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten15.f;
 
  record FunctionTests.FunctionFlatten15.R2
@@ -792,6 +795,7 @@ public
   r[1].r2.x := a + a;
   r[2].r2.x := a + a;
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten16.f;
 
  record FunctionTests.FunctionFlatten16.R2
@@ -842,6 +846,7 @@ public
   r[1].r2.x := a;
   r[2].r2.x := a + a;
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten17.f;
 
  record FunctionTests.FunctionFlatten17.R2
@@ -10127,6 +10132,7 @@ public
    y[i1] := temp_1[i1] + x[i1];
   end for;
   return;
+ annotation(Inline = false);
  end FunctionTests.UnknownArray47.f1;
 
  function FunctionTests.UnknownArray47.f2
@@ -10183,6 +10189,7 @@ public
   end for;
   y[1,1] := temp_1[1,1];
   return;
+ annotation(Inline = false);
  end FunctionTests.UnknownArray48.f;
 
 end FunctionTests.UnknownArray48;
@@ -15094,7 +15101,7 @@ public
  algorithm
   y := x;
   return;
- annotation(derivative = FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der);
+ annotation(derivative = FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der,Inline = false);
  end FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F;
 
  function FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der
@@ -15104,6 +15111,7 @@ public
  algorithm
   y_der := x_der;
   return;
+ annotation(Inline = false);
  end FunctionTests.DerivativeAnnotation.ExtendsTest1.p2.F_der;
 
 end FunctionTests.DerivativeAnnotation.ExtendsTest1;

@@ -278,7 +278,7 @@ aspect Flattening {
             FFunctionDecl ffd = createFFunction(fc, ie);
             copyDerivativeAnnotations(fc, ie, ffd.annotation());
             // TODO: should we look in extends as well?
-            ffd.readInlineAnnotation(annotation());
+            ffd.copyInlineAnnotation(annotation());
             ffd.smoothOrder(smoothOrder());
             
             ffd.ensureFQNamesFull();

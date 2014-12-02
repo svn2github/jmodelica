@@ -803,6 +803,7 @@ public
   output Complex result(re = re,im = im);
  algorithm
   return;
+ annotation(Inline = true);
  end Complex.'constructor'.fromReal;
 
  function OperatorRecordTests.Cplx.'*'.mul

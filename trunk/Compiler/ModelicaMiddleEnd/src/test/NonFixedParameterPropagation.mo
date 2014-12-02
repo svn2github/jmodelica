@@ -178,6 +178,7 @@ public
   o[1] := i;
   o[2] := - i;
   return;
+ annotation(Inline = false);
  end NonFixedParameterPropagation.FunctionCall1.F;
 
 end NonFixedParameterPropagation.FunctionCall1;
