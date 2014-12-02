@@ -499,12 +499,6 @@ namespace ModelicaCasADi
     {
         return equations_->hasBLT();
     }
-    #ifndef SWIG
-    std::set<const Variable*> Model::getBLTEliminables() const
-    {
-        return equations_->eliminableVariables();
-    }
-    #endif
 
     std::vector< Ref<Variable> > Model::getEliminableVariables() const
     {
@@ -590,6 +584,13 @@ namespace ModelicaCasADi
         for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
             elimVars.push_back(*it);
         }
+        
+        //When we keep them in a single container
+        /*for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
+            if((*it)->wasEliminated()){            
+                elimVars.push_back(*it);
+            }
+        }*/
         return elimVars;
     }
 
@@ -667,6 +668,22 @@ namespace ModelicaCasADi
         }
         else {
             std::cout<<"Only Models with BLT can eliminate variables.\n";
+        }
+    }
+    
+    casadi::MX Model::getSolutionOfEliminatedVariable(Ref<Variable> var){
+        if(var->wasEliminated()) {
+            std::map<const Variable*,casadi::MX>::iterator it = eliminatedVariableToSolution.find(var.getNode());
+            if(it!=eliminatedVariableToSolution.end()){
+                return it->second;            
+            }
+            else{
+                return casadi::MX();            
+            }
+        }
+        else {
+            std::cout<<"The variable is not an eliminated variable.\n";
+            return casadi::MX();  
         }
     }
 

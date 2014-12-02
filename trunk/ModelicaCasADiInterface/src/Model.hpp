@@ -215,14 +215,6 @@ namespace ModelicaCasADi
             /** Allows the use of operator << to print this class, through Printable. */
             virtual void print(std::ostream& os) const;
 
-        #ifndef SWIG
-            /**
-             *Gives all variables that have a symbolic solution in the BLT
-             * @return std::set of Variable pointer
-             **/
-            virtual std::set<const Variable*> getBLTEliminables() const;
-        #endif
-
             /**
              *Gives all variables that have a symbolic solution in the BLT
              * @return std::vector of Variable
@@ -262,12 +254,20 @@ namespace ModelicaCasADi
              * @Param Equations
              **/
             virtual void setEquations(Ref<Equations> eqCont);
-
+            #ifndef SWIG
             /**
              * Get the map of eliminated variables to corresponding substituted expressions.
              * @return std::map
              **/
             virtual const std::map<const Variable*,casadi::MX>& eliminatedTosolutions(){return eliminatedVariableToSolution;}
+            
+            /**
+             * Print the BLT of the DAE system
+             * @param A std::ostream
+             * @param A Boolean
+             */
+            void printBLT(std::ostream& out, bool with_details=false){equations_->printBLT(out,with_details);}
+            #endif
             /** Work around ownership of variables. */
             void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
             {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
@@ -285,7 +285,14 @@ namespace ModelicaCasADi
              **/
             virtual void markVariablesForElimination(const std::vector< Ref<Variable> >& vars);
             
-            //Experimental...not to use yet
+            /**
+             * returns the solution of an eliminated variable
+             * @Param MX
+             **/
+            casadi::MX getSolutionOfEliminatedVariable(Ref<Variable> var);
+            
+            //Experimental...not to use yet. Jacobian computation within a block is verify to be correct. 
+            //SolveLinarBlock function works for some blocks but now all XXXX 
             virtual void solveLinearSystemsInBLT()
             {
                 if(equations_->hasBLT()) {
@@ -297,7 +304,10 @@ namespace ModelicaCasADi
                     }
                 }
             }
-            
+            //To be deleted. Used just for testing
+            #ifndef SWIG
+            Ref<Block> getBlock(int i){return equations_->getBlock(i);}
+            #endif
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
             protected:

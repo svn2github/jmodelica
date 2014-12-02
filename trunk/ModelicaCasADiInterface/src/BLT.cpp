@@ -170,9 +170,13 @@ namespace ModelicaCasADi
     }
     
     void BLT::solveBlocksWithLinearSystems(){
+        bool first=0;         
         for(std::vector< Ref<Block> >::iterator it=blt.begin();
-        it!=blt.end();++it) {
-            (*it)->solveLinearSystem();
+        it!=blt.end() /*&& !first*/;++it) {
+            if((*it)->getNumUnsolvedVariables()>1){
+                (*it)->solveLinearSystem();
+                //first=1;
+            }
         }    
     }
 }; //End namespace

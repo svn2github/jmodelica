@@ -212,8 +212,7 @@ namespace ModelicaCasADi
                 typename CStruct::FVariable,
                 typename CStruct::FAbstractEquation,
                 typename CStruct::FEquation,
-                typename CStruct::FExp,
-                JArray>(&jblt, eqContainer, m->getNodeToVariableMap());
+                typename CStruct::FExp>(&jblt, eqContainer, m->getNodeToVariableMap());
         }
         else {
             transferDaeEquationsToContainer<java::util::ArrayList, typename CStruct::FAbstractEquation>(eqContainer, fclass.equations());

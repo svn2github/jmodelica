@@ -142,6 +142,11 @@ namespace ModelicaCasADi
             virtual void solveBlocksWithLinearSystems(){
                 throw std::runtime_error("Abstract Equations does not support solveBlocksWithLinearSystems(). Use BLT.\n");
             }
+            
+            //Experimental just for testing. to be deleted
+            virtual Ref<Block> getBlock(int i) const {
+                throw std::runtime_error("Abstract Equations does not support getBlock(id). Use BLT.\n");
+            }
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 

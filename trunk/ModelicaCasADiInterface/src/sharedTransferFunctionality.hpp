@@ -66,11 +66,10 @@ void tearDownJVM();
  *         BLT          *
  *                      *
  ************************/
-#ifndef SWIG
 
 template<typename JBlock, typename JCollection, typename JIterator,
 typename FVar, typename FAbstractEquation, typename FEquation,
-typename FExp, template<typename Ty> class ArrayJ>
+typename FExp>
 void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBlock,
 const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars)
 {
@@ -189,7 +188,12 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                 ciBlock->setasSolvable(false);
             }
         }
-
+        
+        //set flags
+        ciBlock->setasLinear(block->isLinear());
+        ciBlock->setasSimple(block->isSimple());
+        ciBlock->setasSolvable(block->isSolvable());
+        
         //Setting Jacobian always with casadi
         ciBlock->computeJacobianCasADi();
 
@@ -200,11 +204,6 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
             ciBlock->setasSolvable(false);
         }
 
-        ciBlock->setasSimple(block->isSimple());
-        ciBlock->setasLinear(block->isLinear());
-        ciBlock->setasSolvable(block->isSolvable());
-
-        ciBlock->checkLinearityWithJacobian();
     }
     else {
         std::cout<<"Warning: a Meta block is ignored in the BLT transference.\n";
@@ -214,7 +213,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
 
 template<typename JBLT, typename JBlock, typename JCollection, typename JIterator,
 typename FVar, typename FAbstractEquation, typename FEquation,
-typename FExp, template<typename Ty> class ArrayJ>
+typename FExp>
 void transferBLTToContainer(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::Equations> container,
 const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars)
 {
@@ -232,8 +231,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                 FVar,
                 FAbstractEquation,
                 FEquation,
-                FExp,
-                ArrayJ>(block, ciBloc, mapVars);
+                FExp>(block, ciBloc, mapVars);
             container->addBlock(ciBloc);
             delete block;
         }
@@ -242,7 +240,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
         std::cout<<"The container does not have a BLT. Equations must be transfered from Arraylist of equations\n.";
     }
 }
-#endif
+
 
 /************************
  *                      *

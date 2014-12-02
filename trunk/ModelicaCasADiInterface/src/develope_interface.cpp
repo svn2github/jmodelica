@@ -65,7 +65,13 @@ int main(int argc, char ** argv)
                         
       model->print(std::cout);
       
-      std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminables = model->getEliminableVariables();
+      ModelicaCasADi::Ref<ModelicaCasADi::Block> b = model->getBlock(0);
+      b->printBlock(std::cout,true);
+      b->solveLinearSystem();
+      //model->printBLT(std::cout,true);
+      b->printBlock(std::cout,true);
+      
+      /*std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminables = model->getEliminableVariables();
       
       for(std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> >::const_iterator it=eliminables.begin();
             it!=eliminables.end();++it){
@@ -82,7 +88,7 @@ int main(int argc, char ** argv)
       
       model->eliminateVariables();
       
-      model->print(std::cout);
+      model->print(std::cout);*/
       
       /*std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminated = model->getEliminatedVariables();
       std::cout<<std::endl;

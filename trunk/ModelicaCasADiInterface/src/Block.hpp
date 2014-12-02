@@ -200,7 +200,6 @@ namespace ModelicaCasADi
              * @param An optional flag to include details in the output
              */
             void printBlock(std::ostream& out, bool withData=false) const;
-            void checkLinearityWithJacobian();
 
             /**
              * Check if the block is simple block. A simple block has only one equation.
@@ -338,20 +337,6 @@ namespace ModelicaCasADi
         std::set< const Variable* >::iterator it = variables_.find(var);
         if(it!=variables_.end()){return 1;}
         else{return 0;}
-    }
-
-    inline void Block::checkLinearityWithJacobian() {
-        if(!jacobian.isEmpty()) {
-            std::vector< casadi::MX > vars;
-            for (std::set<const Variable*>::const_iterator it = variables_.begin();
-            it != variables_.end(); ++it) {
-                vars.push_back((*it)->getVar());
-            }
-            linear_flag = !casadi::dependsOn(jacobian,vars);
-            if(!symbolicVariables.isEmpty()) {
-                linear_flag = !casadi::dependsOn(jacobian,std::vector< casadi::MX >(1,symbolicVariables));
-            }
-        }
     }
 
     inline std::vector< casadi::MX > Block::variablesVector() const

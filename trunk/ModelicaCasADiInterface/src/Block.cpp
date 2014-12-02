@@ -84,7 +84,7 @@ namespace ModelicaCasADi
             out<< "Variables:\n";
             for (std::set<const Variable*>::const_iterator it = variables_.begin();
             it != variables_.end(); ++it) {
-                out << (*it)->getVar() << " ";
+                out << (*it)->getVar() << "-->v[" << variableToIndex_.find(*it)->second << "]\n";
             }
 
             out<<"\n";
@@ -121,7 +121,8 @@ namespace ModelicaCasADi
         }
     }
 
-    std::cout<<"Jacobian\n"<<jacobian<<"\n";
+    out<<"Jacobian\n";
+    out<<jacobian<<"\n";
     out<<"---------------------------------------\n";
 
 }
@@ -167,6 +168,23 @@ void Block::computeJacobianCasADi() {
     f.init();
     jacobian=f.jac();
     
+    linear_flag = !casadi::dependsOn(jacobian,std::vector< casadi::MX >(1,symbolicVariables));
+    
+    //This makes printing of the jacobian of linear systems less convoluted. It shows a matrix and not a bunch of symbolics
+    /*casadi::MXFunction df(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,jacobian));    
+    df.init();
+    if(df.getFree().empty() && isLinear()){
+        std::vector<double> inputVals;
+        //this numbers wont be replaced because the system is linear
+        for(int i=0;i<variables_.size();++i){
+            inputVals.push_back(1.0);        
+        }
+        df.setInput(inputVals,0);
+        df.evaluate();
+        casadi::DMatrix output = df.getOutput();
+        jacobian=output;
+    }*/
+    
     //Make the substitution back to variables.This will only matter if the block is nonlinear
     /*if(!isLinear()){
         Expressions = casadi::substitute(std::vector<casadi::MX>(1,jacobian),
@@ -198,14 +216,28 @@ void Block::solveLinearSystem() {
         //std::cout<<"b "<<b<<"\n";
         casadi::MX xsolution = casadi::solve(jacobian,-b);
         //std::cout<<"x "<<xsolution<<"\n";
+        /*casadi::MXFunction dummy = casadi::MXFunction(std::vector<casadi::MX>(),std::vector<casadi::MX>(1,xsolution));
+        dummy.init();
+        casadi::DMatrix output;
+        //Dummy function to see the evaluated solution and not the symbolic expression
+        if(dummy.getFree().empty()){
+            dummy.evaluate();
+            output = dummy.getOutput();
+        }*/
+        
         for(std::set<const Variable*>::const_iterator it = variables_.begin();
         it != variables_.end(); ++it) {
-            addSolutionToVariable(*it, xsolution[variableToIndex_[*it]]);
-            std::cout<<"Variable:  "<<(*it)->getName()<<"  =  "<< xsolution[variableToIndex_[*it]] << "\n";
+            //if(output.isEmpty()){
+                addSolutionToVariable(*it, xsolution[variableToIndex_[*it]]);
+            //}
+            //else{
+            //    addSolutionToVariable(*it, output[variableToIndex_[*it]]);
+            //}
         }
         unSolvedEquations.clear();
         unSolvedVariables_.clear();
         solve_flag = true;
+        
     }
 }
 
