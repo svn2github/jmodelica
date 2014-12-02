@@ -1,0 +1,3268 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
+
+aspect Scalarization {
+
+	/**
+	 * Flag indicating if a variable is scalarized.
+	 */
+	boolean FQName.scalarized = false;
+
+	/**
+	 * Flag indicating if a flat class is scalarized.
+	 */
+	boolean FClass.scalarized = false;
+	
+	syn boolean FVariable.isScalarized() = getFQName().isScalarized();
+	syn boolean FQName.isScalarized() = scalarized;
+
+    public class FClass {
+        /**
+         * Scalarize all variables and equations in the flat model.
+         */
+        public class scalarize extends Transformation {
+            public void perform() {
+                List<FVariable> vars = new List<FVariable>();
+                List<FVariable> alias_vars = new List<FVariable>();
+                scalarizeVars(vars, alias_vars);
+                replaceScalarizedVars(vars, alias_vars);
+                scalarizeFuncs();
+                scalarizeTypes();
+                scalarizeAttributes();
+                getConnectionSetManager().scalarize();
+                scalarized = true;
+                scalarizationCleanup();
+                scalarizationErrorCheck();
+            }
+        }
+    }
+    
+    /**
+     * Scalarize variable declarations and equations.
+     */
+    protected void FClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
+        List<FAbstractEquation> equs = new List<FAbstractEquation>();
+        List<FAbstractEquation> pEqus = new List<FAbstractEquation>();
+        List<FAbstractEquation> iEqus = new List<FAbstractEquation>();
+        
+        FAbstractEquation.scalarizeList(getFAbstractEquations(),  equs,  vars);
+        FAbstractEquation.scalarizeList(getFInitialEquations(),   iEqus, vars);
+        FAbstractEquation.scalarizeList(getFParameterEquations(), pEqus, vars);
+        
+        for (FVariable fv : getFVariables()) 
+            fv.scalarize(vars, equs, pEqus);
+        for (FVariable fv : getAliasVariables()) 
+            fv.scalarize(alias_vars, equs, pEqus);
+        
+        setFAbstractEquationList(equs);
+        setFInitialEquationList(iEqus);
+        setFParameterEquationList(pEqus);
+    }
+    
+    protected void FClass.replaceScalarizedVars(List<FVariable> vars, List<FVariable> alias_vars) {
+        setFVariableList(vars);
+        setAliasVariableList(alias_vars);
+    }
+    
+	protected void FClass.scalarizeFuncs() {
+		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
+		for (FFunctionDecl f : getFFunctionDecls()) 
+			funcs.add(f.scalarize());
+		setFFunctionDeclList(funcs);
+		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
+	}
+	
+    /**
+     * Handles scalarization of the FAttributes that are declared in the FClass
+     */
+    private void FClass.scalarizeAttributes() {
+        List<FAttribute> attrs = new List<FAttribute>();
+        for (FAttribute a : getFAttributes())
+            a.scalarize(attrs, Index.NULL, Collections.<String,FExp>emptyMap());
+        setFAttributeList(attrs);
+    }
+	
+	/**
+	 * Scalarize type declarations by removing array-valued attributes. 
+	 * They have been copied to the variables when the variables were scalarized. 
+	 */
+	protected void FClass.scalarizeTypes() {
+		for (FDerivedType t : getFDerivedTypes())
+			t.removeArrayValuedAttributes();
+	}
+	
+	/**
+	 * Removing all array-valued attributes. 
+	 */
+	public void FDerivedType.removeArrayValuedAttributes() {
+		List<FAttribute> list = new List<FAttribute>();
+		for (FAttribute a : getFAttributes())
+			if (!a.removeArrayValuedAttributes())
+				list.add(a);
+		setFAttributeList(list);
+	}
+	
+	/**
+	 * Removing all array-valued attributes.
+	 * 
+	 * @return  true if the attribute should be removed
+	 */
+	public boolean FAttribute.removeArrayValuedAttributes() {
+		boolean keep = false;
+		List<FAttribute> list = null;
+		if (getNumFAttribute() > 0) {
+			list = new List<FAttribute>();
+			for (FAttribute a : getFAttributes())
+				if (!a.removeArrayValuedAttributes())
+					list.add(a);
+			keep = list.getNumChild() > 0;
+		}
+		if (hasValue()) {
+			if (getValue().isArray()) {
+				if (keep)
+					setValueOpt(new Opt());
+			} else {
+				keep = true;
+			}
+		}
+		if (keep && list != null)
+			setFAttributeList(list);
+		return !keep;
+	}
+	
+	protected void FClass.scalarizationCleanup() {
+		flush();  // Must flush before traversing
+		enableStreamsRewrite();
+		setDummyVariableList(new List<FVariable>());
+	}
+    
+    public static List<FAbstractEquation> FAbstractEquation.scalarizeList(List<FAbstractEquation> fromList, List<FAbstractEquation> toList, List<FVariable> vars) {
+        scalarizeList(fromList, toList, vars, Collections.<String,FExp>emptyMap());
+        return toList;
+    }
+    
+	public static void FAbstractEquation.scalarizeList(
+			List<FAbstractEquation> fromList, List<FAbstractEquation> toList, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		for (FAbstractEquation ae : fromList) 
+			ae.scalarize(toList, vars, indexMap);
+	}
+    
+    /**
+     * Scalarize the FVariable and put all scalarized variables in the
+     * list vars.
+     */
+    public void FVariable.scalarize(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
+        if (size().isZero())
+            return;
+        
+        if (hasBindingExp())
+            getBindingExp().createArrayTemporaries(variability().parameterOrLess(), equs, pEqus, vars);
+        
+        if (isRecord()) {
+            FExp bexp = hasBindingExp() ? getBindingExp() : null;
+            int bexpDims = hasBindingExp() ? getBindingExp().ndims() : -1;
+            scalarRecordFVariables(vars, equs, pEqus, new FQNameEmpty(), null, bexp, Index.NULL, fContinuous(), Collections.<BindingExpSource>emptyList(), bexpDims);
+        } else {
+            getFAttributes().createArrayTemporaries(pEqus, vars);
+            for (Index i : indices()) {
+                vars.add(createScalarFVariable(vars, equs, pEqus, i));
+            }
+        }
+    }
+	
+	/**
+	 * Create a scalar FVariable for a single cell or an already scalar FVariable.
+	 * 
+	 * @param i  the Index of the cell to create an FVariable for. Should be Index.NULL for 
+	 *           already scalar FVariables.
+	 */
+    protected FVariable FVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
+		// Create new variable and copy fields that should be same
+		FVariable fv = createEmptyNode();
+		fv.setFVisibilityType((FVisibilityType) getFVisibilityType().fullCopy());
+		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+		if (hasFTypePrefixInputOutput())
+			fv.setFTypePrefixInputOutput((FTypePrefixInputOutput) getFTypePrefixInputOutput().fullCopy());
+		if (hasFStringComment())
+			fv.setFStringComment(getFStringComment().fullCopy());
+		
+        // Copy name and replace last array subscripts
+        FQName name = (i == Index.NULL) ? 
+                getFQName().fullCopy() : 
+                getFQName().copyAndAddFas(i.createFArraySubscripts());
+        name.scalarized = true;
+        fv.setFQName(name);
+        
+        // Scalarize binding expressions
+        if (hasBindingExp()) {
+            Map<String,FExp> im = Collections.emptyMap();
+            FExp bexp = getBindingExp().getArray().get(i).scalarize(im);
+            if (keepBExp(variability(), getBindingExp())) {
+                fv.setBindingExp(bexp);
+            } else {
+                (isParameter() ? pEqus : equs).add(new FEquation(new FIdUseExp(name), bexp));
+            }
+		}
+		
+		// Iterate over all attributes and scalarize.
+		for (FAttribute a : getFAttributes()) 
+			a.scalarize(fv.getFAttributes(), i, Collections.<String,FExp>emptyMap());
+		fv.setDerivedType(getDerivedType());
+		fv.addArrayAttributesFromType(i, myFDerivedType());
+
+		return fv;
+	}
+	
+    protected FVariable FExternalObjectVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
+		Map<String, FExp> EMPTY = Collections.<String, FExp>emptyMap();
+        FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(vars, equs, pEqus, i);
+		FFunctionCall call = (FFunctionCall) getDestructorCall().getCall();
+		FFunctionCall scalarCall = (FFunctionCall) call.scalarize(EMPTY);
+		if (i != Index.NULL)
+			scalarCall.setArg(call.getArg(0).getArray().get(i).scalarize(EMPTY), 0);
+		if (hasConstructorCall(i))
+		    fex.setDestructorCall(new FFunctionCallStmt(new List(), scalarCall));
+		fex.setConstructor(getConstructor().fullCopy());
+		return fex;
+	}
+	
+    protected FEnumVariable FEnumVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
+        FEnumVariable fv = (FEnumVariable) super.createScalarFVariable(vars, equs, pEqus, i);
+		fv.setEnum(getEnum().fullCopy());
+		return fv;
+	}
+	
+	/**
+	 * Copy any attributes with array values from type, selecting the scalar value corresponding 
+	 * to the given index. 
+	 */
+	protected void FVariable.addArrayAttributesFromType(Index i, FDerivedType t) {
+		if (t != null && i != Index.NULL)
+			for (FAttribute a : t.getFAttributes())
+				a.addArrayAttributesTo(i, getFAttributes());
+	}
+	
+	/**
+	 * Copy any attributes with array values to the given list, selecting the scalar value corresponding 
+	 * to the given index. 
+	 * 
+	 * @return  true if any attribute was added to the list 
+	 */
+	protected boolean FAttribute.addArrayAttributesTo(Index i, List<FAttribute> list) {
+		FAttribute match = findMatching(list, getName().name());
+		if (match != null) {
+			list = match.getFAttributes();
+			for (FAttribute a : getFAttributes())
+				a.addArrayAttributesTo(i, list);
+			return false;
+		}
+		
+		boolean isArray = hasValue() && getValue().isArray();
+		boolean add = isArray;
+		List<FAttribute> subList = null;
+		if (add || getNumFAttribute() > 0) {
+			subList = new List<FAttribute>();
+			for (FAttribute a : getFAttributes())
+				add = a.addArrayAttributesTo(i, subList) || add;
+		}
+		if (add) {
+			FAttribute res = new FAttribute(getType().fullCopy(), getName().fullCopy(), new Opt(), 
+					getAttributeSet(), getLevel(), getFEachOpt().fullCopy(), getFFinalOpt().fullCopy(), subList);
+			if (hasValue()) {
+				FExp val = getValue();
+				if (isArray) {
+					if (val.ndims() < i.ndims())
+						i = i.subIndex(i.ndims() - val.ndims());
+					val = val.getArray().get(i);
+				}
+				res.setValue(val.scalarize(Collections.<String,FExp>emptyMap()));
+			}
+			list.add(res);
+		}
+		return add;
+	}
+	
+    /**
+     * Generate scalar FVariables for this record or record component.
+     * 
+     * @param vars     the list of FVariables to add the variables to
+     * @param equs     a list of equations to add the equations to
+     * @param pEqus    a list of equations to add the parameter equations to
+     * @param prefix   add this as a prefix to the name
+     * @param last     an FVariable containing the attributes, variability, 
+     *                 etc inherited from the surrounding record
+     * @param bexp     binding expression inherited from surrounding record
+     * @param bi       index of part of binding expression to use
+     * @param inParam  this variable is within a constant or parameter record
+     * @param attrs    attributes to search for modifications, before searching in this variable
+     * @param bexpDims number of dimensions in the binding exp (if any)
+     */
+    public void FVariable.scalarRecordFVariables(
+            List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName prefix,
+            FVariable last, FExp bexp, Index bi, FTypePrefixVariability variability, java.util.List<BindingExpSource> attrs, int bexpDims) {
+        variability = variability().combineDown(variability);
+        if (bexp == null && hasBindingExp()) {
+            bexpDims = getBindingExp().ndims();
+            bexp = getBindingExp().reflatten(prefix);
+            bi = Index.NULL;
+            bexp.createArrayTemporaries(variability.parameterVariability(), equs, pEqus, vars);
+        }
+        
+        if (!isRecord())
+            getFAttributes().createArrayTemporaries(variability.parameterVariability(), equs, pEqus, vars);
+        
+        FExp nbexp = null;
+        for (Index i : scalarizationIndices(last)) {
+            if (bexp != null) {
+                Index nbi = bi.expand(i);
+                nbi = nbi.subIndex(nbi.ndims() - bexpDims);
+                nbexp = bexp.extractArrayCell(Collections.<String,FExp>emptyMap(), nbi);
+                nbexp = bexp.dynamicFExp(nbexp);
+            }
+            FQName name = prefix.copyAndAppend(getFQName(), i.createFArraySubscripts());
+            scalarRecordCellFVariables(vars, equs, pEqus, name, last, nbexp, i, variability, attrs, 0);
+        }
+    }
+    
+    
+    /**
+     * Generate scalar FVariables for a single array cell of this record or record component.
+     * 
+     * @param vars     the list of FVariables to add the variables to
+     * @param equs     a list of equations to add the equations to
+     * @param pEqus    a list of equations to add the parameter equations to
+     * @param name     the name of the new variable
+     * @param last     an FVariable containing the attributes, variability, etc inherited from surrounding record
+     * @param bexp     binding expression inherited from surrounding record or array
+     * @param i        the index of this scalar variable in an array, or Index.NULL for scalar components
+     * @param inParam  this variable is within a constant or parameter record
+     * @param attrs    attributes to search for modifications, before searching in this variable
+     * @param bexpDims number of dimensions in the binding exp (if any)
+     */
+    public void FVariable.scalarRecordCellFVariables(
+            List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName name,
+            FVariable last, FExp bexp, Index i, FTypePrefixVariability variability, java.util.List<BindingExpSource> attrs, int bexpDims) {
+        FVariable fv = copyForName(name);
+        Map<String,FExp> im = Collections.emptyMap();
+        if (bexp != null) {
+            if (keepBExp(variability, bexp)) {
+                fv.setBindingExp(bexp);
+            } else {
+                (variability.parameterVariability() ? pEqus : equs).add(new FEquation(new FIdUseExp(name.scalarize(im)), bexp.scalarize(im)));
+                fv.setBindingExpOpt(new Opt());
+            }
+        } else {
+            fv.setBindingExpOpt(new Opt());
+        }
+        fv.inheritFrom(last, variability);
+        fv.addArrayAttributesFromType(i, myFDerivedType());
+        vars.add(fv);
+    }
+    
+    public void FRecordVariable.scalarRecordCellFVariables(
+            List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName name,
+            FVariable last, FExp bexp, Index i, FTypePrefixVariability variability, java.util.List<BindingExpSource> attrs, int bexpDims) {
+        FVariable tmp = (FVariable) fullCopy();
+        if (last != null) {
+            tmp.parent = this;
+            tmp.reflatten(name.copyPrefix());
+            tmp.inheritFrom(last, variability);
+        } else {
+            myFClass().addDummyVariable(tmp);
+        }
+        if (bexp == null && tmp.hasBindingExp()) {
+            bexp = tmp.getBindingExp();
+            bexpDims = bexp.ndims();
+        }
+        int vi = 0;
+		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
+		for (FVariable comp : myFRecordDecl().getFVariables()) {
+			java.util.List<BindingExpSource> nAttrs = Collections.emptyList();
+			FExp nbexp = null;
+            int nbexpDims = -1;
+			Index nbi = Index.NULL;
+			if (bexp != null) {
+                nbexp = bexp.scalarRecordFExp(emptyIndexMap, comp.name());
+                nbexp.parent = comp;
+                if (!comp.modifiableInRecord) {
+                    nbexp = nbexp.reflatten(name);
+                    nbexp.parent = comp;
+                }
+                nbexpDims = comp.ndims();
+			} else {
+				ArrayList<BindingExpSource> foundAttr = new ArrayList<BindingExpSource>();
+				String cName = comp.name();
+				for (BindingExpSource bes : attrs)
+					bes.addIfMatching(foundAttr, cName, i);
+                BindingExpSource.addIfMatching(foundAttr, tmp, cName, i);
+				for (int j = 0; nbexp == null && j < foundAttr.size(); j++) {
+					nbexp = foundAttr.get(j).getFExp();
+                    if (nbexp != null) {
+						nbi = foundAttr.get(j).getI();
+                        nbexpDims = nbexp.ndims();
+                    }
+				}
+				if (nbexp == null)
+					nAttrs = foundAttr;
+			}
+            comp.scalarRecordFVariables(vars, equs, pEqus, name, tmp, nbexp, nbi, variability.getPart(vi++), nAttrs, nbexpDims);
+        }
+    }
+    
+    /**
+     * Check if this FExp is in an binding exp that will still
+     * be a binding exp after scalarization 
+     */
+    inh boolean FExp.inKeptBExp();
+    eq Root.getChild().inKeptBExp() = false;
+    eq FVariable.getBindingExp().inKeptBExp() = keepBExp(variability(), getBindingExp());
+    
+    /**
+     * Check if this FVariable should have a binding exp after scalarization
+     */
+    syn boolean FVariable.keepBExp(FTypePrefixVariability variability, FExp bexp) = variability.knownParameterOrLess() || isString() || (variability.parameterVariability() && bexp.isIndependentParameterExp());
+    
+    /**
+     * Apply a prefix to references to components declared in
+     * the containing record decl of this expression
+     */
+    public FExp FExp.reflatten(FQName prefix) {
+        FExp res = dynamicFExp(fullCopy());
+        FRecordDecl decl = containingRecordDecl();
+        if (decl != null)
+            res.prefixInternalUses(prefix, decl);
+        return res;
+    }
+    
+    /**
+     * Apply a prefix to references to components declared in
+     * the containing record decl of this variable
+     */
+    public void FVariable.reflatten(FQName prefix) {
+        FRecordDecl decl = containingRecordDecl();
+        if (hasBindingExp()) {
+            getBindingExp().prefixInternalUses(prefix, decl);
+        }
+        for (FAttribute attr : getFAttributes()) {
+            attr.reflatten(prefix, decl);
+        }
+    }
+    
+    public void FAttribute.reflatten(FQName prefix, FRecordDecl decl) {
+        if (hasValue()) {
+            getValue().prefixInternalUses(prefix, decl);
+        }
+        for (FAttribute a : getFAttributes()) {
+            a.reflatten(prefix, decl);
+        }
+    }
+    
+    public void FExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        for (FExp e : childFExps())
+            e.prefixInternalUses(prefix, decl);
+    }
+    
+    public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        FQName fqn = getFIdUse().getFQName();
+        fqn.prefixInternalUses(prefix, decl);
+        if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
+            getFIdUse().setFQName(prefix.copyAndAppend(fqn));
+    }
+    
+    public void FQName.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+    
+    public void FQNameFull.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        for (FQNamePart p : getFQNameParts())
+            if (p.hasFArraySubscripts())
+                for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
+                    s.prefixInternalUses(prefix, decl);
+    }
+    
+    public void FQNameString.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        if (hasFArraySubscripts())
+            for (FSubscript s : getFArraySubscripts().getFSubscripts())
+                    s.prefixInternalUses(prefix, decl);
+    }
+    
+    public void FSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+    
+    public void FExpSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+        getFExp().prefixInternalUses(prefix, decl);
+    }
+	
+	/**
+	 * Used to hold information on available candidates for binding expression when scalarizing 
+	 * records.
+	 */
+	public class BindingExpSource {
+		
+		private FAttribute attr;
+		private Index index;
+		
+		private BindingExpSource(FAttribute a, Index i) {
+			attr = a;
+			index = i;
+		}
+		
+		private static void addIfExists(
+				java.util.List<BindingExpSource> attrs, FAttribute a, Index i) {
+			if (a != null)
+				attrs.add(new BindingExpSource(a, i));
+		}
+		
+		public static void addIfMatching(
+				java.util.List<BindingExpSource> attrs, FVariable fv, String name, Index i) {
+			addIfExists(attrs, fv.findAttribute(name), i);
+		}
+		
+		public void addIfMatching(
+				java.util.List<BindingExpSource> attrs, String name, Index i) {
+			addIfExists(attrs, attr.findAttribute(name), index.expand(i));
+		}
+		
+		public FExp getFExp() {
+			return attr.hasValue() ? attr.getValue() : null;
+		}
+		
+		public Index getI() {
+			return index;
+		}
+		
+	}
+	
+	/**
+	 * The Indices object to use when scalarizing records.
+	 * 
+	 * Either returns indices() or calculates from "size()" attribute.
+	 * 
+	 * @param outer  the enclosing FVariable, used to get "size()" attribute 
+	 */
+	syn Indices FVariable.scalarizationIndices(FVariable outer) {
+		if (outer != null && outer.attributeSet(name())) {
+			FAttribute attr = outer.findAttribute(name()).findAttribute(FAttribute.SIZE);
+			if (attr != null && attr.hasValue())
+				return Indices.create(new MutableSize(attr.getValue()));
+		}
+		return indices();
+	}
+	
+	/**
+	 * Inherit prefixes and attributes from the FVariable representing the surrounding record.
+	 */
+	public void FVariable.inheritFrom(FVariable other, FTypePrefixVariability variability) {
+		if (other == null)
+			return;
+
+		// Prefixes
+		setFVisibilityType(other.getFVisibilityType());
+        setFTypePrefixVariability(variability);
+		if (other.hasFTypePrefixInputOutput())
+			setFTypePrefixInputOutput(other.getFTypePrefixInputOutput());
+
+		// Attributes
+		FQName name = getFQName();
+		String myName = name.lastActualPartName();
+		Index myCell = null;
+		if (name.hasFArraySubscripts()) 
+			myCell = name.getFArraySubscripts().asIndex();
+		for (FAttribute a : other.getFAttributes()) {
+			// TODO: support attributes on single cell in array (#599)
+			// TODO: don't these need scalarizing as well?
+			String attrName = a.getName().getFQName().partName(0);
+			if (myName.equals(attrName)) {
+				FAttribute na = a.copyForCell(myCell);
+				if (a.getName().getFQName().numParts() > 1) {
+					na.getName().setFQName(a.getName().getFQName().copySuffix());
+					addFAttribute(na);
+				} else {
+                    inheritFrom(getFAttributes(), na.getFAttributes());
+				}
+			}
+		}
+	}
+	
+    /**
+     * Merge attributes from other into self, overwriting in conflicts.
+     */
+    public void FVariable.inheritFrom(List<FAttribute> self, List<FAttribute> other) {
+        Map<String, FAttribute> m2 = new HashMap<String,FAttribute>();
+        for (FAttribute a : other) {
+            m2.put(a.name(), a);
+        }
+        Set<FAttribute> visited = new HashSet<FAttribute>();
+        for (FAttribute a : self) {
+            String name = a.name();
+            if (m2.containsKey(name)) {
+                FAttribute o = m2.get(name);
+                inheritFrom(a.getFAttributes(), m2.get(name).getFAttributes());
+                if (o.hasValue())
+                    a.setValue(o.getValue().fullCopy());
+                visited.add(m2.get(name));
+            }
+        }
+        for (FAttribute a : other) {
+            if (!visited.contains(a) && !a.isInternal()) {
+                self.add(a.fullCopy());
+            }
+        }
+    }
+	
+	/**
+	 * Create a copy of the variable with a specific name.
+	 * 
+	 * The new variable is marked as scalarized, and if it refers to a specific cell in an array, 
+	 * then attributes are updated accordingly.
+	 */
+	public FVariable FVariable.copyForName(FQName name) {
+		FVariable fv = createEmptyNode();
+		fv.setFQName(name.fullCopy());
+		fv.getFQName().scalarized = true;
+		fv.setFVisibilityType(getFVisibilityType().fullCopy());
+		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+		if (hasFTypePrefixInputOutput())
+			fv.setFTypePrefixInputOutput(getFTypePrefixInputOutput().fullCopy());
+		fv.setDerivedType(getDerivedType());
+		if (hasBindingExp())
+			fv.setBindingExp(getBindingExp().fullCopy());
+		if (hasFStringComment())
+			fv.setFStringComment(getFStringComment().fullCopy());
+		
+		Index myCell = null;
+		if (name.hasFArraySubscripts()) 
+			myCell = name.getFArraySubscripts().asIndex();
+		for (FAttribute a : getFAttributes())
+			if (!a.isInternal())
+				fv.addFAttribute(a.copyForCell(myCell));
+		return fv;
+	}
+
+	public FEnumVariable FEnumVariable.copyForName(FQName name) {
+		FEnumVariable fv = (FEnumVariable) super.copyForName(name);
+		fv.setEnum(getEnum().fullCopy());
+		return fv;
+	}
+    
+    public FExternalObjectVariable FExternalObjectVariable.copyForName(FQName name) {
+        FExternalObjectVariable fv = (FExternalObjectVariable) super.copyForName(name);
+        fv.setConstructor(getConstructor().fullCopy());
+        if (hasDestructorCall()) {
+            fv.setDestructorCall(getDestructorCall().scalarizeDestructor(name));
+        }
+        return fv;
+    }
+    
+    public FFunctionCallStmt FFunctionCallStmt.scalarizeDestructor(FQName name) {
+        FFunctionCall call = (FFunctionCall) getCall().reflatten(name.copyPrefix());
+        if (name.hasFArraySubscripts()) {
+            Index i = name.getFArraySubscripts().asIndex();
+            call.setArg(call.getArg(0).getArray().get(i).scalarize(Collections.<String,FExp>emptyMap()), 0);
+        }
+        
+        FFunctionCallStmt stmt = fullCopy();
+        stmt.setCall(call);
+        return stmt;
+    }
+
+	/**
+	 * Create a copy of the attibute with dimensions removed from all array expressions according 
+	 * to an index.
+	 */
+	public FAttribute FAttribute.copyForCell(Index i) {
+		if (i == null)
+			return fullCopy();
+		FAttribute res = createEmptyNode();
+		res.setType(getType().fullCopy());
+		res.setName(getName().fullCopy());
+		if (hasValue()) {
+			FExp val = getValue();
+			if (val.ndims() < i.ndims() || isInternal())
+				val = val.scalarize(Collections.<String,FExp>emptyMap());
+			else
+				val = val.dynamicFExp(val.splitArrayExp(i).unboundCopy()).scalarize(Collections.<String,FExp>emptyMap());
+			res.setValue(val);
+		}
+		res.setAttributeSet(getAttributeSet());
+		if (hasFEach())
+			res.setFEach(getFEach().fullCopy());
+		if (hasFFinal())
+			res.setFFinal(getFFinal().fullCopy());
+		for (FAttribute a : getFAttributes())
+			res.addFAttribute(a.copyForCell(i));
+		return res;
+	}
+	
+    public FAttribute FAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
+        return scalarizeInternal(attrs, i, indexMap);
+    }
+    /**
+     * Scalarize the attribute, picking out the specific element from an array 
+     *        expression or removing "each".
+     */
+    public FAttribute FAttribute.scalarizeInternal(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
+        FAttribute attr = createEmptyNode();
+        for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
+            a.scalarize(attr.getFAttributes(), i, indexMap);            // TODO: really send i here?
+        attr.setType(getType().fullCopy());
+        attr.setName(getName().fullCopy());
+        attr.setAttributeSet(getAttributeSet());
+        attr.setLevel(getLevel());
+        attr.setFFinalOpt(getFFinalOpt().fullCopy());
+        if (hasValue()) 
+            attr.setValue(scalarizeValue(i, indexMap));
+        attrs.add(attr);
+        return attr;
+    }
+	
+    @Override
+    public FAttribute FAnnotationAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
+        if (i.ndims() == 0)
+            scalarize(attrs, indexMap);
+        else
+            scalarizeInternal(attrs, i, indexMap);
+        return null;
+    }
+    /**
+     * Scalarize the attribute and create multiple instances for non-scalar
+     * attributes.
+     * An attribute is scalarized if it has no value and all its child
+     * attributes have value and are of the same size.
+     */
+    public void FAttribute.scalarize(List<FAttribute> attrs, Map<String,FExp> indexMap) {
+        if (hasValue()) {
+            scalarizeInternal(attrs, Index.NULL, indexMap);
+        } else {
+            Size size = null;
+            boolean keepScalar = false;
+            for (FAttribute attr : getFAttributes()) {
+                if (!attr.hasValue())
+                    keepScalar = true;
+                else if (size == null)
+                    size = attr.getValue().size();
+                else if (!attr.hasFEach() && !attr.getValue().size().equals(size))
+                    keepScalar = true;
+            }
+            if (size == null || keepScalar)
+                size = Size.SCALAR;
+            for (Index i : Indices.create(size)) {
+                scalarizeInternal(attrs, i, indexMap);
+            }
+        }
+    }
+
+    /**
+     * Scalarize the value of this attribute, picking out the specific element from an array 
+     * expression.
+     * 
+     * Returns null if attribute has no value.
+     */
+    public FExp FAttribute.scalarizeValue(Index i, Map<String,FExp> indexMap) {
+        if (!hasValue()) 
+            return null;
+        FExp v = getValue();
+        if (inFunction())
+            return v.scalarizeExp(indexMap);
+        if (v.isArray()) {
+            i = i.subIndex(i.ndims() - v.ndims());
+            v = v.getArray().get(i);
+        }
+        return v.scalarize(indexMap);
+    }
+
+	/**
+	 * Scalarize the function variable.
+	 * 
+	 * Any binding expression is added to statement list as an assignment.
+	 */
+	public void FFunctionVariable.scalarize(
+			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+		FFunctionVariable var = (FFunctionVariable) fullCopy();
+		var.getType().updateFUnknownSizeExps(var);
+		var.setBindingExpOpt(new Opt());
+		vars.add(var);
+	}
+	
+	/**
+	 * A node that can look up variable names in the flat tree.
+	 */
+	public interface FlatLookupNode {
+		public FAbstractVariable lookupFV(FQName fqn);
+	}
+	FFunctionVariable implements FlatLookupNode;
+	FExp implements FlatLookupNode;
+	
+	/**
+	 * Creates and organizes names of for indices for generated for loops.
+	 */
+	public class ForNames implements Iterable<String> {
+		private ArrayList<String[]> names;
+		private int last;
+		private int pos;
+		
+		/**
+		 * Standard constructor.
+		 */
+		public ForNames() {
+			names = new ArrayList<String[]>();
+			last = 0;
+		}
+		
+		/**
+		 * Creates a new ForNames with a single layer with space for <code>n</code> names.
+		 */
+		public ForNames(int n) {
+			this();
+			addLayer(n);
+		}
+		
+		/**
+		 * Add a new layer of names, that can be filled with new names or names 
+		 *        from the layer underneath.
+		 * 
+		 * @param n  the number of names in the new layer
+		 */
+		public void addLayer(int n) {
+			names.add(new String[n]);
+			pos = 0;
+		}
+		
+		/**
+		 * Fills all empty spots in the top layer with newly created names.
+		 */
+		public void fillLayer(FlatLookupNode context) {
+			String[] top = topLayer();
+			for (int i = pos; i < top.length; i++) 
+				create(context);
+		}
+		
+		/**
+		 * Removes the top layer, exposing the layer underneath.
+		 */
+		public void removeLayer() {
+			names.remove(names.size() - 1);
+		}
+
+		private String[] topLayer() {
+			return names.get(names.size() - 1);
+		}
+		
+        public boolean hasNames() {
+            return names.size() > 0 && topLayer().length > 0;
+        }
+		
+		/**
+		 * Gets name with index <code>i</code> in the top layer.
+		 */
+		public String get(int i) {
+			return topLayer()[i];
+		}
+		
+		/**
+		 * Adds a name to the top layer.
+		 */
+		public void add(String name) {
+			topLayer()[pos++] = name;
+		}
+		
+		/**
+		 * Creates a new name and adds it to the top layer.
+		 * 
+		 * @return the created name
+		 */
+		public String create(FlatLookupNode context) {
+			String name;
+			do {
+				name = "i" + (++last);
+			} while (!context.lookupFV(new FQNameString(name)).isUnknown()); 
+			add(name);
+			return name;
+		}
+		
+		/**
+		 * Adds a name from the underlying layer to the top layer.
+		 * 
+		 * @param i  the index in the underlying layer
+		 */
+		public void promote(int i) {
+			add(names.get(names.size() - 2)[i]);
+		}
+		
+		/**
+		 * Checks if there are enough layers to promote a name.
+		 */
+		public boolean canPromote() {
+			return names.size() > 1;
+		}
+		
+		/**
+		 * Return the number of names in the top layer.
+		 */
+		public int size() {
+			return topLayer().length;
+		}
+		
+		/**
+		 * Iterates over the top layer.
+		 */
+		public Iterator<String> iterator() {
+			return Arrays.asList(topLayer()).iterator();
+		}
+		
+		/**
+		 * Pushes a copy of the top layer with first and second names switched
+		 */
+		public void createTransposedLayer() {
+			String[] lay = topLayer();
+			addLayer(lay.length);
+			for (int i = 0; i < lay.length; i++) {
+				promote(i);
+			}
+			topLayer()[0] = lay[1];
+			topLayer()[1] = lay[0];
+			
+		}
+		
+		/**
+		 * Creates nestled for loops using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param sizes  array of expressions describing the size of each dimension
+		 * @return  the list of statements of the innermost loop
+		 */
+		public List<FStatement> createForLoops(List<FStatement> stmts, FExp[] sizes, int startDim) {
+			List<FStatement> cur = stmts;
+			for (int i = 0; i < sizes.length; i++) {
+				FForIndex ffi = new FForIndex(topLayer()[startDim + i], sizes[i]);
+				FForStmt fs = new FForStmt(ffi, new List());
+				cur.add(fs);
+				cur = fs.getForStmts();
+			}
+			return cur;
+		}
+		
+		/**
+		 * Creates nestled for loops over a single variable, using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param var    name of the variable to loop over
+		 * @return  the list of statements of the innermost loop
+		 */
+		public List<FStatement> createForLoops(List<FStatement> stmts, FQName var) {
+			int n = topLayer().length;
+			FExp[] sizes = new FExp[n];
+			for (int i = 0; i < n; i++)
+				sizes[i] = new FSizeExp(var, i);
+			return createForLoops(stmts, sizes, 0);
+		}
+		
+		/**
+		 * Creates nestled (maximum d) for loops  over an expression, 
+		 * using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param exp    expression to loop over
+		 * @param d      dimensions to loop over
+		 * @return  the list of statements of the innermost loop
+		 */
+        public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp, int d) {
+            return createForLoops(stmts, exp, 0, d);
+        }
+        
+        /**
+         * Creates nestled (from d1 to d2) for loops over an expression, 
+         * using the top layer of names.
+         *  
+         * Adds the outermost for loop to a list of statements.
+         * 
+         * @param stmts  list to add the created for statements to
+         * @param exp    expression to loop over
+         * @param d1     dimensions to start in
+         * @param d2     dimensions to end in
+         * @return  the list of statements of the innermost loop
+         */
+        public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp, int d1, int d2) {
+            FExp[] sizes = new FExp[d2 - d1];
+            for (int i = d1; i < d2; i++)
+                sizes[i-d1] = exp.size().createFExp(i);
+            return createForLoops(stmts, sizes, d1);
+        }
+		
+		/**
+		 * Creates nestled for loops over an expression, using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param exp    expression to loop over
+		 * @return  the list of statements of the innermost loop
+		 */
+		public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp) {
+			return createForLoops(stmts, exp, exp.ndims());
+		}
+		
+        public void createForLoops(List clauses, List inner, FExp exp) {
+            List<FStatement> fsl = createForLoops(clauses, exp);
+            fsl.addAll(inner);
+        }
+		
+        /**
+         * Creates a new FArraySubscripts with uses of the <code>d</code> 
+         * first names in the top layer as subscripts. When out of names, adds 1s.
+         */
+        public FArraySubscripts createFArraySubscripts(int d) {
+            if (d == 0)
+                throw new UnsupportedOperationException();
+            FArraySubscripts fas = new FArraySubscripts();
+            for (int i = 0; i < d; i++) {
+                if (i < topLayer().length)
+                    fas.addFSubscript(new FIdTempExp(new FIdUse(topLayer()[i])));
+                else
+                    fas.addFSubscript(new FIntegerLitExp(1));
+            }
+            return fas;
+        }
+		
+		
+		/**
+		 * Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
+		 */
+		public FArraySubscripts createFArraySubscripts() {
+			return createFArraySubscripts(topLayer().length);
+		}
+		
+        public FIdUseExp createUseWithSubscripts(String name) {
+            FQName fqn;
+            if (hasNames())
+                fqn = new FQNameFull(name, createFArraySubscripts());
+            else
+                fqn = new FQNameFull(name);
+            return new FIdTempExp(new FIdUse(fqn));
+        }
+        
+        public FExp[] createFExpArray() {
+            if (!hasNames())
+                return new FExp[0];
+            FExp[] subs = new FExp[topLayer().length];
+            int i = 0;
+            for (String s : topLayer()) {
+                subs[i++] = new FIdUseExp(s);
+            }
+            return subs;
+        }
+        
+		/**
+		 * Creates a new ForNames with the top layer copied
+		 */
+		public ForNames copySurface() {
+			ForNames fn = new ForNames();
+            if (names.size() > 0) {
+                fn.addLayer(topLayer().length);
+                for (String s : topLayer())
+                    fn.add(s);
+            }
+            fn.last = last;
+			return fn;
+		}
+	}
+	
+    /**
+     * Scalarize an assignment and put the resulting statements in the list of statements. 
+     */
+    public void FType.scalarizeAssignment(
+            List vars, List<FStatement> stmts, 
+            Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
+        
+        FExp expInAst = right.getParent() != null ? right : left;
+        
+        ForNames names = new ForNames();
+        if (size().isUnknown()) {
+            names.addLayer(ndims());
+            names.fillLayer(expInAst);
+        }
+        
+        left.createArrayTemporaries(stmts, vars, indexMap, names);
+        right.createArrayTemporaries(stmts, vars, indexMap, names);
+        
+        if (size().isUnknown()) {
+            left.addArrayUsesToIndexMap(indexMap, names);
+            right.addArrayUsesToIndexMap(indexMap, names);
+            stmts = names.createForLoops(stmts, expInAst);
+            names.removeLayer();
+        }
+        
+        scalarizeAssignment_sub(vars, stmts, indexMap, left, right);
+    }
+    
+    public void FType.scalarizeAssignment_sub(
+            List vars, List<FStatement> stmts, 
+            Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
+        if (size().isUnknown() || !isArray()) {
+            scalarizeScalarAssignment(vars, stmts, indexMap, left, right);
+        } else {
+            scalarizeArrayAssignment(vars, stmts, indexMap, left, right);
+        }
+    }
+    
+    /**
+     * Scalarize an array assignment of known size.
+     */
+    public void FType.scalarizeArrayAssignment(
+        List vars, List<FStatement> stmts, 
+        Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
+        
+        Indices ind = size().isUnknown() ? right.indices() : indices();
+        for (Index i : ind) {
+            scalarizeScalarAssignment(vars, stmts, indexMap,
+                    (FIdUseExp) left.extractArrayCell(indexMap, i),
+                    right.extractArrayCell(indexMap, i));
+        }
+    }
+    
+    /**
+     * Scalarize an assignment of record type.
+     */
+    protected void FRecordType.scalarizeScalarAssignment(
+            List vars, List<FStatement> stmts, 
+            Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
+        scalarRecordClauses(stmts, false, new FQNameEmpty(), indexMap, left, right);
+    }
+    
+    /**
+     * Scalarize a scalar assignment
+     */
+    protected void FType.scalarizeScalarAssignment(
+        List vars, List<FStatement> stmts, 
+        Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
+    
+        left = (FIdUseExp) left.scalarize(indexMap);
+        right = right.scalarize(indexMap);
+        
+        stmts.add(new FAssignStmt(left,right));
+    }
+    
+    syn FExp FIdTempExp.scalarize(Map<String,FExp> indexMap) =
+            indexNames == null ? fullCopy() : createUseFas(name());
+    
+    /*
+     * Attributes for creating FTempIdExps and function temps.
+     */
+    syn FIdTempExp FExp.tempExp() = new FIdTempExp(new FIdUse(tempFQName()));
+    syn FIdTempExp FExp.tempExp(String name) = new FIdTempExp(new FIdUse(name));
+    syn FIdTempExp FExp.tempExp(FArraySubscripts fas) = new FIdTempExp(new FIdUse(tempVarName(),fas));
+    syn FIdTempExp FExp.tempExp(FExp[] subs) {
+        if (subs.length > 0) {
+            List<FSubscript> l = new List<FSubscript>();
+            for (FExp e : subs) {
+                l.add(new FExpSubscript(e.fullCopy()));
+            }
+            FArraySubscripts fas = new FArraySubscripts(l);
+            return tempExp(fas);
+        } else {
+            return tempExp();
+        }
+    }
+    
+    syn FQName FExp.tempFQName() {
+        FQName fqn = new FQNameString(tempVarName());
+        if (expandWithIterExp())
+            fqn = fqn.copyAndAddFas(collectIterExpSubscripts());
+        return fqn;
+    }
+    
+    /**
+     * Check if this expression, when generating temporary uses and variables,
+     * should consider any surrounding FIterExp indices. 
+     */
+    syn boolean FExp.expandWithIterExp() = false;
+    inh boolean FFunctionCall.expandWithIterExp();
+    inh boolean FIterExp.expandWithIterExp();
+    eq Root.getChild().expandWithIterExp()       = false;
+    eq FStatement.getChild().expandWithIterExp() = false;
+    eq FEquation.getChild().expandWithIterExp()  = false;
+    eq FIterExp.getFExp().expandWithIterExp()    = !size().isUnknown() || expandWithIterExp();
+    
+    
+    /**
+     * Should this expression be extracted into its own statement?
+     */
+    syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray() && canAcceptArray();
+    eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
+    eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
+    eq FMinMaxExp.extractTemp()    = getX().size().isUnknown();
+    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause();
+    eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
+    eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
+    eq FIdentity.extractTemp()     = size().isUnknown() || inUnknownSize();
+    eq FVectorExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
+    eq FMatrixExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
+    eq FIdTempExp.extractTemp()    = false;
+    
+    /**
+     * If this expression is extracted, should it be extracted as an unknown size?
+     */
+    syn boolean FExp.extractAsUnknown() = size().isUnknown();
+    eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
+    eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
+    eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq FIdentity.extractAsUnknown()     = size().isUnknown();
+    eq FVectorExp.extractAsUnknown()    = getFExp().size().isUnknown();
+    eq FMatrixExp.extractAsUnknown()    = getFExp().size().isUnknown();
+    
+    /**
+     * Stores FSubscripts to be uses by <code>scalarize()</code>
+     */
+    public FExp[] FExp.indexNames = null;
+    public FExp FColonSubscript.indexName = null;
+    
+    public FIdUseExp FIdUseExp.createUseFas(String name) {
+        if (indexNames != null && indexNames.length > 0) {
+            return new FIdUseExp(name, createIndexNameFas());
+        } else {
+            return new FIdUseExp(name);
+        }
+    }
+    
+    public FArraySubscripts FIdUseExp.createIndexNameFas() {
+        List<FSubscript> l = new List<FSubscript>();
+        for (FExp e : indexNames) {
+            l.add(new FExpSubscript(e.fullCopy()));
+        }
+        return new FArraySubscripts(l);
+    }
+    
+    /**
+     * Will this expression be scalarized as an unknown size?
+     */
+    inh boolean FExp.inUnknownSize();
+    eq Root.getChild().inUnknownSize()               = false;
+    eq FStatement.getChild().inUnknownSize()         = false;
+    eq FEquation.getChild().inUnknownSize()          = false;
+    eq FFunctionCall.getChild().inUnknownSize()      = false;
+    eq FRecordConstructor.getChild().inUnknownSize() = false;
+    eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
+    
+    
+    /**
+     * Wrapper for {@link ASTNode#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
+     */
+    public void ASTNode.createArrayTemporaries(boolean inParam, List equs, List pEqus, List vars) {
+        createArrayTemporaries(inParam ? pEqus : equs, vars);
+    }
+    
+    /**
+     * Wrapper for {@link ASTNode#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
+     */
+    public void ASTNode.createArrayTemporaries(List clauses, List vars) {
+        createArrayTemporaries(clauses, vars, Collections.<String,FExp>emptyMap());
+    }
+    
+    /**
+     * Wrapper for {@link ASTNode#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
+     */
+    public void ASTNode.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
+        createArrayTemporaries(clauses, vars, indexMap, new ForNames());
+    }
+    
+    /**
+     * Traverser for {@link FExp#createArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
+     */
+    public void ASTNode.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        for (ASTNode n : this)
+            n.createArrayTemporaries(clauses, vars, indexMap, names);
+    }
+    
+    /**
+     * Finds, extracts, and replaces expressions with temporaries
+     */
+    public void FExp.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        if (extractTemp()) {
+            if (extractAsUnknown()) {
+                unknownFunctionArrayTemporaries_pre(clauses, vars, indexMap, names);
+            } else {
+                knownArrayTemporaries(clauses, vars, indexMap);
+            }
+        } else {
+            super.createArrayTemporaries(clauses, vars, indexMap, names);
+        }
+    }
+    
+    public void FFunctionCall.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // No names available as a function call arg.
+        boolean b = !extractTemp();
+        if (b)
+            names.addLayer(0);
+        super.createArrayTemporaries(clauses, vars, indexMap, names);
+        if (b)
+            names.removeLayer();
+    }
+    
+    public void FRecordConstructor.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // No names available as record con arg.
+        boolean b = !extractTemp();
+        if (b)
+            names.addLayer(0);
+        super.createArrayTemporaries(clauses, vars, indexMap, names);
+        if (b)
+            names.removeLayer();
+    }
+    
+    /**
+     * TODO: this could probably be handled in a better way
+     */
+    public void FIterExp.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        if (!size().isUnknown()) {
+            Indices indices = Indices.create(getForIndexs());
+            Map<String,FExp> myIndexMap = new HashMap<String,FExp>(indexMap);
+            for (Index i : indices) {
+                indices.fillIndexMap(myIndexMap, i, getForIndexs());
+                getFExp().createArrayTemporaries(clauses, vars, myIndexMap);
+                getFExp().flushAllRecursive(); // Throw calculated sizes/arrays
+                vars = null; // Only add variable in the first iteration
+            }
+            for (CommonForIndex fi : getForIndexs()) 
+                fi.setEvaluationValue(null);
+        } else {
+            super.createArrayTemporaries(clauses, vars, indexMap, names);
+        }
+    }
+    
+    public void FSizeExp.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        
+    }
+    
+    /**
+     * Create clauses for and replace this known size expression with a temp variable.
+     * Used in both functions and equations.
+     * @param clauses  List to put generated clauses in.
+     * @param vars     List to put generated variables in.
+     * @param indexMap Maps id uses to replacing expressions.
+     */
+    public void FExp.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
+        /* Assumes we are in function */
+        addFunctionTempVar(clauses, vars, type());
+        Array arr = getArray();
+        for (Index i : indices()) {
+            FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
+            name.scalarized = true;
+            clauses.add(new FAssignStmt(new FIdUseExp(name), arr.get(i).scalarize(indexMap)));
+        }
+        useTempVar = true;
+    }
+    
+    public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
+        boolean func = inFunction();
+        getArgs().createArrayTemporaries(clauses, vars, indexMap);
+        FExp temp = func ? tempExp() : buildRecordConstructor(indexMap);
+        createFunctionCallClause(clauses, indexMap, temp);
+        if (vars != null)
+            addTemporaryVars(clauses, vars, !func);
+    }
+    
+    public void FVectorFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
+        getArray().createArrayTemporaries(clauses, vars, indexMap);
+    }
+    
+
+    /**
+     * Wrapper for {@link FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map indexMap, ForNames names)}.
+     * Performs some common operations
+     */
+    public void FExp.unknownFunctionArrayTemporaries_pre(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        addFunctionTempVar(clauses, vars, type());
+        Map<String,FExp> localIndexMap = new HashMap<String,FExp>(indexMap);
+        unknownFunctionArrayTemporaries(clauses, vars, localIndexMap, names);
+        useTempVar = true;
+    }
+    
+    /**
+     * Create clauses for and replace this unknown size expression with a temp variable.
+     * Used in functions.
+     * @param clauses  List to put generated clauses in.
+     * @param vars     List to put generated variables in.
+     * @param indexMap Maps id uses to replacing expressions.
+     * @param names    Names to use for naming for loop indices.
+     */
+    public void FExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        /* Assumes exp is function call arg or left */
+        boolean writeBack = inFunctionCallLeft();
+        if (!writeBack || vars==null) {
+            FAbstractFunctionCall fc = myFunctionCall();
+            FIdUseExp left = tempExp();
+            FExp right;
+            setParent(null); // Force dynamicFExp
+            if (writeBack) {
+                right = left;
+                left  = (FIdUseExp) fc.dynamicFExp(this);
+            } else {
+                right = fc.dynamicFExp(this);
+            }
+            
+            useTempVar = false;
+            type().scalarizeAssignment(vars, clauses, indexMap, left, right);
+            useTempVar = true;
+        }
+    }
+    
+    public void FFunctionCall.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        getArgs().createArrayTemporaries(clauses, vars, indexMap);
+        createFunctionCallClause(clauses, indexMap, tempUseExp());
+    }
+    
+    public void FArray.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(ndims());
+        names.fillLayer(this);
+        FIdUseExp t = names.createUseWithSubscripts(tempVarName());
+        boolean iter = getFExp(0).editNamesIter(indexMap, names);
+        if (!iter) {
+            // Promote top layer without first name
+            int s = names.size();
+            names.addLayer(s-1);
+            for (int i = 1; i < s; i++)
+                names.promote(i);
+        }
+        
+        for (int i = 0; i < getNumFExp(); i++) {
+            List<FStatement> inner = new List<FStatement>();
+            List<FStatement> outer = clauses;
+            FExp right = getFExp(i);
+            right.createArrayTemporaries(inner, vars, indexMap, names);
+            right.addArrayUsesToIndexMap(indexMap, names);
+            
+            FIdUseExp left = t.fullCopy();
+            if (iter) {
+                names.removeLayer();
+                outer = names.createForLoops(outer, right);
+                outer.addAll(inner);
+                right = ((FIterExp) right).getFExp();
+            } else {
+                left.getFArraySubscripts().setFSubscript(new FIntegerSubscript(i+1), 0);
+                outer.addAll(inner);
+                outer = names.createForLoops(outer, right);
+            }
+            
+            type().scalarizeAssignment_sub(vars, outer, indexMap, left, right);
+        }
+        
+        if (!iter)
+            names.removeLayer();
+        names.removeLayer();
+    }
+    
+    public void FAbstractCat.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        int catDim  = dimension();
+        FExp offset = new FIntegerLitExp(0);
+        FExp firstArg = getFExp(0);
+        ForNames orig = names.copySurface();
+        
+        for (FExp exp : getFExps()) {
+            names = orig.copySurface();
+            names.addLayer(exp.ndims());
+            names.fillLayer(exp);
+            
+            exp.createArrayTemporaries(clauses, vars, indexMap, names);
+            exp.addArrayUsesToIndexMap(indexMap, names);
+            
+            FArraySubscripts fas = names.createFArraySubscripts(ndims());
+            FExp ind = fas.getFSubscript(catDim).asExpSubscript().getFExp();
+            ind = new FAddExp(ind, offset.fullCopy());
+            fas.setFSubscript(new FExpSubscript(ind), catDim);
+            
+            FIdUseExp left = tempExp(fas);
+            names.createForLoops(clauses, exp).add(new FAssignStmt(left, exp.scalarize(indexMap)));
+            names.removeLayer();
+            
+            offset = new FAddExp(offset, exp.size().has(catDim) ? exp.size().createFExp(catDim) : new FIntegerLitExp(1));
+        }
+    }
+    
+    public void FIdentity.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(ndims());
+        names.fillLayer(this);
+        
+        getFExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        getFExp().addArrayUsesToIndexMap(indexMap, names);
+        
+        FArraySubscripts fas = names.createFArraySubscripts(ndims());
+        FIdUseExp left = tempExp(fas);
+        FIfExp right = new FIfExp(
+                new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
+                new FIntegerLitExp(1),
+                new FIntegerLitExp(0)
+        );
+        names.createForLoops(clauses, this).add(new FAssignStmt(left, right));
+        names.removeLayer();
+    }
+    
+    public void FVectorExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(getFExp().ndims());
+        names.fillLayer(getFExp());
+        
+        getFExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        getFExp().addArrayUsesToIndexMap(indexMap, names);
+        
+        FExp ind = null;
+        for (int i = 0; i < names.size(); i++) {
+            FIdUseExp u = new FIdUseExp(names.get(i));
+            FSubExp u1 = new FSubExp(u, new FIntegerLitExp(1));
+            if (ind != null) {
+                ind = new FMulExp(ind, getFExp().size().createFExp(i));
+                ind = new FAddExp(ind, u1);
+            } else {
+                ind = u1;
+            }
+        }
+        ind = new FAddExp(ind, new FIntegerLitExp(1));
+        
+        FArraySubscripts fas = new FArraySubscripts();
+        fas.addFSubscript(new FExpSubscript(ind));
+        FIdUseExp left = tempExp(fas);
+        FExp right = getFExp().scalarize(indexMap);
+        names.createForLoops(clauses, getFExp()).add(new FAssignStmt(left, right));
+        names.removeLayer();
+    }
+    
+    public void FMatrixExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        names.addLayer(getFExp().ndims());
+        names.fillLayer(getFExp());
+        
+        getFExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        getFExp().addArrayUsesToIndexMap(indexMap, names);
+        
+        FIdUseExp left = tempExp(names.createFArraySubscripts(2));
+        FExp right = getFExp().scalarize(indexMap);
+        names.createForLoops(clauses, getFExp()).add(new FAssignStmt(left, right));
+        names.removeLayer();
+    }
+
+    public void FReductionExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // Set up names and create for loop(s)
+        FExp exp = getFExp();
+        names.addLayer(exp.ndims());
+        names.fillLayer(this);
+        
+        FIdUseExp reducer;
+        if (type().isArray())
+            reducer = tempExp(names.createFArraySubscripts(ndims()));
+        else
+            reducer = tempExp();
+        
+        FStatement initStmt = new FAssignStmt(reducer, scalarReduceStartValue().buildLiteral());
+        
+        clauses = unknownReductionSub(clauses, vars, indexMap, names, exp, initStmt);
+        
+        // Add statement updating temp var to loop
+        FBinExp scalarizedExp = scalarReduceExp();
+        scalarizedExp.setLeft(reducer.fullCopy());
+        scalarizedExp.setRight(exp.scalarize(indexMap));
+        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
+        
+        names.removeLayer();
+    }
+
+    public void FMinMaxExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        // Set up names and create for loop(s)
+        FExp exp = getX();
+        names.addLayer(exp.ndims());
+        names.fillLayer(this);
+        
+        FIdUseExp reducer = tempExp();
+        
+        FStatement initStmt = new FAssignStmt(reducer, scalarReduceStartValue().buildLiteral());
+        
+        clauses = unknownReductionSub(clauses, vars, indexMap, names, exp, initStmt);
+        
+        // Add statement updating temp var to loop
+        FExp scalarizedExp = scalarReduceExp(reducer, exp.scalarize(indexMap));
+        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
+        
+        names.removeLayer();
+    }
+    
+    protected List FExp.unknownReductionSub(List clauses, List vars, Map<String,FExp> indexMap, ForNames names, FExp exp, FStatement initStmt) {
+        List<FStatement> inner = new List<FStatement>();
+        boolean iter = exp.editNamesIter(indexMap, names);
+        exp.createArrayTemporaries(inner, vars, indexMap, names);
+        exp.addArrayUsesToIndexMap(indexMap, names);
+        if (iter) {
+            names.removeLayer();
+            clauses = names.createForLoops(clauses, exp, 0, ndims());
+            clauses.add(initStmt);
+            clauses = names.createForLoops(clauses, exp, ndims(), exp.ndims());
+            clauses.addAll(inner);
+        } else {
+            clauses.addAll(inner);
+            clauses.add(initStmt);
+            clauses = names.createForLoops(clauses, exp);
+        }
+        return clauses;
+    }
+    
+    syn FExp FMinMaxExp.scalarReduceExp(FExp reducer, FExp scalar);
+    eq FMaxExp.scalarReduceExp(FExp reducer, FExp scalar) = new FIfExp(new FGtExp(reducer.unboundCopy(), scalar.unboundCopy()), reducer.unboundCopy(), scalar.unboundCopy());
+    eq FMinExp.scalarReduceExp(FExp reducer, FExp scalar) = new FIfExp(new FLtExp(reducer.unboundCopy(), scalar.unboundCopy()), reducer.unboundCopy(), scalar.unboundCopy());
+	
+    /**
+     * Helper for unknown size expressions containing iteration expressions.
+     * Transfers some names  in <code>names</code> to <code>indexMap</code>
+     */
+    public boolean FExp.editNamesIter(Map<String,FExp> indexMap, ForNames names) {
+        return false;
+    }
+    public boolean FIterExp.editNamesIter(Map<String,FExp> indexMap, ForNames names) {
+        int i = 0;
+        for (; i < getNumForIndex(); i++)
+            indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
+        names.addLayer(getFExp().ndims());
+        for (; i < getFExp().ndims() + getNumForIndex(); i++)
+            names.promote(i);
+        return true;
+    }
+
+    public void FMulExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        HashMap<String,FExp> myIndexMap;
+        FIdUseExp sum = new FIdUseExp(calcTempVarName());
+        if (vars != null)
+            vars.add(new FFunctionVariable(type().scalarType(), sum.name()));
+        
+        names.addLayer(ndims());
+        names.fillLayer(this);
+        
+        // Set up indices for the left operand
+        FExp exp = getLeft();
+        names.addLayer(exp.ndims());
+        if (names.size() > 1)
+            names.promote(0);
+        String i = names.create(this);
+        
+        // Create inner loop
+        FForStmt fs = new FForStmt(new FForIndex(i, getRight().size().createFExp(0)), new List());
+        List<FStatement> inner = fs.getForStmts();
+        
+        // Scalarize left operand
+        myIndexMap = new HashMap<String,FExp>(indexMap);
+        exp.createArrayTemporaries(clauses, vars, myIndexMap, names);
+        exp.addArrayUsesToIndexMap(myIndexMap, names);
+        FExp left = exp.scalarize(myIndexMap);
+        names.removeLayer();
+        
+        // Set up indices and scalarize the right operand
+        exp = getRight();
+        names.addLayer(exp.ndims());
+        names.add(i);
+        if (names.size() > 1)
+            names.promote(ndims() - 1);
+        myIndexMap = new HashMap<String,FExp>(indexMap);
+        exp.createArrayTemporaries(clauses, vars, myIndexMap, names);
+        exp.addArrayUsesToIndexMap(myIndexMap, names);
+        FExp right = exp.scalarize(myIndexMap);
+        names.removeLayer();
+        
+        // Add statement updating temp var to loop
+        FExp mul = new FMulExp(left, right);
+        FExp add = new FAddExp(sum.fullCopy(), mul);
+        inner.add(new FAssignStmt(sum.fullCopy(), add));
+        
+        // Create outer loops
+        List<FStatement> outer = names.createForLoops(clauses, this);
+        outer.add(new FAssignStmt(sum, type().scalarType().zeroLiteral()));
+        outer.add(fs);
+        outer.add(new FAssignStmt(names.createUseWithSubscripts(tempVarName()), sum.fullCopy()));
+        
+        names.removeLayer();
+    }
+    
+    /**
+     * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(Map indexMap, FExp[] names)}.
+     */
+    public void ASTNode.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+        addArrayUsesToIndexMap(indexMap, names.createFExpArray());
+    }
+    
+    /**
+     * Traverser for {@link FExp#addArrayUsesToIndexMap(Map indexMap, FExp[] names)}.
+     */
+    public void ASTNode.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        for (ASTNode n : this)
+            n.addArrayUsesToIndexMap(indexMap, names);
+    }
+    
+    /**
+     * Copies top layer in <code>names</code> to id uses and creates entries
+     * in <code>indexNames</code> for expressions replaced with temps.
+     */
+    public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        if (useTempVar) {
+            if (isArray()) {
+                indexMap.put(tempVarName(), tempExp(names));
+            }
+        } else {
+            super.addArrayUsesToIndexMap(indexMap, names);
+        }
+    }
+
+    public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        if (!hasFArraySubscripts() && isArray())
+            indexNames = names;
+        super.addArrayUsesToIndexMap(indexMap, names);
+    }
+    public void FIdTempExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexNames = names;
+    }
+
+    public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexNames = names;
+        super.addArrayUsesToIndexMap(indexMap, names);
+    }
+
+    public void FLinspace.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexNames = names;
+        super.addArrayUsesToIndexMap(indexMap, names);
+    }
+
+    public void FColonSubscript.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        indexName = names[0];
+    }
+
+    public void FArraySubscripts.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        int i = 0;
+        for (FSubscript fs : getFSubscripts()) {
+            if (fs.type().isArray()) {
+                FExp[] local = new FExp[1];
+                local[0] = names[i++];
+                fs.addArrayUsesToIndexMap(indexMap, local);
+            }
+        }
+    }
+
+    public void FTranspose.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        FExp[] local = names.clone();
+        local[0] = names[1];
+        local[1] = names[0];
+        super.addArrayUsesToIndexMap(indexMap, local);
+    }
+
+    public void FFunctionCall.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        // No names available as a function call arg.
+        super.addArrayUsesToIndexMap(indexMap, extractTemp() ? names : new FExp[0]);
+    }
+
+    public void FRecordConstructor.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        // No names available as record con arg.
+        super.addArrayUsesToIndexMap(indexMap, extractTemp() ? names : new FExp[0]);
+    }
+
+    public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+        int n1 = stmts.getNumChild();
+        addSizeAsserts(stmts);
+        boolean breaker = scalarize(vars, stmts, indexMap);
+        if (shouldBeSorted) {
+            int n2 = stmts.getNumChild();
+            for (int i = n1; i < n2; i++) 
+                stmts.getChild(i).shouldBeSorted = true;
+            if (hasExtraSortingDependencies()) {
+                /* Might contain assert statements added by addSizeAsserts() */
+                for (int i = n1; i < n2; i++)  {
+                    if (!extraSortingDependencies().contains(stmts.getChild(i))) {
+                        stmts.getChild(i).extraSortingDependencies().addAll(extraSortingDependencies());
+                        break;
+                    }
+                }
+            }
+        }
+        return breaker;
+    }
+
+    /**
+     * Creates assert statements to check sizes in assignments between known
+     * and unknown sizes. 
+     */
+    public void FStatement.addSizeAsserts(List clauses) {
+        if (!inFunction())
+            return;
+        
+        FStatement stmt;
+        Set<String> vis = new HashSet<String>();
+        for (FAssert a : sizeAssertsColl()) {
+            String s = a.prettyPrint("");
+            if (!vis.contains(s)) {
+                vis.add(s);
+                stmt = new FFunctionCallStmt(new List<FFunctionCallLeft>(), a);
+                stmt.shouldBeSorted = this.shouldBeSorted;
+                if (stmt.shouldBeSorted)
+                    extraSortingDependencies().add(stmt);
+                clauses.add(stmt);
+            }
+        }
+    }
+    coll ArrayList<FAssert> FStatement.sizeAssertsColl() [new ArrayList<FAssert>()] 
+            with addAll root FFunctionDecl;
+    FAssignStmt contributes sizeAsserts()
+        to FStatement.sizeAssertsColl() for this;
+    FFunctionCallLeft contributes sizeAsserts() when hasFExp()
+        to FStatement.sizeAssertsColl() for getFExp().myFStatement();
+    FFunctionCall contributes sizeAsserts() 
+        to FStatement.sizeAssertsColl() for myFStatement();
+    FRecordConstructor contributes getRecord().myFRecordDecl().sizeAsserts(this)
+        to FStatement.sizeAssertsColl() for myFStatement();
+    FAbstractCat contributes sizeAsserts() when extractTemp()
+        to FStatement.sizeAssertsColl() for myFStatement();
+    FDimensionConvert contributes sizeAsserts() when getFExp().size().isUnknown() && getFExp().ndims() > ndims()
+        to FStatement.sizeAssertsColl() for myFStatement();
+                
+    syn ArrayList<FAssert> FAssignStmt.sizeAsserts() {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        getLeft().size().sizeAsserts(a, getRight().size(), getLeft());
+        getRight().size().sizeAsserts(a, getLeft().size(), getLeft());
+        return a;
+    }
+    syn ArrayList<FAssert> FFunctionCallLeft.sizeAsserts() {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        if (hasFExp()) {
+            Size fs = getFExp().myFunctionCall().typeOfOutput(getParent().getIndexOfChild(this)).size();
+            fs.sizeAsserts(a, getFExp().size(), getFExp());
+            getFExp().size().sizeAsserts(a, fs, getFExp());
+        }
+        return a;
+    }
+    
+    syn ArrayList<FAssert> FFunctionCall.sizeAsserts() {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        Iterator<FFunctionVariable> inputs = myCallInputs().iterator();
+        for (FExp arg : getArgs()) {
+            inputs.next().size().sizeAsserts(a, arg.size(), arg);
+        }
+        return a;
+    }
+    
+    syn ArrayList<FAssert> FRecordDecl.sizeAsserts(FRecordConstructor frc) {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        for (FRecordComponentType comp : type().getComponents()) {
+            FExp arg = extractArg(frc, comp.getName());
+            comp.getFType().size().sizeAsserts(a, arg.size(), arg);
+        }
+        return a;
+    }
+    syn ArrayList<FAssert> FAbstractCat.sizeAsserts() {
+        int catDim = dimension();
+        FExp firstArg = getFExp(0);
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        
+        for (int i = 0; i < ndims(); i++) {
+            if (i != catDim) {
+                FExp le = firstArg.size().has(i) ? firstArg.size().createFExp(i) : new FIntegerLitExp(1);
+                String ls = le.prettyPrint("");
+                for (FExp arg : getFExps()) {
+                    if (arg != firstArg) {
+                        FExp re = arg.size().has(i) ? arg.size().createFExp(i) : new FIntegerLitExp(1);
+                        String rs = re.prettyPrint("");
+                        if (!ls.equals(rs)) {
+                            res.add(sizeAssert(orNotIfExpConds(new FEqExp(le.unboundCopy(), re)), i));
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    }
+    
+    syn ArrayList<FAssert> FDimensionConvert.sizeAsserts();
+    
+    eq FScalarExp.sizeAsserts() {
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        Size s = getFExp().size();
+        for (int i = 0; i < s.ndims(); i++) {
+            if (s.isUnknown(i)) {
+                FExp e = new FEqExp(s.createFExp(i), new FIntegerLitExp(1));
+                res.add(sizeAssert(e, i));
+            }
+        }
+        return res;
+    }
+    
+    eq FVectorExp.sizeAsserts() {
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        Size s = getFExp().size();
+        FExp prod = s.createFExp(0);
+        FExp sum  = s.createFExp(0);
+        for (int i = 1; i < s.ndims(); i++) {
+            prod = new FMulExp(prod, s.createFExp(i));
+            sum  = new FAddExp(sum,  s.createFExp(i));
+        }
+        // prod <= sum - n + 1
+        FExp e = new FLeqExp(prod, new FAddExp(new FSubExp(sum, new FIntegerLitExp(s.ndims())), new FIntegerLitExp(1)));
+        res.add(sizeAssert(e, -1));
+        return res;
+    }
+    
+    eq FMatrixExp.sizeAsserts() {
+        ArrayList<FAssert> res = new ArrayList<FAssert>();
+        Size s = getFExp().size();
+        for (int i = 2; i < s.ndims(); i++) {
+            res.add(sizeAssert(new FEqExp(s.createFExp(i), new FIntegerLitExp(1)), i));
+        }
+        return res;
+    }
+    
+    public FAssert FExp.sizeAssert(FExp e, int i) {
+        String dim = i < 0 ? "" : String.format("dimension %d of ", i+1);
+        return new FAssert(e, new FStringLitExp(String.format("Mismatching size in %sexpression %s in function %s",
+                dim, prettyPrint(""), containingFFunctionDecl().name())), new Opt<FExp>());
+    }
+    
+    /**
+     * Adds an assert statement to <code>asserts</code> for all dimensions where
+     * size is known in this size but unknown in <code>other</code>.
+     */
+    public void Size.sizeAsserts(Collection<FAssert> asserts, Size other, FExp context) {
+        Size l = evaluated();
+        other = other.evaluated();
+        for (int i = 0; i < l.size.length; i++) {
+            if (l.size[i] != UNKNOWN && other.size[i] == UNKNOWN) {
+                FAssert a = new FAssert(
+                        context.orNotIfExpConds(new FEqExp(other.createFExp(i), l.createFExp(i))),
+                        new FStringLitExp("Mismatching sizes in " + context.containingFFunctionDecl().name()), new Opt<FExp>());
+                asserts.add(a);
+            }
+        }
+    }
+    
+    public FExp FExp.orNotIfExpConds(FExp e1) {
+        FExp e2 = enclosingIfExpCond();
+        if (e2 != null)
+            e1 = new FOrExp(e1, new FNotExp(e2));
+        return e1;
+    }
+    
+    inh FExp FExp.enclosingIfExpCond();
+    eq Root.getChild().enclosingIfExpCond() = null;
+    eq FStatement.getChild().enclosingIfExpCond() = null;
+    eq FIfExp.getThenExp().enclosingIfExpCond() = andIfExpConds(getIfExp().fullCopy());
+    eq FIfExp.getElseExp().enclosingIfExpCond() = andIfExpConds(new FNotExp(getIfExp().fullCopy()));
+    private FExp FIfExp.andIfExpConds(FExp e1) {
+        FExp e2 = enclosingIfExpCond();
+        if (e2 != null)
+            e1 = new FAndExp(e2,e1);
+        return e1;
+    }
+	/**
+	 * Scalarize the statement and put all resulting statements in the
+	 *        list of statements.
+	 *        
+	 * @return FExp 
+	 */
+	public boolean FStatement.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+		stmts.add((FStatement) fullCopy());
+		return false;
+	}
+	
+    public static boolean FStatement.scalarizeStmtList(
+            List<FStatement> fromList, List<FStatement> toList, 
+            List vars, Map<String,FExp> indexMap) {
+        boolean res = false;
+        boolean breaker = false;
+        for (FStatement stmt : fromList) {
+            if (breaker)
+                toList = FStatement.breakBlock(toList, stmt.createBreakCond());
+            breaker = stmt.scalarizeStmt(vars, toList, indexMap);
+            res = res || breaker;
+        }
+        return res;
+    }
+	
+	public boolean FAssignStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+        indexMap = new HashMap<String, FExp>(indexMap);
+        
+        FIdUseExp left = getLeft();
+        FExp right = getRight();
+        
+        if (left.type().isComposite() && !left.isSlice() && right.inFunction() && right instanceof FFunctionCall) {
+            // Special case, Function call stmt
+            FFunctionCall call = (FFunctionCall) right;
+            call.getArgs().createArrayTemporaries(stmts, vars, indexMap);
+            call.createFunctionCallClause(stmts, indexMap, left);
+        } else {
+            FType t = left.size().isUnknown() ? left.type() : right.type();
+            t.scalarizeAssignment(vars, stmts, indexMap, left, right);
+        }
+        return false;
+    }
+	
+	public boolean FFunctionCallStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+	    indexMap = new HashMap<String, FExp>(indexMap);
+	    FFunctionCallStmt stmt = new FFunctionCallStmt();
+        getCall().createArrayTemporaries(stmts, vars, indexMap);
+        getLefts().createArrayTemporaries(stmts, vars, indexMap);
+        stmts.add(stmt);
+        getLefts().createArrayTemporaries(stmts, null, indexMap);
+        for (FFunctionCallLeft left : getLefts())
+            stmt.addLeft(left.scalarize(indexMap));
+        stmt.setCall((FAbstractFunctionCall) getCall().scalarizeExp(indexMap));
+        return false;
+	}
+	
+	public boolean FIfWhenStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+	    boolean breaker = false;
+	    indexMap = new HashMap<String, FExp>(indexMap);
+		for (FIfWhenClause cl : getFIfWhenClauses())
+			cl.getTest().createArrayTemporaries(stmts, vars, indexMap);
+		FIfWhenStmt stmt = createEmptyNode();
+        for (FIfWhenClause cl : getFIfWhenClauses()) {
+            breaker = breaker || cl.scalarize(vars, stmt.getFIfWhenClauses(), indexMap);
+        }
+        breaker = breaker || scalarizeElse(vars, stmt, indexMap);
+		stmts.add(stmt);
+		return breaker;
+	}
+	
+	/**
+	 * Scalarize the else part of an if statement. Does nothing for when statements.
+	 */
+    public boolean FIfWhenStmt.scalarizeElse(List vars, FIfWhenStmt stmt, Map<String,FExp> indexMap) { 
+        return false; 
+    }
+    
+    public boolean FIfStmt.scalarizeElse(List vars, FIfWhenStmt stmt, Map<String,FExp> indexMap) {
+        FIfStmt ifstmt = (FIfStmt) stmt;
+        return FStatement.scalarizeStmtList(getElseStmts(), ifstmt.getElseStmtList(), vars, indexMap);
+    }
+    
+    /**
+     * Scalarize the if or when clause.
+     */
+    public boolean FIfWhenClause.scalarize(List vars, List<FIfWhenClause> clauses, Map<String,FExp> indexMap) {
+        FExp test = getTest().scalarize(indexMap);
+        List<FStatement> stmts = new List<FStatement>();
+        clauses.add(createNode(test, stmts));
+        return FStatement.scalarizeStmtList(getFStatements(), stmts, vars, indexMap);
+    }
+    
+	public boolean FForStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+		if (inFunction()) {
+		    indexMap = new HashMap<String, FExp>(indexMap);
+			getIndex().createArrayTemporaries(stmts, vars, indexMap);
+			FForStmt stmt = new FForStmt();
+			stmt.setIndex(getIndex().scalarize(indexMap));
+			FStatement.scalarizeStmtList(getForStmts(), stmt.getForStmtList(), vars, indexMap);
+			stmts.add(stmt);
+		} else {
+            List<FStatement> inner = stmts;
+            boolean hasBreak = getForStmts().containsBreakStmt();
+            if (hasBreak) {
+                vars.add(myBreakVar());
+                stmts.add(new FAssignStmt(myBreakVar().createUseExp(), new FBooleanLitExpTrue()));
+            }
+			ArrayList<FForIndex> indexList = new ArrayList();
+			indexList.add(getIndex());
+			Indices indices = Indices.create(indexList);
+			Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
+			myIndexMap.putAll(indexMap);
+			for (Index i : indices) {
+			    if (hasBreak)
+			        inner = FStatement.breakBlock(stmts, myBreakVar().createUseExp());
+                indices.fillIndexMap(myIndexMap, i, indexList);
+                FStatement.scalarizeStmtList(getForStmts(), inner, vars, myIndexMap);
+				getForStmts().flushAllRecursive(); // Throw calculated sizes/arrays
+				getForStmts().flushTempVarNames();
+			}
+			for (FForIndex fi : indexList) 
+				fi.setEvaluationValue(null);
+		}
+		return false;
+	}
+	
+    public boolean FWhileStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+	    indexMap = new HashMap<String, FExp>(indexMap);
+		getTest().createArrayTemporaries(stmts, vars, indexMap);
+		FWhileStmt stmt = new FWhileStmt();
+		stmt.setTest(getTest().scalarize(indexMap));
+		FStatement.scalarizeStmtList(getWhileStmts(), stmt.getWhileStmtList(), vars, indexMap);
+		getTest().createArrayTemporaries(stmt.getWhileStmtList(), null, indexMap);
+		stmts.add(stmt);
+        return false;
+	}
+	
+    public boolean FBreakStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
+        FStatement loop = enclosingLoop();
+        if (!inFunction() && loop instanceof FForStmt) {
+            stmts.add(new FAssignStmt(createBreakCond(), new FBooleanLitExpFalse()));
+            return true;
+        } else {
+            return super.scalarize(vars, stmts, indexMap);
+        }
+    }
+    
+    public static List<FStatement> FStatement.breakBlock(List<FStatement> stmts, FExp breakCond) {
+        FIfStmt ifStmt = new FIfStmt();
+        FIfClause clause = new FIfClause();
+        clause.setTest(breakCond.fullCopy());
+        ifStmt.addFIfWhenClause(clause);
+        stmts.add(ifStmt);
+        return clause.getFStatements();
+    }
+    
+    private FVariable FForStmt.breakVar = null;
+    private FVariable FForStmt.myBreakVar(){
+        if (breakVar == null) {
+            FQName fqn = new FQNameString(getIndex().getFExp().calcTempVarName());
+            FVariable fv = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(), fqn);
+            breakVar = fv;
+        }
+        return breakVar;
+    }
+    
+    inh FIdUseExp FStatement.createBreakCond();
+    eq Root.getChild().createBreakCond() = null;
+    eq FForStmt.getChild().createBreakCond() = myBreakVar().createUseExp();
+    
+    syn boolean ASTNode.containsBreakStmt() {
+        for (ASTNode n : this)
+            if (n.containsBreakStmt())
+                return true;
+        return false;
+    }
+    eq FForStmt.containsBreakStmt() {
+        return false;
+    }
+    eq FWhileStmt.containsBreakStmt() {
+        return false;
+    }
+    eq FBreakStmt.containsBreakStmt() {
+        return true;
+    }
+    
+    /**
+     * Scalarize the function, replacing all array assignments with separate scalar 
+     *        assignments and scalarize all expressions.
+     */
+    public FFunctionDecl FFunctionDecl.scalarize() {
+        Map<String,FExp> emptyIndexMap = Collections.emptyMap();
+        List<FFunctionVariable> vars = new List<FFunctionVariable>();
+        List<FStatement> stmts = new List<FStatement>();
+
+        FFunctionDecl fd = createDecl();
+        fd.setFQName(getFQName().fullCopy());
+        fd.setFFunctionVariableList(vars);
+        fd.setFAlgorithm(new FAlgorithm(stmts));
+        for (FAttribute a : getFAttributes()) 
+            a.scalarize(fd.getFAttributes(), Index.NULL, Collections.<String,FExp>emptyMap());
+        fd.parent = this;
+
+        for (FFunctionVariable var : getFFunctionVariables())
+            var.scalarize(vars, stmts, emptyIndexMap);
+        FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, vars, emptyIndexMap);
+
+        return fd;
+    }
+	
+	public FFunctionDecl FFunctionDecl.createDecl() {
+		return new FFunctionDecl();
+	}
+	
+	public FFunctionDecl FConstructorDecl.createDecl() {
+		return new FConstructorDecl();
+	}
+	
+	public FFunctionDecl FDestructorDecl.createDecl() {
+		return new FDestructorDecl();
+	}
+	
+	/**
+	 * Post processing FFunctionDecls after scalarization.
+	 * Clear the scalarized flag for all FQNames.
+	 * Rewrite FIdTempExp to FIdUseExp
+	 */
+	public void ASTNode.clearScalarized() {
+		for (ASTNode node : this)
+			node.clearScalarized();
+	}
+	
+	public void FQName.clearScalarized() {
+		scalarized = false;
+	}
+	
+    private boolean FIdTempExp.clearScalarized = false;
+    public void FIdTempExp.clearScalarized() {
+        super.clearScalarized();
+        clearScalarized = true;
+    }
+    
+    rewrite FIdTempExp {
+        when (clearScalarized) to FIdUseExp new FIdUseExp(getFIdUse());
+    }
+    
+    public List<FAttribute> FAbstractEquation.scalarizeAttributeList(Index i, Map<String,FExp> indexMap) {
+        List<FAttribute> scalarized = new List<FAttribute>();
+        for (FAttribute a : getFAttributes()) 
+            a.scalarize(scalarized, i, indexMap);
+        return scalarized;
+    }
+	
+	public void FAbstractEquation.scalarize(List<FAbstractEquation> eqns,
+			List<FVariable> vars, Map<String,FExp> indexMap) {}
+	
+	/**
+	 * Scalarize equation and put all resulting equations in list eqns.
+	 */
+	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		//log.debug("FEquation.scalarize() " + ndims());
+        if (size().isZero())
+            return;
+        
+		createArrayTemporaries(eqns, vars, indexMap);
+		if (ndims()==0) {
+			/*
+			 * If the equation is of dimension 0, i.e, already scalar,
+			 * the equations is "scalarized" into a simple equation where
+			 * e.g. built in functions are replaced by elementary operations.
+			 */
+			
+		    List<FAttribute> attrs = scalarizeAttributeList(Index.NULL, indexMap);
+			createScalarFEquations(eqns, indexMap, attrs, getLeft(), getRight());
+		} else if (ndims() > 0) {
+			/*
+			 * If the expression is an array expression, then the FExp.getArray()
+			 * element is used to generate scalar equations.
+			 */
+			// Iterate over array elements and create scalarized equation for each
+			for (Index i : indices()) {
+			    List<FAttribute> attrs = scalarizeAttributeList(i, indexMap);
+				createScalarFEquations(eqns, indexMap, attrs, getLeft().getArray().get(i), getRight().getArray().get(i));
+			}
+		} else {
+			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
+					this + "' returned " + ndims()); 
+		}
+	}
+	
+	public void FAlgorithm.scalarize(List<FAbstractEquation> eqns,
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		List<FStatement> stmts = new List<FStatement>();
+		FStatement.scalarizeStmtList(getFStatements(),stmts,vars,indexMap);
+		eqns.add(new FAlgorithm(stmts));
+	}
+	
+	/**
+	 * Scalarize left and right expressions and create new scalar equations.
+	 */
+	public void FEquation.createScalarFEquations(
+			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs,FExp left, FExp right) {
+		if (left.inferType().isRecord()) 
+			left.inferType().scalarRecordClauses(eqns, true, new FQNameEmpty(), indexMap, left, right);
+		else
+			eqns.add(new FEquation(attrs, left.scalarize(indexMap), right.scalarize(indexMap)));
+	}
+	
+	// TODO: Introduce parameter object?
+	/**
+	 * Generate scalar clauses for this record or record component.
+	 * 
+	 * @param clauses   the list of clauses to add the clause to
+	 * @param eqn       if true adds equations, otherwise statements
+	 * @param suffix    add this as a suffix to the name of the uppermost record in uses
+	 * @param indexMap  translations for indices in the expressions
+	 * @param left      the left expression from the original equation
+	 * @param right     the right expression from the original equation
+	 */
+	public void FType.scalarRecordClauses(
+			List clauses, boolean eqn, FQName suffix, 
+			Map<String,FExp> indexMap, FExp left, FExp right) {
+        left = left.scalarRecordFExp(indexMap, suffix);
+        right = right.scalarRecordFExp(indexMap, suffix);
+        if (eqn) {
+            clauses.add(new FEquation(left, right));
+        } else {
+            clauses.add(new FAssignStmt((FIdUseExp) left, right));
+        }
+	}
+	
+	public void FRecordType.scalarRecordClauses(
+			List clauses, boolean eqn, FQName suffix, 
+			Map<String,FExp> indexMap, FExp left, FExp right) {
+		for (FRecordComponentType comp : getComponents()) {
+			FQName next = suffix.copyAndAppend(comp.getName()).asFQNameFull();
+			comp.getFType().scalarRecordComponentClauses(clauses, eqn, next, indexMap, left, right);
+		}
+	}
+	
+	
+	/**
+	 * Generate scalar clauses for this record component.
+	 * 
+	 * @param clauses   the list of clauses to add the clause to
+	 * @param eqn       if true adds equations, otherwise statements
+	 * @param suffix    add this as a suffix to the name of the uppermost record in uses
+	 * @param indexMap  translations for indices in the expressions
+	 * @param left      the left expression from the original equation
+	 * @param right     the right expression from the original equation
+	 */
+	public void FType.scalarRecordComponentClauses(
+			List clauses, boolean eqn, FQName suffix, 
+			Map<String,FExp> indexMap, FExp left, FExp right) {
+		if (isArray()) {
+			FQNameFull fullSuffix = suffix.copyAsFQNameFull();
+			Indices ind = null;
+			if (size().isComplete()) 
+				ind = indices(); 
+			else  // TODO: This is calculated each time - introduce some kind of lazy attribute?
+				ind = left.dynamicFExp(left.scalarRecordFExp(indexMap, suffix)).indices();
+			for (Index i : ind) {
+				fullSuffix.addFArraySubscripts(i.createFArraySubscripts());
+				scalarRecordClauses(clauses, eqn, fullSuffix, indexMap, left, right);
+			}
+		} else {
+			scalarRecordClauses(clauses, eqn, suffix, indexMap, left, right);
+		}
+	}
+	
+	/**
+	 * Create an FExp that represents a specific scalar component of this record.
+	 * 
+	 * @param indexMap  translations for indices in the expressions
+	 * @param suffix    the suffix to add to a use of the record to access the specific component
+	 */
+    public FExp FExp.scalarRecordFExp(Map<String,FExp> indexMap, String suffix) {
+        return scalarRecordFExp(indexMap, new FQNameString(suffix));
+    }
+    
+    public FExp FExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        if (useTempVar) {
+            FQName fqn;
+            String name = tempVarName();
+            if (indexMap.containsKey(name)) {
+                fqn = ((FIdUseExp)indexMap.get(name)).getFIdUse().getFQName();
+            } else {
+                fqn = new FQNameFull(tempVarName());
+            }
+            fqn = fqn.copyAndAppend(suffix);
+            return new FIdUseExp(new FIdUse(fqn));
+        }
+        return scalarize(indexMap);
+    }
+    
+    public FExp FRecordConstructor.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        return suffix.scalarRecordFExpForCon(indexMap, this);
+    }
+    
+    public FExp FFunctionCall.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        return scalarize(indexMap).scalarRecordFExp(indexMap, suffix);
+    }
+    
+    public FExp FNoEventExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        return createNode(getFExp().scalarRecordFExp(indexMap, suffix));
+    }
+    
+    public FExp FIfExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        FIfExp res = new FIfExp();
+        res.setIfExp(getIfExp().scalarize(indexMap));
+        res.setThenExp(getThenExp().scalarRecordFExp(indexMap, suffix));
+        res.setElseExp(getElseExp().scalarRecordFExp(indexMap, suffix));
+        return res;
+    }
+    
+    public FExp FIdUseExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+      FQName fqn = getFIdUse().getFQName();
+      if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization())
+            fqn = ((FIdUseExp) indexMap.get(name())).getFIdUse().getFQName();
+      if (indexNames != null)
+            fqn = fqn.copyAndAddFas(createIndexNameFas());
+      fqn = fqn.copyAndAppend(suffix);
+      fqn.parent = this;
+      fqn = fqn.scalarize(indexMap);
+      return createNode(new FIdUse(fqn));
+    }
+
+    /**
+     * Create an FExp that represents a specific scalar component of the given record constructor.
+     * 
+     * @param indexMap  translations for indices in the expressions
+     * @param con       the record constructor to extract an expression from
+     * 
+     * @see FExp#scalarRecordFExp(Map, FQName)
+     */
+    public FExp FQName.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
+        throw new UnsupportedOperationException();
+    }
+
+	public FExp FQNameString.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
+		FExp arg = con.myArgFExp(getName());
+		return arg.scalarize(indexMap);
+	}
+	
+	public FExp FQNameFull.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
+		FQNamePart first = getFQNamePart(0);
+		FExp arg = con.myArgFExp(first.getName());
+		if (first.hasFArraySubscripts())
+		    arg = arg.extractArrayCell(indexMap, first.getFArraySubscripts().asIndex());
+		return copySuffix().scalarRecordFExp(indexMap, arg);
+	}
+	
+    public FExp FQName.scalarRecordFExp(Map<String,FExp> indexMap, FExp exp) {
+        return exp.scalarRecordFExp(indexMap, this);
+    }
+    
+    public FExp FQNameEmpty.scalarRecordFExp(Map<String,FExp> indexMap, FExp exp) {
+        return exp.scalarize(indexMap);
+    }
+    
+    
+    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
+        if (useTempVar || size().isUnknown()) {
+            int[] ind = i.index();
+            FExp[] subs = new FExp[ind.length];
+            for (int k = 0; k < ind.length; k++) {
+                subs[k] = new FIntegerLitExp(ind[k]);
+            }
+            return extractArrayCell(indexMap, subs);
+        } else {
+            return dynamicFExp(getArray().get(i).scalarize(indexMap));
+        }
+    }
+    
+    public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, FExp[] subs) {
+        addArrayUsesToIndexMap(indexMap, subs);
+        return scalarize(indexMap);
+    }
+    
+    public FExp FIdUseExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
+        return dynamicFExp(createNode(new FIdUse(getFIdUse().getFQName().specify(i, true))));
+    }
+	
+	/**
+	 * Scalarize equation and put all scalarized equations in list eqns.
+	 */
+	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+	    createArrayTemporaries(eqns, vars, indexMap);
+	    if (getCall().isVectorizedOperatorWithoutOutputs()) { // Special case
+	        for (FExp e : getCall().getArray().iterable()) {
+	            FAbstractFunctionCall call = (FAbstractFunctionCall) e.scalarizeExp(indexMap);
+	            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+	            eqns.add(new FFunctionCallEquation(lefts, call));
+	        }
+	    } else {
+	        List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+	        for (FFunctionCallLeft id : getLefts())
+	            lefts.add(id.scalarize(indexMap));
+	        eqns.add(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarizeExp(indexMap)));
+	    }
+	}
+	
+	syn boolean FAbstractFunctionCall.isVectorizedOperatorWithoutOutputs() = false;
+	eq FReinit.isVectorizedOperatorWithoutOutputs()                        = getVar().isArray();
+	
+	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		Indices indices = Indices.create(getFForIndexs());
+		Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
+		myIndexMap.putAll(indexMap);
+		for (Index i : indices) {
+			indices.fillIndexMap(myIndexMap, i, getFForIndexs());
+			scalarizeList(getFAbstractEquations(), eqns, vars, myIndexMap);
+			getFAbstractEquations().flushAllRecursive(); // Throw calculated sizes/arrays
+			getFAbstractEquations().flushTempVarNames();
+		}
+		for (FForIndex fi : getFForIndexs()) 
+			fi.setEvaluationValue(null);
+	}
+	
+	public void FIfWhenElseEquation.scalarize(List<FAbstractEquation> eqns, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		eqns.add(scalarize(vars, indexMap));
+	}
+	
+	public FIfWhenElseEquation FIfWhenElseEquation.scalarize(
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		FIfWhenElseEquation res = createEmptyNode();
+		res.setType((FEquationType) getType().fullCopy());
+		res.eliminateOnParamTest = eliminateOnParamTest;
+		scalarizeList(getFAbstractEquations(), res.getFAbstractEquations(), vars, indexMap);
+		scalarizeTestAndElse(res, vars, indexMap);
+		return res;
+	}
+	
+	public void FIfWhenElseEquation.scalarizeTestAndElse(FIfWhenElseEquation res, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {}
+	
+	public void FIfWhenEquation.scalarizeTestAndElse(FIfWhenElseEquation res, 
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		FIfWhenEquation res2 = (FIfWhenEquation) res;
+		res2.setTest(getTest().scalarize(indexMap));
+		if (hasElse()) {
+	        ArrayList<FExp> tempsToAddToElse = branchTemporaries;
+	        branchTemporaries = null;
+			res2.setElse(getElse().scalarize(vars, indexMap));
+			res2.addDummyEqnsForTemps(branchTemporaries, tempsToAddToElse);
+		}
+        branchTemporaries = null;
+	}
+	
+	public void FIfWhenElseEquation.addDummyEqnsForTemps(ArrayList<FExp> tempsForThen, ArrayList<FExp> tempsForElse) {
+        if (tempsForThen != null) 
+            for (FExp e : tempsForThen)
+                e.type().addDummyEqnsForTemp(getFAbstractEquations(), e.tempVarName(), getType());
+	}
+    
+    public void FIfWhenEquation.addDummyEqnsForTemps(ArrayList<FExp> tempsForThen, ArrayList<FExp> tempsForElse) {
+        super.addDummyEqnsForTemps(tempsForThen, tempsForElse);
+        if (hasElse())
+            getElse().addDummyEqnsForTemps(tempsForElse, tempsForElse);
+    }
+    
+    public void FType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name, FEquationType eqType) {
+        if (isArray()) {
+            FType scalar = scalarType();
+            for (Index i : indices()) 
+                scalar.addDummyEqnsForTemp(l, name + i, eqType);
+        } else {
+            l.add(new FEquation(eqType.fullCopy(), new FIdUseExp(name), zeroLiteral()));
+        }
+    }
+    
+    public void FRecordType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name, FEquationType eqType) {
+        if (isArray()) {
+            super.addDummyEqnsForTemp(l, name, eqType);
+        } else {
+            for (FRecordComponentType comp : getComponents())
+                comp.getFType().addDummyEqnsForTemp(l, name + '.' + comp.getName(), eqType);
+        }
+    }
+	
+	public void FExp.notifyIfWhenEquationsOfTemporaryVar() {
+	    FIfWhenEquation myIf = surroundingIfOrElse();
+	    if (myIf != null) 
+	        myIf.addBranchTemporary(this);
+	}
+	
+	public void FIfWhenEquation.addBranchTemporary(FExp e) {
+	    if (branchTemporaries == null)
+	        branchTemporaries = new ArrayList<FExp>();
+	    branchTemporaries.add(e);
+        FIfWhenEquation myIf = surroundingIfOrElse();
+        if (myIf != null) 
+            myIf.addBranchTemporary(e);
+	}
+	
+	private ArrayList<FExp> FIfWhenEquation.branchTemporaries = null;
+	
+	/**
+	 * Surrounding if or else equation, if any.
+	 * 
+	 * Only valid in flat tree.
+	 */
+    inh FIfWhenEquation FExp.surroundingIfOrElse();
+    inh FIfWhenEquation FAbstractEquation.surroundingIfOrElse();
+    eq FClass.getChild().surroundingIfOrElse()                      = null;
+    eq InstNode.getChild().surroundingIfOrElse()                    = null;
+    eq Root.getChild().surroundingIfOrElse()                        = null;
+    eq FIfWhenEquation.getFAbstractEquation().surroundingIfOrElse() = this;
+    eq FIfWhenEquation.getElse().surroundingIfOrElse()              = this;
+	
+	
+	public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
+		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().scalarize(indexMap)) : new Opt());
+	}
+	
+	public boolean FFunctionCall.createFunctionCallClause(List clauses, Map<String,FExp> indexMap, FExp left) {
+		boolean equation = !inFunction() && !inAlgorithm();
+		List lefts = new List().add(new FFunctionCallLeft(new Opt(left)));
+		ASTNode clause = equation ?
+			new FFunctionCallEquation(lefts, scalarizeFunction(indexMap)) :
+			new FFunctionCallStmt(lefts, scalarizeFunction(indexMap));
+		clauses.add(clause);
+		return true;
+	}
+	
+	/**
+     * Creates temporary variable for this expression and add to list. If needed,
+     * creates new clauses and adds to the clauses list.
+	 * 
+	 * This applies to expressions that may need temporaries anywhere, not only in 
+	 * expressions with unknown array sizes. Should be used from createArrayTemporaries().
+	 * 
+     * @param clauses   list of clauses to add the new clauses to
+	 * @param vars      list of variable to add the new variables to
+	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
+	 */
+    protected void FExp.addTemporaryVars(List clauses, List vars, boolean equation) {
+		FType type = type();
+        if (equation || expandWithIterExp())
+			type = type.sizedType(expandSizeForIterExp(type.size()));
+		if (equation) {
+    	    boolean init = inInitialEquationSection();
+            boolean param = init || inParamBindingExp() || inAttributeValue();
+            FTypePrefixVariability v = param ? fParameter() : fContinuous().combineDown(type().funcOutputVariability());
+    	    if (variability().discreteVariability())
+    	    	v = v.combineDown(variability());
+			type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
+			notifyIfWhenEquationsOfTemporaryVar();
+		} else {
+            addFunctionTempVar(clauses, vars, type);
+		}
+	}
+	
+    /**
+     * Creates temporary variable for this expression situated in a function.
+     * 
+     * @see FExp#addTemporaryVars(List, List, boolean)
+     * 
+     * @param clauses   list of clauses to add the new clauses to
+     * @param vars      list of variable to add the new variables to
+     * @param type      type of the new variable
+     */
+    public void FExp.addFunctionTempVar(List clauses, List vars, FType type) {
+        if (vars != null) {
+            FFunctionVariable v = type.isArray() ?
+                    new FFunctionArray((FType)type.unboundCopy(), tempVarName()) :
+                    new FFunctionVariable((FType)type.unboundCopy(), tempVarName());
+            if (type.size().isUnknown()) {
+                v.parent = this; // Needed for genInitArrayStatements
+                ASTNode n = v.genInitArrayStatements(clauses, false);
+                type.size().replaceUnknowns(n);
+            }
+            vars.add(v);
+        }
+    }
+	
+	/**
+	 * Create a record constructor (or FArray of record constructors),  
+	 *        with the arguments taken from a record variable with the given name.
+	 */
+	public FExp FType.createRecordConstructor(FQName name) {
+		if (isArray()) 
+			return createRecordConstructorArray(name, indices().iterator(), 0);
+		else 
+			return createRecordConstructorCell(name);
+	}
+	
+	/**
+	 * Create an FArray of expressions, with the arguments taken from a record 
+	 * variable or member with the given name.
+	 */
+	public FExp FType.createRecordConstructorArray(FQName name, Iterator<Index> it, int dim) {
+		FArray arr = new FArray();
+		boolean last = dim == ndims() - 1;
+		for (int i = 0, n = size().get(dim); i < n; i++) {
+			FExp exp;
+			if (last)
+				exp = createRecordConstructorCell(name.specify(it.next()));
+			else
+				exp = createRecordConstructorArray(name, it, dim + 1);
+			arr.addFExp(exp);
+		}
+		return arr;
+	}
+	
+	/**
+	 * Create a record constructor with the arguments taken from a record 
+	 *        variable with the given name.
+	 * 
+	 * Assumes that <code>name</code> refers to a non-array variable 
+	 * (or a specific cell in an array variable).
+	 */
+	public FExp FType.createRecordConstructorCell(FQName name) {
+		FQName fqn = (FQName) name.unboundCopy();
+		fqn.scalarized = true;
+		return new FIdUseExp(fqn);
+	}
+	
+	public FExp FRecordType.createRecordConstructorCell(FQName name) {
+		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
+		for (FRecordComponentType comp : getComponents()) {
+			FQName next = name.copyAndAppend(comp.getName());
+			rc.addArg(comp.getFType().createRecordConstructor(next));
+		}
+		return rc;
+	}
+
+    /**
+     * Creates a new temporary varable with the given name.
+     *        If this is an array, variables are created for each cell.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     * @param fixed        if creating parameters, use this value for the fixed attribute
+     */
+    public void FType.createTempFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
+        if (isArray()) {
+            FQNameFull fqn = name.copyAsFQNameFull();
+            for (Index i : indices()) {
+                fqn.addFArraySubscripts(i.createFArraySubscripts());
+                createTempCellFVariables(vars, fqn, variability, fixed);
+            }
+        } else {
+            createTempCellFVariables(vars, name, variability, fixed);
+        }
+    }
+
+    /**
+     * Creates a new temporary variable with the given name.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     * @param fixed        if creating parameters, use this value for the fixed attribute
+     */
+    public void FType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
+        FQName fqn = name.fullCopy();
+        fqn.scalarized = true;
+        
+        FVariable var = createTempFVariable(fqn, variability);
+        vars.add(var);
+        if (!fixed)
+            var.addFAttribute(new FAttribute(new FIdUse("Boolean"), new FIdDecl("fixed"), new FBooleanLitExpFalse(), true, 0));
+    }
+
+    /**
+     * Creates temporary variables for a record with the given name.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     * @param fixed        if creating parameters, use this value for the fixed attribute
+     */
+    public void FRecordType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
+        for (FRecordComponentType comp : getComponents()) {
+            FQName next = name.copyAndAppend(comp.getName());
+            comp.getFType().createTempFVariables(vars, next, variability, fixed);
+        }
+    }
+
+	/**
+	 * Creates a new temporary variable with the given visibility, name and visibility.
+	 * 
+	 * All optional children in the new variable are empty.
+	 * 
+	 * Default implementation returns <code>null</code>.
+	 */
+	public FVariable FType.createTempFVariable(FQName name, FTypePrefixVariability variability) {
+		return createFVariable(new FTemporaryVisibilityType(), name, variability);
+	}
+	
+	/**
+	 * Creates a new variable with the given visibility, name and visibility.
+	 * 
+	 * All optional children in the new variable are empty.
+	 * 
+	 * Default implementation returns <code>null</code>.
+	 */
+	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		throw new UnsupportedOperationException();
+	}
+		
+	public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FRealVariable(fvt, variability, name);
+	}	
+	
+	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FIntegerVariable(fvt, variability.combineDown(fDiscrete()), name);
+	}	
+	
+	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FBooleanVariable(fvt, variability.combineDown(fDiscrete()), name);
+	}	
+	
+	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FStringVariable(fvt, variability.combineDown(fDiscrete()), name);
+	}	
+	
+	public FVariable FRecordType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FRecordVariable(fvt, variability, name, new FQNameString(getName()));
+	}	
+	
+	public FVariable FEnumType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FEnumVariable(fvt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
+	}	
+	
+	
+	/* Scalarization of expressions is needed in order to compute a simple
+	 * scalar expression from an expression with ndims==0. For example, an
+	 * FIdUse 'x[2]' needs to be marked as scalarized, and the expression
+	 * scalar(x*A*x) needs to be replaced by a double sum.
+	 */
+
+    /**
+     * Create an FArray containing scalarized subexpressions.
+     */
+    public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
+        return buildFArray(new ScalarizedBuilder(indexMap, context));
+    }
+
+    public class Array {
+        /**
+         * Helper object for {@link #buildScalarized(java.util.Map,FExp)}.
+         */
+        protected static class ScalarizedBuilder implements ElementBuilder {
+            private Map<String,FExp> indexMap;
+            private FExp context;
+            
+            public ScalarizedBuilder(Map<String,FExp> indexMap, FExp context) {
+                this.indexMap = indexMap;
+                this.context = context;
+            }
+            
+            public FExp build(FExp e) {
+                return context.dynamicFExp(e).scalarize(indexMap);
+            }
+        }
+    }
+
+	/**
+	 * Flag that signals that this expression should be replaced with a use of a temporary variable.
+	 */
+	protected boolean FExp.useTempVar = false;
+    syn boolean FExp.useTempVar() = useTempVar;
+	
+	/**
+	 * Scalarize expressions, replacing array expressions with FArrays of scalarized subexpressions.
+	 * 
+	 * The FArrays are needed because function calls need arrays to be passed as arrays.
+	 */
+	public FExp FExp.scalarize(Map<String,FExp> indexMap) {
+		FExp res;
+        if (useTempVar) 
+               res = indexMap.containsKey(tempVarName()) ? 
+                       indexMap.get(tempVarName()).fullCopy() : 
+                       new FIdTempExp(new FIdUse(tempVarName()));
+		else if (type().isRecord() && wantsRecordCon())
+			res = buildRecordConstructor(indexMap);
+ 		else if (buildScalarArray() && !inUnknownSize()) 
+ 			res = getArray().buildScalarized(indexMap, this);
+		else
+			res = scalarizeExp(indexMap);
+		return res;
+	}
+	
+	/**
+	 * Create a record constructor (or FArray of record constructors) 
+	 *        describing this record expression.
+	 */
+	public FExp FExp.buildRecordConstructor(Map<String,FExp> indexMap) {
+        return type().createRecordConstructor(tempFQName());
+	}
+	
+	public FExp FIdUseExp.buildRecordConstructor(Map<String,FExp> indexMap) {
+		return type().createRecordConstructor(getFIdUse().getFQName().scalarize(indexMap));
+	}
+	
+	public FExp FRecordConstructor.buildRecordConstructor(Map<String,FExp> indexMap) {
+		return scalarizeExp(indexMap);
+	}
+	
+	public FExp FArray.buildRecordConstructor(Map<String,FExp> indexMap) {
+		if (isIterArray())
+			return getFExp(0).buildRecordConstructor(indexMap);
+		FArray res = new FArray();
+		for (FExp e : getFExps())
+			res.addFExpNoTransform(e.buildRecordConstructor(indexMap));
+		return res;
+	}
+	
+	syn boolean FExp.buildScalarArray() = !size().isUnknown() && isArray() && !keepAsArray();
+	eq FArray.buildScalarArray() = false;
+	
+	syn boolean FExp.keepAsArray() =  canKeepAsArray() && canAcceptArray();
+
+	syn boolean FExp.canKeepAsArray() = false;
+	eq FIdUseExp.canKeepAsArray()     = !isSlice();
+	eq FFunctionCall.canKeepAsArray() = true;
+	
+	inh boolean FExp.canAcceptArray();
+	eq BaseNode.getChild().canAcceptArray()         = false;
+	eq FFunctionCallLeft.getFExp().canAcceptArray() = inFunction();
+	eq FFunctionCall.getArg().canAcceptArray()      = inFunction();
+	eq FSizeExp.getFExp().canAcceptArray()          = inFunction();
+	
+	/**
+	 * Scalarize expressions.
+	 */
+	public FExp FExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return fullCopy();
+	}
+
+	public FExp FArray.scalarizeExp(Map<String,FExp> indexMap) {
+		if (isIterArray())
+			return getFExp(0).scalarize(indexMap);
+		FArray res = new FArray();
+		for (FExp e : getFExps())
+			res.addFExpNoTransform(e.scalarize(indexMap));
+		return res;
+	}
+
+	public FSubscript FSubscript.scalarize(Map<String,FExp> indexMap) {
+		return (FSubscript) fullCopy();
+	}
+	
+	public FSubscript FColonSubscript.scalarize(Map<String,FExp> indexMap) {
+		if (indexName == null)
+			throw new UnsupportedOperationException("Colon subscript without index name");
+		return new FExpSubscript(indexName.fullCopy());
+	}
+	
+	public FSubscript FExpSubscript.scalarize(Map<String,FExp> indexMap) {
+		return new FExpSubscript(getFExp().scalarize(indexMap));
+	}
+	
+	public FArraySubscripts FArraySubscripts.scalarize(Map<String,FExp> indexMap) {
+		FArraySubscripts fas = new FArraySubscripts();
+		for (FSubscript fs : getFSubscripts()) {
+			fas.addFSubscript(fs.scalarize(indexMap));
+		}
+		return fas;
+	}
+	
+	public FQNamePart FQNamePart.scalarize(Map<String,FExp> indexMap) {
+		return new FQNamePart(getName());
+	}
+	
+	public FQNamePartArray FQNamePartArray.scalarize(Map<String,FExp> indexMap) {
+		return new FQNamePartArray(getName(), getFArraySubscripts().scalarize(indexMap));
+	}
+	
+	public abstract FQName FQName.scalarize(Map<String,FExp> indexMap);
+	
+	public FQName FQNameEmpty.scalarize(Map<String,FExp> indexMap) {
+		return new FQNameEmpty();
+	}
+	
+	public FQName FQNameString.scalarize(Map<String,FExp> indexMap) {
+		return new FQNameString(getName());
+	}
+	
+	public FQName FQNameFull.scalarize(Map<String,FExp> indexMap) {
+		FQNameFull fqn = new FQNameFullScalarize(new List());
+		for (FQNamePart fqnp : getFQNameParts()) 
+			fqn.addFQNamePart(fqnp.scalarize(indexMap));
+		fqn.scalarized = true;
+		return fqn;
+	}
+	
+	rewrite FQNameFullScalarize {
+		to FQName inFunction() ? new FQNameFull(getFQNamePartList()) : new FQNameString(scalarName());
+	}
+	
+    public FIdUse FIdUse.scalarize(Map<String,FExp> indexMap) {
+    	return new FIdUse(getFQName().scalarize(indexMap));
+    }
+
+    public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
+        if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization()) 
+            return indexMap.get(name()).fullCopy();
+        if (variability().knownParameterOrLess() && !(inParameterEquation() && isParameterExp()) && !inFunctionCallLeft())
+            return ceval().buildLiteral();
+        if (indexNames != null)
+            return createUseFas(name());
+        return new FIdUseExp(getFIdUse().scalarize(indexMap));
+    }
+    
+    inh boolean FIdUseExp.shouldKeepArrayDuringScalarization();
+    eq BaseNode.getChild().shouldKeepArrayDuringScalarization() = false;
+    eq FFunctionCall.getArg(int i).shouldKeepArrayDuringScalarization() = 
+    	getArg(i).isArray() && myCallInputs().get(i).ndims() == getArg(i).ndims();
+    
+	inh boolean FExp.wantsRecordCon();
+	eq BaseNode.getChild().wantsRecordCon()         = false;
+	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
+	eq FRecordConstructor.getArg().wantsRecordCon() = wantsRecordCon();
+	eq FArray.getFExp().wantsRecordCon()            = wantsRecordCon();
+ 
+    public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return new FIfExp(getIfExp().scalarize(indexMap),
+		                  getThenExp().scalarize(indexMap),
+		                  getElseExp().scalarize(indexMap));
+	}
+	
+	public FExp FMulExp.scalarizeExp(Map<String,FExp> indexMap) {
+		if (getLeft().isArray() && !isArray()) 
+			return dynamicFExp(composeMulScalarCellExp(Index.NULL)).scalarize(indexMap);
+		else
+			return super.scalarizeExp(indexMap);
+	}
+	
+	public FExp FRangeExp.scalarizeExp(Map<String,FExp> indexMap) {
+        FExp res = indexNames[0].fullCopy();
+		boolean startIsOne = getFExp(0).isIntegerLiteral(1);
+		if (!startIsOne || hasStep()) {
+			res = new FSubExp(res, new FIntegerLitExp(1));
+			if (hasStep())
+				res = new FMulExp(res, getFExp(1).fullCopy());
+			res = new FAddExp(getFExp(0).fullCopy(), res);
+		}
+		return res;
+	}
+	
+    public FExp FLinspace.scalarizeExp(Map<String,FExp> indexMap) {
+        FExp index = new FSubExp(indexNames[0].fullCopy(), new FIntegerLitExp(1));
+        FExp len  = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());
+        FExp step = new FDivExp(len, new FSubExp(getN().fullCopy(), new FIntegerLitExp(1)));
+        FExp res = new FAddExp(getStartExp().fullCopy(), new FMulExp(index, step));
+        return res;
+    }
+
+	
+	public FExp FSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
+		// Only the form with dim can be in the tree at this point
+		FExp exp = getFExp();
+		if (exp instanceof FIdUseExp && exp.size().isUnknown() && !((FIdUseExp)exp).hasFArraySubscripts())
+			return fullCopy();
+		else
+			return dynamicFExp(getFExp().size().createFExp(dimension())).scalarize(indexMap);
+	}
+	
+	public FExp FNdimsExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return ceval().buildLiteral();
+	}
+	
+	public FExp FSubscriptedExp.scalarizeExp(Map<String,FExp> indexMap) {
+		FArraySubscripts fas = getFArraySubscripts().scalarize(indexMap);
+		if (getFArraySubscripts().hasUnknownIndices() && inFunction()) {
+			return new FIdUseExp(tempVarName(), fas);
+		} else {
+			Index i = fas.asIndex();
+			return getFExp().getArray().get(i).scalarize(indexMap);
+		}
+	}
+	
+	public FExp FMinMaxExp.scalarizeExp(Map<String,FExp> indexMap) {
+		if (hasY())
+			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));
+		else
+			return getX().reduceToScalarized(this, indexMap);
+	}
+	
+	public FExp FReductionExp.scalarizeExp(Map<String,FExp> indexMap) {
+		if (getFExp().size().numElements() == 0)
+			return reduceStartValue().buildLiteral();
+		else
+			return getFExp().reduceToScalarized(scalarReduceExp(), indexMap);
+	}
+	
+	syn FBinExp FReductionExp.scalarReduceExp();
+	eq FSumExp.scalarReduceExp()     = new FAddExp();
+	eq FProductExp.scalarReduceExp() = new FMulExp();
+	
+	public FExp FIterExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return getFExp().scalarize(indexMap);
+	}
+	
+	/**
+	 * Scalarize an expression by recursively scalarizing and combining the contents in its Array.
+	 * 
+	 * New nodes are created with <code>template.createNodeBinary()</code>.
+	 */
+	public FExp FExp.reduceToScalarized(FExp template, Map<String,FExp> indexMap) {
+		if (isArray()) {
+			Iterator<FExp> it = getArray().iteratorFExp();
+			FExp res = it.next().scalarize(indexMap);
+			while (it.hasNext())
+				res = template.createNodeBinary(res, it.next().scalarize(indexMap));
+			return res;
+		} else {
+			return scalarize(indexMap);
+		}
+	}
+	
+	public FExp FBinExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
+	public FExp FUnaryExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FMathematicalFunctionCall.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FAtan2Exp.scalarizeExp(Map<String,FExp> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
+	public FExp FUnaryBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FTranspose.scalarizeExp(Map<String,FExp> indexMap)    { return getFExp().scalarize(indexMap); }
+	
+	public FExp FNoArgBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createEmptyNode(); }
+	public FExp FEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap)); }
+	public FExp FBinEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap),getY().scalarize(indexMap)); }
+	
+	public FExp FLitExp.scalarizeExp(Map<String,FExp> indexMap) { return (FLitExp) fullCopy(); }
+	public FExp FEnumLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
+	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
+	}
+	public FExp FBooleanLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
+	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
+    }
+	public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
+	public FExp FPreExp.scalarizeExp(Map<String,FExp> indexMap) { return new FPreExp(getFIdUse().scalarize(indexMap)); }
+	
+	public FExp FSmoothExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSmoothExp(getOrder().scalarize(indexMap), getFExp().scalarize(indexMap)); }
+	public FExp FSampleExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSampleExp(getOffset().scalarize(indexMap), getInterval().scalarize(indexMap)); }
+	public FExp FSemiLinearExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSemiLinearExp(getX().scalarize(indexMap), getPosSlope().scalarize(indexMap), getNegSlope().scalarize(indexMap)); }
+	
+	public FExp FStringExp.scalarizeExp(Map<String,FExp> indexMap)  {
+		FStringExp scalarized = new FStringExp();
+		scalarized.setValue(getValue().scalarize(indexMap));
+		if (hasMinimumLength())
+			scalarized.setMinimumLength(getMinimumLength().scalarize(indexMap));
+		if (hasLeftJustified())
+			scalarized.setLeftJustified(getLeftJustified().scalarize(indexMap));
+		if (hasSignificantDigits())
+			scalarized.setSignificantDigits(getSignificantDigits().scalarize(indexMap));
+		if (hasFormat())
+			scalarized.setFormat(getFormat().scalarize(indexMap));
+		return scalarized;
+	}
+	
+    public FExp FFunctionCall.scalarizeExp(Map<String,FExp> indexMap) {
+        if (extractTemp())
+            return tempExp();
+        else
+            return scalarizeFunction(indexMap);
+    }
+	
+	public FExp FRecordConstructor.scalarizeExp(Map<String,FExp> indexMap) {
+		FRecordConstructor rc = new FRecordConstructor(getRecord().scalarize(indexMap), new List());
+		for (FExp arg : getArgs())
+			rc.addArg(arg.scalarize(indexMap));
+		return rc;
+	}
+	
+	public FExp FZeros.scalarizeExp(Map<String,FExp> indexMap) {
+		return new FIntegerLitExp(0);
+	}
+	
+	public FExp FOnes.scalarizeExp(Map<String,FExp> indexMap) {
+		return new FIntegerLitExp(1);
+	}
+    
+    public FExp FScalarExp.scalarizeExp(Map<String,FExp> indexMap) {
+        int[] t = new int[getFExp().ndims()];
+        Arrays.fill(t, 1);
+        return getFExp().extractArrayCell(indexMap, new Index(t));
+    }
+    
+	public FExp FFillExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return getFillExp().fullCopy();
+	}
+	
+	public FFunctionCall FFunctionCall.scalarizeFunction(Map<String,FExp> indexMap) {
+		List<FExp> args = new List<FExp>();
+		for (FExp arg : getArgs())
+			args.add(arg.scalarize(indexMap));
+        return createScalarized(getName().fullCopy(), args, getSizes());
+	}
+    
+    protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, Size[] sizes) {
+        return new FFunctionCall(name, args, sizes); 
+    }
+    
+    protected FFunctionCall FPartialFunctionCall.createScalarized(FIdUse name, List<FExp> args, Size[] sizes) {
+        return new FPartialFunctionCall(name, args, sizes, getArgNames().fullCopy()); 
+    }
+    
+	public FAssert FAssert.scalarizeExp(Map<String,FExp> indexMap) {
+		Opt level = hasLevel() ? new Opt(getLevel().scalarize(indexMap)) : new Opt();
+		return new FAssert(getTest().scalarize(indexMap), getMsg().scalarize(indexMap), level);
+	}
+
+    public FReinit FReinit.scalarizeExp(Map<String,FExp> indexMap) {
+        return new FReinit(getVar().scalarize(indexMap), getFExp().scalarize(indexMap));
+    }
+
+    public FDelayExp FDelayExp.scalarizeExp(Map<String,FExp> indexMap) {
+        Opt max = hasMax() ? new Opt(getMax().scalarize(indexMap)) : new Opt();
+        return new FDelayExp(getFExp().scalarize(indexMap), getDelay().scalarize(indexMap), max);
+    }
+    
+    public FSpatialDistExp FSpatialDistExp.scalarizeExp(Map<String,FExp> indexMap) {
+        return new FSpatialDistExp(getIn0().scalarize(indexMap), getIn1().scalarize(indexMap),
+                getX().scalarize(indexMap), getPositiveVelocity().scalarize(indexMap),
+                getInitialPoints().scalarize(indexMap), getInitialValues().scalarize(indexMap));
+    }
+
+	public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return mySize().isUnknown() ? createFSizeExp() : mySize().createFExp(0);
+	}
+	
+	inh FSizeExp FEndExp.createFSizeExp();
+	eq FArraySubscripts.getFSubscript(int i).createFSizeExp() = createFSizeExp(i);
+	eq FlatRoot.getChild().createFSizeExp()                   = null;
+	eq InstRoot.getChild().createFSizeExp()                   = null;
+	
+	inh FSizeExp FArraySubscripts.createFSizeExp(int dim);
+	eq FlatRoot.getChild().createFSizeExp(int dim) = null;
+	eq InstRoot.getChild().createFSizeExp(int dim) = null;
+	eq FQName.getChild().createFSizeExp(int dim) {
+		FQName fqn = fullCopy();
+		fqn.removeFArraySubscripts();
+		FExp dimExp = new FIntegerLitExp(dim + 1);
+		return new FSizeExp(new FIdUseExp(fqn), new Opt(dimExp));
+	}
+
+	
+	public FForIndex FForIndex.scalarize(Map<String,FExp> indexMap) {
+		return new FForIndex(hasFExp() ? new Opt(getFExp().scalarizeIndexExp(indexMap)) : new Opt(), 
+				(FVariable) getFVariable().fullCopy());
+	}
+	
+	/**
+	 * Scalarize the expression of an FForIndex. 
+	 */
+	public FExp FExp.scalarizeIndexExp(Map<String,FExp> indexMap) {
+		return scalarize(indexMap);
+	}
+	
+	public FRangeExp FRangeExp.scalarizeIndexExp(Map<String,FExp> indexMap) {
+		List<FExp> exps = new List<FExp>();
+		for (FExp e : getFExps())
+			exps.add(e.scalarize(indexMap));
+		return new FRangeExp(exps);
+	}
+	
+	public void ConnectionSetManager.scalarize() {
+		for (ConnectionSet set : list)
+			set.scalarize();
+	}
+	
+	public void ConnectionSet.scalarize() {
+		for (ConnectionSetEntry e : this)
+			e.scalarize();
+	}
+	
+	public void ConnectionSetEntry.scalarize() {
+		if (fqName.accessNdims() == 0) {
+			// Can't use FQName.scalarize(), since it relies on rewrites
+			fqName = new FQNameString(fqName.scalarName());
+		} else {
+			Indices ind = Indices.createFromFas(fqName.getFArraySubscripts());
+			scalarNames = new String[ind.numElements()];
+			int j = 0;
+			for (Index i : ind)
+				scalarNames[j++] = fqName.copyAndAddFas(i.createFArraySubscripts()).scalarName();
+		}
+	}
+
+}
