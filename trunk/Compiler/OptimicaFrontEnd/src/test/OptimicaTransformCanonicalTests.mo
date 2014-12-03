@@ -33,7 +33,6 @@ package OptimicaTransformCanonicalTests
 			name="LinearityTest1",
 			methodName="variableDiagnostics",
 			description="Test linearity of variables.",
-			equation_sorting=false,
 			methodResult="  
 Independent constants: 
  x1: number of uses: 0, isLinear: true

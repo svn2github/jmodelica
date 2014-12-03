@@ -420,14 +420,20 @@ aspect TransformCanonical {
 
     syn boolean FClass.onlyInitBLT() = getDAEBLT() == BLT.EMPTY_BLT && getDAEInitBLT() != BLT.EMPTY_BLT;
 
+    syn boolean FClass.shouldPerformMatchingsAndBLT() = true;
+
     public class FClass {
         /**
          * Run matchings and BLT.
          */
         public class computeMatchingsAndBLT extends Transformation {
+            public computeMatchingsAndBLT() {
+                super("automatic_add_initial_equations");
+            }
+
             @Override
             public boolean active() {
-                return root().options.getBooleanOption("automatic_add_initial_equations") && root().options.getBooleanOption("equation_sorting");
+                return super.active() && shouldPerformMatchingsAndBLT();
             }
 
             @Override
