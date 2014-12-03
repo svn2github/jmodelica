@@ -199,7 +199,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
 
         //Temporal check
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())) {
-            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. DEACTIVATE TEARING!\n";
+            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. EVERYTHING MOVED TO UNSOLVED\n";
             ciBlock->moveAllEquationsToUnsolvable();
             ciBlock->setasSolvable(false);
         }

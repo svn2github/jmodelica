@@ -164,7 +164,7 @@ void Block::computeJacobianCasADi() {
     it != Expressions.end(); ++it) {
         symbolicResidual.append(*it);
     }
-    casadi::MXFunction f(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,symbolicResidual));
+    casadi::MXFunction f = casadi::MXFunction(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,symbolicResidual));
     f.init();
     jacobian=f.jac();
     
@@ -213,9 +213,7 @@ void Block::solveLinearSystem() {
         it!=b_.end();++it) {
             b.append(*it);
         }
-        //std::cout<<"b "<<b<<"\n";
         casadi::MX xsolution = casadi::solve(jacobian,-b);
-        //std::cout<<"x "<<xsolution<<"\n";
         /*casadi::MXFunction dummy = casadi::MXFunction(std::vector<casadi::MX>(),std::vector<casadi::MX>(1,xsolution));
         dummy.init();
         casadi::DMatrix output;
@@ -253,8 +251,9 @@ void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToEx
             expforsubstitutition.push_back(it->second);
         }
     }
+    
     //Get expresions from variableToSolution map
-                                 //Necesary because order is not determined
+    //Necesary because order is not determined
     std::vector<const Variable*> keys;
     for(std::map<const Variable*,casadi::MX>::iterator it=variableToSolution_.begin();
     it!=variableToSolution_.end();++it) {
@@ -270,12 +269,14 @@ void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToEx
             Expressions.push_back((*it)->getRhs());
         }
     }
-    //Make the substitutions
+    
     std::vector<casadi::MX> subExpressions = casadi::substitute(Expressions,varstoSubstitute,expforsubstitutition);
+    
     //retrive substitutions to constainers
     for(int i=0;i<keys.size();++i) {
         variableToSolution_[keys[i]]=subExpressions[i];
     }
+    //update unsolved expressions
     if(!isSolvable()) {
         int j=0;
         for(int i=keys.size();i<subExpressions.size();i+=2) {
@@ -284,6 +285,8 @@ void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToEx
             ++j;
         }
     }
+
+    //STILL MISSING THE SUBSTITUTIONS IN THE JACOBIAN
 
 }
 

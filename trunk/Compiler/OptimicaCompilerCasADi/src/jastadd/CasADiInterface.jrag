@@ -17,5 +17,6 @@ import ifcasadi.MX;
 
 // This aspect defines CasADiInterface functionality unique to the OptimicaCompiler. Shared functionality is located in FExpToCasADi under ModelicaCompilerCasADi. 
 aspect CasADiInterface {
+    refine OptimicaTransformCanonical eq FOptClass.shouldPerformMatchingsAndBLT() = true;
     syn lazy MX FTimedVariable.toMX() = new MX(ifcasadi.msym(getName().toString() + "(" + getArg().toString() + ")"));
 }

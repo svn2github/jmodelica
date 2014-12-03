@@ -292,7 +292,7 @@ namespace ModelicaCasADi
             casadi::MX getSolutionOfEliminatedVariable(Ref<Variable> var);
             
             //Experimental...not to use yet. Jacobian computation within a block is verify to be correct. 
-            //SolveLinarBlock function works for some blocks but now all XXXX 
+            //SolveLinarBlock function works for some blocks but not all XXXX 
             virtual void solveLinearSystemsInBLT()
             {
                 if(equations_->hasBLT()) {

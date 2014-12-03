@@ -259,6 +259,7 @@ namespace ModelicaCasADi
             casadi::MX jacobian;
             ///For handling casadi operations
             casadi::MX symbolicVariables;
+            
 
             ///Simple flag
             bool simple_flag;
