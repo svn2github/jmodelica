@@ -97,10 +97,10 @@ namespace ModelicaCasADi
                     *it = NULL;
                 }
                 // Delete all the Model's variables that were moved to the eliminated container, since they are OwnedNodes with the Model as owner.
-                for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
+                /*for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
                     delete *it;
                     *it = NULL;
-                }
+		}*/
             }
             /** Evaluate the value of a parameter */
             double get(std::string varName);
@@ -321,7 +321,7 @@ namespace ModelicaCasADi
             /// Vector containing pointers to all variables.
             std::vector< Variable * > z;
             /// Vector containing pointers to all variables.
-            std::vector< Variable * > eliminated_z;
+            //std::vector< Variable * > eliminated_z;
             /// Vector containing pointers to all initial equations
             std::vector< Ref<Equation> > initialEquations;
             /// A map for ModelFunction, key is ModelFunction's name.

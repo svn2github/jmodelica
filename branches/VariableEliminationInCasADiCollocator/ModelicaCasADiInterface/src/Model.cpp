@@ -581,16 +581,16 @@ namespace ModelicaCasADi
 
     std::vector< Ref<Variable> > Model::getEliminatedVariables() {
         std::vector< Ref<Variable> > elimVars;
-        for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
+        /*for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
             elimVars.push_back(*it);
-        }
+	    }*/
         
         //When we keep them in a single container
-        /*for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
+        for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
             if((*it)->wasEliminated()){            
                 elimVars.push_back(*it);
             }
-        }*/
+        }
         return elimVars;
     }
 
@@ -602,12 +602,11 @@ namespace ModelicaCasADi
         std::vector< Variable* >::iterator fit;
         for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
         it_var!=listToEliminate.end();++it_var) {
-            //it_var->second->setAsEliminated();
             //Removes variables from variables vector
-            eliminated_z.push_back(const_cast<Variable*>(it_var->second));
+            //eliminated_z.push_back(const_cast<Variable*>(it_var->second));
             fit = std::find(z.begin(), z.end(),it_var->second);
             (*fit)->setAsEliminated();
-            z.erase(fit);
+            //z.erase(fit);
         }
         equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
         equations_->eliminateVariables(eliminatedVariableToSolution);

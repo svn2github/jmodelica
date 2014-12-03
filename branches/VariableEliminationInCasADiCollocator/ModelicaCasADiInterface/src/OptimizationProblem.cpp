@@ -298,12 +298,11 @@ namespace ModelicaCasADi
         std::vector< Variable* >::iterator fit;
         for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
         it_var!=listToEliminate.end();++it_var) {
-            //it_var->second->setAsEliminated();
             //Remove variables from variables vector
-            eliminated_z.push_back(const_cast<Variable*>(it_var->second));
+            //eliminated_z.push_back(const_cast<Variable*>(it_var->second));
             fit = std::find(z.begin(), z.end(),it_var->second);
             (*fit)->setAsEliminated();
-            z.erase(fit);
+            //z.erase(fit);
         }
     
         std::vector<casadi::MX> eliminatedMXs;
