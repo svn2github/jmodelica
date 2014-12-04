@@ -1502,6 +1502,11 @@ int jmi_set_start_values(jmi_t *jmi);
  * Called when initializing jmi struct */
 int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches);
 
+/* Tear down delay interface
+ * Called when destroying jmi struct */
+int jmi_destroy_delay_if(jmi_t* jmi);
+
+
 /* Initialize delay blocks 
  * Called after model initalization */
 int jmi_init_delay_blocks(jmi_t* jmi);
