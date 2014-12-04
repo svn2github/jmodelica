@@ -311,10 +311,7 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
 
-    for (i=0; i < jmi->n_delays; i++) {
-        jmi_delay_delete(jmi, i);
-    }
-    free(jmi->delays);
+    jmi_destroy_delay_if(jmi);
 
     return 0;
 }
@@ -348,6 +345,21 @@ int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_
     return 0;
 }
 
+int jmi_destroy_delay_if(jmi_t* jmi) {
+    int i;
+
+    for (i=0; i < jmi->n_delays; i++) {
+        jmi_delay_delete(jmi, i);
+    }
+    free(jmi->delays);
+
+    for (i=0; i < jmi->n_spatialdists; i++) {
+        jmi_spatialdist_delete(jmi, i);
+    }
+    free(jmi->spatialdists);
+
+    return 0;
+}
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;
