@@ -84,13 +84,13 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
 
         //Adding equations to block
         JIterator iter1(block_equations.iterator().this$);
-        JIterator iter2(unsolved_eq.iterator().this$);
         bool found=false;
         while(iter1.hasNext()) {
             found=false;
             FAbstractEquation f1(iter1.next().this$);
             casadi::MX lhs1 = toMX(f1.toMXForLhs());
             casadi::MX rhs1 = toMX(f1.toMXForRhs());
+            JIterator iter2(unsolved_eq.iterator().this$);
             while(iter2.hasNext() && !found) {
                 FAbstractEquation f2(iter2.next().this$);
                 casadi::MX lhs2 = toMX(f2.toMXForLhs());
@@ -109,13 +109,12 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
         }
         //Adding variables to block
         JIterator iter3(block_variables.iterator().this$);
-        JIterator iter4(unsolved_vars.iterator().this$);
-        const casadi::SharedObjectNode* node;
         std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* >::const_iterator it;
         while(iter3.hasNext()) {
             found=false;
             FVar jv1(iter3.next().this$);
             casadi::MX v1 = toMX(jv1.asMXVariable());
+            JIterator iter4(unsolved_vars.iterator().this$);
             while(iter4.hasNext() && !found) {
                 FVar jv2(iter4.next().this$);
                 casadi::MX v2 = toMX(jv2.asMXVariable());
@@ -123,8 +122,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                     found=true;
                 }
             }
-            node = v1.get();
-            it = mapVars.find(node);
+            it = mapVars.find(v1.get());
             if(it!=mapVars.end()) {
                 if(!found) {
                     ciBlock->addVariable(it->second, true);
@@ -139,8 +137,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
             found=false;
             FVar jvi(iter5.next().this$);
             casadi::MX vi = toMX(jvi.asMXVariable());
-            node = vi.get();
-            it = mapVars.find(node);
+            it = mapVars.find(vi.get());
             if(it!=mapVars.end()) {
                 ciBlock->addExternalVariable(it->second);
             }
@@ -151,8 +148,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
             found=false;
             FVar jvp(iter6.next().this$);
             casadi::MX vp = toMX(jvp.asMXVariable());
-            node = vp.get();
-            it = mapVars.find(node);
+            it = mapVars.find(vp.get());
             if(it!=mapVars.end()) {
                 ciBlock->addExternalVariable(it->second);
             }
@@ -163,8 +159,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
             found=false;
             FVar jvt(iter7.next().this$);
             casadi::MX vt = toMX(jvt.asMXVariable());
-            node = vt.get();
-            it = mapVars.find(node);
+            it = mapVars.find(vt.get());
             if(it!=mapVars.end()) {
                 ciBlock->addExternalVariable(it->second);
             }
@@ -177,8 +172,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                 FEquation feq(iter8.next().this$);
                 casadi::MX var = toMX(fvs.asMXVariable());
                 casadi::MX sol = toMX(feq.solution(fvs).toMX());
-                node = var.get();
-                it = mapVars.find(node);
+                it = mapVars.find(var.get());
                 if(it!=mapVars.end()) {
                     ciBlock->addSolutionToVariable(it->second, sol);
                 }
@@ -199,7 +193,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
 
         //Temporal check
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())) {
-            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. EVERYTHING MOVED TO UNSOLVED\n";
+            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN A BLOCK. EVERYTHING MOVED TO UNSOLVED WITHIN THAT BLOCK. (DEACTIVATE TEARING)\n";
             ciBlock->moveAllEquationsToUnsolvable();
             ciBlock->setasSolvable(false);
         }

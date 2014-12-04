@@ -155,10 +155,6 @@ namespace ModelicaCasADi
             oc::OptimicaCompiler::initializeClass(false);
 
             bool with_blt = options->getBooleanOption("equation_sorting"); 
-            if(with_blt) {
-                options->setBooleanOption("automatic_tearing", false);
-                //options->setBooleanOption("generate_html_diagnostics", true);
-            }
 
             // Create Optimica compiler and compile to flat class
             oc::OptimicaCompiler compiler(options->getOptionRegistry());

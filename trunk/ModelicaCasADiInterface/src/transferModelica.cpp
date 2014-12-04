@@ -160,9 +160,6 @@ namespace ModelicaCasADi
     Ref<CompilerOptionsWrapper> options, string log_level) {
         
         bool with_blt = options->getBooleanOption("equation_sorting");
-        if(with_blt) {
-            options->setBooleanOption("automatic_tearing", false);
-        }
         typename CStruct::TCompiler compiler(options->getOptionRegistry());
         java::lang::String fileVecJava[modelFiles.size()];
         for (int i = 0; i < modelFiles.size(); ++i) {
