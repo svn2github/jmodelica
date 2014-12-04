@@ -2653,41 +2653,12 @@ aspect CCodeGen {
         p.printPostSteps(getFExp(), str, indent);
     }
     
-    
-    public void FDelayExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printVarDecls(getFExp(), str, indent);
-        } else {
-            super.genVarDecls_C(p, str, indent);
-        }
-    }
-    
-    public void FDelayExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPreSteps(getFExp(), str, indent);
-        } else {
-            super.genTempVars_C(p, str, indent);
-        }
-    }
-    
-    public void FDelayExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPostSteps(getFExp(), str, indent);
-        } else {
-            super.genTempFree_C(p, str, indent);
-        }
-    }
-    
     public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.print(getFExp(), str, indent);
-        } else {
-            str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
-            p.print(getFExp(), str, indent);
-            str.print(", ");
-            p.print(getDelay(), str, indent);
-            str.print(")");
-        }
+        str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
+        p.print(getFExp(), str, indent);
+        str.print(", ");
+        p.print(getDelay(), str, indent);
+        str.print(")");
     }
     
     /**
@@ -2772,39 +2743,24 @@ aspect CCodeGen {
     
     
     public void FSpatialDistExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-            p.printVarDecls(getInitialValues(), str, indent);
-        } else {
-            p.printVarDecls(getIn0(), str, indent);
-            p.printVarDecls(getIn1(), str, indent);
-            p.printVarDecls(getX(), str, indent);
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-        }
+        p.printVarDecls(getIn0(), str, indent);
+        p.printVarDecls(getIn1(), str, indent);
+        p.printVarDecls(getX(), str, indent);
+        p.printVarDecls(getPositiveVelocity(), str, indent);
     }
     
     public void FSpatialDistExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-            p.printPreSteps(getInitialValues(), str, indent);
-        } else {
-            p.printPreSteps(getIn0(), str, indent);
-            p.printPreSteps(getIn1(), str, indent);
-            p.printPreSteps(getX(), str, indent);
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-        }
+        p.printPreSteps(getIn0(), str, indent);
+        p.printPreSteps(getIn1(), str, indent);
+        p.printPreSteps(getX(), str, indent);
+        p.printPreSteps(getPositiveVelocity(), str, indent);
     }
     
     public void FSpatialDistExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-            p.printPostSteps(getInitialValues(), str, indent);
-        } else {
-            p.printPostSteps(getIn0(), str, indent);
-            p.printPostSteps(getIn1(), str, indent);
-            p.printPostSteps(getX(), str, indent);
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-        }
+        p.printPostSteps(getIn0(), str, indent);
+        p.printPostSteps(getIn1(), str, indent);
+        p.printPostSteps(getX(), str, indent);
+        p.printPostSteps(getPositiveVelocity(), str, indent);
     }
     
     public void FSpatialDistExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -2813,61 +2769,28 @@ aspect CCodeGen {
 //            jmi_boolean positiveVelocity);
         
         boolean exp = functionCallIsExp();
-        
-        if (p.inInitialSystem()) {
-            if (exp) {
-                prettyPrintInitial_C(p, str, indent, false);
-            } else {
-                if (myLefts().get(0).hasFExp()) {
-                    str.print(indent);
-                    str.print(myLefts().get(0).name_C());
-                    str.print(" = ");
-                    prettyPrintInitial_C(p, str, indent, false);
-                    str.println(";");
-                }
-                if (myLefts().get(1).hasFExp()) {
-                    str.print(indent);
-                    str.print(myLefts().get(1).name_C());
-                    str.print(" = ");
-                    prettyPrintInitial_C(p, str, indent, true);
-                    str.println(";");
-                }
-            }
-        } else {
-            if (!exp) {
-                str.print(indent);
-            }
-            str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
-            if (exp) {
-                str.print("NULL, NULL");
-            } else {
-                prettyPrintCallOutputs_C(p, str, indent, 2, "");
-            }
-            str.print(", ");
-            p.print(getIn0(), str, indent);
-            str.print(", ");
-            p.print(getIn1(), str, indent);
-            str.print(", ");
-            p.print(getX(), str, indent);
-            str.print(", ");
-            p.print(getPositiveVelocity(), str, indent);
-            str.print(")");
-            
-            if (!exp) {
-                str.println(";");
-            }
+        if (!exp) {
+            str.print(indent);
         }
-    }
-    
-    public void FSpatialDistExp.prettyPrintInitial_C(CodePrinter p, CodeStream str, String indent, boolean second) {
-        int size = getInitialValues().getArray().length;
-        str.print("COND_EXP_EQ(");
-        p.print(getPositiveVelocity(), str, indent);
-        str.print(", JMI_TRUE, ");
-        p.print(getInitialValues().getArray().get(second ? size : 1), str, indent);
+        str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
+        if (exp) {
+            str.print("NULL, NULL");
+        } else {
+            prettyPrintCallOutputs_C(p, str, indent, 2, "");
+        }
         str.print(", ");
-        p.print(getInitialValues().getArray().get(second ? 1 : size), str, indent);
+        p.print(getIn0(), str, indent);
+        str.print(", ");
+        p.print(getIn1(), str, indent);
+        str.print(", ");
+        p.print(getX(), str, indent);
+        str.print(", ");
+        p.print(getPositiveVelocity(), str, indent);
         str.print(")");
+        
+        if (!exp) {
+            str.println(";");
+        }
     }
 	
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		

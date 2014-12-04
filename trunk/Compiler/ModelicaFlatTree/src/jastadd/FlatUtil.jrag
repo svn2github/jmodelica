@@ -1817,6 +1817,8 @@ aspect FlatExpressions {
     
     inh boolean FAbstractEquation.isInitial();
     inh boolean FIfExp.isInitial();
+    inh boolean FDelayExp.isInitial();
+    inh boolean FSpatialDistExp.isInitial();
     eq FClass.getChild().isInitial()                      = false;
     eq FClass.getFInitialEquation().isInitial()           = true;
     eq InstNode.getChild().isInitial()                    = false;

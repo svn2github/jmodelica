@@ -1469,9 +1469,15 @@ aspect FlatAPI {
     eq FClass.getFParameterEquation().isParameterEquation() = true;
     eq Root.getChild().isParameterEquation() = false;
     
+    coll ArrayList<FExp> FAbstractEquation.replacedAtInitialExps()
+        [new ArrayList<FExp>()] with add root FAbstractEquation;
+    FDelayExp contributes this
+        to FAbstractEquation.replacedAtInitialExps() for myFEquation();
+    FSpatialDistExp contributes this
+        to FAbstractEquation.replacedAtInitialExps() for myFEquation();
     
-    
-    syn boolean FAbstractEquation.replacedAtInitialization() = isWhen();
+    syn boolean FAbstractEquation.replacedAtInitialization() = 
+            isWhen() || replacedAtInitialExps().size() > 0;
     eq FAlgorithm.replacedAtInitialization() {
         if (super.replacedAtInitialization())
             return true;
@@ -1525,6 +1531,40 @@ aspect FlatAPI {
             else
                 return getElseExp();
         }
+    }
+    
+    rewrite FDelayExp {
+        when (isInitial()) to FExp {
+            return getFExp().copySymbolic();
+        }
+    }
+    
+    rewrite FSpatialDistExp {
+        when (isInitial() && !isFunctionCallClause()) to FExp {
+            return createInitialReplacement(false);
+        }
+    }
+    
+    public FExp FSpatialDistExp.createInitialReplacement(boolean second) {
+        int size = getInitialValues().getArray().length;
+        return new FIfExp(getPositiveVelocity().copySymbolic(),
+                getInitialValues().getArray().get(second ? size : 1).copySymbolic(), 
+                getInitialValues().getArray().get(second ? 1 : size).copySymbolic());
+    }
+    
+    eq FFunctionCallEquation.getInitialEquationList() {
+        if (getCall() instanceof FSpatialDistExp) {
+            FSpatialDistExp call = (FSpatialDistExp) getCall();
+            ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+            if (getNumLeft() > 0 && getLeft(0).hasFExp()) {
+                l.add(new FEquation(getLeft(0).getFExp().copySymbolic(), call.createInitialReplacement(false)));
+            }
+            if (getNumLeft() > 1 && getLeft(1).hasFExp()) {
+                l.add(new FEquation(getLeft(1).getFExp().copySymbolic(), call.createInitialReplacement(true)));
+            }
+            return new List<FAbstractEquation>(l);
+        }
+        return super.getInitialEquationList();
     }
     
     eq FAlgorithm.getInitialEquationList() {

@@ -148,7 +148,7 @@ aspect ComplianceCheck {
     }
     
     public void FSpatialDistExp.complianceCheck(ErrorCheckType checkType) {
-        compliance("The spatialDistribution() function-like operator is not supported");
+        complianceOnlyFMU("The spatialDistribution() function-like operator is");
         FAbstractEquation equation = myFEquation();
         if (isArray() && equation != null && equation instanceof FFunctionCallEquation) {
             compliance("The spatialDistribution() function-like operator is not supported vectorized in function call equations");
