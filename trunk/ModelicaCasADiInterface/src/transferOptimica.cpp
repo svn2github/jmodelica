@@ -146,7 +146,7 @@ namespace ModelicaCasADi
     }
 
     void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/) {
+    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
         try
         {
             // initalizeClass is needed on classes where static variables are acessed.
@@ -154,9 +154,9 @@ namespace ModelicaCasADi
             jl::System::initializeClass(false);
             oc::OptimicaCompiler::initializeClass(false);
 
+            bool with_blt = options->getBooleanOption("equation_sorting"); 
             if(with_blt) {
                 options->setBooleanOption("automatic_tearing", false);
-                options->setBooleanOption("equation_sorting", true);
                 //options->setBooleanOption("generate_html_diagnostics", true);
             }
 
@@ -193,6 +193,7 @@ namespace ModelicaCasADi
             // Transfer user defined types (also generates base types for the user types).
             transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(optProblem, fclass);
 
+            std::map<jobject,Variable*> fvarToCasadiInterfaceVar;
             // Variables template
             transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment > (optProblem, fclass.allVariables());
             // Transfer timed variables. Depends on that other variables are transferred.

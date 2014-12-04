@@ -36,7 +36,7 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
                                  std::string modelName,
                                  const std::vector<std::string> &modelFiles, 
                                  Ref<CompilerOptionsWrapper> options, 
-                                 std::string log_level, bool with_blt=false);
+                                 std::string log_level);
 }; // End namespace
 
 #endif

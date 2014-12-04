@@ -70,6 +70,19 @@ void CompilerOptionsWrapper::setRealOption(std::string opt, double val) {
     }
 }
 
+bool CompilerOptionsWrapper::getBooleanOption(std::string opt) {
+    bool roption;    
+    try 
+    {
+        roption = optr.getBooleanOption(StringFromUTF(opt.c_str()));
+    }
+    catch (JavaError e) 
+    {
+        rethrowJavaException(e);
+    }
+    return roption;
+}
+
 void CompilerOptionsWrapper::addStringOption(std::string opt, std::string val) {
     try 
     {
