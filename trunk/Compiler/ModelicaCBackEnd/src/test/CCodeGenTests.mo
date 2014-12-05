@@ -16129,6 +16129,46 @@ $C_DAE_initial_dependent_parameter_assignments$
 ")})));
 end CFixedFalseParam1;
 
+model CFixedFalseParam2
+    parameter Real x1(start=z, fixed=false) = y;
+    parameter Real x2(start=z, fixed=false);
+    parameter Real x3(start=1, fixed=false) = x2 + 1;
+    parameter Real y = 4;
+    parameter Real z = y;
+initial equation
+    x2 = y;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFixedFalseParam2",
+            description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
+            template="
+set_start
+$C_set_start_values$
+eval_param
+$C_DAE_initial_dependent_parameter_assignments$
+ode_init
+$C_ode_initialization$
+",
+            generatedCode="
+set_start
+    _y_3 = (4);
+    model_init_eval_parameters(jmi);
+    _x2_1 = (_z_4);
+    _x3_2 = (1);
+
+eval_param
+    _x1_0 = (_y_3);
+    _z_4 = (_y_3);
+
+ode_init
+    model_ode_guards(jmi);
+    _x2_1 = _y_3;
+    _x3_2 = _x2_1 + 1;
+    _x1_0 = _z_4;
+")})));
+end CFixedFalseParam2;
+
 model ActiveSwitches1
     Real f = if s then time else -1;
     Boolean s = f > 10;

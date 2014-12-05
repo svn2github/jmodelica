@@ -976,6 +976,11 @@ public class CGenerator extends GenericGenerator {
 			for (FVariable fv : fclass.independentParameters()) 
 				fv.genStartValue_C(INDENT, genPrinter);
 			genPrinter.print(INDENT + "model_init_eval_parameters(jmi);\n");
+            for (FVariable fv : fclass.nonFixedParameters()) {
+                if (!fv.hasParameterEquation()) {
+                    fv.genStartValue_C(INDENT, genPrinter);
+                }
+            }
 			for (FVariable fv : fclass.variables()) 
 				fv.genStartValue_C(INDENT, genPrinter);
 			for (FVariable fv : fclass.discretePreVariables()) 
