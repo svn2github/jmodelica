@@ -3282,10 +3282,20 @@ aspect ConstantEvaluation {
             var.prepareForFunctionEval();
         int i = 0;
         for (FExp arg : args) {
-            if (i < myInputs().size())
-                values.put(myInputs().get(i), arg.ceval(evaluator));
-            else
+            if (i < myInputs().size()) {
+                CommonVariableDecl cvd = myInputs().get(i);
+                if (cvd.type().typeCompatible(arg.type(), true)) {
+                    values.put(cvd, arg.ceval(evaluator));
+                } else {
+                    InstClassDecl constructor = cvd.type().matchOverloadedConstructor(arg.type());
+                    ArrayList<FExp> l = new ArrayList<FExp>();
+                    l.add(arg);
+                    CValue v = constructor.evaluateFirst(evaluator, l);
+                    values.put(cvd, v);
+                }
+            } else {
                 throw new ConstantEvaluationException();
+            }
             i++;
         }
         

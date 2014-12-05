@@ -3335,5 +3335,69 @@ end OperatorRecordTests.OperatorInherit2;
 ")})));
     end OperatorInherit2;
 
+package Eval
+
+model RealTypeOpArg1
+  constant Complex y1 = 3 * Complex(1,2);
+  constant Complex y2 = 3 / Complex(1,2);
+  constant Complex y3 = 3 + Complex(1,2);
+  constant Complex y4 = 3 - Complex(1,2);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RealTypeOpArg1",
+            description="Constant eval of overloaded operator expression, real type inference",
+            flatModel="
+fclass OperatorRecordTests.Eval.RealTypeOpArg1
+ constant Real y1.re = 3.0 \"Real part of complex number\";
+ constant Real y1.im = 6.0 \"Imaginary part of complex number\";
+ constant Real y2.re = 0.6 \"Real part of complex number\";
+ constant Real y2.im = -1.2 \"Imaginary part of complex number\";
+ constant Real y3.re = 4.0 \"Real part of complex number\";
+ constant Real y3.im = 2.0 \"Imaginary part of complex number\";
+ constant Real y4.re = 2.0 \"Real part of complex number\";
+ constant Real y4.im = -2.0 \"Imaginary part of complex number\";
+end OperatorRecordTests.Eval.RealTypeOpArg1;
+")})));
+end RealTypeOpArg1;
+
+model RealTypeOpArg2
+  constant Complex[2] y1 = {3,4} * Complex(1,2);
+  constant Complex[2] y2 = 3 * {Complex(1,2),Complex(3,4)};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RealTypeOpArg2",
+            description="Constant eval of overloaded operator expression: array real type inference",
+            flatModel="
+fclass OperatorRecordTests.Eval.RealTypeOpArg2
+ constant Real y1[1].re = 3.0 \"Real part of complex number\";
+ constant Real y1[1].im = 6.0 \"Imaginary part of complex number\";
+ constant Real y1[2].re = 4.0 \"Real part of complex number\";
+ constant Real y1[2].im = 8.0 \"Imaginary part of complex number\";
+ constant Real y2[1].re = 3.0 \"Real part of complex number\";
+ constant Real y2[1].im = 6.0 \"Imaginary part of complex number\";
+ constant Real y2[2].re = 9.0 \"Real part of complex number\";
+ constant Real y2[2].im = 12.0 \"Imaginary part of complex number\";
+end OperatorRecordTests.Eval.RealTypeOpArg2;
+")})));
+end RealTypeOpArg2;
+
+model ArrayMul1
+  constant Complex[2] y1 = {Complex(3,0),Complex(4,0)} * Complex(1,2);
+//  constant Complex[2] y2 = {Complex(3,0),Complex(4,0)} .* {Complex(1,2),Complex(3,4)};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayMul1",
+            description="Constant eval of overloaded operator expression: array multiplication",
+            flatModel="
+fclass OperatorRecordTests.Eval.ArrayMul1
+ constant Real y1[1].re = 3.0 \"Real part of complex number\";
+ constant Real y1[1].im = 6.0 \"Imaginary part of complex number\";
+ constant Real y1[2].re = 4.0 \"Real part of complex number\";
+ constant Real y1[2].im = 8.0 \"Imaginary part of complex number\";
+end OperatorRecordTests.Eval.ArrayMul1;
+")})));
+end ArrayMul1;
+
+end Eval;
 
 end OperatorRecordTests;
