@@ -268,12 +268,6 @@ namespace ModelicaCasADi
              */
             void printBLT(std::ostream& out, bool with_details=false){equations_->printBLT(out,with_details);}
             #endif
-            /** Work around ownership of variables. */
-            void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
-            {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
-            /** Work around ownership of variables. */
-            const std::map<const casadi::SharedObjectNode*, const Variable* >& getNodeToVariableMap() const {return mxnodeToVariable;}
-
             /**
              * Append a variable to the list of variables to eliminate
              * @Param Variable
@@ -355,8 +349,6 @@ namespace ModelicaCasADi
             void handleVariableTypeForAddedVariable(Ref<Variable> var);
             void assignVariableTypeToVariable(Ref<Variable> var);
 
-            ///Map to build the blocks with CasADiInterface Variables
-            std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
             ///FlatEquations or BLT
             Ref<Equations> equations_;
             /// Map with solutions of eliminated variables 

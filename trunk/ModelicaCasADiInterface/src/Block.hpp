@@ -186,11 +186,6 @@ namespace ModelicaCasADi
 
             /**************AuxiliaryMethods*************/
             /**
-             * Set the jacobian of the block
-             * @param An MX
-             */
-            void setJacobian(const casadi::MX& jac);
-            /**
              * Compute the jacobian of the block with casadi
              */
             void computeJacobianCasADi();
@@ -268,7 +263,6 @@ namespace ModelicaCasADi
 
     };
 
-    inline void Block::setJacobian(const casadi::MX& jac){jacobian = jac; symbolicVariables = casadi::MX::sym("symVars",variables_.size());}
     inline bool Block::isSimple() const {return simple_flag;}
     inline bool Block::isLinear() const {return linear_flag;}
     inline bool Block::isSolvable() const {return solve_flag;}

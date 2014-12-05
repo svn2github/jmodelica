@@ -183,11 +183,11 @@ namespace ModelicaCasADi
         transferUserDefinedTypes<typename CStruct::FClass, typename CStruct::List, typename CStruct::FDerivedType,
             typename CStruct::FAttribute, typename CStruct::FType>(m, fclass);
 
-        std::map<jobject,Variable*> fvarToCasadiInterfaceVar;        
+        std::map<int,Ref<Variable> > indexToVariable;        
         // Variables
         transferVariables<java::util::ArrayList, typename CStruct::FVariable, typename CStruct::FDerivativeVariable,
-            typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables());
-
+            typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables(), indexToVariable);
+        
         ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
         typename CStruct::TBLT jblt;
         if(with_blt) {
@@ -196,7 +196,7 @@ namespace ModelicaCasADi
                 eqContainer = new ModelicaCasADi::BLT();
             }
             else {
-                std::cout<<"The Model does not have a BLT. Transfering list of equations.\n";
+                std::cout<<"WARNING:The Model does not have a BLT. Transfering list of equations.\n";
                 eqContainer = new ModelicaCasADi::FlatEquations();
             }
         }
@@ -213,7 +213,7 @@ namespace ModelicaCasADi
                 typename CStruct::FVariable,
                 typename CStruct::FAbstractEquation,
                 typename CStruct::FEquation,
-                typename CStruct::FExp>(&jblt, eqContainer, m->getNodeToVariableMap());
+                typename CStruct::FExp>(&jblt, eqContainer, indexToVariable);
         }
         else {
             transferDaeEquationsToContainer<java::util::ArrayList, typename CStruct::FAbstractEquation>(eqContainer, fclass.equations());

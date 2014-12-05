@@ -189,9 +189,10 @@ namespace ModelicaCasADi
             // Transfer user defined types (also generates base types for the user types).
             transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(optProblem, fclass);
 
-            std::map<jobject,Variable*> fvarToCasadiInterfaceVar;
+            std::map<int,Ref<Variable> > indexToVariable;
             // Variables template
-            transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment > (optProblem, fclass.allVariables());
+            transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment > (optProblem, fclass.allVariables(), indexToVariable);
+            
             // Transfer timed variables. Depends on that other variables are transferred.
             transferTimedVariables(optProblem, fclass);
             ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
@@ -218,7 +219,7 @@ namespace ModelicaCasADi
                     oc::FVariable,
                     oc::FAbstractEquation,
                     oc::FEquation,
-                    oc::FExp>(&jblt, eqContainer, optProblem->getNodeToVariableMap());
+                    oc::FExp>(&jblt, eqContainer, indexToVariable);
             }
             else {
                 transferDaeEquationsToContainer<java::util::ArrayList, oc::FAbstractEquation>(eqContainer, fclass.equations());

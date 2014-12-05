@@ -286,7 +286,6 @@ namespace ModelicaCasADi
         dirty = true;            // todo: only if (dependent) parameter, or with dependent attributes?
         handleVariableTypeForAddedVariable(var);
         z.push_back(var.getNode());
-        addEntryToNodeVariableMap(var->getVar().get(), var.getNode());
     }
 
     vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
@@ -575,7 +574,13 @@ namespace ModelicaCasADi
 
     void Model::eliminateAlgebraics() {
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
-        markVariablesForElimination(algebraics);
+        std::vector< Ref<Variable> > eliminable_algebraics;
+        for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
+            if((*it)->isEliminable()){
+                eliminable_algebraics.push_back(*it);        
+            }
+        }
+        markVariablesForElimination(eliminable_algebraics);
         eliminateVariables();
     }
 
@@ -595,22 +600,32 @@ namespace ModelicaCasADi
     }
 
     void Model::eliminateVariables() {
-        //Sort the list first
-        listToEliminate.sort(compareFunction);
-
-        //Mark variables as Eliminated
-        std::vector< Variable* >::iterator fit;
-        for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
-        it_var!=listToEliminate.end();++it_var) {
-            //it_var->second->setAsEliminated();
-            //Removes variables from variables vector
-            eliminated_z.push_back(const_cast<Variable*>(it_var->second));
-            fit = std::find(z.begin(), z.end(),it_var->second);
-            (*fit)->setAsEliminated();
-            z.erase(fit);
+        //Ensures eliminate variables is called only once
+        static unsigned int call_count = 0;
+        if(call_count<1){
+            //Sort the list first
+            listToEliminate.sort(compareFunction);
+    
+            //Mark variables as Eliminated
+            std::vector< Variable* >::iterator fit;
+            for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
+            it_var!=listToEliminate.end();++it_var) {
+                //it_var->second->setAsEliminated();
+                //Removes variables from variables vector. Makes sure duplicates in the list are not twice eliminated
+                if(!it_var->second->wasEliminated()){
+                    eliminated_z.push_back(const_cast<Variable*>(it_var->second));
+                    fit = std::find(z.begin(), z.end(),it_var->second);
+                    (*fit)->setAsEliminated();
+                    z.erase(fit);
+                }
+            }
+            equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
+            equations_->eliminateVariables(eliminatedVariableToSolution);
         }
-        equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
-        equations_->eliminateVariables(eliminatedVariableToSolution);
+        else{
+            std::cout<<"WARNING: Variables have been already eliminated once. Further eliminations are ignored.\n";
+        }
+        call_count++;
     }
 
     void Model::markVariablesForElimination(const std::vector< Ref<Variable> >& vars) {

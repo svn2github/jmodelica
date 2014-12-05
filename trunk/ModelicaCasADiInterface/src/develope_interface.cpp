@@ -62,8 +62,8 @@ int main(int argc, char ** argv)
                                         options, 
                                         log_level);
                         
-      model->print(std::cout);
-      
+      //model->print(std::cout);
+      model->printBLT(std::cout,true);
       //ModelicaCasADi::Ref<ModelicaCasADi::Block> b = model->getBlock(0);
       //b->printBlock(std::cout,true);
       //b->solveLinearSystem();

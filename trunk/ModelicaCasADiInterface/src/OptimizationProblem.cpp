@@ -108,7 +108,13 @@ namespace ModelicaCasADi
 
     void OptimizationProblem::eliminateAlgebraics() {
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
-        markVariablesForElimination(algebraics);
+        std::vector< Ref<Variable> > eliminable_algebraics;
+        for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
+            if((*it)->isEliminable()){
+                eliminable_algebraics.push_back(*it);        
+            }
+        }
+        markVariablesForElimination(eliminable_algebraics);
         eliminateVariables();
     }
 
@@ -287,78 +293,86 @@ namespace ModelicaCasADi
 
 
     void OptimizationProblem::eliminateVariables() {
-    
-        //Sort the list first
-        listToEliminate.sort(compareFunction2);
-    
-        equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
-        equations_->eliminateVariables(eliminatedVariableToSolution);
-    
-        //Mark variables as Eliminated
-        std::vector< Variable* >::iterator fit;
-        for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
-        it_var!=listToEliminate.end();++it_var) {
-            //it_var->second->setAsEliminated();
-            //Remove variables from variables vector
-            eliminated_z.push_back(const_cast<Variable*>(it_var->second));
-            fit = std::find(z.begin(), z.end(),it_var->second);
-            (*fit)->setAsEliminated();
-            z.erase(fit);
-        }
-    
-        std::vector<casadi::MX> eliminatedMXs;
-        std::vector<casadi::MX> subtitutes;
-        for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
-        it!=eliminatedVariableToSolution.end();++it) {
-            if(!it->second.isEmpty()) {
-                eliminatedMXs.push_back(it->first->getVar());
-                subtitutes.push_back(it->second);
+        
+        static unsigned int call_count = 0;
+        if(call_count<1){
+            //Sort the list first
+            listToEliminate.sort(compareFunction2);
+        
+            equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
+            equations_->eliminateVariables(eliminatedVariableToSolution);
+        
+            //Mark variables as Eliminated
+            std::vector< Variable* >::iterator fit;
+            for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
+            it_var!=listToEliminate.end();++it_var) {
+                //it_var->second->setAsEliminated();
+                //Removes variables from variables vector. Makes sure duplicates in the list are not twice eliminated
+                if(!it_var->second->wasEliminated()){
+                    eliminated_z.push_back(const_cast<Variable*>(it_var->second));
+                    fit = std::find(z.begin(), z.end(),it_var->second);
+                    (*fit)->setAsEliminated();
+                    z.erase(fit);
+                }
+            }
+        
+            std::vector<casadi::MX> eliminatedMXs;
+            std::vector<casadi::MX> subtitutes;
+            for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
+            it!=eliminatedVariableToSolution.end();++it) {
+                if(!it->second.isEmpty()) {
+                    eliminatedMXs.push_back(it->first->getVar());
+                    subtitutes.push_back(it->second);
+                }
+            }
+            std::vector<casadi::MX> expressions;
+            expressions.push_back(startTime);
+            expressions.push_back(finalTime);
+            expressions.push_back(objectiveIntegrand);
+            expressions.push_back(objective);
+        
+            if(pathConstraints.size()>0) {
+                for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin();
+                path_it!=pathConstraints.end();++path_it) {
+                    expressions.push_back((*path_it)->getLhs());
+                    expressions.push_back((*path_it)->getRhs());
+                }
+            }
+            if(pointConstraints.size()>0) {
+                for(std::vector< Ref<Constraint> >::const_iterator point_it = pointConstraints.begin();
+                point_it!=pointConstraints.end();++point_it) {
+                    expressions.push_back((*point_it)->getLhs());
+                    expressions.push_back((*point_it)->getRhs());
+                }
+            }
+        
+            std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes);
+        
+            int counter=0;
+            startTime = subtitutedExpressions[counter++];
+            finalTime = subtitutedExpressions[counter++];
+            objectiveIntegrand = subtitutedExpressions[counter++];
+            objective = subtitutedExpressions[counter++];
+        
+            if(pathConstraints.size()>0) {
+                for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin();
+                path_it!=pathConstraints.end();++path_it) {
+                    (*path_it)->setLhs(subtitutedExpressions[counter++]);
+                    (*path_it)->setRhs(subtitutedExpressions[counter++]);
+                }
+            }
+            if(pointConstraints.size()>0) {
+                for(std::vector< Ref<Constraint> >::iterator point_it = pointConstraints.begin();
+                point_it!=pointConstraints.end();++point_it) {
+                    (*point_it)->setLhs(subtitutedExpressions[counter++]);
+                    (*point_it)->setRhs(subtitutedExpressions[counter++]);
+                }
             }
         }
-        std::vector<casadi::MX> expressions;
-        expressions.push_back(startTime);
-        expressions.push_back(finalTime);
-        expressions.push_back(objectiveIntegrand);
-        expressions.push_back(objective);
-    
-        if(pathConstraints.size()>0) {
-            for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin();
-            path_it!=pathConstraints.end();++path_it) {
-                expressions.push_back((*path_it)->getLhs());
-                expressions.push_back((*path_it)->getRhs());
-            }
+        else{
+            std::cout<<"WARNING: Variables have been already eliminated once. Further eliminations are ignored.\n";
         }
-        if(pointConstraints.size()>0) {
-            for(std::vector< Ref<Constraint> >::const_iterator point_it = pointConstraints.begin();
-            point_it!=pointConstraints.end();++point_it) {
-                expressions.push_back((*point_it)->getLhs());
-                expressions.push_back((*point_it)->getRhs());
-            }
-        }
-    
-        std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes);
-    
-        int counter=0;
-        startTime = subtitutedExpressions[counter++];
-        finalTime = subtitutedExpressions[counter++];
-        objectiveIntegrand = subtitutedExpressions[counter++];
-        objective = subtitutedExpressions[counter++];
-    
-        if(pathConstraints.size()>0) {
-            for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin();
-            path_it!=pathConstraints.end();++path_it) {
-                (*path_it)->setLhs(subtitutedExpressions[counter++]);
-                (*path_it)->setRhs(subtitutedExpressions[counter++]);
-            }
-        }
-        if(pointConstraints.size()>0) {
-            for(std::vector< Ref<Constraint> >::iterator point_it = pointConstraints.begin();
-            point_it!=pointConstraints.end();++point_it) {
-                (*point_it)->setLhs(subtitutedExpressions[counter++]);
-                (*point_it)->setRhs(subtitutedExpressions[counter++]);
-            }
-        }
-    
+        call_count++;
     }
 
 }; // End namespace
