@@ -354,7 +354,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
  * @param jmi A pointer to the jmi_t struct to clean up.
  * @return Error code.
  */
-int jmi_terminate(jmi_t* jmi);
+int jmi_destruct_external_objs(jmi_t* jmi);
 
 /**
  * Deallocates memory and deletes a jmi_t struct.

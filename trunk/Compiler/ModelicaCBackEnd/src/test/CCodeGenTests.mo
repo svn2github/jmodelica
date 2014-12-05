@@ -14228,27 +14228,25 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_destruct_external_object$
 ",
             generatedCode="
-    if (!jmi->indep_extobjs_initialized) { 
-        _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
-    if (!jmi->indep_extobjs_initialized) { 
-        _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
+    _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _z1_8 = (5);
     model_init_eval_parameters(jmi);
     _y1_4 = (0.0);
     _y2_5 = (0.0);
     _y3_6 = (0.0);
     _y4_7 = (0.0);
-    jmi->indep_extobjs_initialized = 1;
 
-    if (!jmi->dep_extobjs_initialized) { 
-        _myEO3_2 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    if (_myEO3_2 != NULL) {
+        func_CCodeGenTests_ExtObjectwInput_destructor_def2(_myEO3_2);
+        _myEO3_2 = NULL;
     }
-    if (!jmi->dep_extobjs_initialized) { 
-        _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    _myEO3_2 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    if (_myEO4_3 != NULL) {
+        func_CCodeGenTests_ExtObjectwInput_destructor_def2(_myEO4_3);
+        _myEO4_3 = NULL;
     }
-    jmi->dep_extobjs_initialized = 1;
+    _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
 
     if (_myEO1_0 != NULL) {
         func_CCodeGenTests_ExtObject_destructor_def0(_myEO1_0);
@@ -14365,17 +14363,10 @@ $C_set_start_values$
 $C_destruct_external_object$
 ",
             generatedCode="
-    if (!jmi->indep_extobjs_initialized) { 
-        _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
-    if (!jmi->indep_extobjs_initialized) { 
-        _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
-    if (!jmi->indep_extobjs_initialized) { 
-        _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
+    _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     model_init_eval_parameters(jmi);
-    jmi->indep_extobjs_initialized = 1;
 
     if (_r_eo_0 != NULL) {
         func_CCodeGenTests_ExtObject_destructor_def0(_r_eo_0);
@@ -14426,7 +14417,6 @@ $C_functions$
     jmi_array_ref_1(tmp_1, 1) = _myEOs_1_0;
     jmi_array_ref_1(tmp_1, 2) = _myEOs_2_1;
     _z_2 = (func_CCodeGenTests_TestExtObjectArray1_get_y_exp2(tmp_1));
-    jmi->dep_extobjs_initialized = 1;
 
 void func_CCodeGenTests_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()

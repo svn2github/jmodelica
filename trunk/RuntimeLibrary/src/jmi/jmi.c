@@ -193,8 +193,6 @@ int jmi_init(jmi_t** jmi,
     *(jmi_->dz) = (jmi_real_t*)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
     
     jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
-    jmi_->indep_extobjs_initialized = 0;
-    jmi_->dep_extobjs_initialized = 0;
     jmi_->block_level = 0;
     jmi_->dz_active_index = 0;
     for (i=0;i<JMI_ACTIVE_VAR_BUFS_NUM;i++) {
@@ -308,6 +306,7 @@ int jmi_delete(jmi_t* jmi){
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
+    jmi_destruct_external_objs(jmi);
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
 

@@ -4054,10 +4054,10 @@ aspect CCodeGen {
 	public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(this, str, indent);
 		FIdUseExp left = (FIdUseExp)getLeft();
-		String oldindent = indent; // needed if left is EO
+        FAbstractVariable fv = left.myFV();
         if (left.myFV().isExternalObject()) {
-            str.print(indent + "if (!jmi->dep_extobjs_initialized) { \n");
-            indent = p.indent(indent);
+            FExternalObjectVariable eo = (FExternalObjectVariable) fv;
+            eo.genDestructorCall_C(p, str, indent);
         }
         str.print(indent);
 		p.print(left.getFIdUse(), str, "");
@@ -4071,12 +4071,20 @@ aspect CCodeGen {
 		}
 		str.print(";\n");
 		
-		if (left.myFV().isExternalObject()) {
-		    str.print(oldindent + "}\n");
-		}
 		p.printPostSteps(this, str, indent);
 	}
-
+    
+    public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasDestructorCall()) {
+            str.formatln("%sif (%s != NULL) {", indent, name_C());
+            p.print(getDestructorCall(), str, p.indent(indent));
+            str.formatln("%s%s = NULL;", p.indent(indent), name_C());
+            str.formatln("%s}", indent);
+        } else {
+            /* Alias external objects does not call constructors so no destructor call is needed. */
+        }
+    }
+    
     @Override
     public void FFunctionCallEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         genBlock_C(p, str, indent, null, null, null);
@@ -4513,8 +4521,8 @@ aspect CCodeGen {
 		return Integer.toString(intValue());
 	}
 	
-	public void FVariable.genStartValue_C(String indent, CodeStream str) {
-		printer_C.printPreSteps(this, str, indent);
+    public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(this, str, indent);
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
@@ -4522,27 +4530,18 @@ aspect CCodeGen {
 			setBindingExp(exp = type().zeroLiteral());
 		OptionRegistry opt = root().options;
 		str.print("(");
-		exp.prettyPrint_C(str,"");
+        p.print(exp, str, indent);
 		str.print(")");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
 		if (noExp)
 			setBindingExpOpt(new Opt());
 		str.print(";\n");
-        printer_C.printPostSteps(this, str, indent);
+        p.printPostSteps(this, str, indent);
 	}
 	
-	public void FStringVariable.genStartValue_C(String indent, CodeStream str) {
+    public void FStringVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
 		// Skip string variables
-	}
-	
-	public void FExternalObjectVariable.genStartValue_C(String indent, CodeStream str) {
-		str.print(indent + "if (!jmi->indep_extobjs_initialized) { \n");
-		printer_C.printVarDecls(this, str, printer_C.indent(indent));
-		printer_C.printPreSteps(this, str, printer_C.indent(indent));
-		super.genStartValue_C(printer_C.indent(indent), str);
-		str.print(indent + "}\n");
-		printer_C.printPostSteps(this, str, printer_C.indent(indent));
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(CodeStream str) {

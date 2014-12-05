@@ -1195,8 +1195,6 @@ struct jmi_t {
 #define JMI_ACTIVE_VAR_BUFS_NUM 3
     jmi_real_t *dz_active_variables_buf[JMI_ACTIVE_VAR_BUFS_NUM];  /**< \brief  This vector is the buffer used by dz_active_variables */
     void** ext_objs;                     /**< \brief This vector contains the external object pointers. */
-    int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
-    int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
     jmi_real_t* nominals;                             /**< \brief Nominal values of differentiated states. */
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */

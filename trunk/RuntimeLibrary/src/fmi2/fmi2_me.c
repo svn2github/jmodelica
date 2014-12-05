@@ -338,7 +338,6 @@ fmi2Status fmi2_reset(fmi2Component c) {
     tmp_resource_location = jmi->resource_location; /* jmi_delete do not free resource_location */
     
     /* Clear the jmi struct */
-    jmi_terminate(jmi);
     jmi_delete(jmi);
     
     /* Reset default options */

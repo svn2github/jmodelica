@@ -313,9 +313,6 @@ public class CGenerator extends GenericGenerator {
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FAbstractEquation e : fclass.getFParameterEquations()) 
 				e.genAssignment_C(ASTNode.printer_C, genPrinter, INDENT);
-            if (!fclass.externalObjectVariables().isEmpty()) {
-                genPrinter.print(INDENT + "jmi->dep_extobjs_initialized = 1;\n");
-            }
 		}
 	
 	}
@@ -957,37 +954,37 @@ public class CGenerator extends GenericGenerator {
 			super("C_set_start_values", myGenerator, fclass);
 		}
 
-		public void generate(CodeStream genPrinter) {
-			for (FVariable fv : fclass.independentConstants()) 
-				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			for (FVariable fv : fclass.dependentConstants()) 
-				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			for (FVariable fv : fclass.independentParameters()) 
-				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			for (FVariable fv : fclass.variables()) 
-				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			for (FVariable fv : fclass.discretePreVariables()) 
-				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			
-			for (FVariable fv : fclass.independentConstants()) 
-				fv.genStartValue_C(INDENT, genPrinter);
-			for (FVariable fv : fclass.dependentConstants()) 
-				fv.genStartValue_C(INDENT, genPrinter);
-			for (FVariable fv : fclass.independentParameters()) 
-				fv.genStartValue_C(INDENT, genPrinter);
-			genPrinter.print(INDENT + "model_init_eval_parameters(jmi);\n");
+        public void generate(CodeStream str) {
+            CodePrinter p = ASTNode.printer_C;
+            String indent = INDENT;
+            for (FVariable fv : fclass.independentConstants())
+                fv.genVarDecls_C(p, str, indent);
+            for (FVariable fv : fclass.dependentConstants())
+                fv.genVarDecls_C(p, str, indent);
+            for (FVariable fv : fclass.independentParameters())
+                fv.genVarDecls_C(p, str, indent);
+            for (FVariable fv : fclass.variables())
+                fv.genVarDecls_C(p, str, indent);
+            for (FVariable fv : fclass.discretePreVariables())
+                fv.genVarDecls_C(p, str, indent);
+            
+            for (FVariable fv : fclass.independentConstants())
+                fv.genStartValue_C(p, str, indent);
+            for (FVariable fv : fclass.dependentConstants())
+                fv.genStartValue_C(p, str, indent);
+            for (FVariable fv : fclass.independentParameters())
+                fv.genStartValue_C(p, str, indent);
+            str.print(indent + "model_init_eval_parameters(jmi);\n");
             for (FVariable fv : fclass.nonFixedParameters()) {
                 if (!fv.hasParameterEquation()) {
-                    fv.genStartValue_C(INDENT, genPrinter);
+                    fv.genStartValue_C(p, str, indent);
                 }
             }
-			for (FVariable fv : fclass.variables()) 
-				fv.genStartValue_C(INDENT, genPrinter);
-			for (FVariable fv : fclass.discretePreVariables()) 
-				fv.genStartValue_C(INDENT, genPrinter);
-			if (!fclass.externalObjectVariables().isEmpty()) 
-			    genPrinter.print(INDENT + "jmi->indep_extobjs_initialized = 1;\n");
-		}
+            for (FVariable fv : fclass.variables())
+                fv.genStartValue_C(p, str, indent);
+            for (FVariable fv : fclass.discretePreVariables())
+                fv.genStartValue_C(p, str, indent);
+        }
 	}
 	
 	/**
@@ -1028,14 +1025,11 @@ public class CGenerator extends GenericGenerator {
 			super("C_destruct_external_object", myGenerator, fclass);
 		}
 
-		public void generate(CodeStream genPrinter) {
-			for (FExternalObjectVariable eo : fclass.externalObjectVariables()) {
-			    if (eo.hasDestructorCall()) {
-    				genPrinter.format("    if (%s != NULL) {\n", eo.name_C());
-    				eo.getDestructorCall().prettyPrint_C(genPrinter, "        ");
-    				genPrinter.format("        %s = NULL;\n    }\n", eo.name_C());
-			    }
-			}
+		public void generate(CodeStream str) {
+            CodePrinter p = ASTNode.printer_C;
+            for (FExternalObjectVariable eo : fclass.externalObjectVariables()) {
+                eo.genDestructorCall_C(p, str, p.indent(""));
+            }
 		}
 	}
 	

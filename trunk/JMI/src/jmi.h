@@ -441,7 +441,7 @@ int jmi_new(jmi_t** jmi);
  * @param jmi A pointer to the jmi_t struct to clean up.
  * @return Error code.
  */
-int jmi_terminate(jmi_t* jmi);
+int jmi_destruct_external_objs(jmi_t* jmi);
 
 /**
  * Initializes the AD variables and tapes.
