@@ -16159,6 +16159,32 @@ ode_init
 ")})));
 end CFixedFalseParam2;
 
+model CFixedFalseParam3
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+      algorithm
+    end f;
+    parameter Real x1(start=f({1,2,3}), fixed=false);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFixedFalseParam3",
+            description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
+            template="
+$C_set_start_values$
+",
+            generatedCode="
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    model_init_eval_parameters(jmi);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    _x1_0 = (func_CCodeGenTests_CFixedFalseParam3_f_exp0(tmp_1));
+")})));
+end CFixedFalseParam3;
+
 model ActiveSwitches1
     Real f = if s then time else -1;
     Boolean s = f > 10;

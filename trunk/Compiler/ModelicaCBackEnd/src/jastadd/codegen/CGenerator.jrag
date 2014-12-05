@@ -963,6 +963,11 @@ public class CGenerator extends GenericGenerator {
                 fv.genVarDecls_C(p, str, indent);
             for (FVariable fv : fclass.independentParameters())
                 fv.genVarDecls_C(p, str, indent);
+            for (FVariable fv : fclass.nonFixedParameters()) {
+                if (!fv.hasParameterEquation()) {
+                    fv.genVarDecls_C(p, str, indent);
+                }
+            }
             for (FVariable fv : fclass.variables())
                 fv.genVarDecls_C(p, str, indent);
             for (FVariable fv : fclass.discretePreVariables())
