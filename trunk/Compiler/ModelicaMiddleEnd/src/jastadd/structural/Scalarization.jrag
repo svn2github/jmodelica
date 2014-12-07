@@ -3245,6 +3245,14 @@ aspect Scalarization {
 	public void ConnectionSetManager.scalarize() {
 		for (ConnectionSet set : list)
 			set.scalarize();
+		Map<String, CSENameMapEntry> oldCSEStreamMap = cseStreamMap;
+		cseStreamMap = new HashMap<String, CSENameMapEntry>();
+		for (CSENameMapEntry entry : oldCSEStreamMap.values()) {
+            if (entry.outsideCSE != null)
+                updateCSEMapEntry(entry.outsideCSE, entry.outside);
+            if (entry.insideCSE != null)
+                updateCSEMapEntry(entry.insideCSE, entry.inside);
+		}
 	}
 	
 	public void ConnectionSet.scalarize() {
