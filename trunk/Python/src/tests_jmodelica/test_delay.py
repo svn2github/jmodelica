@@ -24,13 +24,14 @@ from tests_jmodelica import testattr, get_files_path
 from nose.tools import nottest
 
 
-compiler_options={}
+compiler_options={'compliance_as_warning':True}
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
-path_to_mo  = os.path.join(path_to_mos, 'TestDelay.mo')
+path_to_delay_mo = os.path.join(path_to_mos, 'TestDelay.mo')
+path_to_fixed_delay_mo = os.path.join(path_to_mos, 'TestFixedDelay.mo')
 
-def compile_and_load(class_name):
-    fmu_name = compile_fmu(class_name, path_to_mo, compiler_options=compiler_options)
+def compile_and_load(class_name, filename=path_to_delay_mo):
+    fmu_name = compile_fmu(class_name, filename, compiler_options=compiler_options)
     return load_fmu(fmu_name) 
 
 def simulate(fmu, final_time, maxh = None):
@@ -42,8 +43,8 @@ def simulate(fmu, final_time, maxh = None):
     res = fmu.simulate(final_time = final_time, options = opts)
     return res
 
-def compile_and_simulate(class_name, final_time, maxh = None):    
-    fmu = compile_and_load(class_name)
+def compile_and_simulate(class_name, final_time, filename=path_to_delay_mo, maxh = None):
+    fmu = compile_and_load(class_name, filename=filename)
     return simulate(fmu, final_time, maxh)
 
 def assert_close(x, y, abstol):
@@ -52,88 +53,6 @@ def assert_close(x, y, abstol):
     assert d <= abstol, ("Signals differ by " + str(d) + " which is more than abstol = " + str(abstol) )
 
 
-@testattr(stddist = True)
-def test_delay_time():
-    res = compile_and_simulate('TestDelayTime', final_time = 5, maxh = 0.5)
-    t, x = res['time'], res['x']
-    x_expected = N.maximum(0, t-1)
-    assert_close(x, x_expected, 1e-8)
-
-@testattr(stddist = True)
-def test_delay_quadratic():
-    fmu = compile_and_load('TestDelayQuadratic')
-    res = simulate(fmu, final_time = 5, maxh = 0.25)
-    t, x = res['time'], res['x']
-    x_expected = N.maximum(0, t-1)**2 + 1
-
-    assert_close(x, x_expected, 1e-4)
-
-    fmu.reset()
-    res = simulate(fmu, final_time = 5, maxh = 1/2.5)
-    t, x = res['time'], res['x']
-    x_expected = N.maximum(0, t-1)**2 + 1
-
-    assert_close(x, x_expected, 0.1)
-
-@testattr(stddist = True)
-def test_integrate_delayed_time():
-    res = compile_and_simulate('TestIntegrateDelayedTime', final_time = 5)
-    t, x = res['time'], res['x']
-    x_expected = N.maximum(0, t-1)**2/2
-    assert_close(x, x_expected, 1e-4)
-
-@testattr(stddist = True)
-def test_integrate_delayed_quadratic():
-    res = compile_and_simulate('TestIntegrateDelayedQuadratic', final_time = 5)
-    t, x = res['time'], res['x']
-    x_expected = N.maximum(0,t-1)**3/3
-    assert_close(x, x_expected, 0.2)
-
-@testattr(stddist = True)
-def test_sinusoid():
-    res = compile_and_simulate('TestSinusoid', final_time = 20)
-    t, x = res['time'], res['x']
-    x_expected = 1.03*N.cos((t+0.35)*N.pi/2)
-    inds = (t >= 0.5)
-    assert_close(x[inds], x_expected[inds], 0.1)
-
-@testattr(stddist = True)
-def test_sinusoid_noevent():
-    # Check that we get the same answer as above with noEvent
-    res = compile_and_simulate('TestSinusoidNoEvent', final_time = 20)
-    t, x = res['time'], res['x']
-    x_expected = 1.03*N.cos((t+0.35)*N.pi/2)
-    inds = (t >= 0.5)
-    assert_close(x[inds], x_expected[inds], 0.1)
-
-@testattr(stddist = True)
-def test_short_delay():
-    fmu = compile_and_load('TestShortDelay')
-    fmu.set('d', 1e-3)
-    res = simulate(fmu, final_time = 5)
-    t, x = res['time'], res['x']
-    x_expected = N.exp(-t)
-
-    assert_close(x, x_expected, 1e-3)
-    assert len(t) < 200
-
-    fmu.reset()
-    fmu.set('d', 0)
-    res = simulate(fmu, final_time = 5)
-    t, x = res['time'], res['x']
-    x_expected = N.exp(-t)
-
-    assert_close(x, x_expected, 1e-3)
-    assert len(t) < 200
-
-@testattr(stddist = True)
-def test_sinusoid():
-    res = compile_and_simulate('TestCommute', final_time = 10, maxh = 1/5.5)
-    t, x_delay, delay_x = res['time'], res['x_delay'], res['delay_x']
-    x_expected = N.cos(N.maximum(0,t-1))
-    assert_close(x_delay, x_expected, 1e-2)
-    assert_close(delay_x, x_expected, 1e-2)
-
 def sol_repeating_events(t, d=1):
     x_expected = N.mod(t, d)
     (inds,) = N.nonzero(N.diff(t) == 0)
@@ -141,21 +60,150 @@ def sol_repeating_events(t, d=1):
     x_expected[inds+1] = 0
     return x_expected
 
-@testattr(stddist = True)
-def test_repeating_events():
-    fmu = compile_and_load('TestRepeatingEvents')
 
-    for (k, d) in enumerate([1.0, N.nextafter(1.0, 0), N.nextafter(1.0, 2)]):
-        if k > 0: fmu.reset()
+class TestFixedDelay:
+    def zero_delay_ok(self):
+        return True
 
-        fmu.set('d', d)
-        res = simulate(fmu, final_time = 5.5, maxh = 1/2.5)  
+    def get_class_postfix(self):
+        return ""
+
+    def compile_and_load(self, class_name):
+        return compile_and_load(class_name+self.get_class_postfix(), filename=path_to_fixed_delay_mo)
+
+    def compile_and_simulate(self, class_name, *args, **kwargs):
+        return compile_and_simulate(class_name+self.get_class_postfix(), *args, filename=path_to_fixed_delay_mo, **kwargs)
+
+    @testattr(stddist = True)
+    def test_delay_time(self):
+        res = compile_and_simulate('TestDelayTime', final_time = 5, maxh = 0.5)
+        t, x = res['time'], res['x']
+        x_expected = N.maximum(0, t-1)
+        assert_close(x, x_expected, 1e-8)
+
+    @testattr(stddist = True)
+    def test_delay_quadratic(self):
+        fmu = compile_and_load('TestDelayQuadratic')
+        res = simulate(fmu, final_time = 5, maxh = 0.25)
+        t, x = res['time'], res['x']
+        x_expected = N.maximum(0, t-1)**2 + 1
+
+        assert_close(x, x_expected, 1e-4)
+
+        fmu.reset()
+        res = simulate(fmu, final_time = 5, maxh = 1/2.5)
+        t, x = res['time'], res['x']
+        x_expected = N.maximum(0, t-1)**2 + 1
+
+        assert_close(x, x_expected, 0.1)
+
+    @testattr(stddist = True)
+    def test_integrate_delayed_time(self):
+        res = self.compile_and_simulate('TestIntegrateDelayedTime', final_time = 5)
+        t, x = res['time'], res['x']
+        x_expected = N.maximum(0, t-1)**2/2
+        assert_close(x, x_expected, 1e-4)
+
+    @testattr(stddist = True)
+    def test_integrate_delayed_quadratic(self):
+        res = self.compile_and_simulate('TestIntegrateDelayedQuadratic', final_time = 5)
+        t, x = res['time'], res['x']
+        x_expected = N.maximum(0,t-1)**3/3
+        assert_close(x, x_expected, 0.2)
+
+    @testattr(stddist = True)
+    def test_sinusoid(self):
+        res = self.compile_and_simulate('TestSinusoid', final_time = 20)
+        t, x = res['time'], res['x']
+        x_expected = 1.03*N.cos((t+0.35)*N.pi/2)
+        inds = (t >= 0.5)
+        assert_close(x[inds], x_expected[inds], 0.1)
+
+    @testattr(stddist = True)
+    def test_sinusoid_noevent(self):
+        # Check that we get the same answer as above with noEvent
+        res = self.compile_and_simulate('TestSinusoidNoEvent', final_time = 20)
+        t, x = res['time'], res['x']
+        x_expected = 1.03*N.cos((t+0.35)*N.pi/2)
+        inds = (t >= 0.5)
+        assert_close(x[inds], x_expected[inds], 0.1)
+
+    @testattr(stddist = True)
+    def test_short_delay(self):
+        fmu = self.compile_and_load('TestShortDelay')
+        fmu.set('d', 1e-3)
+        res = simulate(fmu, final_time = 5)
+        t, x = res['time'], res['x']
+        x_expected = N.exp(-t)
+
+        assert_close(x, x_expected, 1e-3)
+        assert len(t) < 200
+
+        if self.zero_delay_ok():
+            fmu.reset()
+            fmu.set('d', 0)
+            res = simulate(fmu, final_time = 5)
+            t, x = res['time'], res['x']
+            x_expected = N.exp(-t)
+
+            assert_close(x, x_expected, 1e-3)
+            assert len(t) < 200
+
+    @testattr(stddist = True)
+    def test_sinusoid(self):
+        res = self.compile_and_simulate('TestCommute', final_time = 10, maxh = 1/5.5)
+        t, x_delay, delay_x = res['time'], res['x_delay'], res['delay_x']
+        x_expected = N.cos(N.maximum(0,t-1))
+        assert_close(x_delay, x_expected, 1e-2)
+        assert_close(delay_x, x_expected, 1e-2)
+
+    @testattr(stddist = True)
+    def test_repeating_events(self):
+        fmu = self.compile_and_load('TestRepeatingEvents')
+
+        for (k, d) in enumerate([1.0, N.nextafter(1.0, 0), N.nextafter(1.0, 2)]):
+            if k > 0: fmu.reset()
+
+            fmu.set('d', d)
+            res = simulate(fmu, final_time = 5.5, maxh = 1/2.5)  
+            t, x = res['time'], res['x']
+            (inds,) = N.nonzero(N.diff(t) == 0)
+            x_expected = sol_repeating_events(t, d)
+
+            assert_close(t[inds], [1,2,3,4,5], 1e-7)
+            assert_close(x, x_expected, 1e-7)
+
+    #@testattr(stddist = True)
+    @nottest # why is it not working?
+    def test_repeat_noevent(self):
+        res = self.compile_and_simulate('TestRepeatNoEvent', final_time = 5.5, maxh = 1/10.5)
         t, x = res['time'], res['x']
         (inds,) = N.nonzero(N.diff(t) == 0)
-        x_expected = sol_repeating_events(t, d)
+        x_expected = sol_repeating_events(t)
 
-        assert_close(t[inds], [1,2,3,4,5], 1e-15)
-        assert_close(x, x_expected, 1e-8)
+        assert len(inds) == 1
+        assert N.abs(t[inds]-[1]) <= 1e-8
+        assert sum(N.abs(x-x_expected) > 1e-8) <= 6
+
+class TestFixedDelaySpatialDist(TestFixedDelay):
+    def zero_delay_ok(self):
+        return False
+
+    def get_class_postfix(self):
+        return "(redeclare block FD=FixedDelaySD)"
+
+    # Disable these until we can support noEvent with spatialDistribution and two outputs
+    def test_sinusoid_noevent(self):
+        pass
+    def test_repeat_noevent(self):
+        pass
+
+class TestFixedDelaySpatialDistRev(TestFixedDelay):
+    def zero_delay_ok(self):
+        return False
+
+    def get_class_postfix(self):
+        return "(redeclare block FD=FixedDelaySDReverse)"
 
 @testattr(stddist = True)
 def test_repeat_noevent():
@@ -167,6 +215,7 @@ def test_repeat_noevent():
     assert len(inds) == 1
     assert N.abs(t[inds]-[1]) <= 1e-8
     assert sum(N.abs(x-x_expected) > 1e-8) <= 6
+
 
 @testattr(stddist = True)
 def test_variably_delayed_time():
