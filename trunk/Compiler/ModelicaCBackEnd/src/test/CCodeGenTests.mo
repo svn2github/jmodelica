@@ -187,6 +187,7 @@ equation
             name="CCodeGenTest6",
             description="Test of code generation",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -242,6 +243,7 @@ equation
             name="CCodeGenTest8",
             description="Test of code generation",
             variability_propagation=false,
+            relational_time_events=false,
             generate_ode=false,
             generate_dae=true,
             template="$C_DAE_equation_residuals$",
@@ -512,6 +514,7 @@ equation
             equation_sorting=true,
             generate_only_initial_system=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $n_event_indicators$
 $n_initial_event_indicators$
@@ -554,6 +557,7 @@ equation
             name="CCodeGenTest17",
             description="Test C code compilation for pre() of enum variable",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_variable_aliases$
 -----
@@ -593,6 +597,7 @@ algorithm
         CCodeGenTestCase(
             name="CCodeGenTest18",
             description="Test generation of temporary variables",
+            relational_time_events=false,
             template="$C_ode_derivatives$",
             generatedCode="
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
@@ -6398,6 +6403,7 @@ end when;
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_guards$
                    $C_ode_derivatives$ 
@@ -6525,6 +6531,7 @@ equation
             equation_sorting=true,
             generate_ode=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_guards$
                    $C_ode_time_events$
@@ -6907,6 +6914,7 @@ equation
             generate_ode=true,
             automatic_tearing=false,
             equation_sorting=true,
+            relational_time_events=false,
             variability_propagation=false,
             template="
 $C_ode_derivatives$ 
@@ -7102,6 +7110,7 @@ equation
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            relational_time_events=false,
             inline_functions="none",
             template="
 $C_ode_derivatives$ 
@@ -7335,6 +7344,7 @@ equation
             description="Code generation for use of pre on continuous variable",
             equation_sorting=true,
             generate_ode=true,
+            relational_time_events=false,
             template="$C_ode_derivatives$",
             generatedCode="
     model_ode_guards(jmi);
@@ -7638,6 +7648,7 @@ equation
             name="IfEqu5",
             description="Code generation for if equation, initial equation",
             variability_propagation=false,
+            relational_time_events=false,
             inline_functions="none",
             template="$C_ode_initialization$",
             generatedCode="
@@ -7676,6 +7687,7 @@ equation
             name="ReinitCTest1",
             description="",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_derivatives$
 -----
@@ -7822,6 +7834,7 @@ equation
             name="ReinitCTest3",
             description="",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_derivatives$
 -----
@@ -9360,6 +9373,7 @@ equation
             generate_ode=true,
             automatic_tearing=false,
             equation_sorting=true,
+            relational_time_events=false,
             template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -10592,6 +10606,7 @@ equation
             equation_sorting=true,
             inline_functions="none",
             variability_propagation=false,
+            relational_time_events=false,
             automatic_tearing=false,
             template="
 $C_dae_init_blocks_residual_functions$
@@ -11164,6 +11179,7 @@ algorithm
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
@@ -11236,6 +11252,7 @@ algorithm
             equation_sorting=true,
             inline_functions="none",
             variability_propagation=false,
+            relational_time_events=false,
             automatic_tearing=false,
             template="
 $C_ode_derivatives$
@@ -11288,6 +11305,7 @@ algorithm
             equation_sorting=true,
             inline_functions="none",
             variability_propagation=false,
+            relational_time_events=false,
             automatic_tearing=false,
             template="
 $C_ode_derivatives$
@@ -14800,6 +14818,7 @@ equation
             name="TestRelationalOp4",
             description="Test correct event generation.",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_DAE_initial_relations$
 $C_DAE_relations$
@@ -15037,6 +15056,7 @@ model TestRelationalOp7
         CCodeGenTestCase(
             name="TestRelationalOp7",
             description="Test generation of temps in relational operators.",
+            relational_time_events=false,
             template="
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -16663,6 +16683,7 @@ equation
         CCodeGenTestCase(
             name="ActiveSwitches5",
             description="Test code gen differentiated switches inside Smooth(1, ...)",
+            relational_time_events=false,
             template="
 C_dae_init_blocks_residual_functions
 $C_dae_init_blocks_residual_functions$
@@ -18912,6 +18933,7 @@ model Delay5
             description="Delay operator code gen: Event generation",
             generate_ode=true,
             equation_sorting=true,
+            relational_time_events=false,
             template="
 N_delays = $n_delays$;
 $C_DAE_relations$
