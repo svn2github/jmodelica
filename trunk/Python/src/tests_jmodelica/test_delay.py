@@ -62,11 +62,11 @@ def test_delay_time():
 @testattr(stddist = True)
 def test_delay_quadratic():
     fmu = compile_and_load('TestDelayQuadratic')
-    res = simulate(fmu, final_time = 5, maxh = 0.5)
+    res = simulate(fmu, final_time = 5, maxh = 0.25)
     t, x = res['time'], res['x']
     x_expected = N.maximum(0, t-1)**2 + 1
 
-    assert_close(x, x_expected, 1e-3)
+    assert_close(x, x_expected, 1e-4)
 
     fmu.reset()
     res = simulate(fmu, final_time = 5, maxh = 1/2.5)
@@ -173,7 +173,7 @@ def test_variably_delayed_time():
     res = compile_and_simulate('TestVariablyDelayedTime', final_time = 5, maxh = 0.1)
     t, x = res['time'], res['x']
     x_expected = N.maximum(0,t-(N.sin(5*t)*0.5+0.5))
-    assert_close(x, x_expected, 1e-8)
+    assert_close(x, x_expected, 1e-7)
 
 @testattr(stddist = True)
 def test_state_dependent_delay_time():
@@ -211,7 +211,8 @@ def test_variable_delay_events():
     print N.asarray(x, dtype=int)
     print t
     assert_close(x, x_expected, 1e-12)
-    assert_close(t[inds], N.array([ 1., 1.64366485, 2.24956004, 2.67833465]), 1e-7)
+    assert_close(t[inds], N.array([0.43439307, 0.92808171, 1.0, 1.47239509,
+                                   1.64366485, 2.24956004, 2.67833465]), 1e-7)
 
 @testattr(stddist = True)
 def test_delay_going_to_zero():
