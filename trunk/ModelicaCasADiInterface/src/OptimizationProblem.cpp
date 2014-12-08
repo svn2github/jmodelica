@@ -107,6 +107,9 @@ namespace ModelicaCasADi
 
 
     void OptimizationProblem::eliminateAlgebraics() {
+        if(!hasBLT()) {
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+        }
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
         std::vector< Ref<Variable> > eliminable_algebraics;
         for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
@@ -293,7 +296,9 @@ namespace ModelicaCasADi
 
 
     void OptimizationProblem::eliminateVariables() {
-        
+        if(!hasBLT()) {
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+        }
         static unsigned int call_count = 0;
         if(call_count<1){
             //Sort the list first

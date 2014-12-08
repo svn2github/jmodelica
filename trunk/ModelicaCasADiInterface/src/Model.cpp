@@ -528,7 +528,7 @@ namespace ModelicaCasADi
         equations_ = eqCont;
         if(equations_->hasBLT()) {
             for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it) {
-                if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")) {
+                if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") && classifyVariable(*it) != DERIVATIVE) {
                     (*it)->setAsEliminable();
                 }
             }
@@ -573,6 +573,9 @@ namespace ModelicaCasADi
     }
 
     void Model::eliminateAlgebraics() {
+        if(!hasBLT()) {
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+        }
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
         std::vector< Ref<Variable> > eliminable_algebraics;
         for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
@@ -600,6 +603,9 @@ namespace ModelicaCasADi
     }
 
     void Model::eliminateVariables() {
+        if(!hasBLT()) {
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+        }
         //Ensures eliminate variables is called only once
         static unsigned int call_count = 0;
         if(call_count<1){

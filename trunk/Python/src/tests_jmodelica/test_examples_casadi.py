@@ -24,7 +24,7 @@ from tests_jmodelica import testattr
 try:
     from pyjmi.examples import (ccpp, vdp_casadi, vdp_minimum_time_casadi,
                             cstr_casadi, qt_par_est_casadi, vehicle_turn,
-                            distillation4_opt, cstr_mpc_casadi)
+                            distillation4_opt, cstr_mpc_casadi, ccpp_elimination)
 except (NameError, ImportError):
     pass
 
@@ -67,5 +67,10 @@ def test_distillation4_opt():
 def test_cstr_mpc_casadi():
     """Run the cstr mpc optimization example."""
     cstr_mpc_casadi.run_demo(False)
+
+@testattr(casadi = True)
+def test_ccpp_variable_elimination():
+    """Run the Combined Cycle Power Plant example."""
+    ccpp.run_demo(False)
     
 

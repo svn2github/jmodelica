@@ -65,44 +65,45 @@ class TestLocalDAECollocator(object):
     @classmethod
     def setUpClass(self):
         """Compile the test models."""
+        self.compiler_opts = self.compile_options()
         vdp_file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange"
         self.vdp_bounds_lagrange_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange_Renamed_Input"
         self.vdp_bounds_lagrange_renamed_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
         self.vdp_bounds_mayer_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
         self.vdp_constraints_mayer_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Initial_Equations"
         self.vdp_initial_equations_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
         self.vdp_scaled_min_time_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time"
         self.vdp_unscaled_min_time_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
 
         class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start"
         self.vdp_min_time_nonzero_start_op = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
+                transfer_to_casadi_interface(class_path, vdp_file_path, self.compiler_opts)
         
         class_path = "VDP_pack.VDP_Opt_Function"
         self.vdp_function_op = \
                 transfer_to_casadi_interface(
                         class_path, vdp_file_path,
-                        compiler_options={"inline_functions": "none"})
+                        compiler_options=dict({"inline_functions": "none"}.items() + self.compiler_opts.items()))
         
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
@@ -112,31 +113,31 @@ class TestLocalDAECollocator(object):
         
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
         self.cstr_lagrange_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
         
         class_path = "CSTR.CSTR_Opt_Bounds_Mayer"
         self.cstr_mayer_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
         
         class_path = "CSTR.CSTR_Opt_Dependent_Parameter"
         self.cstr_dependent_parameter_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
         
         class_path = "CSTR.CSTR_Opt_Extends"
         self.cstr_extends_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
         
         class_path = "CSTR.CSTR_Opt_Scaled_Min_Time"
         self.cstr_scaled_min_time_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
         
         class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time"
         self.cstr_unscaled_min_time_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
 
         class_path = "CSTR.CSTR_Opt_Min_Time_No_Initial_Guess"
         self.cstr_min_time_no_init_guess_op = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
+                transfer_to_casadi_interface(class_path, cstr_file_path, self.compiler_opts)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
                                     'ParameterEstimation_1.mop')
@@ -147,7 +148,7 @@ class TestLocalDAECollocator(object):
         
         class_path = "ParEst.ParEstCasADi"
         self.second_order_par_est_op = \
-                transfer_to_casadi_interface(class_path, pe_file_path)
+                transfer_to_casadi_interface(class_path, pe_file_path, self.compiler_opts)
         
         qt_file_path = os.path.join(get_files_path(), 'Modelica',
                                     'QuadTankPack.mop')
@@ -158,11 +159,11 @@ class TestLocalDAECollocator(object):
         
         class_path = "QuadTankPack.QuadTank_ParEstCasADi"
         self.qt_par_est_op = \
-                transfer_to_casadi_interface(class_path, qt_file_path)
+                transfer_to_casadi_interface(class_path, qt_file_path, self.compiler_opts)
         
         class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
         self.qt_par_est_degenerate_op = \
-                transfer_to_casadi_interface(class_path, qt_file_path)
+                transfer_to_casadi_interface(class_path, qt_file_path, self.compiler_opts)
         
         self.algorithm = "LocalDAECollocationAlg"
         
@@ -171,6 +172,11 @@ class TestLocalDAECollocator(object):
             return op.optimize_options()
         else:
             return op.optimize_options(alg)
+    
+    @staticmethod
+    def compile_options():
+        compiler_options = dict()
+        return compiler_options
 
     @testattr(casadi = True)
     def test_free_horizon_tdlagrange(self):
@@ -1929,3 +1935,14 @@ class TestLocalDAECollocator_expand_to_sx_DAE(TestLocalDAECollocator):
     @nose.tools.nottest
     def test_cstr_checkpoint(self):
         assert False # shouldn't be run, just used to disable this test with 'expand_to_sx': 'DAE'
+
+class TestLocalDAECollocator_BLT_transfer(TestLocalDAECollocator):
+    """
+    Tests pyjmi.optimization.casadi_collocation.LocalDAECollocator with option 'equation_sorting':True
+    """
+    
+    @staticmethod
+    def compile_options():
+        compiler_options = {'equation_sorting':True,
+                            'automatic_tearing': False}
+        return compiler_options
