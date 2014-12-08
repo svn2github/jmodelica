@@ -537,7 +537,7 @@ libModelicaStandardTables_la_SOURCES =  \
 	$(MSLCSOURCES)/zlib/inffast.c $(MSLCSOURCES)/zlib/inflate.c \
 	$(MSLCSOURCES)/zlib/inftrees.c $(MSLCSOURCES)/zlib/trees.c \
 	$(MSLCSOURCES)/zlib/uncompr.c $(MSLCSOURCES)/zlib/zutil.c
-libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -I$(MSLCSOURCES)
+libModelicaStandardTables_la_CFLAGS = -DHAVE_ZLIB -Wall -g -I$(MSLCSOURCES)
 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
