@@ -91,6 +91,7 @@ namespace ModelicaCasADi
              * @param string identifier, typically <packagename>_<classname>, default empty string */
             void initializeModel(std::string identifier = "");
             ~Model() {
+                //std::cout<<"\nDELETE_MODEL\n";
                 // Delete all the Model's variables, since they are OwnedNodes with the Model as owner.
                 for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
                     delete *it;
@@ -291,11 +292,7 @@ namespace ModelicaCasADi
             {
                 if(equations_->hasBLT()) {
                     equations_->solveBlocksWithLinearSystems();
-                    for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it) {
-                        if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")) {
-                            (*it)->setAsEliminable();
-                        }
-                    }
+                    setEliminableVariables();
                 }
             }
             //To be deleted. Used just for testing
@@ -332,6 +329,11 @@ namespace ModelicaCasADi
             VariableKind classifyInternalStringVariable(Ref<Variable> var) const;
             VariableKind classifyInputVariable(Ref<Variable> var) const;
             VariableKind classifyInternalVariable(Ref<Variable> var) const;
+            
+            /**
+            * Mark variables as eliminables after transfering BLT
+            **/
+            virtual void setEliminableVariables();
 
             bool checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const;
             /// May assign derivative variable to a state variable.

@@ -523,16 +523,28 @@ namespace ModelicaCasADi
     void Model::addDaeEquation(Ref<Equation> eq) {
         equations_->addDaeEquation(eq);
     }
-
-    void Model::setEquations(Ref<Equations> eqCont) {
-        equations_ = eqCont;
+    
+    void Model::setEliminableVariables(){
         if(equations_->hasBLT()) {
+            std::vector< Ref<Variable> > alias_vars = getAliases();
             for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it) {
-                if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") && classifyVariable(*it) != DERIVATIVE) {
+                bool hasAlias=false;
+                for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
+                it_alias!=alias_vars.end() && !hasAlias;++it_alias) {
+                    if((*it)==(*it_alias)->getModelVariable()) {
+                        hasAlias=true;
+                    }
+                }
+                if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") && classifyVariable(*it) != DERIVATIVE && !hasAlias) {
                     (*it)->setAsEliminable();
                 }
             }
-        }
+        }    
+    }
+
+    void Model::setEquations(Ref<Equations> eqCont) {
+        equations_ = eqCont;
+        setEliminableVariables();
     }
     
     bool compareFunction(const std::pair<int, const Variable*>& a, const std::pair<int, const Variable*>& b) {
@@ -541,26 +553,13 @@ namespace ModelicaCasADi
 
     void Model::substituteAllEliminables() {
         if(hasBLT()) {
-            std::set<const Variable*> eliminateables = equations_->eliminableVariables();
-            std::vector< Ref<Variable> > alias_vars = getAliases();
+            std::vector< Ref<Variable> > eliminateables = getEliminableVariables();
             std::list< std::pair<int, const Variable*> > toSubstituteList;
-            bool hasAlias=false;
-            for(std::set<const Variable*>::iterator it=eliminateables.begin();it!=eliminateables.end();++it) {
-                hasAlias=false;
-                for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
-                it_alias!=alias_vars.end() && !hasAlias;++it_alias) {
-                    if(*it==(*it_alias)->getModelVariable().getNode()) {
-                        hasAlias=true;
-                    }
-                }
-                if(!hasAlias) {
-                    Ref<Variable> var = const_cast<Variable*>(*it);
-                    int id_block = equations_->getBlockIDWithSolutionOf(var);
-                    if(id_block>=0) {
-                        toSubstituteList.push_back(std::pair<int, const Variable*>(id_block,var.getNode()));
-                    }
-                }
-                
+            for(std::vector<Ref<Variable> >::iterator it=eliminateables.begin();it!=eliminateables.end();++it) {
+                int id_block = equations_->getBlockIDWithSolutionOf(*it);
+                if(id_block>=0) {
+                    toSubstituteList.push_back(std::pair<int, const Variable*>(id_block,const_cast<const Variable*>((*it).getNode())));
+                }    
             }            
             toSubstituteList.sort(compareFunction);
             std::map<const Variable*,casadi::MX> tmpMap;
@@ -636,22 +635,11 @@ namespace ModelicaCasADi
 
     void Model::markVariablesForElimination(const std::vector< Ref<Variable> >& vars) {
         if(hasBLT()) {
-            std::vector< Ref<Variable> > alias_vars = getAliases();
-            bool hasAlias=false;
             for(std::vector< Ref<Variable> >::const_iterator it=vars.begin();it!=vars.end();++it) {
                 if((*it)->isEliminable()) {
-                    hasAlias=false;
-                    for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
-                    it_alias!=alias_vars.end() && !hasAlias;++it_alias) {
-                        if((*it)==(*it_alias)->getModelVariable()) {
-                            hasAlias=true;
-                        }
-                    }
-                    if(!hasAlias) {
-                        int id_block = equations_->getBlockIDWithSolutionOf(*it);
-                        if(id_block>=0) {
-                            listToEliminate.push_back(std::pair<int, const Variable*>(id_block,(*it).getNode()));
-                        }
+                    int id_block = equations_->getBlockIDWithSolutionOf(*it);
+                    if(id_block>=0) {
+                        listToEliminate.push_back(std::pair<int, const Variable*>(id_block,(*it).getNode()));
                     }
                 }
                 else {
@@ -667,20 +655,9 @@ namespace ModelicaCasADi
     void Model::markVariablesForElimination(Ref<Variable> var) {
         if(hasBLT()) {
             if(var->isEliminable()) {
-                bool hasAlias=false;
-                //This should be an attribute of the class perhaps
-                std::vector< Ref<Variable> > alias_vars = getAliases();
-                for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
-                it_alias!=alias_vars.end() && !hasAlias;++it_alias) {
-                    if(var==(*it_alias)->getModelVariable()) {
-                        hasAlias=true;
-                    }
-                }
-                if(!hasAlias) {
-                    int id_block = equations_->getBlockIDWithSolutionOf(var);
-                    if(id_block>=0) {
-                        listToEliminate.push_back(std::pair<int, const Variable*>(id_block,var.getNode()));
-                    }
+                int id_block = equations_->getBlockIDWithSolutionOf(var);
+                if(id_block>=0) {
+                    listToEliminate.push_back(std::pair<int, const Variable*>(id_block,var.getNode()));
                 }
             }
             else {

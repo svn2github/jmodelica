@@ -100,7 +100,14 @@ namespace ModelicaCasADi
              *Equations of the form z=f(z) are not removed as in the case of variable elimination.
              **/
             void substituteAllEliminables();
+            
+            /**
+             * Transfers the equation container to the model. It can be FlatEquations or BLT
+             * @Param Equations
+             **/
+            virtual void setEquations(Ref<Equations> eqCont);
 
+            
             void markVariablesForElimination(Ref<Variable> var);
             void markVariablesForElimination(const std::vector< Ref<Variable> >& vars);
 
@@ -116,6 +123,11 @@ namespace ModelicaCasADi
             std::vector< TimedVariable * > timedVariables;
             std::vector< Ref<Constraint> >  pathConstraints;
             std::vector< Ref<Constraint> >  pointConstraints;
+            
+            /**
+            * Mark variables as eliminables after transfering BLT
+            **/
+            void setEliminableVariables();
     };
     inline casadi::MX OptimizationProblem::getStartTime() const { return startTime; }
     inline casadi::MX OptimizationProblem::getFinalTime() const { return finalTime; }

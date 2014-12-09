@@ -38,6 +38,7 @@ namespace ModelicaCasADi
         public:
             //Default constructor
             Block(): simple_flag(false),linear_flag(false),solve_flag(false){}
+            //~Block(){std::cout<<"\nDELETE_BLOCK\n";}
 
             /***************************TO BE REMOVE*******************************/
             //Might be kept
@@ -172,11 +173,23 @@ namespace ModelicaCasADi
              */
             std::vector< Ref<Equation> > notSolvedEquations() const;
             /**
-             * Add an equation to the block
+             * Add an equation to the block. Checks O(N*N) if the equation was not already added
              * @param An Equation.
              * @param A boolean specifying if the equation is solvable or not.
              */
             void addEquation(Ref<Equation> eq, bool solvable);
+            /**
+             * Add an equation to the block. It adds an equation to equations container O(1). No check 
+             * Only to be used in transfer block. Not for user
+             * @param An Equation.
+             */
+            void addNotClassifiedEquation(Ref<Equation> eq);
+            /**
+             * Add an equation to the block. It adds an equation to the unsolvedEquations O(1). No check 
+             * Only to be used in transfer block. Not for user
+             * @param An Equation.
+             */
+            void addUnsolvedEquation(Ref<Equation> eq);
             /**
              * Gives equations with symbolic manipulations. (substitutions and eliminations)
              * @return A std::vector of Equation

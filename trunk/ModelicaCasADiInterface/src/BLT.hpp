@@ -33,6 +33,7 @@ namespace ModelicaCasADi
     class BLT: public Equations
     {
         public:
+          //~BLT(){std::cout<<"\nDELETE_BLT\n";}
             /**
              * Check if equations object has a BLT
              * @return A boolean

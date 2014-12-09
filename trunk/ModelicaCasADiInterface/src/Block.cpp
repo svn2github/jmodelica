@@ -55,6 +55,13 @@ namespace ModelicaCasADi
             }
         }
     }
+    
+    void Block::addNotClassifiedEquation(Ref<Equation> eq){
+        equations.push_back(eq);
+    }
+    void Block::addUnsolvedEquation(Ref<Equation> eq){
+        unSolvedEquations.push_back(eq);
+    }
 
     void Block::printBlock(std::ostream& out,bool withData/*=false*/) const{
     out<<"----------------------------------------\n";

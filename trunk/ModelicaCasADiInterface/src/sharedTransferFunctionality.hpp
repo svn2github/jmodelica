@@ -83,8 +83,8 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
         JCollection block_trajectories_var(block->dependsOn().this$);
         
         //Adding equations to block
+        /*bool found=false;
         JIterator iter1(block_equations.iterator().this$);
-        bool found=false;
         while(iter1.hasNext()) {
             found=false;
             FAbstractEquation f1(iter1.next().this$);
@@ -106,10 +106,55 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
             else {
                 ciBlock->addEquation(new ModelicaCasADi::Equation(lhs1,rhs1),false);
             }
+        }*/
+        
+        //The following functions are to be used carefully. for user purpuses better to use addEquation(Equation,bool);
+        //Add unsolved equations
+        JIterator iterUnsolvedEq(unsolved_eq.iterator().this$);
+        while(iterUnsolvedEq.hasNext()) {
+            FAbstractEquation funsolved(iterUnsolvedEq.next().this$);
+            //This will only add to  unsolvedequations container in block
+            ciBlock->addUnsolvedEquation(new ModelicaCasADi::Equation(toMX(funsolved.toMXForLhs()),toMX(funsolved.toMXForRhs())));
         }
+        
+        //Add equations
+        JIterator iterEquations(block_equations.iterator().this$);
+        while(iterEquations.hasNext()) {
+            FAbstractEquation f(iterEquations.next().this$);
+            //This will add all equations to the equations containter
+            ciBlock->addNotClassifiedEquation(new ModelicaCasADi::Equation(toMX(f.toMXForLhs()),toMX(f.toMXForRhs())));       
+        }
+        
         //Adding variables to block
-        JIterator iter3(block_variables.iterator().this$); 
+        std::set<int> indexBlockVariables;
         std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >::iterator it;
+        JIterator iterUnsolvedVars(unsolved_vars.iterator().this$);
+        while(iterUnsolvedVars.hasNext()) {
+            FVar uv(iterUnsolvedVars.next().this$);
+            it = indexToVariable.find(uv.findVariableIndex());
+            if(it!=indexToVariable.end()) {
+                indexBlockVariables.insert(it->first);
+                //This will add a variable to both variable containers in block
+                ciBlock->addVariable(it->second.getNode(), false);
+            }
+        }  
+        
+        JIterator iterSolvedVars(block_variables.iterator().this$);
+        std::set<int>::iterator tmp_it;
+        while(iterSolvedVars.hasNext()) {
+            FVar sv(iterSolvedVars.next().this$);
+            it = indexToVariable.find(sv.findVariableIndex()); 
+            if(it!=indexToVariable.end()) {
+                 tmp_it = indexBlockVariables.find(it->first);
+                 if(tmp_it==indexBlockVariables.end()){
+                     //This will add the solved variables to the variables containter
+                     ciBlock->addVariable(it->second.getNode(), true);                    
+                 }
+            }
+        }
+        
+        //Adding variables to block
+        /*JIterator iter3(block_variables.iterator().this$); 
         while(iter3.hasNext()) {
             found=false;
             FVar jv1(iter3.next().this$);
@@ -132,7 +177,8 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
                     ciBlock->addVariable(it->second.getNode(), false);
                 }
             }
-        }
+        }*/
+        
         JIterator iter5(block_inactive_var.iterator().this$);
         while(iter5.hasNext()) {
             FVar jvinac(iter5.next().this$);
