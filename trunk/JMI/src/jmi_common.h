@@ -239,8 +239,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=1e-6? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-1e-6? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<-1e-6? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>1e-6? JMI_TRUE: JMI_FALSE)
 
 
 /* Record creation macro */
