@@ -139,7 +139,7 @@ if(NOT MSVC)
 endif()
 
 #Build ModelicaStandardTables library
-add_definitions("-DHAVE_ZLIB")
+add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
 add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
 if(NOT MSVC)
     set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
