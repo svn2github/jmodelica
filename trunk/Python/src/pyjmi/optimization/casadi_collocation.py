@@ -541,7 +541,7 @@ class CasadiCollocator(object):
             #Update initial condition
             self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
             self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
-    
+
             #Update dual variables
             self.solver_object.setInput(self.dual_opt, casadi.NLP_SOLVER_LAM_G0)
             self.solver_object.setInput(self.dual_opt2, casadi.NLP_SOLVER_LAM_X0)
@@ -1386,7 +1386,7 @@ class LocalDAECollocator(CasadiCollocator):
                     if self.named_vars:
                         named_xx += [casadi.SX.sym('%s_%d_%d' % (name, i, k)) for
                                      name in u_cont_names] 
-                        
+
             # Create index storage for inputs with blocking factors
             var_indices['u_bf'] = dict()
             for i in xrange(1, self.n_e + 1):
@@ -1580,10 +1580,11 @@ class LocalDAECollocator(CasadiCollocator):
         if self.named_vars:
             self.named_xx = casadi.vertcat(named_xx)
              
+        self.global_split_indices = global_split_indices
         self.n_xx = n_xx
         self.var_map = var_map
         self.var_indices = var_indices
-        
+    
     def _create_nlp_parameters(self):
         """
         Substitute parameter symbols in expressions for new parameter symbols,

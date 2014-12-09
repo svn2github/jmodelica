@@ -85,7 +85,6 @@ def run_demo(with_plots=True):
     sim_model.set('_start_c', c_0_A)
     sim_model.set('_start_T', T_0_A)
     sim_model.set('Tc', 280)
-    sim_model.set('epsilon', 0)
     init_res = sim_model.simulate(start_time=0., final_time=150)
 
     ### 2. Define the optimal control problem and solve it using the MPC class
@@ -94,7 +93,7 @@ def run_demo(with_plots=True):
                             compiler_options={"state_initial_equations":True})
 
     # Define MPC options
-    sample_period = 3                           # s
+    sample_period = 3                         # s
     horizon = 33                                # Samples on the horizon
     n_e_per_sample = 1                          # Collocation elements / sample
     n_e = n_e_per_sample*horizon                # Total collocation elements
@@ -103,7 +102,7 @@ def run_demo(with_plots=True):
 
     # Create blocking factors with quadratic penalty and bound on 'Tc'
     bf_list = [1]*horizon
-    factors = {'Tc': bf_list, 'epsilon': bf_list}
+    factors = {'Tc': bf_list}
     du_quad_pen = {'Tc': 500}
     du_bounds = {'Tc': 30}
     bf = BlockingFactors(factors, du_bounds, du_quad_pen)
@@ -114,7 +113,6 @@ def run_demo(with_plots=True):
     opt_opts['n_cp'] = 2
     opt_opts['init_traj'] = init_res
     opt_opts['nominal_traj'] = init_res
-    opt_opts['IPOPT_options']['print_level'] = 0  
     opt_opts['blocking_factors'] = bf
 
     # Set initial values
@@ -123,7 +121,7 @@ def run_demo(with_plots=True):
 
     if with_plots:
         # Compile and load a new instance of the op to compare the MPC results 
-        # with an open loop optimization 
+        # with an open loop optimization                                                                                                                                           n open loop optimization 
         op_open_loop = transfer_optimization_problem(
             "CSTR.CSTR_MPC", file_path,
             compiler_options={"state_initial_equations":True})
@@ -138,12 +136,15 @@ def run_demo(with_plots=True):
         open_loop_opts['n_e'] = number_samp_tot
         
         bf_list_ol = [n_e_per_sample]*(number_samp_tot/n_e_per_sample)
-        factors_ol = {'Tc': bf_list_ol, 'epsilon': bf_list_ol}
+        factors_ol = {'Tc': bf_list_ol}
         bf_ol = BlockingFactors(factors_ol, du_bounds, du_quad_pen)
         open_loop_opts['blocking_factors'] = bf_ol
 
+    constr_viol_costs = {}
+    constr_viol_costs['T'] = 1e10
+
     # Create the MPC object
-    MPC_object = MPC(op, opt_opts, sample_period, horizon, noise_seed=7)
+    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs, noise_seed=7)
 
     # Set initial state
     x_k = {}
@@ -166,10 +167,11 @@ def run_demo(with_plots=True):
                                      input=u_k)
 
         # Extract state at end of sample_period from sim_res and add Gaussian
-        # noise with mean 0 and standard deviation 0.005*(state_nominal_value)
+        # noise with mean 0 and standard deviation 0.005*(state_current_value)
         x_k = MPC_object.extract_states_add_noise(sim_res)
 
     # Extract variable profiles
+    MPC_object.print_solver_stats()
     complete_result = MPC_object.get_complete_results()
     c_res_comp = complete_result['c']
     T_res_comp = complete_result['T']
@@ -183,11 +185,11 @@ def run_demo(with_plots=True):
         pass
     else:
         Tc_norm = N.linalg.norm(Tc_res_comp) / N.sqrt(len(Tc_res_comp))
-        assert(N.abs(Tc_norm - 307.18630609493079) < 1e-3)
+        assert(N.abs(Tc_norm - 306.00544211904042) < 1e-3)
         c_norm = N.linalg.norm(c_res_comp) / N.sqrt(len(c_res_comp))
-        assert(N.abs(c_norm - 636.49597858589709) < 1e-3)
+        assert(N.abs(c_norm - 639.87711876602896) < 1e-3)
         T_norm = N.linalg.norm(T_res_comp) / N.sqrt(len(T_res_comp))
-        assert(N.abs(T_norm - 321.23049095974829) < 1e-3)
+        assert(N.abs(T_norm - 319.96944904915409) < 1e-3)
 
     # Plot the results
     if with_plots: 
