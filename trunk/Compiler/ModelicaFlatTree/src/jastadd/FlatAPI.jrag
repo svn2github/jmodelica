@@ -2873,136 +2873,106 @@ aspect FlatDiagnostics {
 
     public String FClass.modelDiagnostics() {
         StringBuilder str = new StringBuilder();
-        str.append("Number of independent constants:              " + 
-                numIndependentConstants() + "\n");
-        str.append("  Number of Real independent constants:       " + 
-                numIndependentRealConstants() + "\n");
-        str.append("  Number of Integer independent constants:    " + 
-                numIndependentIntegerConstants() + "\n");
-        str.append("  Number of Enum independent constants:       " + 
-                numIndependentEnumConstants() + "\n");
-        str.append("  Number of Boolean independent constants:    " + 
-                numIndependentBooleanConstants() + "\n");
-        str.append("  Number of String independent constants:     " + 
-                numIndependentStringConstants() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of independent constants:", independentConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Real independent constants:", independentRealConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Real independent constants:", independentRealConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Integer independent constants:", independentIntegerConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Enum independent constants:", independentEnumConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean independent constants:", independentBooleanConstants());
+        modelDiagnosticsPrintRow(str, "  Number of String independent constants:", independentStringConstants());
 
-        str.append("Number of dependent constants:                " + 
-                numDependentConstants() + "\n");
-        str.append("  Number of Real dependent constants:         " + 
-                numDependentRealConstants() + "\n");
-        str.append("  Number of Integer dependent constants:      " + 
-                numDependentIntegerConstants() + "\n");
-        str.append("  Number of Enum dependent constants:         " + 
-                numDependentEnumConstants() + "\n");
-        str.append("  Number of Boolean dependent constants:      " + 
-                numDependentBooleanConstants() + "\n");
-        str.append("  Number of String dependent constants:       " + 
-                numDependentStringConstants() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of dependent constants:", dependentConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Real dependent constants:", dependentRealConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Integer dependent constants:", dependentIntegerConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Enum dependent constants:", dependentEnumConstants());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean dependent constants:", dependentBooleanConstants());
+        modelDiagnosticsPrintRow(str, "  Number of String dependent constants:", dependentStringConstants());
 
-        str.append("Number of independent parameters:             " + 
-                numIndependentParameters() + "\n");
-        str.append("  Number of Real independent parameters:      " + 
-                numIndependentRealParameters() + "\n");
-        str.append("  Number of Integer independent parameters:   " + 
-                numIndependentIntegerParameters() + "\n");
-        str.append("  Number of Enum independent parameters:      " + 
-                numIndependentEnumParameters() + "\n");
-        str.append("  Number of Boolean independent parameters:   " + 
-                numIndependentBooleanParameters() + "\n");
-        str.append("  Number of String independent parameters:    " + 
-                numIndependentStringParameters() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of independent parameters:", independentParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Real independent parameters:", independentRealParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Integer independent parameters:", independentIntegerParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Enum independent parameters:", independentEnumParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean independent parameters:", independentBooleanParameters());
+        modelDiagnosticsPrintRow(str, "  Number of String independent parameters:", independentStringParameters());
                   
-        str.append("Number of dependent parameters:               " + 
-                numDependentParameters() + "\n");
-        str.append("  Number of Real dependent parameters:        " + 
-                numDependentRealParameters() + "\n");
-        str.append("  Number of Integer dependent parameters:     " + 
-                numDependentIntegerParameters() + "\n");
-        str.append("  Number of Enum dependent parameters:        " + 
-                numDependentEnumParameters() + "\n");
-        str.append("  Number of Boolean dependent parameters:     " + 
-                numDependentBooleanParameters() + "\n");
-        str.append("  Number of String dependent parameters:      " + 
-                numDependentStringParameters() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of dependent parameters:", dependentParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Real dependent parameters:", dependentRealParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Integer dependent parameters:", dependentIntegerParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Enum dependent parameters:", dependentEnumParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean dependent parameters:", dependentBooleanParameters());
+        modelDiagnosticsPrintRow(str, "  Number of String dependent parameters:", dependentStringParameters());
         
-        str.append("Number of variables :                         " + 
-                numVariables() + "\n");
-        str.append("  Number of Real variables:                   " + 
-                numRealVariables() + "\n");
-        str.append("  Number of Integer variables:                " + 
-                numIntegerVariables() + "\n");
-        str.append("  Number of Enum variables:                   " + 
-                numEnumVariables() + "\n");
-        str.append("  Number of Boolean variables:                " + 
-                numBooleanVariables() + "\n");
-        str.append("  Number of String variables:                 " + 
-                numStringVariables() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of variables:", variables());
+        modelDiagnosticsPrintRow(str, "  Number of Real variables:", realVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Integer variables:", integerVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Enum variables:", enumVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean variables:", booleanVariables());
+        modelDiagnosticsPrintRow(str, "  Number of String variables:", stringVariables());
 
-        str.append("Number of Real differentiated variables:      " + 
-                numDifferentiatedRealVariables() + "\n"); 
-        str.append("Number of Real derivative variables:          " + 
-                numDerivativeVariables() + "\n"); 
-        str.append("Number of Real continous algebraic variables: " + 
-                numAlgebraicContinousRealVariables() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of Real differentiated variables:", differentiatedRealVariables()); 
+        modelDiagnosticsPrintRow(str, "Number of Real derivative variables:", derivativeVariables()); 
+        modelDiagnosticsPrintRow(str, "Number of Real continous algebraic variables:", algebraicContinousRealVariables());
 
-        str.append("Number of inputs:                             " + 
-                numInputs() + "\n");
-        str.append("  Number of Real inputs:                      " + 
-                numRealInputs() + "\n");
-        str.append("  Number of Integer inputs:                   " + 
-                numIntegerInputs() + "\n");
-        str.append("  Number of Enum inputs:                      " + 
-                numEnumInputs() + "\n");
-        str.append("  Number of Boolean inputs:                   " + 
-                numBooleanInputs() + "\n");
-        str.append("  Number of String inputs:                    " + 
-                numStringInputs() + "\n");
-                
-        str.append("Number of discrete variables :                " + 
-                numDiscreteVariables() + "\n");
-        str.append("  Number of Real discrete variables:          " + 
-                numDiscreteRealVariables() + "\n");
-        str.append("  Number of Integer discrete variables:       " + 
-                numDiscreteIntegerVariables() + "\n");
-        str.append("  Number of Enum discrete variables:          " + 
-                numDiscreteEnumVariables() + "\n");
-        str.append("  Number of Boolean discrete variables:       " + 
-                numDiscreteBooleanVariables() + "\n");
-        str.append("  Number of String discrete variables:        " + 
-                numDiscreteStringVariables() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of inputs:", inputs());
+        modelDiagnosticsPrintRow(str, "  Number of Real inputs:", realInputs());
+        modelDiagnosticsPrintRow(str, "  Number of Integer inputs:", integerInputs());
+        modelDiagnosticsPrintRow(str, "  Number of Enum inputs:", enumInputs());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean inputs:", booleanInputs());
+        modelDiagnosticsPrintRow(str, "  Number of String inputs:", stringInputs());
         
-        str.append("Number of equations:                          " + 
-                numEquations() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of discrete variables:", discreteVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Real discrete variables:", discreteRealVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Integer discrete variables:", discreteIntegerVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Enum discrete variables:", discreteEnumVariables());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean discrete variables:", discreteBooleanVariables());
+        modelDiagnosticsPrintRow(str, "  Number of String discrete variables:", discreteStringVariables());
         
-        str.append("Number of variables with binding expression:  " + 
-                numVariablesWithBindingExp() + "\n");
-        str.append("  Number of Real variables with binding exp:  " + 
-                numRealVariablesWithBindingExp() + "\n");
-        str.append("  Number of Integer variables binding exp:    " + 
-                numIntegerVariablesWithBindingExp() + "\n");
-        str.append("  Number of Enum variables binding exp:       " + 
-                numEnumVariablesWithBindingExp() + "\n");
-        str.append("  Number of Boolean variables binding exp:    " + 
-                numBooleanVariablesWithBindingExp() + "\n");
-        str.append("  Number of String variables binding exp:     " + 
-                numStringVariablesWithBindingExp() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of equations:", equations());
+        
+        modelDiagnosticsPrintRow(str, "Number of variables with binding expression:", variablesWithBindingExp());
+        modelDiagnosticsPrintRow(str, "  Number of Real variables with binding exp:", realVariablesWithBindingExp());
+        modelDiagnosticsPrintRow(str, "  Number of Integer variables binding exp:", integerVariablesWithBindingExp());
+        modelDiagnosticsPrintRow(str, "  Number of Enum variables binding exp:", enumVariablesWithBindingExp());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean variables binding exp:", booleanVariablesWithBindingExp());
+        modelDiagnosticsPrintRow(str, "  Number of String variables binding exp:", stringVariablesWithBindingExp());
             
-        str.append("Total number of equations:                    " + 
-                (numEquations()+numVariablesWithBindingExp()) + "\n");
+        modelDiagnosticsPrintRow(str, "Total number of equations:", equations(), variablesWithBindingExp());
     
-        str.append("Number of initial equations:                  " + 
-                numInitialEquations() + "\n");
+        modelDiagnosticsPrintRow(str, "Number of initial equations:", initialEquations());
 
-        str.append("Number of event indicators in equations:      " + 
-                numEventIndicators() + "\n");
-
-        str.append("Number of event indicators in init equations: " + 
-                numRelExpInInitialEquations() + "\n");
+        str.append(String.format("Number of event indicators in equations:      %6d\n", numEventIndicators()));
+        str.append(String.format("Number of event indicators in init equations: %6d\n", numRelExpInInitialEquations()));
 
 
         return str.toString();
     }
+    
+    private static void FClass.modelDiagnosticsPrintRow(StringBuilder sb, String label, Collection<? extends FDiagnosticsNode> ... lists) {
+        int num = 0;
+        int numScalar = 0;
+        for (Collection<? extends FDiagnosticsNode> list : lists) {
+            num += list.size();
+            numScalar += countNumScalars(list);
+        }
+        sb.append(String.format("%-46s%6d(%5d scalars)\n", label, num, numScalar));
+    }
 
+    private static int FClass.countNumScalars(Collection<? extends FDiagnosticsNode> nodes) {
+        int num = 0;
+        for (FDiagnosticsNode node : nodes)
+            num += node.numScalars();
+        return num;
+    }
+
+    public interface FDiagnosticsNode {
+        public int numScalars();
+    }
+    public class FAbstractEquation implements FDiagnosticsNode {}
+    public class FVariable implements FDiagnosticsNode {}
+    
+    syn int FAbstractEquation.numScalars() = numScalarEquations();
+    syn int FVariable.numScalars() = type().numScalarElements();
+    
     public String FClass.aliasDiagnostics() {
         StringBuilder str = new StringBuilder();
         str.append("Alias sets:\n");

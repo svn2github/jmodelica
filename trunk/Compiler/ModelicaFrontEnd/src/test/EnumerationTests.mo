@@ -320,62 +320,63 @@ end EnumerationTests.EnumerationTest12;
 			methodName="diagnostics",
 			methodResult="
 Diagnostics for flattened class EnumerationTests.FlatAPIEnum1
-Number of independent constants:              6
-  Number of Real independent constants:       0
-  Number of Integer independent constants:    0
-  Number of Enum independent constants:       6
-  Number of Boolean independent constants:    0
-  Number of String independent constants:     0
-Number of dependent constants:                0
-  Number of Real dependent constants:         0
-  Number of Integer dependent constants:      0
-  Number of Enum dependent constants:         0
-  Number of Boolean dependent constants:      0
-  Number of String dependent constants:       0
-Number of independent parameters:             2
-  Number of Real independent parameters:      0
-  Number of Integer independent parameters:   0
-  Number of Enum independent parameters:      2
-  Number of Boolean independent parameters:   0
-  Number of String independent parameters:    0
-Number of dependent parameters:               2
-  Number of Real dependent parameters:        0
-  Number of Integer dependent parameters:     0
-  Number of Enum dependent parameters:        2
-  Number of Boolean dependent parameters:     0
-  Number of String dependent parameters:      0
-Number of variables :                         0
-  Number of Real variables:                   0
-  Number of Integer variables:                0
-  Number of Enum variables:                   0
-  Number of Boolean variables:                0
-  Number of String variables:                 0
-Number of Real differentiated variables:      0
-Number of Real derivative variables:          0
-Number of Real continous algebraic variables: 0
-Number of inputs:                             0
-  Number of Real inputs:                      0
-  Number of Integer inputs:                   0
-  Number of Enum inputs:                      0
-  Number of Boolean inputs:                   0
-  Number of String inputs:                    0
-Number of discrete variables :                0
-  Number of Real discrete variables:          0
-  Number of Integer discrete variables:       0
-  Number of Enum discrete variables:          0
-  Number of Boolean discrete variables:       0
-  Number of String discrete variables:        0
-Number of equations:                          0
-Number of variables with binding expression:  0
-  Number of Real variables with binding exp:  0
-  Number of Integer variables binding exp:    0
-  Number of Enum variables binding exp:       0
-  Number of Boolean variables binding exp:    0
-  Number of String variables binding exp:     0
-Total number of equations:                    0
-Number of initial equations:                  0
-Number of event indicators in equations:      0
-Number of event indicators in init equations: 0
+Number of independent constants:                   6(    6 scalars)
+  Number of Real independent constants:            0(    0 scalars)
+  Number of Real independent constants:            0(    0 scalars)
+  Number of Integer independent constants:         0(    0 scalars)
+  Number of Enum independent constants:            6(    6 scalars)
+  Number of Boolean independent constants:         0(    0 scalars)
+  Number of String independent constants:          0(    0 scalars)
+Number of dependent constants:                     0(    0 scalars)
+  Number of Real dependent constants:              0(    0 scalars)
+  Number of Integer dependent constants:           0(    0 scalars)
+  Number of Enum dependent constants:              0(    0 scalars)
+  Number of Boolean dependent constants:           0(    0 scalars)
+  Number of String dependent constants:            0(    0 scalars)
+Number of independent parameters:                  2(    2 scalars)
+  Number of Real independent parameters:           0(    0 scalars)
+  Number of Integer independent parameters:        0(    0 scalars)
+  Number of Enum independent parameters:           2(    2 scalars)
+  Number of Boolean independent parameters:        0(    0 scalars)
+  Number of String independent parameters:         0(    0 scalars)
+Number of dependent parameters:                    2(    2 scalars)
+  Number of Real dependent parameters:             0(    0 scalars)
+  Number of Integer dependent parameters:          0(    0 scalars)
+  Number of Enum dependent parameters:             2(    2 scalars)
+  Number of Boolean dependent parameters:          0(    0 scalars)
+  Number of String dependent parameters:           0(    0 scalars)
+Number of variables:                               0(    0 scalars)
+  Number of Real variables:                        0(    0 scalars)
+  Number of Integer variables:                     0(    0 scalars)
+  Number of Enum variables:                        0(    0 scalars)
+  Number of Boolean variables:                     0(    0 scalars)
+  Number of String variables:                      0(    0 scalars)
+Number of Real differentiated variables:           0(    0 scalars)
+Number of Real derivative variables:               0(    0 scalars)
+Number of Real continous algebraic variables:      0(    0 scalars)
+Number of inputs:                                  0(    0 scalars)
+  Number of Real inputs:                           0(    0 scalars)
+  Number of Integer inputs:                        0(    0 scalars)
+  Number of Enum inputs:                           0(    0 scalars)
+  Number of Boolean inputs:                        0(    0 scalars)
+  Number of String inputs:                         0(    0 scalars)
+Number of discrete variables:                      0(    0 scalars)
+  Number of Real discrete variables:               0(    0 scalars)
+  Number of Integer discrete variables:            0(    0 scalars)
+  Number of Enum discrete variables:               0(    0 scalars)
+  Number of Boolean discrete variables:            0(    0 scalars)
+  Number of String discrete variables:             0(    0 scalars)
+Number of equations:                               0(    0 scalars)
+Number of variables with binding expression:       0(    0 scalars)
+  Number of Real variables with binding exp:       0(    0 scalars)
+  Number of Integer variables binding exp:         0(    0 scalars)
+  Number of Enum variables binding exp:            0(    0 scalars)
+  Number of Boolean variables binding exp:         0(    0 scalars)
+  Number of String variables binding exp:          0(    0 scalars)
+Total number of equations:                         0(    0 scalars)
+Number of initial equations:                       0(    0 scalars)
+Number of event indicators in equations:           0
+Number of event indicators in init equations:      0
 
 Independent constants: 
  aic: number of uses: 0, isLinear: true
@@ -409,6 +410,8 @@ Alias sets:
 0 variables can be eliminated
 
 Incidence:
+
+
 
 Connection sets: 0 sets
 ")})));
