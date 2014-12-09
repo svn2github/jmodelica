@@ -245,7 +245,7 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
-    jmi_->eventPhase = 1;
+    jmi_->eventPhase = JMI_TIME_EXACT;
     jmi_->nextTimeEvent.defined = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);

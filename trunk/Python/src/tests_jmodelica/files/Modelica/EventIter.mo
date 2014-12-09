@@ -135,7 +135,16 @@ equation
   mode = if (pre(mode) == 1 or pre(mode) == 2 or forward) and w_relfric > 0 then 1 elseif (pre(mode) == -1 or pre(mode) == 2 or backward) and w_relfric < 0 then -1 else 0;
 end SingularSystem1;
 
-
+model InitialPhasing1
+    Boolean b1 = time <= 0;
+    Boolean b2;
+  initial equation
+    b2 = b1;
+  equation
+    when time > 1 then
+      b2 = b1;
+    end when;
+end InitialPhasing1;
 
 end EventIter;
 

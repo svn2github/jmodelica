@@ -292,7 +292,7 @@ def check_zeno_repeat_noevent(t, x, ownevents=True):
     xe2 = N.mod(N.log2(1-(t+1e-8)),1) > 0.5;
     (inds,) = N.nonzero(N.diff(t) == 0)
 
-    if ownevents: assert_close(t[inds], [0, 1-N.sqrt(0.5)], 1e-7)
+    if ownevents: assert_close(t[inds], [1-N.sqrt(0.5)], 1e-7)
     assert all(N.minimum(xe1, xe2) <= x)
     assert all(x <= N.maximum(xe1, xe2))
 

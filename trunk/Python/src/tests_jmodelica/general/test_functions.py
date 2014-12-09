@@ -188,7 +188,7 @@ class TestStringArray(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base('FunctionTests.mo', 
-            'FunctionTests.StringArray1', options={'inline_functions':'none', 'variability_propagation':False})
+            'FunctionTests.StringArray1', options={'inline_functions':'none', 'variability_propagation':False, 'relational_time_events':False})
 
     @testattr(stddist = True)
     def setUp(self):

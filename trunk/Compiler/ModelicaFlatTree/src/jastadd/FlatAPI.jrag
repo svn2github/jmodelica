@@ -1335,17 +1335,17 @@ aspect FlatAPI {
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInDAE() && !isTimeEventGenerating() 
+    FRelExp contributes this when generatesEventInDAE()
     to FAbstractEquation.relExpInEquation() for myFEquation();
 
     coll ArrayList<FRelExp> FStatement.relExpInStmt() 
         [new ArrayList<FRelExp>()] with add root FStatement;
-    FRelExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
+    FRelExp contributes this when generatesEventInDAE()
     to FStatement.relExpInStmt() for myFStatement();
     
     coll ArrayList<FDelayExp> FAbstractEquation.delayExpInEquation() 
         [new ArrayList<FDelayExp>()] with add root FAbstractEquation;
-    FDelayExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
+    FDelayExp contributes this when generatesEventInDAE()
     to FAbstractEquation.delayExpInEquation() for myFEquation();
     
     inh FStatement FExp.myFStatement();

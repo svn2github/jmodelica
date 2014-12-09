@@ -2510,18 +2510,11 @@ aspect CCodeGen {
         if (root().options.getBooleanOption("generate_dae"))
             return;
         if (generatesEvent(p.inInitialSystem())) {
-            boolean phased = isPhased();
             str.format("%sif (", outerIndent);
-            if (phased) {
-                str.print("(");
-            }
             if (p.insideBlock())
                 str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
             else
                 str.print("jmi->atInitial || jmi->atEvent");
-            if (phased) {
-                str.print(") && jmi->eventPhase");
-            }
             str.println(") {");
             
             String indent = p.indent(outerIndent);
@@ -2536,11 +2529,17 @@ aspect CCodeGen {
             } else {
                 str.format(", jmi->events_epsilon, ");
             }
+            boolean phased = isPhased();
             if (phased) {
+                str.print("jmi->eventPhase ? (");
                 genRelExpKindPhased(str);
-            } else {
-                genRelExpKind(str);
+                str.print(") : (");
             }
+            genRelExpKind(str);
+            if (phased) {
+                str.print(")");
+            }
+            
             str.formatln(");");
             str.formatln("%s}", outerIndent);
         }
