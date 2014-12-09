@@ -15174,6 +15174,91 @@ C_ode_derivatives
 ")})));
 end TestRelationalOp8;
 
+model TestRelationalOp9
+    function f
+        input Real[:] x;
+        output Real y;
+      algorithm
+        y := max(x);
+    end f;
+    Boolean b1 = time > f({1,2,3});
+    Boolean b2 = sample(1,f({1,2,3}));
+  
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp9",
+            description="Test correct event generation. Temp in time event calculation.",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
+$C_DAE_relations$
+static const int N_sw = $n_state_switches$ + $n_time_switches$;
+
+C_ode_time_events
+$C_ode_time_events$
+
+C_ode_derivatives
+$C_ode_derivatives$
+",
+            generatedCode="
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
+static const int N_sw = 0 + 1;
+
+C_ode_time_events
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nSamp;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+  if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(1)))) {
+    jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1));
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(1)), func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)))) {
+    nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(1))) / (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)));
+    jmi_min_time_event(&nextEvent, 1, 0, (nSamp + 1.0) * (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)) + (AD_WRAP_LITERAL(1)));
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(1)), func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)))) {
+    nSamp = floor((_t - (AD_WRAP_LITERAL(1))) / (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)));
+    jmi_min_time_event(&nextEvent, 1, 0, (nSamp + 1.0) * (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)) + (AD_WRAP_LITERAL(1)));
+  }
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(3);
+    if (SURELY_LT_ZERO(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2))))) {
+        jmi_min_time_event(&nextEvent, 1, 1, func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2));
+    }
+    *event = nextEvent;
+
+
+
+C_ode_derivatives
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(3);
+    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
+        _sw(0) = jmi_turn_switch(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_3)), _sw(0), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    _b1_0 = _sw(0);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_4, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_4, 3) = AD_WRAP_LITERAL(3);
+    _b2_1 = jmi_sample(jmi,AD_WRAP_LITERAL(1),func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_4));
+/********* Write back reinits *******/
+")})));
+end TestRelationalOp9;
+
 model StringOperations1
 	type E = enumeration(a, bb, ccc);
 	

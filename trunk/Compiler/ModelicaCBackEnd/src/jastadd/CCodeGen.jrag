@@ -4340,6 +4340,7 @@ aspect CCodeGen {
     
     @Override
     public void FRelExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
+        super.genTempVars_C(p, str, indent);
         boolean phased = isPhased();
         str.format("%sif (SURELY_LT_ZERO(", indent);
         printIndicator_C(p, str, indent);
@@ -4354,6 +4355,7 @@ aspect CCodeGen {
         str.format("%sjmi_min_time_event(&%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
         p.print(solutionForTime(), str, indent);
         str.formatln(");\n%s}", indent);
+        super.genTempFree_C(p, str, indent);
     }
     
     @Override
@@ -4371,6 +4373,7 @@ aspect CCodeGen {
                 In this case, the next time event is the next sample
                 instant.
         */
+        super.genTempVars_C(p, str, indent);
         // Case 1: time is before offset 
         str.print("  if (SURELY_LT_ZERO(_t - (");
         getOffset().prettyPrint_C(str,"");
@@ -4438,6 +4441,7 @@ aspect CCodeGen {
 
 *//*---*/
         str.print("  }\n");
+        super.genTempFree_C(p, str, indent);
     }
 
 	public void FRealVariable.genStartAttributeResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
