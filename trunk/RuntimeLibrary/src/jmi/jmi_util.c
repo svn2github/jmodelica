@@ -2388,11 +2388,11 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
         }
     } else {
         if (sw == 1.0){
-            if ((ev_ind < -eps && rel == JMI_REL_GEQ) || (ev_ind <= eps && rel == JMI_REL_GT) || (ev_ind > eps && rel == JMI_REL_LEQ) || (ev_ind >= -eps && rel == JMI_REL_LT)){
+            if ((ev_ind <= -1*eps && rel == JMI_REL_GEQ) || (ev_ind <= 0.0 && rel == JMI_REL_GT) || (ev_ind >= eps && rel == JMI_REL_LEQ) || (ev_ind >= 0.0 && rel == JMI_REL_LT)){
                 sw = 0.0;
             }
         }else{
-            if ((ev_ind >= -eps && rel == JMI_REL_GEQ) || (ev_ind > eps && rel == JMI_REL_GT) || (ev_ind <= eps && rel == JMI_REL_LEQ) || (ev_ind < -eps && rel == JMI_REL_LT)){
+            if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind >= eps && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind <= -1*eps && rel == JMI_REL_LT)){
                 sw = 1.0;
             }
         }
