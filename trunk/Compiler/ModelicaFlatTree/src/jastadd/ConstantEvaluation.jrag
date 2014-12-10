@@ -2814,8 +2814,9 @@ aspect ConstantEvaluation {
 			val = getBindingExp().ceval(evaluator);
 		else
 			val = defaultCValue(evaluator, inParameterRecord);
-		if (isReal())
-			val = val.convertReal();
+        if (isReal() && !val.isUnknown()) {
+            val = val.convertReal();
+        }
 		return val;
 	}
 
