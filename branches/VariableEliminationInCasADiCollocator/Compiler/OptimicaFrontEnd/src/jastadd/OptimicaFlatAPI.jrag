@@ -1037,20 +1037,20 @@ aspect OptimicaFreeParameters {
 	
 	syn int FClass.numFreeIndependentRealParameters() = 
 		freeIndependentRealParameters().size();
-	syn lazy ArrayList<FRealVariable> FClass.freeIndependentRealParameters() =
-      intersectFVColl(reals(), freeIndependentParameters());
+	syn lazy Collection<FRealVariable> FClass.freeIndependentRealParameters() =
+            filterCollection(freeIndependentParameters(), REAL_VARIABLE_FILTER);
 
 	syn int FClass.numFreeIndependentIntegerParameters() = freeIndependentIntegerParameters().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.freeIndependentIntegerParameters() =
-      intersectFVColl(integers(), freeIndependentParameters());
+	syn lazy Collection<FIntegerVariable> FClass.freeIndependentIntegerParameters() =
+            filterCollection(freeIndependentParameters(), INTEGER_VARIABLE_FILTER);
 
 	syn int FClass.numFreeIndependentEnumParameters() = freeIndependentEnumParameters().size();
-	syn lazy ArrayList<FEnumVariable> FClass.freeIndependentEnumParameters() =
-      intersectFVColl(enums(), freeIndependentParameters());
+	syn lazy Collection<FEnumVariable> FClass.freeIndependentEnumParameters() =
+            filterCollection(freeIndependentParameters(), ENUM_VARIABLE_FILTER);
 
 	syn int FClass.numFreeIndependentBooleanParameters() = freeIndependentBooleanParameters().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.freeIndependentBooleanParameters() =
-      intersectFVColl(booleans(), freeIndependentParameters());
+	syn lazy Collection<FBooleanVariable> FClass.freeIndependentBooleanParameters() =
+            filterCollection(freeIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
 	
 	/**
 	 * Get a list of all dependent parameters that depends on
@@ -1125,7 +1125,7 @@ aspect OptimicaFreeParameters {
 	}
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.realFreeParameters() = 
-		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().reals(),freeParameters()));
+		FClass.intersectFVSet(freeParameters(), myFClass().reals());
 	
 }
 

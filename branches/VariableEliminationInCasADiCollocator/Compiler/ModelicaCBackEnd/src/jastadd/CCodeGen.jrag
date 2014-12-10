@@ -2510,37 +2510,41 @@ aspect CCodeGen {
         if (root().options.getBooleanOption("generate_dae"))
             return;
         if (generatesEvent(p.inInitialSystem())) {
-            boolean phased = isPhased();
             str.format("%sif (", outerIndent);
-            if (phased) {
-                str.print("(");
-            }
             if (p.insideBlock())
                 str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
             else
                 str.print("jmi->atInitial || jmi->atEvent");
-            if (phased) {
-                str.print(") && jmi->eventPhase");
-            }
             str.println(") {");
             
             String indent = p.indent(outerIndent);
             str.print(indent);
             printSwitchMacro_C(p, str, indent);
-            str.print(" = jmi_turn_switch(");
+            boolean time = isTimeEventGenerating();
+            if (time) {
+                str.print(" = jmi_turn_switch_time(");
+            } else {
+                str.print(" = jmi_turn_switch(");
+            }
             printIndicator_C(p, str, indent);
             str.print(", ");
             printSwitchMacro_C(p, str, indent);
-            if (isTimeEventGenerating()) {
+            if (time) {
                 str.format(", JMI_ALMOST_EPS, ");
             } else {
                 str.format(", jmi->events_epsilon, ");
             }
+            boolean phased = isPhased();
             if (phased) {
+                str.print("jmi->eventPhase ? (");
                 genRelExpKindPhased(str);
-            } else {
-                genRelExpKind(str);
+                str.print(") : (");
             }
+            genRelExpKind(str);
+            if (phased) {
+                str.print(")");
+            }
+            
             str.formatln(");");
             str.formatln("%s}", outerIndent);
         }
@@ -2653,41 +2657,12 @@ aspect CCodeGen {
         p.printPostSteps(getFExp(), str, indent);
     }
     
-    
-    public void FDelayExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printVarDecls(getFExp(), str, indent);
-        } else {
-            super.genVarDecls_C(p, str, indent);
-        }
-    }
-    
-    public void FDelayExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPreSteps(getFExp(), str, indent);
-        } else {
-            super.genTempVars_C(p, str, indent);
-        }
-    }
-    
-    public void FDelayExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPostSteps(getFExp(), str, indent);
-        } else {
-            super.genTempFree_C(p, str, indent);
-        }
-    }
-    
     public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.print(getFExp(), str, indent);
-        } else {
-            str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
-            p.print(getFExp(), str, indent);
-            str.print(", ");
-            p.print(getDelay(), str, indent);
-            str.print(")");
-        }
+        str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
+        p.print(getFExp(), str, indent);
+        str.print(", ");
+        p.print(getDelay(), str, indent);
+        str.print(")");
     }
     
     /**
@@ -2772,39 +2747,24 @@ aspect CCodeGen {
     
     
     public void FSpatialDistExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-            p.printVarDecls(getInitialValues(), str, indent);
-        } else {
-            p.printVarDecls(getIn0(), str, indent);
-            p.printVarDecls(getIn1(), str, indent);
-            p.printVarDecls(getX(), str, indent);
-            p.printVarDecls(getPositiveVelocity(), str, indent);
-        }
+        p.printVarDecls(getIn0(), str, indent);
+        p.printVarDecls(getIn1(), str, indent);
+        p.printVarDecls(getX(), str, indent);
+        p.printVarDecls(getPositiveVelocity(), str, indent);
     }
     
     public void FSpatialDistExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-            p.printPreSteps(getInitialValues(), str, indent);
-        } else {
-            p.printPreSteps(getIn0(), str, indent);
-            p.printPreSteps(getIn1(), str, indent);
-            p.printPreSteps(getX(), str, indent);
-            p.printPreSteps(getPositiveVelocity(), str, indent);
-        }
+        p.printPreSteps(getIn0(), str, indent);
+        p.printPreSteps(getIn1(), str, indent);
+        p.printPreSteps(getX(), str, indent);
+        p.printPreSteps(getPositiveVelocity(), str, indent);
     }
     
     public void FSpatialDistExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.inInitialSystem()) {
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-            p.printPostSteps(getInitialValues(), str, indent);
-        } else {
-            p.printPostSteps(getIn0(), str, indent);
-            p.printPostSteps(getIn1(), str, indent);
-            p.printPostSteps(getX(), str, indent);
-            p.printPostSteps(getPositiveVelocity(), str, indent);
-        }
+        p.printPostSteps(getIn0(), str, indent);
+        p.printPostSteps(getIn1(), str, indent);
+        p.printPostSteps(getX(), str, indent);
+        p.printPostSteps(getPositiveVelocity(), str, indent);
     }
     
     public void FSpatialDistExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -2813,61 +2773,28 @@ aspect CCodeGen {
 //            jmi_boolean positiveVelocity);
         
         boolean exp = functionCallIsExp();
-        
-        if (p.inInitialSystem()) {
-            if (exp) {
-                prettyPrintInitial_C(p, str, indent, false);
-            } else {
-                if (myLefts().get(0).hasFExp()) {
-                    str.print(indent);
-                    str.print(myLefts().get(0).name_C());
-                    str.print(" = ");
-                    prettyPrintInitial_C(p, str, indent, false);
-                    str.println(";");
-                }
-                if (myLefts().get(1).hasFExp()) {
-                    str.print(indent);
-                    str.print(myLefts().get(1).name_C());
-                    str.print(" = ");
-                    prettyPrintInitial_C(p, str, indent, true);
-                    str.println(";");
-                }
-            }
-        } else {
-            if (!exp) {
-                str.print(indent);
-            }
-            str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
-            if (exp) {
-                str.print("NULL, NULL");
-            } else {
-                prettyPrintCallOutputs_C(p, str, indent, 2, "");
-            }
-            str.print(", ");
-            p.print(getIn0(), str, indent);
-            str.print(", ");
-            p.print(getIn1(), str, indent);
-            str.print(", ");
-            p.print(getX(), str, indent);
-            str.print(", ");
-            p.print(getPositiveVelocity(), str, indent);
-            str.print(")");
-            
-            if (!exp) {
-                str.println(";");
-            }
+        if (!exp) {
+            str.print(indent);
         }
-    }
-    
-    public void FSpatialDistExp.prettyPrintInitial_C(CodePrinter p, CodeStream str, String indent, boolean second) {
-        int size = getInitialValues().getArray().length;
-        str.print("COND_EXP_EQ(");
-        p.print(getPositiveVelocity(), str, indent);
-        str.print(", JMI_TRUE, ");
-        p.print(getInitialValues().getArray().get(second ? size : 1), str, indent);
+        str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
+        if (exp) {
+            str.print("NULL, NULL");
+        } else {
+            prettyPrintCallOutputs_C(p, str, indent, 2, "");
+        }
         str.print(", ");
-        p.print(getInitialValues().getArray().get(second ? 1 : size), str, indent);
+        p.print(getIn0(), str, indent);
+        str.print(", ");
+        p.print(getIn1(), str, indent);
+        str.print(", ");
+        p.print(getX(), str, indent);
+        str.print(", ");
+        p.print(getPositiveVelocity(), str, indent);
         str.print(")");
+        
+        if (!exp) {
+            str.println(";");
+        }
     }
 	
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
@@ -4131,10 +4058,10 @@ aspect CCodeGen {
 	public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(this, str, indent);
 		FIdUseExp left = (FIdUseExp)getLeft();
-		String oldindent = indent; // needed if left is EO
+        FAbstractVariable fv = left.myFV();
         if (left.myFV().isExternalObject()) {
-            str.print(indent + "if (!jmi->dep_extobjs_initialized) { \n");
-            indent = p.indent(indent);
+            FExternalObjectVariable eo = (FExternalObjectVariable) fv;
+            eo.genDestructorCall_C(p, str, indent);
         }
         str.print(indent);
 		p.print(left.getFIdUse(), str, "");
@@ -4148,12 +4075,20 @@ aspect CCodeGen {
 		}
 		str.print(";\n");
 		
-		if (left.myFV().isExternalObject()) {
-		    str.print(oldindent + "}\n");
-		}
 		p.printPostSteps(this, str, indent);
 	}
-
+    
+    public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasDestructorCall()) {
+            str.formatln("%sif (%s != NULL) {", indent, name_C());
+            p.print(getDestructorCall(), str, p.indent(indent));
+            str.formatln("%s%s = NULL;", p.indent(indent), name_C());
+            str.formatln("%s}", indent);
+        } else {
+            /* Alias external objects does not call constructors so no destructor call is needed. */
+        }
+    }
+    
     @Override
     public void FFunctionCallEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         genBlock_C(p, str, indent, null, null, null);
@@ -4409,6 +4344,7 @@ aspect CCodeGen {
     
     @Override
     public void FRelExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
+        super.genTempVars_C(p, str, indent);
         boolean phased = isPhased();
         str.format("%sif (SURELY_LT_ZERO(", indent);
         printIndicator_C(p, str, indent);
@@ -4423,6 +4359,7 @@ aspect CCodeGen {
         str.format("%sjmi_min_time_event(&%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
         p.print(solutionForTime(), str, indent);
         str.formatln(");\n%s}", indent);
+        super.genTempFree_C(p, str, indent);
     }
     
     @Override
@@ -4440,6 +4377,7 @@ aspect CCodeGen {
                 In this case, the next time event is the next sample
                 instant.
         */
+        super.genTempVars_C(p, str, indent);
         // Case 1: time is before offset 
         str.print("  if (SURELY_LT_ZERO(_t - (");
         getOffset().prettyPrint_C(str,"");
@@ -4507,6 +4445,7 @@ aspect CCodeGen {
 
 *//*---*/
         str.print("  }\n");
+        super.genTempFree_C(p, str, indent);
     }
 
 	public void FRealVariable.genStartAttributeResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
@@ -4590,8 +4529,8 @@ aspect CCodeGen {
 		return Integer.toString(intValue());
 	}
 	
-	public void FVariable.genStartValue_C(String indent, CodeStream str) {
-		printer_C.printPreSteps(this, str, indent);
+    public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(this, str, indent);
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
@@ -4599,27 +4538,18 @@ aspect CCodeGen {
 			setBindingExp(exp = type().zeroLiteral());
 		OptionRegistry opt = root().options;
 		str.print("(");
-		exp.prettyPrint_C(str,"");
+        p.print(exp, str, indent);
 		str.print(")");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
 		if (noExp)
 			setBindingExpOpt(new Opt());
 		str.print(";\n");
-        printer_C.printPostSteps(this, str, indent);
+        p.printPostSteps(this, str, indent);
 	}
 	
-	public void FStringVariable.genStartValue_C(String indent, CodeStream str) {
+    public void FStringVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
 		// Skip string variables
-	}
-	
-	public void FExternalObjectVariable.genStartValue_C(String indent, CodeStream str) {
-		str.print(indent + "if (!jmi->indep_extobjs_initialized) { \n");
-		printer_C.printVarDecls(this, str, printer_C.indent(indent));
-		printer_C.printPreSteps(this, str, printer_C.indent(indent));
-		super.genStartValue_C(printer_C.indent(indent), str);
-		str.print(indent + "}\n");
-		printer_C.printPostSteps(this, str, printer_C.indent(indent));
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(CodeStream str) {

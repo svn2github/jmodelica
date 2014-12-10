@@ -91,16 +91,12 @@ namespace ModelicaCasADi
              * @param string identifier, typically <packagename>_<classname>, default empty string */
             void initializeModel(std::string identifier = "");
             ~Model() {
+                //std::cout<<"\nDELETE_MODEL\n";
                 // Delete all the Model's variables, since they are OwnedNodes with the Model as owner.
                 for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
                     delete *it;
                     *it = NULL;
                 }
-                // Delete all the Model's variables that were moved to the eliminated container, since they are OwnedNodes with the Model as owner.
-                /*for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
-                    delete *it;
-                    *it = NULL;
-		}*/
             }
             /** Evaluate the value of a parameter */
             double get(std::string varName);
@@ -268,12 +264,6 @@ namespace ModelicaCasADi
              */
             void printBLT(std::ostream& out, bool with_details=false){equations_->printBLT(out,with_details);}
             #endif
-            /** Work around ownership of variables. */
-            void addEntryToNodeVariableMap(const casadi::SharedObjectNode* node, const Variable* var)
-            {mxnodeToVariable.insert(std::pair<const casadi::SharedObjectNode*, const Variable*>(node,var));}
-            /** Work around ownership of variables. */
-            const std::map<const casadi::SharedObjectNode*, const Variable* >& getNodeToVariableMap() const {return mxnodeToVariable;}
-
             /**
              * Append a variable to the list of variables to eliminate
              * @Param Variable
@@ -297,11 +287,7 @@ namespace ModelicaCasADi
             {
                 if(equations_->hasBLT()) {
                     equations_->solveBlocksWithLinearSystems();
-                    for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it) {
-                        if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")) {
-                            (*it)->setAsEliminable();
-                        }
-                    }
+                    setEliminableVariables();
                 }
             }
             //To be deleted. Used just for testing
@@ -320,8 +306,6 @@ namespace ModelicaCasADi
             casadi::MX timeVar;
             /// Vector containing pointers to all variables.
             std::vector< Variable * > z;
-            /// Vector containing pointers to all variables.
-            //std::vector< Variable * > eliminated_z;
             /// Vector containing pointers to all initial equations
             std::vector< Ref<Equation> > initialEquations;
             /// A map for ModelFunction, key is ModelFunction's name.
@@ -338,6 +322,11 @@ namespace ModelicaCasADi
             VariableKind classifyInternalStringVariable(Ref<Variable> var) const;
             VariableKind classifyInputVariable(Ref<Variable> var) const;
             VariableKind classifyInternalVariable(Ref<Variable> var) const;
+            
+            /**
+            * Mark variables as eliminables after transfering BLT
+            **/
+            virtual void setEliminableVariables();
 
             bool checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const;
             /// May assign derivative variable to a state variable.
@@ -355,8 +344,6 @@ namespace ModelicaCasADi
             void handleVariableTypeForAddedVariable(Ref<Variable> var);
             void assignVariableTypeToVariable(Ref<Variable> var);
 
-            ///Map to build the blocks with CasADiInterface Variables
-            std::map<const casadi::SharedObjectNode*, const Variable* > mxnodeToVariable;
             ///FlatEquations or BLT
             Ref<Equations> equations_;
             /// Map with solutions of eliminated variables 

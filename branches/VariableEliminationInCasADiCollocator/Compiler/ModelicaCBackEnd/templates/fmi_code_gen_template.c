@@ -327,7 +327,7 @@ $CAD_dae_init_add_blocks_residual_functions$
     return 0;
 }
 
-int jmi_terminate(jmi_t* jmi) {
+int jmi_destruct_external_objs(jmi_t* jmi) {
 $C_destruct_external_object$
     return 0;
 }

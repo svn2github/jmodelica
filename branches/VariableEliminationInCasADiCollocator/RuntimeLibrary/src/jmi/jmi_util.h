@@ -161,8 +161,8 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 
 
 /* Record creation macro */
@@ -1195,8 +1195,6 @@ struct jmi_t {
 #define JMI_ACTIVE_VAR_BUFS_NUM 3
     jmi_real_t *dz_active_variables_buf[JMI_ACTIVE_VAR_BUFS_NUM];  /**< \brief  This vector is the buffer used by dz_active_variables */
     void** ext_objs;                     /**< \brief This vector contains the external object pointers. */
-    int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
-    int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
     jmi_real_t* nominals;                             /**< \brief Nominal values of differentiated states. */
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
@@ -1531,6 +1529,8 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  * @return The new switch value
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+
+jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
 
 /**
  * \brief Check if file exists.

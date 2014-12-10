@@ -552,7 +552,7 @@ class Test_FMUModelME2:
         coupled.initialize()
 
         assert len(bounce.get_event_indicators()) == 1
-        assert len(coupled.get_event_indicators()) == 31
+        assert len(coupled.get_event_indicators()) == 27
 
         event_ind = bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],10.000000)

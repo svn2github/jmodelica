@@ -53,23 +53,22 @@ int main(int argc, char ** argv)
       ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options = new ModelicaCasADi::CompilerOptionsWrapper();
       options->setStringOption("inline_functions", "none");
       options->setBooleanOption("automatic_tearing", false);
-      options->setBooleanOption("generate_html_diagnostics", true);
+      options->setBooleanOption("equation_sorting", true);
       //Model
       ModelicaCasADi::Ref<ModelicaCasADi::Model> model = new ModelicaCasADi::Model();
       transferModelFromModelicaCompiler(model, 
                                         modelName, 
                                         modelFiles,
                                         options, 
-                                        log_level, 
-                                        true);
+                                        log_level);
                         
-      model->print(std::cout);
-      
-      ModelicaCasADi::Ref<ModelicaCasADi::Block> b = model->getBlock(0);
-      b->printBlock(std::cout,true);
-      b->solveLinearSystem();
+      //model->print(std::cout);
+      model->printBLT(std::cout,true);
+      //ModelicaCasADi::Ref<ModelicaCasADi::Block> b = model->getBlock(0);
+      //b->printBlock(std::cout,true);
+      //b->solveLinearSystem();
       //model->printBLT(std::cout,true);
-      b->printBlock(std::cout,true);
+      //b->printBlock(std::cout,true);
       
       /*std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Variable> > eliminables = model->getEliminableVariables();
       

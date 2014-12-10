@@ -939,7 +939,7 @@ aspect BLT{
                 if (!first)
                     sb.append(separator);
                 first = false;
-                sb.append(var.name());
+                sb.append(var.displayName());
             }
             return sb.toString();
         }
@@ -2149,7 +2149,7 @@ aspect BLTPrettyPrinting {
 
     @Override
     public void SolvedScalarEquationBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
-        str.format("%s%s := ", indent, fv.name());
+        str.format("%s%s := ", indent, fv.displayName());
         p.print(solution(), str, indent);
         equation().getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
         str.println();
@@ -2255,7 +2255,7 @@ aspect BLTPrettyPrinting {
             str.print(first ? firstIndent : otherIndent);
             if (label != null)
                 str.format("(%s) ", label);
-            str.print(fv.name());
+            str.print(fv.displayName());
             first = false;
             if (printAttributes) {
                 str.print(" (");
@@ -2282,7 +2282,7 @@ aspect IVPrettyPrinting{
     @Override
     protected void TornEquationBlock.printIterationVariables(CodeStream str) {
         for (FVariable var : localUnsolvedVariables())
-            str.println(var.name());
+            str.println(var.displayName());
     }
 
 }
@@ -2538,7 +2538,7 @@ aspect AutomaticTearing {
                 SolvingEq res = bestIter.getMatching();
                 bestIter.isIter(true);
                 res.isRes(true);
-                ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
+                ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
                 Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan();
                 for (SCCBlock<SolvingEq, SolvingVar> block : blt) {
@@ -2572,7 +2572,7 @@ aspect TearingPrinting {
             for (FVariable var : block.allLocalVariables()) {
                 str.print(" (");
                 str.print(block.producer().symbol());
-                str.print(") " + (counter++) + " " + var.name() + " (");
+                str.print(") " + (counter++) + " " + var.displayName() + " (");
                 var.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
                 str.println(")");
                 str.print("   (");

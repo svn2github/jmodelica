@@ -1047,7 +1047,7 @@ int jmi_update_and_terminate(jmi_t* jmi) {
         jmi->recomputeVariables = 0;
     }
 
-    jmi_terminate(jmi);
+    jmi_destruct_external_objs(jmi);
     jmi->user_terminate = 1;
 
     return 0;

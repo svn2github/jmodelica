@@ -2411,10 +2411,7 @@ model SpatialDist2
             name="SpatialDist2",
             description="Check type error for spatialDistribution().",
             errorMessage="
-2 errors found:
-Error: in file '...':
-Compliance error at line 2408, column 15:
-  The spatialDistribution() function-like operator is not supported
+1 errors found:
 Error: in file '...':
 Compliance error at line 2408, column 15:
   The spatialDistribution() function-like operator is not supported vectorized in function call equations

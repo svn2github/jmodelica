@@ -354,7 +354,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
  * @param jmi A pointer to the jmi_t struct to clean up.
  * @return Error code.
  */
-int jmi_terminate(jmi_t* jmi);
+int jmi_destruct_external_objs(jmi_t* jmi);
 
 /**
  * Deallocates memory and deletes a jmi_t struct.
@@ -1501,6 +1501,11 @@ int jmi_set_start_values(jmi_t *jmi);
 /* Initialize delay interface 
  * Called when initializing jmi struct */
 int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches);
+
+/* Tear down delay interface
+ * Called when destroying jmi struct */
+int jmi_destroy_delay_if(jmi_t* jmi);
+
 
 /* Initialize delay blocks 
  * Called after model initalization */

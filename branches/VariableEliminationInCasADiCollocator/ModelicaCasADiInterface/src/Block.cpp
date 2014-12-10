@@ -55,6 +55,13 @@ namespace ModelicaCasADi
             }
         }
     }
+    
+    void Block::addNotClassifiedEquation(Ref<Equation> eq){
+        equations.push_back(eq);
+    }
+    void Block::addUnsolvedEquation(Ref<Equation> eq){
+        unSolvedEquations.push_back(eq);
+    }
 
     void Block::printBlock(std::ostream& out,bool withData/*=false*/) const{
     out<<"----------------------------------------\n";
@@ -261,33 +268,45 @@ void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToEx
         Expressions.push_back(it->second);
     }
 
-    //Get expresions from equations
-    if(!isSolvable()) {
-        for(std::vector< Ref<Equation> >::iterator it=unSolvedEquations.begin();
-        it != unSolvedEquations.end();++it) {
-            Expressions.push_back((*it)->getLhs());
-            Expressions.push_back((*it)->getRhs());
-        }
+    //Get expresions from equations 
+    for(std::vector< Ref<Equation> >::iterator it=equations.begin();
+    it != equations.end();++it) {
+        Expressions.push_back((*it)->getLhs());
+        Expressions.push_back((*it)->getRhs());
     }
     
+    //Get expresions from unsolvedEquations
+    for(std::vector< Ref<Equation> >::iterator it=unSolvedEquations.begin();
+    it != unSolvedEquations.end();++it) {
+        Expressions.push_back((*it)->getLhs());
+        Expressions.push_back((*it)->getRhs());
+    }
     std::vector<casadi::MX> subExpressions = casadi::substitute(Expressions,varstoSubstitute,expforsubstitutition);
     
     //retrive substitutions to constainers
     for(int i=0;i<keys.size();++i) {
         variableToSolution_[keys[i]]=subExpressions[i];
     }
-    //update unsolved expressions
-    if(!isSolvable()) {
-        int j=0;
-        for(int i=keys.size();i<subExpressions.size();i+=2) {
-            unSolvedEquations[j]->setLhs(subExpressions[i]);
-            unSolvedEquations[j]->setRhs(subExpressions[i+1]);
-            ++j;
-        }
+    
+    //update equations
+    int j=0;
+    for(int i=keys.size();i<2*equations.size()+keys.size();i+=2) {
+        equations[j]->setLhs(subExpressions[i]);
+        equations[j]->setRhs(subExpressions[i+1]);
+        ++j;
     }
-
-    //STILL MISSING THE SUBSTITUTIONS IN THE JACOBIAN
-
+    
+    //update unsolved equations
+    j=0;
+    for(int i=2*equations.size()+keys.size();i<2*equations.size()+keys.size()+2*unSolvedEquations.size();i+=2) {
+        unSolvedEquations[j]->setLhs(subExpressions[i]);
+        unSolvedEquations[j]->setRhs(subExpressions[i+1]);
+        ++j;
+    }
+    
+    //Recomputes jacobian with the updated expressions
+    computeJacobianCasADi();
+    
 }
 
 

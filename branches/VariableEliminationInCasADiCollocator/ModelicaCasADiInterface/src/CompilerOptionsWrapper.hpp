@@ -34,6 +34,8 @@ class CompilerOptionsWrapper: public RefCountedNode {
         void setIntegerOption(std::string opt, int val);
         void setRealOption(std::string opt, double val);
         
+        bool getBooleanOption(std::string opt);
+        
         void addStringOption(std::string opt, std::string val);
         void addBooleanOption(std::string opt, bool val);
         void addIntegerOption(std::string opt, int val);

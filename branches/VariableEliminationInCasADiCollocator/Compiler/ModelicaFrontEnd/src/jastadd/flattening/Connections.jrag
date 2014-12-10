@@ -70,7 +70,7 @@ aspect Connections {
         when (rewriteStreams) to FExp {
             // Always create expression from the connection set where the variable is an inside connector. 
             String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
-            ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
+            ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
             return cs.createInStreamExp(name);
         }
     }
@@ -421,9 +421,37 @@ aspect Connections {
 	
 		private ArrayList<ConnectionSet> list = new ArrayList<ConnectionSet>();
 		private ArrayList<EqualityConstraintConnection> equalityConstraints = new ArrayList<EqualityConstraintConnection>();
-		private Map<ConnectionSetEntry, ConnectionSet> entryMap = new HashMap<ConnectionSetEntry, ConnectionSet>();
+		private Map<ConnectionSetEntry, ConnectionSet> cseMap = new HashMap<ConnectionSetEntry, ConnectionSet>();
+		private Map<String, CSENameMapEntry> cseStreamMap = new HashMap<String, CSENameMapEntry>();
 		private OverconstrainedConnectionGraph graph = null;
 		private ExpandableConnectorSets expandable = null;
+		
+        private static class CSENameMapEntry {
+            private ConnectionSetEntry outsideCSE = null;
+            private ConnectionSet outside = null;
+            private ConnectionSetEntry insideCSE = null;
+            private ConnectionSet inside = null;
+        }
+
+        private void updateCSEMapEntry(ConnectionSetEntry cse, ConnectionSet newValue) {
+            cseMap.put(cse, newValue);
+            if (cse.isStream()) {
+                for (String name : cse.names()) {
+                    CSENameMapEntry entry = cseStreamMap.get(name);
+                    if (entry == null) {
+                        entry = new CSENameMapEntry();
+                        cseStreamMap.put(name, entry);
+                    }
+                    if (cse.isOutside()) {
+                        entry.outsideCSE = cse;
+                        entry.outside = newValue;
+                    } else {
+                        entry.insideCSE = cse;
+                        entry.inside = newValue;
+                    }
+                }
+            }
+        }
 		
 		public ArrayList<ConnectionSet> getConnectionSetList() {
 			return list;
@@ -507,7 +535,7 @@ aspect Connections {
             if (getConnectionSet(entry) == null) {
                 ConnectionSet set = ConnectionSet.create(entry);
                 list.add(set);
-                entryMap.put(entry, set);
+                updateCSEMapEntry(entry, set);
             }
         }
 		
@@ -515,13 +543,13 @@ aspect Connections {
 			ConnectionSet set = ConnectionSet.create(entryA);
 			set.add(entryB);
 			list.add(set);
-			entryMap.put(entryA, set);
-			entryMap.put(entryB, set);
+			updateCSEMapEntry(entryA, set);
+			updateCSEMapEntry(entryB, set);
 		}
 		
 		private void add(ConnectionSet set, ConnectionSetEntry entry) {
 			set.add(entry);
-			entryMap.put(entry, set);
+			updateCSEMapEntry(entry, set);
 		}
 		
 		private void merge(ConnectionSet setA, ConnectionSet setB) {
@@ -531,22 +559,23 @@ aspect Connections {
 				setB = tmp;
 			}
 			for (ConnectionSetEntry entry : setB)
-				entryMap.put(entry, setA);
+			    updateCSEMapEntry(entry, setA);
 			setA.addAll(setB);
 			list.remove(setB);
 		}
 		
 		public ConnectionSet getConnectionSet(ConnectionSetEntry cse) {
-			return entryMap.get(cse);
+			return cseMap.get(cse);
 		}
 
-		public ConnectionSet getConnectionSet(String name, boolean outside) {
-			for (ConnectionSet set : list) {
-				if (set.getConnectionSetEntry(name,outside)!=null) {
-					return set;
-				}		
-			}
-			return null;
+		public ConnectionSet getStreamConnectionSet(String name, boolean outside) {
+            CSENameMapEntry entry = cseStreamMap.get(name);
+            if (entry == null)
+                return null;
+            if (outside)
+                return entry.outside;
+            else
+                return entry.inside;
 		}
 
 		public ArrayList<ConnectionSetEntry> getFlowVariables(String prefix) {
@@ -641,6 +670,13 @@ aspect Connections {
 
         public String name() {
            return fqName.name();
+        }
+        
+        public String[] names() {
+            if (scalarNames != null)
+                return scalarNames;
+            else
+                return new String[] {name()};
         }
 
         public String prefix() {

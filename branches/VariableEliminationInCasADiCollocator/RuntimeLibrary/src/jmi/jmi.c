@@ -193,8 +193,6 @@ int jmi_init(jmi_t** jmi,
     *(jmi_->dz) = (jmi_real_t*)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
     
     jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
-    jmi_->indep_extobjs_initialized = 0;
-    jmi_->dep_extobjs_initialized = 0;
     jmi_->block_level = 0;
     jmi_->dz_active_index = 0;
     for (i=0;i<JMI_ACTIVE_VAR_BUFS_NUM;i++) {
@@ -247,7 +245,7 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
-    jmi_->eventPhase = 1;
+    jmi_->eventPhase = JMI_TIME_EXACT;
     jmi_->nextTimeEvent.defined = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
@@ -308,13 +306,11 @@ int jmi_delete(jmi_t* jmi){
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
+    jmi_destruct_external_objs(jmi);
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
 
-    for (i=0; i < jmi->n_delays; i++) {
-        jmi_delay_delete(jmi, i);
-    }
-    free(jmi->delays);
+    jmi_destroy_delay_if(jmi);
 
     return 0;
 }
@@ -348,6 +344,21 @@ int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_
     return 0;
 }
 
+int jmi_destroy_delay_if(jmi_t* jmi) {
+    int i;
+
+    for (i=0; i < jmi->n_delays; i++) {
+        jmi_delay_delete(jmi, i);
+    }
+    free(jmi->delays);
+
+    for (i=0; i < jmi->n_spatialdists; i++) {
+        jmi_spatialdist_delete(jmi, i);
+    }
+    free(jmi->spatialdists);
+
+    return 0;
+}
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;

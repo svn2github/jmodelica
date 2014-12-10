@@ -1605,7 +1605,7 @@ fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference v
 
 fmiStatus fmi1_me_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
-    jmi_terminate(((fmi_t *)c)->jmi);
+    jmi_destruct_external_objs(((fmi_t *)c)->jmi);
     return fmiOK;
 }
 

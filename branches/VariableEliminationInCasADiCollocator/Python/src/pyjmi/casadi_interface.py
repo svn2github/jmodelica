@@ -40,7 +40,7 @@ if modelicacasadi_present:
     from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
 
 def transfer_model(class_name, file_name=[],
-                   compiler_options={}, compiler_log_level='warning', blt=False):
+                   compiler_options={}, compiler_log_level='warning'):
     """ 
     Compiles and transfers a model to the ModelicaCasADi interface. 
     
@@ -94,13 +94,12 @@ def transfer_model(class_name, file_name=[],
     model = Model() # no wrapper exists for Model yet
     _transfer_model(model, class_name=class_name, file_name=file_name,
                     compiler_options=compiler_options,
-                    compiler_log_level=compiler_log_level, 
-                    with_blt=blt)
+                    compiler_log_level=compiler_log_level)
     return model
 
 def transfer_optimization_problem(class_name, file_name=[],
                                   compiler_options={}, compiler_log_level='warning',
-                                  accept_model=False,blt=False):
+                                  accept_model=False):
     """ 
     Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
     
@@ -159,8 +158,7 @@ def transfer_optimization_problem(class_name, file_name=[],
     _transfer_optimization_problem(op, class_name=class_name, file_name=file_name,
                                    compiler_options=compiler_options,
                                    compiler_log_level=compiler_log_level,
-                                   accept_model=accept_model,
-                                   with_blt=blt)
+                                   accept_model=accept_model)
     return op
 
 def transfer_to_casadi_interface(*args, **kwargs):

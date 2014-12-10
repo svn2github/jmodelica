@@ -337,7 +337,7 @@ int jmi_new(jmi_t** jmi) {
 	return 0;
 }
 
-int jmi_terminate(jmi_t* jmi) {
+int jmi_destruct_external_objs(jmi_t* jmi) {
 	return 0;
 }
 

@@ -209,6 +209,7 @@ class Test_Events:
         compile_fmu("EventIter.EnhancedEventIteration1", file_name)
         compile_fmu("EventIter.EnhancedEventIteration2", file_name)
         compile_fmu("EventIter.SingularSystem1", file_name)
+        compile_fmu("EventIter.InitialPhasing1", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -259,6 +260,13 @@ class Test_Events:
         nose.tools.assert_almost_equal(res["y"][-1],1.58385,4)
         nose.tools.assert_almost_equal(res["z"][-1], 0.0)
         nose.tools.assert_almost_equal(res["w"][-1], 1.0)
+    
+    @testattr(stddist = True)
+    def test_initial_phasing_1(self):
+        model = load_fmu("EventIter_InitialPhasing1.fmu")
+        res = model.simulate(final_time=0.1)
+        nose.tools.assert_almost_equal(res["b1"][0], 0.0)
+        nose.tools.assert_almost_equal(res["b2"][0], 1.0)
 
 class Test_Relations:
     @classmethod

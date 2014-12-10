@@ -99,6 +99,16 @@ equation
   connect(u, plant.load);
 end Startup6;
 
+model MPCReference
+  extends CombinedCycle.Optimization.Plants.CC0D_WarmStartUp;
+end MPCReference;
+
+optimization MPC (objectiveIntegrand=1*((p-8.35e6)/1e6)^2 + 0.5*(load-1)^2, startTime=0,finalTime=4000)
+  extends MPCReference(sigma(max=sigma_max),load(min=0,max=1));
+  parameter Real sigma_max = 2.6e8;
+end MPC;
+
+
 model Startup6Verification
 	CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant;
 	Modelica.Blocks.Interfaces.RealInput du;

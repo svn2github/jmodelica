@@ -157,10 +157,9 @@ namespace ModelicaCasADi
 
     template <typename CStruct, typename TModel>
         void transferModel(Ref<TModel> m, string modelName, const vector<string> &modelFiles,
-    Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt=false) {
-        if(with_blt) {
-            options->setBooleanOption("automatic_tearing", false);
-        }
+    Ref<CompilerOptionsWrapper> options, string log_level) {
+        
+        bool with_blt = options->getBooleanOption("equation_sorting");
         typename CStruct::TCompiler compiler(options->getOptionRegistry());
         java::lang::String fileVecJava[modelFiles.size()];
         for (int i = 0; i < modelFiles.size(); ++i) {
@@ -183,10 +182,12 @@ namespace ModelicaCasADi
         // Transfer user defined types (also generates base types for the user types).
         transferUserDefinedTypes<typename CStruct::FClass, typename CStruct::List, typename CStruct::FDerivedType,
             typename CStruct::FAttribute, typename CStruct::FType>(m, fclass);
+
+        std::map<int,Ref<Variable> > indexToVariable;        
         // Variables
         transferVariables<java::util::ArrayList, typename CStruct::FVariable, typename CStruct::FDerivativeVariable,
-            typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables());
-
+            typename CStruct::FRealVariable, typename CStruct::List, typename CStruct::FAttribute, typename CStruct::FStringComment> (m, fclass.allVariables(), indexToVariable);
+        
         ModelicaCasADi::Ref<ModelicaCasADi::Equations> eqContainer;
         typename CStruct::TBLT jblt;
         if(with_blt) {
@@ -195,7 +196,7 @@ namespace ModelicaCasADi
                 eqContainer = new ModelicaCasADi::BLT();
             }
             else {
-                std::cout<<"The Model does not have a BLT. Transfering list of equations.\n";
+                std::cout<<"WARNING:The Model does not have a BLT. Transfering list of equations.\n";
                 eqContainer = new ModelicaCasADi::FlatEquations();
             }
         }
@@ -212,7 +213,7 @@ namespace ModelicaCasADi
                 typename CStruct::FVariable,
                 typename CStruct::FAbstractEquation,
                 typename CStruct::FEquation,
-                typename CStruct::FExp>(&jblt, eqContainer, m->getNodeToVariableMap());
+                typename CStruct::FExp>(&jblt, eqContainer, indexToVariable);
         }
         else {
             transferDaeEquationsToContainer<java::util::ArrayList, typename CStruct::FAbstractEquation>(eqContainer, fclass.equations());
@@ -231,12 +232,12 @@ namespace ModelicaCasADi
     }
 
     void transferModelFromModelicaCompiler(Ref<Model> m, string modelName, const vector<string> &modelFiles,
-    Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/) {
+    Ref<CompilerOptionsWrapper> options, string log_level) {
         try
         {
             jl::System::initializeClass(false);
             mc::ModelicaCompiler::initializeClass(false);
-            transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level,with_blt);
+            transferModel<MCStruct, Model >(m,modelName,modelFiles,options,log_level);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given
@@ -247,12 +248,12 @@ namespace ModelicaCasADi
     }
 
     void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
-    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level, bool with_blt/*=false*/) {
+    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
         try
         {
             jl::System::initializeClass(false);
             oc::ModelicaCompiler::initializeClass(false);
-            transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level,with_blt);
+            transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given

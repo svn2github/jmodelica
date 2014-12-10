@@ -187,6 +187,7 @@ equation
             name="CCodeGenTest6",
             description="Test of code generation",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -242,6 +243,7 @@ equation
             name="CCodeGenTest8",
             description="Test of code generation",
             variability_propagation=false,
+            relational_time_events=false,
             generate_ode=false,
             generate_dae=true,
             template="$C_DAE_equation_residuals$",
@@ -512,6 +514,7 @@ equation
             equation_sorting=true,
             generate_only_initial_system=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $n_event_indicators$
 $n_initial_event_indicators$
@@ -554,6 +557,7 @@ equation
             name="CCodeGenTest17",
             description="Test C code compilation for pre() of enum variable",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_variable_aliases$
 -----
@@ -593,6 +597,7 @@ algorithm
         CCodeGenTestCase(
             name="CCodeGenTest18",
             description="Test generation of temporary variables",
+            relational_time_events=false,
             template="$C_ode_derivatives$",
             generatedCode="
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
@@ -6398,6 +6403,7 @@ end when;
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_guards$
                    $C_ode_derivatives$ 
@@ -6525,6 +6531,7 @@ equation
             equation_sorting=true,
             generate_ode=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_guards$
                    $C_ode_time_events$
@@ -6907,6 +6914,7 @@ equation
             generate_ode=true,
             automatic_tearing=false,
             equation_sorting=true,
+            relational_time_events=false,
             variability_propagation=false,
             template="
 $C_ode_derivatives$ 
@@ -7102,6 +7110,7 @@ equation
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            relational_time_events=false,
             inline_functions="none",
             template="
 $C_ode_derivatives$ 
@@ -7335,6 +7344,7 @@ equation
             description="Code generation for use of pre on continuous variable",
             equation_sorting=true,
             generate_ode=true,
+            relational_time_events=false,
             template="$C_ode_derivatives$",
             generatedCode="
     model_ode_guards(jmi);
@@ -7638,6 +7648,7 @@ equation
             name="IfEqu5",
             description="Code generation for if equation, initial equation",
             variability_propagation=false,
+            relational_time_events=false,
             inline_functions="none",
             template="$C_ode_initialization$",
             generatedCode="
@@ -7676,6 +7687,7 @@ equation
             name="ReinitCTest1",
             description="",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_derivatives$
 -----
@@ -7822,6 +7834,7 @@ equation
             name="ReinitCTest3",
             description="",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_derivatives$
 -----
@@ -9360,6 +9373,7 @@ equation
             generate_ode=true,
             automatic_tearing=false,
             equation_sorting=true,
+            relational_time_events=false,
             template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -10592,6 +10606,7 @@ equation
             equation_sorting=true,
             inline_functions="none",
             variability_propagation=false,
+            relational_time_events=false,
             automatic_tearing=false,
             template="
 $C_dae_init_blocks_residual_functions$
@@ -11164,6 +11179,7 @@ algorithm
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
@@ -11236,6 +11252,7 @@ algorithm
             equation_sorting=true,
             inline_functions="none",
             variability_propagation=false,
+            relational_time_events=false,
             automatic_tearing=false,
             template="
 $C_ode_derivatives$
@@ -11288,6 +11305,7 @@ algorithm
             equation_sorting=true,
             inline_functions="none",
             variability_propagation=false,
+            relational_time_events=false,
             automatic_tearing=false,
             template="
 $C_ode_derivatives$
@@ -14228,27 +14246,25 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_destruct_external_object$
 ",
             generatedCode="
-    if (!jmi->indep_extobjs_initialized) { 
-        _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
-    if (!jmi->indep_extobjs_initialized) { 
-        _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
+    _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _z1_8 = (5);
     model_init_eval_parameters(jmi);
     _y1_4 = (0.0);
     _y2_5 = (0.0);
     _y3_6 = (0.0);
     _y4_7 = (0.0);
-    jmi->indep_extobjs_initialized = 1;
 
-    if (!jmi->dep_extobjs_initialized) { 
-        _myEO3_2 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    if (_myEO3_2 != NULL) {
+        func_CCodeGenTests_ExtObjectwInput_destructor_def2(_myEO3_2);
+        _myEO3_2 = NULL;
     }
-    if (!jmi->dep_extobjs_initialized) { 
-        _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    _myEO3_2 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    if (_myEO4_3 != NULL) {
+        func_CCodeGenTests_ExtObjectwInput_destructor_def2(_myEO4_3);
+        _myEO4_3 = NULL;
     }
-    jmi->dep_extobjs_initialized = 1;
+    _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
 
     if (_myEO1_0 != NULL) {
         func_CCodeGenTests_ExtObject_destructor_def0(_myEO1_0);
@@ -14365,17 +14381,10 @@ $C_set_start_values$
 $C_destruct_external_object$
 ",
             generatedCode="
-    if (!jmi->indep_extobjs_initialized) { 
-        _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
-    if (!jmi->indep_extobjs_initialized) { 
-        _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
-    if (!jmi->indep_extobjs_initialized) { 
-        _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
-    }
+    _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     model_init_eval_parameters(jmi);
-    jmi->indep_extobjs_initialized = 1;
 
     if (_r_eo_0 != NULL) {
         func_CCodeGenTests_ExtObject_destructor_def0(_r_eo_0);
@@ -14426,7 +14435,6 @@ $C_functions$
     jmi_array_ref_1(tmp_1, 1) = _myEOs_1_0;
     jmi_array_ref_1(tmp_1, 2) = _myEOs_2_1;
     _z_2 = (func_CCodeGenTests_TestExtObjectArray1_get_y_exp2(tmp_1));
-    jmi->dep_extobjs_initialized = 1;
 
 void func_CCodeGenTests_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
@@ -14810,6 +14818,7 @@ equation
             name="TestRelationalOp4",
             description="Test correct event generation.",
             variability_propagation=false,
+            relational_time_events=false,
             template="
 $C_DAE_initial_relations$
 $C_DAE_relations$
@@ -15047,6 +15056,7 @@ model TestRelationalOp7
         CCodeGenTestCase(
             name="TestRelationalOp7",
             description="Test generation of temps in relational operators.",
+            relational_time_events=false,
             template="
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -15136,33 +15146,118 @@ C_ode_derivatives
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_ALMOST_EPS, JMI_REL_GEQ);
-    }
-    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
-        _sw(1) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(1), JMI_ALMOST_EPS, JMI_REL_GT);
-    }
-    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
-        _sw(2) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(2), JMI_ALMOST_EPS, JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch_time(_time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_ALMOST_EPS, JMI_REL_GEQ);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(3), JMI_ALMOST_EPS, JMI_REL_GT);
-    }
-    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
-        _sw(4) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(4), JMI_ALMOST_EPS, JMI_REL_LT);
+        _sw(1) = jmi_turn_switch_time(AD_WRAP_LITERAL(1) - (_time), _sw(1), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GT) : (JMI_REL_GEQ));
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(5) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(5), JMI_ALMOST_EPS, JMI_REL_LEQ);
+        _sw(2) = jmi_turn_switch_time(_time - (AD_WRAP_LITERAL(1)), _sw(2), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(6) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(1)), _sw(6), JMI_ALMOST_EPS, JMI_REL_LT);
+        _sw(3) = jmi_turn_switch_time(AD_WRAP_LITERAL(1) - (_time), _sw(3), JMI_ALMOST_EPS, JMI_REL_GT);
     }
-    if ((jmi->atInitial || jmi->atEvent) && jmi->eventPhase) {
-        _sw(7) = jmi_turn_switch(AD_WRAP_LITERAL(1) - (_time), _sw(7), JMI_ALMOST_EPS, JMI_REL_LEQ);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(4) = jmi_turn_switch_time(_time - (AD_WRAP_LITERAL(1)), _sw(4), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_LT) : (JMI_REL_LEQ));
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(5) = jmi_turn_switch_time(AD_WRAP_LITERAL(1) - (_time), _sw(5), JMI_ALMOST_EPS, JMI_REL_LEQ);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(6) = jmi_turn_switch_time(_time - (AD_WRAP_LITERAL(1)), _sw(6), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(7) = jmi_turn_switch_time(AD_WRAP_LITERAL(1) - (_time), _sw(7), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_LEQ) : (JMI_REL_LT));
     }
     _x_0 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3))), LOG_EXP_AND(_sw(4), _sw(5))), LOG_EXP_AND(_sw(6), _sw(7))), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0));
 /********* Write back reinits *******/
 ")})));
 end TestRelationalOp8;
+
+model TestRelationalOp9
+    function f
+        input Real[:] x;
+        output Real y;
+      algorithm
+        y := max(x);
+    end f;
+    Boolean b1 = time > f({1,2,3});
+    Boolean b2 = sample(1,f({1,2,3}));
+  
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp9",
+            description="Test correct event generation. Temp in time event calculation.",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
+$C_DAE_relations$
+static const int N_sw = $n_state_switches$ + $n_time_switches$;
+
+C_ode_time_events
+$C_ode_time_events$
+
+C_ode_derivatives
+$C_ode_derivatives$
+",
+            generatedCode="
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
+static const int N_sw = 0 + 1;
+
+C_ode_time_events
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nSamp;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+  if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(1)))) {
+    jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1));
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(1)), func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)))) {
+    nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(1))) / (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)));
+    jmi_min_time_event(&nextEvent, 1, 0, (nSamp + 1.0) * (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)) + (AD_WRAP_LITERAL(1)));
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(1)), func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)))) {
+    nSamp = floor((_t - (AD_WRAP_LITERAL(1))) / (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)));
+    jmi_min_time_event(&nextEvent, 1, 0, (nSamp + 1.0) * (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1)) + (AD_WRAP_LITERAL(1)));
+  }
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(3);
+    if (SURELY_LT_ZERO(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2))))) {
+        jmi_min_time_event(&nextEvent, 1, 1, func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2));
+    }
+    *event = nextEvent;
+
+
+
+C_ode_derivatives
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(3);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_3)), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _b1_0 = _sw(0);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_4, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_4, 3) = AD_WRAP_LITERAL(3);
+    _b2_1 = jmi_sample(jmi,AD_WRAP_LITERAL(1),func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_4));
+/********* Write back reinits *******/
+")})));
+end TestRelationalOp9;
 
 model StringOperations1
 	type E = enumeration(a, bb, ccc);
@@ -16129,6 +16224,72 @@ $C_DAE_initial_dependent_parameter_assignments$
 ")})));
 end CFixedFalseParam1;
 
+model CFixedFalseParam2
+    parameter Real x1(start=z, fixed=false) = y;
+    parameter Real x2(start=z, fixed=false);
+    parameter Real x3(start=1, fixed=false) = x2 + 1;
+    parameter Real y = 4;
+    parameter Real z = y;
+initial equation
+    x2 = y;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFixedFalseParam2",
+            description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
+            template="
+set_start
+$C_set_start_values$
+eval_param
+$C_DAE_initial_dependent_parameter_assignments$
+ode_init
+$C_ode_initialization$
+",
+            generatedCode="
+set_start
+    _y_3 = (4);
+    model_init_eval_parameters(jmi);
+    _x2_1 = (_z_4);
+    _x3_2 = (1);
+
+eval_param
+    _x1_0 = (_y_3);
+    _z_4 = (_y_3);
+
+ode_init
+    model_ode_guards(jmi);
+    _x2_1 = _y_3;
+    _x3_2 = _x2_1 + 1;
+    _x1_0 = _z_4;
+")})));
+end CFixedFalseParam2;
+
+model CFixedFalseParam3
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+      algorithm
+    end f;
+    parameter Real x1(start=f({1,2,3}), fixed=false);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFixedFalseParam3",
+            description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
+            template="
+$C_set_start_values$
+",
+            generatedCode="
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    model_init_eval_parameters(jmi);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    _x1_0 = (func_CCodeGenTests_CFixedFalseParam3_f_exp0(tmp_1));
+")})));
+end CFixedFalseParam3;
+
 model ActiveSwitches1
     Real f = if s then time else -1;
     Boolean s = f > 10;
@@ -16607,6 +16768,7 @@ equation
         CCodeGenTestCase(
             name="ActiveSwitches5",
             description="Test code gen differentiated switches inside Smooth(1, ...)",
+            relational_time_events=false,
             template="
 C_dae_init_blocks_residual_functions
 $C_dae_init_blocks_residual_functions$
@@ -18700,7 +18862,8 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
     model_ode_guards(jmi);
     _x1_0 = _time + _time;
     _x2_1 = _x1_0;
-    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+    _x3_2 = _x1_0;
+    _p_3 = _x3_2;
 
     model_ode_guards(jmi);
 /************* ODE section *********/
@@ -18711,33 +18874,6 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
     _x2_1 = jmi_delay_evaluate(jmi, 2, _x1_0, AD_WRAP_LITERAL(3));
     _x3_2 = jmi_delay_evaluate(jmi, 3, _x1_0, _x2_1);
 /********* Write back reinits *******/
-
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Init block: 1 *****/
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
-    } else if (evaluation_mode == JMI_BLOCK_START) {
-    } else if (evaluation_mode == JMI_BLOCK_MIN) {
-    } else if (evaluation_mode == JMI_BLOCK_MAX) {
-    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[0] = 0;
-    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
-    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
-    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
-    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _p_3;
-    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
-        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
-            _p_3 = x[0];
-        }
-        _x3_2 = _x1_0;
-        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x3_2 - (_p_3);
-        }
-    }
-    return ef;
-}
 
     jmi_delay_first_event_indicator(jmi, 3, _x2_1, &(*res)[0]);
     jmi_delay_second_event_indicator(jmi, 3, _x2_1, &(*res)[1]);
@@ -18828,42 +18964,42 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
     jmi_array_ref_1(tmp_6, 2) = _t_2;
     _x2_1 = func_CCodeGenTests_Delay4_f_exp0(tmp_6);
 
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_7, 2, 1)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_8, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_9, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_10, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_11, 2, 1)
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _t_2 = _time;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
-    jmi_array_ref_1(tmp_5, 1) = _t_2;
-    jmi_array_ref_1(tmp_5, 2) = _t_2;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_7, 2, 1, 2)
-    jmi_array_ref_1(tmp_7, 1) = _p_3;
-    jmi_array_ref_1(tmp_7, 2) = _p_3;
-    _x1_0 = jmi_delay_evaluate(jmi, 0, func_CCodeGenTests_Delay4_f_exp0(tmp_5), func_CCodeGenTests_Delay4_f_exp0(tmp_7));
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 2, 1, 2)
-    jmi_array_ref_1(tmp_6, 1) = _t_2;
-    jmi_array_ref_1(tmp_6, 2) = _t_2;
+    jmi_array_ref_1(tmp_7, 1) = _t_2;
+    jmi_array_ref_1(tmp_7, 2) = _t_2;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_8, 2, 1, 2)
-    jmi_array_ref_1(tmp_8, 1) = _t_2;
-    jmi_array_ref_1(tmp_8, 2) = _t_2;
+    jmi_array_ref_1(tmp_8, 1) = _p_3;
+    jmi_array_ref_1(tmp_8, 2) = _p_3;
+    _x1_0 = jmi_delay_evaluate(jmi, 0, func_CCodeGenTests_Delay4_f_exp0(tmp_7), func_CCodeGenTests_Delay4_f_exp0(tmp_8));
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_9, 2, 1, 2)
-    jmi_array_ref_1(tmp_9, 1) = _p_3;
-    jmi_array_ref_1(tmp_9, 2) = _p_3;
-    _x2_1 = jmi_delay_evaluate(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_6), func_CCodeGenTests_Delay4_f_exp0(tmp_8));
-/********* Write back reinits *******/
-
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_10, 2, 1)
+    jmi_array_ref_1(tmp_9, 1) = _t_2;
+    jmi_array_ref_1(tmp_9, 2) = _t_2;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_10, 2, 1, 2)
     jmi_array_ref_1(tmp_10, 1) = _t_2;
     jmi_array_ref_1(tmp_10, 2) = _t_2;
-    jmi_delay_first_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_10), &(*res)[0]);
-    jmi_delay_second_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_10), &(*res)[1]);
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_11, 2, 1, 2)
+    jmi_array_ref_1(tmp_11, 1) = _p_3;
+    jmi_array_ref_1(tmp_11, 2) = _p_3;
+    _x2_1 = jmi_delay_evaluate(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_9), func_CCodeGenTests_Delay4_f_exp0(tmp_10));
+/********* Write back reinits *******/
+
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_12, 2, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_12, 2, 1, 2)
+    jmi_array_ref_1(tmp_12, 1) = _t_2;
+    jmi_array_ref_1(tmp_12, 2) = _t_2;
+    jmi_delay_first_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_12), &(*res)[0]);
+    jmi_delay_second_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_12), &(*res)[1]);
 
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
@@ -18882,6 +19018,7 @@ model Delay5
             description="Delay operator code gen: Event generation",
             generate_ode=true,
             equation_sorting=true,
+            relational_time_events=false,
             template="
 N_delays = $n_delays$;
 $C_DAE_relations$
@@ -19000,17 +19137,11 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
     jmi_spatialdist_record_sample(jmi, 1, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_FALSE);
     jmi_spatialdist_record_sample(jmi, 2, _time + AD_WRAP_LITERAL(1), _time + AD_WRAP_LITERAL(2), _time + AD_WRAP_LITERAL(3), JMI_TRUE);
 
-    jmi_ad_var_t tmp_7;
-    jmi_ad_var_t tmp_8;
-    jmi_ad_var_t tmp_9;
     model_ode_guards(jmi);
-    tmp_7 = COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(4));
-    tmp_8 = COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
-    _x1_0 = (tmp_7);
-    _x2_1 = (tmp_8);
-    tmp_9 = COND_EXP_EQ(JMI_FALSE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
-    _x3_2 = (tmp_9);
-    _x4_3 = (COND_EXP_EQ(JMI_TRUE, JMI_TRUE, 0.0, 0.0));
+    _x1_0 = COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(4));
+    _x2_1 = COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
+    _x3_2 = COND_EXP_EQ(JMI_FALSE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
+    _x4_3 = (0.0);
 
     jmi_ad_var_t tmp_7;
     jmi_ad_var_t tmp_8;
@@ -19038,10 +19169,11 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
 end SpatialDist1;
 
 model SpatialDist2
-    Real x1,x2,x3;
+    Real x1,x2,x3,x4;
   equation
     der(x3) = time;
-    (x3,x3) = spatialDistribution(x1, x2, time+3, true, initialPoints={1,2}, initialValues={3,4});
+    der(x4) = time;
+    (x3,x4) = spatialDistribution(x1, x2, time+3, true, initialPoints={1,2}, initialValues={3,4});
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -19064,8 +19196,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[0] = 3;
-        x[1] = 2;
+        x[0] = 5;
+        x[1] = 4;
     } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
     } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
@@ -19080,7 +19212,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             jmi_spatialdist_evaluate(jmi, 0, &tmp_1, &tmp_2, _x1_0, _x2_1, _time + AD_WRAP_LITERAL(3), JMI_TRUE);
             (*res)[0] = tmp_1 - (_x3_2);
-            (*res)[1] = tmp_2 - (_x3_2);
+            (*res)[1] = tmp_2 - (_x4_3);
         }
     }
     return ef;

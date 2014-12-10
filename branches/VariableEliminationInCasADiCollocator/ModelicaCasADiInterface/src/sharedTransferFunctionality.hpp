@@ -71,7 +71,7 @@ template<typename JBlock, typename JCollection, typename JIterator,
 typename FVar, typename FAbstractEquation, typename FEquation,
 typename FExp>
 void transferBlock(JBlock* block, ModelicaCasADi::Ref<ModelicaCasADi::Block> ciBlock,
-const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars)
+std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     if(!block->isMeta()) {
         JCollection block_equations(block->allEquations().this$);
@@ -81,16 +81,16 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
         JCollection block_inactive_var(block->inactiveVariables().this$);
         JCollection block_independent_var(block->independentVariables().this$);
         JCollection block_trajectories_var(block->dependsOn().this$);
-
+        
         //Adding equations to block
+        /*bool found=false;
         JIterator iter1(block_equations.iterator().this$);
-        JIterator iter2(unsolved_eq.iterator().this$);
-        bool found=false;
         while(iter1.hasNext()) {
             found=false;
             FAbstractEquation f1(iter1.next().this$);
             casadi::MX lhs1 = toMX(f1.toMXForLhs());
             casadi::MX rhs1 = toMX(f1.toMXForRhs());
+            JIterator iter2(unsolved_eq.iterator().this$);
             while(iter2.hasNext() && !found) {
                 FAbstractEquation f2(iter2.next().this$);
                 casadi::MX lhs2 = toMX(f2.toMXForLhs());
@@ -106,16 +106,60 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
             else {
                 ciBlock->addEquation(new ModelicaCasADi::Equation(lhs1,rhs1),false);
             }
+        }*/
+        
+        //The following functions are to be used carefully. for user purpuses better to use addEquation(Equation,bool);
+        //Add unsolved equations
+        JIterator iterUnsolvedEq(unsolved_eq.iterator().this$);
+        while(iterUnsolvedEq.hasNext()) {
+            FAbstractEquation funsolved(iterUnsolvedEq.next().this$);
+            //This will only add to  unsolvedequations container in block
+            ciBlock->addUnsolvedEquation(new ModelicaCasADi::Equation(toMX(funsolved.toMXForLhs()),toMX(funsolved.toMXForRhs())));
         }
+        
+        //Add equations
+        JIterator iterEquations(block_equations.iterator().this$);
+        while(iterEquations.hasNext()) {
+            FAbstractEquation f(iterEquations.next().this$);
+            //This will add all equations to the equations containter
+            ciBlock->addNotClassifiedEquation(new ModelicaCasADi::Equation(toMX(f.toMXForLhs()),toMX(f.toMXForRhs())));       
+        }
+        
         //Adding variables to block
-        JIterator iter3(block_variables.iterator().this$);
-        JIterator iter4(unsolved_vars.iterator().this$);
-        const casadi::SharedObjectNode* node;
-        std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* >::const_iterator it;
+        std::set<int> indexBlockVariables;
+        std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >::iterator it;
+        JIterator iterUnsolvedVars(unsolved_vars.iterator().this$);
+        while(iterUnsolvedVars.hasNext()) {
+            FVar uv(iterUnsolvedVars.next().this$);
+            it = indexToVariable.find(uv.findVariableIndex());
+            if(it!=indexToVariable.end()) {
+                indexBlockVariables.insert(it->first);
+                //This will add a variable to both variable containers in block
+                ciBlock->addVariable(it->second.getNode(), false);
+            }
+        }  
+        
+        JIterator iterSolvedVars(block_variables.iterator().this$);
+        std::set<int>::iterator tmp_it;
+        while(iterSolvedVars.hasNext()) {
+            FVar sv(iterSolvedVars.next().this$);
+            it = indexToVariable.find(sv.findVariableIndex()); 
+            if(it!=indexToVariable.end()) {
+                 tmp_it = indexBlockVariables.find(it->first);
+                 if(tmp_it==indexBlockVariables.end()){
+                     //This will add the solved variables to the variables containter
+                     ciBlock->addVariable(it->second.getNode(), true);                    
+                 }
+            }
+        }
+        
+        //Adding variables to block
+        /*JIterator iter3(block_variables.iterator().this$); 
         while(iter3.hasNext()) {
             found=false;
             FVar jv1(iter3.next().this$);
             casadi::MX v1 = toMX(jv1.asMXVariable());
+            JIterator iter4(unsolved_vars.iterator().this$);
             while(iter4.hasNext() && !found) {
                 FVar jv2(iter4.next().this$);
                 casadi::MX v2 = toMX(jv2.asMXVariable());
@@ -123,50 +167,42 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                     found=true;
                 }
             }
-            node = v1.get();
-            it = mapVars.find(node);
-            if(it!=mapVars.end()) {
+            it = indexToVariable.find(jv1.findVariableIndex());
+            if(it!=indexToVariable.end()) {
+
                 if(!found) {
-                    ciBlock->addVariable(it->second, true);
+                    ciBlock->addVariable(it->second.getNode(), true);
                 }
                 else {
-                    ciBlock->addVariable(it->second, false);
+                    ciBlock->addVariable(it->second.getNode(), false);
                 }
             }
-        }
+        }*/
+        
         JIterator iter5(block_inactive_var.iterator().this$);
         while(iter5.hasNext()) {
-            found=false;
-            FVar jvi(iter5.next().this$);
-            casadi::MX vi = toMX(jvi.asMXVariable());
-            node = vi.get();
-            it = mapVars.find(node);
-            if(it!=mapVars.end()) {
-                ciBlock->addExternalVariable(it->second);
+            FVar jvinac(iter5.next().this$);
+            it = indexToVariable.find(jvinac.findVariableIndex());
+            if(it!=indexToVariable.end()) {
+                ciBlock->addExternalVariable(it->second.getNode());
             }
         }
 
         JIterator iter6(block_independent_var.iterator().this$);
         while(iter6.hasNext()) {
-            found=false;
-            FVar jvp(iter6.next().this$);
-            casadi::MX vp = toMX(jvp.asMXVariable());
-            node = vp.get();
-            it = mapVars.find(node);
-            if(it!=mapVars.end()) {
-                ciBlock->addExternalVariable(it->second);
+            FVar jvind(iter6.next().this$);
+            it = indexToVariable.find(jvind.findVariableIndex());
+            if(it!=indexToVariable.end()) {
+                ciBlock->addExternalVariable(it->second.getNode());
             }
         }
 
         JIterator iter7(block_trajectories_var.iterator().this$);
         while(iter7.hasNext()) {
-            found=false;
             FVar jvt(iter7.next().this$);
-            casadi::MX vt = toMX(jvt.asMXVariable());
-            node = vt.get();
-            it = mapVars.find(node);
-            if(it!=mapVars.end()) {
-                ciBlock->addExternalVariable(it->second);
+            it = indexToVariable.find(jvt.findVariableIndex());
+            if(it!=indexToVariable.end()) {
+                ciBlock->addExternalVariable(it->second.getNode());
             }
         }
         if(block->isSimple() && block->isSolvable() ) {
@@ -177,10 +213,9 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                 FEquation feq(iter8.next().this$);
                 casadi::MX var = toMX(fvs.asMXVariable());
                 casadi::MX sol = toMX(feq.solution(fvs).toMX());
-                node = var.get();
-                it = mapVars.find(node);
-                if(it!=mapVars.end()) {
-                    ciBlock->addSolutionToVariable(it->second, sol);
+                it = indexToVariable.find(fvs.findVariableIndex());
+                if(it!=indexToVariable.end()) {
+                    ciBlock->addSolutionToVariable(it->second.getNode(), sol);
                 }
             }
             else {
@@ -199,7 +234,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
 
         //Temporal check
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())) {
-            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN THE BLOCK. EVERYTHING MOVED TO UNSOLVED\n";
+            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN A BLOCK. EVERYTHING MOVED TO UNSOLVED WITHIN THAT BLOCK. (DEACTIVATE TEARING)\n";
             ciBlock->moveAllEquationsToUnsolvable();
             ciBlock->setasSolvable(false);
         }
@@ -215,10 +250,10 @@ template<typename JBLT, typename JBlock, typename JCollection, typename JIterato
 typename FVar, typename FAbstractEquation, typename FEquation,
 typename FExp>
 void transferBLTToContainer(JBLT* javablt, ModelicaCasADi::Ref<ModelicaCasADi::Equations> container,
-const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* > mapVars)
+std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
 
-    if(mapVars.size()==0) {
+    if(indexToVariable.size()==0) {
         throw std::runtime_error("Variables must be transfered before transfering BLT.");
     }
     if(container->hasBLT()) {
@@ -231,7 +266,7 @@ const std::map<const casadi::SharedObjectNode*, const ModelicaCasADi::Variable* 
                 FVar,
                 FAbstractEquation,
                 FEquation,
-                FExp>(block, ciBloc, mapVars);
+                FExp>(block, ciBloc, indexToVariable);
             container->addBlock(ciBloc);
             delete block;
         }
@@ -571,7 +606,7 @@ ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<Mo
 
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv)
+void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv, std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     JMDerivativeVariable fDer = JMDerivativeVariable(fv.myDerivativeVariable().this$);
     JMRealVariable fDiff = JMRealVariable(fv.this$);
@@ -586,17 +621,20 @@ void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<Modelica
     m->addVariable(realVar);
     handleAliasVariable(m, realVar, fv);
     handleAliasVariable(m, derVar, fv);
+    
+    indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), realVar));
+    indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.myDerivativeVariable().findVariableIndex(), derVar));
 }
 
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv)
+void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv, std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     if (fv.isDerivativeVariable()) {
         return;                  // Derivative variables are transferred together with their differentiated variables.
     }
     if (fv.isDifferentiatedVariable()) {
-        transferDifferentiatedVariableAndItsDerivative<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv);
+        transferDifferentiatedVariableAndItsDerivative<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv, indexToVariable);
         return;
     }
     ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), toMX(fv.asMXVariable()),
@@ -604,29 +642,35 @@ void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &f
     transferAttributes<FVar, List, Attribute, Comment>(realVar, fv);
     handleAliasVariable(m, realVar, fv);
     m->addVariable(realVar);
+    
+    indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), realVar));
 }
 
 
 template <class FVar, class List, class Attribute, class Comment>
-void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv)
+void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv, std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     ModelicaCasADi::Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), toMX(fv.asMXVariable()),
         getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(intVar, fv);
     handleAliasVariable(m, intVar, fv);
     m->addVariable(intVar);
+    
+    indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), intVar));
 }
 
 
 template <class FVar, class List, class Attribute, class Comment>
-void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv)
+void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv, std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), toMX(fv.asMXVariable()),
         getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
-
+    
     transferAttributes<FVar, List, Attribute, Comment>(boolVar, fv);
     handleAliasVariable(m, boolVar, fv);
     m->addVariable(boolVar);
+    
+    indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), boolVar));
 }
 
 
@@ -642,22 +686,22 @@ void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaC
 
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar fv)
+void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar fv, std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     if (fv.isReal()) {
-        transferRealVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv);
+        transferRealVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv, indexToVariable);
     }
     else if (fv.isInteger()) {
-        transferIntegerVariable<FVar, List, Attribute, Comment>(m, fv);
+        transferIntegerVariable<FVar, List, Attribute, Comment>(m, fv, indexToVariable);
     }
     else if (fv.isBoolean()) {
-        transferBooleanVariable<FVar, List, Attribute, Comment>(m, fv);
+        transferBooleanVariable<FVar, List, Attribute, Comment>(m, fv, indexToVariable);
     }
 }
 
 
 template <class ArrayList, class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
-static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList vars)
+static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList vars, std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
 {
     for (int i = 0; i < vars.size(); i++) {
         FVar var = FVar(vars.get(i).this$);
@@ -667,7 +711,7 @@ static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, Arr
             delete[] str;
         }
         else {
-            transferFVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, var);
+            transferFVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, var, indexToVariable);
         }
     }
 }
