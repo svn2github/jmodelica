@@ -2400,6 +2400,26 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
     return sw;
 }
 
+jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel) {
+    /* x >= 0
+     * x >  0
+     * x <= 0
+     * x <  0
+     */
+    if (sw == 1.0){
+        if ((ev_ind < -eps && rel == JMI_REL_GEQ) || (ev_ind <= eps && rel == JMI_REL_GT)
+                || (ev_ind > eps && rel == JMI_REL_LEQ) || (ev_ind >= -eps && rel == JMI_REL_LT)) {
+            sw = 0.0;
+        }
+    } else {
+        if ((ev_ind >= -eps && rel == JMI_REL_GEQ) || (ev_ind > eps && rel == JMI_REL_GT)
+                || (ev_ind <= eps && rel == JMI_REL_LEQ) || (ev_ind < -eps && rel == JMI_REL_LT)) {
+            sw = 1.0;
+        }
+    }
+    return sw;
+}
+
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {
     int return_status;
     jmi_set_current(jmi);

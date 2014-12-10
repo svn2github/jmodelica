@@ -2520,11 +2520,16 @@ aspect CCodeGen {
             String indent = p.indent(outerIndent);
             str.print(indent);
             printSwitchMacro_C(p, str, indent);
-            str.print(" = jmi_turn_switch(");
+            boolean time = isTimeEventGenerating();
+            if (time) {
+                str.print(" = jmi_turn_switch_time(");
+            } else {
+                str.print(" = jmi_turn_switch(");
+            }
             printIndicator_C(p, str, indent);
             str.print(", ");
             printSwitchMacro_C(p, str, indent);
-            if (isTimeEventGenerating()) {
+            if (time) {
                 str.format(", JMI_ALMOST_EPS, ");
             } else {
                 str.format(", jmi->events_epsilon, ");

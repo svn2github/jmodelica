@@ -161,8 +161,8 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 
 
 /* Record creation macro */
@@ -1529,6 +1529,8 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  * @return The new switch value
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+
+jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
 
 /**
  * \brief Check if file exists.
