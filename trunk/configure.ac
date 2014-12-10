@@ -23,6 +23,78 @@ AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
+
+# =========== Helper macros =================
+
+# Macros to detect if compiler accepts specific flag
+
+# CXX_FLAG_CHECK [compiler flags]
+# check whether compiler supports given C++ flags or not
+AC_DEFUN([CXX_FLAG_CHECK], 
+[ 
+  AC_MSG_CHECKING([if $CXX supports $1])
+  AC_LANG_PUSH([C++])
+  ac_saved_cxxflags="$CXXFLAGS" 
+  CXXFLAGS="-Werror $1" 
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])], 
+    [cxx_flag_check=yes], 
+    [cxx_flag_check=no] 
+  )
+  AC_MSG_RESULT([$cxx_flag_check])
+  CXXFLAGS="$ac_saved_cxxflags" 
+  AC_LANG_POP([C++])
+])
+
+# C_FLAG_CHECK [compiler flags]
+# check whether compiler supports given C flags or not
+AC_DEFUN([C_FLAG_CHECK], 
+[ 
+  AC_MSG_CHECKING([if $CC supports $1])
+  AC_LANG_PUSH([C])
+  ac_saved_cflags="$CFLAGS" 
+  CFLAGS="-Werror $1" 
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])], 
+    [c_flag_check=yes], 
+    [c_flag_check=no] 
+  )
+  AC_MSG_RESULT([$c_flag_check])
+  CFLAGS="$ac_saved_cflags" 
+  AC_LANG_POP([C])
+])
+
+# F77_FLAG_CHECK [compiler flags]
+# check whether compiler supports given Fortran 77 flags or not
+AC_DEFUN([F77_FLAG_CHECK], 
+[ 
+  AC_MSG_CHECKING([if $F77 supports $1])
+  AC_LANG_PUSH([Fortran 77])
+  ac_saved_fflags="$FFLAGS" 
+  FFLAGS="-Werror $1" 
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])], 
+    [f77_flag_check=yes], 
+    [f77_flag_check=no] 
+  )
+  AC_MSG_RESULT([$f77_flag_check])
+  FFLAGS="$ac_saved_fflags" 
+  AC_LANG_POP([Fortran 77])
+])
+
+
+# ALL_FLAG_CHECK [compiler flags]
+# check whether compilers supports given flags or not for all of C, C++ and Fortran 77
+AC_DEFUN([ALL_FLAG_CHECK], 
+[
+  C_FLAG_CHECK([$1])
+  CXX_FLAG_CHECK([$1])
+  F77_FLAG_CHECK([$1])
+  AS_IF([test "$c_flag_check" = yes -a "$cxx_flag_check" = yes -a "$f77_flag_check" = yes],
+        [all_flag_check=yes],
+        [all_flag_check=no])
+])
+
+# ============= end of helper macros ===================
+
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_F77([gfortran])
@@ -46,38 +118,42 @@ AC_SUBST(CURR_DIR)
 CURR_DIR=`pwd`
 case $build in
   *-cygwin*)
-	echo "Cygwin detected"   
- 	SHAREDEXT=".dll";
-	SHARED_LDFLAGS=" -shared ";
-	SEP='\;'
-	AC_LIBTOOL_WIN32_DLL
-	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
+    echo "Cygwin detected"   
+    SHAREDEXT=".dll";
+    SHARED_LDFLAGS=" -shared ";
+    SEP='\;'
+    AC_LIBTOOL_WIN32_DLL
+    WIN32=yes
+    AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
     ;;
   *-mingw*)
-	echo "MinGW detected"   
-	SHAREDEXT=".dll";
-	SHARED_LDFLAGS=" -shared ";
-	SEP='\;'
-	AC_LIBTOOL_WIN32_DLL
-	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
+    echo "MinGW detected"   
+    SHAREDEXT=".dll";
+    SHARED_LDFLAGS=" -shared ";
+    SEP='\;'
+    AC_LIBTOOL_WIN32_DLL
+    WIN32=yes
+    AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
     ;;
   *-apple*)
-	echo "Mac OS X detected"   
-	AC_DEFINE([WIN32],[0],[Not a win32])    
-	SHAREDEXT=".dylib";
-	SHARED_LDFLAGS=" -dynamiclib ";
-	CP="cp -a"
+    echo "Mac OS X detected"   
+    WIN32=no
+    AC_DEFINE([WIN32],[0],[Not a win32])    
+    SHAREDEXT=".dylib";
+    SHARED_LDFLAGS=" -dynamiclib ";
+    CP="cp -a"
     ;;
   *)
-	echo "Linux detected"   
-	APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
-	SHAREDEXT=".so";
-   	SHARED_LDFLAGS=" -shared ";
-	# The fPIC flag is used to make the code independent of position in the
-	# memory. This is needed on Linux x86_64 platforms.
-	AC_DEFINE([WIN32],[0],[Not a win32])
-	CFLAGS=" -fPIC $CFLAGS"
-	CXXFLAGS=" -fPIC $CXXFLAGS"
+    echo "Linux detected"   
+    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    SHAREDEXT=".so";
+    SHARED_LDFLAGS=" -shared ";
+    # The fPIC flag is used to make the code independent of position in the
+    # memory. This is needed on Linux x86_64 platforms.
+    WIN32=no
+    AC_DEFINE([WIN32],[0],[Not a win32])
+    CFLAGS=" -fPIC $CFLAGS"
+    CXXFLAGS=" -fPIC $CXXFLAGS"
     ;;  
 esac
 AC_PROG_LIBTOOL
@@ -94,6 +170,16 @@ AC_PREFIX_DEFAULT(["/usr/local/jmodelica"])
 AS_IF([test "x$F77" != x],
       [AC_MSG_RESULT([gfortran seems to be working])],
       [AC_MSG_FAILURE([gfortran does not seem to be present or does not work properly])]) 
+
+AS_IF([test "$WIN32" = yes], 
+      [
+          ALL_FLAG_CHECK([-m64])
+          JM_WIN64=$all_flag_check
+          AS_IF([test "$JM_WIN64" = yes],
+                [AC_MSG_RESULT([Will compile 64-bit libs to support 64-bit FMUs.])],
+                [AC_MSG_RESULT([Will not compile 64-bit libs - 64-bit FMUs not supported.])]
+               )
+      ])
 
 # Checks for libraries.
 AC_ARG_WITH([ipopt],
@@ -234,6 +320,17 @@ AS_IF([test "x$with_mingw" = xno],
                      [AC_MSG_FAILURE([MinGW installation specifed, but seems to be corrupt!])])])
 
 AM_CONDITIONAL([WITH_MINGW],[test "x$with_mingw" != xno])
+
+with_tdm=no
+AS_IF([test "$with_mingw" != no],
+      [ AC_MSG_CHECKING([for TDM-GCC])
+        AS_IF([$CC -v 2>&1 | tail -n1 | grep -q "(tdm"],
+              [with_tdm=yes])
+        AC_MSG_RESULT([$with_tdm])
+      ])
+
+AM_CONDITIONAL([COPY_PTHREADS_LIB],[test "$with_mingw" != no -a "$with_tdm" = no])
+
 
 # Set output variables to be exported to the Makefiles
 AC_SUBST(MINGW_HOME)

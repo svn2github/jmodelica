@@ -290,15 +290,15 @@ endif
 	case $(build) in \
 	*-cygwin*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
-  	*-mingw*) \
+	*-mingw*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-  	*-apple*) \
+	*-apple*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
-  	*) \
+	*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
-if WITH_MINGW
+if COPY_PTHREADS_LIB
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
 	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
@@ -314,6 +314,7 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	if [ "$(JM_WIN64)" = "yes" ]; then \
 	case $(build) in \
 	*-cygwin*) \
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 && \
@@ -321,7 +322,8 @@ endif
 	*-mingw*) \
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 && \
 	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 ;; \
-	esac
+	esac \
+	fi
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
