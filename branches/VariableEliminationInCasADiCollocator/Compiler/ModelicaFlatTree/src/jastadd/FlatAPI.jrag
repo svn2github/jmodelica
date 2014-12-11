@@ -2483,6 +2483,10 @@ aspect FVariableUses {
     eq Root.getChild().inParamBindingExp() = false;
     eq FVariable.getBindingExp().inParamBindingExp() = isParameter();
     
+    inh FTypePrefixVariability FExp.bindingExpVariability();
+    eq Root.getChild().bindingExpVariability() = fContinuous();
+    eq FVariable.getBindingExp().bindingExpVariability() = variability();
+    
     /**
      * Collection attribute returning all dependent parameters which
      * depends on the parameter.

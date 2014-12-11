@@ -2612,22 +2612,25 @@ aspect Scalarization {
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
 	 */
     protected void FExp.addTemporaryVars(List clauses, List vars, boolean equation) {
-		FType type = type();
+        FType type = type();
         if (equation || expandWithIterExp())
-			type = type.sizedType(expandSizeForIterExp(type.size()));
-		if (equation) {
-    	    boolean init = inInitialEquationSection();
-            boolean param = init || inParamBindingExp() || inAttributeValue();
-            FTypePrefixVariability v = param ? fParameter() : fContinuous().combineDown(type().funcOutputVariability());
-    	    if (variability().discreteVariability())
-    	    	v = v.combineDown(variability());
-			type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
-			notifyIfWhenEquationsOfTemporaryVar();
-		} else {
+            type = type.sizedType(expandSizeForIterExp(type.size()));
+        if (equation) {
+            boolean init = inInitialEquationSection();
+            FTypePrefixVariability v = bindingExpVariability();
+            if (init || inAttributeValue()) {
+                v = v.combineDown(fParameter());
+            } else {
+                v = v.combineDown(type().funcOutputVariability());
+            }
+            
+            type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
+            notifyIfWhenEquationsOfTemporaryVar();
+        } else {
             addFunctionTempVar(clauses, vars, type);
-		}
-	}
-	
+        }
+    }
+    
     /**
      * Creates temporary variable for this expression situated in a function.
      * 

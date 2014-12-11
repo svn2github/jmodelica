@@ -85,7 +85,7 @@ aspect VariabilityPropagation {
         getCall().flushAllRecursiveClearFinal();
         return super.canPropagate() && variables().size() > 0 && numScalarEquations() > 0 && 
                 ((variables().size() == numScalarEquations() && getCall().variability().parameterOrLess()) 
-                        || potentialPartialVariability().constantVariability());
+                        || potentialPartialVariability().knownParameterOrLess());
     }
     
     inh boolean FAbstractEquation.canPropagateContext();
@@ -102,7 +102,7 @@ aspect VariabilityPropagation {
     syn FTypePrefixVariability FAbstractFunctionCall.potentialPartialVariability() = variability();
     eq FFunctionCall.potentialPartialVariability() {
         for (FExp exp : getArgs()) {
-            if (exp.variability().constantVariability()) {
+            if (exp.variability().knownParameterOrLess()) {
                 return fConstant();
             }
         }
@@ -261,16 +261,14 @@ aspect VariabilityPropagation {
 			return;
 		}
 
-		if (solutionVariability.constantVariability()) {
+		if (solutionVariability.knownParameterOrLess()) {
 			try {
 				solution = solution.ceval().buildLiteral();
 			} catch (ConstantEvaluationException e) {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
 			}
-		}
-
-		if (solutionVariability.parameterVariability()) {
+		} else {
 			parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
 		}
 
@@ -294,13 +292,13 @@ aspect VariabilityPropagation {
             }
         }
         FTypePrefixVariability variability = potentialPartialVariability();
-        boolean eval = variability.constantVariability();
+        boolean eval = variability.knownParameterOrLess();
         
         CValue[] val = null;
         if (eval) {
             try {
                 VariableEvaluator evaluator;
-                boolean fullEval = getCall().variability().constantVariability();
+                boolean fullEval = getCall().variability().knownParameterOrLess();
                 if (fullEval) {
                     evaluator = defaultVariableEvaluator();
                 } else {
@@ -415,11 +413,11 @@ aspect VariabilityPropagation {
             variability = fParameter();
         }
         
-        if (variability.constantVariability() || parameterEquations != null) {
+        if (variability.knownParameterOrLess() || parameterEquations != null) {
             myFV().variabilityPropagation(worklist, variability, bexp, parameterEquations);
         }
         
-        taggedForRemoval = variability.constantVariability();
+        taggedForRemoval = variability.knownParameterOrLess();
         return taggedForRemoval;
     }
     
@@ -444,7 +442,7 @@ aspect VariabilityPropagation {
 		
 		// Declaration
 		setFTypePrefixVariability(variability);
-		if (variability.constantVariability()) {
+		if (variability.knownParameterOrLess()) {
 			setBindingExp(bindingExp.fullCopy());
 		}
         if (variability.parameterVariability()) {
@@ -489,7 +487,7 @@ aspect VariabilityPropagation {
                 boolean neg = av.isNegated() ^ thisAlias.isNegated();
                 if (fv != this) {
                     fv.setFTypePrefixVariability(variability);
-                    if (variability.constantVariability())
+                    if (variability.knownParameterOrLess())
                         fv.setBindingExp(bindingExp.negated(neg));
                     if (variability.parameterVariability() && !fv.isTemporary())
                         parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp().negated(neg)));

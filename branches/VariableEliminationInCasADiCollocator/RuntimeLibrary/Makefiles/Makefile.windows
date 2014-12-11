@@ -164,15 +164,21 @@ SUNDIALS_LIB_DIR64 = $(SUNDIALS_HOME)/lib64
 # Flags needed for specific libs
 LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
+LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a
+ifneq ($(wildcard $(STATIC_PTHREADS_HOME)/.),)
+LIB_PTHREADS = -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1
+else
+LIB_PTHREADS =
+endif
 
 # Libraries necessary to link with jmi
-LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a $(LIB_MINPACK)
-LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
-LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a $(LIB_MINPACK)
+LIBS_FMU_STD = -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a
+LIBS_FMU_ALL = $(LIBS_FMU_STD) $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_PTHREADS)
+LIBS_FMUME10 = -lfmi1_me           $(LIBS_FMU_ALL)
+LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIBS_FMU_ALL)
+LIBS_FMU20   = -lfmi2              $(LIBS_FMU_ALL)
 LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT)  -L$(SUNDIALS_LIB_DIR) -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
 LIBS_CEVAL = -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a 
-
-#LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)

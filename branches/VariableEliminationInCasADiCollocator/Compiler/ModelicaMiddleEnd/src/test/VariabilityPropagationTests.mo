@@ -1580,4 +1580,54 @@ end VariabilityPropagationTests.AliasVariabilities1;
 ")})));
 end AliasVariabilities1;
 
+model StructParam1
+    record R
+        Real a,b;
+    end R;
+    function f
+        output R r;
+      algorithm
+        r.a := 1;
+    end f;
+    function f2
+        input R r;
+        output Real a = r.a;
+      algorithm
+    end f2;
+    parameter R r = f() annotation(Evaluate=true);
+    Real a;
+  equation
+    a = f2(r);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StructParam1",
+            description="Test propagation of structural parameters",
+            flatModel="
+fclass VariabilityPropagationTests.StructParam1
+ structural parameter Real r.a = 1.0 /* 1.0 */;
+ structural parameter Real r.b;
+ structural parameter Real a = 1.0 /* 1.0 */;
+ structural parameter Real temp_1.a;
+ structural parameter Real temp_1.b;
+parameter equation
+ (VariabilityPropagationTests.StructParam1.R(temp_1.a, temp_1.b)) = VariabilityPropagationTests.StructParam1.f();
+ r.b = temp_1.b;
+
+public
+ function VariabilityPropagationTests.StructParam1.f
+  output VariabilityPropagationTests.StructParam1.R r;
+ algorithm
+  r.a := 1;
+  return;
+ end VariabilityPropagationTests.StructParam1.f;
+
+ record VariabilityPropagationTests.StructParam1.R
+  Real a;
+  Real b;
+ end VariabilityPropagationTests.StructParam1.R;
+
+end VariabilityPropagationTests.StructParam1;
+")})));
+end StructParam1;
+
 end VariabilityPropagationTests;

@@ -6757,15 +6757,8 @@ fclass ArrayTests.VariableIndex.ExpEquationArray
  discrete input Integer i;
  Real y[1];
  Real y[2];
- discrete Real temp_1[1];
- discrete Real temp_1[2];
-initial equation 
- pre(temp_1[1]) = 0.0;
- pre(temp_1[2]) = 0.0;
 equation
- ({temp_1[1], temp_1[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
- y[1] = temp_1[1];
- y[2] = temp_1[2];
+ ({y[1], y[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
 
 public
  function temp_1

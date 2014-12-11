@@ -9,9 +9,7 @@ $(SUNDIALS_DIR):
 	mkdir -p $(SUNDIALS_DIR) && \
 	cd $(SUNDIALS_DIR) && \
 	case $(build) in \
-	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
-	*-mingw*) \
+	*-cygwin*|*-mingw*) \
 	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
 	*-apple*) \
 	cmake -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
@@ -20,29 +18,23 @@ $(SUNDIALS_DIR):
 	esac
 
 $(SUNDIALS_DIR64):
-	case $(build) in \
-	*-cygwin*) \
+	if [ "$(JM_WIN64)" = "yes" ]; then \
 	mkdir -p $(SUNDIALS_DIR64) && \
 	cd $(SUNDIALS_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
-	*-mingw*) \
-	mkdir -p $(SUNDIALS_DIR64) && \
-	cd $(SUNDIALS_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ;; \
-	esac
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/ ; \
+	fi
 
 all-local: $(SUNDIALS_DIR) $(SUNDIALS_DIR64)
 	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install
-	case $(build) in \
-	*-cygwin*) \
-	cd $(SUNDIALS_DIR64) && make $(AM_MAKEFLAGS) install ;; \
-	*-mingw*) \
-	cd $(SUNDIALS_DIR64) && make $(AM_MAKEFLAGS) install ;; \
-	esac
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	cd $(SUNDIALS_DIR64) && make $(AM_MAKEFLAGS) install ; \
+	fi
 
 check-local:
 	cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
 	-cd $(SUNDIALS_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	-cd $(SUNDIALS_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	-cd $(SUNDIALS_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ; \
+	fi
