@@ -112,7 +112,6 @@ def run_demo(with_plots=True):
     opt_opts['n_e'] = n_e
     opt_opts['n_cp'] = 2
     opt_opts['init_traj'] = init_res
-    opt_opts['nominal_traj'] = init_res
     opt_opts['blocking_factors'] = bf
 
     # Set initial values
@@ -144,7 +143,7 @@ def run_demo(with_plots=True):
     constr_viol_costs['T'] = 1e10
 
     # Create the MPC object
-    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs, noise_seed=7)
+    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs, noise_seed=6)
 
     # Set initial state
     x_k = {}
@@ -185,11 +184,11 @@ def run_demo(with_plots=True):
         pass
     else:
         Tc_norm = N.linalg.norm(Tc_res_comp) / N.sqrt(len(Tc_res_comp))
-        assert(N.abs(Tc_norm - 306.00544211904042) < 1e-3)
+        assert(N.abs(Tc_norm - 308.22273597541545) < 1e-3)
         c_norm = N.linalg.norm(c_res_comp) / N.sqrt(len(c_res_comp))
-        assert(N.abs(c_norm - 639.87711876602896) < 1e-3)
+        assert(N.abs(c_norm - 631.90779820045452) < 1e-3)
         T_norm = N.linalg.norm(T_res_comp) / N.sqrt(len(T_res_comp))
-        assert(N.abs(T_norm - 319.96944904915409) < 1e-3)
+        assert(N.abs(T_norm - 324.92926269050702) < 1e-3)
 
     # Plot the results
     if with_plots: 
@@ -223,6 +222,7 @@ def run_demo(with_plots=True):
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
         plt.show()
+        
 
 if __name__=="__main__":
     run_demo()

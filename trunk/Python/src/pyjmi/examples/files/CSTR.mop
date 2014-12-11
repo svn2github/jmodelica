@@ -127,5 +127,14 @@ extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
 
 end CSTR_MPC;
 
+optimization CSTR_MPC_Parameter(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + p*(Tc_ref-Tc)^2,
+    				startTime=0.0, finalTime=150)
+
+extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
+
+parameter Real p(free=true, min=1, initialGuess=2);
+
+end CSTR_MPC_Parameter;
+
 
 end CSTR;

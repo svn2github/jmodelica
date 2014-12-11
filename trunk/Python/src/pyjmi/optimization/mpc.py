@@ -30,7 +30,7 @@ class MPC(object):
     """
 
     def __init__(self, op, options, sample_period, horizon, constr_viol_costs = {},
-                 noise_seed=None):
+                 noise_seed=None, use_shift=True, create_comp_result=True ):
         """
         Creates the NLP that corresponds to the op we want to solve with MPC.
 
@@ -57,6 +57,18 @@ class MPC(object):
             noise_seed --
                 The seed to use for adding noise.
                 Default: None
+                
+            use_shift --
+                True: Use the shift operation to compute xx_init. 
+                False: Use methods from casadi_collocation to extract xx_init
+                from a result file.
+                Default: True
+                
+            create_comp_result --
+                True: Save the result for the first sample of each optimization
+                to create a patched together resultfile.
+                False: Do not create the patched together result file.
+                Default: True
         """
         self._create_clock()
         self.op = op
@@ -65,14 +77,17 @@ class MPC(object):
         self.horizon = horizon
         self.horizon_time = horizon*sample_period   
         self.constr_viol_costs = constr_viol_costs
-
+        self.use_shift = use_shift
+        self.create_comp_result = create_comp_result
+        
         # Create complete result lists
-        self.res_t = []
-        self.res_dx = []
-        self.res_x = []
-        self.res_u = []
-        self.res_w = []
-        self.res_p = []
+        if self.create_comp_result:
+            self.res_t = []
+            self.res_dx = []
+            self.res_x = []
+            self.res_u = []
+            self.res_w = []
+            self.res_p = []
         
         self.iterations = []
         self.return_status = []
@@ -243,7 +258,7 @@ class MPC(object):
             slack_var= casadi.MX.sym("%s_slack" %name)
             slack = ci.RealVariable(self.op, slack_var, 0, 3) 
             slack.setMin(0)
-            slack.setNominal(1e-2)
+            slack.setNominal(0.0001*var.getNominal()) 
             self.op.addVariable(slack)
             
             # Add to Objective Integrand 
@@ -291,18 +306,6 @@ class MPC(object):
             for inp in self.original_model_inputs:
                 factors[inp.getName()] = bl_list
             bf = BlockingFactors(factors = factors)
-            self.options['blocking_factors'] = bf
-        else:
-            factors = self.options['blocking_factors'].factors
-            for inp in [var for var in self.original_model_inputs if not
-                        factors.has_key(var.getName())]:
-                n_e = self.options['n_e']
-                bf_value = n_e/self.horizon
-                bl_list = [bf_value]*self.horizon
-                factors[inp.getName()] = bl_list
-            du_bounds = self.options['blocking_factors'].du_bounds
-            du_quad_pen = self.options['blocking_factors'].du_quad_pen
-            bf = BlockingFactors(factors, du_bounds, du_quad_pen)
             self.options['blocking_factors'] = bf
 
         self._nbr_values_sample = self.options['n_e']/self.horizon*\
@@ -370,24 +373,6 @@ class MPC(object):
         for name in self.state_names:
             states["_start_"+name] = sim_res[name][-1]
         return states
-
-    def _redefine_initial_trajectories(self):
-        """
-        Updates the collocators initial trajectories and times for the next
-        optimization.
-        """
-
-        self.collocator.init_traj = self._result_object
-        try:
-            self.collocator.init_traj = self.collocator.init_traj.result_data
-        except AttributeError:
-            pass
-
-
-        self.collocator._create_initial_trajectories()        
-
-        self.collocator._compute_bounds_and_init()
-
 
     def _extract_results(self):
         """
@@ -492,20 +477,20 @@ class MPC(object):
         """
         xx_result = {}
         if self.status == 'Solve_Succeeded' or self.status == 'Solved_To_Acceptable_Level': 
-            xx_result['prim'] = self.collocator.primal_opt
-            xx_result['dual'] = self.collocator.dual_opt2
+            xx_result = self.collocator.primal_opt
         else:
-            xx_result['prim'] = self.shifted_xx['prim']
-            xx_result['dual'] = self.shifted_xx['dual']
+            xx_result = self.shifted_xx
 
-        #~ xx_result['prim'] = self.collocator.named_xx  #Used for debugging 
+        #~ xx_result = self.collocator.named_xx  #Used for debugging 
 
         # Map with splited order
         split_map = dict()
         split_map['x'] = 0
         split_map['dx'] = 1
         split_map['w'] = 2
-        split_map['unelim_u'] = 3
+        split_map['unelim_u'] = 3     
+        split_map['init_final'] = 4
+        split_map['p_opt'] = 5
 
         # Fetch split indices and collocation options
         gsi = self.collocator.global_split_indices
@@ -513,9 +498,8 @@ class MPC(object):
         n_cp = self.options['n_cp']
 
         # Create map for the shifted results
-        shifted_xx = {}
-        shifted_xx['prim'] = xx_result['prim'][0:0]
-        shifted_xx['dual'] = xx_result['dual'][0:0]
+        shifted_xx = xx_result[0:0]
+
         is_x = 1
 
         # Shift x, dx and w
@@ -525,27 +509,31 @@ class MPC(object):
 
             n_var = self.collocator.n_var[vk]
 
-            for var in ['prim', 'dual']:
-                new_xx = xx_result[var][start+n_var*(n_cp+is_x):end]
-                new_xx_extrapolate = xx_result[var][end-n_var:end]
-                shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx))
 
-                for i in range(n_cp+is_x):
-                    shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx_extrapolate))
+            new_xx = xx_result[start+n_var*(n_cp+is_x):end]
+            new_xx_extrapolate = xx_result[end-n_var:end]
+            shifted_xx = N.concatenate((shifted_xx, new_xx))
+            
+            for i in range(n_cp+is_x):
+                shifted_xx = N.concatenate((shifted_xx, new_xx_extrapolate))
             is_x = 0
 
         # Shift inputs without blocking factors
-        n_cont_u = len(self.constr_viol_costs.keys())    #ALL OTHER INPUTS SHOULD HAVE BF
+        u_cont_names = [ var.getName() for var in 
+                        self.collocator.mvar_vectors['unelim_u'] 
+                        if var.getName() not in 
+                        self.options['blocking_factors'].factors.keys()]
+                    
+        n_cont_u = len(u_cont_names) 
         start_cont_u=gsi[split_map['unelim_u']]
         end_cont_u = start_cont_u + n_cont_u*n_cp*n_e
 
-        for var in ['prim', 'dual']:
-            new_xx = xx_result[var][start_cont_u+n_cont_u*n_cp:end_cont_u]
-            new_xx_extrapolate = xx_result[var][end_cont_u-n_cont_u:end_cont_u]
-            shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx))
+        new_xx = xx_result[start_cont_u+n_cont_u*n_cp:end_cont_u]
+        new_xx_extrapolate = xx_result[end_cont_u-n_cont_u:end_cont_u]
+        shifted_xx = N.concatenate((shifted_xx, new_xx))
 
-            for i in range(n_cp):
-                shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx_extrapolate))
+        for i in range(n_cp):
+            shifted_xx = N.concatenate((shifted_xx, new_xx_extrapolate))
 
         # Shift inputs with blocking factors 
         n_bf_u = self.collocator.n_var['unelim_u'] - n_cont_u
@@ -556,22 +544,21 @@ class MPC(object):
 
             end_bf_u = start_bf_u + len(factors)
 
-            for var in ['prim', 'dual']:
-                new_xx = xx_result[var][start_bf_u+n_bf_u:end_bf_u]
-                new_xx_extrapolate = xx_result[var][end_bf_u-n_bf_u:end_bf_u]
-
-                # DO SOMETHING SMARTER?
-                shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx))
-                shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx_extrapolate))
+            new_xx = xx_result[start_bf_u+n_bf_u:end_bf_u]
+            new_xx_extrapolate = xx_result[end_bf_u-n_bf_u:end_bf_u]
+            
+            # DO SOMETHING SMARTER?
+            shifted_xx = N.concatenate((shifted_xx, new_xx))
+            shifted_xx = N.concatenate((shifted_xx, new_xx_extrapolate))
             start_bf_u = end_bf_u
 
         # Shift initial controls (without blocking factors)
         start_init_u = gsi[split_map['unelim_u']] + (n_cp-1)*n_cont_u
         end_init_u = start_init_u + n_cont_u
 
-        for var in ['prim', 'dual']:
-            new_xx = xx_result[var][start_init_u:end_init_u]
-            shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx))
+
+        new_xx = xx_result[start_init_u:end_init_u]
+        shifted_xx = N.concatenate((shifted_xx, new_xx))
 
         # Shift initial dx, w
         for vk in ['dx', 'w']:
@@ -580,14 +567,18 @@ class MPC(object):
             start=gsi[split_map[vk]] + (n_cp-1)*n_var
             end = start+n_var
 
-            for var in ['prim', 'dual']:
-                new_xx = xx_result[var][start:end]
-                shifted_xx[var] = N.concatenate((shifted_xx[var], new_xx))
-                
-        # Save the shifted result in the collocator
-        self.collocator.dual_opt2 = shifted_xx['dual']
-        self.collocator.xx_init = shifted_xx['prim']
+            new_xx = xx_result[start:end]
+            shifted_xx = N.concatenate((shifted_xx, new_xx))
 
+        # Add p_opt
+        start_p = gsi[split_map['p_opt']]
+        end_p = gsi[split_map['p_opt']+1]
+        
+        new_xx = xx_result[start_p:end_p]
+        shifted_xx = N.concatenate((shifted_xx, new_xx))
+        
+        # Save the shifted result in the collocator and locally
+        self.collocator.xx_init = shifted_xx
         self.shifted_xx = shifted_xx
 
     def update_state(self, sim_res=None):
@@ -650,15 +641,19 @@ class MPC(object):
         
         if self._sample_nbr > 2:
             if not self.inittraj_set:
-                #~ self.set_inittraj(self._result_object)
-                self._shift_xx()
-
-        elif self._sample_nbr == 2:          # Initiate the warm start
+                if self.use_shift:
+                    self._shift_xx()
+                else:
+                    self.set_inittraj(self._result_object)
+                
+        elif self._sample_nbr == 2:            # Initiate the warm start
             self.collocator.warm_start = True
             self._set_warm_start_options()
             if not self.inittraj_set:
-                #~ self.set_inittraj(self._result_object)
-                self._shift_xx()
+                if self.use_shift:
+                    self._shift_xx()
+                else:
+                    self.set_inittraj(self._result_object)
             self.collocator._init_and_set_solver_inputs()
             
             # Change w from blocking factors
@@ -671,8 +666,8 @@ class MPC(object):
         # Solve the NLP
         self.alg.solve()
         
+        # Check return status
         self.status = self.collocator.solver_object.getStat('return_status')
-        # Get the results and extract the results for this sample
         if self.status == 'Solve_Succeeded' or self.status == 'Solved_To_Acceptable_Level': 
             self._result_object = self.alg.get_result()
             self.result = self.collocator.get_result()
@@ -680,7 +675,7 @@ class MPC(object):
         else:
             self.consec_fails += 1
             if self.consec_fails >= self.options['n_e']:
-                pass
+                return None
                 #THROW SOMETHING CAUSE THIS AINT WORKING!
         
         self.t0_post = time.clock()
@@ -688,8 +683,10 @@ class MPC(object):
         self.iterations.append(self.collocator.solver_object.getStat('iter_count'))
         self.return_status.append(self.status)
         
-        self._extract_results()
-        self._append_to_result_file()
+        # Get the results and extract the results for this sample
+        if self.create_comp_result:
+            self._extract_results()
+            self._append_to_result_file()
         self.inittraj_set = False
         self._add_times()
         return self._get_opt_input()
@@ -831,3 +828,11 @@ class MPC(object):
         """
         for i, stat in enumerate(self.return_status): 
             print("%s: %s: %s iterations" %(i+1, stat,self.iterations[i]))
+            
+ 
+    def get_solver_stats(self):
+        """ 
+        Returns the return status and number of iterations for each for each 
+        optimization.
+        """
+        return (self.return_status, self.iterations)
