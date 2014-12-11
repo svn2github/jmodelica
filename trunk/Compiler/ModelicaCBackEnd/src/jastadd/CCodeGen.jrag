@@ -3184,6 +3184,12 @@ aspect CCodeGen {
         for (FVariable fv : localNonRealVariables())
             str.format("%sx[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
         
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {\n");
+        // Loop over all non-real variables and write their position in the z-vector
+        Enumerator directImpactNonRealEnumerator = new Enumerator();
+        for (FVariable fv : directlyImpactingNonReals_C())
+            str.format("%sx[%d] = %d;\n", nextIndent, directImpactNonRealEnumerator.next(), fv.valueReference());
+        
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {\n");
         // Loop over all non-real variables and write their position in the z-vector
         Enumerator relExpEnumerator = new Enumerator();
@@ -3191,6 +3197,12 @@ aspect CCodeGen {
             relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
         for (FRelExp relExp : activeInitialSwitches_C())
             relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
+        
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {\n");
+        // Loop over all non-real variables and write their position in the z-vector
+        Enumerator directlyActiveSwitchEnumerator = new Enumerator();
+        for (FRelExp relExp : directlyActiveSwitches_C())
+            relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, directlyActiveSwitchEnumerator);
         
         // Equation nominal values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
@@ -3582,7 +3594,9 @@ aspect CCodeGen {
 			str.print("NULL, ");
 		str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
 		str.print(localNonRealVariables().size() + ", ");
+		str.print(directlyImpactingNonReals_C().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
+		str.print(directlyActiveSwitches_C().size() + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
 		p.C_blockResidualAttributePrinter.printVariability(p, str, indent, this.localUnsolvedVariables());
 		str.print(genJMISolverConstant_C(nleSolver) + ", ");
@@ -3614,6 +3628,8 @@ aspect CCodeGen {
     private Collection<FRelExp> AbstractEquationBlock.inactiveSwitches_C = null;
     private Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C = null;
     private Collection<FRelExp> AbstractEquationBlock.inactiveInitialSwitches_C = null;
+    private Collection<FRelExp> AbstractEquationBlock.directlyActiveSwitches_C = null;
+    private Collection<FVariable> AbstractEquationBlock.directlyImpactingNonReals_C = null;
     
     /**
      * Returns all active switches in the block. A switch is considered active
@@ -3650,33 +3666,73 @@ aspect CCodeGen {
     /**
      * Returns all inactive initial switches in the block. A switch is considered
      * active in a block if is located in the block and depends on active
-     * aariables in the block.
+     * variables in the block.
      */
     public Collection<FRelExp> AbstractEquationBlock.inactiveInitialSwitches_C() {
         cacheSwitches_C();
         return inactiveInitialSwitches_C;
     }
     
+    /**
+     * Returns all directly active switches in the block. A switch is
+     * considered active in a block if is located in the block and depends on
+     * active variables in the block. A switch is considered direct if it
+     * diretly affects an continuous equation.
+     */
+    public Collection<FRelExp> AbstractEquationBlock.directlyActiveSwitches_C() {
+        cacheSwitches_C();
+        return directlyActiveSwitches_C;
+    }
+    
+    /**
+     * Returns all directly affecting non reals in the block. A non real is
+     * considered directly affecting in a block if is solved in the block and 
+     * is used in a continuous equation.
+     */
+    public Collection<FVariable> AbstractEquationBlock.directlyImpactingNonReals_C() {
+        cacheSwitches_C();
+        return directlyImpactingNonReals_C;
+    }
+    
     private void AbstractEquationBlock.cacheSwitches_C() {
-        if (activeSwitches_C != null && activeInitialSwitches_C != null && inactiveSwitches_C != null && inactiveInitialSwitches_C != null)
+        if (activeSwitches_C != null && activeInitialSwitches_C != null && inactiveSwitches_C != null &&
+                inactiveInitialSwitches_C != null && directlyActiveSwitches_C != null && directlyImpactingNonReals_C != null)
             return;
-        activeSwitches_C = new ArrayList<FRelExp>();
-        activeInitialSwitches_C = new ArrayList<FRelExp>();
-        inactiveSwitches_C = new ArrayList<FRelExp>();
-        inactiveInitialSwitches_C = new ArrayList<FRelExp>();
-        Collection<FVariable> allVariables = allLocalVariables();
+        activeSwitches_C = new LinkedHashSet<FRelExp>();
+        activeInitialSwitches_C = new LinkedHashSet<FRelExp>();
+        inactiveSwitches_C = new LinkedHashSet<FRelExp>();
+        inactiveInitialSwitches_C = new LinkedHashSet<FRelExp>();
+        directlyActiveSwitches_C = new LinkedHashSet<FRelExp>();
+        directlyImpactingNonReals_C = new LinkedHashSet<FVariable>();
+        
+        Set<FAbstractEquation> realEqns = new HashSet<FAbstractEquation>(localRealEquations());
+        Set<FVariable> nonRealVars = new HashSet<FVariable>(localNonRealVariables());
+        Set<FVariable> allVariables = new HashSet<FVariable>(allLocalVariables());
         for (FAbstractEquation equation : allLocalEquations()) {
+            boolean realEqn = realEqns.contains(equation);
             for (FRelExp relExp : equation.relExpInInitialEquation()) {
-                if (relExp.dependsOn(allVariables))
+                if (relExp.dependsOn(allVariables)) {
                     activeInitialSwitches_C.add(relExp);
-                else
+                    if (realEqn)
+                        directlyActiveSwitches_C.add(relExp);
+                } else {
                     inactiveInitialSwitches_C.add(relExp);
+                }
             }
             for (FRelExp relExp : equation.relExpInEquation()) {
-                if (relExp.dependsOn(allVariables))
+                if (relExp.dependsOn(allVariables)) {
                     activeSwitches_C.add(relExp);
-                else
+                    if (realEqn)
+                        directlyActiveSwitches_C.add(relExp);
+                } else {
                     inactiveSwitches_C.add(relExp);
+                }
+            }
+            if (realEqn) {
+                for (FVariable var : equation.referencedFVariables()) {
+                    if (nonRealVars.contains(var))
+                        directlyImpactingNonReals_C.add(var);
+                }
             }
         }
     }
