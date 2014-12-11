@@ -290,10 +290,10 @@ namespace ModelicaCasADi
                 //it_var->second->setAsEliminated();
                 //Removes variables from variables vector. Makes sure duplicates in the list are not twice eliminated
                 if(!it_var->second->wasEliminated()){
-                    eliminated_z.push_back(const_cast<Variable*>(it_var->second));
+                    //eliminated_z.push_back(const_cast<Variable*>(it_var->second));
                     fit = std::find(z.begin(), z.end(),it_var->second);
                     (*fit)->setAsEliminated();
-                    z.erase(fit);
+                    //z.erase(fit);
                 }
             }
         

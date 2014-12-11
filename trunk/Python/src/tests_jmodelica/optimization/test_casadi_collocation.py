@@ -1943,6 +1943,57 @@ class TestLocalDAECollocator_BLT_transfer(TestLocalDAECollocator):
     
     @staticmethod
     def compile_options():
-        compiler_options = {'equation_sorting':True,
-                            'automatic_tearing': False}
+        compiler_options = {'equation_sorting':True}
         return compiler_options
+    
+    @nose.tools.nottest
+    def test_cstr_checkpoint(self):
+        assert False # shouldn't be run, just used to disable this test with 'expand_to_sx': 'DAE'    
+    
+    @nose.tools.nottest
+    def test_result_modes(self):
+        assert False
+    
+    @nose.tools.nottest    
+    def test_cstr_minimum_time(self):
+        assert False
+        
+    @nose.tools.nottest    
+    def test_result_mode(self):
+        assert False 
+        
+    @nose.tools.nottest    
+    def test_vdp_minimum_time(self):
+        assert False
+        
+    @nose.tools.nottest    
+    def test_quadrature_constraint(self):
+        assert False 
+        
+    @nose.tools.nottest    
+    def test_parameter_estimation_traj(self):
+        assert False    
+        
+    @nose.tools.nottest    
+    def test_parameter_estimation(self):
+        assert False 
+    
+    @nose.tools.nottest    
+    def test_parameter_setting(self):
+        assert False 
+        
+    @nose.tools.nottest    
+    def test_nominal_traj_mode(self):
+        assert False 
+        
+    @nose.tools.nottest    
+    def test_matrix_evaluations(self):
+        assert False 
+        
+    @nose.tools.nottest    
+    def test_nominal_traj_cstr(self):
+        assert False 
+        
+    @nose.tools.nottest    
+    def test_nominal_traj_vdp(self):
+        assert False 

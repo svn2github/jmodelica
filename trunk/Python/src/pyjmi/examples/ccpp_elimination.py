@@ -102,7 +102,7 @@ def run_demo(with_plots=True):
     ### 2. Solve the optimal control problem
     # Compile model
     from pyjmi import transfer_to_casadi_interface
-    compiler_options={'equation_sorting':True, "automatic_tearing": False}
+    compiler_options={'equation_sorting':True}
     op = transfer_to_casadi_interface("CombinedCycleStartup.Startup6",
                                       file_paths, compiler_options)
     
@@ -118,23 +118,31 @@ def run_demo(with_plots=True):
     print "Number of algebraics:  ",len(algebraics)
 
     print "Eliminating variables!"
-    op.eliminateAlgebraics()
+    
+    eliminable_algebraics = [a for a in algebraics if a in eliminables]
+    op.markVariablesForElimination(eliminable_algebraics)
+    op.eliminateVariables()
+    
+    # Alternative way of eliminating variables
+    #op.eliminateAlgebraics()    
+    
     print "Done with elimination" 
     eliminated_vars = op.getEliminatedVariables()
     print "Number of variables that were eliminated: ", len(eliminated_vars)    
     
-    # Alternative way of eliminating variables
-    #eliminable_algebraics = [a for a in algebraics if a in eliminables]
-    #op.markVariablesForElimination(eliminable_algebraics)
-    #op.eliminateVariables()
+    
 
     # Solve the optimal control problem
     opt_res = op.optimize(options=opt_opts)
+    
+    # get output of one eliminated variable
+    elim_var_name = eliminable_algebraics[5].getName()
     
     # Extract variable profiles
     opt_plant_p = opt_res['plant.p']
     opt_plant_sigma = opt_res['plant.sigma']
     opt_plant_load = opt_res['plant.load']
+    opt_eliminated = opt_res[elim_var_name]
     opt_time = opt_res['time']
     opt_input = N.vstack([opt_time, opt_plant_load]).T
     
@@ -142,22 +150,28 @@ def run_demo(with_plots=True):
     if with_plots:
         plt.close(2)
         plt.figure(2)
-        plt.subplot(3, 1, 1)
+        plt.subplot(4, 1, 1)
         plt.plot(opt_time, opt_plant_p * 1e-6)
         plt.ylabel('evaporator pressure [MPa]')
         plt.grid(True)
         plt.title('Optimized trajectories')
         
-        plt.subplot(3, 1, 2)
+        plt.subplot(4, 1, 2)
         plt.plot(opt_time, opt_plant_sigma * 1e-6)
         plt.grid(True)
         plt.ylabel('turbine thermal stress [MPa]')
         
-        plt.subplot(3, 1, 3)
+        plt.subplot(4, 1, 3)
         plt.plot(opt_time, opt_plant_load)
         plt.grid(True)
         plt.ylabel('input load [1]')
         plt.xlabel('time [s]')
+        
+        plt.subplot(4, 1, 4)
+        plt.plot(opt_time, opt_eliminated)
+        plt.grid(True)
+        plt.ylabel(elim_var_name)
+        plt.xlabel('time [s]')        
     
     # Verify solution for testing purposes
     try:
@@ -186,6 +200,7 @@ def run_demo(with_plots=True):
     sim_plant_load = sim_res['load']
     sim_time = sim_res['time']
     
+    
     # Plot the simulated trajectories
     if with_plots:
         plt.close(3)
@@ -213,7 +228,9 @@ def run_demo(with_plots=True):
         plt.ylabel('input load [1]')
         plt.xlabel('time [s]')
         plt.grid(True)
+        
         plt.show()
+        
     
     # Verify solution for testing purposes
     N.testing.assert_allclose(opt_res.final('plant.p'),

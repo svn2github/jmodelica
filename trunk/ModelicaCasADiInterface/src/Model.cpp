@@ -588,16 +588,11 @@ namespace ModelicaCasADi
 
     std::vector< Ref<Variable> > Model::getEliminatedVariables() {
         std::vector< Ref<Variable> > elimVars;
-        for (std::vector< Variable * >::iterator it = eliminated_z.begin(); it != eliminated_z.end(); ++it) {
-            elimVars.push_back(*it);
-        }
-        
-        //When we keep them in a single container
-        /*for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
+        for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
             if((*it)->wasEliminated()){            
                 elimVars.push_back(*it);
             }
-        }*/
+        }
         return elimVars;
     }
 
@@ -618,10 +613,10 @@ namespace ModelicaCasADi
                 //it_var->second->setAsEliminated();
                 //Removes variables from variables vector. Makes sure duplicates in the list are not twice eliminated
                 if(!it_var->second->wasEliminated()){
-                    eliminated_z.push_back(const_cast<Variable*>(it_var->second));
+                    //eliminated_z.push_back(const_cast<Variable*>(it_var->second));
                     fit = std::find(z.begin(), z.end(),it_var->second);
                     (*fit)->setAsEliminated();
-                    z.erase(fit);
+                    //z.erase(fit);
                 }
             }
             equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);

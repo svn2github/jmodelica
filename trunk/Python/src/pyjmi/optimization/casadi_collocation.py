@@ -920,16 +920,16 @@ class LocalDAECollocator(CasadiCollocator):
                      'w': op.REAL_ALGEBRAIC}
         mvar_vectors = {'dx': N.array([var for var in
                                        op.getVariables(var_kinds['dx'])
-                                       if (not var.isAlias())]),
+                                       if (not var.isAlias() and not var.wasEliminated())]),
                         'x': N.array([var for var in
                                       op.getVariables(var_kinds['x'])
-                                      if (not var.isAlias())]),
+                                      if (not var.isAlias() and not var.wasEliminated())]),
                         'u': N.array([var for var in
                                       op.getVariables(var_kinds['u'])
-                                      if (not var.isAlias())]),
+                                      if (not var.isAlias() and not var.wasEliminated())]),
                         'w': N.array([var for var in
                                       op.getVariables(var_kinds['w'])
-                                      if (not var.isAlias())])}
+                                      if (not var.isAlias() and not var.wasEliminated())])}
 
         # Count variables (uneliminated inputs and free parameters are counted
         # later)
@@ -983,8 +983,6 @@ class LocalDAECollocator(CasadiCollocator):
         mvar_vectors["elim_u"] = mvar_vectors['u'][elim_input_indices]
         n_var['unelim_u'] = len(unelim_input_indices)
         n_var['elim_u'] = len(elim_input_indices)
-        
-        # print n_var
 
         # Sort parameters
         par_kinds = [op.BOOLEAN_CONSTANT,
@@ -1018,7 +1016,12 @@ class LocalDAECollocator(CasadiCollocator):
             [mvar.getVar() for mvar in
              mvar_vectors['u'][elim_input_indices]]
         named_mvar_struct_dx = [mvar.getVar() for mvar in mvar_vectors['dx']]
-
+        
+        # Create structure for variable elimination handling
+        elimination = casadi.MX()
+        for var in op.getEliminatedVariables():
+            elimination.append(op.getSolutionOfEliminatedVariable(var))        
+        
         # Get optimization and model expressions
         initial = op.getInitialResidual()
         dae = op.getDaeResidual()
@@ -1058,13 +1061,21 @@ class LocalDAECollocator(CasadiCollocator):
                 name_map[name] = (i, vt)
                 svector_vars.append(mvar_struct[vt][i])
                 i = i + 1
+        
+        # Add names to the eliminated variables
+        i = 0
+        for var in op.getEliminatedVariables():
+            name = var.getName()
+            name_map[name] = (i, "elim_var")
+            i = i + 1
 
         # Substitute named variables with vector variables in expressions
-        s_op_expressions = [initial, dae, path, mterm, lterm]
-        [initial, dae, path, mterm, lterm] = casadi.substitute(
+        s_op_expressions = [initial, dae, path, mterm, lterm, elimination]
+        [initial, dae, path, mterm, lterm, elimination] = casadi.substitute(
             s_op_expressions
             , named_vars, svector_vars)        
         self.mvar_struct = mvar_struct
+        
 
         # Create BlockingFactors from self.blocking_factors
         if isinstance(self.blocking_factors, Iterable):
@@ -1083,6 +1094,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.mvar_vectors = mvar_vectors
         self.n_var = n_var
         self.name_map = name_map
+        self.elimination = elimination
 
     def _scale_variables(self):
         """
@@ -1620,13 +1632,15 @@ class LocalDAECollocator(CasadiCollocator):
 
         #Substitute old parameter symbols for new parameter symbols
         op_expressions = [self.initial, self.dae, self.path, self.point,
-                        self.mterm, self.lterm]
+                        self.mterm, self.lterm, self.elimination]
         [self.initial,
          self.dae,
          self.path,
          self.point,
          self.mterm,
-         self.lterm] = casadi.substitute(op_expressions, par_vars, self.pp_list)
+         self.lterm,
+         self.elimination] = casadi.substitute(op_expressions, par_vars, self.pp_list)
+        
 
     def _get_z_l0(self,i,k,with_der=True):
         """
@@ -2627,6 +2641,12 @@ class LocalDAECollocator(CasadiCollocator):
         G_i_fcn.init()
         self.G_e_l0_fcn = G_e_fcn
         self.G_i_l0_fcn = G_i_fcn
+        
+        # Solution for eliminated variables NOT SCALED. CALLED AFTER RE-SCALE SOLUTION
+        elimination_fcn = self._FXFunction(s_sym_input,[self.elimination])
+        elimination_fcn.setOption("name","eliminated_variables_solution_fcn")
+        elimination_fcn.init()
+        self.elimination_fcn = elimination_fcn
 
         #Define cost terms
         s_sym_input = [self.mvar_struct["time"]]
@@ -2664,6 +2684,8 @@ class LocalDAECollocator(CasadiCollocator):
             lterm_fcn.setOption("name", "lterm_l0_fcn")
             lterm_fcn.init()
             self. lterm_l0_fcn = lterm_fcn
+            
+        
 
     def _define_l1_functions(self):
         """
@@ -4182,7 +4204,8 @@ class LocalDAECollocator(CasadiCollocator):
 
                     # Rescale x_{i, n_cp + 1}
                     primal_opt[self.var_indices['x'][i][self.n_cp + 1]] = x_i_np1
-
+                    
+        
         # Get solution trajectories
         t_index = 0
         if self.result_mode == "collocation_points":
@@ -4357,10 +4380,38 @@ class LocalDAECollocator(CasadiCollocator):
                 tf = op.get_attr(tf_var, "_value")
             t_opt = t0 + (tf - t0) * t_opt
             var_opt['dx'] /= (tf - t0)
+        
+        # Create array to storage eliminated variables
+        n_eliminations = len(op.getEliminatedVariables())
+        
+        var_opt['elim_vars'] = N.ones([len(t_opt), n_eliminations])    
+        if n_eliminations>0:
+            # Compute eliminated variables
+            t_index = 0
+            var_kinds_ordered =copy.copy(self.mvar_struct.keys())
+            del var_kinds_ordered[0]        
+            for t in t_opt:
+                index_var = 0
+                self.elimination_fcn.setInput(t,0)
+                self.elimination_fcn.setInput(self._par_vals,1)
+                j=2
+                for vk in var_kinds_ordered:
+                    if self.n_var[vk]>0:
+                        if vk is not 'p_opt':
+                            var_input = var_opt[vk][t_index,:]
+                        else:
+                            var_input = var_opt[vk]
+                        self.elimination_fcn.setInput(var_input,j)
+                        j+=1
+                self.elimination_fcn.evaluate()
+                result = self.elimination_fcn.getOutput()
+                for index_v in range(n_eliminations):
+                    var_opt['elim_vars'][t_index,index_v] = result[index_v]
+                t_index+=1 
 
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['merged_u'],
-                var_opt['w'], var_opt['p_opt'])
+                var_opt['w'], var_opt['p_opt'], var_opt['elim_vars'])
 
     def get_h_opt(self):
         if self.hs == "free":
@@ -4408,10 +4459,11 @@ class LocalDAECollocator(CasadiCollocator):
             Currently only textual format is supported.
         """
         if result is None:
-            (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
+            (t,dx_opt,x_opt,u_opt,w_opt,p_opt, elim_vars) = self.get_result()
+            data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt,elim_vars))
         else:
             (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = result
-        data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
+            data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
 
         if (format=='txt'):
             op = self.op
@@ -4421,6 +4473,9 @@ class LocalDAECollocator(CasadiCollocator):
                                    [list(mvar_vectors[vt]) for
                                     vt in ['p_opt', 'p_fixed',
                                            'dx', 'x', 'u', 'w']])
+            if result is None:
+                for v in op.getEliminatedVariables():
+                    variable_list.append(v) 
 
             # Map variable to aliases
             alias_map = {}
@@ -4432,6 +4487,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Set up sections
             num_vars = len(op.getAllVariables()) + 1
+            #num_vars -= len(op.getEliminatedVariables())
             name_section = []
             description_section = []
             data_info_section = []

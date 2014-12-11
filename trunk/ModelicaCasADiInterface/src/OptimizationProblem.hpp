@@ -107,11 +107,17 @@ namespace ModelicaCasADi
              **/
             virtual void setEquations(Ref<Equations> eqCont);
 
-            
+            /**
+             * Append a variable to the list of variables to eliminate
+             * @Param Variable
+             **/
             void markVariablesForElimination(Ref<Variable> var);
+            /**
+             * Append a variable to the list of variables to eliminate
+             * @Param std::vector of Variable
+             **/
             void markVariablesForElimination(const std::vector< Ref<Variable> >& vars);
 
-            //bool markVaribaleAsEliminated(Ref<Variable> var, std::vector< Ref<Variable> >& aliasVars);
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
             private:
