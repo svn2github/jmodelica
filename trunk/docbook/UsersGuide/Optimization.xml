@@ -684,15 +684,17 @@ opts? # View the help text</programlisting>
 
               <entry>False</entry>
 
-              <entry>Checkpoint is used to build the transcribed NLP with
-              packed MX functions. Instead of calling the NLP expressions at
-              every collocation point (n_e x n_cp times), the checkpoint
-              scheme builds an MXFunction that evaluates n_cp collocation
-              points at the same time, so that the packed MXFunction is called
-              only at every element (n_e times). This approach improves the
-              code generation and it is expected to reduce the memory usage
-              for constructing and solving the NLP. However, it is expected to
-              degrade the execution time.</entry>
+              <entry>If <literal>checkpoint</literal> is set to
+              <literal>True,</literal> transcribed NLP is built with packed MX
+              functions. Instead of calling the DAE residual function, the
+              collocation equation function, and the lagrange term function
+              <literal>n_e * n_cp</literal> times, the check point scheme
+              builds an <literal>MXFunction</literal> evaluating
+              <literal>n_cp</literal> collocation points at the same time, so
+              that the packed <literal>MXFunction</literal> is called only
+              <literal>n_e</literal> times. This approach improves the code
+              generation and it is expected to reduce the memory usage for
+              constructing and solving the NLP.</entry>
             </row>
 
             <row>
