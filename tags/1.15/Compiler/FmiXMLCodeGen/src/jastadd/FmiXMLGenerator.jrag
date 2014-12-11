@@ -1,0 +1,1647 @@
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+/*
+    Copyright (C) 2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/**
+ * A generator class containing common functionality for generating the 
+ * modelDescription.xml files for different FMI versions.
+ */
+public abstract class FmiXMLGenerator extends GenericXMLGenerator {
+    
+    /**
+     * Constructor.
+     * 
+     * @param expPrinter Printer object used to generate code for expressions.
+     * @param escapeCharacter Escape characters used to decode tags.
+     * @param fclass An FClass object used as a basis for the code generation.
+     */
+    public FmiXMLGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
+        super(expPrinter,escapeCharacter, fclass);
+    }
+    
+    /**
+     * Base class for tags used to generate XML that should only be present in ME FMUs.
+     */
+    public abstract class METag extends XMLTag {
+        
+        /**
+         * Construct a tag.
+         * 
+         * @param name        tag name
+         * @param xml         name to use for the xml tag or attribute
+         * @param myGenerator the tag's generator
+         * @param fclass      an FClass to generate code for
+         */
+        public METag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, xml, myGenerator, fclass);
+            addOptions("generate_fmi_me_xml");
+        }
+        
+    }
+    
+    /**
+     * Base class for tags used to generate XML that should only be present in CS FMUs.
+     */
+    public abstract class CSTag extends XMLTag {
+        
+        /**
+         * Construct a tag.
+         * 
+         * @param name        tag name
+         * @param xml         name to use for the xml tag or attribute
+         * @param myGenerator the tag's generator
+         * @param fclass      an FClass to generate code for
+         */
+        public CSTag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, xml, myGenerator, fclass);
+            addOptions("generate_fmi_cs_xml");
+        }
+        
+    }
+    
+    /**
+	 * Internal class used to generate a DefaultExperiment tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_defaultExperiment extends XMLTag {
+		
+		private FClass.Experiment e = fclass.experiment;
+		
+		public XMLTag_defaultExperiment(AbstractGenerator myGenerator, FClass fclass) {
+			super("defaultExperiment", "DefaultExperiment", myGenerator, fclass);
+		}
+		
+		public void generate(CodeStream genPrinter) {
+			if (e != null) {
+				super.generate(genPrinter);
+			}
+		}
+		
+		public void generateAttributes(CodeStream genPrinter) {
+			if (e.hasStart)
+				generateAttribute("startTime", Double.toString(e.start),     genPrinter);
+			if (e.hasStop)
+				generateAttribute("stopTime",  Double.toString(e.stop),      genPrinter);
+			if (e.hasTolerance)
+				generateAttribute("tolerance", Double.toString(e.tolerance), genPrinter);
+		}
+	}
+    
+    /**
+	 * Internal class used to generate a VendorAnnotations tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_vendorAnnotations extends XMLTag {
+		
+		public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
+			super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"tool"}; }
+	}
+	
+	/**
+	 * Internal class used to generate a Tool tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_tool extends XMLTag {
+		
+		public XMLTag_tool(AbstractGenerator myGenerator, FClass fclass) {
+			super("tool", "Tool", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"annotation"}; }
+		
+		public void generateAttributes(CodeStream genPrinter) {
+			generateAttribute("name", "JModelica.org", genPrinter);
+		}
+	}
+	
+	/**
+	 * Internal class used to generate a Annotation tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_annotation extends XMLTag {
+		
+		private String name;
+		private String value;
+		
+		public XMLTag_annotation(AbstractGenerator myGenerator, FClass fclass) {
+			super("annotation", "Annotation", myGenerator, fclass);
+		}
+		
+		public void generate(CodeStream genPrinter) {
+			HashSet<String> extLibraries = fclass.externalLibraries();
+			HashSet<String> extIncludes  = fclass.externalIncludes();
+			HashSet<String> extLibDirs   = fclass.externalLibraryDirectories();
+			HashSet<String> extInclDirs  = fclass.externalIncludeDirectories();
+			
+			name = "Library";
+			for(String lib : extLibraries) {
+				value = lib;
+				super.generate(genPrinter);
+			}
+			name = "Include";
+			for(String inc : extIncludes) {
+				value = inc;
+				super.generate(genPrinter);
+			}
+			name = "LibraryDirectory";
+			for(String libdir : extLibDirs) {
+				value = libdir;
+				super.generate(genPrinter);
+			}
+			name = "IncludeDirectory";
+			for(String incdir : extInclDirs) {
+				value = incdir;
+				super.generate(genPrinter);
+			}
+		}
+		
+		public void generateAttributes(CodeStream genPrinter) {
+			generateAttribute("name",  name,                       genPrinter);
+            generateAttribute("value", replaceIllegalChars(value), genPrinter);
+		}
+	}
+    
+    /**
+     * Checks if a variable is real and has a unit associated with it.
+     *
+     * @param FVariable A variable class.
+     */
+    private boolean realVariableWithUnit(FVariable variable) {
+        return variable instanceof FRealVariable && variable.unitAttributeSet();
+    }
+    
+    /**
+     * Adds the unit data of a real variable to the unit HashMap.
+     *
+     * @param HashMap A HashMap that data about units should be added.
+     * @param FRealVariable A real variable class with unit attribute(s).
+     */
+    private void addToUnitMap(HashMap<String,HashSet<String>> unitMap, FRealVariable variable) {
+        String attribute = variable.unitAttribute();
+        if (variable.displayUnitAttributeSet()) {
+            if(unitMap.containsKey(attribute)) {
+                HashSet<String> displayUnitsSet = unitMap.get(attribute);
+                displayUnitsSet.add(variable.displayUnitAttribute());
+            } else {
+                HashSet<String> displayUnitsSet = new HashSet<String>();
+                displayUnitsSet.add(variable.displayUnitAttribute());
+                unitMap.put(attribute, displayUnitsSet);
+            }
+        } else if(!unitMap.containsKey(attribute)) {
+            HashSet<String> emptySet = new HashSet<String>();
+            unitMap.put(attribute, emptySet);
+        }
+    }
+    
+    /**
+     * Create and format the Unit data in a HashMap.
+     *
+     * @param fclass An FClass object used as a basis for the code generation.
+     */
+    protected HashMap<String,HashSet<String>> extractUnits(FClass fclass) {
+        HashMap<String,HashSet<String>> unitMap = new HashMap<String,HashSet<String>>();
+        for(FVariable variable:fclass.allVariables()) {
+            if(realVariableWithUnit(variable)) {
+                addToUnitMap(unitMap, (FRealVariable)variable);
+            }
+        }
+        
+        return unitMap;
+    }
+    
+    /**
+     * Checks if a variable should be exposed in the XML
+     *
+     * @param FVariable A variable class.
+     */
+    protected boolean isXMLVariable(FVariable var) {
+        return !var.isPreVariable() && !var.isExternalObject() && !var.isTemporary();
+    }
+    
+    /**
+     * Gets the start expresion of a variable. Returns null if there is
+     * none.
+     *
+     * @param FVariable A variable class.
+     */
+    protected FExp getStartExp(FVariable var) {
+        if (var.useBindingExpAsStart()) 
+            return var.getBindingExp();
+        else if (var.startAttributeSet() && !var.isDependentParameter())
+            return var.startAttributeExp();
+        else if (var.isInput())
+            return var.createStartAttributeExp();
+        else
+            return null; //Default value
+    }
+    
+    /**
+     * Checks if the start attribute should be generated.
+     *
+     * @param FVariable A variable class.
+     */
+    protected boolean generateStartAttribute(FVariable var) {
+        if (var.variability().knownParameterVariability()) {
+            return false;
+        }
+        FExp startExp = getStartExp(var);
+        return startExp != null && startExp.isConstantExp();
+    }
+    
+    /**
+     * Gets the start attribute formated as XML value attribute.
+     *
+     * @param FVariable A variable class.
+     */
+    protected String getXMLStartAttribute(FVariable var) {
+        return var.type().convert(getStartExp(var).ceval()).xmlValue();
+    }
+    
+    /**
+     * Gets the number of event indicators that should be stated in the XML
+     */
+    protected int numberOfEventIndicators(FClass fclass) {
+        if (fclass.onlyInitBLT())
+            return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
+        else
+            return fclass.numEventIndicators();
+    }
+    
+    
+}
+
+/**
+ * A generator class for XML-generation for FMI 1.0 which takes a model described by
+ * <FClass> and provides an XML document for the meta-data in the model.
+ * 
+ * @see AbstractGenerator
+ * 
+ */
+public class Fmi1XMLGenerator extends FmiXMLGenerator {
+	
+    public static final Creator CREATOR = new Creator()
+    {
+        public Fmi1XMLGenerator create(Printer expPrinter, char escapeCharacter, FClass fclass) {
+            return new Fmi1XMLGenerator(expPrinter, escapeCharacter, fclass);
+        }
+    };
+    
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public Fmi1XMLGenerator(Printer expPrinter, char escapeCharacter,
+			FClass fclass) {
+		super(expPrinter,escapeCharacter, fclass);
+	}
+	
+	/**
+	 * Gets the root-tag for FMI 1.0 XML-generation.
+	 * 
+	 * @see XMLTag
+	 */
+    protected String root() {
+    	return "fmiModelDescription";
+    }
+
+	/**
+	 * Internal class used to generate a fmiModelDescription tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_fmiModelDescription extends XMLTag {
+		
+		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		
+		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
+			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
+		}
+		
+		public String[] children() {
+            return new String[] {"unitDefinitions", "typeDefinitions", "defaultExperiment",
+            					 "vendorAnnotations", "modelVariables", "modelStructure",
+            					 "implementation"};
+        }
+
+        public void generateAttributes(CodeStream genPrinter) {
+            generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
+            generateAttribute("modelName",                fclass.name(),                           genPrinter);
+            generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
+            generateAttribute("guid",                     fclass.guid(),                           genPrinter);
+            generateAttribute("generationTool",           "JModelica.org",                         genPrinter);
+            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),           genPrinter);
+            generateAttribute("variableNamingConvention", "structured",                            genPrinter);
+            generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
+            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),         genPrinter);
+        }
+	}
+	
+	/**
+	 * Internal class used to generate a UnitDefinitions tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_unitDefinitions extends XMLTag {
+        protected String unit;
+        protected Iterator<String> unitItr;
+        protected HashMap<String,HashSet<String>> unitMap;
+		
+		public XMLTag_unitDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("unitDefinitions", "UnitDefinitions", myGenerator, fclass);
+            unitMap = extractUnits(fclass);
+		}
+		
+		public String[] children() { return new String[] {"baseUnit"}; }
+		
+		public void generate(CodeStream genPrinter) {
+			//Generate code if any units are defined.
+            Set<String> units = unitMap.keySet();
+            if(!units.isEmpty()) {
+                unitItr = units.iterator();
+                super.generate(genPrinter);
+            }
+		}
+		
+		public void generateChildren(CodeStream genPrinter) {
+            while(unitItr.hasNext()) {
+                unit = unitItr.next();
+                super.generateChildren(genPrinter);
+            }
+        }
+        
+        public class XMLTag_baseUnit extends XMLTag {
+
+            private String def;
+
+            public XMLTag_baseUnit(AbstractGenerator myGenerator, FClass fclass) {
+                super("baseUnit", "BaseUnit", myGenerator, fclass);
+            }
+
+            public String[] children() { return new String[] {"displayUnitDefinition"}; }
+
+            public void generateAttributes(CodeStream genPrinter) {
+                generateAttribute("unit", unit, genPrinter);
+            }
+
+            public void generateChildren(CodeStream genPrinter) {
+                HashSet<String> defs = unitMap.get(unit);
+                Iterator<String> defsItr = defs.iterator();
+                while(defsItr.hasNext()) {
+                    def = defsItr.next();
+                    super.generateChildren(genPrinter);
+                }
+            }
+
+            public class XMLTag_displayUnitDefinition extends XMLTag {
+
+                public XMLTag_displayUnitDefinition(AbstractGenerator myGenerator, FClass fclass) {
+                    super("displayUnitDefinition", "DisplayUnitDefinition", myGenerator, fclass);
+                }
+
+                public void generateAttributes(CodeStream genPrinter) {
+                    generateAttribute("displayUnit", def, genPrinter);
+                }
+            }
+        }
+    }
+	
+	/**
+	 * Internal class used to generate a TypeDefinitions tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_typeDefinitions extends XMLTag {
+		
+		private FEnumDecl enumdecl;
+		
+		public XMLTag_typeDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("typeDefinitions", "TypeDefinitions", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"type"}; }
+		
+		public void generate(CodeStream genPrinter) {
+            if (fclass.getNumFEnumDecl() > 0) super.generate(genPrinter);
+		}
+		
+		public void generateChildren(CodeStream genPrinter) {
+			Iterator<FEnumDecl> itr = fclass.getFEnumDecls().iterator();
+			while (itr.hasNext()) {
+				enumdecl = itr.next();
+				super.generateChildren(genPrinter);
+			}
+		}
+		
+		public class XMLTag_type extends XMLTag {
+			
+			public XMLTag_type(AbstractGenerator myGenerator, FClass fclass) {
+				super("type", "Type", myGenerator, fclass);
+			}
+            
+            public String[] children() { return new String[] {"enumerationType"}; }
+			
+			public void generateAttributes(CodeStream genPrinter) {
+				generateAttribute("name", enumdecl.name(), genPrinter);
+                if (enumdecl.hasFStringComment())
+					generateAttribute("description", enumdecl.getFStringComment().getComment(), genPrinter);
+			}
+		}
+		
+		public class XMLTag_enumerationType extends XMLTag {
+			
+			private FEnumLiteral literal;
+			
+			public XMLTag_enumerationType(AbstractGenerator myGenerator, FClass fclass) {
+				super("enumerationType", "EnumerationType", myGenerator, fclass);
+			}
+			
+			public String[] children() { return new String[] {"item"}; }
+			
+			public void generateAttributes(CodeStream genPrinter) {
+                generateAttribute("min", "1",                        genPrinter);
+				generateAttribute("max", enumdecl.numEnumLiterals(), genPrinter);
+			}
+			
+			public void generateChildren(CodeStream genPrinter) {
+				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
+				while (itr.hasNext()) {
+					literal = itr.next();
+					super.generateChildren(genPrinter);
+				}
+			}
+			
+			public class XMLTag_item extends XMLTag {
+				
+				public XMLTag_item(AbstractGenerator myGenerator, FClass fclass) {
+					super("item", "Item", myGenerator, fclass);
+				}
+				
+				public void generateAttributes(CodeStream genPrinter) {
+                    generateAttribute("name", literal.name(), genPrinter);
+                    if (literal.hasFStringComment())
+						generateAttribute("description", literal.getFStringComment().getComment(), genPrinter);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Internal class used to generate a ModelVariables tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelVariables extends XMLTag {
+		
+		private FVariable variable;
+		
+		public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelVariables", "ModelVariables", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"variables"}; }
+		
+		public void generateChildren(CodeStream genPrinter) {
+			// get and sort all FVariables
+			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
+			VariableNameComparator comp = new VariableNameComparator();
+			Collections.sort(variables, comp);
+
+			for (FVariable var : variables) {
+                if (isXMLVariable(var)) {
+					variable = var;
+					super.generateChildren(genPrinter);
+				}
+			}
+		}
+		
+		public class XMLTag_variables extends XMLTag {
+
+			public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
+				super("variables", "ScalarVariable", myGenerator, fclass);
+			}
+
+			public String[] children() {
+				return new String[] {"real", "integer", "boolean", "string", "enumeration", "directDependency"};
+			}
+			
+			public void generateAttributes(CodeStream genPrinter) {
+				generateAttribute("name",           variable.name(),           genPrinter);
+				generateAttribute("valueReference", variable.valueReference(), genPrinter);
+                if (variable.hasFStringComment())
+                    generateAttribute("description", replaceIllegalChars(variable.getFStringComment().getComment()), genPrinter);
+
+                if (variable.isConstant())
+                    generateAttribute("variability", "constant", genPrinter);
+                else if (variable.isParameter())
+                    generateAttribute("variability", "parameter", genPrinter);
+                else if (variable.isDiscrete())
+                    generateAttribute("variability", "discrete", genPrinter);
+                else //default
+                    generateAttribute("variability", "continuous", genPrinter);
+
+                if (variable.isInput())
+                    generateAttribute("causality", "input", genPrinter);
+                else if (variable.isOutput())
+                    generateAttribute("causality", "output", genPrinter);
+                else //default
+                    generateAttribute("causality", "internal", genPrinter);
+
+                if (variable.isAlias() && variable.isNegated())
+                    generateAttribute("alias", "negatedAlias", genPrinter);
+                else if (variable.isAlias())
+                    generateAttribute("alias", "alias", genPrinter);
+                else //default
+                    generateAttribute("alias", "noAlias", genPrinter);
+            }
+        }
+
+		public class XMLTag_real extends XMLTag {
+
+			public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
+				super("real", "Real", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isReal()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				FRealVariable realvariable = (FRealVariable)variable;
+
+                if(realvariable.quantityAttributeSet())
+                    generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
+                if(realvariable.unitAttributeSet())
+                    generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
+                if(realvariable.displayUnitAttributeSet())
+                    generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
+                
+                generateAttribute("relativeQuantity", false, genPrinter);
+                if(realvariable.minAttributeSet())
+                    generateAttribute("min", realvariable.minAttribute(), genPrinter);
+                if(realvariable.maxAttributeSet())
+                    generateAttribute("max", realvariable.maxAttribute(), genPrinter);
+                if(realvariable.nominalAttributeSet())
+                    generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
+                
+                generateStartAndFixedAttribute(genPrinter, variable);
+            }
+        }
+
+		public class XMLTag_integer extends XMLTag {
+
+			public XMLTag_integer(AbstractGenerator myGenerator, FClass fclass) {
+				super("integer", "Integer", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isInteger()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				FIntegerVariable integervariable = (FIntegerVariable)variable;
+				
+                if(integervariable.quantityAttributeSet())
+                    generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
+                if(integervariable.minAttributeSet())
+                    generateAttribute("min", integervariable.minAttribute(), genPrinter);
+                if(integervariable.maxAttributeSet())
+                    generateAttribute("max", integervariable.maxAttribute(), genPrinter);
+                
+                generateStartAndFixedAttribute(genPrinter, variable);
+            }
+        }
+
+		public class XMLTag_boolean extends XMLTag {
+
+			public XMLTag_boolean(AbstractGenerator myGenerator, FClass fclass) {
+				super("boolean", "Boolean", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isBoolean()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				generateStartAndFixedAttribute(genPrinter, variable);
+			}
+		}
+
+		public class XMLTag_string extends XMLTag {
+
+			public XMLTag_string(AbstractGenerator myGenerator, FClass fclass) {
+				super("string", "String", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isString()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				generateStartAndFixedAttribute(genPrinter, variable);
+			}
+		}
+
+		public class XMLTag_enumeration extends XMLTag {
+
+			public XMLTag_enumeration(AbstractGenerator myGenerator, FClass fclass) {
+				super("enumeration", "Enumeration", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isEnum()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				FEnumVariable enumvariable = (FEnumVariable)variable;
+				//declaredType
+				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
+
+                if(enumvariable.quantityAttributeSet())
+                    generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
+                if(enumvariable.minAttributeSet())
+                    generateAttribute("min", enumvariable.minAttribute(), genPrinter);
+                if(enumvariable.maxAttributeSet())
+                    generateAttribute("max", enumvariable.maxAttribute(), genPrinter);
+                
+                generateStartAndFixedAttribute(genPrinter, variable);
+            }
+        }
+        
+        protected void generateStartAndFixedAttribute(CodeStream genPrinter, FVariable var) {
+            if (generateStartAttribute(var)) {
+                generateAttribute("start", getXMLStartAttribute(var), genPrinter);
+                
+                if (!var.fixedAttribute() && !var.isConstant())
+                    generateAttribute("fixed", false, genPrinter); //Default is true
+            }
+        }
+
+		//direct dependency - not supported
+		public class XMLTag_directDependency extends XMLTag {
+			
+			public XMLTag_directDependency(AbstractGenerator myGenerator, FClass fclass) {
+				super("directDependency", "DirectDependency", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+				if (variable.isOutput() && variable.isReal()) {
+					generateOpening(xml, genPrinter);
+					for (FVariable dv : variable.dependsOn()) {
+						if (dv.isInput()) {
+							generateTagStart("Name", genPrinter);
+							generateOpenEnd(genPrinter);
+							genPrinter.print(dv.name()); //Element? Attribute?
+							generateClosing("Name", genPrinter);
+						}
+					}
+					generateClosing(xml, genPrinter);
+				}
+			}
+		}
+	}
+
+	
+	
+	/*** TODO: Temporary FMI 2.0 Code Gen ***/
+	
+	/**
+	 * Internal class used to generate a ModelStructure tag for the temporary 2.0.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelStructure extends XMLTag {
+
+		public XMLTag_modelStructure(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelStructure", "ModelStructure", myGenerator, fclass);
+		}
+
+		public void generate(CodeStream genPrinter) {
+
+			if (!fclass.root().options.getStringOption("fmi_version").equals("2.0alpha")) {
+				return;
+			}
+			StringBuilder tmp;
+			
+			generateTagStart(xml, genPrinter);
+			generateOpenEnd(genPrinter);
+			
+			generateTagStart("Inputs", genPrinter);
+			generateOpenEnd(genPrinter);
+			
+			for (FVariable v : fclass.inputs()) {
+				generateTagStart("Input", genPrinter);
+				generateAttribute("name", v.name(), genPrinter);
+				generateClosedEnd(genPrinter);
+			}
+			generateClosing("Inputs", genPrinter);
+			
+			generateTagStart("Derivatives", genPrinter);
+			generateOpenEnd(genPrinter);
+			
+			for (FDerivativeVariable v : fclass.derivativeVariables()) {
+				generateTagStart("Derivative", genPrinter);
+				generateAttribute("name", v.name(), genPrinter);
+				generateAttribute("state", v.myDifferentiatedVariable().name(), genPrinter);
+				
+				tmp = new StringBuilder();
+				for (FVariable vv : v.dependsOn()) {
+					if (vv.isDifferentiatedVariable()) {
+						tmp.append(vv.differentiatedRealVariableIndex()+1);
+						tmp.append(" ");
+					}
+				}
+				if (v.isDifferentiatedVariable()) {
+					tmp.append(v.differentiatedRealVariableIndex()+1);
+					tmp.append(" ");
+				}
+				generateAttribute("stateDependency", tmp, genPrinter);
+				
+				
+				tmp = new StringBuilder();
+				for (FVariable vv : v.dependsOn()) {
+					if (vv.isInput()) {
+						tmp.append(vv.inputIndex()+1);
+						tmp.append(" ");
+					}
+				}
+				generateAttribute("inputDependency", tmp, genPrinter);
+				
+				generateClosedEnd(genPrinter);
+			}
+			generateClosing("Derivatives", genPrinter);
+			
+			generateTagStart("Outputs", genPrinter);
+			generateOpenEnd(genPrinter);
+			for (FVariable v : fclass.outputs()) {
+				generateTagStart("Output", genPrinter);
+				generateAttribute("name", v.name(), genPrinter);
+				
+				tmp = new StringBuilder();
+				for (FVariable vv : v.dependsOn()) {
+					if (vv.isDifferentiatedVariable()) {
+						tmp.append(vv.differentiatedRealVariableIndex()+1);
+						tmp.append(" ");
+					}
+				}
+				if (v.isDifferentiatedVariable()) {
+					tmp.append(v.differentiatedRealVariableIndex()+1);
+					tmp.append(" ");
+				}
+				generateAttribute("stateDependency", tmp, genPrinter);
+				
+				
+				tmp = new StringBuilder();
+				for (FVariable vv : v.dependsOn()) {
+					if (vv.isInput()) {
+						tmp.append(vv.inputIndex()+1);
+						tmp.append(" ");
+					}
+				}
+				generateAttribute("inputDependency", tmp, genPrinter);
+				
+				generateClosedEnd(genPrinter);
+			}
+			
+			generateClosing("Outputs", genPrinter);
+			generateClosing(xml, genPrinter);
+		}
+	}
+	
+	/*** XML tags for Co-Simulation ***/
+	/**
+	 * Internal class used to generate a Implementation tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_implementation extends CSTag {
+		
+		public XMLTag_implementation(AbstractGenerator myGenerator, FClass fclass) {
+			super("implementation", "Implementation", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"coSimulation_StandAlone"}; }
+	}
+	
+	/**
+	 * Internal class used to generate a CoSimulation_StandAlone tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_coSimulation_StandAlone extends CSTag {
+		
+		public XMLTag_coSimulation_StandAlone(AbstractGenerator myGenerator, FClass fclass) {
+			super("coSimulation_StandAlone", "CoSimulation_StandAlone", myGenerator, fclass);
+		}
+	
+		public String[] children() { return new String[] {"capabilities"}; }
+	}
+	
+	/**
+	 * Internal class used to generate a Capabilities tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_capabilities extends CSTag {
+		
+		public XMLTag_capabilities(AbstractGenerator myGenerator, FClass fclass) {
+			super("capabilities", "Capabilities", myGenerator, fclass);
+		}
+		
+		public void generateAttributes(CodeStream genPrinter) {
+
+            generateAttribute("canHandleVariableCommunicationStepSize", true,  genPrinter);
+            generateAttribute("canHandleEvents",                        true,  genPrinter);
+            generateAttribute("canRejectSteps",                         false, genPrinter);
+            generateAttribute("canInterpolateInputs",                   true,  genPrinter);
+            generateAttribute("maxOutputDerivativeOrder",               0,     genPrinter);
+            generateAttribute("canRunAsynchronuously",                  false, genPrinter);
+            generateAttribute("canSignalEvents",                        false, genPrinter);
+            generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,  genPrinter);
+            generateAttribute("canNotUseMemoryManagementFunctions",     false, genPrinter);
+        }
+    }
+}
+
+/**
+ * A generator class for XML-generation for FMI 2.0 which takes a model described by
+ * <FClass> and provides an XML document for the meta-data in the model.
+ * 
+ * @see AbstractGenerator
+ * 
+ */
+public class Fmi2XMLGenerator extends FmiXMLGenerator {
+	
+	private HashMap<String, Integer> variableIndexMap; //Used for finding the indices for scalar variable tags.
+	
+    public static final Creator CREATOR = new Creator()
+    {
+        public Fmi2XMLGenerator create(Printer expPrinter, char escapeCharacter, FClass fclass) {
+            return new Fmi2XMLGenerator(expPrinter, escapeCharacter, fclass);
+        }
+    };
+    
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+    public Fmi2XMLGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
+		super(expPrinter,escapeCharacter, fclass);
+	}
+	
+	/**
+	 * Gets the root-tag for FMI 2.0 XML-generation.
+	 * 
+	 * @see XMLTag
+	 */
+    protected String root() {
+    	return "fmiModelDescription";
+    }
+
+	/**
+	 * Internal class used to generate a fmiModelDescription tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_fmiModelDescription extends XMLTag {
+		
+		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		
+		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
+			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
+		}
+		
+		public String[] children() {
+            return new String[] { "modelExchange",     "coSimulation",   "unitDefinitions",
+                                  "typeDefinitions",   "logCategories",  "defaultExperiment",
+                                  "vendorAnnotations", "modelVariables", "modelStructure"};
+        }
+
+        public void generateAttributes(CodeStream genPrinter) {
+            generateAttribute("fmiVersion",               "2.0",                           genPrinter);
+            generateAttribute("modelName",                fclass.name(),                   genPrinter);
+            generateAttribute("guid",                     fclass.guid(),                   genPrinter);
+            generateAttribute("generationTool",           "JModelica.org",                 genPrinter);
+            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),   genPrinter);
+            generateAttribute("variableNamingConvention", "structured",                    genPrinter);
+            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass), genPrinter);
+        }
+	}
+	
+	/**
+	 * Internal class used to generate a ModelExchange tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelExchange extends METag {
+		
+		
+		public XMLTag_modelExchange(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelExchange", "ModelExchange", myGenerator, fclass);
+		}
+		
+		public void generateAttributes(CodeStream genPrinter) {
+            Boolean supportDirDer = fclass.root().options.getBooleanOption("generate_ode_jacobian");
+            
+			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
+			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
+			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
+			generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
+			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
+			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
+			generateAttribute("canSerializeFMUstate",                false,                   genPrinter);
+			generateAttribute("providesDirectionalDerivative",       supportDirDer,           genPrinter);
+        }
+	}
+
+	/**
+	 * Internal class used to generate a CoSimulation tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_coSimulation extends CSTag {
+		
+		
+		public XMLTag_coSimulation(AbstractGenerator myGenerator, FClass fclass) {
+			super("coSimulation", "CoSimulation", myGenerator, fclass);
+		}
+		
+		public void generateAttributes(CodeStream genPrinter) {
+            Boolean supportDirDer = fclass.root().options.getBooleanOption("generate_ode_jacobian");
+            
+			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
+			generateAttribute("needsExecutionTool",                     false,                   genPrinter);
+			generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
+			generateAttribute("canInterpolateInputs",                   true,                    genPrinter);
+			generateAttribute("maxOutputDerivativeOrder",               0,                       genPrinter);
+			generateAttribute("canRunAsynchronuously",                  false,                   genPrinter);
+			generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
+			generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
+			generateAttribute("canSerializeFMUstate",                   false,                   genPrinter);
+			generateAttribute("providesDirectionalDerivative",          supportDirDer,           genPrinter);
+        }
+	}
+	
+	/**
+	 * Internal class used to generate a UnitDefinitions tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_unitDefinitions extends XMLTag {
+        protected String unit;
+        protected Iterator<String> unitItr;
+        protected HashMap<String,HashSet<String>> unitMap;
+		
+		public XMLTag_unitDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("unitDefinitions", "UnitDefinitions", myGenerator, fclass);
+            unitMap = extractUnits(fclass);
+		}
+		
+		public String[] children() { return new String[] {"unit"}; }
+		
+		public void generate(CodeStream genPrinter) {
+			//Generate code if any units are defined.
+            Set<String> units = unitMap.keySet();
+            if(!units.isEmpty()) {
+                unitItr = units.iterator();
+                super.generate(genPrinter);
+            }
+		}
+		
+		public void generateChildren(CodeStream genPrinter) {
+            while(unitItr.hasNext()) {
+                unit = unitItr.next();
+				super.generateChildren(genPrinter);
+			}
+		}
+		
+        public class XMLTag_unit extends XMLTag {
+
+            private String def;
+
+            public XMLTag_unit(AbstractGenerator myGenerator, FClass fclass) {
+                super("unit", "Unit", myGenerator, fclass);
+            }
+
+            public String[] children() { return new String[] {"displayUnit"}; }
+
+            public void generateAttributes(CodeStream genPrinter) {
+                generateAttribute("name", unit, genPrinter);
+            }
+
+            public void generateChildren(CodeStream genPrinter) {
+                HashSet<String> defs = unitMap.get(unit);
+                Iterator<String> defsItr = defs.iterator();
+                while(defsItr.hasNext()) {
+                    def = defsItr.next();
+                    super.generateChildren(genPrinter);
+                }
+            }
+
+            public class XMLTag_displayUnit extends XMLTag {
+
+                public XMLTag_displayUnit(AbstractGenerator myGenerator, FClass fclass) {
+                    super("displayUnit", "DisplayUnit", myGenerator, fclass);
+                }
+
+                public void generateAttributes(CodeStream genPrinter) {
+                    generateAttribute("name", def, genPrinter);
+                }
+            }
+        }
+    }
+	
+	/**
+	 * Internal class used to generate a TypeDefinitions tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_typeDefinitions extends XMLTag {
+		
+		private FEnumDecl enumdecl;
+		
+		public XMLTag_typeDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("typeDefinitions", "TypeDefinitions", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"simpleType"}; }
+		
+		public void generate(CodeStream genPrinter) {
+            if (fclass.getNumFEnumDecl() > 0) super.generate(genPrinter);
+		}
+		
+		public void generateChildren(CodeStream genPrinter) {
+			Iterator<FEnumDecl> itr = fclass.getFEnumDecls().iterator();
+			while (itr.hasNext()) {
+				enumdecl = itr.next();
+				super.generateChildren(genPrinter);
+			}
+		}
+		
+		public class XMLTag_type extends XMLTag {
+			
+			public XMLTag_type(AbstractGenerator myGenerator, FClass fclass) {
+				super("simpleType", "SimpleType", myGenerator, fclass);
+			}
+            
+            public String[] children() { return new String[] {"enumeration"}; }
+			
+			public void generateAttributes(CodeStream genPrinter) {
+				generateAttribute("name", enumdecl.name(), genPrinter);
+                if (enumdecl.hasFStringComment())
+                    generateAttribute("description", enumdecl.getFStringComment().getComment(), genPrinter);
+			}
+		}
+		
+		public class XMLTag_enumerationType extends XMLTag {
+			
+			private FEnumLiteral literal;
+			private int itemIndex; 
+			
+			public XMLTag_enumerationType(AbstractGenerator myGenerator, FClass fclass) {
+				super("enumeration", "Enumeration", myGenerator, fclass);
+			}
+			
+			public String[] children() { return new String[] {"item"}; }
+			
+			public void generateChildren(CodeStream genPrinter) {
+				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
+                itemIndex = 1;
+				while (itr.hasNext()) {
+					literal = itr.next();
+					super.generateChildren(genPrinter);
+				}
+			}
+			
+			public class XMLTag_item extends XMLTag {
+				
+				public XMLTag_item(AbstractGenerator myGenerator, FClass fclass) {
+					super("item", "Item", myGenerator, fclass);
+				}
+				
+				public void generateAttributes(CodeStream genPrinter) {
+                    generateAttribute("name",  literal.name(), genPrinter);
+                    generateAttribute("value", itemIndex++,    genPrinter);
+					if (literal.hasFStringComment()) {
+						generateAttribute("description", literal.getFStringComment().getComment(), genPrinter);
+					}
+				}
+			}
+		}
+	}
+    
+    /**
+	 * Internal class used to generate a LogCategories tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_logCategories extends XMLTag {
+		
+        //TODO: make a small class for the log categorie that can be looped over.
+		private String[] categorieNames;
+        private String[] categorieDescriptions;
+		private String currentCategorieName;
+        private String currentCategorieDescription;
+		
+		public XMLTag_logCategories(AbstractGenerator myGenerator, FClass fclass) {
+			super("logCategories", "LogCategories", myGenerator, fclass);
+            categorieNames        = new String[] {"logLevel1", "logLevel2", "logLevel3",
+                                                  "logLevel4", "logLevel5", "logLevel6"};
+                                           
+            categorieDescriptions = new String[] { "logLevel1 - fatal errors", 
+                                                   "logLevel2 - errors",
+                                                   "logLevel3 - warnings",
+                                                   "logLevel4 - info",
+                                                   "logLevel5 - verobse",
+                                                   "logLevel6 - debug"};
+		}
+        
+		public String[] children() { return new String[] {"category"}; }
+		
+		public void generateChildren(CodeStream genPrinter) {
+			for (int i = 0; i < categorieNames.length; i++) {
+				currentCategorieName        = categorieNames[i];
+                currentCategorieDescription = categorieDescriptions[i];
+				super.generateChildren(genPrinter);
+			}
+		}
+		
+        public class XMLTag_category extends XMLTag {
+			
+			public XMLTag_category(AbstractGenerator myGenerator, FClass fclass) {
+				super("category", "Category", myGenerator, fclass);
+            }
+			
+			public void generateAttributes(CodeStream genPrinter) {
+				generateAttribute("name",        currentCategorieName,        genPrinter);
+                generateAttribute("description", currentCategorieDescription, genPrinter);
+			}
+		}
+	}
+    
+    private enum InitialType {
+        CALCULATED("calculated"),
+        EXACT     ("exact"),
+        APPROX    ("approx");
+        
+        private final String stringRepresentation;
+        
+        InitialType(String stringRepresentation) {
+            this.stringRepresentation = stringRepresentation;
+        }
+        
+        public String toString() { return stringRepresentation; }
+    }
+    
+    protected boolean generateStartAttribute(FVariable var) {
+        //Overshadow as in FMI 2.0 aliases are calculated unless they are constants
+        return super.generateStartAttribute(var) && (!var.isAlias() || var.isConstant());
+    }
+    
+    private InitialType getInitialType(FVariable var) {
+        if (!generateStartAttribute(var))
+            return InitialType.CALCULATED;
+        else if (var.fixedAttribute() || var.isConstant())
+            return InitialType.EXACT;
+        else
+            return InitialType.APPROX;
+    }
+	
+	/**
+	 * Internal class used to generate a ModelVariables tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelVariables extends XMLTag {
+		
+		private FVariable variable;
+		private String startValue;
+		
+		public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelVariables", "ModelVariables", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"variables"}; }
+		
+		public void generateChildren(CodeStream genPrinter) {
+			// get and sort all FVariables
+			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
+			VariableNameComparator comp = new VariableNameComparator();
+			Collections.sort(variables, comp);
+			
+			//Create map for the indices of the scalar variables.
+			variableIndexMap = new HashMap<String, Integer>();
+			int index = 1;
+			for (FVariable var : variables) {
+                if (isXMLVariable(var))
+                    variableIndexMap.put(var.name(), index++);
+			}
+
+			for (FVariable var : variables) {
+                if (isXMLVariable(var)) {
+					variable = var;
+					super.generateChildren(genPrinter);
+				}
+			}
+		}
+		
+		public class XMLTag_variables extends XMLTag {
+
+			public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
+				super("variables", "ScalarVariable", myGenerator, fclass);
+			}
+
+			public String[] children() {
+				return new String[] {"real", "integer", "boolean", "string", "variableEnumeration"};
+			}
+			
+			public void generateAttributes(CodeStream genPrinter) {
+				
+				//Modify the negated bit of the valuReference if the variable is a negated alias.
+				int valueReference = variable.valueReference();
+                if (variable.isAlias() && variable.isNegated())
+					valueReference = valueReference ^ 0x08000000;
+				
+				generateAttribute("name",           variable.name(), genPrinter);
+				generateAttribute("valueReference", valueReference,  genPrinter);
+                if (variable.hasFStringComment())
+                    generateAttribute("description", replaceIllegalChars(variable.getFStringComment().getComment()), genPrinter);
+				
+				//Find the attribute for initial, is generated later.
+                InitialType initialType = getInitialType(variable);
+                
+                //Generate the causality attribute.
+                if (variable.isInput())
+                    generateAttribute("causality", "input", genPrinter);
+                else if (variable.isOutput())
+                    generateAttribute("causality", "output", genPrinter);
+                else if (variable.isParameter() && initialType == InitialType.CALCULATED)
+                    generateAttribute("causality", "calculatedParameter", genPrinter);
+                else if (variable.isParameter())
+                    generateAttribute("causality", "parameter", genPrinter);
+                else //default
+                    generateAttribute("causality", "local", genPrinter);
+
+                //Generate the variability attribute. No tunable parameters as for now.
+                if (variable.isConstant())
+                    generateAttribute("variability", "constant", genPrinter);
+                else if (variable.isParameter())
+                    generateAttribute("variability", "fixed", genPrinter);
+                else if (variable.isDiscrete())
+                    generateAttribute("variability", "discrete", genPrinter);
+                else //default
+                    generateAttribute("variability", "continuous", genPrinter);
+
+                //Generate the initial attribute.
+                if (!variable.isInput()) //Except for inputs, see FMI 2.0 spec p.47
+                    generateAttribute("initial", initialType, genPrinter);
+            }
+        }
+
+		public class XMLTag_real extends XMLTag {
+
+            FRealVariable realvariable;
+            
+			public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
+				super("real", "Real", myGenerator, fclass);
+			}
+            
+            public String[] attributes() { return new String[] {"reinit"}; }
+			
+			public void generate(CodeStream genPrinter) {
+                if (variable.isReal()) super.generate(genPrinter);
+			}
+            
+            private int getDerivativeIdx(FVariable var) {
+                return variableIndexMap.get(((FDerivativeVariable)var).myDifferentiatedVariable().name());
+            }
+
+			public void generateAttributes(CodeStream genPrinter) {
+				realvariable = (FRealVariable)variable;
+
+                if (realvariable.quantityAttributeSet())
+                    generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
+                if (realvariable.unitAttributeSet())
+                    generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
+                if (realvariable.displayUnitAttributeSet())
+                    generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
+                
+                generateAttribute("relativeQuantity", false, genPrinter);
+                if (realvariable.minAttributeSet())
+                    generateAttribute("min", realvariable.minAttribute(), genPrinter);
+                if (realvariable.maxAttributeSet())
+                    generateAttribute("max", realvariable.maxAttribute(), genPrinter);
+                if (realvariable.nominalAttributeSet())
+                    generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
+                if (generateStartAttribute(variable))
+                    generateAttribute("start", getXMLStartAttribute(variable), genPrinter);
+                if (realvariable.isDerivativeVariable())
+                    generateAttribute("derivative", getDerivativeIdx(variable), genPrinter);
+                
+                super.generateAttributes(genPrinter);
+			}
+            public class XMLTag_reinit extends METag {
+                
+                public XMLTag_reinit(AbstractGenerator myGenerator, FClass fclass) {
+                    super("reinit", "reinit", myGenerator, fclass);
+                }
+                
+                public void generate(CodeStream genPrinter) {
+                    if (realvariable.isReinit()) super.generate(genPrinter);
+                }
+                
+                public Object value() { return true; } //Default is false
+            }
+        }
+
+		public class XMLTag_integer extends XMLTag {
+
+			public XMLTag_integer(AbstractGenerator myGenerator, FClass fclass) {
+				super("integer", "Integer", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isInteger()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				FIntegerVariable integervariable = (FIntegerVariable)variable;
+				
+                if(integervariable.quantityAttributeSet())
+                    generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
+                if(integervariable.minAttributeSet())
+                    generateAttribute("min", integervariable.minAttribute(), genPrinter);
+                if(integervariable.maxAttributeSet())
+                    generateAttribute("max", integervariable.maxAttribute(), genPrinter);
+                if (generateStartAttribute(variable))
+                    generateAttribute("start", getXMLStartAttribute(variable), genPrinter);
+			}
+		}
+
+		public class XMLTag_boolean extends XMLTag {
+
+			public XMLTag_boolean(AbstractGenerator myGenerator, FClass fclass) {
+				super("boolean", "Boolean", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isBoolean()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+                if (generateStartAttribute(variable))
+                    generateAttribute("start", getXMLStartAttribute(variable), genPrinter);
+			}
+		}
+
+		public class XMLTag_string extends XMLTag {
+
+			public XMLTag_string(AbstractGenerator myGenerator, FClass fclass) {
+				super("string", "String", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isString()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+                if (generateStartAttribute(variable))
+                    generateAttribute("start", getXMLStartAttribute(variable), genPrinter);
+			}
+		}
+
+		public class XMLTag_enumeration extends XMLTag {
+
+			public XMLTag_enumeration(AbstractGenerator myGenerator, FClass fclass) {
+				super("variableEnumeration", "Enumeration", myGenerator, fclass);
+			}
+			
+			public void generate(CodeStream genPrinter) {
+                if(variable.isEnum()) super.generate(genPrinter);
+			}
+
+			public void generateAttributes(CodeStream genPrinter) {
+				FEnumVariable enumvariable = (FEnumVariable)variable;
+				//declaredType
+				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
+
+                if(enumvariable.quantityAttributeSet())
+                    generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
+                if(enumvariable.minAttributeSet())
+                    generateAttribute("min", enumvariable.minAttribute(), genPrinter);
+                if(enumvariable.maxAttributeSet())
+                    generateAttribute("max", enumvariable.maxAttribute(), genPrinter);
+                if (generateStartAttribute(variable))
+                    generateAttribute("start", getXMLStartAttribute(variable), genPrinter);
+			}
+		}
+	}
+	
+	/**
+	 * Internal class used to generate a ModelStructure tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelStructure extends XMLTag {
+		
+		private FVariable variable;
+
+		public XMLTag_modelStructure(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelStructure", "ModelStructure", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"outputs", "derivatives", "initialUnknowns"}; }
+		
+		public class XMLTag_derivatives extends XMLTag {
+
+			public XMLTag_derivatives(AbstractGenerator myGenerator, FClass fclass) {
+				super("derivatives", "Derivatives", myGenerator, fclass);
+			}
+			
+            public String[] children() { return new String[] {"unknownForSimulation"}; }
+			
+			public void generate(CodeStream genPrinter) {
+				if (fclass.numDerivativeVariables() > 0)
+					super.generate(genPrinter);
+			}
+			
+			public void generateChildren(CodeStream genPrinter) {
+                for (FVariable var : fclass.derivativeVariables()) {
+					variable = var;
+					super.generateChildren(genPrinter);
+				}
+			}
+		}
+		
+		public class XMLTag_outputs extends XMLTag {
+
+			public XMLTag_outputs(AbstractGenerator myGenerator, FClass fclass) {
+				super("outputs", "Outputs", myGenerator, fclass);
+			}
+			
+            public String[] children() { return new String[] {"unknownForSimulation"}; }
+			
+			public void generate(CodeStream genPrinter) {
+				if (fclass.numOutputs() > 0)
+					super.generate(genPrinter);
+			}
+			
+			public void generateChildren(CodeStream genPrinter) {
+                for (FVariable var : fclass.outputs()) {
+					variable = var;
+					super.generateChildren(genPrinter);
+				}
+			}
+		}
+		
+		public class XMLTag_initialUnknowns extends XMLTag {
+            
+            private LinkedList<FVariable> initialUnknowns;
+			
+			public XMLTag_initialUnknowns(AbstractGenerator myGenerator, FClass fclass) {
+				super("initialUnknowns", "InitialUnknowns", myGenerator, fclass);
+			}
+            
+            public String[] children() { return new String[] {"unknownForInit"}; }
+            
+            private boolean isInitialUnknown(FVariable var) {
+                InitialType initialType = getInitialType(var);
+                boolean calculated         = (initialType == InitialType.CALCULATED);
+                boolean calculatedOrApprox = (calculated || initialType == InitialType.APPROX);
+                
+                return var.isOutput()                 && calculatedOrApprox ||
+                       var.isDifferentiatedVariable() && calculatedOrApprox ||
+                       var.isDerivativeVariable()     && calculatedOrApprox ||
+                       var.isParameter()              && calculated;
+            }
+            
+            public void generate(CodeStream genPrinter) {
+                //Find the initial unknowns if there are any.
+                initialUnknowns = new LinkedList<FVariable>();
+                for (FVariable var : fclass.allVariables()) {
+                    if (isXMLVariable(var) && isInitialUnknown(var))
+                        initialUnknowns.add(var);
+                }
+                
+                if (!initialUnknowns.isEmpty()) {
+                    //Sort the initial unknowns and generate tag.
+                    VariableNameComparator comp = new VariableNameComparator();
+                    Collections.sort(initialUnknowns, comp);
+                    super.generate(genPrinter);
+                }
+			}
+			
+			public void generateChildren(CodeStream genPrinter) {
+				for (FVariable var: initialUnknowns) {
+					variable = var;
+					super.generateChildren(genPrinter);
+				}
+			}
+		}
+        
+        /**
+         * Base class for tags used to generate XML Tags Unknown
+         */
+        public abstract class XMLTag_unknown extends XMLTag {
+            
+            public XMLTag_unknown(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
+                super(name, xml, myGenerator, fclass);
+            }
+            
+            abstract Set<FVariable> dependentVariables(FVariable var);
+            abstract boolean isInitialKnown(FVariable var);
+            
+            private void generateDependenciesAttribute(TreeSet<Integer> dependencyIndex, CodeStream genPrinter) {
+                //Organize and generate the dependencies.
+                StringBuilder dependencies = new StringBuilder();
+                String prefix = "";
+                Iterator<Integer> itr = dependencyIndex.iterator();
+                while(itr.hasNext()) {
+                    dependencies.append(prefix);
+                    dependencies.append(itr.next());
+                    prefix = " ";
+                }
+                
+                generateAttribute("dependencies", dependencies , genPrinter);
+            }
+            
+            public void generateAttributes(CodeStream genPrinter) {
+				
+				generateAttribute("index", variableIndexMap.get(variable.name()), genPrinter);
+				
+				//Find the dependencies.
+				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
+                for (FVariable vv : dependentVariables(variable)) {
+                    if (isInitialKnown(vv))
+                        dependencyIndex.add(variableIndexMap.get(vv.name()));
+                }
+                generateDependenciesAttribute(dependencyIndex, genPrinter);
+            }
+        }
+        
+        public class XMLTag_unknownForInit extends XMLTag_unknown {
+
+            private HashMap<FVariable, HashSet<FVariable>> parameterDependencies = null;
+
+            public XMLTag_unknownForInit(AbstractGenerator myGenerator, FClass fclass) {
+                super("unknownForInit", "Unknown", myGenerator, fclass);
+            }
+            
+            protected Set<FVariable> dependentVariables(FVariable var) {
+                if (var.hasParameterEquation())
+                    return var.myParameterDependencies();
+                else
+                    return var.initDependsOn();
+            }
+            
+            protected boolean isInitialKnown(FVariable var) {
+                boolean isExact = getInitialType(var) == InitialType.EXACT;
+                return isXMLVariable(var) && isExact || var.isInput();
+            }
+        }
+        
+        public class XMLTag_unknownForSimulation extends XMLTag_unknown {
+
+            public XMLTag_unknownForSimulation(AbstractGenerator myGenerator, FClass fclass) {
+                super("unknownForSimulation", "Unknown", myGenerator, fclass);
+            }
+            
+            protected Set<FVariable> dependentVariables(FVariable var) {
+                return var.dependsOn();
+            }
+            
+            protected boolean isInitialKnown(FVariable var) {
+                return var.isDifferentiatedVariable() || var.isInput();
+            }
+        }
+    }
+}
