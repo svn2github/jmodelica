@@ -85,7 +85,7 @@ def test_delayed_feedback_optimization(with_plots = False):
     delay_len = delay_n_e*n_cp
     initial_len = delay_len + 1
     # test initial (fixed) part of delayed var u2
-    assert np.array_equal(u2_res[0:initial_len], u2_res0[0:initial_len])
+    assert np.allclose(u2_res[0:initial_len], u2_res0[0:initial_len], rtol=1e-5)
     # test that delayed part of u2 matches undelayed u1
     assert np.allclose(u1_res[1:-delay_len],u2_res[initial_len:], rtol=1e-5)
 

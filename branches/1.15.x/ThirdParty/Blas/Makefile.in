@@ -410,9 +410,7 @@ $(BLAS_BUILD_DIR):
 	mkdir -p $(BLAS_BUILD_DIR) && \
 	cd $(BLAS_BUILD_DIR) && \
 	case $(build) in \
-	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
-	*-mingw*) \
+	*-cygwin*|*-mingw*) \
 	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	*-apple*) \
 	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
@@ -421,48 +419,36 @@ $(BLAS_BUILD_DIR):
 	esac
 
 $(BLAS_BUILD_DIR64):
-	case $(build) in \
-	*-cygwin*) \
+	if [ "$(JM_WIN64)" = "yes" ]; then \
 	mkdir -p $(BLAS_BUILD_DIR64) && \
 	cd $(BLAS_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
-	*-mingw*) \
-	mkdir -p $(BLAS_BUILD_DIR64) && \
-	cd $(BLAS_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
-	esac
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/ ; \
+	fi
 
 all-local: $(BLAS_BUILD_DIR) $(BLAS_BUILD_DIR64)
 	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-	case $(build) in \
-	*-cygwin*) \
-	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
-	*-mingw*) \
-	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
-	esac
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ; \
+	fi
 
 install-exec-local:
 	mkdir -p $(prefix)/lib/RuntimeLibrary
 	cp $(BLAS_INSTALL_DIR)/* $(prefix)/lib/RuntimeLibrary
-	case $(build) in \
-	*-cygwin*) \
-	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(BLAS_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
-	*-mingw*) \
-	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(BLAS_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ;; \
-	esac
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(BLAS_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ; \
+	fi
 
 check-local:
 	cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
-	case $(build) in \
-	*-cygwin*) \
-	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
-	*-mingw*) \
-	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
-	esac
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ; \
+	fi
 
 clean-local:
 	-cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	-cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	-cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ; \
+	fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

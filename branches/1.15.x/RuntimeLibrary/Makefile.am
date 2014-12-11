@@ -11,9 +11,7 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR) && \
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && \
 	case $(build) in \
-	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	*-mingw*) \
+	*-cygwin*|*-mingw*) \
 	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*-apple*) \
 	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
@@ -22,35 +20,26 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	esac
 
 $(RUNTIMELIBRARY_BUILD_DIR64):
-	case $(build) in \
-	*-cygwin*) \
+	if [ "$(JM_WIN64)" = "yes" ]; then \
 	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64) && \
 	cd $(RUNTIMELIBRARY_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	*-mingw*) \
-	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64) && \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	esac
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ; \
+	fi
 
 all-local: $(RUNTIMELIBRARY_BUILD_DIR) $(RUNTIMELIBRARY_BUILD_DIR64)
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-	case $(build) in \
-	*-cygwin*) \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
-	*-mingw*) \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ;; \
-	esac
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ; \
+	fi
 
 check-local:
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
-	case $(build) in \
-	*-cygwin*) \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
-	*-mingw*) \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ;; \
-	esac
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ; \
+	fi
 
 clean-local:
 	-cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	-cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+	if [ "$(JM_WIN64)" = "yes" ]; then \
+	-cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ; \
+	fi
