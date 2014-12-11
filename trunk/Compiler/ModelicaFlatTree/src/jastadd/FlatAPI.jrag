@@ -1940,7 +1940,7 @@ aspect ReferencedVariables {
     }
 
     syn lazy Set<FIdUseExp> FAbstractEquation.referencedFIdUseExps() {
-        Set<FIdUseExp> res = new HashSet<FIdUseExp>();
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         res.addAll(FIdUseExpsInRHS());
         res.addAll(FIdUseExpsInLHS());
         return res;

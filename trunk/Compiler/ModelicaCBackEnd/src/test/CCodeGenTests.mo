@@ -13622,8 +13622,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = 536870926;
         x[1] = 536870925;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
-        x[0] = 536870926;
-        x[1] = 536870925;
+        x[0] = 536870925;
+        x[1] = 536870926;
     } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
         x[0] = jmi->offs_sw + 1;
         x[1] = jmi->offs_sw + 0;
@@ -13695,8 +13695,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = 536870926;
         x[1] = 536870925;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
-        x[0] = 536870926;
-        x[1] = 536870925;
+        x[0] = 536870925;
+        x[1] = 536870926;
     } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
         x[0] = jmi->offs_sw + 1;
         x[1] = jmi->offs_sw + 0;
