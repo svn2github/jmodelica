@@ -983,8 +983,6 @@ class LocalDAECollocator(CasadiCollocator):
         mvar_vectors["elim_u"] = mvar_vectors['u'][elim_input_indices]
         n_var['unelim_u'] = len(unelim_input_indices)
         n_var['elim_u'] = len(elim_input_indices)
-        
-        # print n_var
 
         # Sort parameters
         par_kinds = [op.BOOLEAN_CONSTANT,
@@ -1019,15 +1017,10 @@ class LocalDAECollocator(CasadiCollocator):
              mvar_vectors['u'][elim_input_indices]]
         named_mvar_struct_dx = [mvar.getVar() for mvar in mvar_vectors['dx']]
         
-        # Create structure for variable elimination mappings
-        eliminatedVarToExpression = OrderedDict()
+        # Create structure for variable elimination handling
+        elimination = casadi.MX()
         for var in op.getEliminatedVariables():
-            eliminatedVarToExpression[var.getName()] = op.getSolutionOfEliminatedVariable(var)
-
-        #for el in eliminatedVarToExpression.items():
-        #    print el[0],"==>",el[1]
-                    
-        #print "\nSubstituted\n"        
+            elimination.append(op.getSolutionOfEliminatedVariable(var))        
         
         # Get optimization and model expressions
         initial = op.getInitialResidual()
@@ -1077,21 +1070,11 @@ class LocalDAECollocator(CasadiCollocator):
             i = i + 1
 
         # Substitute named variables with vector variables in expressions
-        s_op_expressions = [initial, dae, path, mterm, lterm]
-        [initial, dae, path, mterm, lterm] = casadi.substitute(
+        s_op_expressions = [initial, dae, path, mterm, lterm, elimination]
+        [initial, dae, path, mterm, lterm, elimination] = casadi.substitute(
             s_op_expressions
             , named_vars, svector_vars)        
         self.mvar_struct = mvar_struct
-        
-        # Substitute vamed variables with vector variables in eliminated variable solutions
-        elim_expressions = casadi.substitute(eliminatedVarToExpression.values(),
-                                             named_vars,
-                                             svector_vars)
-        
-        # Update expressions for eliminated variables 
-        keys = eliminatedVarToExpression.keys()
-        for i in range(len(keys)):
-            eliminatedVarToExpression[keys[i]]=elim_expressions[i]
         
 
         # Create BlockingFactors from self.blocking_factors
@@ -1111,7 +1094,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.mvar_vectors = mvar_vectors
         self.n_var = n_var
         self.name_map = name_map
-        self.eliminationsMap = eliminatedVarToExpression
+        self.elimination = elimination
 
     def _scale_variables(self):
         """
@@ -1649,23 +1632,14 @@ class LocalDAECollocator(CasadiCollocator):
 
         #Substitute old parameter symbols for new parameter symbols
         op_expressions = [self.initial, self.dae, self.path, self.point,
-                        self.mterm, self.lterm]
+                        self.mterm, self.lterm, self.elimination]
         [self.initial,
          self.dae,
          self.path,
          self.point,
          self.mterm,
-         self.lterm] = casadi.substitute(op_expressions, par_vars, self.pp_list)
-        
-        # Substituted old parameter symbols in eliminated expressions
-        eliminatedExpressions = self.eliminationsMap.values()
-        elim_expressions = casadi.substitute(eliminatedExpressions, par_vars, par_vals)
-        keys = self.eliminationsMap.keys()
-        for i in range(len(keys)):
-            self.eliminationsMap[keys[i]]=elim_expressions[i]
-            
-        #for el in self.eliminationsMap.items():
-        #    print el[0],"==>",el[1]
+         self.lterm,
+         self.elimination] = casadi.substitute(op_expressions, par_vars, self.pp_list)
         
 
     def _get_z_l0(self,i,k,with_der=True):
@@ -2667,6 +2641,12 @@ class LocalDAECollocator(CasadiCollocator):
         G_i_fcn.init()
         self.G_e_l0_fcn = G_e_fcn
         self.G_i_l0_fcn = G_i_fcn
+        
+        # Solution for eliminated variables NOT SCALED. CALLED AFTER RE-SCALE SOLUTION
+        elimination_fcn = self._FXFunction(s_sym_input,[self.elimination])
+        elimination_fcn.setOption("name","eliminated_variables_solution_fcn")
+        elimination_fcn.init()
+        self.elimination_fcn = elimination_fcn
 
         #Define cost terms
         s_sym_input = [self.mvar_struct["time"]]
@@ -2704,6 +2684,8 @@ class LocalDAECollocator(CasadiCollocator):
             lterm_fcn.setOption("name", "lterm_l0_fcn")
             lterm_fcn.init()
             self. lterm_l0_fcn = lterm_fcn
+            
+        
 
     def _define_l1_functions(self):
         """
@@ -4223,23 +4205,6 @@ class LocalDAECollocator(CasadiCollocator):
                     # Rescale x_{i, n_cp + 1}
                     primal_opt[self.var_indices['x'][i][self.n_cp + 1]] = x_i_np1
                     
-        # Define functions for eliminated variables
-        # To be checked...substitution of fixed parameters
-        sym_input = [self.mvar_struct["time"]]
-        var_kinds_ordered = copy.copy(self.mvar_struct.keys())
-        del var_kinds_ordered[0]
-        for vk in var_kinds_ordered:
-            sym_input.append(self.mvar_struct[vk])
-        
-        exp = self.eliminationsMap.values()
-        #exp_with_par = casadi.substitute(self.eliminationsMap.values(), self.pp_list, self._par_vals)
-        
-        eliminatedVarToFunction = OrderedDict()
-        keys = self.eliminationsMap.keys()
-        for i in range(len(keys)):
-            eliminatedVarToFunction[keys[i]] = casadi.MXFunction(sym_input,[exp[i]])        
-            eliminatedVarToFunction[keys[i]].init()
-        
         
         # Get solution trajectories
         t_index = 0
@@ -4417,24 +4382,32 @@ class LocalDAECollocator(CasadiCollocator):
             var_opt['dx'] /= (tf - t0)
         
         # Create array to storage eliminated variables
-        var_opt['elim_vars'] = N.ones([len(t_opt), len(eliminatedVarToFunction.keys())])    
-        # Compute eliminated variables
-        t_index = 0
-        for t in t_opt:
-            index_var = 0
-            for f in eliminatedVarToFunction.values():
-                f.setInput(t,0)
-                f.setInput(var_opt['x'][t_index,:],1)
-                f.setInput(var_opt['dx'][t_index,:],2)
-                f.setInput(var_opt['unelim_u'][t_index,:],3)
-                f.setInput(var_opt['w'][t_index,:],4)
-                f.setInput(var_opt['elim_u'][t_index,:],5)
-                f.setInput(var_opt['p_opt'],6)
-                f.evaluate()
-                result = f.getOutput()
-                var_opt['elim_vars'][t_index,index_var] = result[0,0]
-                index_var += 1
-            t_index += 1
+        n_eliminations = len(op.getEliminatedVariables())
+        
+        var_opt['elim_vars'] = N.ones([len(t_opt), n_eliminations])    
+        if n_eliminations>0:
+            # Compute eliminated variables
+            t_index = 0
+            var_kinds_ordered =copy.copy(self.mvar_struct.keys())
+            del var_kinds_ordered[0]        
+            for t in t_opt:
+                index_var = 0
+                self.elimination_fcn.setInput(t,0)
+                self.elimination_fcn.setInput(self._par_vals,1)
+                j=2
+                for vk in var_kinds_ordered:
+                    if self.n_var[vk]>0:
+                        if vk is not 'p_opt':
+                            var_input = var_opt[vk][t_index,:]
+                        else:
+                            var_input = var_opt[vk]
+                        self.elimination_fcn.setInput(var_input,j)
+                        j+=1
+                self.elimination_fcn.evaluate()
+                result = self.elimination_fcn.getOutput()
+                for index_v in range(n_eliminations):
+                    var_opt['elim_vars'][t_index,index_v] = result[index_v]
+                t_index+=1 
 
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['merged_u'],
