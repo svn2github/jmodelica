@@ -389,11 +389,15 @@ class TestSpatialDistribution:
         assert_close(x[inds], x_expected[inds], 0.1)
 
     @testattr(stddist = True)
-    def test_feed_loop(self):
-        res = self.compile_and_simulate('TestFeedLoop', final_time = 5, maxh = 0.1)
+    def test_feed_loop(self, model_name = 'TestFeedLoop'):
+        res = self.compile_and_simulate(model_name, final_time = 10, maxh = 0.1)
         t, x = res['time'], res['x']
         x_expected = switch_signal(t, N.mod(4.5*N.sin(t)+0.5,2)-0.5, -(N.mod(4.5*N.sin(t)-0.5,2)-0.5), N.sin(N.pi*4.5*N.sin(t)))
         assert_close(x, x_expected, 1e-8)
+
+    @testattr(stddist = True)
+    def test_feed_loop_no_pvel_events(self):
+        self.test_feed_loop(model_name = 'TestFeedLoopNoPVelEvents')
 
 class TestSpatialDistributionRev(TestSpatialDistribution):
     def get_class_postfix(self):

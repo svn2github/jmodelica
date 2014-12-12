@@ -120,3 +120,5 @@ equation
         sd.pVel = noEvent(der(sd.x) >= 0);
     end if;
 end TestFeedLoop;
+
+model TestFeedLoopNoPVelEvents = TestFeedLoop(usePVelEvents = false);

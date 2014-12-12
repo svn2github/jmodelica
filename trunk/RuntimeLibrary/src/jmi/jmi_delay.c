@@ -298,19 +298,23 @@ int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_rea
         /* Truncation will only have an effect upon flow reversal. */
         if (jmi_delaybuffer_truncate_left(     buffer, -spatialdist->last_x, &(spatialdist->lposition)) < 0) return -1;
         if (jmi_delaybuffer_record_sample_left(buffer, -x, in0, jmi->delay_event_mode) < 0) return -1;
+
+        if (jmi->delay_event_mode) {
+            /* Update the position at the recording end to be at the end */
+            if (jmi_delaybuffer_update_position_at_event(buffer, -JMI_INF, &(spatialdist->lposition)) < 0) return -1;
+        }        
     } else {
         /* Contents moving right */
         /* Truncation will only have an effect upon flow reversal. */
         if (jmi_delaybuffer_truncate_right(buffer, 1-spatialdist->last_x, &(spatialdist->rposition)) < 0) return -1;
         if (jmi_delaybuffer_record_sample( buffer, 1-x, in1, jmi->delay_event_mode) < 0) return -1;
+
+        if (jmi->delay_event_mode) {
+            /* Update the position at the recording end to be at the end */
+            if (jmi_delaybuffer_update_position_at_event(buffer, JMI_INF, &(spatialdist->rposition)) < 0) return -1;
+        }
     }
     spatialdist->last_x = x;
-
-    if (jmi->delay_event_mode) {
-        /* Update both positions to be at the end points */
-        if (jmi_delaybuffer_update_position_at_event(buffer,  -x, &(spatialdist->lposition)) < 0) return -1;
-        if (jmi_delaybuffer_update_position_at_event(buffer, 1-x, &(spatialdist->rposition)) < 0) return -1;
-    }
     return 0;
 }
 
