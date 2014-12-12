@@ -155,18 +155,23 @@ aspect FunctionInlining {
         private Map<String,FExp> replMap;
         private FlatVariableMap lookupMap;
         private Map<String,Size> sizeMap;
+        private Queue<FAbstractEquation> currentWorklist = null;
 
         /**
          * Inline all function calls that we can from a specific list of equations.
          */
         public void inline(List<FAbstractEquation> eqns) {
-            for (FAbstractEquation eqn : eqns) {
+            Queue<FAbstractEquation> previousWorklist = currentWorklist;
+            currentWorklist = new ArrayDeque<FAbstractEquation>(eqns.getNumChild());
+            for (FAbstractEquation eqn : eqns)
+                currentWorklist.add(eqn);
+            while (!currentWorklist.isEmpty()) {
+                FAbstractEquation eqn = currentWorklist.poll();
                 while (eqn != null && eqn.hasInlinableFunctions(this)) {
-                    // Note that this will add new equations to eqns, so we depend on
-                    // List.iterator() to handle that correctly.
                     eqn = eqn.inlineFunctions(this);
                 }
             }
+            currentWorklist = previousWorklist;;
         }
 
         /**
@@ -297,7 +302,9 @@ aspect FunctionInlining {
             }
         }
 
-        protected abstract void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability);
+        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+            currentWorklist.add(eqn);
+        }
         
         protected abstract String nextTempVarName();
         
@@ -318,7 +325,11 @@ aspect FunctionInlining {
             return var;
         }
         
-        protected abstract FAbstractEquation handleInlinedFunctionCallEquation(FFunctionCallEquation original, Collection<FEquation> result);
+        protected FAbstractEquation handleInlinedFunctionCallEquation(FFunctionCallEquation original, Collection<FEquation> result) {
+            for (FEquation eqn : result)
+                currentWorklist.add(eqn);
+            return null;
+        }
 
     }
 
@@ -363,6 +374,7 @@ aspect FunctionInlining {
 
         @Override
         protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+            super.addEquation(eqn, variability);
             if (variability.parameterVariability()) {
                 paramEqns.add(eqn);
                 eqn.addToParameterEquationsMap(fc.parameterEquationsMap());
@@ -394,6 +406,7 @@ aspect FunctionInlining {
 
         @Override
         protected  FAbstractEquation handleInlinedFunctionCallEquation(FFunctionCallEquation original, Collection<FEquation> result) {
+            super.handleInlinedFunctionCallEquation(original, result);
             original.replaceMeWithList(result);
             return (result.size() > 0) ? result.iterator().next() : null;
         }
