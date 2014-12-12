@@ -290,7 +290,81 @@ Returns::
     ModelFunction --
         The ModelFunction, or None if there is no ModelFunction with that name in the Model.
 
-";      
+";
+
+%feature("docstring") ModelicaCasADi::Model::markVariablesForElimination "
+Append variables to a list of variables pending for elimination 
+
+Parameters::
+
+    numpy.array(Variable) --
+        A numpy array with zero or more Variables.
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::getSolutionOfEliminatedVariable "
+Retrive the symbolic solution of an eliminated variables 
+
+Parameters::
+
+    Variable --
+        A model variable.
+        
+Returns::
+    MX --
+        A MX with the eliminated variable solution
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::getEliminatedVariables "
+Returns a vector of all eliminated variables of a Model.
+
+Returns::
+    
+    ndarray --
+        A vector of Variable objects.
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::getEliminableVariables "
+Returns a vector of all eliminable variables of a Model. A variable is 
+considered eliminable if has a symbolic solution in the BLT and does not 
+have bounds, alias variables, or timed points.
+
+Returns::
+    
+    ndarray --
+        A vector of Variable objects.
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::eliminateVariables "
+Eliminate all variables that were marked for elimination. The elimination of
+variables must be invoqued only once. If variables have been eliminated already,
+further eliminations wont be done.
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::eliminateAlgebraics "
+Eliminate all algebraic variables that are consider eliminable according to BLT information.
+The elimination of variables must be invoqued only once. If variables have been eliminated already,
+further eliminations wont be done.
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::substituteAllEliminables "
+Substitute all variables that are consider eliminable according to BLT. Model expressions are symbolically
+manipulated to replace the eliminable variables for its corresponding solution.
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::solveLinearSystemsInBLT "
+Experimental method still under development. Solves all linear blocks in BLT. After linear blocks have been
+solved, the list of eliminable variables is updated so that the newly solved variables can be eliminated. 
+This method is still under testing.
+
+";
+
 
 /********** ModelicaCasADi::Equation **********/
 %feature("docstring") ModelicaCasADi::Equation "
