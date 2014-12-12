@@ -43,13 +43,13 @@ void jmi_internal_error(jmi_t *jmi, const char msg[]) {
 }
 
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
-void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[]) {
+void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[], const char val[]) {
     if (func_name != NULL) {
         char buf[64];
         sprintf(buf, "%s%s", cathegory_name, "InFunc");
-        jmi_log_node(jmi->log, logWarning, buf, "<func: %s, exp: %s>", func_name, msg);
+        jmi_log_node(jmi->log, logWarning, buf, "<func: %s, exp: %s, val:%s>", func_name, msg, val);
     } else {
-        jmi_log_node(jmi->log, logWarning, cathegory_name, "<exp:%s>", msg);
+        jmi_log_node(jmi->log, logWarning, cathegory_name, "<exp:%s, val: %s>", msg, val);
     }
 }
 
@@ -64,14 +64,18 @@ int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of
     return JMI_OK;
 }
 
-void jmi_inf_log(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_t res) {
+void jmi_inf_log(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_t res, jmi_real_t x) {
     if (((res - res) != 0)) {
         if (res > 0) {
             /* res is +inf */
-            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E", x);
+            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
         } else if (res < 0){
             /* res is -inf */
-            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E", x);
+            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
         }
     }
 }
@@ -79,7 +83,9 @@ void jmi_inf_log(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_
 /*Some of these functions return types are a temporary remnant of CppAD*/
 jmi_ad_var_t static jmi_divide(jmi_t *jmi, const char func_name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
     if (den == 0) {
-        jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
+        char val[64];
+        sprintf(val, "%.14E, %.14E", num, den);
+        jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg, val);
     }
     
     return num/den;
@@ -103,13 +109,17 @@ jmi_ad_var_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
         /* Check that the inputs are in the domain of the function*/
         if (x > 0 || (x == 0 && y > 0) || (x < 0 && (int)y == y)) {
             /* Range problem, will return JMI_INF or -JMI_INF */
-            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E, %.14E", x, y);
+            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
         } else if (x == 0 && y < 0) {
             /* Pole error */
-            jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E, %.14E", x, y);
+            jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg, val);
         }
     }
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    /* jmi_inf_log(jmi, func_name, msg, to_return); */
     return to_return;
 }
 
@@ -124,7 +134,7 @@ jmi_ad_var_t jmi_pow_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const 
 jmi_ad_var_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = exp(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
     return to_return;
 }
 
@@ -145,10 +155,14 @@ jmi_ad_var_t static jmi_log(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, 
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
-            jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E", x);
+            jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg, val);
         } else if (x > 0) {
             /* Range problem, will return JMI_INF */
-            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E", x);
+            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg, val);
         }
     }
     return to_return;
@@ -171,10 +185,14 @@ jmi_ad_var_t static jmi_log10(jmi_t *jmi, const char func_name[], jmi_ad_var_t x
         
         if (x == 0) {
             /* Pole problem, will return -JMI_INF */
-            jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E", x);
+            jmi_log_func_or_eq(jmi, "LogarithmOfZero", func_name, msg, val);
         } else if (x > 0) {
             /* Infinity problem, will return JMI_INF */
-            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg);
+            char val[64];
+            sprintf(val, "%.14E", x);
+            jmi_log_func_or_eq(jmi, "LogarithmOfInf", func_name, msg, val);
         }
     }
     return to_return;
@@ -191,7 +209,7 @@ jmi_ad_var_t jmi_log10_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_sinh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = sinh(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
     return to_return;
 }
 
@@ -206,7 +224,7 @@ jmi_ad_var_t jmi_sinh_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_cosh(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = cosh(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
     return to_return;
 }
 
@@ -221,7 +239,7 @@ jmi_ad_var_t jmi_cosh_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 jmi_ad_var_t static jmi_tan(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, const char msg[]) {
 
     jmi_ad_var_t to_return = tan(x);
-    jmi_inf_log(jmi, func_name, msg, to_return);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
     return to_return;
 }
 
