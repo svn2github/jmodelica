@@ -29,6 +29,7 @@ compiler_options={'compliance_as_warning':True}
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 path_to_delay_mo = os.path.join(path_to_mos, 'TestDelay.mo')
 path_to_fixed_delay_mo = os.path.join(path_to_mos, 'TestFixedDelay.mo')
+path_to_spatialdist_mo = os.path.join(path_to_mos, 'TestSpatialDistribution.mo')
 
 def compile_and_load(class_name, filename=path_to_delay_mo):
     fmu_name = compile_fmu(class_name, filename, compiler_options=compiler_options)
@@ -51,6 +52,18 @@ def assert_close(x, y, abstol):
     assert len(x) == len(y)
     d = N.abs(x-y).max()
     assert d <= abstol, ("Signals differ by " + str(d) + " which is more than abstol = " + str(abstol) )
+
+def switch_signal(t, yp, ym, s, s_eps = 1e-6):
+    """
+    Return a vector y pointwise choosen from yp an yn trying tp pick yp (ym)
+    when s is positive (negative), switching once when t[k]==t[k+1] and s is small
+    """
+    yp, ym, s = yp+0*t, ym+0*t, s+0*t # make sure they have the same shape as t
+    switches = (N.diff(t) == 0) & (N.abs(s[:-1]) <= s_eps)
+    negative = N.bitwise_xor.accumulate(N.hstack([s[0] < 0, switches]))
+    y = N.array(yp)
+    y[negative] = ym[negative]
+    return y
 
 
 def sol_repeating_events(t, d=1):
@@ -326,3 +339,58 @@ def test_multiple_delays():
     check_zeno_repeat(t/5, xz, False)
     check_zeno_repeat_noevent(t/(5*phi), xzn, False)
 
+
+class TestSpatialDistribution:
+    def get_class_postfix(self):
+        return ""
+
+    def compile_and_load(self, class_name):
+        return compile_and_load(class_name+self.get_class_postfix(), filename=path_to_spatialdist_mo)
+
+    def compile_and_simulate(self, class_name, *args, **kwargs):
+        return compile_and_simulate(class_name+self.get_class_postfix(), *args, filename=path_to_spatialdist_mo, **kwargs)
+
+    @testattr(stddist = True)
+    def test_forward_flow(self):
+        res = self.compile_and_simulate('TestForwardFlow', final_time = 2, maxh = 0.01)
+        t, x = res['time'], res['x']
+        x_expected = switch_signal(t, N.sqrt(N.maximum(0, t**2-1)), 1+t*0, t-1);
+        assert_close(x, x_expected, 1e-2)
+
+    @testattr(stddist = True)
+    def test_back_flow(self):
+        res = self.compile_and_simulate('TestBackFlow', final_time = 3, maxh = 0.01)
+        t, x = res['time'], res['x']
+        x_expected = (t < 1)*t + (t >= 1)*((t<2)*(1-N.sqrt(N.maximum(0,t-1))) + (t>=2)*(2-t))
+        assert_close(x, x_expected, 1e-2)
+
+    @testattr(stddist = True)
+    def test_initial_contents(self):
+        res = self.compile_and_simulate('TestInitialContents', final_time = 2, maxh = 0.01)
+        t, x = res['time'], res['x']
+        x_expected = switch_signal(t, N.minimum(4*t, (1-t)/0.75), -1, 1-t)
+        assert_close(x, x_expected, 1e-8)
+
+    @testattr(stddist = True)
+    def test_reversing_flow(self):
+        res = self.compile_and_simulate('TestReversingFlow', final_time = 10, maxh = 0.1)
+        t, x = res['time'], res['x']
+        inds = N.flatnonzero(N.diff(t) == 0)
+        x_expected = (N.cumsum(N.hstack([False, N.diff(t)==0])) & 3) > 0
+        assert_close(x, x_expected, 1e-15)
+        assert_close(t[inds], N.pi*N.array([1.0/2, 5.0/6, 1+1.0/2, 1+5.0/6, 2+1.0/2, 2+5.0/6]), 1e-7)
+
+    @testattr(stddist = True)
+    def test_sinusoid(self):
+        res = self.compile_and_simulate('TestSinusoid', final_time = 5, maxh = 0.1)
+        t, x = res['time'], res['x']
+        x_expected = 1.03*N.cos((t**2+0.35)*N.pi/2)
+        inds = (t >= 0.5)
+        assert_close(x[inds], x_expected[inds], 0.1)
+
+    @testattr(stddist = True)
+    def test_feed_loop(self):
+        res = self.compile_and_simulate('TestFeedLoop', final_time = 5, maxh = 0.1)
+        t, x = res['time'], res['x']
+        x_expected = switch_signal(t, N.mod(4.5*N.sin(t)+0.5,2)-0.5, -(N.mod(4.5*N.sin(t)-0.5,2)-0.5), N.sin(N.pi*4.5*N.sin(t)))
+        assert_close(x, x_expected, 1e-8)
