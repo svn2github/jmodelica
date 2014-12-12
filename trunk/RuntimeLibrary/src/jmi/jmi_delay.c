@@ -212,6 +212,16 @@ int jmi_delay_second_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_tim
 
  /* Implementation of jmi_spatialdist API, based on jmi_delaybuffer_t */
 
+/* Calculate delay buffer coordinate for the left/right end point given x.
+   It is assumed that the left endpoint has a lower coordinate than the right.
+   These functions should be used everywhere to make sure that the end
+   positions are calculated in a consistent way from x, e.g. to make sure
+   that position updates stay consistent with the event indicators. */
+static jmi_real_t x2left(jmi_real_t x)  { return  -x; }
+static jmi_real_t x2right(jmi_real_t x) { return 1-x; }
+/* y is the normalized position along the pipe, 0 = left, 1 = right */
+static jmi_real_t x2coord(jmi_real_t x, jmi_real_t y) { return y-x; }
+
 static void init_spatialdist(jmi_spatialdist_t *spatialdist, jmi_boolean no_event, jmi_real_t x0) {
     spatialdist->no_event = no_event;
     spatialdist->last_x   = x0;
@@ -254,7 +264,7 @@ int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t
     last_x_init = -1;
     for (i = 0; i < n_init; i++) {
         /* Create an event if this is a repeated x position */
-        if (jmi_delaybuffer_record_sample(buffer, x_init->var[i] - x0, y_init->var[i], x_init->var[i] == last_x_init) < 0) return -1;
+        if (jmi_delaybuffer_record_sample(buffer, x2coord(x0, x_init->var[i]), y_init->var[i], x_init->var[i] == last_x_init) < 0) return -1;
         last_x_init = x_init->var[i];
     }
     return 0;
@@ -280,13 +290,13 @@ jmi_real_t jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi
     if (positiveVelocity) {
         *out0 = in0;
         *out1 = jmi_delaybuffer_evaluate_left(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
-                                              1-x, &(spatialdist->rposition),
-                                               -x, in0);
+                                              x2right(x), &(spatialdist->rposition),
+                                              x2left(x), in0);
     } else {
         *out1 = in1;
         *out0 = jmi_delaybuffer_evaluate(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
-                                          -x, &(spatialdist->lposition),
-                                         1-x, in1);
+                                         x2left(x), &(spatialdist->lposition),
+                                         x2right(x), in1);
     }
     return *out0;
 }
@@ -299,8 +309,8 @@ int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_rea
     if (x > spatialdist->last_x || (x == spatialdist->last_x && positiveVelocity) ) {
         /* Contents moving right */
         /* Truncation will only have an effect upon flow reversal. */
-        if (jmi_delaybuffer_truncate_left(     buffer, -spatialdist->last_x, &(spatialdist->lposition)) < 0) return -1;
-        if (jmi_delaybuffer_record_sample_left(buffer, -x, in0, jmi->delay_event_mode) < 0) return -1;
+        if (jmi_delaybuffer_truncate_left(     buffer, x2left(spatialdist->last_x), &(spatialdist->lposition)) < 0) return -1;
+        if (jmi_delaybuffer_record_sample_left(buffer, x2left(x), in0, jmi->delay_event_mode) < 0) return -1;
 
         if (jmi->delay_event_mode) {
             /* Update the position at the recording end to be at the end */
@@ -309,8 +319,8 @@ int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_rea
     } else {
         /* Contents moving right */
         /* Truncation will only have an effect upon flow reversal. */
-        if (jmi_delaybuffer_truncate_right(buffer, 1-spatialdist->last_x, &(spatialdist->rposition)) < 0) return -1;
-        if (jmi_delaybuffer_record_sample( buffer, 1-x, in1, jmi->delay_event_mode) < 0) return -1;
+        if (jmi_delaybuffer_truncate_right(buffer, x2right(spatialdist->last_x), &(spatialdist->rposition)) < 0) return -1;
+        if (jmi_delaybuffer_record_sample( buffer, x2right(x), in1, jmi->delay_event_mode) < 0) return -1;
 
         if (jmi->delay_event_mode) {
             /* Update the position at the recording end to be at the end */
@@ -330,22 +340,22 @@ int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boo
     
     if (positiveVelocity) {
         /* Contents moving right */
-        if (jmi->atEvent) jmi_delaybuffer_update_position_at_event(buffer, 1-x, &(spatialdist->rposition));
+        if (jmi->atEvent) jmi_delaybuffer_update_position_at_event(buffer, x2right(x), &(spatialdist->rposition));
         t_event = jmi_delaybuffer_prev_event_time(buffer, &(spatialdist->rposition));
         if (t_event <= -JMI_INF) {
             *event_indicator = 1; 
             return 0;
         }
-        *event_indicator = (1-x) - t_event;
+        *event_indicator = x2right(x) - t_event;
     } else {
         /* Contents moving left */
-        if (jmi->atEvent) jmi_delaybuffer_update_position_at_event(buffer,  -x, &(spatialdist->lposition));
+        if (jmi->atEvent) jmi_delaybuffer_update_position_at_event(buffer, x2left(x), &(spatialdist->lposition));
         t_event = jmi_delaybuffer_next_event_time(buffer, &(spatialdist->lposition));
         if (t_event >= JMI_INF) {
             *event_indicator = 1; 
             return 0;
         }
-        *event_indicator = t_event - (-x);
+        *event_indicator = t_event - x2left(x);
     }
     return 0;
 }
