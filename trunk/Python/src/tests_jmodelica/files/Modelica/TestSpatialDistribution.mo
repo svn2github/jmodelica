@@ -14,19 +14,32 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-block SpatialDist
+partial block BaseSpatialDist
     parameter Real[:] xInit = {0.0, 1.0};
     parameter Real[:] yInit = {0.0, 0.0};
     input Real in0, in1, x;
     input Boolean pVel;
     output Real out0, out1;
+end BaseSpatialDist;
+
+block SpatialDist
+    extends BaseSpatialDist;
 equation
     (out0, out1) = spatialDistribution(in0, in1, x, pVel,
                                        initialPoints = xInit, initialValues = yInit);
 end SpatialDist;
 
+block SpatialDistReverse
+    extends BaseSpatialDist;
+equation
+    (out1, out0) = spatialDistribution(in1, in0, -x, not pVel,
+                                       initialPoints = {1-xInit[k] for k in size(xInit,1):-1:1},
+                                       initialValues = {  yInit[k] for k in size(xInit,1):-1:1});
+end SpatialDistReverse;
+
+
 model TestForwardFlow
-    block SD = SpatialDist;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
     SD sd(yInit = {1, 1});
     Real x = sd.out1;
 equation
@@ -37,7 +50,7 @@ equation
 end TestForwardFlow;
 
 model TestBackFlow
-    block SD = SpatialDist;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
     SD sd;
     Real x = sd.out1;
 equation
@@ -48,7 +61,7 @@ equation
 end TestBackFlow;
 
 model TestInitialContents
-    block SD = SpatialDist;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
     SD sd(xInit = {0, 0.75, 1}, yInit = {0, 1, 0});
     Real x = sd.out1;
 equation
@@ -59,7 +72,7 @@ equation
 end TestInitialContents;
 
 model TestReversingFlow
-    block SD = SpatialDist;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
     SD sd;
     Real x = sd.out1;
 equation
@@ -70,7 +83,7 @@ equation
 end TestReversingFlow;
 
 model TestImplicitX
-    block SD = SpatialDist;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
     SD sd(yInit = {0, -1});
     Real x(start = 0) = sd.x;
 equation
@@ -81,7 +94,7 @@ equation
 end TestImplicitX;
 
 model TestSinusoid
-    block SD = SpatialDist;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
     SD sd(yInit = {1, 1});
     Real x(start = 1, fixed = true);
 equation
@@ -94,15 +107,13 @@ end TestSinusoid;
 
 model TestFeedLoop
     parameter Boolean usePVelEvents = true;
-    block SD = SpatialDist;
-    SD sd(yInit = {1, 0});
-    Real x = sd.out1;
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
+    SD sd(yInit = {1, 0}, in1(start = -1));
+    Real x(start = 0) = sd.out1;
 equation
     sd.in0  = -sd.out1;
     sd.in1  = -sd.out0;
     sd.x    = 4.5*sin(time);
-    //sd.pVel = if usePVelEvents then der(sd.x) >= 0 else noEvent(der(sd.x) >= 0);
-    //sd.pVel = noEvent(der(sd.x) >= 0);
     if usePVelEvents then
         sd.pVel = der(sd.x) >= 0;
     else

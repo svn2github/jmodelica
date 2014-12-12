@@ -394,3 +394,7 @@ class TestSpatialDistribution:
         t, x = res['time'], res['x']
         x_expected = switch_signal(t, N.mod(4.5*N.sin(t)+0.5,2)-0.5, -(N.mod(4.5*N.sin(t)-0.5,2)-0.5), N.sin(N.pi*4.5*N.sin(t)))
         assert_close(x, x_expected, 1e-8)
+
+class TestSpatialDistributionRev(TestSpatialDistribution):
+    def get_class_postfix(self):
+        return "(redeclare block SD=SpatialDistReverse)"

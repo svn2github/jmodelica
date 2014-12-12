@@ -137,7 +137,7 @@ end TestCommute;
 
 model TestRepeatingEvents
     replaceable block FD = FixedDelay constrainedby BaseFixedDelay;
-    FD fd(d=d);
+    FD fd(d=d, y(start=0));
     parameter Real d=1;
     Real x(start=0);
 equation
