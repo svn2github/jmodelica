@@ -238,6 +238,7 @@ int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t
     int n_init = x_init->num_elems;
     jmi_spatialdist_t *spatialdist = &(jmi->spatialdists[index]);
     jmi_delaybuffer_t *buffer = &(spatialdist->buffer);
+    jmi_real_t last_x_init;
     
     if (index < 0 || index >= jmi->n_spatialdists) return -1;
     if (n_init != y_init->num_elems) return -1;
@@ -250,9 +251,11 @@ int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t
     if (jmi_delaybuffer_init(buffer, 1.0) < 0) return -1;
 
     /* Initialize the buffer contents. */
-    /* todo: handle repeated x values as events? */
+    last_x_init = -1;
     for (i = 0; i < n_init; i++) {
-        if (jmi_delaybuffer_record_sample(buffer, x_init->var[i] - x0, y_init->var[i], FALSE) < 0) return -1;
+        /* Create an event if this is a repeated x position */
+        if (jmi_delaybuffer_record_sample(buffer, x_init->var[i] - x0, y_init->var[i], x_init->var[i] == last_x_init) < 0) return -1;
+        last_x_init = x_init->var[i];
     }
     return 0;
 }

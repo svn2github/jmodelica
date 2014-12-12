@@ -62,7 +62,7 @@ end TestBackFlow;
 
 model TestInitialContents
     replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
-    SD sd(xInit = {0, 0.75, 1}, yInit = {0, 1, 0});
+    SD sd(xInit = {0, 0.25, 0.25, 0.75, 1}, yInit = {0, 1, 0, 1, 0});
     Real x = sd.out1;
 equation
     sd.in0  = -1;

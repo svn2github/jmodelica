@@ -368,7 +368,7 @@ class TestSpatialDistribution:
     def test_initial_contents(self):
         res = self.compile_and_simulate('TestInitialContents', final_time = 2, maxh = 0.01)
         t, x = res['time'], res['x']
-        x_expected = switch_signal(t, N.minimum(4*t, (1-t)/0.75), -1, 1-t)
+        x_expected = switch_signal(t, switch_signal(t, N.minimum(4*t, (0.75-t)/0.5), (1-t)/0.25, 0.75-t), -1, 1-t)
         assert_close(x, x_expected, 1e-8)
 
     @testattr(stddist = True)
