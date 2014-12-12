@@ -56,9 +56,9 @@ inline casadi::MX Equation::getLhs() const { return lhs; }
 inline casadi::MX Equation::getRhs() const { return rhs; }
 inline casadi::MX Equation::getResidual() const { return lhs - rhs; }
 inline void Equation::print(std::ostream& os) const { 
-    lhs.print(os);
+    os << ModelicaCasADi::normalizeMXRespresentation(lhs);
     os << " = ";
-    rhs.print(os); 
+    os << ModelicaCasADi::normalizeMXRespresentation(rhs); 
 }
 
 inline void Equation::setLhs(casadi::MX nlhs) { lhs = nlhs; }

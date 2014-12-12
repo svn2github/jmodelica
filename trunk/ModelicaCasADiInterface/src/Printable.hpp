@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <iostream>
 #include <string>
+#include "casadi/casadi.hpp"
 
 namespace ModelicaCasADi
 {
@@ -44,6 +45,13 @@ inline std::string Printable::repr() {
 inline void Printable::print(std::ostream& os) const {
     // Test code to help debug python printing problems. Todo: remove
     os << "<This is a Printable>";
+}
+
+inline std::string normalizeMXRespresentation(casadi::MX a){
+    std::string rep = a.getRepresentation();
+    rep.erase(std::remove(rep.begin(), rep.end(), '\n'), rep.end());
+    return rep.substr(3,rep.size()-4);
+    
 }
 
 #ifdef SWIG

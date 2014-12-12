@@ -52,8 +52,11 @@ int main(int argc, char ** argv)
       //OptionWrapper
       ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options = new ModelicaCasADi::CompilerOptionsWrapper();
       options->setStringOption("inline_functions", "none");
-      options->setBooleanOption("automatic_tearing", false);
-      options->setBooleanOption("equation_sorting", true);
+      options->setBooleanOption("automatic_tearing", false); //disable tearing
+      options->setBooleanOption("equation_sorting", true); //Enables blt
+      options->setBooleanOption("generate_runtime_option_parameters", false); // avoid compiler variables generation      
+      
+      
       //Model
       ModelicaCasADi::Ref<ModelicaCasADi::Model> model = new ModelicaCasADi::Model();
       transferModelFromModelicaCompiler(model, 
@@ -61,9 +64,13 @@ int main(int argc, char ** argv)
                                         modelFiles,
                                         options, 
                                         log_level);
-                        
-      //model->print(std::cout);
-      model->printBLT(std::cout,true);
+      
+      casadi::MX x = casadi::MX::sym("x");
+      casadi::MX y = x+1;
+      std::cout<<"Not normalized "<<y<<"\n";
+      std::cout<<"Normalized "<<ModelicaCasADi::normalizeMXRespresentation(y)<<"\n";
+      model->print(std::cout);
+      //model->printBLT(std::cout,true);
       //ModelicaCasADi::Ref<ModelicaCasADi::Block> b = model->getBlock(0);
       //b->printBlock(std::cout,true);
       //b->solveLinearSystem();

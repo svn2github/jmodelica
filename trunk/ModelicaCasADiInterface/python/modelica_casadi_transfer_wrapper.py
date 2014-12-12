@@ -200,10 +200,15 @@ def _get_options(compiler_options):
     #Makes equation_sorting false by default in casadi_interface
     if not compiler_options.has_key("equation_sorting"):
         options_wrapper.setBooleanOption("equation_sorting", False)
-
+        
     #Makes automatic_tearing false by default in casadi_interface
     if not compiler_options.has_key("automatic_tearing"):
-        options_wrapper.setBooleanOption("automatic_tearing", False)        
+        options_wrapper.setBooleanOption("automatic_tearing", False) 
+        
+    #Makes automatic_tearing false by default in casadi_interface
+    if not compiler_options.has_key("generate_runtime_option_parameters"):
+        options_wrapper.setBooleanOption("generate_runtime_option_parameters", False)    
+     
 
     # set compiler options
     for key, value in compiler_options.iteritems():

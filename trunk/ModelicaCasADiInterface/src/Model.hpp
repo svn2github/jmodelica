@@ -85,6 +85,7 @@ namespace ModelicaCasADi
                 timeVar = casadi::MX(0);
                                  //The default container is flat
                 equations_ = new FlatEquations();
+                call_count_eliminations=0;
                 /* todo: just create a time variable instead? */
             }
             /** Initialize the Model, before populating it.
@@ -350,6 +351,8 @@ namespace ModelicaCasADi
             std::map<const Variable*,casadi::MX> eliminatedVariableToSolution;
             /// list of pairs block_id, variables to be eliminated
             std::list< std::pair<int, const Variable*> > listToEliminate;
+            ///Keep track of number of calls of eliminateVariables
+            int call_count_eliminations;
     };
     inline void Model::initializeModel(std::string identifier) {
         this->identifier = identifier;

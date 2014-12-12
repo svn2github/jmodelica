@@ -25,21 +25,21 @@ void Constraint::print(std::ostream& os) const {
 	using std::endl;
     switch(ct) {
         case Constraint::EQ:  {
-            lhs.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(lhs);
             os << " = ";
-            rhs.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(rhs);
             break;
         }
         case Constraint::LEQ: {
-            lhs.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(lhs);
             os << " <= ";
-            rhs.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(rhs);
             break;
         } 
         case Constraint::GEQ:  {
-            lhs.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(lhs);
             os << " >= ";
-            rhs.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(rhs);
             break;
         }
     }

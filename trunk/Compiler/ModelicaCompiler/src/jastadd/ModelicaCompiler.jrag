@@ -1985,6 +1985,8 @@ public class ModelicaCompiler {
                     break;
                 case NOCODEGEN:
                     options.setBooleanOption("generate_runtime_option_parameters", false);
+		    options.setBooleanOption("equation_sorting", false);
+		    options.setBooleanOption("automatic_tearing", false);
                     break;
             }
             

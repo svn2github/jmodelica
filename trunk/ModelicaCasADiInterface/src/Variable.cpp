@@ -161,13 +161,14 @@ void Variable::print(ostream& os) const {
         os << (getType() == REAL ? "Real " : (getType() == INTEGER ? "Integer " : (getType() == BOOLEAN ? "Boolean " : 
               (getType() == STRING ? "String " : ""))));
     }
-    var.print(os);
+    os<<ModelicaCasADi::normalizeMXRespresentation(var);
     if (!attributes.empty() || isAlias()) {
         std::string sep = "";
         os <<"(";
         for (attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
             os << sep <<it->first<<" = ";
-            (it->second).print(os);
+            //(it->second).print(os);
+            os<<ModelicaCasADi::normalizeMXRespresentation(it->second);
             sep = ", ";
         }
         if (isAlias()) {
@@ -177,21 +178,21 @@ void Variable::print(ostream& os) const {
     }
     if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) { 
         os << " = ";
-        (attributes.find(AttributeKeyInternal("bindingExpression"))->second).print(os);
+        os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("bindingExpression"))->second));
     } 
     if (attributes.find(AttributeKeyInternal("comment")) != attributes.end()) { 
         os << " \"";
-        (attributes.find(AttributeKeyInternal("comment"))->second).print(os);
+        os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("comment"))->second));
         os << "\"";
     }
     if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) {
         if (attributes.find(AttributeKeyInternal("bindingExpression"))->second.isConstant()) {
             os << " /* ";
-            (attributes.find(AttributeKeyInternal("bindingExpression"))->second).print(os);
+            os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("bindingExpression"))->second));
             os << " */";
         } else if (attributes.find(AttributeKeyInternal("evaluatedBindingExpression")) != attributes.end()) {
             os << "/* ";
-            (attributes.find(AttributeKeyInternal("evaluatedBindingExpression"))->second).print(os);
+            os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("evaluatedBindingExpression"))->second));
             os << " */";
         }
     } 

@@ -32,7 +32,7 @@ namespace ModelicaCasADi
     {
         public:
             /** Create a blank, uninitialized OptimizationProblem */
-            OptimizationProblem() { normalizedTime = false; startTime = finalTime = objective = objectiveIntegrand = casadi::MX(0); }
+            OptimizationProblem() { normalizedTime = false; startTime = finalTime = objective = objectiveIntegrand = casadi::MX(0);call_count_eliminations=0;}
             virtual ~OptimizationProblem();
             /**
              * Initialize the OptimizationProblem, before populating it.

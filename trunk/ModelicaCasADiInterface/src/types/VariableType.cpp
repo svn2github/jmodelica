@@ -23,7 +23,7 @@ void VariableType::print(ostream& os) const {
     std::string sep("");
     for(attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it){
         os << sep << (it->first) << " = ";
-        (it->second).print(os);
+        os << ModelicaCasADi::normalizeMXRespresentation(it->second);
         sep = ", ";
     }
     os << ");";

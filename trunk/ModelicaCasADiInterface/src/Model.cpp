@@ -461,7 +461,7 @@ namespace ModelicaCasADi
         os << "------------------------------- Variables -------------------------------\n" << endl;
         if (!timeVar.isEmpty()) {
             os << "Time variable: ";
-            timeVar.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(timeVar);
             os << endl;
         }
         printVectorModel(os, z);
@@ -488,7 +488,7 @@ namespace ModelicaCasADi
             os << "\n-------------------------- Eliminated Variables ---------------------------\n" << endl;
             for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
             it!=eliminatedVariableToSolution.end();++it) {
-                os << it->first->getName() << " = " << it->second<<"\n";
+                os << it->first->getName() << "\n";
             }
         }
         os << endl;
@@ -601,8 +601,7 @@ namespace ModelicaCasADi
             throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
         }
         //Ensures eliminate variables is called only once
-        static unsigned int call_count = 0;
-        if(call_count<1){
+        if(call_count_eliminations<1){
             //Sort the list first
             listToEliminate.sort(compareFunction);
     
@@ -625,7 +624,7 @@ namespace ModelicaCasADi
         else{
             std::cout<<"WARNING: Variables have been already eliminated once. Further eliminations are ignored.\n";
         }
-        call_count++;
+        ++call_count_eliminations;
     }
 
     void Model::markVariablesForElimination(const std::vector< Ref<Variable> >& vars) {

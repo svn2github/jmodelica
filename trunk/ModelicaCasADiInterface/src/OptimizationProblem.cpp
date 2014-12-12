@@ -57,7 +57,7 @@ namespace ModelicaCasADi
             os << "not set";
         }
         else {
-            startTime.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(startTime);
         }
     
         os << "\nFinal time = ";
@@ -65,7 +65,7 @@ namespace ModelicaCasADi
             os << "not set";
         }
         else {
-            finalTime.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(finalTime);
         }
     
         os << "\n\n";
@@ -93,7 +93,7 @@ namespace ModelicaCasADi
             os << "not set";
         }
         else {
-            objectiveIntegrand.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(objectiveIntegrand);
         }
     
         os << "\n-- Objective term --\n";
@@ -101,7 +101,7 @@ namespace ModelicaCasADi
             os << "not set";
         }
         else {
-            objective.print(os);
+            os << ModelicaCasADi::normalizeMXRespresentation(objective);
         }
     }
     
@@ -275,8 +275,7 @@ namespace ModelicaCasADi
         if(!hasBLT()) {
             throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
         }
-        static unsigned int call_count = 0;
-        if(call_count<1){
+        if(call_count_eliminations<1){
             //Sort the list first
             listToEliminate.sort(compareFunction2);
         
@@ -370,7 +369,7 @@ namespace ModelicaCasADi
         else{
             std::cout<<"WARNING: Variables have been already eliminated once. Further eliminations are ignored.\n";
         }
-        call_count++;
+        ++call_count_eliminations;
     }
 
 }; // End namespace
