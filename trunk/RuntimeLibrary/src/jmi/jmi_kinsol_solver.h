@@ -50,6 +50,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 /**< \brief Kinsol solver destructor */
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 
+/**< \brief Retrieve residual scales used in Kinsol solver */
+double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver);
+
 /**< \brief Convert Kinsol return flag to readable name */
 const char *jmi_kinsol_flag_to_name(int flag);
 
@@ -60,6 +63,7 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
+    realtype* residual_nominal;      /**< \brief Vector for reading in manual scaling factors for f  */
     realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */

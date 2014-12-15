@@ -78,7 +78,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
         jmi_log_comment(jmi_->log, logError, "Failed to set start values.");
         jmi_delete(jmi_);
-    	return -1;
+        return -1;
     }
     
     /* Runtime options may be updated with start values */
@@ -772,7 +772,7 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
     if (nx != jmi->n_real_x) {
         jmi_log_node(jmi->log, logError, "Error",
             "Wrong size of array when getting nominal values: size is <given_nx:%d>, should be <actual_nx:%d>", nx, jmi->n_real_x);
-    	return 1;
+        return 1;
     }
     
     memcpy(x_nominal, jmi->nominals, nx * sizeof(jmi_real_t));
@@ -1002,8 +1002,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         jmi_log_leave(jmi->log, top_node);
     }
 
-	/* If everything went well, check if termination of simulation was requested. */
-	event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
+    /* If everything went well, check if termination of simulation was requested. */
+    event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
     
     if (jmi->model_terminate == FALSE && jmi->atTimeEvent && 
         jmi->eventPhase == JMI_TIME_EXACT && jmi->nextTimeEvent.defined 
@@ -1104,10 +1104,22 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_residual_scaling_manual:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_manual;
             break;
+        case jmi_residual_scaling_hybrid:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_hybrid;
+            break;
         default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
         }
-    }
+    }  
+        
+    index = get_option_index("_nle_solver_min_residual_scaling_factor");
+    if(index)
+        bsop->min_residual_scaling_factor = z[index];
+    
+    index = get_option_index("_nle_solver_max_residual_scaling_factor");
+    if(index)
+        bsop->max_residual_scaling_factor = z[index];
+
     index = get_option_index("_nle_solver_max_iter");
     if(index)
         bsop->max_iter = (int)z[index];

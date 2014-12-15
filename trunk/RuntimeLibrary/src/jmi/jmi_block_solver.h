@@ -63,9 +63,10 @@ typedef enum {
 
 /** \brief Scaling mode for the residuals in non-linear solver*/
 typedef enum jmi_block_solver_residual_scaling_mode_t {
-    jmi_residual_scaling_none = 0,
+    jmi_residual_scaling_none = 0, /* must be zero */
     jmi_residual_scaling_auto = 1,
-    jmi_residual_scaling_manual = 2
+    jmi_residual_scaling_manual = 2,
+    jmi_residual_scaling_hybrid = 3
 } jmi_block_solver_residual_scaling_mode_t;
 
 /** \brief Scaling mode for the iteration variables in the non-linear solver*/
@@ -206,6 +207,10 @@ struct jmi_block_solver_options_t {
     double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
     
     jmi_block_solver_residual_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
+
+    double max_residual_scaling_factor;    /**< \breif Maximum residual scaling factor used in nle solver */
+    double min_residual_scaling_factor;    /**< \breif Minimum residual scaling factor used in nle solver */
+
     jmi_block_solver_iv_scaling_mode_t iteration_variable_scaling_mode;    /**< \brief Iteration variables scaling mode in equation block solvers:
                                                                          0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc. */
 

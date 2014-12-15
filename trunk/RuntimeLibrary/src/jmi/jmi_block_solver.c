@@ -617,6 +617,10 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->block_jacobian_check_tol = 1e-6;
 
     bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
+
+    bsop->min_residual_scaling_factor = 1e-10;
+    bsop->max_residual_scaling_factor = 1e10;
+
     bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
     bsop->rescale_each_step_flag = 0;
     bsop->rescale_after_singular_jac_flag = 0;

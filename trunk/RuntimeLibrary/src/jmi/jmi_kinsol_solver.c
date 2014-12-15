@@ -51,7 +51,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
 */
 int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 #ifdef JMI_PROFILE_RUNTIME 
-	clock_t t;
+    clock_t t;
 #endif
     realtype *y, *f;
     jmi_block_solver_t *block = problem_data;
@@ -61,9 +61,9 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
     f = NV_DATA_S(ff); /*f is now a vector of realtype*/
 #ifdef JMI_PROFILE_RUNTIME 
-	if (block->n > 1) {
-		t = clock();
-	}
+    if (block->n > 1) {
+        t = clock();
+    }
 #endif
 
     /* Test if input is OK (no -1.#IND) */
@@ -164,9 +164,9 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         }
     }
  #ifdef JMI_PROFILE_RUNTIME 
-	if (block->n > 1) {
-		block->time_f += ((double)clock() - t) / CLOCKS_PER_SEC;
-	}
+    if (block->n > 1) {
+        block->time_f += ((double)clock() - t) / CLOCKS_PER_SEC;
+    }
 #endif
     /*
     realtype* y = NV_DATA_S(yy); */ /*y is now a vector of realtype*/
@@ -198,9 +198,9 @@ static void kin_char_log(jmi_kinsol_solver_t* solver, char c) {
 /* Wrapper function to Jacobian evaluation as needed by standard KINSOL solvers */
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2){
  #ifdef JMI_PROFILE_RUNTIME 
-	clock_t t;
+    clock_t t;
 #endif
-	jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
+    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
     struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
@@ -208,9 +208,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
  #ifdef JMI_PROFILE_RUNTIME 
-	if (block->n > 1) {
-		t = clock();
-	}
+    if (block->n > 1) {
+        t = clock();
+    }
 #endif
 
     kin_char_log(solver, 'J');
@@ -334,9 +334,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         jmi_log_leave(block->log, node);
     }
  #ifdef JMI_PROFILE_RUNTIME 
-	if (block->n > 1) {
-		block->time_df += ((double)clock() - t) / CLOCKS_PER_SEC;
-	}
+    if (block->n > 1) {
+        block->time_df += ((double)clock() - t) / CLOCKS_PER_SEC;
+    }
 #endif
     return ret;
 }
@@ -986,8 +986,8 @@ static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * blo
     /* Perform LU factorization to be used with dgecon */
     dgetrf_(&N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
     if (info != 0 ) {
-    	/* If matrix i singular, return something very large to be evaluated*/
-    	return 1e100;
+        /* If matrix i singular, return something very large to be evaluated*/
+        return 1e100;
     }
 
     /* Compute infinity norm of J to be used with dgecon */
@@ -1180,18 +1180,18 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
         else {
             xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
-			ret = 0;
+            ret = 0;
         }
 
-		/* Evaluate discrete variables after a regularization. */
-		if (block->at_event) {
+        /* Evaluate discrete variables after a regularization. */
+        if (block->at_event) {
             jmi_log_node_t inner_node;
-			if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
+            if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
                 inner_node =jmi_log_enter_fmt(block->log, logInfo, "RegularizationDiscreteUpdate", 
                                 "Evaluating switches after regularization.");
                 jmi_log_fmt(block->log, inner_node, logInfo, "Pre discrete variables");
                 block->log_discrete_variables(block->problem_data, inner_node);
-			}
+            }
 
             block->F(block->problem_data, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
             
@@ -1199,8 +1199,8 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
                 jmi_log_fmt(block->log, inner_node, logInfo, "Post discrete variables");
                 block->log_discrete_variables(block->problem_data, inner_node);
                 jmi_log_leave(block->log, inner_node);
-			}
-		}
+            }
+        }
     }
     else {
         /* Normal linear system solve (with LU) to get Newton step */
@@ -1248,6 +1248,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     return 0;
 }
 
+double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver) {
+    return N_VGetArrayPointer(solver->kin_f_scale);
+}
+
 /* 
     Compute appropriate equation scaling and function tolerance based on Jacobian J,
     nominal values (block->nominal) and current point (block->x).
@@ -1259,22 +1263,47 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     int i, N = block->n;
     realtype tol = solver->kin_stol;
     realtype curtime = block->cur_time;
-    realtype* scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
+    realtype* scale_ptr = 0;
     realtype* col_ptr;
     realtype* scaled_col_ptr;
-    int use_scaling_flag = block->options->residual_equation_scaling_mode;
+    jmi_block_solver_options_t* bsop = block->options;
+    int use_scaling_flag = bsop->residual_equation_scaling_mode;
+
 
     solver->kin_scale_update_time = curtime;
     kin_char_log(solver, 's');
 
-    /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
-    if((block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
-            || block->options->check_jac_cond_flag){
-
-        if(block->options->residual_equation_scaling_mode == jmi_residual_scaling_auto) {
-            /* Zero out the scales initially. */
-            N_VConst_Serial(0,solver->kin_f_scale);
+    /* Read manual scaling from annotations and put them in residual_nominal & scale_ptr*/
+    if(  block->init && 
+        (  (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) 
+        || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid))) {
+        block->F(block->problem_data,dummy, solver->residual_nominal, JMI_BLOCK_EQUATION_NOMINAL) ;
+        for(i = 0; i < N; i++) {
+            if(solver->residual_nominal[i] != 0.0) {
+                if(solver->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
+                    solver->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
+                                 "<equation: %I> since specified residual nominal is too small.", block->label, i);
+                }
+                else if(solver->residual_nominal[i] > 1/bsop->min_residual_scaling_factor) {
+                    solver->residual_nominal[i] = 1/bsop->min_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
+                             "<equation: %I> since specified residual nominal is too big.", block->label, i);
+                }
+            }
+            else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
+                solver->residual_nominal[i] = 1.0;
+            }
         }
+    }
+
+    /* Zero out the scales initially. */
+    N_VConst_Serial(0,solver->kin_f_scale);
+    scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
+
+    /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
+    if((bsop->residual_equation_scaling_mode != jmi_residual_scaling_none)
+            || bsop->check_jac_cond_flag){
 
         for(i = 0; i < N; i++){
             int j;
@@ -1292,30 +1321,38 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 realtype fscale;
                 fscale = dres * x;
                 scaled_col_ptr[j] = fscale;
-                if(block->options->residual_equation_scaling_mode == jmi_residual_scaling_auto) {
+                if( (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto)
+                    || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
+                )
+                {
                     scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
                 }
             }
         }
     }
     
-    /* Read manual scaling from annotations and put them in scale_ptr*/
-    if(block->options->residual_equation_scaling_mode == jmi_residual_scaling_manual){
-        block->F(block->problem_data,dummy,scale_ptr,JMI_BLOCK_EQUATION_NOMINAL) ;
+    /* put in manual non-zero scales in hybrid & manual cases */
+    if(    (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) 
+        || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid))    {
+        for(i = 0; i < N; i++) {
+            if(solver->residual_nominal[i] != 0) {
+                scale_ptr[i] = solver->residual_nominal[i];
+            }
+        }
     }
-    
+
     if(use_scaling_flag) {
         solver->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
         /* check that scaling factors has reasonable magnitude */
         for(i = 0; i < N; i++) {
-            if(scale_ptr[i] < tol) {
-                scale_ptr[i] = 1/tol; /* Singular Jacobian? */
+            if(scale_ptr[i] < 1/bsop->max_residual_scaling_factor) {
+                scale_ptr[i] = bsop->max_residual_scaling_factor; /* Singular Jacobian? */
                 solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
                 jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
                              "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
             }
-            else if(scale_ptr[i] > 1/tol) {
-                scale_ptr[i] = tol;
+            else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
+                scale_ptr[i] = bsop->min_residual_scaling_factor;
                 solver->using_max_min_scaling_flag = 1; /* Using minimum scaling */
                 jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
                              "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
@@ -1354,7 +1391,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     
     /* estimate condition number of the scaled jacobian 
         and scale function tolerance with it. */
-    if((N > 1) && block->options->check_jac_cond_flag){
+    if((N > 1) && bsop->check_jac_cond_flag){
         realtype* scaled_col_ptr;
         char norm = 'I';
         double Jnorm = 1.0, Jcond = 1.0;
@@ -1397,7 +1434,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* block) {
     jmi_kinsol_solver_t* solver;
     int flag, n = block->n;
-	
+    
     
     struct KINMemRec * kin_mem = KINCreate();
     if(!kin_mem) return -1;
@@ -1405,8 +1442,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     if(!solver ) return -1;
     solver->kin_mem = kin_mem;
 #ifdef JMI_PROFILE_RUNTIME 
-	block->time_f = 0;
-	block->time_df = 0;
+    block->time_f = 0;
+    block->time_df = 0;
 #endif
     
     /*Initialize work vectors.*/
@@ -1416,6 +1453,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->kin_y = N_VMake_Serial(n, block->x);
     solver->kin_y_scale = N_VNew_Serial(n);
     solver->kin_f_scale = N_VNew_Serial(n);
+    solver->residual_nominal = (realtype*)calloc(n+1,sizeof(realtype));
     solver->kin_scale_update_time = -1.0;
     solver->kin_jac_update_time = -1.0;
     /*NOTE: it'd be nice to use "jmi->newton_tolerance" here
@@ -1505,25 +1543,26 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     jmi_kinsol_solver_t* solver = block->solver;
 #ifdef JMI_PROFILE_RUNTIME 
-	if (block->n > 1) {
-		char message[256];
-		sprintf(message, "Time in df: %g, BlockLabel: %s, is_init_block: %d", block->time_df, block->label, block->is_init_block);
-		jmi_log_node(block->log, logError, "ACC_TIME_IN_KIN_DF", message);
+    if (block->n > 1) {
+        char message[256];
+        sprintf(message, "Time in df: %g, BlockLabel: %s, is_init_block: %d", block->time_df, block->label, block->is_init_block);
+        jmi_log_node(block->log, logError, "ACC_TIME_IN_KIN_DF", message);
 
-		sprintf(message, "Time in f: %g, BlockLabel: %s, is_init_block: %d", block->time_f, block->label, block->is_init_block);
-		jmi_log_node(block->log, logError, "ACC_TIME_IN_KIN_F", message);
+        sprintf(message, "Time in f: %g, BlockLabel: %s, is_init_block: %d", block->time_f, block->label, block->is_init_block);
+        jmi_log_node(block->log, logError, "ACC_TIME_IN_KIN_F", message);
 
-		if (block->options->use_Brent_in_1d_flag) {
-			sprintf(message, "Time in brent: %g, BlockLabel: %s", block->time_in_brent, block->label);
-			jmi_log_node(block->log, logError, "ACC_TIME_IN_BRENT", message); /**/
-		}
-	}
+        if (block->options->use_Brent_in_1d_flag) {
+            sprintf(message, "Time in brent: %g, BlockLabel: %s", block->time_in_brent, block->label);
+            jmi_log_node(block->log, logError, "ACC_TIME_IN_BRENT", message); /**/
+        }
+    }
 #endif
 
     /*Deallocate Kinsol work vectors.*/
     N_VDestroy_Serial(solver->kin_y);
     N_VDestroy_Serial(solver->kin_y_scale);
     N_VDestroy_Serial(solver->kin_f_scale);
+    free(solver->residual_nominal);
     DestroyMat(solver->J);
     DestroyMat(solver->JTJ);
     DestroyMat(solver->J_LU);
@@ -1544,7 +1583,7 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
         free(solver->active_bounds);
     }
     
-	
+    
 
     /*Deallocate Kinsol */
     if(solver->kin_mem)
@@ -1604,7 +1643,7 @@ const char *jmi_kinsol_flag_to_name(int flag) {
 void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log_node_t *node, int flag) {
     long int nniters;
     jmi_kinsol_solver_t* solver = block->solver;
-	
+    
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
 
     /* NB: must match the condition in jmi_kinsol_solver_print_solve_start exactly! */
@@ -1621,7 +1660,7 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
 int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     int flag;
 #ifdef JMI_PROFILE_RUNTIME 
-	clock_t t = clock();
+    clock_t t = clock();
 #endif
     jmi_kinsol_solver_t* solver = block->solver;
     realtype curtime = block->cur_time;
@@ -1824,13 +1863,13 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);    
      
     /* Store debug information */
-	block->nb_iters += nniters;
+    block->nb_iters += nniters;
 #ifdef JMI_PROFILE_RUNTIME
-	{
-		char message[256];
-		sprintf(message, "Time in kinsol.solve: %g, label: %s, is_init_block: %d, block size: %d", ((double) clock() - t)/CLOCKS_PER_SEC, block->label, block->is_init_block, block->n);
-		jmi_log_node(block->log, logError, "ACC_TIME_IN_KINSOL_SOLVE", message);
-	}
+    {
+        char message[256];
+        sprintf(message, "Time in kinsol.solve: %g, label: %s, is_init_block: %d, block size: %d", ((double) clock() - t)/CLOCKS_PER_SEC, block->label, block->is_init_block, block->n);
+        jmi_log_node(block->log, logError, "ACC_TIME_IN_KINSOL_SOLVE", message);
+    }
 #endif
         
     return flag;
