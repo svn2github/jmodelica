@@ -36,6 +36,7 @@
 #define Ith(v,i)    NV_Ith_S(v,i)
 #define UROUND 1e-15
 
+#define JMI_LIMIT_VALUE 1e30
 
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
 static void jmi_update_f_scale(jmi_block_solver_t *block);
@@ -103,7 +104,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         for (i=0;i<n;i++) {
             double v = Ith(ff,i);
             /* Recoverable error*/
-            if (v- v != 0) {
+            if (v != v) { /* NaN */
                 if(ret == 0) {
                     ret = 1;
                     node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", 
@@ -113,10 +114,26 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
                     jmi_log_node(block->log, logWarning, "NaNOutput", 
                         "Not a number in <output: %I> from <block: %s>", i, block->label);
                 }
-
-#if 0           
-                block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
-#endif
+            } else if(v - v != 0) { /* Inf */
+                if(ret == 0) {
+                    ret = 1;
+                    node = jmi_log_enter_fmt(block->log, logWarning, "INFOutput", 
+                        "Infinity in <output: %I> from <block: %s>", i, block->label);
+                }
+                else {
+                    jmi_log_node(block->log, logWarning, "INFOutput", 
+                        "Infinity in <output: %I> from <block: %s>", i, block->label);
+                }
+            } else if (v > JMI_LIMIT_VALUE || v < -JMI_LIMIT_VALUE) {
+                if(ret == 0) {
+                    ret = 1;
+                    node = jmi_log_enter_fmt(block->log, logWarning, "LimitingValues", 
+                        "Limiting value in <output: %I> from <block: %s>", i, block->label);
+                }
+                else {
+                    jmi_log_node(block->log, logWarning, "LimitingValues", 
+                        "Limiting value in <output: %I> from <block: %s>", i, block->label);
+                }
             }
         }
         if (ret) { 

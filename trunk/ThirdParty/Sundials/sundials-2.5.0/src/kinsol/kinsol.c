@@ -137,7 +137,7 @@
  * MAX_RECVR   max. no. of attempts to correct a recoverable func error
  */
 
-#define MAX_RECVR      5
+#define MAX_RECVR      20
 
 /*
  * Keys for KINPrintInfo
