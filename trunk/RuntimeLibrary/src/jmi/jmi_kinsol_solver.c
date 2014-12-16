@@ -1297,8 +1297,11 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         }
     }
 
-    /* Zero out the scales initially. */
-    N_VConst_Serial(0,solver->kin_f_scale);
+    if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
+        /* Zero out the scales initially if we're modify this. */
+        N_VConst_Serial(0,solver->kin_f_scale);
+    }
+
     scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
