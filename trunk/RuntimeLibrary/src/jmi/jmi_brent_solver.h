@@ -43,6 +43,8 @@ void jmi_brent_solver_delete(jmi_block_solver_t* block_solver);
 struct jmi_brent_solver_t {
     double y;              /**< \brief current/last iterate */
     double f;              /**< \brief Residual at "y" */
+
+    double originalStart; /**< \brief The start value used during the first call */
     
     double y_pos_min;      /**< \brief Iteration variable value for minimal known positive f */
     double f_pos_min;       /**< \brief Residual at y_pos_min */

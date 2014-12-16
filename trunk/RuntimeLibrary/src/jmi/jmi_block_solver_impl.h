@@ -45,11 +45,11 @@ struct jmi_block_solver_t {
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
 #ifdef JMI_PROFILE_RUNTIME
-	jmi_block_solver_t * parent_block;
-	int is_init_block;
-	double time_in_brent;
-	double time_f;
-	double time_df;
+    jmi_block_solver_t * parent_block;
+    int is_init_block;
+    double time_in_brent;
+    double time_f;
+    double time_df;
 #endif
 
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
