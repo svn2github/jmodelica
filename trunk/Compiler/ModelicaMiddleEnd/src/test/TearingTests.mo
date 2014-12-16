@@ -659,4 +659,53 @@ Residual equations:
 ")})));
 end TearingFixedFalse1;
 
+model InitialTearingMatchingTest1
+    Real e(start=0.01);
+    Real c;
+    Real f;
+    Real d;
+    Real a;
+    Real b;
+    parameter Real p1 = 2;
+    parameter Real p2 = 3;
+equation
+  a = time * 2;
+  
+  b = smooth(0, min(1000, max(0, 42 * c)));
+  d = p1 * e;
+  d = c - b;
+  f = p2 * (- e);
+  f = c - a;
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="InitialTearingMatchingTest1",
+            description="Test the initial tearing matching transformation that is done at the start of automatic tearing",
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+a := time * 2
+
+--- Torn system (Block 1) of 1 iteration variables and 4 solved variables ---
+Torn variables:
+  f
+  c
+  d
+  b
+
+Iteration variables:
+  e (start=0.01)
+
+Torn equations:
+  f := p2 * (- e)
+  c := - (- f + (- a))
+  d := p1 * e
+  b := smooth(0, min(1000, max(0, 42 * c)))
+
+Residual equations:
+  d = c - b
+    Iteration variables: e
+-------------------------------
+")})));
+end InitialTearingMatchingTest1;
+
 end TearingTests;

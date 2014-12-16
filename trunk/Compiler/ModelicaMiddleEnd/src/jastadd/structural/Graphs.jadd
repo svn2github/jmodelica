@@ -1302,9 +1302,9 @@ public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comp
     }
 
     /**
-     * Returns integer greather than zero if this variable sutes better as iteration
-     * variable than the <code>other</code> variable. Zero is returned if they are equal
-     * and <0 is returned if the <code>other</code> variable is better.
+     * Returns integer greater than zero if this equation suites better as residual
+     * equation than the <code>other</code> equation. Zero is returned if they are equal
+     * and less than zero is returned if the <code>other</code> variable is better.
      */
     @Override
     public int compareTo(SolvingEq other) {

@@ -2387,20 +2387,25 @@ aspect AutomaticTearing {
                 
                 ASTNode.log.info("Starting automatic tearing");
                 ASTNode.log.info(g);
+                ASTNode.log.info("Initial matching");
+                ASTNode.log.info(g.printMatchingObj());
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
-                Collection<SolvingEq> SUME = g.greedyMatching();
-                Iterator<SolvingEq> itr = SUME.iterator();
-                while (itr.hasNext()) {
-                    SolvingEq e = itr.next();
-                    if (g.augmentPath(e)) {
-                        itr.remove();
-                    } else {
-                        e.isRes(true);
+                g.greedyMatching();
+                for (SolvingEq eqn : g.getUnmatchedEquations()) {
+                    if (!g.augmentPath(eqn)) {
+                        g.constrainedAugmentedPath(eqn);
                     }
                     g.lightReset();
                 }
+                Collection<SolvingEq> SUME = new ArrayList<SolvingEq>();
+                for (SolvingEq eqn : g.getUnmatchedEquations()) {
+                    eqn.isRes(true);
+                    SUME.add(eqn);
+                }
 
+                ASTNode.log.info("Matching after initial manipulation");
+                ASTNode.log.info(g.printMatchingObj());
                 // Now we have a Maximum Solvable Matching
 
                 if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
@@ -2551,6 +2556,41 @@ aspect AutomaticTearing {
                 }
             }
         }
+    }
+    
+    public class SolvingBiPGraph {}
+    
+    public boolean SolvingBiPGraph.constrainedAugmentedPath(SolvingEq startNode) {
+        Collection<SolvingVar> vars = startNode.getVariables();
+        if (startNode.getMatching() != null)
+            return true;
+        for (SolvingVar var : startNode.getVariables()) {
+            if (!canMatch(startNode, var))
+                continue;
+            if (var.getMatching() == null || constrainedAugmentedPath(startNode, var.getMatching())) {
+                match(startNode, var);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean SolvingBiPGraph.constrainedAugmentedPath(SolvingEq startNode, SolvingEq currentNode) {
+        if (currentNode.compareTo(startNode) > 0)
+            return true;
+        if (currentNode.getVariables().size() != 2)
+            return false;
+        for (SolvingVar var : currentNode.getVariables()) {
+            if (currentNode.getMatching() == var)
+                continue;
+            if (!canMatch(currentNode, var))
+                continue;
+            if (var.getMatching() == null || constrainedAugmentedPath(startNode, var.getMatching())) {
+                match(currentNode, var);
+                return true;
+            }
+        }
+        return false;
     }
 }
 
