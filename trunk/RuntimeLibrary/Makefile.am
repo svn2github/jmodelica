@@ -19,27 +19,32 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	esac
 
+if JM_WIN64
+
 $(RUNTIMELIBRARY_BUILD_DIR64):
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64) && \
+	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64)
 	cd $(RUNTIMELIBRARY_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ; \
-	fi
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir)
 
 all-local: $(RUNTIMELIBRARY_BUILD_DIR) $(RUNTIMELIBRARY_BUILD_DIR64)
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ; \
-	fi
+	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+
+else !JM_WIN64
+
+all-local: $(RUNTIMELIBRARY_BUILD_DIR64)
+	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+
+endif !JM_WIN64
 
 check-local:
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ; \
-	fi
+if JM_WIN64
+	cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
+endif
 
 clean-local:
 	-cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	-cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ; \
-	fi
+if JM_WIN64
+	-cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+endif

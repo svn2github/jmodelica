@@ -314,16 +314,10 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	case $(build) in \
-	*-cygwin*) \
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 && \
-	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 ;; \
-	*-mingw*) \
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 && \
-	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64 ;; \
-	esac \
-	fi
+if JM_WIN64
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
+	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
+endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack

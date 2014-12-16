@@ -174,12 +174,13 @@ AS_IF([test "x$F77" != x],
 AS_IF([test "$WIN32" = yes], 
       [
           ALL_FLAG_CHECK([-m64])
-          JM_WIN64=$all_flag_check
-          AS_IF([test "$JM_WIN64" = yes],
+          jm_win64=$all_flag_check
+          AS_IF([test "$jm_win64" = yes],
                 [AC_MSG_RESULT([Will compile 64-bit libs to support 64-bit FMUs.])],
                 [AC_MSG_RESULT([Will not compile 64-bit libs - 64-bit FMUs not supported.])]
                )
       ])
+AM_CONDITIONAL([JM_WIN64],[test "$jm_win64" = yes])
 
 # Checks for libraries.
 AC_ARG_WITH([ipopt],

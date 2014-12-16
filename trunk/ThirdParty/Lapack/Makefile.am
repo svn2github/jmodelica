@@ -1,20 +1,20 @@
 #
-#    Copyright (C) 2009 Modelon AB
+#	Copyright (C) 2009 Modelon AB
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License version 3 as published 
-#    by the Free Software Foundation, or optionally, under the terms of the 
-#    Common Public License version 1.0 as published by IBM.
+#	This program is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License version 3 as published 
+#	by the Free Software Foundation, or optionally, under the terms of the 
+#	Common Public License version 1.0 as published by IBM.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License, or the Common Public License, for more details.
+#	This program is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License, or the Common Public License, for more details.
 #
-#    You should have received copies of the GNU General Public License
-#    and the Common Public License along with this program.  If not, 
-#    see <http://www.gnu.org/licenses/> or 
-#    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
+#	You should have received copies of the GNU General Public License
+#	and the Common Public License along with this program.  If not, 
+#	see <http://www.gnu.org/licenses/> or 
+#	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 #
 LAPACK_BUILD_DIR=../../lapack_build
 LAPACK_BUILD_DIR64=../../lapack_build64
@@ -33,35 +33,40 @@ $(LAPACK_BUILD_DIR):
 	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Lapack/ ;; \
 	esac
 
+if JM_WIN64
+
 $(LAPACK_BUILD_DIR64):
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	mkdir -p $(LAPACK_BUILD_DIR64) && \
+	mkdir -p $(LAPACK_BUILD_DIR64)
 	cd $(LAPACK_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/ ; \
-	fi
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/
 
 all-local: $(LAPACK_BUILD_DIR) $(LAPACK_BUILD_DIR64)
 	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install ; \
-	fi
+	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+
+else !JM_WIN64
+
+all-local: $(LAPACK_BUILD_DIR)
+	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+
+endif !JM_WIN64
 
 install-exec-local:
 	mkdir -p $(prefix)/lib/RuntimeLibrary
 	cp $(LAPACK_INSTALL_DIR)/* $(prefix)/lib/RuntimeLibrary
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64 ; \
-	fi
+if JM_WIN64
+	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64
+endif
 
 check-local:
 	cd $(LAPACK_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test ; \
-	fi
+if JM_WIN64
+	cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
+endif
 
 clean-local:
 	-cd $(LAPACK_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	if [ "$(JM_WIN64)" = "yes" ]; then \
-	-cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean ; \
-	fi
+if JM_WIN64
+	-cd $(LAPACK_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+endif
 
