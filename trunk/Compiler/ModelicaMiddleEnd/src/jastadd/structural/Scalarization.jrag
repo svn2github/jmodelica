@@ -1172,8 +1172,8 @@ aspect Scalarization {
     /*
      * Attributes for creating FTempIdExps and function temps.
      */
-    syn FIdTempExp FExp.tempExp() = new FIdTempExp(new FIdUse(tempFQName()));
-    syn FIdTempExp FExp.tempExp(String name) = new FIdTempExp(new FIdUse(name));
+    syn FIdTempExp FExp.tempExp() = tempExp(tempVarName());
+    syn FIdTempExp FExp.tempExp(String name) = new FIdTempExp(new FIdUse(tempFQName(name)));
     syn FIdTempExp FExp.tempExp(FArraySubscripts fas) = new FIdTempExp(new FIdUse(tempVarName(),fas));
     syn FIdTempExp FExp.tempExp(FExp[] subs) {
         if (subs.length > 0) {
@@ -1188,8 +1188,8 @@ aspect Scalarization {
         }
     }
     
-    syn FQName FExp.tempFQName() {
-        FQName fqn = new FQNameString(tempVarName());
+    public FQName FExp.tempFQName(String name) {
+        FQName fqn = new FQNameString(name);
         if (expandWithIterExp())
             fqn = fqn.copyAndAddFas(collectIterExpSubscripts());
         return fqn;
@@ -1267,6 +1267,45 @@ aspect Scalarization {
     eq FRecordConstructor.getChild().inUnknownSize() = false;
     eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
     eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
+    
+    
+    syn boolean FAssignStmt.extractTemp() {
+        if (type().size().isUnknown() || type().isArray()) {
+            Set<FAbstractVariable> left = getLeft().usesInScalarizedExp();
+            Set<FAbstractVariable> right = getRight().usesInScalarizedExp();
+            for (FAbstractVariable fv : left) {
+                if (right.contains(fv)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    syn Set<FAbstractVariable> FExp.usesInScalarizedExp() {
+        Set<FAbstractVariable> res = new HashSet<FAbstractVariable>();
+        usesInScalarizedExp(res);
+        return res;
+    }
+    
+    public void ASTNode.usesInScalarizedExp(Set<FAbstractVariable> res) {
+        for (ASTNode n : this)
+            n.usesInScalarizedExp(res);
+    }
+    
+    public void FExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
+        if (!extractTemp()) {
+            super.usesInScalarizedExp(res);
+        }
+    }
+    
+    public void FIdUseExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
+        res.add(myFV());
+    }
+    
+    public void FSizeExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
+        
+    }
     
     
     /**
@@ -2009,6 +2048,12 @@ aspect Scalarization {
             call.createFunctionCallClause(stmts, indexMap, left);
         } else {
             FType t = left.size().isUnknown() ? left.type() : right.type();
+            if (extractTemp()) {
+                addTempVar(stmts, vars, t);
+                FIdUseExp temp = getRight().tempExp(tempVarName());
+                t.scalarizeAssignment(vars, stmts, indexMap, temp, right);
+                right = temp;
+            }
             t.scalarizeAssignment(vars, stmts, indexMap, left, right);
         }
         return false;
@@ -2398,7 +2443,16 @@ aspect Scalarization {
       fqn = fqn.scalarize(indexMap);
       return createNode(new FIdUse(fqn));
     }
-
+    
+    public FExp FIdTempExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        FQName fqn = getFIdUse().getFQName();
+        if (indexNames != null)
+            fqn = fqn.copyAndAddFas(createIndexNameFas());
+        fqn = fqn.copyAndAppend(suffix);
+        fqn.scalarized = true;
+        return createNode(new FIdUse(fqn));
+    }
+    
     /**
      * Create an FExp that represents a specific scalar component of the given record constructor.
      * 
@@ -2612,22 +2666,12 @@ aspect Scalarization {
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
 	 */
     protected void FExp.addTemporaryVars(List clauses, List vars, boolean equation) {
-        FType type = type();
-        if (equation || expandWithIterExp())
-            type = type.sizedType(expandSizeForIterExp(type.size()));
-        if (equation) {
-            boolean init = inInitialEquationSection();
-            FTypePrefixVariability v = bindingExpVariability();
-            if (init || inAttributeValue()) {
-                v = v.combineDown(fParameter());
-            } else {
-                v = v.combineDown(type().funcOutputVariability());
+        if (vars != null) {
+            FType type = type();
+            if (equation || expandWithIterExp()) {
+                type = type.sizedType(expandSizeForIterExp(type.size()));
             }
-            
-            type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
-            notifyIfWhenEquationsOfTemporaryVar();
-        } else {
-            addFunctionTempVar(clauses, vars, type);
+            addTempVar(clauses, vars, type, equation, tempVarName());
         }
     }
     
@@ -2642,9 +2686,31 @@ aspect Scalarization {
      */
     public void FExp.addFunctionTempVar(List clauses, List vars, FType type) {
         if (vars != null) {
+            addTempVar(clauses, vars, type, false, tempVarName());
+        }
+    }
+    
+    public void FAssignStmt.addTempVar(List clauses, List vars, FType type) {
+        if (vars != null) {
+            getRight().addTempVar(clauses, vars, type, !inFunction(), tempVarName());
+        }
+    }
+    
+    public void FExp.addTempVar(List clauses, List vars, FType type, boolean equation, String name) {
+        if (equation) {
+            boolean init = inInitialEquationSection();
+            FTypePrefixVariability v = bindingExpVariability();
+            if (init || inAttributeValue()) {
+                v = v.combineDown(fParameter());
+            } else {
+                v = v.combineDown(type().funcOutputVariability());
+            }
+            type.createTempFVariables(vars, new FQNameString(name), v, !init);
+            notifyIfWhenEquationsOfTemporaryVar();
+        } else {
             FFunctionVariable v = type.isArray() ?
-                    new FFunctionArray((FType)type.unboundCopy(), tempVarName()) :
-                    new FFunctionVariable((FType)type.unboundCopy(), tempVarName());
+                    new FFunctionArray((FType)type.unboundCopy(), name) :
+                    new FFunctionVariable((FType)type.unboundCopy(), name);
             if (type.size().isUnknown()) {
                 v.parent = this; // Needed for genInitArrayStatements
                 ASTNode n = v.genInitArrayStatements(clauses, false);
@@ -2876,7 +2942,7 @@ aspect Scalarization {
 	 *        describing this record expression.
 	 */
 	public FExp FExp.buildRecordConstructor(Map<String,FExp> indexMap) {
-        return type().createRecordConstructor(tempFQName());
+        return type().createRecordConstructor(tempFQName(tempVarName()));
 	}
 	
 	public FExp FIdUseExp.buildRecordConstructor(Map<String,FExp> indexMap) {

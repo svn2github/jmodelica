@@ -1687,7 +1687,14 @@ aspect FlatFunctionUtils {
          return myTempVarName;
      }
      private String FExp.myTempVarName;
+     syn String FAssignStmt.tempVarName() {
+         if (myTempVarName == null)
+             myTempVarName = calcTempVarName();
+         return myTempVarName;
+     }
+     private String FAssignStmt.myTempVarName;
      inh String FExp.calcTempVarName();
+     inh String FAssignStmt.calcTempVarName();
      eq InstNode.getChild().calcTempVarName()            = null;
      eq FFunctionCall.getArray().calcTempVarName()       = tempVarName();
      eq FVectorFunctionCall.getArray().calcTempVarName() = calcTempVarName();

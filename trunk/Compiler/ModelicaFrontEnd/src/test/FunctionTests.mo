@@ -4562,6 +4562,7 @@ public
   input Integer[size(is1, 1)] is2;
   input Real[:, :] x;
   output Real[:,:] y;
+  Real[:,:] temp_1;
  algorithm
   size(y) := {size(is1, 1), size(is1, 1)};
   for i1 in 1:size(is1, 1) loop
@@ -4569,9 +4570,15 @@ public
     y[i1,i2] := x[is1[i1],is2[i2]];
    end for;
   end for;
+  size(temp_1) := {size(is1, 1), size(is1, 1)};
   for i1 in 1:size(is1, 1) loop
    for i2 in 1:size(is1, 1) loop
-    y[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
+    temp_1[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
+   end for;
+  end for;
+  for i1 in 1:size(is1, 1) loop
+   for i2 in 1:size(is1, 1) loop
+    y[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
   return;
