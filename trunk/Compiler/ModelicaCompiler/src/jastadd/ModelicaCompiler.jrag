@@ -767,7 +767,7 @@ public class ModelicaCompiler {
             log.debug("Time useage and memory usage change during compilation steps:");
             ASTNode.getStepInfo().logReport();
             if (options.getBooleanOption("debug_csv_step_info"))
-                ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
+                ASTNode.getStepInfo().writeCSVFile(new File(FClass.removeModifiersFromClassName(className) + ".csv"));
         }
         // set back all options
         options.copyAllOptions(tempOptions);

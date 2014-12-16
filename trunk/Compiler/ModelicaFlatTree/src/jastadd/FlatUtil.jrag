@@ -423,11 +423,15 @@ aspect FlatNames {
 
     syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
     
-    public static String FClass.convertClassNameToUnderscore(String name) {
+    public static String FClass.removeModifiersFromClassName(String name) {
         int p = name.indexOf('(');
         if (p >= 0)
             name = name.substring(0, p);
-        return name.replace(".", "_");
+        return name;
+    }
+    
+    public static String FClass.convertClassNameToUnderscore(String name) {
+        return removeModifiersFromClassName(name).replace(".", "_");
     }
     
     syn String FAbstractVariable.nameUnderscore() = null;
