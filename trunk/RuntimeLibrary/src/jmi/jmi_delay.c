@@ -38,7 +38,7 @@
  /* Forward declaration of jmi_delaybuffer_t functions */
 
 /** \brief Construct a new delay buffer and allocate space for the buffer */
-static int jmi_delaybuffer_new(jmi_delaybuffer_t *buffer);
+static int jmi_delaybuffer_new(jmi_t *jmi, jmi_delaybuffer_t *buffer);
 /** \brief Deallocate the internal buffer */
 static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer);
 
@@ -46,16 +46,16 @@ static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer);
 static int jmi_delaybuffer_init(jmi_delaybuffer_t *buffer, jmi_real_t max_delay);
 
 /** \brief Evaluate the buffer at time `tr`. Don't step the (inout) argument `position` over events unless `at_event`. Also provide one last data point. */ 
-static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
+static jmi_real_t jmi_delaybuffer_evaluate(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_boolean at_event,
                                            jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr);
 /** \brief Evaluate the buffer at time `tr`. Don't step the (inout) argument `position` over events unless `at_event`. Also provide one first data point. */ 
-static jmi_real_t jmi_delaybuffer_evaluate_left(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
+static jmi_real_t jmi_delaybuffer_evaluate_left(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_boolean at_event,
                                                 jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr);
 
 /** \brief Record a sample at the right end, discarding samples on the left that are not needed to interpolate with up to `max_delay` delay. */
-static int jmi_delaybuffer_record_sample(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event);
+static int jmi_delaybuffer_record_sample(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event);
 /** \brief Record a sample at the left end, discarding samples on the right that are not needed to interpolate with up to `max_delay` (negative) delay. */
-static int jmi_delaybuffer_record_sample_left(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event);
+static int jmi_delaybuffer_record_sample_left(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event);
 
 /** \brief Get the next event time stored in the buffer, relative to `position`, or `JMI_INF` if there is none */
 static jmi_real_t jmi_delaybuffer_next_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position);
@@ -66,9 +66,9 @@ static jmi_real_t jmi_delaybuffer_prev_event_time(jmi_delaybuffer_t *buffer, jmi
 static int jmi_delaybuffer_update_position_at_event(jmi_delaybuffer_t *buffer, jmi_real_t tr, jmi_delay_position_t *position);
 
 /** \brief Truncate the buffer to cover only `t >= t_limit`. The inout argument `lposition` should point to the interval for `t_limit`. */ 
-static int jmi_delaybuffer_truncate_left( jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *lposition);
+static int jmi_delaybuffer_truncate_left( jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *lposition);
 /** \brief Truncate the buffer to cover only `t <= t_limit`. The inout argument `rposition` should point to the interval for `t_limit`. */ 
-static int jmi_delaybuffer_truncate_right(jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *rposition);
+static int jmi_delaybuffer_truncate_right(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *rposition);
 
 /** \brief Initialize `position` to point at the first position in a newly initialized delay buffer.*/
 static void jmi_delay_position_init(jmi_delay_position_t *position);
@@ -103,7 +103,7 @@ int jmi_delay_new(jmi_t *jmi, int index) {
     /* Initialize with sensible default values to be safe. The proper initialization is done in jmi_delay_init. */
     init_delay(delay, FALSE, FALSE);
     /* Initialize the delay buffer */
-    return jmi_delaybuffer_new(&(delay->buffer));
+    return jmi_delaybuffer_new(jmi, &(delay->buffer));
 }
 int jmi_delay_delete(jmi_t *jmi, int index) {
     if (index < 0 || index >= jmi->n_delays) return -1;
@@ -118,8 +118,8 @@ int jmi_delay_init(jmi_t *jmi, int index, jmi_boolean fixed, jmi_boolean no_even
     if (jmi_delaybuffer_init(&(delay->buffer), max_delay) < 0) return -1;
 
     /* Record the initial point, and then an event with the same value to get constant interpolation before the initial time */
-    if (jmi_delaybuffer_record_sample(&(delay->buffer), get_t(jmi) + get_time_offset(delay), y0, FALSE) < 0) return -1;
-    return jmi_delaybuffer_record_sample(&(delay->buffer), get_t(jmi) + get_time_offset(delay), y0, TRUE);
+    if (jmi_delaybuffer_record_sample(jmi, &(delay->buffer), get_t(jmi) + get_time_offset(delay), y0, FALSE) < 0) return -1;
+    return jmi_delaybuffer_record_sample(jmi, &(delay->buffer), get_t(jmi) + get_time_offset(delay), y0, TRUE);
 }
 
 jmi_real_t jmi_delay_evaluate(jmi_t *jmi, int index, jmi_real_t y_in, jmi_real_t delay_time) {
@@ -142,13 +142,13 @@ jmi_real_t jmi_delay_evaluate(jmi_t *jmi, int index, jmi_real_t y_in, jmi_real_t
     }
 
     /* If delay->no_event, evaluate should always think that we are at an event so that it can cross events in the buffer */
-    return jmi_delaybuffer_evaluate(&(delay->buffer), jmi->atEvent || delay->no_event, t_delayed, &(delay->position), t_curr, y_in);
+    return jmi_delaybuffer_evaluate(jmi, &(delay->buffer), jmi->atEvent || delay->no_event, t_delayed, &(delay->position), t_curr, y_in);
 }
 
 int jmi_delay_record_sample(jmi_t *jmi, int index, jmi_real_t y_in) {
     jmi_delay_t *delay = &(jmi->delays[index]);
     if (index < 0 || index >= jmi->n_delays) return -1;
-    return jmi_delaybuffer_record_sample(&(delay->buffer), get_t(jmi) + get_time_offset(delay), y_in, jmi->delay_event_mode);
+    return jmi_delaybuffer_record_sample(jmi, &(delay->buffer), get_t(jmi) + get_time_offset(delay), y_in, jmi->delay_event_mode);
 }
 
 /* todo: Fold as an argument into the record_sample functions? */
@@ -236,7 +236,7 @@ int jmi_spatialdist_new(jmi_t *jmi, int index) {
     /* Initialize with sensible default values to be safe. The proper initialization is done in jmi_spatialdist_init. */
     init_spatialdist(spatialdist, FALSE, 0);
     /* Initialize the delay buffer */
-    return jmi_delaybuffer_new(&(spatialdist->buffer));
+    return jmi_delaybuffer_new(jmi, &(spatialdist->buffer));
 }
 int jmi_spatialdist_delete(jmi_t *jmi, int index) {
     if (index < 0 || index >= jmi->n_spatialdists) return -1;
@@ -264,9 +264,11 @@ int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event, jmi_real_t
     last_x_init = -1;
     for (i = 0; i < n_init; i++) {
         /* Create an event if this is a repeated x position */
-        if (jmi_delaybuffer_record_sample(buffer, x2coord(x0, x_init->var[i]), y_init->var[i], x_init->var[i] == last_x_init) < 0) return -1;
+        if (jmi_delaybuffer_record_sample(jmi, buffer, x2coord(x0, x_init->var[i]), y_init->var[i], x_init->var[i] == last_x_init) < 0) return -1;
         last_x_init = x_init->var[i];
     }
+    /* Make sure rposition is at the right end point */
+    if (jmi_delaybuffer_update_position_at_event(buffer, JMI_INF, &(spatialdist->rposition)) < 0) return -1;    
     return 0;
 }
 
@@ -289,12 +291,12 @@ jmi_real_t jmi_spatialdist_evaluate(jmi_t *jmi, int index, jmi_real_t *out0, jmi
 
     if (positiveVelocity) {
         *out0 = in0;
-        *out1 = jmi_delaybuffer_evaluate_left(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
+        *out1 = jmi_delaybuffer_evaluate_left(jmi, &(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
                                               x2right(x), &(spatialdist->rposition),
                                               x2left(x), in0);
     } else {
         *out1 = in1;
-        *out0 = jmi_delaybuffer_evaluate(&(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
+        *out0 = jmi_delaybuffer_evaluate(jmi, &(spatialdist->buffer), jmi->atEvent || spatialdist->no_event,
                                          x2left(x), &(spatialdist->lposition),
                                          x2right(x), in1);
     }
@@ -309,8 +311,8 @@ int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_rea
     if (x > spatialdist->last_x || (x == spatialdist->last_x && positiveVelocity) ) {
         /* Contents moving right */
         /* Truncation will only have an effect upon flow reversal. */
-        if (jmi_delaybuffer_truncate_left(     buffer, x2left(spatialdist->last_x), &(spatialdist->lposition)) < 0) return -1;
-        if (jmi_delaybuffer_record_sample_left(buffer, x2left(x), in0, jmi->delay_event_mode) < 0) return -1;
+        if (jmi_delaybuffer_truncate_left(     jmi, buffer, x2left(spatialdist->last_x), &(spatialdist->lposition)) < 0) return -1;
+        if (jmi_delaybuffer_record_sample_left(jmi, buffer, x2left(x), in0, jmi->delay_event_mode) < 0) return -1;
 
         if (jmi->delay_event_mode) {
             /* Update the position at the recording end to be at the end */
@@ -319,8 +321,8 @@ int jmi_spatialdist_record_sample(jmi_t *jmi, int index, jmi_real_t in0, jmi_rea
     } else {
         /* Contents moving right */
         /* Truncation will only have an effect upon flow reversal. */
-        if (jmi_delaybuffer_truncate_right(buffer, x2right(spatialdist->last_x), &(spatialdist->rposition)) < 0) return -1;
-        if (jmi_delaybuffer_record_sample( buffer, x2right(x), in1, jmi->delay_event_mode) < 0) return -1;
+        if (jmi_delaybuffer_truncate_right(jmi, buffer, x2right(spatialdist->last_x), &(spatialdist->rposition)) < 0) return -1;
+        if (jmi_delaybuffer_record_sample( jmi, buffer, x2right(x), in1, jmi->delay_event_mode) < 0) return -1;
 
         if (jmi->delay_event_mode) {
             /* Update the position at the recording end to be at the end */
@@ -455,11 +457,11 @@ static void link(jmi_delay_point_t buf[], int left_pos, int left_index, int righ
 
 /* Note: jmi_delaybuffer_evaluate may reverse the effects of put by restoring the value of buffer->size from before the invocation. */
 /** \brief Try to add a sample to the left or right end of the buffer, possibly discarding it or replacing a previous sample due to filtering */
-static int put(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_right, jmi_boolean event_occurred) {
+static int put(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_right, jmi_boolean event_occurred) {
     jmi_delay_point_t *buf;
     int dest_pos;
     /* Reserve space for the new point to (possibly) be inserted below */
-    if (reserve(buffer, buffer->size+1) < 0) return -1;
+    if (reserve(buffer, buffer->size+1) < 0) jmi_internal_error(jmi, "Unable to allocate more space for delay buffer");
     buf = buffer->buf;
 
     /* Check consistency with previous buffer contents and set up appropriate left/right links */
@@ -532,9 +534,10 @@ static int put(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolea
 }
 
 
-static int jmi_delaybuffer_new(jmi_delaybuffer_t *buffer) {
+static int jmi_delaybuffer_new(jmi_t *jmi, jmi_delaybuffer_t *buffer) {
     buffer->capacity = BUFFER_INITIAL_CAPACITY;
     buffer->buf = (jmi_delay_point_t *)calloc(buffer->capacity, sizeof(jmi_delay_point_t));
+    if (buffer->buf == NULL) jmi_internal_error(jmi, "Unable to allocate space for delay buffer");
     clear(buffer, 0); /* sets max_delay to zero; will be set to correct value in jmi_delaybuffer_init */
     return 0;
 }
@@ -579,7 +582,10 @@ static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
 
     /* Check for an event between index and index + 1. 
        This should probably only occur if we are to the left of the initial event (initial value for delay). */
-    if (!at_event && buf[index2pos(buffer, index)].right == index) return 0; 
+    if (!at_event && buf[index2pos(buffer, index)].right == index) {
+        position->curr_interval = index;
+        return 0;
+    }
 
     /* Search to the right */   
     /* index < last_index ==> index + 1 is a valid sample index */ 
@@ -657,23 +663,23 @@ static jmi_real_t evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     */
 }
 
-static jmi_real_t jmi_delaybuffer_evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
+static jmi_real_t jmi_delaybuffer_evaluate(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_boolean at_event,
                                            jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr) {
     /* todo: more efficient handling of (t_curr, y_curr)? */
     jmi_real_t y;
     int orig_size = buffer->size;
-    put(buffer, t_curr, y_curr, TRUE, FALSE); /* Temporarily put (t_curr, y_curr) at the right end of the delay buffer */
+    put(jmi, buffer, t_curr, y_curr, TRUE, FALSE); /* Temporarily put (t_curr, y_curr) at the right end of the delay buffer */
     y = evaluate(buffer, at_event, tr, position);
     buffer->size = orig_size;       /* Remove (t_curr, y_curr) from the delay buffer again */
     return y;
 }
 
-static jmi_real_t jmi_delaybuffer_evaluate_left(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
+static jmi_real_t jmi_delaybuffer_evaluate_left(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_boolean at_event,
                                                 jmi_real_t tr, jmi_delay_position_t *position, jmi_real_t t_curr, jmi_real_t y_curr) {
     /* todo: more efficient handling of (t_curr, y_curr)? */
     jmi_real_t y;
     int orig_size = buffer->size;
-    put(buffer, t_curr, y_curr, FALSE, FALSE); /* Temporarily put (t_curr, y_curr) at the left end of the delay buffer */
+    put(jmi, buffer, t_curr, y_curr, FALSE, FALSE); /* Temporarily put (t_curr, y_curr) at the left end of the delay buffer */
     y = evaluate(buffer, at_event, tr, position);
     /* Remove (t_curr, y_curr) from the delay buffer again */
     if (buffer->size > orig_size) discard_left(buffer);
@@ -698,13 +704,13 @@ static void discard_samples_right(jmi_delaybuffer_t *buffer, jmi_real_t t_limit)
     }
 }
 
-static int jmi_delaybuffer_record_sample(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event) {
-    if (put(buffer, t, y, TRUE, at_event) < 0) return -1;
+static int jmi_delaybuffer_record_sample(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event) {
+    if (put(jmi, buffer, t, y, TRUE, at_event) < 0) return -1;
     discard_samples_left(buffer, t - buffer->max_delay);
     return 0;
 }
-static int jmi_delaybuffer_record_sample_left(jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event) {
-    if (put(buffer, t, y, FALSE, at_event) < 0) return -1;
+static int jmi_delaybuffer_record_sample_left(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y, jmi_boolean at_event) {
+    if (put(jmi, buffer, t, y, FALSE, at_event) < 0) return -1;
     discard_samples_right(buffer, t + buffer->max_delay);
     return 0;
 }
@@ -762,23 +768,23 @@ static int jmi_delaybuffer_update_position_at_event(jmi_delaybuffer_t *buffer, j
     return update_position(buffer, TRUE, tr, position);
 }
 
-static int jmi_delaybuffer_truncate_left(jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *lposition) {
+static int jmi_delaybuffer_truncate_left(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *lposition) {
     jmi_delay_point_t *buf = buffer->buf;
     /* Early out: `jmi_spatialdist_record_sample` will call this each sample, but truncation will only be needed at flow reversal. */
     if ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index)].t < t_limit)) {
         jmi_real_t y = evaluate(buffer, FALSE, t_limit, lposition);
         while ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index)].t <= t_limit)) discard_left(buffer);
-        put(buffer, t_limit, y, FALSE, FALSE);
+        put(jmi, buffer, t_limit, y, FALSE, FALSE);
     }
     return 0;
 }
-static int jmi_delaybuffer_truncate_right(jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *rposition) {
+static int jmi_delaybuffer_truncate_right(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t_limit, jmi_delay_position_t *rposition) {
     jmi_delay_point_t *buf = buffer->buf;
     /* Early out: `jmi_spatialdist_record_sample` will call this each sample, but truncation will only be needed at flow reversal. */
     if ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index + buffer->size - 1)].t > t_limit)) {
         jmi_real_t y = evaluate(buffer, FALSE, t_limit, rposition);
         while ((buffer->size > 0) && (buf[index2pos(buffer, buffer->head_index + buffer->size - 1)].t >= t_limit)) discard_right(buffer);
-        put(buffer, t_limit, y, TRUE, FALSE);
+        put(jmi, buffer, t_limit, y, TRUE, FALSE);
     }
     return 0;
 }
