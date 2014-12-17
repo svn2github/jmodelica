@@ -750,24 +750,36 @@ static int jmi_delaybuffer_record_sample_left(jmi_t *jmi, jmi_delaybuffer_t *buf
     return 0;
 }
 
+static int _get_left(jmi_delaybuffer_t *buffer, int index) {
+    int left = buffer->buf[index2pos(buffer, index)].left;
+    int head_index = get_head_index(buffer);
+    return left >= head_index ? left : head_index;
+}
+
+static int _get_right(jmi_delaybuffer_t *buffer, int index) {
+    int right = buffer->buf[index2pos(buffer, index)].right;
+    int tail_index = get_tail_index(buffer);
+    return right <= tail_index ? right : tail_index;
+}
+
 static jmi_real_t jmi_delaybuffer_next_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position) {
     jmi_delay_point_t *buf = buffer->buf;
     int last_index = position->curr_interval; /* Start from the left point; there may be an event just to the right of it. */
-    int index = buf[index2pos(buffer, last_index)].right;
+    int index = _get_right(buffer, last_index);
     if (index != last_index) {
         int final_index;
         int orig_index = last_index;
         /* Find the fixed point */
         while (index != last_index) {
             last_index = index;
-            index = buf[index2pos(buffer, index)].right;
+            index = _get_right(buffer, index);
         }
         /* Move all intermediate pointers to the new fixed point */
         final_index = index;
         index = orig_index;
         while (index != final_index) {
             int pos = index2pos(buffer, index);
-            index = buf[pos].right;
+            index = _get_right(buffer, index);
             buf[pos].right = final_index;
         }
     }
@@ -777,21 +789,21 @@ static jmi_real_t jmi_delaybuffer_next_event_time(jmi_delaybuffer_t *buffer, jmi
 static jmi_real_t jmi_delaybuffer_prev_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position) {
     jmi_delay_point_t *buf = buffer->buf;
     int last_index = position->curr_interval;
-    int index = buf[index2pos(buffer, last_index)].left;
+    int index = _get_left(buffer, last_index);
     if (index != last_index) {
         int final_index;
         int orig_index = last_index;
         /* Find the fixed point */
         while (index != last_index) {
             last_index = index;
-            index = buf[index2pos(buffer, index)].left;
+            index = _get_left(buffer, index);
         }
         /* Move all intermediate pointers to the new fixed point */
         final_index = index;
         index = orig_index;
         while (index != final_index) {
             int pos = index2pos(buffer, index);
-            index = buf[pos].left;
+            index = _get_left(buffer, index);
             buf[pos].left = final_index;
         }
     }
