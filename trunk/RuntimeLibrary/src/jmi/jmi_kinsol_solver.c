@@ -683,6 +683,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
         }
     }
 
+    solver->last_xnorm = 1.0;
     jmi_kinsol_init_bounds(block);
     
     /* evaluate the function at initial */
@@ -953,20 +954,19 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     realtype **JTJ_c =  solver->JTJ->cols;
     realtype **jac = solver->J->cols;
     int N = block->n;
-    
-    /* Add the regularization parameter on the diagonal.
-    TODO: consider using scales of X instead of 1.0 for regularization
-      */
+    realtype * uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+    realtype * fscale_data = N_VGetArrayPointer(solver->kin_f_scale);    
 
     for (i=0;i<N;i++) {
+        /* Add the regularization parameter on the diagonal.   */        
+        JTJ_c[i][i] = solver->last_xnorm * uscale_data[i]*uscale_data[i];
         /*Calculate value at RTR(i,i) */
-        JTJ_c[i][i] = 1;
-        for (k=0;k<N;k++) JTJ_c[i][i] += jac[i][k]*jac[i][k];
+        for (k=0;k<N;k++) JTJ_c[i][i] += jac[i][k]*jac[i][k]*fscale_data[k]*fscale_data[k];
         for (j=i+1;j<N;j++){
             
             /*Calculate value at RTR(i,j) */
             JTJ_c[j][i] = 0;
-            for (k=0;k<N;k++) JTJ_c[j][i] += jac[j][k]*jac[i][k];
+            for (k=0;k<N;k++) JTJ_c[j][i] += jac[j][k]*jac[i][k]*fscale_data[k]*fscale_data[k];
             JTJ_c[i][j] = JTJ_c[j][i];
         }
     }
@@ -1168,9 +1168,11 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         realtype** jac = solver->J->cols;
         if(N > 1) {
             int i,j;
+            realtype * fscale_data = N_VGetArrayPointer(solver->kin_f_scale);    
+
             for (i=0;i<N;i++){
                 xd[i] = 0;
-                for (j=0;j<N;j++) xd[i] += jac[i][j]*bd[j];
+                for (j=0;j<N;j++) xd[i] += jac[i][j]*bd[j]*fscale_data[j]*fscale_data[j];
             }
             /* Back-solve and get solution in x */
             trans = 'N'; /* No transposition */
