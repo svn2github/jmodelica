@@ -413,6 +413,13 @@ static int index2pos(jmi_delaybuffer_t *buffer, int index) {
     return pos;
 }
 
+static jmi_boolean event_left_of(jmi_delaybuffer_t *buffer, int index) {
+    return buffer->buf[index2pos(buffer, index)].left == index;
+}
+static jmi_boolean event_right_of(jmi_delaybuffer_t *buffer, int index) {
+    return buffer->buf[index2pos(buffer, index)].right == index;
+}
+
 /** \brief Discard the rightmost sample in the buffer. The buffer must not be empty. */
 static void discard_right(jmi_delaybuffer_t *buffer) {
     buffer->size--;
@@ -482,12 +489,12 @@ static int put(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_t y
                 if (buf[end_pos].y == y) return 0; /* Filter out this event since it has the same y. NB: only valid for linear interpolation. */
 
                 /* If there is already an event at the end, discard it. */
-                if (at_right && buf[end_pos].left == end_index) {
+                if (at_right && event_left_of(buffer, end_index)) {
                     discard_right(buffer);
                     end_index--;
                     end_pos = index2pos(buffer, end_index);
                 }
-                if (!at_right && buf[end_pos].right == end_index) {
+                if (!at_right && event_right_of(buffer, end_index)) {
                     discard_left(buffer);
                     end_index++;
                     end_pos = index2pos(buffer, end_index);
@@ -575,14 +582,14 @@ static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     /* Search to the left */
     while (index > buffer->head_index) {
         int lpos = index2pos(buffer, index);
-        if (!at_event && buf[lpos].left == index) break;
+        if (!at_event && event_left_of(buffer, index)) break;
         if (buf[lpos].t <= tr) break;
         index--;
     }
 
     /* Check for an event between index and index + 1. 
        This should probably only occur if we are to the left of the initial event (initial value for delay). */
-    if (!at_event && buf[index2pos(buffer, index)].right == index) {
+    if (!at_event && event_right_of(buffer, index)) {
         position->curr_interval = index;
         return 0;
     }
@@ -591,7 +598,7 @@ static int update_position(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
     /* index < last_index ==> index + 1 is a valid sample index */ 
     while (index < last_index) {
         int rpos = index2pos(buffer, index+1);
-        if (!at_event && buf[rpos].right == index+1) break;
+        if (!at_event && event_right_of(buffer, index+1)) break;
         /* We must use > so that we choose the rightmost allowable interval at time events triggered when t == buf[rpos].tr */
         if (buf[rpos].t > tr) break;
         index++;
@@ -642,7 +649,7 @@ static jmi_real_t evaluate(jmi_delaybuffer_t *buffer, jmi_boolean at_event,
 
     /* If our interval is just one sample, return its value. */
     lpos = index2pos(buffer, position->curr_interval);
-    if (buf[lpos].right == position->curr_interval) return buf[lpos].y;
+    if (event_right_of(buffer, position->curr_interval)) return buf[lpos].y;
 
     /* We have a whole interval, do linear interpolation. */
     return neville_evaluate(buffer, tr, position->curr_interval, 2);
