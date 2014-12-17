@@ -2585,41 +2585,42 @@ public class GccCompilerDelegator extends CCompilerDelegator {
      */
     protected void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
         Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, String[] platforms) {
-		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
-		String buildPlatform = ModelicaCompiler.getPlatform();
-		String make = getMake(buildPlatform);
-		
-		Map<String, String> vars = new HashMap<String, String>();
-		addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
-		addBuildPlatformMakeVars(vars, buildPlatform);
-		
-		for (String platform : platforms) {
-			Map<String, String> pVars = new HashMap<String, String>(vars);
-			addTargetPlatformMakeVars(pVars, ext_lib_dirs, platform);
-			
-			File makefile = getMakefile(jmodelicaHome, platform);
-			if (!makefile.exists())
-				throw new CcodeCompilationException("Makefile '" + makefile + "' does not exist.");
-			String[] args = new String[] { make, "-f", makefile.getPath(), targetObject.getMakeFileFlag() };
-			ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
-			for (Map.Entry<String,String> var : pVars.entrySet())
-				if (var.getValue() != null)
-					vArgs.add(var.getKey() + '=' + var.getValue());
-			String[] cmd = new String[args.length + vArgs.size()];
-			System.arraycopy(args, 0, cmd, 0, args.length);
-			int i = args.length;
-			for (String arg : vArgs)
-				cmd[i++] = arg;
-			
-			if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir) != 0) {
-				File sourceDir = new File(workDir, "sources");
-				File cfile = new File(sourceDir, fileName+".c");
-				throw new CcodeCompilationException("Compilation of generated C code failed.\n" +
-						"C file location: "+cfile.getAbsolutePath());
-			}
-		}
-	}
-		
+        String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
+        String buildPlatform = ModelicaCompiler.getPlatform();
+        String make = getMake(buildPlatform);
+        
+        Map<String, String> vars = new HashMap<String, String>();
+        addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
+        addBuildPlatformMakeVars(vars, buildPlatform);
+        
+        for (String platform : platforms) {
+            Map<String, String> pVars = new HashMap<String, String>(vars);
+            addTargetPlatformMakeVars(pVars, ext_lib_dirs, platform);
+            
+            File makefile = getMakefile(jmodelicaHome, platform);
+            if (!makefile.exists())
+                throw new CcodeCompilationException("Makefile '" + makefile + "' does not exist.");
+            String makefileVar = "MAKEFILE=" + makefile.getPath();
+            String[] args = new String[] { make, "-f", makefile.getPath(), targetObject.getMakeFileFlag(), makefileVar };
+            ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
+            for (Map.Entry<String,String> var : pVars.entrySet())
+                if (var.getValue() != null)
+                    vArgs.add(var.getKey() + '=' + var.getValue());
+            String[] cmd = new String[args.length + vArgs.size()];
+            System.arraycopy(args, 0, cmd, 0, args.length);
+            int i = args.length;
+            for (String arg : vArgs)
+                cmd[i++] = arg;
+            
+            if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir) != 0) {
+                File sourceDir = new File(workDir, "sources");
+                File cfile = new File(sourceDir, fileName+".c");
+                throw new CcodeCompilationException("Compilation of generated C code failed.\n" +
+                        "C file location: "+cfile.getAbsolutePath());
+            }
+        }
+    }
+
 }
 
 }
