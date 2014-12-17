@@ -38,9 +38,8 @@ typedef struct {
 
 /** \brief Represents the history of a signal. */
 typedef struct {
-    int capacity;    /**< \brief Number of allocated points in buf. */
+    int capacity;    /**< \brief Number of allocated points in buf. Must be a power of two! This simplifies ring buffer management a lot. */
     int size;        /**< \brief Number of used points in buf. */
-    int head;        /**< \brief Position of the first used point in buf. */
     int head_index;  /**< \brief Logical index associated with the head position. */
     jmi_delay_point_t *buf; /**< \brief Buffer of history points. */
     jmi_real_t max_delay;   /**< \brief Maximum delay relative to the last recorded sample that the buffer will be queried for. */

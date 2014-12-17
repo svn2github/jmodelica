@@ -30,7 +30,7 @@
 #include "jmi_delay.h"
 #include "jmi_delay_impl.h"
 
-
+/* BUFFER_INITIAL_CAPACITY must be a power of two! (as must all buffer capacities in this file) */
 #define BUFFER_INITIAL_CAPACITY 256
 
 
@@ -368,54 +368,62 @@ int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, jmi_boo
 
 /** \brief (Re)initialize the buffer as empty, without changing the current allocation */
 static void clear(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
-    buffer->size = buffer->head = buffer->head_index = 0;
+    buffer->size = buffer->head_index = 0;
     buffer->max_delay = max_delay;
 }
 
-/** \brief Make sure that the buffer has space for at least `capacity` points. May reallocate the buffer and move points in it, but preserves the index of each point. */
-static int reserve(jmi_delaybuffer_t *buffer, int capacity) {
+static int _reallocate(void **buf, int *capacity, int needed_capacity, int head_index, int size, int elsize) {
     int new_capacity;
-    jmi_delay_point_t *new_buf;
-    if (capacity <= buffer->capacity) return 0;
+    char *new_buf;
+    int head, new_head;
+    if (needed_capacity <= *capacity) return 0;
 
     /* Allocate new buffer */
-    new_capacity = buffer->capacity;
-    while (new_capacity < capacity) new_capacity *= 2;
-    new_buf = (jmi_delay_point_t *)calloc(new_capacity, sizeof(jmi_delay_point_t));
+    
+    /* Determine new buffer size. Make sure it's a power of two! */
+    new_capacity = *capacity;
+    while (new_capacity < needed_capacity) new_capacity *= 2;
+    new_buf = calloc(new_capacity, elsize);
     if (new_buf == NULL) return -1;
 
-    /* Transfer contents */
-    if (buffer->size <= buffer->capacity - buffer->head) {
+    /* Transfer contents: copy each element so that it can still be found at index & (*capacity - 1) */
+    head     = head_index & (*capacity - 1);
+    new_head = head_index & (new_capacity - 1);
+    if (size <= *capacity - head) {
         /* Just on block to transfer */
-        memcpy(new_buf, buffer->buf + buffer->head, sizeof(jmi_delay_point_t)*(buffer->size));
+        memcpy(new_buf + elsize*new_head, (char *)*buf + elsize*head, elsize*size);
     } else {
         /* Two blocks to transfer */
-        int first_size = buffer->capacity - buffer->head;
-        memcpy(new_buf,              buffer->buf + buffer->head, sizeof(jmi_delay_point_t)*(first_size));
-        memcpy(new_buf + first_size, buffer->buf,                sizeof(jmi_delay_point_t)*(buffer->size - first_size));
+        int first_size = *capacity - head;
+        int new_wrapped_head = (head_index + first_size) & (new_capacity - 1);
+        memcpy(new_buf + elsize*new_head,         (char *)*buf + elsize*head, elsize*first_size);
+        memcpy(new_buf + elsize*new_wrapped_head, *buf,                       elsize*(size - first_size));
     }
 
     /* Free old buffer */
-    free(buffer->buf);
+    free(*buf);
 
     /* Update buffer object */
-    buffer->buf = new_buf;
-    buffer->capacity = new_capacity;
-    buffer->head = 0;
+    *buf = new_buf;
+    *capacity = new_capacity;
 
+    return 0;    
+}
+
+/** \brief Make sure that the buffer has space for at least one more sample. May reallocate the buffer and move samples in it, but preserves the index of each. */
+static int reserve_one_sample(jmi_delaybuffer_t *buffer) {
+    if (buffer->capacity <= buffer->size+1) {
+        return _reallocate((void **)&(buffer->buf), &(buffer->capacity), buffer->size+1, buffer->head_index, buffer->size, sizeof(jmi_delay_point_t));
+    }
     return 0;
 }
 
 /** \brief Translate from sample index to position `buffer->buf`. `index` should be within the buffer, e.g. `0 <= index - buffer->head_index < buffer->size`. */
-static int index2pos(jmi_delaybuffer_t *buffer, int index) {
-    int pos = index - buffer->head_index + buffer->head;
-    if (pos >= buffer->capacity) pos -= buffer->capacity;
-    return pos;
-}
+static int index2pos(jmi_delaybuffer_t *buffer, int index) { return index & (buffer->capacity - 1); }
 
 int get_head_index(jmi_delaybuffer_t *buffer) { return buffer->head_index; }
 int get_tail_index(jmi_delaybuffer_t *buffer) { return buffer->head_index + buffer->size - 1; }
-int get_head_pos(jmi_delaybuffer_t *buffer) { return buffer->head; }
+int get_head_pos(jmi_delaybuffer_t *buffer) { return index2pos(buffer, get_head_index(buffer)); }
 int get_tail_pos(jmi_delaybuffer_t *buffer) { return index2pos(buffer, get_tail_index(buffer)); }
 
 static jmi_boolean event_left_of(jmi_delaybuffer_t *buffer, int index) {
@@ -438,8 +446,6 @@ static void discard_right(jmi_delaybuffer_t *buffer) {
 /** \brief Discard the leftmost sample in the buffer. The buffer must not be empty. */
 static void discard_left(jmi_delaybuffer_t *buffer) {
     buffer->size--;
-    buffer->head++;
-    if (buffer->head >= buffer->capacity) buffer->head = 0;
     buffer->head_index++;
     if (buffer->size > 0) {
         /* Don't link beyond buffer */
@@ -462,8 +468,6 @@ static void _put_left(jmi_delaybuffer_t *buffer, jmi_boolean event_occurred) {
     int last_head_pos = get_head_pos(buffer);
 
     buffer->size++;
-    buffer->head--;
-    if (buffer->head < 0) buffer->head = buffer->capacity-1;
     buffer->head_index--;
     
     if (event_occurred) {
@@ -506,7 +510,7 @@ static int record(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_
     jmi_delay_point_t *buf;
     int dest_pos;
     /* Reserve space for the new point to (possibly) be inserted below */
-    if (reserve(buffer, buffer->size+1) < 0) jmi_internal_error(jmi, "Unable to allocate more space for delay buffer");
+    if (reserve_one_sample(buffer) < 0) jmi_internal_error(jmi, "Unable to allocate more space for delay buffer");
     buf = buffer->buf;
 
     /* Check consistency with previous buffer contents and set up appropriate left/right links */
