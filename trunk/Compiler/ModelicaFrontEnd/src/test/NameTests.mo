@@ -2327,54 +2327,6 @@ end NameTests.ImportTest7;
 ")})));
 end ImportTest7;
 
-model ImportTest8
-  Modelica.Electrical.Analog.Basic.Resistor r;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ImportTest8",
-			description="Test name lookup in a structured library",
-			flatModel="
-fclass NameTests.ImportTest8
- parameter Modelica.SIunits.Resistance r.R(start = 1) \"Resistance at temperature T_ref\";
- parameter Modelica.SIunits.ThermodynamicTemperature r.T_ref = 300.15 \"Reference temperature\" /* 300.15 */;
- parameter Modelica.SIunits.LinearTemperatureCoefficient r.alpha = 0 \"Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))\" /* 0 */;
- Modelica.SIunits.Resistance r.R_actual \"Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))\";
- Modelica.SIunits.ElectricPotential r.v \"Voltage drop between the two pins (= p.v - n.v)\";
- Modelica.SIunits.ElectricCurrent r.i \"Current flowing from pin p to pin n\";
- Modelica.SIunits.ElectricPotential r.p.v \"Potential at the pin\";
- Modelica.SIunits.ElectricCurrent r.p.i \"Current flowing into the pin\";
- Modelica.SIunits.ElectricPotential r.n.v \"Potential at the pin\";
- Modelica.SIunits.ElectricCurrent r.n.i \"Current flowing into the pin\";
- structural parameter Boolean r.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
- parameter Modelica.SIunits.ThermodynamicTemperature r.T = r.T_ref \"Fixed device temperature if useHeatPort = false\";
- Modelica.SIunits.Power r.LossPower \"Loss power leaving component via heatPort\";
- Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of heatPort\";
-equation
- assert(1 + r.alpha * (r.T_heatPort - r.T_ref) >= 1.0E-15, \"Temperature outside scope of model!\");
- r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));
- r.v = r.R_actual * r.i;
- r.LossPower = r.v * r.i;
- r.v = r.p.v - r.n.v;
- 0 = r.p.i + r.n.i;
- r.i = r.p.i;
- if not false then
-  r.T_heatPort = r.T;
- end if;
- r.p.i = 0;
- r.n.i = 0;
-
-public
- type Modelica.SIunits.Resistance = Real(final quantity = \"Resistance\",final unit = \"Ohm\");
- type Modelica.SIunits.ThermodynamicTemperature = Real(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0.0,start = 288.15,nominal = 300,displayUnit = \"degC\");
- type Modelica.SIunits.LinearTemperatureCoefficient = Real(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\");
- type Modelica.SIunits.ElectricPotential = Real(final quantity = \"ElectricPotential\",final unit = \"V\");
- type Modelica.SIunits.ElectricCurrent = Real(final quantity = \"ElectricCurrent\",final unit = \"A\");
- type Modelica.SIunits.Power = Real(final quantity = \"Power\",final unit = \"W\");
-end NameTests.ImportTest8;
-")})));
-end ImportTest8;
-
 model ImportTest9
 	import Math = Modelica.Math;
 	parameter Real p1 = Math.cos(9);

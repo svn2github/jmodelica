@@ -430,55 +430,58 @@ aspect VariabilityPropagation {
 		
 		throw new UnsupportedOperationException();
 	}
-	
-	public void FVariable.variabilityPropagation(
-			LinkedHashSet<FAbstractEquation> worklist,
-			FTypePrefixVariability variability,
+
+    public void FVariable.variabilityPropagation(
+            LinkedHashSet<FAbstractEquation> worklist,
+            FTypePrefixVariability variability,
             FExp bindingExp,
             List<FAbstractEquation> parameterEquations) {
-		
-		FAbstractEquation equation;
-		boolean wasDiscrete = isDiscrete();
-		
-		// Declaration
-		setFTypePrefixVariability(variability);
-		if (variability.knownParameterOrLess()) {
-			setBindingExp(bindingExp.fullCopy());
-		}
+        
+        FAbstractEquation equation;
+        boolean wasDiscrete = isDiscrete();
+        
+        // Declaration
+        // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
+        if (variability.evalParameterVariability())
+            variability = fStructParameter();
+        setFTypePrefixVariability(variability);
+        if (variability.knownParameterOrLess()) {
+            setBindingExp(bindingExp.fullCopy());
+        }
         if (variability.parameterVariability()) {
             if (fixedAttributeSet()) {
                 setFixedAttribute(true);
             }
         }
-		
-		// Uses
-		for (FIdUseExp use : uses()) {
-			if (use.inFEquation()) {
-				equation = use.myFEquation();
-				equation.variables().remove(this);
-				if (equation.canPropagate()) {
-					worklist.add(equation);
-				} else if (equation.inInitialEquationSection() && equation.variables().size() == 0
-						&& equation.nonFixedParameters().size() == 0) {
-					equation.taggedForRemoval = true; // Initial equation
-				}
-			}
-		}
-		
-		// Pre var
-		if (wasDiscrete) {
-			FAbstractVariable pre = myPreVariable();
-			pre.taggedForRemoval = true;
-			pre.variabilityPropagation(worklist, variability, bindingExp, parameterEquations);
-		}
-		
-		// Derivative
-		if (isDifferentiatedVariable()) {
-			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
-			fDerivativeVariable.taggedForRemoval = true;
-			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0), parameterEquations);
-		}
-		
+        
+        // Uses
+        for (FIdUseExp use : uses()) {
+            if (use.inFEquation()) {
+                equation = use.myFEquation();
+                equation.variables().remove(this);
+                if (equation.canPropagate()) {
+                    worklist.add(equation);
+                } else if (equation.inInitialEquationSection() && equation.variables().size() == 0
+                        && equation.nonFixedParameters().size() == 0) {
+                    equation.taggedForRemoval = true; // Initial equation
+                }
+            }
+        }
+        
+        // Pre var
+        if (wasDiscrete) {
+            FAbstractVariable pre = myPreVariable();
+            pre.taggedForRemoval = true;
+            pre.variabilityPropagation(worklist, variability, bindingExp, parameterEquations);
+        }
+        
+        // Derivative
+        if (isDifferentiatedVariable()) {
+            FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
+            fDerivativeVariable.taggedForRemoval = true;
+            fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0), parameterEquations);
+        }
+        
         // Alias variables
         if (aliasSet() != null) {
             AliasManager.AliasVariable thisAlias = aliasSet().getIterationVariable();

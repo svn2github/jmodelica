@@ -96,18 +96,25 @@ aspect InstVariability {
             // does not consider FKnownParameter variabilities.
             v = v.combineDown(inheritedVariability());
             
-            if (isStructural()) {
-                v = v.combineDown(fStructParameter());
-            } else if (isEvalFixed()) {
+            if (isEvalFixed()) {
                 v = v.combineDown(fEvalParameter());
+            } else if (isStructural()) {
+                v = v.combineDown(fStructParameter());
             } else if (isFinalIndependent()) {
                 v = v.combineDown(fFinalParameter());
             }
             
             // TODO: check specific component
+            // TODO: look over this after we have added "dependent parameter that is evaluated" variability
             InstValueModification ivm = myInstValueModTop();
-            if (ivm != null && !ivm.getFExp().type().isUnknown() && ivm.getFExp().variability().parameterVariability())
-                v = v.combineDown(ivm.getFExp().variability());
+            if (ivm != null && !ivm.getFExp().type().isUnknown()) {
+                FTypePrefixVariability bv = ivm.getFExp().variability();
+                if (bv.parameterVariability()) {
+                    if (bv.evalParameterVariability())
+                        bv = fStructParameter();
+                    v = v.combineDown(bv);
+                }
+            }
             
             circularVariability = false;
         }

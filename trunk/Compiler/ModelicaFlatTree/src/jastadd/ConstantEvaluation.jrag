@@ -4441,22 +4441,22 @@ aspect LiteralExpressions {
 
 aspect CircularExpressions {
 
-	/**
-	 * Check if expression is circular.
-	 * 
-	 * Default implementation returns <code>true</code> if any direct FExp child 
-	 * is circular.
-	 */
-	syn boolean FExp.isCircular() = false;
-    syn lazy boolean FAbstractExp.isCircular()  { 
-        if (inIsCircular) 
-        	return true; 
-        inIsCircular = true; 
-        boolean res = isCircularCalc(); 
-        inIsCircular = false; 
-        return res; 	
+    /**
+     * Check if expression is circular.
+     * 
+     * Default implementation returns <code>true</code> if any direct FExp child 
+     * is circular.
+     */
+    syn boolean FExp.isCircular() = false;
+    syn lazy boolean FAbstractExp.isCircular() {
+        if (inIsCircular)
+            return true;
+        inIsCircular = true;
+        boolean res = isCircularCalc();
+        inIsCircular = false;
+        return res;
     }
-	
+
 	syn boolean FExp.isCircularCalc() = false;
 	eq FAbstractExp.isCircularCalc() {
 		for (FExp e : childFExps())
@@ -4474,12 +4474,24 @@ aspect CircularExpressions {
 	eq FIdUseInstAccess.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
-	
+
 	eq FSizeExp.isCircularCalc() { 
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-	
+
+    eq FIfExp.isCircularCalc() {
+        if (getIfExp().variability().evalOrLess()) {
+            try {
+                if (getIfExp().ceval().booleanValue())
+                    return getThenExp().isCircular();
+                else
+                    return getElseExp().isCircular();
+            } catch (ConstantEvaluationException e) {}
+        }
+        return super.isCircularCalc();
+    }
+
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
 	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
 	eq FInstAccessExp.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();

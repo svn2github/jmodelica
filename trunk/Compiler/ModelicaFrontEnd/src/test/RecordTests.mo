@@ -350,7 +350,7 @@ model RecordFlat10
             flatModel="
 fclass RecordTests.RecordFlat10
  structural parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
- structural parameter Real r.x = 3 /* 3 */;
+ eval parameter Real r.x = 3 /* 3 */;
 
 public
  function RecordTests.RecordFlat10.r.f

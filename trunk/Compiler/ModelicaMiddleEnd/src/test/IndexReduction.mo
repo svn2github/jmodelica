@@ -138,7 +138,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
  Modelica.Blocks.Interfaces.RealInput torque.tau(unit = \"N.m\") \"Accelerating torque acting at flange (= -flange.tau)\";
- structural parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ eval parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
  parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
@@ -148,7 +148,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
  Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
- structural parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
+ eval parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  Modelica.SIunits.Torque idealGear.flange_a.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
@@ -175,7 +175,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Modelica.SIunits.Torque damper.tau \"Torque between flanges (= flange_b.tau)\";
  parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\",min = 0.0) = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
- structural parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
+ eval parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
  parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
  parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";

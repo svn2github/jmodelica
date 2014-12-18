@@ -2030,7 +2030,7 @@ syn lazy String SourceRoot.findOutermostLibraryDir() {
 syn String StoredDefinition.findOutermostLibraryDir() {
     if (!hasWithin() || !getWithin().hasPackageName())
         return null;
-    File me = new File(fileName());
+    File me = new File(fileName()).getAbsoluteFile();
     if (me.getName().equals(LibNode.PACKAGE_FILE))
         me = me.getParentFile();
     File lib = getWithin().getPackageName().findOutermostLibraryDirForWithin(me);
@@ -2045,7 +2045,7 @@ eq Dot.findOutermostLibraryDirForWithin(File f) {
 }
 eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
     f = f.getParentFile();
-    if (f.getName().equals(getID()) && LibNode.isStructuredLib(f))
+    if (f != null && f.getName().equals(getID()) && LibNode.isStructuredLib(f))
         return f;
     else 
         return null;

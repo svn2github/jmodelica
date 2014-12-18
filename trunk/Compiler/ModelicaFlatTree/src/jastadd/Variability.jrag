@@ -78,8 +78,8 @@ aspect Variability {
     protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
     protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
     protected static final int FConstant.VARIABILITY_LEVEL        = 0;
-    protected static final int FStructParameter.VARIABILITY_LEVEL = 3;
-    protected static final int FEvalParameter.VARIABILITY_LEVEL   = 4;
+    protected static final int FEvalParameter.VARIABILITY_LEVEL   = 3;
+    protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
     protected static final int FFinalParameter.VARIABILITY_LEVEL  = 5;
     protected static final int FParameter.VARIABILITY_LEVEL       = 10;
     protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;

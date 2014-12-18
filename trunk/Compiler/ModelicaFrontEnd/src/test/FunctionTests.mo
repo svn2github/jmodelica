@@ -7794,7 +7794,7 @@ model ArrayOutputScalarization27
 			description="Function with array output in if exp",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization27
- structural parameter Boolean a = false /* false */;
+ eval parameter Boolean a = false /* false */;
  Real b[1];
  Real b[2];
 equation

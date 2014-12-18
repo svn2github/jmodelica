@@ -1543,7 +1543,7 @@ model EvaluateAnnotation1
 			flatModel="
 fclass EvaluationTests.EvaluateAnnotation1
  structural parameter Real a = 1.0 /* 1.0 */;
- structural parameter Real b = 1.0 /* 1.0 */;
+ eval parameter Real b = 1.0 /* 1.0 */;
  Real c = 1.0 + 1.0;
 end EvaluationTests.EvaluateAnnotation1;
 ")})));
@@ -1570,7 +1570,7 @@ end EvaluationTests.EvaluateAnnotation2;
             errorMessage="
 Warning: in file '...':
 At line 0, column 0:
-  Evaluate annotation is ignored when fixed equals false
+  Evaluate annotation is ignored for parameters with fixed=false
 
 Warning: in file '...':
 At line 0, column 0:
@@ -1633,7 +1633,7 @@ model EvaluateAnnotation5
             description="Check that annotation(Evaluate=true) is honored for components of recors with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation5
- structural parameter EvaluationTests.EvaluateAnnotation5.R r = EvaluationTests.EvaluateAnnotation5.R(1) /* EvaluationTests.EvaluateAnnotation5.R(1) */;
+ eval parameter EvaluationTests.EvaluateAnnotation5.R r = EvaluationTests.EvaluateAnnotation5.R(1) /* EvaluationTests.EvaluateAnnotation5.R(1) */;
  Real x = 1.0;
 
 public
@@ -1666,7 +1666,7 @@ model EvaluateAnnotation6
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation6
- structural parameter EvaluationTests.EvaluateAnnotation6.R r1 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
+ eval parameter EvaluationTests.EvaluateAnnotation6.R r1 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
  structural parameter EvaluationTests.EvaluateAnnotation6.R r2 = EvaluationTests.EvaluateAnnotation6.R(1) /* EvaluationTests.EvaluateAnnotation6.R(1) */;
  Real x = 1.0;
 
@@ -1711,7 +1711,7 @@ model EvaluateAnnotation7
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation7
- structural parameter EvaluationTests.EvaluateAnnotation7.P r1 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
+ eval parameter EvaluationTests.EvaluateAnnotation7.P r1 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
  structural parameter EvaluationTests.EvaluateAnnotation7.P r2 = EvaluationTests.EvaluateAnnotation7.P(1) /* EvaluationTests.EvaluateAnnotation7.P(1) */;
  Real x = 1.0;
 
@@ -1782,7 +1782,7 @@ model EvaluateAnnotation9
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation9
- structural parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
+ eval parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
  structural parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
  Real x = (-41.0 - 1) * time;
 
@@ -1825,7 +1825,7 @@ model EvaluateAnnotation10
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation10
  structural parameter EvaluationTests.EvaluateAnnotation10.R r1(a = 2) = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
- structural parameter EvaluationTests.EvaluateAnnotation10.R m.r2 = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
+ eval parameter EvaluationTests.EvaluateAnnotation10.R m.r2 = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
 
 public
  record EvaluationTests.EvaluateAnnotation10.R
@@ -2015,7 +2015,7 @@ model EvalNoBinding1
 fclass EvaluationTests.EvalNoBinding1
  structural parameter Real x(start = 1) = 1 /* 1 */;
  structural parameter Real y(start = 3) = 3 /* 3 */;
- structural parameter Real z = 4.0 /* 4.0 */;
+ eval parameter Real z = 4.0 /* 4.0 */;
 end EvaluationTests.EvalNoBinding1;
 ")})));
 end EvalNoBinding1;
@@ -2034,7 +2034,7 @@ model EvalNoBinding2
 fclass EvaluationTests.EvalNoBinding2
  structural parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
  structural parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
- structural parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
+ eval parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
  structural parameter Real z2 = 30.0 /* 30.0 */;
 end EvaluationTests.EvalNoBinding2;
 ")})));
@@ -2056,8 +2056,8 @@ model EvalNoBinding3
             description="Evaluate primitives in record without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding3
- structural parameter EvaluationTests.EvalNoBinding3.R r1 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
- structural parameter EvaluationTests.EvalNoBinding3.R r2 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
+ eval parameter EvaluationTests.EvalNoBinding3.R r1 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
+ eval parameter EvaluationTests.EvalNoBinding3.R r2 = EvaluationTests.EvalNoBinding3.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}) /* EvaluationTests.EvalNoBinding3.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) */;
 
 public
  record EvaluationTests.EvalNoBinding3.R
@@ -2087,9 +2087,9 @@ model EvalNoBinding4
             description="Evaluate primitives in record array without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding4
- structural parameter EvaluationTests.EvalNoBinding4.R r[2,2] = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
- structural parameter Real x[2,2] = {{10.0, 11.0}, {12.0, 13.0}} /* { { 10.0, 11.0 }, { 12.0, 13.0 } } */;
- structural parameter Real y = 8.0 /* 8.0 */;
+ eval parameter EvaluationTests.EvalNoBinding4.R r[2,2] = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
+ eval parameter Real x[2,2] = {{10.0, 11.0}, {12.0, 13.0}} /* { { 10.0, 11.0 }, { 12.0, 13.0 } } */;
+ eval parameter Real y = 8.0 /* 8.0 */;
 
 public
  record EvaluationTests.EvalNoBinding4.R
@@ -2128,7 +2128,7 @@ model EvalColonSizeCell
 fclass EvaluationTests.EvalColonSizeCell
  structural parameter Real a[1] = {1} /* { 1 } */;
  structural parameter Real b[2] = {0.5, 1.5} /* { 0.5, 1.5 } */;
- structural parameter Real c[1] = {1} /* { 1 } */;
+ eval parameter Real c[1] = {1} /* { 1 } */;
 
 public
  function EvaluationTests.EvalColonSizeCell.f
@@ -2190,9 +2190,9 @@ equation
 			description="Test constant evaluation Evaluate parameter",
 			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation1
- structural parameter Real p1[1] = 1 /* 1 */;
- structural parameter Real p1[2] = 2 /* 2 */;
- structural parameter Real p1[3] = 3 /* 3 */;
+ eval parameter Real p1[1] = 1 /* 1 */;
+ eval parameter Real p1[2] = 2 /* 2 */;
+ eval parameter Real p1[3] = 3 /* 3 */;
  constant Real r[1] = 1.0;
  constant Real r[2] = 4.0;
  constant Real r[3] = 9.0;
@@ -2220,7 +2220,7 @@ model ParameterEvalAnnotation2
 fclass EvaluationTests.ParameterEvalAnnotation2
  parameter Real p;
  parameter Real dp;
- structural parameter Real p1 = 1 /* 1 */;
+ eval parameter Real p1 = 1 /* 1 */;
  structural parameter Real p2 = 2.0 /* 2.0 */;
  structural parameter Real p3 = 9.0 /* 9.0 */;
  parameter Real p4;
@@ -2262,8 +2262,8 @@ equation
 fclass EvaluationTests.ParameterEvalAnnotation3
  constant Real c[1] = 1;
  constant Real c[2] = 2;
- structural parameter Real x[1] = 3 /* 3 */;
- structural parameter Real x[2] = 6 /* 6 */;
+ eval parameter Real x[1] = 3 /* 3 */;
+ eval parameter Real x[2] = 6 /* 6 */;
  structural parameter Real y[1] = 7 /* 7 */;
  structural parameter Real y[2] = 14 /* 14 */;
  structural parameter Real z[1] = 14 /* 14 */;

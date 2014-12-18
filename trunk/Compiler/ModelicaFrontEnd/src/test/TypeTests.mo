@@ -2063,6 +2063,7 @@ end TypeTests.ModOnConstantExtends;
 ")})));
 end ModOnConstantExtends;
 
+
 model Functional1
     partial function partFunc1
         input Real x;
@@ -2113,6 +2114,7 @@ Semantic error at line 554, column 27:
 ")})));
 end Functional1;
 
+
 model Functional2
     partial function partFunc
         input Real x;
@@ -2146,6 +2148,7 @@ Semantic error at line 673, column 26:
   Creating functional input argument fullFunc(): no input matching named argument x found
 ")})));
 end Functional2;
+
 
 model Functional3
     partial function partFunc1
@@ -2186,6 +2189,7 @@ Semantic error at line 594, column 44:
 ")})));
 end Functional3;
 
+
 model Functional4
     partial function partFunc
         input Real x;
@@ -2224,6 +2228,7 @@ Semantic error at line 783, column 33:
     type of 'fullFunc()' is ((Real y) = TypeTests.Functional4.fullFunc(Real x))
 ")})));
 end Functional4;
+
 
 model Functional5
     partial function partFunc
@@ -2264,6 +2269,7 @@ Semantic error at line 2234, column 27:
 ")})));
 end Functional5;
 
+
 model Functional6
     partial function partFunc
         input Real x;
@@ -2296,6 +2302,7 @@ Semantic error at line 2274, column 27:
   Calling function usePartFunc(): too many positional arguments
 ")})));
 end Functional6;
+
 
 model Functional7
     partial function partFunc
@@ -2355,6 +2362,7 @@ Semantic error at line 2274, column 71:
 ")})));
 end Functional7;
 
+
 model Delay1
     Real x1 = sin(time);
     Real d;
@@ -2373,6 +2381,7 @@ Semantic error at line 2362, column 24:
     type of '{d, d}' is Real[2]
 ")})));
 end Delay1;
+
 
 model SpatialDist1
     Real x = sin(time);
@@ -2401,6 +2410,7 @@ Semantic error at line 2381, column 50:
 ")})));
 end SpatialDist1;
 
+
 model SpatialDist2
     Real[2] y1;
     Real[2] y2;
@@ -2418,5 +2428,110 @@ Compliance error at line 2408, column 15:
 
 ")})));
 end SpatialDist2;
+
+
+model CircularIfExp1
+    parameter Boolean a = true annotation(Evaluate=true);
+    parameter Real b = if a then 1 else c;
+    parameter Real c = if a then b else 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CircularIfExp1",
+            description="Circularity in binding expressions of parameters resolved by Evaluate=true on parameters used in test",
+            flatModel="
+fclass TypeTests.CircularIfExp1
+ eval parameter Boolean a = true /* true */;
+ parameter Real b = if true then 1 else c;
+ parameter Real c = if true then b else 2;
+end TypeTests.CircularIfExp1;
+")})));
+end CircularIfExp1;
+
+
+model CircularIfExp2
+    parameter Boolean a = true annotation(Evaluate=true);
+    parameter Boolean b = true annotation(Evaluate=true);
+    parameter Real c = if a and b then 1 else d;
+    parameter Real d = if a and b then c else 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CircularIfExp2",
+            description="Circularity in binding expressions of parameters resolved by Evaluate=true on parameters used in test",
+            flatModel="
+fclass TypeTests.CircularIfExp2
+ eval parameter Boolean a = true /* true */;
+ eval parameter Boolean b = true /* true */;
+ parameter Real c = if true and true then 1 else d;
+ parameter Real d = if true and true then c else 2;
+end TypeTests.CircularIfExp2;
+")})));
+end CircularIfExp2;
+
+
+model CircularIfExp3
+    parameter Boolean a = true annotation(Evaluate=true);
+    parameter Boolean b = true annotation(Evaluate=true);
+    parameter Real c = if a then 1 else d;
+    parameter Real d = if b then c else 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CircularIfExp3",
+            description="Circularity in binding expressions of parameters resolved by Evaluate=true on parameters used in test",
+            flatModel="
+fclass TypeTests.CircularIfExp3
+ eval parameter Boolean a = true /* true */;
+ eval parameter Boolean b = true /* true */;
+ parameter Real c = if true then 1 else d;
+ parameter Real d = if true then c else 2;
+end TypeTests.CircularIfExp3;
+")})));
+end CircularIfExp3;
+
+
+model CircularIfExp4
+    parameter Boolean a = true annotation(Evaluate=true);
+    parameter Boolean b = true;
+    parameter Real c = if a and b then 1 else d;
+    parameter Real d = if a and b then c else 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="CircularIfExp4",
+            description="Circularity in binding expressions of parameters not resolved by Evaluate=true on only one of the parameters used in test",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 2497, column 24:
+  Circularity in binding expression of parameter: c = if a and b then 1 else d
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 2498, column 24:
+  Circularity in binding expression of parameter: d = if a and b then c else 2
+")})));
+end CircularIfExp4;
+
+
+model CircularIfExp5
+    parameter Boolean a = false annotation(Evaluate=true);
+    parameter Boolean b = true annotation(Evaluate=true);
+    parameter Real c = if a then 1 else d;
+    parameter Real d = if b then c else 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="CircularIfExp5",
+            description="Circularity in binding expressions of parameters not resolved by Evaluate=true on parameters used in test, when actual value leads to circularity",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 2519, column 24:
+  Circularity in binding expression of parameter: c = if a then 1 else d
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 2520, column 24:
+  Circularity in binding expression of parameter: d = if b then c else 2
+")})));
+end CircularIfExp5;
 
 end TypeTests;
