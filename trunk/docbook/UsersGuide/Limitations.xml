@@ -38,15 +38,15 @@
           <para>The following built-in functions are not
           supported:<informaltable border="1" frame="void" width="25%">
               <tr>
-                <td>delay(...)</td>
+                <td><code>delay(...)</code></td>
               </tr>
 
               <tr>
-                <td>spatialDistribution(..)</td>
+                <td><code>spatialDistribution(...)</code></td>
               </tr>
 
               <tr>
-                <td>terminal()</td>
+                <td><code>terminal()</code></td>
               </tr>
             </informaltable></para>
         </listitem>
@@ -55,39 +55,39 @@
           <para>The following built-in functions are only supported in
           FMUs:<informaltable border="1" frame="void" width="75%">
               <tr>
-                <td>ceil(x)</td>
+                <td><code>ceil(x)</code></td>
 
-                <td>integer(x)</td>
+                <td><code>integer(x)</code></td>
 
-                <td>reinit(x, expr)</td>
+                <td><code>reinit(x, expr)</code></td>
               </tr>
 
               <tr>
-                <td>div(x,y)</td>
+                <td><code>div(x,y)</code></td>
 
-                <td>mod(x,y)</td>
+                <td><code>mod(x,y)</code></td>
 
-                <td>sample(start,interval)</td>
+                <td><code>sample(start,interval)</code></td>
               </tr>
 
               <tr>
-                <td>edge(b)</td>
+                <td><code>edge(b)</code></td>
 
-                <td>pre(y)</td>
+                <td><code>pre(y)</code></td>
 
-                <td>semiLinear(...)</td>
+                <td><code>semiLinear(...)</code></td>
               </tr>
 
               <tr>
-                <td>floor(x)</td>
+                <td><code>floor(x)</code></td>
 
-                <td>rem(x,y)</td>
+                <td><code>rem(x,y)</code></td>
 
-                <td>sign(v)</td>
+                <td><code>sign(v)</code></td>
               </tr>
 
               <tr>
-                <td>initial()</td>
+                <td><code>initial()</code></td>
               </tr>
             </informaltable></para>
         </listitem>
@@ -136,7 +136,8 @@
 
       <itemizedlist>
         <listitem>
-          <para>Source code FMUs can not be generated, only binary FMUs.</para>
+          <para>Source code FMUs can not be generated, only binary
+          FMUs.</para>
         </listitem>
 
         <listitem>
@@ -145,7 +146,21 @@
         </listitem>
 
         <listitem>
-          <para>When generating FMI 2.0 FMUs, the InitialUnknowns tag is not generated.</para>
+          <para>The dependenciesKind attribute in the XML file for FMU 2.0 is
+          not generated.</para>
+        </listitem>
+
+        <listitem>
+          <para>Directional derivatives are known to have limitations in some
+          cases.</para>
+        </listitem>
+
+        <listitem>
+          <para>Asynchronous simulation is not supported.</para>
+        </listitem>
+
+        <listitem>
+          <para>FMU states (set, get and serialize) are not supported.</para>
         </listitem>
       </itemizedlist>
     </listitem>
