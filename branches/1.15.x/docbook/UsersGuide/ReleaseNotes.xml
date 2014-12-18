@@ -42,6 +42,118 @@
           </listitem>
         </itemizedlist></para>
     </section>
+
+    <section>
+      <title>Compiler</title>
+
+      <section>
+        <title>Compliance</title>
+
+        <para>Many bug fixes in the compiler has resulted in greatly increased
+        MSL support. Most or all of the tests and examples for the following
+        MSL sub-libraries now compile and simulate successfully (complete
+        compliance information for MSL can be found on the JModelica.org
+        website, www.jmodelica.org):</para>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Blocks</para>
+            </listitem>
+
+            <listitem>
+              <para>ComplexBlocks</para>
+            </listitem>
+
+            <listitem>
+              <para>Electrical.Analog</para>
+            </listitem>
+
+            <listitem>
+              <para>Electrical.Machines</para>
+            </listitem>
+
+            <listitem>
+              <para>Electrical.MultiPhase</para>
+            </listitem>
+
+            <listitem>
+              <para>Electrical.QuasiStationary</para>
+            </listitem>
+
+            <listitem>
+              <para>Electrical.Spice3</para>
+            </listitem>
+
+            <listitem>
+              <para>Magnetic</para>
+            </listitem>
+
+            <listitem>
+              <para>Mechanics.Rotational</para>
+            </listitem>
+
+            <listitem>
+              <para>Mechanics.Translational</para>
+            </listitem>
+
+            <listitem>
+              <para>Media</para>
+            </listitem>
+
+            <listitem>
+              <para>Thermal</para>
+            </listitem>
+
+            <listitem>
+              <para>Utilities</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>Support for over-constrained initialization systems</title>
+
+        <para>Automatic balancing of over-constrained initial systems is now
+        implemented. This means that the compiler automatically checks the
+        consistency of the initial system and automatically removes redundant
+        initial equations.</para>
+      </section>
+
+      <section>
+        <title>FMU 2.0 export</title>
+
+        <para>Support for export of FMUs according to the the recently
+        released FMI 2.0 specification, both for Model Exchange and
+        Co-Simulation, has been added.</para>
+      </section>
+
+      <section>
+        <title>Improved numerical algorithms in FMU runtime</title>
+
+        <para>Numerous improvements has been made to the FMU runtime code.
+        Specific improvements include solving one-dimensional non-linear
+        systems more robustly.</para>
+      </section>
+
+      <section>
+        <title>CasADi 2.0 support in Optimization</title>
+
+        <para>The CasADi based optimization tool chain has been updated to
+        work with CasADi 1.9 and later (which is not backwards compatible with
+        CasADi 1.8 and earlier). This allows exploiting new CasADi
+        improvements such as bug fixes, pluggable solvers, and improved
+        documentation. The version of CasADi that is included in JModelica.org
+        is now 2.0.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <para>Support for the recently released FMI 2.0 specification has been
+      included in PyFMI. FMUs following FMI 2.0 can now be loaded and
+      simulated just as easily as FMUs following FMI 1.0.</para>
+    </section>
   </section>
 
   <section>
@@ -77,7 +189,7 @@
     </section>
 
     <section>
-      <title>Compilers</title>
+      <title>Compiler</title>
 
       <section>
         <title>Compliance</title>
@@ -146,7 +258,7 @@
       <title>Simulation</title>
 
       <para>Support for import and simulation of 2.0 RC2 FMUs with the Python
-      package PyFMI. </para>
+      package PyFMI.</para>
     </section>
 
     <section>
@@ -730,8 +842,8 @@
         (<literal>JMResultBase</literal>) has two new functions,
         <literal>initial</literal> and <literal>final</literal>, which will
         always return initial and final value of the simulation/optimization
-        as scalar values. See both <xref linkend="ch_simulation"/> and <xref
-        linkend="ch_optimization"/> for plotting code examples.</para>
+        as scalar values. See both <xref linkend="ch_simulation" /> and <xref
+        linkend="ch_optimization" /> for plotting code examples.</para>
       </section>
 
       <section>
@@ -756,7 +868,7 @@ print r.warnings</programlisting>
         <para>FMUs and JMUs created with JModelica.org now produce logs in a
         structured XML format, which can be either parsed using tools in the
         Python module <literal>pyjmi.log</literal> or using general purpose
-        XML tools. See <xref linkend="sec_models_debug_nonlinear"/> for code
+        XML tools. See <xref linkend="sec_models_debug_nonlinear" /> for code
         examples.</para>
       </section>
     </section>
@@ -2248,7 +2360,7 @@ yres = res['y']
                     </m:mfenced>
                   </m:mrow>
 
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
 
                   <m:mtext>dt</m:mtext>
                 </m:mrow>
