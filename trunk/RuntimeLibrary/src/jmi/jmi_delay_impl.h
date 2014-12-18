@@ -29,10 +29,62 @@
 
 #define JMI_DELAY_MAX_INTERPOLATION_POINTS 2 /* Linear interpolation */
 
+/*
+Delay buffers
+=============
+A delay buffer contains a sequence of samples ordered from left to right/first to last,
+each represented by a `jmi_delay_point_t`. Samples may be added and discarded at either end.
+
+There may be an event between two consecutive samples. 
+ * If there is, their time values `t` must be the same.
+ * Otherwise, `t_right` must be > `t_left`
+
+Two samples with no events between them are considered to belong to the same _segment_.
+The segments end at the ends of the buffer, so there is always an implicit event to the left
+of the leftmost sample and to the right of the rightmost sample in the buffer.
+
+
+Sample indices
+--------------
+Samples are identified by their index. At any one point, samples with index
+
+    head_index <= index <= tail_index
+
+are present in the buffer. `head_index` and `tail_index` will change as samples are added and
+removed to the left and right.
+
+Internally, a ring buffer `buf` is used to store the samples, and indices are mapped to
+ring buffer positions using the function `index2pos`. This mapping will change each time
+the ring buffer is reallocated.
+
+
+Representation of events in delay buffers
+-----------------------------------------
+The delay buffer must be able to support two kinds of event-related queries:
+ * Is there en event to the left/right of a given sample?
+ * Where is the first event to the left/right of a given sample?
+The event representation is designed to support these queries.
+
+Each sample has a segment index that encodes the presence of events:
+It increases by noe across events and stays constant otherwise.
+
+The segment index also indexes into the _event buffer_ `event_buf`:
+ * The event with index `segment` is at the left end of the segment
+ * The event with index `segment+1` is at the right end of the segment
+Thus, there must always be one more event in the event buffer than segments among the samples.
+The first and last events always point to the left and right boundaries between present and
+absent samples.
+Event indices are mapped to ring buffer positions in `event_buf` using the `ev2pos` function.
+
+The event buffer stores the index of the sample to the left of the corresponding event.
+Thus, the first event points to the sample just before the first sample, and the last event
+points to the last sample.
+*/
+
 typedef struct {
     jmi_real_t t; /**< \brief Increases between points, except at events, where it remains the same. There may never be two events in a row without an event-free interval in between. */
-    int segment;  /**< \brief Index of the segment this sample belongs to. Increases by one accross events. Indexes into the events buffer. */
     jmi_real_t y;
+    int segment;  /**< \brief Index of the segment this sample belongs to. Increases by one accross events. Indexes into the events buffer. */
 } jmi_delay_point_t;
 
 /** \brief Represents the history of a signal. */
