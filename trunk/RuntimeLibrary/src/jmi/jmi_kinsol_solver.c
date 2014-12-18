@@ -1168,12 +1168,27 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         realtype** jac = solver->J->cols;
         if(N > 1) {
             int i,j;
-            realtype * fscale_data = N_VGetArrayPointer(solver->kin_f_scale);    
+            realtype * fscale_data = N_VGetArrayPointer(solver->kin_f_scale);
+            realtype gnorm;/*gradient norm*/
 
             for (i=0;i<N;i++){
                 xd[i] = 0;
                 for (j=0;j<N;j++) xd[i] += jac[i][j]*bd[j]*fscale_data[j]*fscale_data[j];
             }
+
+            gnorm = N_VWL2Norm(x, kin_mem->kin_uscale);
+            if(gnorm < solver->kin_stol) {
+                /*near zero  gradient */
+                realtype* uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+                jmi_log_node(block->log, logWarning, "ZeroGradient", 
+                    "Singular point with near-zero gradient (<norm:%g>) detected in <block: %s>.",
+                        gnorm, block->label);
+                       for (i=0;i<N;i++){
+                            xd[i] = 0;
+                            for (j=0;j<N;j++) xd[i] += bd[j]*fscale_data[j]*fscale_data[j]/uscale_data[j];
+                        }
+            }
+
             /* Back-solve and get solution in x */
             trans = 'N'; /* No transposition */
             i = 1;
