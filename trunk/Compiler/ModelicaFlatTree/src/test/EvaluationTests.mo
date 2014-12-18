@@ -3708,4 +3708,161 @@ end EvaluationTests.Partial.IfStmt15;
     
 end Partial;
 
+model AssigningCached1
+    record R
+        Real a;
+    end R;
+    
+    function f
+        input R x;
+        output R y = x;
+      algorithm
+        y.a := 2;
+    end f;
+    
+    constant R y1 = R(1);
+    constant R y2 = f(y1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="AssigningCached1",
+            description="",
+            flatModel="
+fclass EvaluationTests.AssigningCached1
+ constant EvaluationTests.AssigningCached1.R y1 = EvaluationTests.AssigningCached1.R(1);
+ constant EvaluationTests.AssigningCached1.R y2 = EvaluationTests.AssigningCached1.R(2);
+
+public
+ function EvaluationTests.AssigningCached1.f
+  input EvaluationTests.AssigningCached1.R x;
+  output EvaluationTests.AssigningCached1.R y := x;
+ algorithm
+  y.a := 2;
+  return;
+ end EvaluationTests.AssigningCached1.f;
+
+ record EvaluationTests.AssigningCached1.R
+  Real a;
+ end EvaluationTests.AssigningCached1.R;
+
+end EvaluationTests.AssigningCached1;
+")})));
+end AssigningCached1;
+
+model AssigningCached2
+    function f
+        input Real[:] x;
+        output Real[:] y = x;
+      algorithm
+        y[2] := 3;
+    end f;
+    constant Real[2] y1 = {1,2};
+    constant Real[2] y2 = f(y1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="AssigningCached2",
+            description="",
+            flatModel="
+fclass EvaluationTests.AssigningCached2
+ constant Real y1[2] = {1, 2};
+ constant Real y2[2] = {1, 3};
+
+public
+ function EvaluationTests.AssigningCached2.f
+  input Real[:] x;
+  output Real[size(x, 1)] y := x;
+ algorithm
+  y[2] := 3;
+  return;
+ end EvaluationTests.AssigningCached2.f;
+
+end EvaluationTests.AssigningCached2;
+")})));
+end AssigningCached2;
+
+model AssigningCached3
+    record R
+        Real[2] a;
+    end R;
+    function f
+        input Real[2] x;
+        output R y = R(x);
+      algorithm
+        y.a[2] := 3;
+    end f;
+    constant Real[2] y1 = {1,2};
+    constant R y2 = f(y1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="AssigningCached3",
+            description="",
+            flatModel="
+fclass EvaluationTests.AssigningCached3
+ constant Real y1[2] = {1, 2};
+ constant EvaluationTests.AssigningCached3.R y2 = EvaluationTests.AssigningCached3.R({1, 3});
+
+public
+ function EvaluationTests.AssigningCached3.f
+  input Real[2] x;
+  output EvaluationTests.AssigningCached3.R y := EvaluationTests.AssigningCached3.R(x);
+ algorithm
+  y.a[2] := 3;
+  return;
+ end EvaluationTests.AssigningCached3.f;
+
+ record EvaluationTests.AssigningCached3.R
+  Real a[2];
+ end EvaluationTests.AssigningCached3.R;
+
+end EvaluationTests.AssigningCached3;
+")})));
+end AssigningCached3;
+
+model AssigningCached4
+    record R
+        Real[3] a;
+    end R;
+    function f
+        input Real[3] x;
+        Real[size(x,1)] t;
+        output R y1;
+      algorithm
+        t := x;
+        y1 := R(t);
+        t[1] := 0;
+    end f;
+    constant Real[3] y1 = {1,2,3};
+    constant R y2 = f(y1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="AssigningCached4",
+            description="",
+            flatModel="
+fclass EvaluationTests.AssigningCached4
+ constant Real y1[3] = {1, 2, 3};
+ constant EvaluationTests.AssigningCached4.R y2 = EvaluationTests.AssigningCached4.R({1, 2, 3});
+
+public
+ function EvaluationTests.AssigningCached4.f
+  input Real[3] x;
+  Real[3] t;
+  output EvaluationTests.AssigningCached4.R y1;
+ algorithm
+  t := x;
+  y1 := EvaluationTests.AssigningCached4.R(t);
+  t[1] := 0;
+  return;
+ end EvaluationTests.AssigningCached4.f;
+
+ record EvaluationTests.AssigningCached4.R
+  Real a[3];
+ end EvaluationTests.AssigningCached4.R;
+
+end EvaluationTests.AssigningCached4;
+")})));
+end AssigningCached4;
+
 end EvaluationTests;

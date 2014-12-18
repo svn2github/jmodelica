@@ -1472,8 +1472,8 @@ aspect Arrays {
 				indexMap.put(fi.uniqueIterExpName(), fi.evaluationValue().buildLiteral());
             fillSubset(arr, i, indexMap, scalarize);
 		}
-		for (CommonForIndex fi : forIndices) 
-			fi.setEvaluationValue(null);
+        for (CommonForIndex fi : forIndices)
+            fi.clearEvaluationValue();
 		return arr;
 	}
 	

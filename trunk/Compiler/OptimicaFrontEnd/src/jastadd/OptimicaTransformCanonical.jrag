@@ -207,8 +207,8 @@ aspect OptimicaTransformCanonical {
 			for (FConstraint c : getFConstraints()) 
 				c.scalarize(constr, eqns, vars, myIndexMap);
 		}
-		for (FForIndex fi : getFForIndexs()) 
-			fi.setEvaluationValue(null);
+        for (CommonForIndex fi : getFForIndexs())
+            fi.clearEvaluationValue();
 	}
 	
 	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 

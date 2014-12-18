@@ -1386,7 +1386,7 @@ aspect Scalarization {
                 vars = null; // Only add variable in the first iteration
             }
             for (CommonForIndex fi : getForIndexs()) 
-                fi.setEvaluationValue(null);
+                fi.clearEvaluationValue();
         } else {
             super.createArrayTemporaries(clauses, vars, indexMap, names);
         }
@@ -2136,8 +2136,8 @@ aspect Scalarization {
 				getForStmts().flushAllRecursive(); // Throw calculated sizes/arrays
 				getForStmts().flushTempVarNames();
 			}
-			for (FForIndex fi : indexList) 
-				fi.setEvaluationValue(null);
+            for (FForIndex fi : indexList)
+                fi.clearEvaluationValue();
 		}
 		return false;
 	}
@@ -2543,8 +2543,8 @@ aspect Scalarization {
 			getFAbstractEquations().flushAllRecursive(); // Throw calculated sizes/arrays
 			getFAbstractEquations().flushTempVarNames();
 		}
-		for (FForIndex fi : getFForIndexs()) 
-			fi.setEvaluationValue(null);
+        for (FForIndex fi : getFForIndexs())
+            fi.clearEvaluationValue();
 	}
 	
 	public void FIfWhenElseEquation.scalarize(List<FAbstractEquation> eqns, 
