@@ -1373,7 +1373,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 scale_ptr[i] = bsop->min_residual_scaling_factor;
-                solver->using_max_min_scaling_flag = 1; /* Using minimum scaling */
+               /* Likely not a problem: solver->using_max_min_scaling_flag = 1; /* Using minimum scaling */
                 jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
                              "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
             }
