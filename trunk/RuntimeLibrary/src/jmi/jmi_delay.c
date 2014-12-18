@@ -407,18 +407,10 @@ static int _reallocate(void **buf, int *capacity, int needed_capacity, int head_
     *buf = new_buf;
     *capacity = new_capacity;
 
-    return 0;    
-}
-
-/** \brief Make sure that the buffer has space for at least one more sample. May reallocate the buffer and move samples in it, but preserves the index of each. */
-static int reserve_one_sample(jmi_delaybuffer_t *buffer) {
-    if (buffer->capacity <= buffer->size+1) {
-        return _reallocate((void **)&(buffer->buf), &(buffer->capacity), buffer->size+1, buffer->head_index, buffer->size, sizeof(jmi_delay_point_t));
-    }
     return 0;
 }
 
-/** \brief Translate from sample index to position `buffer->buf`. `index` should be within the buffer, e.g. `0 <= index - buffer->head_index < buffer->size`. */
+/** \brief Translate from sample index to position in `buffer->buf`. `index` should be within the buffer, e.g. `head_index <= index <= tail_index`. */
 static int index2pos(jmi_delaybuffer_t *buffer, int index) { return index & (buffer->capacity - 1); }
 
 int get_head_index(jmi_delaybuffer_t *buffer) { return buffer->head_index; }
@@ -426,82 +418,84 @@ int get_tail_index(jmi_delaybuffer_t *buffer) { return buffer->head_index + buff
 int get_head_pos(jmi_delaybuffer_t *buffer) { return index2pos(buffer, get_head_index(buffer)); }
 int get_tail_pos(jmi_delaybuffer_t *buffer) { return index2pos(buffer, get_tail_index(buffer)); }
 
+/** \brief Translate from segment index to position in `buffer->event_buf`. `segment` should be within the buffer, e.g. `buf[head_index].segment <= segment <= buf[tail_index].segment + 1`. */
+static int seg2pos(jmi_delaybuffer_t *buffer, int segment) { return segment & (buffer->event_capacity - 1); }
+
+
+/* Assumes that index is within the buffer */
 static jmi_boolean event_left_of(jmi_delaybuffer_t *buffer, int index) {
-    return buffer->buf[index2pos(buffer, index)].left == index;
+    if (index <= get_head_index(buffer)) return TRUE;    
+    return buffer->buf[index2pos(buffer, index)].segment != buffer->buf[index2pos(buffer, index-1)].segment;
 }
+/* Assumes that index is within the buffer */
 static jmi_boolean event_right_of(jmi_delaybuffer_t *buffer, int index) {
-    return buffer->buf[index2pos(buffer, index)].right == index;
+    if (index >= get_tail_index(buffer)) return TRUE;    
+    return buffer->buf[index2pos(buffer, index)].segment != buffer->buf[index2pos(buffer, index+1)].segment;
+}
+
+/** \brief Make sure that the buffer has space for at least one more sample. May reallocate the buffer and move samples in it, but preserves the index of each. */
+static int reserve_one_sample(jmi_delaybuffer_t *buffer) {
+    jmi_delay_point_t *buf = buffer->buf;
+    int head_segment = buf[get_head_pos(buffer)].segment;
+    int num_events = buffer->size == 0 ? 2 : 2 + buf[get_tail_pos(buffer)].segment - head_segment;
+
+    if (buffer->event_capacity <= num_events+1) {
+        if (_reallocate((void **)&(buffer->event_buf), &(buffer->event_capacity), num_events+1, head_segment, num_events, sizeof(int)) < 0) return -1;
+    }
+    
+    if (buffer->capacity <= buffer->size+1) {
+        if (_reallocate((void **)&(buffer->buf), &(buffer->capacity), buffer->size+1, buffer->head_index, buffer->size, sizeof(jmi_delay_point_t)) < 0) return -1;
+    }    
+
+    return 0;
 }
 
 /** \brief Discard the rightmost sample in the buffer. The buffer must not be empty. */
 static void discard_right(jmi_delaybuffer_t *buffer) {
     buffer->size--;
-    if (buffer->size > 0) {
-        /* Don't link beyond buffer */
-        int tail_index = get_tail_index(buffer);
-        buffer->buf[index2pos(buffer, tail_index)].right = tail_index;
-    }
 }
 
 /** \brief Discard the leftmost sample in the buffer. The buffer must not be empty. */
 static void discard_left(jmi_delaybuffer_t *buffer) {
     buffer->size--;
     buffer->head_index++;
-    if (buffer->size > 0) {
-        /* Don't link beyond buffer */
-        buffer->buf[get_head_pos(buffer)].left = get_head_index(buffer);
-    }
 }
 
 /** \brief Put the first sample into the buffer and update event info. Space for the new sample must already have been reserved, buffer must be empty. */
 static void _put_first(jmi_delaybuffer_t *buffer) {
+    const int segment = 0;
     jmi_delay_point_t *buf = buffer->buf;
 
     buffer->size = 1;
 
-    buf[get_head_pos(buffer)].left = buf[get_head_pos(buffer)].right = get_head_index(buffer);
+    buf[get_head_pos(buffer)].segment = segment;
+    buffer->event_buf[seg2pos(buffer, segment)]   = get_head_index(buffer) - 1; /* the event to the left of this sample */
+    buffer->event_buf[seg2pos(buffer, segment+1)] = get_tail_index(buffer);     /* the event to the right of this sample */
 }
 
 /** \brief Grow the buffer one sample the left and update event info. Space for the new sample must already have been reserved, buffer must not be empty. */
 static void _put_left(jmi_delaybuffer_t *buffer, jmi_boolean event_occurred) {
     jmi_delay_point_t *buf = buffer->buf;
-    int last_head_pos = get_head_pos(buffer);
+    int segment = buf[get_head_pos(buffer)].segment;
 
     buffer->size++;
-    buffer->head_index--;
-    
-    if (event_occurred) {
-        buf[get_head_pos(buffer)].right = get_head_index(buffer);
-        buf[last_head_pos       ].left  = get_head_index(buffer)+1;
-    } else {
-        buf[get_head_pos(buffer)].right = get_head_index(buffer)+1;
-        buf[last_head_pos       ].left  = get_head_index(buffer);
-    }
-    /* Don't link beyond buffer */
-    buf[get_head_pos(buffer)].left = get_head_index(buffer);
+    buffer->head_index--;    
+    if (event_occurred) segment--;
+
+    buf[get_head_pos(buffer)].segment = segment;
+    buffer->event_buf[seg2pos(buffer, segment)] = get_head_index(buffer) - 1; /* the event to the left of this sample */
 }
 
 /** \brief Grow the buffer one sample the left and update event info. Space for the new sample must already have been reserved, buffer must not be empty. */
 static void _put_right(jmi_delaybuffer_t *buffer, jmi_boolean event_occurred) {
     jmi_delay_point_t *buf = buffer->buf;
-    int lpos, rpos, left_index, right_index;
+    int segment = buf[get_tail_pos(buffer)].segment;
 
     buffer->size++;
+    if (event_occurred) segment++;
 
-    right_index = get_tail_index(buffer);
-    left_index  = right_index - 1;
-    lpos = index2pos(buffer, left_index);
-    rpos = index2pos(buffer, right_index);
-
-    if (event_occurred) {
-        buf[lpos].right = left_index;
-        buf[rpos].left  = right_index;
-    } else {
-        buf[lpos].right = right_index;
-        buf[rpos].left  = left_index;
-    }
-    /* Don't link beyond buffer */
-    buf[rpos].right = right_index;
+    buf[get_tail_pos(buffer)].segment = segment;
+    buffer->event_buf[seg2pos(buffer, segment+1)] = get_tail_index(buffer); /* the event to the right of this sample */
 }
 
 /* Note: jmi_delaybuffer_evaluate may reverse the effects of put by restoring the value of buffer->size from before the invocation. */
@@ -577,6 +571,11 @@ static int jmi_delaybuffer_new(jmi_t *jmi, jmi_delaybuffer_t *buffer) {
     buffer->capacity = BUFFER_INITIAL_CAPACITY;
     buffer->buf = (jmi_delay_point_t *)calloc(buffer->capacity, sizeof(jmi_delay_point_t));
     if (buffer->buf == NULL) jmi_internal_error(jmi, "Unable to allocate space for delay buffer");
+    
+    buffer->event_capacity = BUFFER_INITIAL_CAPACITY;
+    buffer->event_buf = (int *)calloc(buffer->event_capacity, sizeof(int));
+    if (buffer->event_buf == NULL) jmi_internal_error(jmi, "Unable to allocate space for delay buffer");
+
     clear(buffer, 0); /* sets max_delay to zero; will be set to correct value in jmi_delaybuffer_init */
     return 0;
 }
@@ -754,63 +753,19 @@ static int jmi_delaybuffer_record_sample_left(jmi_t *jmi, jmi_delaybuffer_t *buf
     return 0;
 }
 
-static int _get_left(jmi_delaybuffer_t *buffer, int index) {
-    int left = buffer->buf[index2pos(buffer, index)].left;
-    int head_index = get_head_index(buffer);
-    return left >= head_index ? left : head_index;
-}
-
-static int _get_right(jmi_delaybuffer_t *buffer, int index) {
-    int right = buffer->buf[index2pos(buffer, index)].right;
-    int tail_index = get_tail_index(buffer);
-    return right <= tail_index ? right : tail_index;
-}
-
 static jmi_real_t jmi_delaybuffer_next_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position) {
     jmi_delay_point_t *buf = buffer->buf;
-    int last_index = position->curr_interval; /* Start from the left point; there may be an event just to the right of it. */
-    int index = _get_right(buffer, last_index);
-    if (index != last_index) {
-        int final_index;
-        int orig_index = last_index;
-        /* Find the fixed point */
-        while (index != last_index) {
-            last_index = index;
-            index = _get_right(buffer, index);
-        }
-        /* Move all intermediate pointers to the new fixed point */
-        final_index = index;
-        index = orig_index;
-        while (index != final_index) {
-            int pos = index2pos(buffer, index);
-            index = _get_right(buffer, index);
-            buf[pos].right = final_index;
-        }
-    }
+    int right_event = buf[index2pos(buffer, position->curr_interval)].segment + 1;
+    int index = buffer->event_buf[seg2pos(buffer, right_event)];
+
     if (index >= get_tail_index(buffer)) return JMI_INF;
     else return buf[index2pos(buffer, index)].t;
 }
 static jmi_real_t jmi_delaybuffer_prev_event_time(jmi_delaybuffer_t *buffer, jmi_delay_position_t *position) {
     jmi_delay_point_t *buf = buffer->buf;
-    int last_index = position->curr_interval;
-    int index = _get_left(buffer, last_index);
-    if (index != last_index) {
-        int final_index;
-        int orig_index = last_index;
-        /* Find the fixed point */
-        while (index != last_index) {
-            last_index = index;
-            index = _get_left(buffer, index);
-        }
-        /* Move all intermediate pointers to the new fixed point */
-        final_index = index;
-        index = orig_index;
-        while (index != final_index) {
-            int pos = index2pos(buffer, index);
-            index = _get_left(buffer, index);
-            buf[pos].left = final_index;
-        }
-    }
+    int left_event = buf[index2pos(buffer, position->curr_interval)].segment;
+    int index = buffer->event_buf[seg2pos(buffer, left_event)] + 1;
+    
     if (index <= get_head_index(buffer)) return -JMI_INF;
     else return buf[index2pos(buffer, index)].t;
 }

@@ -31,8 +31,7 @@
 
 typedef struct {
     jmi_real_t t; /**< \brief Increases between points, except at events, where it remains the same. There may never be two events in a row without an event-free interval in between. */
-    int left;     /**< \brief Index of a point in the same segment, before this one. Iff it points to the same point, there is an event to the left. Must point inside the buffer. */
-    int right;    /**< \brief Index of a point in the same segment, after this one. Iff it points to the same point, there is an event to the right. Must point inside the buffer. */
+    int segment;  /**< \brief Index of the segment this sample belongs to. Increases by one accross events. Indexes into the events buffer. */
     jmi_real_t y;
 } jmi_delay_point_t;
 
@@ -42,6 +41,10 @@ typedef struct {
     int size;        /**< \brief Number of used points in buf. */
     int head_index;  /**< \brief Logical index associated with the head position. */
     jmi_delay_point_t *buf; /**< \brief Buffer of history points. */
+
+    int event_capacity; /**< \brief Number of allocated points in event_buf. Must be a power of two! This simplifies ring buffer management a lot. */
+    int *event_buf; /**< brief Indices to the left sample of each event. */
+
     jmi_real_t max_delay;   /**< \brief Maximum delay relative to the last recorded sample that the buffer will be queried for. */
 } jmi_delaybuffer_t;
 
