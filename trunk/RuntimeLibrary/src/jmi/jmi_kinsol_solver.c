@@ -959,7 +959,7 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
 
     for (i=0;i<N;i++) {
         /* Add the regularization parameter on the diagonal.   */        
-        JTJ_c[i][i] = solver->last_xnorm * uscale_data[i]*uscale_data[i];
+        JTJ_c[i][i] = uscale_data[i]*uscale_data[i];
         /*Calculate value at RTR(i,i) */
         for (k=0;k<N;k++) JTJ_c[i][i] += jac[i][k]*jac[i][k]*fscale_data[k]*fscale_data[k];
         for (j=i+1;j<N;j++){
@@ -1369,13 +1369,13 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 scale_ptr[i] = bsop->max_residual_scaling_factor; /* Singular Jacobian? */
                 solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
                 jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
-                             "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
+                             "<equation: %I> Consider rescaling in the model.", block->label, i);
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 scale_ptr[i] = bsop->min_residual_scaling_factor;
                /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
                 jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
-                             "<equation: %I> Consider rescaling in the model or tighter tolerance.", block->label, i);
+                             "<equation: %I> Consider rescaling in the model.", block->label, i);
             }
             else
                 scale_ptr[i] = 1/scale_ptr[i];
@@ -1393,7 +1393,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         }
     }
     
-    if (solver->using_max_min_scaling_flag) {
+    if (solver->using_max_min_scaling_flag && !solver->J_is_singular_flag) {
         realtype cond = jmi_calculate_jacobian_condition_number(block);
 
         jmi_log_node(block->log, logInfo, "Regularization",
