@@ -29,7 +29,7 @@ class MPC(object):
     updated with estimates of the states (through measurements).  
     """
 
-    def __init__(self, op, options, sample_period, horizon, constr_viol_costs = {},
+    def __init__(self, op, options, sample_period, horizon, constr_viol_costs={},
                  noise_seed=None, use_shift=True, create_comp_result=True ):
         """
         Creates the NLP that corresponds to the op we want to solve with MPC.
@@ -96,7 +96,6 @@ class MPC(object):
         self._sample_nbr = 0
         self._mpc_result_file_name = op.getIdentifier()+'_mpc_result.txt'
         self._start_index = 0
-        self.test_warm_start = 0
         self.inittraj_set = False
         
         if noise_seed:
@@ -111,7 +110,8 @@ class MPC(object):
         # Soften variable bounds and add u0-parameters for blockingfactors 
         self.extra_param = []
         self.original_model_inputs = self.op.getVariables(self.op.REAL_INPUT)
-        self._soften_constraints()
+        if self.constr_viol_costs != {}:
+            self._soften_constraints()
         self._add_u0()
 
         # Transcribe the DOP to a nlp
@@ -156,7 +156,8 @@ class MPC(object):
                     var_startTime = casadi.MX.sym("%s(startTime)" %key)
                     st = self.op.getVariable('startTime').getVar()
                     variable = self.op.getVariable(key)
-                    timedVar_startTime = ci.TimedVariable(self.op, var_startTime, variable, st)
+                    timedVar_startTime = ci.TimedVariable(self.op, 
+                                                   var_startTime, variable, st)
                     self.op.addTimedVariable(timedVar_startTime)
                 
                 # Create new variable 
@@ -166,7 +167,8 @@ class MPC(object):
                 self.op.set("%s_du_quad_pen" %key, 0)
                 self.extra_param.append("%s_du_quad_pen" %key)
                 
-                extra_obj = du_quad_pen_par*(var_startTime-var_par)*(var_startTime-var_par)
+                extra_obj = du_quad_pen_par*(var_startTime-var_par)*\
+                                                        (var_startTime-var_par)
                 self.op.setObjective(self.op.getObjective() + extra_obj)
             
             # Save all pointconstraints
@@ -194,14 +196,15 @@ class MPC(object):
                     var_startTime = casadi.MX.sym("%s(startTime)" %key)
                     st = self.op.getVariable('startTime').getVar()
                     variable = self.op.getVariable(key)
-                    timedVar_startTime = ci.TimedVariable(self.op, var_startTime, variable, st)
+                    timedVar_startTime = ci.TimedVariable(self.op, 
+                                                   var_startTime, variable, st)
                     self.op.addTimedVariable(timedVar_startTime)
                 
                 # Create new parameter for pointconstraint bound
                 du_bounds_par= casadi.MX.sym("%s_du_bounds" %key)
                 du_bounds = ci.RealVariable(self.op, du_bounds_par, 2, 1)
                 self.op.addVariable(du_bounds)
-                self.op.set("%s_du_bounds" %key, 1e50) #BLEV LEDSEN MED INF
+                self.op.set("%s_du_bounds" %key, 1e50) 
                 self.extra_param.append("%s_du_bounds" %key)
 
                 # Create new pointconstraints
@@ -230,7 +233,8 @@ class MPC(object):
         tv = self.op.getTimedVariables()
         for var in tv:
             if var.getBaseVariable() == self.op.getVariable(name):
-                if var.getTimePoint() == self.op.getVariable('startTime').getVar():
+                if var.getTimePoint() ==\
+                                    self.op.getVariable('startTime').getVar():
                     return var.getVar()
         return None
 
@@ -258,12 +262,27 @@ class MPC(object):
             slack_var= casadi.MX.sym("%s_slack" %name)
             slack = ci.RealVariable(self.op, slack_var, 0, 3) 
             slack.setMin(0)
-            slack.setNominal(0.0001*var.getNominal()) 
+            nominal = var.getNominal()
+            
+            # Check if nominal value is symbolic and find the value
+            if nominal.isSymbolic():
+                nominal = self.op.get(nominal.getName())
+            else:
+                nominal = nominal.getValue()
+                
+            if nominal == 0:
+                raise Warning("Nominal value of base variable is 0. Setting \
+                                nominal for slack variable to 1.")
+                slack.setNominal(1) 
+            else:
+                slack.setNominal(0.0001*N.abs(nominal))
+                 
             self.op.addVariable(slack)
             
             # Add to Objective Integrand 
             oi = self.op.getObjectiveIntegrand()
-            self.op.setObjectiveIntegrand(oi+self.constr_viol_costs[name]*slack_var)
+            self.op.setObjectiveIntegrand(oi+\
+                                        self.constr_viol_costs[name]*slack_var)
             
             var_min = self.op.get_attr(var, "min")
             var_max = self.op.get_attr(var, "max")
@@ -288,6 +307,7 @@ class MPC(object):
         LocalDAECollocator: op.collocator        
         """
         self._set_blocking_options()
+        self._calculate_nbr_values_sample()
         self.extra_init = time.clock() - self._startTime
         self.alg = LocalDAECollocationAlg(self.op, self.options)
         self.collocator = self.alg.nlp
@@ -303,13 +323,27 @@ class MPC(object):
             bf_value = n_e/self.horizon
             bl_list = [bf_value]*self.horizon
             factors = {}
-            for inp in self.original_model_inputs:
+            print("Default blocking factors have been applied to all inputs.")
+            for inp in self.original_model_inputs:  
                 factors[inp.getName()] = bl_list
             bf = BlockingFactors(factors = factors)
             self.options['blocking_factors'] = bf
-
-        self._nbr_values_sample = self.options['n_e']/self.horizon*\
-                                  self.options['n_cp']+1
+            
+    def _calculate_nbr_values_sample(self):
+        """
+        Calculates number of values per sample.
+        """
+        if self.options['n_e']%self.horizon != 0:
+            raise Exception("Sample points must coinside with mesh points.")
+        
+        if self.options['result_mode'] is 'collocation_points':
+            self._nbr_values_sample = self.options['n_e']/self.horizon*\
+                self.options['n_cp']+1
+        elif self.options['result_mode'] is 'mesh_points':
+            self._nbr_values_sample = self.options['n_e']/self.horizon+1
+        else: 
+            self._nbr_values_sample = self.options['n_e']/self.horizon*\
+                                        self.options['n_eval_points']
 
     def _get_states_and_initial_value_parameters(self):
         """
@@ -379,12 +413,14 @@ class MPC(object):
         Extracts the results for the current sample_period from the result file.
         """
 
-        if self.status == 'Solve_Succeeded' or self.status == 'Solved_To_Acceptable_Level':
+        if self.status == 'Solve_Succeeded' or self.status ==\
+                                                'Solved_To_Acceptable_Level':
             start_val = 0
             stop_val = self._nbr_values_sample
         else:
             start_val = self.consec_fails*(self._nbr_values_sample-1)
-            stop_val = (self.consec_fails+1)*self._nbr_values_sample-self.consec_fails
+            stop_val = (self.consec_fails+1)*self._nbr_values_sample-\
+                                                            self.consec_fails
    
         t_opt = self.result[0][start_val:stop_val]
         dx_opt = self.result[1][start_val:stop_val][:]
@@ -416,7 +452,8 @@ class MPC(object):
         """
         sol_time = self.alg.times['sol']
         update_time = self.alg.times['init']
-        if self.status == 'Solve_Succeeded' or self.status == 'Solved_To_Acceptable_Level':
+        if self.status == 'Solve_Succeeded' or self.status ==\
+                                                'Solved_To_Acceptable_Level':
             post_time = self.alg.times['post_processing']
         else:
             post_time = 0
@@ -443,8 +480,12 @@ class MPC(object):
 
         for inp in self.original_model_inputs:
             names.append(inp.getName())
-            inputs.append(self._result_object[inp.getName()][(self._nbr_values_sample-1)*self.consec_fails+1])
-            self._opt_input[inp.getName()] = self._result_object[inp.getName()][(self._nbr_values_sample-1)*self.consec_fails+1]
+            inputs.append(self._result_object[inp.getName()]\
+                            [(self._nbr_values_sample-1)*self.consec_fails+1])
+            self._opt_input[inp.getName()] =\
+                                        self._result_object[inp.getName()]\
+                                            [(self._nbr_values_sample-1)*\
+                                            self.consec_fails+1]
         def input_function(t):
             return N.array(inputs)
 
@@ -476,7 +517,8 @@ class MPC(object):
         guess for the next optimation.
         """
         xx_result = {}
-        if self.status == 'Solve_Succeeded' or self.status == 'Solved_To_Acceptable_Level': 
+        if self.status == 'Solve_Succeeded' or self.status ==\
+                                                'Solved_To_Acceptable_Level': 
             xx_result = self.collocator.primal_opt
         else:
             xx_result = self.shifted_xx
@@ -556,7 +598,6 @@ class MPC(object):
         start_init_u = gsi[split_map['unelim_u']] + (n_cp-1)*n_cont_u
         end_init_u = start_init_u + n_cont_u
 
-
         new_xx = xx_result[start_init_u:end_init_u]
         shifted_xx = N.concatenate((shifted_xx, new_xx))
 
@@ -612,7 +653,8 @@ class MPC(object):
         # Updates states
         for key in state_dict.keys():
             if not self.index.has_key(key):
-                raise Exception("You are not allowed to change %s" %key)
+                raise Exception("You are not allowed to change %s using this\
+                                method. Use MPC.set()-method instead." %key)
             else:
                 self.collocator._par_vals[self.index[key]] = state_dict[key]
 
@@ -629,7 +671,8 @@ class MPC(object):
             self.collocator.time = N.array(coll_time)
     
             for key in [var for var in self.extra_param if var.endswith('_0')]:
-                self.collocator._par_vals[self.index[key]] = self._opt_input[key.split('_0')[0]]
+                self.collocator._par_vals[self.index[key]] =\
+                                            self._opt_input[key.split('_0')[0]]
 
     def sample(self):
         """
@@ -657,30 +700,43 @@ class MPC(object):
             self.collocator._init_and_set_solver_inputs()
             
             # Change w from blocking factors
-            for key in [var for var in self.extra_param if var.endswith('_du_quad_pen')]:
-                self.collocator._par_vals[self.index[key]] = self.options['blocking_factors'].du_quad_pen[key.split('_du_quad_pen')[0]]
+            for key in [var for var in self.extra_param if 
+                                                var.endswith('_du_quad_pen')]:
+                self.collocator._par_vals[self.index[key]] =\
+                                            self.options['blocking_factors'].\
+                                            du_quad_pen[key.split\
+                                            ('_du_quad_pen')[0]]
                 
-            for key in [var for var in self.extra_param if var.endswith('_du_bounds')]:
-                self.collocator._par_vals[self.index[key]] = self.options['blocking_factors'].du_bounds[key.split('_du_bounds')[0]]
+            for key in [var for var in self.extra_param if \
+                                                var.endswith('_du_bounds')]:
+                self.collocator._par_vals[self.index[key]] =\
+                                            self.options['blocking_factors'].\
+                                            du_bounds[key.split\
+                                            ('_du_bounds')[0]]
      
         # Solve the NLP
         self.alg.solve()
         
         # Check return status
         self.status = self.collocator.solver_object.getStat('return_status')
-        if self.status == 'Solve_Succeeded' or self.status == 'Solved_To_Acceptable_Level': 
+        if self.status == 'Solve_Succeeded' or self.status ==\
+                                                'Solved_To_Acceptable_Level': 
             self._result_object = self.alg.get_result()
             self.result = self.collocator.get_result()
             self.consec_fails = 0
         else:
+            if self._sample_nbr == 1:
+                raise Exception("The solver was unable to find a"+\
+                                "feasible solution.")
             self.consec_fails += 1
             if self.consec_fails >= self.options['n_e']:
-                return None
+               return None
                 #THROW SOMETHING CAUSE THIS AINT WORKING!
         
         self.t0_post = time.clock()
 
-        self.iterations.append(self.collocator.solver_object.getStat('iter_count'))
+        self.iterations.append(self.collocator.solver_object.getStat\
+                                                                ('iter_count'))
         self.return_status.append(self.status)
         
         # Get the results and extract the results for this sample
@@ -718,7 +774,6 @@ class MPC(object):
             val = N.abs(states["_start_"+name])
             random = N.random.normal(mean, st_dev*val, 1)
             states["_start_"+name] += random
-
         return states
 
     def get_results_this_sample(self, full_result=False):
@@ -734,6 +789,7 @@ class MPC(object):
                 the result-object and returned. Note: The returned data is not
                 a LocalDAECollocationAlgResult-object.
                 Default: False
+                
         """
 
         if full_result:
@@ -746,7 +802,6 @@ class MPC(object):
         Creates and returns the patched together resultfile from all 
         optimizations.
         """
-        
         # Convert the complete restults lists to arrays
         self.res_t = N.array(self.res_t).reshape([-1, 1])
         self.res_dx = N.array(self.res_dx).reshape([-1, len(self.res_dx[0])])
@@ -796,7 +851,7 @@ class MPC(object):
 
         self.inittraj_set = True
 
-    def set(self, names, values):
+    def set(self, name, value):
         """
         Sets the specified parameters in names to the value in values.
         
@@ -805,21 +860,31 @@ class MPC(object):
             names --
                 List of parameter names whose values are to be changed. 
                 
-                Type: [string] or string
+                Type: [string] or string 
                 
             values --
                 Corresponding new values for the parameters.
                 
                 Type: [float] or float
         """
-        
-        if isinstance(names, list):
-            for name in names:   
-                index = self.collocator.var_indices[name]
-                self.collocator._par_vals[index] = values.pop(0)
+        try:
+            iterator = iter(value)
+        except TypeError:
+            self._set(name, value)
         else:
-            index = self.collocator.var_indices[names]
-            self.collocator._par_vals[index] = values
+            if len(name) != len(value):
+                raise Exception('Must specify the same number of variables" +\
+                                "and values')
+            for i, val in enumerate(value):
+                self._set(name[i], val)
+    
+    def _set(self, name, value):
+        """
+        Changes the value of specified parameter in the collocators _par_vals 
+        vector.
+        """
+        index = self.collocator.var_indices[name]
+        self.collocator._par_vals[index] = value
 
     def print_solver_stats(self):
         """ 

@@ -1591,7 +1591,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.xx = xx
         if self.named_vars:
             self.named_xx = casadi.vertcat(named_xx)
-             
+            
         self.global_split_indices = global_split_indices
         self.n_xx = n_xx
         self.var_map = var_map
@@ -3060,14 +3060,23 @@ class LocalDAECollocator(CasadiCollocator):
         c_e.append(dae_t0_constr)
 
         if self.blocking_factors is None:
+            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']]
+        else:
+            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u'] 
+                   if not self.blocking_factors.factors.has_key(inp.getName())]
+
+        for name in inp_list:
             # Evaluate u_1_0 based on polynomial u_1
             u_1_0 = 0
+            input_index = self.name_map[name][0]
+
             for k in xrange(1, self.n_cp + 1):
                 u_1_0 += (self.pol.eval_basis(k, 0, False) *
-                          self.var_map['unelim_u'][1][k]['all'])
+                          self.var_map['unelim_u'][1][k][input_index
+                          ])
 
             # Add residual for u_1_0 as constraint
-            u_1_0_constr = self.var_map['unelim_u'][1][0]['all'] - u_1_0
+            u_1_0_constr = self.var_map['unelim_u'][1][0][input_index] - u_1_0
             c_e.append(u_1_0_constr)
 
         # Continuity constraints for x_{i, n_cp + 1}

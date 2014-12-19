@@ -283,19 +283,26 @@ end CSTR_Opt_MPC_casadi;
 
 model CSTR_MPC_Model
   extends CSTR;
-  input Real epsilon;
   parameter Real c_ref = 338.775766; 
   parameter Real T_ref = 280.099198;
   parameter Real Tc_ref = 280;
 end CSTR_MPC_Model;
 
-optimization CSTR_MPC(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + 					(Tc_ref-Tc)^2 + 1e4*epsilon^2,
+optimization CSTR_MPC(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + (Tc_ref-Tc)^2,
     				startTime=0.0, finalTime=150)
 
-extends CSTR_MPC_Model(Tc(min=230, max=370), epsilon(min=0, nominal=0.01));
-constraint
-  T <= 350 + epsilon;
+extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
+
 end CSTR_MPC;
 
+optimization CSTR_MPC_Parameter(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + p*(Tc_ref-Tc)^2,
+    				startTime=0.0, finalTime=150)
+
+extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
+
+parameter Real p(free=true, min=1, initialGuess=2);
+
+
+end CSTR_MPC_Parameter;
 
 end CSTR;

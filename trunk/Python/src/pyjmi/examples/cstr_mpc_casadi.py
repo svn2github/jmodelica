@@ -114,10 +114,6 @@ def run_demo(with_plots=True):
     opt_opts['init_traj'] = init_res
     opt_opts['blocking_factors'] = bf
 
-    # Set initial values
-    op.set('_start_c', float(c_0_A))
-    op.set('_start_T', float(T_0_A))
-
     if with_plots:
         # Compile and load a new instance of the op to compare the MPC results 
         # with an open loop optimization                                                                                                                                           n open loop optimization 
@@ -138,17 +134,16 @@ def run_demo(with_plots=True):
         factors_ol = {'Tc': bf_list_ol}
         bf_ol = BlockingFactors(factors_ol, du_bounds, du_quad_pen)
         open_loop_opts['blocking_factors'] = bf_ol
+        open_loop_opts['IPOPT_options']['print_level'] = 0
 
-    constr_viol_costs = {}
-    constr_viol_costs['T'] = 1e10
+    constr_viol_costs = {'T': 1e10}
 
     # Create the MPC object
-    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs, noise_seed=6)
+    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs, 
+                                                                noise_seed=1)
 
     # Set initial state
-    x_k = {}
-    for name in op.get_state_names():
-        x_k["_start_" + name] = op.get("_start_" + name)
+    x_k = {'_start_c': c_0_A, '_start_T': T_0_A }
 
     # Update the state and optimize number_samp_tot times
     for k in range(number_samp_tot):
@@ -184,11 +179,11 @@ def run_demo(with_plots=True):
         pass
     else:
         Tc_norm = N.linalg.norm(Tc_res_comp) / N.sqrt(len(Tc_res_comp))
-        assert(N.abs(Tc_norm - 308.22273597541545) < 1e-3)
+        assert(N.abs(Tc_norm - 310.41919417987316) < 1e-3)
         c_norm = N.linalg.norm(c_res_comp) / N.sqrt(len(c_res_comp))
-        assert(N.abs(c_norm - 631.90779820045452) < 1e-3)
+        assert(N.abs(c_norm - 641.90821167670504) < 1e-3)
         T_norm = N.linalg.norm(T_res_comp) / N.sqrt(len(T_res_comp))
-        assert(N.abs(T_norm - 324.92926269050702) < 1e-3)
+        assert(N.abs(T_norm - 327.65639848916169) < 1e-3)
 
     # Plot the results
     if with_plots: 
