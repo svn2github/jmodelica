@@ -360,7 +360,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double x = block->x[0], tmp, f_tmp;
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
-        double lstep = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR, ustep = lstep;
+        double initialStep = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
+        double lstep = initialStep, ustep = initialStep;
         while (1) {
             if (lower > block->min[0] && /* lower is fine as long as we're inside the bounds */
                 (
@@ -376,6 +377,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     /* This update can increase roundoff that prevents lstep from decreasing.
                        Ok if we hit the bound anyway. */
                     lstep = lower - tmp;
+                }
+                if ( lower > solver->originalStart && tmp <= solver->originalStart && lstep > initialStep * 10) {
+                    tmp = solver->originalStart;
+                    lstep = initialStep;
                 }
 
                 flag = jmi_brent_try_bracket(block, lower, f_lower, tmp, &f_tmp);
@@ -411,6 +416,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     /* This update can increase roundoff that prevents lstep from decreasing.
                        Ok if we hit the bound anyway. */
                     ustep = tmp - upper;
+                }
+                if ( upper < solver->originalStart && tmp >= solver->originalStart && ustep > initialStep * 10) {
+                    tmp = solver->originalStart;
+                    ustep = initialStep;
                 }
 
                 flag = jmi_brent_try_bracket(block, upper, f_upper, tmp, &f_tmp);
