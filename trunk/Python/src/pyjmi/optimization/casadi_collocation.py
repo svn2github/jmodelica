@@ -2319,11 +2319,11 @@ class LocalDAECollocator(CasadiCollocator):
                 var_max = self.op.get_attr(var, "max")
                 if traj_min[var_name] < var_min:
                     raise CasadiCollocatorException(
-                        "The trajectory for the measured input " + name +
+                        "The trajectory for the measured input " + var_name +
                         " does not satisfy the input's lower bound.")
                 if traj_max[var_name] > var_max:
                     raise CasadiCollocatorException(
-                        "The trajectory for the measured input " + name +
+                        "The trajectory for the measured input " + var_name +
                         " does not satisfy the input's upper bound.")
 
 
