@@ -535,7 +535,7 @@ namespace ModelicaCasADi
                         hasAlias=true;
                     }
                 }
-                if(equations_->isBLTEliminable((*it)) /* && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") */ && classifyVariable(*it) != DERIVATIVE && !hasAlias) {
+                if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") && classifyVariable(*it) != DERIVATIVE && !hasAlias) {
                     (*it)->setAsEliminable();
                 }
             }
