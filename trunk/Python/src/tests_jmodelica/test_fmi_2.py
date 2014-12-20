@@ -434,6 +434,15 @@ class Test_FMUModelME2:
         
         coupled = load_fmu(self.coupled_name)
         assert coupled.get_version() == "2.0"
+        
+    @testattr(fmi = True)
+    def test_variable_initial(self):
+        coupled = load_fmu(self.coupled_name)
+        
+        assert coupled.get_variable_initial("sin1.y") == fmi.FMI2_INITIAL_CALCULATED
+        vars = coupled.get_model_variables()
+        assert vars["sin1.y"].initial == fmi.FMI2_INITIAL_CALCULATED
+        
     
     @testattr(windows = True)
     def test_init(self):
