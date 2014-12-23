@@ -535,7 +535,7 @@ namespace ModelicaCasADi
                         hasAlias=true;
                     }
                 }
-                if(equations_->isBLTEliminable((*it)) && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") && classifyVariable(*it) != DERIVATIVE && !hasAlias) {
+                if(equations_->isBLTEliminable((*it)) && /*!(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max") &&*/ classifyVariable(*it) != DERIVATIVE && !hasAlias) {
                     (*it)->setAsEliminable();
                 }
             }
@@ -578,7 +578,7 @@ namespace ModelicaCasADi
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
         std::vector< Ref<Variable> > eliminable_algebraics;
         for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
-            if((*it)->isEliminable()){
+            if((*it)->isEliminable() && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")){
                 eliminable_algebraics.push_back(*it);        
             }
         }

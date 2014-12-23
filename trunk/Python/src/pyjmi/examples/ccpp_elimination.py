@@ -120,10 +120,22 @@ def run_demo(with_plots=True):
     print "Eliminating variables!"
     
     eliminable_algebraics = [a for a in algebraics if a in eliminables]
-    op.markVariablesForElimination(eliminable_algebraics)
+    variables_to_eliminate = list()
+    variables_with_bounds = list()
+    for v in eliminable_algebraics:
+        if not v.hasAttributeSet("min") and not v.hasAttributeSet("max"):
+            variables_to_eliminate.append(v)
+        else:
+            variables_with_bounds.append(v)
+    
+    # Elimination of unbounded variables
+    op.markVariablesForElimination(variables_to_eliminate)
+    # Elimination of bounded variables (skip elimination of plant.sigma)
+    bounded_eliminations = [v for v in variables_with_bounds if not v.getName()=="plant.sigma"]
+    op.markVariablesForElimination(bounded_eliminations)
     op.eliminateVariables()
     
-    # Alternative way of eliminating variables
+    # Alternative way of eliminating variables however this method do not eliminate any bounded variables
     #op.eliminateAlgebraics()    
     
     print "Done with elimination" 
