@@ -397,14 +397,6 @@ x1 = res['x1']
     <section>
       <title>Algorithm overview</title>
 
-      <para>The default algorithm is based on the CasADi package for
-      evaluation of first and second order derivatives, and for integration
-      with the IPOPT and WORHP algorithms. The two main benefits of using
-      CasADi, through its Python interface, is increased flexibility and
-      extensibility of the implementation improved performance. The goal is
-      for the CasADi-based algorithm to replace the C-based algorithm, once it
-      has sufficiently matured.</para>
-
       <para>The direct collocation method can be used to solve dynamic
       optimization problems, including optimal control problems and parameter
       optimization problems. In the collocation method, the dynamic model
@@ -419,25 +411,31 @@ x1 = res['x1']
       sufficiently accurate approximation of the differential constraint. For
       an overview of simultaneous optimization algorithms, see [2]. The
       nonlinear programming solvers IPOPT and WORHP can be used to solve the
-      nonlinear program resulting from collocation.</para>
+      nonlinear program resulting from collocation. The needed first- and
+      second-order derivatives are obtained using CasADi by algorithmic
+      differentiation.</para>
 
-      <para>The collocation method requires that the model to be optimized
-      does not contain discontinuities such as if equations, when clauses or
-      integer variables.</para>
+      <para>The collocation method requires that the model equations are twice
+      continuously differentiable with respect to all of the variables. This
+      for example means that the model can not contain integer variables or if
+      clauses depending on the states.</para>
 
       <para>Optimization models are represented using the class
-      <literal>OptimizationProblem</literal>. An object containing all the
-      options for the optimization algorithm can be retrieved from the model
-      object:</para>
+      <literal>OptimizationProblem</literal>, which can be instantiated using
+      the <literal>transfer_optimization_problem</literal> method. An object
+      containing all the options for the optimization algorithm can be
+      retrieved from the object:</para>
 
-      <programlisting language="python">opts = model.optimize_options()
-
+      <programlisting language="python">from pyjmi import transfer_optimization_problem
+op = transfer_optimization_problem(class_name, optimica_file_path)
+opts = op.optimize_options()
 opts? # View the help text</programlisting>
 
       <para>After options have been set, the options object can be propagated
-      to the <literal>optimize</literal> method:</para>
+      to the <literal>optimize</literal> method, which solves the optimization
+      problem:</para>
 
-      <programlisting language="python">res = model.optimize(options=opts)</programlisting>
+      <programlisting language="python">res = op.optimize(options=opts)</programlisting>
 
       <para>The options for the algorithm are shown in <xref
       linkend="opt-tab-casadi-dae-opts"/>. Additional documentation is
@@ -781,20 +779,6 @@ opts? # View the help text</programlisting>
 
       <programlisting>opts = model.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
-
-      <para>The algorithm is in many ways similar to the JMI algorithm, but
-      there are a few key differences. As mentioned before, it offers
-      increased performance, which is mainly due to two things. The first is
-      that this algorithm constructs automatic differentiation graphs for the
-      entire NLP, whereas the JMI algorithm only constructs graphs for
-      evaluation of residuals, leading to very fast function evaluations. The
-      second is that second-order derivatives are computed using automatic
-      differentiation, whereas the JMI algorithm instead uses a quasi-Newton
-      method, which affects convergence speed and robustness. This feature can
-      be disabled by setting the IPOPT option
-      <literal>generate_hessian</literal> to <literal>False</literal>, in
-      which case it will use the same quasi-Newton approach as the JMI
-      algorithm.</para>
 
       <para>JModelica.org's CasADi framework does not support simulation and
       initialization of models. It is recommended to use PyFMI for these
@@ -1808,235 +1792,236 @@ plt.show()
           in simultaneous strategies for dynamic optimization."
           <emphasis>Chemical Engineering Science</emphasis>, <emphasis
           role="bold">57</emphasis>, pp. 575-593.</para>
-		</section>
-	</section>
-          <section>
-            <title>Minimum time problems</title>
+        </section>
+      </section>
 
-            <para>Minimum time problems are dynamic optimization problems
-            where not only the control inputs are optimized, but also the
-            final time. Typically, elements of such problems include initial
-            and terminal state constraints and an objective function where the
-            transition time is minimized. The following example will be used
-            to illustrate how minimum time problems are formulated in
-            Optimica. We consider the optimization problem:</para>
+      <section>
+        <title>Minimum time problems</title>
 
-            <informalequation>
-              <m:math display="block" overflow="scroll">
-                <m:munder>
-                  <m:mi>min</m:mi>
+        <para>Minimum time problems are dynamic optimization problems where
+        not only the control inputs are optimized, but also the final time.
+        Typically, elements of such problems include initial and terminal
+        state constraints and an objective function where the transition time
+        is minimized. The following example will be used to illustrate how
+        minimum time problems are formulated in Optimica. We consider the
+        optimization problem:</para>
 
-                  <m:mrow>
-                    <m:mi>u</m:mi>
+        <informalequation>
+          <m:math display="block" overflow="scroll">
+            <m:munder>
+              <m:mi>min</m:mi>
 
-                    <m:mo>⁡</m:mo>
+              <m:mrow>
+                <m:mi>u</m:mi>
 
-                    <m:mfenced>
-                      <m:mi>t</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-                </m:munder>
+                <m:mo>⁡</m:mo>
 
-                <m:msub>
+                <m:mfenced>
                   <m:mi>t</m:mi>
+                </m:mfenced>
+              </m:mrow>
+            </m:munder>
 
-                  <m:mi>f</m:mi>
-                </m:msub>
+            <m:msub>
+              <m:mi>t</m:mi>
 
-                <m:mspace linebreak="newline"/>
-              </m:math>
-            </informalequation>
+              <m:mi>f</m:mi>
+            </m:msub>
 
-            <para>subject to the Van der Pol dynamics:</para>
+            <m:mspace linebreak="newline"/>
+          </m:math>
+        </informalequation>
 
-            <informalequation>
-              <m:math display="block" overflow="scroll">
-                <m:mtable>
-                  <m:mtr>
-                    <m:mtd columnalign="right">
-                      <m:msub>
-                        <m:mover>
-                          <m:mi>x</m:mi>
+        <para>subject to the Van der Pol dynamics:</para>
 
-                          <m:mo>.</m:mo>
-                        </m:mover>
+        <informalequation>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
 
-                        <m:mn>1</m:mn>
-                      </m:msub>
-                    </m:mtd>
+                      <m:mo>.</m:mo>
+                    </m:mover>
 
-                    <m:mtd columnalign="left">
-                      <m:mo>=</m:mo>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
 
-                      <m:mfenced separators="">
-                        <m:mn>1</m:mn>
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
 
-                        <m:mo>-</m:mo>
+                  <m:mfenced separators="">
+                    <m:mn>1</m:mn>
 
-                        <m:msubsup>
-                          <m:mi>x</m:mi>
+                    <m:mo>-</m:mo>
 
-                          <m:mn>2</m:mn>
+                    <m:msubsup>
+                      <m:mi>x</m:mi>
 
-                          <m:mn>2</m:mn>
-                        </m:msubsup>
-                      </m:mfenced>
+                      <m:mn>2</m:mn>
 
-                      <m:msub>
-                        <m:mi>x</m:mi>
+                      <m:mn>2</m:mn>
+                    </m:msubsup>
+                  </m:mfenced>
 
-                        <m:mn>1</m:mn>
-                      </m:msub>
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mo>-</m:mo>
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
-                      <m:msub>
-                        <m:mi>x</m:mi>
+                  <m:mo>-</m:mo>
 
-                        <m:mn>2</m:mn>
-                      </m:msub>
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mo>+</m:mo>
+                    <m:mn>2</m:mn>
+                  </m:msub>
 
-                      <m:mi>u</m:mi>
+                  <m:mo>+</m:mo>
 
-                      <m:mi>,</m:mi>
+                  <m:mi>u</m:mi>
 
-                      <m:mspace width="1em"/>
+                  <m:mi>,</m:mi>
 
-                      <m:msub>
-                        <m:mi>x</m:mi>
+                  <m:mspace width="1em"/>
 
-                        <m:mn>1</m:mn>
-                      </m:msub>
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mfenced>
-                        <m:mn>0</m:mn>
-                      </m:mfenced>
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
-                      <m:mo>=</m:mo>
+                  <m:mfenced>
+                    <m:mn>0</m:mn>
+                  </m:mfenced>
 
-                      <m:mn>0</m:mn>
-                    </m:mtd>
-                  </m:mtr>
+                  <m:mo>=</m:mo>
 
-                  <m:mtr>
-                    <m:mtd columnalign="right">
-                      <m:msub>
-                        <m:mover>
-                          <m:mi>x</m:mi>
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
 
-                          <m:mo>.</m:mo>
-                        </m:mover>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
 
-                        <m:mn>2</m:mn>
-                      </m:msub>
-                    </m:mtd>
+                      <m:mo>.</m:mo>
+                    </m:mover>
 
-                    <m:mtd columnalign="left">
-                      <m:mo>=</m:mo>
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
 
-                      <m:msub>
-                        <m:mi>x</m:mi>
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
 
-                        <m:mn>1</m:mn>
-                      </m:msub>
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mi>,</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
-                      <m:mspace width="1em"/>
+                  <m:mi>,</m:mi>
 
-                      <m:msub>
-                        <m:mi>x</m:mi>
+                  <m:mspace width="1em"/>
 
-                        <m:mn>2</m:mn>
-                      </m:msub>
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mfenced>
-                        <m:mn>0</m:mn>
-                      </m:mfenced>
+                    <m:mn>2</m:mn>
+                  </m:msub>
 
-                      <m:mo>=</m:mo>
+                  <m:mfenced>
+                    <m:mn>0</m:mn>
+                  </m:mfenced>
 
-                      <m:mn>1</m:mn>
-                    </m:mtd>
-                  </m:mtr>
-                </m:mtable>
+                  <m:mo>=</m:mo>
 
-                <m:mspace linebreak="newline"/>
-              </m:math>
-            </informalequation>
+                  <m:mn>1</m:mn>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
 
-            <para>and the constraints:</para>
+            <m:mspace linebreak="newline"/>
+          </m:math>
+        </informalequation>
 
-            <informalequation>
-              <m:math display="block" overflow="scroll">
-                <m:mtable>
-                  <m:mtr>
-                    <m:mtd columnalign="right">
-                      <m:msub>
-                        <m:mi>x</m:mi>
+        <para>and the constraints:</para>
 
-                        <m:mn>1</m:mn>
-                      </m:msub>
+        <informalequation>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mo>⁡</m:mo>
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
-                      <m:mfenced>
-                        <m:msub>
-                          <m:mi>t</m:mi>
+                  <m:mo>⁡</m:mo>
 
-                          <m:mi>f</m:mi>
-                        </m:msub>
-                      </m:mfenced>
-                    </m:mtd>
+                  <m:mfenced>
+                    <m:msub>
+                      <m:mi>t</m:mi>
 
-                    <m:mtd columnalign="left">
-                      <m:mo>=</m:mo>
+                      <m:mi>f</m:mi>
+                    </m:msub>
+                  </m:mfenced>
+                </m:mtd>
 
-                      <m:mn>0</m:mn>
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
 
-                      <m:mi>,</m:mi>
+                  <m:mn>0</m:mn>
 
-                      <m:mspace width="1em"/>
+                  <m:mi>,</m:mi>
 
-                      <m:msub>
-                        <m:mi>x</m:mi>
+                  <m:mspace width="1em"/>
 
-                        <m:mn>2</m:mn>
-                      </m:msub>
+                  <m:msub>
+                    <m:mi>x</m:mi>
 
-                      <m:mo>⁡</m:mo>
+                    <m:mn>2</m:mn>
+                  </m:msub>
 
-                      <m:mfenced>
-                        <m:msub>
-                          <m:mi>t</m:mi>
+                  <m:mo>⁡</m:mo>
 
-                          <m:mi>f</m:mi>
-                        </m:msub>
-                      </m:mfenced>
+                  <m:mfenced>
+                    <m:msub>
+                      <m:mi>t</m:mi>
 
-                      <m:mo>=</m:mo>
+                      <m:mi>f</m:mi>
+                    </m:msub>
+                  </m:mfenced>
 
-                      <m:mn>0</m:mn>
-                    </m:mtd>
-                  </m:mtr>
-                </m:mtable>
+                  <m:mo>=</m:mo>
 
-                <m:mspace linebreak="newline"/>
-              </m:math>
-            </informalequation>
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
 
-            <para><informalequation>
-                <m:math display="block">
-                  <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
-                </m:math>
-              </informalequation></para>
+            <m:mspace linebreak="newline"/>
+          </m:math>
+        </informalequation>
 
-            <para>This problem is encoded in the following Optimica
-            specification:</para>
+        <para><informalequation>
+            <m:math display="block">
+              <m:mi>-1 ≤ u(t) ≤ 1</m:mi>
+            </m:math>
+          </informalequation></para>
 
-            <programlisting language="optimica">optimization VDP_Opt_Min_Time (objective = finalTime,
+        <para>This problem is encoded in the following Optimica
+        specification:</para>
+
+        <programlisting language="optimica">optimization VDP_Opt_Min_Time (objective = finalTime,
                                startTime = 0,
                                finalTime(free=true,min=0.2,initialGuess=1)) 
 
@@ -2059,11 +2044,11 @@ constraint
 end VDP_Opt_Min_Time;
 </programlisting>
 
-            <para>Notice how the class attribute <literal>finalTime</literal>
-            is set to be free in the optimization. The problem is solved by
-            the following Python script:</para>
+        <para>Notice how the class attribute <literal>finalTime</literal> is
+        set to be free in the optimization. The problem is solved by the
+        following Python script:</para>
 
-            <programlisting language="python"># Import numerical libraries
+        <programlisting language="python"># Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
 
@@ -2102,251 +2087,249 @@ plt.xlabel('time')
 plt.show()
 </programlisting>
 
-            <para>The resulting control and state profiles are shown in <xref
-            linkend="opt-fig-vdp-min-time-casadi"/>. Notice the difference as
-            compared to Figure <xref linkend="fig-vdp-opt"/>, where the Van
-            der Pol oscillator system is optimized using a quadratic objective
-            function.</para>
+        <para>The resulting control and state profiles are shown in <xref
+        linkend="opt-fig-vdp-min-time-casadi"/>. Notice the difference as
+        compared to Figure <xref linkend="fig-vdp-opt"/>, where the Van der
+        Pol oscillator system is optimized using a quadratic objective
+        function.</para>
 
-            <figure xml:id="opt-fig-vdp-min-time-casadi">
-              <title>Minimum time profiles for the Van der Pol
-              Oscillator.</title>
+        <figure xml:id="opt-fig-vdp-min-time-casadi">
+          <title>Minimum time profiles for the Van der Pol Oscillator.</title>
 
-              <mediaobject>
-                <imageobject>
-                  <imagedata fileref="images/vdp_min_time.svg" scalefit="1"
-                             width="60%"/>
-                </imageobject>
-              </mediaobject>
-            </figure>
-          </section>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/vdp_min_time.svg" scalefit="1"
+                         width="60%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+      </section>
 
-          <section>
-            <title>Optimization under delay constraints</title>
+      <section>
+        <title>Optimization under delay constraints</title>
 
-            <para>In some applications, it can be useful to solve dynamic
-            optimization problems that include time delays in the model.
-            Collocation based optimization schemes are well suited to handle
-            this kind of models, since the whole state trajectory is available
-            at the same time. The direct collocation method using CasADi
-            contains an experimental implementation of such delays, which we
-            will describe with an example. Please note that the implementation
-            of this feature is experimental and subject to change.</para>
+        <para>In some applications, it can be useful to solve dynamic
+        optimization problems that include time delays in the model.
+        Collocation based optimization schemes are well suited to handle this
+        kind of models, since the whole state trajectory is available at the
+        same time. The direct collocation method using CasADi contains an
+        experimental implementation of such delays, which we will describe
+        with an example. Please note that the implementation of this feature
+        is experimental and subject to change.</para>
 
-            <para>We consider the optimization problem</para>
+        <para>We consider the optimization problem</para>
 
-            <informalequation>
-              <m:math display="block">
-                <m:mrow>
-                  <m:munder>
-                    <m:mi>min</m:mi>
+        <informalequation>
+          <m:math display="block">
+            <m:mrow>
+              <m:munder>
+                <m:mi>min</m:mi>
 
-                    <m:mi>u(t)</m:mi>
-                  </m:munder>
+                <m:mi>u(t)</m:mi>
+              </m:munder>
 
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mi>0</m:mi>
+
+                  <m:mi>1</m:mi>
+                </m:munderover>
+
+                <m:msup>
+                  <m:mi>(4x(t)</m:mi>
+
+                  <m:mi>2</m:mi>
+                </m:msup>
+
+                <m:msubsup>
+                  <m:mi>+ u(t)</m:mi>
+
+                  <m:mi>1</m:mi>
+
+                  <m:mi>2</m:mi>
+                </m:msubsup>
+
+                <m:msubsup>
+                  <m:mi>+ u(t)</m:mi>
+
+                  <m:mi>2</m:mi>
+
+                  <m:mi>2</m:mi>
+                </m:msubsup>
+
+                <m:mi>) dt</m:mi>
+              </m:mrow>
+            </m:mrow>
+          </m:math>
+        </informalequation>
+
+        <para>subject to the dynamics</para>
+
+        <informalequation>
+          <m:math display="block">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd>
                   <m:mrow>
-                    <m:munderover>
-                      <m:mo>∫</m:mo>
+                    <m:mover>
+                      <m:mi>x</m:mi>
 
-                      <m:mi>0</m:mi>
+                      <m:mi>.</m:mi>
+                    </m:mover>
 
-                      <m:mi>1</m:mi>
-                    </m:munderover>
+                    <m:mi>(t)</m:mi>
 
-                    <m:msup>
-                      <m:mi>(4x(t)</m:mi>
+                    <m:mo>=</m:mo>
 
-                      <m:mi>2</m:mi>
-                    </m:msup>
-
-                    <m:msubsup>
-                      <m:mi>+ u(t)</m:mi>
+                    <m:msub>
+                      <m:mi>u</m:mi>
 
                       <m:mi>1</m:mi>
+                    </m:msub>
 
-                      <m:mi>2</m:mi>
-                    </m:msubsup>
-
-                    <m:msubsup>
-                      <m:mi>+ u(t)</m:mi>
-
-                      <m:mi>2</m:mi>
-
-                      <m:mi>2</m:mi>
-                    </m:msubsup>
-
-                    <m:mi>) dt</m:mi>
-                  </m:mrow>
-                </m:mrow>
-              </m:math>
-            </informalequation>
-
-            <para>subject to the dynamics</para>
-
-            <informalequation>
-              <m:math display="block">
-                <m:mtable>
-                  <m:mtr>
-                    <m:mtd>
-                      <m:mrow>
-                        <m:mover>
-                          <m:mi>x</m:mi>
-
-                          <m:mi>.</m:mi>
-                        </m:mover>
-
-                        <m:mi>(t)</m:mi>
-
-                        <m:mo>=</m:mo>
-
-                        <m:msub>
-                          <m:mi>u</m:mi>
-
-                          <m:mi>1</m:mi>
-                        </m:msub>
-
-                        <m:mi>(t) -</m:mi>
-
-                        <m:mi>2</m:mi>
-
-                        <m:msub>
-                          <m:mi>u</m:mi>
-
-                          <m:mi>2</m:mi>
-                        </m:msub>
-
-                        <m:mi>(t)</m:mi>
-                      </m:mrow>
-                    </m:mtd>
-                  </m:mtr>
-
-                  <m:mtr>
-                    <m:mtd>
-                      <m:mrow>
-                        <m:msub>
-                          <m:mi>u</m:mi>
-
-                          <m:mi>2</m:mi>
-                        </m:msub>
-
-                        <m:mi>(t)</m:mi>
-
-                        <m:mo>=</m:mo>
-
-                        <m:msub>
-                          <m:mi>u</m:mi>
-
-                          <m:mi>1</m:mi>
-                        </m:msub>
-
-                        <m:mi>(t -</m:mi>
-
-                        <m:msub>
-                          <m:mi>t</m:mi>
-
-                          <m:mi>delay</m:mi>
-                        </m:msub>
-
-                        <m:mi>)</m:mi>
-                      </m:mrow>
-                    </m:mtd>
-                  </m:mtr>
-                </m:mtable>
-              </m:math>
-            </informalequation>
-
-            <para>and the boundary conditions</para>
-
-            <informalequation>
-              <m:math display="block">
-                <m:mtable>
-                  <m:mtr>
-                    <m:mtd>
-                      <m:mrow>
-                        <m:mi>x(0)</m:mi>
-
-                        <m:mo>=</m:mo>
-
-                        <m:mi>1</m:mi>
-                      </m:mrow>
-                    </m:mtd>
-                  </m:mtr>
-
-                  <m:mtr>
-                    <m:mtd>
-                      <m:mrow>
-                        <m:mi>x(1)</m:mi>
-
-                        <m:mo>=</m:mo>
-
-                        <m:mi>0</m:mi>
-                      </m:mrow>
-                    </m:mtd>
-                  </m:mtr>
-
-                  <m:mtr>
-                    <m:mtd>
-                      <m:mrow>
-                        <m:msub>
-                          <m:mi>u</m:mi>
-
-                          <m:mi>2</m:mi>
-                        </m:msub>
-
-                        <m:mi>(t)</m:mi>
-
-                        <m:mo>=</m:mo>
-
-                        <m:mi>0.25, t &lt;</m:mi>
-
-                        <m:msub>
-                          <m:mi>t</m:mi>
-
-                          <m:mi>delay</m:mi>
-                        </m:msub>
-                      </m:mrow>
-                    </m:mtd>
-                  </m:mtr>
-                </m:mtable>
-              </m:math>
-            </informalequation>
-
-            <para>The effect of positive <inlineequation>
-                <m:math display="inline">
-                  <m:msub>
-                    <m:mi>u</m:mi>
-
-                    <m:mi>1</m:mi>
-                  </m:msub>
-                </m:math>
-              </inlineequation> is initially to increase <inlineequation>
-                <m:math display="inline">
-                  <m:mi>x</m:mi>
-                </m:math>
-              </inlineequation>, but after a time delay of time
-            <inlineequation>
-                <m:math display="inline">
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>delay</m:mi>
-                  </m:msub>
-                </m:math>
-              </inlineequation>, it comes back with twice the effect in the
-            negative direction through <inlineequation>
-                <m:math display="inline">
-                  <m:msub>
-                    <m:mi>u</m:mi>
+                    <m:mi>(t) -</m:mi>
 
                     <m:mi>2</m:mi>
-                  </m:msub>
-                </m:math>
-              </inlineequation>.</para>
 
-            <para>We model everything except the delay constraint in the
-            Optimica specification</para>
+                    <m:msub>
+                      <m:mi>u</m:mi>
 
-            <programlisting>optimization DelayTest(startTime = 0, finalTime = 1,
+                      <m:mi>2</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t)</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>1</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t -</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>delay</m:mi>
+                    </m:msub>
+
+                    <m:mi>)</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </informalequation>
+
+        <para>and the boundary conditions</para>
+
+        <informalequation>
+          <m:math display="block">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:mi>x(0)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:mi>1</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:mi>x(1)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:mi>0</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>u</m:mi>
+
+                      <m:mi>2</m:mi>
+                    </m:msub>
+
+                    <m:mi>(t)</m:mi>
+
+                    <m:mo>=</m:mo>
+
+                    <m:mi>0.25, t &lt;</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>delay</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </informalequation>
+
+        <para>The effect of positive <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation> is initially to increase <inlineequation>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
+          </inlineequation>, but after a time delay of time <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mi>delay</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation>, it comes back with twice the effect in the
+        negative direction through <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>2</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation>.</para>
+
+        <para>We model everything except the delay constraint in the Optimica
+        specification</para>
+
+        <programlisting>optimization DelayTest(startTime = 0, finalTime = 1,
                        objectiveIntegrand = 4*x^2 + u1^2 + u2^2)
     input Real u1, u2;
     Real x(start = 1, fixed=true);
@@ -2357,21 +2340,21 @@ constraint
 end DelayTest;
 </programlisting>
 
-            <para>The problem is then solved in the following python script.
-            Notice how delay constraint is added using the
-            <literal>delayed_feedback</literal> option, and the initial part
-            of <inlineequation>
-                <m:math display="inline">
-                  <m:msub>
-                    <m:mi>u</m:mi>
+        <para>The problem is then solved in the following python script.
+        Notice how delay constraint is added using the
+        <literal>delayed_feedback</literal> option, and the initial part of
+        <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
 
-                    <m:mi>2</m:mi>
-                  </m:msub>
-                </m:math>
-              </inlineequation> is set using the
-            <literal>initialGuess</literal> attribute:</para>
+                <m:mi>2</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation> is set using the <literal>initialGuess</literal>
+        attribute:</para>
 
-            <programlisting># Import numerical libraries
+        <programlisting># Import numerical libraries
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -2413,80 +2396,905 @@ plt.legend(('x', 'u1', 'u2', 'delay(u1)'))
 plt.show()
 </programlisting>
 
-            <para>The resulting control and state profiles are shown in <xref
-            linkend="opt-fig-delayed-feedback"/>. Notice that <inlineequation>
-                <m:math display="inline">
-                  <m:mi>x</m:mi>
-                </m:math>
-              </inlineequation> grows initially since <inlineequation>
-                <m:math display="inline">
+        <para>The resulting control and state profiles are shown in <xref
+        linkend="opt-fig-delayed-feedback"/>. Notice that <inlineequation>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
+          </inlineequation> grows initially since <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation> is set positive to exploit the greater control
+        gain that appears delayed through <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>2</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation>. At time <inlineequation>
+            <m:math display="inline">
+              <m:mi>1 -</m:mi>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mi>delay</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation>, the delayed value of <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation> ceases to influence <inlineequation>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
+          </inlineequation> within the horizon, and <inlineequation>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mi>1</m:mi>
+              </m:msub>
+            </m:math>
+          </inlineequation> immediately switches sign to drive down
+        <inlineequation>
+            <m:math display="inline">
+              <m:mi>x</m:mi>
+            </m:math>
+          </inlineequation> to its final value <inlineequation>
+            <m:math display="inline">
+              <m:mi>x(1) = 0</m:mi>
+            </m:math>
+          </inlineequation>.</para>
+
+        <figure xml:id="opt-fig-delayed-feedback">
+          <title>Optimization result for delayed feedback example.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/delayed_feedback_opt.svg"
+                         scalefit="1" width="60%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+      </section>
+
+      <section>
+        <title>Parameter estimation</title>
+
+        <para>In this tutorial it will be demonstrated how to solve parameter
+        estimation problems. We consider a quadruple tank system depicted in
+        <xref linkend="opt-fig-quadtank"/>.</para>
+
+        <figure xml:id="opt-fig-quadtank">
+          <title>A schematic picture of the quadruple tank process.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/qt_schematic.png" scalefit="1"
+                         width="40%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+
+        <para>The dynamics of the system are given by the differential
+        equations:</para>
+
+        <informalequation>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>γ</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
                   <m:msub>
                     <m:mi>u</m:mi>
 
-                    <m:mi>1</m:mi>
+                    <m:mn>1</m:mn>
                   </m:msub>
-                </m:math>
-              </inlineequation> is set positive to exploit the greater control
-            gain that appears delayed through <inlineequation>
-                <m:math display="inline">
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>γ</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
                   <m:msub>
                     <m:mi>u</m:mi>
 
-                    <m:mi>2</m:mi>
+                    <m:mn>2</m:mn>
                   </m:msub>
-                </m:math>
-              </inlineequation>. At time <inlineequation>
-                <m:math display="inline">
-                  <m:mi>1 -</m:mi>
+                </m:mtd>
+              </m:mtr>
 
+              <m:mtr>
+                <m:mtd columnalign="right">
                   <m:msub>
-                    <m:mi>t</m:mi>
+                    <m:mover>
+                      <m:mi>x</m:mi>
 
-                    <m:mi>delay</m:mi>
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>3</m:mn>
                   </m:msub>
-                </m:math>
-              </inlineequation>, the delayed value of <inlineequation>
-                <m:math display="inline">
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>γ</m:mi>
+
+                          <m:mn>2</m:mn>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
                   <m:msub>
                     <m:mi>u</m:mi>
 
-                    <m:mi>1</m:mi>
+                    <m:mn>2</m:mn>
                   </m:msub>
-                </m:math>
-              </inlineequation> ceases to influence <inlineequation>
-                <m:math display="inline">
-                  <m:mi>x</m:mi>
-                </m:math>
-              </inlineequation> within the horizon, and <inlineequation>
-                <m:math display="inline">
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>4</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>γ</m:mi>
+
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
                   <m:msub>
                     <m:mi>u</m:mi>
 
-                    <m:mi>1</m:mi>
+                    <m:mn>1</m:mn>
                   </m:msub>
-                </m:math>
-              </inlineequation> immediately switches sign to drive down
-            <inlineequation>
-                <m:math display="inline">
-                  <m:mi>x</m:mi>
-                </m:math>
-              </inlineequation> to its final value <inlineequation>
-                <m:math display="inline">
-                  <m:mi>x(1) = 0</m:mi>
-                </m:math>
-              </inlineequation>.</para>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
 
-            <figure xml:id="opt-fig-delayed-feedback">
-              <title>Optimization result for delayed feedback example.</title>
+            <m:mspace linebreak="newline"/>
+          </m:math>
+        </informalequation>
 
-              <mediaobject>
-                <imageobject>
-                  <imagedata fileref="images/delayed_feedback_opt.svg"
-                             scalefit="1" width="60%"/>
-                </imageobject>
-              </mediaobject>
-            </figure>
-          </section>
+        <para>Where the nominal parameter values are given in <xref
+        linkend="opt-tab-qtpars"/>.</para>
+
+        <table xml:id="opt-tab-qtpars">
+          <title>Parameters for the quadruple tank process.</title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–opt" colwidth="1*"/>
+
+            <colspec align="left" colname="col–desc" colwidth="2*"/>
+
+            <colspec align="left" colname="col–def" colwidth="1*"/>
+
+            <thead>
+              <row>
+                <entry align="center">Parameter name</entry>
+
+                <entry align="center">Value</entry>
+
+                <entry align="center">Unit</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>A<subscript>i</subscript></entry>
+
+                <entry>4.9</entry>
+
+                <entry>cm<superscript>2</superscript></entry>
+              </row>
+
+              <row>
+                <entry><literal>a<subscript>i</subscript></literal></entry>
+
+                <entry>0.03</entry>
+
+                <entry>cm<superscript>2</superscript></entry>
+              </row>
+
+              <row>
+                <entry><literal>k<subscript>i</subscript></literal></entry>
+
+                <entry>0.56</entry>
+
+                <entry>cm<superscript>2</superscript>V<superscript>-1</superscript>s<superscript>-1</superscript></entry>
+              </row>
+
+              <row>
+                <entry><literal>γ<subscript>i</subscript></literal></entry>
+
+                <entry>0.3</entry>
+
+                <entry>Vcm<superscript>-1</superscript></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>The states of the model are the tank water levels x1, x2, x3,
+        and x4. The control inputs, u1 and u2, are the flows generated by the
+        two pumps.</para>
+
+        <para>The Modelica model for the system is located in <link
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/QuadTankPack.mop">QuadTankPack.mop</link>.
+        Download the file to your working directory and open it in a text
+        editor. Locate the class <literal>QuadTankPack.QuadTank</literal> and
+        make sure you understand the model. In particular, notice that all
+        model variables and parameters are expressed in SI units.</para>
+
+        <para>Measurement data, available in <link
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/qt_par_est_data.mat">qt_par_est_data.mat</link>,
+        has been logged in an identification experiment. Download also this
+        file to your working directory.</para>
+
+        <para>Open a text file and name it
+        <filename>qt_par_est_casadi.py</filename>. Then enter the
+        imports:</para>
+
+        <programlisting language="python">import os
+from collections import OrderedDict
+
+from scipy.io.matlab.mio import loadmat
+import matplotlib.pyplot as plt
+import numpy as N
+
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
+from pyjmi import transfer_optimization_problem
+from pyjmi.optimization.casadi_collocation import ExternalData
+</programlisting>
+
+        <para>into the file. Next, we compile the model, which is used for
+        simulation, and the optimization problem, which is used for estimating
+        parameter values. We will take a closer look at the optimization
+        formulation later, so do not worry about that one for the moment. The
+        initial states for the experiment are stored in the optimization
+        problem, which we propagate to the model for simulation.</para>
+
+        <programlisting># Compile and load FMU, which is used for simulation
+model = load_fmu(compile_fmu('QuadTankPack.QuadTank', "QuadTankPack.mop"))
+
+# Transfer problem to CasADi Interface, which is used for estimation
+op = transfer_optimization_problem("QuadTankPack.QuadTank_ParEstCasADi",
+                                   "QuadTankPack.mop")
+
+# Set initial states in model, which are stored in the optimization problem
+x_0_names = ['x1_0', 'x2_0', 'x3_0', 'x4_0']
+x_0_values = op.get(x_0_names)
+model.set(x_0_names, x_0_values)
+</programlisting>
+
+        <para>Next, we enter code to open the data file, extract the
+        measurement time series and plot the measurements:</para>
+
+        <programlisting language="python"># Load measurement data from file
+data = loadmat("qt_par_est_data.mat", appendmat=False)
+
+# Extract data series
+t_meas = data['t'][6000::100, 0] - 60
+y1_meas = data['y1_f'][6000::100, 0] / 100
+y2_meas = data['y2_f'][6000::100, 0] / 100
+y3_meas = data['y3_d'][6000::100, 0] / 100
+y4_meas = data['y4_d'][6000::100, 0] / 100
+u1 = data['u1_d'][6000::100, 0]
+u2 = data['u2_d'][6000::100, 0]
+
+# Plot measurements and inputs
+plt.close(1)
+plt.figure(1)
+plt.subplot(2, 2, 1)
+plt.plot(t_meas, y3_meas)
+plt.title('x3')
+plt.grid()
+plt.subplot(2, 2, 2)
+plt.plot(t_meas, y4_meas)
+plt.title('x4')
+plt.grid()
+plt.subplot(2, 2, 3)
+plt.plot(t_meas, y1_meas)
+plt.title('x1')
+plt.xlabel('t[s]')
+plt.grid()
+plt.subplot(2, 2, 4)
+plt.plot(t_meas, y2_meas)
+plt.title('x2')
+plt.xlabel('t[s]')
+plt.grid()
+
+plt.close(2)
+plt.figure(2)
+plt.subplot(2, 1, 1)
+plt.plot(t_meas, u1)
+plt.hold(True)
+plt.title('u1')
+plt.grid()
+plt.subplot(2, 1, 2)
+plt.plot(t_meas, u2)
+plt.title('u2')
+plt.xlabel('t[s]')
+plt.hold(True)
+plt.grid()
+plt.show()
+</programlisting>
+
+        <para>You should now see two plots showing the measurement state
+        profiles and the control input profiles similar to <xref
+        linkend="opt-fig-qt_data"/> and <xref
+        linkend="opt-fig-qtinput"/>.</para>
+
+        <figure xml:id="opt-fig-qt_data">
+          <title>Measured state profiles.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+
+        <figure xml:id="opt-fig-qtinput">
+          <title>Control inputs used in the identification experiment.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+
+        <para>In order to evaluate the accuracy of nominal model parameter
+        values, we simulate the model using the same initial state and inputs
+        values as in the performed experiment used to obtain the measurement
+        data. First, a matrix containing the input trajectories is
+        created:</para>
+
+        <programlisting language="python"># Build input trajectory matrix for use in simulation
+u = N.transpose(N.vstack([t_meas, u1, u2]))
+</programlisting>
+
+        <para>Now, the model can be simulated:</para>
+
+        <programlisting language="python"># Simulate model response with nominal parameter values
+res_sim = model.simulate(input=(['u1', 'u2'], u),
+                         start_time=0., final_time=60.)
+</programlisting>
+
+        <para>The simulation result can now be extracted:</para>
+
+        <programlisting language="python"># Load simulation result
+x1_sim = res_sim['x1']
+x2_sim = res_sim['x2']
+x3_sim = res_sim['x3']
+x4_sim = res_sim['x4']
+t_sim  = res_sim['time']
+u1_sim = res_sim['u1']
+u2_sim = res_sim['u2']
+</programlisting>
+
+        <para>and then plotted:</para>
+
+        <programlisting language="python"># Plot simulation result
+plt.figure(1)
+plt.subplot(2, 2, 1)
+plt.plot(t_sim, x3_sim)
+plt.subplot(2, 2, 2)
+plt.plot(t_sim, x4_sim)
+plt.subplot(2, 2, 3)
+plt.plot(t_sim, x1_sim)
+plt.subplot(2, 2, 4)
+plt.plot(t_sim, x2_sim)
+
+plt.figure(2)
+plt.subplot(2, 1, 1)
+plt.plot(t_sim, u1_sim, 'r')
+plt.subplot(2, 1, 2)
+plt.plot(t_sim, u2_sim, 'r')
+plt.show()
+</programlisting>
+
+        <para><xref linkend="opt-fig-sim-nom"/> shows the result of the
+        simulation.</para>
+
+        <figure xml:id="opt-fig-sim-nom">
+          <title>Simulation result for the nominal model.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+
+        <para>Here, the simulated profiles are given by the green curves.
+        Clearly, there is a mismatch in the response, especially for the two
+        lower tanks. Think about why the model does not match the data, i.e.,
+        which parameters may have wrong values.</para>
+
+        <para>The next step towards solving a parameter estimation problem is
+        to identify which parameters to tune. Typically, parameters which are
+        not known precisely are selected. Also, the selected parameters need
+        of course affect the mismatch between model response and data, when
+        tuned. In a first attempt, we aim at decreasing the mismatch for the
+        two lower tanks, and therefore we select the lower tank outflow areas,
+        a1 and a2, as parameters to optimize. The Optimica specification for
+        the estimation problem is contained in the class
+        <literal>QuadTankPack.QuadTank_ParEstCasADi</literal>:</para>
+
+        <programlisting language="optimica">optimization QuadTank_ParEstCasADi(startTime=0, finalTime=60)
+
+    extends QuadTank(x1(fixed=true), x1_0=0.06255,
+                     x2(fixed=true), x2_0=0.06045,
+                     x3(fixed=true), x3_0=0.02395,
+                     x4(fixed=true), x4_0=0.02325,
+                     a1(free=true, min=0, max=0.1e-4),
+                     a2(free=true, min=0, max=0.1e-4));
+                     
+end QuadTank_ParEstCasADi;
+</programlisting>
+
+        <para>We have specified the time horizon to be one minute, which
+        matches the length of the experiment, and that we want to estimate a1
+        and a2 by setting <literal>free=true</literal> for them. Unlike
+        optimal control, the cost function is not specified using Optimica.
+        This is instead specified from Python, using the
+        <literal>ExternalData</literal> class and the code below.</para>
+
+        <programlisting># Create external data object for optimization
+Q = N.diag([1., 1., 10., 10.])
+data_x1 = N.vstack([t_meas, y1_meas])
+data_x2 = N.vstack([t_meas, y2_meas])
+data_u1 = N.vstack([t_meas, u1])
+data_u2 = N.vstack([t_meas, u2])
+quad_pen = OrderedDict()
+quad_pen['x1'] = data_x1
+quad_pen['x2'] = data_x2
+quad_pen['u1'] = data_u1
+quad_pen['u2'] = data_u2
+external_data = ExternalData(Q=Q, quad_pen=quad_pen)
+</programlisting>
+
+        <para>This will create an objective which is integral of the squared
+        difference between the measured profiles for x1 and x2 and the
+        corresponding model profiles. We will also introduce corresponding
+        penalties for the two input variables, which are left as optimization
+        variables. It would also have been possible to eliminate the input
+        variables from the estimation problem by using the
+        <literal>eliminated</literal> parameter of
+        <literal>ExternalData</literal>. See the documentation of
+        <literal>ExternalData</literal> for how to do this. Finally, we use a
+        square matrix Q to weight the different components of the objective.
+        We choose larger weights for the inputs, as we have larger faith in
+        those values.</para>
+
+        <para>We are now ready to solve the optimization problem. We first set
+        some options, where we specify the number of elements
+        (time-discretization grid), the external data, and also provide the
+        simulation with the nominal parameter values as an initial guess for
+        the solution, which is also used to scale the variables instead of the
+        variables' nominal attributes (if they have any):</para>
+
+        <programlisting language="python"># Set optimization options and optimize
+opts = op.optimize_options()
+opts['n_e'] = 60 # Number of collocation elements
+opts['external_data'] = external_data
+opts['init_traj'] = res_sim
+opts['nominal_traj'] = res_sim
+res = op.optimize(options=opts) # Solve estimation problem
+</programlisting>
+
+        <para>Now, let's extract the optimal values of the parameters a1 and
+        a2 and print them to the console:</para>
+
+        <programlisting language="python"># Extract estimated values of parameters
+a1_opt = res.initial("a1")
+a2_opt = res.initial("a2")
+
+# Print estimated parameter values
+print('a1: ' + str(a1_opt*1e4) + 'cm^2')
+print('a2: ' + str(a2_opt*1e4) + 'cm^2')
+</programlisting>
+
+        <para>You should get an output similar to:</para>
+
+        <programlisting language="python">a1: 0.0266cm^2
+a2: 0.0271cm^2
+</programlisting>
+
+        <para>The estimated values are slightly smaller than the nominal
+        values - think about why this may be the case. Also note that the
+        estimated values do not necessarily correspond to the physically true
+        values. Rather, the parameter values are adjusted to compensate for
+        all kinds of modeling errors in order to minimize the mismatch between
+        model response and measurement data.</para>
+
+        <para>Next we plot the optimized profiles:</para>
+
+        <programlisting language="python"># Load state profiles
+x1_opt = res["x1"]
+x2_opt = res["x2"]
+x3_opt = res["x3"]
+x4_opt = res["x4"]
+u1_opt = res["u1"]
+u2_opt = res["u2"]
+t_opt  = res["time"]
+
+# Plot estimated trajectories
+plt.figure(1)
+plt.subplot(2, 2, 1)
+plt.plot(t_opt, x3_opt, 'k')
+plt.subplot(2, 2, 2)
+plt.plot(t_opt, x4_opt, 'k')
+plt.subplot(2, 2, 3)
+plt.plot(t_opt, x1_opt, 'k')
+plt.subplot(2, 2, 4)
+plt.plot(t_opt, x2_opt, 'k')
+
+plt.figure(2)
+plt.subplot(2, 1, 1)
+plt.plot(t_opt, u1_opt, 'k')
+plt.subplot(2, 1, 2)
+plt.plot(t_opt, u2_opt, 'k')
+plt.show()
+</programlisting>
+
+        <para>You will see the plot shown in <xref
+        linkend="opt-fig-par-est1"/>.</para>
+
+        <figure xml:id="opt-fig-par-est1">
+          <title>State profiles corresponding to estimated values of a1 and
+          a2.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+
+        <para>The profiles corresponding to the estimated values of a1 and a2
+        are shown in black curves. As can be seen, the match between the model
+        response and the measurement data has been significantly increased. Is
+        the behavior of the model consistent with the estimated parameter
+        values?</para>
+
+        <para>Nevertheless, there is still a mismatch for the upper tanks,
+        especially for tank 4. In order to improve the match, a second
+        estimation problem may be formulated, where the parameters a1, a2, a3,
+        a4 are free optimization variables, and where the squared errors of
+        all four tank levels are penalized. Do this as an exercise!</para>
+      </section>
     </section>
   </section>
 
