@@ -2222,7 +2222,7 @@ class LocalDAECollocator(CasadiCollocator):
                         print("Warning: Could not find nominal trajectory " +
                               "for variable " + name + ". Using nominal " +
                               "attribute value instead.")
-                        nom_val = op.get_attr(var, "nominal")
+                        nom_val = self.op.get_attr(var, "nominal")
                         d = N.abs(nom_val)
                         if d == 0.:
                             raise CasadiCollocatorException(
