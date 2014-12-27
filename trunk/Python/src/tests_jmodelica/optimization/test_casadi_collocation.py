@@ -305,13 +305,13 @@ class TestLocalDAECollocator(object):
         
         # Measurement data
         Q = N.array([[1.]])
-        unconstrained = OrderedDict()
-        unconstrained['y'] = data
-        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
+        quad_pen = OrderedDict()
+        quad_pen['y'] = data
+        external_data = ExternalData(quad_pen=quad_pen, Q=Q)
         
         # Optimization options
         opts = self.optimize_options(op, self.algorithm)
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opts['n_e'] = 16
         
         # Optimize with trajectories
@@ -327,7 +327,7 @@ class TestLocalDAECollocator(object):
 
         # Optimize with scaling
         opts = self.optimize_options(op, self.algorithm)
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opts['variable_scaling'] = True
         N.testing.assert_raises(CasadiCollocatorException,
                                 op.optimize, self.algorithm, opts)
@@ -663,13 +663,13 @@ class TestLocalDAECollocator(object):
         
         # Measurement data
         Q = N.array([[1.]])
-        unconstrained=OrderedDict()
-        unconstrained['y'] = data
-        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
+        quad_pen = OrderedDict()
+        quad_pen['y'] = data
+        external_data = ExternalData(quad_pen=quad_pen, Q=Q)
         
         # Optimize without scaling
         opts = self.optimize_options(op, self.algorithm)
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opts['variable_scaling'] = False
         opts['n_e'] = 16
         res = op.optimize(self.algorithm, opts)
@@ -712,15 +712,15 @@ class TestLocalDAECollocator(object):
         t_meas = N.linspace(0., 10., num=len(y_meas))
         data = N.vstack([t_meas, y_meas])
         
-        # Measurement data
+        # External data
         Q = N.array([[1.]])
-        unconstrained = OrderedDict()
-        unconstrained['y'] = data
-        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
+        quad_pen = OrderedDict()
+        quad_pen['y'] = data
+        external_data = ExternalData(quad_pen=quad_pen, Q=Q)
         
         # Optimize without scaling
         opts = self.optimize_options(op, self.algorithm)
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opts['n_e'] = 16
         opt_res = op.optimize(self.algorithm, opts)
         
@@ -740,9 +740,9 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
 
     @testattr(casadi = True)
-    def test_qt_par_est_unconstrained(self):
+    def test_qt_par_est_quad_pen(self):
         """
-        Test parameter estimation for the quad tank with unconstrained inputs.
+        Test parameter estimation for the quad tank with quad_pen inputs.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         model = self.qt_model
@@ -764,25 +764,24 @@ class TestLocalDAECollocator(object):
         sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
                                  final_time=60.)
         
-        # Create measurement data
+        # Create external data
         Q = N.diag([1., 1., 10., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        unconstrained['qt.x2'] = data_x2
-        unconstrained['u1'] = data_u1
-        unconstrained['u2'] = data_u2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained)
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        quad_pen['qt.x2'] = data_x2
+        quad_pen['u1'] = data_u1
+        quad_pen['u2'] = data_u2
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen)
         
         # Unconstrained
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
         opts['init_traj'] = sim_res
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opt_res = op.optimize(self.algorithm, options=opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -821,27 +820,26 @@ class TestLocalDAECollocator(object):
         sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
                                  final_time=60.)
         
-        # Create measurement data
+        # Create external data
         Q = N.diag([1., 1.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        unconstrained['qt.x2'] = data_x2
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        quad_pen['qt.x2'] = data_x2
         eliminated = OrderedDict()
         eliminated['u1'] = data_u1
         eliminated['u2'] = data_u2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           eliminated=eliminated)
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     eliminated=eliminated)
         
         # Eliminated
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 30
         opts['init_traj'] = sim_res
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -864,39 +862,37 @@ class TestLocalDAECollocator(object):
         opts2 = self.optimize_options(op_2, self.algorithm)
         opts2['n_e'] = 30
         opts2['init_traj'] = sim_res
-        opts2['measurement_data'] = measurement_data
+        opts2['external_data'] = external_data
         N.testing.assert_raises(CasadiCollocatorException,
                                 op_2.optimize, self.algorithm, opts2)
         
         # Eliminate state
         Q = N.diag([1.])
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
         eliminated = OrderedDict()
         eliminated['u1'] = data_u1
         eliminated['u2'] = data_u2
         eliminated['qt.x2'] = data_x2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           eliminated=eliminated)
-        opts['measurement_data'] = measurement_data
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     eliminated=eliminated)
+        opts['external_data'] = external_data
         N.testing.assert_raises(CasadiCollocatorException,
                                 op.optimize, self.algorithm, opts)
 
         # Eliminate non-existing variable
         del eliminated['qt.x2']
         eliminated['does_not_exist'] = data_x2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           eliminated=eliminated)
-        opts['measurement_data'] = measurement_data
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     eliminated=eliminated)
+        opts['external_data'] = external_data
         N.testing.assert_raises(CasadiCollocatorException,
                                 op.optimize, self.algorithm, opts)
 
     @testattr(casadi = True)
-    def test_qt_par_est_constrained(self):
+    def test_qt_par_est_constr_quad_pen(self):
         """
-        Test parameter estimation for the quad tank with constrained inputs.
+        Test parameter estimation for quad tank with constr_quad_pen inputs.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         model = self.qt_model
@@ -918,33 +914,32 @@ class TestLocalDAECollocator(object):
         sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
                                  final_time=60.)
         
-        # Create measurement data
+        # Create external data
         Q = N.diag([1., 1., 10., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        unconstrained['qt.x2'] = data_x2
-        constrained = OrderedDict()
-        constrained['u1'] = data_u1
-        constrained['u2'] = data_u2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           constrained=constrained)
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        quad_pen['qt.x2'] = data_x2
+        constr_quad_pen = OrderedDict()
+        constr_quad_pen['u1'] = data_u1
+        constr_quad_pen['u2'] = data_u2
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     constr_quad_pen=constr_quad_pen)
         
-        # Constrained
+        # constr_quad_pen
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 30
         opts['init_traj'] = sim_res
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
                                   a_ref, rtol=1e-3)
         
-        # Constrained with nominal trajectories
+        # constr_quad_pen with nominal trajectories
         opts['nominal_traj'] = sim_res
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
@@ -958,16 +953,15 @@ class TestLocalDAECollocator(object):
         op.getVariable('u1').setMin(-N.inf)
         
         # Constrain state
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        constrained = OrderedDict()
-        constrained['u1'] = data_u1
-        constrained['u2'] = data_u2
-        constrained['qt.x2'] = data_x2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           constrained=constrained)
-        opts['measurement_data'] = measurement_data
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        constr_quad_pen = OrderedDict()
+        constr_quad_pen['u1'] = data_u1
+        constr_quad_pen['u2'] = data_u2
+        constr_quad_pen['qt.x2'] = data_x2
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     constr_quad_pen=constr_quad_pen)
+        opts['external_data'] = external_data
         N.testing.assert_raises(VariableNotFoundError,
                                 op.optimize, self.algorithm, opts)
 
@@ -996,27 +990,26 @@ class TestLocalDAECollocator(object):
         sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
                                      final_time=60.)
         
-        # Create measurement data
+        # Create external data
         Q = N.diag([1., 1., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
         data_u1 = N.vstack([t_meas, u1])
         data_u2 = N.vstack([t_meas, u2])
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        unconstrained['qt.x2'] = data_x2
-        unconstrained['u1'] = data_u1
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        quad_pen['qt.x2'] = data_x2
+        quad_pen['u1'] = data_u1
         eliminated = OrderedDict()
         eliminated['u2'] = data_u2
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           eliminated=eliminated)
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     eliminated=eliminated)
         
         # Eliminate u2
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
         opts['init_traj'] = sim_res
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -1030,17 +1023,16 @@ class TestLocalDAECollocator(object):
                                   a_ref, rtol=1e-4)
         
         # Eliminate u1
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        unconstrained['qt.x2'] = data_x2
-        unconstrained['u2'] = data_u2
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        quad_pen['qt.x2'] = data_x2
+        quad_pen['u2'] = data_u2
         eliminated = OrderedDict()
         eliminated['u1'] = data_u1
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           eliminated=eliminated)
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     eliminated=eliminated)
         opts['nominal_traj'] = None
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),
@@ -1078,7 +1070,7 @@ class TestLocalDAECollocator(object):
         sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
                                      final_time=60.)
         
-        # Create measurement data
+        # Create external data
         Q = N.diag([1., 1., 10.])
         data_x1 = N.vstack([t_meas, y1_meas])
         data_x2 = N.vstack([t_meas, y2_meas])
@@ -1086,20 +1078,19 @@ class TestLocalDAECollocator(object):
         linear_u1 = TrajectoryLinearInterpolation(t_meas,
                                                   u1.reshape([-1, 1]))
         user_u1 = linear_u1.eval
-        unconstrained = OrderedDict()
-        unconstrained['qt.x1'] = data_x1
-        unconstrained['qt.x2'] = data_x2
-        unconstrained['u2'] = data_u2
+        quad_pen = OrderedDict()
+        quad_pen['qt.x1'] = data_x1
+        quad_pen['qt.x2'] = data_x2
+        quad_pen['u2'] = data_u2
         eliminated = OrderedDict()
         eliminated['u1'] = user_u1
-        measurement_data = MeasurementData(Q=Q,
-                                           unconstrained=unconstrained,
-                                           eliminated=eliminated)
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen,
+                                     eliminated=eliminated)
         
         # Semi-eliminated with user-defined interpolation function
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 60
-        opts['measurement_data'] = measurement_data
+        opts['external_data'] = external_data
         opt_res = op.optimize(self.algorithm, opts)
         N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
                                                  opt_res.final("qt.a2")]),

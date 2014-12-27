@@ -862,7 +862,7 @@ class CasadiModel(ModelBase):
     """
     
     def __init__(self, name, path='.', verbose=True, ode=False):
-        raise NotImplementedError('CasadiModel is obsolete. \n \
+        raise DeprecationWarning('CasadiModel is obsolete. \n \
         The CasadiPseudoSpectralAlg and LocalDAECollocationAlgOld \n \
         are no longer supported. To solve an optimization problem \n \
         with CasADi use pyjmi.transfer_optimization_problem instead.')

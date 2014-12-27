@@ -1752,11 +1752,11 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: bool
             Default: False
         
-        measurement_data --
-            Data used to penalize, constraint or eliminate certain variables.
+        external_data --
+            Data used to penalize, constrain or eliminate certain variables.
             
             Type: None or
-            pyjmi.optimization.casadi_collocation.MeasurementData
+            pyjmi.optimization.casadi_collocation.ExternalData
             Default: None
 
         delayed_feedback --
@@ -1818,7 +1818,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'quadrature_constraint': True,
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
-                'measurement_data': None,
+                'external_data': None,
                 'checkpoint': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',

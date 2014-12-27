@@ -24,16 +24,29 @@ import numpy as N
 
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
-from pyjmi import transfer_to_casadi_interface, get_files_path
-from pyjmi.optimization.casadi_collocation import MeasurementData
+from pyjmi import transfer_optimization_problem, get_files_path
+from pyjmi.optimization.casadi_collocation import ExternalData
 
 def run_demo(with_plots=True):
     """
     This example demonstrates how to solve parameter estimation problmes.
 
-    The data used in the example was recorded by Kristian Soltesz at the 
-    Department of Automatic Control. 
+    The system is tanks with connected inlets and outlets. The objective is to
+    estimate the outlet area of two of the tanks based on measurement data.
     """
+    # Compile and load FMU, which is used for simulation
+    file_path = os.path.join(get_files_path(), "QuadTankPack.mop")
+    model = load_fmu(compile_fmu('QuadTankPack.QuadTank', file_path))
+
+    # Transfer problem to CasADi Interface, which is used for estimation
+    op = transfer_optimization_problem("QuadTankPack.QuadTank_ParEstCasADi",
+                                       file_path)
+
+    # Set initial states in model, which are stored in the optimization problem
+    x_0_names = ['x1_0', 'x2_0', 'x3_0', 'x4_0']
+    x_0_values = op.get(x_0_names)
+    model.set(x_0_names, x_0_values)
+    
     # Load measurement data from file
     data_path = os.path.join(get_files_path(), "qt_par_est_data.mat")
     data = loadmat(data_path, appendmat=False)
@@ -46,7 +59,7 @@ def run_demo(with_plots=True):
     y4_meas = data['y4_d'][6000::100, 0] / 100
     u1 = data['u1_d'][6000::100, 0]
     u2 = data['u2_d'][6000::100, 0]
-        
+    
     # Plot measurements and inputs
     if with_plots:
         plt.close(1)
@@ -86,32 +99,27 @@ def run_demo(with_plots=True):
 
     # Build input trajectory matrix for use in simulation
     u = N.transpose(N.vstack([t_meas, u1, u2]))
-
-    # Compile and load FMU
-    model_path = os.path.join(get_files_path(), "QuadTankPack.mop")
-    fmu_name = compile_fmu('QuadTankPack.Sim_QuadTank', model_path)
-    model = load_fmu(fmu_name)
     
     # Simulate model response with nominal parameter values
-    res = model.simulate(input=(['u1', 'u2'], u),
-                         start_time=0., final_time=60.)
+    res_sim = model.simulate(input=(['u1', 'u2'], u),
+                             start_time=0., final_time=60.)
 
     # Load simulation result
-    x1_sim = res['qt.x1']
-    x2_sim = res['qt.x2']
-    x3_sim = res['qt.x3']
-    x4_sim = res['qt.x4']
-    t_sim  = res['time']
-    u1_sim = res['u1']
-    u2_sim = res['u2']
+    x1_sim = res_sim['x1']
+    x2_sim = res_sim['x2']
+    x3_sim = res_sim['x3']
+    x4_sim = res_sim['x4']
+    t_sim  = res_sim['time']
+    u1_sim = res_sim['u1']
+    u2_sim = res_sim['u2']
 
     # Check simulation results for testing purposes
-    assert N.abs(res.final('qt.x1') - 0.05642485) < 1e-3
-    assert N.abs(res.final('qt.x2') - 0.05510478) < 1e-3
-    assert N.abs(res.final('qt.x3') - 0.02736532) < 1e-3
-    assert N.abs(res.final('qt.x4') - 0.02789808) < 1e-3
-    assert N.abs(res.final('u1') - 6.0) < 1e-3
-    assert N.abs(res.final('u2') - 5.0) < 1e-3
+    assert N.abs(res_sim.final('x1') - 0.05642485) < 1e-3
+    assert N.abs(res_sim.final('x2') - 0.05510478) < 1e-3
+    assert N.abs(res_sim.final('x3') - 0.02736532) < 1e-3
+    assert N.abs(res_sim.final('x4') - 0.02789808) < 1e-3
+    assert N.abs(res_sim.final('u1') - 6.0) < 1e-3
+    assert N.abs(res_sim.final('u2') - 5.0) < 1e-3
 
     # Plot simulation result
     if with_plots:
@@ -131,69 +139,65 @@ def run_demo(with_plots=True):
         plt.subplot(2, 1, 2)
         plt.plot(t_sim, u2_sim, 'r')
 
-    # Load optimization problem
-    op = transfer_to_casadi_interface("QuadTankPack.QuadTank_ParEstCasADi",
-                                      model_path)
-
-    # Create measurement data object for optimization
+    # Create external data object for optimization
     Q = N.diag([1., 1., 10., 10.])
     data_x1 = N.vstack([t_meas, y1_meas])
     data_x2 = N.vstack([t_meas, y2_meas])
     data_u1 = N.vstack([t_meas, u1])
     data_u2 = N.vstack([t_meas, u2])
-    unconstrained = OrderedDict()
-    unconstrained['qt.x1'] = data_x1
-    unconstrained['qt.x2'] = data_x2
-    unconstrained['u1'] = data_u1
-    unconstrained['u2'] = data_u2
-    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
+    quad_pen = OrderedDict()
+    quad_pen['x1'] = data_x1
+    quad_pen['x2'] = data_x2
+    quad_pen['u1'] = data_u1
+    quad_pen['u2'] = data_u2
+    external_data = ExternalData(Q=Q, quad_pen=quad_pen)
 
     # Set optimization options and optimize
     opts = op.optimize_options()
-    opts['n_e'] = 60
-    opts['measurement_data'] = measurement_data
-    opts['init_traj'] = res
-    opts['nominal_traj'] = res
-    res = op.optimize(options=opts)
-
-    # Load state profiles
-    x1_opt = res["qt.x1"]
-    x2_opt = res["qt.x2"]
-    x3_opt = res["qt.x3"]
-    x4_opt = res["qt.x4"]
-    u1_opt = res["qt.u1"]
-    u2_opt = res["qt.u2"]
-    t_opt  = res["time"]
+    opts['n_e'] = 60 # Number of collocation elements
+    opts['external_data'] = external_data
+    opts['init_traj'] = res_sim
+    opts['nominal_traj'] = res_sim
+    res = op.optimize(options=opts) # Solve estimation problem
 
     # Extract estimated values of parameters
-    a1_opt = res.final("qt.a1")
-    a2_opt = res.final("qt.a2")
+    a1_opt = res.initial("a1")
+    a2_opt = res.initial("a2")
 
     # Print and assert estimated parameter values
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
     a_ref = [0.02656702, 0.02713898]
     N.testing.assert_allclose(1e4 * N.array([a1_opt, a2_opt]),
-                              [0.02656702, 0.02713898], rtol=1e-4)
+                              a_ref, rtol=1e-4)
+
+    # Load state profiles
+    x1_opt = res["x1"]
+    x2_opt = res["x2"]
+    x3_opt = res["x3"]
+    x4_opt = res["x4"]
+    u1_opt = res["u1"]
+    u2_opt = res["u2"]
+    t_opt  = res["time"]
 
     # Plot estimated trajectories
     if with_plots:
         plt.figure(1)
         plt.subplot(2, 2, 1)
-        plt.plot(t_opt,x3_opt,'k')
+        plt.plot(t_opt, x3_opt, 'k')
         plt.subplot(2, 2, 2)
-        plt.plot(t_opt,x4_opt,'k')
+        plt.plot(t_opt, x4_opt, 'k')
         plt.subplot(2, 2, 3)
-        plt.plot(t_opt,x1_opt,'k')
+        plt.plot(t_opt, x1_opt, 'k')
         plt.subplot(2, 2, 4)
-        plt.plot(t_opt,x2_opt,'k')
+        plt.plot(t_opt, x2_opt, 'k')
 
         plt.figure(2)
         plt.subplot(2, 1, 1)
-        plt.plot(t_opt,u1_opt,'k')
+        plt.plot(t_opt, u1_opt, 'k')
         plt.subplot(2, 1, 2)
-        plt.plot(t_opt,u2_opt,'k')
+        plt.plot(t_opt, u2_opt, 'k')
         plt.show()
 
-if __name__=="__main__":
+if __name__ == "__main__":
     run_demo()

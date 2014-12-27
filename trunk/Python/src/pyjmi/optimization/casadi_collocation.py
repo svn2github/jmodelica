@@ -585,10 +585,10 @@ class CasadiCollocator(object):
         self.solver_object.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
         self.solver_object.setInput(self.glub, casadi.NLP_SOLVER_UBG)
         
-class MeasurementData(object):
+class ExternalData(object):
 
     """
-    Numerical data connected to variables.
+    External data connected to variables.
 
     The data can for each variable be treated in three different ways.
 
@@ -596,16 +596,16 @@ class MeasurementData(object):
         The data for these inputs is used to eliminate the corresponding NLP
         variables.
 
-    constrained --
-        The data for these inputs is used to constrain the corresponding NLP
-        variables with equality constraints in each collocation point. A
-        quadratic penalty is also introduced for these inputs.
+    quad_pen --
+        The NLP variables are kept, but a quadratic penalty on the deviation
+        from the data is introduced.
 
-    unconstrained --
-        The data is only used to form a quadratic penalty for these variables.
+    constr_quad_pen --
+        The NLP variables are kept, but a quadratic penalty on the deviation
+        from the data is introduced, as well as an equality constraint.
 
-    eliminated and constrained must be inputs, whereas unconstrained can be any
-    kind of variables.
+    eliminated and constr_quad_pen must be inputs, whereas quad_pen can be any
+    kind of variable.
 
     The data for each variable is either a user-defined function of time, or
     a matrix with two rows where the first row is points in time and the
@@ -614,8 +614,8 @@ class MeasurementData(object):
     values at the collocation points.
     """
 
-    def __init__(self, eliminated=OrderedDict(), constrained=OrderedDict(),
-                 unconstrained=OrderedDict(), Q=None):
+    def __init__(self, eliminated=OrderedDict(), quad_pen=OrderedDict(),
+                 constr_quad_pen=OrderedDict(), Q=None):
         """
         The following quadratic cost is formed:
 
@@ -625,8 +625,8 @@ class MeasurementData(object):
             (y(t) - y_m(t))\,\mathrm{d}t,
 
         where y is the function created by gluing together the
-        collocation polynomials for the constrained and unconstrained variables
-        at all the mesh points and y_m is a function providing the measured
+        collocation polynomials for the variables with quadratic penalties at
+        all the mesh points and y_m is a function providing the measured
         values at a given time point. If the variable data are a matrix, the
         data are linearly interpolated to create the function y_m. If the data
         are a function, then this function defines y_m.
@@ -640,52 +640,43 @@ class MeasurementData(object):
                 Type: OrderedDict
                 Default: OrderedDict()
 
-            constrained --
+            quad_pen --
                 Ordered dictionary with variable names as keys and the values
-                are the corresponding data used to constrain and penalize the
-                inputs.
+                are the corresponding data used to penalize the inputs.
 
                 Type: OrderedDict
                 Default: OrderedDict()
 
-            unconstrained --
+            constr_quad_pen --
                 Dictionary with variable names as keys and the values are the
-                corresponding data used to penalize the variables.
+                corresponding data used to constraint and penalize the
+                variables.
 
                 Type: OrderedDict
                 Default: OrderedDict()
 
             Q --
                 Weighting matrix used to form the quadratic penalty for the
-                constrained and unconstrained variables. The order of the
-                variables is the same as in constrained_inputs and
-                unconstrained_variables, with the constrained inputs coming
-                first.
+                uneliminated variables. The order of the variables is the same
+                as the ordered dictionaries constr_quad_pen and quad_pen,
+                with the constrained inputs coming first.
 
                 Type: rank 2 ndarray
                 Default: None
-
-
-        Limitations::
-
-            Variable names for constrained and eliminated inputs do not take
-            aliases into account; these variables have to be referenced by the
-            name used in CasadiModel.
-
         """
         # Check dimension of Q
-        Q_len = ((0 if constrained is None else len(constrained)) + 
-                 (0 if unconstrained is None else len(unconstrained)))
+        Q_len = ((0 if constr_quad_pen is None else len(constr_quad_pen)) + 
+                 (0 if quad_pen is None else len(quad_pen)))
         if Q_len > 0 and (Q.shape[0] != Q.shape[1] or Q.shape[0] != Q_len):
             raise ValueError("Weighting matrix Q must be square and have " +
                              "the same dimension as the total number of " +
-                             "constrained and unconstrained variables.")
+                             "penalized variables.")
 
         # Transform data into trajectories
         eliminated = copy.copy(eliminated)
-        constrained = copy.copy(constrained)
-        unconstrained = copy.copy(unconstrained)
-        for variable_list in [eliminated, constrained, unconstrained]:
+        constr_quad_pen = copy.copy(constr_quad_pen)
+        quad_pen = copy.copy(quad_pen)
+        for variable_list in [eliminated, constr_quad_pen, quad_pen]:
             for (name, data) in variable_list.items():
                 if (isinstance(data, types.FunctionType) or
                     hasattr(data, '__call__')):
@@ -700,8 +691,8 @@ class MeasurementData(object):
 
         # Store data as attributes
         self.eliminated = eliminated
-        self.constrained = constrained
-        self.unconstrained = unconstrained
+        self.constr_quad_pen = constr_quad_pen
+        self.quad_pen = quad_pen
         self.Q = Q
 
 class FreeElementLengthsData(object):
@@ -938,12 +929,12 @@ class LocalDAECollocator(CasadiCollocator):
                  'u': len(mvar_vectors["u"]),
                  'w': len(mvar_vectors["w"])}
 
-        # Exchange alias variables in measurement data
-        if self.measurement_data is not None:
-            eliminated = self.measurement_data.eliminated
-            constrained = self.measurement_data.constrained
-            unconstrained = self.measurement_data.unconstrained
-            for variable_list in [eliminated, constrained, unconstrained]:
+        # Exchange alias variables in external data
+        if self.external_data is not None:
+            eliminated = self.external_data.eliminated
+            constr_quad_pen = self.external_data.constr_quad_pen
+            quad_pen = self.external_data.quad_pen
+            for variable_list in [eliminated, constr_quad_pen, quad_pen]:
                 for name in variable_list.keys():
                     var = op.getVariable(name)
                     if var is None:
@@ -956,12 +947,12 @@ class LocalDAECollocator(CasadiCollocator):
                         del variable_list[name]
 
         # Create eliminated and uneliminated input lists
-        if (self.measurement_data is None or
-            len(self.measurement_data.eliminated) == 0):
+        if (self.external_data is None or
+            len(self.external_data.eliminated) == 0):
             elim_input_indices = []
         else:
             input_names = [u.getName() for u in mvar_vectors['u']]
-            elim_names = self.measurement_data.eliminated.keys()
+            elim_names = self.external_data.eliminated.keys()
             elim_vars = [op.getModelVariable(elim_name)
                          for elim_name in elim_names]
             for (i, elim_var) in enumerate(elim_vars):
@@ -1773,8 +1764,7 @@ class LocalDAECollocator(CasadiCollocator):
 
     def _compute_collocation_constrained_points(self,time):
         """
-        Returns a dictionary that contains the collocation 
-        constrained points due to timed variables
+        Create dictionary for the collocation points with timed variables.
 
         Parameters::
 
@@ -2244,14 +2234,13 @@ class LocalDAECollocator(CasadiCollocator):
             self.n_variant_dx =n_variant_dx
             self.n_invariant_var = n_invariant_var
 
-    def _create_measurement_input_trajectories(self):
+    def _create_external_input_trajectories(self):
         """
-        Computes the measurement input trajectories 
+        Computes the external input trajectories 
         """        
         # Create measured input trajectories
-
-        if (self.measurement_data is None or
-            len(self.measurement_data.eliminated) == 0):
+        if (self.external_data is None or
+            len(self.external_data.eliminated) == 0):
             self.var_map['elim_u'] = dict()
             self.var_map['constr_u'] = dict()
             for i in xrange(1, self.n_e + 1):
@@ -2263,14 +2252,14 @@ class LocalDAECollocator(CasadiCollocator):
                     self.var_map['elim_u'][i][k]['all'] = N.array([])
                     self.var_map['constr_u'][i][k]['all'] = N.array([])
 
-        if (self.measurement_data is not None and
-            (len(self.measurement_data.eliminated) +
-             len(self.measurement_data.constrained) > 0)):
+        if (self.external_data is not None and
+            (len(self.external_data.eliminated) +
+             len(self.external_data.constr_quad_pen) > 0)):
             # Create storage of maximum and minimum values
             traj_min = OrderedDict()
             traj_max = OrderedDict()
-            for name in (self.measurement_data.eliminated.keys() +
-                         self.measurement_data.constrained.keys()):
+            for name in (self.external_data.eliminated.keys() +
+                         self.external_data.constr_quad_pen.keys()):
                 traj_min[name] = N.inf
                 traj_max[name] = -N.inf
 
@@ -2286,7 +2275,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # Eliminated inputs
                     values = []
                     for (name, data) in \
-                        self.measurement_data.eliminated.items():
+                        self.external_data.eliminated.items():
                         value = data.eval(self.time_points[i][k])[0, 0]
                         values.append(value)
                         if value < traj_min[name]:
@@ -2300,7 +2289,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # Constrained inputs
                     values = []
                     for (name, data) in \
-                        self.measurement_data.constrained.items():
+                        self.external_data.constr_quad_pen.items():
                         value = data.eval(self.time_points[i][k])[0, 0]
                         values.append(value)
                         if value < traj_min[name]:
@@ -2312,8 +2301,8 @@ class LocalDAECollocator(CasadiCollocator):
                         self.var_map['constr_u'][i][k][z] = values[z]                    
 
             # Check that constrained and eliminated inputs satisfy their bounds
-            for var_name in (self.measurement_data.eliminated.keys() +
-                             self.measurement_data.constrained.keys()):
+            for var_name in (self.external_data.eliminated.keys() +
+                             self.external_data.constr_quad_pen.keys()):
                 var = self.op.getVariable(var_name)
                 var_min = self.op.get_attr(var, "min")
                 var_max = self.op.get_attr(var, "max")
@@ -3168,29 +3157,28 @@ class LocalDAECollocator(CasadiCollocator):
 
         c_e.append(G_e_constr)
         c_i.append(G_i_constr)
-        
-        
+
         # Check that only inputs are constrained or eliminated
-        if self.measurement_data is not None:
-            for var_name in (self.measurement_data.eliminated.keys() +
-                             self.measurement_data.constrained.keys()):
+        if self.external_data is not None:
+            for var_name in (self.external_data.eliminated.keys() +
+                             self.external_data.constr_quad_pen.keys()):
                 (_, vt) = self.name_map[var_name]
                 if vt not in ['elim_u', 'unelim_u']:
-                    if var_name in self.measurement_data.eliminated.keys():
+                    if var_name in self.external_data.eliminated.keys():
                         msg = ("Eliminated variable " + var_name + " is " +
                                "either not an input or in the model at all.")
                     else:
                         msg = ("Constrained variable " + var_name + " is " +
                                "either not an input or in the model at all.")
                     raise jmiVariableNotFoundError(msg) 
-                
+
         # Equality constraints for constrained inputs
-        if self.measurement_data is not None:
+        if self.external_data is not None:
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
-                    for j in xrange(len(self.measurement_data.constrained)):
+                    for j in xrange(len(self.external_data.constr_quad_pen)):
                         # Retrieve variable and value
-                        name = self.measurement_data.constrained.keys()[j]
+                        name = self.external_data.constr_quad_pen.keys()[j]
                         constr_var = self._get_unscaled_expr(name, i, k)
                         constr_val = self.var_map['constr_u'][i][k]['all'][j]                            
 
@@ -3639,7 +3627,7 @@ class LocalDAECollocator(CasadiCollocator):
         self._create_trajectory_scaling_factor_structures()
 
         # Create measured input trajectories
-        self._create_measurement_input_trajectories()
+        self._create_external_input_trajectories()
 
         # At this point, most features stop being supported
         if self.eliminate_der_var:
@@ -3647,26 +3635,25 @@ class LocalDAECollocator(CasadiCollocator):
         if self.eliminate_cont_var:
             raise NotImplementedError("eliminate_cont_var not yet supported.")
 
-        #make time an attribute
+        # Make time an attribute
         self.time = N.array(time)
 
-        # define level0 functions
+        # Define level0 functions
         self._define_l0_functions() 
         if self.checkpoint:
             self._define_l1_functions()
 
-        # call functions
+        # Call functions
         self._call_functions()
         if not self.checkpoint:
             self._call_l0_functions()
         else:         
             self._call_l1_functions()
 
-        #Additional terms for the cost
-        # Add quadratic cost for measurement data
-        if (self.measurement_data is not None and
-            (len(self.measurement_data.unconstrained) +
-             len(self.measurement_data.constrained) > 0)):
+        # Add quadratic cost for external data
+        if (self.external_data is not None and
+            (len(self.external_data.quad_pen) +
+             len(self.external_data.constr_quad_pen) > 0)):
             # Retrieve scaling factors
             if self.variable_scaling and self.nominal_traj is not None:
                 invariant_d = self._invariant_d
@@ -3678,8 +3665,8 @@ class LocalDAECollocator(CasadiCollocator):
             # reference values
             err = {}
             y_ref = {}
-            datas = (self.measurement_data.constrained.values() +
-                     self.measurement_data.unconstrained.values())
+            datas = (self.external_data.constr_quad_pen.values() +
+                     self.external_data.quad_pen.values())
             for i in range(1, self.n_e + 1):
                 err[i] = {}
                 y_ref[i] = {}
@@ -3694,8 +3681,8 @@ class LocalDAECollocator(CasadiCollocator):
             name_map = self.name_map
             if self.variable_scaling and self.nominal_traj is None:
                 sfs = self._sf
-            var_names = (self.measurement_data.constrained.keys() +
-                         self.measurement_data.unconstrained.keys())
+            var_names = (self.external_data.constr_quad_pen.keys() +
+                         self.external_data.quad_pen.keys())
             for j in xrange(len(var_names)):
                 name = var_names[j]
                 for i in range(1, self.n_e + 1):
@@ -3705,7 +3692,7 @@ class LocalDAECollocator(CasadiCollocator):
                         err[i][k].append(unscaled_val - ref_val)
 
             # Calculate cost contribution from each collocation point
-            Q = self.measurement_data.Q
+            Q = self.external_data.Q
             for i in range(1, self.n_e + 1):
                 h_i = self.horizon * self.h[i]
                 for k in range(1, self.n_cp + 1):
@@ -4673,3 +4660,14 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise CasadiCollocatorException(
                 "named_var_expr only works if named_vars is enabled.")
+
+class MeasurementData(object):
+
+    """
+    This class is obsolete and replaced by ExternalData.
+    """
+    
+    def __init__(self, eliminated=OrderedDict(), constrained=OrderedDict(),
+                 unconstrained=OrderedDict(), Q=None):
+        raise DeprecationWarning('MeasurementData is obsolete. ' +
+                                 'Use ExternalData instead.')
