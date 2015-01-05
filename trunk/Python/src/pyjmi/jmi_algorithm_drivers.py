@@ -1323,7 +1323,18 @@ class LocalDAECollocationAlg(AlgorithmBase):
             self.quadrature_constraint):
             raise NotImplementedError("quadrature_constraint is not " + \
                                       "compatible with eliminate_der_var.")
-        
+
+        # Check validity of init_dual
+        if self.init_dual is not None and self.solver == "IPOPT":
+            try:
+                warm_start = self.IPOPT_options['warm_start_init_point']
+            except KeyError:
+                warm_start = False
+            if not warm_start:
+                print("Warning: The provided initial guess for the dual " +
+                      "variables will not be used since warm start is not " +
+                      "enabled for IPOPT.")
+
         # Check validity of blocking_factors
         if self.blocking_factors is not None:
             if isinstance(self.blocking_factors, collections.Iterable):
@@ -1394,9 +1405,10 @@ class LocalDAECollocationAlg(AlgorithmBase):
                     self.nominal_traj_mode[mvar.getName()] = \
                             self.nominal_traj_mode[name]
                     del self.nominal_traj_mode[name]
+
         # Check validity of check point
         if self.checkpoint and self.blocking_factors is not None:
-            raise NotImplementedError("Check point does not work with " +
+            raise NotImplementedError("Checkpoint does not work with " +
                                       "blocking factors.")
         # Solver options
         if self.solver == "IPOPT":
@@ -1567,7 +1579,22 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or pyjmi.common.io.ResultDymolaTextual or
                   pyjmi.common.algorithm_drivers.JMResultBase
             Default: None
-        
+
+        init_dual --
+            Dictionary containing vectors of initial guess for NLP dual
+            variables. Intended to be obtained as the solution of an
+            optimization problem which has an identical structure, which is
+            stored in the dual_opt attribute of the result object.
+
+            The dictionary has two keys, 'g' and 'x', containing vectors of the
+            corresponding dual variable intial guesses.
+
+            Note that when using IPOPT, the option warm_start_init_point has to
+            be activated for this option to have an effect.
+
+            Type: None or dict
+            Default: None
+
         variable_scaling --
             Whether to scale the variables according to their nominal values or
             the trajectories provided with the nominal_traj option.
@@ -1806,6 +1833,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'expand_to_sx': "NLP",
                 'named_vars': False,
                 'init_traj': None,
+                'init_dual': None,
                 'variable_scaling': True,
                 'nominal_traj': None,
                 'nominal_traj_mode': {"_default_mode": "linear"},
@@ -1868,6 +1896,8 @@ class LocalDAECollocationAlgResult(JMResultBase):
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times
+        self.primal_opt = solver.primal_opt
+        self.dual_opt = solver.dual_opt
         
         # Print times
         print("\nTotal time: %.2f seconds" % times['tot'])
@@ -2017,7 +2047,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         elif point == "opt":
             x = self.solver.primal_opt
             sigma = self._compute_sigma()
-            dual = self.solver.dual_opt
+            dual = self.solver.dual_opt['g']
             H_fcn.setInput(x, 0)
             H_fcn.setInput(self.solver._par_vals, 1)
             H_fcn.setInput(sigma, 2)
@@ -2087,7 +2117,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
                            self.solver.c_i.numel())
         elif point == "opt":
             x = self.solver.primal_opt
-            dual = self.solver.dual_opt
+            dual = self.solver.dual_opt['g']
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
         sigma = self._compute_sigma()

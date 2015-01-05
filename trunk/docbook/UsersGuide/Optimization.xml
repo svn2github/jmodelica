@@ -555,6 +555,21 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry><literal>init_dual</literal></entry>
+
+              <entry>None</entry>
+
+              <entry>Dictionary containing vectors of initial guess for NLP
+              dual variables. Intended to be obtained as the solution of an
+              optimization problem which has an identical structure, which is
+              stored in the dual_opt attribute of the result object. The
+              dictionary has two keys, 'g' and 'x', containing vectors of the
+              corresponding dual variable intial guesses. Note that when using
+              IPOPT, the option warm_start_init_point has to be activated for
+              this option to have an effect.</entry>
+            </row>
+
+            <row>
               <entry><literal>variable_scaling</literal></entry>
 
               <entry>True</entry>

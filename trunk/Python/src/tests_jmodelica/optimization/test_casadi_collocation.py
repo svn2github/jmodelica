@@ -375,6 +375,39 @@ class TestLocalDAECollocator(object):
                                   rtol=1e-4)
 
     @testattr(casadi = True)
+    def test_init_dual(self):
+        """Test initializing dual variables."""
+        op = self.vdp_bounds_lagrange_op
+        
+        # References values
+        cost_ref = 3.19495079586595e0
+        u_norm_ref = 2.80997269112246e-1
+        
+        # Get initial guess
+        opts = self.optimize_options(op, self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Optimize without warm start
+        opts['init_traj'] = res
+        opts['init_dual'] = res.dual_opt
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
+
+        # Optimize with warm start
+        opts['IPOPT_options']['warm_start_init_point'] = "yes"
+        opts['IPOPT_options']['mu_init'] = 10 ** (-8.6)
+        opts['IPOPT_options']['warm_start_bound_push'] = 1e-12
+        opts['IPOPT_options']['warm_start_bound_frac'] = 1e-12
+        opts['IPOPT_options']['warm_start_slack_bound_frac'] = 1e-12
+        opts['IPOPT_options']['warm_start_slack_bound_push'] = 1e-12
+        opts['IPOPT_options']['warm_start_mult_bound_push'] = 1e-12
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
+
+    @testattr(casadi = True)
     def test_init_traj_opt(self):
         """Test optimizing based on an existing optimization reult."""
         op = self.vdp_bounds_lagrange_op

@@ -538,13 +538,16 @@ class CasadiCollocator(object):
         """
         # Initialize solver
         if self.warm_start:
-            #Update initial condition
-            self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
+            # Initialize primal variables and set parameters
+            self.solver_object.setInput(self.get_xx_init(),
+                                        casadi.NLP_SOLVER_X0)
             self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
 
-            #Update dual variables
-            self.solver_object.setInput(self.dual_opt, casadi.NLP_SOLVER_LAM_G0)
-            self.solver_object.setInput(self.dual_opt2, casadi.NLP_SOLVER_LAM_X0)
+            # Initialize dual variables
+            self.solver_object.setInput(self.dual_opt['g'],
+                                        casadi.NLP_SOLVER_LAM_G0)
+            self.solver_object.setInput(self.dual_opt['x'],
+                                        casadi.NLP_SOLVER_LAM_X0)
         else:
             self._init_and_set_solver_inputs()
         
@@ -555,19 +558,27 @@ class CasadiCollocator(object):
         # Get the result
         primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
         self.primal_opt = primal_opt.reshape(-1)
-        dual_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
-        self.dual_opt = dual_opt.reshape(-1)
-        dual_opt2 = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_X))
-        self.dual_opt2 = dual_opt2.reshape(-1)
+        dual_g_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
+        dual_g_opt = dual_g_opt.reshape(-1)
+        dual_x_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_X))
+        dual_x_opt = dual_x_opt.reshape(-1)
+        self.dual_opt = {'g': dual_g_opt, 'x': dual_x_opt}
         sol_time = time.clock() - t0
         return sol_time
         
     def _init_and_set_solver_inputs(self):
         self.solver_object.init()
 
-        # Initial condition
+        # Primal initial guess and parameter values
         self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
         self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
+
+        # Dual initial guess
+        if self.init_dual is not None:
+            self.solver_object.setInput(self.init_dual['g'],
+                                        casadi.NLP_SOLVER_LAM_G0)
+            self.solver_object.setInput(self.init_dual['x'],
+                                        casadi.NLP_SOLVER_LAM_X0)
 
         # Bounds on x
         self.solver_object.setInput(self.get_xx_lb(), casadi.NLP_SOLVER_LBX)
