@@ -64,7 +64,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     double rcond;
     int info;
     int i;
-	jmi_log_node_t destnode;
+    jmi_log_node_t destnode;
 
     char trans;
     jmi_linear_solver_t* solver = block->solver;
@@ -115,16 +115,17 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
                 }
             }
         }
-	}
+    }
 
-	/* Log the jacobian.*/
-	if((block->callbacks->log_options.log_level >= 5)) {
-		destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
+    /* Log the jacobian.*/
+    if((block->callbacks->log_options.log_level >= 5)) {
+        destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
                                      "Linear solver invoked for <block:%s>", block->label);
-		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->jacobian, block->n, block->n);
-	}
+        jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
+        jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->jacobian, block->n, block->n);
+    }
 
-	/*  If jacobian is reevaluated then factorize Jacobian. */
+    /*  If jacobian is reevaluated then factorize Jacobian. */
     if (solver->cached_jacobian != 1) {
         /* Call 
         *  DGETRF computes an LU factorization of a general M-by-N matrix A
@@ -161,8 +162,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         info = block->F(block->problem_data,solver->zero_vector, block->res, JMI_BLOCK_EVALUATE);
     }
     if(info) {
-		/* Close the LinearSolve log node and generate the Error/Warning node and return. */
-		if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
+        /* Close the LinearSolve log node and generate the Error/Warning node and return. */
+        if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
 
         if(block->init) {
             jmi_log_node(block->log, logError, "ErrEvalEq", "Failed to evaluate equations in <block: %s>", block->label);
@@ -190,9 +191,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     
     if((block->callbacks->log_options.log_level >= 5)) {
-        jmi_log_reals(block->log, destnode, logInfo, "initial_guess", block->initial, block->n);
         jmi_log_reals(block->log, destnode, logInfo, "b", block->res, block->n);     
-        jmi_log_leave(block->log, destnode);
     }
  
     /* Do back-solve */
@@ -201,7 +200,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
       
     if (solver->singular_jacobian == 1){
         /*
-         *   DGELSS - compute the minimum norm solution to	a real 
+         *   DGELSS - compute the minimum norm solution to  a real 
          *   linear least squares problem
          * 
          * SUBROUTINE DGELSS( M, N, NRHS, A, LDA, B, LDB, S, RCOND, RANK,WORK, LWORK, INFO )
@@ -256,6 +255,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
                 block->x[i] = block->res[i];
             }
         }
+    }
+    
+    if((block->callbacks->log_options.log_level >= 5)) {
+        jmi_log_reals(block->log, destnode, logInfo, "x", block->res, block->n);
+        jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
+        jmi_log_leave(block->log, destnode);
     }
     
     /* Write solution back to model */
