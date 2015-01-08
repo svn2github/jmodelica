@@ -912,75 +912,6 @@ public class ModelicaCompiler {
 	}
 
     /**
-     * Compiles a Modelica model. A model file name and class must be provided.
-     * Prints an error and returns without completion if, for example, a file 
-     * can not be found or if the parsing fails. Supports multiple model files.
-     * 
-     * @param name
-     *            Array of model file or library paths.
-     * @param cl
-     *            The name of the class in the model file to compile.
-     * @param target
-     *            The target object for the compiler.
-     * @param flatName
-     *            Name of the unit/flat model supplied by the user, if any.
-     * 
-     * @throws beaver.Parser.Exception
-     *             If there was an Beaver parsing exception.
-     * @throws CompilerException
-     *             If errors have been found during the parsing, instantiation
-     *             or flattening.
-     * @throws FileNotFoundException
-     *             If the model file can not be found.
-     * @throws IOException
-     *             If there was an error reading the model file. (Beaver
-     *             exception.)
-     * @throws IOException
-     *             If there was an error creating the .mof file.
-     * @throws ModelicaClassNotFoundException
-     *             If the Modelica class to parse, instantiate or flatten is not
-     *             found.
-     * 
-     */
-    public FClass compileModel(String name[], String cl, TargetObject target, String flatName)
-      throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        log.info("======= Compiling model =======");
-        resetCompilationInfo();
-        
-        FClass fc = null;
-        try {
-            // compute instance tree
-            InstClassDecl icl = instantiateModel(name, cl, target);
-            
-            // flattening
-            // Throw away source and instance trees when they are not needed any more
-            PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
-            icl = null;
-            fc = flattenModel(buf.pass(), target, flatName);
-
-            // Generate code 
-            if (target.getCodeGenFlag()) {
-                generateCode(fc, target);
-                dumpMemoryUseFile(fc, "generated", false);
-            }
-            
-            fc.loadResources(new File(outDir, "resources"));
-            removeCompiledExternals();
-            
-        } finally {
-        }
-
-        if (options.getBooleanOption("generate_html_diagnostics"))
-            setDiagnosticsGenerator(null);
-
-        log.info("====== Model compiled successfully =======");
-        
-        return fc;
-    }
-
-
-    /**
-     * 
      * Parses a model and returns a reference to the root of the source tree.
      * Options related to the compilation are also loaded here and added to the
      * source tree representation.
@@ -1544,31 +1475,19 @@ public class ModelicaCompiler {
         
         // Compile model
         try {
-            if (programarguments.containsKey("target")) {
-                String targetType = programarguments.get("target");
-                if (targetType.equals("fmume")) {
-                    targetType = "me";
-                } else if (targetType.equals("fmucs")) {
-                    targetType = "cs";
-                }
-                
-                if (targetType.equals("parse")) {
-                    parseFiles(name);
-                } else if (targetType.equals("check")) {
-                    try {
-                        instantiateModel(name, cl, TargetObject.CHECK);
-                    } finally {
-                        if (outDir != null)
-                            deleteOutDir();
-                    }
-                } else {
-                    //Compile
-                    compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
-                } 
-            } else {
+            String targetType = programarguments.get("target");
+            if (targetType == null) {
                 //If no target was set, assume jmu.
-                compileJMU(cl, name, compileTo);
+                targetType = "jmu";
+            } else if (targetType.equals("fmume")) {
+                targetType = "me";
+            } else if (targetType.equals("fmucs")) {
+                targetType = "cs";
             }
+            
+            //Compile
+            compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
+            
         } catch (CompilerException ce) {
             if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
                 getDiagnosticsGenerator().writeProblems(ce.getProblems());
@@ -1788,7 +1707,8 @@ public class ModelicaCompiler {
         FMUX      (Templates.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
         FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
         FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.FMI1, ErrorCheckType.CHECK),
+        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
+        PARSE     (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
         NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false),
         CEVAL     (Templates.CEVAL,     "ceval",     null  , null);
 
@@ -1859,6 +1779,10 @@ public class ModelicaCompiler {
                 return FMUX;
             } else if (targetType.equals("ceval")){
                 return CEVAL;
+            } else if (targetType.equals("parse")) {
+                return PARSE;
+            } else if (targetType.equals("check")) {
+                return CHECK;
             } else {
                 throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU, jmu to compile an JMU or fmux to compile an FMUX."); 
             }
@@ -2012,6 +1936,90 @@ public class ModelicaCompiler {
     }
 }
 
+    /**
+     * Compiles a Modelica model. A model file name and class must be provided.
+     * Prints an error and returns without completion if, for example, a file 
+     * can not be found or if the parsing fails. Supports multiple model files.
+     * 
+     * @param name
+     *            Array of model file or library paths.
+     * @param cl
+     *            The name of the class in the model file to compile.
+     * @param target
+     *            The target object for the compiler.
+     * @param flatName
+     *            Name of the unit/flat model supplied by the user, if any.
+     * 
+     * @return A flat representation of the class specified by <code>cl</code>.
+     *            Returns null for some targets.
+     * 
+     * @throws beaver.Parser.Exception
+     *             If there was an Beaver parsing exception.
+     * @throws CompilerException
+     *             If errors have been found during the parsing, instantiation
+     *             or flattening.
+     * @throws FileNotFoundException
+     *             If the model file can not be found.
+     * @throws IOException
+     *             If there was an error reading the model file. (Beaver
+     *             exception.)
+     * @throws IOException
+     *             If there was an error creating the .mof file.
+     * @throws ModelicaClassNotFoundException
+     *             If the Modelica class to parse, instantiate or flatten is not
+     *             found.
+     * 
+     */
+    public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName)
+          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        if (target.equals(TargetObject.PARSE)) {
+            parseFiles(name);
+            return null;
+        } else if (target.equals(TargetObject.CHECK)) {
+            try {
+                instantiateModel(name, cl, target);
+            } finally {
+                if (outDir != null) {
+                    deleteOutDir();
+                }
+            }
+            return null;
+        }
+        
+        log.info("======= Compiling model =======");
+        resetCompilationInfo();
+        
+        FClass fc = null;
+        try {
+            // compute instance tree
+            InstClassDecl icl = instantiateModel(name, cl, target);
+            
+            // flattening
+            // Throw away source and instance trees when they are not needed any more
+            PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
+            icl = null;
+            fc = flattenModel(buf.pass(), target, flatName);
+            
+            // Generate code 
+            if (target.getCodeGenFlag()) {
+                generateCode(fc, target);
+                dumpMemoryUseFile(fc, "generated", false);
+            }
+            
+            fc.loadResources(new File(outDir, "resources"));
+            removeCompiledExternals();
+            
+        } finally {
+        }
+        
+        if (options.getBooleanOption("generate_html_diagnostics"))
+            setDiagnosticsGenerator(null);
+        
+        log.info("====== Model compiled successfully =======");
+        
+        return fc;
+    }
+    
 }
 
 
