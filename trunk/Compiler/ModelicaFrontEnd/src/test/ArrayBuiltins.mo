@@ -1169,7 +1169,7 @@ public
   output Real y;
   Real temp_1;
  algorithm
-  temp_1 := 1;
+  temp_1 := 1.0;
   for i1 in 1:size(x1, 1) loop
    for i2 in 1:size(x1, 2) loop
     temp_1 := temp_1 * (x1[i1,i2] + x2[i1,i2]);

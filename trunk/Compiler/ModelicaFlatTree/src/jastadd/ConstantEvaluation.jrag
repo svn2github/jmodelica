@@ -1673,6 +1673,20 @@ aspect ConstantEvaluation {
     public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
     public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
     public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
+    
+    public CValue FType.createCValue(int v) {
+        if (isArray()) {
+            CValueArray res = new CValueArray(size());
+            while (!res.isFilled())
+                res.addCell(createCValueScalar(v));
+            return res;
+        } else {
+            return createCValueScalar(v);
+        }
+    }
+    
+    public CValue FType.createCValueScalar(int v)     { return new CValueInteger(v); }
+    public CValue FRealType.createCValueScalar(int v) { return new CValueReal(v); }
 
     public CValue FType.convert(CValue v)        { return v; }
     public CValue FRealType.convert(CValue v)    { return v.convertReal(); }
@@ -2236,12 +2250,12 @@ aspect ConstantEvaluation {
     }
 
     syn CValue FReductionExp.reduceStartValue();
-    eq FSumExp.reduceStartValue()     = type().zeroCValue();
-    eq FProductExp.reduceStartValue() = new CValueInteger(1);
+    eq FSumExp.reduceStartValue()     = type().createCValue(0);
+    eq FProductExp.reduceStartValue() = type().createCValue(1);
 
     syn CValue FReductionExp.scalarReduceStartValue();
-    eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
-    eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
+    eq FSumExp.scalarReduceStartValue()     = type().createCValueScalar(0);
+    eq FProductExp.scalarReduceStartValue() = type().createCValueScalar(1);
 
     syn CValue FMinMaxExp.scalarReduceStartValue();
     eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);

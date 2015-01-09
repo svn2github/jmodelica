@@ -5389,6 +5389,26 @@ end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;
 
+model EmptyArray6
+    model A
+        Real x;
+    end A;
+    
+    A a[0];
+    Real t;
+  equation
+    t = sum(a.x);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_EmptyArray_EmptyArray6",
+            description="Empty arrays, composite array",
+            flatModel="
+fclass ArrayTests.Constructors.EmptyArray.EmptyArray6
+ constant Real t = 0;
+end ArrayTests.Constructors.EmptyArray.EmptyArray6;
+")})));
+end EmptyArray6;
+
 end EmptyArray;
 
 

@@ -12780,7 +12780,7 @@ public
   output Real c;
   Real temp_1;
  algorithm
-  temp_1 := 1;
+  temp_1 := 1.0;
   for i1 in 1:size(a, 1) loop
    temp_1 := temp_1 * a[i1];
   end for;
