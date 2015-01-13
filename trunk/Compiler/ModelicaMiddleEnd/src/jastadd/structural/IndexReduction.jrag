@@ -530,6 +530,7 @@ aspect IndexReduction {
 
         @Override
         protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+            eqn.flushAllRecursiveClearFinal();
             dynamicEquation(eqn);
             newEquations.add(eqn);
         }
