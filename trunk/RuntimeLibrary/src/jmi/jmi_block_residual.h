@@ -112,14 +112,20 @@ struct jmi_block_residual_t {
     int n;                         /**< \brief The number of real unknowns in the equation system */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
     int n_nr;                      /**< \brief The number of non-real unknowns in the equation system */
+    int n_direct_nr;               /**< \brief The number of non-real unknowns that directly impacts the equation system */
+    int n_direct_bool;             /**< \brief The number of booleans unknowns that directly impacts the equation system */
     int n_sw;                      /**< \brief The number of active switches in the equation system */
+    int n_direct_sw;               /**< \brief The number of active switches that directly impacts the equation system */
     /* Not used anywhere: jmi_real_t* x_nr;   */              /**< \brief Work vector for the non-real variables */
 
     int event_iter;                 /**< \brief Current iteration for the switches. Used to index the saved switches/booleans in sw_old/bool_old */
     jmi_real_t* sw_old;             /**< \brief  Saved states of the switches during passed event iterations. Used for infinite loop detection. */
     jmi_real_t* nr_old;             /**< \brief  Saved states of the booleans during passed event iterations. Used for infinite loop detection. */
     jmi_int_t* sw_index;            /**< \brief  Index of the active switches for this block. */
+    jmi_int_t* sw_direct_index;     /**< \brief  Index of the direct switches for this block. */
     jmi_int_t* nr_index;            /**< \brief  Index of the non-reals in this block. */
+    jmi_int_t* nr_direct_index;     /**< \brief  Index of the direct non-reals in this block. */
+    jmi_int_t* bool_direct_index;   /**< \brief  Index of the direct booleans in this block. */
     jmi_int_t* nr_vref;             /**< \brief  Valuereference of the non-reals in this block. */
 
     jmi_real_t* dx;                 /**< \brief Work vector for the seed vector */
@@ -228,7 +234,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
  * @return Error code.
  */
 int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver_kind_t solver,
-                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, int index, jmi_string_t label);
+                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_as, int n_disw, int jacobian_variability, int index, jmi_string_t label);
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
