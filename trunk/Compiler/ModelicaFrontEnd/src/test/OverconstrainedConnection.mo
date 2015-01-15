@@ -271,7 +271,7 @@ model OverconstrainedCorrect7
     constant Boolean c2Root1 = Connections.isRoot(c2.t);
     constant Boolean c2Root2 = c2Root1;
 equation
-    connect(c1.t, c2.t);
+    connect(c1, c2);
     c1.t = c2.t;
     Connections.root(c1.t);
     Connections.potentialRoot(c2.t);
@@ -292,7 +292,7 @@ fclass OverconstrainedConnection.OverconstrainedCorrect7
 equation
  c1.t[1:2] = c2.t[1:2];
  c1.t[1] = 0;
- c1.t[{1, 2}] = c2.t[{1, 2}];
+ c1.t[1:2] = c2.t[1:2];
 
 public
  type OverconstrainedConnection.T1 = Real;

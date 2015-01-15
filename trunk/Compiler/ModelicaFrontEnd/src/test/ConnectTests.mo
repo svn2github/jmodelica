@@ -1044,16 +1044,18 @@ end ConnectTests.ConnectTest21;
 end ConnectTest21;
 
 model ConnectTest22
+    connector C = Real[2,2];
+
     model A
         B a1[3];
         B a2[3];
     equation
         connect(a1[1:2].b1[1,:], a2[2:3].b1[2,:]);
     end A;
-	
-	connector B
-		Real b1[2,2];
-	end B;
+    
+    connector B
+        C b1;
+    end B;
     
     A b[2];
 
@@ -1702,6 +1704,37 @@ Semantic error at line 1129, column 9:
 end ConnectErrTest10;
 
 
+model ConnectErrTest11
+    connector A
+        Real x;
+    end A;
+    
+    connector B
+        Real y;
+    end B;
+    
+    model C
+        A a;
+    end C;
+    
+    C c;
+    B b;
+equation
+    connect(c.a, b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConnectErrTest11",
+            description="Bad connection where one access contains dot",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Semantic error at line 1721, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest11;
+
+
 
 model Electrical
   
@@ -1774,9 +1807,6 @@ model Electrical
   equation 
     p.v = 0;
   end Ground;
-
-
-
 end Electrical;
 
   model CircuitTest1
