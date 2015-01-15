@@ -228,7 +228,7 @@ static jmi_real_t compute_minimal_step(jmi_block_solver_t* block_solver, jmi_rea
         
         non_reals_not_changed = block_solver->check_discrete_variables_change(block_solver->problem_data, x_temp);
                
-        if (non_reals_not_changed){
+        if (non_reals_not_changed > 0){
             a = a+h;
         }else{
             b = b-h;
@@ -556,7 +556,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                     block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 /* Check for consistency */
-                if (non_reals_not_changed_flag){
+                if (non_reals_not_changed_flag > 0){
                     jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>",
                         block_solver->label, iter, cur_time);
                     converged = 1;

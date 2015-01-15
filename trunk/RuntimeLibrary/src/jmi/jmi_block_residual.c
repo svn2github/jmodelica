@@ -90,6 +90,7 @@ int jmi_block_check_discrete_variables_change(void* b, double* x) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
     jmi_t* jmi = block->jmi;
     jmi_real_t *switches, *non_reals;
+    int ret, switches_equal, non_reals_equal;
 
     /* Get the current value of the iteration variables. */
     block->F(jmi, block->work_ivs, NULL, JMI_BLOCK_INITIALIZE);
@@ -110,7 +111,20 @@ int jmi_block_check_discrete_variables_change(void* b, double* x) {
     jmi_block_set_sw_nr(block, block->work_switches, block->work_non_reals);
     
     /* Compare current switches and non-reals with their previous values */
-    return jmi_compare_switches(switches, block->work_switches, block->n_sw) && jmi_compare_switches(non_reals, block->work_non_reals, block->n_nr);
+    switches_equal  = jmi_compare_switches(switches, block->work_switches, block->n_sw);
+    non_reals_equal = jmi_compare_switches(non_reals, block->work_non_reals, block->n_nr);
+    
+    if (switches_equal && non_reals_equal) { 
+        ret = JMI_EQUAL;
+    } else if (!switches_equal && !non_reals_equal) { 
+        ret = JMI_SWITCHES_AND_NON_REALS_CHANGED;
+    } else if (switches_equal) { 
+        ret = JMI_NON_REALS_CHANGED;
+    } else { 
+        ret = JMI_SWITCHES_CHANGED; 
+    }
+    
+    return ret;
 }
 
 int jmi_block_log_discrete_variables(void* b, jmi_log_node_t node) {
