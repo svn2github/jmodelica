@@ -606,6 +606,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     /* We use tighter:  1e-12 */
     bsop->min_tol = 1e-12;       /**< \brief Minimum tolerance for the equation block solver */
     bsop->max_iter = 100;
+    bsop->events_epsilon = 1e-10;
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
 

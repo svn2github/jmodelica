@@ -132,6 +132,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
     jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
+    jmi->options.block_solver_options.events_epsilon = jmi->events_epsilon;
 }
 
 int jmi_initialize(jmi_t* jmi) {
@@ -1193,6 +1194,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->log_options->copy_log_to_file_flag = (int)z[index]; 
     
     bsop->res_tol = jmi->newton_tolerance;
+    bsop->events_epsilon = jmi->events_epsilon;
 /*    op->block_solver_experimental_mode = 
             jmi_block_solver_experimental_steepest_descent_first;
    op->log_level = 5; */

@@ -220,7 +220,9 @@ struct jmi_block_solver_options_t {
     int check_jac_cond_flag;     /**< \brief Flag if the solver should check Jacobian condition number and log it. */
 
     int experimental_mode;         /**< \brief  Activate experimental features of equation block solvers. Combination of jmi_block_solver_experimental_mode_t flags. */
-
+    
+    double events_epsilon;       /**< \brief The event epsilon used for event indicators and switches. */
+    
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
     jmi_block_solver_jac_variability_t jacobian_variability; /**< brief Jac variability for linear block solver */
