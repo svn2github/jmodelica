@@ -127,6 +127,11 @@ struct jmi_block_residual_t {
     jmi_int_t* nr_direct_index;     /**< \brief  Index of the direct non-reals in this block. */
     jmi_int_t* bool_direct_index;   /**< \brief  Index of the direct booleans in this block. */
     jmi_int_t* nr_vref;             /**< \brief  Valuereference of the non-reals in this block. */
+    
+    /* Work vectors */
+    jmi_real_t* work_switches;      /**< \brief Work vector for the switches */
+    jmi_real_t* work_non_reals;     /**< \brief Work vector for the non-reals */
+    jmi_real_t* work_ivs;           /**< \brief Work vector for the iteration variables */
 
     jmi_real_t* dx;                 /**< \brief Work vector for the seed vector */
     jmi_real_t* dv;                 /**< \brief Work vector for (dF/dv)*dv */
@@ -307,7 +312,7 @@ jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t n
 jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, jmi_int_t nR, jmi_real_t tolerance);
 
 /**
- * \brief Finds the current values of the swithces and non-reals that belong to the block.
+ * \brief Finds the current values of the switches and non-reals that belong to the block.
  * 
  * This is a helper method for jmi_block_update_discrete_variables,
  * jmi_block_log_discrete_variables and jmi_block_check_discrete_variables_change
@@ -318,6 +323,15 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
  * @param non_reals Holder for the non-real values
  */
 int jmi_block_get_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals);
+
+/**
+ * \brief Sets the switches and non-reals that belong to the block.
+ *
+ * @param block The current block being solved for.
+ * @param switches The switch values
+ * @param non_reals The non-real values
+ */
+int jmi_block_set_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals);
 
 
 int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);

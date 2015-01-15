@@ -89,15 +89,13 @@ int jmi_block_dir_der(void* b, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residua
 int jmi_block_check_discrete_variables_change(void* b, double* x) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
     jmi_t* jmi = block->jmi;
-    jmi_real_t *switches, *non_reals, *pre_switches, *pre_non_reals;
-    jmi_real_t* x_cur = (jmi_real_t*)calloc(block->n, sizeof(jmi_real_t));
+    jmi_real_t *switches, *non_reals;
 
     /* Get the current value of the iteration variables. */
-    block->F(jmi, x_cur, block->res, JMI_BLOCK_INITIALIZE);
+    block->F(jmi, block->work_ivs, NULL, JMI_BLOCK_INITIALIZE);
 
-    /* Get previous switches and non-reals */
-    pre_switches  = &block->sw_old[(block->event_iter - 1)*block->n_sw];
-    pre_non_reals = &block->nr_old[(block->event_iter - 1)*block->n_nr];
+    /* Get the current switches and non-reals */
+    jmi_block_get_sw_nr(block, block->work_switches, block->work_non_reals);
 
     /* Evaluate and get the current switches and non-reals */
     block->F(jmi, x, NULL, JMI_BLOCK_WRITE_BACK);
@@ -107,13 +105,12 @@ int jmi_block_check_discrete_variables_change(void* b, double* x) {
     jmi_block_get_sw_nr(block, switches, non_reals);
 
     /* Write back the current values of the iteration variables. */
-    block->F(jmi, x_cur, NULL, JMI_BLOCK_WRITE_BACK);
-    /* Reset the values of the switches and non-reals in the block by evaluating it with the current iteration variables. */
-    block->F(jmi, x_cur, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
-    free(x_cur);
+    block->F(jmi, block->work_ivs, NULL, JMI_BLOCK_WRITE_BACK);
+    /* Reset the values of the switches and non-reals in the block. */
+    jmi_block_set_sw_nr(block, block->work_switches, block->work_non_reals);
     
     /* Compare current switches and non-reals with their previous values */
-    return jmi_compare_switches(switches, pre_switches, block->n_sw) && jmi_compare_switches(non_reals, pre_non_reals, block->n_nr);
+    return jmi_compare_switches(switches, block->work_switches, block->n_sw) && jmi_compare_switches(non_reals, block->work_non_reals, block->n_nr);
 }
 
 int jmi_block_log_discrete_variables(void* b, jmi_log_node_t node) {
@@ -238,6 +235,19 @@ int jmi_block_get_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_r
     return 0;
 }
 
+int jmi_block_set_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals) {
+    int i;
+    jmi_t* jmi = block->jmi;
+
+    for (i = 0; i < block->n_sw; i++) {
+        (*(jmi->z))[block->sw_index[i]] = switches[i];
+    }
+    for (i = 0; i < block->n_nr; i++) {
+        (*(jmi->z))[block->nr_index[i]] = non_reals[i];
+    }
+    return 0;
+}
+
 int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
     jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
     int flag = 0;
@@ -277,6 +287,11 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->nr_direct_index = (jmi_int_t*)calloc(b->n_direct_nr, sizeof(jmi_int_t));
     b->bool_direct_index = (jmi_int_t*)calloc(b->n_direct_nr, sizeof(jmi_int_t));
     b->nr_vref  = (jmi_int_t*)calloc(b->n_nr, sizeof(jmi_int_t));
+    
+    /* Work vectors */
+    b->work_ivs       = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+    b->work_non_reals = (jmi_real_t*)calloc(n_nr,sizeof(jmi_real_t));
+    b->work_switches  = (jmi_real_t*)calloc(n_sw,sizeof(jmi_real_t));
 
     b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->dv = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -506,6 +521,11 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->initial);
     free(b->value_references);
     /* clean up the solver.*/
+    
+    /* clean up work arrays */
+    free(b->work_ivs);
+    free(b->work_non_reals);
+    free(b->work_switches);
 
     /*Deallocate struct */
     free(b);
