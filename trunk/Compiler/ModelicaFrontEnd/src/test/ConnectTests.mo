@@ -1065,18 +1065,18 @@ model ConnectTest22
 			description="Connecting arrays of reals within an array of component instances, complex slices",
 			flatModel="
 fclass ConnectTests.ConnectTest22
- Real b[1].a1[1].b1[2,2];
- Real b[1].a1[2].b1[2,2];
- Real b[1].a1[3].b1[2,2];
- Real b[1].a2[1].b1[2,2];
- Real b[1].a2[2].b1[2,2];
- Real b[1].a2[3].b1[2,2];
- Real b[2].a1[1].b1[2,2];
- Real b[2].a1[2].b1[2,2];
- Real b[2].a1[3].b1[2,2];
- Real b[2].a2[1].b1[2,2];
- Real b[2].a2[2].b1[2,2];
- Real b[2].a2[3].b1[2,2];
+ ConnectTests.ConnectTest22.C b[1].a1[1].b1[2,2];
+ ConnectTests.ConnectTest22.C b[1].a1[2].b1[2,2];
+ ConnectTests.ConnectTest22.C b[1].a1[3].b1[2,2];
+ ConnectTests.ConnectTest22.C b[1].a2[1].b1[2,2];
+ ConnectTests.ConnectTest22.C b[1].a2[2].b1[2,2];
+ ConnectTests.ConnectTest22.C b[1].a2[3].b1[2,2];
+ ConnectTests.ConnectTest22.C b[2].a1[1].b1[2,2];
+ ConnectTests.ConnectTest22.C b[2].a1[2].b1[2,2];
+ ConnectTests.ConnectTest22.C b[2].a1[3].b1[2,2];
+ ConnectTests.ConnectTest22.C b[2].a2[1].b1[2,2];
+ ConnectTests.ConnectTest22.C b[2].a2[2].b1[2,2];
+ ConnectTests.ConnectTest22.C b[2].a2[3].b1[2,2];
 equation
  b[1].a1[1].b1[1,1] = b[1].a2[2].b1[2,1];
  b[1].a1[1].b1[1,2] = b[1].a2[2].b1[2,2];
@@ -1086,6 +1086,9 @@ equation
  b[2].a1[1].b1[1,2] = b[2].a2[2].b1[2,2];
  b[2].a1[2].b1[1,1] = b[2].a2[3].b1[2,1];
  b[2].a1[2].b1[1,2] = b[2].a2[3].b1[2,2];
+
+public
+ type ConnectTests.ConnectTest22.C = Real;
 end ConnectTests.ConnectTest22;
 ")})));
 end ConnectTest22;

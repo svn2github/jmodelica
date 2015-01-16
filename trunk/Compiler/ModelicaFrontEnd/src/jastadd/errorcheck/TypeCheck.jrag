@@ -226,9 +226,7 @@ aspect FlatTypeCheck {
         boolean expandableSame = true;
         for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
             if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
-                if (!access.myInstComponentDecl().isConnector() &&
-                        // TODO: don't allow non-connector primitives - temporarily allowed until errors has been dealt with
-                        !(access.myInstComponentDecl().isPrimitive() && access instanceof InstDot))
+                if (!access.myInstComponentDecl().isConnector())
                     access.error("Connecting to an instance of a non-connector type is not allowed");
             } else {
                 check = false;

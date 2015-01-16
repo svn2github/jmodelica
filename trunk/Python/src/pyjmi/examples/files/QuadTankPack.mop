@@ -22,8 +22,9 @@ model QuadTank
 	Modelica.SIunits.Length x4(start=x4_0);
 
 	// Inputs
-	input Modelica.SIunits.Voltage u1;
-	input Modelica.SIunits.Voltage u2;
+	connector InputVoltage = input Modelica.SIunits.Voltage;
+	InputVoltage u1;
+	InputVoltage u2;
 
 equation
 
