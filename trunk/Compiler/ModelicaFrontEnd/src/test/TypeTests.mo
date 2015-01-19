@@ -2534,4 +2534,20 @@ Semantic error at line 2520, column 24:
 ")})));
 end CircularIfExp5;
 
+
+model CircularIfExp6
+    parameter Real a = if a < 2 then 3 else 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="CircularIfExp6",
+            description="Using circular parameter in if expression",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Semantic error at line 2539, column 21:
+  Circularity in binding expression of parameter: a = if a < 2 then 3 else 1
+")})));
+end CircularIfExp6;
+
 end TypeTests;

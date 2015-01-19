@@ -783,8 +783,8 @@ aspect FlatAPI {
                 return true;
         return false;
     }
-    eq FIdUseExp.containsNonFixedParameter() = myFV().isNonFixedParameter();
-    eq FInstAccessExp.containsNonFixedParameter() = myInstComponentDecl().isNonFixedParameter();
+    eq FIdUseExp.containsNonFixedParameter()      = myFV().isNonFixedParameter();
+    eq FInstAccessExp.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
     
     syn boolean InstComponentDecl.isNonFixedParameter() = false;
     eq InstAssignable.isNonFixedParameter() {
