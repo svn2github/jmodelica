@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Arrays;
 
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.test.GenericTestCase;
+import org.jmodelica.util.test.Assert;
 
 aspect TestCases {
 
@@ -34,7 +36,7 @@ aspect TestCases {
  * 
  * @author jakesson
  */
-abstract public class TestCase {
+abstract public class TestCase implements GenericTestCase {
 
     private String name = null;
     private String description = null;
@@ -104,12 +106,6 @@ abstract public class TestCase {
 		} catch (UnknownOptionException e) {
 			exception = e;
 		}
-	}
-		
-	public void dumpJunit(StringBuilder str, int index) {
-		str.append("  @Test public void " + getName() + "() {\n");
-		str.append("    ts.get("+index+").testMe(asserter);\n");
-	    str.append("  }\n\n");
 	}
 	
 	/**
@@ -236,15 +232,6 @@ abstract public class TestCase {
 	public String removeWhitespace(String str) {
 		// TODO: this can mask errors, we need a better filtering
 		return str.replaceAll("\\s+", "");
-	}
-	
-	/**
-	 * Interface for proxy class used to remove dependency on junit from TestCase.
-	 */
-	public static interface Assert {
-		public void fail(String msg);
-		
-		public void assertEquals(String msg, String expected, String actual);
 	}
 	
 	private Assert asserter;

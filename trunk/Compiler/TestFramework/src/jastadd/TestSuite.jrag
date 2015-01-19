@@ -14,17 +14,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.FileReader;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 
 import org.jmodelica.util.CompiledUnit;
+import org.jmodelica.util.test.GenericTestCase;
+import org.jmodelica.util.test.GenericTestSuite;
+import org.jmodelica.util.test.Assert;
 
-public class TestSuite {
+public class TestSuite implements GenericTestSuite {
     String name;
     private ArrayList<TestCase> l;
 
@@ -32,7 +30,7 @@ public class TestSuite {
         l = new ArrayList<TestCase>();
     }
 
-    public TestSuite(String fileName, String className, TestCase.Assert asserter) {
+    public TestSuite(String fileName, String className, Assert asserter) {
         name = className;
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
@@ -52,104 +50,49 @@ public class TestSuite {
         sr.collectTestCases(this,className);
     }
 
-	public File dumpJunit(String testFile, String dir) {
-		SourceRoot sr = new SourceRoot();
-		String lang = sr.language().toLowerCase();
-		
-		StringBuilder str = new StringBuilder();
-		str.append("package org.jmodelica.test." + lang + ".junitgenerated;\n\n");
-		str.append("import org.junit.*;\n");
-		str.append("import org.jmodelica." + lang + ".compiler.*;\n\n");
+    public void add(TestCase tc) {
+        l.add(tc);
+    }
 
-		str.append("public class " + name + " {\n\n");
-		str.append("  static TestSuite ts;\n\n");
-		
-		str.append("  private static class Assert implements TestCase.Assert {\n");
-		str.append("    public void fail(String msg) {\n");
-		str.append("      org.junit.Assert.fail(msg);\n");
-		str.append("    }\n\n");
-		str.append("    public void assertEquals(String msg, String expected, String actual) {\n");
-		str.append("      org.junit.Assert.assertEquals(msg, expected, actual);\n");
-		str.append("    }\n");
-		str.append("  }\n");
-		str.append("  static Assert asserter = new Assert();\n\n");
-		
-		String escaped = testFile.replaceAll("\\\\", "\\\\\\\\");  // Replaces \ with \\
-		str.append("  @BeforeClass public static void setUp() {\n");
-		str.append("    ts = new TestSuite(\"" + escaped + "\", \"" + getName() + "\", asserter);\n");
-		str.append("  }\n\n");
-		
-		for (int i=0; i < l.size(); i++) 
-			get(i).dumpJunit(str, i);
+    public TestCase get(int i) {
+        return l.get(i);
+    }
 
-		str.append("  @AfterClass public static void tearDown() {\n");
-		str.append("    ts = null;\n");
-		str.append("  }\n\n");
-		str.append("}\n\n");
-		
-		File file = new File(dir, getName() + ".java");
-		try {
-			FileWriter writer = new FileWriter(file);
-			writer.append(str.toString());
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return file;
-	}
-	
-	public void add(TestCase tc) {
-		l.add(tc);
-	}
+    public java.util.List<? extends GenericTestCase> getAll() {
+        return l;
+    }
 
-	public TestCase get(int i) {
-		return l.get(i);
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	private static Document parseAndGetDOM(String xmlfile) throws ParserConfigurationException, IOException, SAXException{
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setIgnoringComments(true);
-		factory.setIgnoringElementContentWhitespace(true);
-		factory.setNamespaceAware(true);
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		
-		Document doc = builder.parse(new File(xmlfile));
-		return doc;
-	}
-	
-	private static class SysErrLogger extends ModelicaLogger {
-		public SysErrLogger() {
-			super(Level.WARNING);
-		}
-		
-		@Override
-		public void close() {}
+    private static class SysErrLogger extends ModelicaLogger {
+        public SysErrLogger() {
+            super(Level.WARNING);
+        }
 
-		@Override
-		protected void write(Level level, String logMessage) {
-			System.err.println(logMessage);
-		}
-		
-		@Override
-		protected void write(Level level, Throwable throwable) {
-			write(level, throwable.toString());
-		}
+        @Override
+        public void close() {}
+
+        @Override
+        protected void write(Level level, String logMessage) {
+            System.err.println(logMessage);
+        }
+
+        @Override
+        protected void write(Level level, Throwable throwable) {
+            write(level, throwable.toString());
+        }
 
         @Override
         protected void write(Level level, Problem problem) {
@@ -160,6 +103,6 @@ public class TestSuite {
         protected void write(Level level, CompiledUnit unit) {
             write(level, unit.toString());
         }
-	}
-	
+    }
+
 }

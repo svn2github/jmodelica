@@ -33,7 +33,7 @@
 
     <property name="target" value="${user.dir}"/>
     <property name="java_output" value="${target}/src/java-generated" />
-    <property name="junit_output" value="${target}/src/test/junit-generated" />
+    <property name="junit_output" value="${target}/src/junit-generated" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
     <property name="jar_output" value="${target}/bin" />
@@ -64,9 +64,10 @@
     <taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${beaver_jar}" />
     
     <!-- calculate directories for java files -->
+    <property name="jm_package" value="org.jmodelica" />
     <if>
         <isset property="base_package"/>
-        <else> <property name="base_package" value="org.jmodelica.${sub_package}" /> </else>
+        <else> <property name="base_package" value="${jm_package}.${sub_package}" /> </else>
     </if>
     <if>
         <isset property="ast_package"/>
@@ -86,6 +87,9 @@
     <property name="parser_output" value="${java_output}/${parser_package_dir}" />
     <propertyregex property="test_package_dir" input="${test_package}" defaultValue="${test_package}" regexp="\." replace="/" global="true" />
     <property name="test_package_output" value="${junit_output}/${test_package_dir}" />
+    <property name="test_class_name" value="Tests" />
+    <property name="test_file" value="${test_package_output}/${test_class_name}.java" />
+    <property name="test_file_module_separator" value=", ${line.separator}              " />
 
     
     <!-- calculate module list -->
@@ -119,6 +123,16 @@
             </if>
         </sequential>
     </for>
+
+    <!-- build list of module directories to use in temp file -->
+    <var name="module_dirs_temp" value=""/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <var name="module_dirs_temp" value="${module_dirs_temp}${test_file_module_separator}&quot;${@{module}.path}&quot;" />
+        </sequential>
+    </for>
+    <propertyregex property="module_dirs_temp2" input="${module_dirs_temp}" regexp="^${test_file_module_separator}" replace="" />
+    <propertyregex property="module_dirs" input="${module_dirs_temp2}" regexp="\\" replace="/" defaultValue="${module_dirs_temp2}" />
 
     <!-- calculate set of jastadd files to use -->
     <var name="jastadd_files_temp" value=""/>
@@ -199,7 +213,7 @@
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner" description="Generate all Java files." />
+    <target name="gen" depends="patch,parser,scanner,gen-test" description="Generate all Java files." />
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -444,39 +458,30 @@
         </if>
     </target>
 
-    <!-- Generate JUnit test classes for all Modelica test files. -->
-    <target name="gen-test" depends="build" description="Generate JUnit test classes for all Modelica test files.">
+    <!-- Generate JUnit test class. -->
+    <target name="gen-test" description="Generate JUnit test class.">
         <mkdir dir="${test_package_output}" />
-        <for param="module" list="${modules}">
-            <sequential>
-                <for param="testfile" parallel="true">
-                    <path>
-                        <fileset dir="${@{module}.path}/src/test">
-                            <include name="*.mo" />
-                        </fileset>
-                    </path>
-                    <sequential>
-                        <basename property="@{testfile}.name" file="@{testfile}" suffix=".mo" />
-                        <uptodate property="@{testfile}.uptodate" srcfile="@{testfile}" 
-                                targetfile="${test_package_output}/${@{testfile}.name}.java" />
-                        <if>
-                            <not><isset property="@{testfile}.uptodate" /></not>
-                            <then>
-                                <java classname="${ast_package}.JunitGenerator" 
-                                        classpath="${compiler_jars}" fork="true" failonerror="true" dir="." maxmemory="768M">
-                                    <arg value="@{testfile}" />
-                                    <arg value="${test_package_output}" />
-                                </java>
-                            </then>
-                        </if>
-                    </sequential>
-                </for>
-            </sequential>
-        </for>
+        <echo file="${test_file}">package ${test_package};
+
+import org.junit.runner.RunWith;
+
+@RunWith(${jm_package}.junit.JModelicaRunner.class)
+public class ${test_class_name} extends ${ast_package}.TestSpecification {
+
+    public ${test_class_name}() { 
+        super(${module_dirs});
+    }
+
+    protected ${jm_package}.util.test.Assert createAssert() {
+        return new ${jm_package}.junit.JUnitAssert();
+    }
+
+}
+</echo>
     </target>
     
     <!-- Build a jar file from generated tests. -->
-    <target name="build-test" depends="gen-test">
+    <target name="build-test" depends="build">
         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
                 destdir="${class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false">
             <src path="${test_package_output}" />
