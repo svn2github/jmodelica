@@ -24,4 +24,6 @@
     <property name="ModelicaFrontEnd.parsers" value="ModelicaParser"/>
     <property name="ModelicaFrontEnd.ModelicaParser.header" value="Modelica_header.beaver"/>
     <property name="ModelicaFrontEnd.ModelicaParser.main" value="Modelica.parser"/>
+
+    <property name="ModelicaFrontEnd.test_helpers" value="org.jmodelica.junit"/>
 </project>

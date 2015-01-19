@@ -181,6 +181,28 @@
     </for>
     <property name="java_dirs" value="${java_dirs_temp}" />
     
+    <!-- calculate set of test helpers to use -->
+    <var name="test_helper_java_patterns_temp" value=""/>
+    <var name="test_helper_class_patterns_temp" value=""/>
+    <var name="test_helper_dirs_temp" value=""/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <isset property="@{module}.test_helpers"/>
+                <then>
+                    <propertyregex property="test_helper_dir_temp" input="${@{module}.test_helpers}" regexp="\." replace="/" 
+                            defaultValue="${@{module}.test_helpers}" override="true" global="true" />
+                    <var name="test_helper_java_patterns_temp" value="${test_helper_java_patterns_temp},${test_helper_dir_temp}/*.java"/>
+                    <var name="test_helper_class_patterns_temp" value="${test_helper_class_patterns_temp},${test_helper_dir_temp}/*.class"/>
+                    <var name="test_helper_dirs_temp" value="${test_helper_dirs_temp}:${@{module}.path}/src/java/${test_helper_dir_temp}"/>
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <propertyregex property="test_helper_java_patterns" input="${test_helper_java_patterns_temp}" regexp="^," replace="" defaultvalue="" />
+    <propertyregex property="test_helper_class_patterns" input="${test_helper_class_patterns_temp}" regexp="^," replace="" defaultvalue="" />
+    <propertyregex property="test_helper_dirs" input="${test_helper_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
+    
     <!-- calculate sets of jar files  -->
     <var name="compiler_jars_temp" value="${beaver-rt_jar}" />
     <for list="${jars}" param="jar">
@@ -240,7 +262,7 @@
         <mkdir dir="${class_output}" />
         <javac classpath="${beaver-rt_jar}" compiler="${java_compiler}" source="${java_version}" 
                 target="${java_version}" debug="true" destdir="${class_output}" includeantruntime="false"
-                srcdir="${java_output}${java_dirs}" /> <!-- java_dirs begins with a : -->
+                srcdir="${java_output}${java_dirs}" excludes="${test_helper_java_patterns}" /> <!-- java_dirs begins with a : -->
     </target>
 
     <!-- generates ast files with JastAdd -->
@@ -483,11 +505,10 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     <!-- Build a jar file from generated tests. -->
     <target name="build-test" depends="build">
         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
-                destdir="${class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false">
-            <src path="${test_package_output}" />
-            <include name="*.java" />
-        </javac>
+                destdir="${class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
+                srcdir="${test_package_output}:${test_helper_dirs}"/>
         <jar destfile="${test_jar}">
+            <fileset dir="${class_output}" includes="${test_helper_class_patterns}" />
             <fileset dir="${class_output}" includes="${test_package_dir}/*.class" />
         </jar>
     </target>
