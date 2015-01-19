@@ -497,7 +497,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                                  "BeginEnhancedEventIteration", iter);
                 }
 
-                h = compute_minimal_step(block_solver, x, x_new, 1e-4);
+                h = compute_minimal_step(block_solver, x, x_new, 1e-10);
                 compute_reduced_step(h,x_new,x,x,block_solver->n);
                 jmi_log_reals(log, iter_node, logInfo, "step", &h, 1);
 

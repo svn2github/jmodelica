@@ -388,6 +388,25 @@ class Test_Singular_Systems:
 
         compile_fmu("Singular.LinearInf", file_name)
         compile_fmu("Singular.Linear2", file_name)
+        compile_fmu("Singular.LinearEvent1", file_name)
+        compile_fmu("Singular.LinearEvent2", file_name)
+    
+    @testattr(stddist = True)
+    def test_linear_event_1(self):
+        model = load_fmu("Singular_LinearEvent1.fmu", log_level=3)
+        model.set("_log_level", 3)
+        
+        res = model.simulate(final_time=2)
+        nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
+        
+    @testattr(stddist = True)
+    def test_linear_event_2(self):
+        model = load_fmu("Singular_LinearEvent2.fmu", log_level=3)
+        model.set("_log_level", 3)
+        
+        res = model.simulate(final_time=4)
+        nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('w') ,2.000000000)
     
     @testattr(stddist = True)
     def test_linear_zero_hold(self):

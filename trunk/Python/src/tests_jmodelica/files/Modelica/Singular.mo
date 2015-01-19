@@ -78,5 +78,81 @@ package Singular "Some tests for singular systems"
     model LinearInf
         extends Linear1;
     end LinearInf;
+    
+    model LinearEvent1
+        Real x,y,z,v;
+        parameter Real a11 = 1;
+        parameter Real a12 = 0;
+        parameter Real a13 = 0;
+        parameter Real a21 = 0;
+        parameter Real a22 = 0;
+        parameter Real a23 = 0;
+        parameter Real a31 = 1;
+        parameter Real a32 = 1;
+        parameter Real a33 = 1;
+        parameter Real b[3] = {0,0,3};
+    equation
+        if y <= 1 then
+        a11*x+a12*y+a13*z = b[1];
+        a21*x+a22*y+a23*z = b[2];
+        a31*x+a32*y+a33*z = b[3]*time;
+        else
+        a11*x+a12*y+a13*z = b[1];
+        0*x+1*y+0*z = 1;
+        a31*x+a32*y+a33*z = b[3]*time;
+        end if;
+        der(v) = time;
+    end LinearEvent1;
+    
+    model LinearEvent2
+        Real x,y,z,w,q,v;
+        parameter Real a11 = 1;
+        parameter Real a12 = 0;
+        parameter Real a13 = 0;
+        parameter Real a14 = 0;
+        parameter Real a15 = 0;
+        parameter Real a21 = 0;
+        parameter Real a22 = 1;
+        parameter Real a23 = 1;
+        parameter Real a24 = 0;
+        parameter Real a25 = 0;
+        parameter Real a31 = 0;
+        parameter Real a32 = 0;
+        parameter Real a33 = 0;
+        parameter Real a34 = 1;
+        parameter Real a35 = 1;
+        parameter Real a41 = 0;
+        parameter Real a42 = 0;
+        parameter Real a43 = 0;
+        parameter Real a44 = 0;
+        parameter Real a45 = 0;
+        parameter Real a51 = 0;
+        parameter Real a52 = 0;
+        parameter Real a53 = 0;
+        parameter Real a54 = 0;
+        parameter Real a55 = 0;
+        parameter Real b[5] = {0,2,3,0,0};
+    equation
+        if y <= 1 and time < 3 then
+            a11*x+a12*y+a13*z+a14*w+a15*q = b[1];
+            a21*x+a22*y+a23*z+a24*w+a25*q = b[2]*time;
+            a31*x+a32*y+a33*z+a34*w+a35*q = b[3]*time;
+            a41*x+a42*y+a43*z+a44*w+a45*q = b[4];
+            a51*x+a52*y+a53*z+a54*w+a55*q = b[5];
+        elseif w <= 2 then
+            a11*x+a12*y+a13*z+a14*w+a15*q = b[1];
+            a21*x+a22*y+a23*z+a24*w+a25*q = b[2]*time;
+            a31*x+a32*y+a33*z+a34*w+a35*q = b[3]*time;
+            0*x+1*y+0*z+0*w+0*q = 1;
+            a51*x+a52*y+a53*z+a54*w+a55*q = b[5];
+        else
+            a11*x+a12*y+a13*z+a14*w+a15*q = b[1];
+            a21*x+a22*y+a23*z+a24*w+a25*q = b[2]*time;
+            a31*x+a32*y+a33*z+a34*w+a35*q = b[3]*time;
+            a41*x+a42*y+a43*z+a44*w+a45*q = b[4];
+            0*x+0*y+0*z+1*w+0*q = 2;
+        end if;
+        der(v) = time;
+    end LinearEvent2;
 
 end Singular;

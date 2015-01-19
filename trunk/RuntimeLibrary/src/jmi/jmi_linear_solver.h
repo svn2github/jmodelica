@@ -26,6 +26,9 @@
 
 #include "jmi_block_solver.h"
 
+#define JMI_SWITCHES_AND_NON_REALS_CHANGED -1
+#define JMI_SWITCHES_CHANGED               -3
+
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
@@ -33,7 +36,9 @@ extern void dgelss_(int* M, int* N, int* NRHS, double* A, int* LDA, double* B, i
 extern void dgels_(char* TRANS, int* M, int* N, int* NRHS,double* A,int* LDA, double* B,int* LDB,double* WORK,int* LWORK,int* INFO );
 extern int dgeequ_(int *m, int *n, double *a, int * lda, double *r__, double *c__, double *rowcnd, double 
     *colcnd, double *amax, int *info);
-
+extern void dgesdd_(char* JOBZ, int* M, int* N, double* A, int* LDA, 
+            double* S, double* U, int* LDU, double* VT, int* LDVT,     
+            double* WORK, int* LWORK, int* IWORK, int* INFO);
 extern int dlaqge_(int *m, int *n, double *a, int * lda, double *r__, double *c__, double *rowcnd, double 
     *colcnd, double *amax, char *equed);
 
@@ -55,14 +60,24 @@ struct jmi_linear_solver_t {
     jmi_real_t* jacobian;         /**< \brief Matrix for storing the Jacobian */
     jmi_real_t* jacobian_temp;         /**< \brief Matrix for storing the Jacobian */
     jmi_real_t* singular_values;  /**< \brief Vector for the singular values of the Jacobian */
+    jmi_real_t* singular_vectors; /**< \brief Matrix for the right singular vectors */
+    jmi_real_t* jacobian_extension; /**< \brief The extended Jacobian in case of special singular systems */
+    jmi_real_t* rhs;                  /**< \brief The right-hand-side vector (possibly extended) */
+    int* rhs_extension_index;
+    jmi_real_t*  dependent_set;     /**< \brief Matrix collecting information about linearly dependency */
     double* rScale;               /**< \brief Row scaling of the Jacobian matrix */
     double* cScale;               /**< \brief Column scaling of the Jacobian matrix */
     char equed;                    /**< \brief If scaling of the Jacobian matrix used ('N' - no scaling, 'R' - rows, 'C' - cols, 'B' - both */
     int cached_jacobian;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
     int singular_jacobian;   /**< \brief Indicates if the Jacobian is singular or not */
     int iwork;
+    int update_active_set;          /**< \brief Indicates if active set can be updated or not */
+    int n_extra_rows;               /**< \brief Number of extra rows in the extended Jacobian */
     double* zero_vector;
     jmi_real_t* rwork;
+    double* dgesdd_work;            /**< \brief Work vector for dgesdd */
+    int     dgesdd_lwork;           /**< \brief Work vector for dgesdd */
+    int*    dgesdd_iwork;           /**< \brief Work vector for dgesdd */
 };
 
 #endif /* _JMI_LINEAR_SOLVER_H */
