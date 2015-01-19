@@ -573,8 +573,11 @@ aspect SimpleInstClassLookup {
     public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
-        if (icd == null) 
-            icd = lookupLibrary(parts[0]).target();
+        if (icd == null) {
+            InstLookupResult<InstClassDecl> result = lookupLibrary(parts[0]);
+            if (result.successful())
+                icd = result.target();
+        }
         if (icd != null)
             return icd = (parts.length == 1) ? icd : icd.simpleLookupInstClassDeclRecursive(parts[1]);
         else

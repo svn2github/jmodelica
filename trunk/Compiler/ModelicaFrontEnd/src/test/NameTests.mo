@@ -2391,6 +2391,27 @@ end NameTests.ImportTest11;
 ")})));
 end ImportTest11;
 
+
+model ImportTest12
+    import SI = NotHere.SI;
+    SI.Voltage v = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ImportTest12",
+            description="Check that error is generated properly for missing import",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 2396, column 17:
+  Cannot find class declaration for NotHere
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Semantic error at line 2397, column 5:
+  Cannot find class declaration for SI
+")})));
+end ImportTest12;
+
+
 model ShortClassDeclTest1
   model A
     Real x=2;
