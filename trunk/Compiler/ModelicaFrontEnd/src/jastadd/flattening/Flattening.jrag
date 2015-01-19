@@ -1203,13 +1203,14 @@ aspect Flattening {
 		fas.specifyNext(index);
 		return getArrayCopy(fas);
 	}
-	
-	eq InstArrayAccess.splitArrayAccess(int index) {
-		InstArrayAccess access = fullCopy();
-		access.getFArraySubscripts().specifyNext(index);
-		return access;
-	}
-	
+
+    eq InstArrayAccess.splitArrayAccess(int index) {
+        InstArrayAccess access = fullCopy();
+        access.setParent(this);
+        access.getFArraySubscripts().specifyNext(index);
+        return access;
+    }
+
 	eq InstGlobalAccess.splitArrayAccess(int index) = 
 		new InstGlobalAccess(getInstAccess().splitArrayAccess(index));
 	

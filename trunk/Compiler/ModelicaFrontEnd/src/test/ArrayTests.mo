@@ -16,22 +16,10 @@
 
 within ;
 package ArrayTests
-	
-model Test
-    connector C = Real;
-    C x[3];
-equation
-    for i in 1:3 loop
-        if i < 3 then
-            connect(x[i], x[i+1]);
-        else
-            connect(x[i], x[1]);
-        end if;
-    end for;
-end Test;
-	
+
+
 package General
-		
+
   model ArrayTest1
     Real x[2];
   equation
@@ -1066,6 +1054,7 @@ end ArrayTests.General.ArrayTest39;
 ")})));
 end ArrayTest39;
 
+
 model ArrayTest40
     function f
         input Integer n;
@@ -1091,6 +1080,31 @@ fclass ArrayTests.General.ArrayTest40
 end ArrayTests.General.ArrayTest40;
 ")})));
 end ArrayTest40;
+
+
+model ArrayTest41
+    model A
+        Real x;
+    end A;
+    
+    parameter Integer N = 3;
+    Real y[N] = (1:N) ./ time;
+    A a[N](x = y[1:N]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="General_ArrayTest41",
+            description="Splitting expression with access in array subscripts",
+            flatModel="
+fclass ArrayTests.General.ArrayTest41
+ structural parameter Integer N = 3 /* 3 */;
+ Real y[3] = (1:3) ./ time;
+ Real a[1].x = y[1];
+ Real a[2].x = y[2];
+ Real a[3].x = y[3];
+end ArrayTests.General.ArrayTest41;
+")})));
+end ArrayTest41;
 
 end General;
 
