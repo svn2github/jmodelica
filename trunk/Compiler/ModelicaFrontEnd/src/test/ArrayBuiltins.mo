@@ -2185,6 +2185,35 @@ Semantic error at line 6797, column 15:
 end ArrayCat10;
 
 
+model ArrayCat11
+    record A
+        Real x;
+    end A;
+    
+    A a1[2];
+    A a2[3];
+    A a3[5](x = 1:5) = cat(1, a1, a2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cat_ArrayCat11",
+            description="",
+            flatModel="
+fclass ArrayBuiltins.Cat.ArrayCat11
+ ArrayBuiltins.Cat.ArrayCat11.A a1[2];
+ ArrayBuiltins.Cat.ArrayCat11.A a2[3];
+ ArrayBuiltins.Cat.ArrayCat11.A a3[5](x = 1:5) = cat(1, a1[1:2], a2[1:3]);
+
+public
+ record ArrayBuiltins.Cat.ArrayCat11.A
+  Real x;
+ end ArrayBuiltins.Cat.ArrayCat11.A;
+
+end ArrayBuiltins.Cat.ArrayCat11;
+")})));
+end ArrayCat11;
+
+
 
 model ArrayShortCat1
  Real x[2,3] = [1,2,3; 4,5,6];

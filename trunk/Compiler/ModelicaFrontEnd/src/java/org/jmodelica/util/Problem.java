@@ -46,6 +46,7 @@ public class Problem implements Comparable<Problem>, Serializable {
     public Problem(String fileName, String message) {
         this.fileName = fileName;
         this.message = message;
+        message.length();
     }
     public Problem(String fileName, String message, Severity severity) {
         this(fileName, message);

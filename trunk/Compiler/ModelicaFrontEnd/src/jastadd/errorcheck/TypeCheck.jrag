@@ -930,10 +930,12 @@ aspect FlatTypeCheck {
   
   public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
   
-  inh String InstFunctionArgument.nonBoundArgumentTypeError();
-  eq FExp.getChild().nonBoundArgumentTypeError()                          = null;
-  eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
-	  functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
+    inh String InstFunctionArgument.nonBoundArgumentTypeError();
+    eq FExp.getChild().nonBoundArgumentTypeError() {
+        throw new UnsupportedOperationException("Method nonBoundArgumentTypeError() not implemented for type " + getClass().getSimpleName());
+    }
+    eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
+        functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
   
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
@@ -1057,16 +1059,12 @@ aspect FlatTypeCheck {
     eq FTranspose.getChild().argumentTypeValid(FType type)                = type.ndims() >= 2 && type.isPrimitive();
     eq FSymmetric.getChild().argumentTypeValid(FType type)                = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
     eq FReductionExp.getChild().argumentTypeValid(FType type)             = type.ndims() > 0 && type.hasAdd();
-    eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = true;
     eq FSemiLinearExp.getChild().argumentTypeValid(FType type)            = type.isNumeric();
-    eq FNoEventExp.getChild().argumentTypeValid(FType type)               = true;
-    eq FSizeExp.getChild().argumentTypeValid(FType type)                  = true;
     eq FAbsExp.getChild().argumentTypeValid(FType type)                   = type.isNumeric();
     eq FSignExp.getChild().argumentTypeValid(FType type)                  = type.isNumeric();
     eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)           = type.isEnum();
     eq FEventGenExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
     eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
-    eq FArrayDimAsArgsExp.getChild().argumentTypeValid(FType type)        = true;
     eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type)     = 
         hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
     eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
@@ -1075,7 +1073,12 @@ aspect FlatTypeCheck {
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
             getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FStringExp.getChild().argumentTypeValid(FType type)                = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
+    eq FInfArgsFunctionCall.getChild().argumentTypeValid(FType type)      = true;  // Type checked in FInfArgsFunctionCall.typeCheck()
     eq FReinit.getChild().argumentTypeValid(FType type)                   = true;  // Type checked in Reinit.typeCheck()
+    // All types allowed for these:
+    eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = true;
+    eq FNoEventExp.getChild().argumentTypeValid(FType type)               = true;
+    eq FSizeExp.getChild().argumentTypeValid(FType type)                  = true;
 
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
