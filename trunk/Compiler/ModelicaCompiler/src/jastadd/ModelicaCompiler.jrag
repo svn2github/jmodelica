@@ -1443,6 +1443,7 @@ public class ModelicaCompiler {
         log.info("Compiler arguments:\n  "        + programarguments.line());
         log.info("Current working directory:\n  " + currentWorkingDirecory());
         log.info("Compiler version: "             + Version.parseVersion());
+        log.info("Java version: "                 + System.getProperty("java.version"));
         logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
     }
 
