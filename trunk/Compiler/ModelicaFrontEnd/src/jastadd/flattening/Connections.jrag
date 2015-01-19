@@ -38,16 +38,19 @@ aspect Connections {
 	}
 
 	public void FClass.genConnectionEquations() {
+        beginStep("genConnectionEquations()");
 		log.debug("<<<FClass.genConnectionEquations()");
 		ArrayList<ConnectionSet> l = connectionSetManager.getConnectionSetList();
 		log.debug("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
 		//getConnectionSetManager().printConnectionSets();
 		//System.out.println(connectionSetManager.printConnectionSets());
 		
-		for (ConnectionSet set : l) 
-			set.generateEquations(getFAbstractEquations());
+        List<FAbstractEquation> equationList = getFAbstractEquations();
+        for (ConnectionSet set : l) 
+            set.generateEquations(equationList);
 		connectionSetManager.generateEqualityConstraints(this);
 		connectionSetManager.disconnectFromInstanceTree();
+        endStep("genConnectionEquations()");
 	}
 		
 	public void ASTNode.enableStreamsRewrite() {

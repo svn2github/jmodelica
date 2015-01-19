@@ -93,10 +93,12 @@ aspect Flattening {
         fc.setName(qualifiedName());
         buildConnectionSets(fc);
         root().breakOnErrors();
+        beginStep("flattenComponents()");
         flatten(fc, false);
         flattenUsedFuncsAndEnums(fc);
         flattenInstClassDeclExtra(fc);
-        fc.updateVariablilityForVariablesInWhen();
+        endStep("flattenComponents()");
+        fc.updateVariabilityForVariablesInWhen();
         fc.genConnectionEquations();
         fc.createExperiment(annotation("experiment"));
         root().breakOnErrors();
@@ -795,10 +797,12 @@ aspect Flattening {
     }
 	
 	public void InstClassDecl.buildConnectionSets(FClass fc) {
+        beginStep("buildConnectionSets()");
 		ConnectionSetManager csm = fc.getConnectionSetManager();
 		buildConnectionSets(new FQNameEmpty(), csm, true);
 		csm.buildOverconstrainedConnectionTrees();
 		csm.elaborateExpandableConnectors();
+        endStep("buildConnectionSets()");
 	}
 	
 	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {}

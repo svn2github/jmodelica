@@ -206,9 +206,11 @@ aspect Variability {
     /**
      * Convert all continous variables that are assigned in when equations into discrete variables.
      */
-    public void FClass.updateVariablilityForVariablesInWhen() {
-        getFAbstractEquations().updateVariablilityForVariablesInWhen(false);
+    public void FClass.updateVariabilityForVariablesInWhen() {
+        beginStep("updateVariabilityForVariablesInWhen()");
+        getFAbstractEquations().updateVariabilityForVariablesInWhen(false);
         checkDiscreteOperations();
+        endStep("updateVariabilityForVariablesInWhen()");
     }
 
     /**
@@ -216,59 +218,59 @@ aspect Variability {
      * 
      * @param inWhen  is this node in a when equation?
      */
-    public void ASTNode.updateVariablilityForVariablesInWhen(boolean inWhen) {}
+    public void ASTNode.updateVariabilityForVariablesInWhen(boolean inWhen) {}
 
-    public void Opt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void Opt.updateVariabilityForVariablesInWhen(boolean inWhen) {
         for (ASTNode n : this)
-            n.updateVariablilityForVariablesInWhen(inWhen);
+            n.updateVariabilityForVariablesInWhen(inWhen);
     }
 
-    public void List.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void List.updateVariabilityForVariablesInWhen(boolean inWhen) {
         for (ASTNode n : this)
-            n.updateVariablilityForVariablesInWhen(inWhen);
+            n.updateVariabilityForVariablesInWhen(inWhen);
     }
 
-    public void FAbstractEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FAbstractEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
         for (ASTNode n : this)
-            n.updateVariablilityForVariablesInWhen(inWhen);
+            n.updateVariabilityForVariablesInWhen(inWhen);
     }
 
-    public void FStatement.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FStatement.updateVariabilityForVariablesInWhen(boolean inWhen) {
         for (ASTNode n : this)
-            n.updateVariablilityForVariablesInWhen(inWhen);
+            n.updateVariabilityForVariablesInWhen(inWhen);
     }
 
-    public void FIfWhenClause.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FIfWhenClause.updateVariabilityForVariablesInWhen(boolean inWhen) {
         for (ASTNode n : this)
-            n.updateVariablilityForVariablesInWhen(inWhen);
+            n.updateVariabilityForVariablesInWhen(inWhen);
     }
 
-    public void FWhenEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
-        super.updateVariablilityForVariablesInWhen(true);
+    public void FWhenEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariabilityForVariablesInWhen(true);
     }
 
-    public void FWhenStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
-        super.updateVariablilityForVariablesInWhen(true);
+    public void FWhenStmt.updateVariabilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariabilityForVariablesInWhen(true);
     }
 
-    public void FEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
         if (inWhen) 
             getLeft().makeContinuousVariablesDiscrete();
     }
 
-    public void FFunctionCallEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FFunctionCallEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
         if (inWhen) 
             for (FFunctionCallLeft left : getLefts())
                 if (left.hasFExp())
                     left.getFExp().makeContinuousVariablesDiscrete();
     }
 
-    public void FAssignStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FAssignStmt.updateVariabilityForVariablesInWhen(boolean inWhen) {
         if (inWhen) 
             getLeft().makeContinuousVariablesDiscrete();
     }
 
-    public void FFunctionCallStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+    public void FFunctionCallStmt.updateVariabilityForVariablesInWhen(boolean inWhen) {
         if (inWhen) 
             for (FFunctionCallLeft left : getLefts())
                 if (left.hasFExp())
