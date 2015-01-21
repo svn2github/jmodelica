@@ -14,7 +14,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-""" 
+"""
 Module for optimization, simulation and initialization algorithms to be used 
 together with pyjmi.jmi.JMUModel.optimize, pyjmi.jmi.JMUModel.simulate and
 pyjmi.jmi.JMUModel.initialize respectively.

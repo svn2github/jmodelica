@@ -684,9 +684,9 @@ class ExternalData(object):
                              "penalized variables.")
 
         # Transform data into trajectories
-        eliminated = copy.copy(eliminated)
-        constr_quad_pen = copy.copy(constr_quad_pen)
-        quad_pen = copy.copy(quad_pen)
+        eliminated = copy.deepcopy(eliminated)
+        constr_quad_pen = copy.deepcopy(constr_quad_pen)
+        quad_pen = copy.deepcopy(quad_pen)
         for variable_list in [eliminated, constr_quad_pen, quad_pen]:
             for (name, data) in variable_list.items():
                 if (isinstance(data, types.FunctionType) or
@@ -943,19 +943,29 @@ class LocalDAECollocator(CasadiCollocator):
         # Exchange alias variables in external data
         if self.external_data is not None:
             eliminated = self.external_data.eliminated
-            constr_quad_pen = self.external_data.constr_quad_pen
             quad_pen = self.external_data.quad_pen
-            for variable_list in [eliminated, constr_quad_pen, quad_pen]:
-                for name in variable_list.keys():
+            constr_quad_pen = self.external_data.constr_quad_pen
+            Q = self.external_data.Q
+            variable_lists = [eliminated, quad_pen, constr_quad_pen]
+            new_eliminated = OrderedDict()
+            new_quad_pen = OrderedDict()
+            new_constr_quad_pen = OrderedDict()
+            new_variable_lists = [new_eliminated, new_quad_pen, new_constr_quad_pen]
+            for i in xrange(3):
+                for name in variable_lists[i].keys():
                     var = op.getVariable(name)
                     if var is None:
                         raise CasadiCollocatorException(
                             "Measured variable %s not " % name +
                             "found in model.")
                     if var.isAlias():
-                        mvar_name = var.getModelVariable().getName()
-                        variable_list[mvar_name] = variable_list[name]
-                        del variable_list[name]
+                        new_name = var.getModelVariable().getName()
+                    else:
+                        new_name = name
+                    new_variable_lists[i][new_name] = variable_lists[i][name]
+            self.external_data.eliminated = new_eliminated
+            self.external_data.quad_pen = new_quad_pen
+            self.external_data.constr_quad_pen = new_constr_quad_pen
 
         # Create eliminated and uneliminated input lists
         if (self.external_data is None or
