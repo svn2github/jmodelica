@@ -1202,7 +1202,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
                   dict will thus give all options with default values.
                 - A LocalDAECollocationAlgOptions object.
         """
-        self._t0 = time.clock()
+        t0_init = time.clock()
         self.op = op
         model = op
         self.model = model
@@ -1279,6 +1279,9 @@ class LocalDAECollocationAlg(AlgorithmBase):
             
         # set solver options
         self._set_solver_options()
+
+        # record the initialization time including initialization within the algorithm object
+        self.nlp.times['init'] = time.clock() - t0_init
         
     def _set_options(self):
         """ 

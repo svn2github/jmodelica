@@ -908,10 +908,11 @@ class LocalDAECollocator(CasadiCollocator):
         Solve the nonlinear program and write the results to a file.
         Called e.g. by LocalDAECollocationAlg.solve.
         """
-        self.times['sol'] = self.solve_nlp()
         t0 = time.clock()
-        self.result_file_name = self.export_result_dymola(self.result_file_name)        
-        self.times['post_processing'] = time.clock() - t0
+        # todo: account for preprocessing time within solve_nlp separately?
+        self.times['sol'] = self.solve_nlp()
+        self.result_file_name = self.export_result_dymola(self.result_file_name)
+        self.times['post_processing'] = time.clock() - t0 - self.times['sol']
 
     def get_result_object(self):
         """ 
