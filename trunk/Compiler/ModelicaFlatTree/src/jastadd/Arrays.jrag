@@ -3070,25 +3070,25 @@ aspect ArrayHelpers {
 			String tmp = toString();
 			return tmp.substring(1, tmp.length() - 1);
 		}
-		
-		/**
-		 * Creates a new Size that is a copy of this one, but with dimensions removed 
-		 * from each side. If nothing is changed, <code>this</code> is returned. 
-		 * 
-		 * @param left   the number of dimensions to remove from the left side
-		 * @param right  the number of dimensions to remove from the right side
-		 */
-		public Size contract(int left, int right) {
-			int ndims = size.length - left - right;
-			if (ndims == size.length)
-				return this;
-			if (ndims == 0)
-				return Size.SCALAR;
-			int[] ns = new int[ndims];
-			System.arraycopy(size, left, ns, 0, ndims);
-			return new Size(ns);
-		}
-		
+
+        /**
+         * Creates a new Size that is a copy of this one, but with dimensions removed 
+         * from each side. If nothing is changed, <code>this</code> is returned. 
+         * 
+         * @param left   the number of dimensions to remove from the left side
+         * @param right  the number of dimensions to remove from the right side
+         */
+        public Size contract(int left, int right) {
+            int ndims = size.length - left - right;
+            if (ndims == size.length)
+                return this;
+            if (ndims <= 0)
+                return Size.SCALAR;
+            int[] ns = new int[ndims];
+            System.arraycopy(size, left, ns, 0, ndims);
+            return new Size(ns);
+        }
+
 		/**
 		 * Creates a new Size that is a copy of this one, but with dimensions removed 
 		 * from the left side. If nothing is changed, <code>this</code> is returned. 
