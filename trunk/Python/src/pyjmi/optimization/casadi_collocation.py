@@ -59,6 +59,9 @@ except ImportError:
     VariableNotFoundError = (jmiVariableNotFoundError,
                              pymodelicaVariableNotFoundError)
 
+from pyjmi.common.algorithm_drivers import JMResultBase
+from pyjmi.common.io import ResultDymolaTextual
+
 class CasadiCollocatorException(Exception):
     """
     A CasadiCollocator Exception.
@@ -833,6 +836,10 @@ class LocalDAECollocator(CasadiCollocator):
     def __init__(self, op, options):
         # Get the options
         self.__dict__.update(options)
+        self.options = options # save the options for the result object
+
+        self.times = {}
+        t0_init = time.clock()
 
         # Store OptimizationProblem object
         self.op = op
@@ -893,6 +900,41 @@ class LocalDAECollocator(CasadiCollocator):
         self.warm_start = False
         # Get to work
         self._create_nlp()
+
+        self.times['init'] = time.clock() - t0_init
+
+    def solve_and_write_result(self):
+        """
+        Solve the nonlinear program and write the results to a file.
+        Called e.g. by LocalDAECollocationAlg.solve.
+        """
+        self.times['sol'] = self.solve_nlp()
+        t0 = time.clock()
+        self.result_file_name = self.export_result_dymola(self.result_file_name)        
+        self.times['post_processing'] = time.clock() - t0
+
+    def get_result_object(self):
+        """ 
+        Load result data saved in e.g. solve_and_write_result and create a LocalDAECollocationAlgResult object.
+
+        Returns::
+
+            The LocalDAECollocationAlgResult object.
+        """
+        t0 = time.clock()
+        resultfile = self.result_file_name
+        res = ResultDymolaTextual(resultfile)
+
+        # Get optimized element lengths
+        h_opt = self.get_h_opt()
+
+        self.times['post_processing'] += time.clock() - t0
+        self.times['tot'] = self.times['init'] + self.times['sol'] + self.times['post_processing']
+
+        # Create and return result object
+        return LocalDAECollocationAlgResult(self.op, resultfile, self,
+                                            res, self.options, self.times,
+                                            h_opt)
 
     def _create_nlp(self):
         """
@@ -4471,6 +4513,12 @@ class LocalDAECollocator(CasadiCollocator):
                 optimization/sample.
                 Default: None 
 
+        Returns::
+
+            used_file_name --
+                The actual file name used to write the result file.
+                Equals file_name unless file_name is empty.
+
         Limitations::
 
             Currently only textual format is supported.
@@ -4637,6 +4685,8 @@ class LocalDAECollocator(CasadiCollocator):
             # Close file
             f.write('\n')
             f.close()
+
+            return file_name
         else:
             raise NotImplementedError('Export on binary Dymola result files ' +
                                       'not yet supported.')
@@ -4692,3 +4742,289 @@ class MeasurementData(object):
                  unconstrained=OrderedDict(), Q=None):
         raise DeprecationWarning('MeasurementData is obsolete. ' +
                                  'Use ExternalData instead.')
+
+class LocalDAECollocationAlgResult(JMResultBase):
+    
+    """
+    A JMResultBase object with the additional attributes times and h_opt.
+    
+    Attributes::
+    
+        times --
+            A dictionary with the keys 'init', 'sol', 'post_processing' and
+            'tot', which measure CPU time consumed during different algorithm
+            stages.
+
+            times['init'] is the time spent creating the NLP.
+            
+            times['sol'] is the time spent solving the NLP (total Ipopt
+            time).
+            
+            times['post_processing'] is the time spent processing the NLP
+            solution before it is returned.
+            
+            times['tot'] is the sum of all the other times.
+            
+            Type: dict
+        
+        h_opt --
+            An array with the normalized optimized element lengths.
+            
+            The element lengths are only optimized (and stored in a class
+            instance) if the algorithm option "hs" == free. Otherwise this
+            attribute is None.
+            
+            Type: ndarray of floats or None
+    """
+    
+    def __init__(self, model=None, result_file_name=None, solver=None, 
+                 result_data=None, options=None, times=None, h_opt=None):
+        super(LocalDAECollocationAlgResult, self).__init__(
+                model, result_file_name, solver, result_data, options)
+        self.h_opt = h_opt
+        self.times = times
+        self.primal_opt = solver.primal_opt
+        self.dual_opt = solver.dual_opt
+        
+        # Print times
+        print("\nTotal time: %.2f seconds" % times['tot'])
+        print("Pre-processing time: %.2f seconds" % times['init'])
+        print("Solution time: %.2f seconds" % times['sol'])
+        print("Post-processing time: %.2f seconds\n" %
+              times['post_processing'])
+
+        # Print condition numbers
+        if self.options['print_condition_numbers']:
+            J_init_cond = N.linalg.cond(self.get_J("init"))
+            J_opt_cond = N.linalg.cond(self.get_J("opt"))
+            KKT_init_cond = N.linalg.cond(self.get_KKT("init"))
+            KKT_opt_cond = N.linalg.cond(self.get_KKT("opt"))
+            print("\nJacobian condition number at the initial guess: %.3g" %
+                  J_init_cond)
+            print("Jacobian condition number at the optimum: %.3g" %
+                  J_opt_cond)
+            print("KKT matrix condition number at the initial guess: %.3g" %
+                  KKT_init_cond)
+            print("KKT matrix condition number at the optimum: %.3g" %
+                  KKT_opt_cond)
+
+    def get_opt_input(self):
+        """
+        Get the optimized input variables as a function of time.
+
+        The purpose of this method is to conveniently provide the optimized
+        input variables to a simulator.
+
+        Returns::
+
+            input_names --
+                Tuple consisting of the names of the input variables.
+
+            input_interpolator --
+                Collocation polynomials for input variables as a function of
+                time.
+        """
+        return self.solver.get_opt_input()
+
+    def get_solver_statistics(self):
+        """ 
+        Get nonlinear programming solver statistics.
+
+        Returns::
+
+            return_status -- 
+                Return status from nonlinear programming solver.
+
+            nbr_iter -- 
+                Number of iterations.
+
+            objective -- 
+                Final value of objective function.
+
+            total_exec_time -- 
+                Nonlinear programming solver execution time.
+        """
+        return self.solver.get_solver_statistics()
+
+    def get_J(self, point="fcn"):
+        """
+        Get the Jacobian of the constraints.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+        """
+        J_fcn = self.solver.solver_object.jacG()
+        if point == "fcn":
+            return J_fcn
+        elif point == "init":
+            J_fcn.setInput(self.solver.xx_init, 0)
+        elif point == "opt":
+            J_fcn.setInput(self.solver.primal_opt, 0)
+        elif point == "sym":
+            return J_fcn.call([self.solver.xx, []],True)[0]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        J_fcn.setInput(self.solver._par_vals, 1)
+        J_fcn.evaluate()
+        return J_fcn.output(0).toArray()
+    
+    def get_H(self, point="fcn"):
+        """
+        Get the Hessian of the Lagrangian.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        H_fcn = self.solver.solver_object.hessLag()
+        if point == "fcn":
+            return H_fcn
+        elif point == "init":
+            x = self.solver.xx_init
+            sigma = self._compute_sigma()
+            dual = N.zeros(self.solver.c_e.numel() +
+                           self.solver.c_i.numel())
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput(self.solver._par_vals, 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "opt":
+            x = self.solver.primal_opt
+            sigma = self._compute_sigma()
+            dual = self.solver.dual_opt['g']
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput(self.solver._par_vals, 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "sym":
+            nu = casadi.MX.sym("nu", self.solver.c_e.numel())
+            sigma = casadi.MX.sym("sigma")
+            lam = casadi.MX.sym("lambda", self.solver.c_i.numel())
+            dual = casadi.vertcat([nu, lam])
+            return [H_fcn.call([self.solver.xx, [], sigma, dual],True)[0], sigma,
+                    dual]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        H_fcn.evaluate()
+        return H_fcn.output(0).toArray()
+
+    def get_KKT(self, point="fcn"):
+        """
+        Get the KKT matrix.
+
+        This only constructs the simple KKT system [H, J^T; J, 0]; not the full
+        KKT system used by IPOPT. However, if the problem has no inequality
+        constraints (including bounds), they coincide.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        if point == "fcn" or point == "sym":
+            x = self.solver.xx
+            J = self.get_J("sym")
+            [H, sigma, dual] = self.get_H("sym")
+            zeros = N.zeros([dual.numel(), dual.numel()])
+            KKT = casadi.blockcat([[H, J.T], [J, zeros]])
+            if point == "sym":
+                return KKT
+            else:
+                KKT_fcn = casadi.MXFunction([x, [], sigma, dual], [KKT])
+                return KKT_fcn
+        elif point == "init":
+            x = self.solver.xx_init
+            dual = N.zeros(self.solver.c_e.numel() +
+                           self.solver.c_i.numel())
+        elif point == "opt":
+            x = self.solver.primal_opt
+            dual = self.solver.dual_opt['g']
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        sigma = self._compute_sigma()
+        J = self.get_J(point)
+        H = self.get_H(point)
+        zeros = N.zeros([len(dual), len(dual)])
+        KKT = N.bmat([[H, J.T], [J, zeros]])
+        return KKT
+
+    def _compute_sigma(self):
+        """
+        Computes the objective scaling factor sigma.
+        """
+        grad_fcn = self.solver.solver_object.gradF()
+        grad_fcn.setInput(self.solver.xx_init, 0)
+        grad_fcn.setInput(self.solver._par_vals, 1)
+        grad_fcn.evaluate()
+        grad = grad_fcn.output(0).toArray()
+        sigma_inv = N.linalg.norm(grad, N.inf)
+        if sigma_inv < 1000.:
+            return 1.
+        else:
+            return 1. / sigma_inv
