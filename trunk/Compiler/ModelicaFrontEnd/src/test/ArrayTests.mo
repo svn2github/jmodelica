@@ -1106,6 +1106,23 @@ end ArrayTests.General.ArrayTest41;
 ")})));
 end ArrayTest41;
 
+
+model ArrayTest42
+    Real x = noEvent(f());
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="General_ArrayTest42",
+            description="Using noEvent on expression that gives ndims = -1",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Semantic error at line 1111, column 22:
+  Cannot find function declaration for f()
+")})));
+end ArrayTest42;
+
+
 end General;
 
 

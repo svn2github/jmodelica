@@ -811,7 +811,7 @@ aspect Flattening {
     public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         if (names.add(name())) {
             FVariable fv = createFVariable();
-            if (isConstant() || (isParameter() && tokenComponentDecl_ComponentDecl.hasFinal()))
+            if ((isConstant() && hasBindingFExp()) || (isParameter() && getComponentDecl().hasFinal()))
                 fv.modifiableInRecord = false;
             frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
