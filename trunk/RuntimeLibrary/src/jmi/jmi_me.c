@@ -229,6 +229,7 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+    int needParameterUpdate = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -261,8 +262,12 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         z[index] = value[i];
 
         if (index < jmi->offs_real_dx) {
-            jmi_init_eval_parameters(jmi);
+            needParameterUpdate = 1;
         }
+
+    }
+    if( needParameterUpdate ) {
+          jmi_init_eval_parameters(jmi);
     }
     return 0;
 }
@@ -274,6 +279,7 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+    int needParameterUpdate = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -306,8 +312,12 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         z[index] = value[i];
 
         if (index < jmi->offs_real_dx) {
-            jmi_init_eval_parameters(jmi);
+             needParameterUpdate = 1;
         }
+
+    }
+    if( needParameterUpdate ) {
+          jmi_init_eval_parameters(jmi);
     }
     return 0;
 }
@@ -319,6 +329,7 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+    int needParameterUpdate = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -351,9 +362,12 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         z[index] = value[i];
 
         if (index < jmi->offs_real_dx) {
-            jmi_init_eval_parameters(jmi);
+            needParameterUpdate = 1;
         }
 
+    }
+    if( needParameterUpdate ) {
+          jmi_init_eval_parameters(jmi);
     }
     return 0;
 }
