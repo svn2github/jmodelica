@@ -1113,6 +1113,36 @@ Semantic error at line 1141, column 13:
 end RecursiveStructure4;
 
 
+model RecursiveStructure5
+    Integer i = sum(i for i in 1:2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecursiveStructure5",
+            description="Don't trigger recursiveness check on for expression in binding exp of Integer",
+            flatModel="
+fclass TypeTests.RecursiveStructure5
+ discrete Integer i = sum(i for i in 1:2);
+end TypeTests.RecursiveStructure5;
+")})));
+end RecursiveStructure5;
+
+
+model RecursiveStructure6
+    Integer i(start = sum(i for i in 1:2)) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecursiveStructure6",
+            description="Don't trigger recursiveness check on for expression in modifier on Integer",
+            flatModel="
+fclass TypeTests.RecursiveStructure6
+ discrete Integer i(start = sum(i for i in 1:2)) = 1;
+end TypeTests.RecursiveStructure6;
+")})));
+end RecursiveStructure6;
+
+
 model WhenType1
 	Real x = 1;
 equation

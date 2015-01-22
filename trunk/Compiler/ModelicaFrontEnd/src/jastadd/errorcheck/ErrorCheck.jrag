@@ -1248,15 +1248,15 @@ aspect InstanceErrorCheck {
 			getFExp().collectErrors(checkType);
 	    }
 	}
-	
-	/**
-	 * Check if this node is in a recursive structure.
-	 */
-	syn boolean InstNode.isRecursed()      = false;
-	eq InstComponentDecl.isRecursed()      = isWithin(myInstClass());
-	eq InstExtends.isRecursed()            = isWithin(myInstClass());
-	eq InstArrayComponentDecl.isRecursed() = instComponentDecl().isRecursed();
-	
+
+    /**
+     * Check if this node is in a recursive structure.
+     */
+    syn boolean InstNode.isRecursed()      = false;
+    eq InstComponentDecl.isRecursed()      = !isPrimitive() && isWithin(myInstClass());
+    eq InstExtends.isRecursed()            = isWithin(myInstClass());
+    eq InstArrayComponentDecl.isRecursed() = instComponentDecl().isRecursed();
+
 	// TODO: check if we realy need this in addition to isRecursed()
 	/**
 	 * Check if extends tree is recursive.
