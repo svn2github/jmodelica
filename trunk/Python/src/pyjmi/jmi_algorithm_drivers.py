@@ -68,6 +68,7 @@ except:
     
 if casadi_present:
     from pyjmi.optimization.casadi_collocation import *
+    from pyjmi.optimization import casadi_collocation
     from pyjmi.optimization.polynomial import *
     from pyjmi.common.xmlparser import XMLException
 
@@ -1169,6 +1170,27 @@ class KInitSolveAlg(AlgorithmBase):
         prefilled with default values. (Class method.)
         """
         return KInitSolveAlgOptions()
+
+
+class LocalDAECollocationPrepareAlg(AlgorithmBase):
+    """
+    Carries out the setup parts of LocalDAECollocationAlg.
+    """
+    def __init__(self, op, options):
+        """
+        Create a LocalDAECollocationPrepareAlg
+
+        Arguments are the same as for LocalDAECollocationAlg.
+        """
+        self.alg = LocalDAECollocationAlg(op, options)
+        self.solver = casadi_collocation.OptimizationSolver(self.alg.nlp)
+
+    def solve(self):
+        pass
+
+    def get_result(self):
+        return self.solver
+
 
 class LocalDAECollocationAlg(AlgorithmBase):
     

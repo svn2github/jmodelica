@@ -851,6 +851,23 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
                              "algorithm.")
         return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
                                     algorithm, options)
+
+    def prepare_optimization(self, algorithm='LocalDAECollocationPrepareAlg', options={}):
+        """
+        Prepare the solution of an optimization problem.
+
+        The arguments are the same as for the optimize method.
+
+        Returns::
+
+            A solver object that can be used to solve the problem and change settings.
+        """
+        if algorithm != "LocalDAECollocationPrepareAlg":
+            raise ValueError("LocalDAECollocationPrepareAlg is the only supported " +
+                             "algorithm.")
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
+                                    algorithm, options)
+
     def get_state_names(self):
         return [var.getName() for var in self.getVariables(self.DIFFERENTIATED)\
          if not var.isAlias()]
