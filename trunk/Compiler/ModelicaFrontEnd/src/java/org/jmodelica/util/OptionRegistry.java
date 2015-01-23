@@ -443,6 +443,11 @@ abstract public class OptionRegistry {
             "Controls how matching algorithm computes incidences for function call equations."
             + " Possible values: 'none', 'all'. With 'none' all outputs are assumed to depend"
             + " on all inputs. With 'all' the compiler analyses the function to determine dependencies."),
+        MAX_N_PROC
+            ("max_n_proc",
+            compiler,
+            4,
+            "The maximum number of processes used during c-code compilation"),
 
         // Runtime options
         /*

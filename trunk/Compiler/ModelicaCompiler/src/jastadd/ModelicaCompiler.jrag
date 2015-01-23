@@ -752,7 +752,7 @@ public class ModelicaCompiler {
                 ASTNode.beginStep("compileCCode()");
                 String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
                 CCompilerDelegator ccompiler = getCCompiler();
-                ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+                ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
                 ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
                 ASTNode.endStep("compileCCode()");
             }
@@ -1614,7 +1614,7 @@ public class ModelicaCompiler {
             try {
 //                generateFile(target.getCTemplates(null), createCGenerator(ext), sourceDir, source + ".c");
                 target.getTemplates().generateCFiles(this, null, createCGenerator(ext), sourceDir, source);
-                executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs);
+                executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
                 new File(sourceDir, source + ".c").delete();
                 log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
             } catch (FileNotFoundException e) {
@@ -2347,17 +2347,17 @@ public abstract class CCompilerDelegator {
      * Compile DLL(s) from generated C code.
      */
     public final void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
-            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
-        compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, getTargetPlatforms());
+            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, int maxProc) {
+        compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, getTargetPlatforms(), maxProc);
     }
     
     /**
      * Compile an executable for build platform.
      */
     public final String compileCCodeLocal(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
-            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
+            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, int maxProc) {
         String[] platform = {ModelicaCompiler.reduceBits(ModelicaCompiler.getPlatform(), getTargetPlatforms())};
-        compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, platform);
+        compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, platform, maxProc);
         File dir = new File(workDir, "binaries");
         File executable = new File(dir, fileName + (platform[0].startsWith("win") ? ".exe" : ""));
         return executable.getAbsolutePath();
@@ -2367,8 +2367,7 @@ public abstract class CCompilerDelegator {
      * Compile DLL(s) from generated C code for a set of target platforms.
      */
     protected abstract void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
-            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, String[] platforms);
-
+            Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, String[] platforms, int maxProc);
 	
 	
 	abstract protected String[] getDefaultTargetPlatforms();
@@ -2632,7 +2631,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
      * Compile DLL(s) from generated C code for a set of target platforms.
      */
     protected void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
-        Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, String[] platforms) {
+        Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs, String[] platforms, int maxProc) {
         String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
         String buildPlatform = ModelicaCompiler.getPlatform();
         String make = getMake(buildPlatform);
@@ -2649,7 +2648,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             if (!makefile.exists())
                 throw new CcodeCompilationException("Makefile '" + makefile + "' does not exist.");
             String makefileVar = "MAKEFILE=" + makefile.getPath();
-            String[] args = new String[] { make, "-f", makefile.getPath(), targetObject.getMakeFileFlag(), makefileVar };
+            String[] args = new String[] { make, "-f", makefile.getPath(), "-j", Integer.toString(maxProc), targetObject.getMakeFileFlag(), makefileVar };
             ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
             for (Map.Entry<String,String> var : pVars.entrySet())
                 if (var.getValue() != null)
