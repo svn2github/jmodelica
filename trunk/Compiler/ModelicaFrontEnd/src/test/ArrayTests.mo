@@ -1123,6 +1123,40 @@ Semantic error at line 1111, column 22:
 end ArrayTest42;
 
 
+model ArrayTest43
+    model A
+        Real x;
+    end A;
+    
+    model B
+		parameter Integer m;
+        Real y[m] = (1:m) ./ time;
+    end B;
+    
+    parameter Integer n = 3;
+    A a[n](x = b.y[1:n]);
+	B b(m = n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest43",
+            description="Splitting expression with access in array subscripts in part of dotted access",
+            flatModel="
+fclass ArrayTests.General.ArrayTest43
+ structural parameter Integer n = 3 /* 3 */;
+ Real a[1].x;
+ Real a[2].x;
+ Real a[3].x;
+ structural parameter Integer b.m = 3 /* 3 */;
+equation
+ a[1].x = 1 ./ time;
+ a[2].x = 2 ./ time;
+ a[3].x = 3 ./ time;
+end ArrayTests.General.ArrayTest43;
+")})));
+end ArrayTest43;
+
+
 end General;
 
 

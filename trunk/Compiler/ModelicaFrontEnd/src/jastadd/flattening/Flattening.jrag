@@ -1206,7 +1206,7 @@ aspect Flattening {
 
     eq InstArrayAccess.splitArrayAccess(int index) {
         InstArrayAccess access = fullCopy();
-        access.setParent(this);
+        access.setParent(getTopInstAccess());
         access.getFArraySubscripts().specifyNext(index);
         return access;
     }
