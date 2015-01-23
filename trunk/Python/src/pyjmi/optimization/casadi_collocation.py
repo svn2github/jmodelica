@@ -5029,3 +5029,60 @@ class LocalDAECollocationAlgResult(JMResultBase):
             return 1.
         else:
             return 1. / sigma_inv
+
+
+class OptimizationSolver(object):
+    """
+    Represents an initialized optimization problem that can be reoptimized with different settings.
+
+    Wrapper class around LocalDAECollocator to supply a user interface for warm starting.
+    """
+
+    def __init__(self, collocator):
+        """
+        Create a wrapper around a collocator object to expose reoptimization functionality.
+
+        The collocator should be a LocalDAECollocator.
+        """
+        self.collocator = collocator
+
+    def set(self, name, value):
+        """Set the value of the named parameter from the original OptimizationProblem"""
+        if name not in self.collocator.var_indices:
+            raise KeyError("No parameter " + repr(name) + " in the optimization problem.")
+        self.collocator._par_vals[self.collocator.var_indices[name]] = value
+
+    def get(self, name):
+        """Get the value of the named parameter from the original OptimizationProblem"""
+        if name not in self.collocator.var_indices:
+            raise KeyError("No parameter " + repr(name) + " in the optimization problem.")
+        return self.collocator._par_vals[self.collocator.var_indices[name]]
+
+    def set_solver_option(self, solver_name, name, value):
+        """
+        Set an option to the nonlinear programming solver.
+
+        If solver_name does not correspond to the 'solver' option used
+        in the optimization, the call is ignored.
+        """
+        if solver_name not in ['IPOPT', 'WORHP']:
+            raise ValueError('Unknown nonlinear programming solver %s.' %
+                             solver_name)
+        if solver_name == self.collocator.solver:
+            self.collocator.set_solver_option(name, value)
+
+    def optimize(self):
+        """Solve the optimization problem with the current settings, and return the result."""
+        if self.collocator.warm_start:
+            # It would be good to expose a way for the user to provide an initial guess at some point,
+            # how to expose that option?
+            self.collocator.xx_init = self.collocator.primal_opt
+
+            self.collocator._init_and_set_solver_inputs()
+
+        self.collocator.solve_and_write_result()
+        return self.collocator.get_result_object()
+
+    def set_warm_start(self, warm_start):
+        """Set whether warm start is enabled for the optimization"""
+        self.collocator.warm_start = warm_start
