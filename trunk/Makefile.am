@@ -343,16 +343,11 @@ endif
 	  $(CP) Complex.mo "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
 	fi
 	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
+	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates/FMIBase
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/ceval_external_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi1_me_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi1_cs_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_master_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi_code_gen_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_common_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_me_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_cs_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/*.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/FMIBase/*.c $(DESTDIR)$(prefix)/CodeGenTemplates/FMIBase
+	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/FMIBase/*.h $(DESTDIR)$(prefix)/CodeGenTemplates/FMIBase
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaFMUXBackEnd/templates/*.tpl $(DESTDIR)$(prefix)/CodeGenTemplates
 	mkdir -p $(DESTDIR)$(prefix)/XML

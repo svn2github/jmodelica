@@ -100,7 +100,7 @@ SHARED = $(BINARY_DIR)/$(FILE_NAME).dylib
 EXECUTABLE = $(BINARY_BASE_DIR)/$(FILE_NAME)
 
 # Object files to be included in the shared library
-OBJS = $(FILE_NAME).o
+OBJS = $(patsubst sources/%.c, %.o, $(wildcard sources/*.c)) $(patsubst sources/%.cpp, %.o, $(wildcard sources/*.cpp))
 
 # C++ Compiler command
 CXX = g++

@@ -30,9 +30,6 @@
 #include "fmi2FunctionTypes.h"
 #include "fmi2TypesPlatform.h"
 
-/* Generated code. */
-$INCLUDE: fmi_code_gen_template.c$
-
 /* FMI Funcitons. */
 $INCLUDE: fmi2_functions_common_template.c$
 #ifdef FMUME20

@@ -183,7 +183,7 @@ public abstract class AbstractGenerator {
      */
     public void generate(String templateFile, String outputFile) {
         try {
-            generate(templateFile, new FileOutputStream(outputFile), false);
+            generate(templateFile, new FileOutputStream(outputFile), false, "");
         } catch (IOException e) { // TODO: introduce specific exception type
             throw new RuntimeException("File I/O problem during code generation", e);
         }
@@ -196,9 +196,10 @@ public abstract class AbstractGenerator {
      * @param outputFile    the stream to write output to
      * @param autoFlush     automatically flush output steam on each newline
      */
-    public void generate(String templateFile, OutputStream output, boolean autoFlush) {
+    public void generate(String templateFile, OutputStream output, boolean autoFlush, String header) {
         try {
             CodeStream outStream = new NotNullCodeStream(new PrintStream(output, autoFlush, "UTF-8"));
+            outStream.print(header);
             if (templateFile == null) {
                 generate(null, outStream, null);
             } else {

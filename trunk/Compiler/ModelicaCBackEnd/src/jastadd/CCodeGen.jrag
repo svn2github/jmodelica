@@ -2363,7 +2363,7 @@ aspect CCodeGen {
 	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
 	
 	public void FEnumDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		str.format("%schar* %s[] = { \"\"", indent, name_C());
+		str.format("%sstatic char* %s[] = { \"\"", indent, name_C());
 		for (FEnumLiteral el : ((FEnumLiteralList) getFEnumSpecification()).getFEnumLiterals())
 			str.format(", \"%s\"", el.name());
 		str.print(" };\n");

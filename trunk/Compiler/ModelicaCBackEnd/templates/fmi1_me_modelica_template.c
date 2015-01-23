@@ -26,8 +26,6 @@
 
 #define MODEL_IDENTIFIER $C_model_id$
 
-$INCLUDE: fmi_code_gen_template.c$
-
 /* FMI Functions*/
 
 /* Inquire version numbers of header files */

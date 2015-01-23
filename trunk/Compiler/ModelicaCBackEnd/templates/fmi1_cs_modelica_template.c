@@ -28,8 +28,6 @@
 
 #define MODEL_IDENTIFIER $C_model_id$
 
-$INCLUDE: fmi_code_gen_template.c$
-
 /* FMI for co-simulation Functions*/
 
 /* Inquire version numbers of header files */
