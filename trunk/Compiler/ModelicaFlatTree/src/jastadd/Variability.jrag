@@ -364,7 +364,7 @@ aspect Variability {
     eq FLitExp.expVariability()   = fConstant();
     eq FNoExp.expVariability()    = fConstant();
     eq FNdimsExp.expVariability() = fConstant();
-    eq FEndExp.expVariability()   = fParameter();
+    eq FEndExp.expVariability()   = fStructParameter();
     eq FTimeExp.expVariability()  = fContinuous();
     eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 

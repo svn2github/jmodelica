@@ -1642,7 +1642,34 @@ end ArrayTests.Subscripts.MixedTypes1;
 ")})));
     
 end MixedTypes1;
+
+
+model EndSubscript1
+    record A
+        Real x;
+    end A;
     
+    A a[2] = {A(time), A(2* time)};
+    Real x = a[end].x + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_EndSubscript1",
+            description="Using end in access to member of last record in array of records",
+            flatModel="
+fclass ArrayTests.Subscripts.EndSubscript1
+ Real a[1].x;
+ Real a[2].x;
+ Real x;
+equation
+ a[1].x = time;
+ a[2].x = 2 * time;
+ x = a[2].x + 1;
+end ArrayTests.Subscripts.EndSubscript1;
+")})));
+end EndSubscript1;
+
+
 end Subscripts;
 
 

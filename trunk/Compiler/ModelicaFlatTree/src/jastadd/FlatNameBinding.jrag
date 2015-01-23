@@ -18,24 +18,25 @@ import java.util.Map;
 import java.util.HashMap;
 
 aspect FlatNameBinding {
-	
-	inh FAbstractVariable FIdUse.lookupFV(FQName fqn);
-	inh FAbstractVariable FIdUse.lookupDerFV(FQName fqn);
-	inh FAbstractVariable FIdUse.lookupOutermostFV(FQName fqn);
-	inh FAbstractVariable FExp.lookupFV(FQName fqn);
-	inh FAbstractVariable FAbstractVariable.lookupFV(FQName fqn);
-	inh FAbstractVariable FAbstractVariable.lookupDerFV(FQName fqn);
-	inh FAbstractVariable FRecordDecl.lookupFV(FQName fqn);
-	inh FAbstractVariable FActualStream.lookupFV(FQName fqn);
-	
-	syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
-	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
-	eq FAbstractDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
-	syn FAbstractVariable FReinit.myFV() = getVar().myFVForUse();
-	
-	syn FAbstractVariable FExp.myFVForUse() = null;
-	eq FIdUseExp.myFVForUse()               = myFV();
-	
+
+    inh FAbstractVariable FQName.lookupFV(FQName fqn);
+    inh FAbstractVariable FIdUse.lookupFV(FQName fqn);
+    inh FAbstractVariable FIdUse.lookupDerFV(FQName fqn);
+    inh FAbstractVariable FIdUse.lookupOutermostFV(FQName fqn);
+    inh FAbstractVariable FExp.lookupFV(FQName fqn);
+    inh FAbstractVariable FAbstractVariable.lookupFV(FQName fqn);
+    inh FAbstractVariable FAbstractVariable.lookupDerFV(FQName fqn);
+    inh FAbstractVariable FRecordDecl.lookupFV(FQName fqn);
+    inh FAbstractVariable FActualStream.lookupFV(FQName fqn);
+
+    syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
+    syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
+    eq FAbstractDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
+    syn FAbstractVariable FReinit.myFV() = getVar().myFVForUse();
+
+    syn FAbstractVariable FExp.myFVForUse() = null;
+    eq FIdUseExp.myFVForUse()               = myFV();
+
 	syn FFunctionVariable FIdUse.myFuncVar() {
 		FAbstractVariable fv = lookupOutermostFV(getFQName());
 		return (fv instanceof FFunctionVariable) ? (FFunctionVariable) fv: null;

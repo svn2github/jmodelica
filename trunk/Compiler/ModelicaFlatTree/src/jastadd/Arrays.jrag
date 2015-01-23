@@ -692,32 +692,39 @@ aspect Arrays {
 	eq FExpSubscript.size()     = getFExp().size();
 	eq FColonSubscript.size()   = mySize();
 	eq FIntegerSubscript.size() = Size.SCALAR;
-	
-	/**
-	 * Get the size this subscript(s) would have if all subscripts were colons.
-	 */
-	inh Size FEndExp.mySize();
-	inh Size FSubscript.mySize();
-	inh Size FArraySubscripts.mySize();
-	eq FIdUse.getChild().mySize()                       = myFV().size();
-	eq FIdUseInstAccess.getChild().mySize()             = getInstAccess().size();
-	eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
-	eq InstArrayAccess.getFArraySubscripts().mySize()   = myInstComponentDecl().size();
-	eq InstArrayAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
-	eq FSubscriptedExp.getFArraySubscripts().mySize()   = getFExp().size();
-	eq FExpSubscript.getFExp().mySize()                 = mySize();
-	eq FlatRoot.getChild().mySize()                     = Size.SCALAR;
-	eq InstRoot.getChild().mySize()                     = Size.SCALAR;
-	
-	eq FArraySubscripts.getFSubscript(int i).mySize() {
-		MutableSize s = new MutableSize(1);
-		if (mySize().has(i))
-			s.set(0, mySize(), i);
-		else 
-			s.set(0, Size.UNKNOWN);
-		return s;
-	}
-	
+
+    /**
+     * Get the size this subscript(s) would have if all subscripts were colons.
+     */
+    inh Size FEndExp.mySize();
+    inh Size FSubscript.mySize();
+    inh Size FArraySubscripts.mySize();
+    eq FIdUse.getChild().mySize()                        = myFV().size();
+    eq FIdUseInstAccess.getChild().mySize()              = getInstAccess().size();
+    eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
+    eq InstArrayAccess.getFArraySubscripts().mySize()    = myInstComponentDecl().size();
+    eq InstArrayAccess.getExpandedSubscripts().mySize()  = myInstComponentDecl().size();
+    eq FSubscriptedExp.getFArraySubscripts().mySize()    = getFExp().size();
+    eq FExpSubscript.getFExp().mySize()                  = mySize();
+    eq FlatRoot.getChild().mySize()                      = Size.SCALAR;
+    eq InstRoot.getChild().mySize()                      = Size.SCALAR;
+
+    eq FArraySubscripts.getFSubscript(int i).mySize() {
+        MutableSize s = new MutableSize(1);
+        Size ms = mySize();
+        if (ms.has(i))
+            s.set(0, ms, i);
+        else 
+            s.set(0, Size.UNKNOWN);
+        return s;
+    }
+
+    eq FQNameFull.getFQNamePart(int i).mySize() {
+        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
+        n.setParent(this);
+        return lookupFV(n).size();
+    }
+
 	/**
 	 * Get the array sizes. 
 	 */
