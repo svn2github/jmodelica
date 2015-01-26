@@ -1305,11 +1305,8 @@ public class ModelicaCompiler {
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		generateFile(target.getXMLTemplates(fc), target.getXMLGenerator(fc),
-					outDir, "modelDescription.xml", "");
-//       generateFile(target.getCTemplates(fc), createCGenerator(fc), 
-//                   sourceDir, name + ".c");
-		target.getTemplates().generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        target.getTemplates().generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
+        target.getTemplates().generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
 		
 		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
@@ -1612,7 +1609,6 @@ public class ModelicaCompiler {
             if (ext.includeDirectory() != null)
                 incDirs.add(ext.includeDirectory());
             try {
-//                generateFile(target.getCTemplates(null), createCGenerator(ext), sourceDir, source + ".c");
                 target.getTemplates().generateCFiles(this, null, createCGenerator(ext), sourceDir, source);
                 executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
                 new File(sourceDir, source + ".c").delete();
@@ -1792,30 +1788,6 @@ public class ModelicaCompiler {
             } else {
                 throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU, jmu to compile an JMU or fmux to compile an FMUX."); 
             }
-        }
-        
-        /**
-         * get the C model description template file path.
-         * 
-         * @return Reference to the c template file path attribute.
-         * @param fc A reference to an FClass object. This is convenient in
-         * extensions of ModelicaCompiler that need to distinguish between
-         * different kinds of flattened classes.
-         */
-//        public String getCTemplates(FClass fc) {
-//            return templates.getCTemplates(fc);
-//        }
-        
-        /**
-         * get the XML model description template file path.
-         * 
-         * @return Reference to the XML variables template file path attribute. 
-         * @param fc A reference to an FClass object. This is convenient in
-         * extensions of ModelicaCompiler that need to distinguish between
-         * different kinds of flattened classes.
-         */
-        public String getXMLTemplates(FClass fc) {
-            return templates.getXMLTemplates(fc);
         }
         
     	/**
@@ -2075,11 +2047,11 @@ eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
 public class Templates {
     
     public static final Templates NULL      = new Templates();
-    public static final Templates FMUME10   = new Templates(true, null,                        "fmi1_me_modelica_template.c");
-    public static final Templates FMUME20   = new Templates(true, null,                        "fmi2_master_modelica_template.c");
-    public static final Templates FMUCS10   = new Templates(true, null,                        "fmi1_cs_modelica_template.c");
-    public static final Templates FMUCS20   = new Templates(true, null,                        "fmi2_master_modelica_template.c");
-    public static final Templates FMUMECS20 = new Templates(true, null,                        "fmi2_master_modelica_template.c");
+    public static final Templates FMUME10   = new FMUTemplates(null,                           "fmi1_me_modelica_template.c");
+    public static final Templates FMUME20   = new FMUTemplates(null,                           "fmi2_master_modelica_template.c");
+    public static final Templates FMUCS10   = new FMUTemplates(null,                           "fmi1_cs_modelica_template.c");
+    public static final Templates FMUCS20   = new FMUTemplates(null,                           "fmi2_master_modelica_template.c");
+    public static final Templates FMUMECS20 = new FMUTemplates(null,                           "fmi2_master_modelica_template.c");
     public static final Templates CEVAL     = new Templates(null,                              "ceval_external_template.c");
     public static final Templates JMU       = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
     public static final Templates FMUX      = new Templates("jmodelica_model_description.tpl");
@@ -2089,18 +2061,8 @@ public class Templates {
     
     private String[] templates;
     
-    private String[] heads = {"base"};
-    private String[] tpls = {"base", "start", "param", "equ_init", "equ", "funcs"};
-    private String subDir = "FMIBase";
-    private boolean fmi = false;
-    
     private Templates(String... templates) {
         this.templates = templates;
-    }
-    
-    private Templates(boolean fmi, String... templates) {
-        this(templates);
-        this.fmi = fmi;
     }
     
     private String template(int i) {
@@ -2110,33 +2072,51 @@ public class Templates {
     private static String templatePath(String fileName) {
         if (fileName == null)
             return null;
-        File dir = new File(ModelicaCompiler.getJModelicaHome(), "CodeGenTemplates");
-        return new File(dir, fileName).getPath();
+        return new File(templateDir(), fileName).getPath();
     }
     
-    private String subTemplatePath(String file) {
-        File dir = new File(ModelicaCompiler.getJModelicaHome(), "CodeGenTemplates");
-        dir = new File(dir, subDir);
-        return new File(dir, file).getPath();
+    protected static File templateDir() {
+        return new File(ModelicaCompiler.getJModelicaHome(), "CodeGenTemplates");
     }
     
-    public String getXMLTemplates(FClass fc) {
-        return templatePath(getXMLTemplateName(fc));
+    public void generateXMLFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
+            throws FileNotFoundException {
+        mc.generateFile(templatePath(getXMLTemplateName(fc)), gen, sourceDir, name + ".xml", "");
     }
     
     public void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
             throws FileNotFoundException {
-        String header = "";
+        generateCFiles(mc, fc, gen, sourceDir, name, "");
+    }
+    
+    protected void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
+            throws FileNotFoundException {
+        mc.generateFile(templatePath(getCTemplateName(fc)), gen, sourceDir, name + ".c", header);
+    }
+    
+    private static class FMUTemplates extends Templates {
+        private String[] heads = {"base"};
+        private String[] tpls = {"base", "start", "param", "equ_init", "equ", "funcs"};
+        private String subDir = "FMIBase";
         
-        if (fmi) {
+        protected FMUTemplates(String... templates) {
+            super(templates);
+        }
+        
+        private String subTemplatePath(String file) {
+            File dir = new File(templateDir(), subDir);
+            return new File(dir, file).getPath();
+        }
+        
+        protected void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
+                throws FileNotFoundException {
+            
             for (String tpl : heads) {
                 header = header + "#include \"" + name + "_" + tpl + ".h\"\n";
             }
-        }
-        
-        mc.generateFile(templatePath(getCTemplateName(fc)), gen, sourceDir, name + ".c", header);
-        
-        if (fmi) {
+            
+            super.generateCFiles(mc, fc, gen, sourceDir, name, header);
+            
             for (String tpl : heads) {
                 mc.generateFile(subTemplatePath(tpl) + ".h", gen, sourceDir, name + "_" + tpl + ".h", "");
             }
@@ -2151,7 +2131,7 @@ private String Templates.getCTemplateName(FClass fc) {
     return template(C);
 }
 
-public String Templates.getXMLTemplateName(FClass fc) {
+private String Templates.getXMLTemplateName(FClass fc) {
     return template(XML);
 }
 
