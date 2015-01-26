@@ -1157,6 +1157,72 @@ end ArrayTests.General.ArrayTest43;
 end ArrayTest43;
 
 
+model ArrayTest44
+    constant Real a[2] = {1, 2};
+    
+    model B
+        Real x[2,2];
+    equation
+        for i in 1:2 loop
+            x[:,i] = { a[i] + j * time for j in 1:2 };
+        end for;
+    end B;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest44",
+            description="Using loop index of surrounding for loop to index array package constant used in iteration exception",
+            flatModel="
+fclass ArrayTests.General.ArrayTest44
+ constant Real a[1] = 1;
+ constant Real a[2] = 2;
+ Real b.x[1,1];
+ Real b.x[1,2];
+ Real b.x[2,1];
+ Real b.x[2,2];
+equation
+ b.x[1,1] = 1.0 + time;
+ b.x[2,1] = 1.0 + 2 * time;
+ b.x[1,2] = 2.0 + time;
+ b.x[2,2] = 2.0 + 2 * time;
+end ArrayTests.General.ArrayTest44;
+")})));
+end ArrayTest44;
+
+
+model ArrayTest45
+    constant Real a[2,2] = {{1, 2}, {3, 4}};
+    
+    model B
+        Real x[2] = { a[j,i] + i * time for i in 1:2 };
+        parameter Integer j = 1;
+    end B;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest45",
+            description="Using parameter to index array package constant used in iteration exception",
+            flatModel="
+fclass ArrayTests.General.ArrayTest45
+ constant Real a[1,1] = 1;
+ constant Real a[1,2] = 2;
+ constant Real a[2,1] = 3;
+ constant Real a[2,2] = 4;
+ Real b.x[1];
+ Real b.x[2];
+ parameter Integer b.j = 1 /* 1 */;
+equation
+ b.x[1] = 1.0 + time;
+ b.x[2] = 2.0 + 2 * time;
+end ArrayTests.General.ArrayTest45;
+")})));
+end ArrayTest45;
+
+
 end General;
 
 

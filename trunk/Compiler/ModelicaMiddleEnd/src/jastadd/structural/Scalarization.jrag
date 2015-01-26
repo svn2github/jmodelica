@@ -3116,17 +3116,18 @@ aspect Scalarization {
 	public FExp FNdimsExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return ceval().buildLiteral();
 	}
-	
-	public FExp FSubscriptedExp.scalarizeExp(Map<String,FExp> indexMap) {
-		FArraySubscripts fas = getFArraySubscripts().scalarize(indexMap);
-		if (getFArraySubscripts().hasUnknownIndices() && inFunction()) {
-			return new FIdUseExp(tempVarName(), fas);
-		} else {
-			Index i = fas.asIndex();
-			return getFExp().getArray().get(i).scalarize(indexMap);
-		}
-	}
-	
+
+    public FExp FSubscriptedExp.scalarizeExp(Map<String,FExp> indexMap) {
+        FArraySubscripts fas = getFArraySubscripts().scalarize(indexMap);
+        if (getFArraySubscripts().hasUnknownIndices() && inFunction()) {
+            return new FIdUseExp(tempVarName(), fas);
+        } else {
+            fas.setParent(this);
+            Index i = fas.asIndex();
+            return getFExp().getArray().get(i).scalarize(indexMap);
+        }
+    }
+
 	public FExp FMinMaxExp.scalarizeExp(Map<String,FExp> indexMap) {
 		if (hasY())
 			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));
