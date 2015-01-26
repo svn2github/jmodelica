@@ -241,22 +241,45 @@ equation
 end StreamTests.StreamTest6;
 ")})));
   end StreamTest6;
-  
-// TODO: rewrite from actualStream() does not handle this
-  model StreamTest7
-	  connector A
-		 flow Real a;
-		 stream Real b;
-		 Real c;
-	  end A;
-	  
-	  A d;
-	  A e;
-	  Real f;
-  equation
-	  connect(d, e);
-	  f = actualStream(d.b);
-  end StreamTest7;
+
+
+model StreamTest7
+    connector A
+       flow Real a;
+       stream Real b;
+       Real c;
+    end A;
+    
+    model D
+        A e;
+    end D;
+    D f;
+    A g;
+    Real h;
+equation
+    connect(g, f.e);
+    h = actualStream(g.b);
+	g.b = time;
+	g.c = 2 / g.b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest7",
+            description="",
+            flatModel="
+fclass StreamTests.StreamTest7
+ constant Real g.a = 0;
+ Real g.b;
+ Real g.c;
+ Real h;
+ constant Real f.e.a = 0;
+equation
+ h = noEvent(g.b);
+ g.b = time;
+ g.c = 2 / g.b;
+end StreamTests.StreamTest7;
+")})));
+end StreamTest7;
 
 
 model StreamMinMax1
