@@ -204,6 +204,13 @@ abstract public class OptionRegistry {
              "", 
              "The value of this option is appended to the value of the MODELICAPATH environment " +
              "variable for determining in what directories to search for libraries."),
+        LAPACK_LIB
+            ("lapack_lib", 
+             compiler, 
+             "lapack",
+             "Specifies what lapack library to use. The compiler will remove annotations including the"
+             + "'lapack' library and instead include the library specified by this option. If the specified"
+             + "library is 'lapack', which is default, nothing will happen."),
         START_FIX
             ("state_start_values_fixed", 
              compiler, 

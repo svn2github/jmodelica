@@ -3427,6 +3427,20 @@ aspect FlatExternalFunctionAPI {
     
     public void FExternalStmt.extractLibrary(InstExternal n) {
         library = n.annotation("Library").asStringVector();
+        if (library != null) {
+            ArrayList<String> libs = new ArrayList<String>();
+            String lapackLib = n.root().options.getStringOption("lapack_lib");
+            for (int i = 0; i < library.length; i++) {
+                if (library[i].equals("lapack") && !lapackLib.equals("lapack")) {
+                    n.warning("Removing use of external library 'lapack'. Will use '"
+                            + lapackLib + "' specified by option 'lapack_lib'");
+                } else {
+                    libs.add(library[i]);
+                }
+            }
+            library = new String[libs.size()];
+            library = libs.toArray(library);
+        }
         include = n.annotation("Include").string();
         libraryDir = n.annotation("LibraryDirectory").string();
         includeDir = n.annotation("IncludeDirectory").string();

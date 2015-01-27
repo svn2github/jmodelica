@@ -94,8 +94,14 @@ STATIC_PTHREADS_HOME = $(JMODELICA_HOME)/ThirdParty/pthreads
 EXT_LIB_DIRS =
 
 # Additional libraries
+# The compiler is assumed to always include lapack since some runtime
+# configurations depends on it. Our lapack library is located in the
+# runtime library directory and depends on blas and gfortran. Blas 
+# should also be included from the runtime library directory. Gfortran
+# is found in the mingw configuration and we need to specify that we
+# want the static version.
 EXT_LIBS = 
-EXTERNAL_LIBS = $(EXT_LIBS:%=-l%)
+EXTERNAL_LIBS = $(EXT_LIBS:%=-l%) -lblas -l:libgfortran.a
 
 # Additional include directories
 EXT_INC_DIRS =
@@ -173,13 +179,13 @@ LIB_PTHREADS =
 endif
 
 # Libraries necessary to link with jmi
-LIBS_FMU_STD = -ljmi -lModelicaExternalC "-L$(JMI_LIB_DIR)" -l:liblapack.a -l:libblas.a -l:libgfortran.a
+LIBS_FMU_STD = -ljmi -lModelicaExternalC "-L$(JMI_LIB_DIR)"
 LIBS_FMU_ALL = $(LIBS_FMU_STD) $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_PTHREADS)
 LIBS_FMUME10 = -lfmi1_me           $(LIBS_FMU_ALL)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIBS_FMU_ALL)
 LIBS_FMU20   = -lfmi2              $(LIBS_FMU_ALL)
 LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) "-L$(SUNDIALS_LIB_DIR)" -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
-LIBS_CEVAL = -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a 
+LIBS_CEVAL = -ljmi -lModelicaExternalC
 
 # Include paths for compilation
 INCL_CPPAD = "-I$(JMI_INC_DIR)" "-I$(CPPAD_INC_DIR)" "-I$(SUNDIALS_INC_DIR)"
@@ -197,7 +203,7 @@ endif
 
 ceval_: $(OBJS)
 	if not exist "$(BINARY_BASE_DIR)" mkdir "$(BINARY_BASE_DIR)"
-	$(CC) $(CFLAGS) -o "$(EXECUTABLE)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_CEVAL) -static-libstdc++
+	$(CC) $(CFLAGS) -o "$(EXECUTABLE)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_CEVAL) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
 	$(RM) $(OBJS)
 
 fmume10:
@@ -209,7 +215,7 @@ endif
 
 fmume10_: $(OBJS)
 	mkdir "$(BINARY_MKDIR)"
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME10) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMUME10) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
 	$(RM) $(OBJS)
 
 fmucs10:
@@ -221,7 +227,7 @@ endif
 
 fmucs10_: $(OBJS)
 	mkdir "$(BINARY_MKDIR)"
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS10) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMUCS10) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
 	$(RM) $(OBJS)
 
 fmume20:
@@ -233,7 +239,7 @@ endif
 
 fmume20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
 	$(RM) $(OBJS)
 
 fmucs20:
@@ -245,7 +251,7 @@ endif
 
 fmucs20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
 	$(RM) $(OBJS)
 
 fmumecs20:
@@ -257,7 +263,7 @@ endif
 
 fmumecs20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
 	$(RM) $(OBJS)
 
 jmu: $(OBJS)
