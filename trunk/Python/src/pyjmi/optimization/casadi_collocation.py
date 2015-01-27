@@ -486,6 +486,7 @@ class CasadiCollocator(object):
                 Collocation polynomials for input variables as a function of
                 time.
         """
+        # Consider: do we actually need to save _xi, _ti, and _hi in self?
         if self.hs == "free":
             self._hi = map(lambda h: self.horizon * h, self.h_opt)
         else:
@@ -493,16 +494,18 @@ class CasadiCollocator(object):
         self._xi = self._u_opt[1:].reshape(self.n_e, self.n_cp, self.model.n_u)
         self._ti = N.cumsum([self.t0] + self._hi[1:])
         input_names = tuple([repr(u) for u in self.model.u])
-        return (input_names, self._input_interpolator)
+        return (input_names, self._create_input_interpolator(self._xi, self._ti, self._hi))
 
-    def _input_interpolator(self, t):
-        i = N.clip(N.searchsorted(self._ti, t), 1, self.n_e)
-        tau = (t - self._ti[i - 1]) / self._hi[i]
+    def _create_input_interpolator(self, xi, ti, hi):
+        def _input_interpolator(t):
+            i = N.clip(N.searchsorted(ti, t), 1, self.n_e)
+            tau = (t - ti[i - 1]) / hi[i]
 
-        x = 0
-        for k in xrange(self.n_cp):
-            x += self._xi[i - 1, k, :] * self.pol.eval_basis(k + 1, tau, False)
-        return x
+            x = 0
+            for k in xrange(self.n_cp):
+                x += xi[i - 1, k, :] * self.pol.eval_basis(k + 1, tau, False)
+            return x
+        return _input_interpolator
 
     def get_solver_statistics(self):
         """ 
@@ -4708,6 +4711,7 @@ class LocalDAECollocator(CasadiCollocator):
                 Collocation polynomials for input variables as a function of
                 time.
         """
+        # Consider: do we actually need to save _xi, _ti, and _hi in self?
         if self.hs == "free":
             self._hi = map(lambda h: self.horizon * h, self.h_opt)
         else:
@@ -4717,7 +4721,7 @@ class LocalDAECollocator(CasadiCollocator):
         self._xi = xi.reshape(self.n_e, self.n_cp, self.n_var['u'])
         self._ti = N.cumsum([self.t0] + self._hi[1:])
         input_names = tuple([u.getName() for u in self.mvar_vectors['u']])
-        return (input_names, self._input_interpolator)
+        return (input_names, self._create_input_interpolator(self._xi, self._ti, self._hi))
 
     def get_named_var_expr(self, expr):
         """
@@ -4974,6 +4978,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         self.primal_opt = solver.primal_opt
         self.dual_opt = solver.dual_opt
         self.solver_statistics = solver.get_solver_statistics()
+        self.opt_input = solver.get_opt_input()
         
         # Print times
         print("\nTotal time: %.2f seconds" % times['tot'])
@@ -5013,7 +5018,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
                 Collocation polynomials for input variables as a function of
                 time.
         """
-        return self.solver.get_opt_input()
+        return self.opt_input
 
     def get_solver_statistics(self):
         """ 
