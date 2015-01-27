@@ -1843,36 +1843,36 @@ class TestLocalDAECollocator(object):
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
 
         # Compute Jacobian condition numbers
-        J_init = res.get_J("init")
+        J_init = res.solver.get_J("init")
         J_init_cond = N.linalg.cond(J_init)
         N.testing.assert_allclose(J_init_cond, 2.93e4, rtol=1e-2)
-        J_opt = res.get_J("opt")
+        J_opt = res.solver.get_J("opt")
         J_opt_cond = N.linalg.cond(J_opt)
         N.testing.assert_allclose(J_opt_cond, 3.37e6, rtol=1e-2)
 
         # Compute Hessian norms
-        H_init = res.get_H("init")
+        H_init = res.solver.get_H("init")
         H_init_norm = N.linalg.norm(H_init)
         N.testing.assert_allclose(H_init_norm, 4.36e3, rtol=1e-2)
-        H_opt = res.get_H("opt")
+        H_opt = res.solver.get_H("opt")
         H_opt_norm = N.linalg.norm(H_opt)
         N.testing.assert_allclose(H_opt_norm, 1.47e5, rtol=1e-2)
 
         # Compute KKT condition numbers
-        KKT_init = res.get_KKT("init")
+        KKT_init = res.solver.get_KKT("init")
         KKT_init_cond = N.linalg.cond(KKT_init)
         N.testing.assert_allclose(KKT_init_cond, 2.72e8, rtol=1e-2)
-        KKT_opt = res.get_KKT("opt")
+        KKT_opt = res.solver.get_KKT("opt")
         KKT_opt_cond = N.linalg.cond(KKT_opt)
         N.testing.assert_allclose(KKT_opt_cond, 1.18e10, rtol=1e-2)
 
         # Obtain symbolic matrices and matrix functions
-        res.get_J("sym")
-        res.get_J("fcn")
-        res.get_H("sym")
-        res.get_H("fcn")
-        res.get_KKT("sym")
-        res.get_KKT("fcn")
+        res.solver.get_J("sym")
+        res.solver.get_J("fcn")
+        res.solver.get_H("sym")
+        res.solver.get_H("fcn")
+        res.solver.get_KKT("sym")
+        res.solver.get_KKT("fcn")
 
     @testattr(casadi = True)
     def test_expand_to_sx(self):

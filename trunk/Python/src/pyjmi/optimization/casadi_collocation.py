@@ -4733,6 +4733,190 @@ class LocalDAECollocator(CasadiCollocator):
             raise CasadiCollocatorException(
                 "named_var_expr only works if named_vars is enabled.")
 
+    def get_J(self, point="fcn"):
+        """
+        Get the Jacobian of the constraints.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+        """
+        J_fcn = self.solver_object.jacG()
+        if point == "fcn":
+            return J_fcn
+        elif point == "init":
+            J_fcn.setInput(self.xx_init, 0)
+        elif point == "opt":
+            J_fcn.setInput(self.primal_opt, 0)
+        elif point == "sym":
+            return J_fcn.call([self.xx, []],True)[0]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        J_fcn.setInput(self._par_vals, 1)
+        J_fcn.evaluate()
+        return J_fcn.output(0).toArray()
+    
+    def get_H(self, point="fcn"):
+        """
+        Get the Hessian of the Lagrangian.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        H_fcn = self.solver_object.hessLag()
+        if point == "fcn":
+            return H_fcn
+        elif point == "init":
+            x = self.xx_init
+            sigma = self._compute_sigma()
+            dual = N.zeros(self.c_e.numel() +
+                           self.c_i.numel())
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput(self._par_vals, 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "opt":
+            x = self.primal_opt
+            sigma = self._compute_sigma()
+            dual = self.dual_opt['g']
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput(self._par_vals, 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "sym":
+            nu = casadi.MX.sym("nu", self.c_e.numel())
+            sigma = casadi.MX.sym("sigma")
+            lam = casadi.MX.sym("lambda", self.c_i.numel())
+            dual = casadi.vertcat([nu, lam])
+            return [H_fcn.call([self.xx, [], sigma, dual],True)[0], sigma,
+                    dual]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        H_fcn.evaluate()
+        return H_fcn.output(0).toArray()
+
+    def get_KKT(self, point="fcn"):
+        """
+        Get the KKT matrix.
+
+        This only constructs the simple KKT system [H, J^T; J, 0]; not the full
+        KKT system used by IPOPT. However, if the problem has no inequality
+        constraints (including bounds), they coincide.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        if point == "fcn" or point == "sym":
+            x = self.xx
+            J = self.get_J("sym")
+            [H, sigma, dual] = self.get_H("sym")
+            zeros = N.zeros([dual.numel(), dual.numel()])
+            KKT = casadi.blockcat([[H, J.T], [J, zeros]])
+            if point == "sym":
+                return KKT
+            else:
+                KKT_fcn = casadi.MXFunction([x, [], sigma, dual], [KKT])
+                return KKT_fcn
+        elif point == "init":
+            x = self.xx_init
+            dual = N.zeros(self.c_e.numel() +
+                           self.c_i.numel())
+        elif point == "opt":
+            x = self.primal_opt
+            dual = self.dual_opt['g']
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        sigma = self._compute_sigma()
+        J = self.get_J(point)
+        H = self.get_H(point)
+        zeros = N.zeros([len(dual), len(dual)])
+        KKT = N.bmat([[H, J.T], [J, zeros]])
+        return KKT
+
+    def _compute_sigma(self):
+        """
+        Computes the objective scaling factor sigma.
+        """
+        grad_fcn = self.solver_object.gradF()
+        grad_fcn.setInput(self.xx_init, 0)
+        grad_fcn.setInput(self._par_vals, 1)
+        grad_fcn.evaluate()
+        grad = grad_fcn.output(0).toArray()
+        sigma_inv = N.linalg.norm(grad, N.inf)
+        if sigma_inv < 1000.:
+            return 1.
+        else:
+            return 1. / sigma_inv
+
+
 class MeasurementData(object):
 
     """
@@ -4784,8 +4968,12 @@ class LocalDAECollocationAlgResult(JMResultBase):
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times
+        
+        # Save values from the solver since they might change in the solver.
+        # Assumes that solver.primal_opt and solver.dual_opt will not be mutated, which seems to be the case.
         self.primal_opt = solver.primal_opt
         self.dual_opt = solver.dual_opt
+        self.solver_statistics = solver.get_solver_statistics()
         
         # Print times
         print("\nTotal time: %.2f seconds" % times['tot'])
@@ -4796,10 +4984,10 @@ class LocalDAECollocationAlgResult(JMResultBase):
 
         # Print condition numbers
         if self.options['print_condition_numbers']:
-            J_init_cond = N.linalg.cond(self.get_J("init"))
-            J_opt_cond = N.linalg.cond(self.get_J("opt"))
-            KKT_init_cond = N.linalg.cond(self.get_KKT("init"))
-            KKT_opt_cond = N.linalg.cond(self.get_KKT("opt"))
+            J_init_cond = N.linalg.cond(solver.get_J("init"))
+            J_opt_cond = N.linalg.cond(solver.get_J("opt"))
+            KKT_init_cond = N.linalg.cond(solver.get_KKT("init"))
+            KKT_opt_cond = N.linalg.cond(solver.get_KKT("opt"))
             print("\nJacobian condition number at the initial guess: %.3g" %
                   J_init_cond)
             print("Jacobian condition number at the optimum: %.3g" %
@@ -4845,190 +5033,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             total_exec_time -- 
                 Nonlinear programming solver execution time.
         """
-        return self.solver.get_solver_statistics()
-
-    def get_J(self, point="fcn"):
-        """
-        Get the Jacobian of the constraints.
-        
-        Parameters::
-            
-            point --
-                Evaluation point. Possible values: "fcn", "init", "opt",
-                "sym"
-                
-                "fcn": Returns an SXFunction
-                
-                "init": Numerical evaluation at the initial guess
-                
-                "opt": Numerical evaluation at the found optimum
-                
-                "sym": Symbolic evaluation
-                
-                Type: str
-                Default: "function"
-        
-        Returns::
-            
-            matrix --
-                Matrix value
-        """
-        J_fcn = self.solver.solver_object.jacG()
-        if point == "fcn":
-            return J_fcn
-        elif point == "init":
-            J_fcn.setInput(self.solver.xx_init, 0)
-        elif point == "opt":
-            J_fcn.setInput(self.solver.primal_opt, 0)
-        elif point == "sym":
-            return J_fcn.call([self.solver.xx, []],True)[0]
-        else:
-            raise ValueError("Unkonwn point value: " + repr(point))
-        J_fcn.setInput(self.solver._par_vals, 1)
-        J_fcn.evaluate()
-        return J_fcn.output(0).toArray()
-    
-    def get_H(self, point="fcn"):
-        """
-        Get the Hessian of the Lagrangian.
-        
-        Parameters::
-            
-            point --
-                Evaluation point. Possible values: "fcn", "init", "opt",
-                "sym"
-                
-                "fcn": Returns an SXFunction
-                
-                "init": Numerical evaluation at the initial guess
-                
-                "opt": Numerical evaluation at the found optimum
-                
-                "sym": Symbolic evaluation
-                
-                Type: str
-                Default: "function"
-        
-        Returns::
-            
-            matrix --
-                Matrix value
-
-            sigma --
-                Symbolic sigma. Only returned if point is "sym".
-
-            dual --
-                Symbolic dual variables. Only returned if point is "sym".
-        """
-        H_fcn = self.solver.solver_object.hessLag()
-        if point == "fcn":
-            return H_fcn
-        elif point == "init":
-            x = self.solver.xx_init
-            sigma = self._compute_sigma()
-            dual = N.zeros(self.solver.c_e.numel() +
-                           self.solver.c_i.numel())
-            H_fcn.setInput(x, 0)
-            H_fcn.setInput(self.solver._par_vals, 1)
-            H_fcn.setInput(sigma, 2)
-            H_fcn.setInput(dual, 3)
-        elif point == "opt":
-            x = self.solver.primal_opt
-            sigma = self._compute_sigma()
-            dual = self.solver.dual_opt['g']
-            H_fcn.setInput(x, 0)
-            H_fcn.setInput(self.solver._par_vals, 1)
-            H_fcn.setInput(sigma, 2)
-            H_fcn.setInput(dual, 3)
-        elif point == "sym":
-            nu = casadi.MX.sym("nu", self.solver.c_e.numel())
-            sigma = casadi.MX.sym("sigma")
-            lam = casadi.MX.sym("lambda", self.solver.c_i.numel())
-            dual = casadi.vertcat([nu, lam])
-            return [H_fcn.call([self.solver.xx, [], sigma, dual],True)[0], sigma,
-                    dual]
-        else:
-            raise ValueError("Unkonwn point value: " + repr(point))
-        H_fcn.evaluate()
-        return H_fcn.output(0).toArray()
-
-    def get_KKT(self, point="fcn"):
-        """
-        Get the KKT matrix.
-
-        This only constructs the simple KKT system [H, J^T; J, 0]; not the full
-        KKT system used by IPOPT. However, if the problem has no inequality
-        constraints (including bounds), they coincide.
-        
-        Parameters::
-            
-            point --
-                Evaluation point. Possible values: "fcn", "init", "opt",
-                "sym"
-                
-                "fcn": Returns an SXFunction
-                
-                "init": Numerical evaluation at the initial guess
-                
-                "opt": Numerical evaluation at the found optimum
-                
-                "sym": Symbolic evaluation
-                
-                Type: str
-                Default: "function"
-        
-        Returns::
-            
-            matrix --
-                Matrix value
-
-            sigma --
-                Symbolic sigma. Only returned if point is "sym".
-
-            dual --
-                Symbolic dual variables. Only returned if point is "sym".
-        """
-        if point == "fcn" or point == "sym":
-            x = self.solver.xx
-            J = self.get_J("sym")
-            [H, sigma, dual] = self.get_H("sym")
-            zeros = N.zeros([dual.numel(), dual.numel()])
-            KKT = casadi.blockcat([[H, J.T], [J, zeros]])
-            if point == "sym":
-                return KKT
-            else:
-                KKT_fcn = casadi.MXFunction([x, [], sigma, dual], [KKT])
-                return KKT_fcn
-        elif point == "init":
-            x = self.solver.xx_init
-            dual = N.zeros(self.solver.c_e.numel() +
-                           self.solver.c_i.numel())
-        elif point == "opt":
-            x = self.solver.primal_opt
-            dual = self.solver.dual_opt['g']
-        else:
-            raise ValueError("Unkonwn point value: " + repr(point))
-        sigma = self._compute_sigma()
-        J = self.get_J(point)
-        H = self.get_H(point)
-        zeros = N.zeros([len(dual), len(dual)])
-        KKT = N.bmat([[H, J.T], [J, zeros]])
-        return KKT
-
-    def _compute_sigma(self):
-        """
-        Computes the objective scaling factor sigma.
-        """
-        grad_fcn = self.solver.solver_object.gradF()
-        grad_fcn.setInput(self.solver.xx_init, 0)
-        grad_fcn.setInput(self.solver._par_vals, 1)
-        grad_fcn.evaluate()
-        grad = grad_fcn.output(0).toArray()
-        sigma_inv = N.linalg.norm(grad, N.inf)
-        if sigma_inv < 1000.:
-            return 1.
-        else:
-            return 1. / sigma_inv
+        return self.solver_statistics
 
 
 class OptimizationSolver(object):
