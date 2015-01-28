@@ -138,19 +138,19 @@ MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
 
 # Libraries necessary to link with jmi
 # Reused parts
+LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -lModelicaExternalC -static-libstdc++
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
 LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK) -lstdc++ -lm
-LIB_JMIC     = -ljmi -lModelicaExternalC
 LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
-LIBS_FMUME10 = -lfmi1_me -ldl $(LIB_JMIC) $(LIB_COMMON)
-LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ldl $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
-LIBS_FMU20   = -lfmi2 $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_FMUME10 = -lfmi1_me -ldl $(LIBS_FMU_STD) $(LIB_COMMON)
+LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ldl $(LIBS_FMU_STD) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_FMU20   = -lfmi2 $(LIBS_FMU_STD) $(LIB_COMMON) -l:libsundials_cvode.a
 LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)   $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
-LIBS_CEVAL   = -ljmi -lModelicaExternalC
+LIBS_CEVAL   = $(LIBS_FMU_STD)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
@@ -165,7 +165,7 @@ ceval:
 
 ceval_: $(OBJS)
 	mkdir -p $(BINARY_BASE_DIR)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_CEVAL) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_CEVAL)
 	$(RM) $(OBJS)
 
 
@@ -174,7 +174,7 @@ fmume10:
 
 fmume10_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(LIBS_FMUME10) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(LIBS_FMUME10)
 	$(RM) $(OBJS)
 
 fmucs10:
@@ -182,7 +182,7 @@ fmucs10:
 
 fmucs10_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(LIBS_FMUCS10) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(LIBS_FMUCS10)
 	$(RM) $(OBJS)
 
 fmume20:
@@ -190,7 +190,7 @@ fmume20:
 
 fmume20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_FMU20) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_FMU20)
 	$(RM) $(OBJS)
 	
 fmucs20:
@@ -198,7 +198,7 @@ fmucs20:
 	
 fmucs20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_FMU20) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_FMU20)
 	$(RM) $(OBJS)
 	
 fmumecs20:
@@ -206,7 +206,7 @@ fmumecs20:
 	
 fmumecs20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_FMU20) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_FMU20)
 	$(RM) $(OBJS)
 
 
