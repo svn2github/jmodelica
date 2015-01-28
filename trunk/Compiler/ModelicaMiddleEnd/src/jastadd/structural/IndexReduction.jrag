@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -529,7 +529,7 @@ aspect IndexReduction {
         }
 
         @Override
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability, boolean nonFixedParam) {
             eqn.flushAllRecursiveClearFinal();
             dynamicEquation(eqn);
             newEquations.add(eqn);

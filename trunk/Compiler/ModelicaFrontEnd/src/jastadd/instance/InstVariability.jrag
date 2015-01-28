@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Modelon AB
+    Copyright (C) 2014-2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -143,13 +143,8 @@ aspect InstVariability {
             return false;
         return true;
     }
-    syn boolean FExp.valueIsFixed() {
-        for (FExp n : childFExps())
-            if (!n.valueIsFixed())
-                return false;
-        return true;
-    }
-    eq FInstAccessExp.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
+    eq FInstAccessExp.valueIsFixed()   = getInstAccess().myInstComponentDecl().valueIsFixed();
+    eq FIdUseInstAccess.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
 
     syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
     eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();

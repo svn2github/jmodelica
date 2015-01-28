@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Modelon AB
+    Copyright (C) 2014-2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -171,7 +171,7 @@ aspect FunctionInlining {
                     eqn = eqn.inlineFunctions(this);
                 }
             }
-            currentWorklist = previousWorklist;;
+            currentWorklist = previousWorklist;
         }
 
         /**
@@ -244,7 +244,8 @@ aspect FunctionInlining {
         public void addVarAndEqn(String oldName, FExp value, boolean noEvent) {
             FTypePrefixVariability variability = value.variability().fullCopy();
             if (value.type().addVarInInline()) {
-                FVariable var = addVar(oldName, variability, value.type());
+                boolean nonFixedParam = variability.parameterVariability() && !value.valueIsFixed();
+                FVariable var = addVar(oldName, variability, value.type(), nonFixedParam);
                 if (variability.constantVariability()) {
                     value = value.ceval().buildLiteral();
                     var.setBindingExp(value);
@@ -252,8 +253,9 @@ aspect FunctionInlining {
                 } else {
                     if (noEvent)
                         value = value.preventEvents();
-                    FEquation eqn = new FEquation(new FNormalEquation(), var.createUseExp(), value);
-                    addEquation(eqn, variability);
+                    FEquationType eqnType = nonFixedParam ? new FInitialEquation() : new FNormalEquation();
+                    FEquation eqn = new FEquation(eqnType, var.createUseExp(), value);
+                    addEquation(eqn, variability, nonFixedParam);
                 }
             } else {
                 replMap.put(oldName, value);
@@ -269,6 +271,7 @@ aspect FunctionInlining {
         public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
             int nLefts = lefts.getNumChild();
             FTypePrefixVariability variability = (nLefts == 0) ? ASTNode.fContinuous() : call.variability().fullCopy();
+            boolean nonFixedParam = variability.parameterVariability() && !call.valueIsFixed();
 
             FExp[] exps = null;
             if (variability.constantVariability()) {
@@ -286,7 +289,7 @@ aspect FunctionInlining {
                 exps = new FExp[nLefts];
             FExp[] lExps = new FExp[nLefts];
             for (int i = 0; i < nLefts; i++) 
-                lExps[i] = lefts.getChild(i).createInlineVars(this, exps[i], variability);
+                lExps[i] = lefts.getChild(i).createInlineVars(this, exps[i], variability, nonFixedParam);
 
             if (!variability.constantVariability()) {
                 call = (FAbstractFunctionCall) call.preventEvents();
@@ -298,11 +301,11 @@ aspect FunctionInlining {
                         left.setFExp(exp);
                     eqn.addLeft(left);
                 }
-                addEquation(eqn, variability);
+                addEquation(eqn, variability, nonFixedParam);
             }
         }
 
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability, boolean nonFixedParam) {
             currentWorklist.add(eqn);
         }
         
@@ -310,13 +313,15 @@ aspect FunctionInlining {
         
         protected abstract void addVar(FVariable var);
         
-        protected FVariable addVar(String oldName, FTypePrefixVariability variability, FType type) {
+        protected FVariable addVar(String oldName, FTypePrefixVariability variability, FType type, boolean nonFixedParam) {
             String n = nextTempVarName();
             FQName name = type.isArray() ? 
                     new FQNameFull(n, type.size().flattenFArraySubscripts(new FQNameEmpty())) : 
                     new FQNameString(n);
             
             FVariable var = type.createTempFVariable(name, variability);
+            if (nonFixedParam)
+                var.setAttribute(FAttribute.FIXED, "Boolean", new FBooleanLitExpFalse(), 0);
             
             setSizeOf(oldName, type.size());
             lookupMap.addVariable(var);
@@ -373,11 +378,15 @@ aspect FunctionInlining {
         }
 
         @Override
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
-            super.addEquation(eqn, variability);
+        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability, boolean nonFixedParam) {
+            super.addEquation(eqn, variability, nonFixedParam);
             if (variability.parameterVariability()) {
-                paramEqns.add(eqn);
-                eqn.addToParameterEquationsMap(fc.parameterEquationsMap());
+                if (nonFixedParam) {
+                    initialEqns.add(eqn);
+                } else {
+                    paramEqns.add(eqn);
+                    eqn.addToParameterEquationsMap(fc.parameterEquationsMap());
+                }
             } else {
                 normalEqns.add(eqn);
             }
@@ -442,8 +451,8 @@ aspect FunctionInlining {
      * it is a left of, and return an access.
      */
     public FExp FFunctionCallLeft.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
-        return hasFExp() ? getFExp().createInlineVars(fi, bExp, variability) : null;
+            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability, boolean nonFixedParam) {
+        return hasFExp() ? getFExp().createInlineVars(fi, bExp, variability, nonFixedParam) : null;
     }
 
     /**
@@ -451,13 +460,13 @@ aspect FunctionInlining {
      * it is a left of, and return an access. Non-access expressions returns null.
      */
     public FExp FExp.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability, boolean nonFixedParam) {
         return null;
     }
 
     public FExp FIdUseExp.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
-        FVariable var = fi.addVar(scalarName(), variability, type());
+            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability, boolean nonFixedParam) {
+        FVariable var = fi.addVar(scalarName(), variability, type(), nonFixedParam);
         if (bExp != null) {
             var.setBindingExp(bExp);
             fi.setReplacementExp(scalarName(), bExp);
@@ -466,25 +475,25 @@ aspect FunctionInlining {
     }
 
     public FExp FArray.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability, boolean nonFixedParam) {
         FArray bArr = (FArray) bExp;
         FArray res = new FArray();
         int n = getNumFExp();
         for (int i = 0; i < n; i++) {
             FExp cellBExp = (bArr != null) ? bArr.getFExp(i) : null;
-            res.addFExp(getFExp(i).createInlineVars(fi, cellBExp, variability));
+            res.addFExp(getFExp(i).createInlineVars(fi, cellBExp, variability, nonFixedParam));
         }
         return res;
     }
 
     public FExp FRecordConstructor.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability, boolean nonFixedParam) {
         FRecordConstructor bRec = (FRecordConstructor) bExp;
         FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
         Iterator<FExp> bArgs = (bRec != null) ? bRec.getArgs().iterator() : null;
         for (FExp arg : getArgs()) {
             FExp partBExp = (bArgs != null) ? bArgs.next() : null;
-            res.addArg(arg.createInlineVars(fi, partBExp, variability));
+            res.addArg(arg.createInlineVars(fi, partBExp, variability, nonFixedParam));
         }
         return res;
     }

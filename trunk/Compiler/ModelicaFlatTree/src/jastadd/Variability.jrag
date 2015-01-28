@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -327,6 +327,33 @@ aspect Variability {
     }
     eq FVariable.variability() = getFTypePrefixVariability();
 
+
+    /**
+     * Check if all referenced parameters have fixed values.
+     */
+    syn boolean FExp.valueIsFixed() {
+        for (FExp n : childFExps())
+            if (!n.valueIsFixed())
+                return false;
+        return true;
+    }
+    eq FIdUseExp.valueIsFixed()       = getFIdUse().valueIsFixed();
+    syn boolean FIdUse.valueIsFixed() = myFV().valueIsFixed();
+
+    syn boolean FAbstractVariable.valueIsFixed() = true;
+    eq FVariable.valueIsFixed() {
+        if (!fixedAttribute() || !isParameter() || myFClass().nonFixedParametersPropagated())
+            return fixedAttribute();
+        if (hasBindingExp())
+            return getBindingExp().valueIsFixed();
+        if (hasParameterEquation()) 
+            return parameterEquation().rhsIsFixed();
+        return true;
+    }
+
+    syn boolean FAbstractEquation.rhsIsFixed() = true;
+    eq FEquation.rhsIsFixed()                  = getRight().valueIsFixed();
+    eq FFunctionCallEquation.rhsIsFixed()      = getCall().valueIsFixed();
 
     syn boolean FExp.isConstantExp()   = variability().constantVariability();
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();

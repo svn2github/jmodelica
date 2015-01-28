@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011-2013 Modelon AB
+    Copyright (C) 2011-2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -3352,6 +3352,94 @@ equation
 end FunctionInlining.InlineAnnotation11;
 ")})));
 end InlineAnnotation11;
+
+
+model InlineAnnotation12
+    function f
+        input Real x;
+        input Real y;
+        output Real[2] z;
+    algorithm
+        z := (x - y) * (1:2);
+        annotation(LateInline=true);
+    end f;
+    
+    parameter Real p(fixed = false);
+    Real x[2](start = 1:2);
+initial equation
+    x[1] = p - 2;
+equation
+    der(x) = f(p, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InlineAnnotation12",
+            description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
+            flatModel="
+fclass FunctionInlining.InlineAnnotation12
+ parameter Real p(fixed = false);
+ Real x[1](start = 1);
+ Real x[2](start = 2);
+ parameter Real temp_2(fixed = false);
+ Real temp_3;
+initial equation 
+ x[1] = p - 2;
+ temp_2 = p;
+ x[1] = 1;
+ x[2] = 2;
+equation
+ der(x[1]) = temp_2 - temp_3;
+ der(x[2]) = (temp_2 - temp_3) * 2;
+ temp_3 = time;
+end FunctionInlining.InlineAnnotation12;
+")})));
+end InlineAnnotation12;
+
+
+model InlineAnnotation13
+	record R
+		Real a;
+		Real b;
+	end R;
+	
+    function f
+        input Real x;
+        input Real y;
+        output R z;
+    algorithm
+        z := R(x - y, x + y);
+        annotation(LateInline=true);
+    end f;
+    
+    parameter Real p(fixed = false);
+    R x;
+initial equation
+    x.a = p - 2;
+equation
+    x = f(p, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InlineAnnotation13",
+            description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
+            flatModel="
+fclass FunctionInlining.InlineAnnotation13
+ parameter Real p(fixed = false);
+ Real x.a;
+ Real x.b;
+ parameter Real temp_2(fixed = false);
+ Real temp_3;
+initial equation 
+ x.a = p - 2;
+ temp_2 = p;
+equation
+ x.a = temp_2 - temp_3;
+ x.b = temp_2 + temp_3;
+ temp_3 = time;
+end FunctionInlining.InlineAnnotation13;
+")})));
+end InlineAnnotation13;
+
 
 model EmptyArray
     function f
