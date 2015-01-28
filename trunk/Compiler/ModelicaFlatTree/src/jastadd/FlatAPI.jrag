@@ -3165,7 +3165,31 @@ aspect FlatDiagnostics {
         }
         return str.toString();
     }
-
+    
+    public String FClass.directDependencyDiagnostics() {
+        StringBuilder sb = new StringBuilder();
+        for (FVariable output : realOutputs()) {
+            sb.append(output.name());
+            sb.append("\n");
+            for (FVariable input : output.directDependencies()) {
+                sb.append("    ");
+                sb.append(input.name());
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+    
+    public Set<FVariable> FVariable.directDependencies() {
+        Set<FVariable> res = new LinkedHashSet<FVariable>();
+        for (FVariable dv : dependsOn()) {
+            if (dv.isInput()) {
+                res.add(dv);
+            }
+        }
+        return res;
+    }
+    
     public String FClass.incidence() {
         StringBuilder str = new StringBuilder();
         

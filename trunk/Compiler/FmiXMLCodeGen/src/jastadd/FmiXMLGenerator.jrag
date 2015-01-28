@@ -702,32 +702,27 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
                     generateAttribute("fixed", false, genPrinter); //Default is true
             }
         }
-
-		//direct dependency - not supported
-		public class XMLTag_directDependency extends XMLTag {
-			
-			public XMLTag_directDependency(AbstractGenerator myGenerator, FClass fclass) {
-				super("directDependency", "DirectDependency", myGenerator, fclass);
-			}
-			
-			public void generate(CodeStream genPrinter) {
-				if (variable.isOutput() && variable.isReal()) {
-					generateOpening(xml, genPrinter);
-					for (FVariable dv : variable.dependsOn()) {
-						if (dv.isInput()) {
-							generateTagStart("Name", genPrinter);
-							generateOpenEnd(genPrinter);
-							genPrinter.print(dv.name()); //Element? Attribute?
-							generateClosing("Name", genPrinter);
-						}
-					}
-					generateClosing(xml, genPrinter);
-				}
-			}
-		}
-	}
-
-	
+        
+        public class XMLTag_directDependency extends XMLTag {
+            
+            public XMLTag_directDependency(AbstractGenerator myGenerator, FClass fclass) {
+                super("directDependency", "DirectDependency", myGenerator, fclass);
+            }
+            
+            public void generate(CodeStream genPrinter) {
+                if (variable.isOutput() && variable.isReal()) {
+                    generateOpening(xml, genPrinter);
+                    for (FVariable dv : variable.directDependencies()) {
+                        generateTagStart("Name", genPrinter);
+                        generateOpenEnd(genPrinter);
+                        genPrinter.print(dv.name());
+                        generateClosing("Name", genPrinter);
+                    }
+                    generateClosing(xml, genPrinter);
+                }
+            }
+        }
+    }
 	
 	/*** TODO: Temporary FMI 2.0 Code Gen ***/
 	
