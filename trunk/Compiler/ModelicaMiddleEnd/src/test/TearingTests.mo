@@ -61,7 +61,7 @@ Iteration variables:
 Torn equations:
   i1 := i2 + i3
   u1 := R1 * i1
-  u2 := - (- u0 + u1)
+  u2 := u0 - u1
 
 Residual equations:
   u2 = R3 * i3
@@ -196,7 +196,7 @@ Iteration variables:
   a ()
 
 Torn equations:
-  c := - (- a + (- b))
+  c := a + b
 
 Residual equations:
   a - b = c
@@ -697,7 +697,7 @@ Iteration variables:
 
 Torn equations:
   f := p2 * (- e)
-  c := - (- f + (- a))
+  c := f + a
   d := p1 * e
   b := smooth(0, min(1000, max(0, 42 * c)))
 

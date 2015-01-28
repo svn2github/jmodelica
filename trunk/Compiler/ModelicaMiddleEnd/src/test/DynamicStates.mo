@@ -242,7 +242,7 @@ Iteration variables:
   der(a3)
 
 Torn equations:
-  b := - (- der(a2) + (- der(a3)))
+  b := der(a2) + der(a3)
   der(a1) := b
 
 Residual equations:
@@ -344,7 +344,7 @@ Iteration variables:
   der(a4)
 
 Torn equations:
-  b := - (- der(a3) + (- der(a4)))
+  b := der(a3) + der(a4)
   der(a2) := b
   der(a1) := b
 
@@ -471,7 +471,7 @@ Iteration variables:
 
 Torn equations:
   der(a3) := - der(a2)
-  b := - (- der(a2) + (- der(a3)))
+  b := der(a2) + der(a3)
   der(a1) := - der(a4) + b
 
 Residual equations:

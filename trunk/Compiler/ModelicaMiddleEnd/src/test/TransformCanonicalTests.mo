@@ -1157,7 +1157,7 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  parameter Real x(start = 3,fixed = true);
- constant Real y = 0.0;
+ constant Real y = -0.0;
  parameter Real p = 5 /* 5 */;
 parameter equation
  x = p;
@@ -4859,10 +4859,10 @@ z := x + (- y)
 x := 1
 
 --- Solved equation ---
-y := - (x + 3)
+y := - x - 3
 
 --- Solved equation ---
-z := - (x + (- y))
+z := - x + y
 -------------------------------
 ")})));
   end SolveEqTest2;
@@ -5021,7 +5021,7 @@ z := (x + (- y)) / (- 1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (-1.0 - -1.0 + -1.0)
+der(x) := (- x) / (-1.0 - -1.0 - 1.0)
 -------------------------------
 ")})));
 end SolveEqTest8;

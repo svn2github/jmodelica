@@ -4597,8 +4597,11 @@ aspect AritmeticTransformations {
     /**
      * Create a negated copy of this expression.
      */
-    syn FExp FExp.createNegated()   = new FNegExp(fullCopy());
-    eq FNegExp.createNegated()     = getFExp().fullCopy();
+    syn FExp FExp.createNegated()     = new FNegExp(fullCopy());
+    eq FNegExp.createNegated()        = getFExp().fullCopy();
+    eq FDotSubExp.createNegated()     = createNodeBinary(getRight().fullCopy(), getLeft().fullCopy());
+    eq FDotAddExp.createNegated()     = new FDotSubExp(new FNegExp(getLeft().fullCopy()), getRight().fullCopy());
+    eq FAddExp.createNegated()        = new FSubExp(new FNegExp(getLeft().fullCopy()), getRight().fullCopy());
     eq FIntegerLitExp.createNegated() = new FIntegerLitExp(- getValue());
     eq FRealLitExp.createNegated()    = new FRealLitExp(- getValue());
 
@@ -4609,6 +4612,14 @@ aspect AritmeticTransformations {
      */
     syn FExp FExp.makeNegated()     = new FNegExp(this);
     eq FNegExp.makeNegated()        = getFExp();
+    eq FDotAddExp.makeNegated()     = new FDotSubExp(new FNegExp(getLeft()), getRight());
+    eq FAddExp.makeNegated()        = new FSubExp(new FNegExp(getLeft()), getRight());
+    eq FDotSubExp.makeNegated() {
+        FExp tmp = getLeft();
+        setLeft(getRight());
+        setRight(tmp);
+        return this;
+    }
     eq FIntegerLitExp.makeNegated() {
         setValue(- getValue());
         return this;
@@ -4617,6 +4628,18 @@ aspect AritmeticTransformations {
         setValue(- getValue());
         return this;
     }
+
+    /**
+     * Can {@link #makeNegated()} and {@link #createNegated()} do something better 
+     * than just wrapping the expression in a FNegExp?
+     */
+    syn boolean FExp.hasSimpleNegation()  = false;
+    eq FNegExp.hasSimpleNegation()        = true;
+    eq FDotSubExp.hasSimpleNegation()     = true;
+    eq FDotAddExp.hasSimpleNegation()     = true;
+    eq FIntegerLitExp.hasSimpleNegation() = true;
+    eq FRealLitExp.hasSimpleNegation()    = true;
+
 }
 
 aspect ExternalCEval {

@@ -611,7 +611,7 @@ equation
  der(x[2]) = -2.5 * x[2] + 2.5 * x[3];
  der(x[3]) = -2.0 * x[3] + 2.0 * x[4];
  0 = -1.5 * x[4] + 1.5 * x[5];
- 0 = -1.0 * x[5] + u;
+ 0 = - x[5] + u;
  y = x[1];
 end OptimicaTransformCanonicalTests.DAETest1;
 ")})));

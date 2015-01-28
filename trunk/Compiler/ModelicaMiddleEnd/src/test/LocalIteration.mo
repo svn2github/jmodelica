@@ -42,7 +42,7 @@ Torn equations:
   23 = c * b
     Computed variables: b ()
 
-  a := - (- c + b)
+  a := c - b
 
 Residual equations:
   20 = c * a
@@ -79,7 +79,7 @@ Torn equations:
   23 = c * b annotation(__Modelon(LocalIteration))
     Computed variables: b ()
 
-  a := - (- c + b)
+  a := c - b
 
 Residual equations:
   20 = c * a
@@ -110,7 +110,7 @@ Iteration variables:
   b ()
 
 Torn equations:
-  a := - (- c + b)
+  a := c - b
 
 Residual equations:
   23 = c * b
@@ -150,7 +150,7 @@ Torn equations:
   23 = c * b annotation(__Modelon(LocalIteration(enabled = true)))
     Computed variables: b ()
 
-  a := - (- c + b)
+  a := c - b
 
 Residual equations:
   20 = c * a
@@ -182,7 +182,7 @@ Iteration variables:
   b ()
 
 Torn equations:
-  a := - (- c + b)
+  a := c - b
 
 Residual equations:
   23 = c * b annotation(__Modelon(LocalIteration(enabled = false)))
@@ -221,7 +221,7 @@ Torn equations:
   23 = c * b annotation(__Modelon(LocalIteration(enabled = e)))
     Computed variables: b ()
 
-  a := - (- c + b)
+  a := c - b
 
 Residual equations:
   20 = c * a
@@ -258,7 +258,7 @@ Torn equations:
   23 = c[1] .* b[1] annotation(__Modelon(LocalIteration(enabled = true)))
     Computed variables: b[1] ()
 
-  a[1] := - (- c[1] + b[1])
+  a[1] := c[1] - b[1]
 
 Residual equations:
   20 = c[1] .* a[1]
@@ -279,7 +279,7 @@ Iteration variables:
   b[2]
 
 Torn equations:
-  a[2] := - (- c[2] + b[2])
+  a[2] := c[2] - b[2]
 
 Residual equations:
   42 = c[2] .* b[2] annotation(__Modelon(LocalIteration(enabled = false)))

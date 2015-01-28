@@ -93,4 +93,348 @@ end SymbolicTests.EquivalentIfBranch4;
 ")})));
 end EquivalentIfBranch4;
 
+
+model SimplifyNegations1
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -(y + z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations1",
+            description="Simplification of negation of addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations1
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = - y - z;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations1;
+")})));
+end SimplifyNegations1;
+
+
+model SimplifyNegations2
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -(-y + z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations2",
+            description="Simplification of negation of addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations2
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = y - z;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations2;
+")})));
+end SimplifyNegations2;
+
+
+model SimplifyNegations3
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -(y - z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations3",
+            description="Simplification of negation of addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations3
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = z - y;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations3;
+")})));
+end SimplifyNegations3;
+
+
+model SimplifyNegations4
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -(-y - z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations4",
+            description="Simplification of negation of addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations4
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = z + y;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations4;
+")})));
+end SimplifyNegations4;
+
+
+model SimplifyNegations5
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -1 * (y + z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations5",
+            description="Simplification of literal minus one multiplied by addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations5
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = - y - z;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations5;
+")})));
+end SimplifyNegations5;
+
+
+model SimplifyNegations6
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -1 * (-y + z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations6",
+            description="Simplification of literal minus one multiplied by addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations6
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = y - z;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations6;
+")})));
+end SimplifyNegations6;
+
+
+model SimplifyNegations7
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -1 * (y - z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations7",
+            description="Simplification of literal minus one multiplied by addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations7
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = z - y;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations7;
+")})));
+end SimplifyNegations7;
+
+
+model SimplifyNegations8
+    Real x, y(start = 1), z(start = 0);
+equation
+    x = -1 * (-y - z);
+    der(y) = z - time;
+    der(z) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations8",
+            description="Simplification of literal minus one multiplied by addition or subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations8
+ Real x;
+ Real y(start = 1);
+ Real z(start = 0);
+initial equation 
+ y = 1;
+ z = 0;
+equation
+ x = z + y;
+ der(y) = z - time;
+ der(z) = 3;
+end SymbolicTests.SimplifyNegations8;
+")})));
+end SimplifyNegations8;
+
+
+model SimplifyNegations9
+    Real x, y(start = 0);
+equation
+    x = -1 * -(y * 2);
+    der(y) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations9",
+            description="Simplifying negated expression multiplied or divided by literal minus one",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations9
+ Real x;
+ Real y(start = 0);
+initial equation 
+ y = 0;
+equation
+ x = y * 2;
+ der(y) = 3;
+end SymbolicTests.SimplifyNegations9;
+")})));
+end SimplifyNegations9;
+
+
+model SimplifyNegations10
+    Real x, y(start = 0);
+equation
+    x = -(y * 2) * -1;
+    der(y) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations10",
+            description="Simplifying negated expression multiplied or divided by literal minus one",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations10
+ Real x;
+ Real y(start = 0);
+initial equation 
+ y = 0;
+equation
+ x = y * 2;
+ der(y) = 3;
+end SymbolicTests.SimplifyNegations10;
+")})));
+end SimplifyNegations10;
+
+
+model SimplifyNegations11
+    Real x, y(start = 0);
+equation
+    x = -(y * 2) / -1;
+    der(y) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations11",
+            description="Simplifying negated expression multiplied or divided by literal minus one",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations11
+ Real x;
+ Real y(start = 0);
+initial equation 
+ y = 0;
+equation
+ x = y * 2;
+ der(y) = 3;
+end SymbolicTests.SimplifyNegations11;
+")})));
+end SimplifyNegations11;
+
+
+model SimplifyNegations12
+    Real x, y(start = 0);
+equation
+    x = -(y .+ 1);
+    der(y) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations12",
+            description="Simplifying negation of dotted addition",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations12
+ Real x;
+ Real y(start = 0);
+initial equation 
+ y = 0;
+equation
+ x = - y .- 1;
+ der(y) = 3;
+end SymbolicTests.SimplifyNegations12;
+")})));
+end SimplifyNegations12;
+
+
+model SimplifyNegations13
+    Real x, y(start = 0);
+equation
+    x = -(y .- 1);
+    der(y) = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyNegations13",
+            description="Simplifying negation of dotted subtraction",
+            flatModel="
+fclass SymbolicTests.SimplifyNegations13
+ Real x;
+ Real y(start = 0);
+initial equation 
+ y = 0;
+equation
+ x = 1 .- y;
+ der(y) = 3;
+end SymbolicTests.SimplifyNegations13;
+")})));
+end SimplifyNegations13;
+
 end SymbolicTests;

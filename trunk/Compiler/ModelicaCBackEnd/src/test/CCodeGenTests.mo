@@ -13549,7 +13549,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         _i1_5 = _i2_6 + _i3_7;
         _u1_1 = _R1_9 * _i1_5;
-        _u2_2 = - (- _u0_0 + _u1_1);
+        _u2_2 = _u0_0 - _u1_1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _R3_11 * _i3_7 - (_u2_2);
             (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
