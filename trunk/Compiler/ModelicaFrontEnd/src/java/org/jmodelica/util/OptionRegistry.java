@@ -455,6 +455,11 @@ abstract public class OptionRegistry {
             compiler,
             4,
             "The maximum number of processes used during c-code compilation"),
+        DYNAMIC_STATES
+            ("dynamic_states",
+            compiler,
+            false,
+            "Experimental! Controls whether dynamic states should be calculated and generated."),
 
         // Runtime options
         /*

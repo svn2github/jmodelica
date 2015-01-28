@@ -1735,6 +1735,12 @@ aspect FlatPrettyPrint {
 		str.format(")");
 	}
 	
+    protected void FDSRefExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.format("DSS(%d, ", getSetId());
+        p.print(getOrg(), str, indent);
+        str.print(")");
+    }
+
 	protected void FSumExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("sum(");
 		p.print(getFExp(), str, indent);

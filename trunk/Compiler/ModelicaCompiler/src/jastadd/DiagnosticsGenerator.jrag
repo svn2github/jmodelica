@@ -779,11 +779,15 @@ protected String SimpleEquationBlock.diagnostics_generateBLTTable_color() {
 protected String AlgorithmBlock.diagnostics_generateBLTTable_color() {
     return "#CCF0CC";
 }
-	
+
 protected String EquationBlock.diagnostics_generateBLTTable_color() {
     return "#CCCCF0";
 }
-	
+
+protected String DynamicStateBlock.diagnostics_generateBLTTable_color() {
+    return "#FF00FF";
+}
+
 protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Collections.emptyMap();
 
 public static final int AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE = 15;

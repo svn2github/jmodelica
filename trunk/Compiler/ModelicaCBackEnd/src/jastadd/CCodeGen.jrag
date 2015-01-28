@@ -3275,6 +3275,12 @@ aspect CCodeGen {
     }
     
     @Override
+    public void DynamicStateBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
+            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
+        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunction_residualEqns_C() is not implemented!");
+    }
+    
+    @Override
     public void SimpleEquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
             Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
         genBlockResidualFunction_residualEqn_C(p, str, indent, enumerator, visited, solverArrayMap);
@@ -3315,6 +3321,12 @@ aspect CCodeGen {
             CodeStream str, String indent, boolean inInitial, Set<FAbstractEquation> visited) {
         String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
         str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
+    }
+    
+    @Override
+    public void DynamicStateBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
+            CodeStream str, String indent, boolean inInitial, Set<FAbstractEquation> visited) {
+        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunction_solvedEqn_C() is not implemented!");
     }
     
     @Override

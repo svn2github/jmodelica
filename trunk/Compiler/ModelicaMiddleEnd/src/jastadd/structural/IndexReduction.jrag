@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.Stack;
@@ -84,7 +85,7 @@ aspect IndexReduction {
             log.info(g.printMatchingObj());
             
             try {
-                result = g.reduceIndex(new IndexReductionFunctionInliner(this));
+                result = g.reduceIndex(new IndexReductionFunctionInliner(this), root().options.getBooleanOption("dynamic_states"));
                 break;
             } catch (EquationDifferentiationException e) {
                 ASTNode.log.info("Unable to differentiate equation:\n%s", e.equation);
@@ -158,6 +159,7 @@ aspect IndexReduction {
 
         setFVariableList(new List<FVariable>(l));
 
+        applyDynamicStateResult(result);
         
         log.info(this);
         
@@ -798,7 +800,7 @@ aspect IndexReduction {
         }
     }
     
-    public IndexReductionResult IndexReductionBiPGraph.reduceIndex(IndexReductionFunctionInliner inliner) {
+    public IndexReductionResult IndexReductionBiPGraph.reduceIndex(IndexReductionFunctionInliner inliner, boolean computeDynamicStates) {
         IndexReductionResult result = new IndexReductionResult();
         FClass fclass = null;
         Stack<IndexReductionEq> eqToMatchStack = new Stack<IndexReductionEq>();
@@ -980,11 +982,12 @@ aspect IndexReduction {
             // Compute weights for variables based on state select, linearity
             // and other attributes.
             Map<IndexReductionVar, IndexReductionCost> weights = new HashMap<IndexReductionVar, IndexReductionCost>();
+            Map<IndexReductionEq, Set<IndexReductionVar>> nonConstantCoefficientsMatrix = new HashMap<IndexReductionEq, Set<IndexReductionVar>>();
             for (IndexReductionVar var : getVariables()) {
                 FVariable fv = var.getVariable();
-                int linearity = calculateLinearityWeight(fv);
-                if (fv.getMeIntegrated() != null)
-                    linearity += calculateLinearityWeight(fv.getMeIntegrated());
+                int linearity = calculateLinearityWeight(var, nonConstantCoefficientsMatrix);
+                if (var.getMeIntegrated() != null)
+                    linearity += calculateLinearityWeight(var.getMeIntegrated(), nonConstantCoefficientsMatrix);
                 boolean fixed = fv.getTopIntegrated().fixedAttribute();
                 IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), linearity);
                 ASTNode.log.info("Weight: %s %s", var, weight);
@@ -993,6 +996,10 @@ aspect IndexReduction {
             
             // Run matching
             matchMunkres(weights);
+            ASTNode.log.info(printMatchingObj());
+            Set<IndexReductionVar> dsVars = Collections.emptySet();
+            if (computeDynamicStates)
+                dsVars = computeDynamicStateSets(nonConstantCoefficientsMatrix, result);
             ASTNode.log.info(printMatchingObj());
             
             // Step 5: prepare for next iteration
@@ -1004,8 +1011,10 @@ aspect IndexReduction {
             for (IndexReductionVar var : new ArrayList<IndexReductionVar>(getVariables())) {
                 varsToRemove.add(var);
                 if (var.getMatching() != null) {
-                    ASTNode.log.info("   %s", var);
-                    zHat.add(var.getVariable());
+                    if (!dsVars.contains(var)) {
+                        ASTNode.log.info("   %s", var);
+                        zHat.add(var.getVariable());
+                    }
                     insert(getOrCreateIntegrated(var));
                 }
             }
@@ -1044,25 +1053,32 @@ aspect IndexReduction {
         return result;
     }
     
-    public int IndexReductionBiPGraph.calculateLinearityWeight(FVariable variable) {
+    public int IndexReductionBiPGraph.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Set<IndexReductionVar>> nonConstantCoefficientsMatrix) {
         int weight = 0;
         for (IndexReductionEq eqn : getEquations())
-            weight += eqn.calculateLinearityWeight(variable);
+            weight += eqn.calculateLinearityWeight(var, nonConstantCoefficientsMatrix);
         return weight;
     }
     
-    public int IndexReductionEq.calculateLinearityWeight(FVariable variable) {
+    public int IndexReductionEq.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Set<IndexReductionVar>> nonConstantCoefficientsMatrix) {
         try {
+            FVariable variable = var.getVariable();
             if (!getEquation().referencedFVariables().contains(variable))
                 return 0;
             Collection<FAbstractEquation> feqds = getEquation().diff(variable.name());
             FTypePrefixVariability variability = ASTNode.fConstant();
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
-            if (!variability.lessOrEqual(ASTNode.fParameter()))
+            if (!variability.lessOrEqual(ASTNode.fParameter())) {
+                Set<IndexReductionVar> coefficients = nonConstantCoefficientsMatrix.get(this);
+                if (coefficients == null) {
+                    coefficients = new HashSet<IndexReductionVar>();
+                    nonConstantCoefficientsMatrix.put(this, coefficients);
+                }
+                coefficients.add(var);
                 return 2;
-            else if (!variability.lessOrEqual(ASTNode.fConstant()))
-                return 1;
+            } else if (!variability.lessOrEqual(ASTNode.fConstant()))
+                return 0;
         } catch(EquationDifferentiationException e) {}
         return 0;
     }
@@ -1118,7 +1134,7 @@ aspect IndexReduction {
     }
     eq FVariable.stateSelection() = getTopIntegrated().stateSelectAttribute();
     
-    public abstract class AbstractBiPGraph{
+    public abstract class AbstractBiPGraph {
         
         public static class IndexReductionCost implements MunkresCost<IndexReductionCost> {
             
@@ -1251,6 +1267,7 @@ aspect IndexReduction {
 
         private java.util.List<FAbstractEquation> addedEquations;
         private java.util.List<FVariable> dummyDerivatives;
+        private Collection<IndexReductionBiPGraph.DSSet> dsSets = new ArrayList<IndexReductionBiPGraph.DSSet>();
 
         public IndexReductionResult() {
             addedEquations = new ArrayList<FAbstractEquation>();
@@ -1264,6 +1281,10 @@ aspect IndexReduction {
         public void addDummyDerivative(FVariable fv) {
             dummyDerivatives.add(fv);   
         }
+        
+        public void addDSSet(IndexReductionBiPGraph.DSSet set) {
+            dsSets.add(set);
+        }
 
         public java.util.List<FAbstractEquation> getEquations() {
             return addedEquations;
@@ -1271,6 +1292,10 @@ aspect IndexReduction {
 
         public java.util.List<FVariable> getDummyDerivatives() {
             return dummyDerivatives;
+        }
+        
+        public Collection<IndexReductionBiPGraph.DSSet> getDSSets() {
+            return dsSets;
         }
     }
     

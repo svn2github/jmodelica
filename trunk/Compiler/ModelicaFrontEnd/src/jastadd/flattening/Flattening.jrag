@@ -40,6 +40,7 @@ aspect FlatTree {
         // TODO: We should change how the checkErrors() method works, 
         //       since it relies on the behaviour of DefaultErrorHandler
         icl.root().getErrorHandler().connectTo(flatRoot);
+        fc.setDynamicStateManager(new DynamicStateManager());
         return fc;
     }
 

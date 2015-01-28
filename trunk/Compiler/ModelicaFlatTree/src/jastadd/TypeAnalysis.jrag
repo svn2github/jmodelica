@@ -553,6 +553,8 @@ aspect FlatTypeAnalysis {
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
     eq FIdUseExp.type() = getFIdUse().type();
+    
+    eq FDSRefExp.type() = getOrg().type();
 
     syn lazy FType FIdUse.type() = myFV().type().sizedType(size());
 

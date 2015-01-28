@@ -701,6 +701,12 @@ aspect Constructors {
 		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 
+    /**
+     * Constructs a new dynamic state variable
+     */
+    public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
+        this(new FPublicVisibilityType(), new FContinuous(), new Opt(), new List(), (String)null, new Opt(), new Opt(), new FQNameFull("DS(" + set.id() + ", " + number + ")"), set, number);
+    }
 	
 	/**
 	 * Create an FInternalAttribute with only the children that are 
@@ -1034,6 +1040,7 @@ aspect InheritedFactoryMethods {
 	public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
 	public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
 	public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
+	public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
 	
 	// Array expressions
 	public FArray          FArray.createEmptyNode()          { return new FArray();          }

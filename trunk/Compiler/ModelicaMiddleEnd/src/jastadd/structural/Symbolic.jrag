@@ -322,6 +322,7 @@ aspect EquationSolve {
 	// Classification of terms
 	syn boolean FExp.isIdentifier(String name) = false;
 	eq FIdUseExp.isIdentifier(String name) = name.equals(name());
+	eq FDSRefExp.isIdentifier(String name) = getOrg().isIdentifier(name);
 	
 	syn int FExp.isMulTerm(String name) = 0;
 	eq FDotMulExp.isMulTerm(String name) {
@@ -832,6 +833,10 @@ aspect Derivatives {
             return dynamicFExp(diff);
         else
             return dynamicFExp(new FIfExp(new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0)), diff, new FNegExp(diff.copySymbolic())));
+    }
+
+    public FExp FDSRefExp.diff(String name) {
+        return getOrg().diff(name);
     }
 
     public FExp FSignExp.diff(String name) {

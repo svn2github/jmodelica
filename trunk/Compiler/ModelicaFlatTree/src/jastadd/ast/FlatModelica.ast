@@ -41,7 +41,8 @@ FClass : BaseNode ::= FQName
                       FResidualPair*
                       FAttribute*
                       DummyVariable:FVariable*
-                      /[FDynamicResolver]/;
+                      /[FDynamicResolver]/
+                      DynamicStateManager;
 
 /**
  * A flattened user-defined function.
@@ -271,11 +272,26 @@ FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
  */
 FDerivativeVariable : FRealVariable;
 
+/**
+ * Variable type for representing dummy derivatives.
+ */
 FDummyDerivativeVariable : FRealVariable;
 
+/**
+ * Variable type for representing high order derivatives.
+ */
 FHDerivativeVariable : FDerivativeVariable ::= <Order:int>;
 
+/**
+ * Variable type for representing high order dummy derivatives.
+ */
 FHDummyDerivativeVariable : FDummyDerivativeVariable ::= <Order:int>;
+
+/**
+ * Variable type for representing algebraic variables that has been introduced
+ * by dynamic states.
+ */
+FDynamicStateVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
 
 /**
  * Node representing the visibility of an FVariable object.
@@ -1069,10 +1085,21 @@ abstract CommonAccess : BaseNode;
  */
 FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
+
+/**
+ * Abstract FExp type for all FExps that describes a variable references.
+ */
+abstract FVarRefExp : FAbstractArrayExp;
+
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAbstractArrayExp ::= FIdUse;
+FIdUseExp : FVarRefExp ::= FIdUse;
+
+/**
+ * A reference to a dynamic state
+ */
+FDSRefExp : FVarRefExp ::= <SetId:Integer> /Use:FIdUseExp*/ Org:FIdUseExp;
 
 /**
  * Identifier of temporary variable, used during scalarization
@@ -1706,3 +1733,12 @@ abstract FDynamicResolver : BaseNode;
  */
 FIndexReductionResolver : FDynamicResolver ::= <FClass:FClass> /[FVariable]/ /[FAbstractEquation]/;
 
+/**
+ * Manager that handles dynamic states
+ */
+DynamicStateManager : BaseNode ::= Set:DynamicStateSet*;
+
+/**
+ * A set of dynamic states
+ */
+DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FIdUseExp*;

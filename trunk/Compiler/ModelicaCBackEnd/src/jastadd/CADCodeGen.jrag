@@ -1065,6 +1065,7 @@ aspect CADCodeGen {
      */
     public abstract void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited);
 
+    @Override
     public void EquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         for (SimpleEquationBlock block : unsolvedBlocks())
             block.genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visited);
@@ -1076,6 +1077,12 @@ aspect CADCodeGen {
             aeb.genBlockResidualFunctionBeforeSubEqns_CAD(indent, str, inInitial, visited);
     }
 
+    @Override
+    public void DynamicStateBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunctionBeforeEqns_CAD() is not implemented!");
+    }
+
+    @Override
     public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         if (genBlockEnabled())
             equation().genBlock_CAD(indent, str, visited, allLocalVariables(), assignedIndices());
@@ -1112,6 +1119,7 @@ aspect CADCodeGen {
      */
     public abstract void AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited);
 
+    @Override
     public void EquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
         for (SimpleEquationBlock block : unsolvedBlocks())
             block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
@@ -1123,6 +1131,12 @@ aspect CADCodeGen {
             block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
     }
 
+    @Override
+    public void DynamicStateBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
+        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunctionEqns_CAD() is not implemented!");
+    }
+
+    @Override
     public void SimpleEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
         equation().genResidual_CAD(enumerator, indent, str, visited, assignedIndices());
     }
