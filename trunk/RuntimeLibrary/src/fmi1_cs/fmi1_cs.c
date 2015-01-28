@@ -129,6 +129,11 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                 return fmiError;
             }
             
+            /* Check if the simulation should be terminated. */
+            if (fmi1_cs->event_info.terminateSimulation == fmiTrue) {
+                return fmiDiscard;
+            }
+            
             /* Check if there are upcoming time events. */
             if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
                 if(fmi1_cs->event_info.nextEventTime < time_final){
@@ -465,6 +470,13 @@ fmiStatus fmi1_cs_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* v
 }
 
 fmiStatus fmi1_cs_get_real_status(fmiComponent c, const fmiStatusKind s, fmiReal* value){
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    jmi_ode_problem_t* ode_problem = fmi1_cs -> ode_problem;
+    
+    if (s == fmiLastSuccessfulTime) {
+        *value = ode_problem->time;
+        return fmiOK;
+    }
     return fmiDiscard;
 }
 

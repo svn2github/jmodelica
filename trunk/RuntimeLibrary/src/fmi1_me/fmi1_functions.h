@@ -77,10 +77,17 @@ typedef struct {
 } fmiEventInfo;
 
 /** FMI 1.0 asyncronous co-simulation  status */
+/*
 typedef enum {
     fmi1_do_step_status,
     fmi1_pending_status,
     fmi1_last_successful_time
+} fmiStatusKind;
+*/
+typedef enum {
+    fmiDoStepStatus,
+    fmiPendingStatus,
+    fmiLastSuccessfulTime
 } fmiStatusKind;
 
 /* FMI 1.0 common functions */
