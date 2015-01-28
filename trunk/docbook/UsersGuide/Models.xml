@@ -821,6 +821,15 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>max_n_proc</literal></entry>
+
+                  <entry><literal>integer / 4</literal></entry>
+
+                  <entry>Maximum number of processes allowed to use
+                  when compiling generated c source code</entry>
+                </row>
+
+                <row>
                   <entry><literal>merge_blt_blocks</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
