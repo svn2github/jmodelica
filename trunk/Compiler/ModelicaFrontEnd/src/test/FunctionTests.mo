@@ -11885,6 +11885,42 @@ end FunctionTests.VectorizedCall6;
 end VectorizedCall6;
 
 
+model VectorizedCall7
+    function f
+        input Real a;
+        input Real b[2];
+        output Real c;
+    algorithm
+        c := sum(a * b);
+    end f;
+    
+    Real d[3] = {1, 2, 3} * time;
+    Real e[3] = f(d, {4, 5});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VectorizedCall7",
+            description="",
+            flatModel="
+fclass FunctionTests.VectorizedCall7
+ Real d[1];
+ Real d[2];
+ Real d[3];
+ Real e[1];
+ Real e[2];
+ Real e[3];
+equation
+ d[1] = time;
+ d[2] = 2 * time;
+ d[3] = 3 * time;
+ e[1] = d[1] * 4 + d[1] * 5;
+ e[2] = d[2] * 4 + d[2] * 5;
+ e[3] = d[3] * 4 + d[3] * 5;
+end FunctionTests.VectorizedCall7;
+")})));
+end VectorizedCall7;
+
+
 model Lapack_dgeqpf
   Real A[2,2] = {{1,2},{3,4}};
   Real QR[2,2];

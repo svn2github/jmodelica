@@ -2027,20 +2027,23 @@ aspect Arrays {
 			arr.set(i, createNode(inner1.get(i), inner2.get(i), inner3.get(i)));
 		return arr;
 	}
-	
-	eq FVectorFunctionCall.getArray() {
-		Array arr = new Array(indices());
-		Size[] sizes = (Size[]) getSizes().clone();
-		sizes[0] = Size.SCALAR;
-		
-		for (Index i : arr.indices()) {
-			List<FExp> args = new List<FExp>();
-			for (FExp arg : getArgs())
-				args.add(arg.getArray().subArrayFExp(i));
-			arr.set(i, new FFunctionCall(getName().fullCopy(), args, sizes));
-		}
-		return arr;
-	}
+
+    eq FVectorFunctionCall.getArray() {
+        Array arr = new Array(indices());
+        Size[] sizes = (Size[]) getSizes().clone();
+        sizes[0] = Size.SCALAR;
+        boolean[] vec = getVectorized();
+        
+        int j;
+        for (Index i : arr.indices()) {
+            List<FExp> args = new List<FExp>();
+            j = 0;
+            for (FExp arg : getArgs()) 
+                args.add(vec[j++] ? arg.getArray().subArrayFExp(i) : arg);
+            arr.set(i, new FFunctionCall(getName().fullCopy(), args, sizes));
+        }
+        return arr;
+    }
 
     eq FReinit.getArray() {
         if (!getVar().isArray())
