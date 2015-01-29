@@ -215,7 +215,7 @@ aspect IndexReduction {
         }
     }
     
-    public Object FClass.stateDiagnosticsObj(String title, String noStates) {
+    public Object FClass.stateDiagnosticsObj() {
         return new Object() {
             public String toString() {
                 if (differentiatedRealVariables().isEmpty())
