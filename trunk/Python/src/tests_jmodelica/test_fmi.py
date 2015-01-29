@@ -31,6 +31,7 @@ import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 from pyjmi.log import parse_jmi_log, gather_solves
 from pyfmi.common.io import ResultHandler
+import pyfmi.fmi as fmi
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
@@ -152,7 +153,18 @@ class Test_FMUModelCS1:
         cls.simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
         cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
         cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
-
+        cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs")
+    
+    @testattr(fmi = True)
+    def test_terminate(self):
+        model = load_fmu(Test_FMUModelCS1.terminate)
+        
+        model.initialize()
+        status = model.do_step(0,1)
+        
+        assert status == fmi.FMI_DISCARD
+        assert abs(model.get_real_status(fmi.FMI1_LAST_SUCCESSFUL_TIME) - 0.5) < 1e-3
+    
     @testattr(fmi = True)
     def test_custom_result_handler(self):
         model = load_fmu(Test_FMUModelCS1.rlc_circuit)
