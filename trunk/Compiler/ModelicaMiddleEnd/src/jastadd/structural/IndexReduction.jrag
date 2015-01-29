@@ -178,7 +178,7 @@ aspect IndexReduction {
         log.info(this);
         log.info(aliasManager);
 
-        log.info("States:");
+        // Produce errors and warnings:
         Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
         for (FVariable fv : variables()) {
             if (fv.aliasSet() != null) {
@@ -194,7 +194,6 @@ aspect IndexReduction {
             if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
                 fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");
             stateSelectAlwaysVars.remove(fv);
-            log.info(new PrettyPrintDelegate(fv, "  "));
         }
         for (FVariable fv : stateSelectAlwaysVars) 
             if (fv.isSetInReinit())
@@ -202,6 +201,8 @@ aspect IndexReduction {
             else
                 fv.warning(fv.name() + " has stateSelect=always, but could not be selected as state");
 
+        log.info(stateDiagnosticsObj());
+        
         DAEBiPGraph = computeMatchedDAEBiPGraph();
         log.info("BiPGraph after index reduction");
         log.info(DAEBiPGraph);
@@ -212,6 +213,36 @@ aspect IndexReduction {
             // If we get here, index reduction failed
             throw new IndexReductionException();
         }
+    }
+    
+    public Object FClass.stateDiagnosticsObj(String title, String noStates) {
+        return new Object() {
+            public String toString() {
+                if (differentiatedRealVariables().isEmpty())
+                    return "There are no states in the model";
+                StringBuilder sb = new StringBuilder();
+                sb.append("States:\n");
+                for (FVariable fv : differentiatedRealVariables()) {
+                    if (fv.isDynamicState())
+                        continue;
+                    if (fv.isFDynamicStateVariable()) {
+                        FDynamicStateVariable var = fv.asFDynamicStateVariable();
+                        if (var.getNumber() != 0)
+                            continue;
+                        DynamicStateSet set = var.getSet();
+                        sb.append(String.format("  Set of dynamic states with %d states:\n", set.numStates()));
+                        for (FVariable state : set.fVars()) {
+                            sb.append(state.prettyPrint("    "));
+                            sb.append('\n');
+                        }
+                    } else {
+                        sb.append(fv.prettyPrint("  "));
+                        sb.append('\n');
+                    }
+                }
+                return sb.toString();
+            }
+        };
     }
 
     /**

@@ -709,6 +709,19 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Solved equation ---
 der(_ds.1.s0) := dsDer(1, 0)
 -------------------------------
+"),FClassMethodTestCase(
+                name="DynamicStates_Examples_Pendulum_States",
+                description="Check the states of the pendulum model",
+                dynamic_states=true,
+                methodName="stateDiagnosticsObj",
+                methodResult="
+States:
+  Set of dynamic states with 1 states:
+    Real _der_x
+    Real _der_y
+  Set of dynamic states with 1 states:
+    Real x \"Cartesian x coordinate\"
+    Real y \"Cartesian x coordinate\"
 "),TransformCanonicalTestCase(
                 name="DynamicStates_Examples_Pendulum_Model",
                 description="Check the model of the pendulum model",
