@@ -824,6 +824,109 @@ Returns::
             
     total_exec_time -- 
         Execution time.</programlisting>
+
+      <section>
+        <title>Reusing the same discretization for several optimization
+        solutions</title>
+
+        <para>When collocation is used to solve a dynamic optimization
+        problem, the solution procedure is carried out in several
+        steps:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Discretize the dynamic optimization problem, which is
+            formulated in continuous time. The result is a large and sparse
+            nonlinear program (NLP). The discretization step depends on the
+            options as provided to the <literal>optimize</literal>
+            method.</para>
+          </listitem>
+
+          <listitem>
+            <para>Solve the NLP.</para>
+          </listitem>
+
+          <listitem>
+            <para>Postprocess the NLP solution to extract an approximate
+            solution to the original dynamic optimization problem.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Depending on the problem, discretization may account for a
+        substantial amount of the total solution time, or even dominate
+        it.</para>
+
+        <para>The same discretization can be reused for several solutions with
+        different parameter values, but the same options. Discretization will
+        be carried out each time the <literal>optimize</literal> method is
+        called on the model. Instead of calling
+        <literal>model.optimize(options=opts)</literal>, a problem can be
+        discretized using the <literal>prepare_optimization</literal>
+        method:</para>
+
+        <programlisting>solver = model.prepare_optimization(options=opts)</programlisting>
+
+        <para>The obtained solver object represents the discretized problem,
+        and can be used to solve it using its own <literal>optimize</literal>
+        method:</para>
+
+        <programlisting>res = solver.optimize()</programlisting>
+
+        <para>While options cannot be changed in general, parameter values and
+        NLP solver options can be changed on the solver object. Parameter
+        values can be updated with</para>
+
+        <programlisting>solver.set(parameter_name, value)</programlisting>
+
+        <para>and current values retrieved with</para>
+
+        <programlisting>solver.get(parameter_name)</programlisting>
+
+        <para>Settings to the nonlinear solver can be changed with</para>
+
+        <programlisting>solver.set_solver_option(solver_name, name, value)</programlisting>
+
+        <para>where <literal>solver_name</literal> is e g
+        <literal>'IPOPT'</literal> or <literal>'WORHP'</literal>.</para>
+      </section>
+
+      <section>
+        <title>Warm starting</title>
+
+        <para>The solver object obtained from
+        <literal>prepare_optimization</literal> can also be used for
+        <emphasis>warm starting</emphasis>, where an obtained optimization
+        solution (including primal and dual variables) is used as the initial
+        guess for a new optimization with new parameter values.</para>
+
+        <para>To reuse the solver's last obtained solution as initial guess
+        for the next optimization, warm starting can be enabled with</para>
+
+        <programlisting>solver.set_warm_start(True)</programlisting>
+
+        <para>before calling <literal>solver.optimize()</literal>.</para>
+
+        <para>When using the IPOPT solver with warm starting, several solver
+        options typically also need to be set to see the benefits, e g:</para>
+
+        <programlisting>def set_warm_start_options(solver, push=1e-4, mu_init=1e-1):    
+    solver.set_solver_option('IPOPT', 'warm_start_init_point', 'yes')
+    solver.set_solver_option('IPOPT', 'mu_init', mu_init)
+
+    solver.set_solver_option('IPOPT', 'warm_start_bound_push', push)
+    solver.set_solver_option('IPOPT', 'warm_start_mult_bound_push', push)
+    solver.set_solver_option('IPOPT', 'warm_start_bound_frac', push)
+    solver.set_solver_option('IPOPT', 'warm_start_slack_bound_frac', push)
+    solver.set_solver_option('IPOPT', 'warm_start_slack_bound_push', push)
+
+set_warm_start_options(solver)
+</programlisting>
+
+        <para>Smaller values of the <literal>push</literal> and
+        <literal>mu</literal> arguments will make the solver place more trust
+        in that the sought solution is close to the initial guess, i e, the
+        last solution.</para>
+      </section>
     </section>
 
     <section>
