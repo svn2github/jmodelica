@@ -678,6 +678,8 @@ aspect FlatAPI {
     FDerivativeVariable contributes
         myDifferentiatedVariable() when (shouldContribute())
     to FClass.differentiatedRealVariablesSet() for myFClass();
+    FDynamicStateVariable contributes this
+    to FClass.differentiatedRealVariablesSet() for myFClass();
     syn int FVariable.differentiatedRealVariableIndex() =
         myFClass().differentiatedRealVariables().indexOf(this);
     
@@ -691,6 +693,8 @@ aspect FlatAPI {
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDerivativeVariable contributes
         myDifferentiatedVariable() when (shouldContributeFiltered())
+    to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
+    FDynamicStateVariable contributes this
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     
     /**
@@ -1742,6 +1746,7 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isDifferentiatedVariable() = false;
     syn lazy boolean FVariable.isDifferentiatedVariable() = 
       myFClass().differentiatedRealVariables().contains(this);
+    syn boolean FDynamicStateVariable.isDifferentiatedVariable() = true;
       
     syn boolean FAbstractVariable.isDerivativeVariable() = false;
     eq FDerivativeVariable.isDerivativeVariable() = true;

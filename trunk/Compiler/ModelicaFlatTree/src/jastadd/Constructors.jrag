@@ -705,9 +705,16 @@ aspect Constructors {
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(new FPublicVisibilityType(), new FContinuous(), new Opt(), new List(), (String)null, new Opt(), new Opt(), new FQNameFull("DS(" + set.id() + ", " + number + ")"), set, number);
+        this(new FPublicVisibilityType(), new FContinuous(), new Opt(), new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".s" + number), set, number);
     }
-	
+
+    /**
+     * Constructs a new dynamic state variable
+     */
+    public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
+        this(new FPublicVisibilityType(), new FContinuous(), new Opt(), new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".a" + number), set, number);
+    }
+    
 	/**
 	 * Create an FInternalAttribute with only the children that are 
 	 *        valid for them.
@@ -1041,6 +1048,7 @@ aspect InheritedFactoryMethods {
 	public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
 	public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
 	public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
+	public FDSDerExp      FDSDerExp.createEmptyNode()      { return new FDSDerExp();      }
 	
 	// Array expressions
 	public FArray          FArray.createEmptyNode()          { return new FArray();          }

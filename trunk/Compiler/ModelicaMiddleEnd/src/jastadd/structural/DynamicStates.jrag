@@ -46,19 +46,27 @@ aspect DynamicStateSelect{
 
     syn boolean FAbstractVariable.isDynamicState() = dynamicStateSet() != null;
 
-    syn boolean FAbstractVariable.isDynamicStateVariable() = false;
-    eq FDynamicStateVariable.isDynamicStateVariable() = true;
+    syn boolean FAbstractVariable.isFDynamicStateVariable() = false;
+    eq FDynamicStateVariable.isFDynamicStateVariable() = true;
 
-    syn FDynamicStateVariable FAbstractVariable.asDynamicStateVariable() {
+    syn FDynamicStateVariable FAbstractVariable.asFDynamicStateVariable() {
         throw new UnsupportedOperationException("Unable to convert " + getClass().getSimpleName() + " to FDynamicStateVariable!");
     }
-    eq FDynamicStateVariable.asDynamicStateVariable() = this;
+    eq FDynamicStateVariable.asFDynamicStateVariable() = this;
 
+    syn boolean FAbstractVariable.isFDynamicAlgebraicVariable() = false;
+    eq FDynamicAlgebraicVariable.isFDynamicAlgebraicVariable() = true;
+    
+    syn FDynamicAlgebraicVariable FAbstractVariable.asFDynamicAlgebraicVariable() {
+        throw new UnsupportedOperationException("Unable to convert " + getClass().getSimpleName() + " to FDynamicAlgebraicVariable!");
+    }
+    eq FDynamicAlgebraicVariable.asFDynamicAlgebraicVariable() = this;
+    
     syn boolean FVarRefExp.isDynamicState() = false;
     eq FIdUseExp.isDynamicState() = myFV().isDynamicState();
     eq FDSRefExp.isDynamicState() = true;
 
-    eq FDynamicStateVariable.bltDependencyVars() = getSet().fVarsColl();
+    eq FDynamicAlgebraicVariable.bltDependencyVars() = getSet().fVarsColl();
 
     inh boolean FIdUseExp.shouldRewriteToDSRef();
     eq BaseNode.getChild().shouldRewriteToDSRef()        = true;
@@ -85,12 +93,13 @@ aspect DynamicStateSelect{
     }
 
     syn DynamicStateSet FDSRefExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId());
+    syn DynamicStateSet FDSDerExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId());
 
     syn List<FIdUseExp> FDSRefExp.getUseList() {
         DynamicStateSet set = mySet();
         List<FIdUseExp> list = new List<FIdUseExp>();
         for (int i = 0; i < set.numAlgebraics(); i++)
-            list.add(new FIdUseExp("DS(" + set.id() + ", " + i + ")"));
+            list.add(new FIdUseExp("_ds." + set.id() + ".a" + i));
         return list;
     }
 
@@ -100,6 +109,19 @@ aspect DynamicStateSelect{
         getOrg().findFIdUseExpsInTree(set);
     }
 
+    syn List<FExp> FDSDerExp.getUseList() {
+        DynamicStateSet set = mySet();
+        List<FExp> list = new List<FExp>();
+        for (FIdUseExp var : set.getVars())
+            list.add(var.diff(TIME));
+        return list;
+    }
+
+    public void FDSDerExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+        for (FExp exp : getUses())
+            exp.findFIdUseExpsInTree(set);
+    }
+    
     private Enumerator DynamicStateManager.idEnumerator = new Enumerator(0);
     public int DynamicStateManager.nextId() {
         return idEnumerator.next();
@@ -169,7 +191,12 @@ aspect DynamicStateSelect{
             }
             manager.addSet(set);
             for (int i = 0; i < set.numAlgebraics(); i++)
-                addFVariable(new FDynamicStateVariable(set, i));
+                addFVariable(new FDynamicAlgebraicVariable(set, i));
+            for (int i = 0; i < set.numStates(); i++) {
+                FDynamicStateVariable var = new FDynamicStateVariable(set, i);
+                addFVariable(var);
+                addFEquation(new FEquation(new FDerExp(var.createFIdUse()), new FDSDerExp(set.id(), i)));
+            }
         }
         enableDynamicStateRewrite();
     }
@@ -365,28 +392,28 @@ aspect DynamicStateSelect{
     
     public boolean SCCBlock.containsDynamicStates() {
         for (E eqn : members)
-            if (eqn.getMatching().getVariable().isDynamicStateVariable())
+            if (eqn.getMatching().getVariable().isFDynamicAlgebraicVariable())
                 return true;
         return false;
     }
     
     public class EquationBlockFactory {
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
-            Map<DynamicStateSet, FDynamicStateVariable[]> setVarMap = new HashMap<DynamicStateSet, FDynamicStateVariable[]>();
+            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new HashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
                 FVariable fVar = eqn.getMatching().getVariable();
-                if (!fVar.isDynamicStateVariable()) {
+                if (!fVar.isFDynamicAlgebraicVariable()) {
                     otherVars.add(eqn.getMatching());
                     continue;
                 }
-                FDynamicStateVariable var = fVar.asDynamicStateVariable();
+                FDynamicAlgebraicVariable var = fVar.asFDynamicAlgebraicVariable();
                 DynamicStateSet set = var.getSet();
                 if (var.getNumber() >= set.numAlgebraics() || var.getNumber() < 0)
                     throw new BLTException(var.name() + " has illegal dynamic state variable number, set size is " + set.numAlgebraics());
-                FDynamicStateVariable[] vars = setVarMap.get(set);
+                FDynamicAlgebraicVariable[] vars = setVarMap.get(set);
                 if (vars == null) {
-                    vars = new FDynamicStateVariable[set.numAlgebraics()];
+                    vars = new FDynamicAlgebraicVariable[set.numAlgebraics()];
                     setVarMap.put(set, vars);
                 }
                 if (vars[var.getNumber()] != null)
@@ -399,10 +426,10 @@ aspect DynamicStateSelect{
             int setCounter = 0;
             int totalNumStates = 0;
             Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
-            for (Map.Entry<DynamicStateSet, FDynamicStateVariable[]> entry : setVarMap.entrySet()) {
+            for (Map.Entry<DynamicStateSet, FDynamicAlgebraicVariable[]> entry : setVarMap.entrySet()) {
                 boolean allSet = true;
                 DynamicStateSet set = entry.getKey();
-                FDynamicStateVariable[] DSVars = entry.getValue();
+                FDynamicAlgebraicVariable[] DSVars = entry.getValue();
                 for (int i = 0; i < DSVars.length; i++) {
                     if (DSVars[i] == null) {
                         allSet = false;

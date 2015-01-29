@@ -288,10 +288,16 @@ FHDerivativeVariable : FDerivativeVariable ::= <Order:int>;
 FHDummyDerivativeVariable : FDummyDerivativeVariable ::= <Order:int>;
 
 /**
- * Variable type for representing algebraic variables that has been introduced
+ * Variable type for representing state variables that has been introduced
  * by dynamic states.
  */
 FDynamicStateVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
+
+/**
+ * Variable type for representing algebraic variables that has been introduced
+ * by dynamic states.
+ */
+FDynamicAlgebraicVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
 
 /**
  * Node representing the visibility of an FVariable object.
@@ -1099,7 +1105,9 @@ FIdUseExp : FVarRefExp ::= FIdUse;
 /**
  * A reference to a dynamic state
  */
-FDSRefExp : FVarRefExp ::= <SetId:Integer> /Use:FIdUseExp*/ Org:FIdUseExp;
+FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FIdUseExp*/ Org:FIdUseExp;
+
+FDSDerExp : FVarRefExp ::= <SetId:int> <Number:int> /Use:FExp*/;
 
 /**
  * Identifier of temporary variable, used during scalarization
