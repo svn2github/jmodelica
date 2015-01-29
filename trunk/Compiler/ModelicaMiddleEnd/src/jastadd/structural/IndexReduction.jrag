@@ -1013,7 +1013,7 @@ aspect IndexReduction {
             // Compute weights for variables based on state select, linearity
             // and other attributes.
             Map<IndexReductionVar, IndexReductionCost> weights = new HashMap<IndexReductionVar, IndexReductionCost>();
-            Map<IndexReductionEq, Set<IndexReductionVar>> nonConstantCoefficientsMatrix = new HashMap<IndexReductionEq, Set<IndexReductionVar>>();
+            Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix = new HashMap<IndexReductionEq, Map<IndexReductionVar, FExp>>();
             for (IndexReductionVar var : getVariables()) {
                 FVariable fv = var.getVariable();
                 int linearity = calculateLinearityWeight(var, nonConstantCoefficientsMatrix);
@@ -1084,14 +1084,14 @@ aspect IndexReduction {
         return result;
     }
     
-    public int IndexReductionBiPGraph.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Set<IndexReductionVar>> nonConstantCoefficientsMatrix) {
+    public int IndexReductionBiPGraph.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix) {
         int weight = 0;
         for (IndexReductionEq eqn : getEquations())
             weight += eqn.calculateLinearityWeight(var, nonConstantCoefficientsMatrix);
         return weight;
     }
     
-    public int IndexReductionEq.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Set<IndexReductionVar>> nonConstantCoefficientsMatrix) {
+    public int IndexReductionEq.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix) {
         try {
             FVariable variable = var.getVariable();
             if (!getEquation().referencedFVariables().contains(variable))
@@ -1101,18 +1101,25 @@ aspect IndexReduction {
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
             if (!variability.lessOrEqual(ASTNode.fParameter())) {
-                Set<IndexReductionVar> coefficients = nonConstantCoefficientsMatrix.get(this);
+                Map<IndexReductionVar, FExp> coefficients = nonConstantCoefficientsMatrix.get(this);
                 if (coefficients == null) {
-                    coefficients = new HashSet<IndexReductionVar>();
+                    coefficients = new HashMap<IndexReductionVar, FExp>();
                     nonConstantCoefficientsMatrix.put(this, coefficients);
                 }
-                coefficients.add(var);
+                FAbstractEquation eqn = feqds.iterator().next();
+                if (feqds.size() > 1)
+                    coefficients.put(var, new FNoExp());
+                else
+                    coefficients.put(var, eqn.asSubExp());
                 return 2;
             } else if (!variability.lessOrEqual(ASTNode.fConstant()))
                 return 0;
         } catch(EquationDifferentiationException e) {}
         return 0;
     }
+    
+    syn FExp FAbstractEquation.asSubExp() = new FNoExp();
+    eq FEquation.asSubExp() = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
     
     public void IndexReductionBiPGraph.insert(IndexReductionEq eqn) {
         equationMap.put(eqn.getName(), eqn);

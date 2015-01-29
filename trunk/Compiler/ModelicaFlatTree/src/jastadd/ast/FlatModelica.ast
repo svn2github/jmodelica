@@ -1749,4 +1749,10 @@ DynamicStateManager : BaseNode ::= Set:DynamicStateSet*;
 /**
  * A set of dynamic states
  */
-DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FIdUseExp*;
+DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FIdUseExp* Coefficient:DynamicStateCoefficient*;
+
+/**
+ * Node that contains the coefficient incidence for a specific dynamic state
+ * in a specific equation.
+ */
+DynamicStateCoefficient : BaseNode ::= <Equation:int> <Variable:int> Value:FExp;
