@@ -159,16 +159,17 @@ namespace ModelicaCasADi
             // Create Optimica compiler and compile to flat class
             oc::OptimicaCompiler compiler(options->getOptionRegistry());
 
-            java::lang::String fileVecJava[modelFiles.size()];
+            vector<java::lang::String> fileVecJava;
             for (int i = 0; i < modelFiles.size(); ++i) {
-                fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
+                fileVecJava.push_back(StringFromUTF(modelFiles[i].c_str()));
             }
             compiler.setLogger(StringFromUTF(log_level.c_str()));
             // NB: It is assumed that no other fclass is created or used between this point and
             // the call to `ifcasadi_free_instances();`, and that the ifcasadi instance list
             // is empty at this point; or too many instances will be deleted by it.
+            java::lang::String *strings = modelFiles.size() > 0 ? &fileVecJava.front() : NULL;
             oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
-                new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
+                new_JArray<java::lang::String>(strings, modelFiles.size()),
                 StringFromUTF(modelName.c_str())).this$);
 
             std::string identfier = env->toString(fclass.nameUnderscore().this$);

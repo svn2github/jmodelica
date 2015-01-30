@@ -17,7 +17,7 @@ inline void clearJavaException()    { vm_env->ExceptionClear(); }
 
 
 ::java::lang::String StringFromUTF(const char *bytes);
-jstring fromUTF(const char *bytes);
+jstring fromUTF(const char *bytes); /* consider: will the returned jstring leak? */
 
 // todo: Provide a varargs version instead
 template <typename T>
@@ -31,7 +31,7 @@ template <typename T>
 JArray<T> new_JArray(T items[], int n) {
     JArray<T> array = JArray<T>((jobject)(env->newObjectArray(jclass(T::class$->this$), n)));
     for (int k=0; k < n; k++) {
-	env->setObjectArrayElement((jobjectArray)array.this$, k, jobject(items[k].this$));
+        env->setObjectArrayElement((jobjectArray)array.this$, k, jobject(items[k].this$));
     }
     return array;
 }
