@@ -164,6 +164,15 @@ class Test_FMUModelCS1:
         
         assert status == fmi.FMI_DISCARD
         assert abs(model.get_real_status(fmi.FMI1_LAST_SUCCESSFUL_TIME) - 0.5) < 1e-3
+        
+    @testattr(fmi = True)
+    def test_terminate_2(self):
+        model = load_fmu(Test_FMUModelCS1.terminate)
+        
+        res = model.simulate()
+        
+        assert res.status == fmi.FMI_DISCARD
+        assert abs(res["time"][-1] - 0.5) < 1e-3
     
     @testattr(fmi = True)
     def test_custom_result_handler(self):
