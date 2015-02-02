@@ -36,6 +36,7 @@ set(JMISources
     jmi_global.h
     jmi_delay.h
     jmi_delay_impl.h
+    jmi_dynamic_state.h
     
     jmi_util.c
     jmi_global.c
@@ -45,6 +46,7 @@ set(JMISources
     jmi_cs.c
     jmi_me.c
     jmi_delay.c
+    jmi_dynamic_state.c
 
     # Logging sources
 	jmi_callbacks.h

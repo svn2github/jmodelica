@@ -75,6 +75,8 @@ static const int N_dae_blocks = $n_dae_blocks$;
 static const int N_dae_init_blocks = $n_dae_init_blocks$;
 static const int N_guards = $n_guards$;
 
+static const int N_dynamic_state_sets = 0;
+
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
 static const int N_eq_Fp = 0;
@@ -198,7 +200,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
              N_sw, N_sw_init, N_time_sw,N_state_sw, N_guards, N_guards_init,
              N_dae_blocks, N_dae_init_blocks,
              N_initial_relations, (int (*))DAE_initial_relations,
-             N_relations, (int (*))DAE_relations,
+             N_relations, (int (*))DAE_relations, N_dynamic_state_sets,
              (jmi_real_t *) DAE_nominals,
              Scaling_method, N_ext_objs, jmi_callbacks);
 

@@ -27,6 +27,7 @@
 #include "jmi_block_residual.h"
 #include "jmi_log.h"
 #include "jmi_delay_impl.h"
+#include "jmi_dynamic_state.h"
 
 int jmi_init(jmi_t** jmi,
         int n_real_ci, int n_real_cd, int n_real_pi,
@@ -46,7 +47,7 @@ int jmi_init(jmi_t** jmi,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
-        int n_relations, int* relations,
+        int n_relations, int* relations, int n_dynamic_state_sets,
         jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
@@ -217,6 +218,8 @@ int jmi_init(jmi_t** jmi,
             jmi_->dz_active_variables_buf[j][i] = 0;
         }
     }
+    jmi_->n_dynamic_state_sets = n_dynamic_state_sets;
+    jmi_->dynamic_state_sets = (jmi_dynamic_state_set_t*)calloc(n_dynamic_state_sets,sizeof(jmi_dynamic_state_set_t));
 
     jmi_->scaling_method = scaling_method;
 

@@ -116,6 +116,7 @@ typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward de
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
 typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward declaration of struct. */
+typedef struct jmi_dynamic_state_set_t jmi_dynamic_state_set_t;       /**< \brief Forward declaration of struct. */
 
 typedef struct _jmi_time_event_t {
     int defined;
@@ -870,7 +871,7 @@ int jmi_init(jmi_t** jmi,
         int n_guards, int n_guards_init,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
-        int n_relations, int* relations,
+        int n_relations, int* relations, int n_dynamic_state_sets,
         jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
@@ -1206,6 +1207,9 @@ struct jmi_t {
     jmi_delay_t *delays;                 /**< \brief Delay blocks (fixed and variable time) */
     jmi_spatialdist_t *spatialdists;     /**< \brief spatialDistribution blocks */
     jmi_boolean delay_event_mode;        /**< \brief Controls operation of `jmi_delay_record_sample` and `jmi_spatialdist_record_sample` */
+    
+    jmi_dynamic_state_set_t* dynamic_state_sets; /**< \brief Struct for the list of dynamic state sets */
+    jmi_int_t n_dynamic_state_sets;              /**< \brief Number of set of dynamic state variables */
 
     jmi_int_t n_initial_relations;       /**< \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
     jmi_int_t* initial_relations;        /**< \brief Kind of relational operators used in the event indicators for the initialization system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
