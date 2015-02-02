@@ -448,7 +448,7 @@ aspect DynamicStateSelect{
                 throw new BLTException("No dynamic state variables were found in the BLT block");
             FVariable[][][] setCombinations = new FVariable[setVarMap.size()][][];
             int setCounter = 0;
-            int totalNumStates = 0;
+            int totalNumAlgebraics = 0;
             Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
             for (Map.Entry<DynamicStateSet, FDynamicAlgebraicVariable[]> entry : setVarMap.entrySet()) {
                 boolean allSet = true;
@@ -477,11 +477,11 @@ aspect DynamicStateSelect{
                 }
                 setCombinations[setCounter] = set.combinations();
                 allDynamicStates.addAll(set.fVarsColl());
-                totalNumStates += set.numStates();
+                totalNumAlgebraics += set.numAlgebraics();
                 setCounter++;
             }
             Collection<DynamicStateBLT> blts = new ArrayList<DynamicStateBLT>();
-            for (FVariable[] combination : combineDSCombinations(setCombinations, totalNumStates)) {
+            for (FVariable[] combination : combineDSCombinations(setCombinations, totalNumAlgebraics)) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < combination.length; i++) {
                     sb.append(combination[i].name() + " ");
@@ -496,14 +496,20 @@ aspect DynamicStateSelect{
                         if (vars.contains(var))
                             graph.addEdge(eqn, graph.getVariable(var.name()));
                 }
-                ASTNode.log.info(graph);
+                ASTNode.log.debug(graph);
                 graph.maximumMatching(true);
                 Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
                 Collection<FVariable> states = new ArrayList<FVariable>();
                 for (FVariable var : allDynamicStates)
                     if (!algebraics.contains(var))
                         states.add(var);
-                DynamicStateBLT blt = graph.computeBLT(options, producer, new DynamicStateBLT(setVarMap.keySet(), states, algebraics));
+                DynamicStateBLT blt = new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
+                if (graph.isComplete()) {
+                    blt = graph.computeBLT(options, producer, blt);
+                } else {
+                    ASTNode.log.info("  This combination does not have a valid solution!");
+                    ASTNode.log.debug(graph.printMatchingObj());
+                }
                 ASTNode.log.debug(blt);
                 blts.add(blt);
             }

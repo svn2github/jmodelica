@@ -1996,7 +1996,7 @@ aspect BlockDependencies {
             for (FVariable var : dependentVariables()) {
                 AbstractEquationBlock block = blockMap.get(var);
                 if (block == null)
-                    throw new IllegalArgumentException("Unable to get predecessor block for variable " + var);
+                    throw new IllegalArgumentException("Unable to get predecessor block for variable " + var.name());
                 immediatePredecessors.add(block);
             }
             return new CompleteBlockDependency(dependentVariables, immediatePredecessors);
