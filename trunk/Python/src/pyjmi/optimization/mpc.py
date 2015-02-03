@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from pyjmi.common.io import ResultDymolaTextual
-from pyjmi.jmi_algorithm_drivers import MPCAlgResult, LocalDAECollocationAlg
+from pyjmi.jmi_algorithm_drivers import MPCAlgResult, LocalDAECollocationAlg, LocalDAECollocationAlgOptions
 from pyjmi.optimization.casadi_collocation import BlockingFactors
 import time, types
 import numpy as N
@@ -72,14 +72,25 @@ class MPC(object):
         """
         self._create_clock()
         self.op = op
-        self.options = options
+        
+        # handle options argument
+        if isinstance(options, dict):
+            # user has passed dict with options or empty dict = default
+            self.options = LocalDAECollocationAlgOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOptions):
+            # user has passed LocalDAECollocationAlgOptions instance
+            self.options = options
+        else:
+            raise InvalidAlgorithmOptionException(options)
+
         self.sample_period = sample_period
         self.horizon = horizon
+
         self.horizon_time = horizon*sample_period   
         self.constr_viol_costs = constr_viol_costs
         self.use_shift = use_shift
         self.create_comp_result = create_comp_result
-        
+
         # Create complete result lists
         if self.create_comp_result:
             self.res_t = []
@@ -95,18 +106,30 @@ class MPC(object):
         # Define some things
         self._sample_nbr = 0
         self._mpc_result_file_name = op.getIdentifier()+'_mpc_result.txt'
-        self._start_index = 0
         self.inittraj_set = False
+        self.startTime_set = False
         
         if noise_seed:
             N.random.seed([noise_seed])
+
+        # Check option 'hs'
+        if self.options['hs'] is not None:
+            if self.options['hs'] == "free":
+                raise NotImplementedError("The MPC-class des not support"+\
+                                            " free element lengths.")
+            else:
+                print('Warning: The option [\'hs\'] is active. The '+\
+                        'optimization horizon will be taken from the op-file'+\
+                        ' as final time - start time. Make sure meshpoints '+\
+                        'coincide with samplepoints.')
+                self.horizon_time = op.get('finalTime') - op.get('startTime')
 
         # Check if horizon_time equals finalTime
         if N.abs(op.get('finalTime')-op.get('startTime')-self.horizon_time) >\
                                                                         1e-6:
 			self.op.set('finalTime', self.op.get('startTime')+\
                                                             self.horizon_time)
-        
+
         # Soften variable bounds and add u0-parameters for blockingfactors 
         self.extra_param = []
         self.original_model_inputs = self.op.getVariables(self.op.REAL_INPUT)
@@ -271,7 +294,7 @@ class MPC(object):
                 nominal = nominal.getValue()
                 
             if nominal == 0:
-                raise Warning("Nominal value of base variable is 0. Setting \
+                print("Warning: Nominal value of base variable is 0. Setting \
                                 nominal for slack variable to 1.")
                 slack.setNominal(1) 
             else:
@@ -334,12 +357,12 @@ class MPC(object):
         Calculates number of values per sample.
         """
         if self.options['n_e']%self.horizon != 0:
-            raise Exception("Sample points must coinside with mesh points.")
-        
-        if self.options['result_mode'] is 'collocation_points':
+            raise ValueError("Sample points must coincide with mesh points.")
+
+        if self.options['result_mode'] == 'collocation_points':
             self._nbr_values_sample = self.options['n_e']/self.horizon*\
                 self.options['n_cp']+1
-        elif self.options['result_mode'] is 'mesh_points':
+        elif self.options['result_mode'] == 'mesh_points':
             self._nbr_values_sample = self.options['n_e']/self.horizon+1
         else: 
             self._nbr_values_sample = self.options['n_e']/self.horizon*\
@@ -378,7 +401,7 @@ class MPC(object):
             'mu_init' = 1e-4
             'print_level' = 0
         """  
-        if self.options['solver'] is 'IPOPT':
+        if self.options['solver'] == 'IPOPT':
             self.collocator.solver_object.setOption('expand', False)
             if self.options['IPOPT_options'].get('warm_start_init_point')\
                                                                     is None:
@@ -507,7 +530,8 @@ class MPC(object):
                 measurements[name_init] = self._result_object[name]\
                                     [self._nbr_values_sample-1]
                 val = N.abs(measurements[name_init])
-                measurements[name_init] += N.random.normal(mean, st_dev*val, 1)
+                if val != 0:
+                    measurements[name_init] += N.random.normal(mean, st_dev*val, 1)
 
         return measurements
 
@@ -648,27 +672,28 @@ class MPC(object):
         elif sim_res == None:
             state_dict = self._extract_estimates_prev_opt()
         else:
-            state_dict = self._create_state_dict(sim_res)
+            state_dict = self.extract_states(sim_res)
 
         # Updates states
         for key in state_dict.keys():
             if not self.index.has_key(key):
-                raise Exception("You are not allowed to change %s using this\
+                raise ValueError("You are not allowed to change %s using this\
                                 method. Use MPC.set()-method instead." %key)
             else:
                 self.collocator._par_vals[self.index[key]] = state_dict[key]
 
         # Update times
         if self._sample_nbr > 1:
-            self.collocator._par_vals[self.index['startTime']] +=\
+            if not self.startTime_set:
+                self.collocator._par_vals[self.index['startTime']] +=\
                                                         self.sample_period
-            self.collocator._par_vals[self.index['finalTime']] +=\
+                self.collocator._par_vals[self.index['finalTime']] +=\
                                                         self.sample_period
-            self.collocator.t0 += self.sample_period
-            self.collocator.tf += self.sample_period
+                self.collocator.t0 += self.sample_period
+                self.collocator.tf += self.sample_period
     
-            coll_time = self.collocator._compute_time_points()
-            self.collocator.time = N.array(coll_time)
+                coll_time = self.collocator._compute_time_points()
+                self.collocator.time = N.array(coll_time)
     
             for key in [var for var in self.extra_param if var.endswith('_0')]:
                 self.collocator._par_vals[self.index[key]] =\
@@ -726,11 +751,14 @@ class MPC(object):
             self.consec_fails = 0
         else:
             if self._sample_nbr == 1:
-                raise Exception("The solver was unable to find a"+\
+                raise RuntimeError("The solver was unable to find a "+\
                                 "feasible solution.")
             self.consec_fails += 1
             if self.consec_fails >= self.options['n_e']:
                return None
+               raise RuntimeError("The solver has not found a feasible " +\
+                                    "solution for the last %2 samples" 
+                                    %self.consec_fails)
                 #THROW SOMETHING CAUSE THIS AINT WORKING!
         
         self.t0_post = time.clock()
@@ -744,10 +772,11 @@ class MPC(object):
             self._extract_results()
             self._append_to_result_file()
         self.inittraj_set = False
+        self.startTime_set = False
         self._add_times()
         return self._get_opt_input()
 
-    def extract_states_add_noise(self, sim_res, mean=0, st_dev=0.005):
+    def extract_states(self, sim_res, mean=0, st_dev=0.000):
         """
 		Extracts the last value of the states from a simulation result object 
         and adds a noise with mean and variance as defined.
@@ -765,16 +794,20 @@ class MPC(object):
             st_dev --
                 Factor to be multiplied with the nominal value of each state to
                 define the stanard deviation of the noise.
-                Default: 0.005
+                Default: 0.000
 		"""
 
         states = {}
         for name in self.state_names:
             states["_start_"+name] = sim_res[name][-1]
             val = N.abs(states["_start_"+name])
-            random = N.random.normal(mean, st_dev*val, 1)
+            if st_dev == 0 or val == 0:
+                random = 0 
+            else: 
+                random = N.random.normal(mean, st_dev*val, 1)
             states["_start_"+name] += random
         return states
+
 
     def get_results_this_sample(self, full_result=False):
         """
@@ -873,7 +906,7 @@ class MPC(object):
             self._set(name, value)
         else:
             if len(name) != len(value):
-                raise Exception('Must specify the same number of variables" +\
+                raise ValueError('Must specify the same number of variables" +\
                                 "and values')
             for i, val in enumerate(value):
                 self._set(name[i], val)
@@ -885,7 +918,26 @@ class MPC(object):
         """
         index = self.collocator.var_indices[name]
         self.collocator._par_vals[index] = value
-
+    
+    def set_start_time(self, startTime):
+        """
+        Sets the start time of the next sample to the specified time.
+        
+        Parameters::
+            startTime --
+                A float with the new startTime
+                
+                Type: float
+        """
+        self.collocator._par_vals[self.index['startTime']]= startTime
+        self.collocator._par_vals[self.index['finalTime']]= startTime+self.horizon_time
+        self.collocator.t0 = startTime
+        self.collocator.tf = startTime+self.horizon_time
+    
+        coll_time = self.collocator._compute_time_points()
+        self.collocator.time = N.array(coll_time)
+    
+        self.startTime_set_manually = True
     def print_solver_stats(self):
         """ 
         Prints the return status and number of iterations for each for each 

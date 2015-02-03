@@ -123,7 +123,7 @@ end CSTR_MPC_Model;
 optimization CSTR_MPC(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + (Tc_ref-Tc)^2,
     				startTime=0.0, finalTime=150)
 
-extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
+extends CSTR_MPC_Model(Tc(min=230, max=370, nominal=300), T(min=0, max=350, nominal=300), c(nominal=500));
 
 end CSTR_MPC;
 

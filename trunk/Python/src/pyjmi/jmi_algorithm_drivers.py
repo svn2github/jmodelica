@@ -1857,7 +1857,7 @@ class MPCAlgResult(JMResultBase):
 
               
         #Print times 
-        print("\nTotal time for %s samples (averege time in parenthesis)." 
+        print("\nTotal time for %s samples (average time in parenthesis)." 
                 %(nbr_samp))
         print("\nInitialization time: %.2f seconds" %times['init'])
         print("\nTotal time: %.2f seconds             (%.3f)" % (times['tot'], 

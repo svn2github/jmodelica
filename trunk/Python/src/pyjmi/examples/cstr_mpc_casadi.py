@@ -162,7 +162,7 @@ def run_demo(with_plots=True):
 
         # Extract state at end of sample_period from sim_res and add Gaussian
         # noise with mean 0 and standard deviation 0.005*(state_current_value)
-        x_k = MPC_object.extract_states_add_noise(sim_res)
+        x_k = MPC_object.extract_states(sim_res, mean=0, st_dev=0.005)
 
     # Extract variable profiles
     MPC_object.print_solver_stats()

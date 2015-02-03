@@ -63,7 +63,7 @@ def test_distillation4_opt():
     """Run the large istillation optimization example."""
     distillation4_opt.run_demo(False)
     
-@testattr(ma27 = True)
+@testattr(casadi = True)
 def test_cstr_mpc_casadi():
     """Run the cstr mpc optimization example."""
     cstr_mpc_casadi.run_demo(False)
