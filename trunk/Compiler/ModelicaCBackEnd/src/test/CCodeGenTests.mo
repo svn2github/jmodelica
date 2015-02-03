@@ -19619,14 +19619,14 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         int* ds_value_refs = calloc(2, sizeof(int));
         ds_value_refs[0] = 12;
         ds_value_refs[1] = 13;
-        jmi_dynamic_state_add_set(jmi, 0, 2, 1, ds_value_refs, ds_coefficients_0);
+        jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_value_refs, ds_coefficients_0);
         free(ds_value_refs);
     }
     {
         int* ds_value_refs = calloc(2, sizeof(int));
         ds_value_refs[0] = 10;
         ds_value_refs[1] = 11;
-        jmi_dynamic_state_add_set(jmi, 1, 2, 1, ds_value_refs, ds_coefficients_1);
+        jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_value_refs, ds_coefficients_1);
         free(ds_value_refs);
     }
 
