@@ -652,7 +652,7 @@ public class CGenerator extends GenericGenerator {
 			} else {
 				fclass.getDAEStructuredBLT().genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
+				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(ASTNode.printer_C, genPrinter, INDENT);
 			}
 		}
 	}
@@ -1202,6 +1202,52 @@ public class CGenerator extends GenericGenerator {
             ext.genSerializeMain_C(genPrinter, "");
         }
     }
+    /**
+     * C: Number of DAE dynamic state sets
+     */
+    public class DAETag_C_dynamic_state_n_sets extends DAETag {
+        
+        public DAETag_C_dynamic_state_n_sets(AbstractGenerator myGenerator, FClass fclass) {
+            super("dynamic_state_n_sets", myGenerator, fclass);
+        }
+
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.getDynamicStateManager().getNumSet());
+        }
+    }
+
+    /**
+     * C: Add the DAE block functions to the JMI struct
+     */
+    public class DAETag_C_dynamic_state_add_call extends DAETag {
+
+        public DAETag_C_dynamic_state_add_call(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_dynamic_state_add_call", myGenerator, fclass);
+            addOptions("generate_ode");
+        }
+
+        public void generate(CodeStream genPrinter) {
+            CodePrinter p = ASTNode.printer_C;
+            fclass.getDynamicStateManager().genDynamicStateAddCall_C(p, genPrinter, p.indent(""));
+        }
+    }
+
+    /**
+     * C: C functions for the DAE BLT block residuals
+     */
+    public class DAETag_C_dynamic_state_coefficients extends DAETag {
+        
+        public DAETag_C_dynamic_state_coefficients(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_dynamic_state_coefficients", myGenerator, fclass);
+            addOptions("generate_ode");
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            CodePrinter p = ASTNode.printer_C;
+            fclass.getDynamicStateManager().genDynamicStateCoefficients_C(p, genPrinter, "");
+        }
+    }
+
 }
 
 public class ExternCEvalGenerator extends CGenerator {

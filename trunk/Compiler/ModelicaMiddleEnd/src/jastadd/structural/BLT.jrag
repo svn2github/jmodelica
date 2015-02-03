@@ -1318,10 +1318,29 @@ aspect BLT{
 
     public class DynamicStateBlock extends AbstractEquationBlock {
         private Collection<DynamicStateBLT> subBLTs;
+        private Collection<DynamicStateSet> sets;
+        
+        private final int numVars;
+        private final int numStates;
+        private final int numAlgebraics;
 
-        public DynamicStateBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<DynamicStateBLT> subBLTs) {
+        public DynamicStateBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<DynamicStateSet> sets, Collection<DynamicStateBLT> subBLTs) {
             super(producer, blockDependency);
+            this.sets = sets;
             this.subBLTs = subBLTs;
+            int numVars = 0;
+            for (DynamicStateSet set : sets)
+                numVars += set.numVars();
+            this.numVars = numVars;
+            int numStates = 0;
+            for (DynamicStateSet set : sets)
+                numStates += set.numStates();
+            this.numStates = numStates;
+            int numAlgebraics = 0;
+            for (DynamicStateSet set : sets)
+                numAlgebraics += set.numAlgebraics();
+            this.numAlgebraics = numAlgebraics;
+
         }
 
         @Override
@@ -1427,6 +1446,18 @@ aspect BLT{
             for (DynamicStateBLT blt : subBLTs)
                 blt.errorCheck();
             
+        }
+
+        public int numVars() {
+            return numVars;
+        }
+
+        public int numStates() {
+            return numStates;
+        }
+
+        public int numAlgebraics() {
+            return numAlgebraics;
         }
     }
 

@@ -39,10 +39,22 @@ aspect DynamicStateSelect{
         return vars;
     }
 
+    syn lazy Map<FAbstractVariable, Integer> DynamicStateSet.varIndexMap() {
+        Map<FAbstractVariable, Integer> map = new HashMap<FAbstractVariable, Integer>();
+        FVariable[] vars = fVars();
+        for (int i = 0; i < numVars(); i++)
+            map.put(vars[i], i);
+        return map;
+    }
+
+    syn int DynamicStateSet.varIndex(FAbstractVariable var) = varIndexMap().get(var);
+
     syn Collection<FVariable> DynamicStateSet.fVarsColl() = Arrays.asList(fVars());
 
     syn DynamicStateSet FAbstractVariable.dynamicStateSet() = null;
     eq FVariable.dynamicStateSet() = myFClass().getDynamicStateManager().lookupSet(this);
+    
+    syn int FAbstractVariable.dynamicStateVarIndex() = dynamicStateSet().varIndex(this);
 
     syn boolean FAbstractVariable.isDynamicState() = dynamicStateSet() != null;
 
@@ -138,7 +150,7 @@ aspect DynamicStateSelect{
         return r;
     }
 
-    public FVariable[][] DynamicStateSet.combinations() {
+    syn lazy FVariable[][] DynamicStateSet.combinations() {
         Collection<FVariable[]> res = new ArrayList<FVariable[]>();
         genCombinations(res, numVars(), numAlgebraics(), fVars(), 0, 0, new FVariable[numAlgebraics()]);
         return res.toArray(new FVariable[res.size()][]);
@@ -196,15 +208,23 @@ aspect DynamicStateSelect{
                         coffList.add(new DynamicStateCoefficient(eqn, var, resSet.coefficients[eqn][var]));
                 }
             }
-            DynamicStateSet set = new DynamicStateSet(manager.nextId(), resSet.eqns.size(), varList, coffList);
-            manager.addSet(set);
-            for (int i = 0; i < set.numAlgebraics(); i++)
-                addFVariable(new FDynamicAlgebraicVariable(set, i));
+            DynamicStateSet set = new DynamicStateSet(manager.nextId(), resSet.eqns.size(), varList, coffList, null, null);
+            FDynamicAlgebraicVariable[] algebraicVars = new FDynamicAlgebraicVariable[set.numAlgebraics()];
+            for (int i = 0; i < set.numAlgebraics(); i++) {
+                FDynamicAlgebraicVariable var = new FDynamicAlgebraicVariable(set, i);
+                algebraicVars[i] = var;
+                addFVariable(var);
+            }
+            set.setAlgebraicVars(algebraicVars);
+            FDynamicStateVariable[] stateVars = new FDynamicStateVariable[set.numStates()];
             for (int i = 0; i < set.numStates(); i++) {
                 FDynamicStateVariable var = new FDynamicStateVariable(set, i);
+                stateVars[i] = var;
                 addFVariable(var);
                 addFEquation(new FEquation(new FDerExp(var.createFIdUse()), new FDSDerExp(set.id(), i)));
             }
+            set.setStateVars(stateVars);
+            manager.addSet(set);
         }
         enableDynamicStateRewrite();
     }
@@ -513,7 +533,7 @@ aspect DynamicStateSelect{
                 ASTNode.log.debug(blt);
                 blts.add(blt);
             }
-            return new DynamicStateBlock(producer, component.computeBlockDependency(), blts);
+            return new DynamicStateBlock(producer, component.computeBlockDependency(), setVarMap.keySet(), blts);
         }
     }
     

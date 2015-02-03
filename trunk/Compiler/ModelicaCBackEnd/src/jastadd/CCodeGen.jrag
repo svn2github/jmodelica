@@ -380,6 +380,46 @@ aspect CCodeGen {
 		}
 	}
 	
+    public void FDSRefExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        p.print(getOrg(), str, indent);
+    }
+
+    public void FDSDerExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(tempName_C());
+    }
+    
+    public void FDSDerExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        str.formatln("%sjmi_ad_var_t %s;", indent, tempName_C());
+    }
+    
+    public void FDSDerExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        boolean first = true;
+        String innerIndent = p.indent(indent);
+        for (FVariable[] combination : mySet().combinations()) {
+            if (first)
+                str.format("%sif (", indent);
+            else
+                str.format("%s} else if(", indent);
+            first = false;
+            DynamicStateSet previousSet = null;
+            for (FVariable var : combination) {
+                DynamicStateSet set = var.dynamicStateSet();
+                if (set != previousSet) {
+                    if (previousSet != null)
+                        str.print(") && ");
+                    previousSet = set;
+                    str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
+                }
+                str.format(", %d", var.valueReference());
+            }
+            str.println(")) {");
+            str.format("%s%s = ", innerIndent, tempName_C());
+            p.print(getUse(combination[getNumber()].dynamicStateVarIndex()), str, indent);
+            str.println(";");
+        }
+        str.formatln("%s}", indent);
+    }
+    
 	inh boolean FIdUse.isAssignUse();
 	eq InstNode.getChild().isAssignUse()          = false;
 	eq FClass.getChild().isAssignUse()            = false;
@@ -3137,7 +3177,7 @@ aspect CCodeGen {
     
     
     public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
-        if (getLabel() == null)
+        if (!hasResidualFunction_C())
             return;
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
             subBlock.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
@@ -3233,6 +3273,11 @@ aspect CCodeGen {
         str.print(outerIndent + "}\n\n");
     }
 
+    public void DynamicStateBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
+        for (DynamicStateBLT blt : subBLTs)
+            for (AbstractEquationBlock block : blt)
+                block.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
+    }
     /*
      * Various dispatch methods used in genBlockResidualFunction_C():
      */
@@ -3590,9 +3635,17 @@ aspect CCodeGen {
         str.format("%sfree(Q1);\n", indent);
         str.format("%sfree(Q2);\n", indent);
     }
-    
+
+    public boolean AbstractEquationBlock.hasResidualFunction_C() {
+        return getLabel() != null;
+    }
+
+    public boolean DynamicStateBlock.hasResidualFunction_C() {
+        return false;
+    }
+
 	public void AbstractEquationBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
-		if (getLabel() == null)
+		if (!hasResidualFunction_C())
 			return;
 		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
 			subBlock.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver, getSequenceNumber());
@@ -3616,7 +3669,13 @@ aspect CCodeGen {
 		str.print(getLabel() + "\", ");
 		str.print(parentBlockNumber + ");\n");
 	}
-	
+
+    public void DynamicStateBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
+        for (DynamicStateBLT blt : subBLTs)
+            for (AbstractEquationBlock block : blt)
+                block.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver, parentBlockNumber);
+    }
+
 	syn String FTypePrefixVariability.genJMIVariabilityConstant_C();
 	eq FParameter.genJMIVariabilityConstant_C() = "JMI_PARAMETER_VARIABILITY";
 	eq FDiscrete.genJMIVariabilityConstant_C() = "JMI_DISCRETE_VARIABILITY";
@@ -3769,7 +3828,10 @@ aspect CCodeGen {
     /**
      * Generate code for blocks of equations 
      */
-    public void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+    public abstract void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial);
+
+    @Override
+    public void EquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         genBlockBase_C(p, str, indent, inInitial);
     }
 
@@ -3790,12 +3852,69 @@ aspect CCodeGen {
         ASTNode.printer_C.printPostSteps(equation(), str, indent);
     }
     
-     public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
-     public boolean SolvedScalarEquationBlock.genBlockEnabled()       { return true; }
-     public boolean SolvedAlgorithmBlock.genBlockEnabled()            { return true; }
-     public boolean SolvedFunctionCallEquationBlock.genBlockEnabled() { return true; }
-     public boolean SolvedIfEquationBlock.genBlockEnabled()           { return true; }
-    
+    public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
+    public boolean SolvedScalarEquationBlock.genBlockEnabled()       { return true; }
+    public boolean SolvedAlgorithmBlock.genBlockEnabled()            { return true; }
+    public boolean SolvedFunctionCallEquationBlock.genBlockEnabled() { return true; }
+    public boolean SolvedIfEquationBlock.genBlockEnabled()           { return true; }
+
+    @Override
+    public void DynamicStateBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        String innerIndent = p.indent(indent);
+        for (DynamicStateSet set : sets) {
+            str.formatln("%sif (jmi->atInitial || jmi->atEvent) {", indent);
+            str.formatln("%sjmi_dynamic_state_update_states(jmi, %d);", innerIndent, set.id_C());
+            str.formatln("%s}", indent);
+        }
+        boolean first = true;
+        for (DynamicStateBLT blt : subBLTs) {
+            if (first)
+                str.format("%sif (", indent);
+            else
+                str.format("%s} else if(", indent);
+            first = false;
+            DynamicStateSet previousSet = null;
+            for (FVariable var : blt.states()) {
+                DynamicStateSet set = var.dynamicStateSet();
+                if (set != previousSet) {
+                    if (previousSet != null)
+                        str.print(") && ");
+                    previousSet = set;
+                    str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
+                }
+                str.format(", %d", var.valueReference());
+            }
+            str.println(")) {");
+            blt.genVarDecls_C(p, str, innerIndent);
+            DynamicStateSet lastSet = null;
+            int i = 0;
+            for (FVariable state : blt.states()) {
+                DynamicStateSet set = state.dynamicStateSet();
+                if (lastSet != set) {
+                    i = 0;
+                    lastSet = set;
+                } else {
+                    i++;
+                }
+                str.formatln("%s%s = %s;", innerIndent, state.name_C(), set.getStateVars()[i].name_C());
+            }
+            blt.genOdeDerivativeBlocks(p, str, innerIndent);
+            lastSet = null;
+            i = 0;
+            for (FVariable algebraic : blt.algebraics()) {
+                DynamicStateSet set = algebraic.dynamicStateSet();
+                if (lastSet != set) {
+                    i = 0;
+                    lastSet = set;
+                } else {
+                    i++;
+                }
+                str.formatln("%s%s = %s;", innerIndent, set.getAlgebraicVars()[i].name_C(), algebraic.name_C());
+            }
+        }
+        str.formatln("%s}", indent);
+    }
+ 
     /**
      * Generate block code for equations
      * 
@@ -4620,9 +4739,9 @@ aspect CCodeGen {
 		// Skip string variables
 	}
 	
-	public void BLT.genOdeDerivativeBlocks(CodeStream str) {
+	public void BLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
 		for (AbstractEquationBlock block : this) {
-			block.genBlock_C(ASTNode.printer_C, str, ASTNode.printer_C.indent(""), false); 
+			block.genBlock_C(p, str, indent, false); 
 		}
 	}
 	
@@ -4637,27 +4756,25 @@ aspect CCodeGen {
 		}
 	}
 
-	public void StructuredBLT.genOdeDerivativeBlocks(CodeStream str) {
-	    CodePrinter p = ASTNode.printer_C;
-	    String indent = p.indent("");
-		str.print("/************* ODE section *********/\n");
+	public void StructuredBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
+		str.formatln("%s/************* ODE section *********/", indent);
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
 			eb.genBlock_C(p, str, indent, false);
 		}
-		str.print("/************ Real outputs *********/\n");
+		str.formatln("%s/************ Real outputs *********/", indent);
 		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
 			eb.genBlock_C(p, str, indent, false);
 		}
-		str.print("/****Integer and boolean outputs ***/\n");
+		str.formatln("%s/****Integer and boolean outputs ***/", indent);
 		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
 			eb.genBlock_C(p, str, indent, false);
 		}
-		str.print("/**** Other variables ***/\n");
+		str.formatln("%s/**** Other variables ***/", indent);
 		for (AbstractEquationBlock eb : getOtherBlocks()) {
 			eb.genBlock_C(p, str, indent, false);
 		}
-        str.print("/********* Write back reinits *******/\n");
+        str.formatln("%s/********* Write back reinits *******/", indent);
         for (AbstractEquationBlock eb : getAllBlocks()) {
             eb.genReinitWritebacks_C(p, indent, str);
         }
@@ -4933,5 +5050,58 @@ aspect Serialize {
         buf.append('_');
         buf.append(type().isArray() ? C_SUFFIX_ARRAY : C_SUFFIX_VARIABLE);
         return buf.toString();
+    }
+
+    syn int DynamicStateSet.id_C() = id();
+
+    public void DynamicStateSet.genDSCoefficientsFuncName_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("ds_coefficients");
+        str.format("_%d", id_C());
+    }
+
+    public void DynamicStateManager.genDynamicStateAddCall_C(CodePrinter p, CodeStream str, String indent) {
+        for (DynamicStateSet set : getSets())
+            set.genDynamicStateAddCall_C(p, str, indent);
+    }
+
+    public void DynamicStateSet.genDynamicStateAddCall_C(CodePrinter p, CodeStream str, String indent) {
+        str.formatln("%s{", indent);
+        String innerIndent = p.indent(indent);
+        str.formatln("%sint* ds_value_refs = calloc(%d, sizeof(int));", innerIndent, numVars());
+        int i = 0;
+        for (FVariable var : fVars()) {
+            str.formatln("%sds_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            i++;
+        }
+        str.format("%sjmi_dynamic_state_add_set(%d, %s, %s, ds_value_refs, ", innerIndent, id_C(), numVars(), numStates());
+        genDSCoefficientsFuncName_C(p, str, indent);
+        str.println(");");
+        str.formatln("%sfree(ds_value_refs);", innerIndent);
+        str.formatln("%s}", indent);
+    }
+
+    public void DynamicStateManager.genDynamicStateCoefficients_C(CodePrinter p, CodeStream str, String indent) {
+        for (DynamicStateSet set : getSets())
+            set.genDynamicStateCoefficients_C(p, str, indent);
+    }
+
+    public void DynamicStateSet.genDynamicStateCoefficients_C(CodePrinter p, CodeStream str, String outerIndent) {
+        str.format("%sstatic void ", outerIndent);
+        String indent = p.indent(outerIndent);
+        genDSCoefficientsFuncName_C(p, str, indent);
+        str.println("(jmi_t* jmi, jmi_real_t* res) {");
+        for (DynamicStateCoefficient coff : getCoefficients())
+            p.printVarDecls(coff, str, indent);
+        str.format("%smemset(res, 0, %d * sizeof(jmi_real_t));\n", indent, numAlgebraics() * numVars());
+        for (DynamicStateCoefficient coff : getCoefficients()) {
+            p.printPreSteps(coff, str, indent);
+            str.format("%sres[%d] = ", indent, coff.getEquation() * numAlgebraics() + coff.getVariable());
+            p.print(coff, str, indent);
+            str.println(";");
+            p.printPostSteps(coff, str, indent);
+        }
+        
+        str.formatln("%s}", outerIndent);
+        str.println();
     }
 }

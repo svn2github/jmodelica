@@ -903,7 +903,7 @@ aspect CADCodeGen {
      * @param str          Output stream
      */
     public void AbstractEquationBlock.genBlockResidualFunction_CAD(boolean inInitial, String outerIndent, CodeStream str) {
-        if (getLabel() == null)
+        if (!hasResidualFunction_C())
             return;
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
             subBlock.genBlockResidualFunction_CAD(inInitial, outerIndent, str);
