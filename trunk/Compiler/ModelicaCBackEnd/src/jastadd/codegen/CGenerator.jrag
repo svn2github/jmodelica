@@ -1202,19 +1202,6 @@ public class CGenerator extends GenericGenerator {
             ext.genSerializeMain_C(genPrinter, "");
         }
     }
-    /**
-     * C: Number of DAE dynamic state sets
-     */
-    public class DAETag_C_dynamic_state_n_sets extends DAETag {
-        
-        public DAETag_C_dynamic_state_n_sets(AbstractGenerator myGenerator, FClass fclass) {
-            super("dynamic_state_n_sets", myGenerator, fclass);
-        }
-
-        public void generate(CodeStream genPrinter) {
-            genPrinter.print(fclass.getDynamicStateManager().getNumSet());
-        }
-    }
 
     /**
      * C: Add the DAE block functions to the JMI struct

@@ -5073,7 +5073,7 @@ aspect Serialize {
             str.formatln("%sds_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
             i++;
         }
-        str.format("%sjmi_dynamic_state_add_set(%d, %s, %s, ds_value_refs, ", innerIndent, id_C(), numVars(), numStates());
+        str.format("%sjmi_dynamic_state_add_set(jmi, %d, %d, %d, ds_value_refs, ", innerIndent, id_C(), numVars(), numStates());
         genDSCoefficientsFuncName_C(p, str, indent);
         str.println(");");
         str.formatln("%sfree(ds_value_refs);", innerIndent);

@@ -1009,6 +1009,19 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+    /**
+     * C: Number of DAE dynamic state sets
+     */
+    public class DAETag_dynamic_state_n_sets extends DAETag {
+        
+        public DAETag_dynamic_state_n_sets(AbstractGenerator myGenerator, FClass fclass) {
+            super("dynamic_state_n_sets", myGenerator, fclass);
+        }
+
+        public void generate(CodeStream genPrinter) {
+            genPrinter.print(fclass.getDynamicStateManager().getNumSet());
+        }
+    }
 	/**
 	 * Constructor.
 	 * 
