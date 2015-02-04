@@ -38,7 +38,7 @@ struct jmi_dynamic_state_set_t {
     jmi_dynamic_state_coefficents_func_t coefficents;
 };
 
-int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* value_references, jmi_dynamic_state_coefficents_func_t coefficents);
+int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* variable_value_references, int* state_value_references, int* algebraic_value_references, jmi_dynamic_state_coefficents_func_t coefficents);
 
 int jmi_dynamic_state_check_is_state(jmi_t* jmi, int index, int* value_references);
 

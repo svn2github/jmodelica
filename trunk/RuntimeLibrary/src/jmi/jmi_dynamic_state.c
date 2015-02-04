@@ -25,7 +25,7 @@
 #include "jmi_util.h"
 #include "jmi_dynamic_state.h"
 
-int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* value_references, jmi_dynamic_state_coefficents_func_t coefficents) {
+int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* variable_value_references, int* state_value_references, int* algebraic_value_references, jmi_dynamic_state_coefficents_func_t coefficents);
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index];
     int i = 0;
     
@@ -36,11 +36,11 @@ int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_stat
     set->coefficents = coefficents;
     
     for (i = 0; i < n_variables; i++) {
-        set->variables_value_references[i] = value_references[i];
+        set->variables_value_references[i] = variable_value_references[i];
     }
     /* As default, choose the first variables to the states */
     for (i = 0; i < n_states; i++) {
-        set->state_value_references[i] = value_references[i];
+        set->state_value_references[i] = variable_value_references[i];
     }
     
     return JMI_OK;

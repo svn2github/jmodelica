@@ -19615,19 +19615,31 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
 }
 
 
-    {
-        int* ds_value_refs = calloc(2, sizeof(int));
-        ds_value_refs[0] = 12;
-        ds_value_refs[1] = 13;
-        jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_value_refs, ds_coefficients_0);
-        free(ds_value_refs);
+   {
+        int* ds_var_value_refs = calloc(2, sizeof(int));
+        int* ds_state_value_refs = calloc(1, sizeof(int));
+        int* ds_algebraic_value_refs = calloc(1, sizeof(int));
+        ds_var_value_refs[0] = 12;
+        ds_var_value_refs[1] = 13;
+        ds_state_value_refs[0] = 8;
+        ds_algebraic_value_refs[0] = 19;
+        jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
+        free(ds_var_value_refs);
+        free(ds_state_value_refs);
+        free(ds_algebraic_value_refs);
     }
     {
-        int* ds_value_refs = calloc(2, sizeof(int));
-        ds_value_refs[0] = 10;
-        ds_value_refs[1] = 11;
-        jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_value_refs, ds_coefficients_1);
-        free(ds_value_refs);
+        int* ds_var_value_refs = calloc(2, sizeof(int));
+        int* ds_state_value_refs = calloc(1, sizeof(int));
+        int* ds_algebraic_value_refs = calloc(1, sizeof(int));
+        ds_var_value_refs[0] = 10;
+        ds_var_value_refs[1] = 11;
+        ds_state_value_refs[0] = 9;
+        ds_algebraic_value_refs[0] = 20;
+        jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_1);
+        free(ds_var_value_refs);
+        free(ds_state_value_refs);
+        free(ds_algebraic_value_refs);
     }
 
     jmi_ad_var_t tmp_1;

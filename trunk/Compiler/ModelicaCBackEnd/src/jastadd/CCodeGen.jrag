@@ -5067,16 +5067,30 @@ aspect Serialize {
     public void DynamicStateSet.genDynamicStateAddCall_C(CodePrinter p, CodeStream str, String indent) {
         str.formatln("%s{", indent);
         String innerIndent = p.indent(indent);
-        str.formatln("%sint* ds_value_refs = calloc(%d, sizeof(int));", innerIndent, numVars());
+        str.formatln("%sint* ds_var_value_refs = calloc(%d, sizeof(int));", innerIndent, numVars());
+        str.formatln("%sint* ds_state_value_refs = calloc(%d, sizeof(int));", innerIndent, numStates());
+        str.formatln("%sint* ds_algebraic_value_refs = calloc(%d, sizeof(int));", innerIndent, numAlgebraics());
         int i = 0;
         for (FVariable var : fVars()) {
-            str.formatln("%sds_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            str.formatln("%sds_var_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
             i++;
         }
-        str.format("%sjmi_dynamic_state_add_set(*jmi, %d, %d, %d, ds_value_refs, ", innerIndent, id_C(), numVars(), numStates());
+        i = 0;
+        for (FVariable var : getStateVars()) {
+            str.formatln("%sds_state_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            i++;
+        }
+        i = 0;
+        for (FVariable var : getAlgebraicVars()) {
+            str.formatln("%sds_algebraic_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            i++;
+        }
+        str.format("%sjmi_dynamic_state_add_set(*jmi, %d, %d, %d, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ", innerIndent, id_C(), numVars(), numStates());
         genDSCoefficientsFuncName_C(p, str, indent);
         str.println(");");
-        str.formatln("%sfree(ds_value_refs);", innerIndent);
+        str.formatln("%sfree(ds_var_value_refs);", innerIndent);
+        str.formatln("%sfree(ds_state_value_refs);", innerIndent);
+        str.formatln("%sfree(ds_algebraic_value_refs);", innerIndent);
         str.formatln("%s}", indent);
     }
 
