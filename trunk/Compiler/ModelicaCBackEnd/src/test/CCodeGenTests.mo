@@ -19575,6 +19575,106 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 end SpatialDist2;
 
     package DynamicStates
+    
+        model ThreeDSOneEq
+            // a1 a2 a3
+            // +  +  +
+            Real a1;
+            Real a2;
+            Real a3;
+            Real b;
+        equation
+            der(a1) = b;
+            der(a2) = b;
+            der(a3) = b;
+            a1 * a2 * a3 = 1;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="DynamicStates_ThreeDSOneEq",
+            description="Test code gen for dynamic state model with three states in and one equation",
+            dynamic_states=true,
+            template="
+n_real_x = $n_real_x$
+n_dynamic_sets = $dynamic_state_n_sets$
+$C_dynamic_state_coefficients$
+$C_dynamic_state_add_call$
+$C_ode_derivatives$
+",
+            generatedCode="
+n_real_x = 2
+n_dynamic_sets = 1
+static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
+    memset(res, 0, 3 * sizeof(jmi_real_t));
+    res[0] = _a1_0 * _a2_1;
+    res[1] = _a1_0 * _a3_2;
+    res[2] = _a2_1 * _a3_2;
+}
+
+
+    {
+        int* ds_var_value_refs = calloc(3, sizeof(int));
+        int* ds_state_value_refs = calloc(2, sizeof(int));
+        int* ds_algebraic_value_refs = calloc(1, sizeof(int));
+        ds_var_value_refs[0] = 9; /* a3 */
+        ds_var_value_refs[1] = 8; /* a2 */
+        ds_var_value_refs[2] = 7; /* a1 */
+        ds_state_value_refs[0] = 5; /* _ds.0.s0 */
+        ds_state_value_refs[1] = 6; /* _ds.0.s1 */
+        ds_algebraic_value_refs[0] = 11; /* _ds.0.a0 */
+        jmi_dynamic_state_add_set(*jmi, 0, 3, 2, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
+        free(ds_var_value_refs);
+        free(ds_state_value_refs);
+        free(ds_algebraic_value_refs);
+    }
+
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    model_ode_guards(jmi);
+    /************* ODE section *********/
+    if (jmi->atInitial || jmi->atEvent) {
+        jmi_dynamic_state_update_states(jmi, 0);
+    }
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 8, 7)) {
+        _a2_1 = __ds_0_s0_5;
+        _a1_0 = __ds_0_s1_6;
+        _a3_2 = jmi_divide_equation(jmi, 1,(_a1_0 * _a2_1),\"1 / (ds(0, a1) * ds(0, a2))\");
+        __ds_0_a0_4 = _a3_2;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 7)) {
+        _a3_2 = __ds_0_s0_5;
+        _a1_0 = __ds_0_s1_6;
+        _a2_1 = jmi_divide_equation(jmi, 1,(_a1_0 * _a3_2),\"1 / (ds(0, a1) * ds(0, a3))\");
+        __ds_0_a0_4 = _a2_1;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 8)) {
+        _a3_2 = __ds_0_s0_5;
+        _a2_1 = __ds_0_s1_6;
+        _a1_0 = jmi_divide_equation(jmi, 1,(_a2_1 * _a3_2),\"1 / (ds(0, a2) * ds(0, a3))\");
+        __ds_0_a0_4 = _a1_0;
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 8, 7)) {
+        tmp_1 = _der_a2_10;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 7)) {
+        tmp_1 = _der_a3_11;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 8)) {
+        tmp_1 = _der_a3_11;
+    }
+    _der__ds_0_s0_7 = tmp_1;
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 8, 7)) {
+        tmp_2 = _der_a1_9;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 7)) {
+        tmp_2 = _der_a1_9;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 8)) {
+        tmp_2 = _der_a2_10;
+    }
+    _der__ds_0_s1_8 = tmp_2;
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    /********* Write back reinits *******/
+
+")})));
+        end ThreeDSOneEq;
+            
         model Pendulum
             parameter Real L = 1 "Pendulum length";
             parameter Real g = 9.81 "Acceleration due to gravity";
@@ -19621,10 +19721,10 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         int* ds_var_value_refs = calloc(2, sizeof(int));
         int* ds_state_value_refs = calloc(1, sizeof(int));
         int* ds_algebraic_value_refs = calloc(1, sizeof(int));
-        ds_var_value_refs[0] = 17;
-        ds_var_value_refs[1] = 18;
-        ds_state_value_refs[0] = 8;
-        ds_algebraic_value_refs[0] = 19;
+        ds_var_value_refs[0] = 17; /* _der_x */
+        ds_var_value_refs[1] = 18; /* _der_y */
+        ds_state_value_refs[0] = 8; /* _ds.0.s0 */
+        ds_algebraic_value_refs[0] = 19; /* _ds.0.a0 */
         jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -19634,10 +19734,10 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         int* ds_var_value_refs = calloc(2, sizeof(int));
         int* ds_state_value_refs = calloc(1, sizeof(int));
         int* ds_algebraic_value_refs = calloc(1, sizeof(int));
-        ds_var_value_refs[0] = 10;
-        ds_var_value_refs[1] = 11;
-        ds_state_value_refs[0] = 9;
-        ds_algebraic_value_refs[0] = 20;
+        ds_var_value_refs[0] = 10; /* x */
+        ds_var_value_refs[1] = 11; /* y */
+        ds_state_value_refs[0] = 9; /* _ds.1.s0 */
+        ds_algebraic_value_refs[0] = 20; /* _ds.1.a0 */
         jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_1);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -19677,16 +19777,16 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         __ds_0_a0_11 = __der_y_10;
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 17)) {
-        tmp_1 = _der__der_x_19;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 18)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 18)) {
         tmp_1 = _der__der_y_20;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 17)) {
+        tmp_1 = _der__der_x_19;
     }
     _der__ds_0_s0_15 = tmp_1;
-    if (jmi_dynamic_state_check_is_state(jmi, 1, 10)) {
-        tmp_2 = _der_x_17;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 11)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 1, 11)) {
         tmp_2 = _der_y_18;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 10)) {
+        tmp_2 = _der_x_17;
     }
     _der__ds_1_s0_16 = tmp_2;
     /************ Real outputs *********/

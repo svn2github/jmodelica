@@ -395,23 +395,15 @@ aspect CCodeGen {
     public void FDSDerExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         boolean first = true;
         String innerIndent = p.indent(indent);
-        for (FVariable[] combination : mySet().combinations()) {
+        for (FVariable[] combination : mySet().stateCombinations()) {
             if (first)
                 str.format("%sif (", indent);
             else
                 str.format("%s} else if(", indent);
             first = false;
-            DynamicStateSet previousSet = null;
-            for (FVariable var : combination) {
-                DynamicStateSet set = var.dynamicStateSet();
-                if (set != previousSet) {
-                    if (previousSet != null)
-                        str.print(") && ");
-                    previousSet = set;
-                    str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
-                }
+            str.format("jmi_dynamic_state_check_is_state(jmi, %d", mySet().id_C());
+            for (FVariable var : combination)
                 str.format(", %d", var.valueReference());
-            }
             str.println(")) {");
             str.format("%s%s = ", innerIndent, tempName_C());
             p.print(getUse(combination[getNumber()].dynamicStateVarIndex()), str, indent);
@@ -5072,17 +5064,17 @@ aspect Serialize {
         str.formatln("%sint* ds_algebraic_value_refs = calloc(%d, sizeof(int));", innerIndent, numAlgebraics());
         int i = 0;
         for (FVariable var : fVars()) {
-            str.formatln("%sds_var_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            str.formatln("%sds_var_value_refs[%d] = %d; /* %s */", innerIndent, i, var.valueReference(), var.name());
             i++;
         }
         i = 0;
         for (FVariable var : getStateVars()) {
-            str.formatln("%sds_state_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            str.formatln("%sds_state_value_refs[%d] = %d; /* %s */", innerIndent, i, var.valueReference(), var.name());
             i++;
         }
         i = 0;
         for (FVariable var : getAlgebraicVars()) {
-            str.formatln("%sds_algebraic_value_refs[%d] = %d;", innerIndent, i, var.valueReference());
+            str.formatln("%sds_algebraic_value_refs[%d] = %d; /* %s */", innerIndent, i, var.valueReference(), var.name());
             i++;
         }
         str.format("%sjmi_dynamic_state_add_set(*jmi, %d, %d, %d, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ", innerIndent, id_C(), numVars(), numStates());

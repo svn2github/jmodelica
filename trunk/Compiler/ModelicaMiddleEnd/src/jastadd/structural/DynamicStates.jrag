@@ -150,7 +150,7 @@ aspect DynamicStateSelect{
         return r;
     }
 
-    syn lazy FVariable[][] DynamicStateSet.combinations() {
+    syn lazy FVariable[][] DynamicStateSet.algebraicCombinations() {
         Collection<FVariable[]> res = new ArrayList<FVariable[]>();
         genCombinations(res, numVars(), numAlgebraics(), fVars(), 0, 0, new FVariable[numAlgebraics()]);
         return res.toArray(new FVariable[res.size()][]);
@@ -167,6 +167,22 @@ aspect DynamicStateSelect{
                 genCombinations(res, n, k, vars, i + 1, index + 1, current);
             }
         }
+    }
+    
+    syn lazy FVariable[][] DynamicStateSet.stateCombinations() {
+        FVariable[][] algCombs = algebraicCombinations();
+        FVariable[][] res = new FVariable[algCombs.length][];
+        for (int i = 0; i < res.length; i++) {
+            int j = 0;
+            res[i] = new FVariable[numStates()];
+            Set<FVariable> algs = new HashSet<FVariable>();
+            for (FVariable alg : algCombs[i])
+                algs.add(alg);
+            for (FVariable var : fVars())
+                if (!algs.contains(var))
+                    res[i][j++] = var;
+        }
+        return res;
     }
 
     private static FVariable[][] EquationBlockFactory.combineDSCombinations(FVariable[][][] sets, int totalNumVars) {
@@ -495,7 +511,7 @@ aspect DynamicStateSelect{
                     sb.append(set);
                     throw new BLTException(sb.toString());
                 }
-                setCombinations[setCounter] = set.combinations();
+                setCombinations[setCounter] = set.algebraicCombinations();
                 allDynamicStates.addAll(set.fVarsColl());
                 totalNumAlgebraics += set.numAlgebraics();
                 setCounter++;
