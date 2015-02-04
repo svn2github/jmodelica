@@ -312,6 +312,8 @@
 #define JMI_NON_REALS_CHANGED              -2
 #define JMI_SWITCHES_CHANGED               -3
 
+#define JMI_UPDATE_STATES    1
+
  typedef enum {
      JMI_ODE_CVODE,
      JMI_ODE_EULER

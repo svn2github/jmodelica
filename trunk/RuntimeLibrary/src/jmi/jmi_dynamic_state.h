@@ -27,20 +27,33 @@
 
 #include "jmi_types.h"
 
-typedef int (*jmi_dynamic_state_coefficents_func_t)(jmi_t* jmi, jmi_real_t* x,
-        jmi_real_t* residual);
+typedef int (*jmi_dynamic_state_coefficents_func_t)(jmi_t* jmi, jmi_real_t* residual);
 
 struct jmi_dynamic_state_set_t {
-    int n_variables;
-    int n_states;
-    int *variables_value_references;
-    int *state_value_references;
+    jmi_int_t n_variables;
+    jmi_int_t n_states;
+    jmi_int_t *variables_value_references;
+    jmi_int_t *state_value_references;
+    jmi_int_t *ds_state_value_references;
+    jmi_int_t *algebraic_value_references;
+    jmi_int_t *ds_algebraic_value_references;
+    jmi_int_t *temp_algebraic;
+    jmi_real_t *temp;
     jmi_dynamic_state_coefficents_func_t coefficents;
 };
 
-int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* variable_value_references, int* state_value_references, int* algebraic_value_references, jmi_dynamic_state_coefficents_func_t coefficents);
+int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set);
 
-int jmi_dynamic_state_check_is_state(jmi_t* jmi, int index, int* value_references);
+int jmi_dynamic_state_update_states(jmi_t* jmi, jmi_int_t index_set);
+
+int jmi_dynamic_state_verify_choice(jmi_t* jmi);
+
+int jmi_dynamic_state_delete_set(jmi_t* jmi, jmi_int_t index);
+
+/* int jmi_dynamic_state_add_set(jmi_t* jmi, jmi_int_t index_set, jmi_int_t n_variables, jmi_int_t n_states, jmi_int_t* value_references, jmi_dynamic_state_coefficents_func_t coefficents); */
+int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* variable_value_references, int* state_value_references, int* algebraic_value_references, jmi_dynamic_state_coefficents_func_t coefficents); 
+
+int jmi_dynamic_state_check_is_state(jmi_t* jmi, jmi_int_t index_set, ...);
 
 
 #endif /* _JMI_DYNAMIC_STATE_H */

@@ -1239,6 +1239,7 @@ struct jmi_t {
     jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
+    jmi_int_t updated_states;            /**< \brief Flag indicating if the dynamic set of states has been updated. */
 
 
     jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */

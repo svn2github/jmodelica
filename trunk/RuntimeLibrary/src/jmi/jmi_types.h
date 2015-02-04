@@ -38,6 +38,7 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
                < Library. */
 
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#define JMI_ABS(X)   ((X) < (0) ? (-1*X) : (X))
 
 /* Max allowed length of strings */
 #define JMI_STR_MAX 16 * 1024 - 1

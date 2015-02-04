@@ -19,6 +19,7 @@
 
 #include "jmi_me.h"
 #include "jmi_delay.h"
+#include "jmi_dynamic_state.h"
 
 #define indexmask  0x07FFFFFF
 #define negatemask 0x08000000
@@ -691,6 +692,7 @@ int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx) {
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     int retval = 0;
     jmi_log_node_t node;
+    *triggered_event = JMI_FALSE;
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         node = jmi_log_enter_fmt(jmi->log, logInfo, "CompletedIntegratorStep", 
@@ -713,12 +715,18 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     /* Block completed step */
     /* jmi_block_completed_integrator_step(jmi); */
     
+    /* Verify the choice of dynamic states */
+    retval = jmi_dynamic_state_verify_choice(jmi);
+    if (retval == JMI_UPDATE_STATES) { /*Bad choice, needs to be updated */
+        *triggered_event = JMI_TRUE;
+    }
+    
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         jmi_log_leave(jmi->log, node);
     }
 
-    *triggered_event = JMI_FALSE;
-    return retval;
+    
+    return 0;
 }
 
 int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
@@ -1025,6 +1033,11 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         && ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) &&
         event_info->iteration_converged == TRUE) {
         return jmi_event_iteration(jmi, intermediate_results, event_info);
+    }
+    
+    if (jmi->updated_states == JMI_TRUE) {
+        event_info->state_values_changed = TRUE;
+        jmi->updated_states = JMI_FALSE;
     }
     
     return 0;

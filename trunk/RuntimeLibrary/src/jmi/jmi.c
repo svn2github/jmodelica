@@ -220,6 +220,7 @@ int jmi_init(jmi_t** jmi,
     }
     jmi_->n_dynamic_state_sets = n_dynamic_state_sets;
     jmi_->dynamic_state_sets = (jmi_dynamic_state_set_t*)calloc(n_dynamic_state_sets,sizeof(jmi_dynamic_state_set_t));
+    jmi_->updated_states = JMI_FALSE;
 
     jmi_->scaling_method = scaling_method;
 
@@ -293,6 +294,10 @@ int jmi_delete(jmi_t* jmi){
         jmi_delete_block_residual(jmi->dae_block_residuals[i]);
     }
         free(jmi->dae_block_residuals);
+    
+    for (i=0; i < jmi->n_dynamic_state_sets; i++) {
+        jmi_dynamic_state_delete_set(jmi, i);
+    }
 
     free(jmi->output_vrefs);
     free(*(jmi->z));
