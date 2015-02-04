@@ -331,7 +331,6 @@ class MPC(object):
         """
         self._set_blocking_options()
         self._calculate_nbr_values_sample()
-        self.extra_init = time.clock() - self._startTime
         self.alg = LocalDAECollocationAlg(self.op, self.options)
         self.collocator = self.alg.nlp
         self._get_states_and_initial_value_parameters()
@@ -473,11 +472,11 @@ class MPC(object):
         Adds each samples times to the total times. Also keeps track of the 
         largest total time for one sample. 
         """
-        sol_time = self.alg.times['sol']
-        update_time = self.alg.times['init']
+        sol_time = self.collocator.times['sol']
+        update_time = self.collocator.times['init'] 
         if self.status == 'Solve_Succeeded' or self.status ==\
                                                 'Solved_To_Acceptable_Level':
-            post_time = self.alg.times['post_processing']
+            post_time = self.collocator.times['post_processing']
         else:
             post_time = 0
         self.times['update'] += update_time
@@ -540,6 +539,7 @@ class MPC(object):
         Shifts the result from the previous optimation and gives it as initial 
         guess for the next optimation.
         """
+
         xx_result = {}
         if self.status == 'Solve_Succeeded' or self.status ==\
                                                 'Solved_To_Acceptable_Level': 
@@ -663,7 +663,7 @@ class MPC(object):
                 Default: None 
         """  
         # Update times and sample number
-        self.alg._t0 = time.clock()
+        self._t0 = time.clock()
         self._sample_nbr+=1
 
         # Check the type of sim_res and do accordingly
@@ -740,13 +740,15 @@ class MPC(object):
                                             ('_du_bounds')[0]]
      
         # Solve the NLP
-        self.alg.solve()
+        self.collocator.times['init'] = time.clock() - self._t0    
+        self.collocator.solve_and_write_result()
         
         # Check return status
         self.status = self.collocator.solver_object.getStat('return_status')
         if self.status == 'Solve_Succeeded' or self.status ==\
                                                 'Solved_To_Acceptable_Level': 
-            self._result_object = self.alg.get_result()
+
+            self._result_object = self.collocator.get_result_object()
             self.result = self.collocator.get_result()
             self.consec_fails = 0
         else:
@@ -937,7 +939,7 @@ class MPC(object):
         coll_time = self.collocator._compute_time_points()
         self.collocator.time = N.array(coll_time)
     
-        self.startTime_set_manually = True
+        self.startTime_set = True
     def print_solver_stats(self):
         """ 
         Prints the return status and number of iterations for each for each 

@@ -542,6 +542,7 @@ class CasadiCollocator(object):
                 Duration (seconds) of call to nonlinear programming solver.
                 Type: float
         """
+        init = time.clock()
         # Initialize solver
         if self.warm_start:
             # Initialize primal variables and set parameters
@@ -556,9 +557,10 @@ class CasadiCollocator(object):
                                         casadi.NLP_SOLVER_LAM_X0)
         else:
             self._init_and_set_solver_inputs()
-        
         # Solve the problem
         t0 = time.clock()
+        self.extra_init = t0 - init
+        self.times['init'] += self.extra_init
         self.solver_object.evaluate()
 
         # Get the result
@@ -915,7 +917,7 @@ class LocalDAECollocator(CasadiCollocator):
         # todo: account for preprocessing time within solve_nlp separately?
         self.times['sol'] = self.solve_nlp()
         self.result_file_name = self.export_result_dymola(self.result_file_name)
-        self.times['post_processing'] = time.clock() - t0 - self.times['sol']
+        self.times['post_processing'] = time.clock() - t0 - self.times['sol'] -self.extra_init
 
     def get_result_object(self):
         """ 
