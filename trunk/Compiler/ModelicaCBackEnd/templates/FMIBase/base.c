@@ -93,15 +93,6 @@ static const int Scaling_method = $C_DAE_scaling_method$;
 
 const char *C_GUID = $C_guid$;
 
-
-$C_dae_blocks_residual_functions$
-
-$C_dae_init_blocks_residual_functions$
-
-$CAD_dae_blocks_residual_functions$
-
-$CAD_dae_init_blocks_residual_functions$
-
 $C_DAE_output_vrefs$
 
 $C_DAE_equation_sparsity$
