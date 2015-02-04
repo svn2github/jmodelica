@@ -165,6 +165,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         variableMap.remove(v.getName());
     }
 
+    public void removeVariables(Collection<? extends FVariable> fVars) {
+        for (FVariable fVar : fVars) {
+            V var = getVariable(fVar.name());
+            if (var != null)
+                removeVariable(var);
+        }
+    }
+    
     public V getVariable(String name) {
         return variableMap.get(name);
     }
@@ -189,16 +197,16 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
         },
         DIFFERENTIATED_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.differentiatedRealVariables(); }
+            public Collection<? extends FVariable> variables(FClass c)            { return c.allDifferentiatedRealVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
             public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         ALGEBRAIC_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicVariables(); }
+            public Collection<? extends FVariable> variables(FClass c)            { return c.normalAlgebraicVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicVariables(); }
         }, 
         CONTINUOUS_ALGEBRAIC_VARIABLES { 
-            public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicContinousRealVariables(); }
+            public Collection<? extends FVariable> variables(FClass c)            { return c.normalAlgebraicContinousRealVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
             public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 

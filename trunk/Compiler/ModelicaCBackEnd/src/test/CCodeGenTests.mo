@@ -19595,13 +19595,15 @@ end SpatialDist2;
             description="Test code gen for dynamic state related parts of the pendulum model",
             dynamic_states=true,
             template="
-$dynamic_state_n_sets$
+n_real_x = $n_real_x$
+n_dynamic_sets = $dynamic_state_n_sets$
 $C_dynamic_state_coefficients$
 $C_dynamic_state_add_call$
 $C_ode_derivatives$
 ",
             generatedCode="
-2
+n_real_x = 2
+n_dynamic_sets = 2
 static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
     memset(res, 0, 2 * sizeof(jmi_real_t));
     res[0] = 2 * _x_2;
@@ -19615,12 +19617,12 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
 }
 
 
-   {
+    {
         int* ds_var_value_refs = calloc(2, sizeof(int));
         int* ds_state_value_refs = calloc(1, sizeof(int));
         int* ds_algebraic_value_refs = calloc(1, sizeof(int));
-        ds_var_value_refs[0] = 12;
-        ds_var_value_refs[1] = 13;
+        ds_var_value_refs[0] = 17;
+        ds_var_value_refs[1] = 18;
         ds_state_value_refs[0] = 8;
         ds_algebraic_value_refs[0] = 19;
         jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
@@ -19661,13 +19663,13 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 13)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 18)) {
         __der_y_10 = __ds_0_s0_12;
         _der_y_18 = __der_y_10;
         _der_x_17 = jmi_divide_equation(jmi, (- 2 * _y_3 * _der_y_18),(2 * _x_2),\"(- 2 * ds(1, y) * der(y)) / (2 * ds(1, x))\");
         __der_x_9 = _der_x_17;
         __ds_0_a0_11 = __der_x_9;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 12)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 17)) {
         __der_x_9 = __ds_0_s0_12;
         _der_x_17 = __der_x_9;
         _der_y_18 = jmi_divide_equation(jmi, (- 2 * _x_2 * _der_x_17),(2 * _y_3),\"(- 2 * ds(1, x) * der(x)) / (2 * ds(1, y))\");
@@ -19675,9 +19677,9 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         __ds_0_a0_11 = __der_y_10;
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 12)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 17)) {
         tmp_1 = _der__der_x_19;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 13)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 18)) {
         tmp_1 = _der__der_y_20;
     }
     _der__ds_0_s0_15 = tmp_1;

@@ -617,10 +617,10 @@ der(_ds.1.s0) := dsDer(1, 0)
         model Pendulum
             parameter Real L = 1 "Pendulum length";
             parameter Real g = 9.81 "Acceleration due to gravity";
-            Real x "Cartesian x coordinate";
+            Real x(start = L) "Cartesian x coordinate";
             Real y "Cartesian x coordinate";
             Real vx "Velocity in x coordinate";
-            Real vy "Velocity in y coordinate";
+            Real vy(start = 0) "Velocity in y coordinate";
             Real lambda "Lagrange multiplier";
         equation
             der(x) = vx;
@@ -710,6 +710,77 @@ der(_ds.0.s0) := dsDer(0, 0)
 der(_ds.1.s0) := dsDer(1, 0)
 -------------------------------
 "),FClassMethodTestCase(
+                name="DynamicStates_Examples_Pendulum_initBLT",
+                description="Check the BLT of the pendulum model",
+                dynamic_states=true,
+                methodName="printDAEInitBLT",
+                methodResult="
+--- Solved equation ---
+_der_y := 0.0
+
+--- Solved equation ---
+der(y) := ds(0, _der_y)
+
+--- Solved equation ---
+x := L
+
+--- Unsolved equation (Block 1) ---
+ds(1, x) ^ 2 + ds(1, y) ^ 2 = L
+  Computed variables: y
+
+--- Solved equation ---
+der(x) := (- 2 * ds(1, y) * der(y)) / (2 * ds(1, x))
+
+--- Solved equation ---
+vx := der(x)
+
+--- Solved equation ---
+vy := der(y)
+
+--- Torn linear system (Block 2) of 1 iteration variables and 4 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  _der_vy
+  der(_der_y)
+  _der_vx
+  der(_der_x)
+
+Iteration variables:
+  lambda
+
+Torn equations:
+  _der_vy := lambda * ds(1, y) + (- g)
+  der(_der_y) := _der_vy
+  _der_vx := lambda * ds(1, x)
+  der(_der_x) := _der_vx
+
+Residual equations:
+  2 * ds(1, x) * der(_der_x) + 2 * der(x) * der(x) + (2 * ds(1, y) * der(_der_y) + 2 * der(y) * der(y)) = 0.0
+    Iteration variables: lambda
+
+Jacobian:
+  |1.0, 0.0, 0.0, 0.0, - ds(1, y)|
+  |-1.0, 1.0, 0.0, 0.0, 0.0|
+  |0.0, 0.0, 1.0, 0.0, (- ds(1, x))|
+  |0.0, 0.0, -1.0, 1.0, 0.0|
+  |0.0, 2 * ds(1, y), 0.0, 2 * ds(1, x), 0.0|
+
+--- Solved equation ---
+_der_x := der(x)
+
+--- Solved equation ---
+der(_ds.0.s0) := dsDer(0, 0)
+
+--- Solved equation ---
+der(_ds.1.s0) := dsDer(1, 0)
+
+--- Solved equation ---
+_ds.0.s0 := 0.0
+
+--- Solved equation ---
+_ds.1.s0 := 0.0
+-------------------------------
+"),FClassMethodTestCase(
                 name="DynamicStates_Examples_Pendulum_States",
                 description="Check the states of the pendulum model",
                 dynamic_states=true,
@@ -720,7 +791,7 @@ States:
     Real _der_x
     Real _der_y
   Set of dynamic states with 1 states:
-    Real x \"Cartesian x coordinate\"
+    Real x(start = L) \"Cartesian x coordinate\"
     Real y \"Cartesian x coordinate\"
 "),TransformCanonicalTestCase(
                 name="DynamicStates_Examples_Pendulum_Model",
@@ -730,10 +801,10 @@ States:
 fclass DynamicStates.Examples.Pendulum
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
  parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x \"Cartesian x coordinate\";
+ Real x(start = L) \"Cartesian x coordinate\";
  Real y \"Cartesian x coordinate\";
  Real vx \"Velocity in x coordinate\";
- Real vy \"Velocity in y coordinate\";
+ Real vy(start = 0) \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  Real _der_vx;
  Real _der_vy;
@@ -746,9 +817,7 @@ fclass DynamicStates.Examples.Pendulum
 initial equation 
  _ds.0.s0 = 0.0;
  _ds.1.s0 = 0.0;
- x = 0.0;
- y = 0.0;
- _der_x = 0.0;
+ x = L;
  _der_y = 0.0;
 equation
  der(x) = vx;

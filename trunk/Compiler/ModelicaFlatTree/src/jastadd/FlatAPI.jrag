@@ -664,25 +664,64 @@ aspect FlatAPI {
             filterCollection(discreteVariables(), STRING_VARIABLE_FILTER);
         
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
-    syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariables() {
+    // The LinkedHashSet is used here to avoid duplicates.
+    coll LinkedHashSet<FRealVariable> FClass.allDifferentiatedRealVariables() 
+      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
+    FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
+    to FClass.allDifferentiatedRealVariables() for myFClass();
+    FDerivativeVariable contributes
+        myDifferentiatedVariable() when (shouldContribute())
+    to FClass.allDifferentiatedRealVariables() for myFClass();
+    FDynamicStateVariable contributes this
+    to FClass.allDifferentiatedRealVariables() for myFClass();
+
+    syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariablesList() {
         ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
-        for (FRealVariable fv : differentiatedRealVariablesSet()) 
+        for (FRealVariable fv : differentiatedRealVariables()) 
             l.add(fv);
         return l;
     }
-    // The LinkedHashSet is used here to avoid duplicates.
-    coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesSet() 
-      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
-    FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
-    to FClass.differentiatedRealVariablesSet() for myFClass();
-    FDerivativeVariable contributes
-        myDifferentiatedVariable() when (shouldContribute())
-    to FClass.differentiatedRealVariablesSet() for myFClass();
-    FDynamicStateVariable contributes this
-    to FClass.differentiatedRealVariablesSet() for myFClass();
     syn int FVariable.differentiatedRealVariableIndex() =
-        myFClass().differentiatedRealVariables().indexOf(this);
-    
+        myFClass().differentiatedRealVariablesList().indexOf(this);
+
+    syn lazy LinkedHashSet<FRealVariable> FClass.differentiatedRealVariables() {
+        LinkedHashSet<FRealVariable> set = new LinkedHashSet<FRealVariable>(allDifferentiatedRealVariables());
+        set.removeAll(dynamicStates());
+        return set;
+    }
+
+    /**
+     * Collection that contains all differentiated variables that has been
+     * found to be dynamic states. All of these variables originates from
+     * the original model.
+     */
+    coll LinkedHashSet<FRealVariable> FClass.dynamicStates()
+      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
+    FRealVariable contributes this when (isDynamicState())
+      to FClass.dynamicStates() for myFClass();
+    syn int FClass.numDynamicStates() = dynamicStates().size();
+
+    /**
+     * Collection that contains all dynamic state variables introduced by the
+     * compiler. This collection differs from dynamicStates() in that it 
+     * contains all the actual states.
+     */
+    coll LinkedHashSet<FDynamicStateVariable> FClass.dynamicStateVariables()
+      [new LinkedHashSet<FDynamicStateVariable>()] with add root FlatRoot;
+    FDynamicStateVariable contributes this 
+      to FClass.dynamicStateVariables() for myFClass();
+    syn int FClass.numDynamicStateVariables() = dynamicStateVariables().size();
+
+    /**
+     * Collection that contains all dynamic algebraic variables introduced by the
+     * compiler.
+     */
+    coll LinkedHashSet<FDynamicAlgebraicVariable> FClass.dynamicAlgebraicVariables()
+    [new LinkedHashSet<FDynamicAlgebraicVariable>()] with add root FlatRoot;
+      FDynamicAlgebraicVariable contributes this 
+    to FClass.dynamicAlgebraicVariables() for myFClass();
+    syn int FClass.numDynamicAlgebraicVariables() = dynamicAlgebraicVariables().size();
+
     /**
      * Returns the same set as differentiatedRealVariablesSet, except derivatives with no
      * uses that were not introduced because of stateselect.
@@ -874,11 +913,24 @@ aspect FlatAPI {
         set.removeAll(inputs());
         return set;
     }
-    
+
+    syn int FClass.numNormalAlgebraicContinousRealVariables() = normalAlgebraicContinousRealVariables().size();
+    syn lazy Collection<FRealVariable> FClass.normalAlgebraicContinousRealVariables() {
+        Collection<FRealVariable> set = new LinkedHashSet<FRealVariable>(algebraicContinousRealVariables());
+        set.removeAll(dynamicStates());
+        return set;
+    }
+
     syn lazy ArrayList<FVariable> FClass.algebraicVariables() {
         ArrayList<FVariable> set = new ArrayList<FVariable>();
         set.addAll(algebraicContinousRealVariables());
         set.addAll(discreteVariables());
+        return set;
+    }
+
+    syn lazy Collection<FVariable> FClass.normalAlgebraicVariables() {
+        Collection<FVariable> set = new LinkedHashSet<FVariable>(algebraicVariables());
+        set.removeAll(dynamicStates());
         return set;
     }
 

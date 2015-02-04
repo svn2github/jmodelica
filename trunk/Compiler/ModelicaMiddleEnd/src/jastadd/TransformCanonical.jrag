@@ -578,6 +578,8 @@ aspect TransformCanonical {
             setDAEBLT(BLT.EMPTY_BLT);
         }
         
+        g.removeVariables(dynamicAlgebraicVariables());
+        
         // Find matching for the initialization system
         g.addVariables(this, VAR_TYPES_INIT);
         g.addEquations(equations(), VAR_TYPES_INIT);
@@ -3207,8 +3209,8 @@ aspect TransformCanonicalErrorCheck {
 	 * plus the number of discrete variables.
 	 */
 	syn int FClass.numDAEVariables() = 
-		numAlgebraicContinousRealVariables() + 
-		numDifferentiatedRealVariables() + numDiscreteVariables();
+        numNormalAlgebraicContinousRealVariables() + 
+		numDerivativeVariables() + numDiscreteVariables();
 	
     /**
      * This field is populated by computeMatchingsAndBLT, there are some models
@@ -3233,7 +3235,7 @@ aspect TransformCanonicalErrorCheck {
         */
        syn int FClass.numDAEInitVariables() = numDAEVariables() +
                numDifferentiatedRealVariables() + numDiscretePreVariables() +
-               numNonFixedParameters();
+               numNonFixedParameters() + numDynamicStates() - numDynamicAlgebraicVariables();
 
        public void FClass.checkFClassDimensions() {
                // Check dimensions of DAE
