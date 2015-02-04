@@ -28,7 +28,7 @@
 #include <stdarg.h>
 
 /* #define SAFETY_FACTOR 100 */
-#define SAFETY_FACTOR 0.001
+#define SAFETY_FACTOR 0.05
 
 /* int jmi_dynamic_state_add_set(jmi_t* jmi, jmi_int_t index, jmi_int_t n_variables, jmi_int_t n_states, jmi_int_t* value_references, jmi_dynamic_state_coefficents_func_t coefficents) { */
 int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* variable_value_references, int* ds_state_value_references, int* ds_algebraic_value_references, jmi_dynamic_state_coefficents_func_t coefficents) {

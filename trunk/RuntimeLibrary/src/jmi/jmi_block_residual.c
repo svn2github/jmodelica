@@ -508,6 +508,7 @@ int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t del
 }
 
 int jmi_delete_block_residual(jmi_block_residual_t* b){
+    if (b == NULL) { return 0; }
     jmi_delete_block_solver(&b->block_solver);
     free(b->x);
 /*    if (b->n_nr>0) {

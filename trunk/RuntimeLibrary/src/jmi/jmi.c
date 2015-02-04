@@ -298,6 +298,7 @@ int jmi_delete(jmi_t* jmi){
     for (i=0; i < jmi->n_dynamic_state_sets; i++) {
         jmi_dynamic_state_delete_set(jmi, i);
     }
+    free(jmi->dynamic_state_sets);
 
     free(jmi->output_vrefs);
     free(*(jmi->z));
