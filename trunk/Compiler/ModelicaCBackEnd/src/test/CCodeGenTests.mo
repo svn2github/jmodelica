@@ -19615,12 +19615,12 @@ static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
         int* ds_var_value_refs = calloc(3, sizeof(int));
         int* ds_state_value_refs = calloc(2, sizeof(int));
         int* ds_algebraic_value_refs = calloc(1, sizeof(int));
-        ds_var_value_refs[0] = 9; /* a3 */
-        ds_var_value_refs[1] = 8; /* a2 */
-        ds_var_value_refs[2] = 7; /* a1 */
-        ds_state_value_refs[0] = 5; /* _ds.0.s0 */
-        ds_state_value_refs[1] = 6; /* _ds.0.s1 */
-        ds_algebraic_value_refs[0] = 11; /* _ds.0.a0 */
+        ds_var_value_refs[0] = 6; /* a3 */
+        ds_var_value_refs[1] = 5; /* a2 */
+        ds_var_value_refs[2] = 4; /* a1 */
+        ds_state_value_refs[0] = 2; /* _ds.0.s0 */
+        ds_state_value_refs[1] = 3; /* _ds.0.s1 */
+        ds_algebraic_value_refs[0] = 8; /* _ds.0.a0 */
         jmi_dynamic_state_add_set(*jmi, 0, 3, 2, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -19634,36 +19634,36 @@ static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 8, 7)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 5, 4)) {
         _a2_1 = __ds_0_s0_5;
         _a1_0 = __ds_0_s1_6;
         _a3_2 = jmi_divide_equation(jmi, 1,(_a1_0 * _a2_1),\"1 / (ds(0, a1) * ds(0, a2))\");
         __ds_0_a0_4 = _a3_2;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 7)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 6, 4)) {
         _a3_2 = __ds_0_s0_5;
         _a1_0 = __ds_0_s1_6;
         _a2_1 = jmi_divide_equation(jmi, 1,(_a1_0 * _a3_2),\"1 / (ds(0, a1) * ds(0, a3))\");
         __ds_0_a0_4 = _a2_1;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 8)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 6, 5)) {
         _a3_2 = __ds_0_s0_5;
         _a2_1 = __ds_0_s1_6;
         _a1_0 = jmi_divide_equation(jmi, 1,(_a2_1 * _a3_2),\"1 / (ds(0, a2) * ds(0, a3))\");
         __ds_0_a0_4 = _a1_0;
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 8, 7)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 5, 4)) {
         tmp_1 = _der_a2_10;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 7)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 6, 4)) {
         tmp_1 = _der_a3_11;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 8)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 6, 5)) {
         tmp_1 = _der_a3_11;
     }
     _der__ds_0_s0_7 = tmp_1;
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 8, 7)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 5, 4)) {
         tmp_2 = _der_a1_9;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 7)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 6, 4)) {
         tmp_2 = _der_a1_9;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 9, 8)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 6, 5)) {
         tmp_2 = _der_a2_10;
     }
     _der__ds_0_s1_8 = tmp_2;
@@ -19721,10 +19721,10 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         int* ds_var_value_refs = calloc(2, sizeof(int));
         int* ds_state_value_refs = calloc(1, sizeof(int));
         int* ds_algebraic_value_refs = calloc(1, sizeof(int));
-        ds_var_value_refs[0] = 17; /* _der_x */
-        ds_var_value_refs[1] = 18; /* _der_y */
-        ds_state_value_refs[0] = 8; /* _ds.0.s0 */
-        ds_algebraic_value_refs[0] = 19; /* _ds.0.a0 */
+        ds_var_value_refs[0] = 13; /* _der_x */
+        ds_var_value_refs[1] = 14; /* _der_y */
+        ds_state_value_refs[0] = 4; /* _ds.0.s0 */
+        ds_algebraic_value_refs[0] = 15; /* _ds.0.a0 */
         jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -19734,10 +19734,10 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         int* ds_var_value_refs = calloc(2, sizeof(int));
         int* ds_state_value_refs = calloc(1, sizeof(int));
         int* ds_algebraic_value_refs = calloc(1, sizeof(int));
-        ds_var_value_refs[0] = 10; /* x */
-        ds_var_value_refs[1] = 11; /* y */
-        ds_state_value_refs[0] = 9; /* _ds.1.s0 */
-        ds_algebraic_value_refs[0] = 20; /* _ds.1.a0 */
+        ds_var_value_refs[0] = 6; /* x */
+        ds_var_value_refs[1] = 7; /* y */
+        ds_state_value_refs[0] = 5; /* _ds.1.s0 */
+        ds_algebraic_value_refs[0] = 16; /* _ds.1.a0 */
         jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_1);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -19751,11 +19751,11 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 1);
     }
-    if (jmi_dynamic_state_check_is_state(jmi, 1, 11)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
         _y_3 = __ds_1_s0_14;
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
         __ds_1_a0_13 = _x_2;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 10)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
         _x_2 = __ds_1_s0_14;
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[2]);
         __ds_1_a0_13 = _y_3;
@@ -19763,29 +19763,29 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 18)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 14)) {
         __der_y_10 = __ds_0_s0_12;
         _der_y_18 = __der_y_10;
-        _der_x_17 = jmi_divide_equation(jmi, (- 2 * _y_3 * _der_y_18),(2 * _x_2),\"(- 2 * ds(1, y) * der(y)) / (2 * ds(1, x))\");
+        _der_x_17 = jmi_divide_equation(jmi, (- 2 * _y_3 * _der_y_18),(2 * _x_2),\"(- 2 * ds(1, y) * dynDer(y)) / (2 * ds(1, x))\");
         __der_x_9 = _der_x_17;
         __ds_0_a0_11 = __der_x_9;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 17)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 13)) {
         __der_x_9 = __ds_0_s0_12;
         _der_x_17 = __der_x_9;
-        _der_y_18 = jmi_divide_equation(jmi, (- 2 * _x_2 * _der_x_17),(2 * _y_3),\"(- 2 * ds(1, x) * der(x)) / (2 * ds(1, y))\");
+        _der_y_18 = jmi_divide_equation(jmi, (- 2 * _x_2 * _der_x_17),(2 * _y_3),\"(- 2 * ds(1, x) * dynDer(x)) / (2 * ds(1, y))\");
         __der_y_10 = _der_y_18;
         __ds_0_a0_11 = __der_y_10;
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
-    if (jmi_dynamic_state_check_is_state(jmi, 0, 18)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 14)) {
         tmp_1 = _der__der_y_20;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 17)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 13)) {
         tmp_1 = _der__der_x_19;
     }
     _der__ds_0_s0_15 = tmp_1;
-    if (jmi_dynamic_state_check_is_state(jmi, 1, 11)) {
+    if (jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
         tmp_2 = _der_y_18;
-    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 10)) {
+    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
         tmp_2 = _der_x_17;
     }
     _der__ds_1_s0_16 = tmp_2;

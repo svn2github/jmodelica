@@ -49,18 +49,18 @@ package DynamicStates
 Coefficient variability: continuous-time
 Torn variables:
   b
-  der(a1)
+  dynDer(a1)
 
 Iteration variables:
-  der(a2)
+  dynDer(a2)
 
 Torn equations:
-  b := der(a2)
-  der(a1) := b
+  b := dynDer(a2)
+  dynDer(a1) := b
 
 Residual equations:
-  ds(0, a1) * der(a2) + der(a1) * ds(0, a2) = 0
-    Iteration variables: der(a2)
+  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+    Iteration variables: dynDer(a2)
 
 Jacobian:
   |-1.0, 0.0, 1.0|
@@ -107,18 +107,18 @@ der(_ds.0.s0) := dsDer(0, 0)
 Coefficient variability: continuous-time
 Torn variables:
   b
-  der(a2)
+  dynDer(a2)
 
 Iteration variables:
-  der(a1)
+  dynDer(a1)
 
 Torn equations:
-  b := der(a1)
-  der(a2) := b
+  b := dynDer(a1)
+  dynDer(a2) := b
 
 Residual equations:
-  2 * ds(0, a1) * der(a1) + 2 * ds(0, a2) * der(a2) = 0
-    Iteration variables: der(a1)
+  2 * ds(0, a1) * dynDer(a1) + 2 * ds(0, a2) * dynDer(a2) = 0
+    Iteration variables: dynDer(a1)
 
 Jacobian:
   |-1.0, 0.0, 1.0|
@@ -169,20 +169,20 @@ der(_ds.0.s0) := dsDer(0, 0)
 Coefficient variability: continuous-time
 Torn variables:
   b
-  der(a2)
-  der(a1)
+  dynDer(a2)
+  dynDer(a1)
 
 Iteration variables:
-  der(a3)
+  dynDer(a3)
 
 Torn equations:
-  b := der(a3)
-  der(a2) := b
-  der(a1) := b
+  b := dynDer(a3)
+  dynDer(a2) := b
+  dynDer(a1) := b
 
 Residual equations:
-  ds(0, a1) * ds(0, a2) * der(a3) + (ds(0, a1) * der(a2) + der(a1) * ds(0, a2)) * ds(0, a3) = 0
-    Iteration variables: der(a3)
+  ds(0, a1) * ds(0, a2) * dynDer(a3) + (ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2)) * ds(0, a3) = 0
+    Iteration variables: dynDer(a3)
 
 Jacobian:
   |-1.0, 0.0, 0.0, 1.0|
@@ -247,21 +247,21 @@ der(_ds.0.s1) := dsDer(0, 1)
 Coefficient variability: continuous-time
 Torn variables:
   b
-  der(a1)
+  dynDer(a1)
 
 Iteration variables:
-  der(a2)
-  der(a3)
+  dynDer(a2)
+  dynDer(a3)
 
 Torn equations:
-  b := der(a2) + der(a3)
-  der(a1) := b
+  b := dynDer(a2) + dynDer(a3)
+  dynDer(a1) := b
 
 Residual equations:
-  ds(0, a2) * der(a3) + der(a2) * ds(0, a3) = 0
-    Iteration variables: der(a2)
-  ds(0, a1) * der(a2) + der(a1) * ds(0, a2) = 0
-    Iteration variables: der(a3)
+  ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3) = 0
+    Iteration variables: dynDer(a2)
+  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+    Iteration variables: dynDer(a3)
 
 Jacobian:
   |-1.0, 0.0, 1.0, 1.0|
@@ -351,23 +351,23 @@ der(_ds.0.s0) := dsDer(0, 0)
 Coefficient variability: continuous-time
 Torn variables:
   b
-  der(a2)
-  der(a1)
+  dynDer(a2)
+  dynDer(a1)
 
 Iteration variables:
-  der(a3)
-  der(a4)
+  dynDer(a3)
+  dynDer(a4)
 
 Torn equations:
-  b := der(a3) + der(a4)
-  der(a2) := b
-  der(a1) := b
+  b := dynDer(a3) + dynDer(a4)
+  dynDer(a2) := b
+  dynDer(a1) := b
 
 Residual equations:
-  ds(0, a2) * ds(0, a3) * der(a4) + (ds(0, a2) * der(a3) + der(a2) * ds(0, a3)) * ds(0, a4) = 0
-    Iteration variables: der(a3)
-  ds(0, a1) * ds(0, a2) * der(a3) + (ds(0, a1) * der(a2) + der(a1) * ds(0, a2)) * ds(0, a3) = 0
-    Iteration variables: der(a4)
+  ds(0, a2) * ds(0, a3) * dynDer(a4) + (ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3)) * ds(0, a4) = 0
+    Iteration variables: dynDer(a3)
+  ds(0, a1) * ds(0, a2) * dynDer(a3) + (ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2)) * ds(0, a3) = 0
+    Iteration variables: dynDer(a4)
 
 Jacobian:
   |-1.0, 0.0, 0.0, 1.0, 1.0|
@@ -482,24 +482,24 @@ der(_ds.0.s1) := dsDer(0, 1)
 --- Torn linear system (Block 2) of 2 iteration variables and 3 solved variables ---
 Coefficient variability: continuous-time
 Torn variables:
-  der(a3)
+  dynDer(a3)
   b
-  der(a1)
+  dynDer(a1)
 
 Iteration variables:
-  der(a2)
-  der(a4)
+  dynDer(a2)
+  dynDer(a4)
 
 Torn equations:
-  der(a3) := - der(a2)
-  b := der(a2) + der(a3)
-  der(a1) := - der(a4) + b
+  dynDer(a3) := - dynDer(a2)
+  b := dynDer(a2) + dynDer(a3)
+  dynDer(a1) := - dynDer(a4) + b
 
 Residual equations:
-  ds(0, a1) * der(a2) + der(a1) * ds(0, a2) = 0
-    Iteration variables: der(a2)
-  ds(0, a3) * der(a4) + der(a3) * ds(0, a4) = 0
-    Iteration variables: der(a4)
+  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+    Iteration variables: dynDer(a2)
+  ds(0, a3) * dynDer(a4) + dynDer(a3) * ds(0, a4) = 0
+    Iteration variables: dynDer(a4)
 
 Jacobian:
   |1.0, 0.0, 0.0, 1.0, 0.0|
@@ -551,18 +551,18 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
 Coefficient variability: continuous-time
 Torn variables:
-  der(a4)
-  der(a5)
+  dynDer(a4)
+  dynDer(a5)
 
 Iteration variables:
   _der_a1
 
 Torn equations:
-  der(a4) := - _der_a1
-  der(a5) := - _der_a1 + (- der(a4))
+  dynDer(a4) := - _der_a1
+  dynDer(a5) := - _der_a1 + (- dynDer(a4))
 
 Residual equations:
-  ds(0, a4) * der(a5) + der(a4) * ds(0, a5) = 0
+  ds(0, a4) * dynDer(a5) + dynDer(a4) * ds(0, a5) = 0
     Iteration variables: _der_a1
 
 Jacobian:
@@ -586,17 +586,17 @@ a1 := - ds(0, a4) + 1
 --- Torn linear system (Block 4) of 1 iteration variables and 1 solved variables ---
 Coefficient variability: continuous-time
 Torn variables:
-  der(a2)
+  dynDer(a2)
 
 Iteration variables:
-  der(a3)
+  dynDer(a3)
 
 Torn equations:
-  der(a2) := - der(a3)
+  dynDer(a2) := - dynDer(a3)
 
 Residual equations:
-  _der_a1 = ds(1, a2) * der(a3) + der(a2) * ds(1, a3)
-    Iteration variables: der(a3)
+  _der_a1 = ds(1, a2) * dynDer(a3) + dynDer(a2) * ds(1, a3)
+    Iteration variables: dynDer(a3)
 
 Jacobian:
   |1.0, 1.0|
@@ -650,50 +650,50 @@ der(_ds.1.s0) := dsDer(1, 0)
 --- Dynamic state block ---
   --- States: _der_y ---
     --- Solved equation ---
-    der(y) := ds(0, _der_y)
+    dynDer(y) := ds(0, _der_y)
 
     --- Solved equation ---
-    der(x) := (- 2 * ds(1, y) * der(y)) / (2 * ds(1, x))
+    dynDer(x) := (- 2 * ds(1, y) * dynDer(y)) / (2 * ds(1, x))
 
     --- Solved equation ---
-    _der_x := der(x)
+    _der_x := dynDer(x)
     -------------------------------
   --- States: _der_x ---
     --- Solved equation ---
-    der(x) := ds(0, _der_x)
+    dynDer(x) := ds(0, _der_x)
 
     --- Solved equation ---
-    der(y) := (- 2 * ds(1, x) * der(x)) / (2 * ds(1, y))
+    dynDer(y) := (- 2 * ds(1, x) * dynDer(x)) / (2 * ds(1, y))
 
     --- Solved equation ---
-    _der_y := der(y)
+    _der_y := dynDer(y)
     -------------------------------
 
 --- Solved equation ---
-vx := der(x)
+vx := dynDer(x)
 
 --- Solved equation ---
-vy := der(y)
+vy := dynDer(y)
 
 --- Torn linear system (Block 3) of 1 iteration variables and 4 solved variables ---
 Coefficient variability: continuous-time
 Torn variables:
   _der_vy
-  der(_der_y)
+  dynDer(_der_y)
   _der_vx
-  der(_der_x)
+  dynDer(_der_x)
 
 Iteration variables:
   lambda
 
 Torn equations:
   _der_vy := lambda * ds(1, y) + (- g)
-  der(_der_y) := _der_vy
+  dynDer(_der_y) := _der_vy
   _der_vx := lambda * ds(1, x)
-  der(_der_x) := _der_vx
+  dynDer(_der_x) := _der_vx
 
 Residual equations:
-  2 * ds(1, x) * der(_der_x) + 2 * der(x) * der(x) + (2 * ds(1, y) * der(_der_y) + 2 * der(y) * der(y)) = 0.0
+  2 * ds(1, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(1, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0
     Iteration variables: lambda
 
 Jacobian:
@@ -719,7 +719,7 @@ der(_ds.1.s0) := dsDer(1, 0)
 _der_y := 0.0
 
 --- Solved equation ---
-der(y) := ds(0, _der_y)
+dynDer(y) := ds(0, _der_y)
 
 --- Solved equation ---
 x := L
@@ -729,33 +729,33 @@ ds(1, x) ^ 2 + ds(1, y) ^ 2 = L
   Computed variables: y
 
 --- Solved equation ---
-der(x) := (- 2 * ds(1, y) * der(y)) / (2 * ds(1, x))
+dynDer(x) := (- 2 * ds(1, y) * dynDer(y)) / (2 * ds(1, x))
 
 --- Solved equation ---
-vx := der(x)
+vx := dynDer(x)
 
 --- Solved equation ---
-vy := der(y)
+vy := dynDer(y)
 
 --- Torn linear system (Block 2) of 1 iteration variables and 4 solved variables ---
 Coefficient variability: continuous-time
 Torn variables:
   _der_vy
-  der(_der_y)
+  dynDer(_der_y)
   _der_vx
-  der(_der_x)
+  dynDer(_der_x)
 
 Iteration variables:
   lambda
 
 Torn equations:
   _der_vy := lambda * ds(1, y) + (- g)
-  der(_der_y) := _der_vy
+  dynDer(_der_y) := _der_vy
   _der_vx := lambda * ds(1, x)
-  der(_der_x) := _der_vx
+  dynDer(_der_x) := _der_vx
 
 Residual equations:
-  2 * ds(1, x) * der(_der_x) + 2 * der(x) * der(x) + (2 * ds(1, y) * der(_der_y) + 2 * der(y) * der(y)) = 0.0
+  2 * ds(1, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(1, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0
     Iteration variables: lambda
 
 Jacobian:
@@ -766,7 +766,7 @@ Jacobian:
   |0.0, 2 * ds(1, y), 0.0, 2 * ds(1, x), 0.0|
 
 --- Solved equation ---
-_der_x := der(x)
+_der_x := dynDer(x)
 
 --- Solved equation ---
 der(_ds.0.s0) := dsDer(0, 0)
@@ -814,23 +814,27 @@ fclass DynamicStates.Examples.Pendulum
  Real _ds.0.s0;
  Real _ds.1.a0;
  Real _ds.1.s0;
+ Real dynDer(x);
+ Real dynDer(y);
+ Real dynDer(_der_x);
+ Real dynDer(_der_y);
 initial equation 
  _ds.0.s0 = 0.0;
  _ds.1.s0 = 0.0;
  x = L;
  _der_y = 0.0;
 equation
- der(x) = vx;
- der(y) = vy;
+ dynDer(x) = vx;
+ dynDer(y) = vy;
  _der_vx = lambda * ds(1, x);
  _der_vy = lambda * ds(1, y) - g;
  ds(1, x) ^ 2 + ds(1, y) ^ 2 = L;
- 2 * ds(1, x) * der(x) + 2 * ds(1, y) * der(y) = 0.0;
- der(_der_x) = _der_vx;
- der(_der_y) = _der_vy;
- 2 * ds(1, x) * der(_der_x) + 2 * der(x) * der(x) + (2 * ds(1, y) * der(_der_y) + 2 * der(y) * der(y)) = 0.0;
- ds(0, _der_x) = der(x);
- ds(0, _der_y) = der(y);
+ 2 * ds(1, x) * dynDer(x) + 2 * ds(1, y) * dynDer(y) = 0.0;
+ dynDer(_der_x) = _der_vx;
+ dynDer(_der_y) = _der_vy;
+ 2 * ds(1, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(1, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
+ ds(0, _der_x) = dynDer(x);
+ ds(0, _der_y) = dynDer(y);
  der(_ds.0.s0) = dsDer(0, 0);
  der(_ds.1.s0) = dsDer(1, 0);
 end DynamicStates.Examples.Pendulum;

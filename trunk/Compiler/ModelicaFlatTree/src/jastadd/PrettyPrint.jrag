@@ -1019,14 +1019,15 @@ aspect FlatPrettyPrint {
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
-	syn String FVariable.displayName()        = getFQName().toString();
-	eq FDerivativeVariable.displayName()      = name();
-	eq FPreBooleanVariable.displayName()      = name();
-	eq FPreEnumVariable.displayName()         = name();
-	eq FPreIntegerVariable.displayName()      = name();
-	eq FPreRealVariable.displayName()         = name();
-	eq FPreStringVariable.displayName()       = name();
-	eq FDummyDerivativeVariable.displayName() = derPrefixName();
+	syn String FVariable.displayName()          = getFQName().toString();
+	eq FDerivativeVariable.displayName()        = name();
+	eq FPreBooleanVariable.displayName()        = name();
+	eq FPreEnumVariable.displayName()           = name();
+	eq FPreIntegerVariable.displayName()        = name();
+	eq FPreRealVariable.displayName()           = name();
+	eq FPreStringVariable.displayName()         = name();
+	eq FDummyDerivativeVariable.displayName()   = derPrefixName();
+	eq FDynamicDerivativeVariable.displayName() = dynDerName();
 
 	public void FVariable.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
@@ -1713,6 +1714,10 @@ aspect FlatPrettyPrint {
 		str.print(derPrefixName());
 	}
 
+	protected void FDynamicDerExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+	    str.print(dynDerName());
+	}
+	
 	protected void FPreExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(name());
 	}

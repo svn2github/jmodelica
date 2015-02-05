@@ -245,6 +245,18 @@ aspect DynamicStateSelect{
         enableDynamicStateRewrite();
     }
     
+    rewrite FDerExp {
+        when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
+            return new FDynamicDerExp(getFIdUse(), order());
+        }
+    }
+    
+    rewrite FDerivativeVariable {
+        when (getMeIntegrated().isDynamicState() && order() == 1) to FDynamicDerivativeVariable {
+            return new FDynamicDerivativeVariable(this, getMeIntegrated().dynamicStateSet());
+        }
+    }
+    
     public class IndexReductionBiPGraph {
         public static class DSSet {
             public final Set<IndexReductionEq> eqns = new LinkedHashSet<IndexReductionEq>();

@@ -273,23 +273,27 @@ aspect FlatNames {
     
     syn FQName FAbstractVariable.getFQName() = null;
 
-    syn String FQName.name()             = "";
-    syn String FQName.resolvedName()     = "";
-    syn String FQName.derName(int index) = "";
-    syn String FQName.preName()          = "";
+    syn String FQName.name()                = "";
+    syn String FQName.resolvedName()        = "";
+    syn String FQName.derName(int index)    = "";
+    syn String FQName.dynDerName(int index) = "";
+    syn String FQName.preName()             = "";
     
-    eq FQNameString.name()                          = getName();
-    eq FQNameString.resolvedName()                  = getName();
-    syn lazy String FQNameString.derName(int index) = applyOpToName(getName(), DER, index);
-    syn lazy String FQNameString.preName()          = applyOpToName(getName(), PRE, -1);
+    eq FQNameString.name()                             = getName();
+    eq FQNameString.resolvedName()                     = getName();
+    syn lazy String FQNameString.derName(int index)    = applyOpToName(getName(), DER, index);
+    syn lazy String FQNameString.dynDerName(int index) = applyOpToName(getName(), DYN_DER, index);
+    syn lazy String FQNameString.preName()             = applyOpToName(getName(), PRE, -1);
     
-    syn lazy String FQNameFull.name()             = prefixName(0, null, false, -1);
-    syn lazy String FQNameFull.resolvedName()     = prefixName(0, null, true, -1);
-    syn lazy String FQNameFull.derName(int index) = prefixName(0, DER, false, index);
-    syn lazy String FQNameFull.preName()          = prefixName(0, PRE, false, -1);
+    syn lazy String FQNameFull.name()                = prefixName(0, null, false, -1);
+    syn lazy String FQNameFull.resolvedName()        = prefixName(0, null, true, -1);
+    syn lazy String FQNameFull.derName(int index)    = prefixName(0, DER, false, index);
+    syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, DYN_DER, false, index);
+    syn lazy String FQNameFull.preName()             = prefixName(0, PRE, false, -1);
     
     protected static final String FQName.DER = "der";
     protected static final String FQName.PRE = "pre";
+    protected static final String FQName.DYN_DER = "dynDer";
     
     private String FQNameString.applyOpToName(String name, String op, int index) {
         return op + '(' + name + (index > 1 ? "," + index : "") + ')';
@@ -327,6 +331,9 @@ aspect FlatNames {
     
     syn String FDummyDerivativeVariable.derPrefixName() = getFQName().derPrefixName(order());
     syn String FDummyDerExp.derPrefixName() = getFIdUse().getFQName().derPrefixName(order());
+    
+    syn String FDynamicDerivativeVariable.dynDerName() = getFQName().dynDerName(order());
+    syn String FDynamicDerExp.dynDerName() = getFIdUse().getFQName().dynDerName(order());
     
     syn String FQNamePart.name() = getName();
 
@@ -1033,6 +1040,10 @@ aspect FlatNames {
          return getFQName().createUseFQName().createFDummyDerExp(order());
     }
 
+    public FIdUseExp FDynamicDerivativeVariable.createUseExp() {
+        return getFQName().createUseFQName().createFDynamicDerExp(order());
+    }
+    
     public FIdUseExp FFunctionVariable.createUseExp() {
          return getFQName().createUseFQName().createFIdUseExp();
     }
@@ -1085,7 +1096,14 @@ aspect FlatNames {
     public FDummyDerExp FQName.createFDummyDerExp(int order) {
         return new FDummyDerExp(createFIdUse(), order); 
     }
-    
+
+    /**
+     * Create an FHDummyDerExp for this name with order order, using a copy if needed.
+     */
+    public FDynamicDerExp FQName.createFDynamicDerExp(int order) {
+        return new FDynamicDerExp(createFIdUse(), order); 
+    }
+
     /**
      * Create an FIdUseExp for this name, using a copy if needed.
      */

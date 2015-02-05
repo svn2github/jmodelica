@@ -614,6 +614,16 @@ aspect Constructors {
         this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
+    /**
+     * Create a derivative variable with only the required children.
+     */
+    public FDynamicDerivativeVariable.FDynamicDerivativeVariable(FVariable var, DynamicStateSet set) {
+        this(var.getFVisibilityType().fullCopy(), var.getFTypePrefixVariability().fullCopy(), new Opt(), new List(),
+                (String) null, new Opt(), new Opt(), var.getFQName().fullCopy(), var.order(), set);
+        if (!var.isAbstractDerivativeVariable())
+            throw new IllegalArgumentException("Unable to construct FDynamicDerivativeVariable since the supplied variable isn't a derivative.");
+    }
+    
 	/**
 	 * Create a pre variable for a discrete real variable.
 	 */
@@ -1040,6 +1050,7 @@ aspect InheritedFactoryMethods {
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
     public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
     public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
+    public FDynamicDerExp FDynamicDerExp.createEmptyNode() { return new FDynamicDerExp(); }
     public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
     public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
     public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }

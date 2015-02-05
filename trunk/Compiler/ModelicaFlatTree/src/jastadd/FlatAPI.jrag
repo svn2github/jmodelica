@@ -672,7 +672,10 @@ aspect FlatAPI {
     FDerivativeVariable contributes
         myDifferentiatedVariable() when (shouldContribute())
     to FClass.allDifferentiatedRealVariables() for myFClass();
-    FDynamicStateVariable contributes this
+    FDynamicDerivativeVariable contributes
+        myDifferentiatedVariable() when (shouldContribute())
+        to FClass.allDifferentiatedRealVariables() for myFClass();
+    FDynamicStateVariable contributes this when (shouldContribute())
     to FClass.allDifferentiatedRealVariables() for myFClass();
 
     syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariablesList() {
@@ -1799,7 +1802,10 @@ aspect FlatAPI {
     syn lazy boolean FVariable.isDifferentiatedVariable() = 
       myFClass().differentiatedRealVariables().contains(this);
     syn boolean FDynamicStateVariable.isDifferentiatedVariable() = true;
-      
+
+    syn boolean FAbstractVariable.isAbstractDerivativeVariable() = false;
+    eq FAbstractDerivativeVariable.isAbstractDerivativeVariable() = true;
+
     syn boolean FAbstractVariable.isDerivativeVariable() = false;
     eq FDerivativeVariable.isDerivativeVariable() = true;
 
@@ -1816,6 +1822,9 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isDummyDerivativeVariable() = false;
     eq FDummyDerivativeVariable.isDummyDerivativeVariable() = true;
 
+    syn boolean FAbstractVariable.isDynamicDerivativeVariable() = false;
+    eq FDynamicDerivativeVariable.isDynamicDerivativeVariable() = true;
+    
     syn boolean FAbstractVariable.isPreVariable() = false;
     eq FPreRealVariable.isPreVariable() = true;
     eq FPreIntegerVariable.isPreVariable() = true;
@@ -2747,8 +2756,9 @@ aspect FVariableUses {
     /**
      * Get the differenetiated variabel (FVariable) corresponding to 
      * a derivative variable (FDerivativeVariable)
+     * TODO: this is incorrect what if order=2!
      */
-    syn FRealVariable FDerivativeVariable.myDifferentiatedVariable() =
+    syn FRealVariable FAbstractDerivativeVariable.myDifferentiatedVariable() =
         (FRealVariable) lookupFV(getFQName());
 
     /**

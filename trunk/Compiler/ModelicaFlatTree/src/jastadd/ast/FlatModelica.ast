@@ -283,6 +283,12 @@ FDerivativeVariable : FAbstractDerivativeVariable;
 FDummyDerivativeVariable : FAbstractDerivativeVariable;
 
 /**
+ * Variable type for representing dynamic derivatives that are introduced
+ * by the compiler.
+ */
+FDynamicDerivativeVariable : FAbstractDerivativeVariable ::= <Set:DynamicStateSet>;
+
+/**
  * Variable type for representing state variables that has been introduced
  * by dynamic states.
  */
@@ -1128,6 +1134,11 @@ FDerExp : FAbstractDerExp;
  * The built-in function der converted into a dummy derivative.
  */
 FDummyDerExp : FAbstractDerExp; 
+
+/**
+ * The built-in function der converted into a dynamic derivative.
+ */
+FDynamicDerExp : FAbstractDerExp; 
 
 /**
  * Pre built-in function in the instance tree.
