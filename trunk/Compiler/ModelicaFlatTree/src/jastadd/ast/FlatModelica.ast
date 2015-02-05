@@ -265,27 +265,22 @@ FPreEnumVariable : FEnumVariable;
 FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
 
 /**
+ * Abstract variable type for all the different derivative variable types.
+ */
+abstract FAbstractDerivativeVariable : FRealVariable ::= <Order:int>;
+
+/**
  * FVariable corresponding to a derivative variable.
  *
  * Notice that this kind of variables does not result from flattening, but are
  * introduced when a flattened model is transformed into a canonical form.
  */
-FDerivativeVariable : FRealVariable;
+FDerivativeVariable : FAbstractDerivativeVariable;
 
 /**
  * Variable type for representing dummy derivatives.
  */
-FDummyDerivativeVariable : FRealVariable;
-
-/**
- * Variable type for representing high order derivatives.
- */
-FHDerivativeVariable : FDerivativeVariable ::= <Order:int>;
-
-/**
- * Variable type for representing high order dummy derivatives.
- */
-FHDummyDerivativeVariable : FDummyDerivativeVariable ::= <Order:int>;
+FDummyDerivativeVariable : FAbstractDerivativeVariable;
 
 /**
  * Variable type for representing state variables that has been introduced
@@ -1122,13 +1117,17 @@ InstDerExp : FUnaryExp;
 /**
  * Abstract super class for all der related expressions.
  */
+abstract FAbstractDerExp : FIdUseExp ::= <Order:int>;
 
-abstract FAbstractDerExp : FIdUseExp; 
 /**
  * The built-in function der.
  */
-
 FDerExp : FAbstractDerExp; 
+
+/**
+ * The built-in function der converted into a dummy derivative.
+ */
+FDummyDerExp : FAbstractDerExp; 
 
 /**
  * Pre built-in function in the instance tree.
@@ -1141,25 +1140,9 @@ InstPreExp : FUnaryBuiltIn;
 FPreExp : FIdUseExp;
 
 /**
- * The built-in function der converted into a dummy derivative.
- */
-FDummyDerExp : FAbstractDerExp; 
-
-/**
  * Higher order derivatives occurring as a result of index reduction.
  */
 InstHDerExp : InstDerExp ::= <Order:int>; 
-
-/**
- * Higher order derivatives occurring as a result of index reduction.
- */
-FHDerExp : FDerExp ::= <Order:int>; 
-
-/**
- * Higher order derivatives occurring as a result of index reduction, 
- * converted into a dummy derivative.
- */
-FHDummyDerExp : FDummyDerExp ::= <Order:int>; 
 
 /**
  * Identifier in the instance tree.

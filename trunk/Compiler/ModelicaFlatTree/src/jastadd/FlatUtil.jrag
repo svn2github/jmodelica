@@ -133,8 +133,10 @@ aspect FlatNames {
      *              all but the last <code>-n</code> parts are included.
      * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "der(a.b)")
      * @param eval  if <code>true</code>, then evaluate all expressions first
+     * @param index if greater or equal to two, then the index added as a second argument (eg "der(a.b,2)").
+     *              This only works if op is not null. 
      */
-    private String FQNameFull.prefixName(int n, String op, boolean eval) {
+    private String FQNameFull.prefixName(int n, String op, boolean eval, int index) {
         int tot = getNumFQNamePart();
         if (n <= 0)
             n = tot + n;
@@ -156,8 +158,13 @@ aspect FlatNames {
             if (!last) 
                 str.append(".");
         }
-        if (op != null)
+        if (op != null) {
+            if (index > 1) {
+                str.append(',');
+                str.append(index);
+            }
             str.append(")");
+        }
         return str.toString();
     }
     
@@ -185,7 +192,7 @@ aspect FlatNames {
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */
     syn String FQName.prefixActualPartName();
-    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false);
+    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false, -1);
     eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
     eq FQNameEmpty.prefixActualPartName() {
         throw new UnsupportedOperationException();
@@ -266,44 +273,35 @@ aspect FlatNames {
     
     syn FQName FAbstractVariable.getFQName() = null;
 
-    syn String FQName.name()         = "";
-    syn String FQName.resolvedName() = "";
-    syn String FQName.derName()      = "";
-    syn String FQName.preName()      = "";
+    syn String FQName.name()             = "";
+    syn String FQName.resolvedName()     = "";
+    syn String FQName.derName(int index) = "";
+    syn String FQName.preName()          = "";
     
-    eq FQNameString.name()                 = getName();
-    eq FQNameString.resolvedName()         = getName();
-    syn lazy String FQNameString.derName() = applyOpToName(getName(), DER);
-    syn lazy String FQNameString.preName() = applyOpToName(getName(), PRE);
+    eq FQNameString.name()                          = getName();
+    eq FQNameString.resolvedName()                  = getName();
+    syn lazy String FQNameString.derName(int index) = applyOpToName(getName(), DER, index);
+    syn lazy String FQNameString.preName()          = applyOpToName(getName(), PRE, -1);
     
-    syn lazy String FQNameFull.name()         = prefixName(0, null, false);
-    syn lazy String FQNameFull.resolvedName() = prefixName(0, null, true);
-    syn lazy String FQNameFull.derName()      = prefixName(0, DER, false);
-    syn lazy String FQNameFull.preName()      = prefixName(0, PRE, false);
+    syn lazy String FQNameFull.name()             = prefixName(0, null, false, -1);
+    syn lazy String FQNameFull.resolvedName()     = prefixName(0, null, true, -1);
+    syn lazy String FQNameFull.derName(int index) = prefixName(0, DER, false, index);
+    syn lazy String FQNameFull.preName()          = prefixName(0, PRE, false, -1);
     
     protected static final String FQName.DER = "der";
     protected static final String FQName.PRE = "pre";
     
-    private String FQNameString.applyOpToName(String name, String op) {
-        return op + '(' + name + ')';
+    private String FQNameString.applyOpToName(String name, String op, int index) {
+        return op + '(' + name + (index > 1 ? "," + index : "") + ')';
     }
 
     syn String FQName.scalarName() = name();
     eq FQNameFull.scalarName() {
         boolean scalar = scalarized;
         scalarized = true;
-        String res = prefixName(0, null, true);
+        String res = prefixName(0, null, true, -1);
         scalarized = scalar;
         return res;
-    }
-    
-    syn lazy String FQName.hDerName(int derOrder) {
-        StringBuilder str = new StringBuilder(derName());
-        int len = str.length();
-        str.replace(len - 1, len, ",");
-        str.append(derOrder);
-        str.append(")");
-        return str.toString();
     }
     
     private static String FQName.derPrefixString = "_der_der_der_der";
@@ -334,9 +332,7 @@ aspect FlatNames {
 
     syn String FIdUse.name()           = getFQName().name();
     syn String FIdUseExp.name()        = getFIdUse().name();
-    eq FAbstractDerExp.name()          = derName();
-    eq FHDerExp.name()                 = hDerName(getOrder());
-    eq FHDummyDerExp.name()            = hDerName(getOrder());
+    eq FAbstractDerExp.name()          = derName(order());
     eq FPreExp.name()                  = preName();
     syn String FInstAccessExp.name()   = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
@@ -362,15 +358,10 @@ aspect FlatNames {
     
     syn String FEnumLiteral.name() = getName().name();
     
-    eq FDerivativeVariable.name()       = getFQNameNoTransform().derName();
-    eq FHDerivativeVariable.name()      = getFQNameNoTransform().hDerName(getOrder());
-    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
-    eq FHDummyDerivativeVariable.name() = getFQNameNoTransform().hDerName(getOrder());
+    eq FAbstractDerivativeVariable.name() = getFQNameNoTransform().derName(order());
 
-    syn String FIdUse.derName()    = getFQNameNoTransform().derName();
-    syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
-    syn String FIdUse.hDerName(int derOrder)    = getFQNameNoTransform().hDerName(derOrder);
-    syn String FIdUseExp.hDerName(int derOrder) = getFIdUseNoTransform().hDerName(derOrder);
+    syn String FIdUse.derName(int order)    = getFQNameNoTransform().derName(order);
+    syn String FIdUseExp.derName(int order) = getFIdUseNoTransform().derName(order);
 
     eq FPreRealVariable.name()     = getFQNameNoTransform().preName();
     eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();  
@@ -384,10 +375,6 @@ aspect FlatNames {
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
 
-    
-    //syn String FIdUse.derName2() = getFQName().derName2();
-    //syn String FIdUseExp.derName2() = getFIdUse().derName2();
-    
     syn String FQName.nameUnderscore()            = "";
     syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[^0-9a-zA-Z_]", "_");
     syn lazy String FQNameFull.nameUnderscore() {
@@ -413,11 +400,12 @@ aspect FlatNames {
 
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
-    eq FAbstractDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
-    eq FHDummyDerExp.nameUnderscore() = "der_" + getOrder() + "_" + getFIdUse().nameUnderscore();
-    
-    //syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
-    //syn String FIdUseInstAccess.nameUnderscore() = getInstAccess().nameUnderscore();
+    eq FAbstractDerExp.nameUnderscore() {
+        if (order() == 1)
+            return "der_" + getFIdUse().nameUnderscore();
+        else
+            return "der_" + order() + "_" + getFIdUse().nameUnderscore();
+    }
     
     syn String FIdDecl.nameUnderscore() = getFQName().nameUnderscore();
 
@@ -433,14 +421,17 @@ aspect FlatNames {
     public static String FClass.convertClassNameToUnderscore(String name) {
         return removeModifiersFromClassName(name).replace(".", "_");
     }
-    
+
     syn String FAbstractVariable.nameUnderscore() = null;
-    eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();
-    eq FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
-    eq FDummyDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
-    eq FHDummyDerivativeVariable.nameUnderscore() = "der_" + getOrder() + "_" + getFQName().nameUnderscore();
-    eq FFunctionVariable.nameUnderscore()   = getFQName().nameUnderscore();
-    
+    eq FVariable.nameUnderscore()         = getFQName().nameUnderscore();
+    eq FFunctionVariable.nameUnderscore() = getFQName().nameUnderscore();
+    eq FAbstractDerivativeVariable.nameUnderscore() {
+        if (order() == 1)
+            return "der_" + getFQName().nameUnderscore();
+        else
+            return "der_" + order() + "_" + getFQName().nameUnderscore();
+    }
+
     syn String FQName.funcNameUnderscore(String suffix)            = "func_" + nameUnderscore() + "_" + suffix;
     syn String FIdUse.funcNameUnderscore(String suffix)            = getFQName().funcNameUnderscore(suffix);
     syn String FFunctionCall.funcNameUnderscore(String suffix)     = getName().funcNameUnderscore(suffix) + functionIndex();
@@ -1035,21 +1026,13 @@ aspect FlatNames {
     }
 
     public FIdUseExp FDerivativeVariable.createUseExp() {
-         return getFQName().createUseFQName().createFDerExp();
-    }
-
-    public FIdUseExp FHDerivativeVariable.createUseExp() {
-         return getFQName().createUseFQName().createFHDerExp(getOrder());
+         return getFQName().createUseFQName().createFDerExp(order());
     }
 
     public FIdUseExp FDummyDerivativeVariable.createUseExp() {
-         return getFQName().createUseFQName().createFDummyDerExp();
+         return getFQName().createUseFQName().createFDummyDerExp(order());
     }
 
-    public FIdUseExp FHDummyDerivativeVariable.createUseExp() {
-         return getFQName().createUseFQName().createFHDummyDerExp(getOrder());
-    }
-    
     public FIdUseExp FFunctionVariable.createUseExp() {
          return getFQName().createUseFQName().createFIdUseExp();
     }
@@ -1090,31 +1073,17 @@ aspect FlatNames {
     }
 
     /**
-     * Create an FDerExp for this name, using a copy if needed.
+     * Create an FDerExp for this name with order order, using a copy if needed.
      */
-    public FDerExp FQName.createFDerExp() {
-        return new FDerExp(createFIdUse()); 
+    public FDerExp FQName.createFDerExp(int order) {
+        return new FDerExp(createFIdUse(), order); 
     }
 
     /**
-     * Create an FHDerExp for this name, using a copy if needed.
+     * Create an FHDummyDerExp for this name with order order, using a copy if needed.
      */
-    public FHDerExp FQName.createFHDerExp(int order) {
-        return new FHDerExp(createFIdUse(), order); 
-    }
-
-    /**
-     * Create an FDummyDerExp for this name, using a copy if needed.
-     */
-    public FDummyDerExp FQName.createFDummyDerExp() {
-        return new FDummyDerExp(createFIdUse()); 
-    }
-
-    /**
-     * Create an FHDummyDerExp for this name, using a copy if needed.
-     */
-    public FHDummyDerExp FQName.createFHDummyDerExp(int order) {
-        return new FHDummyDerExp(createFIdUse(), order); 
+    public FDummyDerExp FQName.createFDummyDerExp(int order) {
+        return new FDummyDerExp(createFIdUse(), order); 
     }
     
     /**

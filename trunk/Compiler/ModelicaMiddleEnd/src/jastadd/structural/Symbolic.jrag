@@ -875,26 +875,20 @@ aspect Derivatives {
             return exp;
         }
     }
-    
-    syn int FIdUseExp.order()                = 0;
-    eq FDerExp.order()                       = 1;
-    eq FHDerExp.order()                      = getOrder();
-    eq FDummyDerExp.order()                  = 1;
-    eq FHDummyDerExp.order()                 = getOrder();
-    syn int InstDerExp.order()               = 1;
-    eq InstHDerExp.order()                   = getOrder();
-    syn int FVariable.order()                = 0;
-    eq FDerivativeVariable.order()           = 1;
-    eq FHDerivativeVariable.order()          = getOrder();
-    syn int FDummyDerivativeVariable.order() = 1;
-    eq FHDummyDerivativeVariable.order()     = getOrder();
-    
+
+    syn int FIdUseExp.order()              = 0;
+    eq FAbstractDerExp.order()             = getOrder();
+    syn int InstDerExp.order()             = 1;
+    eq InstHDerExp.order()                 = getOrder();
+    syn int FVariable.order()              = 0;
+    eq FAbstractDerivativeVariable.order() = getOrder();
+
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
     eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
     eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
-	
-	syn FExp FIdUse.createDerExp(int order) = (order == 1) ? new FDerExp(fullCopy()) : new FHDerExp(fullCopy(), order);
+
+    syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);
 	
 	syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
 	

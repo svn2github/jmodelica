@@ -441,7 +441,7 @@ aspect Variability {
     eq FDelayExp.expVariability() = getFExp().variability();
 
     eq FIdUseExp.expVariability() = getFIdUse().variability();
-    eq FDerExp.expVariability() = 
+    eq FAbstractDerExp.expVariability() = 
         getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();
     eq FPreExp.expVariability() = super.expVariability().combineDown(fDiscrete());
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(fDiscrete());

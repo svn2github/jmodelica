@@ -2300,12 +2300,11 @@ aspect FlatExpressions {
 	public FExp FExp.flattenDer(FQName prefix, int order) {
 		return diff(TIME, order).flatten(prefix);
 	}
-	
-	public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
-		FIdUse use = new FIdUse(getInstAccess().flatten(prefix));
-		return (order == 1) ? new FDerExp(use) : new FHDerExp(use, order);
-	}
-	
+
+    public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
+        return new FDerExp(new FIdUse(getInstAccess().flatten(prefix)), order);
+    }
+
 	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {
 		List<FExp> l = new List<FExp>();
 		for (FExp e : getFExps()) 

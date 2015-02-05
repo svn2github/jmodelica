@@ -412,12 +412,12 @@ aspect FlatTypeAnalysis {
 
     syn boolean FExp.isOKTestExp() = type().isBoolean() && type().isScalar();
 
-    eq FRealLitExp.type()    = fRealScalarType();
-    eq FIntegerLitExp.type() = fIntegerScalarType();
-    eq FBooleanLitExp.type() = fBooleanScalarType();
-    eq FStringLitExp.type()  = fStringScalarType();
-    eq FTimeExp.type()       = fRealScalarType();
-    eq FDerExp.type()        = fRealType(size());
+    eq FRealLitExp.type()     = fRealScalarType();
+    eq FIntegerLitExp.type()  = fIntegerScalarType();
+    eq FBooleanLitExp.type()  = fBooleanScalarType();
+    eq FStringLitExp.type()   = fStringScalarType();
+    eq FTimeExp.type()        = fRealScalarType();
+    eq FAbstractDerExp.type() = fRealType(size());
 
     eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
 

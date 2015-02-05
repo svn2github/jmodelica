@@ -21,38 +21,38 @@ aspect FlatNameBinding {
 
     inh FAbstractVariable FQName.lookupFV(FQName fqn);
     inh FAbstractVariable FIdUse.lookupFV(FQName fqn);
-    inh FAbstractVariable FIdUse.lookupDerFV(FQName fqn);
+    inh FAbstractVariable FIdUse.lookupDerFV(FQName fqn, int index);
     inh FAbstractVariable FIdUse.lookupOutermostFV(FQName fqn);
     inh FAbstractVariable FExp.lookupFV(FQName fqn);
     inh FAbstractVariable FAbstractVariable.lookupFV(FQName fqn);
-    inh FAbstractVariable FAbstractVariable.lookupDerFV(FQName fqn);
+    inh FAbstractVariable FAbstractVariable.lookupDerFV(FQName fqn, int index);
     inh FAbstractVariable FRecordDecl.lookupFV(FQName fqn);
     inh FAbstractVariable FActualStream.lookupFV(FQName fqn);
 
     syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
     syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
-    eq FAbstractDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
+    eq FAbstractDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName(), order());
     syn FAbstractVariable FReinit.myFV() = getVar().myFVForUse();
 
     syn FAbstractVariable FExp.myFVForUse() = null;
     eq FIdUseExp.myFVForUse()               = myFV();
 
-	syn FFunctionVariable FIdUse.myFuncVar() {
-		FAbstractVariable fv = lookupOutermostFV(getFQName());
-		return (fv instanceof FFunctionVariable) ? (FFunctionVariable) fv: null;
-	}
-	
+    syn FFunctionVariable FIdUse.myFuncVar() {
+        FAbstractVariable fv = lookupOutermostFV(getFQName());
+        return (fv instanceof FFunctionVariable) ? (FFunctionVariable) fv: null;
+    }
+
     syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getFIdUse().myCommonVarDecl();
     syn CommonVariableDecl FIdUse.myCommonVarDecl() = myFV();
     eq  FIdUseInstAccess.myCommonVarDecl() = getInstAccess().myInstComponentDecl();
-    
-	eq Root.getChild().lookupFV(FQName fqn)          = null;
-	eq Root.getChild().lookupDerFV(FQName fqn)       = null;
-	eq Root.getChild().lookupOutermostFV(FQName fqn) = null;
 
-	eq FClass.getChild().lookupFV(FQName fqn)          = lookupFV(fqn);
-	eq FClass.getChild().lookupDerFV(FQName fqn)       = lookupFV(fqn.derName());
-	eq FClass.getChild().lookupOutermostFV(FQName fqn) = lookupOutermostFV(fqn);
+    eq Root.getChild().lookupFV(FQName fqn)               = null;
+    eq Root.getChild().lookupDerFV(FQName fqn, int index) = null;
+    eq Root.getChild().lookupOutermostFV(FQName fqn)      = null;
+
+    eq FClass.getChild().lookupFV(FQName fqn)               = lookupFV(fqn);
+    eq FClass.getChild().lookupDerFV(FQName fqn, int index) = lookupFV(fqn.derName(index));
+    eq FClass.getChild().lookupOutermostFV(FQName fqn)      = lookupOutermostFV(fqn);
 	
 	// TODO: kolla om lookupFV kan tas bort
 	
@@ -79,9 +79,9 @@ aspect FlatNameBinding {
 	syn FAbstractVariable FClass.lookupOutermostFV(FQName fqn) = nullUnknown(variablesMap().lookupOutermost(fqn));
 	
 	
-	eq FFunctionDecl.getChild().lookupFV(FQName fqn)          = lookupFV(fqn);
-    eq FFunctionDecl.getChild().lookupDerFV(FQName fqn)       = lookupFV(fqn.createDerPrefixedName(1));
-	eq FFunctionDecl.getChild().lookupOutermostFV(FQName fqn) = lookupOutermostFV(fqn);
+    eq FFunctionDecl.getChild().lookupFV(FQName fqn)               = lookupFV(fqn);
+    eq FFunctionDecl.getChild().lookupDerFV(FQName fqn, int index) = lookupFV(fqn.createDerPrefixedName(index));
+    eq FFunctionDecl.getChild().lookupOutermostFV(FQName fqn)      = lookupOutermostFV(fqn);
 	
 	/**
 	 * Generic lookup function. Can find normal variables, records and record members.
@@ -602,25 +602,6 @@ aspect FlatPreBinding {
 	syn FAbstractVariable FPreExp.myNonPreFV() = lookupFV(getFIdUse().getFQName());
 	eq Root.getChild().lookupPreFV(FQName fqn)   = null;
 	eq FClass.getChild().lookupPreFV(FQName fqn) = lookupFV(fqn.preName());
-
-}
-
-aspect FlatHDerBinding {
-
-	inh FAbstractVariable FIdUse.lookupHDerFV(FQName fqn, int order);	
-	inh FAbstractVariable FExp.lookupHDerFV(FQName fqn, int order);	
-	syn FAbstractVariable FHDerExp.myFV() {
-		return getFIdUse().lookupHDerFV(getFIdUse().getFQName(),getOrder());
-    }
-
-	syn FAbstractVariable FHDummyDerExp.myFV() {
-		return getFIdUse().lookupHDerFV(getFIdUse().getFQName(),getOrder());
-    }
-    
-	eq Root.getChild().lookupHDerFV(FQName fqn, int order) = null;
-
-	eq FClass.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupFV(fqn.hDerName(order));
-	eq FFunctionDecl.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupFV(fqn.createDerPrefixedName(order));
 
 }
 

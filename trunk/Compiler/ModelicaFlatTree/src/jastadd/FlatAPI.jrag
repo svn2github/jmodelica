@@ -2754,9 +2754,10 @@ aspect FVariableUses {
     /**
      * Get the derivative variabel (FDerivativeVariable) corresponding to 
      * a differentiated variable (FVariable)
+     * TODO: this is sort of the same as meDifferentiated()
      */
     syn FDerivativeVariable FVariable.myDerivativeVariable() =
-        (FDerivativeVariable) lookupDerFV(getFQName());
+        (FDerivativeVariable) lookupDerFV(getFQName(), order() + 1);
     
     /**
      * Get the pre variable connected to a normal variable, if any.

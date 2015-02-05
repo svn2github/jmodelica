@@ -328,14 +328,28 @@ aspect Constructors {
 	public FIdUseExp.FIdUseExp(String name, FArraySubscripts fas) {
 		this(new FIdUse(name, fas));
 	}
-	
-	/**
-	 * Constructs an FDerExp that refers to the variable with the given name.
-	 */
-	public FDerExp.FDerExp(FQName name) {
-		this(new FIdUse(name));
-	}
-	
+
+    /**
+     * Constructs an FDerExp that refers to the variable with the given name.
+     */
+    public FDerExp.FDerExp(FQName name, int order) {
+        this(new FIdUse(name), order);
+    }
+
+    /**
+     * Constructs an FDerExp of order one that refers to the variable with the given name.
+     */
+    public FDerExp.FDerExp(FQName name) {
+        this(new FIdUse(name), 1);
+    }
+
+    /**
+     * Constructs an FDerExp of order that refers to the variable with the given name.
+     */
+    public FDerExp.FDerExp(FIdUse name) {
+        this(name, 1);
+    }
+
 	/**
 	 * Constructs an FIdUseInstAccess with an empty FQName.
 	 * 
@@ -584,38 +598,22 @@ aspect Constructors {
 		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
-	/**
-	 * Create a derivative variable with only the required children.
-	 */
-	public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
-	}
-	
-	/**
-	 * Create a derivative variable with only the required children.
-	 */
-	public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
-	}
-	
-	/**
-	 * Create a derivative variable with only the required children.
-	 */
-	public FHDerivativeVariable.FHDerivativeVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
-	}
-	
-	/**
-	 * Create a derivative variable with only the required children.
-	 */
-	public FHDummyDerivativeVariable.FHDummyDerivativeVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
-	}
-	
+    /**
+     * Create a derivative variable with only the required children.
+     */
+    public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
+            FTypePrefixVariability variability, FQName name, int order) {
+        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+    }
+
+    /**
+     * Create a derivative variable with only the required children.
+     */
+    public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
+            FTypePrefixVariability variability, FQName name, int order) {
+        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+    }
+
 	/**
 	 * Create a pre variable for a discrete real variable.
 	 */
@@ -1037,19 +1035,20 @@ aspect InheritedFactoryMethods {
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
 	public FUnknownSizeExp FUnknownSizeExp.createEmptyNode() { return new FUnknownSizeExp(); }
 	
-	// Identifier expressions
-	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
-	public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
-	public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
-	public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
-	public FHDerExp       FHDerExp.createEmptyNode()       { return new FHDerExp();       }
-	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
-	public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
-	public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
-	public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
-	public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
-	public FDSDerExp      FDSDerExp.createEmptyNode()      { return new FDSDerExp();      }
-	
+    // Identifier expressions
+    public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
+    public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
+    public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
+    public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
+    public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
+    public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
+    public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
+    public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
+    public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
+    public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
+    public FDSDerExp      FDSDerExp.createEmptyNode()      { return new FDSDerExp();      }
+    public abstract FAbstractDerExp FAbstractDerExp.createEmptyNode();
+
 	// Array expressions
 	public FArray          FArray.createEmptyNode()          { return new FArray();          }
 	public FLongArray      FLongArray.createEmptyNode()      { return new FLongArray();      }
@@ -1159,7 +1158,17 @@ aspect InheritedFactoryMethods {
 		node.setFIdUse(use);
 		return node;
 	}
-	
+
+    /**
+     * Create new node of same class as this, with the specified children.
+     */
+    public FIdUseExp FAbstractDerExp.createNode(FIdUse use) {
+        FAbstractDerExp node = createEmptyNode();
+        node.setFIdUse(use);
+        node.setOrder(order());
+        return node;
+    }
+
 	/**
 	 * \Create new node of same class as this, with the specified children.
 	 */

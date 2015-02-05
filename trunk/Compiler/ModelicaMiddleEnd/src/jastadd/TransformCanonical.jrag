@@ -1494,35 +1494,20 @@ aspect TransformCanonical {
 	    throw new UnsupportedOperationException("Trying to create a derivative variable from the non real variable " + name() + "! Java class type: '" + getClass().getSimpleName() + "'");
 	}
 
-	public FDerivativeVariable FRealVariable.createFDerivativeVariable() {
-	    FDerivativeVariable fdv = new FDerivativeVariable(getFVisibilityType().fullCopy(),
-	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy());
-	    fdv.setMeIntegrated(this);
-	    this.setMeDifferentiated(fdv);
-	    fdv = dynamicVariable(fdv);
+    public FDerivativeVariable FRealVariable.createFDerivativeVariable() {
+        FDerivativeVariable fdv = new FDerivativeVariable(getFVisibilityType().fullCopy(),
+                getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), order() + 1);
+        fdv.setMeIntegrated(this);
+        this.setMeDifferentiated(fdv);
+        fdv = dynamicVariable(fdv);
         FAttribute ssAttr = findAttributeLocal(FAttribute.STATE_SELECT);
         if (ssAttr != null) {
             StateSelect ss = stateSelectAttribute();
             if (ss == StateSelect.NEVER || ss == StateSelect.AVOID)
                 fdv.addFAttribute(ssAttr.fullCopy());
         }
-	    return fdv;
-	}
-
-	public FDerivativeVariable FDerivativeVariable.createFDerivativeVariable() {
-	    FHDerivativeVariable fhdv = new FHDerivativeVariable(getFVisibilityType().fullCopy(),
-	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), order() + 1);
-	    fhdv.setMeIntegrated(this);
-	    this.setMeDifferentiated(fhdv);
-        fhdv = dynamicVariable(fhdv);
-        FAttribute ssAttr = findAttributeLocal(FAttribute.STATE_SELECT);
-        if (ssAttr != null) {
-            StateSelect ss = stateSelectAttribute();
-            if (ss == StateSelect.NEVER || ss == StateSelect.AVOID)
-                fhdv.addFAttribute(ssAttr.fullCopy());
-        }
-	    return fhdv;
-	}
+        return fdv;
+    }
 
     public class FClass {
         /**
@@ -1751,9 +1736,10 @@ aspect TransformCanonical {
 	eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
 	
 	syn boolean FAbstractVariable.canBeAlias() = false;
-	eq FVariable.canBeAlias() = !lookupDerFV(getFQName()).isDummyDerivativeVariable() 
-	        && !isPreVariable() && !isDerivativeVariable() 
-	        && !isInput() && !isOutput();
+    // TODO: Use meDifferentiated instead of myDerivativeVariable()
+    eq FVariable.canBeAlias() = !lookupDerFV(getFQName(), order() + 1).isDummyDerivativeVariable() 
+            && !isPreVariable() && !isDerivativeVariable() && !isDummyDerivativeVariable()
+            && !isInput() && !isOutput();
 	
 	syn int FExp.aliasSign() = 1;
 	eq FNegExp.aliasSign()   = -getFExp().aliasSign();
@@ -1942,81 +1928,45 @@ aspect TransformCanonical {
 		}
 	}
 	
-	/**
-	 * FDerExps referring to alias variables need to be changed to 
-	 * FDerExps referring to their alias targets. 
-	 * 
-	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
-	 * is true. Notice that in order for the rewrite to be enable, the is$final
-	 * field of FIdUseExp needs to be set to false: this is done by the recursive
-	 * method ASTNode.flushAllRecursiveClearFinal. 
-	 */
-	rewrite FDerExp {
-		when (rewriteAlias && getFIdUse().myFV().isFVariable() && (myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
-			if (myFV().isAlias()) {
-				FVariable fv = (FVariable) myFV();
-				FExp new_exp = fv.alias().createUseExp();
-				if (myFV().isNegated()) 
-					new_exp = new FNegExp(new_exp);
-				return new_exp;				
-			} else {			
-				FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
-				FExp new_exp = new FDerExp(new FIdUse(new_name));
-				if (getFIdUse().myFV().isNegated()) 
-					new_exp = new FNegExp(new_exp);
-				return new_exp;
-			}
-		}
-	}
+    /**
+     * FDerExps referring to alias variables need to be changed to 
+     * FDerExps referring to their alias targets. 
+     * 
+     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * is true. Notice that in order for the rewrite to be enable, the is$final
+     * field of FIdUseExp needs to be set to false: this is done by the recursive
+     * method ASTNode.flushAllRecursiveClearFinal. 
+     */
+    rewrite FAbstractDerExp {
+        when (rewriteAlias && getFIdUse().myFV().isFVariable() && (myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
+            if (myFV().isAlias()) {
+                FVariable fv = (FVariable) myFV();
+                FExp new_exp = fv.alias().createUseExp();
+                if (myFV().isNegated()) 
+                    new_exp = new FNegExp(new_exp);
+                return new_exp;
+            } else {
+                FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
+                FAbstractDerExp new_exp = createEmptyNode();
+                new_exp.setFIdUse(new FIdUse(new_name));
+                new_exp.setOrder(order());
+                if (getFIdUse().myFV().isNegated())
+                    return new FNegExp(new_exp);
+                else
+                    return new_exp;
+            }
+        }
+    }
 
-	/**
-	 * FDummyDerExps referring to alias variables need to be changed to 
-	 * FDummyDerExps referring to their alias targets. 
-	 * 
-	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
-	 * is true. Notice that in order for the rewrite to be enable, the is$final
-	 * field of FIdUseExp needs to be set to false: this is done by the recursive
-	 * method ASTNode.flushAllRecursiveClearFinal. 
-	 */
-	rewrite FDummyDerExp {
-		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
-			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createUseExp();
-			if (myFV().isNegated()) 
-				new_exp = new FNegExp(new_exp);
-			return new_exp;
-		}
-	}
+    /*
+     * Rewrite derivatives of parameters to zeros.
+     */
+    rewrite FAbstractDerExp {
+        when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().lessOrEqual(fParameter())) to FExp {
+            return new FRealLitExp(0.0);
+        }
+    }
 
-	/**
-	 * FHDummyDerExps referring to alias variables need to be changed to 
-	 * FHDummyDerExps referring to their alias targets. 
-	 * 
-	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
-	 * is true. Notice that in order for the rewrite to be enable, the is$final
-	 * field of FIdUseExp needs to be set to false: this is done by the recursive
-	 * method ASTNode.flushAllRecursiveClearFinal. 
-	 */
-	rewrite FHDummyDerExp {
-		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
-			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createUseExp();
-			if (myFV().isNegated()) 
-				new_exp = new FNegExp(new_exp);
-			return new_exp;
-		}
-	}
-
-	/*
-	 * Rewrite derivatives of parameters to zeros.
-	 */
-	rewrite FDerExp {
-		when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().lessOrEqual(fParameter())) to FExp {
-			return new FRealLitExp(0.0);
-		}
-	}
-	
-	
 	/**
 	 * Remove all unused temporary variables, and inline temporaries only used once.
 	 */
@@ -3148,41 +3098,35 @@ aspect ParameterSorting {
 
 aspect DummyDerivatives {
 
-	rewrite FDerExp {
-		when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
-			return new FDummyDerExp(getFIdUse());
-		}
-	}
+    rewrite FDerExp {
+        when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
+            return new FDummyDerExp(getFIdUse(), order());
+        }
+    }
 
-	rewrite FHDerExp {
-		when (myFV().isDummyDerivativeVariable()) to FHDummyDerExp {
-			return new FHDummyDerExp(getFIdUse(),getOrder());
-		}
-	}
-	
-	public void ASTNode.enableFHDerRewrite() {
-		for (ASTNode n : this)
-			n.enableFHDerRewrite();
-	}
-	
-	public void FHDerExp.enableFHDerRewrite() {
-		rewriteFHDer = true;
-		is$Final = false;
-	}
-	
-	boolean FHDerExp.rewriteFHDer = false;
+    public void ASTNode.enableFHDerRewrite() {
+        for (ASTNode n : this)
+            n.enableFHDerRewrite();
+    }
 
-	public void FHDerivativeVariable.enableFHDerRewrite() {
-		rewriteFHDer = true;
-		is$Final = false;
-	}
-	
-	boolean FHDerivativeVariable.rewriteFHDer = false;
+    public void FDerExp.enableFHDerRewrite() {
+        rewriteFHDer = true;
+        is$Final = false;
+    }
 
-	rewrite FHDerExp {
-		when (rewriteFHDer) to FDerExp 
-		new FDerExp(getFIdUse().getFQName().createDerPrefixedName(getOrder() - 1));
-	}
+    boolean FDerExp.rewriteFHDer = false;
+
+    public void FDerivativeVariable.enableFHDerRewrite() {
+        rewriteFHDer = true;
+        is$Final = false;
+    }
+
+    boolean FDerivativeVariable.rewriteFHDer = false;
+
+    rewrite FDerExp {
+        when (rewriteFHDer && order() > 1) to FDerExp 
+        new FDerExp(getFIdUse().getFQName().createDerPrefixedName(order() - 1));
+    }
 
 }
 
