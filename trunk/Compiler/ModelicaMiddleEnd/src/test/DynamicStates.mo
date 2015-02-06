@@ -514,6 +514,145 @@ der(_ds.0.s0) := dsDer(0, 0)
 ")})));
         end TwoDSSetMerge;
 
+        model TwoBigDSSetMerge
+            // a1 a2 a3 a4 a5 a6
+            // +  +             
+            //    +  +          
+            //       *  *       
+            //          +  +    
+            //             +  + 
+            Real a1;
+            Real a2;
+            Real a3;
+            Real a4;
+            Real a5;
+            Real a6;
+            Real b;
+        equation
+            der(a1) + der(a4) = b;
+            der(a2) + der(a3) + der(a5) = b;
+            a1 * a2 = 1;
+            a2 * a3 = 1;
+            a3 + a4 = 1;
+            a4 * a5 = 1;
+            a5 * a6 = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_Basic_TwoBigDSSetMerge",
+                description="Two dynamic state sets of two equations each that need to be merged",
+                dynamic_states=true,
+                methodName="printDAEBLT",
+                methodResult="
+--- Dynamic state block ---
+  --- States: a4 ---
+    --- Solved equation ---
+    a5 := 1 / ds(0, a4)
+
+    --- Solved equation ---
+    a3 := - ds(0, a4) + 1
+
+    --- Solved equation ---
+    a2 := 1 / ds(0, a3)
+
+    --- Solved equation ---
+    a1 := 1 / ds(0, a2)
+    -------------------------------
+  --- States: a1 ---
+    --- Solved equation ---
+    a2 := 1 / ds(0, a1)
+
+    --- Solved equation ---
+    a3 := 1 / ds(0, a2)
+
+    --- Solved equation ---
+    a4 := - ds(0, a3) + 1
+
+    --- Solved equation ---
+    a5 := 1 / ds(0, a4)
+    -------------------------------
+  --- States: a2 ---
+    --- Solved equation ---
+    a3 := 1 / ds(0, a2)
+
+    --- Solved equation ---
+    a4 := - ds(0, a3) + 1
+
+    --- Solved equation ---
+    a5 := 1 / ds(0, a4)
+
+    --- Solved equation ---
+    a1 := 1 / ds(0, a2)
+    -------------------------------
+  --- States: a3 ---
+    --- Solved equation ---
+    a4 := - ds(0, a3) + 1
+
+    --- Solved equation ---
+    a5 := 1 / ds(0, a4)
+
+    --- Solved equation ---
+    a2 := 1 / ds(0, a3)
+
+    --- Solved equation ---
+    a1 := 1 / ds(0, a2)
+    -------------------------------
+  --- States: a5 ---
+    --- Solved equation ---
+    a4 := 1 / ds(0, a5)
+
+    --- Solved equation ---
+    a3 := - ds(0, a4) + 1
+
+    --- Solved equation ---
+    a2 := 1 / ds(0, a3)
+
+    --- Solved equation ---
+    a1 := 1 / ds(0, a2)
+    -------------------------------
+
+--- Torn linear system (Block 2) of 3 iteration variables and 3 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  b
+  dynDer(a4)
+  dynDer(a1)
+
+Iteration variables:
+  dynDer(a2)
+  dynDer(a3)
+  dynDer(a5)
+
+Torn equations:
+  b := dynDer(a2) + dynDer(a3) + dynDer(a5)
+  dynDer(a4) := - dynDer(a3)
+  dynDer(a1) := - dynDer(a4) + b
+
+Residual equations:
+  ds(0, a4) * dynDer(a5) + dynDer(a4) * ds(0, a5) = 0
+    Iteration variables: dynDer(a2)
+  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+    Iteration variables: dynDer(a3)
+  ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3) = 0
+    Iteration variables: dynDer(a5)
+
+Jacobian:
+  |-1.0, 0.0, 0.0, 1.0, 1.0, 1.0|
+  |0.0, 1.0, 0.0, 0.0, 1.0, 0.0|
+  |-1.0, 1.0, 1.0, 0.0, 0.0, 0.0|
+  |0.0, ds(0, a5), 0.0, 0.0, 0.0, ds(0, a4)|
+  |0.0, 0.0, ds(0, a2), ds(0, a1), 0.0, 0.0|
+  |0.0, 0.0, 0.0, ds(0, a3), ds(0, a2), 0.0|
+
+--- Solved equation ---
+a6 := 1 / ds(0, a5)
+
+--- Solved equation ---
+der(_ds.0.s0) := dsDer(0, 0)
+-------------------------------
+")})));
+        end TwoBigDSSetMerge;
+
         model TwoDSSetForced
             // a1 a2 a3 a4 a5
             // *  +  +       

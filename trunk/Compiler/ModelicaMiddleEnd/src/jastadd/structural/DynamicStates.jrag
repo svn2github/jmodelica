@@ -330,6 +330,7 @@ aspect DynamicStateSelect{
                 }
             }
             if (set.vars.size() >= 2 || set.eqns.size() > 0) {
+                Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
                 for (IndexReductionEq otherEqn : set.eqns) {
                     DSSet otherSet = dsLookup.remove(otherEqn);
                     if (otherSet != null) {
@@ -337,7 +338,7 @@ aspect DynamicStateSelect{
                         for (IndexReductionVar memberVar : otherSet.vars)
                             set.vars.add(memberVar);
                         for (IndexReductionEq memberEq : otherSet.eqns) {
-                            set.eqns.add(memberEq);
+                            otherEqns.add(memberEq);
                             dsLookup.put(memberEq, set);
                         }
                     } else {
@@ -345,6 +346,7 @@ aspect DynamicStateSelect{
                         set.vars.add(otherEqn.getMatching());
                     }
                 }
+                set.eqns.addAll(otherEqns);
                 set.eqns.add(eqn);
                 dsLookup.put(eqn, set);
                 dsSets.add(set);
