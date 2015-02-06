@@ -5101,7 +5101,7 @@ aspect Serialize {
         str.format("%smemset(res, 0, %d * sizeof(jmi_real_t));\n", indent, numAlgebraics() * numVars());
         for (DynamicStateCoefficient coff : getCoefficients()) {
             p.printPreSteps(coff, str, indent);
-            str.format("%sres[%d] = ", indent, coff.getEquation() * numAlgebraics() + coff.getVariable());
+            str.format("%sres[%d] = ", indent, coff.getEquation() + (numVars() - 1) * coff.getVariable());
             p.print(coff, str, indent);
             str.println(";");
             p.printPostSteps(coff, str, indent);
