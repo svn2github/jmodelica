@@ -170,6 +170,11 @@ int jmi_initialize(jmi_t* jmi) {
         return -1;
     }
     
+    /* Copy ds values */
+    jmi_dynamic_state_copy_to_ds_values(jmi);
+    /* Update ds values */
+    jmi_dynamic_state_update(jmi);
+    
     /* Copy values to pre after the initial equations are solved. */
     jmi_copy_pre_values(jmi);
 

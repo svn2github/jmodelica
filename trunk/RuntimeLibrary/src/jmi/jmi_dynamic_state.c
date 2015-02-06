@@ -41,10 +41,16 @@ int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_stat
     set->algebraic_value_references = (jmi_int_t*)calloc(n_variables-n_states,sizeof(jmi_int_t));
     set->temp_algebraic = (jmi_int_t*)calloc(n_variables-n_states,sizeof(jmi_int_t));
     set->ds_algebraic_value_references = (jmi_int_t*)calloc(n_variables-n_states,sizeof(jmi_int_t));
-    set->temp = (jmi_real_t*)calloc((n_variables-n_states)*n_variables,sizeof(jmi_real_t));
+    set->coefficent_matrix = (jmi_real_t*)calloc((n_variables-n_states)*n_variables,sizeof(jmi_real_t));
     set->n_variables = n_variables;
     set->n_states = n_states;
+    set->n_algebraics = n_variables-n_states;
     set->coefficents = coefficents;
+    
+    set->dgeqp3_lwork = 3*n_variables+1;
+    set->dgeqp3_work = (double*)calloc(set->dgeqp3_lwork,sizeof(double));
+    set->dgeqp3_jpvt = (int*)calloc(set->n_variables, sizeof(int));
+    set->dgeqp3_tau = (double*)calloc(set->n_algebraics, sizeof(double));
     
     for (i = 0; i < n_variables; i++) {
         set->variables_value_references[i] = variable_value_references[i];
@@ -70,8 +76,12 @@ int jmi_dynamic_state_delete_set(jmi_t* jmi, jmi_int_t index) {
     free(set->ds_state_value_references);
     free(set->algebraic_value_references);
     free(set->ds_algebraic_value_references);
-    free(set->temp);
+    free(set->coefficent_matrix);
     free(set->temp_algebraic);
+    
+    free(set->dgeqp3_work);
+    free(set->dgeqp3_jpvt);
+    free(set->dgeqp3_tau);
     
     return JMI_OK;
 }
@@ -80,7 +90,6 @@ int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set) {
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index_set];
     int i = 0;
     int j = 0;
-    jmi_real_t *z;
     
     jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, "DynamicStatesUpdate", 
                             "Updating the dynamic states in <set:%I>", index_set);
@@ -102,7 +111,23 @@ int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set) {
         j++;
     }
     
+    jmi_dynamic_state_copy_to_ds_values_single(jmi, index_set);
 
+    /* Set that the states has been updated */
+    jmi->updated_states = JMI_TRUE;
+    
+    jmi_log_vrefs(jmi->log, node, logInfo, "new_states", 'r', set->state_value_references, set->n_states);
+    jmi_log_leave(jmi->log, node);
+    
+    return JMI_OK;
+}
+
+int jmi_dynamic_state_copy_to_ds_values_single(jmi_t* jmi, jmi_int_t index_set) {
+    jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index_set];
+    int i;
+    jmi_real_t *z;
+    
+    /* Update the values in for the ds variables */
     for (i = 0; i < set->n_states; i++) {
         z = jmi_get_z(jmi);
         z[jmi_get_index_from_value_ref(set->ds_state_value_references[i])] = z[jmi_get_index_from_value_ref(set->state_value_references[i])];
@@ -112,11 +137,15 @@ int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set) {
         z[jmi_get_index_from_value_ref(set->ds_algebraic_value_references[i])] = z[jmi_get_index_from_value_ref(set->algebraic_value_references[i])];
     }
     
-    /* Set that the states has been updated */
-    jmi->updated_states = JMI_TRUE;
+    return JMI_OK;
+}
+
+int jmi_dynamic_state_copy_to_ds_values(jmi_t* jmi) {
+    int i;
     
-    jmi_log_vrefs(jmi->log, node, logInfo, "new_states", 'r', set->state_value_references, set->n_states);
-    jmi_log_leave(jmi->log, node);
+    for (i = 0; i < jmi->n_dynamic_state_sets; i++) {
+        jmi_dynamic_state_copy_to_ds_values_single(jmi, i);
+    }
     
     return JMI_OK;
 }
@@ -128,12 +157,12 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
                             "Verifying the dynamic states in <set:%I>", index_set);
     
     /* Update the coefficients */
-    set->coefficents(jmi, set->temp);
+    set->coefficents(jmi, set->coefficent_matrix);
     
     jmi_log_vrefs(jmi->log, node, logInfo, "variables", 'r', set->variables_value_references, set->n_variables);
     jmi_log_vrefs(jmi->log, node, logInfo, "states", 'r', set->state_value_references, set->n_states);
     jmi_log_vrefs(jmi->log, node, logInfo, "algebraics", 'r', set->algebraic_value_references, set->n_variables - set->n_states);
-    jmi_log_real_matrix(jmi->log, node, logInfo, "CoefficientMatrix", set->temp, set->n_variables-set->n_states, set->n_variables);
+    jmi_log_real_matrix(jmi->log, node, logInfo, "CoefficientMatrix", set->coefficent_matrix, set->n_variables-set->n_states, set->n_variables);
     
     if (set->n_variables - set->n_states == 1) {
         int i = 0;
@@ -142,17 +171,17 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         
         for (i = 0; i < set->n_variables; i++) {
             if (set->algebraic_value_references[0] == set->variables_value_references[i]) {
-                if (JMI_ABS(set->temp[i]) < SAFETY_FACTOR) {
+                if (JMI_ABS(set->coefficent_matrix[i]) < SAFETY_FACTOR) {
                     /* Look if there are any other better choice */
-                    best_value = JMI_ABS(set->temp[i]);
+                    best_value = JMI_ABS(set->coefficent_matrix[i]);
                 }
             }
         }
         if (best_value != -1) {
             jmi_log_node(jmi->log, logInfo, "Info", "Looking for new dynamic states in <set:%I> due to <value:%E>.",index_set, best_value);
             for (i = 0; i < set->n_variables; i++) {
-                if (JMI_ABS(best_value) < JMI_ABS(set->temp[i])) {
-                    best_value = JMI_ABS(set->temp[i]);
+                if (JMI_ABS(best_value) < JMI_ABS(set->coefficent_matrix[i])) {
+                    best_value = JMI_ABS(set->coefficent_matrix[i]);
                     best_choice = set->variables_value_references[i];
                 }
             }
@@ -163,32 +192,21 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
             set->temp_algebraic[0] = best_choice;
         }
         
-        /*
-        for (i = 1; i < set->n_variables; i++) {
-            if (JMI_ABS(set->temp[i]) < min) {
-                second_min = min;
-                min = JMI_ABS(set->temp[i]);
-                index_alg = set->variables_value_references[i];
-            } else if(second_min == -1) {
-                second_min = JMI_ABS(set->temp[i]);
-            }
-        }
-        jmi_log_node(jmi->log, logInfo, "Info", "Comparing <min:%E> against <second_min:%E> in <set:%I>.",
-            min, second_min, index_set);
-        if (min < SAFETY_FACTOR*second_min) {
-            for (i = 0; i < set->n_states; i++) {
-                if (index_alg == set->state_value_references[i]) { 
-                    new_states = JMI_TRUE;
-                }
-            }
-        }
-        */
-        
         if (new_states == JMI_TRUE) {
             jmi_log_node(jmi->log, logInfo, "Info", "Found new dynamic states in <set:%I>. Changing algebraic to <real: #r%d#>.",
              index_set, best_choice);
         }
     } else {
+        int info = 0;
+        
+        memset(set->dgeqp3_jpvt, 0, set->n_variables * sizeof(int));
+        dgeqp3_(&set->n_algebraics, &set->n_variables, set->coefficent_matrix, &set->n_algebraics, set->dgeqp3_jpvt, set->dgeqp3_tau, set->dgeqp3_work, &set->dgeqp3_lwork, &info);
+        
+        if (info == 0) {
+            jmi_log_ints(jmi->log, node, logInfo, "pivoting", set->dgeqp3_jpvt, set->n_variables);
+            jmi_log_real_matrix(jmi->log, node, logInfo, "R", set->coefficent_matrix, set->n_algebraics, set->n_variables);
+        }
+        
         jmi_log_node(jmi->log, logError, "Error", "Trying to update the <set:%I> but the set is multi-dimensional which is currently not supported.",
              index_set);
     }
@@ -203,6 +221,16 @@ int jmi_dynamic_state_update_states(jmi_t* jmi, jmi_int_t index_set) {
     
     if (new_states == JMI_TRUE) {
         jmi_dynamic_state_perform_update(jmi, index_set);
+    }
+    
+    return JMI_OK;
+}
+
+int jmi_dynamic_state_update(jmi_t* jmi) {
+    int i;
+    
+    for (i = 0; i < jmi->n_dynamic_state_sets; i++) {
+        jmi_dynamic_state_update_states(jmi, i);
     }
     
     return JMI_OK;

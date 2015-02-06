@@ -27,24 +27,38 @@
 
 #include "jmi_types.h"
 
+/* Lapack functions */
+extern void dgeqp3_(int* M, int* N, double* A, int* LDA, int* JPVT, double* TAU, double* WORK, int* LWORK, int* INFO );
+
 typedef int (*jmi_dynamic_state_coefficents_func_t)(jmi_t* jmi, jmi_real_t* residual);
 
 struct jmi_dynamic_state_set_t {
     jmi_int_t n_variables;
     jmi_int_t n_states;
+    jmi_int_t n_algebraics;
     jmi_int_t *variables_value_references;
     jmi_int_t *state_value_references;
     jmi_int_t *ds_state_value_references;
     jmi_int_t *algebraic_value_references;
     jmi_int_t *ds_algebraic_value_references;
     jmi_int_t *temp_algebraic;
-    jmi_real_t *temp;
+    jmi_real_t *coefficent_matrix;
+    double* dgeqp3_work;
+    double* dgeqp3_tau;
+    int* dgeqp3_jpvt;
+    int dgeqp3_lwork;
     jmi_dynamic_state_coefficents_func_t coefficents;
 };
+
+int jmi_dynamic_state_copy_to_ds_values(jmi_t* jmi);
+
+int jmi_dynamic_state_copy_to_ds_values_single(jmi_t* jmi, jmi_int_t index_set);
 
 int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set);
 
 int jmi_dynamic_state_update_states(jmi_t* jmi, jmi_int_t index_set);
+
+int jmi_dynamic_state_update(jmi_t* jmi);
 
 int jmi_dynamic_state_verify_choice(jmi_t* jmi);
 
