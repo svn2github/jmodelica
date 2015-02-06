@@ -614,16 +614,6 @@ aspect Constructors {
         this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
-    /**
-     * Create a derivative variable with only the required children.
-     */
-    public FDynamicDerivativeVariable.FDynamicDerivativeVariable(FVariable var, DynamicStateSet set) {
-        this(var.getFVisibilityType().fullCopy(), var.getFTypePrefixVariability().fullCopy(), new Opt(), new List(),
-                (String) null, new Opt(), new Opt(), var.getFQName().fullCopy(), var.order(), set);
-        if (!var.isAbstractDerivativeVariable())
-            throw new IllegalArgumentException("Unable to construct FDynamicDerivativeVariable since the supplied variable isn't a derivative.");
-    }
-    
 	/**
 	 * Create a pre variable for a discrete real variable.
 	 */

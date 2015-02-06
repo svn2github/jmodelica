@@ -251,12 +251,6 @@ aspect DynamicStateSelect{
         }
     }
     
-    rewrite FDerivativeVariable {
-        when (getMeIntegrated().isDynamicState() && order() == 1) to FDynamicDerivativeVariable {
-            return new FDynamicDerivativeVariable(this, getMeIntegrated().dynamicStateSet());
-        }
-    }
-    
     public class IndexReductionBiPGraph {
         public static class DSSet {
             public final Set<IndexReductionEq> eqns = new LinkedHashSet<IndexReductionEq>();

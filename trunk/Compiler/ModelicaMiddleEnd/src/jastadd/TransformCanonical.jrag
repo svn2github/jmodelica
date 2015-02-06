@@ -1490,13 +1490,24 @@ aspect TransformCanonical {
         root().flushAllRecursive();
     }
 
-	public FDerivativeVariable FVariable.createFDerivativeVariable() {
+	public FAbstractDerivativeVariable FVariable.createFDerivativeVariable() {
 	    throw new UnsupportedOperationException("Trying to create a derivative variable from the non real variable " + name() + "! Java class type: '" + getClass().getSimpleName() + "'");
 	}
 
-    public FDerivativeVariable FRealVariable.createFDerivativeVariable() {
-        FDerivativeVariable fdv = new FDerivativeVariable(getFVisibilityType().fullCopy(),
-                getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), order() + 1);
+    @Override
+    public FAbstractDerivativeVariable FRealVariable.createFDerivativeVariable() {
+        FAbstractDerivativeVariable fdv;
+        if (isDynamicState()) {
+            FDynamicDerivativeVariable var = new FDynamicDerivativeVariable();
+            var.setSet(dynamicStateSet());
+            fdv = var;
+        } else {
+            fdv = new FDerivativeVariable();
+        }
+        fdv.setFVisibilityType(getFVisibilityType().fullCopy());
+        fdv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+        fdv.setFQName(getFQName().fullCopy());
+        fdv.setOrder(order() + 1);
         fdv.setMeIntegrated(this);
         this.setMeDifferentiated(fdv);
         fdv = dynamicVariable(fdv);
