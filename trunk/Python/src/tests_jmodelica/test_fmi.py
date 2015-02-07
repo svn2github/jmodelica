@@ -154,6 +154,13 @@ class Test_FMUModelCS1:
         cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
         cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
         cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs")
+        cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs")
+    
+    @testattr(fmi = True)
+    def test_asseert_fail(self):
+        model = load_fmu(Test_FMUModelCS1.assert_fail)
+        
+        nose.tools.assert_raises(Exception, model.simulate)
     
     @testattr(fmi = True)
     def test_terminate(self):
