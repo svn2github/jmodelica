@@ -926,10 +926,10 @@ _ds.1.s0 := 0.0
                 methodName="stateDiagnosticsObj",
                 methodResult="
 States:
-  Set of dynamic states with 1 states:
+  Set of dynamic states with 1 states and 1 algebraics:
     Real _der_x
     Real _der_y
-  Set of dynamic states with 1 states:
+  Set of dynamic states with 1 states and 1 algebraics:
     Real x(start = L) \"Cartesian x coordinate\"
     Real y \"Cartesian x coordinate\"
 "),TransformCanonicalTestCase(

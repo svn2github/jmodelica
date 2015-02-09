@@ -19575,7 +19575,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 end SpatialDist2;
 
     package DynamicStates
-    
+        
         model ThreeDSOneEq
             // a1 a2 a3
             // +  +  +
@@ -19591,7 +19591,7 @@ end SpatialDist2;
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="DynamicStates_ThreeDSOneEq",
-            description="Test code gen for dynamic state model with three states in and one equation",
+            description="Test code gen for dynamic state model with three states in one equation",
             dynamic_states=true,
             template="
 n_real_x = $n_real_x$
@@ -19674,7 +19674,101 @@ static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
 
 ")})));
         end ThreeDSOneEq;
-            
+        
+        model ThreeDSTwoEqWithConstantCoefficients
+            // a1 a2 a3
+            // +  +  *
+            // *  +  +
+            Real a1;
+            Real a2;
+            Real a3;
+            Real b;
+        equation
+            der(a1) = b;
+            der(a2) + der(a3) = b;
+            a1^2 + a2^2 + a3 = 1;
+            a1 + a2^2 + a3^2 = 1;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="DynamicStates_ThreeDSTwoEqWithConstantCoefficients",
+            description="Test code gen for dynamic state model with three states in two equation with some constant coefficients",
+            dynamic_states=true,
+            template="
+n_real_x = $n_real_x$
+n_dynamic_sets = $dynamic_state_n_sets$
+$C_dynamic_state_coefficients$
+$C_dynamic_state_add_call$
+$C_ode_derivatives$
+",
+            generatedCode="
+n_real_x = 1
+n_dynamic_sets = 1
+static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
+    memset(res, 0, 6 * sizeof(jmi_real_t));
+    res[0] = 1.0;
+    res[2] = 2 * _a1_0;
+    res[4] = 2 * _a2_1;
+    res[1] = 2 * _a3_2;
+    res[3] = 1.0;
+    res[5] = 2 * _a2_1;
+}
+
+
+    {
+        int* ds_var_value_refs = calloc(3, sizeof(int));
+        int* ds_state_value_refs = calloc(1, sizeof(int));
+        int* ds_algebraic_value_refs = calloc(2, sizeof(int));
+        ds_var_value_refs[0] = 4; /* a3 */
+        ds_var_value_refs[1] = 2; /* a1 */
+        ds_var_value_refs[2] = 3; /* a2 */
+        ds_state_value_refs[0] = 1; /* _ds.0.s0 */
+        ds_algebraic_value_refs[0] = 6; /* _ds.0.a0 */
+        ds_algebraic_value_refs[1] = 7; /* _ds.0.a1 */
+        jmi_dynamic_state_add_set(*jmi, 0, 3, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
+        free(ds_var_value_refs);
+        free(ds_state_value_refs);
+        free(ds_algebraic_value_refs);
+    }
+
+    jmi_ad_var_t tmp_1;
+    model_ode_guards(jmi);
+    /************* ODE section *********/
+    if (jmi->atInitial || jmi->atEvent) {
+        jmi_dynamic_state_update_states(jmi, 0);
+    }
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 3)) {
+        _a2_1 = __ds_0_s0_6;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
+        __ds_0_a0_4 = _a3_2;
+        __ds_0_a1_5 = _a1_0;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 2)) {
+        _a1_0 = __ds_0_s0_6;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[2]);
+        __ds_0_a0_4 = _a3_2;
+        __ds_0_a1_5 = _a2_1;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
+        _a3_2 = __ds_0_s0_6;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[3]);
+        __ds_0_a0_4 = _a1_0;
+        __ds_0_a1_5 = _a2_1;
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 3)) {
+        tmp_1 = _der_a2_9;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 2)) {
+        tmp_1 = _der_a1_8;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
+        tmp_1 = _der_a3_10;
+    }
+    _der__ds_0_s0_7 = tmp_1;
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    /********* Write back reinits *******/
+
+")})));
+        end ThreeDSTwoEqWithConstantCoefficients;
+        
         model Pendulum
             parameter Real L = 1 "Pendulum length";
             parameter Real g = 9.81 "Acceleration due to gravity";

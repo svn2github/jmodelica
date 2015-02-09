@@ -272,26 +272,28 @@ aspect DynamicStateSelect{
         
     }
 
-    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix, IndexReductionResult result) {
+    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
         Set<DSSet> dsSets = new LinkedHashSet<DSSet>();
         Map<IndexReductionEq, DSSet> dsLookup = new HashMap<IndexReductionEq, DSSet>();
         Queue<IndexReductionEq> worklist = new ArrayDeque<IndexReductionEq>();
-        SAP1 sap1 = new SAP1(dsLookup.keySet(), nonConstantCoefficientsMatrix);
-        SAP2 sap2 = new SAP2(dsLookup.keySet(), nonConstantCoefficientsMatrix, worklist);
+        SAP1 sap1 = new SAP1(dsLookup.keySet(), coefficientsMatrix);
+        SAP2 sap2 = new SAP2(dsLookup.keySet(), coefficientsMatrix, worklist);
         for (IndexReductionEq eqn : getEquations()) {
-            Map<IndexReductionVar, FExp> nonConstantCoefficients = nonConstantCoefficientsMatrix.get(eqn);
-            if (nonConstantCoefficients == null)
+            Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+            if (coefficients == null)
                 continue;
-            if (nonConstantCoefficients.containsKey(eqn.getMatching()))
+            Coefficient coff = coefficients.get(eqn.getMatching());
+            if (coff != null && coff.continuous)
                 worklist.add(eqn);
         }
         while (!worklist.isEmpty()) {
             IndexReductionEq eqn = worklist.poll();
             ASTNode.log.debug("Looking for DS in %s", eqn);
-            Map<IndexReductionVar, FExp> nonConstantCoefficients = nonConstantCoefficientsMatrix.get(eqn);
-            if (nonConstantCoefficients == null)
+            Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+            if (coefficients == null)
                 continue;
-            if (!nonConstantCoefficients.containsKey(eqn.getMatching()))
+            Coefficient coff = coefficients.get(eqn.getMatching());
+            if (coff == null || !coff.continuous)
                 continue;
             lightReset();
             ASTNode.log.debug("SAP1");
@@ -300,7 +302,8 @@ aspect DynamicStateSelect{
             ASTNode.log.debug("Path not found");
             DSSet set = new DSSet();
             for (IndexReductionVar var : eqn.getVariables()) {
-                if (!nonConstantCoefficients.containsKey(var))
+                Coefficient varCoff = coefficients.get(var);
+                if (varCoff == null || !varCoff.continuous)
                     continue;
                 ASTNode.log.debug("Checking ncc variable %s", var);
                 if (var.getMatching() == eqn) {
@@ -360,11 +363,12 @@ aspect DynamicStateSelect{
             int i = 0;
             for (IndexReductionEq eqn : set.eqns) {
                 int j = 0;
-                Map<IndexReductionVar, FExp> coefficients = nonConstantCoefficientsMatrix.get(eqn);
+                Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
                 if (coefficients == null)
                     continue; // Yes this can happen :)
                 for (IndexReductionVar var : set.vars) {
-                    set.coefficients[i][j] = coefficients.get(var);
+                    Coefficient coff = coefficients.get(var);
+                    set.coefficients[i][j] = coff == null ? null : coefficients.get(var).exp;
                     if (set.coefficients[i][j] != null && set.coefficients[i][j].isNoExp())
                         throw new IndexReductionException("Dynamic state construction failed due to non scalar derivative for variable " + var.getName() + " when differentiating: \n" + eqn.getEquation());
                     j++;
@@ -382,11 +386,11 @@ aspect DynamicStateSelect{
         
         public class SAP1 extends StandardAugmentingPath {
             private final Set<IndexReductionEq> dsEqns;
-            private final Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nccMap;
+            private final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix;
             
-            public SAP1(Set<IndexReductionEq> dsEqns, Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nccMap) {
+            public SAP1(Set<IndexReductionEq> dsEqns, Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix) {
                 this.dsEqns = dsEqns;
-                this.nccMap = nccMap;
+                this.coefficientsMatrix = coefficientsMatrix;
             }
 
             @Override
@@ -399,23 +403,25 @@ aspect DynamicStateSelect{
 
             @Override
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
-                Map<IndexReductionVar, FExp> nccSet =  nccMap.get(eqn);
-                if (nccSet != null && nccSet.containsKey(var))
-                    return false;
-                else
-                    return super.shouldVisit(eqn, var);
+                Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
+                if (coefficients != null) {
+                    Coefficient coff = coefficients.get(var);
+                    if (coff != null && coff.continuous)
+                        return false;
+                }
+                return super.shouldVisit(eqn, var);
             }
         }
 
         public class SAP2 extends AugmentingPathAlgorithm<Collection<IndexReductionEq>> {
             private final Set<IndexReductionEq> dsEqns;
-            private final Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nccMap;
+            private final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix;
             private final Queue<IndexReductionEq> worklist;
             
-            public SAP2(Set<IndexReductionEq> dsEqns, Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nccMap, Queue<IndexReductionEq> worklist) {
+            public SAP2(Set<IndexReductionEq> dsEqns, Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, Queue<IndexReductionEq> worklist) {
                 super(Collections.unmodifiableCollection(new ArrayList<IndexReductionEq>()));
                 this.dsEqns = dsEqns;
-                this.nccMap = nccMap;
+                this.coefficientsMatrix = coefficientsMatrix;
                 this.worklist = worklist;
             }
             
@@ -449,8 +455,11 @@ aspect DynamicStateSelect{
             @Override
             protected void match(IndexReductionEq eqn, IndexReductionVar var) {
                 super.match(eqn, var);
-                Map<IndexReductionVar, FExp> nccSet = nccMap.get(eqn);
-                if (nccSet != null && nccSet.containsKey(var)) {
+                Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+                if (coefficients == null)
+                    return;
+                Coefficient coff = coefficients.get(var);
+                if (coff != null && coff.continuous) {
                     ASTNode.log.debug("Adding %s to worklist", eqn);
                     worklist.add(eqn);
                 }

@@ -221,7 +221,7 @@ aspect IndexReduction {
                         if (var.getNumber() != 0)
                             continue;
                         DynamicStateSet set = var.getSet();
-                        sb.append(String.format("  Set of dynamic states with %d states:\n", set.numStates()));
+                        sb.append(String.format("  Set of dynamic states with %d states and %d algebraics:\n", set.numStates(), set.numAlgebraics()));
                         for (FVariable state : set.fVars()) {
                             sb.append(state.prettyPrint("    "));
                             sb.append('\n');
@@ -1004,12 +1004,12 @@ aspect IndexReduction {
             // Compute weights for variables based on state select, linearity
             // and other attributes.
             Map<IndexReductionVar, IndexReductionCost> weights = new HashMap<IndexReductionVar, IndexReductionCost>();
-            Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix = new HashMap<IndexReductionEq, Map<IndexReductionVar, FExp>>();
+            Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix = new HashMap<IndexReductionEq, Map<IndexReductionVar, Coefficient>>();
             for (IndexReductionVar var : getVariables()) {
                 FVariable fv = var.getVariable();
-                int linearity = calculateLinearityWeight(var, nonConstantCoefficientsMatrix);
+                int linearity = calculateLinearityWeight(var, coefficientsMatrix);
                 if (var.getMeIntegrated() != null)
-                    linearity += calculateLinearityWeight(var.getMeIntegrated(), nonConstantCoefficientsMatrix);
+                    linearity += calculateLinearityWeight(var.getMeIntegrated(), coefficientsMatrix);
                 boolean fixed = fv.getTopIntegrated().fixedAttribute();
                 IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), linearity);
                 ASTNode.log.info("Weight: %s %s", var, weight);
@@ -1021,7 +1021,7 @@ aspect IndexReduction {
             ASTNode.log.info(printMatchingObj());
             Set<IndexReductionVar> dsVars = Collections.emptySet();
             if (computeDynamicStates)
-                dsVars = computeDynamicStateSets(nonConstantCoefficientsMatrix, result);
+                dsVars = computeDynamicStateSets(coefficientsMatrix, result);
             ASTNode.log.info(printMatchingObj());
             
             // Step 5: prepare for next iteration
@@ -1075,14 +1075,26 @@ aspect IndexReduction {
         return result;
     }
     
-    public int IndexReductionBiPGraph.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix) {
+    public class IndexReductionBiPGraph {
+        public static class Coefficient {
+            public final FExp exp;
+            public final boolean continuous;
+            
+            public Coefficient(FExp exp, boolean continuous) {
+                this.exp = exp;
+                this.continuous = continuous;
+            }
+        }
+    }
+    
+    public int IndexReductionBiPGraph.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix) {
         int weight = 0;
         for (IndexReductionEq eqn : getEquations())
-            weight += eqn.calculateLinearityWeight(var, nonConstantCoefficientsMatrix);
+            weight += eqn.calculateLinearityWeight(var, coefficientsMatrix);
         return weight;
     }
     
-    public int IndexReductionEq.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, FExp>> nonConstantCoefficientsMatrix) {
+    public int IndexReductionEq.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, IndexReductionBiPGraph.Coefficient>> coefficientsMatrix) {
         try {
             FVariable variable = var.getVariable();
             if (!getEquation().referencedFVariables().contains(variable))
@@ -1091,17 +1103,15 @@ aspect IndexReduction {
             FTypePrefixVariability variability = ASTNode.fConstant();
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
+            Map<IndexReductionVar, IndexReductionBiPGraph.Coefficient> coefficients = coefficientsMatrix.get(this);
+            if (coefficients == null) {
+                coefficients = new HashMap<IndexReductionVar, IndexReductionBiPGraph.Coefficient>();
+                coefficientsMatrix.put(this, coefficients);
+            }
+            FAbstractEquation eqn = feqds.iterator().next();
+            coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), !variability.lessOrEqual(ASTNode.fParameter())));
+            
             if (!variability.lessOrEqual(ASTNode.fParameter())) {
-                Map<IndexReductionVar, FExp> coefficients = nonConstantCoefficientsMatrix.get(this);
-                if (coefficients == null) {
-                    coefficients = new HashMap<IndexReductionVar, FExp>();
-                    nonConstantCoefficientsMatrix.put(this, coefficients);
-                }
-                FAbstractEquation eqn = feqds.iterator().next();
-                if (feqds.size() > 1)
-                    coefficients.put(var, new FNoExp());
-                else
-                    coefficients.put(var, eqn.asSubExp());
                 return 2;
             } else if (!variability.lessOrEqual(ASTNode.fConstant()))
                 return 0;
