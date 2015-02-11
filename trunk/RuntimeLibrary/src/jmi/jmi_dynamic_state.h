@@ -39,10 +39,13 @@ struct jmi_dynamic_state_set_t {
     jmi_int_t *variables_value_references;
     jmi_int_t *state_value_references;
     jmi_int_t *ds_state_value_references;
+    jmi_int_t *ds_state_value_local_index;
     jmi_int_t *algebraic_value_references;
     jmi_int_t *ds_algebraic_value_references;
+    jmi_int_t *ds_algebraic_value_local_index;
     jmi_int_t *temp_algebraic;
     jmi_real_t *coefficent_matrix;
+    jmi_real_t *sub_coefficent_matrix;
     double* dgeqp3_work;
     double* dgeqp3_tau;
     int* dgeqp3_jpvt;
@@ -50,23 +53,81 @@ struct jmi_dynamic_state_set_t {
     jmi_dynamic_state_coefficents_func_t coefficents;
 };
 
+/**
+ * \brief Copy the values of the choosen states and algebraics to the ds variables.
+ *
+ * @param jmi A jmi_t struct.
+ */
 int jmi_dynamic_state_copy_to_ds_values(jmi_t* jmi);
 
+/**
+ * \brief Copy the values of the choosen states and algebraics to the ds variables in a set.
+ *
+ * @param jmi A jmi_t struct.
+ * @param index_set The set to copy.
+ */
 int jmi_dynamic_state_copy_to_ds_values_single(jmi_t* jmi, jmi_int_t index_set);
 
+/**
+ * \brief Perform an actual update of in a set.
+ *
+ * @param jmi A jmi_t struct.
+ * @param index_set The set to update
+ */
 int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set);
 
+/**
+ * \brief Check for and update the states in a set.
+ *
+ * @param jmi A jmi_t struct.
+ * @param index_set The set to check and update
+ */
 int jmi_dynamic_state_update_states(jmi_t* jmi, jmi_int_t index_set);
 
+/**
+ * \brief Check for and update the states in ALL sets.
+ *
+ * @param jmi A jmi_t struct.
+ */
 int jmi_dynamic_state_update(jmi_t* jmi);
 
+/**
+ * \brief Verify the choosen states in ALL sets.
+ *
+ * @param jmi A jmi_t struct.
+ */
 int jmi_dynamic_state_verify_choice(jmi_t* jmi);
 
+/**
+ * \brief Deletes a ynamic state set.
+ *
+ * @param jmi A jmi_t struct.
+ * @param index The set index
+ */
 int jmi_dynamic_state_delete_set(jmi_t* jmi, jmi_int_t index);
 
-/* int jmi_dynamic_state_add_set(jmi_t* jmi, jmi_int_t index_set, jmi_int_t n_variables, jmi_int_t n_states, jmi_int_t* value_references, jmi_dynamic_state_coefficents_func_t coefficents); */
+/**
+ * \brief Adds a new dynamic state set.
+ *
+ * @param jmi A jmi_t struct.
+ * @param index The set index
+ * @param n_variables The number of variables in the set
+ * @param n_states The number of states to choose from the set
+ * @param variable_value_references The variables value references in the set
+ * @param state_value_references The value references to the dynamic states choosen (i.e. the ds.s*.s* variables)
+ * @param algebraic_value_references The value references to the dynamic algebraics choosen (i.e. the ds.s*.a* variables)
+ * @param coefficients The coefficent matrix.
+ */
 int jmi_dynamic_state_add_set(jmi_t* jmi, int index, int n_variables, int n_states, int* variable_value_references, int* state_value_references, int* algebraic_value_references, jmi_dynamic_state_coefficents_func_t coefficents); 
 
+/**
+ * \brief Check if the provided states are choosen as states.
+ *
+ * @param jmi A jmi_t struct.
+ * @param index_set The set to look for states
+ * @param ... The states to verify
+ * @return JMI_TRUE if the states are choosen, otherwise JMI_FALSE
+ */
 int jmi_dynamic_state_check_is_state(jmi_t* jmi, jmi_int_t index_set, ...);
 
 
