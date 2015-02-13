@@ -253,13 +253,15 @@ aspect DynamicStateSelect{
     
     public class IndexReductionBiPGraph {
         public static class DSSet {
+            private static Enumerator e = new Enumerator();
             public final Set<IndexReductionEq> eqns = new LinkedHashSet<IndexReductionEq>();
             public final Set<IndexReductionVar> vars = new LinkedHashSet<IndexReductionVar>();
+            public final int id = e.next();
             public FExp[][] coefficients;
             
             public String toString() {
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("%d equations and %d variables:\n", eqns.size(), vars.size()));
+                sb.append(String.format("Set %d, %d equations and %d variables:\n", id, eqns.size(), vars.size()));
                 sb.append("  Equations:\n");
                 for (IndexReductionEq eqn : eqns)
                     sb.append("    " + eqn + "\n");
@@ -273,6 +275,8 @@ aspect DynamicStateSelect{
     }
 
     public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+        ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, false));
+        ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, true));
         Set<DSSet> dsSets = new LinkedHashSet<DSSet>();
         Map<IndexReductionEq, DSSet> dsLookup = new HashMap<IndexReductionEq, DSSet>();
         Queue<IndexReductionEq> worklist = new ArrayDeque<IndexReductionEq>();
@@ -296,21 +300,26 @@ aspect DynamicStateSelect{
             if (coff == null || !coff.continuous)
                 continue;
             lightReset();
-            ASTNode.log.debug("SAP1");
+            ASTNode.log.debug("  SAP1");
             if (sap1.augmentingPath(eqn))
                 continue;
-            ASTNode.log.debug("Path not found");
-            DSSet set = new DSSet();
+            DSSet set = dsLookup.get(eqn);
+            if (set == null)
+                set = new DSSet();
+            Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
+            ASTNode.log.debug("    Path not found, set %d", set.id);
             for (IndexReductionVar var : eqn.getVariables()) {
                 Coefficient varCoff = coefficients.get(var);
                 if (varCoff == null || !varCoff.continuous)
                     continue;
-                ASTNode.log.debug("Checking ncc variable %s", var);
+                ASTNode.log.debug("  Checking ncc variable %s", var);
                 if (var.getMatching() == eqn) {
                     set.vars.add(var);
+                    ASTNode.log.debug("    adding %s to set %d", var, set.id);
                 } else if (var.getMatching() == null) {
                     set.vars.add(var);
                     var.setMatching(eqn);
+                    ASTNode.log.debug("    adding %s to set %d", var, set.id);
                 } else {
                     lightReset();
                     DSSet otherSet = dsLookup.get(var.getMatching());
@@ -320,39 +329,47 @@ aspect DynamicStateSelect{
                     noVisit.addAll(set.vars);
                     noVisit.add(eqn.getMatching());
                     noVisit.add(var);
-                    ASTNode.log.debug("SAP2 %s", var.getMatching());
+                    ASTNode.log.debug("    SAP2 %s", var.getMatching());
                     Collection<IndexReductionEq> res = sap2.augmentingPath(var.getMatching(), noVisit);
                     if (res == sap2.trueValue()) {
-                        ASTNode.log.debug("Path found");
+                        ASTNode.log.debug("      Path found");
                         set.vars.add(var);
                         var.setMatching(eqn);
+                        ASTNode.log.debug("      adding %s to set %d", var, set.id);
                     } else {
-                        ASTNode.log.debug("Path not found");
-                        set.eqns.addAll(res);
+                        ASTNode.log.debug("      Path not found");
+                        for (IndexReductionEq resEqn : res)
+                            ASTNode.log.debug("      Adding %s to set.eqns", resEqn);
+                        otherEqns.addAll(res);
                     }
                 }
             }
-            if (set.vars.size() >= 2 || set.eqns.size() > 0) {
-                Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
-                for (IndexReductionEq otherEqn : set.eqns) {
+            if (set.vars.size() >= 2 || set.eqns.size() > 0 || otherEqns.size() > 0) {
+                for (IndexReductionEq otherEqn : otherEqns) {
                     DSSet otherSet = dsLookup.remove(otherEqn);
                     if (otherSet != null) {
+                        ASTNode.log.debug("  Merging with set %d from %s", otherSet.id, otherEqn);
                         dsSets.remove(otherSet);
-                        for (IndexReductionVar memberVar : otherSet.vars)
+                        for (IndexReductionVar memberVar : otherSet.vars) {
                             set.vars.add(memberVar);
+                            ASTNode.log.debug("    adding %s to set %d", memberVar, set.id);
+                        }
                         for (IndexReductionEq memberEq : otherSet.eqns) {
-                            otherEqns.add(memberEq);
+                            set.eqns.add(memberEq);
                             dsLookup.put(memberEq, set);
                         }
                     } else {
+                        set.eqns.add(otherEqn);
                         dsLookup.put(otherEqn, set);
                         set.vars.add(otherEqn.getMatching());
                     }
                 }
-                set.eqns.addAll(otherEqns);
                 set.eqns.add(eqn);
                 dsLookup.put(eqn, set);
                 dsSets.add(set);
+                ASTNode.log.debug("  Set added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
+            } else {
+                ASTNode.log.debug("  Set not added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
             }
         }
         
@@ -380,6 +397,39 @@ aspect DynamicStateSelect{
             vars.addAll(set.vars);
         }
         return vars;
+    }
+    
+    public Object IndexReductionBiPGraph.printCoefficientsObj(final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, final boolean printExpressions) {
+        return new Object() {
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                for (IndexReductionVar var : getVariables()) {
+                    sb.append('\t');
+                    sb.append(var);
+                }
+                sb.append('\n');
+                for (IndexReductionEq eqn : getEquations()) {
+                    sb.append(eqn);
+                    Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+                    for (IndexReductionVar var : getVariables()) {
+                        sb.append('\t');
+                        Coefficient coff = coefficients.get(var);
+                        if (coff == null)
+                            continue;
+                        if (printExpressions) {
+                            sb.append(coff.exp);
+                        } else {
+                            if (coff.continuous)
+                                sb.append('+');
+                            else
+                                sb.append('*');
+                        }
+                    }
+                    sb.append('\n');
+                }
+                return sb.toString();
+            }
+        };
     }
     
     public class IndexReductionBiPGraph {
@@ -460,7 +510,7 @@ aspect DynamicStateSelect{
                     return;
                 Coefficient coff = coefficients.get(var);
                 if (coff != null && coff.continuous) {
-                    ASTNode.log.debug("Adding %s to worklist", eqn);
+                    ASTNode.log.debug("      Adding %s to worklist", eqn);
                     worklist.add(eqn);
                 }
             }
@@ -502,6 +552,7 @@ aspect DynamicStateSelect{
             FVariable[][][] setCombinations = new FVariable[setVarMap.size()][][];
             int setCounter = 0;
             int totalNumAlgebraics = 0;
+            int totalNumCombinations = 1;
             Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
             for (Map.Entry<DynamicStateSet, FDynamicAlgebraicVariable[]> entry : setVarMap.entrySet()) {
                 boolean allSet = true;
@@ -531,8 +582,11 @@ aspect DynamicStateSelect{
                 setCombinations[setCounter] = set.algebraicCombinations();
                 allDynamicStates.addAll(set.fVarsColl());
                 totalNumAlgebraics += set.numAlgebraics();
+                totalNumCombinations *= set.numCombinations();
                 setCounter++;
             }
+            if (totalNumCombinations > 42)
+                throw new BLTException("Ouch! There are more than 42 combinations for the dynamic states, there were " + totalNumCombinations + " combinations!");
             Collection<DynamicStateBLT> blts = new ArrayList<DynamicStateBLT>();
             for (FVariable[] combination : combineDSCombinations(setCombinations, totalNumAlgebraics)) {
                 StringBuilder sb = new StringBuilder();

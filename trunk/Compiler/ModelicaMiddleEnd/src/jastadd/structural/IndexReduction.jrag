@@ -1120,7 +1120,7 @@ aspect IndexReduction {
     }
     
     syn FExp FAbstractEquation.asSubExp() = new FNoExp();
-    eq FEquation.asSubExp() = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
+    eq FEquation.asSubExp() = getLeft().dynamicFExp(new FSubExp(getLeft().fullCopy(), getRight().fullCopy()));
     
     public void IndexReductionBiPGraph.insert(IndexReductionEq eqn) {
         equationMap.put(eqn.getName(), eqn);
