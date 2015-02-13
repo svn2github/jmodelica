@@ -342,7 +342,6 @@ int cvDlsDenseDQJac(long int N, realtype t,
   N_Vector ftemp, jthCol;
   long int j;
   int retval = 0;
-  int forward_diff = 1;
 
   CVodeMem cv_mem;
   CVDlsMem cvdls_mem;
@@ -369,7 +368,7 @@ int cvDlsDenseDQJac(long int N, realtype t,
            (MIN_INC_MULT * ABS(h) * uround * N * fnorm) : ONE;
 
   for (j = 0; j < N; j++) {
-    forward_diff = 1;
+
     /* Generate the jth col of J(tn,y) */
 
     N_VSetArrayPointer(DENSE_COL(Jac,j), jthCol);
@@ -380,19 +379,7 @@ int cvDlsDenseDQJac(long int N, realtype t,
 
     retval = f(t, y, ftemp, user_data);
     nfeDQ++;
-    if (retval != 0) { /* Forward difference failed, trying backward */
-        forward_diff = 0;
-        
-        y_data[j] = yjsaved;
-        y_data[j] -= inc;
-        
-        retval = f(t, y, ftemp, user_data);
-        nfeDQ++;
-        
-        if (retval != 0) {
-            break;
-        }
-    }
+    if (retval != 0) break;
     
     y_data[j] = yjsaved;
 
