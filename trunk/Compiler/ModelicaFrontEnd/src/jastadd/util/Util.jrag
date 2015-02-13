@@ -479,6 +479,9 @@ aspect FileNames {
     public String Root.fileName() { 
     	return fName; 
     }
+    public String LibNode.fileName() {
+        return getFileName();
+    }
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");

@@ -1084,8 +1084,11 @@ public class ModelicaCompiler {
         
         log.info("Checking for errors...");
         InstClassDecl icd = ipr.instantiateModel(cl);
-        icd.checkErrorsInModelInstance(cl, target.getCheckType());
-        handleCompilerWarnings(sr.collectWarnings());
+        try {
+            icd.checkErrorsInModelInstance(cl, target.getCheckType());
+        } finally {
+            handleCompilerWarnings(sr.collectWarnings());
+        }
         
         hookModelInstantiatied(icd);
         ASTNode.endStep("instantiateModel()");

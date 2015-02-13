@@ -57,6 +57,9 @@ aspect Library {
             log.info("Reading file: " + fileName);
             SourceRoot sr = ParserHandler.parseFile(fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
+            if (entity == null) {
+                return new StoredDefinition();
+            }
             entity.setFileName(fileName);
             if (isStructured) {
                 FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
