@@ -242,7 +242,7 @@ class TestAssertEqu1(SimulationTest):
     @testattr(stddist = True)
     def test_simulate(self):
         try:
-            self.run()
+            self.run(cvode_options={"minh":1e-15})
             assert False, 'Simulation not stopped by failed assertions'
         except CVodeError, e:
             self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
@@ -283,7 +283,7 @@ class TestAssertFunc(SimulationTest):
     @testattr(stddist = True)
     def test_simulate(self):
         try:
-            self.run()
+            self.run(cvode_options={"minh":1e-15})
             assert False, 'Simulation not stopped by failed assertions'
         except CVodeError, e:
             self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
@@ -323,7 +323,7 @@ class TestModelicaError:
         fmu_name = compile_fmu(cpath, TestModelicaError.fpath)
         model = load_fmu(fmu_name)
         try:
-            model.simulate(final_time = 3)
+            model.simulate(final_time = 3, options={"CVode_options":{"minh":1e-15}})
             assert False, 'Simulation not stopped by calls to ModelicaError()'
         except CVodeError, e:
             assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
