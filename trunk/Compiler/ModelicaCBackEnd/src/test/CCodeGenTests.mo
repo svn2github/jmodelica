@@ -11255,31 +11255,32 @@ $C_DAE_event_indicator_residuals$
 ",
             generatedCode="
     model_ode_guards(jmi);
-/************* ODE section *********/
-/************ Real outputs *********/
-/****Integer and boolean outputs ***/
-/**** Other variables ***/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
     _y_1 = _time;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(_temp_1_3, _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch(_y_1 - (_x_0 * 3), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_temp_2_4, _sw(1), jmi->events_epsilon, JMI_REL_LT);
+        _sw(1) = jmi_turn_switch(_y_1 - 1 - (_x_0), _sw(1), jmi->events_epsilon, JMI_REL_LT);
     }
     _x_0 = 1;
     _temp_1_3 = _y_1 - _x_0 * 3;
     _temp_2_4 = _y_1 - 1 - _x_0;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(_temp_1_3, _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch(_y_1 - (_x_0 * 3), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_temp_2_4, _sw(1), jmi->events_epsilon, JMI_REL_LT);
+        _sw(1) = jmi_turn_switch(_y_1 - 1 - (_x_0), _sw(1), jmi->events_epsilon, JMI_REL_LT);
     }
     _b_2 = LOG_EXP_OR(_sw(0), _sw(1));
-/********* Write back reinits *******/
+    /********* Write back reinits *******/
 
-    (*res)[0] = _temp_1_3;
-    (*res)[1] = _temp_2_4;
+    (*res)[0] = _y_1 - (_x_0 * 3);
+    (*res)[1] = _y_1 - 1 - (_x_0);
+
 ")})));
 end Algorithm12;
 

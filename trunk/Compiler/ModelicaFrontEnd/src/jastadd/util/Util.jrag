@@ -1596,26 +1596,6 @@ aspect Sorting {
 
 aspect GeneralHelpers {
 
-    abstract public FExp FExp.fullCopy();
-    abstract public FQName FQName.fullCopy();
-    abstract public Access Access.fullCopy();
-    abstract public CommonAccess CommonAccess.fullCopy();
-    abstract public InstAccess InstAccess.fullCopy();
-    abstract public InstNamedAccess InstNamedAccess.fullCopy();
-    abstract public InstScalarAccess InstScalarAccess.fullCopy();
-    abstract public InstArrayAccess InstArrayAccess.fullCopy();
-    abstract public VisibilityType VisibilityType.fullCopy();
-    abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
-    abstract public InstFunctionArgument InstFunctionArgument.fullCopy();
-    abstract public FStatement FStatement.fullCopy();
-    abstract public FEquationType FEquationType.fullCopy();
-    abstract public FType FType.fullCopy();
-    abstract public FVisibilityType FVisibilityType.fullCopy();
-    abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
-    abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
-    abstract public FSubscript FSubscript.fullCopy();
-    abstract public CommonForIndex CommonForIndex.fullCopy();
-
     abstract public FExp FExp.copy();
     abstract public InstAccess InstAccess.copy();
 

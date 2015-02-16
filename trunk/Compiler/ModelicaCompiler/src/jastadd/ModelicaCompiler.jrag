@@ -2434,7 +2434,7 @@ public abstract class CCompilerDelegator {
 		return (buf.length() == 0) ? null : buf.toString();
 	}
 	
-	protected static interface StringOperation {
+	interface StringOperation {
 		
 		public static final StringOperation NULL_OP = new StringOperation() {
 			public String op(String str) { return str; }

@@ -183,6 +183,7 @@ class TestAlgo1(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['b', 'r', 'i'])
         
+"""
 class TestAlgo2(SimulationTest):
 
     @classmethod
@@ -199,6 +200,7 @@ class TestAlgo2(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['y', 'z', 'a'])
+"""
         
 class TestAlgo3(SimulationTest):
 
