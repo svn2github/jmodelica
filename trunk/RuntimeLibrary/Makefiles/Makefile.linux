@@ -141,7 +141,8 @@ MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
 LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -lModelicaExternalC
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
-LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK) -lstdc++ -lm
+LIB_STD      = -lstdc++ -lm
+LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_STD)
 LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
@@ -165,7 +166,7 @@ ceval:
 
 ceval_: $(OBJS)
 	mkdir -p $(BINARY_BASE_DIR)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_CEVAL)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(LIBS_CEVAL) $(LIB_STD)
 	$(RM) $(OBJS)
 
 
