@@ -36,6 +36,7 @@ package IndexReduction
 		TransformCanonicalTestCase(
 			name="IndexReduction1a_PlanarPendulum",
 			description="Test of index reduction",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction1a_PlanarPendulum
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -86,6 +87,7 @@ end IndexReduction.IndexReduction1a_PlanarPendulum;
 		TransformCanonicalTestCase(
 			name="IndexReduction1b_PlanarPendulum",
 			description="Test of index reduction. This test exposes a nasty bug caused by rewrites of FDerExp:s in different order.",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction1b_PlanarPendulum
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -493,6 +495,7 @@ equation
             name="IndexReduction27_DerFunc",
             description="Test of index reduction",
             inline_functions="none",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.IndexReduction27_DerFunc
  parameter Real A[1,1] = 1 /* 1 */;
@@ -588,6 +591,7 @@ equation
 			name="IndexReduction28_Record",
 			description="Index reduction: function with record input & output",
 			inline_functions="none",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction28_Record
  parameter Real A[1,1] = 1 /* 1 */;
@@ -671,6 +675,7 @@ end IndexReduction28_Record;
 		TransformCanonicalTestCase(
 			name="IndexReduction30_PlanarPendulum_StatePrefer",
 			description="Test of index reduction",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction30_PlanarPendulum_StatePrefer
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -725,6 +730,7 @@ model IndexReduction31_PlanarPendulum_StateAlways
 		TransformCanonicalTestCase(
 			name="IndexReduction31_PlanarPendulum_StateAlways",
 			description="Test of index reduction",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction31_PlanarPendulum_StateAlways
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -778,6 +784,7 @@ end IndexReduction.IndexReduction31_PlanarPendulum_StateAlways;
 		TransformCanonicalTestCase(
 			name="IndexReduction32_PlanarPendulum_StatePreferAlways",
 			description="Test of index reduction",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferAlways
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -831,6 +838,7 @@ end IndexReduction.IndexReduction32_PlanarPendulum_StatePreferAlways;
 		TransformCanonicalTestCase(
 			name="IndexReduction32_PlanarPendulum_StatePreferNever",
 			description="Test of index reduction",
+            dynamic_states=false,
 			flatModel="
 fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -883,6 +891,7 @@ model IndexReduction32_PlanarPendulum_StateAvoidNever
         TransformCanonicalTestCase(
             name="IndexReduction32_PlanarPendulum_StateAvoidNever",
             description="Test of index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.IndexReduction32_PlanarPendulum_StateAvoidNever
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -1050,6 +1059,7 @@ model IndexReduction52
         TransformCanonicalTestCase(
             name="IndexReduction52",
             description="Test of complicated index reduction, alias elimination and function inlining. temp_1 and _der_temp_1 is the smoking gun in this test",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.IndexReduction52
  Real x;
@@ -1458,6 +1468,7 @@ algorithm
         TransformCanonicalTestCase(
             name="AlgorithmVariability1",
             description="Test so that variability calculations are done propperly for algorithms",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.AlgorithmVariability1
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -1748,6 +1759,7 @@ equation
         TransformCanonicalTestCase(
             name="NonDiffArgsTest1",
             description="Test so that noDerivative and zeroDerivative augmenting are ignored in augmenting path",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.NonDiffArgsTest1
  Real x;
@@ -1844,6 +1856,7 @@ equation
         TransformCanonicalTestCase(
             name="NonDiffArgsTest2",
             description="Test so that noDerivative and zeroDerivative augmenting are ignored in augmenting path",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.NonDiffArgsTest2
  Real x;
@@ -2438,6 +2451,7 @@ equation
         TransformCanonicalTestCase(
             name="DoubleDifferentiationWithSS1",
             description="Test double differentiation whit state select avoid or never during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.DoubleDifferentiationWithSS1
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
@@ -2609,6 +2623,7 @@ package FunctionInlining
         TransformCanonicalTestCase(
             name="FunctionInlining_Test1",
             description="Test function inlining during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test1
  Real x;
@@ -2683,6 +2698,7 @@ end IndexReduction.FunctionInlining.Test1;
         TransformCanonicalTestCase(
             name="FunctionInlining_Test2",
             description="Test function inlining during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test2
  Real x[1];
@@ -2782,6 +2798,7 @@ end IndexReduction.FunctionInlining.Test2;
         TransformCanonicalTestCase(
             name="FunctionInlining_Test3",
             description="Test function inlining during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test3
  Real x;
@@ -2864,6 +2881,7 @@ end IndexReduction.FunctionInlining.Test3;
         TransformCanonicalTestCase(
             name="FunctionInlining_Test4",
             description="Test function inlining during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test4
  Real x[1];
@@ -2972,6 +2990,7 @@ end IndexReduction.FunctionInlining.Test4;
         TransformCanonicalTestCase(
             name="FunctionInlining_Test5",
             description="Test function inlining during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test5
  Real x;
@@ -3046,6 +3065,7 @@ end IndexReduction.FunctionInlining.Test5;
         TransformCanonicalTestCase(
             name="FunctionInlining_Test6",
             description="Test function inlining during index reduction",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test6
  Real x;
@@ -3146,6 +3166,7 @@ end IndexReduction.FunctionInlining.Test6;
         TransformCanonicalTestCase(
             name="FunctionInlining_Test7",
             description="Test function inlining during index reduction. This test requires that temporary equations and variables (introduced during index reduction) are hidden from munkres.",
+            dynamic_states=false,
             flatModel="
 fclass IndexReduction.FunctionInlining.Test7
  Real x(stateSelect = StateSelect.prefer);

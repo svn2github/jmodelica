@@ -458,7 +458,7 @@ abstract public class OptionRegistry {
         DYNAMIC_STATES
             ("dynamic_states",
             compiler,
-            false,
+            true,
             "Experimental! Controls whether dynamic states should be calculated and generated."),
 
         // Runtime options

@@ -496,6 +496,7 @@ end Differentiation.Expressions.Pow;
         annotation(__JModelica(UnitTesting(tests={
             TransformCanonicalTestCase(
                 name="Expressions_Div1",
+                dynamic_states=false,
                 description="Test of index reduction",
                 flatModel="
 fclass Differentiation.Expressions.Div1
@@ -580,6 +581,7 @@ end Differentiation.Expressions.NoEvent;
             TransformCanonicalTestCase(
                 name="IMinExp",
                 description="Test of index reduction. Min expression.",
+                dynamic_states=false,
                 flatModel="
 fclass Differentiation.Expressions.MinExp
  Real x1;
@@ -610,6 +612,7 @@ end Differentiation.Expressions.MinExp;
             TransformCanonicalTestCase(
                 name="Expressions_MaxExp",
                 description="Test of index reduction. Max expression.",
+                dynamic_states=false,
                 flatModel="
 fclass Differentiation.Expressions.MaxExp
  Real x1;
@@ -711,6 +714,7 @@ end Differentiation.Expressions.DotSub;
             TransformCanonicalTestCase(
                 name="Expressions_DotMul",
                 description="Test of index reduction",
+                dynamic_states=false,
                 flatModel="
 fclass Differentiation.Expressions.DotMul
  Real x1[1];
@@ -743,6 +747,7 @@ end Differentiation.Expressions.DotMul;
             TransformCanonicalTestCase(
                 name="Expressions_DotDiv",
                 description="Test of index reduction",
+                dynamic_states=false,
                 flatModel="
 fclass Differentiation.Expressions.DotDiv
  Real x1[1];
@@ -905,6 +910,7 @@ end Differentiation.Expressions.FunctionCall1;
         TransformCanonicalTestCase(
             name="ComponentArray",
             description="Name for der variables from FQNameString",
+            dynamic_states=false,
             flatModel="
 fclass Differentiation.ComponentArray
  parameter Real m[1].L = 1 \"Pendulum length\" /* 1 */;
@@ -2121,6 +2127,7 @@ end Differentiation.AlgorithmDifferentiation.InitArray;
                 name="AlgorithmDifferentiation_RecordArray",
                 description="Test code gen of differentiated function with array of records #3611",
                 template="$C_functions$",
+                dynamic_states=false,
                 generatedCode="
 void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
@@ -2449,6 +2456,7 @@ end Differentiation.AlgorithmDifferentiation.DiscreteComponents;
             TransformCanonicalTestCase(
                 name="AlgorithmDifferentiation_PlanarPendulum",
                 description="Test differentiation of simple function twice",
+                dynamic_states=false,
                 flatModel="
 fclass Differentiation.AlgorithmDifferentiation.PlanarPendulum
  parameter Real L = 1 \"Pendulum length\" /* 1 */;
