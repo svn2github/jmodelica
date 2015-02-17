@@ -984,7 +984,7 @@ public class ModelicaCompiler {
 		    File f = new File(name);
 		    String name_tmp = name;
 		    if (f.isDirectory()) 
-		        name_tmp = LibNode.isStructuredLib(f) ? new File(f, LibNode.PACKAGE_FILE).getPath() : null;
+		        name_tmp = LibNode.packageFile(f);
             SourceRoot sr_tmp = (name_tmp != null) ? parseModel(name_tmp) : null;
             if (!options.getBooleanOption("ignore_within")) {
                 String lib = null;
