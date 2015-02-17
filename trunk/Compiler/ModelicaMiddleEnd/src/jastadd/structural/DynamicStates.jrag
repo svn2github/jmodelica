@@ -1,3 +1,5 @@
+import java.util.Map;
+
 /*
     Copyright (C) 2015 Modelon AB
 
@@ -207,6 +209,10 @@ aspect DynamicStateSelect{
     }
 
     public void FClass.applyDynamicStateResult(IndexReductionResult result) {
+        if (result.hasDSFailed()) {
+            warning("Unable to use dynamic states since there are too big sets. Using static states instead");
+            return;
+        }
         DynamicStateManager manager = getDynamicStateManager();
         for (IndexReductionBiPGraph.DSSet resSet : result.getDSSets()) {
             List<FIdUseExp> varList = new List<FIdUseExp>();
@@ -275,6 +281,13 @@ aspect DynamicStateSelect{
     }
 
     public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+        if (result.hasDSFailed())
+            return Collections.emptySet();
+        Map<IndexReductionVar, IndexReductionEq> initialMatching = new HashMap<IndexReductionVar, IndexReductionEq>();
+        for (IndexReductionVar var : getVariables())
+            initialMatching.put(var, var.getMatching());
+        
+        
         ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, false));
         ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, true));
         Set<DSSet> dsSets = new LinkedHashSet<DSSet>();
@@ -373,8 +386,29 @@ aspect DynamicStateSelect{
             }
         }
         
-        Set<IndexReductionVar> vars = new HashSet<IndexReductionVar>();
+        boolean skipDynamicStates = false;
+        for (DSSet set : dsSets) {
+            if (set.eqns.size() > 2 || set.vars.size() > 8) {
+                ASTNode.log.info("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
+                ASTNode.log.info(set);
+                skipDynamicStates = true;
+            }
+        }
         
+        if (skipDynamicStates) {
+            ASTNode.log.info("Resetting matchings");
+            for (Map.Entry<IndexReductionVar, IndexReductionEq> entry : initialMatching.entrySet()) {
+                IndexReductionVar var = entry.getKey();
+                IndexReductionEq eqn = entry.getValue();
+                var.setMatching(eqn);
+                if (eqn != null)
+                    eqn.setMatching(var);
+            }
+            result.markDSAsFailed();
+            return Collections.emptySet();
+        }
+        
+        Set<IndexReductionVar> vars = new HashSet<IndexReductionVar>();
         for (DSSet set : dsSets) {
             set.coefficients = new FExp[set.eqns.size()][set.vars.size()];
             int i = 0;
@@ -431,7 +465,25 @@ aspect DynamicStateSelect{
             }
         };
     }
-    
+
+    private Collection<IndexReductionBiPGraph.DSSet> IndexReductionResult.dsSets = new ArrayList<IndexReductionBiPGraph.DSSet>();
+
+    public void IndexReductionResult.addDSSet(IndexReductionBiPGraph.DSSet set) {
+        dsSets.add(set);
+    }
+
+    public Collection<IndexReductionBiPGraph.DSSet> IndexReductionResult.getDSSets() {
+        return dsSets;
+    }
+
+    public void IndexReductionResult.markDSAsFailed() {
+        dsSets = null;
+    }
+
+    public boolean IndexReductionResult.hasDSFailed() {
+        return dsSets == null;
+    }
+
     public class IndexReductionBiPGraph {
         
         public class SAP1 extends StandardAugmentingPath {

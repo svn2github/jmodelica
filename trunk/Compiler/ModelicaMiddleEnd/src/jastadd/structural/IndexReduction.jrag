@@ -1306,23 +1306,18 @@ aspect IndexReduction {
 
         private java.util.List<FAbstractEquation> addedEquations;
         private java.util.List<FVariable> dummyDerivatives;
-        private Collection<IndexReductionBiPGraph.DSSet> dsSets = new ArrayList<IndexReductionBiPGraph.DSSet>();
 
         public IndexReductionResult() {
             addedEquations = new ArrayList<FAbstractEquation>();
             dummyDerivatives = new ArrayList<FVariable>();
         }
-        
+
         public void addEquation(FAbstractEquation fe) {
             addedEquations.add(fe); 
         }
 
         public void addDummyDerivative(FVariable fv) {
             dummyDerivatives.add(fv);   
-        }
-        
-        public void addDSSet(IndexReductionBiPGraph.DSSet set) {
-            dsSets.add(set);
         }
 
         public java.util.List<FAbstractEquation> getEquations() {
@@ -1332,10 +1327,7 @@ aspect IndexReduction {
         public java.util.List<FVariable> getDummyDerivatives() {
             return dummyDerivatives;
         }
-        
-        public Collection<IndexReductionBiPGraph.DSSet> getDSSets() {
-            return dsSets;
-        }
+
     }
     
     public class IndexReductionSCCBlock extends SCCBlock<IndexReductionEq, IndexReductionVar> {

@@ -430,7 +430,7 @@ der(_ds.0.s1) := dsDer(0, 1)
             a2 + a3 = 1;
             a3 * a4 = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica_disabled(UnitTesting(tests={
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoDSSetMerge",
                 description="Two dynamic state sets that need to be merged",
@@ -537,7 +537,7 @@ der(_ds.0.s0) := dsDer(0, 0)
             a4 * a5 = 1;
             a5 * a6 = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica_disabled(UnitTesting(tests={
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoBigDSSetMerge",
                 description="Two dynamic state sets of two equations each that need to be merged",
