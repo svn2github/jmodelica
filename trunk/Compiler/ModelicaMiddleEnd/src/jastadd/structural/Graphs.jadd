@@ -1665,36 +1665,28 @@ public Set<V> AbstractBiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
     }
     return res;
 }
-    
-    public class FAbstractEquation {
-        public <V> AbstractBiPGraph.IncidenceMap createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-            return g.new IncidenceMap(this, additionalDependencies);
-        }
+
+    public <V> AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return g.new IncidenceMap(this, additionalDependencies);
     }
-    
-    public class FAlgorithm {
-        public <V> AbstractBiPGraph.IncidenceMap createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-            return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
-        }
+
+    public <V> AbstractBiPGraph.IncidenceMap FAlgorithm.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
     }
-    
-    public class FIfEquation {
-        public <V> AbstractBiPGraph.IncidenceMap createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-            return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
-        }
+
+    public <V> AbstractBiPGraph.IncidenceMap FIfEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
     }
-    
-    public class FFunctionCallEquation {
-        public <V> AbstractBiPGraph.IncidenceMap createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-            if (root().options.getStringOption("function_incidence_computation").equals("all")) {
-                try {
-                    return g.new SplitIncidenceMap(this, additionalDependencies, variableTypes);
-                } catch (ConstantEvaluationException e) {
-                    
-                }
+
+    public <V> AbstractBiPGraph.IncidenceMap FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        if (root().options.getStringOption("function_incidence_computation").equals("all")) {
+            try {
+                return g.new SplitIncidenceMap(this, additionalDependencies, variableTypes);
+            } catch (ConstantEvaluationException e) {
+                
             }
-            return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
         }
+        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
     }
     
 

@@ -252,18 +252,16 @@ aspect BLT{
         }
     }
 
-    public abstract class AbstractBiPGraph{
-        public <T extends BLT> T computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt) {
-            ASTNode.beginStep("computeBLT()");
-            try {
-                Collection<C> components = tarjan(options);
-                for (C bl : components)
-                    blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
-                blt.setLabels();
-                return blt;
-            } finally {
-                ASTNode.endStep("computeBLT()");
-            }
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt) {
+        ASTNode.beginStep("computeBLT()");
+        try {
+            Collection<C> components = tarjan(options);
+            for (C bl : components)
+                blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
+            blt.setLabels();
+            return blt;
+        } finally {
+            ASTNode.endStep("computeBLT()");
         }
     }
 
