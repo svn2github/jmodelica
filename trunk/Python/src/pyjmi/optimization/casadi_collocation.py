@@ -1669,7 +1669,9 @@ class LocalDAECollocator(CasadiCollocator):
         self._par_vals = N.array(par_vals).reshape(-1)
 
         #Create parameter symbols        
-        self.pp_unvarying = casadi.MX.sym("par", len(par_vars), 1)
+        #todo: Allocate time varying nlp parameters too, and split pp into unvarying and varying. Create corresponding entries in named_pp.
+        self.pp = casadi.MX.sym("par", len(par_vars), 1)
+        self.pp_unvarying = self.pp
         self.pp_unvarying_list = []
 
         #Add parameters to variable dictionaries and create list with parameter 
@@ -4081,7 +4083,7 @@ class LocalDAECollocator(CasadiCollocator):
         constraints = casadi.vertcat([self.c_e, self.c_i])
 
         # Create solver object
-        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp_unvarying),
+        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp),
                                 casadi.nlpOut(f=self.cost, g=constraints))
         if self.solver == "IPOPT":
             self.solver_object = casadi.NlpSolver("ipopt",nlp)
@@ -4732,7 +4734,7 @@ class LocalDAECollocator(CasadiCollocator):
         Only works if named_vars == True.
         """
         if self.named_vars:
-            f = casadi.MXFunction([self.xx, self.pp_unvarying], [expr])
+            f = casadi.MXFunction([self.xx, self.pp], [expr])
             f.init()
             return f.call([self.named_xx, self.named_pp],True)[0]
         else:
