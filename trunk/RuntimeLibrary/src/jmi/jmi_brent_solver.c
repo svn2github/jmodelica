@@ -30,7 +30,7 @@
 #define BRENT_BASE_LOG_LEVEL 6     /* Minimal Brent printouts log level */
 #define BRENT_EXTENDED_LOG_LEVEL 7 /* Extended Brent printouts log level */
 
-#define BRENT_INITIAL_STEP_FACTOR 0.01 /* Initial bracketing step as a fraction of nominal */
+#define BRENT_INITIAL_STEP_FACTOR 0.001 /* Initial bracketing step as a fraction of nominal */
 
 /* Interface to the residual function that is compatible with Brent search.
    @param y - input - function argument
