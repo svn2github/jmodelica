@@ -60,10 +60,9 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_ASG(TYPE, DEST, SRC) \
     JMI_ASG_##TYPE(DEST, SRC)
 #define JMI_ASG_STR(DEST,SRC) \
-    if (DEST != SRC) { \
-      JMI_SET_STR(DEST, SRC) \
-      JMI_DYNAMIC_ADD_POINTER(DEST) \
-    }
+    JMI_SET_STR(DEST, SRC) \
+    JMI_DYNAMIC_ADD_POINTER(DEST)
+    
 #define JMI_ASG_STR_ARR(DEST, SRC) \
     { \
       int i; \
