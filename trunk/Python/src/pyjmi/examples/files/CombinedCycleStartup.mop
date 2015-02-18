@@ -92,7 +92,7 @@ optimization Startup6 (objectiveIntegrand=1*((plant.p-8.35e6)/1e6)^2 + 0.5*(u-1)
   parameter Real sigma_max = 2.6e8;
   //parameter Real sigma_max = 4e8;
   CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant(sigma(max=sigma_max));
-  Modelica.Blocks.Interfaces.RealInput du(free=true,min=0,max=0.1/60);
+  Modelica.Blocks.Interfaces.RealInput du(free=true,min=0, max=0.1/60);
   RealConnector u(start=0.15,fixed=true,min=0,max=1);
 equation 
   der(u) = du;
@@ -100,14 +100,16 @@ equation
 end Startup6;
 
 model MPCReference
-  extends CombinedCycle.Optimization.Plants.CC0D_WarmStartUp;
+  parameter Real u0 = 0.15 "Initial value of control variable";
+  parameter Real Tstart = 8000 "Start-up time";
+  parameter Real N = 6;
+  CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant;
+  RealConnector u(start=0.15,fixed=true);
+  Modelica.Blocks.Interfaces.RealInput du(free=true);
+equation
+  der(u) = du;
+  connect(u, plant.load);
 end MPCReference;
-
-optimization MPC (objectiveIntegrand=1*((p-8.35e6)/1e6)^2 + 0.5*(load-1)^2, startTime=0,finalTime=4000)
-  extends MPCReference(sigma(max=sigma_max),load(min=0,max=1));
-  parameter Real sigma_max = 2.6e8;
-end MPC;
-
 
 model Startup6Verification
 	CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant;

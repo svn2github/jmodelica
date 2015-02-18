@@ -93,15 +93,15 @@ def run_demo(with_plots=True):
                             compiler_options={"state_initial_equations":True})
 
     # Define MPC options
-    sample_period = 3                         # s
+    sample_period = 3                           # s
     horizon = 33                                # Samples on the horizon
     n_e_per_sample = 1                          # Collocation elements / sample
     n_e = n_e_per_sample*horizon                # Total collocation elements
     finalTime = 150                             # s
-    number_samp_tot = finalTime/sample_period   # Total number of samples to do
+    number_samp_tot = int(finalTime/sample_period)   # Total number of samples to do
 
     # Create blocking factors with quadratic penalty and bound on 'Tc'
-    bf_list = [1]*horizon
+    bf_list = [n_e_per_sample]*(horizon/n_e_per_sample)
     factors = {'Tc': bf_list}
     du_quad_pen = {'Tc': 500}
     du_bounds = {'Tc': 30}
@@ -116,7 +116,7 @@ def run_demo(with_plots=True):
 
     if with_plots:
         # Compile and load a new instance of the op to compare the MPC results 
-        # with an open loop optimization                                                                                                                                           n open loop optimization 
+        # with an open loop optimization 
         op_open_loop = transfer_optimization_problem(
             "CSTR.CSTR_MPC", file_path,
             compiler_options={"state_initial_equations":True})
@@ -136,11 +136,11 @@ def run_demo(with_plots=True):
         open_loop_opts['blocking_factors'] = bf_ol
         open_loop_opts['IPOPT_options']['print_level'] = 0
 
-    constr_viol_costs = {'T': 1e10}
+    constr_viol_costs = {'T': 1e6}
 
     # Create the MPC object
-    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs, 
-                                                                noise_seed=1)
+    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs,
+                                                noise_seed=1)
 
     # Set initial state
     x_k = {'_start_c': c_0_A, '_start_T': T_0_A }
@@ -179,12 +179,12 @@ def run_demo(with_plots=True):
         pass
     else:
         Tc_norm = N.linalg.norm(Tc_res_comp) / N.sqrt(len(Tc_res_comp))
-        assert(N.abs(Tc_norm - 310.41919417987316) < 1e-3)
+        assert(N.abs(Tc_norm - 311.71777347245921) < 1e-3)
         c_norm = N.linalg.norm(c_res_comp) / N.sqrt(len(c_res_comp))
-        assert(N.abs(c_norm - 641.90821167670504) < 1e-3)
+        assert(N.abs(c_norm - 653.65024527945957) < 1e-3)
         T_norm = N.linalg.norm(T_res_comp) / N.sqrt(len(T_res_comp))
-        assert(N.abs(T_norm - 327.65639848916169) < 1e-3)
-
+        assert(N.abs(T_norm - 328.0844758978343) < 1e-3)
+    
     # Plot the results
     if with_plots: 
         ### 3. Solve the original optimal control problem without MPC
@@ -193,6 +193,11 @@ def run_demo(with_plots=True):
         T_res = res['T']
         Tc_res = res['Tc']
         time_res = res['time']
+        
+        # Get reference values
+        Tc_ref = op.get('Tc_ref')
+        T_ref = op.get('T_ref')
+        c_ref = op.get('c_ref')
 
         # Plot
         plt.close('MPC')
@@ -200,19 +205,22 @@ def run_demo(with_plots=True):
         plt.subplot(3, 1, 1)
         plt.plot(time_res_comp, c_res_comp)
         plt.plot(time_res, c_res )
-        plt.legend(('MPC with noise', 'Open-loop without noise'))
+        plt.plot([time_res[0],time_res[-1]],[c_ref,c_ref],'--')
+        plt.legend(('MPC with noise', 'Open-loop without noise', 'Reference value'))
         plt.grid()
         plt.ylabel('Concentration')
 
         plt.subplot(3, 1, 2)
         plt.plot(time_res_comp, T_res_comp)
         plt.plot(time_res, T_res,)
+        plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref],'--')
         plt.grid()
         plt.ylabel('Temperature')
 
         plt.subplot(3, 1, 3)
         plt.step(time_res_comp, Tc_res_comp)
         plt.step(time_res, Tc_res)
+        plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref],'--')
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
