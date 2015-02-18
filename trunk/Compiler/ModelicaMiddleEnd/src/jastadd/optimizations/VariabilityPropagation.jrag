@@ -18,16 +18,16 @@
 aspect VariabilityPropagation {
 	
     public boolean FFunctionCallEquation.taggedForCleanup = false;
-	public boolean FAbstractEquation.taggedByVProp = false;
-	public boolean FAbstractVariable.taggedByVProp = false;
-	public boolean FFunctionCallLeft.taggedByVProp = false;
-	public boolean FExp.taggedByVProp              = false;
+	public boolean FAbstractEquation.taggedForRemoval = false;
+	public boolean FAbstractVariable.taggedForRemoval = false;
+	public boolean FFunctionCallLeft.taggedForRemoval = false;
+	public boolean FExp.taggedForRemoval              = false;
 	
     public void FAbstractEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
-        if (!taggedByVProp) {
+        if (!taggedForRemoval) {
             l.add(this);
         }
-        taggedByVProp = false;
+        taggedForRemoval = false;
     }
     public void FFunctionCallEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
         super.cleanEquations(l);
@@ -39,16 +39,16 @@ aspect VariabilityPropagation {
         }
     }
     public void FFunctionCallLeft.cleanEquations() {
-        if (taggedByVProp) {
+        if (taggedForRemoval) {
             setFExpOpt(new Opt());
-            taggedByVProp = false;
+            taggedForRemoval = false;
         } else if (hasFExp()){
             setFExpOpt(new Opt(getFExp().cleanEquations()));
         }
     }
     
     public FExp FExp.cleanEquations() {
-        if (taggedByVProp) {
+        if (taggedForRemoval) {
             return new FNoExp();
         } else {
             return this;
@@ -187,7 +187,7 @@ aspect VariabilityPropagation {
         ArrayList<FVariable> newAliases   = new ArrayList<FVariable>();
         AliasManager am = getAliasManager();
         for (FVariable fVariable: getFVariables()) {
-            if (!fVariable.taggedByVProp) {
+            if (!fVariable.taggedForRemoval) {
                 newVariables.add(fVariable);
             }
         }
@@ -211,7 +211,7 @@ aspect VariabilityPropagation {
 		// Clean initial equations
 		newEquations = new ArrayList<FAbstractEquation>();
 		for (FAbstractEquation equation: initialEquations()) {
-			if (!equation.taggedByVProp) {
+			if (!equation.taggedForRemoval) {
 				newEquations.add(equation);
 			}
 		}
@@ -272,7 +272,7 @@ aspect VariabilityPropagation {
 			parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
 		}
 
-		this.taggedByVProp = true;
+		this.taggedForRemoval = true;
 		fVariable.variabilityPropagation(worklist, solutionVariability, solution, parameterEquations);
 
 	}
@@ -315,20 +315,20 @@ aspect VariabilityPropagation {
         for (FFunctionCallLeft left : getLefts()) {
             if (left.hasFExp()) {
                 if (left.getFExp().canPropagate()) {
-                    left.taggedByVProp = left.getFExp().variabilityPropagation(worklist,
+                    left.taggedForRemoval = left.getFExp().variabilityPropagation(worklist,
                             eval ? val[i] : CValue.UNKNOWN, param ? parameterEquations : null);
                 }
-                allRemoved &= left.taggedByVProp;
+                allRemoved &= left.taggedForRemoval;
             }
             i++;
         }
         
         if (allRemoved) {
-            this.taggedByVProp = true;
+            this.taggedForRemoval = true;
         } else {
             if (param) {
                 parameterEquations.add(this);
-                this.taggedByVProp = true;
+                this.taggedForRemoval = true;
             }
         }
         this.taggedForCleanup = true;
@@ -356,7 +356,7 @@ aspect VariabilityPropagation {
 			res &= getArg(i).variabilityPropagation(worklist, 
 					frc != null ? frc.getMember(i) : CValue.UNKNOWN, parameterEquations);
 		}
-		taggedByVProp = res;
+		taggedForRemoval = res;
 		return res;
 	}
 	
@@ -369,8 +369,8 @@ aspect VariabilityPropagation {
 		if (value != CValue.UNKNOWN) {
 			a = (CValueArray) value;
 		}
-		taggedByVProp = this.variabilityPropagationArray(worklist, a, parameterEquations, new Enumerator());
-		return taggedByVProp;
+		taggedForRemoval = this.variabilityPropagationArray(worklist, a, parameterEquations, new Enumerator());
+		return taggedForRemoval;
 	}
 	
     public boolean FExp.variabilityPropagationArray(
@@ -417,8 +417,8 @@ aspect VariabilityPropagation {
             myFV().variabilityPropagation(worklist, variability, bexp, parameterEquations);
         }
         
-        taggedByVProp = variability.knownParameterOrLess();
-        return taggedByVProp;
+        taggedForRemoval = variability.knownParameterOrLess();
+        return taggedForRemoval;
     }
     
     
@@ -439,7 +439,6 @@ aspect VariabilityPropagation {
         
         FAbstractEquation equation;
         boolean wasDiscrete = isDiscrete();
-        boolean isZero = variability.constantVariability() && bindingExp.isLiteralZero();
         
         // Declaration
         // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
@@ -460,32 +459,11 @@ aspect VariabilityPropagation {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 equation.variables().remove(this);
-                
-                if (isZero) {
-                    // Adjust variable set for special case y = 0 * z
-                    FExp topFactorExp = use.myTopFactorFExp();
-                    if (topFactorExp != null) {
-                        Set<FIdUseExp> usesInEq = equation.findFIdUseExpsInTree();
-                        Set<FIdUseExp> usesInTop = topFactorExp.findFIdUseExpsInTree();
-                        usesInEq.removeAll(usesInTop);
-                        Set<FVariable> fvsInEq = lookupFVariablesInSet(usesInEq);
-                        Set<FVariable> fvsInTop = lookupFVariablesInSet(usesInTop);
-                        
-                        for (FVariable tFV : fvsInTop) {
-                            if (!fvsInEq.contains(tFV)) {
-                                equation.variables().remove(tFV);
-                            }
-                        }
-                        
-                        topFactorExp.taggedByVProp = true;
-                    }
-                }
-                
                 if (equation.canPropagate()) {
                     worklist.add(equation);
                 } else if (equation.inInitialEquationSection() && equation.variables().size() == 0
                         && equation.nonFixedParameters().size() == 0) {
-                    equation.taggedByVProp = true; // Initial equation
+                    equation.taggedForRemoval = true; // Initial equation
                 }
             }
         }
@@ -493,14 +471,14 @@ aspect VariabilityPropagation {
         // Pre var
         if (wasDiscrete) {
             FAbstractVariable pre = myPreVariable();
-            pre.taggedByVProp = true;
+            pre.taggedForRemoval = true;
             pre.variabilityPropagation(worklist, variability, bindingExp, parameterEquations);
         }
         
         // Derivative
         if (isDifferentiatedVariable()) {
             FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
-            fDerivativeVariable.taggedByVProp = true;
+            fDerivativeVariable.taggedForRemoval = true;
             fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0), parameterEquations);
         }
         
@@ -520,35 +498,6 @@ aspect VariabilityPropagation {
             }
             myFClass().getAliasManager().unAlias(this);
         }
-    }
-	
-    inh FExp FExp.myTopFactorFExp();
-    eq BaseNode.getChild().myTopFactorFExp() = null;
-    eq FMulExp.getChild().myTopFactorFExp() = topFactorFExp();
-    eq FDivExp.getLeft().myTopFactorFExp() = topFactorFExp();
-    
-    protected FExp FArtmBinExp.topFactorFExp() {
-        if (taggedByVProp) {
-            return null;
-        }
-        FExp t = myTopFactorFExp();
-        if (t == null) {
-            t = this;
-        }
-        return t;
-    }
-    
-    
-    refine Variability eq FMulExp.expVariability() {
-        if (taggedByVProp)
-            return fConstant();
-        return Variability.FMulExp.expVariability();
-    }
-    
-    refine Variability eq FDivExp.expVariability() {
-        if (taggedByVProp)
-            return fConstant();
-        return Variability.FMulExp.expVariability();
     }
 }
 

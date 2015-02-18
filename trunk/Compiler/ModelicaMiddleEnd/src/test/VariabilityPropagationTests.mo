@@ -395,10 +395,11 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Der2
  constant Real x = 0;
- constant Real y = 1.0;
+ Real y;
  Real z;
 equation
  z = time;
+ y = 1;
 end VariabilityPropagationTests.Der2;
 ")})));
 end Der2;
@@ -1628,78 +1629,5 @@ public
 end VariabilityPropagationTests.StructParam1;
 ")})));
 end StructParam1;
-
-model ZeroFactor1
-    Real c = 0;
-    Real x1 = c * time;
-    Real x2 = time * c;
-    Real x3 = c / time;
-    Real x4 = time / c;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ZeroFactor1",
-            description="Test elimination of factors that can be reduced to zero.",
-            flatModel="
-fclass VariabilityPropagationTests.ZeroFactor1
- constant Real c = 0;
- constant Real x1 = 0.0;
- constant Real x2 = 0.0;
- constant Real x3 = 0.0;
- Real x4;
-equation
- x4 = time / 0.0;
-end VariabilityPropagationTests.ZeroFactor1;
-")})));
-end ZeroFactor1;
-
-model ZeroFactor2
-    Real c = 0;
-    Real z = time;
-    Real x1 = c * z + z;
-    Real x2 = z * c + z;
-    Real x3 = c / z + z;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ZeroFactor2",
-            description="Test elimination of factors that can be reduced to zero.",
-            flatModel="
-fclass VariabilityPropagationTests.ZeroFactor2
- constant Real c = 0;
- Real x1;
-equation
- x1 = time;
-end VariabilityPropagationTests.ZeroFactor2;
-")})));
-end ZeroFactor2;
-
-model ZeroFactor3
-    Real c = 0;
-    Real z1 = time;
-    Real z2 = time;
-    Real z3 = time;
-    Real x1 = z1 * (z2 * (z3 * c));
-    Real x2 = ((c / z1) / z2) / z3;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ZeroFactor3",
-            description="Test elimination of factors that can be reduced to zero.",
-            flatModel="
-fclass VariabilityPropagationTests.ZeroFactor3
- constant Real c = 0;
- Real z1;
- Real z2;
- Real z3;
- constant Real x1 = 0.0;
- constant Real x2 = 0.0;
-equation
- z1 = time;
- z2 = time;
- z3 = time;
-end VariabilityPropagationTests.ZeroFactor3;
-")})));
-end ZeroFactor3;
 
 end VariabilityPropagationTests;
