@@ -121,7 +121,7 @@ static int jmi_dynamic_state_perform_update_states(jmi_t* jmi, jmi_dynamic_state
             k++;
         }
         
-        if (j > set->n_algebraics) { break; }
+        if (k >= set->n_algebraics) { break; }
     }
     for (i = i+1; i < set->n_variables; i++) {
         set->state_value_references[j] = set->variables_value_references[i];
