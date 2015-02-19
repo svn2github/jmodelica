@@ -1750,11 +1750,15 @@ class LocalDAECollocator(CasadiCollocator):
                         z.append(self.var_map[vk][i][k]['all'])
                     else:
                         z.append(self.var_map[vk][i][k])
+
+        if self.n_var['p_opt']>0:
+            z.append(self.var_map['p_opt']['all'])
+
         return z
 
     def _get_z_l1(self,i,with_der=True):
         """
-        Returns a vector with all the NLP variables at a collocation point.
+        Returns a vector with all the NLP variables at an element.
 
         Parameters::
 
@@ -1788,6 +1792,10 @@ class LocalDAECollocator(CasadiCollocator):
         for vk in var_kinds:
             if self.n_var[vk]>0:
                 z.append(self.var_map[vk][i]['all'])
+        
+        if self.n_var['p_opt']>0:
+            z.append(self.var_map['p_opt']['all'])
+
         return z
 
     def _compute_time_points(self):
@@ -2406,7 +2414,7 @@ class LocalDAECollocator(CasadiCollocator):
         DAE residual
               self.dae_l0_fcn
         Mayer term
-              self.mtem_l0_fcn
+              self.mterm_l0_fcn
         Lagrange Term
               self.lterm_l0_fcn 
 
@@ -2726,7 +2734,7 @@ class LocalDAECollocator(CasadiCollocator):
             mterm_fcn = self._FXFunction(s_mterm_input, [self.mterm])
             mterm_fcn.setOption("name", "mterm_l0_fcn")
             mterm_fcn.init()
-            self.mtem_l0_fcn = mterm_fcn
+            self.mterm_l0_fcn = mterm_fcn
 
         # Lagrange term
         if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
@@ -3104,8 +3112,6 @@ class LocalDAECollocator(CasadiCollocator):
         i = 1
         k = 0
         s_fcn_input = self._get_z_l0(i, k)
-        if self.n_var['p_opt']>0:
-            s_fcn_input += [self.var_map['p_opt']['all'] ]
         if self.variable_scaling and self.nominal_traj is not None:
             if self.n_variant_var>0:
                 s_fcn_input.append(self._variant_sf[i][k])
@@ -3205,8 +3211,6 @@ class LocalDAECollocator(CasadiCollocator):
                     raise NotImplementedError("eliminate_der_var not supported yet")
                 else:
                     s_fcn_input += self._get_z_l0(i, k)
-                if self.n_var['p_opt']>0:
-                    s_fcn_input += [self.var_map['p_opt']['all']]
                 s_fcn_input += self._nlp_timed_variables
                 if self.variable_scaling and self.nominal_traj is not None:
                     if self.n_variant_var>0:
@@ -3220,8 +3224,6 @@ class LocalDAECollocator(CasadiCollocator):
                 
         # Point constraints
         s_fcn_input = self._get_z_l0(i, k, with_der=False)
-        if self.n_var['p_opt']>0:
-            s_fcn_input += [self.var_map['p_opt']['all']]
         s_fcn_input += self._nlp_timed_variables
         [G_e_constr] = self.G_e_l0_fcn.call(s_fcn_input)
         [G_i_constr] = self.G_i_l0_fcn.call(s_fcn_input)
@@ -3292,10 +3294,8 @@ class LocalDAECollocator(CasadiCollocator):
             # Evaluate Mayer term
             s_z = self._get_z_l0(1, 0, with_der=False)
             s_mterm_fcn_input = s_z
-            if self.n_var['p_opt']>0:
-                s_mterm_fcn_input += [self.var_map['p_opt']['all']]            
             s_mterm_fcn_input += self._nlp_timed_variables
-            [self.cost_mayer] = self.mtem_l0_fcn.call(s_mterm_fcn_input)
+            [self.cost_mayer] = self.mterm_l0_fcn.call(s_mterm_fcn_input)
 
     
     def _call_l0_functions(self):
@@ -3304,7 +3304,7 @@ class LocalDAECollocator(CasadiCollocator):
         
         Build the list of equality and inequality constraints 
         using only level zero functions. This function must 
-        be called only after _define_l0_constraint_functions 
+        be called only after _define_l0_functions 
         has been called. 
 
         The inequality constraints are stored in  the class 
@@ -3324,8 +3324,6 @@ class LocalDAECollocator(CasadiCollocator):
                     raise NotImplementedError("eliminate_der_var not supported yet")
                 else:
                     s_fcn_input = self._get_z_l0(i, k)
-                    if self.n_var['p_opt']>0:
-                        s_fcn_input += [self.var_map['p_opt']['all']]                    
 
                     scoll_input = self.x_list[i] + [self.der_vals[k],
                                                self.horizon * self.h[i]]                    
@@ -3388,8 +3386,6 @@ class LocalDAECollocator(CasadiCollocator):
                         raise NotImplementedError("eliminate_der_var not supported yet")                          
                     else:
                         s_lterm_fcn_input = self._get_z_l0(i,k)
-                        if self.n_var['p_opt']>0:
-                            s_lterm_fcn_input += [self.var_map['p_opt']['all']]                        
                         s_lterm_fcn_input += self._nlp_timed_variables
 
                     if self.variable_scaling and self.nominal_traj is not None:
@@ -3507,8 +3503,6 @@ class LocalDAECollocator(CasadiCollocator):
                 raise NotImplementedError("eliminate_der_var not supported yet")
             else:
                 e_fcn_input = self._get_z_l1(i)
-                if self.n_var['p_opt']>0:
-                    e_fcn_input += [self.var_map['p_opt']['all']]
                 if self.hs == "free" or non_uniform_h:
                     ecoll_input = [self.var_map['x'][i]['all']]+\
                         [der_vals_l1]+[self.horizon * self.h[i]]+\
@@ -3571,8 +3565,6 @@ class LocalDAECollocator(CasadiCollocator):
                         raise NotImplementedError("eliminate_der_var not supported yet")                          
                     else:
                         e_fcn_input = [Gauss_w]+self._get_z_l1(i)
-                        if self.n_var['p_opt']>0:
-                            e_fcn_input += [self.var_map['p_opt']['all']]  
                         e_fcn_input += self._nlp_timed_variables
                         if self.variable_scaling and self.nominal_traj is not None:
                             if self.n_variant_var>0: 
@@ -3588,8 +3580,6 @@ class LocalDAECollocator(CasadiCollocator):
                         raise NotImplementedError("eliminate_der_var not supported yet")                          
                     else:
                         e_fcn_input = [Gauss_w]+self._get_z_l1(i)
-                        if self.n_var['p_opt']>0:
-                            e_fcn_input += [self.var_map['p_opt']['all']]  
                         e_fcn_input += self._nlp_timed_variables
                         if self.variable_scaling and self.nominal_traj is not None:
                             if self.n_variant_var>0: 
