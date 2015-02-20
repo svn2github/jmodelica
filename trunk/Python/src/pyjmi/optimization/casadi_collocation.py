@@ -2318,66 +2318,46 @@ class LocalDAECollocator(CasadiCollocator):
         Computes the external input trajectories 
         """        
         # Create measured input trajectories
-        if (self.external_data is None or
-            len(self.external_data.eliminated) == 0):
-            self.var_map['elim_u'] = dict()
-            self.var_map['constr_u'] = dict()
-            for i in xrange(1, self.n_e + 1):
-                self.var_map['elim_u'][i]=dict()
-                self.var_map['constr_u'][i] = dict()
-                for k in self.time_points[i].keys():
-                    self.var_map['elim_u'][i][k] = dict()
-                    self.var_map['constr_u'][i][k] = dict()
-                    self.var_map['elim_u'][i][k]['all'] = N.array([])
-                    self.var_map['constr_u'][i][k]['all'] = N.array([])
+        if self.external_data is None:
+            for vk in ('elim_u', 'constr_u', 'quad_pen'):
+                self.var_map[vk] = dict()
+                for i in xrange(1, self.n_e + 1):
+                    self.var_map[vk][i]=dict()
+                    for k in self.time_points[i].keys():
+                        self.var_map[vk][i][k] = dict()
+                        self.var_map[vk][i][k]['all'] = N.array([])
 
-        if (self.external_data is not None and
-            (len(self.external_data.eliminated) +
-             len(self.external_data.constr_quad_pen) > 0)):
+        if self.external_data is not None:
             # Create storage of maximum and minimum values
             traj_min = OrderedDict()
             traj_max = OrderedDict()
             for name in (self.external_data.eliminated.keys() +
-                         self.external_data.constr_quad_pen.keys()):
+                         self.external_data.constr_quad_pen.keys() +
+                         self.external_data.quad_pen.keys()):
                 traj_min[name] = N.inf
                 traj_max[name] = -N.inf
 
-            # Collocation points
-            self.var_map['elim_u'] = dict()
-            self.var_map['constr_u'] = dict()            
-            for i in xrange(1, self.n_e + 1):
-                self.var_map['elim_u'][i]=dict()
-                self.var_map['constr_u'][i] = dict()                
-                for k in self.time_points[i].keys():
-                    self.var_map['elim_u'][i][k] = dict()
-                    self.var_map['constr_u'][i][k] = dict()                    
-                    # Eliminated inputs
-                    values = []
-                    for (name, data) in \
-                        self.external_data.eliminated.items():
-                        value = data.eval(self.time_points[i][k])[0, 0]
-                        values.append(value)
-                        if value < traj_min[name]:
-                            traj_min[name] = value
-                        if value > traj_max[name]:
-                            traj_max[name] = value
-                    self.var_map['elim_u'][i][k]['all'] = N.array(values)
-                    for z in range(0,len(values)):
-                        self.var_map['elim_u'][i][k][z] = values[z]                    
+            for (vk, source) in (('elim_u', self.external_data.eliminated), 
+                                 ('constr_u', self.external_data.constr_quad_pen),
+                                 ('quad_pen', self.external_data.quad_pen)):
+                # Collocation points
+                self.var_map[vk] = dict()
+                for i in xrange(1, self.n_e + 1):
+                    self.var_map[vk][i]=dict()
+                    for k in self.time_points[i].keys():
+                        self.var_map[vk][i][k] = dict()
 
-                    # Constrained inputs
-                    values = []
-                    for (name, data) in \
-                        self.external_data.constr_quad_pen.items():
-                        value = data.eval(self.time_points[i][k])[0, 0]
-                        values.append(value)
-                        if value < traj_min[name]:
-                            traj_min[name] = value
-                        if value > traj_max[name]:
-                            traj_max[name] = value
-                    self.var_map['constr_u'][i][k]['all'] = N.array(values)
-                    for z in range(0,len(values)):
-                        self.var_map['constr_u'][i][k][z] = values[z]                    
+                        values = []
+                        for (name, data) in source.items():
+                            value = data.eval(self.time_points[i][k])[0, 0]
+                            values.append(value)
+                            if value < traj_min[name]:
+                                traj_min[name] = value
+                            if value > traj_max[name]:
+                                traj_max[name] = value
+                        self.var_map[vk][i][k]['all'] = N.array(values)
+                        for z in range(0,len(values)):
+                            self.var_map[vk][i][k][z] = values[z]                    
 
             # Check that constrained and eliminated inputs satisfy their bounds
             for var_name in (self.external_data.eliminated.keys() +
