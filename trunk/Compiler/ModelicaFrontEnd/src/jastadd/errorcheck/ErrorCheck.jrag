@@ -67,16 +67,6 @@ import org.jmodelica.util.ErrorCheckType;
        * @see ASTNode#problem(Problem)
        */
       public void problem(Problem p);
-	  
-	  /**
-	   * Connect error handler to a Root.
-	   * 
-	   * Might return another equivalent error handler that is connected to the root instead.
-	   * 
-	   * @param root  the Root to connect to
-	   * @return  an error handler connected to <code>root</code>
-	   */
-	  public IErrorHandler connectTo(Root root);
   }
   
   /**
@@ -85,11 +75,15 @@ import org.jmodelica.util.ErrorCheckType;
    * Collects a list of {@link Problem} for all found errors.
    */
   public class DefaultErrorHandler implements IErrorHandler {
-	  protected Root root;
+	  protected boolean haltOnWarning;
 	  
-	  public DefaultErrorHandler(Root root) {
-		  this.root = root;
-	  }
+        public DefaultErrorHandler() {
+            this(false);
+        }
+        
+        public DefaultErrorHandler(boolean haltOnWarning) {
+            this.haltOnWarning = haltOnWarning;
+        }
 
 	  /**
 	   * Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
@@ -98,7 +92,7 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @param n	the node the error originated from.
 	   */
 	  public void error(String s, ASTNode n) {
-		  problem(s, n, root.errors, Problem.Severity.ERROR, Problem.Kind.SEMANTIC);
+		  problem(s, n, errors, Problem.Severity.ERROR, Problem.Kind.SEMANTIC);
 	  }
 
 	  /**
@@ -109,7 +103,7 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @param n	the node the error originated from.
 	   */
 	  public void compliance(String s, ASTNode n) {
-		  problem(s, n, root.errors, Problem.Severity.ERROR, Problem.Kind.COMPLIANCE);
+		  problem(s, n, errors, Problem.Severity.ERROR, Problem.Kind.COMPLIANCE);
 	  }
 
 	  /**
@@ -119,7 +113,7 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @param n	the node the warning originated from.
 	   */
 	  public void warning(String s, ASTNode n) {
-		  problem(s, n, root.warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
+		  problem(s, n, warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
 	  }
 
       /**
@@ -130,7 +124,7 @@ import org.jmodelica.util.ErrorCheckType;
        * @see ASTNode#problem(Problem)
        */
       public void problem(Problem p) {
-          ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? root.warnings : root.errors;
+          ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? warnings : errors;
           int pos = list.indexOf(p);
           if (pos == -1)
               list.add(p);
@@ -148,12 +142,6 @@ import org.jmodelica.util.ErrorCheckType;
           else
               list.get(pos).merge(p);
       }
-
-	  public IErrorHandler connectTo(Root root) {
-		  IErrorHandler eh = new DefaultErrorHandler(root);
-		  root.setErrorHandler(eh);
-		  return eh;
-	  }
   }
   
   /**
@@ -210,23 +198,23 @@ import org.jmodelica.util.ErrorCheckType;
       public void problem(Problem p) {
           delegate.problem(p);
       }
-	  
-	  public IErrorHandler connectTo(Root root) {
-		  delegate = delegate.connectTo(root);
-		  return this;
-	  }
-	  
   }
   
 
 aspect ErrorCheck {
 	
-	public void FClass.breakOnErrors() throws CompilerException {
-		root().breakOnErrors();
+	public void ASTNode.breakOnErrors() throws CompilerException {
+		root().getErrorHandler().breakOnErrors();
 	}
 	
-	public void Root.breakOnErrors() throws CompilerException {
-		if (!errors.isEmpty() || (options.getBooleanOption("halt_on_warning") && !warnings.isEmpty())) {
+	public void IErrorHandler.breakOnErrors() throws CompilerException;
+	
+	public void ComplianceWarnErrorHandler.breakOnErrors() throws CompilerException {
+	    delegate.breakOnErrors();
+	}
+	
+	public void DefaultErrorHandler.breakOnErrors() throws CompilerException {
+		if (!errors.isEmpty() || (haltOnWarning && !warnings.isEmpty())) {
 		    java.util.Collections.sort(errors);
 		    java.util.Collections.sort(warnings);
 		    
@@ -241,11 +229,17 @@ aspect ErrorCheck {
 		}
 	}
 	
-	public ArrayList<Problem> FClass.collectWarnings() {
-		return root().collectWarnings();
-	}
-	
-	public ArrayList<Problem> Root.collectWarnings() {
+    public ArrayList<Problem> ASTNode.collectWarnings() {
+        return root().getErrorHandler().collectWarnings();
+    }
+    
+    public ArrayList<Problem> IErrorHandler.collectWarnings();
+    
+    public ArrayList<Problem> ComplianceWarnErrorHandler.collectWarnings() {
+        return delegate.collectWarnings();
+    }
+    
+    public ArrayList<Problem> DefaultErrorHandler.collectWarnings() {
 		breakOnErrors();
 	    java.util.Collections.sort(warnings);
 	    ArrayList<Problem> problems = new ArrayList<Problem>(warnings);
@@ -253,10 +247,10 @@ aspect ErrorCheck {
 	    return problems;
 	}
 
-  public ArrayList<Problem> Root.errors = new ArrayList<Problem>();
-  public ArrayList<Problem> Root.warnings = new ArrayList<Problem>();
+    public ArrayList<Problem> DefaultErrorHandler.errors = new ArrayList<Problem>();
+    public ArrayList<Problem> DefaultErrorHandler.warnings = new ArrayList<Problem>();
 
-  private IErrorHandler Root.errorHandler = new DefaultErrorHandler(this);
+  private IErrorHandler Root.errorHandler = null;
   
   /**
    * Set the handler for semantic errors.
@@ -465,7 +459,7 @@ aspect ErrorCheck {
 
 	public void ASTNode.errorCheck(ErrorCheckType checkType) {
 		collectErrors(checkType);
-		root().breakOnErrors();
+		breakOnErrors();
 	}
 
     inh InstComponentDecl ASTNode.errorEnclosingComponent();

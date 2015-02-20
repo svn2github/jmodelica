@@ -35,7 +35,7 @@ public class TestSuite implements GenericTestSuite {
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
         try {
-            sr = ParserHandler.parseFile(fileName);
+            sr = ParserHandler.parseFile(new DefaultErrorHandler(), fileName);
         } catch (Exception e) {
             asserter.fail("Error when parsing file: " + fileName + "\n" + e);
         }

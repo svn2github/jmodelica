@@ -39,7 +39,7 @@ aspect FlatTree {
         flatRoot.options = icl.root().options.copy();
         // TODO: We should change how the checkErrors() method works, 
         //       since it relies on the behaviour of DefaultErrorHandler
-        icl.root().getErrorHandler().connectTo(flatRoot);
+        flatRoot.setErrorHandler(icl.root().getErrorHandler());
         fc.setDynamicStateManager(new DynamicStateManager());
         return fc;
     }
@@ -93,7 +93,7 @@ aspect Flattening {
         beginStep("flattenInstClassDecl()");
         fc.setName(qualifiedName());
         buildConnectionSets(fc);
-        root().breakOnErrors();
+        breakOnErrors();
         beginStep("flattenComponents()");
         flatten(fc, false);
         flattenUsedFuncsAndEnums(fc);
@@ -102,7 +102,7 @@ aspect Flattening {
         fc.updateVariabilityForVariablesInWhen();
         fc.genConnectionEquations();
         fc.createExperiment(annotation("experiment"));
-        root().breakOnErrors();
+        breakOnErrors();
         endStep("flattenInstClassDecl()");
         fc.generateStepMof("flattening");
     }

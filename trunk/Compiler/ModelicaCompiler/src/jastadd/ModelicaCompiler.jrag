@@ -714,6 +714,8 @@ public class ModelicaCompiler {
         //Set options for the target.
         target.setDefaultOptions(options);
         
+        setErrorHandler(new DefaultErrorHandler(options.getBooleanOption("halt_on_warning")));
+        
         String unitFile = null;
         try {
             // set invokegc if set
@@ -937,9 +939,7 @@ public class ModelicaCompiler {
         log.info("Parsing " + name + "...");
         SourceRoot sr;
         try {
-            sr = ParserHandler.parseFile(name);
-            if (errorHandler != null)
-                sr.setErrorHandler(errorHandler);
+            sr = ParserHandler.parseFile(errorHandler, name);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
@@ -980,6 +980,7 @@ public class ModelicaCompiler {
 		
 		SourceRoot sr = new SourceRoot(new Program());
 		sr.options = options.copy();
+        sr.setErrorHandler(errorHandler);
 		for (String name : names) {
 		    File f = new File(name);
 		    String name_tmp = name;
@@ -2004,6 +2005,14 @@ public class ModelicaCompiler {
         return fc;
     }
     
+    
+    protected void ModelicaCompiler.warning(String message) {
+        errorHandler.problem(new Problem("", message, Problem.Severity.WARNING));
+    }
+    
+    protected void ModelicaCompiler.error(String message) {
+        errorHandler.problem(new Problem("", message, Problem.Severity.ERROR));
+    }
 }
 
 

@@ -296,7 +296,7 @@ abstract public class TestCase implements GenericTestCase {
             fail(exception);
         
         // Parse
-        SourceRoot sr = ParserHandler.parseFile(getSourceFileName());
+        SourceRoot sr = ParserHandler.parseFile(new DefaultErrorHandler(), getSourceFileName());
         sr.options = options;
         sr.setFileName(getSourceFileName());
         

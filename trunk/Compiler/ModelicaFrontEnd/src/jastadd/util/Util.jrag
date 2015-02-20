@@ -93,14 +93,14 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.anonymous_short_class;
     }
 
-    public static SourceRoot ParserHandler.parseFile(String fileName) 
+    public static SourceRoot ParserHandler.parseFile(IErrorHandler eh, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseModelicaFile(fileName);
+        return parseModelicaFile(eh, fileName);
     }
 
-    public static SourceRoot ParserHandler.parseString(String str, String fileName) 
+    public static SourceRoot ParserHandler.parseString(IErrorHandler eh, String str, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseModelicaString(str,fileName);
+        return parseModelicaString(eh, str,fileName);
     }
 
     public static Exp ParserHandler.parseExpString(String str)
@@ -113,22 +113,24 @@ aspect Parsers {
         return parseModelicaAnonymousClassString(code, restriction, targetName);
     }
 
-    public static SourceRoot ParserHandler.parseModelicaFile(String fileName) 
+    public static SourceRoot ParserHandler.parseModelicaFile(IErrorHandler eh, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        Reader reader = fileReader(fileName);
+        Reader reader = fileReader(eh, fileName);
         AbstractModelicaScanner scanner = createModelicaScanner(new BufferedReader(reader));
         beaver.Parser parser = createModelicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
+        sr.setErrorHandler(eh);
         sr.setFileName(fileName);
         reader.close();
         return sr;
     }
     
-    public static SourceRoot ParserHandler.parseModelicaString(String str, String fileName) 
+    public static SourceRoot ParserHandler.parseModelicaString(IErrorHandler eh, String str, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(str));
         beaver.Parser parser = createModelicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
+        sr.setErrorHandler(eh);
         sr.setFileName(fileName);
         return sr;
     }
@@ -154,12 +156,12 @@ aspect Parsers {
         return cl;
     }
 
-    public static Reader ParserHandler.fileReader(File file) throws FileNotFoundException {
+    public static Reader ParserHandler.fileReader(IErrorHandler eh, File file) throws FileNotFoundException {
         return new InputStreamReader(new FileInputStream(file), ASTNode.UTF8);
     }
 
-    public static Reader ParserHandler.fileReader(String path) throws FileNotFoundException {
-        return fileReader(new File(path));
+    public static Reader ParserHandler.fileReader(IErrorHandler eh, String path) throws FileNotFoundException {
+        return fileReader(eh, new File(path));
     }
 
     public static final Charset ASTNode.UTF8 = Charset.forName("UTF-8");

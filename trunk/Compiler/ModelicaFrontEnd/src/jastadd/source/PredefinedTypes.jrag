@@ -97,7 +97,7 @@ aspect PredefinedTypes {
 
         Program p;
         try {
-            p = ParserHandler.parseString(builtInDef, "").getProgram();
+            p = ParserHandler.parseString(root().getErrorHandler(), builtInDef, "").getProgram();
         } catch (Exception e) {
             return l;
         }
@@ -185,7 +185,7 @@ aspect PredefinedTypes {
   
         try {
         
-            SourceRoot sr = ParserHandler.parseString(builtInDef,"");
+            SourceRoot sr = ParserHandler.parseString(root().getErrorHandler(), builtInDef,"");
             Program p = sr.getProgram();
 
             FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));   
@@ -533,7 +533,7 @@ aspect PredefinedTypes {
         List<BaseClassDecl> l = new List<BaseClassDecl>();
   
         try {
-            SourceRoot sr = ParserHandler.parseString(BUILTIN_FUNCS, "");
+            SourceRoot sr = ParserHandler.parseString(root().getErrorHandler(), BUILTIN_FUNCS, "");
             Program p = sr.getProgram();
             
             ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt());

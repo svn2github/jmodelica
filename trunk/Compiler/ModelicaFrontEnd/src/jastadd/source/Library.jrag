@@ -55,7 +55,7 @@ aspect Library {
         }
         try {
             log.info("Reading file: " + fileName);
-            SourceRoot sr = ParserHandler.parseFile(fileName);
+            SourceRoot sr = ParserHandler.parseFile(root().getErrorHandler(), fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
             if (entity == null) {
                 return new StoredDefinition();
@@ -71,7 +71,7 @@ aspect Library {
                 
                 File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
                 if (orderFile.isFile()) {
-                    BufferedReader in = new BufferedReader(ParserHandler.fileReader(orderFile));
+                    BufferedReader in = new BufferedReader(ParserHandler.fileReader(root().getErrorHandler(), orderFile));
                     java.util.List<String> order = new ArrayList<String>();
                     String line;
                     while ((line = in.readLine()) != null)

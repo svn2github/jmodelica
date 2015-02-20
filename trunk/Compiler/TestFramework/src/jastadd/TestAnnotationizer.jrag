@@ -303,7 +303,7 @@ abstract public class TestAnnotationizerHelper {
 		SourceRoot root;
 		
 		try {
-			root = ParserHandler.parseFile(filePath);
+			root = ParserHandler.parseFile(new DefaultErrorHandler(), filePath);
 			root.options = opts;
 		} catch (ParserException e) {
 			e.getProblem().setFileName(filePath);
@@ -434,7 +434,7 @@ abstract public class TestAnnotationizerHelper {
 		int start = icd.beginLine();
 		int end = icd.endLine();
 		File old = new File(filePath);
-		BufferedReader in = new BufferedReader(ParserHandler.fileReader(old));
+		BufferedReader in = new BufferedReader(ParserHandler.fileReader(null, old));
         File altered = File.createTempFile(className, ".mo");
         PrintStream out = new PrintStream(altered, "UTF-8");
         boolean foundOld = false;
@@ -464,7 +464,7 @@ abstract public class TestAnnotationizerHelper {
 			out.println(line);
 		out.close();
 		if (!altered.renameTo(old)) {
-			in = new BufferedReader(ParserHandler.fileReader(altered));
+			in = new BufferedReader(ParserHandler.fileReader(null, altered));
 	        out = new PrintStream(old, "UTF-8");
 			for (String line = in.readLine(); line != null; line = in.readLine())
 				out.println(line);
