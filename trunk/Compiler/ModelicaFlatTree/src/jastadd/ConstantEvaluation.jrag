@@ -2517,6 +2517,15 @@ aspect ConstantEvaluation {
           throw new UnsupportedOperationException();
         return new CValueString(String.format((Locale) null, formatString(), value));
     }
+    eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
+
+    /**
+     * Calculate the value of a getInstanceName() call.
+     */
+    inh String FGetInstanceName.calcInstanceName();
+    eq FClass.getChild().calcInstanceName() {
+        throw new UnsupportedOperationException("The getInstanceName() operator is not allowed in the flat tree.");
+    }
 
     // TODO: support format args
     syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();

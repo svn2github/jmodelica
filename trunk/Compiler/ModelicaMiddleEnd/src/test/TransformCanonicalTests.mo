@@ -6448,29 +6448,30 @@ end InInitialEquation;
 end EventGeneratingExps;
 
 
-model GetInstanceName
-	model B
-		model C
-			equation
-				Modelica.Utilities.Streams.print("Info from: " + getInstanceName());
-		end C;
-		
-		String s = getInstanceName();
-		C c;
-	end B;
-	
-	B b;
-	String s = getInstanceName();
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="GetInstanceName",
-			description="Tests getInstanceName().",
-			flatModel="
-fclass TransformCanonicalTests.GetInstanceName
- discrete String b.s = \"GetInstanceName.b\";
- discrete String s = \"GetInstanceName.\";
+model GetInstanceName1
+    model B
+        model C
+            equation
+                Modelica.Utilities.Streams.print("Info from: " + getInstanceName());
+        end C;
+        
+        String s = getInstanceName();
+        C c;
+    end B;
+    
+    B b;
+    String s = getInstanceName();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="GetInstanceName1",
+            description="Tests getInstanceName().",
+            flatModel="
+fclass TransformCanonicalTests.GetInstanceName1
+ discrete String b.s = \"GetInstanceName1.b\";
+ discrete String s = \"GetInstanceName1\";
 equation
- Modelica.Utilities.Streams.print(\"Info from: \" + \"GetInstanceName.b.c\", \"\");
+ Modelica.Utilities.Streams.print(\"Info from: \" + \"GetInstanceName1.b.c\", \"\");
 
 public
  function Modelica.Utilities.Streams.print
@@ -6480,10 +6481,27 @@ public
   external \"C\" ModelicaInternal_print(string, fileName);
   return;
  end Modelica.Utilities.Streams.print;
-end TransformCanonicalTests.GetInstanceName;
+
+end TransformCanonicalTests.GetInstanceName1;
 ")})));
-	
-end GetInstanceName;
+end GetInstanceName1;
+
+
+model GetInstanceName2
+    parameter String s = getInstanceName() annotation(Evaluate=true);
+    Real dummy = true;  // To generate an error.
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="GetInstanceName2",
+            description="Check that constant evaluation of getInstanceName() works",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 6491, column 18:
+  The binding expression of the variable dummy does not match the declared type of the variable
+")})));
+end GetInstanceName2;
 
 
 model FixedFalseParam1

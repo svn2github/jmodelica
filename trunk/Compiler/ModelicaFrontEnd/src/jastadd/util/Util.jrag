@@ -633,8 +633,21 @@ aspect Names {
   syn String InstAccess.enclosingName() = "";
   eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
   eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
-  
-  
+
+    eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
+    eq InstAssignable.getBindingFExp().calcInstanceName()         = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
+    eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFQName());
+    eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FQNameEmpty());
+    eq InstProgramRoot.getChild().calcInstanceName() {
+        throw new UnsupportedOperationException("Missing equation for inh calcInstanceName().");
+    }
+
+    /**
+     * Create an instance name from a class declaration and a suffix.
+     */
+    syn String InstNode.buildInstanceName(InstClassDecl cls, FQName suffix) =
+        (suffix.numParts() == 0) ? cls.name() : cls.name() + '.' + suffix.name();
+
   inh String InstExternal.packageName();
   inh String InstBaseClassDecl.packageName();
   eq InstBaseClassDecl.getChild().packageName() = isPackage() ? qualifiedName() : packageName();
