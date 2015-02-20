@@ -3705,32 +3705,20 @@ class LocalDAECollocator(CasadiCollocator):
             # Create nested dictionary for storage of errors and calculate
             # reference values
             err = {}
-            y_ref = {}
-            datas = (self.external_data.constr_quad_pen.values() +
-                     self.external_data.quad_pen.values())
             for i in range(1, self.n_e + 1):
                 err[i] = {}
-                y_ref[i] = {}
                 for k in range(1, self.n_cp + 1):
                     err[i][k] = []
-                    ref_val = []
-                    for data in datas:
-                        ref_val.append(data.eval(self.time_points[i][k])[0, 0])
-                    y_ref[i][k] = N.array(ref_val)
 
             # Calculate errors
-            name_map = self.name_map
-            if self.variable_scaling and self.nominal_traj is None:
-                sfs = self._sf
-            var_names = (self.external_data.constr_quad_pen.keys() +
-                         self.external_data.quad_pen.keys())
-            for j in xrange(len(var_names)):
-                name = var_names[j]
-                for i in range(1, self.n_e + 1):
-                    for k in range(1, self.n_cp + 1):
-                        unscaled_val = self._get_unscaled_expr(name, i, k)
-                        ref_val = y_ref[i][k][j]
-                        err[i][k].append(unscaled_val - ref_val)
+            for (vk, source) in (('constr_u', self.external_data.constr_quad_pen),
+                                 ('quad_pen', self.external_data.quad_pen)):
+                for (j, name) in enumerate(source.keys()):
+                    for i in range(1, self.n_e + 1):
+                        for k in range(1, self.n_cp + 1):
+                            unscaled_val = self._get_unscaled_expr(name, i, k)
+                            ref_val = self.var_map[vk][i][k][j]
+                            err[i][k].append(unscaled_val - ref_val)
 
             # Calculate cost contribution from each collocation point
             Q = self.external_data.Q
