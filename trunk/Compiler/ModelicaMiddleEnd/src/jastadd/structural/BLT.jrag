@@ -101,32 +101,45 @@ aspect BLT{
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            Collection<E> realEquations = new ArrayList<E>();
+            Collection<E> realEquations = new LinkedHashSet<E>();
             Collection<E> nonRealEquations = new ArrayList<E>();
-            
-            // Check if an equation block is mixed, i.e., contains both continous
-            // and discrete variables, and if it is linear in the unknowns
-            Set<FVariable> activeVariables = new HashSet<FVariable>();
-            for (E e : component)
-                activeVariables.add(e.getMatching().getVariable());
-            
-            boolean linear = true;
             for (E e : component) {
-                if (e.getMatching().getVariable().isReal()) {
+                if (e.getMatching().getVariable().isReal())
                     realEquations.add(e);
-                    linear &= e.getEquation().checkLinearity(activeVariables);
-                } else {
+                else 
                     nonRealEquations.add(e);
                 }
-            }
-            boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
             
             AbstractEquationBlock block = null;
+            boolean torn = false;
             if (producer.useTearing() && realEquations.size() > 1) {
                 TornEquationBlock tornBlock = tear(component, producer, options);
-                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty())
+                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty()) {
                     block = tornBlock;
+                    torn = true;
             }
+            }
+            // Check if an equation block is mixed, i.e., contains both continous
+            // and discrete variables, and if it is linear in the unknowns
+            Map<V, Collection<E>> varToEqnMap = AbstractBiPGraph.computeVarToEqMap(realEquations);
+            Collection<FAbstractEquation> realLoopEquations = new ArrayList<FAbstractEquation>();
+            Set<FVariable> activeRealVariables = new HashSet<FVariable>();
+            Set<FAbstractEquation> nonLoopEquations = new HashSet<FAbstractEquation>();
+            for (E e : realEquations) {
+                if (!torn || e.getGroupMembers().size() > 1 ||  varToEqnMap.get(e.getMatching()).size() > 1) {
+                    realLoopEquations.add(e.getEquation());
+                    activeRealVariables.add(e.getMatching().getVariable());
+                } else {
+                    nonLoopEquations.add(e.getEquation());
+                }
+            }
+            
+            boolean linear = true;
+            for (FAbstractEquation eqn : realLoopEquations)
+                linear &= eqn.checkLinearity(activeRealVariables);
+            
+            boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
+            
             if (block == null) {
                 if (seb != null && !mixed) {
                     block = seb;
@@ -139,7 +152,7 @@ aspect BLT{
             
             if (linear) {
                 if (block.canComputeJacobian())
-                    block.computeJacobian();
+                    block.computeJacobian(nonLoopEquations);
 //                else
 //                   Give warning?
             }
@@ -850,10 +863,10 @@ aspect BLT{
          * the result. This method should only be called if the block is linear.
          * This method also computes the variability of the resulting jacobian.
          */
-        public boolean computeJacobian() {
+        public boolean computeJacobian(Set<FAbstractEquation> dummyEquations) {
             if (!canComputeJacobian())
                 return false;
-            jacobian = computeJacobian(localRealEquations(), localRealVariables());
+            jacobian = computeJacobian(localRealEquations(), localRealVariables(), dummyEquations);
             variability = computeVariability(jacobian);
             return true;
         }
@@ -902,7 +915,7 @@ aspect BLT{
          */
         public abstract void errorCheck();
 
-        protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
+        protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars, Set<FAbstractEquation> dummyEquations) {
             FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
             int row = 0;
             int col = 0;
@@ -911,6 +924,10 @@ aspect BLT{
                 columnMap.put(fv, col++);
             
             for (FAbstractEquation fe : eqns) {
+                if (dummyEquations.contains(fe)) {
+                    jacobian[row][row] = new FRealLitExp(1);
+                    jacobian[row][row].parent = fe; // TODO: This is ugly, yes!
+                } else {
                 Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
                 Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
                 FExp l = ((FEquation)fe).getLeft();
@@ -937,6 +954,7 @@ aspect BLT{
                     }
                     jacobian[row][col] = je;
                 }   
+                }
                 row++;
             }
             return jacobian;
