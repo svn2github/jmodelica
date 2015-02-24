@@ -1165,7 +1165,9 @@ public class ModelicaCompiler {
         hookCheckAbort();
         boolean doTearDown = trySetUp(icd.root().getErrorHandler());
         try {
-            return doFlattenModel(icd, target, flatName);
+            PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icd);
+            icd = null;
+            return doFlattenModel(buf.pass(), target, flatName);
         } finally {
             tryTearDown(doTearDown);
         }
