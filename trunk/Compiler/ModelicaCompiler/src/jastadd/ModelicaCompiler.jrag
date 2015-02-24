@@ -145,6 +145,7 @@ public class ModelicaCompiler {
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
+	protected IErrorHandler errorHandler = null;
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
 	
@@ -269,19 +270,17 @@ public class ModelicaCompiler {
 		hooksList.remove(hooks);
 	}
 	
-    protected IErrorHandler errorHandler = null;
-    
-    /**
-     * Set the error handler to use for collection errors.
-     * Passing <code>null</code> resets to default.
-     */
-    public void setErrorHandler(IErrorHandler eh) {
-        errorHandler = eh;
-    }
-    
-    public IErrorHandler getErrorHandler() {
-        return errorHandler;
-    }
+	public IErrorHandler getErrorHandler() {
+		return errorHandler;
+	}
+	
+	/**
+	 * Set the error handler to use for collection errors.
+	 * Passing <code>null</code> resets to default.
+	 */
+	public void setErrorHandler(IErrorHandler eh) {
+		errorHandler = eh;
+	}
 	
 	/**
 	 * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
@@ -715,18 +714,8 @@ public class ModelicaCompiler {
         //Set options for the target.
         target.setDefaultOptions(options);
         
-        boolean doTearDown = trySetUp();
-        try {
-            return doCompileUnit(className, fileName, target, compileTo);
-        } finally {
-            tryTearDown(doTearDown);
-            // set back all options
-            options.copyAllOptions(tempOptions);
-        }
-    }
-    
-    protected String doCompileUnit(String className, String fileName[], TargetObject target, String compileTo) 
-        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        setErrorHandler(new DefaultErrorHandler(options.getBooleanOption("halt_on_warning")));
+        
         String unitFile = null;
         try {
             // set invokegc if set
@@ -755,6 +744,7 @@ public class ModelicaCompiler {
             
             if (!target.getCodeGenFlag()) {
                 //No code have been generated.
+                options.copyAllOptions(tempOptions);
                 return null;
             }
             
@@ -783,6 +773,8 @@ public class ModelicaCompiler {
             if (options.getBooleanOption("debug_csv_step_info"))
                 ASTNode.getStepInfo().writeCSVFile(new File(FClass.removeModifiersFromClassName(className) + ".csv"));
         }
+        // set back all options
+        options.copyAllOptions(tempOptions);
         
         return unitFile;
     }
@@ -983,18 +975,9 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
-        boolean doTearDown = trySetUp();
-        try {
-            return doParseModel(names);
-        } finally {
-            tryTearDown(doTearDown);
-        }
-    }
-    
-    public SourceRoot doParseModel(String names[]) 
-      throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
-        ASTNode.getStepInfo().reset();
-        ASTNode.beginStep("parseModel()");
+		ASTNode.getStepInfo().reset();
+		ASTNode.beginStep("parseModel()");
+		
 		SourceRoot sr = new SourceRoot(new Program());
 		sr.options = options.copy();
         sr.setErrorHandler(errorHandler);
@@ -1091,22 +1074,14 @@ public class ModelicaCompiler {
     public InstClassDecl instantiateModel(SourceRoot sr, String cl, TargetObject target) 
         throws ModelicaClassNotFoundException, CompilerException {
         hookCheckAbort();
-        boolean doTearDown = trySetUp(sr.getErrorHandler());
-        try {
-            return doInstantiateModel(sr, cl, target);
-        } finally {
-            tryTearDown(doTearDown);
-        }
-    }
-    
-    public InstClassDecl doInstantiateModel(SourceRoot sr, String cl, TargetObject target) 
-        throws ModelicaClassNotFoundException, CompilerException {
-        
         ASTNode.beginStep("instantiateModel()");
         
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
         ipr.options = sr.options.copy();
         ipr.setCompiler(this);
+        
+        if (sr.options.getBooleanOption("compliance_as_warning"))
+            sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
         
         log.info("Checking for errors...");
         InstClassDecl icd = ipr.instantiateModel(cl);
@@ -1163,18 +1138,6 @@ public class ModelicaCompiler {
     public FClass flattenModel(InstClassDecl icd, TargetObject target, String flatName) 
             throws CompilerException, ModelicaClassNotFoundException, IOException {
         hookCheckAbort();
-        boolean doTearDown = trySetUp(icd.root().getErrorHandler());
-        try {
-            PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icd);
-            icd = null;
-            return doFlattenModel(buf.pass(), target, flatName);
-        } finally {
-            tryTearDown(doTearDown);
-        }
-    }
-    
-    public FClass doFlattenModel(InstClassDecl icd, TargetObject target, String flatName) 
-            throws CompilerException, ModelicaClassNotFoundException, IOException {
         ASTNode.beginStep("flattenModel()");
         
         String instName = icd.qualifiedName();
@@ -1344,15 +1307,6 @@ public class ModelicaCompiler {
 	 *             If either of the three template files can not be found.
 	 */
 	public void generateCode(FClass fc, TargetObject target) throws FileNotFoundException {
-        boolean doTearDown = trySetUp(fc.root().getErrorHandler());
-        try {
-            doGenerateCode(fc, target);
-        } finally {
-            tryTearDown(doTearDown);
-        }
-    }
-	
-    public void doGenerateCode(FClass fc, TargetObject target) throws FileNotFoundException {
 		ASTNode.beginStep("generateCode()");
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
@@ -2003,16 +1957,6 @@ public class ModelicaCompiler {
      */
     public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        boolean doTearDown = trySetUp();
-        try {
-            return doCompileModel(name, cl, target, flatName);
-        } finally {
-            tryTearDown(doTearDown);
-        }
-    }
-    
-    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName)
-          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         if (target.equals(TargetObject.PARSE)) {
             parseFiles(name);
             return null;
@@ -2061,65 +2005,6 @@ public class ModelicaCompiler {
         return fc;
     }
     
-    /**
-     * If true, the compiler has been set up.
-     */
-    protected boolean ModelicaCompiler.isSetUp = false;
-    
-    /**
-     * If the compiler has not been set up yet, do so and return true. If it
-     * has been return false. It is the callers responsibility to call 
-     * {@link #tryTearDown(boolean)}.
-     */
-    protected boolean ModelicaCompiler.trySetUp() {
-        return trySetUp(null);
-    }
-    
-    /**
-     *@see #trySetUp()
-     */
-    protected boolean ModelicaCompiler.trySetUp(IErrorHandler eh) {
-        if (!isSetUp) {
-            setUp(eh);
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Set up the compiler. It is the callers responsibility to call
-     * {@link #tearDown()}.
-     * 
-     *@param IErrorHandler The error handler to use when compiling. If null the
-     *                     default will be used.
-     */
-    protected void ModelicaCompiler.setUp(IErrorHandler eh) {
-        if (eh == null) {
-            eh = new DefaultErrorHandler(options.getBooleanOption("halt_on_warning"));
-            if (options.getBooleanOption("compliance_as_warning")) {
-                eh = new ComplianceWarnErrorHandler(eh);
-            }
-        }
-        setErrorHandler(eh);
-        isSetUp = true;
-    }
-    
-    /**
-     *@param doTearDown If true, run tear down.
-     */
-    protected void ModelicaCompiler.tryTearDown(boolean doTearDown) {
-        if (doTearDown) {
-            tearDown();
-        }
-    }
-    
-    /**
-     * Tear down the compiler. Undo the work done in {@link #setUp(IErrorHandler)}.
-     */
-    protected void ModelicaCompiler.tearDown() {
-        setErrorHandler(null);
-        isSetUp = false;
-    }
     
     protected void ModelicaCompiler.warning(String message) {
         errorHandler.problem(new Problem("", message, Problem.Severity.WARNING));
