@@ -17045,13 +17045,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         double beta = 1;
         int n1 = 1;
         int n2 = 1;
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(_x_2 - (AD_WRAP_LITERAL(0)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(1) = jmi_turn_switch(_a_3 - (AD_WRAP_LITERAL(0)), _sw(1), jmi->events_epsilon, JMI_REL_GT);
-        }
-        Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), COND_EXP_EQ(_sw(1), JMI_TRUE, AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(-1.0)));
         for (i = 0; i < 1; i += 1) {
             Q1[i + 0] = (Q1[i + 0]) / (1.0);
         }
@@ -17124,13 +17117,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         double beta = 1;
         int n1 = 1;
         int n2 = 1;
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(_x_2 - (AD_WRAP_LITERAL(0)), _sw(0), jmi->events_epsilon, JMI_REL_GT);
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(1) = jmi_turn_switch(_a_3 - (AD_WRAP_LITERAL(0)), _sw(1), jmi->events_epsilon, JMI_REL_GT);
-        }
-        Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), COND_EXP_EQ(_sw(1), JMI_TRUE, AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(-1.0)));
         for (i = 0; i < 1; i += 1) {
             Q1[i + 0] = (Q1[i + 0]) / (1.0);
         }
@@ -17170,9 +17156,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 2, 1, 2, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 2, 1, 2, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 2, 1, 2, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 2, 1, 2, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
 ")})));
 end DirectlyActiveSwitches1;

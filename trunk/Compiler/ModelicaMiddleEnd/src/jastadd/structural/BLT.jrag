@@ -101,32 +101,69 @@ aspect BLT{
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            Collection<E> realEquations = new ArrayList<E>();
+            Collection<E> realEquations = new LinkedHashSet<E>();
             Collection<E> nonRealEquations = new ArrayList<E>();
-            
-            // Check if an equation block is mixed, i.e., contains both continous
-            // and discrete variables, and if it is linear in the unknowns
-            Set<FVariable> activeVariables = new HashSet<FVariable>();
-            for (E e : component)
-                activeVariables.add(e.getMatching().getVariable());
-            
-            boolean linear = true;
+            Set<FVariable> realVariables = new HashSet<FVariable>();
             for (E e : component) {
                 if (e.getMatching().getVariable().isReal()) {
                     realEquations.add(e);
-                    linear &= e.getEquation().checkLinearity(activeVariables);
+                    realVariables.add(e.getMatching().getVariable());
                 } else {
                     nonRealEquations.add(e);
                 }
             }
-            boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
+
+            Map<FAbstractEquation, Collection<E>> faeToEMap = new HashMap<FAbstractEquation, Collection<E>>();
+            for (E e : component) {
+                Collection<E> col = faeToEMap.get(e.getEquation());
+                if (col == null) {
+                    col = new ArrayList<E>();
+                    faeToEMap.put(e.getEquation(), col);
+                }
+                col.add(e);
+            }
             
             AbstractEquationBlock block = null;
+            TornEquationBlock tornBlock = null;
+            boolean torn = false;
             if (producer.useTearing() && realEquations.size() > 1) {
-                TornEquationBlock tornBlock = tear(component, producer, options);
-                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty())
+                tornBlock = tear(component, producer, options);
+                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty()) {
                     block = tornBlock;
+                    torn = true;
+                }
             }
+            Set<FAbstractEquation> activeRealEquations = new HashSet<FAbstractEquation>();
+            if (torn) {
+                // Check if an equation block is mixed, i.e., contains both continous
+                // and discrete variables, and if it is linear in the unknowns
+                Map<FVariable, AbstractEquationBlock> varToBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
+                for (AbstractEquationBlock subBlock : tornBlock.solvedRealBlocks()) {
+                    for (FVariable var : subBlock.allVariables())
+                        varToBlockMap.put(var, subBlock);
+                }
+                Set<FVariable> iterationVariables = new HashSet<FVariable>();
+                for (FVariable var : block.localUnsolvedVariables())
+                    iterationVariables.add(var);
+                Set<AbstractEquationBlock> visitedBlocks = new HashSet<AbstractEquationBlock>();
+                Set<AbstractEquationBlock> activeBlocks = new HashSet<AbstractEquationBlock>();
+                for (SimpleEquationBlock subBlock : tornBlock.unsolvedBlocks()) {
+                    linearityUseCheck(subBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
+                    activeBlocks.add(subBlock);
+                }
+                for (AbstractEquationBlock subBlock : activeBlocks)
+                    activeRealEquations.addAll(subBlock.allEquations());
+            } else {
+                for (E eqn : realEquations)
+                    activeRealEquations.add(eqn.getEquation());
+            }
+            
+            boolean linear = true;
+            for (FAbstractEquation eqn : activeRealEquations)
+                linear &= eqn.checkLinearity(realVariables);
+            
+            boolean mixed = nonRealEquations.size() > 0 && realEquations.size() > 0;
+            
             if (block == null) {
                 if (seb != null && !mixed) {
                     block = seb;
@@ -139,11 +176,31 @@ aspect BLT{
             
             if (linear) {
                 if (block.canComputeJacobian())
-                    block.computeJacobian();
+                    block.computeJacobian(activeRealEquations);
 //                else
 //                   Give warning?
             }
             return block;
+        }
+        
+        private static boolean linearityUseCheck(AbstractEquationBlock block, Map<FVariable, AbstractEquationBlock> varToBlockMap,
+                Set<FVariable> iterationVariables, Set<AbstractEquationBlock> visitedBlocks, Set<AbstractEquationBlock> activeBlocks) {
+            if (visitedBlocks.contains(block))
+                return activeBlocks.contains(block);
+            visitedBlocks.add(block);
+            boolean inLoop = false;
+            for (FVariable var : block.inactiveVariables()) {
+                if (iterationVariables.contains(var)) {
+                    inLoop = true;
+                    continue;
+                }
+                AbstractEquationBlock varBlock = varToBlockMap.get(var);
+                if (varBlock != null)
+                    inLoop |= linearityUseCheck(varBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
+            }
+            if (inLoop)
+                activeBlocks.add(block);
+            return inLoop;
         }
 
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<SimpleEquationBlock> createSimpleBlocks(Collection<SCCBlock<E, V>> eqs, BlockProducer producer) {
@@ -781,6 +838,8 @@ aspect BLT{
 			for (FAbstractEquation e : allEquations()) {
 				s.addAll(e.algebraicVariables());
 				s.addAll(e.derivativeVariables());
+				s.addAll(e.differentiatedRealVariables());
+				s.addAll(e.nonFixedParameters());
 			}
 			s.removeAll(allVariables());
 			return s;	
@@ -850,10 +909,10 @@ aspect BLT{
          * the result. This method should only be called if the block is linear.
          * This method also computes the variability of the resulting jacobian.
          */
-        public boolean computeJacobian() {
+        public boolean computeJacobian(Set<FAbstractEquation> activeRealEquations) {
             if (!canComputeJacobian())
                 return false;
-            jacobian = computeJacobian(localRealEquations(), localRealVariables());
+            jacobian = computeJacobian(localRealEquations(), localRealVariables(), activeRealEquations);
             variability = computeVariability(jacobian);
             return true;
         }
@@ -902,7 +961,7 @@ aspect BLT{
          */
         public abstract void errorCheck();
 
-        protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
+        protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars, Set<FAbstractEquation> activeRealEquations) {
             FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
             int row = 0;
             int col = 0;
@@ -911,32 +970,37 @@ aspect BLT{
                 columnMap.put(fv, col++);
             
             for (FAbstractEquation fe : eqns) {
-                Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
-                Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
-                FExp l = ((FEquation)fe).getLeft();
-                FExp r = ((FEquation)fe).getRight();
-                for (FVariable fv : new ChainedIterable<FVariable>(RLHS, RRHS)) {
-                    Integer colObj = columnMap.get(fv);
-                    if (colObj == null)
-                        continue;
-                    col = colObj;
-                    
-                    FExp dl = l.dynamicFExp(l.diff(fv.name()));
-                    boolean lz = dl.equalsRealValue(0);
-                    FExp dr = r.dynamicFExp(r.diff(fv.name()));;
-                    boolean rz = dr.equalsRealValue(0);;
-                    FExp je;
-                    if (rz && lz) {
-                        je = null;
-                    } else if (lz) {
-                        je = r.dynamicFExp(new FNegExp(dr));
-                    } else if (rz) {
-                        je = dl;
-                    } else {
-                        je = r.dynamicFExp(new FSubExp(dl,dr));
-                    }
-                    jacobian[row][col] = je;
-                }   
+                if (!activeRealEquations.contains(fe)) {
+                    jacobian[row][row] = new FRealLitExp(1);
+                    jacobian[row][row].parent = fe; // TODO: This is ugly, yes!
+                } else {
+                    Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
+                    Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
+                    FExp l = ((FEquation)fe).getLeft();
+                    FExp r = ((FEquation)fe).getRight();
+                    for (FVariable fv : new ChainedIterable<FVariable>(RLHS, RRHS)) {
+                        Integer colObj = columnMap.get(fv);
+                        if (colObj == null)
+                            continue;
+                        col = colObj;
+                        
+                        FExp dl = l.dynamicFExp(l.diff(fv.name()));
+                        boolean lz = dl.equalsRealValue(0);
+                        FExp dr = r.dynamicFExp(r.diff(fv.name()));;
+                        boolean rz = dr.equalsRealValue(0);;
+                        FExp je;
+                        if (rz && lz) {
+                            je = null;
+                        } else if (lz) {
+                            je = r.dynamicFExp(new FNegExp(dr));
+                        } else if (rz) {
+                            je = dl;
+                        } else {
+                            je = r.dynamicFExp(new FSubExp(dl,dr));
+                        }
+                        jacobian[row][col] = je;
+                    }   
+                }
                 row++;
             }
             return jacobian;
