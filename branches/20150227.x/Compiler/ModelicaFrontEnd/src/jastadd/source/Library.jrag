@@ -1,0 +1,430 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.io.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.jmodelica.util.OptionRegistry;
+
+aspect Library {
+
+    syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
+
+    public static final String LibNode.PACKAGE_FILE = "package.mo";
+    public static final String LibNode.PACKAGE_ORDER_FILE = "package.order";
+
+    syn lazy StoredDefinition LibNode.getStoredDefinition() {
+        /* If structured
+                a. Read all files
+                b. Check for package.mo
+                c. Parse package.mo
+                d. Read all .mo files
+                e. Add LibNodes to the LibClassDecl
+                f. Return the LibClassDecl
+           If unstructured
+                a. Parse the .mo file
+                b. Return the resulting FullClassDecl
+        */
+        
+        String fileName = getFileName();
+        String dirName = null;
+        File baseDir = null;
+        boolean isStructured = getStructured();
+        if (isStructured) {
+            dirName = getFileName();
+            baseDir = new File(dirName);
+            fileName = myPackageFile().getPath();
+        }
+        try {
+            log.info("Reading file: " + fileName);
+            SourceRoot sr = ParserHandler.parseFile(root().getErrorHandler(), fileName);
+            StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
+            if (entity == null) {
+                return new StoredDefinition();
+            }
+            entity.setFileName(fileName);
+            if (isStructured) {
+                FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
+                LibClassDecl lcd = new LibClassDecl(fcd);
+                
+                LibraryList ll = new LibraryList();
+                ll.add(dirName, true);
+                lcd.setLibNodeList(ll.createLibNodeList());
+                
+                File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
+                if (orderFile.isFile()) {
+                    BufferedReader in = new BufferedReader(ParserHandler.fileReader(root().getErrorHandler(), orderFile));
+                    java.util.List<String> order = new ArrayList<String>();
+                    String line;
+                    while ((line = in.readLine()) != null)
+                        order.add(line);
+                    lcd.setOrder(order);
+                }
+                
+                entity.setElement(lcd, 0);
+            }
+            return entity;
+        } catch (ParserException e) {
+            problem(e.getProblem());
+            return createErrorStoredDefinition();
+        } catch (Exception e) {
+            String msg = "Error when parsing file: '" + fileName + "':\n" + 
+                    "   " + e.getClass().getName() + "\n";
+            if (e.getMessage() != null)
+                msg = msg + "   " + e.getMessage();
+            error(msg);
+            log.debug(e);
+            return createErrorStoredDefinition();
+        } 
+    }
+
+	/**
+	 * Gets the name of the file, without file extension.
+	 */
+	public static String LibNode.fileBaseName(File f) {
+		String name = f.getName();
+		int p = name.lastIndexOf('.');
+		return (p > 0) ? name.substring(0, p) : name;
+	}
+	
+	/**
+	 * Check if a path points to a structured library.
+	 */
+	public static boolean LibNode.isStructuredLib(File f) {
+		return f.isDirectory() && new File(f, PACKAGE_FILE).isFile();
+	}
+	
+    public static boolean LibNode.isUnstructuredLib(File f) {
+        String name = f.getName();
+        return f.isFile() && !name.equals(LibNode.PACKAGE_FILE) && LibNode.isUnstructuredLibName(name);
+    }
+    
+    private static boolean LibNode.isUnstructuredLibName(String name) {
+        return name.endsWith(".mo");
+    }
+    
+    private File LibNode.myPackageFile() {
+        return new File(getFileName(), myPackageFileName());
+    }
+    
+    private String LibNode.myPackageFileName() {
+        return LibNode.PACKAGE_FILE;
+    }
+    
+    public static String LibNode.packageFile(File f) {
+        File l = new File(f,LibNode.PACKAGE_FILE);
+        if (!l.exists()) {
+             return null;
+        }
+        return l.getPath();
+    }
+	
+	public LibNode.LibNode(File loc, boolean structured) {
+		this(loc.getPath(), structured ? loc.getName() : fileBaseName(loc), structured);
+	}
+
+    syn ClassDecl LibNode.classDecl() = 
+        (getStoredDefinition().getNumElement() > 0) ? (ClassDecl) getStoredDefinition().getElement(0) : createErrorClass();
+
+	private java.util.List<String> LibClassDecl.order = Collections.emptyList();
+	
+	public void LibClassDecl.setOrder(java.util.List<String> order) {
+		this.order = order;
+	}
+
+    private StoredDefinition LibNode.createErrorStoredDefinition() {
+        StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+        sd.addElement(createErrorClass());
+        return sd;
+    }
+
+    private BadClassDecl LibNode.createErrorClass() {
+        BadClassDecl bcd = new BadClassDecl();
+        bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+        return bcd;
+    }
+
+	public LibNode.LibNode(String fileName, String name, boolean structured) {
+		this(fileName,name,structured,"Unknown");
+		
+	}
+	
+	public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
+		assignFields(fcd);
+		originalComposition = fcd.originalComposition;
+	}
+	
+	public void LibClassDecl.assignFields(FullClassDecl fcd) {
+		setVisibilityType(fcd.getVisibilityType());
+		setEncapsulatedOpt(fcd.getEncapsulatedOpt());
+		setPartialOpt(fcd.getPartialOpt());
+		setRestriction(fcd.getRestriction());
+		setName(fcd.getName());
+		setRedeclareOpt(fcd.getRedeclareOpt());
+		setFinalOpt(fcd.getFinalOpt());
+		setInnerOpt(fcd.getInnerOpt());
+		setOuterOpt(fcd.getOuterOpt());
+		setReplaceableOpt(fcd.getReplaceableOpt());
+		setConstrainingClauseOpt(fcd.getConstrainingClauseOpt());
+	    setConstrainingClauseCommentOpt(fcd.getConstrainingClauseCommentOpt());
+		setStringCommentOpt(fcd.getStringCommentOpt());
+		setEquationList(fcd.getEquationList());
+		setAlgorithmList(fcd.getAlgorithmList());
+		setSuperList(fcd.getSuperList());
+		setImportList(fcd.getImportList());
+		setClassDeclList(fcd.getClassDeclList());
+		setComponentDeclList(fcd.getComponentDeclList());
+		setAnnotationOpt(fcd.getAnnotationOpt());
+		setExternalClauseOpt(fcd.getExternalClauseOpt());
+		setEndDecl(fcd.getEndDecl());
+		setLocation(fcd);
+	}
+	
+	eq LibClassDecl.getLibNode().enclosingClassDecl() = this; 	
+	eq LibClassDecl.getLibNode().classNamePrefix() = classNamePrefix().equals("")?
+                                                      name(): classNamePrefix() + "." + name();
+                                                      
+	public LibClassDecl FullClassDecl.createLibClassDecl() {
+		return new LibClassDecl(this);
+	}
+	
+	private LibraryList Program.libraryList;
+	
+	public LibraryList Program.getLibraryList() {
+		if (libraryList == null)
+			libraryList = new DefaultLibraryList(root().options);
+		return libraryList;
+	}
+	
+	public void Program.setLibraryList(LibraryList list) {
+		libraryList = list;
+	}
+	
+	syn lazy List Program.getLibNodeList() = getLibraryList().createLibNodeList();
+	
+	public class LibraryList {
+
+		protected Set<LibraryDef> set;
+		
+		public LibraryList() {
+			set = new HashSet<LibraryDef>();
+		}
+		
+		public void reset() {
+			set.clear();
+		}
+		
+		public Set<LibraryDef> loadedLibraries() {
+			return availableLibraries();
+		}
+		
+		public Set<LibraryDef> availableLibraries() {
+			return set;
+		}
+		
+		public List<LibNode> createLibNodeList() {
+			List<LibNode> res = new List<LibNode>();
+			Set<LibraryDef> libs = loadedLibraries();
+			LibraryDef[] sorted = libs.toArray(new LibraryDef[libs.size()]);
+			Arrays.sort(sorted);
+			for (LibraryDef def : sorted)
+				res.add(def.createLibNode());
+			return res;
+		}
+		
+		/**
+		 * Add <code>path</code> to list of libraries.
+		 * 
+		 * @return <code>true</code> if a library was added 
+		 */
+		public boolean addLibrary(String path) {
+			return add(path, false);
+		}
+		
+		/**
+		 * Add each library found in the directory <code>path</code> to list of libraries.
+		 * 
+		 * @return <code>true</code> if any libraries were added 
+		 */
+		public boolean addLibraryDirectory(String path) {
+			return add(path, true);
+		}
+		
+		/**
+		 * Add each of <code>paths</code> to list of libraries.
+		 * 
+		 * @return <code>true</code> if a library was added 
+		 */
+		public boolean addLibraries(String[] paths) {
+			return addAll(paths, false);
+		}
+		
+		/**
+		 * Add each library found in each of the directories in <code>paths</code> 
+		 * to list of libraries.
+		 * 
+		 * @return <code>true</code> if any libraries were added 
+		 */
+		public boolean addLibraryDirectories(String[] paths) {
+			return addAll(paths, true);
+		}
+		
+		protected boolean addAll(String[] paths, boolean directories) {
+			boolean res = false;
+			for (String path : paths)
+				if (add(path, directories))
+					res = true;
+			return res;
+		}
+		
+		/**
+		 * Add a path to list of libraries.
+		 * 
+		 * @param path       the library or directory containing libraries to add
+		 * @param directory  if <code>true</code>, add all libraried found in the directory 
+		 *                   <code>path</code>, else add <code>path</code>
+		 * @return <code>true</code> if any libraries were added 
+		 */
+		protected boolean add(String path, boolean directory) {
+			File base = new File(path);
+			if (directory) {
+				boolean res = false;
+				try {
+					File[] files = base.listFiles();
+					if (files != null)
+						for (File file : files)
+							if (add(file))
+								res = true;
+				} catch (SecurityException e) {
+					// TODO: should probably do something constructive here, log an error or something
+				}
+				return res;
+			} else {
+				return add(base);
+			}
+		}
+		
+		protected boolean add(File path) {
+			try {
+				return add(LibraryDef.create(path));
+			} catch (SecurityException e) {
+				// TODO: should probably do something constructive here, log an error or something
+				return false;
+			}
+		}
+		
+		protected boolean add(LibraryDef def) {
+			boolean res = def != null;
+			if (res)
+				set.add(def);
+			return res;
+		}
+		
+		public static class LibraryDef implements Comparable<LibraryDef> {
+			
+			public String name;
+			public File path;
+			public boolean structured;
+			
+			public static LibraryDef create(File path) {
+				if (LibNode.isStructuredLib(path))
+					return new LibraryDef(path, true);
+				else if (LibNode.isUnstructuredLib(path))
+					return new LibraryDef(path, false);
+				else
+				    return null;
+			}
+			
+			public LibNode createLibNode() {
+				return new LibNode(path, structured);
+			}
+			
+			public int hashCode() {
+				return path.hashCode();
+			}
+			
+			public boolean equals(Object o) {
+				return o instanceof LibraryDef && path.equals(((LibraryDef) o).path);
+			}
+			
+			public int compareTo(LibraryDef def) {
+				int res = name.compareTo(def.name);
+				return res == 0 ? path.compareTo(def.path) : res;
+			}
+			
+			public String toString() {
+				return name;
+			}
+			
+			private LibraryDef(File path, boolean structured) {
+				this.path = path;
+				this.structured = structured;
+				name = path.getName();
+				if (!structured)
+					name = name.substring(0, name.length() - 3);
+			}
+			
+		}
+		
+	}
+	
+	public class DefaultLibraryList extends LibraryList {
+		
+		protected OptionRegistry options;
+		protected boolean calculated;
+		
+		public static final String[] LIBRARY_OPTIONS = 
+			new String[] { "MODELICAPATH", "extra_lib_dirs" };
+		
+		public DefaultLibraryList(OptionRegistry options) {
+			this.options = options;
+			calculated = false;
+		}
+		
+		public Set<LibraryDef> availableLibraries() {
+			search();
+			return set;
+		}
+		
+		public void reset() {
+			super.reset();
+			calculated = false;
+		}
+		
+		protected void search() {
+			if (!calculated) {
+				for (String opt : LIBRARY_OPTIONS)
+					addFromOption(opt, true);
+				calculated = true;
+			}
+		}
+	
+		protected void addFromOption(String name, boolean directories) {
+			try {
+		        String paths = options.getStringOption(name);
+		        ASTNode.log.info(name + " = " + paths);
+		        addAll(paths.split(File.pathSeparator), directories);
+			} catch (OptionRegistry.UnknownOptionException e) {}
+		}
+
+	}
+	
+}

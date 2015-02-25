@@ -1,0 +1,310 @@
+/*
+    Copyright (C) 2009-2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Comparator;
+import org.jmodelica.util.ErrorCheckType;
+
+aspect Types { 
+
+   syn String InstNode.className() = "";
+   syn String InstComponentDecl.className() = myInstClass().name();
+
+   // The double dispatch pattern applied to subtype testing.
+   syn boolean InstNode.subType(InstNode t)              = subType(t, true);
+   syn boolean InstNode.subType(InstNode t, boolean top) = false;
+
+   syn boolean InstNode.superTypeCompositeType(InstComposite subType, boolean top)          = false;
+   syn boolean InstNode.superTypeArrayType(InstArrayComponentDecl subType, boolean top)     = false;
+   syn boolean InstNode.superTypeRecordType(InstRecord subType, boolean top)                = false;
+   syn boolean InstNode.superTypeClassType(InstRoot subType, boolean top)                   = false;
+   syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) = false;
+   
+   eq InstComposite.subType(InstNode t, boolean top)          = t.superTypeCompositeType(this, top);
+   eq InstArrayComponentDecl.subType(InstNode t, boolean top) = t.superTypeArrayType(this, top);
+   eq InstRecord.subType(InstNode t, boolean top)             = t.superTypeRecordType(this, top);
+   eq InstPrimitive.subType(InstNode t, boolean top)          = t.superTypePrimitiveComponentType(this, top);
+
+   eq InstComposite.superTypeCompositeType(InstComposite subType, boolean top)               = compareCompositeTypes(this, subType, top);
+   eq InstArrayComponentDecl.superTypeArrayType(InstArrayComponentDecl subType, boolean top) = compareCompositeTypes(this, subType, top);
+   eq InstRecord.superTypeRecordType(InstRecord subType, boolean top)                        = compareCompositeTypes(this, subType, top);
+   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType, boolean top)          = true;
+   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType, boolean top)    = true;
+   eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) {
+       if (subType == this) 
+           return true;
+       return subType.baseClassName().equals(baseClassName()) && 
+               (subType.ndims() == ndims() || top && subType.ndims() == 0);
+   }
+   
+   public static boolean InstComponentDecl.compareCompositeTypes(InstComponentDecl superType, InstComponentDecl subType, boolean top) {
+       if (subType == superType || subType.myInstClass().isUnknown()) 
+           return true;
+       
+       if (superType.isArray() != subType.isArray()) {
+           if (top && superType.isArray()) 
+               return compareCompositeTypes(superType.getInstComponentDecl(0), subType, true);
+           else
+               return false;
+       }
+       
+       if (superType.isArray()) {
+           List<InstComponentDecl> superComponents = superType.getInstComponentDecls();
+           List<InstComponentDecl> subComponents = subType.getInstComponentDecls();
+           for (int i = 0, n = Math.min(superComponents.getNumChild(), subComponents.getNumChild()); i < n; i++)
+               if (!subComponents.getChild(i).subType(superComponents.getChild(i)))
+                   return false;
+       } else {
+           // Check that all elements (here: components) in superType are in subType 
+           for (InstNode superTypeComponentInst : superType.containedInstComponents()) {
+               // TODO: memberComponentInst should be switched for something in the general name analysis framework
+               HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+               if (set.size() != 1)
+                   return false;
+               InstNode subTypeComponentInst = set.iterator().next();
+               if (!subTypeComponentInst.subType(superTypeComponentInst))
+                   return false;
+           }
+       }
+       return true;
+   }
+
+  // Rudimentary name analysis framework for looking up instances
+  syn lazy HashSet<InstNode> InstNode.memberComponentInst(String name) {
+     HashSet<InstNode> set = new HashSet<InstNode>(4);
+     for (InstNode node : containedInstComponents()) {
+     	// This is to take InstExtends into account
+     if (node.name().equals(name))
+        set.add(node);
+     }
+     return set;
+  }
+
+  public static final Comparator<InstComponentDecl> InstComponentDecl.NAME_COMPARATOR = 
+	  new Comparator<InstComponentDecl>() {
+	  public int compare(InstComponentDecl o1, InstComponentDecl o2) {
+		  return o1.name().compareTo(o2.name());
+	  }
+  };
+
+  syn lazy SortedSet<InstComponentDecl> InstNode.containedInstComponents() {
+	  SortedSet<InstComponentDecl> s = new TreeSet<InstComponentDecl>(InstComponentDecl.NAME_COMPARATOR);
+	  for (InstNode node : getInstExtendss())
+		  s.addAll(node.containedInstComponents());
+	  for (InstComponentDecl node : getInstComponentDecls())
+		  s.add(node);
+	  return s;
+  }
+  
+  
+  syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
+  	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
+  
+}
+
+aspect ConnectorTypes {
+    
+    /**
+     * Check if two components are of types that can be connected.
+     */
+    syn boolean InstComponentDecl.connectableTo(InstComponentDecl other)    = 
+        other.connectableTypes(this) && typePrefixesMatch(other);
+    eq InstExpandableConnectorMember.connectableTo(InstComponentDecl other) = getCopyOf().connectableTo(other);
+    
+    /**
+     * Check if two components are of sizes that can be connected.
+     */
+    syn boolean InstComponentDecl.connectableSizes(InstComponentDecl other) = size().equivalent(other.size(), false);
+    
+    /**
+     * Check if two components are of types that can be connected given that they have matching type prefixes.
+     */
+    syn boolean InstComponentDecl.connectableTypes(InstComponentDecl other) {
+        // TODO: in array case, we should make sure that all connected elements match, since array elements can be of different structure
+        if (isArray())
+            return getInstComponentDecl(0).connectableTypes(other);
+        while (other.isArray())
+            other = other.getInstComponentDecl(0);
+        Map<String,InstComponentDecl> componentMap = new HashMap<String,InstComponentDecl>();
+        for (InstComponentDecl oicd : other.allInstComponentDecls())
+            if (!oicd.definedVariability().constantVariability())
+                componentMap.put(oicd.name(), oicd);
+        boolean expandable = isExpandableConnector();
+        for (InstComponentDecl icd : allInstComponentDecls()) {
+            if (!icd.definedVariability().constantVariability()) {
+                InstComponentDecl oicd = componentMap.remove(icd.name());
+                boolean match = oicd != null && icd.connectableTo(oicd) && icd.connectableSizes(oicd);
+                if (!match && (oicd != null || !expandable))
+                    return false;
+            }
+        }
+        return other.isExpandableConnector() || componentMap.size() == 0;
+    }
+    eq InstPrimitive.connectableTypes(InstComponentDecl other)                 = 
+        other.isPrimitive() && type().scalarType().equivalentTo(other.type().scalarType());
+    eq InstExpandableConnectorMember.connectableTypes(InstComponentDecl other) = getCopyOf().connectableTypes(other);
+    
+    // TODO: Should other prefixes be checked?
+    // TODO: Special handling for expandable connector members?
+    /**
+     * Check if two components have type prefixes that are compatible for connecting.
+     */
+    syn boolean InstComponentDecl.typePrefixesMatch(InstComponentDecl other) = 
+        (isDeclaredFlow() == other.isDeclaredFlow()) && (isStream() == other.isStream()) && (isParameter() == other.isParameter());
+    
+}
+
+aspect DerivativeFunctions {
+
+	syn boolean FType.shouldBeDifferentiated()             = isReal() || isComposite();
+	syn boolean FAbstractVariable.shouldBeDifferentiated() = false;
+	eq FFunctionVariable.shouldBeDifferentiated()          = delegateShouldBeDifferentiated();
+	eq FVariable.shouldBeDifferentiated()                  = variability().continuousVariability();
+	syn boolean FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
+	syn boolean FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
+	eq FDivFuncExp.shouldBeDifferentiated()                = false;
+	eq FSignExp.shouldBeDifferentiated()                   = false;
+	eq FLitExp.shouldBeDifferentiated()                    = false;
+	syn boolean FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
+	syn boolean FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
+	syn boolean FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;
+
+
+    syn AnnotationNode FFunctionDecl.derivativeAnnotation() = annotation().forPath("derivative");
+    syn FFunctionDecl FFunctionDecl.derivativeFunction() {
+        if (derivativeAnnotation().exists())
+            return derivativeAnnotation().fExp().asFIdUse().myFCallable().asFFunctionDecl();
+        else
+            return null;
+    }
+
+    inh boolean FFunctionVariable.delegateShouldBeDifferentiated();
+    eq Root.getChild().delegateShouldBeDifferentiated() = true;
+    eq FFunctionDecl.getFFunctionVariable(int i).delegateShouldBeDifferentiated() {
+        if (derivativeAnnotation().exists())
+            return calculateShouldBeDifferentiated(i);
+        else
+            return getFFunctionVariable(i).type().shouldBeDifferentiated();
+    }
+
+    inh boolean FExp.inNonDiffArg();
+    eq FFunctionCall.getArg(int i).inNonDiffArg() {
+        FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
+        if (myDecl == null)
+            return false;
+        return !myDecl.getFFunctionVariable(i).shouldBeDifferentiated();
+        
+    }
+    eq InstRoot.getChild().inNonDiffArg() = false;
+    eq FlatRoot.getChild().inNonDiffArg() = false;
+
+    /**
+     * Calculate if variable no <code>i</code> in the variables the function should be differentiated.
+     * 
+     * Result is cached for all variables in list, and in subsequent calls it will be assumed that 
+     * the list is the same.
+     */
+    syn boolean FFunctionDecl.calculateShouldBeDifferentiated(int i) {
+        if (cachedShouldBeDifferentiated == null) {
+            AnnotationNode derNode = derivativeAnnotation();
+            List<FFunctionVariable> vars = getFFunctionVariables();
+            cachedShouldBeDifferentiated = new boolean[vars.getNumChild()];
+            
+            // Type
+            boolean[] okType = new boolean[cachedShouldBeDifferentiated.length];
+            boolean[] input = new boolean[cachedShouldBeDifferentiated.length];
+            int n = 0;
+            int k = 0;
+            for (FFunctionVariable var : vars) {
+                okType[k] = var.type().shouldBeDifferentiated();
+                input[k] = var.isInput();
+                if (okType[k] && input[k]) 
+                    n++;
+                k++;
+            }
+            
+            // noDerivative && zeroDerivative
+            Set<String> exclude = new HashSet<String>();
+            for (AnnotationNode attrNode : derNode) {
+                if ("noDerivative".equals(attrNode.name()) || "zeroDerivative".equals(attrNode.name()))
+                    exclude.add(attrNode.fExp().asFIdUse().name());
+            }
+            
+            int j = k = 0;
+            boolean[] hasDerivative = new boolean[n];
+            for (FFunctionVariable var : vars) {
+                if (okType[k] && input[k]) {
+                    if (!exclude.contains(var.name()))
+                        hasDerivative[j] = true;
+                    j++;
+                }
+                k++;
+            }
+            
+            // order
+            int order = 1;
+            for (AnnotationNode attrNode : derNode) {
+                if ("order".equals(attrNode.name()))
+                    order = attrNode.integer();
+            }
+            int[] part = new int[order];
+            partitionArgumentsByOrder(hasDerivative, 0, n, order, part);
+            
+            // Calc result
+            int ignore = n - part[order - 1];
+            for (k = 0, j = 0; k < cachedShouldBeDifferentiated.length; k++) {
+                if (okType[k]) { 
+                    if (input[k]) {
+                        if (j >= ignore && hasDerivative[j])
+                            cachedShouldBeDifferentiated[k] = true;
+                        j++;
+                    } else {
+                        cachedShouldBeDifferentiated[k] = true;
+                    }
+                }
+            }
+	    }
+	    return cachedShouldBeDifferentiated[i];
+	}
+	
+	private static boolean FFunctionDecl.partitionArgumentsByOrder(boolean[] hasDerivative, int start, int max, int order, int[] result) {
+	    int n = hasDerivative.length - start;
+	    if (order <= 1) {
+	        result[result.length - 1] = n;
+	        return max == n;
+	    }
+	    int first = (n + order - 1) / order;
+	    int nd = 0;
+        for (int i = start; i < start + first - 1; i++)
+            if (hasDerivative[i])
+                nd++;
+	    for (; first < max; first++) {
+	        result[result.length - order] = first;
+            if (hasDerivative[start + first - 1])
+                nd++;
+            if (nd * order >= n - first && partitionArgumentsByOrder(hasDerivative, start + first, nd, order - 1, result))
+                return true;
+	    }
+	    return false;
+	}
+	
+	private boolean[] FFunctionDecl.cachedShouldBeDifferentiated = null;
+
+}
