@@ -1778,6 +1778,13 @@ class LocalDAECollocationAlgOptions(OptionBase):
             pyjmi.optimization.casadi_collocation.ExternalData
             Default: None
 
+        mutable_external_data --
+            True: If the external_data option is used, the external data
+            can be changed after discretization, e.g. during warm starting.
+
+            Type: bool
+            Default: True
+
         delayed_feedback --
             Experimental feature used to add delay constraints to the
             optimization problem.
@@ -1839,6 +1846,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'external_data': None,
+                'mutable_external_data': True,
                 'checkpoint': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',

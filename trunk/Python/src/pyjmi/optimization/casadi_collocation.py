@@ -1058,6 +1058,7 @@ class LocalDAECollocator(CasadiCollocator):
                                      par_kind in par_kinds])
         mvar_vectors['p_fixed'] = [par for par in pars
                                    if not op.get_attr(par, "free")]
+        n_var['p_fixed'] = len(mvar_vectors['p_fixed'])
         mvar_vectors['p_opt'] = [par for par in pars
                                  if op.get_attr(par, "free")]
         n_var['p_opt'] = len(mvar_vectors['p_opt'])
@@ -1070,6 +1071,8 @@ class LocalDAECollocator(CasadiCollocator):
             [mvar.getVar() for mvar in
              mvar_vectors['u'][unelim_input_indices]]
         named_mvar_struct["w"] = [mvar.getVar() for mvar in mvar_vectors['w']]
+        named_mvar_struct["p_fixed"] = [mvar.getVar() for
+                                        mvar in mvar_vectors['p_fixed']]
         named_mvar_struct["p_opt"] = [mvar.getVar() for
                                       mvar in mvar_vectors['p_opt']]
         named_mvar_struct["elim_u"] = \
@@ -1106,6 +1109,7 @@ class LocalDAECollocator(CasadiCollocator):
         mvar_struct["unelim_u"] = casadi.MX.sym("unelim_u", n_var['unelim_u'])
         mvar_struct["w"] = casadi.MX.sym("w", n_var['w'])
         mvar_struct["elim_u"] = casadi.MX.sym("elim_u", n_var['elim_u'])
+        mvar_struct["p_fixed"] = casadi.MX.sym("p_fixed", n_var['p_fixed'])
         mvar_struct["p_opt"] = casadi.MX.sym("p_opt", n_var['p_opt'])
         
         # Handy ordered structure for substitution
@@ -1114,7 +1118,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Create map from name to variable index and type
         name_map = {}
-        for vt in ["x", "unelim_u", "w", "p_opt", "elim_u", "dx"]:
+        for vt in ["x", "unelim_u", "w", "p_fixed", "p_opt", "elim_u", "dx"]:
             i = 0
             for var in mvar_vectors[vt]:
                 name = var.getName()
@@ -1130,8 +1134,8 @@ class LocalDAECollocator(CasadiCollocator):
             i = i + 1
 
         # Substitute named variables with vector variables in expressions
-        s_op_expressions = [initial, dae, path, mterm, lterm, elimination]
-        [initial, dae, path, mterm, lterm, elimination] = casadi.substitute(
+        s_op_expressions = [initial, dae, path, point, mterm, lterm, elimination]
+        [initial, dae, path, point, mterm, lterm, elimination] = casadi.substitute(
             s_op_expressions
             , named_vars, svector_vars)        
         self.mvar_struct = mvar_struct
@@ -1252,6 +1256,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.eliminate_der_var:
             del nlp_n_var['dx']
         n_popt = nlp_n_var['p_opt']
+        del nlp_n_var['p_fixed']
         del nlp_n_var['p_opt']
         mvar_vectors = self.mvar_vectors
 
@@ -1284,7 +1289,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.named_vars:
             named_xx = []            
 
-        # Contains the indices at which xx is splited
+        # Contains the indices at which xx is split
         # Those indices will let us split the xx as follows
         # [0, all_x, all_dx, all_w, all_unelimu, initial_final_points, popt, h_free]
         global_split_indices=[0]
@@ -1659,28 +1664,46 @@ class LocalDAECollocator(CasadiCollocator):
     
     def _create_nlp_parameters(self):
         """
-        Substitute parameter symbols in expressions for new parameter symbols,
-        and save their values.
+        Create parameter symbols that will be used in the final nlp,
+        and record values for them.
         """
+        # Turn off the mutable_external_data unless there is external data to work with
+        if self.external_data is None: self.mutable_external_data = False
+
+        # Count parameters
+        n_pp_unvarying = self.n_var['p_fixed']
+        n_pp_kinds = [n_pp_unvarying]
+        if self.mutable_external_data:
+            n_pp_kinds.extend(N.array([len(self.external_data.eliminated),
+                                      len(self.external_data.quad_pen),
+                                      len(self.external_data.constr_quad_pen)]) * 
+                                      self.n_e * self.n_cp)
+        n_pp = N.sum(n_pp_kinds)        
+        pp_offsets = N.hstack((0, N.cumsum(n_pp_kinds)))
+        # CasADi's vertsplit seems to be having trouble with taking pp_offsets
+        # as a numpy array of dtype=int64
+        pp_offsets = [offset for offset in pp_offsets]
+
         # Get parameter values and symbols
         par_vars = [par.getVar() for par in self.mvar_vectors['p_fixed']]
-        par_vals = [self.op.get_attr(par, "_value")
-                    for par in self.mvar_vectors['p_fixed']]
-        self._par_vals = N.array(par_vals).reshape(-1)
+        pp_unvarying_vals = [self.op.get_attr(par, "_value")
+                             for par in self.mvar_vectors['p_fixed']]
+        par_vals = N.hstack([pp_unvarying_vals, N.zeros(n_pp - n_pp_unvarying)])
+        self._par_vals = N.asarray(par_vals)
 
-        #Create parameter symbols        
-        #todo: Allocate time varying nlp parameters too, and split pp into unvarying and varying. Create corresponding entries in named_pp.
-        self.pp = casadi.MX.sym("par", len(par_vars), 1)
-        self.pp_unvarying = self.pp
-        self.pp_unvarying_list = []
+        #Create parameter symbols
+        self.pp = casadi.MX.sym("par", n_pp, 1)
+        if self.mutable_external_data:
+            self.pp_unvarying, self.pp_eliminated, self.pp_quad_pen, self.pp_constr_quad_pen = (
+                casadi.vertsplit(self.pp, pp_offsets) )
+        else:
+            self.pp_unvarying = self.pp
 
-        #Add parameters to variable dictionaries and create list with parameter 
-        #symbols (the list is needed for the substitution below).
+        #Add parameters to variable dictionaries
         #Note: For parameters the var_indices dictionary gives the index in 
         #self.pp_unvarying (and not self.xx).  
         i=0
         for para in par_vars:
-            self.pp_unvarying_list.append(self.pp_unvarying[i])
             self.var_indices[para.getName()] = i
             self.var_map[para.getName()] = self.pp_unvarying[i]
             i+=1
@@ -1690,19 +1713,22 @@ class LocalDAECollocator(CasadiCollocator):
             named_pp = []
             for para in par_vars:
                 named_pp.append(casadi.SX.sym(para.getName()))
+            for i in xrange(n_pp, n_pp_unvarying):
+                # todo: better names for the time varying nlp parameters
+                named_pp.append(casadi.SX.sym('par' + repr(i)))
             self.named_pp = casadi.vertcat(named_pp)
 
-        #Substitute old parameter symbols for new parameter symbols
-        op_expressions = [self.initial, self.dae, self.path, self.point,
-                        self.mterm, self.lterm, self.elimination]
-        [self.initial,
-         self.dae,
-         self.path,
-         self.point,
-         self.mterm,
-         self.lterm,
-         self.elimination] = casadi.substitute(op_expressions, par_vars, self.pp_unvarying_list)
-        
+        # Add p_fixed to var_map and var_indices
+        self.var_map['p_fixed'] = dict()
+        self.var_map['p_fixed']['all'] = self.pp_unvarying
+        self.var_indices['p_fixed']=range(0, self.n_var['p_fixed'])
+        if self.n_var['p_fixed'] != 0:
+            tmp_split=casadi.vertsplit(self.var_map['p_fixed']['all'])
+            for par in self.mvar_vectors['p_fixed']:
+                name = par.getName()
+                (var_index, _) = self.name_map[name] 
+                self.var_map['p_fixed'][var_index] = tmp_split[var_index]
+
 
     def _get_z_l0(self,i,k,with_der=True):
         """
@@ -1727,32 +1753,28 @@ class LocalDAECollocator(CasadiCollocator):
                 NLP variable vector.
                 Type: MX or SX
         """
-        keys = copy.copy(self.mvar_struct.keys())
-        del keys[0] #removes time
-        del keys[-1] #removes parameters
-
-        if with_der:
-            var_kinds = keys
-        else:
-            del keys[1]
-            var_kinds = keys
-        if self._normalize_min_time:
-            z = [self.time_points[i][k]*(self._denorm_tf-self._denorm_t0)]
-        else:
-            z = [self.time_points[i][k]]
-        z.append(self.pp_unvarying)
-        for vk in var_kinds:
-            if self.n_var[vk]>0:
-                if self.blocking_factors is None:
-                    z.append(self.var_map[vk][i][k]['all'])
+        z = []
+        for vk in self.mvar_struct.iterkeys():
+            if vk == 'time':
+                if self._normalize_min_time:
+                    z.append(self.time_points[i][k]*(self._denorm_tf-self._denorm_t0))
                 else:
-                    if vk != 'unelim_u':
+                    z.append(self.time_points[i][k])
+            elif vk == 'dx' and not with_der:
+                pass
+            elif vk in ['p_fixed', 'p_opt']:
+                if self.n_var[vk]>0:
+                    z.append(self.var_map[vk]['all'])
+            else:
+                if self.n_var[vk]>0:
+                    if self.blocking_factors is None:
                         z.append(self.var_map[vk][i][k]['all'])
                     else:
-                        z.append(self.var_map[vk][i][k])
+                        if vk != 'unelim_u':
+                            z.append(self.var_map[vk][i][k]['all'])
+                        else:
+                            z.append(self.var_map[vk][i][k])
 
-        if self.n_var['p_opt']>0:
-            z.append(self.var_map['p_opt']['all'])
 
         return z
 
@@ -1775,26 +1797,21 @@ class LocalDAECollocator(CasadiCollocator):
             NLP variable vector.
             Type: MX or 
         """
-        keys = copy.copy(self.mvar_struct.keys())
-        del keys[0]
-        del keys[-1]
-
-        if with_der:
-            var_kinds = keys
-        else:
-            del keys[1]
-            var_kinds = keys
-        times=[self.time_points[i][k] for k in range(1, self.n_cp+1)]
-        if self._normalize_min_time:
-            times *= (self._denorm_tf-self._denorm_t0) 
-        z=[casadi.MX(times)]
-        z.append(self.pp_unvarying)
-        for vk in var_kinds:
-            if self.n_var[vk]>0:
-                z.append(self.var_map[vk][i]['all'])
-        
-        if self.n_var['p_opt']>0:
-            z.append(self.var_map['p_opt']['all'])
+        z = []
+        for vk in self.mvar_struct.iterkeys():
+            if vk == 'time':
+                times = [self.time_points[i][k] for k in range(1, self.n_cp+1)]
+                if self._normalize_min_time:
+                    times *= (self._denorm_tf-self._denorm_t0) 
+                z.append(casadi.MX(times))
+            elif vk == 'dx' and not with_der:
+                pass
+            elif vk in ['p_fixed', 'p_opt']:
+                if self.n_var[vk]>0:
+                    z.append(self.var_map[vk]['all'])
+            else:
+                if self.n_var[vk]>0:
+                    z.append(self.var_map[vk][i]['all'])
 
         return z
 
@@ -1988,10 +2005,10 @@ class LocalDAECollocator(CasadiCollocator):
                 t_var = self.op.getVariable(t_name)
                 if self.op.get_attr(t_var, "free"):
                     if t_name == 'startTime':
-                         t0_index = self.name_map.get('startTime')[0]
+                         t0_index = self.name_map['startTime'][0]
                          self._denorm_t0 = self.var_map['p_opt'][t0_index]
                     else:
-                        tf_index = self.name_map.get('finalTime')[0]
+                        tf_index = self.name_map['finalTime'][0]
                         self._denorm_tf = self.var_map['p_opt'][tf_index]
                     var_init_guess = self.op.get_attr(t_var, "initialGuess")
                     if self.init_traj is None:
@@ -2116,7 +2133,6 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Create storage for scaling factors
             time_points = self.get_time_points()
-            n_var = copy.copy(self.n_var)
             is_variant = {}
             n_variant_var = 0
             n_invariant_var = 0
@@ -2399,7 +2415,8 @@ class LocalDAECollocator(CasadiCollocator):
               self.lterm_l0_fcn 
 
         The signature of the functions is 
-        f(["x", "dx", "unelim_u", "w", "elim_u", "p_opt"]+["scaling_factor_list"])
+        f(["time", "x", "dx", "unelim_u", "w", "elim_u", "p_fixed", "p_opt"]+["scaling_factor_list"])
+        where the first list corresponds to the order in self.mvar_struct.
 
         if one of the arguments has dimension zero (n_var[vt]=0) then 
         it is skipped and not passed as an argument. The same applies to
@@ -2415,8 +2432,6 @@ class LocalDAECollocator(CasadiCollocator):
         #defines the symbolic input
         s_sym_input = [self.mvar_struct["time"]]
         s_sym_input_no_der = [self.mvar_struct["time"]]
-        s_sym_input.append(self.pp_unvarying)
-        s_sym_input_no_der.append(self.pp_unvarying)
         var_kinds_ordered =copy.copy(self.mvar_struct.keys())
         del var_kinds_ordered[0]
         for vk in var_kinds_ordered:
@@ -2699,9 +2714,7 @@ class LocalDAECollocator(CasadiCollocator):
         #Define cost terms
         s_sym_input = [self.mvar_struct["time"]]
         s_sym_input_no_der = [self.mvar_struct["time"]]
-        s_sym_input.append(self.pp_unvarying)
-        s_sym_input_no_der.append(self.pp_unvarying)
-        for vk in ["x", "dx", "unelim_u", "w",  "elim_u",  "p_opt"]:
+        for vk in ["x", "dx", "unelim_u", "w",  "elim_u", "p_fixed", "p_opt"]:
             if self.n_var[vk]>0:
                 s_sym_input.append(self.mvar_struct[vk])
                 if vk!="dx":
@@ -2748,16 +2761,15 @@ class LocalDAECollocator(CasadiCollocator):
               self.lterm_l1_fcn 
 
         The signature of the functions is 
-        f(["x", "dx", "unelim_u", "w", "elim_u", "p_opt"]+["scaling_factor_list"])
+        f(["time", "x", "dx", "unelim_u", "w", "elim_u", "p_fixed", "p_opt"]+["scaling_factor_list"])
 
         if one of the arguments has dimension zero (n_var[vt]=0) then 
         it is skipped and not passed as an argument. The same applies to
         scaling_factor_list if the time_variant scaling mode is not activated
 
-        This functions recieve variables that contain all the collocation
-        points of a certain element ith. The idea consist on setting up all the 
-        collocation points of a certain element by calling a single function per 
-        element.
+        These functions recieve variables that contain all the collocation
+        points of a certain element i. The idea is to set up all the collocation
+        points of a certain element by calling a single function per element.
         """     
         # Define the symbolic input for level 1 functions
         l1_mvar_struct = OrderedDict()
@@ -2773,30 +2785,24 @@ class LocalDAECollocator(CasadiCollocator):
                                           self.n_var['w']*self.n_cp)
         l1_mvar_struct["elim_u"] = casadi.MX.sym("elim_ul1", 
                                                self.n_var['elim_u']*self.n_cp)
-        l1_mvar_struct["p_opt"] = casadi.MX.sym("p_opt_l1", self.n_var['p_opt']) 
+        l1_mvar_struct["p_fixed"] = casadi.MX.sym("p_fixed_l1", self.n_var['p_fixed'])
+        l1_mvar_struct["p_opt"] = casadi.MX.sym("p_opt_l1", self.n_var['p_opt'])
         inputs_order_map=OrderedDict()
         inputs_order_map_no_der=OrderedDict()
         s_sym_input_l1 = [l1_mvar_struct["time"]]
         s_sym_input_l1_no_der = [l1_mvar_struct["time"]]
-        s_sym_input_l1.append(self.pp_unvarying)
-        s_sym_input_l1_no_der.append(self.pp_unvarying)
         inputs_order_map["time"]=0
         inputs_order_map_no_der["time"]=0
-        inputs_order_map["parameters"]=1
-        inputs_order_map_no_der["parameters"]=1
         var_kinds_ordered =copy.copy(l1_mvar_struct.keys())
         del var_kinds_ordered[0]
-        counter=2
-        counter2=2
         for vk in var_kinds_ordered:
             if self.n_var[vk]>0:
+                inputs_order_map[vk]=len(s_sym_input_l1)
                 s_sym_input_l1.append(l1_mvar_struct[vk])
+
                 if vk!="dx":
+                    inputs_order_map_no_der[vk]=len(s_sym_input_l1_no_der)
                     s_sym_input_l1_no_der.append(l1_mvar_struct[vk])
-                    inputs_order_map_no_der[vk]=counter2
-                    counter2+=1
-                inputs_order_map[vk]=counter
-                counter+=1  
 
         # Build lists of collocation point variables
         empty_list = [[] for i in range(self.n_cp)]
@@ -2833,6 +2839,7 @@ class LocalDAECollocator(CasadiCollocator):
         sym_g_weights = casadi.MX.sym("Gauss_wj", self.n_cp)
 
         # Create parameters symbolic variable
+        p_fixed = [l1_mvar_struct["p_fixed"]] if self.n_var['p_fixed']>0 else []
         p_opt=[l1_mvar_struct["p_opt"]] if self.n_var['p_opt']>0 else []
 
         # Prepare input for collocation equation (level 0 functions)
@@ -2863,8 +2870,8 @@ class LocalDAECollocator(CasadiCollocator):
                 lagTerms = list()
                 for k in range(self.n_cp):
                     # Call level0 DAEResidual
-                    input_l0_fcn = time_col[k]+[self.pp_unvarying]+no_boundaries_x_col[k]\
-                        +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_opt
+                    input_l0_fcn = time_col[k]+no_boundaries_x_col[k]\
+                        +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_fixed+p_opt
                     [dae_k] = self.dae_l0_fcn.call(input_l0_fcn)
                     output_dae_element.append(dae_k)
                     # Call level0 Collocations
@@ -2942,7 +2949,7 @@ class LocalDAECollocator(CasadiCollocator):
                 for k in range(self.n_cp):
                     # Call level1 Collocations
                     input_l0_fcn = time_col[k]+no_boundaries_x_col[k]\
-                        +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_opt\
+                        +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_fixed+p_opt\
                         +sym_sf_col[k]
                     [dae_k]=self.dae_l0_fcn.call(input_l0_fcn)
                     output_dae_element.append(dae_k)
@@ -2957,7 +2964,7 @@ class LocalDAECollocator(CasadiCollocator):
                     if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
                         #call level0 lagrange
                         input_l0_fcn = time_col[k]+no_boundaries_x_col[k]\
-                            +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_opt\
+                            +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_fixed+p_opt\
                             + self._timed_variables +sym_sf_col[k]
                         [lag_k] = self.lterm_l0_fcn.call(input_l0_fcn)
                         lagTerms.append(lag_k)
@@ -4409,23 +4416,25 @@ class LocalDAECollocator(CasadiCollocator):
         # Create array to storage eliminated variables
         n_eliminations = len(op.getEliminatedVariables())
         
-        var_opt['elim_vars'] = N.ones([len(t_opt), n_eliminations])    
+        var_opt['elim_vars'] = N.ones([len(t_opt), n_eliminations])
         if n_eliminations>0:
             # Compute eliminated variables
             t_index = 0
             var_kinds_ordered =copy.copy(self.mvar_struct.keys())
-            del var_kinds_ordered[0]        
+            del var_kinds_ordered[0]
             for t in t_opt:
                 index_var = 0
                 self.elimination_fcn.setInput(t,0)
-                self.elimination_fcn.setInput(self._par_vals,1)
-                j=2
+                j=1
                 for vk in var_kinds_ordered:
                     if self.n_var[vk]>0:
-                        if vk is not 'p_opt':
-                            var_input = var_opt[vk][t_index,:]
-                        else:
+                        if vk == 'p_opt':
                             var_input = var_opt[vk]
+                        elif vk == 'p_fixed':
+                            # todo: better way to access these?
+                            var_input = self._par_vals[0:self.n_var['p_fixed']]
+                        else:
+                            var_input = var_opt[vk][t_index,:]
                         self.elimination_fcn.setInput(var_input,j)
                         j+=1
                 self.elimination_fcn.evaluate()
