@@ -684,7 +684,7 @@ int jmi_set_time(jmi_t* jmi, jmi_real_t time) {
     }
 
     if (*time_old != time) {
-        if (*time_old > time) {
+        if (*time_old > time && jmi->is_initialized == 1) {
             jmi_reset_internal_variables(jmi);
         }
         *time_old = time;
