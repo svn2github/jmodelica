@@ -213,7 +213,7 @@ der(_ds.0.s1) := dsDer(0, 1)
             a1 * a2 = 1;
             a2 * a3 = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica_disabled(UnitTesting(tests={
             FClassMethodTestCase(
                 name="DynamicStates_Basic_ThreeDSTwoEq",
                 description="Three dynamic states in two equation",
@@ -291,7 +291,7 @@ der(_ds.0.s0) := dsDer(0, 0)
             a1 * a2 * a3 = 1;
             a2 * a3 * a4 = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica_disabled(UnitTesting(tests={
             FClassMethodTestCase(
                 name="DynamicStates_Basic_FourDSTwoEq",
                 description="Four dynamic states in two equation",

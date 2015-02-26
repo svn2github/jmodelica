@@ -19675,7 +19675,7 @@ static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
             der(a2) + der(a3) = b;
             a1^2 + a2^2 + a3 = 1;
             a1 + a2^2 + a3^2 = 1;
-    annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica_disabled(UnitTesting(tests={
         CCodeGenTestCase(
             name="DynamicStates_ThreeDSTwoEqWithConstantCoefficients",
             description="Test code gen for dynamic state model with three states in two equation with some constant coefficients",
