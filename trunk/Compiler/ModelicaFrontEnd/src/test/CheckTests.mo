@@ -947,4 +947,33 @@ Semantic error at line 936, column 10:
 ")})));
 end SpatialDist1;
 
+model FixedFalseIfEquTest1
+    Real x;
+    parameter Boolean b(fixed=false);
+  initial equation
+    b = true;
+  equation
+    if b then
+        x = time;
+    else
+        x = 0;
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalseIfEquTest1",
+            description="Test that fixed false parameter if test in if equation is not marked as structural.",
+            flatModel="
+fclass CheckTests.FixedFalseIfEquTest1
+ Real x;
+ parameter Boolean b(fixed = false);
+initial equation 
+ b = true;
+equation
+ x = if b then time else 0;
+end CheckTests.FixedFalseIfEquTest1;
+
+")})));
+end FixedFalseIfEquTest1;
+
 end CheckTests;

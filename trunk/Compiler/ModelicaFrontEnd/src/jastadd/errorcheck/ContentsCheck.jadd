@@ -393,7 +393,7 @@ aspect ContentCheck {
 			boolean inWhen = inWhen();
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
 			boolean functionCallEqu = hasFunctionCallEquations(); 
-			if (hasOnlyParamTests()) {
+            if (hasOnlyFixedParamTests()) {
 				setEliminateOnParamTest(checkType);
 			} else {
 				if (!balanced) {
@@ -427,9 +427,9 @@ aspect ContentCheck {
 	eq ASTNode.getChild().isTopWhenIfEquation()        = true;
 	eq FIfWhenEquation.getElse().isTopWhenIfEquation() = false;
 	
-	syn boolean FIfWhenElseEquation.hasOnlyParamTests() = true;
-	eq FIfWhenEquation.hasOnlyParamTests()              = 
-		getTest().variability().parameterOrLess() && (!hasElse() || getElse().hasOnlyParamTests());
+    syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
+    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().isFixedParamOrLessExp() 
+            && (!hasElse() || getElse().hasOnlyFixedParamTests());
 	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
 	eq FEquation.isAssignmentEqn()                  = getLeft().isAccess();

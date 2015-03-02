@@ -359,7 +359,14 @@ aspect Variability {
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();
     syn boolean FExp.isDiscreteExp()   = variability().discreteVariability();
     syn boolean FExp.isContinuousExp() = variability().continuousVariability();
-
+    
+    syn boolean FExp.isFixedParamOrLessExp() {
+        if (variability().parameterVariability()) {
+            return !containsNonFixedParameter();
+        }
+        return variability().parameterOrLess();
+    }
+    
     syn boolean FSubscript.isConstant() = true;
     eq FExpSubscript.isConstant() = getFExp().isConstantExp();
 
