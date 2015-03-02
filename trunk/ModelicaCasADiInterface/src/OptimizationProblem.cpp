@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "OptimizationProblem.hpp"
+#include <string>
+#include <math.h>
 using std::ostream; using casadi::MX;
 
 namespace ModelicaCasADi
@@ -370,6 +372,341 @@ namespace ModelicaCasADi
             std::cout<<"WARNING: Variables have been already eliminated once. Further eliminations are ignored.\n";
         }
         ++call_count_eliminations;
+    }
+
+    std::string removesMXprint(std::string s)
+    {
+        std::string strnomx = s.substr(3,s.length()-4);
+        return strnomx;
+        /*if(strnomx[0] == "(" && strnomx[strnomx.length()-1] == ")"){
+            return strnomx.substr(1,strnomx.length()-2);
+        }
+        else{
+            return strnomx;
+        }*/
+    } 
+
+    void OptimizationProblem::printPyomoModel(const std::string& modelName)
+    {
+        std::vector<casadi::MX> pyomoStates;
+        std::vector<casadi::MX> pyomoDerivatives;
+        std::vector<casadi::MX> pyomoInputs;
+        std::vector<casadi::MX> pyomoAlgebraics;
+        std::vector<casadi::MX> pyomoIndParams;
+        std::vector<casadi::MX> pyomoDepParams;
+        std::vector<casadi::MX> pyomoTimedVars;
+
+        std::vector<casadi::MX> JMStates;
+        std::vector<casadi::MX> JMDerivatives;
+        std::vector<casadi::MX> JMInputs;
+        std::vector<casadi::MX> JMAlgebraics;
+        std::vector<casadi::MX> JMIndParams;
+        std::vector<casadi::MX> JMDepParams;
+        std::vector<casadi::MX> JMTimedVars;
+
+        std::ofstream modelFile;
+        std::string name;
+        double min;
+        double max;
+        modelFile.open("PyomoModel.py");
+
+        modelFile << "from pyomo.environ import *\n";
+        modelFile << "from pyomo.dae import *\n";
+        modelFile << "from pyomo import *\n\n";
+        modelFile << "import pyomo.core.base.expr as pyomo_ope\n";
+
+        modelFile << "\n#sq = lambda x : pyomo_ope.pow(x,2)\n";
+        modelFile << "\nsq = lambda x : x**2\n";
+        modelFile << "exp = lambda x : pyomo_ope.exp(x)\n";
+        modelFile << "log = lambda x : pyomo_ope.log10(x)\n";
+        modelFile << "sin = lambda x : pyomo_ope.sin(x)\n";
+        modelFile << "cos = lambda x : pyomo_ope.cos(x)\n";
+        modelFile << "tan = lambda x : pyomo_ope.tan(x)\n";
+        modelFile << "inf = float('inf')\n\n";
+
+
+        modelFile << modelName << " = ConcreteModel()\n";
+
+        std::vector< Ref<Variable> > ind_parameters = getVariables(REAL_PARAMETER_INDEPENDENT);
+        if(!ind_parameters.empty()){modelFile << "\n# Independent Params ....Could be written in a data file instead\n";}
+        for(std::vector<Ref<Variable> >::iterator it=ind_parameters.begin();it!=ind_parameters.end();++it)
+        {
+            name = (*it)->getName();
+            std::replace(name.begin(), name.end(), '.', '_');
+            std::replace(name.begin(), name.end(), '(','_');
+            std::replace(name.begin(), name.end(), ')','_');  
+            modelFile << name <<" = "<< evaluateExpression((*it)->getVar())<<"\n";
+            JMIndParams.push_back((*it)->getVar());
+            pyomoIndParams.push_back(casadi::MX::sym(modelName+"."+name));
+        }
+
+        modelFile << "\n# Sets\n";
+        modelFile << modelName << ".t = ContinuousSet(bounds = (startTime, finalTime))\n"; 
+
+        std::vector< Ref<Variable> > states = getVariables(DIFFERENTIATED);
+
+        modelFile << "\n# State and Derivative Variables \n";
+        for(std::vector<Ref<Variable> >::iterator it=states.begin();it!=states.end();++it)
+        {
+            name = (*it)->getName();
+            min = evaluateExpression(*(*it)->getMin());
+            max = evaluateExpression(*(*it)->getMax());
+            std::replace(name.begin(), name.end(), '.', '_');
+            std::replace(name.begin(), name.end(), '(','_');
+            std::replace(name.begin(), name.end(), ')','_');  
+            Ref<RealVariable> casted = dynamic_cast<RealVariable*>((*it).getNode());
+            Ref<Variable> derivative = casted->getMyDerivativeVariable();
+            std::string name_der = derivative->getName();
+            std::replace(name_der.begin(), name_der.end(), '.', '_');
+            std::replace(name_der.begin(), name_der.end(), '(', '_');
+            std::replace(name_der.begin(), name_der.end(), ')', '_');
+            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t)\n";
+            }
+            else{
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"))\n";
+            }
+            modelFile << modelName << "." << name_der <<" = DerivativeVar("<< modelName <<"."<< name <<")\n";
+            
+            JMStates.push_back((*it)->getVar());
+            JMDerivatives.push_back(derivative->getVar());
+            pyomoStates.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
+            pyomoDerivatives.push_back(casadi::MX::sym(modelName+"."+name_der+"[i]"));
+        }
+
+        std::vector< Ref<Variable> > inputs = getVariables(REAL_INPUT);
+        if(!inputs.empty()){modelFile << "\n# Inputs\n";}
+        for(std::vector<Ref<Variable> >::iterator it=inputs.begin();it!=inputs.end();++it)
+        {
+            name = (*it)->getName();
+            min = evaluateExpression(*(*it)->getMin());
+            max = evaluateExpression(*(*it)->getMax());
+            std::replace(name.begin(), name.end(), '.', '_');
+            std::replace(name.begin(), name.end(), '(','_');
+            std::replace(name.begin(), name.end(), ')','_');  
+            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t)\n";
+            }
+            else{
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"))\n";
+            }
+            JMInputs.push_back((*it)->getVar());
+            pyomoInputs.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
+        }
+        
+        std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
+        if(!algebraics.empty()){modelFile << "\n# Algebraics\n";}
+        for(std::vector<Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it)
+        {
+            name = (*it)->getName();
+            min = evaluateExpression(*(*it)->getMin());
+            max = evaluateExpression(*(*it)->getMax());
+            std::replace(name.begin(), name.end(), '.', '_');
+            std::replace(name.begin(), name.end(), '(','_');
+            std::replace(name.begin(), name.end(), ')','_');  
+            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t)\n";
+            }
+            else{
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"))\n";
+            }
+            JMAlgebraics.push_back((*it)->getVar());
+            pyomoAlgebraics.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
+        }
+
+        std::vector< Ref<Variable> > dep_parameters = getVariables(REAL_PARAMETER_DEPENDENT);
+        if(!dep_parameters.empty()){modelFile << "\n# Dependent Parameters\n";}
+        for(std::vector<Ref<Variable> >::iterator it=dep_parameters.begin();it!=dep_parameters.end();++it)
+        {
+            name = (*it)->getName();
+            std::replace(name.begin(), name.end(), '.', '_');
+            std::replace(name.begin(), name.end(), '(','_');
+            std::replace(name.begin(), name.end(), ')','_');  
+            modelFile << modelName << "." << name <<" = Var()\n";
+            JMDepParams.push_back((*it)->getVar());
+            pyomoDepParams.push_back(casadi::MX::sym(modelName+"."+name));
+        }
+
+        std::vector< Ref<TimedVariable> >  timed_vars = getTimedVariables();
+        std::string timed_string;
+        for(std::vector< Ref<TimedVariable> >::iterator it=timed_vars.begin();it!=timed_vars.end();++it)
+        {
+            Ref<Variable> base = (*it)->getBaseVariable();
+            name = base->getName();
+            std::replace(name.begin(), name.end(), '.', '_');
+            std::replace(name.begin(), name.end(), '(','_');
+            std::replace(name.begin(), name.end(), ')','_');
+            std::ostringstream sstream;
+            sstream << evaluateExpression((*it)->getTimePoint());
+            //timed_string = sstream.str();
+            timed_string = removesMXprint((*it)->getTimePoint().getRepresentation());
+            JMTimedVars.push_back((*it)->getVar());
+            pyomoTimedVars.push_back(casadi::MX::sym(modelName+"."+name+"["+timed_string+"]"));
+        }
+
+
+        std::vector< Ref< Equation> > dae = getDaeEquations();
+        std::vector<casadi::MX> daeLHS;
+        std::vector<casadi::MX> daeRHS;
+        for(std::vector< Ref< Equation> >::iterator it=dae.begin();it!=dae.end();++it)
+        {
+            daeLHS.push_back(casadi::MX((*it)->getLhs()));
+            daeRHS.push_back(casadi::MX((*it)->getRhs()));
+        }
+
+        // All of this can be avoided if the loop is done over all variables .... to be improved later 
+        std::vector<casadi::MX> allVarsJM;
+        allVarsJM.insert(allVarsJM.end(), JMStates.begin(), JMStates.end());
+        allVarsJM.insert(allVarsJM.end(), JMDerivatives.begin(), JMDerivatives.end());
+        allVarsJM.insert(allVarsJM.end(), JMInputs.begin(), JMInputs.end());
+        allVarsJM.insert(allVarsJM.end(), JMAlgebraics.begin(), JMAlgebraics.end());
+        allVarsJM.insert(allVarsJM.end(), JMDepParams.begin(), JMDepParams.end());
+        //allVarsJM.insert(allVarsJM.end(), JMIndParams.begin(), JMIndParams.end());
+        allVarsJM.insert(allVarsJM.end(), JMTimedVars.begin(), JMTimedVars.end());
+        
+
+        std::vector<casadi::MX> allVarsPY;
+        allVarsPY.insert(allVarsPY.end(), pyomoStates.begin(), pyomoStates.end());
+        allVarsPY.insert(allVarsPY.end(), pyomoDerivatives.begin(), pyomoDerivatives.end());
+        allVarsPY.insert(allVarsPY.end(), pyomoInputs.begin(), pyomoInputs.end());
+        allVarsPY.insert(allVarsPY.end(), pyomoAlgebraics.begin(), pyomoAlgebraics.end());
+        allVarsPY.insert(allVarsPY.end(), pyomoDepParams.begin(), pyomoDepParams.end());
+        //allVarsPY.insert(allVarsPY.end(), pyomoIndParams.begin(), pyomoIndParams.end());
+        allVarsPY.insert(allVarsPY.end(), pyomoTimedVars.begin(), pyomoTimedVars.end());
+
+        std::vector<casadi::MX> pyLHS = casadi::substitute(daeLHS,
+        allVarsJM,
+        allVarsPY);
+
+        std::vector<casadi::MX> pyRHS = casadi::substitute(daeRHS,
+        allVarsJM,
+        allVarsPY);
+        modelFile << "\n################## Constraints ##################\n\n";
+        for(int i=0;i<pyRHS.size();++i)
+        {
+            modelFile << "def dae_constraint_rule_" << i << "("<<modelName<<",i):\n";
+            modelFile << "\tif i == 0:\n\t\treturn Constraint.Skip\n";
+            modelFile << "\treturn " << removesMXprint(pyLHS[i].getRepresentation()) << " == " << removesMXprint(pyRHS[i].getRepresentation()) <<"\n";
+            modelFile << modelName << ".dae_constraint_" << i << " = " 
+            << "Constraint(" << modelName << ".t, rule = "<< "dae_constraint_rule_" << i << ")\n\n";
+        }
+
+        modelFile << "# Initial Conditions\n";
+        std::vector< Ref< Equation> > dae_init = getInitialEquations();
+        std::vector<casadi::MX> dae_initLHS;
+        std::vector<casadi::MX> dae_initRHS;
+        for(std::vector< Ref< Equation> >::iterator it=dae_init.begin();it!=dae_init.end();++it)
+        {
+            dae_initLHS.push_back(casadi::MX((*it)->getLhs()));
+            dae_initRHS.push_back(casadi::MX((*it)->getRhs()));
+        }
+
+        std::vector<casadi::MX> pyinitLHS = casadi::substitute(dae_initLHS,
+        allVarsJM,
+        allVarsPY);
+
+        std::vector<casadi::MX> pyinitRHS = casadi::substitute(dae_initRHS,
+        allVarsJM,
+        allVarsPY);
+
+        modelFile << "def _init_rule("<<modelName<<"):\n\ti=0\n";
+        for(int i=0;i<dae_initRHS.size();++i)
+        {
+            modelFile << "\tyield " << removesMXprint(pyinitLHS[i].getRepresentation()) << " == " 
+            << removesMXprint(pyinitRHS[i].getRepresentation())<<"\n";
+        }
+        modelFile << "\tyield ConstraintList.End\n";
+        modelFile << modelName << ".init_conditions = ConstraintList( rule = _init_rule)\n\n";
+
+        std::vector< Ref<Constraint> >  pathConst = getPathConstraints();
+        if(!pathConst.empty()){modelFile << "# Path constraints\n";}
+        std::vector<casadi::MX> path_LHS;
+        std::vector<casadi::MX> path_RHS;
+        for(std::vector< Ref< Constraint> >::iterator it=pathConst.begin();it!=pathConst.end();++it)
+        {
+            path_LHS.push_back(casadi::MX((*it)->getLhs()));
+            path_RHS.push_back(casadi::MX((*it)->getRhs()));
+        }
+
+        std::vector<casadi::MX> pypathLHS = casadi::substitute(path_LHS,
+        allVarsJM,
+        allVarsPY);
+
+        std::vector<casadi::MX> pypathRHS = casadi::substitute(path_RHS,
+        allVarsJM,
+        allVarsPY);
+
+        for(int i=0;i<pypathLHS.size();++i)
+        {
+            modelFile << "def path_constraint_rule_" << i << "("<<modelName<<",i):\n";
+            if(pathConst[i]->getType() == Constraint::EQ){
+                modelFile << "\treturn " << removesMXprint(pypathLHS[i].getRepresentation()) << " == " << removesMXprint(pypathRHS[i].getRepresentation()) <<"\n";
+            }
+            else if(pathConst[i]->getType() == Constraint::LEQ){
+                modelFile << "\treturn " << removesMXprint(pypathLHS[i].getRepresentation()) << " <= " << removesMXprint(pypathRHS[i].getRepresentation()) <<"\n";
+            }
+            else{
+                modelFile << "\treturn " << removesMXprint(pypathLHS[i].getRepresentation()) << " >= " << removesMXprint(pypathRHS[i].getRepresentation()) <<"\n";
+            }
+            modelFile << modelName << ".path_constraint_" << i << " = " 
+            << "Constraint(" << modelName << ".t, rule = "<< "path_constraint_rule_" << i << ")\n\n";
+        }
+
+        std::vector< Ref<Constraint> >  pointConst = getPointConstraints();
+        if(!pointConst.empty()){modelFile << "# Point constraints\n";}
+        std::vector<casadi::MX> point_LHS;
+        std::vector<casadi::MX> point_RHS;
+        for(std::vector< Ref< Constraint> >::iterator it=pointConst.begin();it!=pointConst.end();++it)
+        {
+            point_LHS.push_back(casadi::MX((*it)->getLhs()));
+            point_RHS.push_back(casadi::MX((*it)->getRhs()));
+        }
+
+        std::vector<casadi::MX> pypointLHS = casadi::substitute(point_LHS,
+        allVarsJM,
+        allVarsPY);
+
+        std::vector<casadi::MX> pypointRHS = casadi::substitute(point_RHS,
+        allVarsJM,
+        allVarsPY);
+
+        for(int i=0;i<pypointLHS.size();++i)
+        {
+            modelFile << "def point_constraint_rule_" << i << "("<<modelName<<"):\n";
+            if(pointConst[i]->getType() == Constraint::EQ){
+                modelFile << "\treturn " << removesMXprint(pypointLHS[i].getRepresentation()) << " == " << removesMXprint(pypointLHS[i].getRepresentation()) <<"\n";
+            }
+            else if(pointConst[i]->getType() == Constraint::LEQ){
+                modelFile << "\treturn " << removesMXprint(pypointLHS[i].getRepresentation()) << " <= " << removesMXprint(pypointLHS[i].getRepresentation()) <<"\n";
+            }
+            else{
+                modelFile << "\treturn " << removesMXprint(pypointLHS[i].getRepresentation()) << " >= " << removesMXprint(pypointLHS[i].getRepresentation()) <<"\n";
+            }
+            modelFile << modelName << ".point_constraint_" << i << " = " 
+            << "Constraint(" << modelName << ".t, rule = "<< "point_constraint_rule_" << i << ")\n\n";
+        }
+
+        modelFile << "################## Objective function ##################\n\n";
+        std::vector<casadi::MX> Boltza;
+        Boltza.push_back(casadi::MX(objectiveIntegrand));
+        Boltza.push_back(casadi::MX(objective));
+        
+        std::vector<casadi::MX> pyObjective = casadi::substitute(Boltza,
+        allVarsJM,
+        allVarsPY);
+
+
+        modelFile << "def _integralExp("<<modelName<<",i):\n";
+        modelFile << "\treturn " << removesMXprint(pyObjective.front().getRepresentation()) << "\n";
+        modelFile << modelName << ".initExp = Expression(" << modelName << ".t, rule = _integralExp)\n";
+        modelFile << "\ndef _obj_rule("<<modelName<<"):\n";
+        modelFile << "\t#return " << removesMXprint(pyObjective.back().getRepresentation()) 
+        << " + Integral(expr=" << modelName <<".initExp,wrt = "<<modelName<<".t)\n"; 
+        modelFile << "\treturn " << removesMXprint(pyObjective.back().getRepresentation()) <<"\n";
+        modelFile << modelName<< ".obj = Objective(rule = _obj_rule)\n";
+
+
+        modelFile.close();
     }
 
 }; // End namespace

@@ -34,12 +34,14 @@ int main(int argc, char ** argv)
     with_blt=atoi(argv[1]);
   }
    //Class
-   std::string modelName("BLTExample");
+   //std::string modelName("BLTExample");
    //std::string modelName("CombinedCycle.Substances.Gas");
    //std::string modelName("Modelica.Mechanics.Rotational.Examples.CoupledClutches");
+   std::string modelName("VDP_pack.VDP_Opt");
    //Files
    std::vector<std::string> modelFiles;
-   modelFiles.push_back("./example_blt.mo");
+   modelFiles.push_back("VDP.mop");
+   //modelFiles.push_back("./example_blt.mo");
    //modelFiles.push_back("./CombinedCycle.mo");   
    //modelFiles.push_back("./MSL/Modelica");
    //modelFiles.push_back("./MSL/ModelicaServices");
@@ -58,18 +60,19 @@ int main(int argc, char ** argv)
       
       
       //Model
-      ModelicaCasADi::Ref<ModelicaCasADi::Model> model = new ModelicaCasADi::Model();
-      transferModelFromModelicaCompiler(model, 
-                                        modelName, 
-                                        modelFiles,
-                                        options, 
-                                        log_level);
+      ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> model = new ModelicaCasADi::OptimizationProblem();
+      ModelicaCasADi::transferOptimizationProblem(model, 
+        modelName, 
+        modelFiles,
+        options, 
+        log_level);
       
-      casadi::MX x = casadi::MX::sym("x");
-      casadi::MX y = x+1;
-      std::cout<<"Not normalized "<<y<<"\n";
-      std::cout<<"Normalized "<<ModelicaCasADi::normalizeMXRespresentation(y)<<"\n";
-      model->print(std::cout);
+      //casadi::MX x = casadi::MX::sym("x");
+      //casadi::MX y = x+1;
+      //std::cout<<"Not normalized "<<y<<"\n";
+      //std::cout<<"Normalized "<<ModelicaCasADi::normalizeMXRespresentation(y)<<"\n";
+      //model->print(std::cout);
+      model->printPyomoModel("model");
       //model->printBLT(std::cout,true);
       //ModelicaCasADi::Ref<ModelicaCasADi::Block> b = model->getBlock(0);
       //b->printBlock(std::cout,true);
