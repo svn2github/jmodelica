@@ -31,9 +31,7 @@
 #define BRENT_EXTENDED_LOG_LEVEL 7 /* Extended Brent printouts log level */
 
 #define BRENT_INITIAL_STEP_FACTOR 0.001 /* Initial bracketing step as a fraction of nominal */
-#define BRENT_MAX_NEWTON 10 /* Max number of Newton iteration */
-#define BRENT_INF 1e20
- 
+
 /* Interface to the residual function that is compatible with Brent search.
    @param y - input - function argument
    @param f - output - residual value
@@ -76,54 +74,6 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     return ret;
 }
 
-int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
-    jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
-    int ret = 0;
-    realtype y0 = y;
-    realtype ftemp;
-    int sign;
-    realtype inc;
-
-    /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %s>", block->label);
-        return -1;
-    }
-            
-    sign = (y >= 0) ? 1 : -1;
-    inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
-    y += inc;
-    /* make sure we're inside bounds*/
-    if((y > block->max[0]) || (y < block->min[0])) {
-        inc = -inc;
-        y = y0 + inc;
-    }
-          
-    ret = brentf(y, &ftemp, block);
-    if (ret) {
-        jmi_log_t* log = block->log;
-        jmi_log_node_t node = 
-            jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling residual function in <block: %s>", ret, block->label);
-        jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
-        jmi_log_leave(log, node);
-        return ret;
-    }
-    
-    *df = (ftemp-f)/inc;
-    
-    /* Check that outputs are valid */    
-    {
-        realtype v = *df;
-        if (v- v != 0) {
-             jmi_log_t* log = block->log;
-             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
-             jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
-             jmi_log_leave(log, node);
-             ret = 1;
-        }
-    }
-    return ret;
-}
 
 /* Initialize solver structures 
 
@@ -189,100 +139,6 @@ void jmi_brent_solver_print_solve_end(jmi_block_solver_t *block, const jmi_log_n
     }
 }
 
-static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
-    double x = *x0;
-    double f = 0.0;
-    double df = 0.0;
-    double delta = 1e20;
-    int flag;
-    int i = 0;
-    jmi_log_node_t node;
-    
-    if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { 
-            node = jmi_log_enter_fmt(block->log, logInfo, "BrentNewton", 
-                                "Starting Newton to find a good initial for Brent in <block:%s> <initial_f:%f>", block->label, *f0);
-    }
-    
-    
-    for (i = 0; i < BRENT_MAX_NEWTON; i++) {
-        flag = brentf(x, &f, block);
-        if (flag) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
-            jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed during Newton for block "
-                    "<block: %s>", block->label);
-            return -1;
-        }
-        
-        /* Iteration terminates successfully */
-        if (JMI_ABS(f) < UNIT_ROUNDOFF) { 
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-                jmi_log_fmt(block->log, node, logInfo, "The residual meets the tolerance requirement <res: %f>. Stopping Newton.", f);
-            }
-            break; 
-        }
-        
-        flag = brentdf(x, f, &df, block);
-        if (flag) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
-            jmi_log_node(block->log, logError, "Error", "Residual derivative function evaluation failed during Newton for block "
-                    "<block: %s>", block->label);
-            return -1;
-        }
-        if (JMI_ABS(df) < UNIT_ROUNDOFF) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-                jmi_log_fmt(block->log, node, logInfo, "The residual derivative is too small <df: %f>. Stopping Newton.", df);
-            }
-            break;
-        }
-        
-        delta = f/df;
-        
-        if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Dervative value <df: %f>, Delta <delta:%f>",
-            x,f,df,delta);
-        }
-        
-        /* If the step is zero, stop */
-        if (JMI_ABS(delta) < UNIT_ROUNDOFF*block->nominal[0]) { 
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-                jmi_log_fmt(block->log, node, logInfo, "The step is too small <delta: %f>. Stopping Newton.", delta);
-            }
-            break; 
-        }
-        
-        x = x - delta;
-        
-        /* Clamping */
-        if (x < block->min[0]) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-                jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to minimum, <min: %f>",
-                    x,block->min[0]);
-            }
-            x = block->min[0];
-        } else if (x > block->max[0]) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-                jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to maximum, <max: %f>",
-                    x,block->max[0]);
-            }
-            x = block->max[0];
-        }
-        
-    }
-    
-    if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
-    
-    /* If the function value was decreased during Newton, return successful together with the values, x, f and the last step */
-    if (JMI_ABS(f) < JMI_ABS(*f0)) {
-        *x0 = x;
-        *f0 = f;
-        *d = delta >= 0 ? delta : -delta;
-    } else {
-        return -1;
-    }
-    
-    return 0;
-}
-
 /* Initialize solver structures */
 /* just a placeholder in case more init is needed*/
 static int jmi_brent_init(jmi_block_solver_t * block) {
@@ -344,10 +200,6 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 #endif
     jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
     double f, init;
-    double initialStepNewton = BRENT_INF;
-    double xNewton = 0.0;
-    double fNewton = 0.0;
-    double dNewton = 0.0;
     jmi_log_node_t topnode;
     jmi_log_t *log = block->log;
 #ifdef JMI_PROFILE_RUNTIME
@@ -502,29 +354,13 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         else
             return JMI_BRENT_FIRST_SYSFUNC_ERR;
     }
-    
-    /* Try to use Newton to find a good initial interval */
-    if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
-        xNewton = block->x[0];
-        fNewton = f;
-        flag = jmi_brent_newton(block, &xNewton, &fNewton, &dNewton);
-        jmi_log_fmt(log, topnode, BRENT_EXTENDED_LOG_LEVEL, "<flag:%d>, <newton_x:%g>, <newton_f:%g>, <newton_step:%g>", flag, xNewton, fNewton, initialStepNewton);
-        
-        /* If Newton was successful, use the returned values, otherwise continue */
-        if (!flag) {
-            block->x[0] = xNewton;
-            f = fNewton;
-            initialStepNewton = dNewton;
-        }
-    }
 
     /* bracket the root */
     if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
         double x = block->x[0], tmp, f_tmp;
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
-        double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
-        double initialStep = (initialStepNewton > initialStepStatic) ? initialStepStatic : initialStepNewton;
+        double initialStep = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
         double lstep = initialStep, ustep = initialStep;
         while (1) {
             if (lower > block->min[0] && /* lower is fine as long as we're inside the bounds */
