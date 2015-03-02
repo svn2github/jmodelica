@@ -1,0 +1,111 @@
+<?xml version='1.0'?>
+<?xml-stylesheet type='text/xsl' href='pmathml.xsl'?>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>Preprocessor Definitions Used by CppAD</title>
+<meta name="description" id="description" content="Preprocessor Definitions Used by CppAD"/>
+<meta name="keywords" id="keywords" content=" configure symbol Package Version preprocessor processor config.h "/>
+<style type='text/css'>
+body { color : black }
+body { background-color : white }
+A:link { color : blue }
+A:visited { color : purple }
+A:active { color : purple }
+</style>
+<script type='text/javascript' language='JavaScript' src='_configure_xml.js'>
+</script>
+</head>
+<body>
+<table><tr>
+<td>
+<a href="http://www.coin-or.org/CppAD/" target="_top"><img border="0" src="_image.gif"/></a>
+</td>
+<td><a href="test_vector.xml" target="_top">Prev</a>
+</td><td><a href="appendix.xml" target="_top">Next</a>
+</td><td>
+<select onchange='choose_across0(this)'>
+<option>Index-&gt;</option>
+<option>contents</option>
+<option>reference</option>
+<option>index</option>
+<option>search</option>
+<option>external</option>
+</select>
+</td>
+<td>
+<select onchange='choose_up0(this)'>
+<option>Up-&gt;</option>
+<option>CppAD</option>
+<option>configure</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down1(this)'>
+<option>CppAD-&gt;</option>
+<option>Install</option>
+<option>Introduction</option>
+<option>AD</option>
+<option>ADFun</option>
+<option>library</option>
+<option>Example</option>
+<option>configure</option>
+<option>Appendix</option>
+</select>
+</td>
+<td>configure</td>
+<td>
+<select onchange='choose_current0(this)'>
+<option>Headings-&gt;</option>
+<option>Preprocessor Symbols</option>
+<option>Example</option>
+<option>config.h</option>
+</select>
+</td>
+</tr></table><br/>
+
+
+
+<center><b><big><big>Preprocessor Definitions Used by CppAD</big></big></b></center>
+<br/>
+<b><big><a name="Preprocessor Symbols" id="Preprocessor Symbols">Preprocessor Symbols</a></big></b>
+
+
+<br/>
+All of the preprocessor symbols used by CppAD begin either with
+<code><font color="blue">CppAD</font></code> or with <code><font color="blue">CPPAD_</font></code>.
+
+<br/>
+<br/>
+<b><big><a name="Example" id="Example">Example</a></big></b>
+<br/>
+For example,
+the preprocessor symbol 
+<small><a href="test_vector.xml" target="_top"><span style='white-space: nowrap'>CPPAD_TEST_VECTOR</span></a>
+ </small> 
+determines which
+<a href="simplevector.xml" target="_top"><span style='white-space: nowrap'>SimpleVector</span></a>
+ template class is extensively used 
+by the tests in the <code><font color="blue">Example</font></code> and <code><font color="blue">TestMore</font></code> directories.
+
+<br/>
+<br/>
+<b><big><a name="config.h" id="config.h">config.h</a></big></b>
+
+<br/>
+The following is a list of exceptions to the rule above.
+These preprocessor symbols are placed in the file <code><font color="blue">cppad/config.h</font></code>
+by <code><font color="blue">autoconf</font></code> (which is used to generate the CppAD distribution).
+Directly after you include a CppAD file, these symbols may be undefined:
+<code><font color="blue">PACKAGE</font></code>,
+<code><font color="blue">PACKAGE_BUGREPORT</font></code>,
+<code><font color="blue">PACKAGE_NAME</font></code>,
+<code><font color="blue">PACKAGE_STRING</font></code>,
+<code><font color="blue">PACKAGE_TARNAME</font></code>,
+<code><font color="blue">PACKAGE_VERSION</font></code>,
+<code><font color="blue">VERSION</font></code>.
+
+
+<hr/>Input File: cppad/configure.hpp
+
+</body>
+</html>

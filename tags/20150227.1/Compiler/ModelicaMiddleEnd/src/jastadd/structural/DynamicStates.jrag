@@ -1,0 +1,680 @@
+import java.util.Map;
+
+/*
+    Copyright (C) 2015 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect DynamicStateSelect{
+    
+    syn lazy Map<FVariable, DynamicStateSet> DynamicStateManager.varLookupMap() {
+        Map<FVariable, DynamicStateSet> map = new HashMap<FVariable, DynamicStateSet>();
+        for (DynamicStateSet set : getSets()) {
+            for (FVariable var : set.fVars())
+                map.put(var, set);
+        }
+        return map;
+    }
+    
+    syn DynamicStateSet DynamicStateManager.lookupSet(FVariable var) = varLookupMap().get(var);
+
+    syn int DynamicStateSet.numStates() = getNumVar() - numAlgebraics();
+    syn int DynamicStateSet.numAlgebraics() = getNumAlgebraics();
+    syn int DynamicStateSet.numVars() = getNumVar();
+    syn int DynamicStateSet.id() = getSetId();
+
+    syn lazy FVariable[] DynamicStateSet.fVars() {
+        FVariable[] vars = new FVariable[getNumVar()];
+        for (int i = 0; i < vars.length; i++)
+            vars[i] = getVar(i).myFV().asFVariable();
+        return vars;
+    }
+
+    syn lazy Map<FAbstractVariable, Integer> DynamicStateSet.varIndexMap() {
+        Map<FAbstractVariable, Integer> map = new HashMap<FAbstractVariable, Integer>();
+        FVariable[] vars = fVars();
+        for (int i = 0; i < numVars(); i++)
+            map.put(vars[i], i);
+        return map;
+    }
+
+    syn int DynamicStateSet.varIndex(FAbstractVariable var) = varIndexMap().get(var);
+
+    syn Collection<FVariable> DynamicStateSet.fVarsColl() = Arrays.asList(fVars());
+
+    syn DynamicStateSet FAbstractVariable.dynamicStateSet() = null;
+    eq FVariable.dynamicStateSet() = myFClass().getDynamicStateManager().lookupSet(this);
+    
+    syn int FAbstractVariable.dynamicStateVarIndex() = dynamicStateSet().varIndex(this);
+
+    syn boolean FAbstractVariable.isDynamicState() = dynamicStateSet() != null;
+
+    syn boolean FAbstractVariable.isFDynamicStateVariable() = false;
+    eq FDynamicStateVariable.isFDynamicStateVariable() = true;
+
+    syn FDynamicStateVariable FAbstractVariable.asFDynamicStateVariable() {
+        throw new UnsupportedOperationException("Unable to convert " + getClass().getSimpleName() + " to FDynamicStateVariable!");
+    }
+    eq FDynamicStateVariable.asFDynamicStateVariable() = this;
+
+    syn boolean FAbstractVariable.isFDynamicAlgebraicVariable() = false;
+    eq FDynamicAlgebraicVariable.isFDynamicAlgebraicVariable() = true;
+    
+    syn FDynamicAlgebraicVariable FAbstractVariable.asFDynamicAlgebraicVariable() {
+        throw new UnsupportedOperationException("Unable to convert " + getClass().getSimpleName() + " to FDynamicAlgebraicVariable!");
+    }
+    eq FDynamicAlgebraicVariable.asFDynamicAlgebraicVariable() = this;
+    
+    syn boolean FVarRefExp.isDynamicState() = false;
+    eq FIdUseExp.isDynamicState() = myFV().isDynamicState();
+    eq FDSRefExp.isDynamicState() = true;
+
+    eq FDynamicAlgebraicVariable.bltDependencyVars() = getSet().fVarsColl();
+
+    inh boolean FIdUseExp.shouldRewriteToDSRef();
+    eq BaseNode.getChild().shouldRewriteToDSRef()        = true;
+    eq DynamicStateSet.getChild().shouldRewriteToDSRef() = false;
+    eq FDSRefExp.getChild().shouldRewriteToDSRef()       = false;
+
+    private boolean FIdUseExp.dynamicStateRewriteEnabled = false;
+    public void ASTNode.enableDynamicStateRewrite() {
+        for (ASTNode n : this)
+            n.enableDynamicStateRewrite();
+    }
+
+    @Override
+    public void FIdUseExp.enableDynamicStateRewrite() {
+        super.enableDynamicStateRewrite();
+        dynamicStateRewriteEnabled = true;
+    }
+
+    rewrite FIdUseExp {
+        when (dynamicStateRewriteEnabled && isDynamicState() && shouldRewriteToDSRef()) to FDSRefExp {
+            dynamicStateRewriteEnabled = false;
+            return new FDSRefExp(myFV().dynamicStateSet().id(), this);
+        }
+    }
+
+    syn DynamicStateSet FDSRefExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId());
+    syn DynamicStateSet FDSDerExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId());
+
+    syn List<FIdUseExp> FDSRefExp.getUseList() {
+        DynamicStateSet set = mySet();
+        List<FIdUseExp> list = new List<FIdUseExp>();
+        for (int i = 0; i < set.numAlgebraics(); i++)
+            list.add(new FIdUseExp("_ds." + set.id() + ".a" + i));
+        return list;
+    }
+
+    public void FDSRefExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+        for (FIdUseExp exp : getUses())
+            set.add(exp);
+        getOrg().findFIdUseExpsInTree(set);
+    }
+
+    syn List<FExp> FDSDerExp.getUseList() {
+        DynamicStateSet set = mySet();
+        List<FExp> list = new List<FExp>();
+        for (FIdUseExp var : set.getVars())
+            list.add(var.diff(TIME));
+        return list;
+    }
+
+    public void FDSDerExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+        for (FExp exp : getUses())
+            exp.findFIdUseExpsInTree(set);
+    }
+    
+    private Enumerator DynamicStateManager.idEnumerator = new Enumerator(0);
+    public int DynamicStateManager.nextId() {
+        return idEnumerator.next();
+    }
+
+    syn int DynamicStateSet.numCombinations() {
+        int n = numVars();
+        int k = numStates();
+        if (k > n - k)
+            k = n - k;
+        int r=1;
+        for (int i = 1, j = n; i <= k; i++, j--)
+            r = r * j / i;
+        return r;
+    }
+
+    syn lazy FVariable[][] DynamicStateSet.algebraicCombinations() {
+        Collection<FVariable[]> res = new ArrayList<FVariable[]>();
+        genCombinations(res, numVars(), numAlgebraics(), fVars(), 0, 0, new FVariable[numAlgebraics()]);
+        return res.toArray(new FVariable[res.size()][]);
+    }
+
+    private static void DynamicStateSet.genCombinations(Collection<FVariable[]> res, int n, int k, FVariable[] vars, int min, int index, FVariable[] current) {
+        for (int i = min; i <= n - k + index && i < n; i++) {
+            current[index] = vars[i];
+            if (index == k - 1) {
+                FVariable[] copy = new FVariable[k];
+                System.arraycopy(current, 0, copy, 0, k);
+                res.add(copy);
+            } else {
+                genCombinations(res, n, k, vars, i + 1, index + 1, current);
+            }
+        }
+    }
+    
+    syn lazy FVariable[][] DynamicStateSet.stateCombinations() {
+        FVariable[][] algCombs = algebraicCombinations();
+        FVariable[][] res = new FVariable[algCombs.length][];
+        for (int i = 0; i < res.length; i++) {
+            int j = 0;
+            res[i] = new FVariable[numStates()];
+            Set<FVariable> algs = new HashSet<FVariable>();
+            for (FVariable alg : algCombs[i])
+                algs.add(alg);
+            for (FVariable var : fVars())
+                if (!algs.contains(var))
+                    res[i][j++] = var;
+        }
+        return res;
+    }
+
+    private static FVariable[][] EquationBlockFactory.combineDSCombinations(FVariable[][][] sets, int totalNumVars) {
+        if (sets.length == 1)
+            return sets[0];
+        Collection<FVariable[]> res = new ArrayList<FVariable[]>();
+        combineDSCombinations(sets, res, totalNumVars, new FVariable[totalNumVars], 0 , 0);
+        return res.toArray(new FVariable[res.size()][]);
+    }
+
+    private static void EquationBlockFactory.combineDSCombinations(FVariable[][][] sets, Collection<FVariable[]> res, int totalNumVars, FVariable[] current, int set, int offset) {
+        for (int i = 0; i < sets[set].length; i++) {
+            System.arraycopy(sets[set][i], 0, current, offset, sets[set][i].length);
+            if (sets.length == set + 1) {
+                FVariable[] copy = new FVariable[totalNumVars];
+                System.arraycopy(current, 0, copy, 0, totalNumVars);
+                res.add(copy);
+            } else {
+                combineDSCombinations(sets, res, totalNumVars, current, set + 1, offset + sets[set][i].length);
+            }
+        }
+    }
+
+    public void FClass.applyDynamicStateResult(IndexReductionResult result) {
+        if (result.hasDSFailed()) {
+            warning("Unable to use dynamic states since there are too big sets. Using static states instead");
+            return;
+        }
+        DynamicStateManager manager = getDynamicStateManager();
+        for (IndexReductionBiPGraph.DSSet resSet : result.getDSSets()) {
+            List<FIdUseExp> varList = new List<FIdUseExp>();
+            for (IndexReductionVar var : resSet.vars) {
+                FVariable fVar = var.getVariable();
+                if (fVar.order() == 1)
+                    varList.add(fVar.getMeIntegrated().createUseExp());
+                else
+                    varList.add(new FIdUseExp(fVar.getFQName().createDerPrefixedName(fVar.order() - 1)));
+            }
+            List<DynamicStateCoefficient> coffList = new List<DynamicStateCoefficient>();
+            for (int eqn = 0; eqn < resSet.coefficients.length; eqn++) {
+                for (int var = 0; var < resSet.coefficients[eqn].length; var++) {
+                    if (resSet.coefficients[eqn][var] != null)
+                        coffList.add(new DynamicStateCoefficient(eqn, var, resSet.coefficients[eqn][var]));
+                }
+            }
+            DynamicStateSet set = new DynamicStateSet(manager.nextId(), resSet.eqns.size(), varList, coffList, null, null);
+            FDynamicAlgebraicVariable[] algebraicVars = new FDynamicAlgebraicVariable[set.numAlgebraics()];
+            for (int i = 0; i < set.numAlgebraics(); i++) {
+                FDynamicAlgebraicVariable var = new FDynamicAlgebraicVariable(set, i);
+                algebraicVars[i] = var;
+                addFVariable(var);
+            }
+            set.setAlgebraicVars(algebraicVars);
+            FDynamicStateVariable[] stateVars = new FDynamicStateVariable[set.numStates()];
+            for (int i = 0; i < set.numStates(); i++) {
+                FDynamicStateVariable var = new FDynamicStateVariable(set, i);
+                stateVars[i] = var;
+                addFVariable(var);
+                addFEquation(new FEquation(new FDerExp(var.createFIdUse()), new FDSDerExp(set.id(), i)));
+            }
+            set.setStateVars(stateVars);
+            manager.addSet(set);
+        }
+        enableDynamicStateRewrite();
+    }
+    
+    rewrite FDerExp {
+        when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
+            return new FDynamicDerExp(getFIdUse(), order());
+        }
+    }
+    
+    public class IndexReductionBiPGraph {
+        public static class DSSet {
+            private static Enumerator e = new Enumerator();
+            public final Set<IndexReductionEq> eqns = new LinkedHashSet<IndexReductionEq>();
+            public final Set<IndexReductionVar> vars = new LinkedHashSet<IndexReductionVar>();
+            public final int id = e.next();
+            public FExp[][] coefficients;
+            
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                sb.append(String.format("Set %d, %d equations and %d variables:\n", id, eqns.size(), vars.size()));
+                sb.append("  Equations:\n");
+                for (IndexReductionEq eqn : eqns)
+                    sb.append("    " + eqn + "\n");
+                sb.append("  Variables:\n");
+                for (IndexReductionVar var : vars)
+                    sb.append("    " + var + "\n");
+                return sb.toString();
+            }
+        }
+        
+    }
+
+    public Set<IndexReductionVar> IndexReductionBiPGraph.computeDynamicStateSets(Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, IndexReductionResult result) {
+        if (result.hasDSFailed())
+            return Collections.emptySet();
+        Map<IndexReductionVar, IndexReductionEq> initialMatching = new HashMap<IndexReductionVar, IndexReductionEq>();
+        for (IndexReductionVar var : getVariables())
+            initialMatching.put(var, var.getMatching());
+        
+        
+        ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, false));
+        ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, true));
+        Set<DSSet> dsSets = new LinkedHashSet<DSSet>();
+        Map<IndexReductionEq, DSSet> dsLookup = new HashMap<IndexReductionEq, DSSet>();
+        Queue<IndexReductionEq> worklist = new ArrayDeque<IndexReductionEq>();
+        SAP1 sap1 = new SAP1(dsLookup.keySet(), coefficientsMatrix);
+        SAP2 sap2 = new SAP2(dsLookup.keySet(), coefficientsMatrix, worklist);
+        for (IndexReductionEq eqn : getEquations()) {
+            Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+            if (coefficients == null)
+                continue;
+            Coefficient coff = coefficients.get(eqn.getMatching());
+            if (coff != null && coff.continuous)
+                worklist.add(eqn);
+        }
+        while (!worklist.isEmpty()) {
+            IndexReductionEq eqn = worklist.poll();
+            ASTNode.log.debug("Looking for DS in %s", eqn);
+            Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+            if (coefficients == null)
+                continue;
+            Coefficient coff = coefficients.get(eqn.getMatching());
+            if (coff == null || !coff.continuous)
+                continue;
+            lightReset();
+            ASTNode.log.debug("  SAP1");
+            if (sap1.augmentingPath(eqn))
+                continue;
+            DSSet set = dsLookup.get(eqn);
+            if (set == null)
+                set = new DSSet();
+            Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
+            ASTNode.log.debug("    Path not found, set %d", set.id);
+            for (IndexReductionVar var : eqn.getVariables()) {
+                Coefficient varCoff = coefficients.get(var);
+                if (varCoff == null || !varCoff.continuous)
+                    continue;
+                ASTNode.log.debug("  Checking ncc variable %s", var);
+                if (var.getMatching() == eqn) {
+                    set.vars.add(var);
+                    ASTNode.log.debug("    adding %s to set %d", var, set.id);
+                } else if (var.getMatching() == null) {
+                    set.vars.add(var);
+                    var.setMatching(eqn);
+                    ASTNode.log.debug("    adding %s to set %d", var, set.id);
+                } else {
+                    lightReset();
+                    DSSet otherSet = dsLookup.get(var.getMatching());
+                    Collection<IndexReductionVar> noVisit = new ArrayList<IndexReductionVar>();
+                    if (otherSet != null)
+                        noVisit.addAll(otherSet.vars);
+                    noVisit.addAll(set.vars);
+                    noVisit.add(eqn.getMatching());
+                    noVisit.add(var);
+                    ASTNode.log.debug("    SAP2 %s", var.getMatching());
+                    Collection<IndexReductionEq> res = sap2.augmentingPath(var.getMatching(), noVisit);
+                    if (res == sap2.trueValue()) {
+                        ASTNode.log.debug("      Path found");
+                        set.vars.add(var);
+                        var.setMatching(eqn);
+                        ASTNode.log.debug("      adding %s to set %d", var, set.id);
+                    } else {
+                        ASTNode.log.debug("      Path not found");
+                        for (IndexReductionEq resEqn : res)
+                            ASTNode.log.debug("      Adding %s to set.eqns", resEqn);
+                        otherEqns.addAll(res);
+                    }
+                }
+            }
+            if (set.vars.size() >= 2 || set.eqns.size() > 0 || otherEqns.size() > 0) {
+                for (IndexReductionEq otherEqn : otherEqns) {
+                    DSSet otherSet = dsLookup.remove(otherEqn);
+                    if (otherSet != null) {
+                        ASTNode.log.debug("  Merging with set %d from %s", otherSet.id, otherEqn);
+                        dsSets.remove(otherSet);
+                        for (IndexReductionVar memberVar : otherSet.vars) {
+                            set.vars.add(memberVar);
+                            ASTNode.log.debug("    adding %s to set %d", memberVar, set.id);
+                        }
+                        for (IndexReductionEq memberEq : otherSet.eqns) {
+                            set.eqns.add(memberEq);
+                            dsLookup.put(memberEq, set);
+                        }
+                    } else {
+                        set.eqns.add(otherEqn);
+                        dsLookup.put(otherEqn, set);
+                        set.vars.add(otherEqn.getMatching());
+                    }
+                }
+                set.eqns.add(eqn);
+                dsLookup.put(eqn, set);
+                dsSets.add(set);
+                ASTNode.log.debug("  Set added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
+            } else {
+                ASTNode.log.debug("  Set not added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
+            }
+        }
+        
+        boolean skipDynamicStates = false;
+        for (DSSet set : dsSets) {
+            if (set.eqns.size() > 1 || set.vars.size() > 8) {
+                ASTNode.log.info("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
+                ASTNode.log.info(set);
+                skipDynamicStates = true;
+            }
+        }
+        
+        if (skipDynamicStates) {
+            ASTNode.log.info("Resetting matchings");
+            for (Map.Entry<IndexReductionVar, IndexReductionEq> entry : initialMatching.entrySet()) {
+                IndexReductionVar var = entry.getKey();
+                IndexReductionEq eqn = entry.getValue();
+                var.setMatching(eqn);
+                if (eqn != null)
+                    eqn.setMatching(var);
+            }
+            result.markDSAsFailed();
+            return Collections.emptySet();
+        }
+        
+        Set<IndexReductionVar> vars = new HashSet<IndexReductionVar>();
+        for (DSSet set : dsSets) {
+            set.coefficients = new FExp[set.eqns.size()][set.vars.size()];
+            int i = 0;
+            for (IndexReductionEq eqn : set.eqns) {
+                int j = 0;
+                Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+                if (coefficients == null)
+                    continue; // Yes this can happen :)
+                for (IndexReductionVar var : set.vars) {
+                    Coefficient coff = coefficients.get(var);
+                    set.coefficients[i][j] = coff == null ? null : coefficients.get(var).exp;
+                    if (set.coefficients[i][j] != null && set.coefficients[i][j].isNoExp())
+                        throw new IndexReductionException("Dynamic state construction failed due to non scalar derivative for variable " + var.getName() + " when differentiating: \n" + eqn.getEquation());
+                    j++;
+                }
+                i++;
+            }
+            ASTNode.log.info(set);
+            result.addDSSet(set);
+            vars.addAll(set.vars);
+        }
+        return vars;
+    }
+    
+    public Object IndexReductionBiPGraph.printCoefficientsObj(final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, final boolean printExpressions) {
+        return new Object() {
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                for (IndexReductionVar var : getVariables()) {
+                    sb.append('\t');
+                    sb.append(var);
+                }
+                sb.append('\n');
+                for (IndexReductionEq eqn : getEquations()) {
+                    sb.append(eqn);
+                    Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+                    for (IndexReductionVar var : getVariables()) {
+                        sb.append('\t');
+                        Coefficient coff = coefficients.get(var);
+                        if (coff == null)
+                            continue;
+                        if (printExpressions) {
+                            sb.append(coff.exp);
+                        } else {
+                            if (coff.continuous)
+                                sb.append('+');
+                            else
+                                sb.append('*');
+                        }
+                    }
+                    sb.append('\n');
+                }
+                return sb.toString();
+            }
+        };
+    }
+
+    private Collection<IndexReductionBiPGraph.DSSet> IndexReductionResult.dsSets = new ArrayList<IndexReductionBiPGraph.DSSet>();
+
+    public void IndexReductionResult.addDSSet(IndexReductionBiPGraph.DSSet set) {
+        dsSets.add(set);
+    }
+
+    public Collection<IndexReductionBiPGraph.DSSet> IndexReductionResult.getDSSets() {
+        return dsSets;
+    }
+
+    public void IndexReductionResult.markDSAsFailed() {
+        dsSets = null;
+    }
+
+    public boolean IndexReductionResult.hasDSFailed() {
+        return dsSets == null;
+    }
+
+    public class IndexReductionBiPGraph {
+        
+        public class SAP1 extends StandardAugmentingPath {
+            private final Set<IndexReductionEq> dsEqns;
+            private final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix;
+            
+            public SAP1(Set<IndexReductionEq> dsEqns, Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix) {
+                this.dsEqns = dsEqns;
+                this.coefficientsMatrix = coefficientsMatrix;
+            }
+
+            @Override
+            protected Iterable<IndexReductionVar> visitVariables(IndexReductionEq eqn) {
+                if (dsEqns.contains(eqn))
+                    return Collections.emptyList();
+                else
+                    return super.visitVariables(eqn);
+            }
+
+            @Override
+            protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
+                Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
+                if (coefficients != null) {
+                    Coefficient coff = coefficients.get(var);
+                    if (coff != null && coff.continuous)
+                        return false;
+                }
+                return super.shouldVisit(eqn, var);
+            }
+        }
+
+        public class SAP2 extends AugmentingPathAlgorithm<Collection<IndexReductionEq>> {
+            private final Set<IndexReductionEq> dsEqns;
+            private final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix;
+            private final Queue<IndexReductionEq> worklist;
+            
+            public SAP2(Set<IndexReductionEq> dsEqns, Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, Queue<IndexReductionEq> worklist) {
+                super(Collections.unmodifiableCollection(new ArrayList<IndexReductionEq>()));
+                this.dsEqns = dsEqns;
+                this.coefficientsMatrix = coefficientsMatrix;
+                this.worklist = worklist;
+            }
+            
+            @Override
+            protected Collection<IndexReductionEq> startValue(IndexReductionEq eqn) {
+                if (dsEqns.contains(eqn))
+                    return Collections.singletonList(eqn);
+                else
+                    return Collections.emptyList();
+            }
+
+            @Override
+            protected Iterable<IndexReductionVar> visitVariables(IndexReductionEq eqn) {
+                if (dsEqns.contains(eqn))
+                    return Collections.emptyList();
+                else
+                    return super.visitVariables(eqn);
+            }
+
+            @Override
+            protected Collection<IndexReductionEq> mergeSubRes(Collection<IndexReductionEq> res, Collection<IndexReductionEq> subRes, IndexReductionEq eqn) {
+                if (subRes.size() > 0) {
+                    if (res.isEmpty())
+                        res = new ArrayList<IndexReductionEq>();
+                    res.addAll(subRes);
+                    res.add(eqn);
+                }
+                return res;
+            }
+    
+            @Override
+            protected void match(IndexReductionEq eqn, IndexReductionVar var) {
+                super.match(eqn, var);
+                Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+                if (coefficients == null)
+                    return;
+                Coefficient coff = coefficients.get(var);
+                if (coff != null && coff.continuous) {
+                    ASTNode.log.debug("      Adding %s to worklist", eqn);
+                    worklist.add(eqn);
+                }
+            }
+        }
+    }
+    
+    public boolean SCCBlock.containsDynamicStates() {
+        for (E eqn : members)
+            if (eqn.getMatching().getVariable().isFDynamicAlgebraicVariable())
+                return true;
+        return false;
+    }
+    
+    public class EquationBlockFactory {
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
+            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new HashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
+            Collection<V> otherVars = new ArrayList<V>();
+            for (E eqn : component.getMembers()) {
+                FVariable fVar = eqn.getMatching().getVariable();
+                if (!fVar.isFDynamicAlgebraicVariable()) {
+                    otherVars.add(eqn.getMatching());
+                    continue;
+                }
+                FDynamicAlgebraicVariable var = fVar.asFDynamicAlgebraicVariable();
+                DynamicStateSet set = var.getSet();
+                if (var.getNumber() >= set.numAlgebraics() || var.getNumber() < 0)
+                    throw new BLTException(var.name() + " has illegal dynamic state variable number, set size is " + set.numAlgebraics());
+                FDynamicAlgebraicVariable[] vars = setVarMap.get(set);
+                if (vars == null) {
+                    vars = new FDynamicAlgebraicVariable[set.numAlgebraics()];
+                    setVarMap.put(set, vars);
+                }
+                if (vars[var.getNumber()] != null)
+                    throw new BLTException("There are two instances of " + var.name() + " in the same BLT block!");
+                vars[var.getNumber()] = var;
+            }
+            if (setVarMap.isEmpty())
+                throw new BLTException("No dynamic state variables were found in the BLT block");
+            FVariable[][][] setCombinations = new FVariable[setVarMap.size()][][];
+            int setCounter = 0;
+            int totalNumAlgebraics = 0;
+            int totalNumCombinations = 1;
+            Collection<FVariable> allDynamicStates = new ArrayList<FVariable>();
+            for (Map.Entry<DynamicStateSet, FDynamicAlgebraicVariable[]> entry : setVarMap.entrySet()) {
+                boolean allSet = true;
+                DynamicStateSet set = entry.getKey();
+                FDynamicAlgebraicVariable[] DSVars = entry.getValue();
+                for (int i = 0; i < DSVars.length; i++) {
+                    if (DSVars[i] == null) {
+                        allSet = false;
+                    }
+                }
+                if (!allSet) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Not all dynamic state variables resides in the same block, index ");
+                    boolean first = true;
+                    for (int i = 0; i < DSVars.length; i++) {
+                        if (DSVars[i] != null)
+                            continue;
+                        if (!first)
+                            sb.append(", ");
+                        first = false;
+                        sb.append(i);
+                    }
+                    sb.append(" are missing. Set:\n");
+                    sb.append(set);
+                    throw new BLTException(sb.toString());
+                }
+                setCombinations[setCounter] = set.algebraicCombinations();
+                allDynamicStates.addAll(set.fVarsColl());
+                totalNumAlgebraics += set.numAlgebraics();
+                totalNumCombinations *= set.numCombinations();
+                setCounter++;
+            }
+            if (totalNumCombinations > 42)
+                throw new BLTException("Ouch! There are more than 42 combinations for the dynamic states, there were " + totalNumCombinations + " combinations!");
+            Collection<DynamicStateBLT> blts = new ArrayList<DynamicStateBLT>();
+            for (FVariable[] combination : combineDSCombinations(setCombinations, totalNumAlgebraics)) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < combination.length; i++) {
+                    sb.append(combination[i].name() + " ");
+                }
+                ASTNode.log.debug("Generating BLT for: %s", sb);
+                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars);
+                for (FVariable var : combination)
+                    graph.addVariable(var);
+                for (Eq eqn : graph.getEquations()) {
+                    Set<FVariable> vars = eqn.getEquation().referencedFVariables();
+                    for (FVariable var : combination)
+                        if (vars.contains(var))
+                            graph.addEdge(eqn, graph.getVariable(var.name()));
+                }
+                ASTNode.log.debug(graph);
+                graph.maximumMatching(true);
+                Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
+                Collection<FVariable> states = new ArrayList<FVariable>();
+                for (FVariable var : allDynamicStates)
+                    if (!algebraics.contains(var))
+                        states.add(var);
+                DynamicStateBLT blt = new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
+                if (graph.isComplete()) {
+                    blt = graph.computeBLT(options, producer, blt);
+                } else {
+                    ASTNode.log.info("  This combination does not have a valid solution!");
+                    ASTNode.log.debug(graph.printMatchingObj());
+                }
+                ASTNode.log.debug(blt);
+                blts.add(blt);
+            }
+            return new DynamicStateBlock(producer, component.computeBlockDependency(), setVarMap.keySet(), blts);
+        }
+    }
+    
+
+}
