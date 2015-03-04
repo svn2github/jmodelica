@@ -273,10 +273,12 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
 
     }
-    jmi->recomputeVariables = needRecomputeVars;
+    if(needRecomputeVars) {
+        jmi->recomputeVariables = 1;    
 
-    if( needParameterUpdate ) {
+        if( needParameterUpdate ) {
           jmi_init_eval_parameters(jmi);
+        }
     }
     return 0;
 }
@@ -327,9 +329,12 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
     }
 
-    jmi->recomputeVariables = needRecomputeVars;
-    if( needParameterUpdate ) {
-          jmi_init_eval_parameters(jmi);
+    if(needRecomputeVars) {
+        jmi->recomputeVariables = needRecomputeVars;
+    
+        if( needParameterUpdate ) {
+              jmi_init_eval_parameters(jmi);
+        }
     }
     return 0;
 }
@@ -379,9 +384,12 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         }
     }
 
-    jmi->recomputeVariables = needRecomputeVars;
-    if( needParameterUpdate ) {
-          jmi_init_eval_parameters(jmi);
+    if(needRecomputeVars) {
+        jmi->recomputeVariables = needRecomputeVars;
+    
+        if( needParameterUpdate ) {
+              jmi_init_eval_parameters(jmi);
+        }
     }
     return 0;
 }
