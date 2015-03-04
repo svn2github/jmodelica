@@ -286,13 +286,17 @@ class test_ResultWriterDymola:
             "Wrong size of y returned by result_data.get_variable_data")
 
 class TestResultCSVTextual:
+    
+    @classmethod
+    def setUpClass(cls):
+        model_file = os.path.join(get_files_path(), 'Modelica', 'NegatedAlias.mo')
+        name = compile_fmu("NegatedAlias", model_file)
+        name = compile_fmu("NegatedAlias", model_file, target="cs", compile_to="NegatedAliasCS.fmu")
 
     @testattr(stddist = True)
     def test_variable_alias(self):
-        
-        model_file = os.path.join(get_files_path(), 'Modelica', 'NegatedAlias.mo')
-        name = compile_fmu("NegatedAlias", model_file)
-        simple_alias = load_fmu(name)
+
+        simple_alias = load_fmu("NegatedAlias.fmu")
         
         opts = simple_alias.simulate_options()
         opts["result_handling"] = "custom"
@@ -319,6 +323,49 @@ class TestResultCSVTextual:
         x = res.get_variable_data("fd.y")
         
         assert x.x[-1] == 1
+    
+    @testattr(fmi = True)
+    def test_csv_options_me(self):
+        
+        simple_alias = load_fmu("NegatedAlias.fmu")
+        
+        opts = simple_alias.simulate_options()
+        opts["result_handling"] = "csv"
+        
+        res = simple_alias.simulate(options=opts)
+        
+        # test that res['y'] returns a vector of the same length as the time
+        # vector
+        nose.tools.assert_equal(len(res['y']),len(res['time']), 
+            "Wrong size of result vector.")
+            
+        x = res["x"]
+        y = res["y"]
+        
+        for i in range(len(x)):
+            nose.tools.assert_equal(x[i], -y[i])
+            
+    @testattr(fmi = True)
+    def test_csv_options_cs(self):
+        
+        simple_alias = load_fmu("NegatedAliasCS.fmu")
+        
+        opts = simple_alias.simulate_options()
+        opts["result_handling"] = "csv"
+        
+        res = simple_alias.simulate(options=opts)
+        
+        # test that res['y'] returns a vector of the same length as the time
+        # vector
+        nose.tools.assert_equal(len(res['y']),len(res['time']), 
+            "Wrong size of result vector.")
+            
+        x = res["x"]
+        y = res["y"]
+        
+        for i in range(len(x)):
+            nose.tools.assert_equal(x[i], -y[i])
+    
         
 class TestParameterAliasVector:
     """Tests IO"""
