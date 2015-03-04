@@ -26,7 +26,7 @@ import nose
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu, compile_fmu
-from pyfmi.common.io import ResultDymolaTextual, ResultDymolaBinary, ResultWriterDymola, JIOError, ResultHandlerCSV
+from pyfmi.common.io import ResultDymolaTextual, ResultDymolaBinary, ResultWriterDymola, JIOError, ResultHandlerCSV, ResultCSVTextual
 from pyjmi.common.io import VariableNotTimeVarying
 from pyfmi.common.io import ResultHandlerFile as fmi_ResultHandlerFile
 from pyjmi.jmi import JMUModel
@@ -310,6 +310,15 @@ class TestResultCSVTextual:
         
         for i in range(len(x)):
             nose.tools.assert_equal(x[i], -y[i])
+            
+    @testattr(stddist = True)
+    def test_delimiter(self):
+        
+        res = ResultCSVTextual(os.path.join(get_files_path(), 'Results', 'TestCSV.csv'), delimiter=",")
+        
+        x = res.get_variable_data("fd.y")
+        
+        assert x.x[-1] == 1
         
 class TestParameterAliasVector:
     """Tests IO"""
