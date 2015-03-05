@@ -1240,6 +1240,60 @@ class LocalDAECollocator(CasadiCollocator):
 
         self._collocation = collocation
 
+    def _fill_checkpoint_map(self, varType, xx, n_var, initial_index, named_xx=None, n_add_points=0, move_zero=1):
+        """
+        Fill the checkpoint map for a given variable type with one sample per collocation point.
+
+        Fills in self.var_map and self.var_indices, and appends to named_xx if the option is given.
+        Returns the number of scalar variables used - should be the same as the length of xx.
+
+        This function may be used for both nlp variables and parameters.
+        """
+        self.var_map[varType] = dict()
+        self.var_indices[varType] = dict()
+        self.var_map[varType]['all'] = xx
+
+        if n_var == 0:
+            # Handle the cases of empty variables
+            for i in range(1, self.n_e+1):
+                self.var_map[varType][i] = dict()
+                self.var_indices[varType][i] = dict()
+                self.var_map[varType][i]['all'] = xx[0:0]
+                for k in range(1, self.n_cp+1):
+                    self.var_map[varType][i][k] = dict()
+                    self.var_indices[varType][i][k] = list()
+                    self.var_map[varType][i][k]['all'] = xx[0:0]
+            return 0
+
+        n_discrete_points = self.n_cp + n_add_points
+        counter = 0
+
+        element_split2 = casadi.vertsplit(self.var_map[varType]['all'],
+                                          n_var*n_discrete_points)
+        # Builds element branch of the map
+        for i in range(1, self.n_e+1):
+            self.var_map[varType][i] = dict()
+            self.var_map[varType][i]['all'] = element_split2[i-1]
+            self.var_indices[varType][i] = dict()
+            collocations_split2 = casadi.vertsplit(
+                self.var_map[varType][i]['all'], n_var)
+            # Builds collocation branch of the map
+            for k in range(n_discrete_points):
+                self.var_map[varType][i][k+move_zero] = dict()
+                self.var_map[varType][i][k+move_zero]['all'] = collocations_split2[k]
+                self.var_indices[varType][i][k+move_zero] = list()
+                scalar_split = casadi.vertsplit(self.var_map[varType][i][k+move_zero]['all'])
+                # Builds the individual variables branch of the map
+                for var in self.mvar_vectors[varType]:
+                    name = var.getName()
+                    (var_index, _) = self.name_map[name]
+                    self.var_map[varType][i][k+move_zero][var_index] = scalar_split[var_index]
+                    self.var_indices[varType][i][k+move_zero].append(counter + initial_index)
+                    if self.named_vars:
+                        named_xx.append(casadi.SX.sym(name+'_%d_%d' % (i, k+move_zero)))
+                    counter += 1
+        return counter
+
     def _create_nlp_variables(self):
         """
         Create the NLP variables and store them in a nested dictionary.
@@ -1282,9 +1336,9 @@ class LocalDAECollocator(CasadiCollocator):
         xx = casadi.MX.sym("xx", n_xx)
             
         # Map with indices of variables
-        var_indices=dict()
+        self.var_indices = var_indices = dict()
         # Map with different levels of packed mx variables
-        var_map=dict()
+        self.var_map = var_map = dict()
 
         if self.named_vars:
             named_xx = []            
@@ -1377,67 +1431,21 @@ class LocalDAECollocator(CasadiCollocator):
             variable_type_list = ['x','dx','w']
         else:
             variable_type_list = ['x','dx','w','unelim_u'] 
-        # Builds the check_point map
-        for j,varType in enumerate(variable_type_list):
-            var_map[varType] = dict()
-            var_indices[varType] = dict()
-            var_map[varType]['all'] = \
-                      global_split[split_map[varType]]
-            if nlp_n_var[varType]>0:
-                add=0
-                if varType=='x':
+        # Build the check_point map
+        for varType in variable_type_list:
+            add=0
+            move_zero=1
+            if varType=='x':
+                move_zero=0
+                if self.discr == "LG":
+                    add=2
+                else:
                     add=1
-                    if self.discr == "LG":
-                        add=2
-                element_split2 = casadi.vertsplit(
-                    var_map[varType]['all'],
-                    nlp_n_var[varType]*(self.n_cp+add))
-                # Builds element branch of the map
-                for i in range(1, self.n_e+1):
-                    var_map[varType][i] = dict()
-                    var_map[varType][i]['all'] = element_split2[i-1]
-                    var_indices[varType][i] = dict()
-                    collocations_split2 = casadi.vertsplit(
-                        var_map[varType][i]['all'],
-                        nlp_n_var[varType])
-                    discrete_points=self.n_cp 
-                    move_zero=1
-                    if varType=='x':
-                        if self.discr == "LGR":
-                            discrete_points+=1
-                        else:
-                            discrete_points+=2
-                        move_zero=0
-                    # Builds collocation branch of the map
-                    for k in range(discrete_points):
-                        var_map[varType][i][k+move_zero] = dict()
-                        var_map[varType][i][k+move_zero]['all'] = \
-                                  collocations_split2[k]
-                        var_indices[varType][i][k+move_zero] = list()
-                        scalar_split = casadi.vertsplit(
-                            var_map[varType][i][k+move_zero]['all'])
-                        # Builds the individual variables branch of the map
-                        for var in mvar_vectors[varType]:
-                            name = var.getName()
-                            (var_index, _) = self.name_map[name]
-                            var_map[varType][i][k+move_zero][var_index] = \
-                                      scalar_split[var_index]
-                            var_indices[varType][i][k+move_zero].append(counter_s)
-                            if self.named_vars:
-                                named_xx.append(
-                                    casadi.SX.sym(name+'_%d_%d' % (i, k+move_zero)))
-                            counter_s+=1
-            else:
-                # Handle the cases of empty variables
-                for i in range(1, self.n_e+1):
-                    var_map[varType][i] = dict()
-                    var_indices[varType][i] = dict()
-                    var_map[varType][i]['all'] = xx[0:0]
-                    for k in range(1, self.n_cp+1):
-                        var_map[varType][i][k] = dict()
-                        var_indices[varType][i][k] = list()
-                        var_map[varType][i][k]['all'] = xx[0:0]
-                        
+            counter_s += self._fill_checkpoint_map(varType, global_split[split_map[varType]],
+                                                   nlp_n_var[varType], counter_s, 
+                                                   named_xx if self.named_vars else None,
+                                                   add, move_zero)
+
         if self.blocking_factors is not None:
             varType = 'unelim_u'
             # Index controls without blocking factors
@@ -1659,8 +1667,6 @@ class LocalDAECollocator(CasadiCollocator):
             
         self.global_split_indices = global_split_indices
         self.n_xx = n_xx
-        self.var_map = var_map
-        self.var_indices = var_indices
     
     def _create_nlp_parameters(self):
         """
