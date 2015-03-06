@@ -1066,12 +1066,28 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_set_start_values$
 ",
             generatedCode="
+void model_init_eval_parameters_0(jmi_t* jmi) {
     _y_1 = ((_x_0*sf(0)))/sf(1);
     _z_2 = (func_CCodeGenTests_CCodeGenParameters1_f_exp0(AD_WRAP_LITERAL(1)))/sf(2);
+}
 
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
+
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _x_0 = (1)/sf(0);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     _dummy_3 = (0.0)/sf(3);
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
 ")})));
 end CCodeGenParameters1;
 
@@ -1185,8 +1201,11 @@ N_string_pi_e = 0;
 #define _time ((*(jmi->z))[jmi->offs_t])
 
 ---
+void model_init_eval_parameters_base(jmi_t* jmi) {
+}
 
 ---
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _reg1_0 = (1);
     _reg2_1 = (1);
     _reg3_2 = (1);
@@ -1206,7 +1225,12 @@ N_string_pi_e = 0;
     _eval3_17 = (1);
     _eval4_18 = (JMI_TRUE);
     _n_22 = (2);
-    model_init_eval_parameters(jmi);
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+model_init_eval_parameters(jmi);
+}
 ")})));
 end CCodeGenParameters2;
 
@@ -2382,11 +2406,14 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_DAE_initial_guess_equation_residuals$
 ",
             generatedCode="
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _p1_1_0 = (1);
     _p1_2_1 = (2);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = _p1_1_0 + _p3_3;
     jmi_array_ref_1(tmp_1, 2) = _p1_2_1 + _p3_3;
@@ -2397,7 +2424,15 @@ $C_DAE_initial_guess_equation_residuals$
     _w_5 = (func_CCodeGenTests_CFunctionTest15_f_exp0(tmp_2));
     _der_z_6 = (0.0);
     _der_w_7 = (0.0);
+}
 
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
+
+void model_init_eval_parameters_0(jmi_t* jmi) {
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
@@ -2408,6 +2443,11 @@ $C_DAE_initial_guess_equation_residuals$
     jmi_array_ref_1(tmp_4, 1) = _p1_1_0 + _p2_2;
     jmi_array_ref_1(tmp_4, 2) = _p1_2_1 + _p2_2;
     _p3_3 = (func_CCodeGenTests_CFunctionTest15_f_exp0(tmp_4));
+}
+
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
 
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
@@ -6360,6 +6400,7 @@ model DependentParametersWithScalingTest1
             inline_functions="none",
             template="$C_DAE_initial_dependent_parameter_assignments$",
             generatedCode="
+void model_init_eval_parameters_0(jmi_t* jmi) {
     JMI_RECORD_STATIC(R_0_r, tmp_1)
     JMI_RECORD_STATIC(R_0_r, tmp_2)
     _p2_1 = (3 * (_p1_0*sf(0)))/sf(2);
@@ -6369,6 +6410,11 @@ model DependentParametersWithScalingTest1
     func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def1(tmp_2, tmp_1);
     _temp_1_x_5 = (tmp_1->x)/sf(5);
     _r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
+}
+
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
 ")})));
 end DependentParametersWithScalingTest1;
 
@@ -11781,12 +11827,22 @@ equation
             variability_propagation=false,
             template="$C_set_start_values$",
             generatedCode="
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _y_1 = (2);
     _z_2 = (3);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     _x_0 = (1);
     _q_3 = (0.0);
     _der_x_4 = (0.0);
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
 ")})));
 end StartValues1;
 
@@ -11812,10 +11868,13 @@ equation
             variability_propagation=false,
             template="$C_set_start_values$",
             generatedCode="
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _pr_0 = (1.5);
     _pi_1 = (2);
     _pb_2 = (JMI_TRUE);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
@@ -11824,6 +11883,13 @@ equation
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
     pre_temp_1_6 = (0);
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
 ")})));
 end StartValues2;
 
@@ -14392,15 +14458,26 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_destruct_external_object$
 ",
             generatedCode="
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _z1_8 = (5);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     _y1_4 = (0.0);
     _y2_5 = (0.0);
     _y3_6 = (0.0);
     _y4_7 = (0.0);
+}
 
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
+
+void model_init_eval_parameters_0(jmi_t* jmi) {
     if (_myEO3_2 != NULL) {
         func_CCodeGenTests_ExtObjectwInput_destructor_def2(_myEO3_2);
         _myEO3_2 = NULL;
@@ -14411,6 +14488,11 @@ $C_destruct_external_object$
         _myEO4_3 = NULL;
     }
     _myEO4_3 = (func_CCodeGenTests_ExtObjectwInput_constructor_exp3(_z1_8));
+}
+
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
 
     if (_myEO1_0 != NULL) {
         func_CCodeGenTests_ExtObject_destructor_def0(_myEO1_0);
@@ -14527,10 +14609,16 @@ $C_set_start_values$
 $C_destruct_external_object$
 ",
             generatedCode="
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
+}
 
     if (_r_eo_0 != NULL) {
         func_CCodeGenTests_ExtObject_destructor_def0(_r_eo_0);
@@ -14576,11 +14664,17 @@ $C_functions$
 #define _myEOs_1_0 ((jmi->ext_objs)[0])
 #define _myEOs_2_1 ((jmi->ext_objs)[1])
 
+void model_init_eval_parameters_0(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = _myEOs_1_0;
     jmi_array_ref_1(tmp_1, 2) = _myEOs_2_1;
     _z_2 = (func_CCodeGenTests_TestExtObjectArray1_get_y_exp2(tmp_1));
+}
+
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
 
 void func_CCodeGenTests_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
@@ -14721,6 +14815,7 @@ const int fmi_runtime_options_map_length = 26;
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
 
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     __block_jacobian_check_1 = (JMI_FALSE);
     __block_jacobian_check_tol_2 = (1.0E-6);
     __block_solver_experimental_mode_3 = (0);
@@ -14747,8 +14842,17 @@ const int fmi_runtime_options_map_length = 26;
     __runtime_log_to_file_24 = (JMI_FALSE);
     __use_Brent_in_1d_25 = (JMI_TRUE);
     __use_jacobian_equilibration_26 = (JMI_FALSE);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     _x_0 = (0.0);
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
 ")})));
 end TestRuntimeOptions1;
 
@@ -16351,13 +16455,13 @@ $C_DAE_initial_dependent_parameter_assignments$
             generatedCode="
 ***Derivatives:
     model_ode_guards(jmi);
-/************* ODE section *********/
+    /************* ODE section *********/
     _der_x_3 = - _x_0;
-/************ Real outputs *********/
-/****Integer and boolean outputs ***/
-/**** Other variables ***/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
     _y_1 = _x_0 * _time;
-/********* Write back reinits *******/
+    /********* Write back reinits *******/
 
 ***Initialization:
     model_ode_guards(jmi);
@@ -16367,6 +16471,8 @@ $C_DAE_initial_dependent_parameter_assignments$
     _p_2 = 2 * _x_0;
 
 ***Param:
+void model_init_eval_parameters_base(jmi_t* jmi) {
+}
 ")})));
 end CFixedFalseParam1;
 
@@ -16393,14 +16499,30 @@ $C_ode_initialization$
 ",
             generatedCode="
 set_start
+void jmi_set_start_values_0_0(jmi_t* jmi) {
     _y_3 = (4);
-    model_init_eval_parameters(jmi);
+}
+
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     _x2_1 = (_z_4);
     _x3_2 = (1);
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
 
 eval_param
+void model_init_eval_parameters_0(jmi_t* jmi) {
     _x1_0 = (_y_3);
     _z_4 = (_y_3);
+}
+
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
 
 ode_init
     model_ode_guards(jmi);
@@ -16426,13 +16548,19 @@ model CFixedFalseParam3
 $C_set_start_values$
 ",
             generatedCode="
+void jmi_set_start_values_1_0(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
-    model_init_eval_parameters(jmi);
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     _x1_0 = (func_CCodeGenTests_CFixedFalseParam3_f_exp0(tmp_1));
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    model_init_eval_parameters(jmi);
+    jmi_set_start_values_1_0(jmi);
+}
 ")})));
 end CFixedFalseParam3;
 
@@ -17864,10 +17992,10 @@ $C_DAE_initial_dependent_parameter_assignments$
     char tmp_3[JMI_PATH_MAX];
     char tmp_4[JMI_PATH_MAX];
     model_ode_guards(jmi);
-/************* ODE section *********/
-/************ Real outputs *********/
-/****Integer and boolean outputs ***/
-/**** Other variables ***/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
     jmi_load_resource(jmi, tmp_1, \"/0_Examples_readRealParameters.txt\");
     _z_1 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_1);
     jmi_load_resource(jmi, tmp_2, \"/1_String.txt\");
@@ -17876,11 +18004,17 @@ $C_DAE_initial_dependent_parameter_assignments$
     _abs_3 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_3);
     jmi_load_resource(jmi, tmp_4, \"/2_String.txt\");
     _file_4 = func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_4);
-/********* Write back reinits *******/
+    /********* Write back reinits *******/
 
+void model_init_eval_parameters_0(jmi_t* jmi) {
     char tmp_5[JMI_PATH_MAX];
     jmi_load_resource(jmi, tmp_5, \"/0_Examples_readRealParameters.txt\");
     _y_0 = (func_CCodeGenTests_LoadResource1_strlen_exp0(tmp_5));
+}
+
+void model_init_eval_parameters_base(jmi_t* jmi) {
+    model_init_eval_parameters_0(jmi);
+}
 ")})));
 end LoadResource1;
 

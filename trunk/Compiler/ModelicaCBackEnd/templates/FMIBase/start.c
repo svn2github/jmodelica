@@ -16,7 +16,9 @@
 
 $C_enum_strings$
 
-int jmi_set_start_values(jmi_t* jmi) {
 $C_set_start_values$
+
+int jmi_set_start_values(jmi_t* jmi) {
+    jmi_set_start_values_base(jmi);
     return 0;
 }

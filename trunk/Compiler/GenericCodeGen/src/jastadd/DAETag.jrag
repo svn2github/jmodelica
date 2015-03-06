@@ -115,5 +115,78 @@ public abstract class DAETag extends AbstractTag {
 		instantiateTags(getClass(), map, this, myGenerator, fclass);
 	}
 
+    public abstract class CodeSplitter<T extends ASTNode> {
+        private int itemIndex = 0;
+        private int itemLimit = 10000;
+        private int splitCount = 0;
+        private String funcName;
+        protected CodeStream str;
+        protected CodePrinter p;
+        protected String indent;
+        
+        private ArrayList<T> elements = new ArrayList<T>();
+        
+        public CodeSplitter(CodePrinter p, CodeStream str, String indent, String funcName) {
+            this(p, str, indent, funcName, new ArrayList<T>());
+        }
+        
+        public CodeSplitter(CodePrinter p, CodeStream str, String indent,
+                String funcName, ArrayList<T> elements) {
+            this.funcName = funcName;
+            this.str = str;
+            this.p = p;
+            this.indent = indent;
+            this.elements = elements;
+        }
+
+        public void add(Collection<T> coll) {
+            elements.addAll(coll);
+        }
+        
+        public void add(T fv) {
+            elements.add(fv);
+        }
+        
+        private int numSplits() {
+            int s = elements.size();
+            if (s > 0) {
+                s = 1 + ((s-1) / itemLimit);
+            }
+            return s;
+        }
+        
+        public void genFuncs() {
+            for (int split = 0; split < numSplits(); split++) {
+                str.print("void ");
+                str.print(funcName);
+                str.print(split);
+                str.print("(jmi_t* jmi) {\n");
+                int n = Math.min(itemLimit, elements.size()-split*itemLimit);
+                gen(split*itemLimit, n);
+                str.print("}\n\n");
+            }
+        }
+        
+        public void genCalls() {
+            for (int split = 0; split < numSplits(); split++) {
+                str.print(indent);
+                str.print(funcName);
+                str.print(split);
+                str.print("(jmi);\n");
+            }
+        }
+        
+        protected void gen(int start, int n) {
+            for (int i = start; i < start + n; i++) {
+                p.printVarDecls(elements.get(i), str, indent);
+            }
+            for (int i = start; i < start + n; i++) {
+                gen(elements.get(i));
+            }
+        }
+        
+        public abstract void gen(T element);
+    }
+
 }
 

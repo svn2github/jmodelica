@@ -308,11 +308,24 @@ public class CGenerator extends GenericGenerator {
 			super("C_DAE_initial_dependent_parameter_assignments", myGenerator, fclass);
 		}
 	
-		public void generate(CodeStream genPrinter) {
-			for (FAbstractEquation e : fclass.getFParameterEquations()) 
-				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-			for (FAbstractEquation e : fclass.getFParameterEquations()) 
-				e.genAssignment_C(ASTNode.printer_C, genPrinter, INDENT);
+        public void generate(CodeStream str) {
+            CodePrinter p = ASTNode.printer_C;
+            String indent = "";
+            String next = p.indent(indent);
+            
+            CodeSplitter<FAbstractEquation> cs1 = new CodeSplitter<FAbstractEquation>(p, str, next, 
+                    "model_init_eval_parameters_", fclass.getFParameterEquations().toArrayList()) {
+                @Override
+                public void gen(FAbstractEquation element) {
+                    element.genAssignment_C(p, str, indent);
+                }
+            };
+            
+            cs1.genFuncs();
+            
+            str.print("void model_init_eval_parameters_base(jmi_t* jmi) {\n");
+            cs1.genCalls();
+            str.print("}\n");
 		}
 	
 	}
@@ -953,42 +966,47 @@ public class CGenerator extends GenericGenerator {
 		public DAETag_C_set_start_values(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_set_start_values", myGenerator, fclass);
 		}
-
+		
+        
         public void generate(CodeStream str) {
             CodePrinter p = ASTNode.printer_C;
-            String indent = INDENT;
-            for (FVariable fv : fclass.independentConstants())
-                fv.genVarDecls_C(p, str, indent);
-            for (FVariable fv : fclass.dependentConstants())
-                fv.genVarDecls_C(p, str, indent);
-            for (FVariable fv : fclass.independentParameters())
-                fv.genVarDecls_C(p, str, indent);
-            for (FVariable fv : fclass.nonFixedParameters()) {
-                if (!fv.hasParameterEquation()) {
-                    fv.genVarDecls_C(p, str, indent);
-                }
-            }
-            for (FVariable fv : fclass.variables())
-                fv.genVarDecls_C(p, str, indent);
-            for (FVariable fv : fclass.discretePreVariables())
-                fv.genVarDecls_C(p, str, indent);
+            String indent = "";
+            String next = p.indent(indent);
             
-            for (FVariable fv : fclass.independentConstants())
-                fv.genStartValue_C(p, str, indent);
-            for (FVariable fv : fclass.dependentConstants())
-                fv.genStartValue_C(p, str, indent);
-            for (FVariable fv : fclass.independentParameters())
-                fv.genStartValue_C(p, str, indent);
-            str.print(indent + "model_init_eval_parameters(jmi);\n");
+            CodeSplitter<FVariable> cs1 = new CodeSplitter<FVariable>(p, str, next, "jmi_set_start_values_0_") {
+                @Override
+                public void gen(FVariable element) {
+                    element.genStartValue_C(p, str, indent);
+                }
+            };
+            
+            
+            cs1.add(fclass.independentConstants());
+            cs1.add(fclass.dependentConstants());
+            cs1.add(fclass.independentParameters());
+            cs1.genFuncs();
+            
+            CodeSplitter<FVariable> cs2 = new CodeSplitter<FVariable>(p, str, next, "jmi_set_start_values_1_") {
+                @Override
+                public void gen(FVariable element) {
+                    element.genStartValue_C(p, str, indent);
+                }
+            };
             for (FVariable fv : fclass.nonFixedParameters()) {
                 if (!fv.hasParameterEquation()) {
-                    fv.genStartValue_C(p, str, indent);
+                    cs2.add(fv);
                 }
             }
-            for (FVariable fv : fclass.variables())
-                fv.genStartValue_C(p, str, indent);
-            for (FVariable fv : fclass.discretePreVariables())
-                fv.genStartValue_C(p, str, indent);
+            cs2.add(fclass.variables());
+            cs2.add(fclass.discretePreVariables());
+            cs2.genFuncs();
+            
+            str.print("int jmi_set_start_values_base(jmi_t* jmi) {\n");
+            cs1.genCalls();
+            str.print(next);
+            str.print("model_init_eval_parameters(jmi);\n");
+            cs2.genCalls();
+            str.print("}\n");
         }
 	}
 	
