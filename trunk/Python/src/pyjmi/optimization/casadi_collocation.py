@@ -1044,6 +1044,12 @@ class LocalDAECollocator(CasadiCollocator):
         n_var['unelim_u'] = len(unelim_input_indices)
         n_var['elim_u'] = len(elim_input_indices)
 
+        # Create lists of other external data variables
+        if self.external_data is not None:
+            for (vk, source) in (('constr_u', self.external_data.constr_quad_pen),
+                                 ('quad_pen', self.external_data.quad_pen)):
+                mvar_vectors[vk] = [op.getVariable(name) for (name, data) in source.iteritems()]
+
         # Sort parameters
         par_kinds = [op.BOOLEAN_CONSTANT,
                      op.BOOLEAN_PARAMETER_DEPENDENT,
@@ -1252,6 +1258,8 @@ class LocalDAECollocator(CasadiCollocator):
         self.var_map[varType] = dict()
         self.var_indices[varType] = dict()
         self.var_map[varType]['all'] = xx
+        
+        n_discrete_points = self.n_cp + n_add_points
 
         if n_var == 0:
             # Handle the cases of empty variables
@@ -1259,13 +1267,12 @@ class LocalDAECollocator(CasadiCollocator):
                 self.var_map[varType][i] = dict()
                 self.var_indices[varType][i] = dict()
                 self.var_map[varType][i]['all'] = xx[0:0]
-                for k in range(1, self.n_cp+1):
-                    self.var_map[varType][i][k] = dict()
-                    self.var_indices[varType][i][k] = list()
-                    self.var_map[varType][i][k]['all'] = xx[0:0]
+                for k in xrange(n_discrete_points):
+                    self.var_map[varType][i][k+move_zero] = dict()
+                    self.var_indices[varType][i][k+move_zero] = list()
+                    self.var_map[varType][i][k+move_zero]['all'] = xx[0:0]
             return 0
 
-        n_discrete_points = self.n_cp + n_add_points
         counter = 0
 
         element_split2 = casadi.vertsplit(self.var_map[varType]['all'],
@@ -1284,13 +1291,11 @@ class LocalDAECollocator(CasadiCollocator):
                 self.var_indices[varType][i][k+move_zero] = list()
                 scalar_split = casadi.vertsplit(self.var_map[varType][i][k+move_zero]['all'])
                 # Builds the individual variables branch of the map
-                for var in self.mvar_vectors[varType]:
-                    name = var.getName()
-                    (var_index, _) = self.name_map[name]
-                    self.var_map[varType][i][k+move_zero][var_index] = scalar_split[var_index]
+                for (j, var) in enumerate(self.mvar_vectors[varType]):
+                    self.var_map[varType][i][k+move_zero][j] = scalar_split[j]
                     self.var_indices[varType][i][k+move_zero].append(counter + initial_index)
                     if self.named_vars:
-                        named_xx.append(casadi.SX.sym(name+'_%d_%d' % (i, k+move_zero)))
+                        named_xx.append(casadi.SX.sym(var.getName()+'_%d_%d' % (i, k+move_zero)))
                     counter += 1
         return counter
 
@@ -1678,13 +1683,24 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Count parameters
         n_pp_unvarying = self.n_var['p_fixed']
-        n_pp_kinds = [n_pp_unvarying]
+        n_pp_kinds = [n_pp_unvarying] # total number of parameters of each kind
+        n_var_pp = [n_pp_unvarying]   # number of variables of each kind in the continuous time model
+        pp_kinds = ['p_fixed']        # corresponding kinds. 'p_fixed' expected to be first        
+
+        if self.discr == "LG":
+            n_add_points=2
+        else:
+            n_add_points=1
+
         if self.mutable_external_data:
-            n_pp_kinds.extend(N.array([len(self.external_data.eliminated),
-                                      len(self.external_data.quad_pen),
-                                      len(self.external_data.constr_quad_pen)]) * 
-                                      self.n_e * self.n_cp)
-        n_pp = N.sum(n_pp_kinds)        
+
+            nv = N.array([len(self.external_data.eliminated),
+                          len(self.external_data.quad_pen),
+                          len(self.external_data.constr_quad_pen)])
+            n_var_pp.extend(nv)
+            n_pp_kinds.extend(nv * (self.n_e * (self.n_cp + n_add_points)))
+            pp_kinds.extend(['elim_u', 'quad_pen', 'constr_u'])
+        n_pp = N.sum(n_pp_kinds)
         pp_offsets = N.hstack((0, N.cumsum(n_pp_kinds)))
         # CasADi's vertsplit seems to be having trouble with taking pp_offsets
         # as a numpy array of dtype=int64
@@ -1700,8 +1716,8 @@ class LocalDAECollocator(CasadiCollocator):
         #Create parameter symbols
         self.pp = casadi.MX.sym("par", n_pp, 1)
         if self.mutable_external_data:
-            self.pp_unvarying, self.pp_eliminated, self.pp_quad_pen, self.pp_constr_quad_pen = (
-                casadi.vertsplit(self.pp, pp_offsets) )
+            self.pp_split = casadi.vertsplit(self.pp, pp_offsets)
+            self.pp_unvarying = self.pp_split[0]
         else:
             self.pp_unvarying = self.pp
 
@@ -1711,6 +1727,7 @@ class LocalDAECollocator(CasadiCollocator):
         i=0
         for para in par_vars:
             self.var_indices[para.getName()] = i
+            # todo: Consider if this is really right. What if there is a parameter named 'x' or 'elim_u'?
             self.var_map[para.getName()] = self.pp_unvarying[i]
             i+=1
 
@@ -1719,9 +1736,6 @@ class LocalDAECollocator(CasadiCollocator):
             named_pp = []
             for para in par_vars:
                 named_pp.append(casadi.SX.sym(para.getName()))
-            for i in xrange(n_pp, n_pp_unvarying):
-                # todo: better names for the time varying nlp parameters
-                named_pp.append(casadi.SX.sym('par' + repr(i)))
             self.named_pp = casadi.vertcat(named_pp)
 
         # Add p_fixed to var_map and var_indices
@@ -1735,6 +1749,14 @@ class LocalDAECollocator(CasadiCollocator):
                 (var_index, _) = self.name_map[name] 
                 self.var_map['p_fixed'][var_index] = tmp_split[var_index]
 
+        # Fill in var_map, var_indices, and named_pp for time-varying nlp parameters
+        if self.mutable_external_data:
+            # Assume 'p_fixed' (handled above) is the first entry
+            for j in xrange(1, len(pp_kinds)):
+                self._fill_checkpoint_map(pp_kinds[j], self.pp_split[j],
+                    n_var_pp[j], pp_offsets[j],
+                    named_xx=(named_pp if self.named_vars else None),
+                    n_add_points=n_add_points, move_zero=0)
 
     def _get_z_l0(self,i,k,with_der=True):
         """
@@ -2340,7 +2362,7 @@ class LocalDAECollocator(CasadiCollocator):
         Computes the external input trajectories 
         """        
         # Create measured input trajectories
-        if self.external_data is None:
+        if not self.mutable_external_data:
             for vk in ('elim_u', 'constr_u', 'quad_pen'):
                 self.var_map[vk] = dict()
                 for i in xrange(1, self.n_e + 1):
@@ -2363,12 +2385,8 @@ class LocalDAECollocator(CasadiCollocator):
                                  ('constr_u', self.external_data.constr_quad_pen),
                                  ('quad_pen', self.external_data.quad_pen)):
                 # Collocation points
-                self.var_map[vk] = dict()
                 for i in xrange(1, self.n_e + 1):
-                    self.var_map[vk][i]=dict()
                     for k in self.time_points[i].keys():
-                        self.var_map[vk][i][k] = dict()
-
                         values = []
                         for (name, data) in source.items():
                             value = data.eval(self.time_points[i][k])[0, 0]
@@ -2377,9 +2395,15 @@ class LocalDAECollocator(CasadiCollocator):
                                 traj_min[name] = value
                             if value > traj_max[name]:
                                 traj_max[name] = value
-                        self.var_map[vk][i][k]['all'] = N.array(values)
-                        for z in range(0,len(values)):
-                            self.var_map[vk][i][k][z] = values[z]                    
+                        
+                        # Write the sampled data to var_map or _par_vals
+                        if self.mutable_external_data:
+                            for z in xrange(len(values)):
+                                self._par_vals[self.var_indices[vk][i][k][z]] = values[z]
+                        else:
+                            self.var_map[vk][i][k]['all'] = N.array(values)
+                            for z in xrange(len(values)):
+                                self.var_map[vk][i][k][z] = values[z]
 
             # Check that constrained and eliminated inputs satisfy their bounds
             for var_name in (self.external_data.eliminated.keys() +
@@ -4252,7 +4276,12 @@ class LocalDAECollocator(CasadiCollocator):
                     for var_type in var_types:
                         xx_i_k = primal_opt[self.var_indices[var_type][i][k]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
-                    var_opt['elim_u'][t_index, :] = self.var_map['elim_u'][i][k]['all']
+                    if self.mutable_external_data:
+                        for j in xrange(self.n_var['elim_u']):
+                            var_opt['elim_u'][t_index, j] = self._par_vals[
+                                self.var_indices['elim_u'][i][k][j]]
+                    else:
+                        var_opt['elim_u'][t_index, :] = self.var_map['elim_u'][i][k]['all']
                     t_index += 1
             if self.eliminate_der_var:
                 # dx_1_0
