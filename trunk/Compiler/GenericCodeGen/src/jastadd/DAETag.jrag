@@ -117,7 +117,7 @@ public abstract class DAETag extends AbstractTag {
 
     public abstract class CodeSplitter<T extends ASTNode> {
         private int itemIndex = 0;
-        private int itemLimit = 10000;
+        private int itemLimit = 1000;
         private int splitCount = 0;
         private String funcName;
         protected CodeStream str;
