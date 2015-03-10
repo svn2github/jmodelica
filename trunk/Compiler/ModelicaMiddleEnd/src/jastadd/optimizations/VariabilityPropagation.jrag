@@ -474,9 +474,7 @@ aspect VariabilityPropagation {
         
         // TODO: This would be much nicer if we had a fixedfalse parameter variability.
         if (variability.parameterVariability()) {
-             if (!isFixed || fixedAttributeSet()) {
-                 setFixedAttribute(isFixed);
-             }
+            propagateFixedFalse(isFixed);
         }
         
         // Uses
@@ -538,12 +536,20 @@ aspect VariabilityPropagation {
                     fv.setFTypePrefixVariability(variability);
                     if (variability.knownParameterOrLess())
                         fv.setBindingExp(bindingExp.negated(neg));
-                    if (variability.parameterVariability() && !fv.isTemporary())
+                    if (variability.parameterVariability() && !fv.isTemporary()) {
+                        fv.propagateFixedFalse(isFixed);
                         parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
+                    }
                 }
             }
             myFClass().getAliasManager().unAlias(this);
         }
+    }
+    
+    public void FVariable.propagateFixedFalse(boolean isFixed) {
+         if (!isFixed || fixedAttributeSet()) {
+             setFixedAttribute(isFixed);
+         }
     }
 	
     inh FExp FExp.myTopFactorFExp();

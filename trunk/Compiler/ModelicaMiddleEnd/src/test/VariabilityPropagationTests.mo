@@ -1810,4 +1810,27 @@ end VariabilityPropagationTests.FixedFalse4;
 ")})));
 end FixedFalse4;
 
+model FixedFalse5
+    parameter Real p1(fixed=false);
+    Real p2 = p1 + 1;
+    Real p3 = p2;
+initial equation
+    p1 = p2 * 23;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalse5",
+            description="Test propagation of fixed false parameters, alias",
+            flatModel="
+fclass VariabilityPropagationTests.FixedFalse5
+ parameter Real p1(fixed = false);
+ parameter Real p3(fixed = false);
+ parameter Real p2(fixed = false);
+initial equation 
+ p1 = p3 * 23;
+ p3 = p1 + 1;
+ p2 = p3;
+end VariabilityPropagationTests.FixedFalse5;
+")})));
+end FixedFalse5;
+
 end VariabilityPropagationTests;
