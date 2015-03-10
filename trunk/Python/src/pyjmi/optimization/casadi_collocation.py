@@ -1044,11 +1044,14 @@ class LocalDAECollocator(CasadiCollocator):
         n_var['unelim_u'] = len(unelim_input_indices)
         n_var['elim_u'] = len(elim_input_indices)
 
-        # Create lists of other external data variables
+        # Create lists of and count other external data variables
         if self.external_data is not None:
             for (vk, source) in (('constr_u', self.external_data.constr_quad_pen),
                                  ('quad_pen', self.external_data.quad_pen)):
                 mvar_vectors[vk] = [op.getVariable(name) for (name, data) in source.iteritems()]
+                n_var[vk] = len(mvar_vectors[vk])
+        else:
+            n_var['constr_u'] = n_var['quad_pen'] = 0
 
         # Sort parameters
         par_kinds = [op.BOOLEAN_CONSTANT,
@@ -1307,6 +1310,8 @@ class LocalDAECollocator(CasadiCollocator):
         nlp_n_var = copy.copy(self.n_var)
         del nlp_n_var['u']
         del nlp_n_var['elim_u']
+        del nlp_n_var['constr_u']
+        del nlp_n_var['quad_pen']
         if self.blocking_factors is not None:
             n_u = nlp_n_var['unelim_u']
             del nlp_n_var['unelim_u']
@@ -2357,6 +2362,45 @@ class LocalDAECollocator(CasadiCollocator):
             self.n_variant_dx =n_variant_dx
             self.n_invariant_var = n_invariant_var
 
+    def _sample_external_input_trajectory(self, vk, var_index, name, data):
+        """
+        Sample the external data for one variable.
+        """
+        traj_min, traj_max = N.inf, -N.inf
+
+        # Sample collocation points
+        for i in xrange(1, self.n_e + 1):
+            for k in self.time_points[i].keys():
+                value = data.eval(self.time_points[i][k])[0, 0]
+                if value < traj_min:
+                    traj_min = value
+                if value > traj_max:
+                    traj_max = value
+                
+                # Write the sampled data to var_map or _par_vals
+                if self.mutable_external_data:
+                    self._par_vals[self.var_indices[vk][i][k][var_index]] = value
+                else:
+                    # consider: Could we have var_map[vk][i][k]['all']
+                    # be the same array as self.var_map[vk][i][k]
+                    # in this case?
+                    self.var_map[vk][i][k]['all'][var_index] = value
+                    self.var_map[vk][i][k][var_index] = value
+
+        # Check that constrained and eliminated inputs satisfy their bounds
+        if vk in ('elim_u', 'constr_u'):
+            var = self.op.getVariable(name)
+            var_min = self.op.get_attr(var, "min")
+            var_max = self.op.get_attr(var, "max")
+            if traj_min < var_min:
+                raise CasadiCollocatorException(
+                    "The trajectory for the measured input " + name +
+                    " does not satisfy the input's lower bound.")
+            if traj_max > var_max:
+                raise CasadiCollocatorException(
+                    "The trajectory for the measured input " + name +
+                    " does not satisfy the input's upper bound.")
+
     def _create_external_input_trajectories(self):
         """
         Computes the external input trajectories 
@@ -2369,58 +2413,14 @@ class LocalDAECollocator(CasadiCollocator):
                     self.var_map[vk][i]=dict()
                     for k in self.time_points[i].keys():
                         self.var_map[vk][i][k] = dict()
-                        self.var_map[vk][i][k]['all'] = N.array([])
+                        self.var_map[vk][i][k]['all'] = N.zeros(self.n_var[vk])
 
         if self.external_data is not None:
-            # Create storage of maximum and minimum values
-            traj_min = OrderedDict()
-            traj_max = OrderedDict()
-            for name in (self.external_data.eliminated.keys() +
-                         self.external_data.constr_quad_pen.keys() +
-                         self.external_data.quad_pen.keys()):
-                traj_min[name] = N.inf
-                traj_max[name] = -N.inf
-
             for (vk, source) in (('elim_u', self.external_data.eliminated), 
                                  ('constr_u', self.external_data.constr_quad_pen),
                                  ('quad_pen', self.external_data.quad_pen)):
-                # Collocation points
-                for i in xrange(1, self.n_e + 1):
-                    for k in self.time_points[i].keys():
-                        values = []
-                        for (name, data) in source.items():
-                            value = data.eval(self.time_points[i][k])[0, 0]
-                            values.append(value)
-                            if value < traj_min[name]:
-                                traj_min[name] = value
-                            if value > traj_max[name]:
-                                traj_max[name] = value
-                        
-                        # Write the sampled data to var_map or _par_vals
-                        if self.mutable_external_data:
-                            for z in xrange(len(values)):
-                                self._par_vals[self.var_indices[vk][i][k][z]] = values[z]
-                        else:
-                            self.var_map[vk][i][k]['all'] = N.array(values)
-                            for z in xrange(len(values)):
-                                self.var_map[vk][i][k][z] = values[z]
-
-            # Check that constrained and eliminated inputs satisfy their bounds
-            for var_name in (self.external_data.eliminated.keys() +
-                             self.external_data.constr_quad_pen.keys()):
-                var = self.op.getVariable(var_name)
-                var_min = self.op.get_attr(var, "min")
-                var_max = self.op.get_attr(var, "max")
-                if traj_min[var_name] < var_min:
-                    raise CasadiCollocatorException(
-                        "The trajectory for the measured input " + var_name +
-                        " does not satisfy the input's lower bound.")
-                if traj_max[var_name] > var_max:
-                    raise CasadiCollocatorException(
-                        "The trajectory for the measured input " + var_name +
-                        " does not satisfy the input's upper bound.")
-
-
+                for (j, (name, data)) in enumerate(source.items()):
+                    self._sample_external_input_trajectory(vk, j, name, data)
 
     def _define_l0_functions(self):
         """
