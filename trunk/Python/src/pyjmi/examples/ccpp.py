@@ -201,5 +201,5 @@ def run_demo(with_plots=True):
     N.testing.assert_allclose(opt_res.final('plant.p'),
                               sim_res.final('p'), rtol=5e-3)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     run_demo()

@@ -19,7 +19,8 @@
 The pyjmi example package.
 """
 __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt', 
-           'blood_glucose_opt_scaled', 'catalyst_mixing', 'catalytic_cracking', 
+           'blood_glucose_opt_scaled',
+           'cart_pendulum', 'catalyst_mixing', 'catalytic_cracking', 
            'ccpp', 'ccpp_elimination', 'coloumb_friction', 'cont_state', 'crane',
            'crystallizer', 
            'cstr', 'cstr_casadi', 'cstr_mpc', 'cstr_mpc_casadi', 'cstr2',
