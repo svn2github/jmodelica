@@ -341,15 +341,7 @@ aspect Variability {
     syn boolean FIdUse.valueIsFixed() = myFV().valueIsFixed();
 
     syn boolean FAbstractVariable.valueIsFixed() = true;
-    eq FVariable.valueIsFixed() {
-        if (!fixedAttribute() || !isParameter() || myFClass().nonFixedParametersPropagated())
-            return fixedAttribute();
-        if (hasBindingExp())
-            return getBindingExp().valueIsFixed();
-        if (hasParameterEquation()) 
-            return parameterEquation().rhsIsFixed();
-        return true;
-    }
+    eq FVariable.valueIsFixed() = fixedAttribute();
 
     syn boolean FAbstractEquation.rhsIsFixed() = true;
     eq FEquation.rhsIsFixed()                  = getRight().valueIsFixed();

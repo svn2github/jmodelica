@@ -1702,4 +1702,135 @@ end VariabilityPropagationTests.ZeroFactor3;
 ")})));
 end ZeroFactor3;
 
+model FixedFalse1
+    parameter Real p1(fixed=false);
+    Real p2 = p1 + 1;
+initial equation
+    p1 = 23;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalse1",
+            description="Test propagation of fixed false parameters",
+            flatModel="
+fclass VariabilityPropagationTests.FixedFalse1
+ parameter Real p1(fixed = false);
+ parameter Real p2(fixed = false);
+initial equation 
+ p1 = 23;
+ p2 = p1 + 1;
+end VariabilityPropagationTests.FixedFalse1;
+")})));
+end FixedFalse1;
+
+model FixedFalse2
+
+    function f
+        input Real x;
+        output Real y2 = x;
+        output Real y3 = x;
+        algorithm
+    end f;
+
+    parameter Real p1(fixed=false);
+    Real p2;
+    Real p3;
+initial equation
+    p1 = 23;
+equation
+    (p2,p3) = f(p1);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalse2",
+            inline_functions="none",
+            description="Test propagation of fixed false parameters, function call equation",
+            flatModel="
+fclass VariabilityPropagationTests.FixedFalse2
+ parameter Real p1(fixed = false);
+ parameter Real p2(fixed = false);
+ parameter Real p3(fixed = false);
+initial equation 
+ p1 = 23;
+ (p2, p3) = VariabilityPropagationTests.FixedFalse2.f(p1);
+
+public
+ function VariabilityPropagationTests.FixedFalse2.f
+  input Real x;
+  output Real y2;
+  output Real y3;
+ algorithm
+  y2 := x;
+  y3 := x;
+  return;
+ end VariabilityPropagationTests.FixedFalse2.f;
+
+end VariabilityPropagationTests.FixedFalse2;
+")})));
+end FixedFalse2;
+
+model FixedFalse3
+    parameter Real p1(fixed=false);
+    discrete Real p2 = p1 + 1;
+initial equation
+    p1 = 23;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalse3",
+            description="Test propagation of fixed false parameters, originally discrete",
+            flatModel="
+fclass VariabilityPropagationTests.FixedFalse3
+ parameter Real p1(fixed = false);
+ parameter Real p2(fixed = false);
+initial equation 
+ p1 = 23;
+ p2 = p1 + 1;
+end VariabilityPropagationTests.FixedFalse3;
+")})));
+end FixedFalse3;
+
+model FixedFalse4
+    parameter Real p1(fixed=false);
+    Real p2 = p1 + 1;
+    Real p3 = p2 + 1;
+initial equation
+    p1 = 23;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalse4",
+            description="Test propagation of fixed false parameters, chained",
+            flatModel="
+fclass VariabilityPropagationTests.FixedFalse4
+ parameter Real p1(fixed = false);
+ parameter Real p2(fixed = false);
+ parameter Real p3(fixed = false);
+initial equation 
+ p1 = 23;
+ p2 = p1 + 1;
+ p3 = p2 + 1;
+end VariabilityPropagationTests.FixedFalse4;
+")})));
+end FixedFalse4;
+
+model FixedFalse5
+    parameter Real p1(fixed=false);
+    Real p2 = p1 + 1;
+    Real p3 = p2;
+initial equation
+    p1 = p2 * 23;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalse5",
+            description="Test propagation of fixed false parameters, alias",
+            flatModel="
+fclass VariabilityPropagationTests.FixedFalse5
+ parameter Real p1(fixed = false);
+ parameter Real p3(fixed = false);
+ parameter Real p2(fixed = false);
+initial equation 
+ p1 = p3 * 23;
+ p3 = p1 + 1;
+ p2 = p3;
+end VariabilityPropagationTests.FixedFalse5;
+")})));
+end FixedFalse5;
+
 end VariabilityPropagationTests;
