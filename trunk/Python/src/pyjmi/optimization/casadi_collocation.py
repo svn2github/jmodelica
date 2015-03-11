@@ -603,7 +603,26 @@ class CasadiCollocator(object):
 
         self.solver_object.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
         self.solver_object.setInput(self.glub, casadi.NLP_SOLVER_UBG)
-        
+
+
+def _create_trajectory_function(data):
+    """
+    Create an interpolation function from user supplied external data.
+
+    The format of data is the same as expected for the data items in external_data.
+    Returns a TrajectoryUserFunction or TrajectoryLinearInterpolation instance.
+    """
+    if (isinstance(data, types.FunctionType) or
+        hasattr(data, '__call__')):
+        return TrajectoryUserFunction(data)
+    else:
+        if data.shape[0] != 2:
+            raise ValueError("If variable data is not a " +
+                             "function, it must be a matrix " +
+                             "with exactly two rows.")
+        return TrajectoryLinearInterpolation(
+            data[0], data[1].reshape([-1, 1]))
+
 class ExternalData(object):
 
     """
@@ -697,16 +716,7 @@ class ExternalData(object):
         quad_pen = copy.deepcopy(quad_pen)
         for variable_list in [eliminated, constr_quad_pen, quad_pen]:
             for (name, data) in variable_list.items():
-                if (isinstance(data, types.FunctionType) or
-                    hasattr(data, '__call__')):
-                    variable_list[name] = TrajectoryUserFunction(data)
-                else:
-                    if data.shape[0] != 2:
-                        raise ValueError("If variable data is not a " +
-                                         "function, it must be a matrix " +
-                                         "with exactly two rows.")
-                    variable_list[name] = TrajectoryLinearInterpolation(
-                        data[0], data[1].reshape([-1, 1]))
+                variable_list[name] = _create_trajectory_function(data)
 
         # Store data as attributes
         self.eliminated = eliminated
@@ -1052,6 +1062,15 @@ class LocalDAECollocator(CasadiCollocator):
                 n_var[vk] = len(mvar_vectors[vk])
         else:
             n_var['constr_u'] = n_var['quad_pen'] = 0
+
+        # Create name map for external data
+        if self.external_data is not None:
+            self.external_data_name_map = {}
+            for (vk, source) in (('elim_u', self.external_data.eliminated), 
+                                 ('constr_u', self.external_data.constr_quad_pen),
+                                 ('quad_pen', self.external_data.quad_pen)):
+                for (j, name) in enumerate(source.iterkeys()):
+                    self.external_data_name_map[name] = (j, vk)
 
         # Sort parameters
         par_kinds = [op.BOOLEAN_CONSTANT,
@@ -2421,6 +2440,29 @@ class LocalDAECollocator(CasadiCollocator):
                                  ('quad_pen', self.external_data.quad_pen)):
                 for (j, (name, data)) in enumerate(source.items()):
                     self._sample_external_input_trajectory(vk, j, name, data)
+
+    def set_external_variable(self, name, data):
+        """
+        Set new data for one variable that was supplied the external_data option
+
+        The option mutable_external_data must be enabled to use this method.
+        """
+        if name not in self.name_map:
+            raise CasadiCollocatorException("No variable " + name + " in model.");
+
+        if name not in self.external_data_name_map:
+            raise CasadiCollocatorException(
+                "Cannot change external data for variable " + name
+                + " since it has no original external data.");
+
+        if not self.mutable_external_data:
+            raise CasadiCollocatorException(
+                "Cannot update external data unless the mutable_external_data option is set to True.")
+
+        var_index, vk = self.external_data_name_map[name]
+        interpolator = _create_trajectory_function(data)
+        self._sample_external_input_trajectory(vk, var_index, name, interpolator)
+
 
     def _define_l0_functions(self):
         """
@@ -5073,6 +5115,14 @@ class OptimizationSolver(object):
         if name not in self.collocator.var_indices:
             raise KeyError("No parameter " + repr(name) + " in the optimization problem.")
         return self.collocator._par_vals[self.collocator.var_indices[name]]
+
+    def set_external_variable(self, name, data):
+        """
+        Set new data for one variable that was supplied the external_data option
+
+        The option mutable_external_data must be enabled to use this method.
+        """
+        self.collocator.set_external_variable(name, data)            
 
     def set_solver_option(self, solver_name, name, value):
         """
