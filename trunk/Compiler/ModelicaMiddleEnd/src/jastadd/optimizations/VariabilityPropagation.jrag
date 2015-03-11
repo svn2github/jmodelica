@@ -165,7 +165,6 @@ aspect VariabilityPropagation {
 	public void FClass.variabilityPropagation() {
 
 		List<FAbstractEquation> parameterEquations = getFParameterEquations();
-        List<FAbstractEquation> initialEquations = getFInitialEquations();
 		LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
 		List<FAbstractEquation> equations = getFAbstractEquations();
 
@@ -179,7 +178,7 @@ aspect VariabilityPropagation {
 		// Work
 		while (!worklist.isEmpty()) {
 			FAbstractEquation equation = worklist.iterator().next();
-            equation.variabilityPropagation(worklist, parameterEquations, initialEquations);
+			equation.variabilityPropagation(worklist, parameterEquations);
 			worklist.remove(equation);
 		}
 
@@ -211,7 +210,7 @@ aspect VariabilityPropagation {
 		
 		// Clean initial equations
 		newEquations = new ArrayList<FAbstractEquation>();
-		for (FAbstractEquation equation: initialEquations) {
+		for (FAbstractEquation equation: initialEquations()) {
 			if (!equation.taggedByVProp) {
 				newEquations.add(equation);
 			}
@@ -221,15 +220,13 @@ aspect VariabilityPropagation {
 	
 	public void FAbstractEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-            List<FAbstractEquation> parameterEquations,
-            List<FAbstractEquation> initialEquations) {
+			List<FAbstractEquation> parameterEquations) {
 		
 	}
 		
 	public void FEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-            List<FAbstractEquation> parameterEquations,
-            List<FAbstractEquation> initialEquations) {
+			List<FAbstractEquation> parameterEquations) {
 		
 		FVariable fVariable;
 		FExp solution;
@@ -263,8 +260,6 @@ aspect VariabilityPropagation {
 			// discrete variability. IfExpr, sample() etc.
 			return;
 		}
-        
-        boolean solutionFixed = true;
 
 		if (solutionVariability.knownParameterOrLess()) {
 			try {
@@ -274,22 +269,17 @@ aspect VariabilityPropagation {
 				solutionVariability = fParameter();
 			}
 		} else {
-            if (solution.containsNonFixedParameter()) {
-                solutionFixed = false;
-                parameterEquations = initialEquations;
-            }
-            parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
+			parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
 		}
 
 		this.taggedByVProp = true;
-        fVariable.variabilityPropagation(worklist, solutionVariability, solution, solutionFixed, parameterEquations);
+		fVariable.variabilityPropagation(worklist, solutionVariability, solution, parameterEquations);
 
 	}
 	
 	public void FFunctionCallEquation.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
-            List<FAbstractEquation> parameterEquations,
-            List<FAbstractEquation> initialEquations) {
+			List<FAbstractEquation> parameterEquations) {
         
         if (!canPropagate()) {
             return;
@@ -303,8 +293,6 @@ aspect VariabilityPropagation {
         }
         FTypePrefixVariability variability = potentialPartialVariability();
         boolean eval = variability.knownParameterOrLess();
-        boolean solutionFixed = !param || !getCall().containsNonFixedParameter();
-        parameterEquations = solutionFixed ? parameterEquations : initialEquations;
         
         CValue[] val = null;
         if (eval) {
@@ -328,7 +316,7 @@ aspect VariabilityPropagation {
             if (left.hasFExp()) {
                 if (left.getFExp().canPropagate()) {
                     left.taggedByVProp = left.getFExp().variabilityPropagation(worklist,
-                            eval ? val[i] : CValue.UNKNOWN, solutionFixed, param ? parameterEquations : null);
+                            eval ? val[i] : CValue.UNKNOWN, param ? parameterEquations : null);
                 }
                 allRemoved &= left.taggedByVProp;
             }
@@ -349,8 +337,7 @@ aspect VariabilityPropagation {
 	public boolean FExp.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
 			CValue value,
-            boolean isFixed,
-            List<FAbstractEquation> parameterEquations) {
+			List<FAbstractEquation> parameterEquations) {
 		
 		throw new UnsupportedOperationException();
 	}
@@ -358,7 +345,6 @@ aspect VariabilityPropagation {
 	public boolean FRecordConstructor.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations) {
 	    boolean res = true;
 		CValueRecord frc = null;
@@ -368,8 +354,7 @@ aspect VariabilityPropagation {
 
 		for (int i = 0; i < getNumArg(); i++) {
 			res &= getArg(i).variabilityPropagation(worklist, 
-                    frc != null ? frc.getMember(i) : CValue.UNKNOWN, 
-                    isFixed, parameterEquations);
+					frc != null ? frc.getMember(i) : CValue.UNKNOWN, parameterEquations);
 		}
 		taggedByVProp = res;
 		return res;
@@ -378,37 +363,33 @@ aspect VariabilityPropagation {
 	public boolean FArray.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations) {
 		
 		CValueArray a = null;
 		if (value != CValue.UNKNOWN) {
 			a = (CValueArray) value;
 		}
-        taggedByVProp = this.variabilityPropagationArray(worklist, a, isFixed, parameterEquations, new Enumerator());
+		taggedByVProp = this.variabilityPropagationArray(worklist, a, parameterEquations, new Enumerator());
 		return taggedByVProp;
 	}
 	
     public boolean FExp.variabilityPropagationArray(
             LinkedHashSet<FAbstractEquation> worklist,
             CValueArray value,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations,
             Enumerator enumerator) {
         return this.variabilityPropagation(worklist, 
-                value == null ? CValue.UNKNOWN : value.values[enumerator.next()], 
-                isFixed, parameterEquations);
+                    value == null ? CValue.UNKNOWN : value.values[enumerator.next()], parameterEquations);
     }
     
     public boolean FArray.variabilityPropagationArray(
             LinkedHashSet<FAbstractEquation> worklist,
             CValueArray value,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations,
             Enumerator enumerator) {
         boolean res = true;
         for (FExp exp : getFExps()) {
-            res &= exp.variabilityPropagationArray(worklist, value, isFixed, parameterEquations, enumerator);
+            res &= exp.variabilityPropagationArray(worklist, value, parameterEquations, enumerator);
         }
         return res;
     }
@@ -417,7 +398,6 @@ aspect VariabilityPropagation {
     public boolean FIdUseExp.variabilityPropagation(
             LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations) {
         
         FExp bexp = null;
@@ -434,7 +414,7 @@ aspect VariabilityPropagation {
         }
         
         if (variability.knownParameterOrLess() || parameterEquations != null) {
-            myFV().variabilityPropagation(worklist, variability, bexp, isFixed, parameterEquations);
+            myFV().variabilityPropagation(worklist, variability, bexp, parameterEquations);
         }
         
         taggedByVProp = variability.knownParameterOrLess();
@@ -446,7 +426,6 @@ aspect VariabilityPropagation {
 			LinkedHashSet<FAbstractEquation> worklist,
 			FTypePrefixVariability variability,
             FExp bindingExp,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations) {
 		
 		throw new UnsupportedOperationException();
@@ -456,7 +435,6 @@ aspect VariabilityPropagation {
             LinkedHashSet<FAbstractEquation> worklist,
             FTypePrefixVariability variability,
             FExp bindingExp,
-            boolean isFixed,
             List<FAbstractEquation> parameterEquations) {
         
         FAbstractEquation equation;
@@ -471,10 +449,10 @@ aspect VariabilityPropagation {
         if (variability.knownParameterOrLess()) {
             setBindingExp(bindingExp.fullCopy());
         }
-        
-        // TODO: This would be much nicer if we had a fixedfalse parameter variability.
         if (variability.parameterVariability()) {
-            propagateFixedFalse(isFixed);
+            if (fixedAttributeSet()) {
+                setFixedAttribute(true);
+            }
         }
         
         // Uses
@@ -516,14 +494,14 @@ aspect VariabilityPropagation {
         if (wasDiscrete) {
             FAbstractVariable pre = myPreVariable();
             pre.taggedByVProp = true;
-            pre.variabilityPropagation(worklist, variability, bindingExp, isFixed, parameterEquations);
+            pre.variabilityPropagation(worklist, variability, bindingExp, parameterEquations);
         }
         
         // Derivative
         if (isDifferentiatedVariable()) {
             FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
             fDerivativeVariable.taggedByVProp = true;
-            fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0), true, parameterEquations);
+            fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0), parameterEquations);
         }
         
         // Alias variables
@@ -536,20 +514,12 @@ aspect VariabilityPropagation {
                     fv.setFTypePrefixVariability(variability);
                     if (variability.knownParameterOrLess())
                         fv.setBindingExp(bindingExp.negated(neg));
-                    if (variability.parameterVariability() && !fv.isTemporary()) {
-                        fv.propagateFixedFalse(isFixed);
+                    if (variability.parameterVariability() && !fv.isTemporary())
                         parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
-                    }
                 }
             }
             myFClass().getAliasManager().unAlias(this);
         }
-    }
-    
-    public void FVariable.propagateFixedFalse(boolean isFixed) {
-         if (!isFixed || fixedAttributeSet()) {
-             setFixedAttribute(isFixed);
-         }
     }
 	
     inh FExp FExp.myTopFactorFExp();

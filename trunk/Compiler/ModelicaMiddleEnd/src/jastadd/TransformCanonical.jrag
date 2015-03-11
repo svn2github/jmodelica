@@ -118,7 +118,6 @@ aspect TransformCanonical {
             transformations.add(new transformAlgorithms());
             transformations.add(new enableWhenClauseRewrite());
             transformations.add(new genInitArrayStatements());
-            transformations.add(new propagateNonFixedParameters());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
             transformations.add(new addFPreVariables());
@@ -132,6 +131,7 @@ aspect TransformCanonical {
             transformations.add(new genInitialEquations());
             transformations.add(new addStateInitialEquationsIfSet());
             transformations.add(new setFDerivativeVariablesPreBLT());
+            transformations.add(new propagateNonFixedParameters());
             transformations.add(new indexReduction());
             transformations.add(new LateFunctionInliningIfSet());
             transformations.add(new addFPreVariables());
