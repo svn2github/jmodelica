@@ -354,6 +354,7 @@ class MPC(object):
         self._calculate_nbr_values_sample()
         self.alg = LocalDAECollocationAlg(self.op, self.options)
         self.collocator = self.alg.nlp
+        self.p_fixed = None
         self._get_states_and_initial_value_parameters()
         self.collocator.solver_object.init()
 
@@ -681,7 +682,10 @@ class MPC(object):
         
         par_vals = [self.op.get_attr(par, "_value")
                         for par in self.collocator.mvar_vectors['p_fixed']]
-        self.collocator._par_vals = N.array(par_vals).reshape(-1)
+        par_vals = N.array(par_vals).reshape(-1)
+        if self.p_fixed is None:
+            self.p_fixed = par_vals
+        self.collocator._par_vals[0:self.collocator.n_var['p_fixed']] = par_vals
 
     def update_state(self, x_k=None, start_time=None):
         """ 
@@ -905,7 +909,7 @@ class MPC(object):
         res_p = N.array(0).reshape(-1)
         
         res = (self.res_t, self.res_dx, self.res_x, self.res_u, 
-                        self.res_w, res_p )
+                        self.res_w, self.p_fixed, res_p)
 
         self.collocator.export_result_dymola(self._mpc_result_file_name, 
                                                 result=res)

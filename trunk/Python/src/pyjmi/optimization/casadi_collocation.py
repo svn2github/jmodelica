@@ -4226,6 +4226,9 @@ class LocalDAECollocator(CasadiCollocator):
                 p_opt *= p_opt_sf
         var_opt['p_opt'][:] = p_opt
 
+        # Get current values for fixed parameters
+        var_opt['p_fixed'] = self._par_vals[0:self.n_var['p_fixed']]
+
         # Rescale solution
         time_points = self.get_time_points()
         if self.variable_scaling and not self.write_scaled_result:
@@ -4522,7 +4525,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['merged_u'],
-                var_opt['w'], var_opt['p_opt'], var_opt['elim_vars'])
+            var_opt['w'], var_opt['p_fixed'], var_opt['p_opt'], var_opt['elim_vars'])
 
     def get_h_opt(self):
         if self.hs == "free":
@@ -4576,10 +4579,10 @@ class LocalDAECollocator(CasadiCollocator):
             Currently only textual format is supported.
         """
         if result is None:
-            (t,dx_opt,x_opt,u_opt,w_opt,p_opt, elim_vars) = self.get_result()
+            (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt, elim_vars) = self.get_result()
             data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt,elim_vars))
         else:
-            (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = result
+            (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt) = result
             data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
 
         if (format=='txt'):
@@ -4683,8 +4686,8 @@ class LocalDAECollocator(CasadiCollocator):
                 (ind, _) = name_map[name]
                 data_1.append(" %.14E" % p_opt[ind])
 
-            for par in mvar_vectors['p_fixed']:
-                data_1.append(" %.14E" % op.get_attr(par, "_value"))
+            for par_val in p_fixed:
+                data_1.append(" %.14E" % par_val)
 
             # Open file
             if file_name == '':

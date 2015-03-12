@@ -48,9 +48,11 @@ def test_warm_start():
     # Optimize without going through prepare_optimization
     op.set('p1', 1) # Should already be set to 1
     res1c = op.optimize(options=opts)
+    assert res1c.final('p1') == 1
     
     op.set('p1', 2)
     res2c = op.optimize(options=opts)
+    assert res2c.final('p1') == 2
 
     # Make sure that the parameter changes have an effect
     assert result_distance(res1c, res2c, var_names) > 1e-2
@@ -63,6 +65,7 @@ def test_warm_start():
     solver.set('p1', 1)
     assert solver.get('p1') == 1
     res1w = solver.optimize()
+    assert res1w.final('p1') == 1
     assert result_distance(res1c, res1w, var_names) < 1e-6
     res1w_stats = res1w.get_solver_statistics()
  
@@ -72,9 +75,11 @@ def test_warm_start():
     set_warm_start_options(solver, push = 1e-5)
 
     res2w = solver.optimize()
+    assert res2w.final('p1') == 2
     assert result_distance(res2c, res2w, var_names) < 1e-6
 
     res2w2 = solver.optimize()
+    assert res2w2.final('p1') == 2
     assert result_distance(res2c, res2w2, var_names) < 1e-6
 
     # Check that the results haven't changed
