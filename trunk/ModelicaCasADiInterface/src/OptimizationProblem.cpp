@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "OptimizationProblem.hpp"
 #include <string>
 #include <math.h>
+#include <stdio.h>
 using std::ostream; using casadi::MX;
 
 namespace ModelicaCasADi
@@ -386,7 +387,7 @@ namespace ModelicaCasADi
         }*/
     } 
 
-    void OptimizationProblem::printPyomoModel(const std::string& modelName)
+    void OptimizationProblem::printPyomoModel(const std::string& modelName /*="model"*/)
     {
         std::vector<casadi::MX> pyomoStates;
         std::vector<casadi::MX> pyomoDerivatives;
@@ -406,16 +407,17 @@ namespace ModelicaCasADi
 
         std::ofstream modelFile;
         std::string name;
+        std::string fileName = identifier;
+        fileName = "JMPyomoModel.py";
         double min;
         double max;
-        modelFile.open("PyomoModel.py");
-
+        double initialGuess;
+        modelFile.open(fileName.c_str());
         modelFile << "from pyomo.environ import *\n";
         modelFile << "from pyomo.dae import *\n";
         modelFile << "from pyomo import *\n\n";
         modelFile << "import pyomo.core.base.expr as pyomo_ope\n";
 
-        modelFile << "\n#sq = lambda x : pyomo_ope.pow(x,2)\n";
         modelFile << "\nsq = lambda x : x**2\n";
         modelFile << "exp = lambda x : pyomo_ope.exp(x)\n";
         modelFile << "log = lambda x : pyomo_ope.log10(x)\n";
@@ -437,7 +439,7 @@ namespace ModelicaCasADi
             std::replace(name.begin(), name.end(), ')','_');  
             modelFile << name <<" = "<< evaluateExpression((*it)->getVar())<<"\n";
             JMIndParams.push_back((*it)->getVar());
-            pyomoIndParams.push_back(casadi::MX::sym(modelName+"."+name));
+            pyomoIndParams.push_back(casadi::MX::sym(name));
         }
 
         modelFile << "\n# Sets\n";
@@ -451,6 +453,11 @@ namespace ModelicaCasADi
             name = (*it)->getName();
             min = evaluateExpression(*(*it)->getMin());
             max = evaluateExpression(*(*it)->getMax());
+            initialGuess = evaluateExpression(*(*it)->getStart());
+            if(casadi::casadi_limits<double>::isInf(initialGuess) || casadi::casadi_limits<double>::isMinusInf(initialGuess) || initialGuess==0.0)
+            {
+                initialGuess = 1.0;
+            }
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
             std::replace(name.begin(), name.end(), ')','_');  
@@ -461,10 +468,10 @@ namespace ModelicaCasADi
             std::replace(name_der.begin(), name_der.end(), '(', '_');
             std::replace(name_der.begin(), name_der.end(), ')', '_');
             if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
-                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t)\n";
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, initialize = "<<initialGuess<<")\n";
             }
             else{
-                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"))\n";
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"), initialize = "<<initialGuess<<")\n";
             }
             modelFile << modelName << "." << name_der <<" = DerivativeVar("<< modelName <<"."<< name <<")\n";
             
@@ -481,14 +488,19 @@ namespace ModelicaCasADi
             name = (*it)->getName();
             min = evaluateExpression(*(*it)->getMin());
             max = evaluateExpression(*(*it)->getMax());
+            initialGuess = evaluateExpression(*(*it)->getStart());
+            if(casadi::casadi_limits<double>::isInf(initialGuess) || casadi::casadi_limits<double>::isMinusInf(initialGuess) || initialGuess==0.0)
+            {
+                initialGuess = 1.0;
+            }
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
             std::replace(name.begin(), name.end(), ')','_');  
             if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
-                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t)\n";
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, initialize = "<<initialGuess<<")\n";
             }
             else{
-                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"))\n";
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"), initialize = "<<initialGuess<<")\n";
             }
             JMInputs.push_back((*it)->getVar());
             pyomoInputs.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
@@ -501,14 +513,19 @@ namespace ModelicaCasADi
             name = (*it)->getName();
             min = evaluateExpression(*(*it)->getMin());
             max = evaluateExpression(*(*it)->getMax());
+            initialGuess = evaluateExpression(*(*it)->getStart());
+            if(casadi::casadi_limits<double>::isInf(initialGuess) || casadi::casadi_limits<double>::isMinusInf(initialGuess) || initialGuess==0.0)
+            {
+                initialGuess = 1.0;
+            }
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
             std::replace(name.begin(), name.end(), ')','_');  
             if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
-                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t)\n";
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, initialize = "<<initialGuess<<")\n";
             }
             else{
-                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"))\n";
+                modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"), initialize = "<<initialGuess<<")\n";
             }
             JMAlgebraics.push_back((*it)->getVar());
             pyomoAlgebraics.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
@@ -561,7 +578,7 @@ namespace ModelicaCasADi
         allVarsJM.insert(allVarsJM.end(), JMInputs.begin(), JMInputs.end());
         allVarsJM.insert(allVarsJM.end(), JMAlgebraics.begin(), JMAlgebraics.end());
         allVarsJM.insert(allVarsJM.end(), JMDepParams.begin(), JMDepParams.end());
-        //allVarsJM.insert(allVarsJM.end(), JMIndParams.begin(), JMIndParams.end());
+        allVarsJM.insert(allVarsJM.end(), JMIndParams.begin(), JMIndParams.end());
         allVarsJM.insert(allVarsJM.end(), JMTimedVars.begin(), JMTimedVars.end());
         
 
@@ -571,7 +588,7 @@ namespace ModelicaCasADi
         allVarsPY.insert(allVarsPY.end(), pyomoInputs.begin(), pyomoInputs.end());
         allVarsPY.insert(allVarsPY.end(), pyomoAlgebraics.begin(), pyomoAlgebraics.end());
         allVarsPY.insert(allVarsPY.end(), pyomoDepParams.begin(), pyomoDepParams.end());
-        //allVarsPY.insert(allVarsPY.end(), pyomoIndParams.begin(), pyomoIndParams.end());
+        allVarsPY.insert(allVarsPY.end(), pyomoIndParams.begin(), pyomoIndParams.end());
         allVarsPY.insert(allVarsPY.end(), pyomoTimedVars.begin(), pyomoTimedVars.end());
 
         std::vector<casadi::MX> pyLHS = casadi::substitute(daeLHS,
@@ -695,18 +712,23 @@ namespace ModelicaCasADi
         allVarsJM,
         allVarsPY);
 
-
-        modelFile << "def _integralExp("<<modelName<<",i):\n";
-        modelFile << "\treturn " << removesMXprint(pyObjective.front().getRepresentation()) << "\n";
-        modelFile << modelName << ".initExp = Expression(" << modelName << ".t, rule = _integralExp)\n";
+        if(!pyObjective.front().isZero()){
+            modelFile << "def _integralExp("<<modelName<<",i):\n";
+            modelFile << "\treturn " << removesMXprint(pyObjective.front().getRepresentation()) << "\n";
+            modelFile << modelName << ".initExp = Integral(" << modelName << ".t, rule = _integralExp, wrt = "<<modelName <<".t)\n";
+        }
         modelFile << "\ndef _obj_rule("<<modelName<<"):\n";
-        modelFile << "\t#return " << removesMXprint(pyObjective.back().getRepresentation()) 
-        << " + Integral(expr=" << modelName <<".initExp,wrt = "<<modelName<<".t)\n"; 
-        modelFile << "\treturn " << removesMXprint(pyObjective.back().getRepresentation()) <<"\n";
+        modelFile << "\treturn " << removesMXprint(pyObjective.back().getRepresentation());
+        if(!pyObjective.front().isZero()){ 
+        modelFile << " + " << modelName <<".initExp\n"; 
+        }
+        else{
+            modelFile << "\n";
+        }
         modelFile << modelName<< ".obj = Objective(rule = _obj_rule)\n";
 
-
         modelFile.close();
+        std::cout << "Pyomo model written in file "<<fileName<<"\n";
     }
 
 }; // End namespace

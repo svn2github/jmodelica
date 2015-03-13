@@ -118,7 +118,7 @@ namespace ModelicaCasADi
              **/
             void markVariablesForElimination(const std::vector< Ref<Variable> >& vars);
 
-            void printPyomoModel(const std::string& modelName);
+            void printPyomoModel(const std::string& modelName = "model");
 
 
             MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
