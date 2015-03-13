@@ -2298,7 +2298,7 @@ aspect FlatExpressions {
 	}
 	
 	public FExp FExp.flattenDer(FQName prefix, int order) {
-		return diff(TIME, order).flatten(prefix);
+		return dynamicFExp(diff(TIME, order)).flatten(prefix);
 	}
 
     public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {

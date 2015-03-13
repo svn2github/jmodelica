@@ -1370,6 +1370,99 @@ end StreamTests.StreamAttributesOnType;
 end StreamAttributesOnType;
 
 
+model InStreamDer1
+    connector StreamConnector2 = StreamConnector(f(nominal=2,max=-1));
+
+    model A
+        StreamConnector c1(f(nominal=10));
+        StreamConnector c2(f(nominal=10));
+        StreamConnector2 c3;
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    equation
+        connect(c1, c2);
+        connect(c1, c3);
+    end A;
+    
+    model B
+        StreamConnector c4(p = 7, f = 8, s = 4);
+        StreamConnector c5(s = 5);
+        StreamConnector c6(s = 6, f = 9);
+    end B;
+    
+    A a;
+    B b;
+    
+    Real x1 = der(inStream(a.c1.s));
+    Real x2 = der(der(inStream(a.c1.s)));
+equation
+    connect(a.c1, b.c4);
+    connect(a.c2, b.c5);
+    connect(a.c3, b.c6);
+    
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InStreamDer1",
+            description="Test that attributes on types affect generation of stream equations",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
+fclass StreamTests.InStreamDer1
+ Real a.c1.p;
+ Real a.c1.f(nominal = 10);
+ Real a.c1.s;
+ Real a.c2.p;
+ Real a.c2.f(nominal = 10);
+ Real a.c2.s;
+ Real a.c3.p;
+ Real a.c3.f(nominal = 2,max = -1);
+ Real a.c3.s;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real b.c4.p;
+ Real b.c4.f;
+ Real b.c4.s;
+ Real b.c5.p;
+ Real b.c5.f;
+ Real b.c5.s;
+ Real b.c6.p;
+ Real b.c6.f;
+ Real b.c6.s;
+ Real x1;
+ Real x2;
+ Real b.c4._der_s;
+equation
+ a.c1.f + b.c4.f = 0;
+ a.c1.p = b.c4.p;
+ a.c2.f + b.c5.f = 0;
+ a.c2.p = b.c5.p;
+ a.c3.f + b.c6.f = 0;
+ a.c3.p = b.c6.p;
+ - a.c1.f - a.c2.f - a.c3.f = 0;
+ a.c1.p = a.c2.p;
+ a.c2.p = a.c3.p;
+ a.c1.s = b.c5.s;
+ a.c2.s = b.c4.s;
+ a.c3.s = (max(a.c1.f, 2.0E-8) * b.c4.s + max(a.c2.f, 2.0E-8) * b.c5.s) / (max(a.c1.f, 2.0E-8) + max(a.c2.f, 2.0E-8));
+ a.x1 = b.c4.s;
+ a.x2 = b.c5.s;
+ a.x3 = b.c6.s;
+ b.c4.p = 7;
+ b.c4.f = 8;
+ b.c4.s = 4;
+ b.c5.s = 5;
+ b.c6.f = 9;
+ b.c6.s = 6;
+ x1 = b.c4._der_s;
+ x2 = der(b.c4._der_s);
+ b.c4._der_s = 0;
+end StreamTests.InStreamDer1;
+")})));
+end InStreamDer1;
+
 // TODO: Add error tests (e.g. stream connector without flow)
 
 end StreamTests;

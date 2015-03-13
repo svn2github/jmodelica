@@ -1914,6 +1914,7 @@ aspect FlatPrettyPrint {
     eq FCardinality.builtInName()        = "cardinality";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
+	eq FDerInStream.builtInName()        = "derInStream";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";
 	eq FConnBranch.builtInName()         = "Connections.branch";

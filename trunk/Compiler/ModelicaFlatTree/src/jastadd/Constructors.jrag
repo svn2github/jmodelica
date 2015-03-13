@@ -1120,6 +1120,7 @@ aspect InheritedFactoryMethods {
 	public FHomotopyExp    FHomotopyExp.createEmptyNode()    { return new FHomotopyExp();    }
 	public FSemiLinearExp  FSemiLinearExp.createEmptyNode()  { return new FSemiLinearExp();  }
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
+	public FDerInStream    FDerInStream.createEmptyNode()    { return new FDerInStream();    }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	public FGetInstanceName FGetInstanceName.createEmptyNode() { return new FGetInstanceName(); }
 	

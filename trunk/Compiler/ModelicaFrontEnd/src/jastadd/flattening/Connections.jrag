@@ -72,10 +72,18 @@ aspect Connections {
     rewrite FInStream {
         when (rewriteStreams) to FExp {
             // Always create expression from the connection set where the variable is an inside connector. 
-            String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
-            ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
-            return cs.createInStreamExp(name);
+            return expandInStreamExp();
         }
+    }
+    
+    protected FExp FInStream.expandInStreamExp() {
+        String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
+        ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
+        return cs.createInStreamExp(name);
+    }
+    
+    protected FExp FDerInStream.expandInStreamExp() {
+        return getFExp().diff(FExp.TIME);
     }
 
 	/**

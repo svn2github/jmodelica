@@ -859,6 +859,14 @@ aspect Derivatives {
     public FExp FSpatialDistExp.diff(String name) {
         throw new FunctionDifferentiationException(this);
     }
+    
+    public FExp FInStream.diff(String name) {
+        if (name.equals(FExp.TIME)) {
+            return new FDerInStream(this.treeCopy());
+        }
+        return super.diff(name);
+    }
+
 
     public FExp FExp.diffUseOrDerExp(String name, String myName) {
         if (type().containsReal()) {
