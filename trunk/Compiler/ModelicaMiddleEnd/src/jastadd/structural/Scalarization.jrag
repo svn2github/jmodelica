@@ -398,6 +398,7 @@ aspect Scalarization {
         int vi = 0;
 		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
 		for (FVariable comp : myFRecordDecl().getFVariables()) {
+		    FTypePrefixVariability compVariability = variability.getPart(vi++);
 			java.util.List<BindingExpSource> nAttrs = Collections.emptyList();
 			FExp nbexp = null;
             int nbexpDims = -1;
@@ -421,12 +422,13 @@ aspect Scalarization {
                     if (nbexp != null) {
 						nbi = foundAttr.get(j).getI();
                         nbexpDims = nbexp.ndims();
+                        nbexp.createArrayTemporaries(compVariability.parameterVariability() ? pEqus : equs, vars);
                     }
 				}
 				if (nbexp == null)
 					nAttrs = foundAttr;
 			}
-            comp.scalarRecordFVariables(vars, equs, pEqus, name, tmp, nbexp, nbi, variability.getPart(vi++), nAttrs, nbexpDims);
+            comp.scalarRecordFVariables(vars, equs, pEqus, name, tmp, nbexp, nbi, compVariability, nAttrs, nbexpDims);
         }
     }
     
@@ -2700,7 +2702,7 @@ aspect Scalarization {
         if (equation) {
             boolean init = inInitialEquationSection();
             FTypePrefixVariability v = bindingExpVariability();
-            if (init || inAttributeValue()) {
+            if (init) {
                 v = v.combineDown(fParameter());
             } else {
                 v = v.combineDown(type().funcOutputVariability());

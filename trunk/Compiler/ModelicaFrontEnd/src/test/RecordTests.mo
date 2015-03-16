@@ -3113,6 +3113,155 @@ end RecordTests.RecordScalarize30;
 ")})));
 end RecordScalarize30;
 
+model RecordScalarize31
+    record A
+        Real x;
+    end A;
+    
+    record B
+        A a;
+    end B;
+    
+    function f
+        input Real x;
+        output A a;
+    algorithm
+        a := A(x);
+    end f;
+    
+    B b(a = f(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize31",
+            description="Scalarizing record without binding expressions.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize31
+ Real b.a.x;
+equation
+ (RecordTests.RecordScalarize31.A(b.a.x)) = RecordTests.RecordScalarize31.f(time);
+
+public
+ function RecordTests.RecordScalarize31.f
+  input Real x;
+  output RecordTests.RecordScalarize31.A a;
+ algorithm
+  a.x := x;
+  return;
+ end RecordTests.RecordScalarize31.f;
+
+ record RecordTests.RecordScalarize31.A
+  Real x;
+ end RecordTests.RecordScalarize31.A;
+
+end RecordTests.RecordScalarize31;
+")})));
+end RecordScalarize31;
+
+model RecordScalarize32
+
+    record A
+        Real x;
+    end A;
+    
+    record B
+        A a;
+    end B;
+    
+    function f
+        input Real x;
+        output A a;
+    algorithm
+        a := A(x);
+    end f;
+    
+    parameter B pb(a = f(2));
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize32",
+            description="Scalarizing record without binding expressions.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize32
+ parameter Real temp_1.x;
+ parameter Real pb.a.x;
+parameter equation
+ (RecordTests.RecordScalarize32.A(temp_1.x)) = RecordTests.RecordScalarize32.f(2);
+ pb.a.x = temp_1.x;
+
+public
+ function RecordTests.RecordScalarize32.f
+  input Real x;
+  output RecordTests.RecordScalarize32.A a;
+ algorithm
+  a.x := x;
+  return;
+ end RecordTests.RecordScalarize32.f;
+
+ record RecordTests.RecordScalarize32.A
+  Real x;
+ end RecordTests.RecordScalarize32.A;
+
+end RecordTests.RecordScalarize32;
+")})));
+end RecordScalarize32;
+
+model RecordScalarize33
+    record A
+        Real x;
+    end A;
+    
+    record B
+        A a1;
+        parameter A a2;
+    end B;
+    
+    function f
+        input Real x;
+        output A a;
+    algorithm
+        a := A(x);
+    end f;
+    
+    B b(a1 = f(time), a2 = f(2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize33",
+            description="Scalarizing record without binding expressions.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize33
+ Real b.a1.x;
+ parameter Real temp_2.x;
+ parameter Real b.a2.x;
+parameter equation
+ (RecordTests.RecordScalarize33.A(temp_2.x)) = RecordTests.RecordScalarize33.f(2);
+ b.a2.x = temp_2.x;
+equation
+ (RecordTests.RecordScalarize33.A(b.a1.x)) = RecordTests.RecordScalarize33.f(time);
+
+public
+ function RecordTests.RecordScalarize33.f
+  input Real x;
+  output RecordTests.RecordScalarize33.A a;
+ algorithm
+  a.x := x;
+  return;
+ end RecordTests.RecordScalarize33.f;
+
+ record RecordTests.RecordScalarize33.A
+  Real x;
+ end RecordTests.RecordScalarize33.A;
+
+end RecordTests.RecordScalarize33;
+")})));
+end RecordScalarize33;
+
 
 
 model RecordFunc1

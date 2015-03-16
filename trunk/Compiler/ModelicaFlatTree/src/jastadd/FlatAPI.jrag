@@ -2552,6 +2552,11 @@ aspect FVariableUses {
     inh FTypePrefixVariability FExp.bindingExpVariability();
     eq Root.getChild().bindingExpVariability() = fContinuous();
     eq FVariable.getBindingExp().bindingExpVariability() = variability();
+    eq FVariable.getFAttribute().bindingExpVariability() = fParameter();
+    eq FRecordVariable.getFAttribute(int i).bindingExpVariability() {
+        int partIndex = myFRecordDecl().indexOf(getFAttribute(i).name());
+        return variability().getPart(partIndex);
+    }
     
     /**
      * Collection attribute returning all dependent parameters which
