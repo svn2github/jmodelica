@@ -96,11 +96,18 @@ def test_warm_start():
     # Warm starting from the right result should need very few iterations
     assert res2w2.get_solver_statistics()[1] < 4
 
-def check_changed_input(model_name, signal_name, ext_data_constructor):
+def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate_algebraics=False):
     file_path = os.path.join(get_files_path(), 'Modelica', 'DisturbedIntegrator.mop')
-    op = transfer_optimization_problem(model_name, file_path)
+    
+    if eliminate_algebraics:
+        compiler_options={'equation_sorting':True, 'automatic_tearing':False}
+    else:
+        compiler_options={}
+    op = transfer_optimization_problem(model_name, file_path, compiler_options=compiler_options)    
+    if eliminate_algebraics:
+        op.eliminateAlgebraics()
 
-    var_names = ('x', 'u')
+    var_names = ('x', 'u', 'xdot')
 
     input1 = OrderedDict()
     data1 = N.vstack([[0, 1], [0, 1]])
@@ -126,16 +133,29 @@ def check_changed_input(model_name, signal_name, ext_data_constructor):
     assert result_distance(res2, res2b, var_names) < 1e-6
 
 @testattr(casadi = True)
-def test_change_eliminated_input():
+def test_change_eliminated_input(eliminate_algebraics=False):
     check_changed_input('DisturbedIntegrator', 'w',
-        (lambda input:ExternalData(eliminated=input)) )
+        (lambda input:ExternalData(eliminated=input)),
+        eliminate_algebraics)
 
 @testattr(casadi = True)
-def test_change_constrained_input():
+def test_change_constrained_input(eliminate_algebraics=False):
     check_changed_input('DisturbedIntegrator', 'w',
-        (lambda input:ExternalData(constr_quad_pen=input, Q = N.atleast_2d(1))) )
+        (lambda input:ExternalData(constr_quad_pen=input, Q = N.atleast_2d(1))),
+        eliminate_algebraics)
 
 @testattr(casadi = True)
-def test_change_quad_pen_input():
-    check_changed_input('DisturbedIntegrator', 'u',
-        (lambda input:ExternalData(quad_pen=input, Q = N.atleast_2d(1))) )
+def test_change_quad_pen_input(eliminate_algebraics=False):
+    check_changed_input('Integrator', 'u',
+        (lambda input:ExternalData(quad_pen=input, Q = N.atleast_2d(1))),
+        eliminate_algebraics)
+
+@testattr(casadi = True)
+def test_change_eliminated_input_with_elim():
+    test_change_eliminated_input(True)
+@testattr(casadi = True)
+def test_change_constrained_input_with_elim():
+    test_change_constrained_input(True)
+@testattr(casadi = True)
+def test_change_quad_pen_input_with_elim():
+    test_change_quad_pen_input(True)
