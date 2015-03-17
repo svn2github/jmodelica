@@ -18,9 +18,11 @@
 """Tests warm starting optimization functionality for the casadi_collocation module."""
 
 import os
+from collections import OrderedDict
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
 from pyjmi import transfer_optimization_problem
+from pyjmi.optimization.casadi_collocation import ExternalData
 
 def set_warm_start_options(solver, push=1e-4, mu_init=1e-1):    
     solver.set_solver_option('IPOPT', 'warm_start_init_point', 'yes')
@@ -93,3 +95,47 @@ def test_warm_start():
     assert res2w.get_solver_statistics()[1] < 40
     # Warm starting from the right result should need very few iterations
     assert res2w2.get_solver_statistics()[1] < 4
+
+def check_changed_input(model_name, signal_name, ext_data_constructor):
+    file_path = os.path.join(get_files_path(), 'Modelica', 'DisturbedIntegrator.mop')
+    op = transfer_optimization_problem(model_name, file_path)
+
+    var_names = ('x', 'u')
+
+    input1 = OrderedDict()
+    data1 = N.vstack([[0, 1], [0, 1]])
+    input1[signal_name] = data1
+    opts1 = op.optimize_options()
+    opts1['external_data'] = ext_data_constructor(input1)
+
+    input2 = OrderedDict()
+    data2 = N.vstack([[0, 1], [1, 0]])
+    input2[signal_name] = data2
+    opts2 = op.optimize_options()
+    opts2['external_data'] = ext_data_constructor(input2)
+
+    solver = op.prepare_optimization(options=opts1)
+    res1 = solver.optimize()
+
+    solver.set_external_variable(signal_name, data2)
+    res2b = solver.optimize()
+
+    res2 = op.optimize(options=opts2)
+
+    assert result_distance(res1, res2, var_names) > 1e-2
+    assert result_distance(res2, res2b, var_names) < 1e-6
+
+@testattr(casadi = True)
+def test_change_eliminated_input():
+    check_changed_input('DisturbedIntegrator', 'w',
+        (lambda input:ExternalData(eliminated=input)) )
+
+@testattr(casadi = True)
+def test_change_constrained_input():
+    check_changed_input('DisturbedIntegrator', 'w',
+        (lambda input:ExternalData(constr_quad_pen=input, Q = N.atleast_2d(1))) )
+
+@testattr(casadi = True)
+def test_change_quad_pen_input():
+    check_changed_input('DisturbedIntegrator', 'u',
+        (lambda input:ExternalData(quad_pen=input, Q = N.atleast_2d(1))) )
