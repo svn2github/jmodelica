@@ -37,7 +37,7 @@ aspect FunctionInlining {
             }
 
             public boolean active() {
-                opt = root().options.getStringOption("inline_functions");
+                opt = myOptions().getStringOption("inline_functions");
                 return opt != OptionRegistry.Inlining.NONE;
             }
 

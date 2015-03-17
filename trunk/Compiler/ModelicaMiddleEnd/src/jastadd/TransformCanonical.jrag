@@ -205,7 +205,7 @@ aspect TransformCanonical {
              * Defaults to true if this transformation does not depend on an option or the option is true.
              */
             public boolean active() {
-                return (option == null) || root().options.getBooleanOption(option);
+                return (option == null) || myOptions().getBooleanOption(option);
             }
 
             /**
@@ -256,7 +256,7 @@ aspect TransformCanonical {
      * Generate a .mof file with the current flat tree.
      */
     public void FClass.generateStepMof(String stepName) {
-        String value = root().options.getStringOption("debug_transformation_steps");
+        String value = myOptions().getStringOption("debug_transformation_steps");
         if ("full".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
             String fileName = String.format("%02d_%s.mof", completedTransformationSteps, stepName);
@@ -555,14 +555,14 @@ aspect TransformCanonical {
         } 
 
         // Perform BLT
-        if (root().options.getBooleanOption("equation_sorting") &&
-                !root().options.getBooleanOption("generate_only_initial_system") &&
+        if (myOptions().getBooleanOption("equation_sorting") &&
+                !myOptions().getBooleanOption("generate_only_initial_system") &&
                 g.isComplete()) {
             BLT daeBLT;
             try {
-                daeBLT = g.computeBLT(root().options);
+                daeBLT = g.computeBLT(myOptions());
                 if (blockFunctionExtraction(daeBLT, g)) {
-                    daeBLT = g.computeBLT(root().options);
+                    daeBLT = g.computeBLT(myOptions());
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
@@ -639,7 +639,7 @@ aspect TransformCanonical {
         g = overdeterminedInitialSystem(g);
         
         // Add initial equations if needed
-        if (g.getUnmatchedEquations().isEmpty() && root().options.getBooleanOption("automatic_add_initial_equations")) {
+        if (g.getUnmatchedEquations().isEmpty() && myOptions().getBooleanOption("automatic_add_initial_equations")) {
             for (Var var : g.getUnmatchedVariables()) {
                 FVariable fv = var.getVariable();
                 FAbstractEquation fe = prePropagationEquations.remove(fv);
@@ -682,13 +682,13 @@ aspect TransformCanonical {
         collectErrors(ErrorCheckType.COMPILE);
         breakOnErrors();
         
-        if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
+        if (myOptions().getBooleanOption("equation_sorting") && g.isComplete()) {
             g.tarjanReset();
             BLT daeInitBLT;
             try {
-                daeInitBLT = g.computeBLT(root().options);
+                daeInitBLT = g.computeBLT(myOptions());
                 if (blockFunctionExtraction(daeInitBLT, g)) {
-                    daeInitBLT = g.computeBLT(root().options);
+                    daeInitBLT = g.computeBLT(myOptions());
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
@@ -722,7 +722,7 @@ aspect TransformCanonical {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public void FClass.checkStructure() {
-		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
+		if (myOptions().getBooleanOption("enable_structural_diagnosis")) {
 			StringBuffer err_str = new StringBuffer("The system is structurally singular. ");
 			if (writeUnmatchedElements(err_str, getDAEUnmatchedVariables(), getDAEUnmatchedEquations())) 
 				error(err_str.toString());
@@ -1608,11 +1608,11 @@ aspect TransformCanonical {
                 // TODO: Isn't there always a value for fv.startAttributeExp() now?
                 for (FVariable fv : variables()) {
                     boolean generate = false;
-                    if (!root().options.getBooleanOption("state_initial_equations") &&
+                    if (!myOptions().getBooleanOption("state_initial_equations") &&
                             fv.isDifferentiatedVariable() && (fv.fixedAttribute() ||
-                            root().options.getBooleanOption("state_start_values_fixed")))
+                            myOptions().getBooleanOption("state_start_values_fixed")))
                         generate = true;
-                    else if (!root().options.getBooleanOption("state_initial_equations") &&
+                    else if (!myOptions().getBooleanOption("state_initial_equations") &&
                             fv.isAlgebraicContinousRealVariable() && fv.fixedAttribute())
                         generate = true;
                     else if (fv.isDiscrete() && !fv.isString() && fv.fixedAttribute())
@@ -3324,12 +3324,12 @@ aspect RuntimeOptions {
          */
         public class addRuntimeOptionParameters extends Transformation {
             public boolean active() {
-                OptionRegistry opt = root().options;
+                OptionRegistry opt = myOptions();
                 return opt.getBooleanOption("generate_runtime_option_parameters") && opt.getBooleanOption("generate_ode");
             }
             
             public void perform() {
-                OptionRegistry opt = root().options;
+                OptionRegistry opt = myOptions();
                 for (String key : opt.getRuntimeOptionKeys()) {
                     FVariable v = null;
                     String name = "_" + key;
@@ -4138,9 +4138,9 @@ aspect FunctionAndRecordCleanup {
         functionUsed = functionUsed.combine(type);
         if (functionUsed != oldType) {
             if (functionUsed == UseType.DIRECT &&
-               (root().options.getBooleanOption("generate_block_jacobian") ||
-                root().options.getBooleanOption("generate_dae_jacobian") ||
-                root().options.getBooleanOption("generate_ode_jacobian"))) {
+               (myOptions().getBooleanOption("generate_block_jacobian") ||
+                myOptions().getBooleanOption("generate_dae_jacobian") ||
+                myOptions().getBooleanOption("generate_ode_jacobian"))) {
                 if (requiresDerivative() && !canDifferentiate()) {
                     error("Unable to determine derivative function for function '" + name() + "'");
                 } else if (derivativeFunction() != null) {

@@ -739,7 +739,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
 		public void generate(CodeStream genPrinter) {
 
-			if (!fclass.root().options.getStringOption("fmi_version").equals("2.0alpha")) {
+			if (!fclass.myOptions().getStringOption("fmi_version").equals("2.0alpha")) {
 				return;
 			}
 			StringBuilder tmp;
@@ -965,7 +965,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public void generateAttributes(CodeStream genPrinter) {
-            Boolean supportDirDer = fclass.root().options.getBooleanOption("generate_ode_jacobian");
+            Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
             
 			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
@@ -991,7 +991,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public void generateAttributes(CodeStream genPrinter) {
-            Boolean supportDirDer = fclass.root().options.getBooleanOption("generate_ode_jacobian");
+            Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
             
 			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                     false,                   genPrinter);

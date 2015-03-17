@@ -947,7 +947,7 @@ public class ModelicaCompiler {
         log.info("Parsing " + name + "...");
         SourceRoot sr;
         try {
-            sr = ParserHandler.parseFile(errorHandler, name);
+            sr = ParserHandler.parseFile(createUtilInterface(), name);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
@@ -996,8 +996,7 @@ public class ModelicaCompiler {
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
 		SourceRoot sr = new SourceRoot(new Program());
-		sr.options = options.copy();
-        sr.setErrorHandler(errorHandler);
+        createUtilInterface().transferRoot(sr);
 		for (String name : names) {
 		    File f = new File(name);
 		    String name_tmp = name;
@@ -1105,8 +1104,6 @@ public class ModelicaCompiler {
         ASTNode.beginStep("instantiateModel()");
         
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-        ipr.options = sr.options.copy();
-        ipr.setCompiler(this);
         
         log.info("Checking for errors...");
         InstClassDecl icd = ipr.instantiateModel(cl);
@@ -1196,7 +1193,7 @@ public class ModelicaCompiler {
         //fc.dumpTree("");
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
-        if (fc.root().options.getBooleanOption("generate_mof_files")) {
+        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
             log.debug("Creating raw .mof file...");
             CodeStream out = new CodeStream(flatFile);
             fc.prettyPrint_MC(out, "");
@@ -1208,7 +1205,7 @@ public class ModelicaCompiler {
         log.info(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
-        if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeRawFlattenedModel(fc);
             getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
@@ -1218,13 +1215,13 @@ public class ModelicaCompiler {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
-        fc.root().options.setIntegerOption("external_constant_evaluation", 0);
+        fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
         hookCheckAbort();
         
         ASTNode.beginStep("prettyPrintFlat()");
-        if (fc.root().options.getBooleanOption("generate_mof_files")) {
+        if (fc.myOptions().getBooleanOption("generate_mof_files")) {
             log.debug("Creating transformed .mof file...");
             CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
             fc.prettyPrint_MC(out, "");
@@ -1246,7 +1243,7 @@ public class ModelicaCompiler {
         
         dumpMemoryUseFile(fc, "transformed", false);
         
-        if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
+        if (fc.myOptions().getBooleanOption("write_iteration_variables_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
@@ -1254,7 +1251,7 @@ public class ModelicaCompiler {
             ASTNode.endStep("writeIterationVariables()");
         }
         
-        if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
+        if (fc.myOptions().getBooleanOption("write_tearing_pairs_to_file")) {
             ASTNode.beginStep("writeIterationVariables()");
             if (!fc.onlyInitBLT())
                 fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
@@ -1265,7 +1262,7 @@ public class ModelicaCompiler {
         fc.errorCheck(target.getCheckType());
         handleCompilerWarnings(fc.collectWarnings());
         
-        if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+        if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
             ASTNode.beginStep("htmlDiagnostics()");
             getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
             getDiagnosticsGenerator().writeDiagnostics(fc);

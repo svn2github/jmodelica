@@ -235,7 +235,7 @@ aspect EquationSolve {
 */
 		}
 	    	
-	    if ((duringTearing && !root().options.getBooleanOption("divide_by_vars_in_tearing")) || 
+	    if ((duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing")) || 
 	            sol.isLiteralZero()) { 	   
 		    if (!mulCoeffVar.lessOrEqual(fConstant())) {
 		    	return new FNoExp();

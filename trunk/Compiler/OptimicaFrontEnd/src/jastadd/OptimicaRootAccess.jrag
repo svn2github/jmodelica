@@ -64,14 +64,14 @@ aspect OptimicaParsers {
         return org.jmodelica.optimica.parser.OptimicaParser.AltGoals.anonymous_short_class;
     }
 
-    refine Parsers public static SourceRoot ParserHandler.parseFile(IErrorHandler eh, String fileName) 
+    refine Parsers public static SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseOptimicaFile(eh, fileName);
+        return parseOptimicaFile(uif, fileName);
     }
 
-    refine Parsers public static SourceRoot ParserHandler.parseString(IErrorHandler eh, String str, String fileName)  
+    refine Parsers public static SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName)  
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseOptimicaString(eh, str, fileName);
+        return parseOptimicaString(uif, str, fileName);
     }
 
     refine Parsers public static Exp ParserHandler.parseExpString(String str) 
@@ -84,24 +84,24 @@ aspect OptimicaParsers {
         return parseOptimicaAnonymousClassString(code, restriction, targetName);
     }
 
-    public static SourceRoot ParserHandler.parseOptimicaFile(IErrorHandler eh, String fileName) 
+    public static SourceRoot ParserHandler.parseOptimicaFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        Reader reader = fileReader(eh, fileName);
+        Reader reader = fileReader(uif, fileName);
         AbstractModelicaScanner scanner = createOptimicaScanner(new BufferedReader(reader));
         beaver.Parser parser = createOptimicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
-        sr.setErrorHandler(eh);
+        sr.setUtilInterface(uif);
         sr.setFileName(fileName);
         reader.close();
         return sr;
     }
 
-    public static SourceRoot ParserHandler.parseOptimicaString(IErrorHandler eh, String str, String fileName)  
+    public static SourceRoot ParserHandler.parseOptimicaString(UtilInterface uif, String str, String fileName)  
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         AbstractModelicaScanner scanner = createOptimicaScanner(new StringReader(str));
         beaver.Parser parser = createOptimicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
-        sr.setErrorHandler(eh);
+        sr.setUtilInterface(uif);
         sr.setFileName(fileName);
         return sr;
     }

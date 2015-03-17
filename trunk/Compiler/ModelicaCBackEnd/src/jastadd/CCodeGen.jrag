@@ -316,7 +316,7 @@ aspect CCodeGen {
 	}
 	
 	public void FAbstractDerExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+		if (myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
 			str.print(myFV().name_C());
 			str.print("*sf(");
@@ -368,7 +368,7 @@ aspect CCodeGen {
 			str.print(getFIdUse().toString_C(p));
 		} else {
 			if (type().isReal() && !inFunction() && 
-					root().options.getBooleanOption("enable_variable_scaling")) {
+					myOptions().getBooleanOption("enable_variable_scaling")) {
 				str.print("(");
 				p.print(getFIdUse(), str, indent);
 				str.print("*sf(");
@@ -2539,7 +2539,7 @@ aspect CCodeGen {
     @Override
     public void FRelExp.genTempVars_C(CodePrinter p, CodeStream str, String outerIndent) {
         super.genTempVars_C(p, str, outerIndent);
-        if (root().options.getBooleanOption("generate_dae"))
+        if (myOptions().getBooleanOption("generate_dae"))
             return;
         if (generatesEvent(p.inInitialSystem())) {
             str.format("%sif (", outerIndent);
@@ -4247,7 +4247,7 @@ aspect CCodeGen {
 		str.print(" = (");
 		p.print(getRight(), str, "");
 		str.print(")");
-		if (left.myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+		if (left.myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("/sf(");
 			str.print(left.myFV().valueReference());
 			str.print(")");
@@ -4409,7 +4409,7 @@ aspect CCodeGen {
 		str.print(" = (");
 		str.print(name);
 		str.print(")");
-		if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+		if (myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("/sf(");
 			str.print(myFV().valueReference());
 			str.print(")");
@@ -4632,7 +4632,7 @@ aspect CCodeGen {
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + enumerator.next() + "] = ");
 			if (startAttributeSet()) {
-				if (root().options.getBooleanOption("enable_variable_scaling")) {
+				if (myOptions().getBooleanOption("enable_variable_scaling")) {
 					str.print("(");
 					p.print(startAttributeExp(), str, "");
 					str.print(")");
@@ -4715,7 +4715,7 @@ aspect CCodeGen {
 		boolean noExp = exp == null;
 		if (noExp)
 			setBindingExp(exp = type().zeroLiteral());
-		OptionRegistry opt = root().options;
+		OptionRegistry opt = myOptions();
 		str.print("(");
         p.print(exp, str, indent);
 		str.print(")");

@@ -93,14 +93,14 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.anonymous_short_class;
     }
 
-    public static SourceRoot ParserHandler.parseFile(IErrorHandler eh, String fileName) 
+    public static SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseModelicaFile(eh, fileName);
+        return parseModelicaFile(uif, fileName);
     }
 
-    public static SourceRoot ParserHandler.parseString(IErrorHandler eh, String str, String fileName) 
+    public static SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseModelicaString(eh, str,fileName);
+        return parseModelicaString(uif, str,fileName);
     }
 
     public static Exp ParserHandler.parseExpString(String str)
@@ -113,24 +113,24 @@ aspect Parsers {
         return parseModelicaAnonymousClassString(code, restriction, targetName);
     }
 
-    public static SourceRoot ParserHandler.parseModelicaFile(IErrorHandler eh, String fileName) 
+    public static SourceRoot ParserHandler.parseModelicaFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        Reader reader = fileReader(eh, fileName);
+        Reader reader = fileReader(uif, fileName);
         AbstractModelicaScanner scanner = createModelicaScanner(new BufferedReader(reader));
         beaver.Parser parser = createModelicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
-        sr.setErrorHandler(eh);
+        sr.setUtilInterface(uif);
         sr.setFileName(fileName);
         reader.close();
         return sr;
     }
     
-    public static SourceRoot ParserHandler.parseModelicaString(IErrorHandler eh, String str, String fileName) 
+    public static SourceRoot ParserHandler.parseModelicaString(UtilInterface uif, String str, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(str));
         beaver.Parser parser = createModelicaParser(scanner, fileName);
         SourceRoot sr = (SourceRoot) parser.parse(scanner);
-        sr.setErrorHandler(eh);
+        sr.setUtilInterface(uif);
         sr.setFileName(fileName);
         return sr;
     }
@@ -156,12 +156,12 @@ aspect Parsers {
         return cl;
     }
 
-    public static Reader ParserHandler.fileReader(IErrorHandler eh, File file) throws FileNotFoundException {
+    public static Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
         return new InputStreamReader(new FileInputStream(file), ASTNode.UTF8);
     }
 
-    public static Reader ParserHandler.fileReader(IErrorHandler eh, String path) throws FileNotFoundException {
-        return fileReader(eh, new File(path));
+    public static Reader ParserHandler.fileReader(UtilInterface uif, String path) throws FileNotFoundException {
+        return fileReader(uif, new File(path));
     }
 
     public static final Charset ASTNode.UTF8 = Charset.forName("UTF-8");
@@ -1766,4 +1766,65 @@ aspect DebugHelpers {
 		 return false;
 	}
 
+}
+
+aspect UtilInterface {
+    
+    private UtilInterface Root.utilInterface = null;
+    
+    public void Root.setUtilInterface(UtilInterface utilInterface) {
+        if (this.utilInterface != null || utilInterface == null) {
+            throw new UnsupportedOperationException();
+        }
+        this.utilInterface = utilInterface;
+    }
+    
+    public UtilInterface Root.getUtilInterface() {
+        return utilInterface;
+    }
+    
+    public void Root.transferRoot(Root other) {
+        other.getUtilInterface().transferRoot(this);
+    }
+    
+    UtilInterface ModelicaCompiler.createUtilInterface() {
+        return new UtilInterface(this, options, errorHandler);
+    }
+    
+    /**
+     * Provides easy access to non-ast utils via the AST root.
+     */
+    class UtilInterface {
+        
+        private ModelicaCompiler mc;
+        private OptionRegistry options;
+        private IErrorHandler eh;
+        
+        public UtilInterface(OptionRegistry options) {
+            this(null, options, new DefaultErrorHandler());
+        }
+        
+        public UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh) {
+            this.mc = mc;
+            this.options = options;
+            this.eh = eh;
+        }
+        
+        public ModelicaCompiler getModelicaCompiler() {
+            return mc;
+        }
+        
+        public OptionRegistry getOptionRegistry() {
+            return options;
+        }
+        
+        public IErrorHandler getErrorHandler() {
+            return eh;
+        }
+        
+        public void transferRoot(Root root) {
+            root.setUtilInterface(new UtilInterface(mc, getOptionRegistry().copy(), getErrorHandler()));
+        }
+    }
+    
 }

@@ -134,7 +134,7 @@ import org.jmodelica.util.ErrorCheckType;
 
       protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
           Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
-          if (n.root().options.getBooleanOption("component_names_in_errors"))
+          if (n.myOptions().getBooleanOption("component_names_in_errors"))
               p.addComponent(n.errorComponentName());
           int pos = list.indexOf(p);
           if (pos == -1)
@@ -253,19 +253,11 @@ aspect ErrorCheck {
   private IErrorHandler Root.errorHandler = null;
   
   /**
-   * Set the handler for semantic errors.
-   * @see IErrorHandler 
-   */
-  public void Root.setErrorHandler(IErrorHandler handler) {
-	  errorHandler = handler;
-  }
-  
-  /**
    * Get the handler for semantic errors.
    * @see IErrorHandler 
    */
   public IErrorHandler Root.getErrorHandler() {
-	  return errorHandler;
+	  return getUtilInterface().getErrorHandler();
   }
 
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
@@ -717,7 +709,7 @@ aspect InstanceErrorCheck {
     }
 	
 	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
-	        !isDisabled() || checkType.checkInactiveComponents() || root().options.getBooleanOption("check_inactive_contitionals");
+	        !isDisabled() || checkType.checkInactiveComponents() || myOptions().getBooleanOption("check_inactive_contitionals");
 
 	public void InstComponentDecl.collectErrorsInClassName(ErrorCheckType checkType) {
 		getClassName().collectErrors(checkType);

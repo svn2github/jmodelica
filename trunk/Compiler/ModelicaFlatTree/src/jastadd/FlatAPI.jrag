@@ -1203,7 +1203,7 @@ aspect FlatAPI {
     
     
     
-    syn boolean FRelExp.isTimeEventGenerating() = root().options.getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
+    syn boolean FRelExp.isTimeEventGenerating() = myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
     eq FEqRelExp.isTimeEventGenerating() = false;
     syn boolean FDelayExp.isTimeEventGenerating() = getDelay().variability().parameterOrLess();
     
@@ -1344,7 +1344,7 @@ aspect FlatAPI {
     syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
             inEventGeneratingLocation() && hasEventGeneratingType() &&
             (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters)) &&
-            root().options.getBooleanOption("generate_event_switches");
+            myOptions().getBooleanOption("generate_event_switches");
 
     /**
      * Check if an expression will generate an event.
@@ -3201,13 +3201,13 @@ aspect FlatDiagnostics {
         
         StringBuilder str = new StringBuilder();
             
-        if (root().options.getBooleanOption("equation_sorting")) {
+        if (myOptions().getBooleanOption("equation_sorting")) {
             
             str.append("Variable dependencies:\n");
             
-            if (getNumFVariable() > root().options.getIntegerOption("diagnostics_limit")) {
+            if (getNumFVariable() > myOptions().getIntegerOption("diagnostics_limit")) {
                 str.append("Oh dear, the model has way to many variables (" + getNumFVariable() + ")!\n");
-                str.append("Current limit is set to " + root().options.getIntegerOption("diagnostics_limit") + ", you can change this by changing the option 'diagnostics_limit'.\n");
+                str.append("Current limit is set to " + myOptions().getIntegerOption("diagnostics_limit") + ", you can change this by changing the option 'diagnostics_limit'.\n");
                 return str.toString();
             }
             
@@ -3526,7 +3526,7 @@ aspect FlatExternalFunctionAPI {
         library = n.annotation("Library").asStringVector();
         if (library != null) {
             ArrayList<String> libs = new ArrayList<String>();
-            String lapackLib = n.root().options.getStringOption("lapack_lib");
+            String lapackLib = n.myOptions().getStringOption("lapack_lib");
             for (int i = 0; i < library.length; i++) {
                 if (library[i].equals("lapack") && !lapackLib.equals("lapack")) {
                     n.warning("Removing use of external library 'lapack'. Will use '"

@@ -1679,7 +1679,7 @@ public Set<V> AbstractBiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
     }
 
     public <V> AbstractBiPGraph.IncidenceMap FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-        if (root().options.getStringOption("function_incidence_computation").equals("all")) {
+        if (myOptions().getStringOption("function_incidence_computation").equals("all")) {
             try {
                 return g.new SplitIncidenceMap(this, additionalDependencies, variableTypes);
             } catch (ConstantEvaluationException e) {

@@ -33,13 +33,9 @@ aspect FlatTree {
     public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc, String flatName) {
         FlatRoot flatRoot = new FlatRoot(icl.createFClass());
         flatRoot.setFileName(file);
-        flatRoot.setCompiler(mc);
         FClass fc = flatRoot.getFClass(); // make FClass final
         fc.userDefinedName = flatName;
-        flatRoot.options = icl.root().options.copy();
-        // TODO: We should change how the checkErrors() method works, 
-        //       since it relies on the behaviour of DefaultErrorHandler
-        flatRoot.setErrorHandler(icl.root().getErrorHandler());
+        fc.root().transferRoot(icl.root());
         fc.setDynamicStateManager(new DynamicStateManager());
         return fc;
     }
@@ -2202,10 +2198,10 @@ aspect FlatExpressions {
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
     public FExp                 FHomotopyExp.flatten(FQName prefix)              {
-        if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.ACTUAL) {
+        if (myOptions().getStringOption("homotopy_type") == OptionRegistry.Homotopy.ACTUAL) {
             return getActual().flatten(prefix);
         }
-        if (root().options.getStringOption("homotopy_type") == OptionRegistry.Homotopy.SIMPLIFIED) {
+        if (myOptions().getStringOption("homotopy_type") == OptionRegistry.Homotopy.SIMPLIFIED) {
             return getSimplified().flatten(prefix);
         }
         return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 

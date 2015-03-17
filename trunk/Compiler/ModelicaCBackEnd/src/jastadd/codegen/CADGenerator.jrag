@@ -38,7 +38,7 @@ public class CADGenerator extends CGenerator {
 	 * Helper method to check if DAE jacobians should be generated (generate_dae_jacobian)
 	 */
 	static boolean shouldGenerateDAEJacobians(FClass fclass) {
-		OptionRegistry opt = fclass.root().options;
+		OptionRegistry opt = fclass.myOptions();
 		return opt.getBooleanOption("generate_dae_jacobian");
 	}
 	
@@ -46,7 +46,7 @@ public class CADGenerator extends CGenerator {
 	 * Helper method to check if ODE jacobians should be generated (generated_ode_jacobian)
 	 */
 	static boolean shouldGenerateODEJacobians(FClass fclass) {
-		OptionRegistry opt = fclass.root().options;
+		OptionRegistry opt = fclass.myOptions();
 		return opt.getBooleanOption("generate_ode_jacobian");
 	}
 	
@@ -55,7 +55,7 @@ public class CADGenerator extends CGenerator {
 	 * (depends on both generate_ode_jacobian and generate_block_jacobian)
 	 */
 	static boolean shouldGenerateBlockJacobians(FClass fclass) {
-		OptionRegistry opt = fclass.root().options;
+		OptionRegistry opt = fclass.myOptions();
 		return opt.getBooleanOption("generate_ode_jacobian") || opt.getBooleanOption("generate_block_jacobian");
 	}
 
@@ -185,7 +185,7 @@ public class CADGenerator extends CGenerator {
                 CodePrinter p = ASTNode.printer_CAD;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, true, false, fclass.root().options.getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, true, false, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
             }
         }
 	    }
@@ -204,7 +204,7 @@ public class CADGenerator extends CGenerator {
                 CodePrinter p = ASTNode.printer_CAD;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, true, true, fclass.root().options.getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, true, true, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
             }
         }
     }

@@ -85,7 +85,7 @@ aspect IndexReduction {
             log.info(g.printMatchingObj());
             
             try {
-                result = g.reduceIndex(new IndexReductionFunctionInliner(this), root().options.getBooleanOption("dynamic_states"));
+                result = g.reduceIndex(new IndexReductionFunctionInliner(this), myOptions().getBooleanOption("dynamic_states"));
                 break;
             } catch (EquationDifferentiationException e) {
                 ASTNode.log.info("Unable to differentiate equation:\n%s", e.equation);
@@ -526,7 +526,7 @@ aspect IndexReduction {
         public IndexReductionFunctionInliner(FClass fclass) {
             this.resolver = fclass.dynamicResolver(new FIndexReductionResolver(fclass));
             this.fclass = fclass;
-            inlineEnabled = fclass.root().options.getStringOption("inline_functions") != OptionRegistry.Inlining.NONE;
+            inlineEnabled = fclass.myOptions().getStringOption("inline_functions") != OptionRegistry.Inlining.NONE;
         }
 
         @Override
@@ -959,7 +959,7 @@ aspect IndexReduction {
             diverged from the original one that was presented in the paper.
         */
         
-        Collection<IndexReductionSCCBlock> components = tarjan(fclass.root().options);
+        Collection<IndexReductionSCCBlock> components = tarjan(fclass.myOptions());
     
         Set<IndexReductionVar> varsToKeep = new HashSet<IndexReductionVar>();
         // Remove all equations and variables that doesn't exist in blocks that

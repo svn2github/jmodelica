@@ -47,15 +47,15 @@ abstract public class TestCase implements GenericTestCase {
     private boolean checkAll = false;
     private ErrorCheckType checkType = ErrorCheckType.COMPILE;
 
-    protected OptionRegistry options = createOptionsRegistry();
+    protected OptionRegistry options = createOptionRegistry();
     private Exception exception = null;
 
 	/**
-	 * Create the OptionsRegistry to be used during compilation.
+	 * Create the OptionRegistry to be used during compilation.
 	 * 
 	 * Options may be further changed by test annotation.
 	 */
-	protected OptionRegistry createOptionsRegistry() {
+	protected OptionRegistry createOptionRegistry() {
 		OptionRegistry or = ModelicaCompiler.createOptions();
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
@@ -296,9 +296,7 @@ abstract public class TestCase implements GenericTestCase {
             fail(exception);
         
         // Parse
-        SourceRoot sr = ParserHandler.parseFile(new DefaultErrorHandler(), getSourceFileName());
-        sr.options = options;
-        sr.setFileName(getSourceFileName());
+        SourceRoot sr = ParserHandler.parseFile(new UtilInterface(options), getSourceFileName());
         
         // Instantiate and check for errors
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
