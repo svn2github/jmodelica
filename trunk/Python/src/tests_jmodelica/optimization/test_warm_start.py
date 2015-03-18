@@ -127,7 +127,7 @@ def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate
     solver = op.prepare_optimization(options=opts1)
     res1 = solver.optimize()
 
-    solver.set_external_variable(signal_name, data2)
+    solver.set_external_variable_data(signal_name, data2)
     res2b = solver.optimize()
 
     res2 = op.optimize(options=opts2)

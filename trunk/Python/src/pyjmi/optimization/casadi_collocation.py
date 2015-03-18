@@ -2441,7 +2441,7 @@ class LocalDAECollocator(CasadiCollocator):
                 for (j, (name, data)) in enumerate(source.items()):
                     self._sample_external_input_trajectory(vk, j, name, data)
 
-    def set_external_variable(self, name, data):
+    def set_external_variable_data(self, name, data):
         """
         Set new data for one variable that was supplied the external_data option
 
@@ -5127,13 +5127,26 @@ class OptimizationSolver(object):
             raise KeyError("No parameter " + repr(name) + " in the optimization problem.")
         return self.collocator._par_vals[self.collocator.var_indices[name]]
 
-    def set_external_variable(self, name, data):
+    def set_external_variable_data(self, name, data):
         """
         Set new data for one variable that was supplied the external_data option
 
+        Parameters::
+
+            name --
+                Name of a model variable that was given in the external_data
+                option when the sovler was created with prepare_optimization.
+
+            data --
+                New data to use for the external variable given by name.
+                The format is the same as used in external_data.
+
+        The kind of external data used for the variable
+        (eliminated/constrained/quadratic penalty) is not changed.
+        
         The option mutable_external_data must be enabled to use this method.
         """
-        self.collocator.set_external_variable(name, data)            
+        self.collocator.set_external_variable_data(name, data)
 
     def set_solver_option(self, solver_name, name, value):
         """

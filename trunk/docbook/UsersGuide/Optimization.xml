@@ -693,7 +693,7 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>checkpoint</entry>
+              <entry><literal>checkpoint</literal></entry>
 
               <entry>False</entry>
 
@@ -725,16 +725,26 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>measurement_data</literal></entry>
+              <entry><literal>external_data</literal></entry>
 
               <entry>None</entry>
 
-              <entry>Data used to penalize, constraint or eliminate certain
+              <entry>Data used to penalize, constrain or eliminate certain
               variables.</entry>
             </row>
 
             <row>
-              <entry>delayed_feedback</entry>
+              <entry><literal>mutable_external_data</literal></entry>
+
+              <entry>True</entry>
+
+              <entry>If true and the <literal>external_data</literal> option
+              is used, the external data can be changed after discretization,
+              e.g. during warm starting.</entry>
+            </row>
+
+            <row>
+              <entry><literal>delayed_feedback</literal></entry>
 
               <entry>None</entry>
 
@@ -872,15 +882,28 @@ Returns::
 
         <programlisting>res = solver.optimize()</programlisting>
 
-        <para>While options cannot be changed in general, parameter values and
-        NLP solver options can be changed on the solver object. Parameter
-        values can be updated with</para>
+        <para>While options cannot be changed in general, parameter values,
+        external data, and NLP solver options can be changed on the solver
+        object. Parameter values can be updated with</para>
 
         <programlisting>solver.set(parameter_name, value)</programlisting>
 
         <para>and current values retrieved with</para>
 
         <programlisting>solver.get(parameter_name)</programlisting>
+
+        <para>External data can be updated with</para>
+
+        <programlisting>solver.set_external_variable_data(variable_name, data)</programlisting>
+
+        <para>(unless the <literal>mutable_external_data</literal> option is
+        turned off). <literal>variable_name</literal> should correspond to one
+        of the variables used in the <literal>external_data</literal> option
+        passed to <literal>prepare_optimization</literal>.
+        <literal>data</literal> should be the new data, in the same format as
+        variable data used in the <literal>external_data</literal> option. The
+        kind of external data used for the variable
+        (eliminated/constrained/quadratic penalty) is not changed.</para>
 
         <para>Settings to the nonlinear solver can be changed with</para>
 
