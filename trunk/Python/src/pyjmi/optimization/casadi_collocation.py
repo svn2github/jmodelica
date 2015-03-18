@@ -4142,6 +4142,19 @@ class LocalDAECollocator(CasadiCollocator):
     def get_cost(self):
         return self.cost_fcn
 
+    def _get_elim_u_result(self, i, k):
+        """Return a vector of values of eliminated variables at (i,k)."""
+        if self.mutable_external_data:
+            elim_u = N.zeros(self.n_var['elim_u'])
+            for j in xrange(self.n_var['elim_u']):
+                # consider: are those always consecutive indices?
+                # If so, would be enough to index into _par_vals with a range
+                elim_u[j] = self._par_vals[
+                    self.var_indices['elim_u'][i][k][j]]
+            return elim_u
+        else:
+            return self.var_map['elim_u'][i][k]['all']
+
     def get_result(self):
         # Set model info
         n_var = self.n_var
@@ -4321,12 +4334,7 @@ class LocalDAECollocator(CasadiCollocator):
                     for var_type in var_types:
                         xx_i_k = primal_opt[self.var_indices[var_type][i][k]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
-                    if self.mutable_external_data:
-                        for j in xrange(self.n_var['elim_u']):
-                            var_opt['elim_u'][t_index, j] = self._par_vals[
-                                self.var_indices['elim_u'][i][k][j]]
-                    else:
-                        var_opt['elim_u'][t_index, :] = self.var_map['elim_u'][i][k]['all']
+                    var_opt['elim_u'][t_index, :] = self._get_elim_u_result(i, k)
                     t_index += 1
             if self.eliminate_der_var:
                 # dx_1_0
@@ -4365,7 +4373,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # eliminated inputs
                     xx_i_tau = 0
                     for k in xrange(not cont[var_type], self.n_cp + 1):
-                        xx_i_k = self.var_map['elim_u'][i][k]['all']
+                        xx_i_k = self._get_elim_u_result(i, k)
                         xx_i_tau += xx_i_k * self.pol.eval_basis(
                             k, tau, cont[var_type])
                     var_opt['elim_u'][t_index, :] = xx_i_tau.reshape(-1)
@@ -4386,7 +4394,7 @@ class LocalDAECollocator(CasadiCollocator):
             for var_type in var_types:
                 xx_i_k = primal_opt[self.var_indices[var_type][i][k]]
                 var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
-            var_opt['elim_u'][t_index, :] = self.var_map['elim_u'][i][k]['all']
+            var_opt['elim_u'][t_index, :] = self._get_elim_u_result(i, k)
             t_index += 1
             k = self.n_cp + self.is_gauss
 
@@ -4397,7 +4405,7 @@ class LocalDAECollocator(CasadiCollocator):
                     for var_type in var_types:
                         xx_i_k = primal_opt[self.var_indices[var_type][i][k]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
-                    u_i_k = self.var_map['elim_u'][i][k]['all']
+                    u_i_k = self._get_elim_u_result(i, k)
                     var_opt['elim_u'][t_index, :] = u_i_k.reshape(-1)
                     t_index += 1
             elif self.discr == "LG":
@@ -4412,7 +4420,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # Evaluate u_{i, n_cp + 1} based on polynomial u_i
                     u_i_k = 0
                     for l in xrange(1, self.n_cp + 1):
-                        u_i_l = self.var_map['elim_u'][i][l]['all']
+                        u_i_l = self._get_elim_u_result(i, l)
                         u_i_k += u_i_l * self.pol.eval_basis(l, 1, False)
                     var_opt['elim_u'][t_index, :] = u_i_k.reshape(-1)
                     t_index += 1
@@ -4468,7 +4476,7 @@ class LocalDAECollocator(CasadiCollocator):
                     unelim_u_i_k = primal_opt[self.var_indices['unelim_u'][i][k]]
                     u_opt[t_index, self._unelim_input_indices] = \
                         unelim_u_i_k.reshape(-1)
-                    elim_u_i_k = self.var_map['elim_u'][i][k]['all']
+                    elim_u_i_k = self._get_elim_u_result(i, k)
                     u_opt[t_index, self._elim_input_indices] = \
                         elim_u_i_k.reshape(-1)
                     t_index += 1

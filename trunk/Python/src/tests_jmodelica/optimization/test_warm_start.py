@@ -96,7 +96,8 @@ def test_warm_start():
     # Warm starting from the right result should need very few iterations
     assert res2w2.get_solver_statistics()[1] < 4
 
-def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate_algebraics=False):
+def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate_algebraics=False,
+        result_mode='collocation_points'):
     file_path = os.path.join(get_files_path(), 'Modelica', 'DisturbedIntegrator.mop')
     
     if eliminate_algebraics:
@@ -114,12 +115,14 @@ def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate
     input1[signal_name] = data1
     opts1 = op.optimize_options()
     opts1['external_data'] = ext_data_constructor(input1)
+    opts1['result_mode'] = result_mode
 
     input2 = OrderedDict()
     data2 = N.vstack([[0, 1], [1, 0]])
     input2[signal_name] = data2
     opts2 = op.optimize_options()
     opts2['external_data'] = ext_data_constructor(input2)
+    opts2['result_mode'] = result_mode
 
     solver = op.prepare_optimization(options=opts1)
     res1 = solver.optimize()
@@ -133,10 +136,10 @@ def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate
     assert result_distance(res2, res2b, var_names) < 1e-6
 
 @testattr(casadi = True)
-def test_change_eliminated_input(eliminate_algebraics=False):
+def test_change_eliminated_input(eliminate_algebraics=False, result_mode='collocation_points'):
     check_changed_input('DisturbedIntegrator', 'w',
         (lambda input:ExternalData(eliminated=input)),
-        eliminate_algebraics)
+        eliminate_algebraics, result_mode)
 
 @testattr(casadi = True)
 def test_change_constrained_input(eliminate_algebraics=False):
@@ -159,3 +162,10 @@ def test_change_constrained_input_with_elim():
 @testattr(casadi = True)
 def test_change_quad_pen_input_with_elim():
     test_change_quad_pen_input(True)
+
+@testattr(casadi = True)
+def test_change_eliminated_input_element_interpolation():
+    test_change_eliminated_input(result_mode = 'element_interpolation')
+@testattr(casadi = True)
+def test_change_eliminated_input_mesh_points():
+    test_change_eliminated_input(result_mode = 'mesh_points')
