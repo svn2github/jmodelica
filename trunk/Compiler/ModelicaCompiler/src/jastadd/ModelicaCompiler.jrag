@@ -2657,6 +2657,23 @@ public abstract class CCompilerDelegator {
 		}
 	}
 	
+    protected static Object printStringArrayObject(final String[] strArr) {
+        return new Object() {
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (String str : strArr) {
+                    if (!first)
+                        sb.append(' ');
+                    first = false;
+                    sb.append(str);
+                }
+                return sb.toString();
+            }
+        };
+    }
+
 }
 
 /**
@@ -2765,6 +2782,8 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             int i = args.length;
             for (String arg : vArgs)
                 cmd[i++] = arg;
+            ASTNode.log.debug("C-code compilation command:");
+            ASTNode.log.debug(printStringArrayObject(cmd));
             
             if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir) != 0) {
                 File sourceDir = new File(workDir, "sources");
