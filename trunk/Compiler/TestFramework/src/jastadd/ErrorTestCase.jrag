@@ -61,7 +61,7 @@ public class ErrorTestCase extends TestCase {
 	
 	private static  Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
 	private static String introReplacement = "";
-	private static Pattern fileFilter = Pattern.compile("(in file )'([^'\\\\]|\\\\.)+\\.(mof|mo)'([:,])");
+	private static Pattern fileFilter = Pattern.compile("(in file )'([^'\\\\]|\\\\.)+(\\.[A-Za-z]+)?'([:,])");
 	private static String fileReplacement = "$1'...'$4";
 	private static Pattern lineFilter = Pattern.compile("([Aa]t line )[0-9]+");
 	private static String lineReplacement = "$10";
