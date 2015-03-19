@@ -46,6 +46,8 @@ abstract public class TestCase implements GenericTestCase {
     private boolean filter = false;
     private boolean checkAll = false;
     private ErrorCheckType checkType = ErrorCheckType.COMPILE;
+    
+    private String[] modelicaLibraries = new String[0];
 
     protected OptionRegistry options = createOptionRegistry();
     private Exception exception = null;
@@ -194,6 +196,18 @@ abstract public class TestCase implements GenericTestCase {
     public ErrorCheckType getCheckType() {
         return checkType;
     }
+    
+    public void setModelicaLibraries(String s) {
+        modelicaLibraries = s.split(",");
+    }
+    
+    public String[] getModelicaLibraries() {
+        return modelicaLibraries;
+    }
+    
+    public boolean hasModelicaLibraries() {
+        return modelicaLibraries.length > 0;
+    }
 	
 	/**
 	 * Perform filtering on string, if activated.
@@ -295,8 +309,21 @@ abstract public class TestCase implements GenericTestCase {
         if (exception != null)
             fail(exception);
         
+        UtilInterface uif = UtilInterface.create(options);
+        
         // Parse
-        SourceRoot sr = ParserHandler.parseFile(new UtilInterface(options), getSourceFileName());
+        SourceRoot sr;
+        if (modelicaLibraries.length > 0) {
+            String[] names = new String[modelicaLibraries.length + 1];
+            File parent = new File(getSourceFileName()).getParentFile();
+            for (int i = 0; i < modelicaLibraries.length; i++) {
+                names[i] = new File(parent, modelicaLibraries[i]).getAbsolutePath();
+            }
+            names[modelicaLibraries.length] = getSourceFileName();
+            sr = ParserHandler.parseModel(uif, names);
+        } else {
+            sr = ParserHandler.parseFile(uif, getSourceFileName());
+        }
         
         // Instantiate and check for errors
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();

@@ -63,6 +63,58 @@ aspect RootAccess {
 aspect Parsers {
 
     public abstract class ParserHandler {}
+    
+    public static SourceRoot ParserHandler.parseModel(UtilInterface uif, String name) 
+      throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+        ModelicaCompiler.log.info("Parsing " + name + "...");
+        SourceRoot sr;
+        try {
+            sr = ParserHandler.parseFile(uif, name);
+        } catch (ParserException e) {
+            CompilerException ce = new CompilerException();
+            ce.addProblem(e.getProblem());
+            throw ce;
+        }
+        //loadOptions(sr);
+        for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+            sd.setFileName(name);
+        }
+        return sr;
+    }
+    
+    public static SourceRoot ParserHandler.parseModel(UtilInterface uif, String[] names) 
+            throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+        SourceRoot sr = new SourceRoot(new Program());
+        uif.transferRoot(sr);
+        for (String name : names) {
+            File f = new File(name);
+            String name_tmp = name;
+            if (f.isDirectory()) 
+                name_tmp = LibNode.packageFile(f);
+            SourceRoot sr_tmp = (name_tmp != null) ? parseModel(uif, name_tmp) : null;
+            if (!uif.getOptionRegistry().getBooleanOption("ignore_within")) {
+                String lib = null;
+                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
+                    lib = sr_tmp.findOutermostLibraryDir();
+                else if (f.getName().equals(LibNode.PACKAGE_FILE))
+                    lib = f.getParent();
+                if (lib != null) {
+                    String type = f.isDirectory() ? "Directory" : "File";
+                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
+                    name = lib;
+                    f = new File(name);
+                }
+            }
+            if (f.isDirectory()) {
+                if (!sr.getProgram().getLibraryList().addLibrary(name)) 
+                    ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
+            } else {
+                for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+                    sr.getProgram().addUnstructuredEntity(sd);
+            }
+        }
+        return sr;
+    }
 
     /*
      * These five methods are the only with references to the package containing 
@@ -1783,14 +1835,6 @@ aspect UtilInterface {
         return utilInterface;
     }
     
-    public void Root.transferRoot(Root other) {
-        other.getUtilInterface().transferRoot(this);
-    }
-    
-    UtilInterface ModelicaCompiler.createUtilInterface() {
-        return new UtilInterface(this, options, errorHandler);
-    }
-    
     /**
      * Provides easy access to non-ast utils via the AST root.
      */
@@ -1800,11 +1844,7 @@ aspect UtilInterface {
         private OptionRegistry options;
         private IErrorHandler eh;
         
-        public UtilInterface(OptionRegistry options) {
-            this(null, options, new DefaultErrorHandler());
-        }
-        
-        public UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
@@ -1821,10 +1861,35 @@ aspect UtilInterface {
         public IErrorHandler getErrorHandler() {
             return eh;
         }
-        
-        public void transferRoot(Root root) {
-            root.setUtilInterface(new UtilInterface(mc, getOptionRegistry().copy(), getErrorHandler()));
-        }
+    }
+    
+    UtilInterface ModelicaCompiler.createUtilInterface() {
+        return UtilInterface.create(this);
+    }
+    
+    public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
+        return create(mc, mc.getOptions(), mc.getErrorHandler());
+    }
+    
+    public static UtilInterface UtilInterface.create(UtilInterface other) {
+        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), other.getErrorHandler());
+    }
+    
+    public static UtilInterface UtilInterface.create(OptionRegistry options) {
+        return create(null, options, new DefaultErrorHandler());
+    }
+    
+    private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
+            IErrorHandler eh) {
+        return new UtilInterface(mc, options, eh);
+    }
+    
+    public void Root.transferRoot(Root other) {
+        other.getUtilInterface().transferRoot(this);
+    }
+    
+    public void UtilInterface.transferRoot(Root root) {
+        root.setUtilInterface(UtilInterface.create(this));
     }
     
 }
