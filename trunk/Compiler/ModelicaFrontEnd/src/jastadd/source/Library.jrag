@@ -114,13 +114,13 @@ aspect Library {
 	
     public static boolean LibNode.isUnstructuredLib(File f) {
         String name = f.getName();
-        return f.isFile() && !name.equals(LibNode.PACKAGE_FILE) && LibNode.isUnstructuredLibName(name);
+        return f.isFile() && LibNode.isUnstructuredLibName(name);
     }
-    
+
     private static boolean LibNode.isUnstructuredLibName(String name) {
-        return name.endsWith(".mo");
+        return name.endsWith(".mo") && !name.equals(PACKAGE_FILE);
     }
-    
+
     private File LibNode.myPackageFile() {
         return new File(getFileName(), myPackageFileName());
     }
