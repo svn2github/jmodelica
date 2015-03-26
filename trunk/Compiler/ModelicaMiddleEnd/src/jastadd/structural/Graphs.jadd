@@ -91,10 +91,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return equationMap.get(name);
     }
 
-    public void isInitialSystem() {
+    public void setAsInitialSystem() {
         initialSystem = true;
     }
 
+    public boolean isInitialSystem() {
+        return initialSystem;
+    }
+    
     public java.util.List<E> getEquations(FAbstractEquation eqn) {
         java.util.List<E> list = equationIndexMap.get(eqn);
         return (list == null) ? Collections.<E>emptyList() : list;
@@ -807,7 +811,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * Abstract class for describing arc contributors to Tarjan's strongly
      * connected components algorithm.
      */
-    private static abstract class SCCContributor {
+    public static abstract class SCCContributor {
         private final String option;
         
         private SCCContributor() {
@@ -859,6 +863,68 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
+    public static final PreVariableContributor PRE_VARIABLE_CONTRIBUTOR = new PreVariableContributor();
+    
+    /**
+     * Contributor that ensures that discrete variables are bound with their
+     * pre variable.
+     */
+    private static class PreVariableContributor extends SCCContributor {
+
+        public PreVariableContributor() {
+            super("local_pre_handling");
+        }
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            Collection<E> depends = Collections.emptyList();
+            if (graph.isInitialSystem())
+                return depends;
+            for (FVariable var : equation.getEquation().discretePreVariables()) {
+                FAbstractVariable nonPre = var.myNonPreVariable();
+                if (nonPre.isUnknown())
+                    continue;
+                V v = graph.getVariable(nonPre.name());
+                if (v == null)
+                    continue;
+                if (depends.isEmpty())
+                    depends = new ArrayList<E>();
+                depends.add(v.getMatching());
+            }
+            V var = equation.getMatching();
+            FVariable fVar = var.getVariable();
+            if (fVar.isDiscrete() && !fVar.isPreVariable()) {
+                FAbstractVariable preVar = fVar.myPreVariable();
+                for (FIdUseExp exp : preVar.uses()) {
+                    FAbstractEquation fae = exp.myFEquation();
+                    if (fae == null)
+                        continue;
+                    Collection<E> eqns = graph.getEquations(fae);
+                    if (eqns != null) {
+                        boolean add = false;
+                        for (E eqn : eqns) {
+                            if (eqn.getVariable(var.getName()) != null) {
+                                add = true;
+                                break;
+                            }
+                        }
+                        if (add) {
+                            if (depends.isEmpty())
+                                depends = new ArrayList<E>();
+                            depends.addAll(eqns);
+                        }
+                    }
+                }
+            }
+            return depends;
+        }
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            return Collections.emptyMap();
+        }
+    }
+    
     protected abstract C createComponentBlock();
 
     public Collection<C> tarjan() {
@@ -867,6 +933,10 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     
 
     public Collection<C> tarjan(OptionRegistry options) {
+        return tarjan(options, Collections.<SCCContributor>emptyList());
+    }
+
+    public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors) {
         Enumerator indexer = new Enumerator();
         Stack<E> stack = new Stack<E>();
         Collection<C> components = new ArrayList<C>();
@@ -876,7 +946,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         Map<Object, Collection<E>> memberSetsMap = new HashMap<Object, Collection<E>>();
         Map<E, Collection<Collection<E>>> keepTogetherMap = new LinkedHashMap<E, Collection<Collection<E>>>();
 
-        for (SCCContributor contributor : getSCCContributors()) {
+        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), extraContributors)) {
             if (!contributor.isActive(options))
                 continue;
             contributors.add(contributor);

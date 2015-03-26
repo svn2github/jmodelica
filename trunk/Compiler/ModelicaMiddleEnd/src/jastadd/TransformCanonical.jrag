@@ -446,8 +446,8 @@ aspect TransformCanonical {
     }
     
     public void FClass.complianceCheckBLT() {
-        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE);
-        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE);
+        getDAEBLT().complianceCheck(ErrorCheckType.COMPILE, myOptions());
+        getDAEInitBLT().complianceCheck(ErrorCheckType.COMPILE, myOptions());
     }
     
     private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_NORMAL = 
@@ -560,9 +560,9 @@ aspect TransformCanonical {
                 g.isComplete()) {
             BLT daeBLT;
             try {
-                daeBLT = g.computeBLT(myOptions());
+                daeBLT = g.computeBLT(myOptions(), Arrays.<AbstractBiPGraph.SCCContributor>asList(AbstractBiPGraph.PRE_VARIABLE_CONTRIBUTOR));
                 if (blockFunctionExtraction(daeBLT, g)) {
-                    daeBLT = g.computeBLT(myOptions());
+                    daeBLT = g.computeBLT(myOptions(), Arrays.<AbstractBiPGraph.SCCContributor>asList(AbstractBiPGraph.PRE_VARIABLE_CONTRIBUTOR));
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
@@ -583,7 +583,7 @@ aspect TransformCanonical {
         // Find matching for the initialization system
         g.addVariables(this, VAR_TYPES_INIT);
         g.addEquations(equations(), VAR_TYPES_INIT);
-        g.isInitialSystem();
+        g.setAsInitialSystem();
         
         // Replace when equations
         java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
@@ -686,9 +686,9 @@ aspect TransformCanonical {
             g.tarjanReset();
             BLT daeInitBLT;
             try {
-                daeInitBLT = g.computeBLT(myOptions());
+                daeInitBLT = g.computeBLT(myOptions(), Arrays.<AbstractBiPGraph.SCCContributor>asList(AbstractBiPGraph.PRE_VARIABLE_CONTRIBUTOR));
                 if (blockFunctionExtraction(daeInitBLT, g)) {
-                    daeInitBLT = g.computeBLT(myOptions());
+                    daeInitBLT = g.computeBLT(myOptions(), Arrays.<AbstractBiPGraph.SCCContributor>asList(AbstractBiPGraph.PRE_VARIABLE_CONTRIBUTOR));
                 }
             } catch (BLTException e) {
                 error(e.getMessage());

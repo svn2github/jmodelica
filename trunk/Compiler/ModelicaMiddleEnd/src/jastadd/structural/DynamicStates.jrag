@@ -323,7 +323,7 @@ aspect DynamicStateSelect{
             ASTNode.log.debug("    Path not found, set %d", set.id);
             for (IndexReductionVar var : eqn.getVariables()) {
                 Coefficient varCoff = coefficients.get(var);
-                if (varCoff == null || !varCoff.continuous)
+                if (varCoff == null || !varCoff.continuous || var.getVariable().stateSelection() == FRealVariable.StateSelect.ALWAYS)
                     continue;
                 ASTNode.log.debug("  Checking ncc variable %s", var);
                 if (var.getMatching() == eqn) {

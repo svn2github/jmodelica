@@ -460,6 +460,11 @@ abstract public class OptionRegistry {
             compiler,
             true,
             "Experimental! Controls whether dynamic states should be calculated and generated."),
+        LOCAL_PRE_HANDLING
+            ("local_pre_handling",
+            compiler,
+            false,
+            "Experimental! Controls whether pre writebacks should be done after each block."),
 
         // Runtime options
         /*
