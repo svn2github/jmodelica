@@ -167,6 +167,9 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         pre_switches  = &block->sw_old[(iter - 1)*block->n_sw];
         pre_non_reals = &block->nr_old[(iter - 1)*block->n_nr];
     }
+    
+    /* Update pre values */
+    jmi_block_update_pre(block);
 
     /* Evaluate switches and non-reals */
     ef = block->F(jmi, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
@@ -236,6 +239,39 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     return jmi_block_solver_status_success;
 }
 
+int jmi_block_update_pre(jmi_block_residual_t* block) {
+    jmi_t* jmi = block->jmi;
+    int i = 0;
+    jmi_real_t previous, current;
+    jmi_value_reference type;
+    
+    jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, 
+                    "BlockUpdateOfPreDiscreteVariables", 
+                    "Block updating of pre discrete variables");
+
+    for (i=0;i<block->n_nr; i++) {
+        type = jmi_get_type_from_value_ref(block->nr_vref[i]);
+        
+        current = (*(jmi->z))[block->nr_index[i]];
+        previous = (*(jmi->z))[block->nr_pre_index[i]]; 
+        
+        if (current != previous) {
+            (*(jmi->z))[block->nr_pre_index[i]] = (*(jmi->z))[block->nr_index[i]];
+            
+            if (type == JMI_INTEGER) {
+                    jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <from: %d> <to: %d> ", block->nr_vref[i], (jmi_int_t)current, (jmi_int_t)previous);
+            } else if (type == JMI_BOOLEAN) {
+                    jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <from: %d> <to: %d> ", block->nr_vref[i], (jmi_int_t)current, (jmi_int_t)previous);
+            } else if (type == JMI_REAL) {
+                    jmi_log_node(jmi->log, logInfo, "Info", " <real: #r%d#> <from: %d> <to: %d> ", block->nr_vref[i], current, previous);
+            }
+        }
+    }
+    jmi_log_leave(jmi->log, node);
+    
+    return 0;
+}
+
 int jmi_block_get_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals) {
     int i;
     jmi_t* jmi = block->jmi;
@@ -298,6 +334,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->sw_index = (jmi_int_t*)calloc(b->n_sw, sizeof(jmi_int_t));
     b->sw_direct_index = (jmi_int_t*)calloc(b->n_direct_sw, sizeof(jmi_int_t));
     b->nr_index = (jmi_int_t*)calloc(b->n_nr, sizeof(jmi_int_t));
+    b->nr_pre_index = (jmi_int_t*)calloc(b->n_nr, sizeof(jmi_int_t));
     b->nr_direct_index = (jmi_int_t*)calloc(b->n_direct_nr, sizeof(jmi_int_t));
     b->bool_direct_index = (jmi_int_t*)calloc(b->n_direct_nr, sizeof(jmi_int_t));
     b->nr_vref  = (jmi_int_t*)calloc(b->n_nr, sizeof(jmi_int_t));
@@ -377,6 +414,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 	
     if(block->init) {
 		/* Get the switch indexes and non-real valuereferences. */
+        jmi_value_reference type;
 		jmi_real_t* nr_vref_tmp = (jmi_real_t*)calloc(block->n_nr, sizeof(jmi_real_t));
 		jmi_real_t* sw_index_tmp = (jmi_real_t*)calloc(block->n_sw, sizeof(jmi_real_t));
 #ifdef JMI_PROFILE_RUNTIME
@@ -400,6 +438,15 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             block->nr_vref[i] =  (jmi_int_t)nr_vref_tmp[i];
             /* Get index for non-reals from their valuereference */
             block->nr_index[i] = get_index_from_value_ref(block->nr_vref[i]);
+            
+            type = jmi_get_type_from_value_ref(block->nr_vref[i]);
+            if (type == JMI_INTEGER) {
+                block->nr_pre_index[i] = block->nr_index[i] - jmi->offs_integer_d + jmi->offs_pre_integer_d;
+            } else if (type == JMI_BOOLEAN) {
+                block->nr_pre_index[i] = block->nr_index[i] - jmi->offs_boolean_d + jmi->offs_pre_boolean_d;
+            } else if (type == JMI_REAL) {
+                block->nr_pre_index[i] = block->nr_index[i] - jmi->offs_real_d + jmi->offs_pre_real_d;
+            }
         }
         
         block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE);
@@ -525,6 +572,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->sw_direct_index);
     free(b->bool_direct_index);
     free(b->nr_index);
+    free(b->nr_pre_index);
     free(b->nr_direct_index);
     free(b->nr_vref);
     free(b->jac);

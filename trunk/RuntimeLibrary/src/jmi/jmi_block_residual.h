@@ -124,6 +124,7 @@ struct jmi_block_residual_t {
     jmi_int_t* sw_index;            /**< \brief  Index of the active switches for this block. */
     jmi_int_t* sw_direct_index;     /**< \brief  Index of the direct switches for this block. */
     jmi_int_t* nr_index;            /**< \brief  Index of the non-reals in this block. */
+    jmi_int_t* nr_pre_index;        /**< \brief  Index of the pre non-reals in this block. */
     jmi_int_t* nr_direct_index;     /**< \brief  Index of the direct non-reals in this block. */
     jmi_int_t* bool_direct_index;   /**< \brief  Index of the direct booleans in this block. */
     jmi_int_t* nr_vref;             /**< \brief  Valuereference of the non-reals in this block. */
@@ -243,6 +244,13 @@ int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
+/**
+ * \brief Updates the pre() discrete values in the block.
+ * 
+ * @param b A jmi_block_residual_t struct.
+ * @return Error code.
+ */
+int jmi_block_update_pre(jmi_block_residual_t* b);
 
 int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs);
 
