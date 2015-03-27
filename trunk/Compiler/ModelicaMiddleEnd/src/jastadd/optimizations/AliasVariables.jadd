@@ -618,10 +618,10 @@ aspect AliasVariables {
 				public void addToMap(Map<String, AttributePropagator> map) {
                     map.put(name, this);
 				}
-				
-				protected void select(int i, List<FAttribute> l) {
-				    if (i < 0)
-				        return;
+
+                protected void select(int i, List<FAttribute> l) {
+                    if (i < 0)
+                        return;
                     FAttribute sel = list.get(i);
                     
                     // Don't add attributes from own type
@@ -631,16 +631,18 @@ aspect AliasVariables {
                         return;
                     
                     // If it is taken from elsewhere, we need a copy
-                    if (!inTarget)
+                    if (!inTarget) {
                         sel = sel.fullCopy();
+                        sel.parent = list.get(i).parent;
+                    }
                     
                     // Value may need to be negated
                     if (neg.get(i) != target.isNegated() && sel.hasValue())
                         negate(sel);
                     
                     l.add(sel);
-				}
-				
+                }
+
 				protected void negate(FAttribute sel) {
 				    sel.setValue(sel.getValue().createNegated());
 				}

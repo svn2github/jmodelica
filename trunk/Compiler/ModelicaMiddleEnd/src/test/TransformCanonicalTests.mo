@@ -1649,6 +1649,38 @@ end TransformCanonicalTests.AliasStateSelect5;
 end AliasStateSelect5;
 
 
+model AliasPropNegSecondRound1
+    Real x(stateSelect=StateSelect.always);
+    Real y(min=ymin);
+    Real z;
+    parameter Real ymin = 2;
+equation
+    x = -y * z;
+    z = 1;
+    der(x) = time - 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasPropNegSecondRound1",
+            description="Test against crash when propagating negated attribute during second round of alias elimination",
+            flatModel="
+fclass TransformCanonicalTests.AliasPropNegSecondRound1
+ Real x(stateSelect = StateSelect.always,max = - ymin);
+ constant Real z = 1;
+ parameter Real ymin = 2 /* 2 */;
+initial equation 
+ x = 0.0;
+equation
+ der(x) = time - 3;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end TransformCanonicalTests.AliasPropNegSecondRound1;
+")})));
+end AliasPropNegSecondRound1;
+
+
 model ParameterBindingExpTest3_Warn
 
   parameter Real p;

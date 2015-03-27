@@ -1899,46 +1899,61 @@ aspect TransformCanonical {
 	
 	boolean FIdUseExp.rewriteAlias = false;
 	boolean FAssignStmt.rewriteAlias = false;
-	
-	/**
-	 * FIdUses referring to alias variables need to be changed to 
-	 * FIdUses referring to their alias targets. 
-	 * 
-	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
-	 * is true. Notice that in order for the rewrite to be enable, the is$final
-	 * field of FIdUseExp needs to be set to false: this is done by the recursive
-	 * method ASTNode.flushAllRecursiveClearFinal. 
-	 */
-	rewrite FIdUseExp {
-		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
-			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createUseExp();
-			if (fv.isNegated()) 
-				new_exp = new FNegExp(new_exp);
-			return new_exp;
-		}
-	}
-	
-	rewrite FPreExp {
-		when (rewriteAlias && myNonPreFV().isFVariable() && myNonPreFV().isAlias()) to FExp {
-			FVariable fv = (FVariable) myNonPreFV();
-			FExp new_exp = fv.alias().createFPreExp();
-			if (fv.isNegated()) 
-				new_exp = new FNegExp(new_exp);
-			return new_exp;
-		}
-	}
-	
-	rewrite FAssignStmt {
-		when (rewriteAlias && getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) to FAssignStmt {
-			FVariable fv = (FVariable) getLeft().myFV();
-			setLeft(fv.alias().createUseExp());
-			if (fv.isNegated()) 
-				setRight(new FNegExp(getRight()));
-			return this;
-		}
-	}
-	
+
+    /**
+     * FIdUses referring to alias variables need to be changed to 
+     * FIdUses referring to their alias targets. 
+     * 
+     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * is true. Notice that in order for the rewrite to be enable, the is$final
+     * field of FIdUseExp needs to be set to false: this is done by the recursive
+     * method ASTNode.flushAllRecursiveClearFinal. 
+     */
+    rewrite FIdUseExp {
+        when (rewriteAlias) to FExp {
+            if (myFV().isFVariable() && myFV().isAlias()) {
+                FVariable fv = (FVariable) myFV();
+                FExp new_exp = fv.alias().createUseExp();
+                if (fv.isNegated()) 
+                    new_exp = new FNegExp(new_exp);
+                return new_exp;
+            } else {
+                rewriteAlias = false;
+                return this;
+            }
+        }
+    }
+
+    rewrite FPreExp {
+        when (rewriteAlias) to FExp {
+            if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
+                FVariable fv = (FVariable) myNonPreFV();
+                FExp new_exp = fv.alias().createFPreExp();
+                if (fv.isNegated()) 
+                    new_exp = new FNegExp(new_exp);
+                return new_exp;
+            } else {
+                rewriteAlias = false;
+                return this;
+            }
+        }
+    }
+
+    rewrite FAssignStmt {
+        when (rewriteAlias) to FAssignStmt {
+            if (getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) {
+                FVariable fv = (FVariable) getLeft().myFV();
+                setLeft(fv.alias().createUseExp());
+                if (fv.isNegated()) 
+                    setRight(new FNegExp(getRight()));
+                return this;
+            } else {
+                rewriteAlias = false;
+                return this;
+            }
+        }
+    }
+
     /**
      * FDerExps referring to alias variables need to be changed to 
      * FDerExps referring to their alias targets. 
