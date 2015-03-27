@@ -45,8 +45,10 @@ class MPC(object):
     updated with estimates of the states (through measurements).  
     """
 
-    def __init__(self, op, options, sample_period, horizon, constr_viol_costs={},
-                 noise_seed=None, use_shift=True, create_comp_result=True ):
+    def __init__(self, op, options, sample_period, horizon, 
+                 initial_guess='shift', create_comp_result=True,
+                 constr_viol_costs={}, warm_start_options={},
+                 noise_seed=None):
         """
         Creates the NLP that corresponds to the op we want to solve with MPC.
 
@@ -64,28 +66,41 @@ class MPC(object):
             horizon --
                 The number of samples on the horizon. This is used to define
                 the horizon_time. 
-                
-            constr_viol_costs --
-                The constraint violation costs to use when automatically 
-                softening variable bounds.
-                Default: {}
-
-            noise_seed --
-                The seed to use for adding noise.
-                Default: None
-                
-            use_shift --
-                True: Use the shift operation to compute xx_init. 
-                False: Use methods from casadi_collocation to extract xx_init
+        
+            initial_guess --
+                Specifies which method to use to calculate the next initial 
+                guess for the primal variables.
+                'shift': Use the shift method to shift the NLP result vector 
+                from the last successful optimization one collocation element.  
+                'trajectory': Extract xx_init from the result reajectories of
+                the last successful optimization.
+                optimization.
                 from a result file.
-                None: Do not shift previous result.
-                Default: True
-                
+                'prev': Use the NLP result vector from the last successful 
+                optimization as it is.
+                Default: 'shift'
+         
             create_comp_result --
                 True: Save the result for the first sample of each optimization
                 to create a patched together resultfile.
                 False: Do not create the patched together result file.
                 Default: True
+            
+            constr_viol_costs --
+                The constraint violation costs to use when automatically 
+                softening variable bounds.
+                Default: {}
+                
+            warm_start_options --
+                A dictionary with the solver options to use once the warm start
+                has been initialized. The warm start is initiated in between 
+                the first and the second samples.
+                Default = {} 
+                
+            noise_seed --
+                The seed to use for adding noise when using the method
+                extract_states().
+                Default: None
         """
         self._create_clock()
         self.op = op
@@ -103,9 +118,10 @@ class MPC(object):
         self.sample_period = sample_period
         self.horizon = horizon
         self.constr_viol_costs = constr_viol_costs
-        self.use_shift = use_shift
+        self.initial_guess = initial_guess
         self.create_comp_result = create_comp_result
-
+        self.warm_start_options = warm_start_options
+        
         # Create complete result lists
         if self.create_comp_result:
             self.res= {}
@@ -123,8 +139,8 @@ class MPC(object):
         self._sample_nbr = 0
         self._mpc_result_file_name = op.getIdentifier()+'_mpc_result.txt'
         self.result_file_name = op.getIdentifier()
-        self.inittraj_set = False
-        self.startTime_set = False
+        self._init_traj_set_by_user = False
+
         self.startTime= self.op.get('startTime')
         if noise_seed:
             N.random.seed([noise_seed])
@@ -154,12 +170,21 @@ class MPC(object):
         if self.constr_viol_costs != {}:
             self._soften_constraints()
         self._add_u0()
-
+            
         # Transcribe the DOP to a nlp
         self._create_nlp_object()
 
         self.collocator.result_file_name= self.result_file_name
-
+        
+        if self.options['solver'] == 'IPOPT':
+            self.successful_optimization = ['Solve_Succeeded', 
+                                            'Solved_To_Acceptable_Level']
+            
+        if self.options['solver'] == 'WORHP':
+            self.successful_optimization = ['OptimalSolution', 
+                                            'LowPassFilterOptimal', 
+                                            'AcceptableSolution']
+             
         # Save the initialization time
         self.times['init'] = time.clock() - self._startTime
         self.t0_update = time.clock()
@@ -246,7 +271,7 @@ class MPC(object):
                 du_bounds_par= casadi.MX.sym("%s_du_bounds" %key)
                 du_bounds = ci.RealVariable(self.op, du_bounds_par, 2, 1)
                 self.op.addVariable(du_bounds)
-                self.op.set("%s_du_bounds" %key, 1e50) 
+                self.op.set("%s_du_bounds" %key, 1e10) 
                 self.extra_param.append("%s_du_bounds" %key)
 
                 # Create new pointconstraints
@@ -355,7 +380,7 @@ class MPC(object):
         self.alg = LocalDAECollocationAlg(self.op, self.options)
         self.collocator = self.alg.nlp
         self.p_fixed = None
-        self._get_states_and_initial_value_parameters()
+        self._get_states_and_initial_condition_parameters()
         self.collocator.solver_object.init()
 
     def _set_blocking_options(self):
@@ -383,13 +408,13 @@ class MPC(object):
          # Check option 'hs'
         if self.options['hs'] is not None:
             if self.options['hs'] == "free":
-                raise NotImplementedError("The MPC-class des not support"+\
+                raise NotImplementedError("The MPC-class does not support"+\
                                             " free element lengths.")
             else:
                 bf = self.options['blocking_factors'].factors.values()[0]
                 if bf[0] != self.n_e_s:
                     raise ValueError("The first value in the blocking factor"+\
-                                     " vector does not equal to the number of"+\
+                                     " vector does not equal the number of"+\
                                      " collocation elements per sample chosen.")
                 self.horizon_time = self.sample_period/sum(hs[0:self.n_e_s])
         else:
@@ -399,7 +424,7 @@ class MPC(object):
         if N.abs(self.op.get('finalTime')-self.op.get('startTime')-\
                                                 self.horizon_time) > 1e-6:
 			self.op.set('finalTime',self.op.get('startTime')+self.horizon_time)
-        
+            #print("Warning: The final time has been changed to %s" % op.get('finalTime'))
         print("The prediction horizon is %s" % self.horizon_time)
 
     def _calculate_nbr_values_sample(self):
@@ -416,17 +441,17 @@ class MPC(object):
             self._nbr_values_sample = self.n_e_s*\
                                         self.options['n_eval_points']
 
-    def _get_states_and_initial_value_parameters(self):
+    def _get_states_and_initial_condition_parameters(self):
         """
         Saves the indices in the collocators _par_vals vector for the initial 
-        values of the measured states + start and final times.
+        condition parameters + start and final times.
         """
 
         # Retrieve the names of all the states 
         self.state_names = self.op.get_state_names()
 
-        # Find and save the indices for each states initial value + startTime 
-        # and finalTime. 
+        # Find and save the indices for each states initial condition parameter
+        # + startTime and finalTime. 
         self.index = {}    
         for name in self.state_names:
             name_init = "_start_"+name
@@ -441,34 +466,44 @@ class MPC(object):
         
     def _set_warm_start_options(self):
         """
-        Sets the warm start options for Ipopt if they have not already been set
-        by the user. 
+        Sets the warm start options for the NLP solver. 
         
-        Default warm start options are:
+        Default warm start options for IPOPT are:
             'warm_start_init_point' = 'yes'
-            'mu_init' = 1e-4
+            'mu_init' = 1e-3
             'print_level' = 0
-            'max_cpu_time' = 0.5*sample_period
+        Default warm start options for WORHP are:
+            'InitialLMest' = False
+            'NLPprint' = 0
         """  
+        
         if self.options['solver'] == 'IPOPT':
-            self.collocator.solver_object.setOption('expand', False)
             if self.options['IPOPT_options'].get('warm_start_init_point')\
                                                                     is None:
                 self.collocator.solver_object.\
                                     setOption('warm_start_init_point', 'yes')
             if self.options['IPOPT_options'].get('mu_init') is None:
-                self.collocator.solver_object.setOption('mu_init', 1e-4)
+                self.collocator.solver_object.setOption('mu_init', 1e-3)
             if self.options['IPOPT_options'].get('print_level') is None:
                 self.collocator.solver_object.setOption('print_level', 0)
-            self.collocator.solver_object.setOption('max_cpu_time', \
-                                                    0.50*self.sample_period)
-        else:
+                                                    
+            for key in self.warm_start_options.keys():
+                self.collocator.solver_object.setOption(key,\
+                                                self.warm_start_options[key])
+
+            self.collocator.solver_object.setOption('expand', False)
+             
+        elif self.options['solver'] == 'WORHP':
             self.collocator.solver_object.setOption('NLPprint', 0)
             self.collocator.solver_object.setOption('InitialLMest', False)
+            
+            for key in self.warm_start_options.keys():
+                self.collocator.solver_object.setOption(key,\
+                                                self.warm_start_options[key])
 
     def _append_to_result_file(self, sim_res):
         """
-        Extracts the results for the current sample_period from the result file.
+        Extracts the results in sim_res and appends it to the result lists.
         """
         res_mat = sim_res.data_matrix
         n_dx= self.collocator.n_var['dx']
@@ -544,6 +579,8 @@ class MPC(object):
         Returns an estimated value of the states, based on the result
         of the previous optimization. 
         """
+        if self._sample_nbr == 1:
+            return {};
         mean = 0
         st_dev = 0.005
         measurements = {} 
@@ -558,7 +595,7 @@ class MPC(object):
                 if val != 0:
                     measurements[name_init] += N.random.normal(mean,\
                                                                 st_dev*val, 1)
-
+                    measurements[name_init] = measurements[name_init][0]
         return measurements
 
     def _shift_xx(self):
@@ -568,12 +605,13 @@ class MPC(object):
         """
 
         xx_result = {}
-        if self.status == 'Solve_Succeeded' or self.status ==\
-                                                'Solved_To_Acceptable_Level': 
+        # If last optimization was successful, shift the result.
+        # Otherwise shift the last successful result.
+        if self.found_solution: 
             xx_result = self.collocator.primal_opt
         else:
             xx_result = self.shifted_xx
-
+            
         #~ xx_result = self.collocator.named_xx  #Used for debugging 
 
         # Map with splited order
@@ -602,7 +640,6 @@ class MPC(object):
             end = gsi[split_map[vk]+1]
 
             n_var = self.collocator.n_var[vk]
-
 
             new_xx = xx_result[start+n_var*n_e_s*(n_cp+is_x):end]
             new_xx_extrapolate = xx_result[end-n_var:end]
@@ -641,7 +678,6 @@ class MPC(object):
             new_xx = xx_result[start_bf_u+n_bf_u:end_bf_u]
             new_xx_extrapolate = xx_result[end_bf_u-n_bf_u:end_bf_u]
             
-            # DO SOMETHING SMARTER?
             shifted_xx = N.concatenate((shifted_xx, new_xx))
             shifted_xx = N.concatenate((shifted_xx, new_xx_extrapolate))
             start_bf_u = end_bf_u
@@ -689,18 +725,26 @@ class MPC(object):
 
     def update_state(self, x_k=None, start_time=None):
         """ 
-        Updates the initial value for the next sample based on the estimates in
-        state_dict which is defined based on sim_res. 
-        Moves the optimization time one sample_period forward.
+        Updates the initial condition parameters for the next optimization 
+        to the values in x_k. 
+        Moves the start time  of the optimization one sample_period forward, 
+        or to the value specified by start_time.
 
         Parameters::
 
             x_k --
-                Either a dictionary containing the estimates of the states in 
-                this sample or None.
-                If None estimates of the states will be extracted automatically 
-                from the previous optimization result.
+                Either a dictionary containing the new values of the initial 
+                condition parameters or None.
+                If None values of the initial condition parameters will be 
+                extracted automatically from the previous optimization result.
                 Default: None 
+            
+            start_time --
+                A float defining the start time of the next optimization. 
+                If None the start time of the next optimization will be 
+                calculated as the start time of the last optimization + 
+                the sample period.
+                Defaul: None
         """  
         # Update times and sample number
         self._t0 = time.clock()
@@ -724,133 +768,148 @@ class MPC(object):
 
         # Define new startTime
         if start_time == None:
-            self.startTime += self.sample_period
+            if self._sample_nbr > 1:
+                self.startTime += self.sample_period
         else:
             self.startTime = start_time
                 
         # Update times and parameter values
-        if self._sample_nbr > 1:
-            self.op.set('startTime', self.startTime)
-            self.op.set('finalTime', self.startTime+self.horizon_time)
+        self.op.set('startTime', self.startTime)
+        self.op.set('finalTime', self.startTime+self.horizon_time)
 
+        self.collocator.t0 = self.startTime
+        self.collocator.tf = self.startTime+self.horizon_time
+        
+        if self._sample_nbr > 1:
             for key in [var for var in self.extra_param if var.endswith('_0')]:
                 self.op.set(key, self._opt_input[key.split('_0')[0]]) 
-
-            self.collocator.t0 = self.startTime
-            self.collocator.tf = self.startTime+self.horizon_time
-            
+                
             # Update blocking_factor parameters
             if self._sample_nbr == 2:
-                            # Change w from blocking factors
+                # Change w from blocking factors
                 for key in [var for var in self.extra_param if 
                                                 var.endswith('_du_quad_pen')]:
                     self.op.set(key, self.options['blocking_factors'].\
                                             du_quad_pen[key.split\
                                             ('_du_quad_pen')[0]])
-                
+            
                 for key in [var for var in self.extra_param if \
                                                 var.endswith('_du_bounds')]:
                     self.op.set(key, self.options['blocking_factors'].\
                                             du_bounds[key.split\
                                             ('_du_bounds')[0]])
-            
+                
     def sample(self):
         """
-        Redefines the initial trajectories (for all but the first sample) and 
-        solves the NLP. 
+        Updates parameter values, shifts the optimization horizon, 
+        redefines the initial guess of the primal variables (for all but the 
+        first sample) and solves the NLP. 
         Warm start is initiated the second time sample is called.  
         """
         # Update parameter values
         self._recalculate_parameters()
         
         # Update timepoints
-        if self._sample_nbr > 1:
+        if self.startTime != self.collocator.time[0]:
             coll_time = self.collocator._compute_time_points()
             self.collocator.time = N.array(coll_time)
         
+        # Set the next initial guesses for primal variables
         if self._sample_nbr > 2:
-            if not self.inittraj_set:
-                if self.use_shift == True:
+            if self._init_traj_set_by_user:
+                self._set_inittraj()
+            else:
+                if self.initial_guess == 'shift':
                     self._shift_xx()
-                elif self.use_shift == False:
-                    self.set_inittraj(self._result_object)
-                else:
-                    if self.status == 'Solve_Succeeded' or self.status ==\
-                                                'Solved_To_Acceptable_Level': 
+                elif self.initial_guess == 'trajectory':
+                    self._init_traj = self._result_object
+                    self._set_inittraj()
+                elif self.initial_guess == 'prev':
+                    if self.status in self.successful_optimization: 
                         self.collocator.xx_init = self.collocator.primal_opt
-                
-        elif self._sample_nbr == 2:            # Initiate the warm start
+                else:
+                    print("Warning: A new initial guess for the primal " +\
+                          "variables have not been specified for this sample.") 
+
+        # Set next initial guess and initiate the warm start        
+        elif self._sample_nbr == 2:            
             self.collocator.warm_start = True
             self._set_warm_start_options()
-            if not self.inittraj_set:
-                if self.use_shift == True:
+            if self._init_traj_set_by_user:
+                self._set_inittraj()
+            else:
+                if self.initial_guess == 'shift':
                     self._shift_xx()
-                elif self.use_shift == False:
-                    self.set_inittraj(self._result_object)
-                else:
-                    if self.status == 'Solve_Succeeded' or self.status ==\
-                                                'Solved_To_Acceptable_Level': 
+                elif self.initial_guess == 'trajectory':
+                    self._init_traj = self._result_object
+                    self._set_inittraj()
+                elif self.initial_guess == 'prev':
+                    if self.status in self.successful_optimization: 
                         self.collocator.xx_init = self.collocator.primal_opt
+                else:
+                    print("Warning: A new initial guess for the primal " +\
+                          "variables have not been specified for this sample.") 
             self.collocator._init_and_set_solver_inputs()
-            
-        # Solve the NLP
-        self.update_time = time.clock() - self._t0    
-        self.sol_time = self.collocator.solve_nlp()
-        self.post_time = time.clock()
-        
-        # Check if result object shall be created
-        if self.use_shift == False:
-             self.export_result_dymola(self.result_file_name)
-             self.collocator.export_result_dymola(self.result_file_name)
-             self.collocator.times['init'] = self.update_time
-             self.collocator.times['sol'] = self.sol_time
-             self.collocator.times['post_processing']= time.clock()-self.post_time 
-             self._result_object = self.collocator.get_result_object()
-        
-        # Check return status
-        self.status = self.collocator.solver_object.getStat('return_status')
-        if self.status == 'Solve_Succeeded' or self.status ==\
-                                                'Solved_To_Acceptable_Level': 
 
+        # Solve the NLP
+        self.sol_time = self.collocator.solve_nlp()
+        self.update_time = time.clock() - self._t0 - self.sol_time
+        self.post_time = time.clock()
+
+        # Check return status and if optimization was successful
+        self.status = self.collocator.solver_object.getStat('return_status')
+        if self.status in self.successful_optimization:
+            self.found_solution = True
+        else:
+            self.found_solution = False
+        
+        if self.found_solution: 
             self.result = self.collocator.get_result()
             self.consec_fails = 0
+            if self.initial_guess == 'trajectory':
+                self.collocator.export_result_dymola(self.result_file_name)
+                self.collocator.times['init'] = self.update_time
+                self.collocator.times['sol'] = self.sol_time
+                self.collocator.times['post_processing']= time.clock()-self.post_time 
+                self._result_object = self.collocator.get_result_object()
         else:
             if self._sample_nbr == 1:
                 raise RuntimeError("The solver was unable to find a "+\
                                 "feasible solution.")
             self.consec_fails += 1
             if self.consec_fails >= self.options['n_e']:
-               return None
-               raise RuntimeError("The solver has not found a feasible " +\
-                                    "solution for the last %2 samples" 
+                raise RuntimeError("The solver has not found a feasible " +\
+                                    "solution for the last %s samples" 
                                     %self.consec_fails)
                 #THROW SOMETHING CAUSE THIS AINT WORKING!
         
         self.t0_post = time.clock()
         self.solver_stats.append(self.collocator.get_solver_statistics())
 
-        self.inittraj_set = False
-        self.startTime_set = False
+        self._init_traj_set_by_user = False
         self._add_times()
         return self._get_opt_input()
 
     def extract_states(self, sim_res, mean=0, st_dev=0.000):
         """
 		Extracts the last value of the states from a simulation result object 
-        and adds a noise with mean and variance as defined.
+        and adds a noise with mean and variance as defined. 
+        If 'create_comp_result' is True the method also saves and concatenates 
+        all sim_res to create a complete MPC simulation result file.
 
         Parameters::
 
             sim_res --
                 The simulation result object from which the states are to be 
-                extracted. 
+                extracted. If 'create_comp_result' is True, sim_res will be 
+                added to the complete result. 
 
             mean --
                 Mean value of the noise.
                 Default: 0
 
             st_dev --
-                Factor to be multiplied with the nominal value of each state to
+                Factor to be multiplied with the current value of each state to
                 define the stanard deviation of the noise.
                 Default: 0.000
 		"""
@@ -867,14 +926,14 @@ class MPC(object):
             states["_start_"+name] += random
             states["_start_"+name] = states["_start_"+name][0]
         return states
+        
 
     def get_results_this_sample(self):
         """
-        Returns the results for the last successful optimization.
+        Returns the results for the last optimization.
         (a LocalDAECollocationAlgResult-object). 
-                
         """
-        if self.use_shift != False:
+        if self.initial_guess != 'trajectory':
              self.collocator.export_result_dymola(self.result_file_name)
              self.collocator.times['init'] = self.update_time
              self.collocator.times['sol'] = self.sol_time
@@ -909,7 +968,7 @@ class MPC(object):
         res_p = N.array(0).reshape(-1)
         
         res = (self.res_t, self.res_dx, self.res_x, self.res_u, 
-                        self.res_w, self.p_fixed, res_p)
+                        self.res_w, self.p_fixed, res_p) 
 
         self.collocator.export_result_dymola(self._mpc_result_file_name, 
                                                 result=res)
@@ -927,7 +986,7 @@ class MPC(object):
         
     def set_inittraj(self, sim_result): 
         """ 
-        Sets the initial guess for the next optimization.
+        Defines the initial guess to use for the next optimization.
         
         Parameters::
             
@@ -935,7 +994,16 @@ class MPC(object):
                 The result file from which the initial guess is to be
                 extracted.
         """
-        self.collocator.init_traj = sim_result
+        self._init_traj = sim_result
+        self._init_traj_set_by_user = True
+        
+    def _set_inittraj(self): 
+        """ 
+        Internal method to define the initial guess for the next optimization.
+        
+        """
+
+        self.collocator.init_traj = self._init_traj
         try:
             self.collocator.init_traj = self.collocator.init_traj.result_data
         except AttributeError:
@@ -944,24 +1012,44 @@ class MPC(object):
         self.collocator._create_initial_trajectories()        
         self.collocator._compute_bounds_and_init()
 
-        self.inittraj_set = True
-
+    def set(self, name, value): 
+        """ 
+        Sets the specified parameters in names to the value in values. 
+ 	         
+ 	        Parameters:: 
+	 	             
+ 	            names -- 
+ 	                List of parameter names whose values are to be changed.  
+ 	                 
+ 	                Type: [string] or string  
+ 	                 
+ 	            values -- 
+ 	                Corresponding new values for the parameters. 
+ 	                 
+ 	                Type: [float] or float 
+        """ 
+        self.op.set(name, value)
+    
     def get(self, name):
         """
         Returns the value of the specified parameter.
+        
+        Parameters::
+
+            name --
+            The name of the parameter whose value is to be returned.
         """
         index = self.collocator.var_indices[name]
         return self.collocator._par_vals[index]
         
     def print_solver_stats(self):
         """ 
-        Prints the return status and number of iterations for each for each 
-        optimization.
+        Prints the return status, number of iterations and solution time 
+        for each optimization.
         """
         for i, stat in enumerate(self.solver_stats): 
             print("%s: %s: %s iterations in %s seconds" %(i+1, stat[0], \
-                                                stat[1], self.tot_times[i]))
-            
+                                                stat[1], stat[3]))
     def get_solver_stats(self):
         """ 
         Returns the return status and number of iterations for each for each 

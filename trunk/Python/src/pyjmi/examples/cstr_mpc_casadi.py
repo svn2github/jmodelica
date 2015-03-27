@@ -139,8 +139,8 @@ def run_demo(with_plots=True):
     constr_viol_costs = {'T': 1e6}
 
     # Create the MPC object
-    MPC_object = MPC(op, opt_opts, sample_period, horizon, constr_viol_costs,
-                                                noise_seed=1)
+    MPC_object = MPC(op, opt_opts, sample_period, horizon, 
+                    constr_viol_costs=constr_viol_costs, noise_seed=1)
 
     # Set initial state
     x_k = {'_start_c': c_0_A, '_start_T': T_0_A }
@@ -163,6 +163,7 @@ def run_demo(with_plots=True):
         # Extract state at end of sample_period from sim_res and add Gaussian
         # noise with mean 0 and standard deviation 0.005*(state_current_value)
         x_k = MPC_object.extract_states(sim_res, mean=0, st_dev=0.005)
+
 
     # Extract variable profiles
     MPC_object.print_solver_stats()
@@ -209,20 +210,21 @@ def run_demo(with_plots=True):
         plt.legend(('MPC with noise', 'Open-loop without noise', 'Reference value'))
         plt.grid()
         plt.ylabel('Concentration')
+        plt.title('Simulated trajectories')
 
         plt.subplot(3, 1, 2)
         plt.plot(time_res_comp, T_res_comp)
-        plt.plot(time_res, T_res,)
-        plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref],'--')
+        plt.plot(time_res, T_res)
+        plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref], '--')
         plt.grid()
-        plt.ylabel('Temperature')
+        plt.ylabel('Temperature [C]')
 
         plt.subplot(3, 1, 3)
         plt.step(time_res_comp, Tc_res_comp)
         plt.step(time_res, Tc_res)
-        plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref],'--')
+        plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref], '--')
         plt.grid()
-        plt.ylabel('Cooling temperature')
+        plt.ylabel('Cooling temperature [C]')
         plt.xlabel('time')
         plt.show()
         
