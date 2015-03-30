@@ -248,13 +248,13 @@ namespace ModelicaCasADi
 
     }
 
-    void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
+    void transferModelFromOptimicaCompiler(Ref<Model> m,
     string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
         try
         {
             jl::System::initializeClass(false);
             oc::ModelicaCompiler::initializeClass(false);
-            transferModel<OCStruct, OptimizationProblem >(m,modelName,modelFiles,options,log_level);
+            transferModel<OCStruct, Model >(m,modelName,modelFiles,options,log_level);
         }
         catch (JavaError e) {
             // Release all CasADi resources that it has been given

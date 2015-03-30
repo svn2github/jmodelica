@@ -38,7 +38,7 @@ void transferModelFromModelicaCompiler(Ref<Model> m,
                            Ref<CompilerOptionsWrapper> options, 
                            std::string log_level);
                            
-void transferModelFromOptimicaCompiler(Ref<OptimizationProblem> m,
+void transferModelFromOptimicaCompiler(Ref<Model> m,
                            std::string modelName, 
                            const std::vector<std::string> &modelFiles, 
                            Ref<CompilerOptionsWrapper> options, 

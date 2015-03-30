@@ -77,8 +77,12 @@ def transfer_model(model, class_name, file_name=[],
         files = [file_name]
     else: 
         files = file_name
-    return modelicacasadi_wrapper.transferModelFromModelicaCompiler(model, class_name, files,
-                              _get_options(compiler_options), compiler_log_level)
+    if has_mop_file(files):
+        return modelicacasadi_wrapper.transferModelFromOptimicaCompiler(model, class_name, files,
+            _get_options(compiler_options), compiler_log_level)
+    else:
+        return modelicacasadi_wrapper.transferModelFromModelicaCompiler(model, class_name, files,
+            _get_options(compiler_options), compiler_log_level)
 
 def transfer_optimization_problem(ocp, class_name, 
                                   file_name=[],
