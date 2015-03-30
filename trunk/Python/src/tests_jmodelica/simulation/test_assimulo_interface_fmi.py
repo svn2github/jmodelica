@@ -457,9 +457,11 @@ class Test_FMI_ODE:
         Compile the test model.
         """
         file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
+        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
 
         _ex1_name = compile_fmu("NoState.Example1", file_name)
         _ex2_name = compile_fmu("NoState.Example2", file_name)
+        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
         
     def setUp(self):
@@ -492,7 +494,19 @@ class Test_FMI_ODE:
         res = self._bounce.simulate(options=opts)
         
         nose.tools.assert_raises(Exception,res._get_result_data)
+    
+    @testattr(stddist = True)
+    def test_reset_internal_variables(self):
+        model = load_fmu("Inputs_SimpleInput.fmu")
         
+        model.initialize()
+        
+        model.set("u",2)
+        model.time = 1
+        assert model.get("u") == 2.0
+        
+        model.time = 0.5
+        assert model.get("u") == 2.0
         
     @testattr(stddist = True)
     def test_cc_with_radau(self):
