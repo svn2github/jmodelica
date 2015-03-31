@@ -222,6 +222,7 @@ def linearize_dae_with_point(optProblem,t0,z0):
             
         
     """
+    optProblem.calculateValuesForDependentParameters()
     
     # Get model variable vectors
     var_kinds = {'dx': optProblem.DERIVATIVE,
@@ -470,6 +471,7 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
             dictionary with the values for the reference point 
             around which the linearization is done
     """
+    optProblem.calculateValuesForDependentParameters()
     
     # Get model variable vectors
     var_kinds = {'dx': optProblem.DERIVATIVE,
