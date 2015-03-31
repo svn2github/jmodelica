@@ -573,8 +573,36 @@ class CasadiCollocator(object):
         self.dual_opt = {'g': dual_g_opt, 'x': dual_x_opt}
         sol_time = time.clock() - t0
         return sol_time
+
+    def _calc_Lagrangian_Hessian(self):
+        """
+        Calculate the Hessian of the NLP Lagrangian.
+
+        CasADi normally does this automatically, but in rare cases it does not
+        work correctly. This is a workaround. See #4313
+        """
+        # Lagrange multipliers and objective function scaling
+        unknown = casadi.MX.sym("unknown", 0)
+        sigma = casadi.MX.sym("sigma")
+        lam = casadi.MX.sym("lambda", self.c_e.numel() + self.c_i.numel())
+        
+        # Lagrangian
+        constraints = casadi.vertcat([self.get_equality_constraint(),
+                                      self.get_inequality_constraint()])
+        lag_exp = sigma * self.cost + casadi.inner_prod(lam, constraints)
+        L = self._FXFunction([self.xx, self.pp, sigma, lam], [lag_exp])
+        L.init()
+
+        # Calculate Hessian
+        H_exp = casadi.jacobian(L.grad(), self.xx)
+        self.H = self._FXFunction([self.xx, self.pp, sigma, lam], [H_exp, H_exp, H_exp, H_exp, H_exp])
+        self.H.init()
         
     def _init_and_set_solver_inputs(self):
+        # Circumvent CasADi bug, see #4313
+        if self.explicit_hessian:
+            self._calc_Lagrangian_Hessian()
+            self.solver_object.setOption("hess_lag", self.H)
         self.solver_object.init()
 
         # Primal initial guess and parameter values
@@ -1942,7 +1970,7 @@ class LocalDAECollocator(CasadiCollocator):
             tf_var = self.op.getVariable('finalTime').getVar()
 
             # Map time points to constraint points
-            cnstr_points_f = casadi.MXFunction(
+            cnstr_points_f = self._FXFunction(
                 [t0_var, tf_var], [casadi.vertcat(cnstr_points_expr)])
             cnstr_points_f.init()
             cnstr_points_f.setInput(0., 0)
@@ -2527,7 +2555,7 @@ class LocalDAECollocator(CasadiCollocator):
                 print "TODO define input for no derivative mode daeresidual"
                 raise NotImplementedError("eliminate_der_ver not supported yet")
             else:
-                coll_eq_fcn = casadi.MXFunction(
+                coll_eq_fcn = self._FXFunction(
                     x_i + [der_vals_k, h_i] + dx_i_k, [scoll_eq])
                 coll_eq_fcn.init()
                 self.coll_l0_eq_fcn = coll_eq_fcn
@@ -2676,19 +2704,19 @@ class LocalDAECollocator(CasadiCollocator):
                 raise NotImplementedError("eliminate_der_var not supported yet") 
             else:
                 if self.n_variant_x>0 and self.n_variant_dx>0:
-                    coll_eq_fcn = casadi.MXFunction(
+                    coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k +
                         [x_i_sf, dx_i_k_sf], [scoll_eq])
                 elif self.n_variant_x>0 and not self.n_variant_dx>0:
-                    coll_eq_fcn = casadi.MXFunction(
+                    coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k +
                         [x_i_sf], [scoll_eq])  
                 elif not self.n_variant_x>0 and self.n_variant_dx>0:
-                    coll_eq_fcn = casadi.MXFunction(
+                    coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k +
                         [dx_i_k_sf], [scoll_eq])  
                 else:
-                    coll_eq_fcn = casadi.MXFunction(
+                    coll_eq_fcn = self._FXFunction(
                         x_i + [der_vals_k, h_i] + dx_i_k, [scoll_eq])  
 
                 coll_eq_fcn.setOption("name", "coll_l0_eq_fcn")
@@ -3460,7 +3488,7 @@ class LocalDAECollocator(CasadiCollocator):
 
     def _FXFunction(self, *args):
         f = casadi.MXFunction(*args)
-        if self.expand_to_sx == 'DAE':
+        if self.expand_to_sx != 'no':
             f.init()
             f = casadi.SXFunction(f)
         return f
@@ -3681,7 +3709,7 @@ class LocalDAECollocator(CasadiCollocator):
         [zero] = casadi.substitute([expr], [t0, tf], [0., 0.])
         if zero != 0.:
             return False
-        f = casadi.MXFunction([t0, tf], [expr])
+        f = self._FXFunction([t0, tf], [expr])
         f.init()
         if not f.grad(0).isConstant() or not f.grad(1).isConstant():
             return False
@@ -3693,7 +3721,7 @@ class LocalDAECollocator(CasadiCollocator):
         """
         t0_var = self.op.getVariable('startTime').getVar()
         tf_var = self.op.getVariable('finalTime').getVar()
-        cp_f = casadi.MXFunction([t0_var, tf_var], [tp])
+        cp_f = self._FXFunction([t0_var, tf_var], [tp])
         cp_f.init()
         cp_f.setInput(0., 0)
         cp_f.setInput(1., 1)

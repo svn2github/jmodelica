@@ -1810,6 +1810,15 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: String
             Default: 'IPOPT'
 
+        explicit_hessian --
+            Explicitly construct the Lagrangian Hessian, rather than rely on
+            CasADi to automatically generate it. This is only done to
+            circumvent a bug in CasADi, see #????, which rarely causes the
+            automatic Hessian to be incorrect.
+
+            Type: bool
+            Default: False
+
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
@@ -1850,6 +1859,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'checkpoint': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
+                'explicit_hessian': False,
                 'IPOPT_options': {},
                 'WORHP_options': {}}
         
