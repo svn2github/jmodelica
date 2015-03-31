@@ -849,6 +849,15 @@ aspect FlatAPI {
     }
     
 
+    syn boolean ASTNode.containsFTimeExp() {
+        for (ASTNode child : this)
+            if (child.containsFTimeExp())
+                return true;
+        return false;
+    }
+    eq FTimeExp.containsFTimeExp() = true;
+    syn lazy boolean FAbstractEquation.containsFTimeExp() = super.containsFTimeExp();
+    
     syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
     syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
         ArrayList<FVariable> l = new ArrayList<FVariable>();

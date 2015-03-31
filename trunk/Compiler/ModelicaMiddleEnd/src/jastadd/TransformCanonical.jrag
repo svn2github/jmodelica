@@ -342,6 +342,14 @@ aspect TransformCanonical {
         return daeFVariableEquationBlockMap;
     }
 
+    private HashMap<FAbstractEquation, AbstractEquationBlock> FClass.daeEquationEquationBlockMap =
+            new HashMap<FAbstractEquation, AbstractEquationBlock>();
+
+    syn HashMap<FAbstractEquation,AbstractEquationBlock> FClass.getDAEFEquationEquationBlockMap() {
+        transformCanonical();
+        return daeEquationEquationBlockMap;
+    }
+
     syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
             myFClass().getDAEInitFVariableEquationBlockMap().get(this);
 
@@ -349,6 +357,12 @@ aspect TransformCanonical {
     syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
         transformCanonical();
         return daeInitFVariableEquationBlockMap;
+    }
+
+    private HashMap<FAbstractEquation,AbstractEquationBlock> FClass.daeInitEquationEquationBlockMap = new HashMap<FAbstractEquation,AbstractEquationBlock>();
+    syn HashMap<FAbstractEquation,AbstractEquationBlock> FClass.getDAEInitEquationEquationBlockMap() {
+        transformCanonical();
+        return daeInitEquationEquationBlockMap;
     }
 
     private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = new ArrayList<FAbstractEquation>();
@@ -384,9 +398,18 @@ aspect TransformCanonical {
     public void FClass.setDAEBLT(BLT newBLT) {
         daeBLT = newBLT;
         daeFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-        for (AbstractEquationBlock eb : daeBLT)
-            for (FVariable fv : eb.allVariables())
+        daeEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
+
+        for (AbstractEquationBlock eb : daeBLT) {
+            for (FVariable fv : eb.allVariables()) {
                 daeFVariableEquationBlockMap.put(fv,eb);
+            }
+
+            for (FAbstractEquation equation : eb.allEquations()) {
+            	daeEquationEquationBlockMap.put(equation, eb);
+            }
+        }
+
         if (newBLT == BLT.EMPTY_BLT)
             daeStructuredBLT = BLT.EMPTY_BLT;
         else
@@ -410,9 +433,15 @@ aspect TransformCanonical {
     public void FClass.setDAEInitBLT(BLT newBLT) {
         daeInitBLT = newBLT;
         daeInitFVariableEquationBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
+        daeInitEquationEquationBlockMap = new HashMap<FAbstractEquation, AbstractEquationBlock>();
+
         for (AbstractEquationBlock eb : daeInitBLT) {
             for (FVariable fv : eb.allVariables()) {
                 daeInitFVariableEquationBlockMap.put(fv,eb);
+            }
+
+            for (FAbstractEquation equation : eb.allEquations()) {
+                daeInitEquationEquationBlockMap.put(equation, eb);
             }
         }
         daeInitBLT.computeDependencies();

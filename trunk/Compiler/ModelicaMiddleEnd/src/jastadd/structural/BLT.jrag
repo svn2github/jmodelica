@@ -362,6 +362,8 @@ aspect BLT{
         
         private int numLabledBlocks = 0;
 		
+        private Enumerator indexEnumerator;
+
 		public ArrayList<Integer> unsolvedBlockSizes() {
 			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
 			for (AbstractEquationBlock b : this) {
@@ -432,6 +434,13 @@ aspect BLT{
             Map<FVariable, AbstractEquationBlock> blockMap = new HashMap<FVariable, AbstractEquationBlock>();
             for (AbstractEquationBlock block : this)
                 block.computeDependencies(blockMap);
+
+            for (AbstractEquationBlock block : this) {
+                for (AbstractEquationBlock preBlock : block.immediatePredecessors()) {
+                    BlockDependency blockDependency = preBlock.getBlockDependency();
+                    blockDependency.immediateSuccessors().add(block);
+                }
+            }
         }
 
     }
@@ -659,10 +668,15 @@ aspect BLT{
         private final EquationBlockFactory.BlockProducer producer;
         private String label;
         private int sequenceNumber = -1;
+        private int indexNumber = -1;
 
         public AbstractEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
             this.producer = producer;
             this.blockDependency = blockDependency;
+        }
+
+        public BlockDependency getBlockDependency() {
+            return blockDependency;
         }
 
         /**
@@ -877,6 +891,10 @@ aspect BLT{
             return blockDependency.allPredecessors();
         }
 
+        public Collection<AbstractEquationBlock> immediateSuccessors() {
+            return blockDependency.immediateSuccessors();
+        }
+
         private Set<FVariable> dependsOnVariables_cashe = null;
 
         public Set<FVariable> dependsOn() {
@@ -939,6 +957,17 @@ aspect BLT{
 
         public final int getSequenceNumber() {
             return sequenceNumber;
+        }
+
+        public final int getIndexNumber() {
+            if (indexNumber < 0) {
+                throw new IllegalStateException("indexNumber has not been initialized.");
+            }
+            return indexNumber;
+        }
+
+        public void setIndexNumber(int indexNumber) {
+            this.indexNumber = indexNumber;
         }
 
         protected abstract boolean needLabel(boolean inSubBlock);
@@ -1061,6 +1090,15 @@ aspect BLT{
             return false;
         }
         
+        public boolean isTimeDependent() {
+            for (FAbstractEquation eqn : allEquations()) {
+                if (eqn.containsFTimeExp()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     /**
@@ -2046,9 +2084,9 @@ aspect BlockDependencies {
             throw new UnsupportedOperationException("Unable to get all predecessors from block dependency of type " + getClass().getSimpleName());
         }
 
-//        public Collection<AbstractEquationBlock> immediateSuccessors() {
-//            throw new UnsupportedOperationException("Unable to get immediate successors from block dependency of type " + getClass().getSimpleName());
-//        }
+        public Collection<AbstractEquationBlock> immediateSuccessors() {
+            throw new UnsupportedOperationException("Unable to get immediate successors from block dependency of type " + getClass().getSimpleName());
+        }
 
         /**
          * Computes a complete dependency for this block. This function takes
@@ -2107,6 +2145,7 @@ aspect BlockDependencies {
 
         private final Collection<AbstractEquationBlock> immediatePredecessors;
         private Collection<AbstractEquationBlock> allPredecessors = null;
+        private Collection<AbstractEquationBlock> immediateSuccessors = new ArrayList<AbstractEquationBlock>();
 
         public CompleteBlockDependency(Collection<FVariable> dependentVariables, Collection<AbstractEquationBlock> immediatePredecessors) {
             super(dependentVariables);
@@ -2121,6 +2160,11 @@ aspect BlockDependencies {
         @Override
         public Collection<AbstractEquationBlock> immediatePredecessors() {
             return immediatePredecessors;
+        }
+
+        @Override
+        public Collection<AbstractEquationBlock> immediateSuccessors() {
+            return immediateSuccessors;
         }
 
         @Override
