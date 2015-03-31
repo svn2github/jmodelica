@@ -3262,6 +3262,38 @@ end RecordTests.RecordScalarize33;
 ")})));
 end RecordScalarize33;
 
+model RecordScalarize34
+    record R
+        parameter Real n;
+        Real[:] x = cat(1, 1:n, 2:n);
+    end R;
+    
+    R r(n=3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize34",
+            description="Scalarizing record without binding expressions.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize34
+ parameter Real r.n = 3 /* 3 */;
+ Real r.x[1];
+ Real r.x[2];
+ Real r.x[3];
+ Real r.x[4];
+ Real r.x[5];
+equation
+ r.x[1] = 1.0;
+ r.x[2] = 2.0;
+ r.x[3] = 3.0;
+ r.x[4] = 2.0;
+ r.x[5] = 3.0;
+end RecordTests.RecordScalarize34;
+")})));
+end RecordScalarize34;
+
 
 
 model RecordFunc1

@@ -324,7 +324,7 @@ aspect Scalarization {
         variability = variability().combineDown(variability);
         if (bexp == null && hasBindingExp()) {
             bexpDims = getBindingExp().ndims();
-            bexp = getBindingExp().reflatten(prefix);
+            bexp = getBindingExp().reflatten(prefix, this);
             bi = Index.NULL;
             bexp.createArrayTemporaries(variability.parameterVariability(), equs, pEqus, vars);
         }
@@ -407,8 +407,7 @@ aspect Scalarization {
                 nbexp = bexp.scalarRecordFExp(emptyIndexMap, comp.name());
                 nbexp.parent = comp;
                 if (!comp.modifiableInRecord) {
-                    nbexp = nbexp.reflatten(name);
-                    nbexp.parent = comp;
+                    nbexp = nbexp.reflatten(name, comp);
                 }
                 nbexpDims = comp.ndims();
 			} else {
@@ -449,8 +448,9 @@ aspect Scalarization {
      * Apply a prefix to references to components declared in
      * the containing record decl of this expression
      */
-    public FExp FExp.reflatten(FQName prefix) {
-        FExp res = dynamicFExp(fullCopy());
+    public FExp FExp.reflatten(FQName prefix, FAbstractVariable fv) {
+        FExp res = fullCopy();
+        res.parent = fv;
         FRecordDecl decl = containingRecordDecl();
         if (decl != null)
             res.prefixInternalUses(prefix, decl);
@@ -669,13 +669,13 @@ aspect Scalarization {
         FExternalObjectVariable fv = (FExternalObjectVariable) super.copyForName(name);
         fv.setConstructor(getConstructor().fullCopy());
         if (hasDestructorCall()) {
-            fv.setDestructorCall(getDestructorCall().scalarizeDestructor(name));
+            fv.setDestructorCall(getDestructorCall().scalarizeDestructor(name, this));
         }
         return fv;
     }
     
-    public FFunctionCallStmt FFunctionCallStmt.scalarizeDestructor(FQName name) {
-        FFunctionCall call = (FFunctionCall) getCall().reflatten(name.copyPrefix());
+    public FFunctionCallStmt FFunctionCallStmt.scalarizeDestructor(FQName name, FAbstractVariable fv) {
+        FFunctionCall call = (FFunctionCall) getCall().reflatten(name.copyPrefix(), fv);
         if (name.hasFArraySubscripts()) {
             Index i = name.getFArraySubscripts().asIndex();
             call.setArg(call.getArg(0).getArray().get(i).scalarize(Collections.<String,FExp>emptyMap()), 0);
@@ -1269,6 +1269,7 @@ aspect Scalarization {
     eq FRecordConstructor.getChild().inUnknownSize() = false;
     eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
     eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
+    eq FAbstractVariable.getChild().inUnknownSize()  = false;
     
     
     syn boolean FAssignStmt.extractTemp() {
