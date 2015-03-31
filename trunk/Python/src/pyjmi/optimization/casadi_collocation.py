@@ -5142,6 +5142,7 @@ class OptimizationSolver(object):
         The collocator should be a LocalDAECollocator.
         """
         self.collocator = collocator
+        self.init_traj_set = False
 
     def set(self, name, value):
         """Set the value of the named parameter from the original OptimizationProblem"""
@@ -5189,14 +5190,35 @@ class OptimizationSolver(object):
         if solver_name == self.collocator.solver:
             self.collocator.set_solver_option(name, value)
 
+    def set_init_traj(self, sim_result): 
+        """ 
+        Define the initial guess to use for the next optimization
+        
+        Parameters::
+            
+            sim_result --
+                The result from which the initial guess is to be extracted.
+        """
+
+        self.collocator.init_traj = sim_result
+        try:
+            self.collocator.init_traj = self.collocator.init_traj.result_data
+        except AttributeError:
+            pass
+
+        self.init_traj_set = True
+        self.collocator._create_initial_trajectories()        
+        self.collocator._compute_bounds_and_init()
+
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
         if self.collocator.warm_start:
-            # It would be good to expose a way for the user to provide an initial guess at some point,
-            # how to expose that option?
-            self.collocator.xx_init = self.collocator.primal_opt
+            if not self.init_traj_set:
+                self.collocator.xx_init = self.collocator.primal_opt
 
             self.collocator._init_and_set_solver_inputs()
+
+        self.init_traj_set = False
 
         self.collocator.solve_and_write_result()
         return self.collocator.get_result_object()

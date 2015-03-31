@@ -96,6 +96,28 @@ def test_warm_start():
     # Warm starting from the right result should need very few iterations
     assert res2w2.get_solver_statistics()[1] < 4
 
+@testattr(casadi = True)
+def test_set_init_traj():
+    """Test that OptimizationSolver.set_init_traj works"""
+    file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+    op = transfer_optimization_problem("VDP_pack.VDP_Opt2", file_path)
+
+    res0 = op.optimize()
+
+    opts = op.optimize_options()
+    opts["IPOPT_options"]["max_iter"] = 0
+
+    solver = op.prepare_optimization(options = opts)
+    res1 = solver.optimize()
+    solver.set_init_traj(res0)
+    res2 = solver.optimize()
+
+    assert(N.linalg.norm(res2['x1']-res0['x1'])) <= 1e-8
+    assert(N.linalg.norm(res2['x2']-res0['x2'])) <= 1e-8
+
+    assert(N.linalg.norm(res1['x1']-res0['x1'])) >= 1e-4
+    assert(N.linalg.norm(res1['x2']-res0['x2'])) >= 1e-4
+
 def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate_algebraics=False,
         result_mode='collocation_points'):
     file_path = os.path.join(get_files_path(), 'Modelica', 'DisturbedIntegrator.mop')
