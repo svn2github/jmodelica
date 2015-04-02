@@ -83,7 +83,7 @@ EXT_LIB_DIRS =
 
 # Additional libraries
 EXT_LIBS = 
-EXTERNAL_LIBS = $(EXT_LIBS:%=-l%) -lblas -lgfortran
+EXTERNAL_LIBS = $(EXT_LIBS:%=-l%) -llapack -lblas -lgfortran
 
 # Additional include directories
 EXT_INC_DIRS =

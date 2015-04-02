@@ -101,7 +101,7 @@ EXT_LIB_DIRS =
 # is found in the mingw configuration and we need to specify that we
 # want the static version.
 EXT_LIBS = 
-EXTERNAL_LIBS = $(EXT_LIBS:%=-l%) -lblas -l:libgfortran.a
+EXTERNAL_LIBS = $(EXT_LIBS:%=-l%) -llapack -lblas -l:libgfortran.a
 
 # Additional include directories
 EXT_INC_DIRS =

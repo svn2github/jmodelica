@@ -761,9 +761,7 @@ public class ModelicaCompiler {
                 ASTNode.beginStep("compileCCode()");
                 String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
                 CCompilerDelegator ccompiler = getCCompiler();
-                Set<String> extLibs = new HashSet<String>(fc.externalLibraries());
-                extLibs.add(options.getStringOption("lapack_lib"));
-                ccompiler.compileCCode(cFileName, target, outDir, extLibs, fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
+                ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories(), options.getIntegerOption("max_n_proc"));
                 ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
                 ASTNode.endStep("compileCCode()");
             }
@@ -1599,7 +1597,6 @@ public class ModelicaCompiler {
             if (ext.library() != null)
                 for (String lib : ext.library())
                     libs.add(lib);
-            libs.add(options.getStringOption("lapack_lib"));
             if (ext.libraryDirectory() != null)
                 libDirs.add(ext.libraryDirectory());
             if (ext.includeDirectory() != null)
