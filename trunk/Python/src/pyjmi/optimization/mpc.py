@@ -813,12 +813,13 @@ class MPC(object):
         if self.startTime != self.collocator.time[0]:
             coll_time = self.collocator._compute_time_points()
             self.collocator.time = N.array(coll_time)
-        
+            
+            
         # Set the next initial guesses for primal variables
-        if self._sample_nbr > 2:
-            if self._init_traj_set_by_user:
+        if self._init_traj_set_by_user:
                 self._set_inittraj()
-            else:
+        else: 
+            if self._sample_nbr > 1:
                 if self.initial_guess == 'shift':
                     self._shift_xx()
                 elif self.initial_guess == 'trajectory':
@@ -830,26 +831,32 @@ class MPC(object):
                 else:
                     print("Warning: A new initial guess for the primal " +\
                           "variables have not been specified for this sample.") 
-
-        # Set next initial guess and initiate the warm start        
-        elif self._sample_nbr == 2:            
+       
+        # Initiate the warm start 
+        if self._sample_nbr == 2:            
             self.collocator.warm_start = True
             self._set_warm_start_options()
-            if self._init_traj_set_by_user:
-                self._set_inittraj()
-            else:
-                if self.initial_guess == 'shift':
-                    self._shift_xx()
-                elif self.initial_guess == 'trajectory':
-                    self._init_traj = self._result_object
-                    self._set_inittraj()
-                elif self.initial_guess == 'prev':
-                    if self.status in self.successful_optimization: 
-                        self.collocator.xx_init = self.collocator.primal_opt
-                else:
-                    print("Warning: A new initial guess for the primal " +\
-                          "variables have not been specified for this sample.") 
             self.collocator._init_and_set_solver_inputs()
+                    
+        #~ # Set next initial guess and initiate the warm start        
+            #~ elif self._sample_nbr == 2:            
+            #~ self.collocator.warm_start = True
+            #~ self._set_warm_start_options()
+            #~ if self._init_traj_set_by_user:
+                #~ self._set_inittraj()
+            #~ else:
+                #~ if self.initial_guess == 'shift':
+                    #~ self._shift_xx()
+                #~ elif self.initial_guess == 'trajectory':
+                    #~ self._init_traj = self._result_object
+                    #~ self._set_inittraj()
+                #~ elif self.initial_guess == 'prev':
+                    #~ if self.status in self.successful_optimization: 
+                        #~ self.collocator.xx_init = self.collocator.primal_opt
+                #~ else:
+                    #~ print("Warning: A new initial guess for the primal " +\
+                          #~ "variables have not been specified for this sample.") 
+            #~ self.collocator._init_and_set_solver_inputs()
 
         # Solve the NLP
         self.sol_time = self.collocator.solve_nlp()
