@@ -26,6 +26,7 @@ import sys
 import casadi
 from collections import OrderedDict, Iterable
 from pyjmi.common.core import TrajectoryLinearInterpolation
+from pyjmi.common.io import VariableNotFoundError
 
 try:
     import modelicacasadi_wrapper
