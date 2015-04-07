@@ -3833,6 +3833,11 @@ aspect CCodeGen {
             genBlockBase_C(p, str, indent, inInitial);
         } else if (genBlockEnabled()) {
             equation().genBlock_C(p, str, indent, new HashSet<FAbstractEquation>(), allLocalVariables(), assignedIndices());
+            for (FVariable var : allLocalVariables()) {
+                if (!inInitial && var.isDiscrete() && !var.isPreVariable()) {
+                    str.formatln("%s%s = %s;", indent, var.myPreVariable().name_C(), var.name_C());
+                }
+            }
         } else {
             throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName());
         }

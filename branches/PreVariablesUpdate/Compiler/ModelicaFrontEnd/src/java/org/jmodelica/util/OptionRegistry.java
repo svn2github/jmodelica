@@ -456,7 +456,7 @@ abstract public class OptionRegistry {
         LOCAL_PRE_HANDLING
             ("local_pre_handling",
             compiler,
-            false,
+            true,
             "Experimental! Controls whether pre writebacks should be done after each block."),
 
         // Runtime options

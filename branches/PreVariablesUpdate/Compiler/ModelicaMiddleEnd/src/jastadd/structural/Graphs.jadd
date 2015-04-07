@@ -897,7 +897,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 FAbstractVariable preVar = fVar.myPreVariable();
                 for (FIdUseExp exp : preVar.uses()) {
                     FAbstractEquation fae = exp.myFEquation();
-                    if (fae == null)
+                    if (fae == null || fae.isPrePropagationEquation() != null)
                         continue;
                     Collection<E> eqns = graph.getEquations(fae);
                     if (eqns != null) {
