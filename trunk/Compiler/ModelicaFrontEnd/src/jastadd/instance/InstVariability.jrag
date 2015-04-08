@@ -96,10 +96,10 @@ aspect InstVariability {
             // does not consider FKnownParameter variabilities.
             v = v.combineDown(inheritedVariability());
             
+            v = v.combineDown(forcedVariability);
+            
             if (isEvalFixed()) {
                 v = v.combineDown(fEvalParameter());
-            } else if (isStructural()) {
-                v = v.combineDown(fStructParameter());
             } else if (isFinalIndependent()) {
                 v = v.combineDown(fFinalParameter());
             }
@@ -132,7 +132,6 @@ aspect InstVariability {
         return mod != null && mod.isFinal() && mod.getFExp().isIndependentParameterExp();
     }
     syn boolean InstAssignable.isEvalFixed() = annotation().forPath("Evaluate").bool() && valueIsFixed();
-    syn boolean InstAssignable.isStructural() = isStructuralParam;
     
     syn boolean InstComponentDecl.valueIsFixed() = true;
     eq InstAssignable.valueIsFixed() {

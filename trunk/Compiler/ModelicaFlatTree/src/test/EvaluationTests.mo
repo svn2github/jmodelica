@@ -1542,7 +1542,7 @@ model EvaluateAnnotation1
 			description="Check that annotation(Evaluate=true) is honored",
 			flatModel="
 fclass EvaluationTests.EvaluateAnnotation1
- structural parameter Real a = 1.0 /* 1.0 */;
+ eval parameter Real a = 1.0 /* 1.0 */;
  eval parameter Real b = 1.0 /* 1.0 */;
  Real c = 1.0 + 1.0;
 end EvaluationTests.EvaluateAnnotation1;
@@ -1731,7 +1731,6 @@ end EvaluationTests.EvaluateAnnotation7;
 ")})));
 end EvaluateAnnotation7;
 
-// This test gives wrong result #3629
 model EvaluateAnnotation8
     record R
         Real y;
@@ -1747,7 +1746,7 @@ model EvaluateAnnotation8
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation8
- structural parameter EvaluationTests.EvaluateAnnotation8.R r(y = 2) = EvaluationTests.EvaluateAnnotation8.R(3, 3) /* EvaluationTests.EvaluateAnnotation8.R(3, 3) */;
+ eval parameter EvaluationTests.EvaluateAnnotation8.R r(y = 2) = EvaluationTests.EvaluateAnnotation8.R(3, 3) /* EvaluationTests.EvaluateAnnotation8.R(3, 3) */;
  Real x = 2.0;
 
 public
@@ -1760,7 +1759,7 @@ end EvaluationTests.EvaluateAnnotation8;
 ")})));
 end EvaluateAnnotation8;
 
-// This test gives wrong result #3629
+// This test gives wrong result #4327
 model EvaluateAnnotation9
     function F
         input R i;
@@ -1824,7 +1823,7 @@ model EvaluateAnnotation10
             description="Evaluate annotation on record with mixed variabilities",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation10
- structural parameter EvaluationTests.EvaluateAnnotation10.R r1(a = 2) = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
+ eval parameter EvaluationTests.EvaluateAnnotation10.R r1(a = 2) = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
  eval parameter EvaluationTests.EvaluateAnnotation10.R m.r2 = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
 
 public
@@ -2013,8 +2012,8 @@ model EvalNoBinding1
             description="Evaluate primitives without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding1
- structural parameter Real x(start = 1) = 1 /* 1 */;
- structural parameter Real y(start = 3) = 3 /* 3 */;
+ eval parameter Real x(start = 1) = 1 /* 1 */;
+ eval parameter Real y(start = 3) = 3 /* 3 */;
  eval parameter Real z = 4.0 /* 4.0 */;
 end EvaluationTests.EvalNoBinding1;
 ")})));
@@ -2032,8 +2031,8 @@ model EvalNoBinding2
             description="Evaluate array primitives without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding2
- structural parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
- structural parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
+ eval parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
+ eval parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
  eval parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
  structural parameter Real z2 = 30.0 /* 30.0 */;
 end EvaluationTests.EvalNoBinding2;
@@ -2126,8 +2125,8 @@ model EvalColonSizeCell
             checkAll=true,
             flatModel="
 fclass EvaluationTests.EvalColonSizeCell
- structural parameter Real a[1] = {1} /* { 1 } */;
- structural parameter Real b[2] = {0.5, 1.5} /* { 0.5, 1.5 } */;
+ eval parameter Real a[1] = {1} /* { 1 } */;
+ eval parameter Real b[2] = {0.5, 1.5} /* { 0.5, 1.5 } */;
  eval parameter Real c[1] = {1} /* { 1 } */;
 
 public

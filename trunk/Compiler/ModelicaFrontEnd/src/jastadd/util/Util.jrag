@@ -808,6 +808,13 @@ aspect Names {
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
     eq InstBaseClassDecl.getChild().enclosingInstClassDecl() = this;
     eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
+    
+    inh InstComponentDecl InstComponentDecl.enclosingInstComponentDecl();
+    inh InstComponentDecl InstExtends.enclosingInstComponentDecl();
+    eq BaseNode.getChild().enclosingInstComponentDecl()          = null;
+    eq InstExtends.getChild().enclosingInstComponentDecl()       = enclosingInstComponentDecl();
+    eq InstComponentDecl.getChild().enclosingInstComponentDecl() = this;
+    
 
     inh BaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;

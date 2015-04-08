@@ -225,7 +225,7 @@ aspect ContentCheck {
 
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
         if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
-            getFArraySubscripts().markAsStructuralParameter(checkType);
+            getFArraySubscripts().forceVariability(checkType, fStructParameter());
         checkQuotedIdentifier(getComponentDecl(), getComponentDecl().getName().getID());
     }
 
@@ -654,88 +654,107 @@ aspect ContentCheck {
 
 }
 
-aspect StructuralParams {
-	
-	private boolean InstAssignable.isStructuralParam = false;
-	
-	public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
-		if (inFunction())
-			return;
-		if (!checkType.allowConstantNoValue() && !canCeval())
-			compliance("Could not evaluate expression used as structural parameter: " + this);
-		markUsesAsStructuralParameter(checkType);
-	}
-	
-	public void FArraySubscripts.markAsStructuralParameter(ErrorCheckType checkType) {
-		for (FSubscript s : getFSubscripts())
-			s.markAsStructuralParameter(checkType);
-	}
-	
-	public void FSubscript.markAsStructuralParameter(ErrorCheckType checkType) {}
-	public void FExpSubscript.markAsStructuralParameter(ErrorCheckType checkType) {
-		getFExp().markAsStructuralParameter(checkType);
-	}  
-
-	
-	public void ASTNode.markUsesAsStructuralParameter(ErrorCheckType checkType) {
-		for (ASTNode n : this)
-			n.markUsesAsStructuralParameter(checkType);
-	}
+aspect ForceVariability {
     
-    public void FSizeExp.markUsesAsStructuralParameter(ErrorCheckType checkType) {
-        getDimOpt().markUsesAsStructuralParameter(checkType);
+    private FTypePrefixVariability InstAssignable.forcedVariability = fContinuous();
+    
+    public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
+        forceVariability(checkType, fStructParameter());
     }
     
-    public void FNdimsExp.markUsesAsStructuralParameter(ErrorCheckType checkType) {}
-	
-	public void InstAccess.markUsesAsStructuralParameter(ErrorCheckType checkType) {
-		myInstComponentDecl().markAsStructuralParameter(checkType);
-		markUsesInSubscriptsAsStructuralParameter(checkType);
-	}
-	
-	public void InstAccess.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {}
-	
-	public void InstDot.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {
-		for (InstAccess ia : getInstAccesss())
-			ia.markUsesInSubscriptsAsStructuralParameter(checkType);
-	}
-	
-	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {
-		getFArraySubscripts().markUsesAsStructuralParameter(checkType);
-	}
-	
-	
-	public void InstComponentDecl.markAsStructuralParameter(ErrorCheckType checkType) {
-		// TODO: should probably do something constructive here?
-	}
-
-    public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
-        if (isStructuralParam || !variability().combine().parameterVariability() || inFunction() || isForIndex())
+    public void FExp.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+        if (inFunction())
+            return;
+        if (!checkType.allowConstantNoValue() && !canCeval())
+            compliance("Could not evaluate expression used as structural parameter: " + this);
+        forceUsesVariability(checkType, v);
+    }
+    
+    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+        for (FSubscript s : getFSubscripts())
+            s.forceVariability(checkType, v);
+    }
+    
+    public void FSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {}
+    
+    public void FExpSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+        getFExp().forceVariability(checkType, v);
+    }
+    
+    
+    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        for (ASTNode n : this)
+            n.forceUsesVariability(checkType, v);
+    }
+    
+    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        getDimOpt().forceUsesVariability(checkType, v);
+    }
+    
+    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    
+    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        myInstComponentDecl().forceVariability(checkType, v);
+        forceUsesInSubscriptsVariability(checkType, v);
+    }
+    
+    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    
+    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        for (InstAccess ia : getInstAccesss())
+            ia.forceUsesInSubscriptsVariability(checkType, v);
+    }
+    
+    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        getFArraySubscripts().forceUsesVariability(checkType, v);
+    }
+    
+    
+    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        // TODO: should probably do something constructive here?
+    }
+    
+    public void InstAssignable.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        if (forcedVariability.lessOrEqual(v)) {
+            return;
+        }
+        if (!variability().combine().parameterVariability() || inFunction() || isForIndex())
             return;
         // TODO: hierarchical check for records?
         if (indices().numElements() > 0 && isPrimitive() && !fixedAttributeCValue().reduceBooleanOr()) {
             compliance("Parameters with fixed=false can not be used as structural parameters");
             return;
         }
-        isStructuralParam = true;
+        forcedVariability = forcedVariability.combineDown(v);
         // Flush cache for variability()
-        variability_computed = false;
+        setVariabilityNotCalculated();
         if (hasBindingFExp()) {
             FExp e = getBindingFExp();
             if (!checkType.allowConstantNoValue() && !e.canCeval())
                 compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
-            e.markUsesAsStructuralParameter(checkType);
+            e.forceUsesVariability(checkType, v);
         }
     }
-
-    public void InstRecord.markAsStructuralParameter(ErrorCheckType checkType) {
-        super.markAsStructuralParameter(checkType);
+    
+    public void InstRecord.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        super.forceVariability(checkType, v);
         for (InstComponentDecl icd : getInstComponentDecls())
-            icd.markAsStructuralParameter(checkType);
+            icd.forceVariability(checkType, v);
     }
     
-    public void InstExternalObject.markAsStructuralParameter(ErrorCheckType checkType) {
+    public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
         
     }
-
+    
+    public void InstComponentDecl.setVariabilityNotCalculated() {
+        if (!variability_computed) {
+            return;
+        }
+        InstComponentDecl icd = enclosingInstComponentDecl();
+        if (icd != null) {
+            icd.setVariabilityNotCalculated();
+        }
+        variability_computed = false;
+    }
+    
 }

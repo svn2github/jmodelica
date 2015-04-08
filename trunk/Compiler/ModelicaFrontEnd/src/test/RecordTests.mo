@@ -349,7 +349,7 @@ model RecordFlat10
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat10
- structural parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ eval parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
  eval parameter Real r.x = 3 /* 3 */;
 
 public
@@ -1946,7 +1946,7 @@ model RecordConstructor9
 			description="Constant eval of default value in record constructor that depends on another member",
 			flatModel="
 fclass RecordTests.RecordConstructor9
- parameter RecordTests.RecordConstructor9.A a = RecordTests.RecordConstructor9.A(1, 1 + 2) /* RecordTests.RecordConstructor9.A(1, 3) */;
+ structural parameter RecordTests.RecordConstructor9.A a = RecordTests.RecordConstructor9.A(1, 1 + 2) /* RecordTests.RecordConstructor9.A(1, 3) */;
  structural parameter Integer b = 3 /* 3 */;
  Real z[3] = (1:3) * time;
 
@@ -5012,7 +5012,7 @@ model RecordParam7
 			description="Variability calculation for records involving inheritance",
 			flatModel="
 fclass RecordTests.RecordParam7
- parameter Integer b.n = 2 /* 2 */;
+ structural parameter Integer b.n = 2 /* 2 */;
  Real x[1];
  Real x[2];
 equation
