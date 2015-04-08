@@ -230,6 +230,9 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     jmi_linear_solver_t* solver = block->solver;
     iwork = solver->iwork;
     
+    /* If there are no equations, return. */
+    if (n_x == 0) { return 0; }
+    
     /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
         int j = 0;
