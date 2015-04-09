@@ -597,9 +597,9 @@ aspect TransformCanonical {
                 error(e.getMessage());
                 return;
             }
-            for (FAbstractEquation e : equations())
-                if (e.numScalarEquations() == 0)
-                    daeBLT.add(EquationBlockFactory.createMetaBlock(e));
+//            for (FAbstractEquation e : equations())
+//                if (e.numScalarEquations() == 0)
+//                    daeBLT.add(EquationBlockFactory.createMetaBlock(e));
             setDAEBLT(daeBLT);
             log.info(getDAEStructuredBLT());
             log.info(getDAEBLT());
@@ -723,17 +723,17 @@ aspect TransformCanonical {
                 error(e.getMessage());
                 return;
             }
-            for (FAbstractEquation e : equations()) {
-                if (e.numScalarEquations() == 0) {
-                    if (e.replacedAtInitialization()) {
-                        for (FAbstractEquation fae : e.getInitialEquations()) {
-                            daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
-                        }
-                    } else {
-                        daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
-                    }
-                }
-            }
+//            for (FAbstractEquation e : equations()) {
+//                if (e.numScalarEquations() == 0) {
+//                    if (e.replacedAtInitialization()) {
+//                        for (FAbstractEquation fae : e.getInitialEquations()) {
+//                            daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
+//                        }
+//                    } else {
+//                        daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
+//                    }
+//                }
+//            }
             setDAEInitBLT(daeInitBLT);
             log.info(daeInitBLT);
         } else {

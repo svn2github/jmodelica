@@ -8251,6 +8251,8 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
+$C_reinit_temp_decls$
+-----
 $C_ode_derivatives$
 -----
 $C_ode_initialization$
@@ -8315,6 +8317,8 @@ equation
             description="",
             variability_propagation=false,
             template="
+$C_reinit_temp_decls$
+-----
 $C_ode_derivatives$
 -----
 $C_ode_initialization$
@@ -8398,6 +8402,8 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
+$C_reinit_temp_decls$
+-----
 $C_ode_derivatives$
 -----
 $C_ode_initialization$

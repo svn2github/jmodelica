@@ -276,8 +276,8 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
-            return new IndexReductionEq(name, eqn, groupNumber, variability);
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
+            return new IndexReductionEq(name, eqn, groupNumber, variability, isMeta);
         }
 
         @Override
@@ -304,8 +304,8 @@ aspect IndexReduction {
         private Set<String> nonDiffVars;
         private Set<FAbstractEquation> nonDiffEqns;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
-            super(name, eqn, groupNumber, variability);
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
+            super(name, eqn, groupNumber, variability, isMeta);
         }
 
         public int numDifferentiations() {

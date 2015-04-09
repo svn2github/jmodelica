@@ -77,13 +77,20 @@ aspect BLT{
             Collection<FVariable> fvs = new ArrayList<FVariable>();
             Collection<Integer> assignedIndices = new ArrayList<Integer>();
             FAbstractEquation e = component.iterator().next().getEquation(); // TODO remove this hack, set to null and introduce in first loop iteration
+            boolean isMeta = true;
             for (E eqn : component) {
                 if (eqn.getEquation() != e) 
                     return null;
-                fvs.add(eqn.getMatching().getVariable());
-                assignedIndices.add(eqn.groupNumber());
+                if (!eqn.isMeta()) {
+                    isMeta = false;
+                    fvs.add(eqn.getMatching().getVariable());
+                    assignedIndices.add(eqn.groupNumber());
+                }
             }
-            return createSimpleEquationBlock(e, fvs, assignedIndices, producer, component.computeBlockDependency(), solve);
+            if (isMeta)
+                return createMetaBlock(e);
+            else
+                return createSimpleEquationBlock(e, fvs, assignedIndices, producer, component.computeBlockDependency(), solve);
         }
 
         /**
@@ -105,9 +112,12 @@ aspect BLT{
             
             Collection<E> realEquations = new LinkedHashSet<E>();
             Collection<E> nonRealEquations = new ArrayList<E>();
+            Collection<E> metaEquations = new ArrayList<E>();
             Set<FVariable> realVariables = new HashSet<FVariable>();
             for (E e : component) {
-                if (e.getMatching().getVariable().isReal()) {
+                if (e.isMeta()) {
+                    metaEquations.add(e);
+                } else if (e.getMatching().getVariable().isReal()) {
                     realEquations.add(e);
                     realVariables.add(e.getMatching().getVariable());
                 } else {
@@ -126,12 +136,12 @@ aspect BLT{
             }
             
             AbstractEquationBlock block = null;
-            TornEquationBlock tornBlock = null;
+            EquationBlock eqnBlock = null;
             boolean torn = false;
             if (producer.useTearing() && realEquations.size() > 1) {
-                tornBlock = tear(component, producer, options, isInitial);
-                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty()) {
-                    block = tornBlock;
+                eqnBlock = tear(component, producer, options, isInitial);
+                if (eqnBlock != null && !eqnBlock.solvedBlocks().isEmpty()) {
+                    block = eqnBlock;
                     torn = true;
                 }
             }
@@ -140,7 +150,7 @@ aspect BLT{
                 // Check if an equation block is mixed, i.e., contains both continous
                 // and discrete variables, and if it is linear in the unknowns
                 Map<FVariable, AbstractEquationBlock> varToBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-                for (AbstractEquationBlock subBlock : tornBlock.solvedRealBlocks()) {
+                for (AbstractEquationBlock subBlock : eqnBlock.solvedRealBlocks()) {
                     for (FVariable var : subBlock.allVariables())
                         varToBlockMap.put(var, subBlock);
                 }
@@ -149,7 +159,7 @@ aspect BLT{
                     iterationVariables.add(var);
                 Set<AbstractEquationBlock> visitedBlocks = new HashSet<AbstractEquationBlock>();
                 Set<AbstractEquationBlock> activeBlocks = new HashSet<AbstractEquationBlock>();
-                for (SimpleEquationBlock subBlock : tornBlock.unsolvedBlocks()) {
+                for (SimpleEquationBlock subBlock : eqnBlock.unsolvedBlocks()) {
                     linearityUseCheck(subBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
                     activeBlocks.add(subBlock);
                 }
@@ -172,7 +182,8 @@ aspect BLT{
                 } else {
                     BiPGraph g = new BiPGraph(nonRealEquations);
                     Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(producer, options);
-                    block = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    block = eqnBlock;
                 }
             }
             
@@ -181,6 +192,11 @@ aspect BLT{
                     block.computeJacobian(activeRealEquations);
 //                else
 //                   Give warning?
+            }
+            if (eqnBlock != null) {
+                for (E eqn : metaEquations) {
+                    eqnBlock.addSolvedBlock(createMetaBlock(eqn.getEquation()));
+                }
             }
             return block;
         }

@@ -16,6 +16,8 @@
 
 $C_enum_strings$
 
+$genReinitTempDecls_C$
+
 $C_dae_blocks_residual_functions$
 
 $CAD_dae_blocks_residual_functions$
