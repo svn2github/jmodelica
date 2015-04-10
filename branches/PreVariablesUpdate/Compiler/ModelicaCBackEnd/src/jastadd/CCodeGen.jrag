@@ -3563,17 +3563,8 @@ aspect CCodeGen {
             visited = new HashSet<ASTNode>();
         for (SimpleEquationBlock seb : unsolvedBlocks())
             seb.genVarDecls_C(p, str, indent, visited);
-        for (SimpleEquationBlock seb : localNonRealBlocks())
-            seb.genVarDecls_C(p, str, indent, visited);
-    }
-
-    @Override
-    protected void TornEquationBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
-        if (visited == null)
-            visited = new HashSet<ASTNode>();
         for (SimpleEquationBlock seb : localSolvedBlocks())
             seb.genVarDecls_C(p, str, indent, visited);
-        super.genVarDecls_C(p, str, indent, visited);
     }
 
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
