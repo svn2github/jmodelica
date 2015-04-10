@@ -16,7 +16,7 @@
 
 $C_enum_strings$
 
-$genReinitTempDecls_C$
+$C_reinit_temp_decls$
 
 $C_dae_blocks_residual_functions$
 
