@@ -1106,11 +1106,22 @@ aspect FlatAPI {
     FAlgorithm contributes this when !inFunction()
         to FClass.algorithms() for myFClass();
 
-    syn int FClass.numContinousEquations() = continuousEquations().size();
+    syn int FClass.numContinuousEquations() = continuousEquations().size();
     syn lazy ArrayList<FAbstractEquation> FClass.continuousEquations() {
         ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
         for (FAbstractEquation e : getFAbstractEquations()) {
             if (!e.isIgnored() && e.isContinuous()) {
+                l.add(e);
+            }
+        }
+        return l;
+    }
+
+    syn int FClass.numContinuousNonMetaEquations() = continuousNonMetaEquations().size();
+    syn lazy ArrayList<FAbstractEquation> FClass.continuousNonMetaEquations() {
+        ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+        for (FAbstractEquation e : continuousEquations()) {
+            if (!e.isMetaEquation()) {
                 l.add(e);
             }
         }
@@ -1158,6 +1169,8 @@ aspect FlatAPI {
             res += l.numScalarElements();
         return res;
     }
+    
+    syn boolean FAbstractEquation.isMetaEquation() = numScalarEquations() == 0;
     
     syn int FFunctionCallLeft.numScalarElements() {
         int res = 0;

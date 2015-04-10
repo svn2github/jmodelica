@@ -78,7 +78,7 @@ aspect IndexReduction {
             IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             // Only do index reduction based on real variables and equations
             g.addVariables(this, VAR_TYPES_REAL);
-            g.addEquations(continuousEquations(), VAR_TYPES_REAL);
+            g.addEquations(continuousNonMetaEquations(), VAR_TYPES_REAL);
             log.info(g);
             g.maximumMatching(true);
             log.info("DAE system real variables only");
