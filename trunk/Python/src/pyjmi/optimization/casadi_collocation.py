@@ -5403,3 +5403,189 @@ class OptimizationSolver(object):
     def set_warm_start(self, warm_start):
         """Set whether warm start is enabled for the optimization"""
         self.collocator.warm_start = warm_start
+
+    def get_nlp_residuals(self, point = 'opt', raw=False):
+        """
+        Get the raw vector of (scaled) residuals for the underlying NLP.
+
+        The vector contains residuals for all equality and inequality
+        constraints.
+
+        Parameters::
+            
+            point --
+                The where the residuals should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+
+            raw --
+                If True, return the raw residuals.
+                Otherwise, return the constraint violations:
+                0 if not violating the bounds, the difference from
+                the violated bound otherwise.
+                Default: False
+
+        """
+        assert point in ('opt', 'init')
+        residuals = self.collocator.get_nlp(point)[1]
+        if raw:
+            return residuals
+        lb, ub = self.get_nlp_residual_bounds()
+        violations = N.zeros_like(residuals)
+        violations[residuals < lb] = (residuals - lb)[residuals < lb]
+        violations[residuals > ub] = (residuals - ub)[residuals > ub]
+        return violations
+
+    def get_nlp_residual_bounds(self):
+        """Get the raw vectors (lb, ub) of bounds on residuals in the underlying NLP"""
+        return (self.collocator.gllb, self.collocator.glub)
+
+    def get_nlp_constraint_duals(self):
+        """Get the raw vector of (scaled) dual variables for the constraints in the underlying NLP"""
+        return self.collocator.dual_opt['g']
+
+    def get_constraint_types(self):
+        """
+        Get a list of all types of constraints that have mappings to the NLP
+        """
+        return self.collocator.get_nlp_constraint_types()
+
+    def get_nlp_constraint_indices(self, eqtype):
+        """
+        Get a mapping from continuous time equations to NLP constraints
+
+        Parameters::
+
+            eqtype --
+                Type of equation, see get_constraint_types() for available
+                types in the model.
+                Possible values include
+
+                    'initial', 'dae', 'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+
+        Returns::
+
+            indices --
+                Array of shape (n_tp, n_eq) of indices into the
+                NLP constraints, where n_tp is the number of time points found
+                and n_eq the number of equations of the corresponding kind.
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+        """
+        return self.collocator.get_nlp_constraint_indices(eqtype)
+
+    def get_residuals(self, eqtype, point='opt', raw=False):
+        """
+        Get the residuals for a given equation type.
+
+        Parameters::
+            eqtype --
+                Type of equation, see get_constraint_types() for available
+                types in the model.
+                Possible values include
+
+                    'initial', 'dae', 'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+
+            point --
+                The where the residuals should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+
+            raw --
+                If True, return the raw residuals.
+                Otherwise, return the constraint violations:
+                0 if not violating the bounds, the difference from
+                the violated bound otherwise.
+                Default: False
+
+        Returns::
+
+            residuals --
+                Array of shape (n_tp, n_eq) of (scaled) residuals,
+                where n_tp is the number of time points found
+                and n_eq the number of equations of the corresponding kind.
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+        """
+        inds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+        residuals = self.get_nlp_residuals(point, raw=raw)
+        return (residuals[inds], time, i, k)
+
+    def get_constraint_duals(self, eqtype):
+        """
+        Get the dual variables at the optimization solution for a given equation type.
+
+        Parameters::
+            eqtype --
+                Type of equation, see get_constraint_types() for available
+                types in the model.
+                Possible values include
+
+                    'initial', 'dae', 'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+
+        Returns::
+
+            duals --
+                Array of shape (n_tp, n_eq) of (scaled) dual variable values,
+                where n_tp is the number of time points found
+                and n_eq the number of equations of the corresponding kind.
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+        """
+        inds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+        duals = self.get_nlp_constraint_duals()
+        return (duals[inds], time, i, k)
+
+    def get_residual_norms(self, point='opt', ord=N.inf):
+        """
+        List the equation kinds and how much they contribute to the norm of the residual
+
+        For inequality constraints, only the constraint violation contributes
+        to the norm.
+
+        Parameters::
+            point --
+                The where the residuals should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+
+            ord --
+                Vector norm order used with numpy.linalg.norm
+        """
+        result = []
+        for eqtype in self.get_constraint_types():
+            r, t, i, k = self.get_residuals(eqtype, point=point)
+            rnorm = N.linalg.norm(r.ravel(), ord=ord)
+            result.append((rnorm, eqtype))
+        result.sort(reverse = True)
+        return result
