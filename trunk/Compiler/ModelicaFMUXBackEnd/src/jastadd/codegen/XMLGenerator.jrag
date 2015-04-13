@@ -447,7 +447,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 					}
 					
 					//direct dependency - not supported
-					if (variable.isOutput() && variable.isReal()) {
+					if (variable.isOutput()) {
 						genPrinter.print("\n\t\t\t<DirectDependency>");
 						for (FVariable dv : variable.dependsOn()) {
 							if (dv.isInput()) {

@@ -915,6 +915,49 @@ equation
 ")})));
 end DirectDependencyTest1;
 
+    model DirectDependencyTest2
+        input Real x;
+        output Boolean b = x > 0;
+        output Integer i = integer(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        XMLCodeGenTestCase(
+            name="DirectDependencyTest2",
+            description="Generate direct dependencies for non-real variables",
+            equation_sorting=true,
+            eliminate_alias_variables=false,
+            generate_fmi_me_xml=false,
+            template="$XML_variables$",
+            generatedCode="
+        <ScalarVariable name=\"b\" valueReference=\"536870916\" variability=\"discrete\" causality=\"output\" alias=\"noAlias\">
+            <Boolean />
+            <DirectDependency>
+                <Name>x</Name>
+            </DirectDependency>
+            <isLinear>true</isLinear>
+            <VariableCategory>algebraic</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"i\" valueReference=\"268435458\" variability=\"discrete\" causality=\"output\" alias=\"noAlias\">
+            <Integer />
+            <DirectDependency>
+                <Name>x</Name>
+            </DirectDependency>
+            <isLinear>true</isLinear>
+            <VariableCategory>algebraic</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"temp_1\" valueReference=\"268435459\" variability=\"discrete\" causality=\"internal\" alias=\"noAlias\">
+            <Integer />
+            <isLinear>true</isLinear>
+            <VariableCategory>algebraic</VariableCategory>
+        </ScalarVariable>
+        <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+            <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
+            <isLinear>true</isLinear>
+            <VariableCategory>algebraic</VariableCategory>
+        </ScalarVariable>
+")})));
+end DirectDependencyTest2;
+
 
 model NonConstantStart1
     Real x(start = 1 + a[b]);

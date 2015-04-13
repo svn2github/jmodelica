@@ -710,7 +710,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             }
             
             public void generate(CodeStream genPrinter) {
-                if (variable.isOutput() && variable.isReal()) {
+                if (variable.isOutput()) {
                     generateOpening(xml, genPrinter);
                     for (FVariable dv : variable.directDependencies()) {
                         generateTagStart("Name", genPrinter);
