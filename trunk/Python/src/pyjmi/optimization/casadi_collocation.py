@@ -4895,6 +4895,50 @@ class LocalDAECollocator(CasadiCollocator):
             raise CasadiCollocatorException(
                 "named_var_expr only works if named_vars is enabled.")
 
+    def get_nlp(self, point="fcn"):
+        """
+        Get the nlp residual function.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "fcn"
+        
+        Returns::
+            
+            objective --
+                The objective value evaluated in the given point
+
+            residuals --
+                The constraint residuals evaluated in the given point
+        """
+        nlp_fcn = self.solver_object.nlp()
+        if point == "fcn":
+            return nlp_fcn
+        elif point == "init":
+            nlp_fcn.setInput(self.xx_init, 0)
+        elif point == "opt":
+            nlp_fcn.setInput(self.primal_opt, 0)
+        elif point == "sym":
+            return nlp_fcn.call([self.xx, self.pp],True)
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        nlp_fcn.setInput(self._par_vals, 1)
+        nlp_fcn.evaluate()
+        return (nlp_fcn.output(0).getValue(), nlp_fcn.output(1).toArray().ravel())
+
     def get_J(self, point="fcn"):
         """
         Get the Jacobian of the constraints.
@@ -4914,7 +4958,7 @@ class LocalDAECollocator(CasadiCollocator):
                 "sym": Symbolic evaluation
                 
                 Type: str
-                Default: "function"
+                Default: "fcn"
         
         Returns::
             
@@ -4955,7 +4999,7 @@ class LocalDAECollocator(CasadiCollocator):
                 "sym": Symbolic evaluation
                 
                 Type: str
-                Default: "function"
+                Default: "fcn"
         
         Returns::
             
@@ -5023,7 +5067,7 @@ class LocalDAECollocator(CasadiCollocator):
                 "sym": Symbolic evaluation
                 
                 Type: str
-                Default: "function"
+                Default: "fcn"
         
         Returns::
             
