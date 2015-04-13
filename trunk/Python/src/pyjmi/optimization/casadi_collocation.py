@@ -3123,15 +3123,28 @@ class LocalDAECollocator(CasadiCollocator):
                     lterm_l1.init()
                     self.lterm_l1 = lterm_l1
 
-    def _add_c(self, sources, eqtype, pos, i, k):
+    def _add_c(self, kind, eqtype, pos, i, k):
         """
         Record origin of a block of residuals in self.c_e or self.c_i
         """
-        if pos[1] == pos[0]:
+        n_eq = pos[1] - pos[0]
+        if n_eq == 0:
             return # don't record empty residuals
-        if eqtype not in sources:
-            sources[eqtype] = []
-        sources[eqtype].append((i, k, pos))
+        if eqtype not in self.c_sources:
+            source = self.c_sources[eqtype] = {'kind':kind, 'n_eq':n_eq, 'i':[], 'k':[], 'inds':[]}
+        else:
+            source = self.c_sources[eqtype]
+        
+        assert source['kind'] == kind, ("Residual type '" + eqtype +
+            "' previously recorded as kind '" + source['kind'] +
+            "' cannot record it as kind '" + kind + "'")
+        assert source['n_eq'] == n_eq, ("Residual type '" + eqtype +
+            "' previously recorded with " + repr(source['n_eq']) +
+            "equations per point, cannot record it with " + repr(n_eq))
+
+        source['i'].append(i)
+        source['k'].append(k)
+        source['inds'].append(N.arange(pos[0], pos[1], dtype=N.int))
 
     def add_c_eq(self, eqtype, constr, i=-1, k=-1):
         """
@@ -3147,7 +3160,7 @@ class LocalDAECollocator(CasadiCollocator):
         j0 = self.c_e.numel()
         self.c_e.append(constr)
         j1 = self.c_e.numel()
-        self._add_c(self.c_e_sources, eqtype, (j0, j1), i, k)
+        self._add_c('eq', eqtype, (j0, j1), i, k)
 
     def add_c_ineq(self, eqtype, constr, i=-1, k=-1):
         """
@@ -3160,7 +3173,7 @@ class LocalDAECollocator(CasadiCollocator):
         j0 = self.c_i.numel()
         self.c_i.append(constr)
         j1 = self.c_i.numel()
-        self._add_c(self.c_i_sources, eqtype, (j0, j1), i, k)
+        self._add_c('ineq', eqtype, (j0, j1), i, k)
 
     def add_c_eq_l1(self, eqtype, constr, i=-1):
         """
@@ -3180,7 +3193,7 @@ class LocalDAECollocator(CasadiCollocator):
         n = (j1-j0)//self.n_cp
         assert n*self.n_cp == j1-j0
         for k in xrange(1, self.n_cp+1):
-            self._add_c(self.c_e_sources, eqtype, (j0+(k-1)*n, j0+k*n), i, k)
+            self._add_c('eq', eqtype, (j0+(k-1)*n, j0+k*n), i, k)
 
     def _call_functions(self):
         """
@@ -3254,8 +3267,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.c_e = c_e = casadi.MX()
         self.c_i = c_i = casadi.MX()
         # NB: internal format of c_e_sources/c_i_sources is subject to change!
-        self.c_e_sources = {}
-        self.c_i_sources = {}
+        self.c_sources = {}
 
         # Initial conditions
         i = 1
@@ -5065,6 +5077,68 @@ class LocalDAECollocator(CasadiCollocator):
             return 1.
         else:
             return 1. / sigma_inv
+
+    def get_nlp_constraint_types(self):
+        """
+        Get a list of all types of constraints that have mappings to the NLP
+        """
+        return self.c_sources.keys()
+
+    def get_nlp_constraint_indices(self, eqtype):
+        """
+        Get a mapping from continuous time equations to NLP constraints
+
+        Parameters::
+
+            eqtype --
+                Type of equation, see get_nlp_constraint_kinds() for available
+                types in the model.
+                Possible values include
+
+                    'initial', 'dae', 'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+
+        Returns::
+
+            indices --
+                Array of shape (n_tp, n_eq) of indices into the
+                NLP constraints, where n_tp is the number of time points found
+                and n_eq the number of equations of the corresponding kind.
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+
+        """
+        if eqtype not in self.c_sources:
+            return (N.zeros((0,0), dtype=N.int), N.zeros(0),
+                N.zeros(0, dtype=N.int), N.zeros(0, dtype=N.int))
+        
+        source = self.c_sources[eqtype]
+        
+        indices = N.vstack(source['inds'])
+        if source['kind'] == 'ineq':
+            # inequalities come after equalities in the constraints
+            indices += self.c_e.numel()
+        else:
+            assert source['kind'] == 'eq', "Unrecognized equation kind"
+
+        ii = N.array(source['i'])
+        kk = N.array(source['k'])
+        
+        # Use reasonable defaults when i or k is not given.
+        # todo: Better defaults?
+        i2 = ii.copy(); i2[i2 == -1] = 1
+        k2 = kk.copy(); k2[k2 == -1] = 1
+        time = N.array([self.time_points[i][k] for (i,k) in zip(i2,k2)])
+
+        return (indices, time, ii, kk)
 
 
 class MeasurementData(object):
