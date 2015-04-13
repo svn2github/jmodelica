@@ -2740,41 +2740,30 @@ aspect ConstantEvaluation {
      */
     syn CValue InstComponentDecl.attributeCValueGeneric(VariableEvaluator evaluator, String name) = CValue.UNKNOWN;
     eq InstAssignable.attributeCValueGeneric(VariableEvaluator evaluator, String name) {
-        
-        CValue val = attributeCValueSet(evaluator, name);
-        if (val != null) {
-            return val;
-        }
-        
-        CValue res = attributeCValueDefault(name);
-        if (isArray()) {
-            res = arrayCValue(res);
-        }
-        return res;
-    }
-    
-    syn CValue InstAssignable.attributeCValueSet(VariableEvaluator evaluator, String name) {
         for (InstModification im : totalMergedEnvironment()) {
             FExp exp = im.findAttribute(name);
             if (exp != null) {
                 CValue val = exp.ceval(evaluator);
                 if (im.hasEach()) {
-                    val = arrayCValue(val);
+                    CValueArray a = new CValueArray(size());
+                    for (Index i : indices()) {
+                        a.addCell(val);
+                    }
+                    val = a;
                 }
                 return val;
             }
         }
-        return null;
-    }
-    
-    syn CValueArray InstAssignable.arrayCValue(CValue val) {
-        CValueArray array = new CValueArray(size());
-        for (Index i : indices()) {
-            array.setCell(i, val);
+        
+        CValue res = attributeCValueDefault(name);
+        if (isArray()) {
+            CValueArray array = new CValueArray(size());
+            for (Index i : indices())
+                array.setCell(i, res);
+            res = array;
         }
-        return array;
+        return res;
     }
-    
 
     /**
      * Get the default value for attribute <code>name</code> for a given type.
