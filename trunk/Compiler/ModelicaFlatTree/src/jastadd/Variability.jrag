@@ -94,8 +94,8 @@ aspect Variability {
     
     eq FCompositeVariability.combine() {
         FTypePrefixVariability high = fConstant();
-        for (FTypePrefixVariability v : getComponents()) {
-            high = high.combine(v.combine());
+        for (FComponentVariability v : getComponents()) {
+            high = high.combine(v.getVariability().combine());
         }
         return high;
     }
@@ -108,7 +108,20 @@ aspect Variability {
     }
     
     eq FCompositeVariability.getPart(int i) {
-        return getComponent(i);
+        return getComponent(i).getVariability();
+    }
+    
+    syn FTypePrefixVariability FTypePrefixVariability.getPart(String name) = this;
+    
+    private Map<String,Integer> FCompositeVariability.nameMap = null;
+    public FTypePrefixVariability FCompositeVariability.getPart(String name) {
+        if (nameMap==null) {
+            nameMap = new HashMap<String,Integer>();
+            for (int i = 0; i < getNumComponent(); i++) {
+                nameMap.put(getComponent(i).getName(), i);
+            }
+        }
+        return getComponent(nameMap.get(name)).getVariability();
     }
     
 
@@ -424,7 +437,7 @@ aspect Variability {
         FTypePrefixVariability total = fConstant();
         for (InstFunctionArgument arg : getArgs()) 
             if (arg.isOKArg())
-                total = total.combine(arg.getFExp().variability());
+                total = total.combine(arg.getFExp().variability().combine());
         return total;
     }
     
@@ -503,7 +516,7 @@ aspect Variability {
     
     @Override
     public FTypePrefixVariability FCompositeVariability.combine(FTypePrefixVariability other) {
-        return combine(other, false);
+        return combine(other, upCombiner);
     }
 
     public FTypePrefixVariability FTypePrefixVariability.combineDown(FTypePrefixVariability other) {
@@ -512,29 +525,54 @@ aspect Variability {
     
     @Override
     public FTypePrefixVariability FCompositeVariability.combineDown(FTypePrefixVariability other) {
-        return combine(other, true);
+        return combine(other, downCombiner);
     }
     
-    /**
-     * Combine each component variability with the assumed primitive variability other.
-     * Merges to a primitive variability if possible.
-     */
-    private FTypePrefixVariability FCompositeVariability.combine(FTypePrefixVariability other, boolean down) {
+    class FTypePrefixVariability {
+        protected static abstract class Combiner {
+            public abstract FTypePrefixVariability combine(FTypePrefixVariability v1, FTypePrefixVariability v2);
+        }
+    }
+    
+    class FCompositeVariability {
+        protected static final Combiner upCombiner = new Combiner() {
+            public FTypePrefixVariability combine(FTypePrefixVariability v1, FTypePrefixVariability v2) {
+                return v1.combine(v2);
+            }
+        };
+        
+        protected static final Combiner downCombiner = new Combiner() {
+            public FTypePrefixVariability combine(FTypePrefixVariability v1, FTypePrefixVariability v2) {
+                return v1.combineDown(v2);
+            }
+        };
+    }
+    
+    
+    public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other, Combiner combiner) {
+        return combiner.combine(this, other);
+    }
+    
+    public FTypePrefixVariability FCompositeVariability.combine(FTypePrefixVariability other, Combiner combiner) {
         FTypePrefixVariability low = fContinuous();
         FTypePrefixVariability high = fConstant();
         boolean containsComposite = false;
-        ArrayList<FTypePrefixVariability> l = new ArrayList<FTypePrefixVariability>();
-        for (FTypePrefixVariability v : getComponents()) {
-            FTypePrefixVariability nv = down ? v.combineDown(other) : v.combine(other);
-            l.add(nv);
+        ArrayList<FComponentVariability> l = new ArrayList<FComponentVariability>();
+        for (FComponentVariability fcv : getComponents()) {
+            String name = fcv.getName();
+            FTypePrefixVariability v = fcv.getVariability();
+            FTypePrefixVariability nv = other.getPart(name);
+            nv = v.combine(nv, combiner);
+            l.add(new FComponentVariability(fcv.getName(), nv));
             low = low.combineDown(nv);
             high = high.combine(nv);
             containsComposite = containsComposite || nv.compositeVariability();
         }
         if (!containsComposite && low.equals(high))
             return low;
-        return new FCompositeVariability(new List<FTypePrefixVariability>(l));
+        return new FCompositeVariability(new List<FComponentVariability>(l));
     }
+
 
     syn FTypePrefixVariability FExp.indexVariability() {
         throw new UnsupportedOperationException();

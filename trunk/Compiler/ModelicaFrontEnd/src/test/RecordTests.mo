@@ -5370,6 +5370,62 @@ end RecordTests.RecordEval6;
 ")})));
 end RecordEval6;
 
+model RecordEval7
+  record B
+    parameter Real x;
+    parameter Real y = x + 1;
+    parameter Integer n;
+  end B;
+  
+  record SB
+    extends B(final n = 1);
+  end SB;
+  
+  record A
+    parameter Real x;
+    SB b(final n = 2);
+  end A;
+  
+  A a1(x=3);
+  B b1 = a1.b;
+  Real x;
+equation
+  x = b1.n;
+  
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordEval7",
+            description="Test that evaluation before scalarization of record variable works",
+            flatModel="
+fclass RecordTests.RecordEval7
+ parameter RecordTests.RecordEval7.A a1(x = 3);
+ parameter RecordTests.RecordEval7.B b1 = a1.b;
+ Real x;
+equation
+ x = 2;
+
+public
+ record RecordTests.RecordEval7.SB
+  parameter Real x;
+  parameter Real y = x + 1;
+  final parameter Integer n = 1 /* 1 */;
+ end RecordTests.RecordEval7.SB;
+
+ record RecordTests.RecordEval7.A
+  parameter Real x;
+  parameter RecordTests.RecordEval7.SB b(final n = 2);
+ end RecordTests.RecordEval7.A;
+
+ record RecordTests.RecordEval7.B
+  parameter Real x;
+  parameter Real y = x + 1;
+  parameter Integer n;
+ end RecordTests.RecordEval7.B;
+
+end RecordTests.RecordEval7;
+")})));
+end RecordEval7;
+
 
 model RecordModification1
   record R
