@@ -3123,6 +3123,65 @@ class LocalDAECollocator(CasadiCollocator):
                     lterm_l1.init()
                     self.lterm_l1 = lterm_l1
 
+    def _add_c(self, sources, eqtype, pos, i, k):
+        """
+        Record origin of a block of residuals in self.c_e or self.c_i
+        """
+        if pos[1] == pos[0]:
+            return # don't record empty residuals
+        if eqtype not in sources:
+            sources[eqtype] = []
+        sources[eqtype].append((i, k, pos))
+
+    def add_c_eq(self, eqtype, constr, i=-1, k=-1):
+        """
+        Add a block of equality constraints to self.c_e
+
+        The constraint
+
+            constr == 0
+
+        should be instantiated from the given equation type at the given
+        i and k (use default value -1 if a value for i or k does not apply).
+        """
+        j0 = self.c_e.numel()
+        self.c_e.append(constr)
+        j1 = self.c_e.numel()
+        self._add_c(self.c_e_sources, eqtype, (j0, j1), i, k)
+
+    def add_c_ineq(self, eqtype, constr, i=-1, k=-1):
+        """
+        Add a block of inequality constraints to self.c_i
+
+        The constraint on constr should be instantiated from the given
+        equation type at the given i and k (use default value -1 if a value
+        for i or k does not apply).
+        """
+        j0 = self.c_i.numel()
+        self.c_i.append(constr)
+        j1 = self.c_i.numel()
+        self._add_c(self.c_i_sources, eqtype, (j0, j1), i, k)
+
+    def add_c_eq_l1(self, eqtype, constr, i=-1):
+        """
+        Add a block of l1 equality constraints to self.c_e
+
+        The constraint
+
+            constr == 0
+
+        should be instantiated from the given equation type at the given i
+        and be the concatenation of one constraint for each collocation point
+        (use the default value -1 for i if a value does not apply).
+        """
+        j0 = self.c_e.numel()
+        self.c_e.append(constr)
+        j1 = self.c_e.numel()
+        n = (j1-j0)//self.n_cp
+        assert n*self.n_cp == j1-j0
+        for k in xrange(1, self.n_cp+1):
+            self._add_c(self.c_e_sources, eqtype, (j0+(k-1)*n, j0+k*n), i, k)
+
     def _call_functions(self):
         """
         Call common functions for level 1 and level 0
@@ -3192,8 +3251,11 @@ class LocalDAECollocator(CasadiCollocator):
                                 self._variant_sf[i][k][dx_sf_index])
                             
         # Create constraint storage
-        c_e = casadi.MX()
-        c_i = casadi.MX()
+        self.c_e = c_e = casadi.MX()
+        self.c_i = c_i = casadi.MX()
+        # NB: internal format of c_e_sources/c_i_sources is subject to change!
+        self.c_e_sources = {}
+        self.c_i_sources = {}
 
         # Initial conditions
         i = 1
@@ -3204,13 +3266,13 @@ class LocalDAECollocator(CasadiCollocator):
                 s_fcn_input.append(self._variant_sf[i][k])
 
         [initial_constr] = self.initial_l0_fcn.call(s_fcn_input)
-        c_e.append(initial_constr)
+        self.add_c_eq('initial', initial_constr, i, k)
         if self.eliminate_der_var:
             print "Call the additional equations for no derivative mode"
             raise NotImplementedError("named_vars not supported yet")
         else:
             [dae_t0_constr] = self.dae_l0_fcn.call(s_fcn_input)
-        c_e.append(dae_t0_constr)
+        self.add_c_eq('dae', dae_t0_constr, i, k)
 
         if self.blocking_factors is None:
             inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']]
@@ -3230,7 +3292,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Add residual for u_1_0 as constraint
             u_1_0_constr = self.var_map['unelim_u'][1][0][input_index] - u_1_0
-            c_e.append(u_1_0_constr)
+            self.add_c_eq('u_1_0', u_1_0_constr, i=1, k=0)
 
         # Continuity constraints for x_{i, n_cp + 1}
         if self.is_gauss:
@@ -3245,7 +3307,7 @@ class LocalDAECollocator(CasadiCollocator):
 
                     # Add residual for x_i_np1 as constraint
                     quad_constr = self.var_map['x'][i][self.n_cp + 1]['all'] - x_i_np1
-                    c_e.append(quad_constr)
+                    self.add_c_eq('continuity', quad_constr, i)
             else:
                 for i in xrange(1, self.n_e + 1):
                     # Evaluate x_{i, n_cp + 1} based on polynomial x_i
@@ -3256,7 +3318,7 @@ class LocalDAECollocator(CasadiCollocator):
 
                     # Add residual for x_i_np1 as constraint
                     quad_constr = self.var_map['x'][i][self.n_cp + 1]['all'] - x_i_np1
-                    c_e.append(quad_constr)
+                    self.add_c_eq('continuity', quad_constr, i)
 
         # Constraints for terminal values
         if self.is_gauss:
@@ -3270,7 +3332,7 @@ class LocalDAECollocator(CasadiCollocator):
                 # Add residual for xx_ne_np1 as constraint
                 term_constr = (self.var_map[var_type][self.n_e][self.n_cp + 1]['all'] -
                                xx_ne_np1)
-                c_e.append(term_constr)
+                self.add_c_eq('terminal_' + var_type, term_constr, i=self.n_e, k=self.n_cp+1)
             if not self.eliminate_der_var:
                 # Evaluate dx_{n_e, n_cp + 1} based on polynomial x_{n_e}
                 dx_ne_np1 = 0
@@ -3282,12 +3344,12 @@ class LocalDAECollocator(CasadiCollocator):
                 # Add residual for dx_ne_np1 as constraint
                 term_constr_dx = (self.var_map['dx'][self.n_e][self.n_cp + 1]['all'] -
                                   dx_ne_np1)
-                c_e.append(term_constr_dx)
+                self.add_c_eq('terminal_dx', term_constr_dx, i=self.n_e, k=self.n_cp+1)
 
         # Element length constraints
         if self.hs == "free":
             h_constr = casadi.sumRows(self.h[1:]) - 1
-            c_e.append(h_constr)
+            self.add_c_eq('h_sum', h_constr)
             
         # Path constraints
         for i in xrange(1, self.n_e + 1):
@@ -3306,8 +3368,8 @@ class LocalDAECollocator(CasadiCollocator):
                 [g_e_constr] = self.g_e_l0_fcn.call(s_fcn_input)
                 [g_i_constr] = self.g_i_l0_fcn.call(s_fcn_input)
 
-                c_e.append(g_e_constr)
-                c_i.append(g_i_constr)
+                self.add_c_eq(  'path_eq',   g_e_constr, i, k)
+                self.add_c_ineq('path_ineq', g_i_constr, i, k)
                 
         # Point constraints
         s_fcn_input = self._get_z_l0(i, k, with_der=False)
@@ -3315,8 +3377,8 @@ class LocalDAECollocator(CasadiCollocator):
         [G_e_constr] = self.G_e_l0_fcn.call(s_fcn_input)
         [G_i_constr] = self.G_i_l0_fcn.call(s_fcn_input)
 
-        c_e.append(G_e_constr)
-        c_i.append(G_i_constr)
+        self.add_c_eq(  'point_eq',   G_e_constr)
+        self.add_c_ineq('point_ineq', G_i_constr)
 
         # Check that only inputs are constrained or eliminated
         if self.external_data is not None:
@@ -3370,11 +3432,7 @@ class LocalDAECollocator(CasadiCollocator):
                         # Add constraint
                         input_constr = u_var - u_value
                         c_e.append(input_constr)
-        
-        # Broadcast the constraints
-        self.c_e = c_e
-        self.c_i = c_i
-        
+
         # Calculate cost
         self.cost_mayer = 0
         if not self.mterm.isConstant() or self.mterm.getValue() != 0.:
@@ -3434,11 +3492,11 @@ class LocalDAECollocator(CasadiCollocator):
                 # Evaluate collocation constraints
                 if not self.eliminate_der_var:
                     [scoll_constr] = self.coll_l0_eq_fcn.call(scoll_input)
-                    self.c_e.append(scoll_constr)
+                    self.add_c_eq('collocation', scoll_constr, i, k)
 
                 # Evaluate DAE constraints
                 [dae_constr] = self.dae_l0_fcn.call(s_fcn_input)
-                self.c_e.append(dae_constr)
+                self.add_c_eq('dae', dae_constr, i, k)
 
 
         # Continuity constraints for x_{i, 0}
@@ -3446,7 +3504,7 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e):
                 cont_constr = (self.var_map['x'][i][self.n_cp + self.is_gauss]['all'] - 
                                self.var_map['x'][i + 1][0]['all'])
-                self.c_e.append(cont_constr)
+                self.add_c_eq('continuity', cont_constr, i)
 
 
         self.cost_lagrange = 0        
@@ -3611,17 +3669,18 @@ class LocalDAECollocator(CasadiCollocator):
                         ecoll_input += [coll_l1_sf[i]['dx']]
 
                 [dae_constr_l1] = self.dae_l1_fcn.call(e_fcn_input)
-                self.c_e.append(dae_constr_l1)
+                self.add_c_eq_l1('dae', dae_constr_l1, i)
+
                 if not self.eliminate_der_var:
                     [col_costr_l1]=self.coll_eq_l1_fcn.call(ecoll_input)
-                    self.c_e.append(col_costr_l1)
+                    self.add_c_eq_l1('collocation', col_costr_l1, i)
 
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
             for i in xrange(1, self.n_e):
                 cont_constr = (self.var_map['x'][i][self.n_cp + self.is_gauss]['all'] - 
                                self.var_map['x'][i + 1][0]['all'])
-                self.c_e.append(cont_constr)  
+                self.add_c_eq('continuity', cont_constr, i)
 
         # Lagrange term with check point
         self.cost_lagrange = 0       
@@ -3915,8 +3974,8 @@ class LocalDAECollocator(CasadiCollocator):
 
                         # Add constraints
                         if name in self.blocking_factors.du_bounds:
-                            c_i.append(du - bound)
-                            c_i.append(-du - bound)
+                            self.add_c_ineq('delta_u_ub',  du - bound, i)
+                            self.add_c_ineq('delta_u_lb', -du - bound, i)
 
                         # Add penalty
                         if name in self.blocking_factors.du_quad_pen:
