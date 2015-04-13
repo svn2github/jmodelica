@@ -4823,8 +4823,14 @@ aspect CCodeGen {
 	
 	public void BLT.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
 		for (AbstractEquationBlock eb : getAllBlocks()) {
-			if(eb.isSolvable())
+			if (eb.isSolvable()) {
 				eb.genVarDecls_C(p, str, indent, null);
+			} else {
+                for (FRelExp relExp : eb.inactiveSwitches_C())
+                    p.printVarDecls(relExp, str, indent);
+                for (FRelExp relExp : eb.inactiveInitialSwitches_C())
+                    p.printVarDecls(relExp, str, indent);
+			}
 		}
 	}
 

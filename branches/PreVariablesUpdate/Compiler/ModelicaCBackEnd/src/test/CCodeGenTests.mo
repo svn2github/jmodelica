@@ -10610,6 +10610,113 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end BlockTest18;
 
+model InactiveBlockSwitch1
+    function F
+        input Real i1[:];
+        output Real o1;
+    algorithm
+        o1 := sum(i1 .* 42);
+        annotation(Inline=false);
+    end F;
+    Real a,b,c;
+equation
+    a = time + 3.14;
+    b = if F({a, 1}) < 6.28 then c else -c;
+    c = b + 42;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="InactiveBlockSwitch1",
+            description="Test code gen for inactive block switches that need temp variables",
+            template="
+$C_ode_derivatives$
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    model_ode_guards(jmi);
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    _a_0 = _time + 3.14;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _a_0;
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(1);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(func_CCodeGenTests_InactiveBlockSwitch1_F_exp0(tmp_1) - (AD_WRAP_LITERAL(6.28)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    /********* Write back reinits *******/
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _c_2;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t* Q1 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 1;
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+        jmi_array_ref_1(tmp_2, 1) = _a_0;
+        jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(1);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch(func_CCodeGenTests_InactiveBlockSwitch1_F_exp0(tmp_2) - (AD_WRAP_LITERAL(6.28)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+        }
+        Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
+        for (i = 0; i < 1; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = -1.0;
+        memset(Q3, 0, 1 * sizeof(jmi_real_t));
+        Q3[0] = 1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _c_2 = x[0];
+        }
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
+        jmi_array_ref_1(tmp_3, 1) = _a_0;
+        jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(1);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch(func_CCodeGenTests_InactiveBlockSwitch1_F_exp0(tmp_3) - (AD_WRAP_LITERAL(6.28)), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+        }
+        _b_1 = COND_EXP_EQ(_sw(0), JMI_TRUE, _c_2, - _c_2);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _b_1 + 42 - (_c_2);
+        }
+    }
+    return ef;
+}
+
+
+")})));
+end InactiveBlockSwitch1;
+
+
 
 model Algorithm1
  Real x;
