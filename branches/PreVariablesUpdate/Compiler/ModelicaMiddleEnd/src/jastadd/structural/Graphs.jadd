@@ -274,12 +274,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             
             Collection<E> groupMembers = getEquations(e);
             int n_existing = 0;
+            int n_existing_meta = 0;
             for (E eqn : groupMembers) {
-                if (!eqn.isMeta()) {
-                    n_existing += 1;
+                n_existing += 1;
+                if (eqn.isMeta()) {
+                    n_existing_meta++;
                 }
             }
-            if (n_existing != 0 && n_existing != n_eq)
+            if (n_existing != 0 && (n_existing - n_existing_meta) != n_eq)
                 throw new IllegalArgumentException("Equation already exist in BiPGraph but with different number of scalars, previously " + n_existing + ", now " + n_eq + ", equation:\n" + e);
             
             if (n_existing == 0) {

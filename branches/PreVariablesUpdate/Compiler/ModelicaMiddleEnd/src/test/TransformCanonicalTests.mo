@@ -6639,6 +6639,28 @@ Semantic error at line 0, column 0:
 ")})));
 end AssertEval2;
 
+model MetaEqn1
+    function F
+        input Real i1[:];
+    algorithm
+        assert(sum(i1) > 0, "Oh, no!");
+        annotation(Inline=false);
+    end F;
+equation
+    F({-time,time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="MetaEqn1",
+            description="Test init BLT for meta equations",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Meta equation block ---
+TransformCanonicalTests.MetaEqn1.F({- time, time})
+-------------------------------
+")})));
+end MetaEqn1;
+
 model MixedVariabilityFunction1
     function F
         input Real x;
