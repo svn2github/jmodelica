@@ -1837,6 +1837,31 @@ end EvaluationTests.EvaluateAnnotation10;
 ")})));
 end EvaluateAnnotation10;
 
+model EvaluateAnnotation11
+    parameter A[:] a1 = {A()};
+    parameter A[:] a2 = a1;
+      
+    record A
+        parameter Integer n = 1 annotation(Evaluate=true);
+        parameter Integer x = 1;
+    end A;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EvaluateAnnotation10",
+            description="Evaluate annotation on record with mixed variabilities",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation11
+ eval parameter Integer a1[1].n = 1 /* 1 */;
+ parameter Integer a1[1].x = 1 /* 1 */;
+ eval parameter Integer a2[1].n = 1 /* 1 */;
+ parameter Integer a2[1].x;
+parameter equation
+ a2[1].x = a1[1].x;
+end EvaluationTests.EvaluateAnnotation11;
+")})));
+end EvaluateAnnotation11;
+
 
 
 model FinalParameterEval1

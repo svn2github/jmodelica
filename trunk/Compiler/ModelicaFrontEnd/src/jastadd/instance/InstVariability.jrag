@@ -127,7 +127,7 @@ aspect InstVariability {
     private boolean InstAssignable.circularVariability = false;
     
     syn FTypePrefixVariability InstComponentDecl.bExpVariability() = parentBExpVariability().getPart(name());
-    
+    eq InstArrayComponentDecl.bExpVariability() = parentBExpVariability();
     eq InstAssignable.bExpVariability() {
         FTypePrefixVariability v = super.bExpVariability();
         if (!circularVariability && v.continuousVariability()) {
