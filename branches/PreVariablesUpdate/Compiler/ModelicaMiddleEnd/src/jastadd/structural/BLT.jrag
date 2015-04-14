@@ -1148,6 +1148,7 @@ aspect BLT{
         private Collection<SimpleEquationBlock> localNonRealBlocks_cache = null;
         private Collection<AbstractEquationBlock> solvedRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedRealBlocks_cache = null;
+        private Collection<SimpleEquationBlock> localMetaBlocks_cache = null;
 
         protected EquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
             super(producer, blockDependency);
@@ -1284,6 +1285,21 @@ aspect BLT{
                         localSolvedRealBlocks_cache.add(block.asSimple());
             }
             return localSolvedRealBlocks_cache;
+        }
+
+        /**
+         * Returns all locla meta blocks in this block.
+         * 
+         * @return Collection<SimpleEquationBlock> all local meta blocks
+         */
+        public Collection<SimpleEquationBlock> localMetaBlocks() {
+            if (localMetaBlocks_cache == null) {
+                localMetaBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (block.isSimple() && block.asSimple().isMeta())
+                        localMetaBlocks_cache.add(block.asSimple());
+            }
+            return localMetaBlocks_cache;
         }
 
         @Override
@@ -2362,6 +2378,12 @@ aspect BLTPrettyPrinting {
             str.println();
             str.formatln("%sDiscrete equations:", indent);
             for (SimpleEquationBlock seb : localNonRealBlocks())
+                seb.prettyPrintSub(p, str, innerIndent);
+        }
+        if (localMetaBlocks().size() > 0) {
+            str.println();
+            str.formatln("%sMeta equations:", indent);
+            for (SimpleEquationBlock seb : localMetaBlocks())
                 seb.prettyPrintSub(p, str, innerIndent);
         }
         if (isLinear()) {
