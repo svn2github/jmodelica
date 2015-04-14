@@ -2793,13 +2793,18 @@ class LocalDAECollocator(CasadiCollocator):
         # Manipulate and sort path constraints
         g_e = []
         g_i = []
+        self.path_eq_orig = []
+        self.path_ineq_orig = []
         for (res, cnstr) in itertools.izip(self.path, self.op.getPathConstraints()):
             if cnstr.getType() == cnstr.EQ:
                 g_e.append(res)
+                self.path_eq_orig.append(cnstr)
             elif cnstr.getType() == cnstr.LEQ:
                 g_i.append(res)
+                self.path_ineq_orig.append(cnstr)
             elif cnstr.getType() == cnstr.GEQ:
                 g_i.append(-res)
+                self.path_ineq_orig.append(cnstr)
 
         # Create path constraint functions
         s_path_constraint_input = []
@@ -2831,14 +2836,19 @@ class LocalDAECollocator(CasadiCollocator):
         # Manipulate and sort point constraints
         G_e = []
         G_i = []
+        self.point_eq_orig = []
+        self.point_ineq_orig = []
         for (res, cnstr) in itertools.izip(self.point,
                                            self.op.getPointConstraints()):
             if cnstr.getType() == cnstr.EQ:
                 G_e.append(res)
+                self.point_eq_orig.append(cnstr)
             elif cnstr.getType() == cnstr.LEQ:
                 G_i.append(res)
+                self.point_ineq_orig.append(cnstr)
             elif cnstr.getType() == cnstr.GEQ:
                 G_i.append(-res)
+                self.point_ineq_orig.append(cnstr)
 
         # Create point constraint functions
         # Note that sym_input is needed as input since the point constraints
@@ -5491,11 +5501,13 @@ class OptimizationSolver(object):
 
     def get_nlp_residual_bounds(self):
         """Get the raw vectors (lb, ub) of bounds on residuals in the underlying NLP"""
-        return (self.collocator.gllb, self.collocator.glub)
+        # Returning copies to be safe
+        return (N.array(self.collocator.gllb), N.array(self.collocator.glub))
 
     def get_nlp_constraint_duals(self):
         """Get the raw vector of (unscaled) dual variables for the constraints in the underlying NLP"""
-        return self.collocator.dual_opt['g']
+        # Returning a copy to be safe
+        return N.array(self.collocator.dual_opt['g'])
 
     def get_constraint_types(self):
         """
@@ -5536,7 +5548,7 @@ class OptimizationSolver(object):
         """
         return self.collocator.get_nlp_constraint_indices(eqtype)
 
-    def get_residuals(self, eqtype, point='opt', raw=False):
+    def get_residuals(self, eqtype, point='opt', raw=False, inds=None):
         """
         Get the residuals for a given equation type.
 
@@ -5562,12 +5574,18 @@ class OptimizationSolver(object):
                 the violated bound otherwise.
                 Default: False
 
+            inds --
+                Iterable of equation indices within eqtype that the residuals
+                should be returned for, or None if residuals should be
+                returned for all equations.
+                Default: None
+
         Returns::
 
             residuals --
                 Array of shape (n_tp, n_eq) of (unscaled) residuals,
                 where n_tp is the number of time points found
-                and n_eq the number of equations of the corresponding kind.
+                and n_eq the number of equations.
 
             time --
                 The time for each time point
@@ -5579,11 +5597,14 @@ class OptimizationSolver(object):
                 The collocation point index for each time point.
                 -1 if not applicable.
         """
-        inds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+        rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
         residuals = self.get_nlp_residuals(point, raw=raw)
-        return (residuals[inds], time, i, k)
+        residuals = residuals[rinds]
+        if inds is not None:
+            residuals = residuals[:, inds]
+        return (residuals, time, i, k)
 
-    def get_constraint_duals(self, eqtype):
+    def get_constraint_duals(self, eqtype, inds=None):
         """
         Get the dual variables at the optimization solution for a given equation type.
 
@@ -5596,12 +5617,18 @@ class OptimizationSolver(object):
                     'initial', 'dae', 'path_eq', 'path_ineq',
                     'point_eq', 'point_ineq'
 
+            inds --
+                Iterable of equation indices within eqtype that the duals
+                should be returned for, or None if duals should be
+                returned for all equations.
+                Default: None
+
         Returns::
 
             duals --
                 Array of shape (n_tp, n_eq) of (unscaled) dual variable values,
                 where n_tp is the number of time points found
-                and n_eq the number of equations of the corresponding kind.
+                and n_eq the number of equations.
 
             time --
                 The time for each time point
@@ -5613,9 +5640,12 @@ class OptimizationSolver(object):
                 The collocation point index for each time point.
                 -1 if not applicable.
         """
-        inds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+        rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
         duals = self.get_nlp_constraint_duals()
-        return (duals[inds], time, i, k)
+        duals = duals[rinds]
+        if inds is not None:
+            duals = duals[:, inds]
+        return (duals, time, i, k)
 
     def get_residual_norms(self, point='opt', ord=N.inf, eqtype=None):
         """
@@ -5655,3 +5685,26 @@ class OptimizationSolver(object):
 
         result.sort(reverse = True)
         return result
+
+    def get_model_equations(self, eqtype):
+        """
+        Get the model equations corresponding to the given equation type
+
+        The equations are in the same order as the corresponding residuals
+        and constraint duals.
+
+        The only equation types supported are
+
+                    'initial', 'dae',
+                    'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+        """
+        op = self.collocator.op
+        # To be safe, only returning copies
+        if eqtype == 'initial':      return op.getInitialEquations()
+        elif eqtype == 'dae':        return op.getDaeEquations()
+        elif eqtype == 'path_eq':    return N.array(self.collocator.path_eq_orig) 
+        elif eqtype == 'path_ineq':  return N.array(self.collocator.path_ineq_orig)
+        elif eqtype == 'point_eq':   return N.array(self.collocator.point_eq_orig)
+        elif eqtype == 'point_ineq': return N.array(self.collocator.point_ineq_orig)
+        else: raise KeyError("Unsupported equation type %s" % repr(eqtype))
