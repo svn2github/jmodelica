@@ -5406,7 +5406,7 @@ class OptimizationSolver(object):
 
     def get_nlp_residuals(self, point = 'opt', raw=False):
         """
-        Get the raw vector of (scaled) residuals for the underlying NLP.
+        Get the raw vector of (unscaled) residuals for the underlying NLP.
 
         The vector contains residuals for all equality and inequality
         constraints.
@@ -5442,7 +5442,7 @@ class OptimizationSolver(object):
         return (self.collocator.gllb, self.collocator.glub)
 
     def get_nlp_constraint_duals(self):
-        """Get the raw vector of (scaled) dual variables for the constraints in the underlying NLP"""
+        """Get the raw vector of (unscaled) dual variables for the constraints in the underlying NLP"""
         return self.collocator.dual_opt['g']
 
     def get_constraint_types(self):
@@ -5513,7 +5513,7 @@ class OptimizationSolver(object):
         Returns::
 
             residuals --
-                Array of shape (n_tp, n_eq) of (scaled) residuals,
+                Array of shape (n_tp, n_eq) of (unscaled) residuals,
                 where n_tp is the number of time points found
                 and n_eq the number of equations of the corresponding kind.
 
@@ -5547,7 +5547,7 @@ class OptimizationSolver(object):
         Returns::
 
             duals --
-                Array of shape (n_tp, n_eq) of (scaled) dual variable values,
+                Array of shape (n_tp, n_eq) of (unscaled) dual variable values,
                 where n_tp is the number of time points found
                 and n_eq the number of equations of the corresponding kind.
 
@@ -5565,9 +5565,9 @@ class OptimizationSolver(object):
         duals = self.get_nlp_constraint_duals()
         return (duals[inds], time, i, k)
 
-    def get_residual_norms(self, point='opt', ord=N.inf):
+    def get_residual_norms(self, point='opt', ord=N.inf, eqtype=None):
         """
-        List the equation kinds and how much they contribute to the norm of the residual
+        List the norms of different parts of the residual, in descending order
 
         For inequality constraints, only the constraint violation contributes
         to the norm.
@@ -5581,11 +5581,25 @@ class OptimizationSolver(object):
 
             ord --
                 Vector norm order used with numpy.linalg.norm
+
+            eqtype --
+                If None, list all equation types and their residual norms.
+                Otherwise, list the residual norm of each equation
+                of the given type, along with its index within the type.
+                Default: None
         """
         result = []
-        for eqtype in self.get_constraint_types():
+
+        if eqtype is None:
+            for eqtype in self.get_constraint_types():
+                r, t, i, k = self.get_residuals(eqtype, point=point)
+                rnorm = N.linalg.norm(r.ravel(), ord=ord)
+                result.append((rnorm, eqtype))
+        else:
             r, t, i, k = self.get_residuals(eqtype, point=point)
-            rnorm = N.linalg.norm(r.ravel(), ord=ord)
-            result.append((rnorm, eqtype))
+            for j in xrange(r.shape[1]):
+                rnorm = N.linalg.norm(r[:,j], ord=ord)
+                result.append((rnorm, j))
+
         result.sort(reverse = True)
         return result
