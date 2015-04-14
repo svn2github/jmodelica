@@ -1296,14 +1296,50 @@ class LocalDAECollocator(CasadiCollocator):
 
         self._collocation = collocation
 
-    def _fill_checkpoint_map(self, varType, xx, n_var, initial_index, named_xx=None, n_add_points=0, move_zero=1):
+    def add_named_var(self, kind, var, i=-1, k=-1):
+        """
+        Append a named variable to named_xx/named_pp and record source information
+
+        Should be called even if the named_vars option is off
+        to record the source information.
+        """
+        if kind == 'xx':
+            self.n_named_xx += 1
+        else:
+            assert kind == 'pp'
+            self.n_named_pp += 1
+
+        if self.named_vars:
+            if k == -1:
+                if i == -1:
+                    named_var = casadi.SX.sym(var.getName())
+                else:
+                    named_var = casadi.SX.sym(var.getName()+'_%d' % i)
+            else:
+                named_var = casadi.SX.sym(var.getName()+'_%d_%d' % (i, k))
+
+            if kind == 'xx':
+                self.named_xx.append(named_var)
+                assert len(self.named_xx) == self.n_named_xx
+            else:
+                # assert kind == 'pp' # already checked
+                self.named_pp.append(named_var)
+                assert len(self.named_pp) == self.n_named_pp
+
+    def add_named_xx(self, var, i=-1, k=-1):
+        self.add_named_var('xx', var, i, k)
+
+    def add_named_pp(self, var, i=-1, k=-1):
+        self.add_named_var('pp', var, i, k)
+
+    def _fill_checkpoint_map(self, varType, xx, n_var, initial_index, varKind='xx', n_add_points=0, move_zero=1):
         """
         Fill the checkpoint map for a given variable type with one sample per collocation point.
 
-        Fills in self.var_map and self.var_indices, and appends to named_xx if the option is given.
+        Fills in self.var_map and self.var_indices, and appends to named_xx/named_pp if the named_vars option is on.
+        Use varKind='pp' for parameters.
+        
         Returns the number of scalar variables used - should be the same as the length of xx.
-
-        This function may be used for both nlp variables and parameters.
         """
         self.var_map[varType] = dict()
         self.var_indices[varType] = dict()
@@ -1344,9 +1380,11 @@ class LocalDAECollocator(CasadiCollocator):
                 for (j, var) in enumerate(self.mvar_vectors[varType]):
                     self.var_map[varType][i][k+move_zero][j] = scalar_split[j]
                     self.var_indices[varType][i][k+move_zero].append(counter + initial_index)
-                    if self.named_vars:
-                        named_xx.append(casadi.SX.sym(var.getName()+'_%d_%d' % (i, k+move_zero)))
+
+                    self.add_named_var(varKind, var, i, k+move_zero)
+
                     counter += 1
+
         return counter
 
     def _create_nlp_variables(self):
@@ -1397,8 +1435,11 @@ class LocalDAECollocator(CasadiCollocator):
         # Map with different levels of packed mx variables
         self.var_map = var_map = dict()
 
+        # Count the number of named variables to see that they match up even
+        # if named_vars is off - also needed for back tracking of variables
+        self.n_named_xx = 0
         if self.named_vars:
-            named_xx = []            
+            self.named_xx = named_xx = []
 
         # Contains the indices at which xx is split
         # Those indices will let us split the xx as follows
@@ -1500,8 +1541,7 @@ class LocalDAECollocator(CasadiCollocator):
                     add=1
             counter_s += self._fill_checkpoint_map(varType, global_split[split_map[varType]],
                                                    nlp_n_var[varType], counter_s, 
-                                                   named_xx if self.named_vars else None,
-                                                   add, move_zero)
+                                                   'xx', add, move_zero)
 
         if self.blocking_factors is not None:
             varType = 'unelim_u'
@@ -1512,11 +1552,10 @@ class LocalDAECollocator(CasadiCollocator):
             # Creates auxiliary list
             aux_list = [counter_s]*n_u
             
-            if self.named_vars:
-                u_cont_names = [
-                    var.getName() for var in mvar_vectors['unelim_u']
-                    if var.getName() not in
-                    self.blocking_factors.factors.keys()]
+            u_cont_vars = [
+                var for var in mvar_vectors['unelim_u']
+                if var.getName() not in
+                self.blocking_factors.factors.keys()]
             
             var_indices['u_cont'] = dict()
             for i in xrange(1, self.n_e + 1):
@@ -1525,9 +1564,9 @@ class LocalDAECollocator(CasadiCollocator):
                     new_index = counter_s + n_cont_u
                     var_indices['u_cont'][i][k] = range(counter_s, new_index)
                     counter_s = new_index
-                    if self.named_vars:
-                        named_xx += [casadi.SX.sym('%s_%d_%d' % (name, i, k)) for
-                                     name in u_cont_names] 
+
+                    for var in u_cont_vars:
+                        self.add_named_xx(var, i, k)
 
             # Create index storage for inputs with blocking factors
             var_indices['u_bf'] = dict()
@@ -1539,14 +1578,16 @@ class LocalDAECollocator(CasadiCollocator):
                     
             # Index controls with blocking factors
             for name in self.blocking_factors.factors.keys():
+                var = self.op.getVariable(name)
                 element = 1
                 factors = self.blocking_factors.factors[name]
                 for (factor_i, factor) in enumerate(factors):
                     for i in xrange(element, element + factor):
                         for k in xrange(1, self.n_cp + 1):
                             var_indices['u_bf'][i][k].append(counter_s)
-                    if self.named_vars:
-                        named_xx.append(casadi.SX.sym('%s_%d' % (name, element)))
+
+                    self.add_named_xx(var, element)
+
                     counter_s += 1
                     element += factor
                     
@@ -1610,11 +1651,9 @@ class LocalDAECollocator(CasadiCollocator):
             
             # Insert initial controls into variable map                
             var_map['unelim_u'][1][0] = xx[var_indices['unelim_u'][1][0]]
-            if self.named_vars:
-                named_xx += [
-                    casadi.SX.sym(var.getName() + '_1_0') for
-                    var in mvar_vectors['unelim_u'] if
-                    var.getName() not in self.blocking_factors.factors] 
+            for var in mvar_vectors['unelim_u']:
+                if var.getName() not in self.blocking_factors.factors:
+                    self.add_named_xx(var, i=1, k=0)
 
         # Creates check_point map entry for initial points
         split_indices=[0,nlp_n_var['dx']]
@@ -1649,8 +1688,9 @@ class LocalDAECollocator(CasadiCollocator):
                     var_map[varType][1][0][var_index] = \
                               tmp_split[var_index]
                     var_indices[varType][1][0].append(counter_s)
-                    if self.named_vars:
-                        named_xx.append(casadi.SX.sym(name+'_1_0'))                        
+
+                    self.add_named_xx(var, i=1, k=0)
+
                     counter_s+=1
             else:
                 var_map[varType][1][0]['all']=xx[0:0]
@@ -1673,9 +1713,9 @@ class LocalDAECollocator(CasadiCollocator):
                         var_map[varType][ii][kk][var_index] = \
                                   tmp_split[var_index]
                         var_indices[varType][ii][kk].append(counter_s)
-                        if self.named_vars:
-                            named_xx.append(
-                                casadi.SX.sym(name+'_%d_%d' % (ii, kk)))                             
+
+                        self.add_named_xx(var, ii, kk)
+
                         counter_s+=1
                 else:
                     var_map[varType][ii][kk]['all']=xx[0:0]
@@ -1691,8 +1731,9 @@ class LocalDAECollocator(CasadiCollocator):
                 name = par.getName()
                 (var_index, _) = self.name_map[name] 
                 var_map['p_opt'][var_index] = tmp_split[var_index]
-                if self.named_vars:
-                    named_xx.append(casadi.SX.sym(name))
+                
+                self.add_named_xx(par)
+
                 counter_s+=1
                                    
         # Creates check_point map entry free elements
@@ -1704,8 +1745,11 @@ class LocalDAECollocator(CasadiCollocator):
             tmp_split=casadi.vertsplit(var_map['h']['all'])
             for i in range(self.n_e):
                 var_map['h'][i+1] = tmp_split[i]
+
+                self.n_named_xx += 1 # increment since we don't call add_named_xx
                 if self.named_vars:
                     named_xx.append(casadi.SX.sym('h_%d' % i+1))
+
                 counter_s+=1                     
 
         # Update h_i for free elements length
@@ -1714,13 +1758,13 @@ class LocalDAECollocator(CasadiCollocator):
             self.h = casadi.vertcat([N.nan,var_map['h']['all']])        
 
         assert(counter_s == n_xx)
-        if self.named_vars:
-            assert(len(named_xx) == n_xx)
         
         # Save variables and indices as data attributes
         self.xx = xx
+        assert self.n_named_xx == n_xx
         if self.named_vars:
-            self.named_xx = casadi.vertcat(named_xx)
+            assert(len(named_xx) == n_xx)
+            self.named_xx = casadi.vertcat(self.named_xx)
             
         self.global_split_indices = global_split_indices
         self.n_xx = n_xx
@@ -1783,12 +1827,15 @@ class LocalDAECollocator(CasadiCollocator):
             self.var_map[para.getName()] = self.pp_unvarying[i]
             i+=1
 
+        # Count the number of named variables to see that they match up even
+        # if named_vars is off - also needed for back tracking of variables
+        self.n_named_pp = 0
         #Create list of parameter names
         if self.named_vars:
-            named_pp = []
-            for para in par_vars:
-                named_pp.append(casadi.SX.sym(para.getName()))
-            self.named_pp = casadi.vertcat(named_pp)
+            self.named_pp = named_pp = []
+
+        for para in par_vars:
+            self.add_named_pp(para)
 
         # Add p_fixed to var_map and var_indices
         self.var_map['p_fixed'] = dict()
@@ -1807,8 +1854,13 @@ class LocalDAECollocator(CasadiCollocator):
             for j in xrange(1, len(pp_kinds)):
                 self._fill_checkpoint_map(pp_kinds[j], self.pp_split[j],
                     n_var_pp[j], pp_offsets[j],
-                    named_xx=(named_pp if self.named_vars else None),
-                    n_add_points=n_add_points, move_zero=0)
+                    'pp', n_add_points=n_add_points, move_zero=0)
+
+        # Finalize named_pp
+        assert self.n_named_pp == n_pp
+        if self.named_vars:
+            assert(len(self.named_pp) == n_pp)
+            self.named_pp = casadi.vertcat(self.named_pp)
 
     def _get_z_l0(self,i,k,with_der=True):
         """
