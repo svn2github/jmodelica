@@ -5248,6 +5248,16 @@ class LocalDAECollocator(CasadiCollocator):
         """
         return self.c_dests.keys()
 
+    def get_times(self, ii, kk):
+        """
+        Return a vector of times corresponding to the time points zip(ii,kk)
+        """
+        # Use reasonable defaults when i or k is not given.
+        # todo: Better defaults?
+        ii = N.array(ii); ii[ii == -1] = 1
+        kk = N.array(kk); kk[kk == -1] = 1
+        return N.array([self.time_points[i][k] for (i,k) in zip(ii,kk)])
+
     def get_nlp_constraint_indices(self, eqtype):
         """
         Get a mapping from continuous time equations to NLP constraints
@@ -5293,16 +5303,12 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             assert source['kind'] == 'eq', "Unrecognized equation kind"
 
-        ii = N.array(source['i'])
-        kk = N.array(source['k'])
+        i = N.array(source['i'])
+        k = N.array(source['k'])
         
-        # Use reasonable defaults when i or k is not given.
-        # todo: Better defaults?
-        i2 = ii.copy(); i2[i2 == -1] = 1
-        k2 = kk.copy(); k2[k2 == -1] = 1
-        time = N.array([self.time_points[i][k] for (i,k) in zip(i2,k2)])
+        time = self.get_times(i, k)
 
-        return (indices, time, ii, kk)
+        return (indices, time, i, k)
 
 
 class MeasurementData(object):
@@ -5534,7 +5540,7 @@ class OptimizationSolver(object):
         Parameters::
             
             point --
-                The where the residuals should be evaluated,
+                The point where the residuals should be evaluated,
                 'opt' for the optimization solution or
                 'init' for the initial guess.
                 Default: 'opt'
@@ -5620,7 +5626,7 @@ class OptimizationSolver(object):
                     'point_eq', 'point_ineq'
 
             point --
-                The where the residuals should be evaluated,
+                The point where the residuals should be evaluated,
                 'opt' for the optimization solution or
                 'init' for the initial guess.
                 Default: 'opt'
@@ -5714,7 +5720,7 @@ class OptimizationSolver(object):
 
         Parameters::
             point --
-                The where the residuals should be evaluated,
+                The point where the residuals should be evaluated,
                 'opt' for the optimization solution or
                 'init' for the initial guess.
                 Default: 'opt'
@@ -5744,7 +5750,7 @@ class OptimizationSolver(object):
         result.sort(reverse = True)
         return result
 
-    def get_model_equations(self, eqtype):
+    def get_equations(self, eqtype):
         """
         Get the model equations corresponding to the given equation type
 
@@ -5766,3 +5772,159 @@ class OptimizationSolver(object):
         elif eqtype == 'point_eq':   return N.array(self.collocator.point_eq_orig)
         elif eqtype == 'point_ineq': return N.array(self.collocator.point_ineq_orig)
         else: raise KeyError("Unsupported equation type %s" % repr(eqtype))
+
+    def get_nlp_jacobian(self, point='opt'):
+        """
+        Get the raw Jacobian of the nlp
+
+        Parameters::
+            point --
+                The point where the Jacobian should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+        """
+        assert point in ('opt', 'init')
+        return self.collocator.get_J(point)
+
+    def get_point_times(self, i, k):
+        """
+        Return a vector of times corresponding to the time points zip(ii,kk)        
+        """
+        return self.collocator.get_times(i, k)
+
+    def get_model_variables(self, xx_inds):
+        """
+        Get the model variables corresponding to the given nlp variables
+
+        Parameters::
+            xx_inds --
+                Array of indices into the nlp variables
+
+        Returns::
+            vars --
+                Array of model variables
+
+            time --
+                The time that each variable was instantiated
+
+            i --
+                The element index where each variable was instantiated.
+                -1 if not applicable.
+
+            k --
+                The collocation point where each variable was instantiated.
+                -1 if not applicable.
+        """
+        xx_sources = self.collocator.xx_sources
+        vars = xx_sources['var'][xx_inds]
+        i    = xx_sources['i'][xx_inds]
+        k    = xx_sources['k'][xx_inds]
+        time = self.get_point_times(i, k)
+        return (vars, time, i, k)
+
+    def get_model_constraints(self, c_inds):
+        """
+        Get the model constraints corresponding to the given nlp constraints
+
+        Parameters::
+            c_inds --
+                Array of indices into the nlp constraints
+
+        Returns::
+            eqtypes --
+                The constraint type for each constraint
+
+            eqinds --
+                The index within constraint type for each constraint
+
+            time --
+                The time that each constraint was instantiated
+
+            i --
+                The element index where each constraint was instantiated.
+                -1 if not applicable.
+
+            k --
+                The collocation point where each constraint was instantiated.
+                -1 if not applicable.
+        """
+        c_sources = self.collocator.c_sources
+        eqtypes = c_sources['eqtype'][c_inds]
+        eqinds  = c_sources['eqind'][c_inds]
+        i       = c_sources['i'][c_inds]
+        k       = c_sources['k'][c_inds]
+        time = self.get_point_times(i, k)
+        return (eqtypes, eqinds, time, i, k)
+
+    def get_model_jacobian_entries(self, c_inds, xx_inds):
+        """
+        List model equations and variables corresponding to constraints and variables in the nlp
+
+        Map zip(c_inds, xx_inds) to model equations and variables and
+        return a set of (eqtype, eqind, var) tuples for each unique
+        combination.
+        """
+        c_sources, xx_sources = self.collocator.c_sources, self.collocator.xx_sources
+        combos = set(zip(c_sources['eqtype'][c_inds], c_sources['eqind'][c_inds], xx_sources['var'][xx_inds]))
+
+        return combos        
+
+    def find_nonfinite_jacobian_entries(self, point='opt'):
+        """
+        Return combinations of model constraints and variables where the Jacobian is nonfinite
+
+        Return a set of (eqtype, eqind, var) tuples where the equation
+        (eqtype, eqind) has a nonfinite derivative with respect to var
+        at some time point.
+
+        Parameters::
+            point --
+                The point where the Jacobian should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+        """
+        J = self.get_nlp_jacobian(point)
+        nonfinite = ~N.isfinite(J)
+        c_inds, xx_inds = N.nonzero(nonfinite)
+
+        return self.get_model_jacobian_entries(c_inds, xx_inds)
+
+    def list_jacobian_entries(self, entries):
+        """
+        Print a list of Jacobian entries
+
+        Parameters::
+            entries --
+                Iterable of entries (eqtype, eqind, var) as returned from
+                find_nonfinite_jacobian_entries or get_model_jacobian_entries
+        """
+        last_eqtype = None
+        last_eqind = -1
+        for (eqtype, eqind, var) in sorted(entries):
+            if eqtype != last_eqtype or eqind != last_eqind:
+                # Print new equation
+                try:
+                    eq = self.get_equations(eqtype)[eqind] # todo: faster lookup?
+                    print "\nEquation(%s):" % eqtype, eq
+                except (KeyError, IndexError):
+                    print "\nEquation: (%s, %i)" % (eqtype, eqind)
+
+                last_eqtype, last_eqind = eqtype, eqind
+            print "wrt", var
+
+    def list_nonfinite_jacobian_entries(self, point='opt'):
+        """
+        List combinations of model equations and variables where the Jacobian is nonfinite
+
+        Parameters::
+            point --
+                The point where the Jacobian should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+        """
+        print "Nonfinite Jacobian entries:"
+        print "---------------------------"
+        self.list_jacobian_entries(self.find_nonfinite_jacobian_entries(point))
