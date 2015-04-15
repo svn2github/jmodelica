@@ -4294,6 +4294,17 @@ class LocalDAECollocator(CasadiCollocator):
         self.xx_init = xx_init
 
     def _assemble_back_tracking_info(self):
+        # Finalize and sort recorded tracking info
+        for dests in (self.c_dests, self.xx_dests):
+            for dest in dests.itervalues():
+                inds = N.vstack(dest['inds'])
+                i = N.array(dest['i'])
+                k = N.array(dest['k'])
+                tinds = N.lexsort((k, i))
+                dest['inds'] = inds[tinds, :]
+                dest['i']    = i[tinds]
+                dest['k']    = k[tinds]
+
         # Create mapping from nlp constraints to model equations
         # We need to know the number of equality and inequality constraints at this point
         n_e = self.c_e.numel()
@@ -5294,21 +5305,59 @@ class LocalDAECollocator(CasadiCollocator):
             return (N.zeros((0,0), dtype=N.int), N.zeros(0),
                 N.zeros(0, dtype=N.int), N.zeros(0, dtype=N.int))
         
-        source = self.c_dests[eqtype]
+        dest = self.c_dests[eqtype]
         
-        indices = N.vstack(source['inds'])
-        if source['kind'] == 'ineq':
+        indices = N.array(dest['inds'])
+        if dest['kind'] == 'ineq':
             # inequalities come after equalities in the constraints
             indices += self.c_e.numel()
         else:
-            assert source['kind'] == 'eq', "Unrecognized equation kind"
+            assert dest['kind'] == 'eq', "Unrecognized equation kind"
 
-        i = N.array(source['i'])
-        k = N.array(source['k'])
+        i = N.array(dest['i'])
+        k = N.array(dest['k'])
         
         time = self.get_times(i, k)
 
         return (indices, time, i, k)
+
+    def get_nlp_variable_indices(self, var):
+        """
+        Get a mapping from continuous time equations to NLP constraints
+
+        Parameters::
+
+            var --
+                The model variable to get the NLP variables for
+
+        Returns::
+
+            indices --
+                Vector of indices into the NLP variables
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+
+        """
+        if isinstance(var, basestring):
+            var = self.op.getVariable(var)
+
+        dest = self.xx_dests[var]
+
+        inds = N.array(dest['inds'])
+        i = N.array(dest['i'])
+        k = N.array(dest['k'])
+        
+        time = self.get_times(i, k)
+
+        return (inds, time, i, k)
 
 
 class MeasurementData(object):
@@ -5530,6 +5579,24 @@ class OptimizationSolver(object):
         """Set whether warm start is enabled for the optimization"""
         self.collocator.warm_start = warm_start
 
+    def get_nlp_variables(self, point = 'opt'):
+        """
+        Get the raw vector of variable values for the underlying NLP.
+
+        Parameters::
+            
+            point --
+                The point where the variables should be evaluated,
+                'opt' for the optimization solution or
+                'init' for the initial guess.
+                Default: 'opt'
+        """
+        assert point in ('opt', 'init')
+        if point == 'opt':
+            return self.collocator.primal_opt
+        else:
+            return self.collocator.xx_init
+
     def get_nlp_residuals(self, point = 'opt', raw=False):
         """
         Get the raw vector of (unscaled) residuals for the underlying NLP.
@@ -5563,6 +5630,11 @@ class OptimizationSolver(object):
         violations[residuals > ub] = (residuals - ub)[residuals > ub]
         return violations
 
+    def get_nlp_variable_bounds(self):
+        """Get the raw vectors (lb, ub) of bounds on variables in the underlying NLP"""
+        # Returning copies to be safe
+        return (N.array(self.collocator.xx_lb), N.array(self.collocator.xx_ub))
+
     def get_nlp_residual_bounds(self):
         """Get the raw vectors (lb, ub) of bounds on residuals in the underlying NLP"""
         # Returning copies to be safe
@@ -5572,6 +5644,11 @@ class OptimizationSolver(object):
         """Get the raw vector of (unscaled) dual variables for the constraints in the underlying NLP"""
         # Returning a copy to be safe
         return N.array(self.collocator.dual_opt['g'])
+
+    def get_nlp_bound_duals(self):
+        """Get the raw vector of dual variables for variable bounds in the underlying NLP"""
+        # Returning a copy to be safe
+        return N.array(self.collocator.dual_opt['x'])
 
     def get_constraint_types(self):
         """
@@ -5611,6 +5688,33 @@ class OptimizationSolver(object):
                 -1 if not applicable.
         """
         return self.collocator.get_nlp_constraint_indices(eqtype)
+
+    def get_nlp_variable_indices(self, var):
+        """
+        Get a mapping from continuous time equations to NLP constraints
+
+        Parameters::
+
+            var --
+                The model variable to get the NLP variables for
+
+        Returns::
+
+            indices --
+                Vector of indices into the NLP variables
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+
+        """
+        return self.collocator.get_nlp_variable_indices(var)
 
     def get_residuals(self, eqtype, point='opt', raw=False, inds=None):
         """
@@ -5710,6 +5814,34 @@ class OptimizationSolver(object):
         if inds is not None:
             duals = duals[:, inds]
         return (duals, time, i, k)
+
+    def get_bound_duals(self, var, inds=None):
+        """
+        Get the dual variables at the optimization solution for the bounds on the given variable.
+
+        Parameters::
+            var --
+                The model variable to get the bounds dual variables for
+
+        Returns::
+
+            duals --
+                Vector of bounds duals for the given model variable
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+        """
+        inds, time, i, k = self.get_nlp_variable_indices(var)
+        duals = self.get_nlp_bound_duals()
+        duals = duals[inds]
+        return duals, time, i, k
 
     def get_residual_norms(self, point='opt', ord=N.inf, eqtype=None):
         """
