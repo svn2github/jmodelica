@@ -992,6 +992,7 @@ class LocalDAECollocator(CasadiCollocator):
         self._create_constraints_and_cost()
         self._create_blocking_factors_constraints_and_cost()
         self._compute_bounds_and_init()
+        self._assemble_back_tracking_info()
         self._create_solver()
 
     def _create_model_variable_structures(self):
@@ -1304,8 +1305,19 @@ class LocalDAECollocator(CasadiCollocator):
         to record the source information.
         """
         if kind == 'xx':
+            # Record back tracking information
+            if var not in self.xx_dests:
+                dest = self.xx_dests[var] = {'i':[], 'k':[], 'inds':[]}
+            else:
+                dest = self.xx_dests[var]
+
+            dest['i'].append(i)
+            dest['k'].append(k)
+            dest['inds'].append(self.n_named_xx)
+            
             self.n_named_xx += 1
         else:
+            # Consider: do we want to record parameters tracking info as well?
             assert kind == 'pp'
             self.n_named_pp += 1
 
@@ -1438,6 +1450,10 @@ class LocalDAECollocator(CasadiCollocator):
         # Count the number of named variables to see that they match up even
         # if named_vars is off - also needed for back tracking of variables
         self.n_named_xx = 0
+        # Create storage to track connection between nlp variables and model variables
+        # NB: internal format of xx_dests is subject to change!
+        self.xx_dests = {} # map from model variables to their xx instances
+
         if self.named_vars:
             self.named_xx = named_xx = []
 
@@ -3192,21 +3208,21 @@ class LocalDAECollocator(CasadiCollocator):
         n_eq = pos[1] - pos[0]
         if n_eq == 0:
             return # don't record empty residuals
-        if eqtype not in self.c_sources:
-            source = self.c_sources[eqtype] = {'kind':kind, 'n_eq':n_eq, 'i':[], 'k':[], 'inds':[]}
+        if eqtype not in self.c_dests:
+            dest = self.c_dests[eqtype] = {'kind':kind, 'n_eq':n_eq, 'i':[], 'k':[], 'inds':[]}
         else:
-            source = self.c_sources[eqtype]
+            dest = self.c_dests[eqtype]
         
-        assert source['kind'] == kind, ("Residual type '" + eqtype +
-            "' previously recorded as kind '" + source['kind'] +
+        assert dest['kind'] == kind, ("Residual type '" + eqtype +
+            "' previously recorded as kind '" + dest['kind'] +
             "' cannot record it as kind '" + kind + "'")
-        assert source['n_eq'] == n_eq, ("Residual type '" + eqtype +
-            "' previously recorded with " + repr(source['n_eq']) +
+        assert dest['n_eq'] == n_eq, ("Residual type '" + eqtype +
+            "' previously recorded with " + repr(dest['n_eq']) +
             "equations per point, cannot record it with " + repr(n_eq))
 
-        source['i'].append(i)
-        source['k'].append(k)
-        source['inds'].append(N.arange(pos[0], pos[1], dtype=N.int))
+        dest['i'].append(i)
+        dest['k'].append(k)
+        dest['inds'].append(N.arange(pos[0], pos[1], dtype=N.int))
 
     def add_c_eq(self, eqtype, constr, i=-1, k=-1):
         """
@@ -3328,8 +3344,9 @@ class LocalDAECollocator(CasadiCollocator):
         # Create constraint storage
         self.c_e = c_e = casadi.MX()
         self.c_i = c_i = casadi.MX()
-        # NB: internal format of c_e_sources/c_i_sources is subject to change!
-        self.c_sources = {}
+        # Create storage to track connection between nlp constraints and equations
+        # NB: internal format of c_dests is subject to change!
+        self.c_dests = {} # map from equation types to nlp constraints
 
         # Initial conditions
         i = 1
@@ -4276,6 +4293,47 @@ class LocalDAECollocator(CasadiCollocator):
         self.xx_ub = xx_ub
         self.xx_init = xx_init
 
+    def _assemble_back_tracking_info(self):
+        # Create mapping from nlp constraints to model equations
+        # We need to know the number of equality and inequality constraints at this point
+        n_e = self.c_e.numel()
+        n_i = self.c_i.numel()
+        n_c = n_e + n_i
+
+        self.c_sources = {}
+        self.c_sources['eqtype'] = N.zeros(n_c, dtype=object)
+        self.c_sources['eqind'] = N.zeros(n_c, dtype=N.int)
+        self.c_sources['i'] = N.zeros(n_c, dtype=N.int)
+        self.c_sources['k'] = N.zeros(n_c, dtype=N.int)
+
+        self.c_sources['eqtype'].fill('other')
+        self.c_sources['eqind'].fill(-1)
+        self.c_sources['i'].fill(-1)
+        self.c_sources['k'].fill(-1)
+
+        for eqtype in self.get_nlp_constraint_types():
+            c_inds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+            self.c_sources['eqtype'][c_inds] = eqtype
+            self.c_sources['eqind'][c_inds] = N.arange(c_inds.shape[1], dtype=N.int)
+            self.c_sources['i'][c_inds] = i[:, N.newaxis]
+            self.c_sources['k'][c_inds] = k[:, N.newaxis]
+
+        # Create mapping from nlp variables xx to model variables
+        self.xx_sources = {}
+        self.xx_sources['var'] = N.zeros(self.n_xx, dtype=object)
+        self.xx_sources['i'] = N.zeros(self.n_xx, dtype=N.int)
+        self.xx_sources['k'] = N.zeros(self.n_xx, dtype=N.int)
+
+        self.xx_sources['var'].fill(None)
+        self.xx_sources['i'].fill(-1)
+        self.xx_sources['k'].fill(-1)
+
+        for (var, dest) in self.xx_dests.iteritems():
+            v_inds = dest['inds']
+            self.xx_sources['var'][v_inds] = var
+            self.xx_sources['i'][v_inds] = dest['i']
+            self.xx_sources['k'][v_inds] = dest['k']
+
     def _create_solver(self):
         # Concatenate constraints
         constraints = casadi.vertcat([self.c_e, self.c_i])
@@ -5188,7 +5246,7 @@ class LocalDAECollocator(CasadiCollocator):
         """
         Get a list of all types of constraints that have mappings to the NLP
         """
-        return self.c_sources.keys()
+        return self.c_dests.keys()
 
     def get_nlp_constraint_indices(self, eqtype):
         """
@@ -5222,11 +5280,11 @@ class LocalDAECollocator(CasadiCollocator):
                 -1 if not applicable.
 
         """
-        if eqtype not in self.c_sources:
+        if eqtype not in self.c_dests:
             return (N.zeros((0,0), dtype=N.int), N.zeros(0),
                 N.zeros(0, dtype=N.int), N.zeros(0, dtype=N.int))
         
-        source = self.c_sources[eqtype]
+        source = self.c_dests[eqtype]
         
         indices = N.vstack(source['inds'])
         if source['kind'] == 'ineq':
