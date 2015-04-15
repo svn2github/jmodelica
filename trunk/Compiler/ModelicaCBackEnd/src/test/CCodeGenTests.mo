@@ -11775,6 +11775,85 @@ initial algorithm
 ")})));
 end Algorithm17;
 
+model Algorithm18
+    function F
+        input Real i1[:];
+        output Real a;
+        output Real b;
+    algorithm
+        a := sum(i1);
+        b := a * a;
+        annotation(Inline=false);
+    end F;
+    Real a, b, c;
+equation
+    c = a * b;
+algorithm
+    (a, b) := F({-c,time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Algorithm18",
+            description="C code generation function call statement inside a block",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
+    jmi_ad_var_t tmp_4;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _c_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _c_2 = x[0];
+        }
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
+        jmi_array_ref_1(tmp_3, 1) = - _c_2;
+        jmi_array_ref_1(tmp_3, 2) = _time;
+        tmp_1 = _a_0;
+        tmp_2 = _b_1;
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
+        jmi_array_ref_1(tmp_3, 1) = - _c_2;
+        jmi_array_ref_1(tmp_3, 2) = _time;
+        func_CCodeGenTests_Algorithm18_F_def0(tmp_3, &tmp_1, &tmp_2);
+        _a_0 = (tmp_1);
+        _b_1 = (tmp_2);
+        tmp_4 = _a_0;
+        _a_0 = tmp_1;
+        tmp_1 = tmp_4;
+        tmp_4 = _b_1;
+        _b_1 = tmp_2;
+        tmp_2 = tmp_4;
+        _b_1 = (tmp_2);
+        _a_0 = (tmp_1);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _a_0 * _b_1 - (_c_2);
+        }
+    }
+    return ef;
+}
+
+
+")})));
+end Algorithm18;
+
 model OutputTest1
 
   output Real x_1(start=0.951858508368);
