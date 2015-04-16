@@ -259,11 +259,11 @@ int jmi_block_update_pre(jmi_block_residual_t* block) {
             (*(jmi->z))[block->nr_pre_index[i]] = (*(jmi->z))[block->nr_index[i]];
             
             if (type == JMI_INTEGER) {
-                    jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <from: %d> <to: %d> ", block->nr_vref[i], (jmi_int_t)current, (jmi_int_t)previous);
+                    jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <from: %d> <to: %d> ", block->nr_vref[i], (jmi_int_t)previous, (jmi_int_t)current);
             } else if (type == JMI_BOOLEAN) {
-                    jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <from: %d> <to: %d> ", block->nr_vref[i], (jmi_int_t)current, (jmi_int_t)previous);
+                    jmi_log_node(jmi->log, logInfo, "Info", " <boolean: #b%d#> <from: %d> <to: %d> ", block->nr_vref[i], (jmi_int_t)previous, (jmi_int_t)current);
             } else if (type == JMI_REAL) {
-                    jmi_log_node(jmi->log, logInfo, "Info", " <real: #r%d#> <from: %d> <to: %d> ", block->nr_vref[i], current, previous);
+                    jmi_log_node(jmi->log, logInfo, "Info", " <real: #r%d#> <from: %d> <to: %d> ", block->nr_vref[i], previous, current);
             }
         }
     }
