@@ -58,6 +58,9 @@ aspect Library {
             SourceRoot sr = ParserHandler.parseFile(root().getUtilInterface(), fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
             if (entity == null) {
+                if (isStructured) {
+                    warning("Empty structured entity, package is omitted", sr);
+                }
                 return new StoredDefinition();
             }
             entity.setFileName(fileName);

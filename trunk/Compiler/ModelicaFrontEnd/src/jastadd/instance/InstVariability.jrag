@@ -143,6 +143,7 @@ aspect InstVariability {
     
     inh FTypePrefixVariability InstComponentDecl.parentBExpVariability();
     inh FTypePrefixVariability InstExtends.parentBExpVariability();
+    eq Root.getChild().parentBExpVariability()  = fContinuous();
     eq InstBaseNode.getChild().parentBExpVariability()  = fContinuous();
     eq InstComponentDecl.getInstComponentDecl().parentBExpVariability() = bExpVariability();
     eq InstComponentDecl.getInstExtends().parentBExpVariability() = bExpVariability();
