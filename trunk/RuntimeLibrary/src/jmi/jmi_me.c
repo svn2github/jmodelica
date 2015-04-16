@@ -1205,6 +1205,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_use_Brent_in_1d");
     if(index)
         bsop->use_Brent_in_1d_flag = (int)z[index]; 
+    index = get_option_index("_use_newton_for_brent");
+    if(index)
+        bsop->use_newton_for_brent = (int)z[index];
     index = get_option_index("_nle_solver_default_tol");
     if(index)
         op->nle_solver_default_tol = z[index]; 

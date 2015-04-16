@@ -14961,16 +14961,17 @@ const char *fmi_runtime_options_map_names[] = {
     \"_runtime_log_to_file\",
     \"_use_Brent_in_1d\",
     \"_use_jacobian_equilibration\",
+    \"_use_newton_for_brent\",
     NULL
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
     536870930, 0, 268435468, 1, 268435469, 2, 536870931, 3, 4, 268435470,
     268435471, 536870932, 5, 268435472, 6, 7, 8, 9, 10, 11,
-    536870933, 536870934, 268435473, 536870935, 536870936, 536870937, 0
+    536870933, 536870934, 268435473, 536870935, 536870936, 536870937, 536870938, 0
 };
 
-const int fmi_runtime_options_map_length = 26;
+const int fmi_runtime_options_map_length = 27;
 #define __block_jacobian_check_tol_2 ((*(jmi->z))[jmi->offs_real_pi+0])
 #define __cs_rel_tol_4 ((*(jmi->z))[jmi->offs_real_pi+1])
 #define __cs_step_size_6 ((*(jmi->z))[jmi->offs_real_pi+2])
@@ -14997,6 +14998,7 @@ const int fmi_runtime_options_map_length = 26;
 #define __runtime_log_to_file_24 ((*(jmi->z))[jmi->offs_boolean_pi+5])
 #define __use_Brent_in_1d_25 ((*(jmi->z))[jmi->offs_boolean_pi+6])
 #define __use_jacobian_equilibration_26 ((*(jmi->z))[jmi->offs_boolean_pi+7])
+#define __use_newton_for_brent_27 ((*(jmi->z))[jmi->offs_boolean_pi+8])
 #define _x_0 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
@@ -15028,6 +15030,7 @@ void jmi_set_start_values_0_0(jmi_t* jmi) {
     __runtime_log_to_file_24 = (JMI_FALSE);
     __use_Brent_in_1d_25 = (JMI_TRUE);
     __use_jacobian_equilibration_26 = (JMI_FALSE);
+    __use_newton_for_brent_27 = (JMI_FALSE);
 }
 
 void jmi_set_start_values_1_0(jmi_t* jmi) {
