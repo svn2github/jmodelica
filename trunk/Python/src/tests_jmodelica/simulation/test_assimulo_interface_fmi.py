@@ -462,6 +462,7 @@ class Test_FMI_ODE:
         _ex1_name = compile_fmu("NoState.Example1", file_name)
         _ex2_name = compile_fmu("NoState.Example2", file_name)
         _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
+        _in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
         
     def setUp(self):
@@ -507,6 +508,19 @@ class Test_FMI_ODE:
         
         model.time = 0.5
         assert model.get("u") == 2.0
+        
+    @testattr(stddist = True)
+    def test_reset_internal_variables2(self):
+        model = load_fmu("Inputs_SimpleInput3.fmu")
+        
+        model.initialize()
+        
+        model.set("p",2)
+        model.time = 1
+        assert model.get("p") == 2.0
+        
+        model.time = 0.5
+        assert model.get("p") == 2.0
         
     @testattr(stddist = True)
     def test_cc_with_radau(self):

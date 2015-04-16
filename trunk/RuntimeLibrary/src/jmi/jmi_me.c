@@ -611,7 +611,7 @@ static int jmi_reset_internal_variables(jmi_t* jmi) {
     memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
     memcpy(u, jmi_get_real_u(jmi), jmi->n_real_u*sizeof(jmi_real_t));
     
-    jmi_reset_last_successful_values(jmi);
+    jmi_reset_last_internal_successful_values(jmi);
     
     /* Restore the current time and states */
     memcpy (jmi_get_real_u(jmi), u, jmi->n_real_u*sizeof(jmi_real_t));
