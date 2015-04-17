@@ -35,7 +35,7 @@
 #define nbr_allocated_iterations 30
 
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
     flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_dinr, n_sw, n_disw, jacobian_variability, index, label);
@@ -49,7 +49,7 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
     return flag;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
     flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_nr, n_dinr, n_sw, n_disw, jacobian_variability, index, label);
@@ -450,7 +450,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             block->value_references[i] = (jmi_int_t)vref_tmp[i];
         }
         
-        block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_NON_REAL_VALUE_REFERENCE);
+        block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE);
 		block->F(jmi, sw_index_tmp, NULL, JMI_BLOCK_ACTIVE_SWITCH_INDEX); 
 			
         for (i = 0; i < block->n_sw; i++) {

@@ -3289,7 +3289,13 @@ aspect CCodeGen {
         for (FVariable fv : localUnsolvedVariables()) 
             fv.genBlockResidualValuref_C(p, str, nextIndent, solverArrayMap);
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {\n");
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {\n");
+        // Loop over all non-real variables and write their position in the z-vector
+        Enumerator realEnumerator = new Enumerator();
+        for (FVariable fv : localSolvedRealVariables())
+            str.format("%sx[%d] = %d;\n", nextIndent, realEnumerator.next(), fv.valueReference());
+        
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {\n");
         // Loop over all non-real variables and write their position in the z-vector
         Enumerator nonRealEnumerator = new Enumerator();
         for (FVariable fv : localNonRealVariables())
@@ -3726,6 +3732,7 @@ aspect CCodeGen {
 		else
 			str.print("NULL, ");
 		str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
+		str.print(localSolvedRealVariables().size() + ", ");
 		str.print(localNonRealVariables().size() + ", ");
 		str.print(directlyImpactingNonReals_C().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");

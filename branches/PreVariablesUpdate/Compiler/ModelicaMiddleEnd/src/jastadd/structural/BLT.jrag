@@ -868,6 +868,17 @@ aspect BLT{
         public abstract Collection<FVariable> localNonRealVariables();
 
         /**
+         * Returns all local variables in this block that are solved and of
+         * real type.
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local solved real variables
+         */
+        public abstract Collection<FVariable> localSolvedRealVariables();
+        
+        /**
          * Returns all variables in this block that are of type real and is unsolved.
          * 
          * @return Collection<FVariable> all unsolved real variables
@@ -1401,6 +1412,11 @@ aspect BLT{
             return collectLocalVariables(localNonRealBlocks());
         }
 
+        @Override
+        public Collection<FVariable> localSolvedRealVariables() {
+            return collectLocalVariables(localSolvedRealBlocks());
+        }
+        
         /**
          * Returns all variables in this block that are localy solved.
          * 
@@ -1563,6 +1579,11 @@ aspect BLT{
         }
 
         @Override
+        public Collection<FVariable> localSolvedRealVariables() {
+            return Collections.emptyList();
+        }
+        
+        @Override
         public Collection<FVariable> unsolvedVariables() {
             return Collections.emptyList();
         }
@@ -1720,6 +1741,14 @@ aspect BLT{
                 return Collections.emptyList();
             else
                 return allLocalVariables();
+        }
+
+        @Override
+        public Collection<FVariable> localSolvedRealVariables() {
+            if (isReal() && isSolvable())
+                return allLocalVariables();
+            else
+                return Collections.emptyList();
         }
 
         @Override
