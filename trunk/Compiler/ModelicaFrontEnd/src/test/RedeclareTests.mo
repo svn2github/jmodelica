@@ -4465,6 +4465,67 @@ end RedeclareTests.RedeclareElement26;
 ")})));
 end RedeclareElement26;
 
+
+model RedeclareElement27
+    package A
+        model B
+            extends C;
+            redeclare parameter D x = 1;
+        end B;
+        
+        model C
+            replaceable D x;
+        end C;
+        
+        type D = Real;
+    end A;
+    
+    A.B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareElement27",
+            description="",
+            flatModel="
+fclass RedeclareTests.RedeclareElement27
+ parameter Real b.x = 1 /* 1 */;
+end RedeclareTests.RedeclareElement27;
+")})));
+end RedeclareElement27;
+
+
+model RedeclareElement28
+    package A
+        model B
+            extends C;
+            redeclare parameter D x = 1;
+        end B;
+        
+        model C
+            replaceable D x;
+        end C;
+        
+        type D = Real;
+    end A;
+    
+    model E
+        extends A.B;
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareElement28",
+            description="",
+            flatModel="
+fclass RedeclareTests.RedeclareElement28
+ parameter Real e.x = 1 /* 1 */;
+end RedeclareTests.RedeclareElement28;
+")})));
+end RedeclareElement28;
+
+
 model RedeclareSameLevel10
 	package A
 		replaceable partial model C

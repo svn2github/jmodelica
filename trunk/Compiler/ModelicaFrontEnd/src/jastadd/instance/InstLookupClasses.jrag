@@ -39,6 +39,7 @@ aspect InstLookupClasses {
     eq InstNode.getRedeclaredInstClassDecl().lookupInstClass(String name)        = genericLookupInstClass(name); 
     eq InstNode.getInstComponentDecl().lookupInstClass(String name)              = genericLookupInstClass(name); 
     eq InstNode.getFAbstractEquation().lookupInstClass(String name)              = genericLookupInstClass(name); 
+    eq InstNode.getElementInstModification().lookupInstClass(String name)        = genericLookupInstClass(name); 
     eq InstNode.getInstExtends().lookupInstClass(String name)                    = superLookupInstClass(name);
 
     eq InstComponentDecl.getInstExtends().lookupInstClass(String name)           = superLookupInstClassInComponent(name);
@@ -54,6 +55,7 @@ aspect InstLookupClasses {
     eq InstExtends.getInstExtends().lookupInstClass(String name)                 = superLookupInstClassInExtends(name);
     eq InstExtends.getRedeclaredInstClassDecl().lookupInstClass(String name)     = genericLookupInstClassInExtends(name);
     eq InstExtends.getFAbstractEquation().lookupInstClass(String name)           = genericLookupInstClassInExtends(name);
+    eq InstExtends.getElementInstModification().lookupInstClass(String name)     = genericLookupInstClassInExtends(name); 
     eq InstNormalExtends.getInstClassModification().lookupInstClass(String name) = lookupInstClassFromMod(name);
 
     inh InstLookupResult<InstClassDecl> InstExtends.lookupInstClassFromMod(String name);
