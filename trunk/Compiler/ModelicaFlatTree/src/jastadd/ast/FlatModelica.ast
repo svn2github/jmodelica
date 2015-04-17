@@ -40,7 +40,6 @@ FClass : BaseNode ::= FQName
                       /UnknownFVariable/
                       FResidualPair*
                       FAttribute*
-                      DummyVariable:FVariable*
                       /[FDynamicResolver]/
                       DynamicStateManager;
 

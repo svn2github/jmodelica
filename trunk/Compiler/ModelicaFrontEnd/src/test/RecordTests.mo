@@ -3434,6 +3434,55 @@ end RecordTests.RecordScalarize34;
 ")})));
 end RecordScalarize34;
 
+model RecordScalarize35
+    function f
+        input Real i;
+        output B o = B(i);
+    algorithm
+    end f;
+    
+    record B
+        Real v1;
+    end B;
+    
+    record A
+        B[3] b1;
+    end A;
+    
+    A a1(b1 = f({1,2,3}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize35",
+            description="Scalarizing record with vector function call in modifier #4316",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize35
+ Real a1.b1[1].v1;
+ Real a1.b1[2].v1;
+ Real a1.b1[3].v1;
+equation
+ (RecordTests.RecordScalarize35.B(a1.b1[1].v1)) = RecordTests.RecordScalarize35.f(1);
+ (RecordTests.RecordScalarize35.B(a1.b1[2].v1)) = RecordTests.RecordScalarize35.f(2);
+ (RecordTests.RecordScalarize35.B(a1.b1[3].v1)) = RecordTests.RecordScalarize35.f(3);
+
+public
+ function RecordTests.RecordScalarize35.f
+  input Real i;
+  output RecordTests.RecordScalarize35.B o;
+ algorithm
+  o.v1 := i;
+  return;
+ end RecordTests.RecordScalarize35.f;
+
+ record RecordTests.RecordScalarize35.B
+  Real v1;
+ end RecordTests.RecordScalarize35.B;
+
+end RecordTests.RecordScalarize35;
+")})));
+end RecordScalarize35;
 
 
 model RecordFunc1

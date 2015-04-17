@@ -153,7 +153,6 @@ aspect Scalarization {
 	protected void FClass.scalarizationCleanup() {
 		flush();  // Must flush before traversing
 		enableStreamsRewrite();
-		setDummyVariableList(new List<FVariable>());
 	}
     
     public static List<FAbstractEquation> FAbstractEquation.scalarizeList(List<FAbstractEquation> fromList, List<FAbstractEquation> toList, List<FVariable> vars) {
@@ -383,14 +382,13 @@ aspect Scalarization {
     public void FRecordVariable.scalarRecordCellFVariables(
             List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, FQName name,
             FVariable last, FExp bexp, Index i, FTypePrefixVariability variability, java.util.List<BindingExpSource> attrs, int bexpDims) {
-        FVariable tmp = (FVariable) fullCopy();
+        FVariable tmp = dynamicFVariable((FVariable) fullCopy());
         if (last != null) {
-            tmp.parent = this;
             tmp.reflatten(name.copyPrefix());
             tmp.inheritFrom(last, variability);
-        } else {
-            myFClass().addDummyVariable(tmp);
         }
+        dynamicFVariable(tmp);
+        
         if (bexp == null && tmp.hasBindingExp()) {
             bexp = tmp.getBindingExp();
             bexpDims = bexp.ndims();
