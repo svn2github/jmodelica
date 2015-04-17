@@ -616,6 +616,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->events_epsilon = 1e-10;
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
+    bsop->use_newton_for_brent = 0; 
 
     bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     bsop->use_jacobian_equilibration_flag = 0; 

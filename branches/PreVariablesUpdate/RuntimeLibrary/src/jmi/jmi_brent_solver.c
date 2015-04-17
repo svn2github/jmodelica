@@ -504,7 +504,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     }
     
     /* Try to use Newton to find a good initial interval */
-    if (block->options->experimental_mode & jmi_block_solver_experimental_Brent_with_newton) {
+    if (block->options->use_newton_for_brent) {
         if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
             xNewton = block->x[0];
             fNewton = f;

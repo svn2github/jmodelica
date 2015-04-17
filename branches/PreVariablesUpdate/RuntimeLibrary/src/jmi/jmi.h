@@ -508,6 +508,15 @@ int jmi_copy_pre_values(jmi_t *jmi);
 int jmi_reset_last_successful_values(jmi_t *jmi);
 
 /**
+ * \brief Reset the z vector (except constants and parameters) 
+ *        to the last successful state.
+ *
+ * @param jmi The jmi_t struct.
+ * @return Error code.
+ */
+int jmi_reset_last_internal_successful_values(jmi_t *jmi);
+
+/**
  * \brief Save the complete z vector.
  *
  * @param jmi The jmi_t struct.
