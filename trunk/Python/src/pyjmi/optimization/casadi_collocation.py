@@ -28,6 +28,7 @@ import copy
 import types
 from operator import sub
 from collections import OrderedDict, Iterable
+from scipy.sparse import csc_matrix
 
 try:
     import casadi
@@ -5070,7 +5071,7 @@ class LocalDAECollocator(CasadiCollocator):
         nlp_fcn.evaluate()
         return (nlp_fcn.output(0).getValue(), nlp_fcn.output(1).toArray().ravel())
 
-    def get_J(self, point="fcn"):
+    def get_J(self, point="fcn", dense=True):
         """
         Get the Jacobian of the constraints.
         
@@ -5109,7 +5110,10 @@ class LocalDAECollocator(CasadiCollocator):
             raise ValueError("Unkonwn point value: " + repr(point))
         J_fcn.setInput(self._par_vals, 1)
         J_fcn.evaluate()
-        return J_fcn.output(0).toArray()
+        result = J_fcn.output(0)
+        if dense: result = result.toArray()
+        else: result = csc_matrix(result)
+        return result
     
     def get_H(self, point="fcn"):
         """
@@ -5907,7 +5911,7 @@ class OptimizationSolver(object):
 
     def get_nlp_jacobian(self, point='opt'):
         """
-        Get the raw Jacobian of the nlp
+        Get the raw Jacobian of the nlp's constraints
 
         Parameters::
             point --
@@ -5915,9 +5919,14 @@ class OptimizationSolver(object):
                 'opt' for the optimization solution or
                 'init' for the initial guess.
                 Default: 'opt'
+
+        Returns::
+            J --
+                The constraint Jacobian evaluated at the given point.
+                Type: scipy.sparse.csc_matrix
         """
         assert point in ('opt', 'init')
-        return self.collocator.get_J(point)
+        return self.collocator.get_J(point, dense=False)
 
     def get_point_times(self, i, k):
         """
@@ -6018,9 +6027,8 @@ class OptimizationSolver(object):
                 Default: 'opt'
         """
         J = self.get_nlp_jacobian(point)
-        nonfinite = ~N.isfinite(J)
-        c_inds, xx_inds = N.nonzero(nonfinite)
-
+        # J-J != 0 only at entries that are +-inf or nan
+        c_inds, xx_inds = N.nonzero(J-J)
         return self.get_model_jacobian_entries(c_inds, xx_inds)
 
     def list_jacobian_entries(self, entries):
