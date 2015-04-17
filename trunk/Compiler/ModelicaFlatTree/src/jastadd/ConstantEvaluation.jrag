@@ -233,33 +233,40 @@ aspect ConstantEvaluation {
             return buildLiteral(); 
         }
 
-	    /**
-	     * Convert to CValueInteger, default implementation.
-	     */
-	    public CValue convertInteger() {
-	    	return new CValueInteger(intValue());
-	    }
-	    
-	    /**
-	     * Convert to CValueReal, default implementation.
-	     */
-	    public CValue convertReal() {
-	    	return new CValueReal(realValue());
-	    }
-	    
-	    /**
-	     * Convert to CValueBoolean, default implementation.
-	     */
-	    public CValue convertBoolean() {
-	    	return new CValueBoolean(booleanValue());
-	    }
-	    
-	    /**
-	     * Convert to CValueString, default implementation.
-	     */
-	    public CValue convertString() {
-	    	return new CValueString(stringValue());
-	    }
+        /**
+         * Constrain value to be between min and max, inclusively
+         */
+        public CValue constrainWithin(CValue min, CValue max) {
+            throw new ConstantEvaluationException(this, "do relational comparison on "); 
+        }
+
+        /**
+         * Convert to CValueInteger, default implementation.
+         */
+        public CValue convertInteger() {
+            return new CValueInteger(intValue());
+        }
+
+        /**
+         * Convert to CValueReal, default implementation.
+         */
+        public CValue convertReal() {
+            return new CValueReal(realValue());
+        }
+
+        /**
+         * Convert to CValueBoolean, default implementation.
+         */
+        public CValue convertBoolean() {
+            return new CValueBoolean(booleanValue());
+        }
+
+        /**
+         * Convert to CValueString, default implementation.
+         */
+        public CValue convertString() {
+            return new CValueString(stringValue());
+        }
 
         /**
          * Returns true if the constant value is of integer type or array that
@@ -587,22 +594,30 @@ aspect ConstantEvaluation {
             return value;
         }
 
-	    /**
-	     * Convert to CValueInteger.
-	     */
-	    public CValue convertInteger() {
-	    	return this;
-	    }
-        
-        /**
-	     * Convert to string.
-	     * 
-	     * @return Value converted to string.
-	     */
-        public String stringValue() { 
-        	return Integer.toString(value); 
+        public CValue constrainWithin(CValue min, CValue max) {
+            if (!min.isUnknown() && min.intValue() > value)
+                return min;
+            if (!max.isUnknown() && max.intValue() < value)
+                return max;
+            return this;
         }
-        
+
+        /**
+         * Convert to CValueInteger.
+         */
+        public CValue convertInteger() {
+            return this;
+        }
+
+        /**
+         * Convert to string.
+         * 
+         * @return Value converted to string.
+         */
+        public String stringValue() { 
+            return Integer.toString(value); 
+        }
+
         /**
          * Create a new integer literal AST node.
          * 
@@ -682,23 +697,31 @@ aspect ConstantEvaluation {
         public double maxValue() {
             return value;
         }
-	    
-	    /**
-	     * Convert to CValueReal.
-	     */
-	    public CValue convertReal() {
-	    	return this;
-	    }
+
+        public CValue constrainWithin(CValue min, CValue max) {
+            if (!min.isUnknown() && min.realValue() > value)
+                return min;
+            if (!max.isUnknown() && max.realValue() < value)
+                return max;
+            return this;
+        }
 
         /**
-	     * Convert to string.
-	     * 
-	     * @return Value converted to string.
-	     */
-        public String stringValue() { 
-        	return Double.toString(value); 
+         * Convert to CValueReal.
+         */
+        public CValue convertReal() {
+            return this;
         }
-        
+
+        /**
+         * Convert to string.
+         * 
+         * @return Value converted to string.
+         */
+        public String stringValue() { 
+            return Double.toString(value);
+        }
+
         /**
          * Create a new literal expression AST node.
          * 
@@ -998,7 +1021,17 @@ aspect ConstantEvaluation {
                     return true;
             return false;
         }
-        
+
+        public CValue constrainWithin(CValue min, CValue max) {
+            CValueArray res = new CValueArray(size());
+            for (int i = 0; i < values.length; i++) {
+                CValue cellMin = min.isArray() ? min.array().getCell(i) : min;
+                CValue cellMax = max.isArray() ? max.array().getCell(i) : max;
+                res.values[i] = values[i].constrainWithin(cellMin, cellMax);
+            }
+            return res;
+        }
+
         @Override
         public boolean isReal() {
             boolean res = true;
@@ -1579,73 +1612,81 @@ aspect ConstantEvaluation {
         }
 
     }
-    
+
     /**
      * Constant value for enumeration literal.
      */
     public class CValueEnum extends CValue {
-    	
-    	private FEnumType type;
-    	private String value;
-    	private int index;
-    	
-    	/**
-    	 * Create a new constant value for enumeration literal.
-    	 * 
-    	 * @param type   the type of the enumeration
-    	 * @param value  the name of the enumeration literal
-    	 */
-    	public CValueEnum(FType type, String value) {
-    		this.type = (FEnumType) type;
-    		this.value = value;
-    		index = 0;
-    		int n = this.type.getNumFEnumLiteralType();
-    		for (int i = 0; i < n && index == 0; i++)
-    			if (this.type.getFEnumLiteralType(i).getName().equals(value))
-    				index = i + 1;
-    	}
-    	
-    	/**
-    	 * Create a new constant value for enumeration literal.
-    	 * 
-    	 * @param type   the type of the enumeration
-    	 * @param index  the ordinal for the enumeration literal
-    	 */
-    	public CValueEnum(FType type, int index) {
-    		this.type = (FEnumType) type;
-    		if (index < 0)
-    		    index = this.type.getNumFEnumLiteralType() + index + 1;
-     		this.index = index;
-     		value = this.type.getFEnumLiteralType(index - 1).getName();
-    	}
-        
+
+        private FEnumType type;
+        private String value;
+        private int index;
+
+        /**
+         * Create a new constant value for enumeration literal.
+         * 
+         * @param type   the type of the enumeration
+         * @param value  the name of the enumeration literal
+         */
+        public CValueEnum(FType type, String value) {
+            this.type = (FEnumType) type;
+            this.value = value;
+            index = 0;
+            int n = this.type.getNumFEnumLiteralType();
+            for (int i = 0; i < n && index == 0; i++)
+                if (this.type.getFEnumLiteralType(i).getName().equals(value))
+                    index = i + 1;
+        }
+
+        /**
+         * Create a new constant value for enumeration literal.
+         * 
+         * @param type   the type of the enumeration
+         * @param index  the ordinal for the enumeration literal
+         */
+        public CValueEnum(FType type, int index) {
+            this.type = (FEnumType) type;
+            if (index < 0)
+                index = this.type.getNumFEnumLiteralType() + index + 1;
+            this.index = index;
+            value = this.type.getFEnumLiteralType(index - 1).getName();
+        }
+
         public int intValue() {
             return index;
         }
-        
+
         public double realValue() {
             return index;
         }
-    	
-    	public String stringValue() {
-    		return value;
-    	}
-    	
-    	public String toString() {
-    		return type.getName() + "." + value;
-    	}
-	    
-	    /**
-	     * Create a literal AST node from constant.
-	     * 
-	     * Always creates node for the flat tree.
-	     *  
-	     *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
-	     */
-	    public FExp buildLiteral() {
-	    	return type.createLiteral(index);
-	    }
-    	
+
+        public String stringValue() {
+            return value;
+        }
+
+        public String toString() {
+            return type.getName() + "." + value;
+        }
+
+        /**
+         * Create a literal AST node from constant.
+         * 
+         * Always creates node for the flat tree.
+         *  
+         *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
+         */
+        public FExp buildLiteral() {
+            return type.createLiteral(index);
+        }
+
+        public CValue constrainWithin(CValue min, CValue max) {
+            if (!min.isUnknown() && min.intValue() > index)
+                return min;
+            if (!max.isUnknown() && max.intValue() < index)
+                return max;
+            return this;
+        }
+
         @Override
         public boolean isValid() {
             return true;
@@ -2650,11 +2691,20 @@ aspect ConstantEvaluation {
     
     syn CValue InstAssignable.cevalNoBExp(VariableEvaluator evaluator, Index i) {
         CValue val = startAttributeCValue(evaluator);
-        if (i == Index.NULL) {
-            return val;
-        } else {
-            return val.array().getCell(i);
+        if (i != Index.NULL) 
+            val = val.array().getCell(i);
+        if (isInteger() || isReal() || isEnum()) {
+            try {
+                CValue min = minAttributeCValue(evaluator);
+                if (i != Index.NULL) 
+                    min = min.array().getCell(i);
+                CValue max = maxAttributeCValue(evaluator);
+                if (i != Index.NULL) 
+                    max = max.array().getCell(i);
+                val =  val.constrainWithin(min, max);
+            } catch (ConstantEvaluationException e) {}
         }
+        return val;
     }
     
     eq InstRecord.cevalNoBExp(VariableEvaluator evaluator, Index i) {

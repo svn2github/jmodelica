@@ -4485,7 +4485,7 @@ model RedeclareElement27
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RedeclareElement27",
-            description="",
+            description="Check that class lookup goes the correct path from element redeclares",
             flatModel="
 fclass RedeclareTests.RedeclareElement27
  parameter Real b.x = 1 /* 1 */;
@@ -4517,7 +4517,7 @@ model RedeclareElement28
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RedeclareElement28",
-            description="",
+            description="Check that class lookup goes the correct path from element redeclares",
             flatModel="
 fclass RedeclareTests.RedeclareElement28
  parameter Real e.x = 1 /* 1 */;
