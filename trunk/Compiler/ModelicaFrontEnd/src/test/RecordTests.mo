@@ -1510,6 +1510,78 @@ end RecordTests.UnmodifiableComponent4;
 ")})));
 end UnmodifiableComponent4;
 
+model UnmodifiableComponent5
+    record R
+        constant Real x;
+    end R;
+    
+    constant R r1(x = 1);
+    constant R r2(x = 2);
+    constant R r[2] = { r1, r2 };
+    
+    function f1
+        input Integer i;
+        output Real x;
+    algorithm
+        x := f2(r[i]);
+    end f1;
+    
+    function f2
+        input R y;
+        output Real z;
+    algorithm
+        z := y.x;
+    end f2;
+    
+    Real w = f1(i);
+    Integer i = if time > 2 then 1 else 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnmodifiableComponent5",
+            description="Record constructor for record of unmodifiable components",
+            flatModel="
+fclass RecordTests.UnmodifiableComponent5
+ constant Real r1.x = 1;
+ constant Real r2.x = 2;
+ constant Real r[1].x = 1;
+ constant Real r[2].x = 2;
+ Real w;
+ discrete Integer i;
+initial equation 
+ pre(i) = 0;
+equation
+ w = RecordTests.UnmodifiableComponent5.f1(i);
+ i = if time > 2 then 1 else 2;
+
+public
+ function RecordTests.UnmodifiableComponent5.f1
+  RecordTests.UnmodifiableComponent5.R[2] r;
+  input Integer i;
+  output Real x;
+ algorithm
+  r[1].x := 1;
+  r[2].x := 2;
+  x := RecordTests.UnmodifiableComponent5.f2(r[i]);
+  return;
+ end RecordTests.UnmodifiableComponent5.f1;
+
+ function RecordTests.UnmodifiableComponent5.f2
+  input RecordTests.UnmodifiableComponent5.R y;
+  output Real z;
+ algorithm
+  z := y.x;
+  return;
+ end RecordTests.UnmodifiableComponent5.f2;
+
+ record RecordTests.UnmodifiableComponent5.R
+  constant Real x;
+ end RecordTests.UnmodifiableComponent5.R;
+
+end RecordTests.UnmodifiableComponent5;
+")})));
+end UnmodifiableComponent5;
+
 
 model RecordArray1
  record A
