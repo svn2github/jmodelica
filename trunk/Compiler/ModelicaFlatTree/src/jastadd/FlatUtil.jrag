@@ -1294,8 +1294,7 @@ aspect FlatFunctionUtils {
      /**
       * May this component be altered by a modification?
       */
-     syn boolean InstComponentDecl.isModifiable() = !isConstant() && !getComponentDecl().hasFinal();
-     // TODO: Are there other reasons a component might not be modifiable?
+     syn boolean InstComponentDecl.isModifiable() = !(isConstant()&& hasBindingExp()) && !(isParameter() && getComponentDecl().hasFinal());
      
      /**
       * Returns a list of all FFunctionVariables declared as "input".

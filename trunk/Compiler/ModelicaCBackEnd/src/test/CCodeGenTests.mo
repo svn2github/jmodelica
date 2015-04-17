@@ -5303,8 +5303,8 @@ model CRecordDecl20
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     tmp_1->x1 = _time;
-    tmp_1->y = 2;
-    tmp_1->z = 3;
+    tmp_1->y = AD_WRAP_LITERAL(2);
+    tmp_1->z = AD_WRAP_LITERAL(3);
     tmp_1->x2 = _time;
     _r_0 = func_CCodeGenTests_CRecordDecl20_f_exp0(tmp_1);
 /********* Write back reinits *******/

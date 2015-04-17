@@ -2227,11 +2227,7 @@ aspect FlatTypes {
     }
     
     syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
-        FVariable fv = getFVariable(indexOf(name));
-        if (fv.modifiableInRecord)
-            return frc.getArg(indexOfArg(name));
-        else
-            return fv.getBindingExp();
+        return frc.getArg(indexOf(name));
     }
     
     syn FExp FRecordConstructor.myArgFExp(String name) {

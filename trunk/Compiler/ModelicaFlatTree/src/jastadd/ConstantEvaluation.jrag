@@ -2138,8 +2138,16 @@ aspect ConstantEvaluation {
     eq InstRecordConstructor.cevalCalc(VariableEvaluator evaluator) {
         CValueRecord res = new CValueRecord((FRecordType) type());
         int i = 0;
-        for (InstFunctionArgument arg : getArgs())
-            res.setMember(i++, arg.getFExp().ceval(evaluator));
+        int i_arg = 0;
+        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
+            CValue val;
+            if (icd.isModifiable()) {
+                val = getArg(i_arg++).getFExp().ceval(evaluator);
+            } else {
+                val = icd.ceval(evaluator);
+            }
+            res.setMember(i++, val);
+        }
         return res;
     }
 

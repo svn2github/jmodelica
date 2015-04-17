@@ -808,8 +808,7 @@ aspect Flattening {
     public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         if (names.add(name())) {
             FVariable fv = createFVariable();
-            if (isConstant() || (isParameter() && getComponentDecl().hasFinal()))
-                fv.modifiableInRecord = false;
+            fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
         }
@@ -2325,10 +2324,28 @@ aspect FlatExpressions {
 	
 	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
 		List args = new List();
-		for (InstFunctionArgument a : getArgs()) 
-			args.add(a.flatten(prefix));
+        int i = 0;
+        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
+            if (icd.isModifiable()) {
+                args.add(getArg(i++).flatten(prefix));
+            } else {
+                args.add(icd.flattenInRecordConstructor(prefix));
+            }
+        }
 		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
 	}
+	
+    public FExp InstComponentDecl.flattenInRecordConstructor(FQName prefix) {
+        return null;
+    }
+    
+    public FExp InstAssignable.flattenInRecordConstructor(FQName prefix) {
+        if (hasBindingFExp()) {
+            return flattenBindingFExp();
+        } else {
+            return cevalNoBExp(defaultVariableEvaluator(), Index.NULL).buildLiteral();
+        }
+    }
 	
 	public FIdUse InstAccess.flattenRecordName() {
 		return new FIdUse(myInstClassDecl().qualifiedName());

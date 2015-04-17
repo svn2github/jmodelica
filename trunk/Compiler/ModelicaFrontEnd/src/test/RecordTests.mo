@@ -1078,40 +1078,6 @@ end RecordTests.RecordBinding13;
 ")})));
 end RecordBinding13;
 
-
-model RecordBinding14
-    record R
-        Real x1 = -1;
-        constant Real y = 2;
-        final parameter Real z = 3; 
-        Real x2;
-    end R;
-    
-    R rec = R(x2=4);
-    R[2] recs = {R(1,4),R(1,4)};
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="RecordBinding14",
-            description="Record constructor for record of unmodifiable components",
-            flatModel="
-fclass RecordTests.RecordBinding14
- constant Real rec.x1 = -1;
- constant Real rec.y = 2;
- final parameter Real rec.z = 3 /* 3 */;
- constant Real rec.x2 = 4;
- constant Real recs[1].x1 = 1;
- constant Real recs[1].y = 2;
- final parameter Real recs[1].z = 3 /* 3 */;
- constant Real recs[1].x2 = 4;
- constant Real recs[2].x1 = 1;
- constant Real recs[2].y = 2;
- final parameter Real recs[2].z = 3 /* 3 */;
- constant Real recs[2].x2 = 4;
-end RecordTests.RecordBinding14;
-")})));
-end RecordBinding14;
-
 model RecordBinding15
     record R1
       Real y1 = 50;
@@ -1441,6 +1407,108 @@ equation
 end RecordTests.RecordBinding25;
 ")})));
 end RecordBinding25;
+
+
+model UnmodifiableComponent1
+    record R
+        Real x1 = -1;
+        constant Real y = 2;
+        final parameter Real z = 3; 
+        Real x2;
+    end R;
+    
+    R rec = R(x2=4);
+    R[2] recs = {R(1,4),R(1,4)};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnmodifiableComponent1",
+            description="Record constructor for record of unmodifiable components",
+            flatModel="
+fclass RecordTests.UnmodifiableComponent1
+ constant Real rec.x1 = -1;
+ constant Real rec.y = 2;
+ final parameter Real rec.z = 3 /* 3 */;
+ constant Real rec.x2 = 4;
+ constant Real recs[1].x1 = 1;
+ constant Real recs[1].y = 2;
+ final parameter Real recs[1].z = 3 /* 3 */;
+ constant Real recs[1].x2 = 4;
+ constant Real recs[2].x1 = 1;
+ constant Real recs[2].y = 2;
+ final parameter Real recs[2].z = 3 /* 3 */;
+ constant Real recs[2].x2 = 4;
+end RecordTests.UnmodifiableComponent1;
+")})));
+end UnmodifiableComponent1;
+
+model UnmodifiableComponent2
+    record R
+        constant Real c1 = 1;
+        constant Real c2;
+    end R;
+    
+    R r = R(2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnmodifiableComponent2",
+            description="Record constructor for record of unmodifiable components",
+            flatModel="
+fclass RecordTests.UnmodifiableComponent2
+ constant Real r.c1 = 1;
+ constant Real r.c2 = 2;
+end RecordTests.UnmodifiableComponent2;
+")})));
+end UnmodifiableComponent2;
+
+model UnmodifiableComponent3
+    record R2
+        constant Real c2;
+        constant Real c1 = 1;
+        Real x;
+    end R2;
+    
+    R2 r2 = R2(2, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnmodifiableComponent3",
+            description="Record constructor for record of unmodifiable components",
+            flatModel="
+fclass RecordTests.UnmodifiableComponent3
+ constant Real r2.c2 = 2;
+ constant Real r2.c1 = 1;
+ Real r2.x;
+equation
+ r2.x = time;
+end RecordTests.UnmodifiableComponent3;
+")})));
+end UnmodifiableComponent3;
+
+model UnmodifiableComponent4
+    record R
+        final parameter Real p1 = 1;
+        final parameter Real p2;
+        final Real x;
+    end R;
+    
+    R r = R(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnmodifiableComponent4",
+            description="Record constructor for record of unmodifiable components",
+            flatModel="
+fclass RecordTests.UnmodifiableComponent4
+ final parameter Real r.p1 = 1 /* 1 */;
+ parameter Real r.p2 = 0.0 /* 0.0 */;
+ Real r.x;
+equation
+ r.x = time;
+end RecordTests.UnmodifiableComponent4;
+")})));
+end UnmodifiableComponent4;
 
 
 model RecordArray1
@@ -1793,7 +1861,7 @@ model RecordConstructor3
 			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor3
- RecordTests.RecordConstructor3.A x = RecordTests.RecordConstructor3.A(1, 2);
+  RecordTests.RecordConstructor3.A x = RecordTests.RecordConstructor3.A(1, 2, \"foo\");
 
 public
  record RecordTests.RecordConstructor3.A
