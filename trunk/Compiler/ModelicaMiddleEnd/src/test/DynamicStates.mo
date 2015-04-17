@@ -752,6 +752,126 @@ der(_ds.1.s0) := dsDer(1, 0)
 
     end Basic;
     
+    package StateSelectBias
+        
+        model AlwaysVar1
+            // a1 a2 a3
+            // *  *    
+            //    +  + 
+            Real a1(stateSelect = StateSelect.always);
+            Real a2;
+            Real a3;
+            Real b;
+        equation
+            der(a1) + der(a2) = b;
+            der(a2) + der(a3) = b;
+            a1 + a2 = 1;
+            a2 * a3 = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_StateSelectBias_AlwaysVar1",
+                description="Test so that StateSelect.always prevents the dss algorithm from moving variables.",
+                dynamic_states=true,
+                methodName="printDAEBLT",
+                methodResult="
+--- Solved equation ---
+a2 := - a1 + 1
+
+--- Solved equation ---
+a3 := 1 / a2
+
+--- Torn linear system (Block 1) of 1 iteration variables and 3 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  der(a1)
+  b
+  _der_a3
+
+Iteration variables:
+  _der_a2
+
+Torn equations:
+  der(a1) := - _der_a2
+  b := der(a1) + _der_a2
+  _der_a3 := - _der_a2 + b
+
+Residual equations:
+  a2 * _der_a3 + _der_a2 * a3 = 0
+    Iteration variables: _der_a2
+
+Jacobian:
+  |1.0, 0.0, 0.0, 1.0|
+  |1.0, -1.0, 0.0, 1.0|
+  |0.0, -1.0, 1.0, 1.0|
+  |0.0, 0.0, a2, a3|
+-------------------------------
+")})));
+        end AlwaysVar1;
+        
+        model AlwaysVar2
+            // a1 a2 a3
+            // *  +  + 
+            //    +  + 
+            Real a1(stateSelect = StateSelect.always);
+            Real a2;
+            Real a3;
+            Real b;
+        equation
+            der(a1) + der(a2) = b;
+            der(a2) + der(a3) = b;
+            a1 + a2 * a3 = 1;
+            a2 * a3 = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_StateSelectBias_AlwaysVar2",
+                description="Test so that StateSelect.always prevents the dss algorithm from moving variables.",
+                dynamic_states=true,
+                methodName="printDAEBLT",
+                methodResult="
+--- Unsolved system (Block 1) of 2 variables ---
+Unknown variables:
+  a3 ()
+  a2 ()
+
+Equations:
+  a2 * a3 = 1
+    Iteration variables: a3
+  a1 + a2 * a3 = 1
+    Iteration variables: a2
+
+--- Torn linear system (Block 2) of 2 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  der(a1)
+  b
+
+Iteration variables:
+  _der_a2
+  _der_a3
+
+Torn equations:
+  der(a1) := - a2 * _der_a3 + (- _der_a2 * a3)
+  b := _der_a2 + _der_a3
+
+Residual equations:
+  der(a1) + _der_a2 = b
+    Iteration variables: _der_a2
+  a2 * _der_a3 + _der_a2 * a3 = 0
+    Iteration variables: _der_a3
+
+Jacobian:
+  |1.0, 0.0, a3, a2|
+  |0.0, -1.0, 1.0, 1.0|
+  |1.0, -1.0, 1.0, 0.0|
+  |0.0, 0.0, a3, a2|
+-------------------------------
+")})));
+        end AlwaysVar2;
+        
+    end StateSelectBias;
+    
     package Examples
         model Pendulum
             parameter Real L = 1 "Pendulum length";

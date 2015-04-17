@@ -505,13 +505,15 @@ aspect DynamicStateSelect{
 
             @Override
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
+                if (!super.shouldVisit(eqn, var))
+                    return false;
                 Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
                 if (coefficients != null) {
                     Coefficient coff = coefficients.get(var);
                     if (coff != null && coff.continuous)
                         return false;
                 }
-                return super.shouldVisit(eqn, var);
+                return var.getVariable().stateSelection() != FRealVariable.StateSelect.ALWAYS;
             }
         }
 
@@ -557,6 +559,7 @@ aspect DynamicStateSelect{
             @Override
             protected void match(IndexReductionEq eqn, IndexReductionVar var) {
                 super.match(eqn, var);
+                ASTNode.log.debug("      Rematch %s to %s", eqn, var);
                 Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
                 if (coefficients == null)
                     return;
@@ -565,6 +568,13 @@ aspect DynamicStateSelect{
                     ASTNode.log.debug("      Adding %s to worklist", eqn);
                     worklist.add(eqn);
                 }
+            }
+            
+            @Override
+            protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
+                if (!super.shouldVisit(eqn, var))
+                    return false;
+                return var.getVariable().stateSelection() != FRealVariable.StateSelect.ALWAYS;
             }
         }
     }
