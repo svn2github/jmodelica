@@ -305,7 +305,7 @@ class ModelicaCompiler(object):
         
             A list of warnings
         """
-        java_warnings = self._compiler.retreiveAndClearWarnings()
+        java_warnings = self._compiler.retrieveAndClearWarnings()
         warnings = []
         for java_warning in java_warnings:
             warnings.append(CompilationWarning( \
@@ -354,7 +354,7 @@ class ModelicaCompiler(object):
         
             A list of warnings given by the compiler
         """
-        self._compiler.retreiveAndClearWarnings() # Remove old warnings
+        self._compiler.retrieveAndClearWarnings() # Remove old warnings
         unit = None
         try:
             unit = self._compiler.compileUnit(class_name, file_name, target, version, compile_to)

@@ -1082,14 +1082,22 @@ public class ModelicaCompiler {
 		}
 	}
 	
-	/**
-	 * Retreives a list of warnings and clear the internal list.
-	*/
-	public Problem[] retreiveAndClearWarnings() {
-		Problem[] oldWarnings = warnings.toArray(new Problem[warnings.size()]);
-		warnings = new ArrayList<Problem>();
-		return oldWarnings;
-	}
+    /**
+     * Retrieves a list of warnings and clear the internal list.
+    */
+    public Problem[] retrieveAndClearWarnings() {
+        Problem[] oldWarnings = warnings.toArray(new Problem[warnings.size()]);
+        warnings = new ArrayList<Problem>();
+        return oldWarnings;
+    }
+
+    /**
+     * Please use the correctly spelled version!
+     */
+    @Deprecated
+    public Problem[] retreiveAndClearWarnings() {
+        return retrieveAndClearWarnings();
+    }
 
     /**
      * Computes the flattened model representation from a model instance.
