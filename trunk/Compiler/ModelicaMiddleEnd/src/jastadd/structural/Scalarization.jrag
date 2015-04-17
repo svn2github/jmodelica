@@ -3055,8 +3055,6 @@ aspect Scalarization {
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization()) 
             return indexMap.get(name()).fullCopy();
-        if (variability().knownParameterOrLess() && !(inParameterEquation() && isParameterExp()) && !inFunctionCallLeft())
-            return ceval().buildLiteral();
         if (indexNames != null)
             return createUseFas(name());
         return new FIdUseExp(getFIdUse().scalarize(indexMap));

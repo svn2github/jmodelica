@@ -480,7 +480,7 @@ aspect Variability {
 
 	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
 
-	syn FTypePrefixVariability FSubscript.variability() = fParameter();
+    syn FTypePrefixVariability FSubscript.variability() = fConstant();
 	eq FExpSubscript.variability() = getFExp().variability();
 	
 	syn FTypePrefixVariability FArraySubscripts.variability() {

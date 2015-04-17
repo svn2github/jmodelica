@@ -1651,10 +1651,10 @@ aspect FlatExpressions {
             int i = parent.myCallInputs().indexOf(var);
             int d = findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
-        } else if (!inFunction() && !getInstAccess().indexVariability().parameterOrLess()) {
+        } else if (!inFunction() && variability().extractNonParameterIndices(getInstAccess().indexVariability())) {
             FInstAccessExp copy = (FInstAccessExp) dynamicFExp(fullCopy());
             List<FSubscript> sub = new List<FSubscript>();
-            copy.getInstAccess().extractNonParameterIndexes(sub);
+            copy.getInstAccess().extractNonParameterIndices(sub, variability());
             FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
             return res.flatten(prefix);
         } else {
@@ -1733,16 +1733,16 @@ aspect FlatExpressions {
 
 
     /**
-     * Move any non-parameter indexes to given list and replace with colon.
+     * Move any non-parameter indices to given list and replace with colon.
      * Copy any parameter non-scalar indices to given list.
      */
-    public void InstAccess.extractNonParameterIndexes(List<FSubscript> sub) {}
+    public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {}
 
-    public void InstArrayAccess.extractNonParameterIndexes(List<FSubscript> sub) {
+    public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
         FArraySubscripts fas = getFArraySubscripts();
         for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
             FSubscript fs = fas.getFSubscript(i);
-            if (!fs.variability().parameterOrLess()) {
+            if (v.extractNonParameterIndices(fs.variability())) {
                 sub.add(fs);
                 fas.setFSubscript(new FColonSubscript(), i);
             } else if (fs.ndims() == 1) {
@@ -1751,16 +1751,23 @@ aspect FlatExpressions {
         }
     }
 
-    public void InstComponentAccess.extractNonParameterIndexes(List<FSubscript> sub) {
-        if (isArray())
-            for (int i = 0, n = ndims(); i < n; i++)
+    public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+        if (isArray()) {
+            for (int i = 0, n = ndims(); i < n; i++) {
                 sub.add(size().rangeFSubscript(i));
+            }
+        }
     }
 
-    public void InstDot.extractNonParameterIndexes(List<FSubscript> sub) {
-        for (InstAccess ia : getInstAccesss())
-            ia.extractNonParameterIndexes(sub);
+    public void InstDot.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+        for (InstAccess ia : getInstAccesss()) {
+            ia.extractNonParameterIndices(sub, v);
+        }
     }
+    
+    syn boolean FTypePrefixVariability.extractNonParameterIndices(FTypePrefixVariability other) = !other.parameterOrLess();
+    eq FConstant.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
+    eq FKnownParameter.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
 
 	/**
 	 * Check if this access is in the binding expression of an input to a function 
