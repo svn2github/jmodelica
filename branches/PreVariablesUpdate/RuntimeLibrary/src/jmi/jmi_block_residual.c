@@ -243,11 +243,28 @@ int jmi_block_update_pre(jmi_block_residual_t* block) {
     jmi_t* jmi = block->jmi;
     int i = 0;
     jmi_real_t previous, current;
-    jmi_value_reference type;
+    jmi_value_reference type, ind;
     
     jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, 
-                    "BlockUpdateOfPreDiscreteVariables", 
-                    "Block updating of pre discrete variables");
+                    "BlockUpdateOfPreVariables", 
+                    "Block updating of pre variables");
+
+    for (i = 0; i < block->n; i++) {
+        ind = jmi_get_index_from_value_ref(block->value_references[i]);
+
+        /* Check if the variable is a discrete real */
+        if (ind >= jmi->offs_real_d && ind < jmi->offs_integer_d) {
+            current = (*(jmi->z))[ind];
+            previous = (*(jmi->z))[ind - jmi->offs_real_d + jmi->offs_pre_real_d];
+            
+            if (current != previous) {
+                (*(jmi->z))[ind - jmi->offs_real_d + jmi->offs_pre_real_d] = (*(jmi->z))[ind];
+                
+                jmi_log_node(jmi->log, logInfo, "Info", " <iv: #r%d#> <from: %E> <to: %E> ", block->value_references[i], previous, current);
+            }
+        }
+        
+    }
 
     for (i=0;i<block->n_nr; i++) {
         type = jmi_get_type_from_value_ref(block->nr_vref[i]);
@@ -417,6 +434,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         jmi_value_reference type;
 		jmi_real_t* nr_vref_tmp = (jmi_real_t*)calloc(block->n_nr, sizeof(jmi_real_t));
 		jmi_real_t* sw_index_tmp = (jmi_real_t*)calloc(block->n_sw, sizeof(jmi_real_t));
+        jmi_real_t* vref_tmp = (jmi_real_t*)calloc(block->n, sizeof(jmi_real_t));
 #ifdef JMI_PROFILE_RUNTIME
 		if (block->parent_index != -1) {
 			if (block->is_init_block) {
@@ -427,7 +445,11 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 		} 
 		block->block_solver->is_init_block = block->is_init_block;
 #endif
-
+        block->F(jmi, vref_tmp, NULL, JMI_BLOCK_VALUE_REFERENCE);
+        for (i = 0; i < block->n; i++) {
+            block->value_references[i] = (jmi_int_t)vref_tmp[i];
+        }
+        
         block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_NON_REAL_VALUE_REFERENCE);
 		block->F(jmi, sw_index_tmp, NULL, JMI_BLOCK_ACTIVE_SWITCH_INDEX); 
 			
@@ -469,6 +491,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         
         free(nr_vref_tmp);
         free(sw_index_tmp);
+        free(vref_tmp);
     }
 
     {
