@@ -4299,8 +4299,8 @@ class LocalDAECollocator(CasadiCollocator):
         for dests in (self.c_dests, self.xx_dests):
             for dest in dests.itervalues():
                 inds = N.vstack(dest['inds'])
-                i = N.array(dest['i'])
-                k = N.array(dest['k'])
+                i = N.array(dest['i'], dtype=N.int)
+                k = N.array(dest['k'], dtype=N.int)
                 tinds = N.lexsort((k, i))
                 dest['inds'] = inds[tinds, :]
                 dest['i']    = i[tinds]
@@ -5311,15 +5311,15 @@ class LocalDAECollocator(CasadiCollocator):
         
         dest = self.c_dests[eqtype]
         
-        indices = N.array(dest['inds'])
+        indices = N.array(dest['inds'], dtype=N.int)
         if dest['kind'] == 'ineq':
             # inequalities come after equalities in the constraints
             indices += self.c_e.numel()
         else:
             assert dest['kind'] == 'eq', "Unrecognized equation kind"
 
-        i = N.array(dest['i'])
-        k = N.array(dest['k'])
+        i = N.array(dest['i'], dtype=N.int)
+        k = N.array(dest['k'], dtype=N.int)
         
         time = self.get_times(i, k)
 
@@ -5355,9 +5355,9 @@ class LocalDAECollocator(CasadiCollocator):
 
         dest = self.xx_dests[var]
 
-        inds = N.array(dest['inds'])
-        i = N.array(dest['i'])
-        k = N.array(dest['k'])
+        inds = N.array(dest['inds'], dtype=N.int)
+        i = N.array(dest['i'], dtype=N.int)
+        k = N.array(dest['k'], dtype=N.int)
         
         time = self.get_times(i, k)
 
@@ -5720,7 +5720,7 @@ class OptimizationSolver(object):
         """
         return self.collocator.get_nlp_variable_indices(var)
 
-    def get_residuals(self, eqtype, point='opt', raw=False, inds=None):
+    def get_residuals(self, eqtype, inds=None, point='opt', raw=False):
         """
         Get the residuals for a given equation type.
 
@@ -5732,6 +5732,12 @@ class OptimizationSolver(object):
 
                     'initial', 'dae', 'path_eq', 'path_ineq',
                     'point_eq', 'point_ineq'
+
+            inds --
+                Iterable of equation indices within eqtype that the residuals
+                should be returned for, or None if residuals should be
+                returned for all equations.
+                Default: None
 
             point --
                 The point where the residuals should be evaluated,
@@ -5745,12 +5751,6 @@ class OptimizationSolver(object):
                 0 if not violating the bounds, the difference from
                 the violated bound otherwise.
                 Default: False
-
-            inds --
-                Iterable of equation indices within eqtype that the residuals
-                should be returned for, or None if residuals should be
-                returned for all equations.
-                Default: None
 
         Returns::
 
@@ -5847,7 +5847,7 @@ class OptimizationSolver(object):
         duals = duals[inds]
         return duals, time, i, k
 
-    def get_residual_norms(self, point='opt', ord=N.inf, eqtype=None):
+    def get_residual_norms(self, eqtype=None, point='opt', ord=N.inf):
         """
         List the norms of different parts of the residual, in descending order
 
@@ -5855,6 +5855,12 @@ class OptimizationSolver(object):
         to the norm.
 
         Parameters::
+            eqtype --
+                If None, list all equation types and their residual norms.
+                Otherwise, list the residual norm of each equation
+                of the given type, along with its index within the type.
+                Default: None
+
             point --
                 The point where the residuals should be evaluated,
                 'opt' for the optimization solution or
@@ -5863,12 +5869,6 @@ class OptimizationSolver(object):
 
             ord --
                 Vector norm order used with numpy.linalg.norm
-
-            eqtype --
-                If None, list all equation types and their residual norms.
-                Otherwise, list the residual norm of each equation
-                of the given type, along with its index within the type.
-                Default: None
         """
         result = []
 
@@ -5886,19 +5886,26 @@ class OptimizationSolver(object):
         result.sort(reverse = True)
         return result
 
-    def get_equations(self, eqtype):
+    def get_equations(self, eqtype, eqinds=None):
         """
-        Get the model equations corresponding to the given equation type
+        Get model equations corresponding to the given equation type
 
-        The equations are in the same order as the corresponding residuals
-        and constraint duals.
-
-        The only equation types supported are
+        Parameters::
+            eqtype --
+                Type of equation. The only values supported are
 
                     'initial', 'dae',
                     'path_eq', 'path_ineq',
                     'point_eq', 'point_ineq'
+
+            eqinds --
+                Indices of the equations to be returned.
+                If None, return all equations of the given type in index order.
+                Default: None
         """
+        if eqinds is not None:
+            return self.get_equations(eqtype)[eqinds]
+
         op = self.collocator.op
         # To be safe, only returning copies
         if eqtype == 'initial':      return op.getInitialEquations()
@@ -6009,7 +6016,7 @@ class OptimizationSolver(object):
         c_sources, xx_sources = self.collocator.c_sources, self.collocator.xx_sources
         combos = set(zip(c_sources['eqtype'][c_inds], c_sources['eqind'][c_inds], xx_sources['var'][xx_inds]))
 
-        return combos        
+        return combos
 
     def find_nonfinite_jacobian_entries(self, point='opt'):
         """
@@ -6031,7 +6038,7 @@ class OptimizationSolver(object):
         c_inds, xx_inds = N.nonzero(J-J)
         return self.get_model_jacobian_entries(c_inds, xx_inds)
 
-    def list_jacobian_entries(self, entries):
+    def print_jacobian_entries(self, entries):
         """
         Print a list of Jacobian entries
 
@@ -6054,7 +6061,7 @@ class OptimizationSolver(object):
                 last_eqtype, last_eqind = eqtype, eqind
             print "wrt", var
 
-    def list_nonfinite_jacobian_entries(self, point='opt'):
+    def print_nonfinite_jacobian_entries(self, point='opt'):
         """
         List combinations of model equations and variables where the Jacobian is nonfinite
 
@@ -6067,4 +6074,4 @@ class OptimizationSolver(object):
         """
         print "Nonfinite Jacobian entries:"
         print "---------------------------"
-        self.list_jacobian_entries(self.find_nonfinite_jacobian_entries(point))
+        self.print_jacobian_entries(self.find_nonfinite_jacobian_entries(point))
