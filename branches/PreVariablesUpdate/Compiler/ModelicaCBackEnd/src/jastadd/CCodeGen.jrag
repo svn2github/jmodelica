@@ -3464,9 +3464,13 @@ aspect CCodeGen {
                 if (equation().isMixed()) {
                     equation().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
                 }
-                str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
-                equation().genBlock_C(p, str, p.indent(indent), visited, forVariables, forIndices);
-                str.format("%s}\n", indent);
+                if (equation().shouldProduceNonRealGuard_C()) {
+                    str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
+                    equation().genBlock_C(p, str, p.indent(indent), visited, forVariables, forIndices);
+                    str.format("%s}\n", indent);
+                } else {
+                    equation().genBlock_C(p, str, indent, visited, forVariables, forIndices);
+                }
             } else {
                 equation().genBlock_C(p, str, indent, visited, forVariables, forIndices);
             }
@@ -3474,6 +3478,8 @@ aspect CCodeGen {
             throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName() + " in residual function");
         }
     }
+
+    syn boolean FAbstractEquation.shouldProduceNonRealGuard_C() = !isSampleEquation();
 
     @Override
     public void MetaEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p, CodeStream str,
