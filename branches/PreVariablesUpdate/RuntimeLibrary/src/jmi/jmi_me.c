@@ -129,7 +129,11 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->events_epsilon = jmi->options.events_default_tol; /* Used in the event detection */
         jmi->newton_tolerance = jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
     } else {
-        jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
+        if (jmi->options.events_tol_factor == 0) {
+            jmi->events_epsilon = jmi->options.events_default_tol; /* Used in the event detection */
+        } else {
+            jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
+        }
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
     jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
