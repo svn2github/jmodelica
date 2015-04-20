@@ -1183,7 +1183,7 @@ class LocalDAECollocationPrepareAlg(AlgorithmBase):
         Arguments are the same as for LocalDAECollocationAlg.
         """
         self.alg = LocalDAECollocationAlg(op, options)
-        self.solver = casadi_collocation.OptimizationSolver(self.alg.nlp)
+        self.solver = self.alg.nlp.wrapper
 
     def solve(self):
         pass

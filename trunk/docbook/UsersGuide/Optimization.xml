@@ -876,6 +876,10 @@ Returns::
 
         <programlisting>solver = model.prepare_optimization(options=opts)</programlisting>
 
+        <para>Alternatively, the solver can be retrieved from an existing
+        optimization result, as <literal>solver =
+        res.get_solver()</literal>.</para>
+
         <para>The obtained solver object represents the discretized problem,
         and can be used to solve it using its own <literal>optimize</literal>
         method:</para>
@@ -3435,6 +3439,265 @@ plt.show()
         estimation problem may be formulated, where the parameters a1, a2, a3,
         a4 are free optimization variables, and where the squared errors of
         all four tank levels are penalized. Do this as an exercise!</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Investigating optimization progress</title>
+
+      <para>This section describes some tools that can be used to investigate
+      the progress of the nonlinear programming solver on an optimization
+      problem. This information can be useful when debugging convergence
+      problems; some of it (e.g. dual variables) may also be useful to gain a
+      better understanding of the properties of an optimization problem. To
+      make sense of the information that can be retrieved, we first give an
+      overview of the collocation procedure that transcribes the optimization
+      problem into a Nonlinear Program (NLP).</para>
+
+      <para>Methods for inspecting progress are divided into low level and
+      high level methods, where the low level methods provide details of the
+      underlying NLP while the high level methods are oriented towards the
+      optimization problem as seen in the model formulation.</para>
+
+      <para>All functionality related to inspection of solver progress is
+      exposed through the solver object as returned through the
+      <literal>prepare_optimization</literal> method. If the optimization has
+      been done through the <literal>optimize</literal> method instead, the
+      solver can be obtained as in</para>
+
+      <programlisting>res = model.optimize(options=opts)
+solver = res.get_solver()
+</programlisting>
+
+      <section>
+        <title>Collocation</title>
+
+        <para>To be able to solve a dynamic optimization problem, it is first
+        discretized through collocation. Time is divided into
+        <emphasis>elements</emphasis> (time intervals), and time varying
+        variables are approximated by a low order polynomial over each
+        element. Each polynomial piece is described by sample values at a
+        number of <emphasis>collocation points</emphasis> (default 3) within
+        the element. The result is that each time varying variable in the
+        model is <emphasis>instantiated</emphasis> into one NLP variable for
+        each collocation point within each element. Some variables may also
+        need to be instantiated at additional points, such as the initial
+        point which is typically not a collocation point.</para>
+
+        <para>The equations in a model are divided into initial equations, dae
+        equations, path constraints and point constraints. These equations are
+        also instantiated at different time points to become constraints in
+        the NLP. Initial equations and point constraints are instantiated only
+        once. Dae equations and path constraints are instantiated at
+        collocation point of each element and possibly some additional
+        points.</para>
+
+        <para>When using the methods described below, each model equation is
+        referred to as a pair <literal>(eqtype, eqind)</literal>. The string
+        <literal>eqtype</literal> may be either <literal>'initial'</literal>,
+        <literal>'dae'</literal>, <literal>'path_eq'</literal>,
+        <literal>'path_ineq'</literal>, <literal>'point_eq'</literal>, or
+        <literal>'point_ineq'</literal>. The equation index
+        <literal>eqind</literal> gives the index within the given equation
+        type, and is a nonnegative integer less than the number of equations
+        within the type. The symbolic model equations corresponding to given
+        pairs <literal>(eqtype, eqind)</literal> can be retrieved through the
+        <literal>get_equations</literal> method:</para>
+
+        <programlisting>eq      = solver.get_equations(eqtype, 0)     # first equation of type eqtype
+eqs     = solver.get_equations(eqtype, [1,3]) # second and fourth equation
+all_eqs = solver.get_equations(eqtype)        # all equations of the given type
+</programlisting>
+
+        <para>Apart from the model equations, collocation may also instantiate
+        additional kinds of constraints, such as <emphasis>continuity
+        constraints</emphasis> to enforce continuity of states between
+        elements and <emphasis>collocation constraints</emphasis> to prescribe
+        the coupling between states and their derivatives. These constraints
+        have their own <literal>eqtype</literal> strings. A list of all
+        equation types that are used in a given model can be retrieved
+        using</para>
+
+        <programlisting>eqtypes = solver.get_constraint_types()</programlisting>
+      </section>
+
+      <section>
+        <title>Inspecting residuals</title>
+
+        <para>Given a potential solution to the NLP, the
+        <emphasis>residual</emphasis> of a constraint is a number that
+        specifies how close it is to being satisfied. For equalities, the
+        residual must be (close to) zero for the solution to be feasible. For
+        inequalities, the residual must be in a specified range, typically
+        nonpositive. The constraint <emphasis>violation</emphasis> is zero if
+        the residual is within bounds, and gives the signed distance to the
+        closest bound otherwise; for equality constraints, this is the same as
+        the residual. Methods for returning residuals actually return the
+        violation by default, but have an option to get the raw
+        residual.</para>
+
+        <para>For a feasible solution, all violations are (almost) zero. If an
+        optimization converges to an infeasible point or does not have time to
+        converge to a feasible one then the residuals show which constraints
+        the NLP solver was unable to satisfy. If one problematic constraint
+        comes into conflict with a number of constraints, all of them will
+        likely have nonzero violations.</para>
+
+        <para>Residual values for a given equation type can be retrieved as a
+        function of time through</para>
+
+        <programlisting>r, t, i, k = solver.get_residuals(eqtype)</programlisting>
+
+        <para>where <literal>r</literal> is an array of residuals of shape
+        <literal>(n_timepoints, n_equations)</literal>, and
+        <literal>t</literal>, <literal>i</literal>, and <literal>k</literal>
+        are vectors that give the time, element index, and collocation point
+        index for each instantiation. The are also optional arguments:
+        <literal>inds</literal> gives a subset of equation indices (e.g.
+        <literal>inds=[0, 1]</literal>), <literal>point</literal> specifies
+        whether to evaluate residuals at the optimization solution
+        (<literal>point='opt'</literal>, default) or the initial point
+        (<literal>point='init'</literal>), and <literal>raw</literal>
+        specifies whether to return constraint violations
+        (<literal>raw=False</literal>, default) or raw residuals
+        (<literal>raw=True</literal>).</para>
+
+        <para>To get an overview of which residuals are the biggest,</para>
+
+        <programlisting>solver.get_residual_norms()</programlisting>
+
+        <para>returns a list of equation types sorted by descending residual
+        norm, and</para>
+
+        <programlisting>solver.get_residual_norms(eqtype)</programlisting>
+
+        <para>returns a list of equation indices of the given type sorted by
+        residual norm.</para>
+      </section>
+
+      <section>
+        <title>Inspecting the constraint Jacobian</title>
+
+        <para>When solving the collocated NLP, the NLP solver typically has to
+        evaluate the Jacobian of the constraint residual functions.
+        Convergence problems can sometimes be related to numerical problems
+        with the constraint Jacobian. In particular, Ipopt will never consider
+        potential solution if there are nonfinite (infinity or not-a-number)
+        entries in the Jacobian. If the Jacobian has such entries at the
+        initial guess, the optimizer will give up completely.</para>
+
+        <para>The constraint Jacobian comes from the NLP. As seen from the
+        original model, it contains the derivatives of the model equations
+        (and also e.g. the collocation equations) with respect to the model
+        variables at different time points. If one or several problematic
+        entries are found in the Jacobian, it is often helpful to know the
+        model equation and variable that they correspond to.</para>
+
+        <para>The set of (model equation, model variable) pairs that
+        correspond to nonfinite entries in the constraint Jacobian can be
+        printed with</para>
+
+        <programlisting>solver.print_nonfinite_jacobian_entries()</programlisting>
+
+        <para>or returned with</para>
+
+        <programlisting>entries = solver.find_nonfinite_jacobian_entries()</programlisting>
+
+        <para>There are also methods to allow to make more custom analyses of
+        this kind. To instead list all Jacobian entries with an absolute value
+        greater than 10, one can use</para>
+
+        <programlisting>J = solver.get_nlp_jacobian() # Get the raw NLP constraint Jacobian as a (sparse) scipy.csc_matrix
+
+# Find the indices of all entries with absolute value &gt; 10
+J.data = abs(J.data) &gt; 10
+c_inds, xx_inds = N.nonzero(J)
+
+entries = solver.get_model_jacobian_entries(c_inds, xx_inds) # Map the indices to equations and variables in the model
+solver.print_jacobian_entries(entries) # Print them
+</programlisting>
+      </section>
+
+      <section>
+        <title>Inspecting dual variables</title>
+
+        <para>Many NLP solvers (including Ipopt) produce a solution that
+        consists of not only the primal variables (the actual NLP variables),
+        but also one <emphasis>dual variable</emphasis> for each constraint in
+        the NLP. Upon convergence, the value of each dual variable gives the
+        change in the optimal objective per unit change in the residual. Thus,
+        the dual variables can give an idea of which constraints are most
+        hindering when it comes to achieving a lower objective value, however,
+        they must be interpreted in relation to how much it might be possible
+        to change any given constraint.</para>
+
+        <para>Dual variable values for a given equation type can be retrieved
+        as a function of time through</para>
+
+        <programlisting>d, t, i, k = solver.get_constraint_duals(eqtype)</programlisting>
+
+        <para>in analogy to <literal>solver.get_residuals</literal>.</para>
+
+        <para>Besides regular constraints, the NLP can also contain upper and
+        lower bounds on variables. These will correspond to the Modelica
+        <literal>min</literal> and <literal>max</literal> attributes for
+        instantiated model variables. The dual variables for the bounds on a
+        given model variable <literal>var</literal> can be retrieved as a
+        function of time through</para>
+
+        <programlisting>d, t, i, k = solver.get_bound_duals(var)</programlisting>
+      </section>
+
+      <section>
+        <title>Inspecting low level information about NLP solver
+        progress</title>
+
+        <para>The methods described above generally hide the actual collocated
+        NLP and only require to work with model variables and equations,
+        instantiated at different points. There also exist lower level methods
+        that expose the NLP level information and its mapping to the original
+        model more directly, and may be useful for more custom applications.
+        These include</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>get_nlp_variables</literal>,
+            <literal>get_nlp_residuals</literal>,
+            <literal>get_nlp_bound_duals</literal>, and
+            <literal>get_nlp_constraint_duals</literal> to get raw vectors
+            from the NLP solution.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>get_nlp_variable_bounds</literal> and
+            <literal>get_nlp_residual_bounds</literal> to get the
+            corresponding bounds used in the NLP.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>get_nlp_variable_indices</literal> and
+            <literal>get_nlp_constraint_indices</literal> to get mappings from
+            model variables and equations to their NLP counterparts.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>get_point_times</literal> to get the times of
+            collocation points <literal>(i, k)</literal>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>get_model_variables</literal> and
+            <literal>get_model_constraints</literal> to map from NLP variables
+            and constraints to the corresponding model variables and
+            equations.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The low level constraint Jacobian methods
+        <literal>get_nlp_jacobian</literal>,
+        <literal>get_model_jacobian_entries</literal>, and the
+        <literal>print_jacobian_entries</literal> method have already been
+        covered in the section about jacobians above.</para>
       </section>
     </section>
   </section>

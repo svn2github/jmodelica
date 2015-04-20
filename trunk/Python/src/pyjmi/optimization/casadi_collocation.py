@@ -945,6 +945,10 @@ class LocalDAECollocator(CasadiCollocator):
         # Get to work
         self._create_nlp()
 
+        # Create the canonical OptimizationSolver that should always be used
+        # to work against this collocator instance
+        self.wrapper = OptimizationSolver(self)
+
         self.times['init'] = time.clock() - t0_init
 
     def solve_and_write_result(self):
@@ -5483,6 +5487,16 @@ class LocalDAECollocationAlgResult(JMResultBase):
         """
         return self.solver_statistics
 
+    def get_solver(self):
+        """
+        Get the solver that was used to create this result.
+
+        Returns an OptimizationSolver wrapping the collocator that was used.
+        The solver can be used to query NLP solver progress
+        for the optimization, such as residuals and dual variables.
+        """
+        return self.solver.wrapper
+
 
 class OptimizationSolver(object):
     """
@@ -5819,13 +5833,14 @@ class OptimizationSolver(object):
             duals = duals[:, inds]
         return (duals, time, i, k)
 
-    def get_bound_duals(self, var, inds=None):
+    def get_bound_duals(self, var):
         """
         Get the dual variables at the optimization solution for the bounds on the given variable.
 
         Parameters::
             var --
-                The model variable to get the bounds dual variables for
+                The model variable to get the bounds dual variables for.
+                Type: string or Variable
 
         Returns::
 
