@@ -772,7 +772,6 @@ der(_ds.1.s0) := dsDer(1, 0)
             FClassMethodTestCase(
                 name="DynamicStates_StateSelectBias_AlwaysVar1",
                 description="Test so that StateSelect.always prevents the dss algorithm from moving variables.",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Solved equation ---
@@ -827,7 +826,6 @@ Jacobian:
             FClassMethodTestCase(
                 name="DynamicStates_StateSelectBias_AlwaysVar2",
                 description="Test so that StateSelect.always prevents the dss algorithm from moving variables.",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Unsolved system (Block 1) of 2 variables ---
@@ -869,6 +867,116 @@ Jacobian:
 -------------------------------
 ")})));
         end AlwaysVar2;
+        
+        model NeverVar1
+            // a1 a2 a3
+            // *  *    
+            //    +  + 
+            Real a1;
+            Real a2(stateSelect = StateSelect.never);
+            Real a3;
+            Real b;
+        equation
+            der(a1) + der(a2) = b;
+            der(a2) + der(a3) = b;
+            a1 + a2 = 1;
+            a2 * a3 = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_StateSelectBias_NeverVar1",
+                description="Test so that StateSelect.never prevents the dss algorithm from moving variables.",
+                methodName="printDAEBLT",
+                methodResult="
+--- Solved equation ---
+a2 := 1 / a3
+
+--- Torn linear system (Block 1) of 1 iteration variables and 3 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  _der_a1
+  b
+  der(a3)
+
+Iteration variables:
+  _der_a2
+
+Torn equations:
+  _der_a1 := - _der_a2
+  b := _der_a1 + _der_a2
+  der(a3) := - _der_a2 + b
+
+Residual equations:
+  a2 * der(a3) + _der_a2 * a3 = 0
+    Iteration variables: _der_a2
+
+Jacobian:
+  |1.0, 0.0, 0.0, 1.0|
+  |1.0, -1.0, 0.0, 1.0|
+  |0.0, -1.0, 1.0, 1.0|
+  |0.0, 0.0, a2, a3|
+
+--- Solved equation ---
+a1 := - a2 + 1
+-------------------------------
+")})));
+        end NeverVar1;
+        
+        model NeverVar2
+            // a1 a2 a3
+            // *  +  + 
+            //    +  + 
+            Real a1;
+            Real a2(stateSelect = StateSelect.never);
+            Real a3;
+            Real b;
+        equation
+            der(a1) + der(a2) = b;
+            der(a2) + der(a3) = b;
+            a1 + a2 * a3 = 1;
+            a2 * a3 = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_StateSelectBias_NeverVar2",
+                description="Test so that StateSelect.never prevents the dss algorithm from moving variables.",
+                dynamic_states=true,
+                methodName="printDAEBLT",
+                methodResult="
+--- Solved equation ---
+a2 := 1 / a3
+
+--- Torn linear system (Block 1) of 2 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  _der_a1
+  b
+
+Iteration variables:
+  _der_a2
+  der(a3)
+
+Torn equations:
+  _der_a1 := - a2 * der(a3) + (- _der_a2 * a3)
+  b := _der_a2 + der(a3)
+
+Residual equations:
+  _der_a1 + _der_a2 = b
+    Iteration variables: _der_a2
+  a2 * der(a3) + _der_a2 * a3 = 0
+    Iteration variables: der(a3)
+
+Jacobian:
+  |1.0, 0.0, a3, a2|
+  |0.0, -1.0, 1.0, 1.0|
+  |1.0, -1.0, 1.0, 0.0|
+  |0.0, 0.0, a3, a2|
+
+--- Solved equation ---
+a1 := - a2 * a3 + 1
+-------------------------------
+")})));
+        end NeverVar2;
         
     end StateSelectBias;
     

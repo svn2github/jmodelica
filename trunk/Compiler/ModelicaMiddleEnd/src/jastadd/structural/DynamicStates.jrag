@@ -309,8 +309,7 @@ aspect DynamicStateSelect{
             Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
             if (coefficients == null)
                 continue;
-            Coefficient coff = coefficients.get(eqn.getMatching());
-            if (coff == null || !coff.continuous)
+            if (!eqn.getMatching().dynamicSetCandidate(coefficients.get(eqn.getMatching())))
                 continue;
             lightReset();
             ASTNode.log.debug("  SAP1");
@@ -322,8 +321,7 @@ aspect DynamicStateSelect{
             Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
             ASTNode.log.debug("    Path not found, set %d", set.id);
             for (IndexReductionVar var : eqn.getVariables()) {
-                Coefficient varCoff = coefficients.get(var);
-                if (varCoff == null || !varCoff.continuous || var.getVariable().stateSelection() == FRealVariable.StateSelect.ALWAYS)
+                if (!var.dynamicSetCandidate(coefficients.get(var)))
                     continue;
                 ASTNode.log.debug("  Checking ncc variable %s", var);
                 if (var.getMatching() == eqn) {
@@ -432,7 +430,20 @@ aspect DynamicStateSelect{
         }
         return vars;
     }
-    
+
+    public boolean IndexReductionVar.dynamicSetCandidate(IndexReductionBiPGraph.Coefficient coefficient) {
+        if (coefficient == null)
+            return false;
+        if (!coefficient.continuous)
+            return false;
+        FAbstractVariable.StateSelect stateSelect = getVariable().stateSelection();
+        if (stateSelect == FRealVariable.StateSelect.ALWAYS)
+            return false;
+        if (stateSelect == FRealVariable.StateSelect.NEVER)
+            return false;
+        return true;
+    }
+
     public Object IndexReductionBiPGraph.printCoefficientsObj(final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, final boolean printExpressions) {
         return new Object() {
             public String toString() {
@@ -513,7 +524,12 @@ aspect DynamicStateSelect{
                     if (coff != null && coff.continuous)
                         return false;
                 }
-                return var.getVariable().stateSelection() != FRealVariable.StateSelect.ALWAYS;
+                FAbstractVariable.StateSelect stateSelect = var.getVariable().stateSelection();
+                if (stateSelect == FRealVariable.StateSelect.ALWAYS)
+                    return false;
+                if (stateSelect == FRealVariable.StateSelect.NEVER)
+                    return false;
+                return true;
             }
         }
 
@@ -574,7 +590,12 @@ aspect DynamicStateSelect{
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
                 if (!super.shouldVisit(eqn, var))
                     return false;
-                return var.getVariable().stateSelection() != FRealVariable.StateSelect.ALWAYS;
+                FAbstractVariable.StateSelect stateSelect = var.getVariable().stateSelection();
+                if (stateSelect == FRealVariable.StateSelect.ALWAYS)
+                    return false;
+                if (stateSelect == FRealVariable.StateSelect.NEVER)
+                    return false;
+                return true;
             }
         }
     }
