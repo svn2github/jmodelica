@@ -7,7 +7,6 @@
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
@@ -930,18 +929,18 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                             continue;
                         Collection<E> eqns = graph.getEquations(fae);
                         if (eqns != null) {
-                            boolean add = false;
-                            for (E eqn : eqns) {
-                                if (eqn.getVariable(var.getName()) != null) {
-                                    add = true;
-                                    break;
-                                }
-                            }
-                            if (add) {
+//                            boolean add = false;
+//                            for (E eqn : eqns) {
+//                                if (eqn.getVariable(var.getName()) != null) {
+//                                    add = true;
+//                                    break;
+//                                }
+//                            }
+//                            if (add) {
                                 if (depends.isEmpty())
                                     depends = new ArrayList<E>();
                                 depends.addAll(eqns);
-                            }
+//                            }
                         }
                     }
                 }
