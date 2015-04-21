@@ -571,15 +571,15 @@ abstract public class OptionRegistry {
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               runtime,
-             1e-13,
+             1e-10,
              "Default tolerance for the event iterations.",
-              1e-15, 1e-2),
+              1e-14, 1e-2),
         EVENTS_TOL_FACTOR
             ("events_tol_factor",
                 runtime,
-              0,
+              0.0001,
               "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
-              0.0,1.0),
+              1e-6,1.0),
         BLOCK_JACOBIAN_CHECK
             ("block_jacobian_check",
              runtime,
