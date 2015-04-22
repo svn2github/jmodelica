@@ -3681,7 +3681,7 @@ solver.print_jacobian_entries(entries) # Print them
           </listitem>
 
           <listitem>
-            <para><literal>get_point_times</literal> to get the times of
+            <para><literal>get_point_time</literal> to get the times of
             collocation points <literal>(i, k)</literal>.</para>
           </listitem>
 

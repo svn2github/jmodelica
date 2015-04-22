@@ -1776,7 +1776,11 @@ class LocalDAECollocator(CasadiCollocator):
         # Update h_i for free elements length
         if self.hs == "free":
             var_indices['h'] =[ N.nan ]+ var_indices['h']
-            self.h = casadi.vertcat([N.nan,var_map['h']['all']])        
+            self.h = casadi.vertcat([N.nan,var_map['h']['all']])
+        else:
+            # Make sure self.h can be indexed with vectors
+            # (just as the result from casadi.vertcat above can)
+            self.h = N.array(self.h)
 
         assert(counter_s == n_xx)
         
@@ -1968,6 +1972,12 @@ class LocalDAECollocator(CasadiCollocator):
 
         return z
 
+    def get_point_time(self, i, k):
+        """
+        Get the time of a point (i, k)
+        """
+        return self.element_times[i] + self.horizon * self.h[i] * self.coll_p[k]
+
     def _compute_time_points(self):
         """
         Return a vector with the corresponding times at the collocation points
@@ -1978,34 +1988,36 @@ class LocalDAECollocator(CasadiCollocator):
                 time vector.
                 Type float
         """
+        # Calculate start and end times of elements
+        self.element_times = N.zeros(self.n_e+2,
+            dtype = object if self.hs == "free" else float)
+        self.element_times[0] = N.nan # element 0 is unused
+        t = self.t0
+        for i in xrange(1, self.n_e + 1):
+            self.element_times[i] = t
+            t = t + self.horizon * self.h[i]
+        self.element_times[self.n_e + 1] = t
+
+        if self.is_gauss:
+            self.coll_p = N.hstack((self.pol.p, 1))
+        else:
+            self.coll_p = self.pol.p
+
+        # Now it's ok to call get_point_time
+
         # Calculate time points
         self.time_points = {}
         time = []
-        i = 1
-        self.time_points[i] = {}
-        t = self.t0
-        self.time_points[i][0] = t
-        time.append(t)
-        ti = t # Time at start of element
-        for k in xrange(1, self.n_cp + 1):
-            t = ti + self.horizon * self.h[i] * self.pol.p[k]
-            self.time_points[i][k] = t
-            time.append(t)
-        for i in xrange(2, self.n_e + 1):
+
+        for i in xrange(1, self.n_e + 1):
             self.time_points[i] = {}
-            ti = (self.time_points[i - 1][self.n_cp] +
-                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
-            for k in xrange(1, self.n_cp + 1):
-                t = ti + self.horizon * self.h[i] * self.pol.p[k]
+            k0 = 0 if i == 1 else 1
+            k1 = self.n_cp + (2 if self.is_gauss and i == self.n_e else 1)
+            for k in xrange(k0, k1):
+                t = self.get_point_time(i, k)
                 self.time_points[i][k] = t
                 time.append(t)
-        if self.is_gauss:
-            i = self.n_e
-            ti = (self.time_points[i - 1][self.n_cp] +
-                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
-            t = ti + self.horizon * self.h[i]
-            self.time_points[i][self.n_cp + 1] = t
-            time.append(t)
+
         if self.hs != "free":
             assert(N.allclose(time[-1], self.tf))
 
@@ -4301,12 +4313,17 @@ class LocalDAECollocator(CasadiCollocator):
     def _assemble_back_tracking_info(self):
         # Finalize and sort recorded tracking info
         for dests in (self.c_dests, self.xx_dests):
-            for dest in dests.itervalues():
+            for dest in dests.itervalues():                
                 inds = N.vstack(dest['inds'])
                 i = N.array(dest['i'], dtype=N.int)
                 k = N.array(dest['k'], dtype=N.int)
                 tinds = N.lexsort((k, i))
-                dest['inds'] = inds[tinds, :]
+
+                inds = inds[tinds, :]
+                if dests is self.xx_dests:
+                    inds = inds[:, 0]
+
+                dest['inds'] = inds
                 dest['i']    = i[tinds]
                 dest['k']    = k[tinds]
 
@@ -4328,7 +4345,7 @@ class LocalDAECollocator(CasadiCollocator):
         self.c_sources['k'].fill(-1)
 
         for eqtype in self.get_nlp_constraint_types():
-            c_inds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+            c_inds, i, k = self.get_nlp_constraint_indices(eqtype)
             self.c_sources['eqtype'][c_inds] = eqtype
             self.c_sources['eqind'][c_inds] = N.arange(c_inds.shape[1], dtype=N.int)
             self.c_sources['i'][c_inds] = i[:, N.newaxis]
@@ -4425,7 +4442,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Create array with discrete times
         if self.result_mode == "collocation_points":
             if self.hs == "free":
-                t_start = self.time[0]
+                t_start = self.t0
                 t_opt = [t_start]
                 for h in h_scaled[1:]:
                     for k in xrange(1, self.n_cp + 1):
@@ -4435,12 +4452,12 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 t_opt = self.get_time().reshape([-1, 1])
         elif self.result_mode == "mesh_points":
-            t_opt = [self.time[0]]
+            t_opt = [self.t0]
             for h in h_scaled[1:]:
                 t_opt.append(t_opt[-1] + h)
             t_opt = N.array(t_opt).reshape([-1, 1])
         elif self.result_mode == "element_interpolation":
-            t_opt = [self.time[0]]
+            t_opt = [self.t0]
             for i in xrange(1, self.n_e + 1):
                 t_end = t_opt[-1] + h_scaled[i]
                 t_i = N.linspace(t_opt[-1], t_end, self.n_eval_points)
@@ -5267,16 +5284,6 @@ class LocalDAECollocator(CasadiCollocator):
         """
         return self.c_dests.keys()
 
-    def get_times(self, ii, kk):
-        """
-        Return a vector of times corresponding to the time points zip(ii,kk)
-        """
-        # Use reasonable defaults when i or k is not given.
-        # todo: Better defaults?
-        ii = N.array(ii); ii[ii == -1] = 1
-        kk = N.array(kk); kk[kk == -1] = 1
-        return N.array([self.time_points[i][k] for (i,k) in zip(ii,kk)])
-
     def get_nlp_constraint_indices(self, eqtype):
         """
         Get a mapping from continuous time equations to NLP constraints
@@ -5297,9 +5304,6 @@ class LocalDAECollocator(CasadiCollocator):
                 Array of shape (n_tp, n_eq) of indices into the
                 NLP constraints, where n_tp is the number of time points found
                 and n_eq the number of equations of the corresponding kind.
-
-            time --
-                The time for each time point
 
             i --
                 The element index for each time point. -1 if not applicable.
@@ -5325,9 +5329,7 @@ class LocalDAECollocator(CasadiCollocator):
         i = N.array(dest['i'], dtype=N.int)
         k = N.array(dest['k'], dtype=N.int)
         
-        time = self.get_times(i, k)
-
-        return (indices, time, i, k)
+        return (indices, i, k)
 
     def get_nlp_variable_indices(self, var):
         """
@@ -5342,9 +5344,6 @@ class LocalDAECollocator(CasadiCollocator):
 
             indices --
                 Vector of indices into the NLP variables
-
-            time --
-                The time for each time point
 
             i --
                 The element index for each time point. -1 if not applicable.
@@ -5363,9 +5362,7 @@ class LocalDAECollocator(CasadiCollocator):
         i = N.array(dest['i'], dtype=N.int)
         k = N.array(dest['k'], dtype=N.int)
         
-        time = self.get_times(i, k)
-
-        return (inds, time, i, k)
+        return (inds, i, k)
 
 
 class MeasurementData(object):
@@ -5599,7 +5596,7 @@ class OptimizationSolver(object):
 
     def get_nlp_variables(self, point = 'opt'):
         """
-        Get the raw vector of variable values for the underlying NLP.
+        Get the raw vector of (scaled) variable values for the underlying NLP.
 
         Parameters::
             
@@ -5705,7 +5702,9 @@ class OptimizationSolver(object):
                 The collocation point index for each time point.
                 -1 if not applicable.
         """
-        return self.collocator.get_nlp_constraint_indices(eqtype)
+        inds, i, k = self.collocator.get_nlp_constraint_indices(eqtype)
+        time = self.get_point_time(i, k)
+        return (inds, time, i, k)
 
     def get_nlp_variable_indices(self, var):
         """
@@ -5732,7 +5731,9 @@ class OptimizationSolver(object):
                 -1 if not applicable.
 
         """
-        return self.collocator.get_nlp_variable_indices(var)
+        inds, i, k = self.collocator.get_nlp_variable_indices(var)
+        time = self.get_point_time(i, k)
+        return (inds, time, i, k)
 
     def get_residuals(self, eqtype, inds=None, point='opt', raw=False):
         """
@@ -5950,11 +5951,11 @@ class OptimizationSolver(object):
         assert point in ('opt', 'init')
         return self.collocator.get_J(point, dense=False)
 
-    def get_point_times(self, i, k):
+    def get_point_time(self, i, k):
         """
         Return a vector of times corresponding to the time points zip(ii,kk)        
         """
-        return self.collocator.get_times(i, k)
+        return self.collocator.get_point_time(N.maximum(1, i), N.maximum(0, k))
 
     def get_model_variables(self, xx_inds):
         """
@@ -5983,7 +5984,7 @@ class OptimizationSolver(object):
         vars = xx_sources['var'][xx_inds]
         i    = xx_sources['i'][xx_inds]
         k    = xx_sources['k'][xx_inds]
-        time = self.get_point_times(i, k)
+        time = self.get_point_time(i, k)
         return (vars, time, i, k)
 
     def get_model_constraints(self, c_inds):
@@ -6017,7 +6018,7 @@ class OptimizationSolver(object):
         eqinds  = c_sources['eqind'][c_inds]
         i       = c_sources['i'][c_inds]
         k       = c_sources['k'][c_inds]
-        time = self.get_point_times(i, k)
+        time = self.get_point_time(i, k)
         return (eqtypes, eqinds, time, i, k)
 
     def get_model_jacobian_entries(self, c_inds, xx_inds):

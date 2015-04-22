@@ -1,0 +1,29 @@
+/*
+    Copyright (C) 2015 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+optimization TestVariableTypes(objectiveIntegrand = x^2 + u_cont^2 + u_bf^2) 
+    Real x(start=1, fixed=true);
+    Real x2(start=0, fixed=true);
+    Real w;
+    Real w2 = w+10;
+    input Real u_cont;
+    input Real u_bf;
+    parameter Real p(free=true, initialGuess=0);
+equation
+    der(x) = u_cont + w;
+    w = -x + u_bf + p;
+    der(x2) = x;
+end TestVariableTypes;
