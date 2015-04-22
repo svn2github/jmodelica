@@ -117,6 +117,7 @@ aspect TransformCanonical {
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
             transformations.add(new enableWhenClauseRewrite());
+            transformations.add(new extractSampleExpressions());
             transformations.add(new genInitArrayStatements());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
@@ -597,9 +598,9 @@ aspect TransformCanonical {
                 error(e.getMessage());
                 return;
             }
-            for (FAbstractEquation e : equations())
-                if (e.numScalarEquations() == 0)
-                    daeBLT.add(EquationBlockFactory.createMetaBlock(e));
+//            for (FAbstractEquation e : equations())
+//                if (e.numScalarEquations() == 0)
+//                    daeBLT.add(EquationBlockFactory.createMetaBlock(e));
             setDAEBLT(daeBLT);
             log.info(getDAEStructuredBLT());
             log.info(getDAEBLT());
@@ -723,17 +724,17 @@ aspect TransformCanonical {
                 error(e.getMessage());
                 return;
             }
-            for (FAbstractEquation e : equations()) {
-                if (e.numScalarEquations() == 0) {
-                    if (e.replacedAtInitialization()) {
-                        for (FAbstractEquation fae : e.getInitialEquations()) {
-                            daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
-                        }
-                    } else {
-                        daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
-                    }
-                }
-            }
+//            for (FAbstractEquation e : equations()) {
+//                if (e.numScalarEquations() == 0) {
+//                    if (e.replacedAtInitialization()) {
+//                        for (FAbstractEquation fae : e.getInitialEquations()) {
+//                            daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
+//                        }
+//                    } else {
+//                        daeInitBLT.add(EquationBlockFactory.createMetaBlock(e));
+//                    }
+//                }
+//            }
             setDAEInitBLT(daeInitBLT);
             log.info(daeInitBLT);
         } else {
@@ -2527,6 +2528,63 @@ aspect WhenClauses{
 	}
 }
 
+
+aspect ExtractSampleExpressions {
+    public class FClass {
+        /**
+         * Rewrites when clauses to if clauses.
+         */
+        public class extractSampleExpressions extends Transformation {
+            public void perform() {
+                extractSampleExpressions();
+                flushAllRecursiveClearFinal();
+            }
+        }
+    }
+
+    public void FClass.extractSampleExpressions() {
+        Collection<FEquation> newEqns = new ArrayList<FEquation>();
+        Collection<FVariable> newVars = new ArrayList<FVariable>();
+        extractSampleExpressions(newEqns, newVars);
+        for (FEquation eqn : newEqns)
+            addFAbstractEquation(eqn);
+        for (FVariable var : newVars)
+            addFVariable(var);
+    }
+
+    public void ASTNode.extractSampleExpressions(Collection<FEquation> newEqns, Collection<FVariable> newVars) {
+        for (ASTNode n : this)
+            n.extractSampleExpressions(newEqns, newVars);
+    }
+
+    public void FSampleExp.extractSampleExpressions(Collection<FEquation> newEqns, Collection<FVariable> newVars) {
+        if (!originalFExp().shouldExtract())
+            return;
+        if (originalFExp() == this) {
+            newEqns.add(new FEquation(tempUseExp(), fullCopy()));
+            newVars.add(type().createFVariable(new FPublicVisibilityType(), new FQNameFull(tempVarName()), variability().combine(fDiscrete())));
+        }
+        rewriteToTemp = true;
+    }
+
+    private boolean FSampleExp.rewriteToTemp = false;
+
+    rewrite FSampleExp {
+        when (rewriteToTemp) to FExp {
+            return originalFExp().tempUseExp();
+        }
+    }
+
+    inh boolean FSampleExp.shouldExtract();
+    eq FAbstractEquation.getChild().shouldExtract() = false;
+    eq BaseNode.getChild().shouldExtract()          = true;
+
+    syn boolean FAbstractEquation.isSampleEquation() = false;
+    eq FEquation.isSampleEquation()                  = getRight().isFSampleExp();
+
+    syn boolean FExp.isFSampleExp() = false;
+    eq FSampleExp.isFSampleExp()    = true;
+}
 
 aspect IfEquations {
 	
