@@ -2035,145 +2035,67 @@ aspect CCodeGen {
         p.printPostSteps(getTest(), str, indent);
     }
     
+    public void FReinit.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        str.format("%sjmi_ad_var_t %s;\n", indent, tempName_C());
+    }
+    
     public void FReinit.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.format("%s%s = ", indent, tempName_C());
         p.print(getFExp(), str, indent);
-        str.println(";");
+        str.print(";\n");
     }
     
-//    public void FReinit.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-//        str.formatln("%sjmi->reinit_triggered = 1;", indent);
-//    }
-
-    @Override
-    public void FReinit.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sstatic jmi_ad_var_t %s;", indent, tempName_C());
-    }
-
-    public void FAbstractFunctionCall.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    public void FAbstractEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FFunctionCallEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitTempDecls_C(p, str, indent);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        super.genReinitTempDecls_C(p, str, indent);
-        if (hasElse()) {
-            getElse().genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    /**
-     * Generates temporary variable declarations for storing reinit values.
-     */
-    public void AbstractEquationBlock.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FReinit.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, tempName_C());
-        p.print(getVar(), str, indent);
-        str.println(";");
-    }
-
-    public void FAbstractFunctionCall.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {}
-
-    public void FAbstractEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FFunctionCallEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitTempInits_C(p, str, indent);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        super.genReinitTempInits_C(p, str, indent);
-        if (hasElse()) {
-            getElse().genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    /**
-     * Generates temporary variable initializaions for storing reinit values.
-     * This should be done in the begining of ode-derivatives and sets the
-     * value to current value.
-     */
-    public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempInits_C(p, str, indent);
-        }
-    }
-    
-    
-
-    @Override
     public void FReinit.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
-        //TODO: This is TEMPORARY, will need a better solution later!
-        str.format("%sif (%s != ", indent, tempName_C());
+        str.print(indent);
         p.print(getVar(), str, indent);
-        str.println(") {");
-        str.print(p.indent(indent));
-        p.print(getVar(), str, indent);
-        str.formatln(" = %s;", tempName_C());
-        str.formatln("%sjmi->reinit_triggered = 1;", p.indent(indent));
-        str.formatln("%s}", indent);
+        str.format(" = %s;\n", tempName_C());
+        str.format("%sjmi->reinit_triggered = 1;\n", indent);
     }
-
     public void FAbstractFunctionCall.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {}
-
+    
     public void FAbstractEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
+    
     public void FFunctionCallEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
         getCall().genReinitWritebacks_C(p, str, indent);
     }
-
-    @Override
+    
     public void FIfWhenElseEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitWritebacks_C(p, str, indent);
+        if (containsReinit()) {
+            genIfStart_C(p, str, indent);
+            String nextInd = p.indent(indent);
+            for (FAbstractEquation e : getFAbstractEquations())
+                e.genReinitWritebacks_C(p, str, nextInd);
         }
     }
-
-    @Override
+    
     public void FIfWhenEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
-        super.genReinitWritebacks_C(p, str, indent);
-        if (hasElse()) {
-            getElse().genReinitWritebacks_C(p, str, indent);
+        if (containsReinit()) {
+            super.genReinitWritebacks_C(p, str, indent);
+            if (hasElse() && getElse().containsReinit())
+                getElse().genReinitWritebacks_C(p, str, indent);
+            genIfEnd_C(p, str, indent);
         }
     }
-
-    /**
-     * Generates code that writes back the reinit values to the state. There is
-     * no if guard here, that is controlled from the actual reinit statement.
-     */
-    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitWritebacks_C(p, str, indent);
-        }
+    
+    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {}
+    
+    public void MetaEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
+        equation().genReinitWritebacks_C(p, str, indent);
     }
-
+    
+    public void FunctionCallEquationBlock.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
+        equation().genReinitWritebacks_C(p, str, indent);
+    }
+    
+    syn boolean ASTNode.containsReinit() {
+        for (ASTNode n : this)
+            if (n.containsReinit())
+                return true;
+        return false;
+    }
+    eq FExp.containsReinit()    = false;
+    eq FReinit.containsReinit() = true;
+	
 	syn String FBinExp.op_C() = op();
 	eq FDotAddExp.op_C() = " + ";
 	eq FDotSubExp.op_C() = " - ";
@@ -3289,13 +3211,7 @@ aspect CCodeGen {
         for (FVariable fv : localUnsolvedVariables()) 
             fv.genBlockResidualValuref_C(p, str, nextIndent, solverArrayMap);
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {\n");
-        // Loop over all non-real variables and write their position in the z-vector
-        Enumerator realEnumerator = new Enumerator();
-        for (FVariable fv : localSolvedRealVariables())
-            str.format("%sx[%d] = %d;\n", nextIndent, realEnumerator.next(), fv.valueReference());
-        
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {\n");
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {\n");
         // Loop over all non-real variables and write their position in the z-vector
         Enumerator nonRealEnumerator = new Enumerator();
         for (FVariable fv : localNonRealVariables())
@@ -3464,13 +3380,9 @@ aspect CCodeGen {
                 if (equation().isMixed()) {
                     equation().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
                 }
-                if (equation().shouldProduceNonRealGuard_C()) {
-                    str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
-                    equation().genBlock_C(p, str, p.indent(indent), visited, forVariables, forIndices);
-                    str.format("%s}\n", indent);
-                } else {
-                    equation().genBlock_C(p, str, indent, visited, forVariables, forIndices);
-                }
+                str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
+                equation().genBlock_C(p, str, p.indent(indent), visited, forVariables, forIndices);
+                str.format("%s}\n", indent);
             } else {
                 equation().genBlock_C(p, str, indent, visited, forVariables, forIndices);
             }
@@ -3478,15 +3390,7 @@ aspect CCodeGen {
             throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName() + " in residual function");
         }
     }
-
-    syn boolean FAbstractEquation.shouldProduceNonRealGuard_C() = !isSampleEquation();
-
-    @Override
-    public void MetaEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p, CodeStream str,
-            String indent, boolean inInitial, Set<FAbstractEquation> visited) {
-        genBlock_C(p, str, indent, inInitial);
-    }
-
+    
     public C_blockResidualAttributePrinter CodePrinter.C_blockResidualAttributePrinter = new C_blockResidualAttributePrinter();
     
     public abstract class CodePrinter {
@@ -3576,8 +3480,17 @@ aspect CCodeGen {
             visited = new HashSet<ASTNode>();
         for (SimpleEquationBlock seb : unsolvedBlocks())
             seb.genVarDecls_C(p, str, indent, visited);
+        for (SimpleEquationBlock seb : localNonRealBlocks())
+            seb.genVarDecls_C(p, str, indent, visited);
+    }
+
+    @Override
+    protected void TornEquationBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
+        if (visited == null)
+            visited = new HashSet<ASTNode>();
         for (SimpleEquationBlock seb : localSolvedBlocks())
             seb.genVarDecls_C(p, str, indent, visited);
+        super.genVarDecls_C(p, str, indent, visited);
     }
 
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
@@ -3738,7 +3651,6 @@ aspect CCodeGen {
 		else
 			str.print("NULL, ");
 		str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
-		str.print(localSolvedRealVariables().size() + ", ");
 		str.print(localNonRealVariables().size() + ", ");
 		str.print(directlyImpactingNonReals_C().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
@@ -3922,11 +3834,6 @@ aspect CCodeGen {
             genBlockBase_C(p, str, indent, inInitial);
         } else if (genBlockEnabled()) {
             equation().genBlock_C(p, str, indent, new HashSet<FAbstractEquation>(), allLocalVariables(), assignedIndices());
-            for (FVariable var : allLocalVariables()) {
-                if (!inInitial && var.isDiscrete() && !var.isPreVariable()) {
-                    str.formatln("%s%s = %s;", indent, var.myPreVariable().name_C(), var.name_C());
-                }
-            }
         } else {
             throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName());
         }
@@ -4849,10 +4756,6 @@ aspect CCodeGen {
 	}
 
 	public void StructuredBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%s/********* Initialize reinits *******/", indent);
-        for (AbstractEquationBlock eb : getAllBlocks()) {
-            eb.genReinitTempInits_C(p, str, indent);
-        }
 		str.formatln("%s/************* ODE section *********/", indent);
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {

@@ -2589,34 +2589,6 @@ end IndexReduction.PartiallyPropagatedComposite1;
 ")})));
 end PartiallyPropagatedComposite1;
 
-model ModelWithMetaEquation
-    Real x,y;
-equation
-    x = time;
-    der(x) + y = 1;
-    assert(x > y, "Oh no!");
-    
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="ModelWithMetaEquation",
-            description="Test so that meta equations are ignored during index reduction",
-            methodName="printDAEBLT",
-            methodResult="
---- Solved equation ---
-x := time
-
---- Solved equation ---
-_der_x := 1.0
-
---- Solved equation ---
-y := - _der_x + 1
-
---- Meta equation block ---
-assert(x > y, \"Oh no!\")
--------------------------------
-")})));
-end ModelWithMetaEquation;
-
 package FunctionInlining
     model Test1
         function F

@@ -379,10 +379,10 @@ aspect EquationSolve {
     public FSpatialDistExp FSpatialDistExp.originalFSpatialDistExp = null;
     
     syn FExp FExp.originalFExp() { throw new UnsupportedOperationException(); }
-    syn FRelExp FRelExp.originalFExp() = (originalFRelExp == null)    ? this : originalFRelExp;
-    syn FSampleExp FSampleExp.originalFExp() = (originalFSampleExp == null) ? this : originalFSampleExp;
-    syn FDelayExp FDelayExp.originalFExp() = (originalFDelayExp == null)  ? this : originalFDelayExp;
-    syn FSpatialDistExp FSpatialDistExp.originalFExp() = (originalFSpatialDistExp == null)  ? this : originalFSpatialDistExp;
+    eq FRelExp.originalFExp()    = (originalFRelExp == null)    ? this : originalFRelExp;
+    eq FSampleExp.originalFExp() = (originalFSampleExp == null) ? this : originalFSampleExp;
+    eq FDelayExp.originalFExp()  = (originalFDelayExp == null)  ? this : originalFDelayExp;
+    eq FSpatialDistExp.originalFExp() = (originalFSpatialDistExp == null)  ? this : originalFSpatialDistExp;
     
     /**
      * This method is used when the original node has been discarded and the

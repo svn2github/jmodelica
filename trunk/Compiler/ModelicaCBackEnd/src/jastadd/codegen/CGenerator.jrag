@@ -708,25 +708,6 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 	
-    /**
-     * Generates temporary variables for reinit writebacks
-     */
-    /**
-     * C: C temporary variables for reinit writebacks
-     */
-    public class DAETag_C_reinit_writeback_temps extends DAETag {
-        
-        public DAETag_C_reinit_writeback_temps(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_reinit_temp_decls", myGenerator, fclass);
-            addOptions("generate_ode");
-        }
-
-        public void generate(CodeStream genPrinter) {
-            for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                block.genReinitTempDecls_C(ASTNode.printer_C, genPrinter, "");
-        }
-    }
-
 	/**
 	 * Generates headers for Modelica functions.
 	 */

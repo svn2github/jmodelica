@@ -39,22 +39,5 @@ package WhenTests
       x = 1;
     end when;
   end WhenTest4;
-  
-    model WhenTest5
-      Real x(start = 1);
-
-      Real nextTime(start=1, fixed=true);
-      Real nextTime2;
-      Real nextTime3;
-      
-    equation 
-      when time >= pre(nextTime) then
-        nextTime = pre(nextTime) + 1;
-        nextTime2 = pre(nextTime);
-        nextTime3 = 2*nextTime;
-      end when;
-      der(x) = sin(x);
-      
-    end WhenTest5;
 
 end WhenTests;

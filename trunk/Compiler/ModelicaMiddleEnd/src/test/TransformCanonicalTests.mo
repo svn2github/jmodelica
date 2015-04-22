@@ -6639,28 +6639,6 @@ Semantic error at line 0, column 0:
 ")})));
 end AssertEval2;
 
-model MetaEqn1
-    function F
-        input Real i1[:];
-    algorithm
-        assert(sum(i1) > 0, "Oh, no!");
-        annotation(Inline=false);
-    end F;
-equation
-    F({-time,time});
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="MetaEqn1",
-            description="Test init BLT for meta equations",
-            methodName="printDAEInitBLT",
-            methodResult="
---- Meta equation block ---
-TransformCanonicalTests.MetaEqn1.F({- time, time})
--------------------------------
-")})));
-end MetaEqn1;
-
 model MixedVariabilityFunction1
     function F
         input Real x;
@@ -6992,59 +6970,6 @@ pre(b) := false
 ")})));
 end LinearBlockTest2;
 
-
-model Sample1
-    Real x;
-equation
-    when sample(0,1) then
-        x = time * 6.28;
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Sample1",
-            description="Test so that sample operator is extracted correctly",
-            flatModel="
-fclass TransformCanonicalTests.Sample1
- discrete Real x;
- discrete Boolean temp_1;
-initial equation 
- pre(x) = 0.0;
- pre(temp_1) = false;
-equation
- temp_1 = sample(0, 1);
- x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
-end TransformCanonicalTests.Sample1;
-")})));
-end Sample1;
-
-model Sample2
-    Real x;
-equation
-    when sample(0,1) and time < 20 then
-        x = time * 6.28;
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Sample2",
-            description="Test so that sample operator is extracted correctly",
-            flatModel="
-fclass TransformCanonicalTests.Sample2
- discrete Real x;
- discrete Boolean temp_1;
- discrete Boolean temp_2;
-initial equation 
- pre(x) = 0.0;
- pre(temp_1) = false;
- pre(temp_2) = false;
-equation
- temp_1 = temp_2 and time < 20;
- x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
- temp_2 = sample(0, 1);
-end TransformCanonicalTests.Sample2;
-")})));
-end Sample2;
 
 
 end TransformCanonicalTests;

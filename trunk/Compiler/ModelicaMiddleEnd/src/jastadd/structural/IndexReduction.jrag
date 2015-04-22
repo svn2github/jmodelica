@@ -78,7 +78,7 @@ aspect IndexReduction {
             IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             // Only do index reduction based on real variables and equations
             g.addVariables(this, VAR_TYPES_REAL);
-            g.addEquations(continuousNonMetaEquations(), VAR_TYPES_REAL);
+            g.addEquations(continuousEquations(), VAR_TYPES_REAL);
             log.info(g);
             g.maximumMatching(true);
             log.info("DAE system real variables only");
@@ -276,8 +276,8 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
-            return new IndexReductionEq(name, eqn, groupNumber, variability, isMeta);
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
+            return new IndexReductionEq(name, eqn, groupNumber, variability);
         }
 
         @Override
@@ -304,8 +304,8 @@ aspect IndexReduction {
         private Set<String> nonDiffVars;
         private Set<FAbstractEquation> nonDiffEqns;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
-            super(name, eqn, groupNumber, variability, isMeta);
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
+            super(name, eqn, groupNumber, variability);
         }
 
         public int numDifferentiations() {

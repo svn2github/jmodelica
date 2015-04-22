@@ -60,22 +60,6 @@ def input_linear(t):
         
 input_object = (["u"],input_linear)
 
-class Test_When:
-    @classmethod
-    def setUpClass(cls):
-        file_name = os.path.join(get_files_path(), 'Modelica', 'WhenTests.mo')
-        
-        compile_fmu("WhenTests.WhenTest5", file_name)
-        
-    @testattr(stddist = True)
-    def test_sequence_of_pre(self):
-        model = load_fmu("WhenTests_WhenTest5.fmu")
-        
-        res = model.simulate(final_time=3.5)
-        
-        assert res.final("nextTime") == 4.0
-        assert res.final("nextTime2") == 3.0
-        assert res.final("nextTime3") == 8.0
 
 class Test_Time_Events:
     @classmethod
