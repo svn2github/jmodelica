@@ -3444,6 +3444,184 @@ end RedeclareTests.RedeclareTest44;
 end RedeclareTest44;
 
 
+model RedeclareTest45
+    model A
+        Real x = time;
+    end A;
+    
+    model B
+        extends A;
+        Real y = 2 * time;
+    end B;
+    
+    model C
+        extends A;
+        Real z = 3 * time;
+    end C;
+    
+    model D
+        extends A;
+        Real w = 4 * time;
+    end D;
+    
+    model E
+        replaceable B b constrainedby A;
+    end E;
+    
+    model F
+        extends E(redeclare C b);
+    end F;
+    
+    model G
+        extends E(redeclare D b);
+    end G;
+    
+    model H
+        replaceable F f constrainedby E;
+    end H;
+    
+    model I
+        extends H(redeclare G f);
+    end I;
+    
+    I i;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest45",
+            description="When checking constraining type, use constraining type for replaceable components/classes within the constraining type",
+            flatModel="
+fclass RedeclareTests.RedeclareTest45
+ Real i.f.b.w = 4 * time;
+ Real i.f.b.x = time;
+end RedeclareTests.RedeclareTest45;
+")})));
+end RedeclareTest45;
+
+
+model RedeclareTest46
+    model A
+        Real x = time;
+    end A;
+    
+    model B
+        extends A;
+        Real y = 2 * time;
+    end B;
+    
+    model C
+        extends B;
+        Real z = 3 * time;
+    end C;
+    
+    model D
+        replaceable B b constrainedby A;
+    end D;
+    
+    model E
+        extends D(redeclare C b);
+    end E;
+    
+    model F
+        replaceable E e constrainedby D;
+        Real w = e.b.y;
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest46",
+            description="When checking constraining type, use constraining type for replaceable components/classes within the constraining type",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 3527, column 22:
+  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
+")})));
+end RedeclareTest46;
+
+
+model RedeclareTest47
+    package A
+    end A;
+    
+    package B
+        extends A;
+        type I = Real;
+    end B;
+    
+    package C
+        extends B;
+        type J = Real;
+    end C;
+    
+    package D
+        replaceable package E = B constrainedby A;
+    end D;
+    
+    package F
+        extends D(redeclare package E = C);
+    end F;
+    
+    package G
+        replaceable package H = F constrainedby D;
+    end G;
+    
+    G.H.E.I x = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest47",
+            description="When checking constraining type, use constraining type for replaceable components/classes within the constraining type",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 3571, column 11:
+  Cannot use class I, because it is not present in constraining type of declaration 'replaceable package E = B constrainedby A'
+")})));
+end RedeclareTest47;
+
+
+model RedeclareTest48
+    model A
+        Real x = time;
+    end A;
+    
+    model B
+        extends A;
+        Real y = 2 * time;
+    end B;
+    
+    model C
+        A a;
+    end C;
+    
+    model D
+        B a;
+    end D;
+    
+    model E
+        replaceable D c constrainedby C;
+        Real z = c.a.y;
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest48",
+            description="Check for usage of components not in constraining type also when accessing nestled components",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 3606, column 22:
+  Cannot use component y, because it is not present in constraining type of declaration 'replaceable D c constrainedby C'
+")})));
+end RedeclareTest48;
+
+
+
 model RedeclareElement1
   model A
     replaceable model B
