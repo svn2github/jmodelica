@@ -227,7 +227,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
             jmi_compare_switches(pre_switches, switches, block->n_sw) && 
             jmi_compare_switches(pre_non_reals, non_reals, block->n_nr)) {
             *non_reals_changed_flag = 0;
-        } else if (iter > 1) {
+        } else {
             /* Check for infinite loop */
             if (block->n_nr == 0) { /* If there are no non-reals do the extensive check for infinite loops */
                 if (jmi_check_infinite_loop(block->sw_old, switches, block->n_sw, iter)) {
@@ -235,15 +235,10 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
                     block->event_iter = 0;
                     return jmi_block_solver_status_inf_event_loop;
                 }
-            } else if (block->n_sw == 0) { /* If there are no switches do the extensive check for infinite loops */
-                if (jmi_check_infinite_loop(block->nr_old, non_reals, block->n_nr, iter)) {
-                    jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
-                    block->event_iter = 0;
-                    return jmi_block_solver_status_inf_event_loop;
-                }
-            } else { /* Else, do the naive test for infinite loops */
+            } else if (iter > 2) { /* Else, do the naive test for infinite loops */
                 if (jmi_compare_switches(&block->sw_old[block->n_sw*(iter-2)], switches, block->n_sw) && 
-                    jmi_compare_switches(&block->nr_old[block->n_nr*(iter-2)], non_reals, block->n_nr)) {
+                    jmi_compare_switches(&block->nr_old[block->n_nr*(iter-2)], non_reals, block->n_nr) &&
+                    jmi_compare_switches(&block->nr_old[block->n_nr*(iter-3)], pre_non_reals, block->n_nr)) {
                     
                     jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
                     block->event_iter = 0;
