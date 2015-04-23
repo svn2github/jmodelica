@@ -15992,7 +15992,7 @@ const int fmi_runtime_options_map_length = 27;
     __runtime_log_to_file_24 = (JMI_FALSE);
     __use_Brent_in_1d_25 = (JMI_TRUE);
     __use_jacobian_equilibration_26 = (JMI_FALSE);
-    __use_newton_for_brent_27 = (JMI_FALSE);
+    __use_newton_for_brent_27 = (JMI_TRUE);
     model_init_eval_parameters(jmi);
     _x_0 = (0.0);
 ")})));

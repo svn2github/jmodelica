@@ -504,23 +504,6 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     }
     
     /* Try to use Newton to find a good initial interval */
-    if (block->options->experimental_mode & jmi_block_solver_experimental_Brent_with_newton) {
-        if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
-            xNewton = block->x[0];
-            fNewton = f;
-            flag = jmi_brent_newton(block, &xNewton, &fNewton, &dNewton);
-            jmi_log_fmt(log, topnode, BRENT_EXTENDED_LOG_LEVEL, "<flag:%d>, <newton_x:%g>, <newton_f:%g>, <newton_step:%g>", flag, xNewton, fNewton, dNewton);
-            
-            /* If Newton was successful, use the returned values, otherwise continue */
-            if (!flag) {
-                block->x[0] = xNewton;
-                f = fNewton;
-                initialStepNewton = dNewton;
-            }
-        }
-    }
-
-    /* Try to use Newton to find a good initial interval */
     if (block->options->use_newton_for_brent) {
         if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
             xNewton = block->x[0];
