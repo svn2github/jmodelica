@@ -591,12 +591,12 @@ class CasadiCollocator(object):
         constraints = casadi.vertcat([self.get_equality_constraint(),
                                       self.get_inequality_constraint()])
         lag_exp = sigma * self.cost + casadi.inner_prod(lam, constraints)
-        L = self._FXFunction([self.xx, self.pp, sigma, lam], [lag_exp])
+        L = casadi.MXFunction([self.xx, self.pp, sigma, lam], [lag_exp])
         L.init()
 
         # Calculate Hessian
         H_exp = casadi.jacobian(L.grad(), self.xx)
-        self.H = self._FXFunction([self.xx, self.pp, sigma, lam], [H_exp, H_exp, H_exp, H_exp, H_exp])
+        self.H = casadi.MXFunction([self.xx, self.pp, sigma, lam], [H_exp, H_exp, H_exp, H_exp, H_exp])
         self.H.init()
         
     def _init_and_set_solver_inputs(self):
@@ -2279,7 +2279,14 @@ class LocalDAECollocator(CasadiCollocator):
                         ordinates = N.array([[constant_sf]])
                     else:
                         abscissae = data.t
-                        ordinates = data.x.reshape([-1, 1])
+                        ordinates = data.x
+                        nonfinite_ind = N.nonzero(N.isfinite(ordinates) == 0.)[0]
+                        if len(nonfinite_ind) > 0:
+                            print("Warning: Nominal trajectory for variable " + name +
+                                  " contains nonfinite values. Using nominal attribute " +
+                                  "value for these instead.")
+                            ordinates[nonfinite_ind] = self.op.get_attr(var, "nominal")
+                        ordinates = ordinates.reshape([-1, 1])
                     nom_traj[vt][var_index] = \
                         TrajectoryLinearInterpolation(abscissae, ordinates)
         return nom_traj
@@ -4119,7 +4126,14 @@ class LocalDAECollocator(CasadiCollocator):
                         abscissae = N.array([0])
                     else:
                         abscissae = data.t
-                        ordinates = data.x.reshape([-1, 1])
+                        ordinates = data.x
+                        nonfinite_ind = N.nonzero(N.isfinite(ordinates) == 0.)[0]
+                        if len(nonfinite_ind) > 0:
+                            print("Warning: Initial trajectory for variable " + name +
+                                  " contains nonfinite values. Using initialGuess attribute " +
+                                  "value for these instead.")
+                            ordinates[nonfinite_ind] = self.op.get_attr(var, "initialGuess")
+                        ordinates = ordinates.reshape([-1, 1])
                     traj[var] = TrajectoryLinearInterpolation(
                         abscissae, ordinates)
 
