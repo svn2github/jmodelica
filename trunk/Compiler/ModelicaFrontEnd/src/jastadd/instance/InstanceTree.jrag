@@ -1750,33 +1750,14 @@ aspect InstanceAST_API {
 		return l;
 	}
 
-
-    // Overridden in InstComponentDecl and InstBaseClassDecl by generated API for optional child
-    syn boolean InstNode.hasInstConstraining() = false;
-    syn InstConstraining InstNode.getInstConstraining() = null;
-
-    /**
-     * Is this declaration redeclared?
-     */
-    syn boolean InstNode.isRedeclared()                 = false;
-    eq InstReplacingFullClassDecl.isRedeclared()        = true;
-    eq InstReplacingShortClassDecl.isRedeclared()       = true;
-    eq InstReplacingSimpleShortClassDecl.isRedeclared() = true;
-    eq InstReplacingComposite.isRedeclared()            = true;
-    eq InstReplacingRecord.isRedeclared()               = true;
-    eq InstReplacingPrimitive.isRedeclared()            = true;
-
-    /**
-     * Is this declaration replaceable?
-     */
-    syn boolean InstNode.isReplaceable() = false;
+	
+	// Overridden in InstComponentDecl and InstBaseClassDecl by generated API for optional child
+	syn boolean InstNode.hasInstConstraining() = false;
+	syn InstConstraining InstNode.getInstConstraining() = null;
+	
+	syn boolean InstNode.isReplaceable() = false;
     eq InstClassDecl.isReplaceable()     = getClassDecl().hasReplaceable();
     eq InstComponentDecl.isReplaceable() = getComponentDecl().hasReplaceable();
-
-    /**
-     * Is this declaration affected by a constraining type?
-     */
-    syn boolean InstNode.isConstrained() = isReplaceable() || isRedeclared();
 
     // Overridden in BaseClassDecl by generated API for optional child
     syn boolean ClassDecl.hasReplaceable() = false;

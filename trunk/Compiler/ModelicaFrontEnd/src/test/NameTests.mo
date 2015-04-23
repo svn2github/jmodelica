@@ -794,7 +794,7 @@ model NameTest25_Err
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
 Semantic error at line 787, column 18:
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby B'
+  Cannot use component y, because it is not present in constraining type of declaration 'redeclare replaceable C b'
 ")})));
 end NameTest25_Err;
 
