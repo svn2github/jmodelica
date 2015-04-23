@@ -1211,6 +1211,25 @@ end ConnectTests.ConnectTest26;
 end ConnectTest26;
 
 
+model ConnectTest27
+    connector T = Real;
+    T[2] x1 if false;
+    T[3] x2 = (1:3) * time;
+equation
+    connect(x1, x2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectTest27",
+            description="Allow connect clauses with mismatch in sizes if one side refers to a disabled conditional",
+            flatModel="
+fclass ConnectTests.ConnectTest27
+ Real x2[3] = (1:3) * time;
+end ConnectTests.ConnectTest27;
+")})));
+end ConnectTest27;
+
+
 model ConnectOuterTest1
     connector C = Real;
     

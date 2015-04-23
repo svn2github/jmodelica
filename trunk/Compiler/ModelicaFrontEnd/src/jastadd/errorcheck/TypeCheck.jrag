@@ -222,21 +222,21 @@ aspect FlatTypeCheck {
     public void FConnectClause.typeCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1().getInstAccess();
         InstAccess right = getConnector2().getInstAccess();
-        boolean check = true;
+        boolean checkTypes = !isDisabled();
         boolean expandableSame = true;
         for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
             if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
                 if (!access.myInstComponentDecl().isConnector())
                     access.error("Connecting to an instance of a non-connector type is not allowed");
             } else {
-                check = false;
+                checkTypes = false;
             }
             if (access.myInstComponentDecl().isExpandableConnector())
                 expandableSame = !expandableSame;
         }
         if (!expandableSame && !left.isUnknown() && !right.isUnknown())
             error("Connecting an expandable connector to a non-expandable connector is not allowed");
-        if (check) { 
+        if (checkTypes) { 
             InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
             InstComponentDecl rightComp = right.lookupEvaluatingIndices();
             if (!leftComp.connectableTo(rightComp))

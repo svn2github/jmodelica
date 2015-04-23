@@ -1087,14 +1087,16 @@ aspect Connections {
 			fi.buildConnectionSets(prefix, csm, connect);
 		}
 	}
-	
-	public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-		if (!getConnector1().isDisabled() && !getConnector2().isDisabled() && connect) {
-			InstAccess left  = getConnector1().getInstAccess();
-			InstAccess right = getConnector2().getInstAccess();
-			left.connectTo(right, prefix, csm, this);
-		}
-	}
+
+    public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        if (!isDisabled() && connect) {
+            InstAccess left  = getConnector1().getInstAccess();
+            InstAccess right = getConnector2().getInstAccess();
+            left.connectTo(right, prefix, csm, this);
+        }
+    }
+
+    syn boolean FConnectClause.isDisabled() = getConnector1().isDisabled() || getConnector2().isDisabled();
 
 }
 
