@@ -240,7 +240,7 @@ public class DiagnosticsGenerator {
 
         @Override
         protected void writeContents(FClass fc, CodeStream out) {
-            if (!fc.root().options.getBooleanOption("equation_sorting"))
+            if (!fc.myOptions().getBooleanOption("equation_sorting"))
                 return;
             out.print("<h2>BLT for initialization system </h2>\n");
             for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
@@ -289,7 +289,7 @@ public class DiagnosticsGenerator {
 
         @Override
         protected void writeContents(FClass fc, CodeStream out) {
-            if (!fc.root().options.getBooleanOption("equation_sorting"))
+            if (!fc.myOptions().getBooleanOption("equation_sorting"))
                 return;
             out.print("<h2>Alias sets of iteration variables:</h2>\n");
             out.print("<pre>\n");
@@ -452,7 +452,7 @@ public class DiagnosticsGenerator {
                 bltFile.writeLink(out);
                 bltTableFile.writeLink(out);
                 
-                if (fc.root().options.getBooleanOption("equation_sorting")) {
+                if (fc.myOptions().getBooleanOption("equation_sorting")) {
                     ArrayList<Integer> unsolvedDAEInitBlockSizes =
                         fc.getDAEInitBLT().unsolvedBlockSizes(); 
                     out.print("<p>Number of unsolved equation blocks in DAE initialization system: " + 
@@ -482,7 +482,7 @@ public class DiagnosticsGenerator {
                         out.println("}");
                     }
                     out.println("</p>");
-                    if (EquationBlockFactory.canTear(fc.root().options)) {
+                    if (EquationBlockFactory.canTear(fc.myOptions())) {
                         unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
                         out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
                                   unsolvedDAEInitBlockSizes.size() + ": {");   
@@ -532,7 +532,7 @@ public class DiagnosticsGenerator {
 
         @Override
         protected void writeContents(FClass fc, CodeStream out) {
-            if (!fc.root().options.getBooleanOption("equation_sorting"))
+            if (!fc.myOptions().getBooleanOption("equation_sorting"))
                 return;
             out.println("<div id=\"rowHighlight\" style=\"display:none;\"></div>");
             out.println("<div id=\"colHighlight\" style=\"display:none;\"></div>");

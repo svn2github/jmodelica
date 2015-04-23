@@ -94,7 +94,7 @@ public abstract class DAETag extends AbstractTag {
                 flip = true;
                 opt = opt.substring(1);
             }
-            if (fclass.root().options.getBooleanOption(opt) == flip)
+            if (fclass.myOptions().getBooleanOption(opt) == flip)
                 return false;
         }
         return true;

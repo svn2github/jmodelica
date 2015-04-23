@@ -18,7 +18,7 @@
 aspect BlockFunctionExtraction {
     
     public boolean FClass.blockFunctionExtraction(BLT blt, BiPGraph g) {
-        if (!root().options.getBooleanOption("enable_block_function_extraction"))
+        if (!myOptions().getBooleanOption("enable_block_function_extraction"))
             return false;
             
         ArrayList<FFunctionCall> functions = new ArrayList<FFunctionCall>();

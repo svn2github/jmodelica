@@ -54,7 +54,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	@Override
 	protected void addRealAttributes(CodeStream genPrinter, FRealVariable realvariable) {
 		super.addRealAttributes(genPrinter, realvariable);
-		Boolean generateFMI = realvariable.root().options.getBooleanOption("generate_fmi_me_xml");
+		Boolean generateFMI = realvariable.myOptions().getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
 			genPrinter.print("free=\""+realvariable.isFreeParameter()+"\" ");
 			double ig_val = 0;
@@ -71,7 +71,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	@Override
 	protected void addIntegerAttributes(CodeStream genPrinter, FIntegerVariable integervariable) {
 		super.addIntegerAttributes(genPrinter, integervariable);
-		Boolean generateFMI = integervariable.root().options.getBooleanOption("generate_fmi_me_xml");
+		Boolean generateFMI = integervariable.myOptions().getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
 			genPrinter.print("free=\""+integervariable.isFreeParameter()+"\" ");
 			int ig_val = 0;
@@ -88,7 +88,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	@Override
 	protected void addBooleanAttributes(CodeStream genPrinter, FBooleanVariable booleanvariable) {
 		super.addBooleanAttributes(genPrinter, booleanvariable);
-		Boolean generateFMI = booleanvariable.root().options.getBooleanOption("generate_fmi_me_xml");
+		Boolean generateFMI = booleanvariable.myOptions().getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
 			genPrinter.print("free=\""+booleanvariable.isFreeParameter()+"\" ");
 			boolean ig_val = false;
@@ -106,7 +106,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	protected void addLinearInfo(CodeStream genPrinter, FVariable variable) {
 		super.addLinearInfo(genPrinter, variable);
 		boolean[] linearTimedVariables = variable.isLinearTimedVariables();
-		Boolean generateFMI = variable.root().options.getBooleanOption("generate_fmi_me_xml");
+		Boolean generateFMI = variable.myOptions().getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
 			if(linearTimedVariables.length > 0) {
 				genPrinter.print("\n\t\t\t <isLinearTimedVariables>");
@@ -134,7 +134,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 		 */
 		@Override
 		public void generate(CodeStream genPrinter) {
-			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			Boolean generateEqu = fclass.myOptions().getBooleanOption("generate_xml_equations");
 			
 			String indent="\t\t";
 			FOptClass optClass = (FOptClass) fclass;

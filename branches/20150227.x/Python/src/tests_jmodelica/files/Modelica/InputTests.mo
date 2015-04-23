@@ -21,6 +21,16 @@ package Inputs
         z = u2;
     end SimpleInput2;
     
+    model SimpleInput3
+        Real x(start = 0);
+        Real y(start = 0);
+        input Real u;
+        parameter Real p = 20;
+    equation
+        der(x) = sin(time);
+        y = p*u;
+    end SimpleInput3;
+    
     model InputDiscontinuity
         Real x(start = 0);
         input Real u;

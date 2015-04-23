@@ -378,13 +378,20 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                              "for the iteration variable <iv: #r%d#> in <block: %s>. Clamping to <clamped_start: %g>.",
                              old_initi, mini, maxi, block_solver->value_references[i], block_solver->label, initi);
             }
-
+            
+            if(block_solver->nominal[i] == 0) {
+                jmi_log_node(block_solver->log, logError, "NominalEqualZero", 
+                            "The nominal value for iteration variable <iv: #r%d#> in <block: %s> "
+                            "is zero and thus invalid.", block_solver->value_references[i], block_solver->label);
+                free(real_vrs);
+                return -1;
+            }
+            
             if(block_solver->nominal[i] < 0) /* according to spec negative nominal is fine but solver expects positive.*/
                 block_solver->nominal[i] = -block_solver->nominal[i];
             block_solver->x[i] = initi;
         }
         free(real_vrs);
-        /*        block_solver->F(block_solver->jmi,block_solver->x, block_solver->res, JMI_BLOCK_EVALUATE); */
     }
     
     if (handle_discrete_changes) {
@@ -609,6 +616,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->events_epsilon = 1e-10;
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
+    bsop->use_newton_for_brent = 0; 
 
     bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     bsop->use_jacobian_equilibration_flag = 0; 

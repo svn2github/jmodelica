@@ -1241,7 +1241,9 @@ struct jmi_t {
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
     jmi_int_t updated_states;            /**< \brief Flag indicating if the dynamic set of states has been updated. */
 
-
+    jmi_real_t* real_x_work;             /**< \brief Work array for the real x variables */
+    jmi_real_t* real_u_work;             /**< \brief Work array for the real u variables */
+    
     jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
     jmi_int_t model_terminate;           /**< \brief Flag to trigger termination of the simulation. */
     jmi_int_t user_terminate;            /**< \brief Flag that the user has terminated the model. */

@@ -221,7 +221,11 @@ int jmi_init(jmi_t** jmi,
     jmi_->n_dynamic_state_sets = n_dynamic_state_sets;
     jmi_->dynamic_state_sets = (jmi_dynamic_state_set_t*)calloc(n_dynamic_state_sets,sizeof(jmi_dynamic_state_set_t));
     jmi_->updated_states = JMI_FALSE;
-
+    
+    /* Work arrays */
+    jmi_->real_x_work = (jmi_real_t*)calloc(jmi_->n_real_x,sizeof(jmi_real_t));
+    jmi_->real_u_work = (jmi_real_t*)calloc(jmi_->n_real_u,sizeof(jmi_real_t));
+    
     jmi_->scaling_method = scaling_method;
 
     jmi_->n_initial_relations = n_initial_relations;
@@ -308,6 +312,8 @@ int jmi_delete(jmi_t* jmi){
 /*  free(jmi->pre_z);*/
     free(*(jmi->dz));
     free(jmi->dz);
+    free(jmi->real_x_work);
+    free(jmi->real_u_work);
     free(jmi->initial_relations);
     free(jmi->relations);
     free(jmi->nominals);

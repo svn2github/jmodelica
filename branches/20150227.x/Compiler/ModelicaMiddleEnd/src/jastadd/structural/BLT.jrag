@@ -77,13 +77,20 @@ aspect BLT{
             Collection<FVariable> fvs = new ArrayList<FVariable>();
             Collection<Integer> assignedIndices = new ArrayList<Integer>();
             FAbstractEquation e = component.iterator().next().getEquation(); // TODO remove this hack, set to null and introduce in first loop iteration
+            boolean isMeta = true;
             for (E eqn : component) {
                 if (eqn.getEquation() != e) 
                     return null;
-                fvs.add(eqn.getMatching().getVariable());
-                assignedIndices.add(eqn.groupNumber());
+                if (!eqn.isMeta()) {
+                    isMeta = false;
+                    fvs.add(eqn.getMatching().getVariable());
+                    assignedIndices.add(eqn.groupNumber());
+                }
             }
-            return createSimpleEquationBlock(e, fvs, assignedIndices, producer, component.computeBlockDependency(), solve);
+            if (isMeta)
+                return createMetaBlock(e);
+            else
+                return createSimpleEquationBlock(e, fvs, assignedIndices, producer, component.computeBlockDependency(), solve);
         }
 
         /**
@@ -93,7 +100,7 @@ aspect BLT{
          * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
          * a real or mixed equation block is created.
          */
-        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> AbstractEquationBlock createEquationBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> AbstractEquationBlock createEquationBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options, boolean isInitial) {
             if (component.containsDynamicStates())
                 return computeDynamicStateBlock(component, producer, options);
             
@@ -101,11 +108,16 @@ aspect BLT{
             if (seb != null && seb.isSolvable())
                 return seb;
             
+            errorCheckWhenEquations(component);
+            
             Collection<E> realEquations = new LinkedHashSet<E>();
             Collection<E> nonRealEquations = new ArrayList<E>();
+            Collection<E> metaEquations = new ArrayList<E>();
             Set<FVariable> realVariables = new HashSet<FVariable>();
             for (E e : component) {
-                if (e.getMatching().getVariable().isReal()) {
+                if (e.isMeta()) {
+                    metaEquations.add(e);
+                } else if (e.getMatching().getVariable().isReal()) {
                     realEquations.add(e);
                     realVariables.add(e.getMatching().getVariable());
                 } else {
@@ -124,12 +136,12 @@ aspect BLT{
             }
             
             AbstractEquationBlock block = null;
-            TornEquationBlock tornBlock = null;
+            EquationBlock eqnBlock = null;
             boolean torn = false;
             if (producer.useTearing() && realEquations.size() > 1) {
-                tornBlock = tear(component, producer, options);
-                if (tornBlock != null && !tornBlock.solvedBlocks().isEmpty()) {
-                    block = tornBlock;
+                eqnBlock = tear(component, producer, options, isInitial);
+                if (eqnBlock != null && !eqnBlock.solvedBlocks().isEmpty()) {
+                    block = eqnBlock;
                     torn = true;
                 }
             }
@@ -138,7 +150,7 @@ aspect BLT{
                 // Check if an equation block is mixed, i.e., contains both continous
                 // and discrete variables, and if it is linear in the unknowns
                 Map<FVariable, AbstractEquationBlock> varToBlockMap = new HashMap<FVariable, AbstractEquationBlock>();
-                for (AbstractEquationBlock subBlock : tornBlock.solvedRealBlocks()) {
+                for (AbstractEquationBlock subBlock : eqnBlock.solvedRealBlocks()) {
                     for (FVariable var : subBlock.allVariables())
                         varToBlockMap.put(var, subBlock);
                 }
@@ -147,7 +159,7 @@ aspect BLT{
                     iterationVariables.add(var);
                 Set<AbstractEquationBlock> visitedBlocks = new HashSet<AbstractEquationBlock>();
                 Set<AbstractEquationBlock> activeBlocks = new HashSet<AbstractEquationBlock>();
-                for (SimpleEquationBlock subBlock : tornBlock.unsolvedBlocks()) {
+                for (SimpleEquationBlock subBlock : eqnBlock.unsolvedBlocks()) {
                     linearityUseCheck(subBlock, varToBlockMap, iterationVariables, visitedBlocks, activeBlocks);
                     activeBlocks.add(subBlock);
                 }
@@ -170,7 +182,8 @@ aspect BLT{
                 } else {
                     BiPGraph g = new BiPGraph(nonRealEquations);
                     Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(producer, options);
-                    block = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
+                    block = eqnBlock;
                 }
             }
             
@@ -179,6 +192,11 @@ aspect BLT{
                     block.computeJacobian(activeRealEquations);
 //                else
 //                   Give warning?
+            }
+            if (eqnBlock != null) {
+                for (E eqn : metaEquations) {
+                    eqnBlock.addSolvedBlock(createMetaBlock(eqn.getEquation()));
+                }
             }
             return block;
         }
@@ -208,6 +226,45 @@ aspect BLT{
             for (SCCBlock<E, V> e : eqs)
                 blocks.add(createSimpleEquationBlock(e, producer, false));
             return blocks;
+        }
+
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void errorCheckWhenEquations(SCCBlock<E, V> component) {
+            boolean containsWhen = false;
+            for (E eqn : component.getMembers()) {
+                if (eqn.getEquation().isWhen()) {
+                    containsWhen = true;
+                    break;
+                }
+            }
+            if (!containsWhen)
+                return;
+            BiPGraph g = new BiPGraph(component.getMembers());
+            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan();
+            for (SCCBlock<Eq, Var> block : subBlocks) {
+                if (block.getMembers().size() == 1)
+                    continue;
+                containsWhen = false;
+                for (Eq eqn : block.getMembers()) {
+                    if (eqn.getEquation().isWhen()) {
+                        containsWhen = true;
+                        break;
+                    }
+                }
+                Collection<FVariable> vars = new ArrayList<FVariable>();
+                for (Eq eqn : block.getMembers()) {
+                    vars.add(eqn.getMatching().getVariable());
+                }
+                for (Eq eqn : block.getMembers()) {
+                    if (!eqn.getEquation().isWhen())
+                        continue;
+                    for (FExp guard : eqn.getEquation().transformedGuards()) {
+                        if (guard.dependsOn(vars)) {
+                            throw new BLTException("A when-guard is involved in an algebraic loop, "
+                                            + "consider breaking it using pre() expressions");
+                        }
+                    }
+                }
+            }
         }
 
         /**
@@ -309,12 +366,12 @@ aspect BLT{
         }
     }
 
-    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt) {
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, Collection<SCCContributor> extraContributors) {
         ASTNode.beginStep("computeBLT()");
         try {
-            Collection<C> components = tarjan(options);
+            Collection<C> components = tarjan(options, extraContributors);
             for (C bl : components)
-                blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options));
+                blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options, isInitialSystem()));
             blt.setLabels();
             return blt;
         } finally {
@@ -322,12 +379,12 @@ aspect BLT{
         }
     }
 
-    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER);
+    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, Collection<SCCContributor> extraContributors) {
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), extraContributors);
     }
 
-    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer) {
-        return computeBLT(options, producer, new BLT());
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt) {
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
     public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
@@ -377,16 +434,10 @@ aspect BLT{
 			for (AbstractEquationBlock b : this) {
 				if (!b.isSolvable()) {
 					blockSizes.add(new Integer(b.unsolvedVariables().size()));
-				}		
+				}
 			}
 			return blockSizes;
 		}
-
-//		public void reset() {
-//			for (AbstractEquationBlock eb : this) {
-//				eb.reset();
-//			}	
-//		}
 
         public void setLabels() {
             Enumerator nestedEnum = new Enumerator(1);
@@ -399,24 +450,10 @@ aspect BLT{
         public int getNumLabledBlocks() {
             return numLabledBlocks;
         }
-		
-		public void complianceCheck(ErrorCheckType checkType) {
-			for (AbstractEquationBlock block : this) {
-				if (!block.isSolvable()) {
-					for (FAbstractEquation equ : block.allEquations()) {
-						if (equ.isWhen()) {
-							for (FExp guard : equ.transformedGuards()) {
-								if (guard.dependsOn(block.allVariables())) {
-									equ.error("A when-guard is involved in an algebraic loop, "
-											+ "consider breaking it using pre() expressions");
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		
+
+        public void complianceCheck(ErrorCheckType checkType, OptionRegistry options) {
+        }
+
         public void errorCheck() {
             for (AbstractEquationBlock block : this)
                 block.errorCheck();
@@ -817,6 +854,17 @@ aspect BLT{
         public abstract Collection<FVariable> localNonRealVariables();
 
         /**
+         * Returns all local variables in this block that are solved and of
+         * real type.
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local solved real variables
+         */
+        public abstract Collection<FVariable> localSolvedRealVariables();
+        
+        /**
          * Returns all variables in this block that are of type real and is unsolved.
          * 
          * @return Collection<FVariable> all unsolved real variables
@@ -1073,6 +1121,7 @@ aspect BLT{
         private Collection<SimpleEquationBlock> localNonRealBlocks_cache = null;
         private Collection<AbstractEquationBlock> solvedRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedRealBlocks_cache = null;
+        private Collection<SimpleEquationBlock> localMetaBlocks_cache = null;
 
         protected EquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
             super(producer, blockDependency);
@@ -1211,6 +1260,21 @@ aspect BLT{
             return localSolvedRealBlocks_cache;
         }
 
+        /**
+         * Returns all locla meta blocks in this block.
+         * 
+         * @return Collection<SimpleEquationBlock> all local meta blocks
+         */
+        public Collection<SimpleEquationBlock> localMetaBlocks() {
+            if (localMetaBlocks_cache == null) {
+                localMetaBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks())
+                    if (block.isSimple() && block.asSimple().isMeta())
+                        localMetaBlocks_cache.add(block.asSimple());
+            }
+            return localMetaBlocks_cache;
+        }
+
         @Override
         public boolean canComputeJacobian() {
             boolean res = true;
@@ -1310,6 +1374,11 @@ aspect BLT{
             return collectLocalVariables(localNonRealBlocks());
         }
 
+        @Override
+        public Collection<FVariable> localSolvedRealVariables() {
+            return collectLocalVariables(localSolvedRealBlocks());
+        }
+        
         /**
          * Returns all variables in this block that are localy solved.
          * 
@@ -1472,6 +1541,11 @@ aspect BLT{
         }
 
         @Override
+        public Collection<FVariable> localSolvedRealVariables() {
+            return Collections.emptyList();
+        }
+        
+        @Override
         public Collection<FVariable> unsolvedVariables() {
             return Collections.emptyList();
         }
@@ -1629,6 +1703,14 @@ aspect BLT{
                 return Collections.emptyList();
             else
                 return allLocalVariables();
+        }
+
+        @Override
+        public Collection<FVariable> localSolvedRealVariables() {
+            if (isReal() && isSolvable())
+                return allLocalVariables();
+            else
+                return Collections.emptyList();
         }
 
         @Override
@@ -2283,6 +2365,12 @@ aspect BLTPrettyPrinting {
             for (SimpleEquationBlock seb : localNonRealBlocks())
                 seb.prettyPrintSub(p, str, innerIndent);
         }
+        if (localMetaBlocks().size() > 0) {
+            str.println();
+            str.formatln("%sMeta equations:", indent);
+            for (SimpleEquationBlock seb : localMetaBlocks())
+                seb.prettyPrintSub(p, str, innerIndent);
+        }
         if (isLinear()) {
             str.println();
             str.formatln("%sJacobian:", indent);
@@ -2601,15 +2689,15 @@ aspect Tearing {
                 return other.priority - priority;
             }
 
-            public abstract <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options);
+            public abstract <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial);
         }
         
-        public static <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options) {
+        public static <E extends AbstractEq<E,V>, V extends AbstractVar<E,V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial) {
             TearingAlgorithm algorithm = getActiveAlgorithm(options);
             if (algorithm == null)
                 return null;
             else
-                return algorithm.tear(block, producer, options);
+                return algorithm.tear(block, producer, options, isInitial);
         }
         
         public static TearingAlgorithm getActiveAlgorithm(OptionRegistry options) {
@@ -2656,14 +2744,16 @@ aspect AutomaticTearing {
             }
 
             @Override
-            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options) {
+            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial) {
                 TornEquationBlock teb = new TornEquationBlock(producer, block.computeBlockDependency());
-                tear(block, teb);
+                tear(block, teb, isInitial);
                 return teb;
             }
             
-            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb) {
+            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb, boolean isInitial) {
                 SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers());
+                if (isInitial)
+                    g.setAsInitialSystem();
                 
                 ASTNode.log.info("Starting automatic tearing");
                 ASTNode.log.info(g);

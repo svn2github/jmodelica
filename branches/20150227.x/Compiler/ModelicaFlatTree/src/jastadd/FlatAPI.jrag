@@ -1097,11 +1097,22 @@ aspect FlatAPI {
     FAlgorithm contributes this when !inFunction()
         to FClass.algorithms() for myFClass();
 
-    syn int FClass.numContinousEquations() = continuousEquations().size();
+    syn int FClass.numContinuousEquations() = continuousEquations().size();
     syn lazy ArrayList<FAbstractEquation> FClass.continuousEquations() {
         ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
         for (FAbstractEquation e : getFAbstractEquations()) {
             if (!e.isIgnored() && e.isContinuous()) {
+                l.add(e);
+            }
+        }
+        return l;
+    }
+
+    syn int FClass.numContinuousNonMetaEquations() = continuousNonMetaEquations().size();
+    syn lazy ArrayList<FAbstractEquation> FClass.continuousNonMetaEquations() {
+        ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+        for (FAbstractEquation e : continuousEquations()) {
+            if (!e.isMetaEquation()) {
                 l.add(e);
             }
         }
@@ -1149,6 +1160,8 @@ aspect FlatAPI {
             res += l.numScalarElements();
         return res;
     }
+    
+    syn boolean FAbstractEquation.isMetaEquation() = numScalarEquations() == 0;
     
     syn int FFunctionCallLeft.numScalarElements() {
         int res = 0;
@@ -1203,7 +1216,7 @@ aspect FlatAPI {
     
     
     
-    syn boolean FRelExp.isTimeEventGenerating() = root().options.getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
+    syn boolean FRelExp.isTimeEventGenerating() = myOptions().getBooleanOption("relational_time_events") && solutionForTime().isValidExp();
     eq FEqRelExp.isTimeEventGenerating() = false;
     syn boolean FDelayExp.isTimeEventGenerating() = getDelay().variability().parameterOrLess();
     
@@ -1344,7 +1357,7 @@ aspect FlatAPI {
     syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
             inEventGeneratingLocation() && hasEventGeneratingType() &&
             (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters)) &&
-            root().options.getBooleanOption("generate_event_switches");
+            myOptions().getBooleanOption("generate_event_switches");
 
     /**
      * Check if an expression will generate an event.
@@ -1545,7 +1558,69 @@ aspect FlatAPI {
     inh lazy FClass FExternalStmt.myFClass();
     eq FClass.getChild().myFClass() = this;
     eq Root.getChild().myFClass() = null; 
+    
+    public Iterable<FAbstractEquation> FExp.enclosingEquationsIterator() {
+        return myFEquation().enclosingEquationsIterator();
+    }
 
+    public Iterable<FAbstractEquation> FStatement.enclosingEquationsIterator() {
+        return myFEquation().enclosingEquationsIterator();
+    }
+    
+    inh FAbstractEquation FAbstractEquation.enclosingEquation();
+    eq FAbstractEquation.getChild().enclosingEquation() = this;
+    eq Root.getChild().enclosingEquation()              = null;
+    
+    /**
+     * Returns the outermost enclosing equation or the equation itself if it is
+     * the outermost.
+     */
+    syn FAbstractEquation FAbstractEquation.outermostEnclosingEquation() {
+        FAbstractEquation enclosing = this;
+        FAbstractEquation next = enclosingEquation();
+        while (next != null) {
+            enclosing = next;
+            next = enclosing.enclosingEquation();
+        }
+        return enclosing;
+    }
+    
+    /**
+     * Returns an iterable that can be used to iterate over all surounding
+     * equations (including this one).
+     */
+    public Iterable<FAbstractEquation> FAbstractEquation.enclosingEquationsIterator() {
+        return new Iterable<FAbstractEquation>() {
+
+            @Override
+            public Iterator<FAbstractEquation> iterator() {
+                return new Iterator<FAbstractEquation>() {
+
+                    private FAbstractEquation next = FAbstractEquation.this;
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return next != null;
+                    }
+
+                    @Override
+                    public FAbstractEquation next() {
+                        FAbstractEquation res = next;
+                        next = next.enclosingEquation();
+                        return res;
+                    }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+                    
+                };
+            }
+            
+        };
+    }
+    
     syn lazy boolean FVariable.isIndependentConstant() = isConstant();
     syn lazy boolean FVariable.isDependentConstant() = false;
     
@@ -2619,13 +2694,13 @@ aspect FVariableUses {
      * Collection attribute returning all algebraic variables (FVariables)
      * referenced in an equation.
      */
-    coll LinkedHashSet<FVariable> FAbstractEquation.retrieveAlgebraicVariables() 
+    coll LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
-        FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
+        FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
     FAssignStmt contributes (FVariable) getLeft().myFV() when getLeft().myFV().isAlgebraicVariable() to 
-        FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
+        FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
 
     syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
 
@@ -2634,26 +2709,6 @@ aspect FVariableUses {
     eq SourceRoot.getChild().inAlgebraicAccessLocation()   = false;
     eq FAbstractEquation.getFAttribute().inAlgebraicAccessLocation() = false;
     eq FAbstractEquation.getChild().inAlgebraicAccessLocation() = true;
-    
-    syn LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
-        retrieveAlgebraicVariables();
-    
-    syn lazy LinkedHashSet<FVariable> FIfWhenElseEquation.algebraicVariables() {
-        LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
-        s.addAll(retrieveAlgebraicVariables());
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            s.addAll(e.algebraicVariables());
-        }
-        return s;
-    }
-    
-   syn lazy LinkedHashSet<FVariable> FIfWhenEquation.algebraicVariables() {
-        LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
-        s.addAll(super.algebraicVariables());
-        if (hasElse())
-            s.addAll(getElse().algebraicVariables());
-        return s;
-   }
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
         FClass.intersectFVSet(algebraicVariables(), myFClass().algebraicContinousRealVariables());
@@ -2682,7 +2737,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
 
     FDerExp contributes (FDerivativeVariable) myFV() when myFV().isDerivativeVariable() to 
-        FAbstractEquation.derivativeVariables() for myFEquation();
+        FAbstractEquation.derivativeVariables() for each enclosingEquationsIterator();
 
     /**
      * Collection attribute returning all differentiated variables (FVariables)
@@ -2692,7 +2747,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() to 
-        FAbstractEquation.differentiatedRealVariables() for myFEquation();
+        FAbstractEquation.differentiatedRealVariables() for each enclosingEquationsIterator();
 
     /**
      * Collection attribute returning all independent parameter variables (FVariables)
@@ -2702,7 +2757,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when myFV().isDependentParameter() to 
-        FAbstractEquation.dependentParameters() for myFEquation();
+        FAbstractEquation.dependentParameters() for each enclosingEquationsIterator();
         
     /**
      * Collection attribute returning all dependent parameter variables (FVariables)
@@ -2712,7 +2767,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when myFV().isParameter() to 
-        FAbstractEquation.parameters() for myFEquation();
+        FAbstractEquation.parameters() for each enclosingEquationsIterator();
 
     /**
      * Collection attribute returning all discrete variables (FVariables)
@@ -2722,7 +2777,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when myFV().isDiscreteVariable() to 
-        FAbstractEquation.discreteVariables() for myFEquation();
+        FAbstractEquation.discreteVariables() for each enclosingEquationsIterator();
 
     /**
      * Collection attribute returning all non-fixed parameters (FVariables)
@@ -2732,7 +2787,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when myFV().isNonFixedParameter() to
-        FAbstractEquation.nonFixedParameters() for myFEquation();
+        FAbstractEquation.nonFixedParameters() for each enclosingEquationsIterator();
 
     /**
      * Collection attribute returning all pre variables (FPreVariable)
@@ -2742,7 +2797,7 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FPreExp contributes (FVariable) myFV() when myFV().isPreVariable() to 
-        FAbstractEquation.discretePreVariables() for myFEquation();
+        FAbstractEquation.discretePreVariables() for each enclosingEquationsIterator();
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {
         LinkedHashSet<FVariable> l = new LinkedHashSet<FVariable>();
@@ -3196,13 +3251,13 @@ aspect FlatDiagnostics {
         
         StringBuilder str = new StringBuilder();
             
-        if (root().options.getBooleanOption("equation_sorting")) {
+        if (myOptions().getBooleanOption("equation_sorting")) {
             
             str.append("Variable dependencies:\n");
             
-            if (getNumFVariable() > root().options.getIntegerOption("diagnostics_limit")) {
+            if (getNumFVariable() > myOptions().getIntegerOption("diagnostics_limit")) {
                 str.append("Oh dear, the model has way to many variables (" + getNumFVariable() + ")!\n");
-                str.append("Current limit is set to " + root().options.getIntegerOption("diagnostics_limit") + ", you can change this by changing the option 'diagnostics_limit'.\n");
+                str.append("Current limit is set to " + myOptions().getIntegerOption("diagnostics_limit") + ", you can change this by changing the option 'diagnostics_limit'.\n");
                 return str.toString();
             }
             
@@ -3521,7 +3576,7 @@ aspect FlatExternalFunctionAPI {
         library = n.annotation("Library").asStringVector();
         if (library != null) {
             ArrayList<String> libs = new ArrayList<String>();
-            String lapackLib = n.root().options.getStringOption("lapack_lib");
+            String lapackLib = n.myOptions().getStringOption("lapack_lib");
             for (int i = 0; i < library.length; i++) {
                 if (library[i].equals("lapack") && !lapackLib.equals("lapack")) {
                     n.warning("Removing use of external library 'lapack'. Will use '"

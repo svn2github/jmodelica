@@ -78,14 +78,14 @@ aspect IndexReduction {
             IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             // Only do index reduction based on real variables and equations
             g.addVariables(this, VAR_TYPES_REAL);
-            g.addEquations(continuousEquations(), VAR_TYPES_REAL);
+            g.addEquations(continuousNonMetaEquations(), VAR_TYPES_REAL);
             log.info(g);
             g.maximumMatching(true);
             log.info("DAE system real variables only");
             log.info(g.printMatchingObj());
             
             try {
-                result = g.reduceIndex(new IndexReductionFunctionInliner(this), root().options.getBooleanOption("dynamic_states"));
+                result = g.reduceIndex(new IndexReductionFunctionInliner(this), myOptions().getBooleanOption("dynamic_states"));
                 break;
             } catch (EquationDifferentiationException e) {
                 ASTNode.log.info("Unable to differentiate equation:\n%s", e.equation);
@@ -276,8 +276,8 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
-            return new IndexReductionEq(name, eqn, groupNumber, variability);
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
+            return new IndexReductionEq(name, eqn, groupNumber, variability, isMeta);
         }
 
         @Override
@@ -304,8 +304,8 @@ aspect IndexReduction {
         private Set<String> nonDiffVars;
         private Set<FAbstractEquation> nonDiffEqns;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
-            super(name, eqn, groupNumber, variability);
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
+            super(name, eqn, groupNumber, variability, isMeta);
         }
 
         public int numDifferentiations() {
@@ -526,7 +526,7 @@ aspect IndexReduction {
         public IndexReductionFunctionInliner(FClass fclass) {
             this.resolver = fclass.dynamicResolver(new FIndexReductionResolver(fclass));
             this.fclass = fclass;
-            inlineEnabled = fclass.root().options.getStringOption("inline_functions") != OptionRegistry.Inlining.NONE;
+            inlineEnabled = fclass.myOptions().getStringOption("inline_functions") != OptionRegistry.Inlining.NONE;
         }
 
         @Override
@@ -959,7 +959,7 @@ aspect IndexReduction {
             diverged from the original one that was presented in the paper.
         */
         
-        Collection<IndexReductionSCCBlock> components = tarjan(fclass.root().options);
+        Collection<IndexReductionSCCBlock> components = tarjan(fclass.myOptions());
     
         Set<IndexReductionVar> varsToKeep = new HashSet<IndexReductionVar>();
         // Remove all equations and variables that doesn't exist in blocks that

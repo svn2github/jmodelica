@@ -22,7 +22,7 @@ aspect OptimicaTransformCanonical {
         doneTransformCanonical = true;
     	beginStep("transformCanonical()");
 		
-		if (root().options.getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
+		if (myOptions().getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
 			for (FVariable fv : freeDependentParameters()) {
 				fv.setFTypePrefixVariability(new FContinuous());
                 for (FIdUseExp use : fv.uses())
@@ -39,7 +39,7 @@ aspect OptimicaTransformCanonical {
 		FRealVariable fv_startTime = addExperimentTimeParameter("startTime", startTime_attr, 0.0);
 		FRealVariable fv_finalTime = addExperimentTimeParameter("finalTime", finalTime_attr, 1.0);
 
-		if (root().options.getBooleanOption("normalize_minimum_time_problems")) {
+		if (myOptions().getBooleanOption("normalize_minimum_time_problems")) {
 			// Add 'finalTime' parameter if free
 			
 			// If either startTime or finalTime is free, and the 

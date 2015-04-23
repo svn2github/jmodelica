@@ -30,7 +30,7 @@ aspect ClassAttributes {
         
         PrimitiveClassDecl pcd = null;
         try {
-            SourceRoot sr = ParserHandler.parseString(root().getErrorHandler(), builtInDef, "");
+            SourceRoot sr = ParserHandler.parseString(root().getUtilInterface(), builtInDef, "");
             Program p = sr.getProgram();
             FullClassDecl cd = (FullClassDecl) (p.getUnstructuredEntity(0).getElement(0));
             for (ComponentDecl comp : cd.getComponentDecls()) 

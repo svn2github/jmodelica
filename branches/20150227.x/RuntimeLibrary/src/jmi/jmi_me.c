@@ -590,15 +590,23 @@ int jmi_get_directional_derivative(jmi_t* jmi,
 static int jmi_reset_internal_variables(jmi_t* jmi) {
     /* Store the current time and states */
     jmi_real_t time = *(jmi_get_t(jmi));
-    jmi_real_t *x = jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
+    jmi_real_t *x = jmi->real_x_work;
+    jmi_real_t *u = jmi->real_u_work;
     memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
+    memcpy(u, jmi_get_real_u(jmi), jmi->n_real_u*sizeof(jmi_real_t));
     
-    jmi_reset_last_successful_values(jmi);
+    jmi_reset_last_internal_successful_values(jmi);
     
     /* Restore the current time and states */
+    memcpy (jmi_get_real_u(jmi), u, jmi->n_real_u*sizeof(jmi_real_t));
     memcpy (jmi_get_real_x(jmi), x, jmi->n_real_x*sizeof(jmi_real_t));
     *(jmi_get_t(jmi)) = time;
-    jmi->jmi_callbacks.free_memory(x);
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 6){
+        jmi_log_node_t node =jmi_log_enter_fmt(jmi->log, logInfo, "ResettingInternalVariables", 
+                                "Resetting internal variables at <t:%g>.", jmi_get_t(jmi)[0]);
+        jmi_log_leave(jmi->log, node);
+    }
     
     return 0;
 }
@@ -621,21 +629,11 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     if (jmi->recomputeVariables == 1  && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            
-            /* Store the current time and states */
-            jmi_real_t time = *(jmi_get_t(jmi));
-            jmi_real_t *x = jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
-            memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
-            
+
             jmi_log_node(jmi->log, logWarning, "Warning",
                 "Evaluating the derivatives failed at <t:%g>, retrying with restored values.", jmi_get_t(jmi)[0]);
             /* If it failed, reset to the previous succesful values */
-            jmi_reset_last_successful_values(jmi);
-            
-            /* Restore the current time and states */
-            memcpy (jmi_get_real_x(jmi), x, jmi->n_real_x*sizeof(jmi_real_t));
-            *(jmi_get_t(jmi)) = time;
-            jmi->jmi_callbacks.free_memory(x);
+            jmi_reset_internal_variables(jmi);
             
             /* Try again */
             retval = jmi_ode_derivatives(jmi);
@@ -766,20 +764,10 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             
-            /* Store the current time and states */
-            jmi_real_t time = *(jmi_get_t(jmi));
-            jmi_real_t *x = (jmi_real_t*)jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
-            memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
-            
             jmi_log_node(jmi->log, logWarning, "Warning",
                 "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>, retrying with restored values.", jmi_get_t(jmi)[0]);
             /* If it failed, reset to the previous succesful values */
-            jmi_reset_last_successful_values(jmi);
-            
-            /* Restore the current time and states */
-            memcpy (jmi_get_real_x(jmi), x, jmi->n_real_x*sizeof(jmi_real_t));
-            *(jmi_get_t(jmi)) = time;
-            jmi->jmi_callbacks.free_memory(x);
+            jmi_reset_internal_variables(jmi);
             
             /* Try again */
             retval = jmi_ode_derivatives(jmi);
@@ -1201,6 +1189,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_use_Brent_in_1d");
     if(index)
         bsop->use_Brent_in_1d_flag = (int)z[index]; 
+    index = get_option_index("_use_newton_for_brent");
+    if(index)
+        bsop->use_newton_for_brent = (int)z[index];
     index = get_option_index("_nle_solver_default_tol");
     if(index)
         op->nle_solver_default_tol = z[index]; 

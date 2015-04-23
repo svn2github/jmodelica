@@ -18,7 +18,8 @@ import org.jmodelica.util.OptionRegistry;
 
 aspect Options {
 
-    public OptionRegistry Root.options;
-    public OptionRegistry InstProgramRoot.options;
+    public OptionRegistry ASTNode.myOptions() {
+        return root().getUtilInterface().getOptionRegistry();
+    }
 
 }

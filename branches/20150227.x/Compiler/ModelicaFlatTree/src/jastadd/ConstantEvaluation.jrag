@@ -4656,23 +4656,13 @@ aspect ExternalCEval {
     /**
      * Retrieve ModelicaCompiler from root. Might be null.
      */
-    inh ModelicaCompiler FExternalStmt.myCompiler();
-    eq FlatRoot.getChild().myCompiler() = getCompiler();
-    eq InstRoot.getChild().myCompiler() = getCompiler();
-    
-    private ModelicaCompiler FlatRoot.compiler = null;
-    public void FlatRoot.setCompiler(ModelicaCompiler mc) { compiler = mc; }
-    public ModelicaCompiler FlatRoot.getCompiler()        { return compiler; }
-    
-    private ModelicaCompiler InstRoot.compiler = null;
-    public void InstRoot.setCompiler(ModelicaCompiler mc) { compiler = mc; }
-    public ModelicaCompiler InstRoot.getCompiler()        { return compiler; }
+    syn ModelicaCompiler FExternalStmt.myCompiler() = root().getUtilInterface().getModelicaCompiler();
     
     /**
      * Check external arguments
      */
     syn boolean FExternalStmt.canEvaluate() {
-        if (root().options.getIntegerOption("external_constant_evaluation") == 0)
+        if (myOptions().getIntegerOption("external_constant_evaluation") == 0)
             return false;
         for (CommonVariableDecl cvd : varsToSerialize()) {
             if (cvd.type().isRecord()) {
@@ -4738,7 +4728,7 @@ aspect ExternalCEval {
         } 
         
         int res = 0;
-        int timeout = root().options.getIntegerOption("external_constant_evaluation");
+        int timeout = myOptions().getIntegerOption("external_constant_evaluation");
         ProcessCommunicator com = new ProcessCommunicator(proc, timeout);
         try {
             com.accept("START");

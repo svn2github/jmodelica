@@ -459,7 +459,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 						genPrinter.print("\n\t\t\t</DirectDependency>");
 					}
 					
-					Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+					Boolean generateEqu = fclass.myOptions().getBooleanOption("generate_xml_equations");
 					if (generateEqu){
 						//qualified name
 						genPrinter.print("\n\t\t\t<QualifiedName>\n");
@@ -467,7 +467,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 						genPrinter.print("\t\t\t</QualifiedName>");
 					}		
 					
-					Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_me_xml");
+					Boolean generateFMI = fclass.myOptions().getBooleanOption("generate_fmi_me_xml");
 					if (!generateFMI) {				
 						//is linear?
 						addLinearInfo(genPrinter, variable);
@@ -529,7 +529,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		    else if (var.isInput())
 		        e_start = var.createStartAttributeExp();
 		    
-		    if (!var.root().options.getBooleanOption("generate_xml_equations") && e_start != null && !e_start.isConstantExp())
+		    if (!var.myOptions().getBooleanOption("generate_xml_equations") && e_start != null && !e_start.isConstantExp())
 		        e_start = null;
 		    if (e_start != null) {
 		        genPrinter.print("start=\"" + var.type().convert(e_start.ceval()).xmlValue() + "\" ");
@@ -682,7 +682,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(CodeStream genPrinter) {
-			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			Boolean generateEqu = fclass.myOptions().getBooleanOption("generate_xml_equations");
 			if(generateEqu) {
 				genPrinter.println("<equ:BindingEquations>");			
 			
@@ -743,7 +743,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(CodeStream genPrinter) {
-			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			Boolean generateEqu = fclass.myOptions().getBooleanOption("generate_xml_equations");
 			if(generateEqu){
 				genPrinter.println("<equ:DynamicEquations>");			
 				for(FAbstractEquation e : fclass.equations())
@@ -770,7 +770,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(CodeStream genPrinter) {
-			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			Boolean generateEqu = fclass.myOptions().getBooleanOption("generate_xml_equations");
 			if(generateEqu) {
 				genPrinter.println("<equ:InitialEquations>");			
 				for(FAbstractEquation e : fclass.initialEquations())
@@ -819,7 +819,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(CodeStream genPrinter) {
-			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			Boolean generateEqu = fclass.myOptions().getBooleanOption("generate_xml_equations");
 			if(generateEqu) {
 				genPrinter.println("<fun:FunctionsList>");			
 				for(FFunctionDecl f : fclass.getFFunctionDeclList())
@@ -848,7 +848,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 */
 		public void generate(CodeStream genPrinter) {
 
-		if (!fclass.root().options.getStringOption("fmi_version").equals("2.0alpha")) {
+		if (!fclass.myOptions().getStringOption("fmi_version").equals("2.0alpha")) {
 			return;
 		}
 		

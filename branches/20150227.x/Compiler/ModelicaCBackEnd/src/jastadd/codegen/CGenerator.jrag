@@ -50,7 +50,7 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("enable_variable_scaling")) {
+			if (fclass.myOptions().getBooleanOption("enable_variable_scaling")) {
 				genPrinter.print("JMI_SCALING_VARIABLES");
 			} else {
 				genPrinter.print("JMI_SCALING_NONE");
@@ -392,7 +392,7 @@ public class CGenerator extends GenericGenerator {
             generateVarList(genPrinter, "integer_u",  fclass.integerInputs(),            fclass.enumInputs());
             generateVarList(genPrinter, "boolean_d",  fclass.discreteBooleanVariables());
             generateVarList(genPrinter, "boolean_u",  fclass.booleanInputs());
-            if (fclass.root().options.getBooleanOption("generate_ode")) {
+            if (fclass.myOptions().getBooleanOption("generate_ode")) {
                 generatePreVarList(genPrinter, "real_dx",   fclass.derivativeVariables());
                 generatePreVarList(genPrinter, "real_x",    fclass.differentiatedRealVariables());
                 generatePreVarList(genPrinter, "real_u",    fclass.realInputs());
@@ -454,7 +454,7 @@ public class CGenerator extends GenericGenerator {
                 CodePrinter p = ASTNode.printer_C;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false, false, fclass.root().options.getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, false, false, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
             }
         }
 	}
@@ -517,7 +517,7 @@ public class CGenerator extends GenericGenerator {
                 CodePrinter p = ASTNode.printer_C;
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false, true, fclass.root().options.getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, false, true, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
             }
         }
     }
@@ -695,6 +695,25 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 	
+    /**
+     * Generates temporary variables for reinit writebacks
+     */
+    /**
+     * C: C temporary variables for reinit writebacks
+     */
+    public class DAETag_C_reinit_writeback_temps extends DAETag {
+        
+        public DAETag_C_reinit_writeback_temps(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_reinit_temp_decls", myGenerator, fclass);
+            addOptions("generate_ode");
+        }
+
+        public void generate(CodeStream genPrinter) {
+            for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                block.genReinitTempDecls_C(ASTNode.printer_C, genPrinter, "");
+        }
+    }
+
 	/**
 	 * Generates headers for Modelica functions.
 	 */

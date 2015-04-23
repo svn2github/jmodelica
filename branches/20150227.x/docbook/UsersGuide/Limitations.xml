@@ -38,14 +38,6 @@
           <para>The following built-in functions are not
           supported:<informaltable border="1" frame="void" width="25%">
               <tr>
-                <td><code>delay(...)</code></td>
-              </tr>
-
-              <tr>
-                <td><code>spatialDistribution(...)</code></td>
-              </tr>
-
-              <tr>
                 <td><code>terminal()</code></td>
               </tr>
             </informaltable></para>
@@ -88,6 +80,10 @@
 
               <tr>
                 <td><code>initial()</code></td>
+
+                <td><code>delay(...)</code></td>
+
+                <td><code>spatialDistribution(...)</code></td>
               </tr>
             </informaltable></para>
         </listitem>

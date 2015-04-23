@@ -174,7 +174,7 @@ namespace ModelicaCasADi
 
             std::string identfier = env->toString(fclass.nameUnderscore().this$);
             std::string option = "normalize_minimum_time_problems";
-            bool normalizedTime = fclass.root()._get_options().getBooleanOption(StringFromUTF(option.c_str()));
+            bool normalizedTime = fclass.myOptions().getBooleanOption(StringFromUTF(option.c_str()));
 
             // Initialize the model with the model identfier and normalizedTime flag.
             optProblem->initializeProblem(identfier, normalizedTime);

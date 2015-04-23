@@ -39,11 +39,12 @@
 #define JMI_BLOCK_EVALUATE_JACOBIAN                             128
 #define JMI_BLOCK_EQUATION_NOMINAL                              256
 #define JMI_BLOCK_VALUE_REFERENCE                               512
-#define JMI_BLOCK_NON_REAL_VALUE_REFERENCE                      1024
+#define JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE               1024
 #define JMI_BLOCK_ACTIVE_SWITCH_INDEX                           2048
 #define JMI_BLOCK_START                                         4096
 #define JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE   8192
 #define JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX                  16384
+#define JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE                   32768
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -83,7 +84,8 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_steepest_descent = 1,
     jmi_block_solver_experimental_steepest_descent_first = 2,
     jmi_block_solver_experimental_Brent = 4,
-    jmi_block_solver_experimental_Brent_ignore_error = 8
+    jmi_block_solver_experimental_Brent_ignore_error = 8,
+    jmi_block_solver_experimental_Brent_with_newton = 16
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
@@ -217,11 +219,10 @@ struct jmi_block_solver_options_t {
     int rescale_each_step_flag;             /**< \brief If scaling should be updated at every step (only active if residual_equation_scaling_mode is not "none") */
     int rescale_after_singular_jac_flag;    /**< \brief If scaling should be updated after singular jac was detected (only active if residual_equation_scaling_mode is not "none") */
 
-    int check_jac_cond_flag;     /**< \brief Flag if the solver should check Jacobian condition number and log it. */
-
+    int check_jac_cond_flag;       /**< \brief Flag if the solver should check Jacobian condition number and log it. */
     int experimental_mode;         /**< \brief  Activate experimental features of equation block solvers. Combination of jmi_block_solver_experimental_mode_t flags. */
-    
-    double events_epsilon;       /**< \brief The event epsilon used for event indicators and switches. */
+    double events_epsilon;         /**< \brief The event epsilon used for event indicators and switches. */
+    int use_newton_for_brent;      /**< \brief If a few Newton steps are to be performed in order to get a better guess for Brent. */
     
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */

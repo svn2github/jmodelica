@@ -56,7 +56,7 @@ aspect LocalIteration{
             addAttributeContributer(new AttributeContributer.LocalIterationContributer());
     
     syn boolean FAbstractEquation.canUseLocalIteration() {
-        String option = root().options.getStringOption("local_iteration_in_tearing");
+        String option = myOptions().getStringOption("local_iteration_in_tearing");
         if (option == OptionRegistry.LocalIteration.OFF)
             return false;
         else if (option == OptionRegistry.LocalIteration.ANNOTATION)

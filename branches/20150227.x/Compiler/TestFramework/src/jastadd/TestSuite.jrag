@@ -34,18 +34,16 @@ public class TestSuite implements GenericTestSuite {
         name = className;
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
+        String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
+                "ThirdParty" + File.separator + "MSL";
+        OptionRegistry options = ModelicaCompiler.createOptions();
+        options.addStringOption("MODELICAPATH", modelica_path);
+        ASTNode.log = new SysErrLogger();
         try {
-            sr = ParserHandler.parseFile(new DefaultErrorHandler(), fileName);
+            sr = ParserHandler.parseFile(new UtilInterface(options), fileName);
         } catch (Exception e) {
             asserter.fail("Error when parsing file: " + fileName + "\n" + e);
         }
-        
-        OptionRegistry or = ModelicaCompiler.createOptions();
-        String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
-                "ThirdParty" + File.separator + "MSL";
-        or.addStringOption("MODELICAPATH", modelica_path);
-        sr.options = or;
-        ASTNode.log = new SysErrLogger();
         
         sr.collectTestCases(this,className);
     }

@@ -20,7 +20,7 @@ aspect OptimicaCCodeGen {
 	
 	@Override
 	public void FTimedVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (getName().myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+		if (getName().myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
 			str.print(getName().name_C()+"_p_(" + 
 					myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
