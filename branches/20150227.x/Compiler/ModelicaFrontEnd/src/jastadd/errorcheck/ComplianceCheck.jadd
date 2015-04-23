@@ -260,7 +260,7 @@ aspect ComplianceCheck {
 			} else if (variability().lessOrEqual(fParameter())) {
 				warning("String parameters are only partially supported");
 				if (isParameter())
-					markAsStructuralParameter(checkType);
+					forceVariability(checkType, fStructParameter());
 			} else {
 				compliance("String variables are not supported");
 			}

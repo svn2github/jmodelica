@@ -349,7 +349,7 @@ model RecordFlat10
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat10
- structural parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ eval parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
  eval parameter Real r.x = 3 /* 3 */;
 
 public
@@ -1946,7 +1946,7 @@ model RecordConstructor9
 			description="Constant eval of default value in record constructor that depends on another member",
 			flatModel="
 fclass RecordTests.RecordConstructor9
- parameter RecordTests.RecordConstructor9.A a = RecordTests.RecordConstructor9.A(1, 1 + 2) /* RecordTests.RecordConstructor9.A(1, 3) */;
+ structural parameter RecordTests.RecordConstructor9.A a = RecordTests.RecordConstructor9.A(1, 1 + 2) /* RecordTests.RecordConstructor9.A(1, 3) */;
  structural parameter Integer b = 3 /* 3 */;
  Real z[3] = (1:3) * time;
 
@@ -4831,7 +4831,7 @@ model RecordParam7
 			description="Variability calculation for records involving inheritance",
 			flatModel="
 fclass RecordTests.RecordParam7
- parameter Integer b.n = 2 /* 2 */;
+ structural parameter Integer b.n = 2 /* 2 */;
  Real x[1];
  Real x[2];
 equation
@@ -5188,6 +5188,62 @@ equation
 end RecordTests.RecordEval6;
 ")})));
 end RecordEval6;
+
+model RecordEval7
+  record B
+    parameter Real x;
+    parameter Real y = x + 1;
+    parameter Integer n;
+  end B;
+  
+  record SB
+    extends B(final n = 1);
+  end SB;
+  
+  record A
+    parameter Real x;
+    SB b(final n = 2);
+  end A;
+  
+  A a1(x=3);
+  B b1 = a1.b;
+  Real x;
+equation
+  x = b1.n;
+  
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordEval7",
+            description="Test that evaluation before scalarization of record variable works",
+            flatModel="
+fclass RecordTests.RecordEval7
+ parameter RecordTests.RecordEval7.A a1(x = 3);
+ parameter RecordTests.RecordEval7.B b1 = a1.b;
+ Real x;
+equation
+ x = 2;
+
+public
+ record RecordTests.RecordEval7.SB
+  parameter Real x;
+  parameter Real y = x + 1;
+  final parameter Integer n = 1 /* 1 */;
+ end RecordTests.RecordEval7.SB;
+
+ record RecordTests.RecordEval7.A
+  parameter Real x;
+  parameter RecordTests.RecordEval7.SB b(final n = 2);
+ end RecordTests.RecordEval7.A;
+
+ record RecordTests.RecordEval7.B
+  parameter Real x;
+  parameter Real y = x + 1;
+  parameter Integer n;
+ end RecordTests.RecordEval7.B;
+
+end RecordTests.RecordEval7;
+")})));
+end RecordEval7;
 
 
 model RecordModification1

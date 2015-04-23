@@ -187,7 +187,9 @@ FConstant : FTypePrefixVariability;
  * Composite variability. Represents variability of
  * records between flattening and scalarization.
  */
-FCompositeVariability : FTypePrefixVariability ::= Component:FTypePrefixVariability*;
+FCompositeVariability : FTypePrefixVariability ::= Component:FComponentVariability*;
+
+FComponentVariability ::= <Name:String> Variability:FTypePrefixVariability;
 
 /**
  * Base class for causality type prefixes.
