@@ -162,7 +162,7 @@ aspect InstLookupClasses {
      */
     syn InstClassDecl InstClassDecl.actualInstClass() = this;
     eq InstSimpleShortClassDecl.actualInstClass()     = 
-        isRecursive() ? unknownInstClassDecl() : getTarget().myInstClassDecl().actualInstClass();
+        isRecursive() ? unknownInstClassDecl() : myTargetInstClassDecl().actualInstClass();
 
     /**
      * Lookup the class being redeclared & extended in the last step of a chain 

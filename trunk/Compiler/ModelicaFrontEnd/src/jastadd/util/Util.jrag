@@ -1439,7 +1439,7 @@ aspect MultiDeclMethods {
 aspect ShortClassUtil {
 
     syn InstClassDecl InstClassDecl.finalClass() = this;
-    eq InstShortClassDecl.finalClass()           = getInstExtends(0).myInstClass().finalClass();
+    eq InstShortClassDecl.finalClass()           = myTargetInstClassDecl().finalClass();
     eq InstSimpleShortClassDecl.finalClass()     = actualInstClass().finalClass();
 
 
@@ -1456,7 +1456,7 @@ aspect ShortClassUtil {
 
     syn boolean InstClassDecl.isInput()            = false;
     eq InstShortClassDecl.isInput()                = 
-        getClassDecl().isInput() || getInstExtends(0).myInstClass().isInput();
+        getClassDecl().isInput() || myTargetInstClassDecl().isInput();
     eq InstSimpleShortClassDecl.isInput()          = actualInstClass().isInput();
     eq InstReplacingShortClassDecl.isInput()       = 
         (super.isInput() || super.isOutput()) ? super.isInput() : getOriginalInstClass().isInput();
@@ -1465,7 +1465,7 @@ aspect ShortClassUtil {
 
     syn boolean InstClassDecl.isOutput()            = false;
     eq InstShortClassDecl.isOutput()                =
-        getClassDecl().isOutput() || getInstExtends(0).myInstClass().isOutput();
+        getClassDecl().isOutput() || myTargetInstClassDecl().isOutput();
     eq InstSimpleShortClassDecl.isOutput()          = actualInstClass().isOutput();
     eq InstReplacingShortClassDecl.isOutput()       = 
         (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();

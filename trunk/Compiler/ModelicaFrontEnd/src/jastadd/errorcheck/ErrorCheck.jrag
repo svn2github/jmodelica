@@ -1146,16 +1146,20 @@ aspect InstanceErrorCheck {
     inh boolean ASTNode.canBeReplacedForMe(InstNode node);
     eq InstNode.getChild().canBeReplacedForMe(InstNode node) = node.canBeReplacedFor(this);
     eq Root.getChild().canBeReplacedForMe(InstNode node)     = false;
-	
-	/**
-	 * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
-	 */
-	syn boolean InstNode.canBeReplacedFor(InstNode source) = canBeReplacedIn(commonAncestor(source));
-	
+
+    /**
+     * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
+     */
+    syn boolean InstNode.canBeReplacedFor(InstNode source)        = canBeReplacedIn(commonAncestor(source));
+    eq InstSimpleShortClassDecl.canBeReplacedFor(InstNode source) = 
+        super.canBeReplacedFor(source) || myTargetInstClassDecl().canBeReplacedFor(source);
+    eq InstShortClassDecl.canBeReplacedFor(InstNode source)       = 
+        super.canBeReplacedFor(source) || myTargetInstClassDecl().canBeReplacedFor(source);
+
     /**
      * Is this class or any class before <code>ancestor</code> replaceable?
      */
-	syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
+    syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
 
     /**
      * Helper method for {@link #canBeReplacedIn(InstNode)} - use it instead.
@@ -1261,14 +1265,14 @@ aspect InstanceErrorCheck {
 		for (InstExtends ie : getInstExtendss())
 			ie.calcIsRecursive(visited);
 	}
-	
-	public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
-		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
-		visited.add(this);
-		if (recursiveCache == RECURSIVE_NO) 
-			getTarget().myInstClassDecl().calcIsRecursive(visited);
-	}
-	
+
+    public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
+        recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+        visited.add(this);
+        if (recursiveCache == RECURSIVE_NO) 
+            myTargetInstClassDecl().calcIsRecursive(visited);
+    }
+
 	private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
 	private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
 	protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;

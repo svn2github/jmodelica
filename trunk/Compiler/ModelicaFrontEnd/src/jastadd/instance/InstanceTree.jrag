@@ -249,7 +249,7 @@ aspect Environments {
 			l.add(getInstConstraining().getInstClassModification());
           }
         } 
-        l.addAll(getInstExtends(0).myInstClass().classInstModifications());
+        l.addAll(myTargetInstClassDecl().classInstModifications());
    		return l;
 	}
 	
@@ -271,7 +271,7 @@ aspect Environments {
  	
 	eq InstReplacingShortClassDecl.localInstModifications() {
 		ArrayList<InstModification> l = localInstModificationsForReplacingClass();
-        l.addAll(getInstExtends(0).myInstClass().classInstModifications());
+        l.addAll(myTargetInstClassDecl().classInstModifications());
 		return l;
 	}
  	
@@ -1404,10 +1404,13 @@ aspect InstanceTreeConstruction {
 	
 	syn boolean ExtendsClauseShortClass.hasTypePrefix() = 
 		hasTypePrefixFlow() || hasTypePrefixVariability() || hasTypePrefixInputOutput();
-	
-	syn lazy InstAccess InstSimpleShortClassDecl.getTarget() = 
-		getBaseClassDecl().superClasses().iterator().next().getSuper().newInstAccess();
-	
+
+    syn lazy InstAccess InstSimpleShortClassDecl.getTarget() = 
+            getBaseClassDecl().superClasses().iterator().next().getSuper().newInstAccess();
+
+    syn InstClassDecl InstSimpleShortClassDecl.myTargetInstClassDecl() = getTarget().myInstClassDecl();
+    syn InstClassDecl InstShortClassDecl.myTargetInstClassDecl()       = getInstExtends(0).myInstClass();
+
 	public List<InstComponentDecl> InstSimpleShortClassDecl.getInstComponentDeclList() {
 		throw new UnsupportedOperationException();
 	}

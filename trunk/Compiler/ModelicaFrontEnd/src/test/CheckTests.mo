@@ -300,6 +300,65 @@ Semantic error at line 261, column 14:
 ")})));
 end FunctionNoAlgorithm3;
 
+
+model FunctionNoAlgorithm4
+    function f
+        input Real x;
+        output Real y;
+    end f;
+    
+    function f2 = f3;
+    
+    replaceable function f3 = f;
+
+    Real z = f2(time);
+    Integer y = 1.2; // Generate an error to be able to use error test case
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionNoAlgorithm4",
+            description="",
+            checkType=check,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Semantic error at line 315, column 17:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end FunctionNoAlgorithm4;
+
+
+model FunctionNoAlgorithm5
+    function f
+        input Real x;
+        output Real y;
+    end f;
+    
+    model A
+        replaceable function f2 = f;
+        Real z = f2(time);
+    end A;
+    
+    replaceable function f3 = f;
+
+    A a(redeclare function f2 = f3);
+    Integer y = 1.2; // Generate an error to be able to use error test case
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionNoAlgorithm5",
+            description="",
+            checkType=check,
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Semantic error at line 345, column 17:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end FunctionNoAlgorithm5;
+
+
+
 model IfEquationElse1
   Real x;
 equation
