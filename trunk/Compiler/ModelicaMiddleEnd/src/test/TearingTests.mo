@@ -146,8 +146,9 @@ Iteration variables:
   sa
 
 Solved discrete variables:
-  startBack
   startFor
+  startBack
+  mode
 
 Torn equations:
   a := if pre(mode) == 1 or startFor then sa - 1 elseif pre(mode) == 3 or startBack then sa + 1 else 0
@@ -159,17 +160,15 @@ Continuous residual equations:
     Iteration variables: sa
 
 Discrete equations:
-  startBack := pre(mode) == 2 and sa < -1
   startFor := pre(mode) == 2 and sa > 1
+  startBack := pre(mode) == 2 and sa < -1
+  mode := if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 or startBack) and v < 0 then 3 else 2
 
 Jacobian:
   |1.0, 0.0, 0.0, - (if pre(mode) == 1 or startFor then 1.0 elseif pre(mode) == 3 or startBack then 1.0 else 0)|
-  |- 1.0, 1.0, 0.0, 0.0|
+  |-1.0, 1.0, 0.0, 0.0|
   |0.0, 0.0, 1.0, - (if pre(mode) == 1 or startFor then 0.0 elseif pre(mode) == 3 or startBack then 0.0 else f0)|
   |0.0, m, 1.0, 0.0|
-
---- Solved equation ---
-mode := if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 or startBack) and v < 0 then 3 else 2
 -------------------------------
 ")})));
 end Test2;

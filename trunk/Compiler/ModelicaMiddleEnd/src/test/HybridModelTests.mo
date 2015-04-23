@@ -30,17 +30,28 @@ package HybridModelTests
         FClassMethodTestCase(
             name="HybridModelTests.PreTest1",
             description="Testing of hybrid models with pre variable that don't need to be iterated in block",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Solved equation ---
 b := sin(time) >= 0
 
---- Solved equation ---
-i := if b then 1 else 0
+--- Unsolved mixed linear system (Block 1) of 2 variables ---
+Coefficient variability: constant
+Unknown continuous variables:
+  der(x)
 
---- Solved equation ---
-der(x) := if pre(i) == 0 then 0 else 1
+Solved discrete variables:
+  i
+
+Continuous residual equations:
+  der(x) = if pre(i) == 0 then 0 else 1
+    Iteration variables: der(x)
+
+Discrete equations:
+  i := if b then 1 else 0
+
+Jacobian:
+  |1.0|
 
 --- Solved equation ---
 der(y) := if i == 0 then 2 else 3
@@ -60,7 +71,6 @@ der(y) := if i == 0 then 2 else 3
         FClassMethodTestCase(
             name="HybridModelTests.PreTest2",
             description="Testing of hybrid models with pre variable that need to be iterated in block",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Solved equation ---
@@ -91,9 +101,9 @@ Jacobian:
         Real x, y, z;
         Integer i, j;
     equation
+        y = 3 * sin(time);
         x + pre(i) = y;
         i = if x >= 0 then 1 else 2;
-        y = 3 * sin(time);
         z + pre(i) + pre(j) = y;
         j = if x >= 0 and z>=0 then 1 else 2;
     
@@ -101,37 +111,25 @@ Jacobian:
         FClassMethodTestCase(
             name="HybridModelTests.PreTest3",
             description="Testing of hybrid models with pre variables that need to be iterated in two separate blocks",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Unsolved mixed linear system (Block 1) of 2 variables ---
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
 Coefficient variability: constant
-Unknown continuous variables:
+Torn variables:
   x
 
-Solved discrete variables:
-  i
-
-Continuous residual equations:
-  x + pre(i) = y
-    Iteration variables: x
-
-Discrete equations:
-  i := if x >= 0 then 1 else 2
-
-Jacobian:
-  |1.0|
-
---- Unsolved mixed linear system (Block 2) of 2 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+Iteration variables:
   z
 
 Solved discrete variables:
   j
+  i
+
+Torn equations:
+  x := - pre(i) + y
 
 Continuous residual equations:
   z + pre(i) + pre(j) = y
@@ -139,9 +137,11 @@ Continuous residual equations:
 
 Discrete equations:
   j := if x >= 0 and z >= 0 then 1 else 2
+  i := if x >= 0 then 1 else 2
 
 Jacobian:
-  |1.0|
+  |1.0, 0.0|
+  |0.0, 1.0|
 -------------------------------
 ")})));
     end PreTest3;
@@ -161,7 +161,6 @@ Jacobian:
         FClassMethodTestCase(
             name="HybridModelTests.PreTest4",
             description="Test interaction between continuous and discrete equations",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Unsolved mixed linear system (Block 1) of 2 variables ---
@@ -203,7 +202,6 @@ der(x_c) := - x_c + x_d
         FClassMethodTestCase(
             name="HybridModelTests.PreTest5",
             description="TODO: this model should give an error",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
@@ -249,7 +247,6 @@ Jacobian:
         FClassMethodTestCase(
             name="HybridModelTests.PreTest6",
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
@@ -295,7 +292,6 @@ Jacobian:
         FClassMethodTestCase(
             name="HybridModelTests.PreTest7",
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Unsolved mixed linear system (Block 1) of 2 variables ---
@@ -337,19 +333,22 @@ x_c := x_d
         FClassMethodTestCase(
             name="HybridModelTests.PreTest8",
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
---- Solved equation ---
-i := if time >= 3 then 1 else 0
-
---- Unsolved mixed linear system (Block 1) of 2 variables ---
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
 Coefficient variability: constant
-Unknown continuous variables:
+Torn variables:
+  der(x)
+
+Iteration variables:
   y
 
 Solved discrete variables:
   temp_1
+  i
+
+Torn equations:
+  der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
 
 Continuous residual equations:
   y = if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
@@ -357,12 +356,11 @@ Continuous residual equations:
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  i := if time >= 3 then 1 else 0
 
 Jacobian:
-  |1.0|
-
---- Solved equation ---
-der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
+  |1.0, 0.0|
+  |0.0, 1.0|
 -------------------------------
 ")})));
     end PreTest8;
@@ -380,7 +378,6 @@ der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
         FClassMethodTestCase(
             name="HybridModelTests.PreTest9",
             description="A test that simulates the common friction problems",
-            local_pre_handling=true,
             methodName="printDAEBLT",
             methodResult="
 --- Unsolved mixed linear system (Block 1) of 3 variables ---
@@ -405,5 +402,105 @@ Jacobian:
 -------------------------------
 ")})));
     end PreTest9;
+    
+    model WhenAndPreTest1
+        Real xx(start=2);
+        discrete Real x; 
+        discrete Real y; 
+        discrete Boolean w(start=true); 
+        discrete Boolean v(start=true); 
+        discrete Boolean z(start=true); 
+    equation
+        when sample(0,1) then 
+            x = pre(x) + 1.1; 
+            y = pre(y) + 1.1; 
+        end when; 
+    
+        der(xx) = -x; 
+    
+        when y > 2 and pre(z) then 
+            w = false; 
+        end when; 
+    
+        when x > 2 then 
+            z = false; 
+        end when; 
+    
+        when y > 2 and z then 
+            v = false; 
+        end when; 
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.WhenAndPreTest1",
+            description="Test complicated when and pre variable case",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  x
+
+Iteration variables:
+  y
+
+Solved discrete variables:
+  temp_1
+
+Torn equations:
+  x := if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x)
+
+Continuous residual equations:
+  y = if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
+    Iteration variables: y
+
+Discrete equations:
+  temp_1 := sample(0, 1)
+
+Jacobian:
+  |1.0, 0.0|
+  |0.0, 1.0|
+
+--- Solved equation ---
+der(xx) := - x
+
+--- Unsolved mixed linear system (Block 2) of 4 variables ---
+Coefficient variability: constant
+Unknown continuous variables:
+
+Solved discrete variables:
+  temp_2
+  w
+  temp_3
+  z
+
+Continuous residual equations:
+
+Discrete equations:
+  temp_2 := y > 2 and pre(z)
+  w := if temp_2 and not pre(temp_2) then false else pre(w)
+  temp_3 := x > 2
+  z := if temp_3 and not pre(temp_3) then false else pre(z)
+
+Jacobian:
+
+--- Unsolved mixed linear system (Block 3) of 2 variables ---
+Coefficient variability: constant
+Unknown continuous variables:
+
+Solved discrete variables:
+  temp_4
+  v
+
+Continuous residual equations:
+
+Discrete equations:
+  temp_4 := y > 2 and z
+  v := if temp_4 and not pre(temp_4) then false else pre(v)
+
+Jacobian:
+-------------------------------
+")})));
+    end WhenAndPreTest1;
 
 end HybridModelTests;

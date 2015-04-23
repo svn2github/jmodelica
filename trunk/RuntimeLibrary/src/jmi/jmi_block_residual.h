@@ -112,6 +112,7 @@ struct jmi_block_residual_t {
     int n;                         /**< \brief The number of real unknowns in the equation system */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
     int n_nr;                      /**< \brief The number of non-real unknowns in the equation system */
+    int n_sr;                      /**< \brief The number of solved reals in the equation system */
     int n_direct_nr;               /**< \brief The number of non-real unknowns that directly impacts the equation system */
     int n_direct_bool;             /**< \brief The number of booleans unknowns that directly impacts the equation system */
     int n_sw;                      /**< \brief The number of active switches in the equation system */
@@ -122,6 +123,7 @@ struct jmi_block_residual_t {
     jmi_real_t* sw_old;             /**< \brief  Saved states of the switches during passed event iterations. Used for infinite loop detection. */
     jmi_real_t* nr_old;             /**< \brief  Saved states of the booleans during passed event iterations. Used for infinite loop detection. */
     jmi_int_t* sw_index;            /**< \brief  Index of the active switches for this block. */
+    jmi_int_t* sr_vref;             /**< \brief  Value reference of the solved reals for this block. */
     jmi_int_t* sw_direct_index;     /**< \brief  Index of the direct switches for this block. */
     jmi_int_t* nr_index;            /**< \brief  Index of the non-reals in this block. */
     jmi_int_t* nr_pre_index;        /**< \brief  Index of the pre non-reals in this block. */
@@ -188,6 +190,7 @@ struct jmi_block_residual_t {
  * @param F A jmi_block_residual_func_t function
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
+ * @param n_sr Integer size of the block of solved real variables
  * @param n_nr Integer size of the block of non-real variables
  * @param n_dinr Integer size of the block of directly impacting non-real variables
  * @param n_as Integer size of the number of active switches
@@ -200,7 +203,7 @@ struct jmi_block_residual_t {
  * @param parent_index Index of parent block.
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -209,6 +212,7 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param F A jmi_block_residual_func_t function
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
+ * @param n_sr Integer size of the block of solved real variables
  * @param n_nr Integer size of the block of non-real variables
  * @param n_dinr Integer size of the block of directly impacting non-real variables
  * @param n_as Integer size of the number of active switches
@@ -221,7 +225,7 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param parent_index Index of parent block.
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
 
 
 /**
@@ -240,7 +244,7 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
  * @return Error code.
  */
 int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver_kind_t solver,
-                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_dinr, int n_as, int n_disw, int jacobian_variability, int index, jmi_string_t label);
+                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_as, int n_disw, int jacobian_variability, int index, jmi_string_t label);
                            
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
