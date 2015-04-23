@@ -303,7 +303,7 @@ abstract public class TestAnnotationizerHelper {
 		SourceRoot root;
 		
 		try {
-			root = ParserHandler.parseFile(new UtilInterface(opts), filePath);
+			root = ParserHandler.parseFile(UtilInterface.create(opts), filePath);
 		} catch (ParserException e) {
 			e.getProblem().setFileName(filePath);
 			CompilerException ce = new CompilerException();

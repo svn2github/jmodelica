@@ -49,6 +49,7 @@ InstPrimitiveClassDecl   : InstFullClassDecl;
 InstEnumClassDecl        : InstPrimitiveClassDecl;
 InstBuiltInClassDecl     : InstClassDecl;
 UnknownInstClassDecl     : InstFullClassDecl;
+BadInstClassDecl         : InstFullClassDecl;
 
 InstReplacingFullClassDecl        : InstFullClassDecl  ::= 
 	                                 <OriginalClassDecl:ClassDecl> 

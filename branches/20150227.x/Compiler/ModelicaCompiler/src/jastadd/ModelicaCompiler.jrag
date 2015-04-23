@@ -944,20 +944,7 @@ public class ModelicaCompiler {
      */
     private SourceRoot parseModel(String name) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        log.info("Parsing " + name + "...");
-        SourceRoot sr;
-        try {
-            sr = ParserHandler.parseFile(createUtilInterface(), name);
-        } catch (ParserException e) {
-            CompilerException ce = new CompilerException();
-            ce.addProblem(e.getProblem());
-            throw ce;
-        }
-        //loadOptions(sr);
-        for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-            sd.setFileName(name);
-        }
-        return sr;
+        return ParserHandler.parseModel(createUtilInterface(), name);
     }
 
 	/**
@@ -995,36 +982,7 @@ public class ModelicaCompiler {
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
-		SourceRoot sr = new SourceRoot(new Program());
-        createUtilInterface().transferRoot(sr);
-		for (String name : names) {
-		    File f = new File(name);
-		    String name_tmp = name;
-		    if (f.isDirectory()) 
-		        name_tmp = LibNode.packageFile(f);
-            SourceRoot sr_tmp = (name_tmp != null) ? parseModel(name_tmp) : null;
-            if (!options.getBooleanOption("ignore_within")) {
-                String lib = null;
-                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
-                    lib = sr_tmp.findOutermostLibraryDir();
-                else if (f.getName().equals(LibNode.PACKAGE_FILE))
-                    lib = f.getParent();
-                if (lib != null) {
-                    String type = f.isDirectory() ? "Directory" : "File";
-                    log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
-                    name = lib;
-                    f = new File(name);
-                }
-            }
-			if (f.isDirectory()) {
-				if (!sr.getProgram().getLibraryList().addLibrary(name)) 
-					log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
-			} else {
-				for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
-					sr.getProgram().addUnstructuredEntity(sd);
-			}
-		}
-		
+        SourceRoot sr = ParserHandler.parseModel(createUtilInterface(), names);
 		hookFilesParsed(sr);
 		ASTNode.endStep("parseModel()");
 		
@@ -1457,6 +1415,10 @@ public class ModelicaCompiler {
                 modelicapath = String.format("%s%sThirdParty%sMSL", jmodelicaHome, File.separator, File.separator);
         }
         options.addStringOption("MODELICAPATH", modelicapath);
+    }
+    
+    public OptionRegistry getOptions() {
+        return options;
     }
 
     protected void setArguments(Arguments programarguments) 

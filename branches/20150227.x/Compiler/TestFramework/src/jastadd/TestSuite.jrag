@@ -40,7 +40,7 @@ public class TestSuite implements GenericTestSuite {
         options.addStringOption("MODELICAPATH", modelica_path);
         ASTNode.log = new SysErrLogger();
         try {
-            sr = ParserHandler.parseFile(new UtilInterface(options), fileName);
+            sr = ParserHandler.parseFile(UtilInterface.create(options), fileName);
         } catch (Exception e) {
             asserter.fail("Error when parsing file: " + fileName + "\n" + e);
         }

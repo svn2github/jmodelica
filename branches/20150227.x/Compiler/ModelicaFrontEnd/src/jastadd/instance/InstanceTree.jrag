@@ -1089,7 +1089,7 @@ aspect InstanceTreeConstruction {
 	}
 
     public InstClassDecl ClassDecl.newInstClassDecl() {
-    	throw new UnsupportedOperationException();
+        return new UnknownInstClassDecl();
     }
     
     public Opt<InstExternal> FullClassDecl.newInstExternalOpt() {
@@ -1135,6 +1135,11 @@ aspect InstanceTreeConstruction {
     	InstEnumClassDecl ecd = new InstEnumClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt());
     	ecd.setLocation(this);
     	return ecd;
+    }
+    
+    public BadInstClassDecl BadClassDecl.newInstClassDecl() {
+        BadInstClassDecl ecd = new BadInstClassDecl(this, new Opt<InstConstraining>(), new InstMClass(), new Opt<InstExternal>());
+        return ecd;
     }
   
     public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRedeclareClassNode icr) {

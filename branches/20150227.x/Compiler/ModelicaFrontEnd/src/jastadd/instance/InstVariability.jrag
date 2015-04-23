@@ -158,6 +158,38 @@ aspect InstVariability {
     }
     eq InstRecord.defaultVariability() = fContinuous();
     
+    // Parameters variabilities also depend on binding expressions since its nice
+    // to propagate known values, these include: 
+    // * Structural parameters, marked during error checking.
+    // * Evaluate=true parameters
+    // * Final independent parameters
+    //
+    // Since this is used before/during error checks and depend on expressions
+    // we have to guard agains circularity.
+    private boolean InstAssignable.circularVariability = false;
+    
+    syn FTypePrefixVariability InstComponentDecl.bExpVariability() = parentBExpVariability().getPart(name());
+    eq InstArrayComponentDecl.bExpVariability() = parentBExpVariability();
+    eq InstAssignable.bExpVariability() {
+        FTypePrefixVariability v = super.bExpVariability();
+        if (!circularVariability && v.continuousVariability()) {
+            InstValueModification ivm = myInstValueMod();
+            if (ivm != null && !ivm.getFExp().type().isUnknown()) {
+                circularVariability = true;
+                v = ivm.getFExp().variability();
+                circularVariability = false;
+            }
+        }
+        return v;
+    }
+    
+    inh FTypePrefixVariability InstComponentDecl.parentBExpVariability();
+    inh FTypePrefixVariability InstExtends.parentBExpVariability();
+    eq Root.getChild().parentBExpVariability()  = fContinuous();
+    eq InstBaseNode.getChild().parentBExpVariability()  = fContinuous();
+    eq InstComponentDecl.getInstComponentDecl().parentBExpVariability() = bExpVariability();
+    eq InstComponentDecl.getInstExtends().parentBExpVariability() = bExpVariability();
+    
     /**
      * The variability of the surrounding component, if any (null otherwise).
      */
