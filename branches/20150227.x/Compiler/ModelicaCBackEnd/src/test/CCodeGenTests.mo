@@ -15993,9 +15993,7 @@ const int fmi_runtime_options_map_length = 27;
     __use_Brent_in_1d_25 = (JMI_TRUE);
     __use_jacobian_equilibration_26 = (JMI_FALSE);
     __use_newton_for_brent_27 = (JMI_FALSE);
-}
-
-void jmi_set_start_values_1_0(jmi_t* jmi) {
+    model_init_eval_parameters(jmi);
     _x_0 = (0.0);
 ")})));
 end TestRuntimeOptions1;
