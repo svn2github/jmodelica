@@ -33,7 +33,8 @@
 #define BRENT_INITIAL_STEP_FACTOR 0.001 /* Initial bracketing step as a fraction of nominal */
 #define BRENT_MAX_NEWTON 10 /* Max number of Newton iteration */
 #define BRENT_INF 1e20
- 
+#define BRENT_SIGNIFICANT_DECREASE 0.01 /* Value used in Newton for determining if the values should be used or not */
+
 /* Interface to the residual function that is compatible with Brent search.
    @param y - input - function argument
    @param f - output - residual value
@@ -271,8 +272,8 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     
     if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
     
-    /* If the function value was decreased during Newton, return successful together with the values, x, f and the last step */
-    if (JMI_ABS(f) < JMI_ABS(*f0)) {
+    /* If the function value was significantly decreased during Newton, return successful together with the values, x, f and the last step */
+    if (JMI_ABS(f) < JMI_ABS(*f0) * BRENT_SIGNIFICANT_DECREASE) {
         *x0 = x;
         *f0 = f;
         *d = delta >= 0 ? delta : -delta;
@@ -675,8 +676,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             }
 #endif
             return JMI_BRENT_SYSFUNC_FAIL;
-        }
-        else {
+        } else {
                 /* Write solution back to model just to make sure. In some cases x was not the last evaluations*/    
             block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
         }
