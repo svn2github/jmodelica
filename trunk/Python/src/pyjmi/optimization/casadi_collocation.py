@@ -5328,7 +5328,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         """
         if eqtype not in self.c_dests:
-            return (N.zeros((0,0), dtype=N.int), N.zeros(0),
+            return (N.zeros((0,0), dtype=N.int),
                 N.zeros(0, dtype=N.int), N.zeros(0, dtype=N.int))
         
         dest = self.c_dests[eqtype]
@@ -5524,6 +5524,7 @@ class OptimizationSolver(object):
         """
         self.collocator = collocator
         self.init_traj_set = False
+        self.solver_options_changed = False
 
     def set(self, name, value):
         """Set the value of the named parameter from the original OptimizationProblem"""
@@ -5570,6 +5571,7 @@ class OptimizationSolver(object):
                              solver_name)
         if solver_name == self.collocator.solver:
             self.collocator.set_solver_option(name, value)
+            self.solver_options_changed = True
 
     def set_init_traj(self, sim_result): 
         """ 
@@ -5593,6 +5595,10 @@ class OptimizationSolver(object):
 
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
+        if self.solver_options_changed:
+            self.collocator.solver_object.init()
+            self.solver_options_changed = False
+
         if self.collocator.warm_start:
             if not self.init_traj_set:
                 self.collocator.xx_init = self.collocator.primal_opt

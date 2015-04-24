@@ -51,3 +51,50 @@ def test_nlp_variable_indices():
             # at the discontinuity point, and back tracking uses the right
             tinds += 1
         assert N.max(N.abs(res[name][tinds] - xx[inds])) < 1e-12
+
+@testattr(casadi = True)
+def test_get_residuals():
+    file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
+    op = transfer_optimization_problem("TestResiduals", file_path)
+
+    n_e = 10
+    n_cp = 3
+
+    opts = op.optimize_options()
+    opts['n_e'] = n_e
+    opts['n_cp'] = n_cp
+    opts['variable_scaling'] = False
+
+    var_names = ('x', 'der(x)', 'w', 'u')
+    eqtypes   = ('initial', 'dae', 'path_eq', 'path_ineq', 'point_eq', 'point_ineq')
+
+    solver = op.prepare_optimization(options=opts)
+    collocator = solver.collocator
+
+    # Set random initial values
+    N.random.seed(486151)
+    initial = {}
+    for var in var_names:
+        initial[var] = N.random.rand(n_e+1, n_cp+1)
+
+        inds, t, i, k = solver.get_nlp_variable_indices(var)
+        collocator.xx_init[inds] = initial[var][i, k]
+    x, derx, w, u = initial['x'], initial['der(x)'], initial['w'], initial['u'] 
+
+    # Check that the residuals match the equations in the model
+    for eqtype in eqtypes:
+        r1, t, i, k = solver.get_residuals(eqtype, point='init', raw=True)
+        i, k = N.maximum(1, i), N.maximum(0, k)
+        if eqtype == 'initial':      r2 = x - 1 # x = 1;
+        elif eqtype == 'dae':        r2 = derx - u # der(x) = u;
+        elif eqtype == 'path_eq':    r2 = w - x**2 # w = x^2;
+        elif eqtype == 'path_ineq':  r2 = x - u**2 # x <= u^2;
+        elif eqtype == 'point_eq':
+            r2 = x - 2 # x(finalTime) = 2;
+            i, k = -1, -1
+        elif eqtype == 'point_ineq':
+            r2 = -5 - x # x(startTime) >= -5;
+            i, k = 1, 0
+        r2 = r2[i, k]
+        
+        assert N.max(N.abs(r2 - r1.ravel())) < 1e-12

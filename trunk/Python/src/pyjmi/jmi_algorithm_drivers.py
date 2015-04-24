@@ -1301,6 +1301,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             
         # set solver options
         self._set_solver_options()
+        self.nlp.solver_object.init()
 
         # record the initialization time including initialization within the algorithm object
         self.nlp.times['init'] = time.clock() - t0_init

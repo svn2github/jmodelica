@@ -27,3 +27,18 @@ equation
     w = -x + u_bf + p;
     der(x2) = x;
 end TestVariableTypes;
+
+optimization TestResiduals(startTime=0, finalTime=1)
+    Real x;
+    Real w;
+    input Real u;
+initial equation
+    x = 1;
+equation
+    der(x) = u; 
+constraint
+    w = x^2;
+    x <= u^2;
+    x(finalTime) = 2;
+    x(startTime) >= -5;
+end TestResiduals;
