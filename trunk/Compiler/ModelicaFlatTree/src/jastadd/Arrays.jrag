@@ -3366,6 +3366,7 @@ aspect ArrayHelpers {
 				}
 			} else {
 				for (int si : s.size) {
+					exps[i] = null;
 					size[i++] = si;
 				}
 			}
@@ -3376,6 +3377,7 @@ aspect ArrayHelpers {
 		 */
 		public void set(int i, int s) {
 			size[i] = s;
+			exps[i] = null;
 		}
 		
 		/**
@@ -3413,6 +3415,7 @@ aspect ArrayHelpers {
 				if (exps[i] != null) {
 					try {
 						size[i] = exps[i].ceval().intValue();
+						exps[i] = null;
 					} catch (ConstantEvaluationException e) {
 					}
 				}
@@ -3486,7 +3489,7 @@ aspect ArrayHelpers {
 			evaluate(i);
 			if (i < 0 || i >= size.length)
 				return UNKNOWN;
-			if (size[i] != Size.UNKNOWN) // We want to evaluate FUnknownSizeExps as well
+			if (exps[i] == null) // We want to evaluate FUnknownSizeExps as well
 				return size[i];
 			try {
 				return exps[i].ceval().intValue();
@@ -3499,7 +3502,7 @@ aspect ArrayHelpers {
 		 * Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {
-			return size[dim] != UNKNOWN || okExp(dim);
+			return size[dim] != UNKNOWN || okExp(exps[dim]);
 		}
 		
         /**
@@ -3509,16 +3512,8 @@ aspect ArrayHelpers {
             return okExp(e, false);
         }
         
-        protected boolean okExp(int i) {
-            return okExp(i, false);
-        }
-        
         protected static boolean okExp(FExp e, boolean allowUnknownSize) {
             return e != null && e.isValidExp(allowUnknownSize);
-        }
-        
-        protected boolean okExp(int i, boolean allowUnknownSize) {
-            return size[i] == Size.UNKNOWN && okExp(exps[i], allowUnknownSize);
         }
 		
 		/**
@@ -3614,7 +3609,7 @@ aspect ArrayHelpers {
          */
         public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
             evaluate(d);
-            return (okExp(d, true)) ?
+            return (okExp(exps[d], true)) ?
                     exps[d].createSizeFExp(varMap) :
                     super.createSizeFExp(d, varMap);
         }
@@ -3626,7 +3621,7 @@ aspect ArrayHelpers {
 		 */
 		public FExp createFExp(int d) {
 			evaluate(d);
-            return (okExp(d, true)) ?
+            return (okExp(exps[d], true)) ?
 					exps[d].createSizeFExp() : 
 					super.createFExp(d);
 		}
@@ -3688,7 +3683,7 @@ aspect ArrayHelpers {
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
 			evaluate(i);
-			return !okExp(i) ? super.flattenFSubscript(i, prefix) : 
+			return exps[i] == null ? super.flattenFSubscript(i, prefix) : 
 				new FExpSubscript(exps[i].flatten(prefix));
 		}
 
@@ -3697,7 +3692,7 @@ aspect ArrayHelpers {
          */
         public FSubscript rangeFSubscript(int i) {
             evaluate(i);
-            return !okExp(i) ? super.rangeFSubscript(i) : 
+            return !okExp(exps[i]) ? super.rangeFSubscript(i) : 
                 new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), exps[i].fullCopy()));
         }
 
@@ -3706,7 +3701,8 @@ aspect ArrayHelpers {
 		 */
 		protected String toString(int i) {
 			evaluate(i);
-            return !okExp(i) ? super.toString(i) : exps[i].prettyPrint("");
+			// TODO: use okExp() instead of "== null"?
+			return exps[i] == null ? super.toString(i) : exps[i].prettyPrint("");
 		}
 		
 		/**
@@ -4466,7 +4462,7 @@ aspect ArrayHelpers {
 		 */
 		protected Indices(Size size) {
 			ndims = size.ndims();
-			this.size = size.evaluated();
+			this.size = size;
 			hash = -1;
 			if (ndims < 4) {
 				int h = 0;

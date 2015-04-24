@@ -3418,7 +3418,7 @@ model RecordScalarize34
             variability_propagation=false,
             flatModel="
 fclass RecordTests.RecordScalarize34
- structural parameter Real r.n = 3 /* 3 */;
+ parameter Real r.n = 3 /* 3 */;
  Real r.x[1];
  Real r.x[2];
  Real r.x[3];

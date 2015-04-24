@@ -224,8 +224,8 @@ aspect ContentCheck {
 	}
 
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
-        if (!inFunction()) // Array sizes outside functions should be structural parameters
-            size().forceVariability(checkType, fStructParameter());
+        if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
+            getFArraySubscripts().forceVariability(checkType, fStructParameter());
         checkQuotedIdentifier(getComponentDecl(), getComponentDecl().getName().getID());
     }
 
@@ -755,18 +755,6 @@ aspect ForceVariability {
             icd.setVariabilityNotCalculated();
         }
         variability_computed = false;
-    }
-    
-    public void Size.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        
-    }
-    
-    public void MutableSize.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        for (FExp e : exps) {
-            if (e != null) {
-                e.forceVariability(checkType, v);
-            }
-        }
     }
     
 }

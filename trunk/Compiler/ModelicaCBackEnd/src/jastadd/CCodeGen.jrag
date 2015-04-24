@@ -1533,7 +1533,7 @@ aspect CCodeGen {
 			for (int i = 0; i < size.length; i++) {
 				if (i > 0)
 					str.print(", ");
-				if (size[i] != Size.UNKNOWN || exps[i] == null) {
+				if (exps[i] == null) {
 					str.print(size[i]);
 				} else {
                     FExp exp = exps[i];
@@ -1579,7 +1579,7 @@ aspect CCodeGen {
     public void MutableSize.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExp src) {
         if (isUnknown()) {
             for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
+                if (exps[i] != null) {
                     FExp exp = src.dynamicFExp(exps[i]);
                     p.printVarDecls(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
                 }
@@ -1596,7 +1596,7 @@ aspect CCodeGen {
     public void MutableSize.genTempVars_C(CodePrinter p, CodeStream str, String indent, FExp src) {
         if (isUnknown()) {
             for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
+                if (exps[i] != null) {
                     FExp exp = src.dynamicFExp(exps[i]);
                     p.printPreSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
                 }
@@ -1612,7 +1612,7 @@ aspect CCodeGen {
     public void MutableSize.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {
         if (isUnknown()) {
             for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
+                if (exps[i] != null) {
                     FExp exp = src.dynamicFExp(exps[i]);
                     p.printPostSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
                 }
