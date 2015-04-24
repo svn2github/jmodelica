@@ -23,6 +23,24 @@ from tests_jmodelica import testattr, get_files_path
 from pyjmi import transfer_optimization_problem
 from pyjmi.optimization.casadi_collocation import BlockingFactors
 
+def check_roundtrip(solver):
+    coll = solver.collocator
+    
+    xx_dests, xx_sources = coll.xx_dests, coll.xx_sources
+    for (var, dest) in xx_dests.iteritems():
+        inds = dest['inds']
+        assert N.all(xx_sources['var'][inds] == var)
+        assert N.all(xx_sources['i'][inds] == dest['i'])
+        assert N.all(xx_sources['k'][inds] == dest['k'])
+    
+    c_dests, c_sources = coll.c_dests, coll.c_sources
+    for eqtype in solver.get_constraint_types():
+        inds, t, i, k = solver.get_nlp_constraint_indices(eqtype)
+        assert N.all(c_sources['eqtype'][inds] == eqtype)
+        assert N.all(c_sources['eqind'][inds] == N.arange(inds.shape[1], dtype=N.int))
+        assert N.all(c_sources['i'][inds] == i[:, N.newaxis])
+        assert N.all(c_sources['k'][inds] == k[:, N.newaxis])
+
 @testattr(casadi = True)
 def test_nlp_variable_indices():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
@@ -39,6 +57,7 @@ def test_nlp_variable_indices():
 
     t = res['time']
     solver = res.get_solver()
+    check_roundtrip(solver)
     xx = solver.collocator.primal_opt
 
     var_names = ['x', 'x2', 'w', 'w2', 'u_cont', 'u_bf', 'p']
@@ -69,6 +88,7 @@ def test_get_residuals():
     eqtypes   = ('initial', 'dae', 'path_eq', 'path_ineq', 'point_eq', 'point_ineq')
 
     solver = op.prepare_optimization(options=opts)
+    check_roundtrip(solver)
     collocator = solver.collocator
 
     # Set random initial values
@@ -96,5 +116,29 @@ def test_get_residuals():
             r2 = -5 - x # x(startTime) >= -5;
             i, k = 1, 0
         r2 = r2[i, k]
-        
         assert N.max(N.abs(r2 - r1.ravel())) < 1e-12
+
+        dest = solver.collocator.c_dests[eqtype]
+        assert dest['n_eq'] == 1 # for this model
+        if eqtype in ('path_ineq', 'point_ineq'):
+            assert dest['kind'] == 'ineq'
+        else:
+            assert dest['kind'] == 'eq'
+
+@testattr(casadi = True)
+def test_find_nonfinite_jacobian_entry():
+    file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
+    op = transfer_optimization_problem("TestJacInf", file_path)
+
+    solver = op.prepare_optimization()
+    check_roundtrip(solver)
+    for point in ('init', 'opt'):
+        if point == 'opt':
+            solver.optimize()
+
+        entries = solver.find_nonfinite_jacobian_entries(point=point)
+        assert len(entries) == 1
+        (eqtype, eqind, var), = entries # get the only entry and unpack it
+        assert eqtype == 'dae'
+        assert var == op.getVariable('x2')
+        assert 'sqrt' in str(solver.get_equations(eqtype,eqind))

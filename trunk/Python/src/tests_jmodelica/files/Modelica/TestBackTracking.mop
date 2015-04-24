@@ -42,3 +42,12 @@ constraint
     x(finalTime) = 2;
     x(startTime) >= -5;
 end TestResiduals;
+
+optimization TestJacInf(objectiveIntegrand = u^2 + x2^2)
+    Real x1;
+    Real x2;
+    input Real u;
+equation
+    der(x1) = u - x1;
+    der(x2) = x1 - sqrt(x2);
+end TestJacInf;
