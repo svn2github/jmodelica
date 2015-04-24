@@ -142,3 +142,32 @@ def test_find_nonfinite_jacobian_entry():
         assert eqtype == 'dae'
         assert var == op.getVariable('x2')
         assert 'sqrt' in str(solver.get_equations(eqtype,eqind))
+
+@testattr(casadi = True)
+def test_duals():
+    file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
+    op = transfer_optimization_problem("TestDuals", file_path)
+
+    n_e = 10
+    n_cp = 1
+
+    opts = op.optimize_options()
+    opts['n_e'] = n_e
+    opts['n_cp'] = n_cp
+
+    solver = op.prepare_optimization(options=opts)
+    check_roundtrip(solver)
+    solver.optimize()
+
+    h = 1.0/n_e
+
+    # Strange things seem to happen with the first two entries in the duals;
+    # skip them in the comparison.
+    # Interaction with initial constraints?
+    l, t, i, k = solver.get_constraint_duals('path_ineq')
+    l0 = t*h
+    assert N.max(N.abs((l.ravel()-l0)[2:])) < 1e-12
+
+    l, t, i, k = solver.get_bound_duals('y')
+    l0 = (t-2)*h
+    assert N.max(N.abs((l.ravel()-l0)[2:])) < 1e-12
