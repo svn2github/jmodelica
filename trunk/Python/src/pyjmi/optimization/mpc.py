@@ -714,14 +714,9 @@ class MPC(object):
         """
         Method that extracts and sets the parameter values from op.
         """
-        self.op.calculateValuesForDependentParameters()
-        
-        par_vals = [self.op.get_attr(par, "_value")
-                        for par in self.collocator.mvar_vectors['p_fixed']]
-        par_vals = N.array(par_vals).reshape(-1)
+        par_vals = self.collocator._recalculate_model_parameters()
         if self.p_fixed is None:
             self.p_fixed = par_vals
-        self.collocator._par_vals[0:self.collocator.n_var['p_fixed']] = par_vals
 
     def update_state(self, x_k=None, start_time=None):
         """ 

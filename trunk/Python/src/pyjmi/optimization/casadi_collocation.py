@@ -1875,6 +1875,18 @@ class LocalDAECollocator(CasadiCollocator):
             assert(len(self.named_pp) == n_pp)
             self.named_pp = casadi.vertcat(self.named_pp)
 
+    def _recalculate_model_parameters(self):
+        """
+        Recalculate the model's parameters and set them in self._par_vals
+        """
+        self.op.calculateValuesForDependentParameters()
+        
+        pp_unvarying_vals = [self.op.get_attr(par, "_value")
+                             for par in self.mvar_vectors['p_fixed']]
+        pp_unvarying_vals = N.array(pp_unvarying_vals).reshape(-1)
+        self._par_vals[0:self.n_var['p_fixed']] = pp_unvarying_vals
+        return pp_unvarying_vals
+
     def _get_z_l0(self,i,k,with_der=True):
         """
         Returns a vector with all the NLP variables at a collocation point.
@@ -5530,15 +5542,11 @@ class OptimizationSolver(object):
 
     def set(self, name, value):
         """Set the value of the named parameter from the original OptimizationProblem"""
-        if name not in self.collocator.var_indices:
-            raise KeyError("No parameter " + repr(name) + " in the optimization problem.")
-        self.collocator._par_vals[self.collocator.var_indices[name]] = value
+        return self.collocator.op.set(name, value)
 
     def get(self, name):
         """Get the value of the named parameter from the original OptimizationProblem"""
-        if name not in self.collocator.var_indices:
-            raise KeyError("No parameter " + repr(name) + " in the optimization problem.")
-        return self.collocator._par_vals[self.collocator.var_indices[name]]
+        return self.collocator.op.get(name)
 
     def set_external_variable_data(self, name, data):
         """
@@ -5597,6 +5605,8 @@ class OptimizationSolver(object):
 
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
+        self.collocator._recalculate_model_parameters()
+
         if self.solver_options_changed:
             self.collocator.solver_object.init()
             self.solver_options_changed = False

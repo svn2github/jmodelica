@@ -14,3 +14,11 @@ optimization Integrator(objectiveIntegrand = x^2)
 equation
     der(x) = xdot;
 end Integrator;
+
+optimization TestDependentParameter
+    parameter Real p = 1;
+    parameter Real q = -p;
+    Real x(start = 1, fixed = true);
+equation
+    der(x) = q*x;
+end TestDependentParameter;

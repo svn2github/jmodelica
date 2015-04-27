@@ -120,7 +120,7 @@ def test_set_init_traj():
 
 def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate_algebraics=False,
         result_mode='collocation_points'):
-    file_path = os.path.join(get_files_path(), 'Modelica', 'DisturbedIntegrator.mop')
+    file_path = os.path.join(get_files_path(), 'Modelica', 'TestWarmStart.mop')
     
     if eliminate_algebraics:
         compiler_options={'equation_sorting':True, 'automatic_tearing':False}
@@ -191,3 +191,26 @@ def test_change_eliminated_input_element_interpolation():
 @testattr(casadi = True)
 def test_change_eliminated_input_mesh_points():
     test_change_eliminated_input(result_mode = 'mesh_points')
+
+@testattr(casadi = True)
+def test_update_dependent_parameter():
+    file_path = os.path.join(get_files_path(), 'Modelica', 'TestWarmStart.mop')
+    op = transfer_optimization_problem("TestDependentParameter", file_path)
+
+    solver = op.prepare_optimization()
+    res = solver.optimize()
+
+    assert solver.get('p') ==  1
+    assert solver.get('q') == -1
+    assert N.abs(res.final('x') - N.exp(-1)) < 1e-8
+
+    solver.set('p', 2)
+
+    assert solver.get('p') ==  2
+    assert solver.get('q') == -2
+
+    res = solver.optimize()
+
+    assert solver.get('p') ==  2
+    assert solver.get('q') == -2
+    assert N.abs(res.final('x') - N.exp(-2)) < 1e-8
