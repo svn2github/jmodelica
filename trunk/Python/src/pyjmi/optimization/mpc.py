@@ -836,6 +836,7 @@ class MPC(object):
         if self._sample_nbr == 2:            
             self.collocator.warm_start = True
             self._set_warm_start_options()
+            self.collocator.solver_object.init()
             self.collocator._init_and_set_solver_inputs()
                     
         #~ # Set next initial guess and initiate the warm start        

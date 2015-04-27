@@ -600,11 +600,7 @@ class CasadiCollocator(object):
         self.H.init()
         
     def _init_and_set_solver_inputs(self):
-        # Circumvent CasADi bug, see #4313
-        if self.explicit_hessian:
-            self._calc_Lagrangian_Hessian()
-            self.solver_object.setOption("hess_lag", self.H)
-        self.solver_object.init()
+        # self.solver_object.init() # Already done in LocalDAECollocationAlg constructor
 
         # Primal initial guess and parameter values
         self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
@@ -622,14 +618,6 @@ class CasadiCollocator(object):
         self.solver_object.setInput(self.get_xx_ub(), casadi.NLP_SOLVER_UBX)
 
         # Bounds on the constraints
-        n_h = self.get_equality_constraint().numel()
-        hublb = n_h * [0]
-        n_g = self.get_inequality_constraint().numel()
-        gub = n_g * [0]
-        glb = n_g * [self.LOWER]
-        self.glub = hublb + gub
-        self.gllb = hublb + glb
-
         self.solver_object.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
         self.solver_object.setInput(self.glub, casadi.NLP_SOLVER_UBG)
 
@@ -4324,6 +4312,15 @@ class LocalDAECollocator(CasadiCollocator):
         self.xx_ub = xx_ub
         self.xx_init = xx_init
 
+        # Create and store bounds on the constraints
+        n_h = self.get_equality_constraint().numel()
+        hublb = n_h * [0]
+        n_g = self.get_inequality_constraint().numel()
+        gub = n_g * [0]
+        glb = n_g * [self.LOWER]
+        self.glub = hublb + gub
+        self.gllb = hublb + glb
+
     def _assemble_back_tracking_info(self):
         # Finalize and sort recorded tracking info
         for dests in (self.c_dests, self.xx_dests):
@@ -4398,6 +4395,11 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Expand to SX
         self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
+
+        # Circumvent CasADi bug, see #4313
+        if self.explicit_hessian:
+            self._calc_Lagrangian_Hessian()
+            self.solver_object.setOption("hess_lag", self.H)        
 
     def get_equality_constraint(self):
         return self.c_e

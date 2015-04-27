@@ -41,6 +41,10 @@ def check_roundtrip(solver):
         assert N.all(c_sources['i'][inds] == i[:, N.newaxis])
         assert N.all(c_sources['k'][inds] == k[:, N.newaxis])
 
+def check_solution(solver):
+    violations = solver.get_nlp_residuals()
+    assert N.max(N.abs(violations)) < 1e-12
+
 @testattr(casadi = True)
 def test_nlp_variable_indices():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
@@ -58,6 +62,7 @@ def test_nlp_variable_indices():
     t = res['time']
     solver = res.get_solver()
     check_roundtrip(solver)
+    check_solution(solver)
     xx = solver.collocator.primal_opt
 
     var_names = ['x', 'x2', 'w', 'w2', 'u_cont', 'u_bf', 'p']
@@ -118,6 +123,13 @@ def test_get_residuals():
         r2 = r2[i, k]
         assert N.max(N.abs(r2 - r1.ravel())) < 1e-12
 
+        v1, t, i, k = solver.get_residuals(eqtype, point='init', raw=False)
+        if eqtype in ('path_ineq', 'point_ineq'):
+            v2 = N.maximum(0, r2)
+        else:
+            v2 = r2
+        assert N.max(N.abs(v2 - v1.ravel())) < 1e-12
+
         dest = solver.collocator.c_dests[eqtype]
         assert dest['n_eq'] == 1 # for this model
         if eqtype in ('path_ineq', 'point_ineq'):
@@ -158,6 +170,7 @@ def test_duals():
     solver = op.prepare_optimization(options=opts)
     check_roundtrip(solver)
     solver.optimize()
+    check_solution(solver)
 
     h = 1.0/n_e
 
@@ -171,3 +184,19 @@ def test_duals():
     l, t, i, k = solver.get_bound_duals('y')
     l0 = (t-2)*h
     assert N.max(N.abs((l.ravel()-l0)[2:])) < 1e-12
+
+@testattr(casadi = True)
+def test_get_equations():
+    file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
+    op = transfer_optimization_problem("TestEquations", file_path)
+
+    eqkeys = {'initial':'sin', 'dae':'der', 'path_eq':'sqrt', 'path_ineq':'cos',
+        'point_eq':'tan', 'point_ineq':'exp'}
+
+    solver = op.prepare_optimization()
+    check_roundtrip(solver)
+
+    for (eqtype, key) in eqkeys.iteritems():
+        eqs = solver.get_equations(eqtype)
+        assert len(eqs) == 1
+        assert key in repr(eqs[0])

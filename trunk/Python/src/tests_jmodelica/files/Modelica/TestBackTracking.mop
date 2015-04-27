@@ -43,6 +43,21 @@ constraint
     x(startTime) >= -5;
 end TestResiduals;
 
+optimization TestEquations()
+    Real x;
+    Real w;
+    input Real u;
+initial equation
+    x = sin(u);
+equation
+    der(x) = u; 
+constraint
+    w = sqrt(x);
+    x <= cos(u);
+    x(finalTime) = tan(u(finalTime));
+    x(startTime) >= exp(u(finalTime));
+end TestEquations;
+
 optimization TestJacInf(objectiveIntegrand = u^2 + x2^2)
     Real x1;
     Real x2;
