@@ -35,23 +35,18 @@ package HybridModelTests
 --- Solved equation ---
 b := sin(time) >= 0
 
---- Unsolved mixed linear system (Block 1) of 2 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
   der(x)
 
 Solved discrete variables:
   i
 
-Continuous residual equations:
-  der(x) = if pre(i) == 0 then 0 else 1
-    Iteration variables: der(x)
+Continuous equations:
+  der(x) := if pre(i) == 0 then 0 else 1
 
 Discrete equations:
   i := if b then 1 else 0
-
-Jacobian:
-  |1.0|
 
 --- Solved equation ---
 der(y) := if i == 0 then 2 else 3
@@ -76,23 +71,18 @@ der(y) := if i == 0 then 2 else 3
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Unsolved mixed linear system (Block 1) of 2 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
   x
 
 Solved discrete variables:
   i
 
-Continuous residual equations:
-  x + pre(i) = y
-    Iteration variables: x
+Continuous equations:
+  x := - pre(i) + y
 
 Discrete equations:
   i := if x >= 0 then 1 else 2
-
-Jacobian:
-  |1.0|
 -------------------------------
 ")})));
     end PreTest2;
@@ -116,32 +106,22 @@ Jacobian:
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
-Coefficient variability: constant
-Torn variables:
+--- Pre propagation mixed system (Block 1) of 4 variables ---
+Continuous variables:
   x
-
-Iteration variables:
   z
 
 Solved discrete variables:
   j
   i
 
-Torn equations:
+Continuous equations:
   x := - pre(i) + y
-
-Continuous residual equations:
-  z + pre(i) + pre(j) = y
-    Iteration variables: z
+  z := - pre(i) + (- pre(j)) + y
 
 Discrete equations:
   j := if x >= 0 and z >= 0 then 1 else 2
   i := if x >= 0 then 1 else 2
-
-Jacobian:
-  |1.0, 0.0|
-  |0.0, 1.0|
 -------------------------------
 ")})));
     end PreTest3;
@@ -163,23 +143,18 @@ Jacobian:
             description="Test interaction between continuous and discrete equations",
             methodName="printDAEBLT",
             methodResult="
---- Unsolved mixed linear system (Block 1) of 2 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
   x_d
 
 Solved discrete variables:
   temp_1
 
-Continuous residual equations:
-  x_d = if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
-    Iteration variables: x_d
+Continuous equations:
+  x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
 
 Discrete equations:
   temp_1 := sample(0, 1)
-
-Jacobian:
-  |1.0|
 
 --- Solved equation ---
 der(x_c) := - x_c + x_d
@@ -249,30 +224,20 @@ Jacobian:
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
-Coefficient variability: constant
-Torn variables:
-  x_d
-
-Iteration variables:
+--- Pre propagation mixed system (Block 1) of 3 variables ---
+Continuous variables:
   x_c
+  x_d
 
 Solved discrete variables:
   temp_1
 
-Torn equations:
+Continuous equations:
+  x_c := pre(x_d)
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
-
-Continuous residual equations:
-  0 = - x_c + pre(x_d)
-    Iteration variables: x_c
 
 Discrete equations:
   temp_1 := sample(0, 1)
-
-Jacobian:
-  |1.0, 0.0|
-  |0.0, 1.0|
 -------------------------------
 ")})));
     end PreTest6;
@@ -294,23 +259,18 @@ Jacobian:
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Unsolved mixed linear system (Block 1) of 2 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
   x_d
 
 Solved discrete variables:
   temp_1
 
-Continuous residual equations:
-  x_d = if temp_1 and not pre(temp_1) then pre(x_c) + 1 else pre(x_d)
-    Iteration variables: x_d
+Continuous equations:
+  x_d := if temp_1 and not pre(temp_1) then pre(x_c) + 1 else pre(x_d)
 
 Discrete equations:
   temp_1 := sample(0, 1)
-
-Jacobian:
-  |1.0|
 
 --- Solved equation ---
 x_c := x_d
@@ -335,32 +295,22 @@ x_c := x_d
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
-Coefficient variability: constant
-Torn variables:
-  der(x)
-
-Iteration variables:
+--- Pre propagation mixed system (Block 1) of 4 variables ---
+Continuous variables:
   y
+  der(x)
 
 Solved discrete variables:
   temp_1
   i
 
-Torn equations:
+Continuous equations:
+  y := if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
   der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
-
-Continuous residual equations:
-  y = if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
-    Iteration variables: y
 
 Discrete equations:
   temp_1 := sample(0, 1)
   i := if time >= 3 then 1 else 0
-
-Jacobian:
-  |1.0, 0.0|
-  |0.0, 1.0|
 -------------------------------
 ")})));
     end PreTest8;
@@ -436,37 +386,25 @@ Jacobian:
             description="Test complicated when and pre variable case",
             methodName="printDAEBLT",
             methodResult="
---- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
-Coefficient variability: constant
-Torn variables:
-  x
-
-Iteration variables:
+--- Pre propagation mixed system (Block 1) of 3 variables ---
+Continuous variables:
   y
+  x
 
 Solved discrete variables:
   temp_1
 
-Torn equations:
+Continuous equations:
+  y := if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
   x := if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x)
-
-Continuous residual equations:
-  y = if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
-    Iteration variables: y
 
 Discrete equations:
   temp_1 := sample(0, 1)
 
-Jacobian:
-  |1.0, 0.0|
-  |0.0, 1.0|
-
 --- Solved equation ---
 der(xx) := - x
 
---- Unsolved mixed linear system (Block 2) of 4 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+--- Pre propagation mixed system (Block 2) of 4 variables ---
 
 Solved discrete variables:
   temp_2
@@ -474,7 +412,6 @@ Solved discrete variables:
   temp_3
   z
 
-Continuous residual equations:
 
 Discrete equations:
   temp_2 := y > 2 and pre(z)
@@ -482,25 +419,62 @@ Discrete equations:
   temp_3 := x > 2
   z := if temp_3 and not pre(temp_3) then false else pre(z)
 
-Jacobian:
-
---- Unsolved mixed linear system (Block 3) of 2 variables ---
-Coefficient variability: constant
-Unknown continuous variables:
+--- Pre propagation mixed system (Block 3) of 2 variables ---
 
 Solved discrete variables:
   temp_4
   v
 
-Continuous residual equations:
 
 Discrete equations:
   temp_4 := y > 2 and z
   v := if temp_4 and not pre(temp_4) then false else pre(v)
-
-Jacobian:
 -------------------------------
 ")})));
     end WhenAndPreTest1;
+    
+    model NoResTest1
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o;
+        algorithm
+            assert(i1 == 0, "Oh, no!");
+            assert(i2 == 0, "Oh, no!");
+            o := 3.14 / i1 + 42 / i2;
+            annotation(Inline=false);
+        end F;
+        Real next, x;
+    initial equation
+        pre(next) = 0;
+    equation
+        when time >= pre(next) then
+            next = pre(next) + 1;
+        end when;
+        x = F(next, pre(next));
+        
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.NoResTest1",
+            description="Verify that no residuals are added to the block even though it contains continuous equations",
+            methodName="printDAEBLT",
+            methodResult="
+--- Pre propagation mixed system (Block 1) of 3 variables ---
+Continuous variables:
+  next
+  x
+
+Solved discrete variables:
+  temp_1
+
+Continuous equations:
+  next := if temp_1 and not pre(temp_1) then pre(next) + 1 else pre(next)
+  x := HybridModelTests.NoResTest1.F(next, pre(next))
+
+Discrete equations:
+  temp_1 := time >= pre(next)
+-------------------------------
+")})));
+    end NoResTest1;
 
 end HybridModelTests;
