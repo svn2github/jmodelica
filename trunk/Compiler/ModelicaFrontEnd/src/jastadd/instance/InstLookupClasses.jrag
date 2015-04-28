@@ -399,7 +399,7 @@ aspect InstLookupClasses {
             return res;
         if (getInstConstraining().getInstNode().memberInstClass(name).successful())
             return res;
-        return InstLookupResult.<InstClassDecl>constrained(this);
+        return InstLookupResult.<InstClassDecl>constrained(res, this);
     }
 
     syn InstLookupResult<InstClassDecl> InstNode.memberInstClass(String name) = InstLookupResult.notFound();
@@ -485,14 +485,25 @@ aspect InstLookupClasses {
     eq InstBuiltInClassDecl.matches(String str) = name().equals(str); 
     eq InstBaseClassDecl.matches(String str)    = name().equals(str);
 
+
+    eq InstClassAccess.hasLookupError() {
+        myInstClassDecl();
+        return lookupError;
+    }
+
+    private boolean InstClassAccess.lookupError = false;
+
     // This attribute should to be circular due to lookup in import-statements
     // If the lookup is triggered by lookup of A in 'extends A', and
     // there are import statements, evaluation might get back to the 
     // ClassAccess A when when looking up the ClassAccess to import.
     // See NameTests.ImportTest1 for an example. 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
-    syn lazy InstClassDecl InstClassAccess.myInstClassDecl() circular [unknownInstClassDecl()] =
-        lookupInstClass(name()).target(INST_UNKNOWN_CLASS, this);
+    syn lazy InstClassDecl InstClassAccess.myInstClassDecl() circular [unknownInstClassDecl()] {
+        InstLookupResult<InstClassDecl> res = lookupInstClass(name());
+        lookupError = res.isError();
+        return res.target(INST_UNKNOWN_CLASS, this);
+    }
     eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
     eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
     syn InstClassDecl InstFunctionCall.myInstClassDecl() = getName().myInstClassDecl(); 

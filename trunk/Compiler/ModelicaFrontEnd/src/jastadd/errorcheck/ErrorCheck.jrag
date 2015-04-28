@@ -1105,19 +1105,25 @@ aspect InstanceErrorCheck {
             errorChecked = true;
             // Check that the function exists
             InstCallable func = getName().myInstCallable();
-            if (!func.isCallable()) {
-                // Report that function does not exist
-                String name = getName().name();
+            String name = getName().name();
+            if (getName().hasLookupError() || func.isUnknown()) {
+                // Function does not exist or can't be used due to constraining classes, or name refers to component
+                getName().classLookupError("function", name + "()");
+            } else if (!func.isCallable()) {
                 if (func.isExternalObject()) {
+                    // Something is be wrong with constructor
                     name += ".constructor";
                     func = func.asInstClassDecl().myConstructor();
-                    if (func.isUnknown()) 
+                    if (func.isUnknown()) {
+                        // The constructor does not exist
                         error("Cannot find function declaration for " + name + "()");
-                } else if (func.isUnknown()) {
-                    getName().classLookupError("function", name + "()");
-                } 
-                if (!func.isUnknown())
+                    }
+                    // Constructor exists, but is not a function - delegate to default case
+                }
+                if (!func.isUnknown()) {
+                    // Not a function
                     error("The class " + name + " is not a function");
+                }
             } else if (!func.isRecord() && !func.isCompleteFunction()) {
                 // TODO: add check if function is partial?
                 if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func.asInstNode()))

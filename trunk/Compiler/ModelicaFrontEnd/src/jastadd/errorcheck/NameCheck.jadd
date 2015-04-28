@@ -62,17 +62,16 @@ aspect InstanceNameCheck {
     }
 
     public void InstComponentAccess.nameCheck(ErrorCheckType checkType) {
-        //log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
-        if (myInstComponentDecl().isUnknown()) 
-            lookupInstComponent(name()).error(this, "component", qualifiedName());
-        if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
-            error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
-        }
+        nameCheckComponentAccess(checkType);
     }
 
     public void InstComponentArrayAccess.nameCheck(ErrorCheckType checkType) {
+        nameCheckComponentAccess(checkType);
+    }
+
+    public void InstAccess.nameCheckComponentAccess(ErrorCheckType checkType) {
         //log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
-        if (myInstComponentDecl().isUnknown()) 
+        if (hasLookupError()) 
             lookupInstComponent(name()).error(this, "component", qualifiedName());
         if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
             error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
@@ -81,8 +80,7 @@ aspect InstanceNameCheck {
 
     public void InstClassAccess.nameCheck(ErrorCheckType checkType) {
         //log.debug("InstClassAccess.nameCheck(" + checkType + "): " + name() + " " + myInstClassDecl().name());
-        if (myInstClassDecl().isUnknown()) {
-            //getParent().dumpTree("");
+        if (hasLookupError()) {
             classLookupError("class", qualifiedName());
         }
     }

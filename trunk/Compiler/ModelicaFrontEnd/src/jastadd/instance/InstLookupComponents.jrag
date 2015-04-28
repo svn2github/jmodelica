@@ -45,8 +45,17 @@ aspect InstLookupComponents {
          * 
          * Includes the declaration with the limiting constrainedby clause.
          */
-        public static <T extends InstNode> InstLookupResult<T> constrained(InstNode constr) {
-            return new Constrained(constr);
+        public static <T extends InstNode> InstLookupResult<T> constrained(T target, InstNode constr) {
+            return new Constrained(target, constr);
+        }
+
+        /**
+         * Indicates that the target was found, but not accessible due to a constrainedby clause.
+         * 
+         * Includes the declaration with the limiting constrainedby clause.
+         */
+        public static <T extends InstNode> InstLookupResult<T> constrained(InstLookupResult<T> res, InstNode constr) {
+            return res.isError() ? res : new Constrained(res.target(), constr);
         }
 
         /**
@@ -60,6 +69,13 @@ aspect InstLookupComponents {
          * Is this a "not found" result?
          */
         public boolean isNotFound() {
+            return false;
+        }
+
+        /**
+         * Is this a result that should generate an error?
+         */
+        public boolean isError() {
             return false;
         }
 
@@ -116,6 +132,10 @@ aspect InstLookupComponents {
             public boolean isNotFound() {
                 return true;
             }
+
+            public boolean isError() {
+                return true;
+            }
         }
 
         private static class Found<T extends InstNode> extends InstLookupResult<T> {
@@ -138,11 +158,16 @@ aspect InstLookupComponents {
             }
         }
 
-        private static class Constrained<T extends InstNode> extends InstLookupResult<T> {
+        private static class Constrained<T extends InstNode> extends Found<T> {
             private InstNode constr;
 
-            public Constrained(T constr) {
+            public Constrained(T target, InstNode constr) {
+                super(target);
                 this.constr = constr;
+            }
+
+            public boolean isError() {
+                return true;
             }
 
             public void error(ASTNode src, String kind, String name) {
@@ -333,7 +358,7 @@ aspect InstLookupComponents {
             return res;
         if (getInstConstraining().getInstNode().memberInstComponent(name).successful())
             return res;
-        return InstLookupResult.<InstComponentDecl>constrained(this);
+        return InstLookupResult.<InstComponentDecl>constrained(res, this);
     }
 
     syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, int ndims) {
@@ -441,13 +466,40 @@ aspect InstLookupComponents {
     eq InstComponentDecl.matches(String str) = name().equals(str);
     eq InstForIndex.matches(String str)      = getInstPrimitive().matches(str);
 
+
+    /**
+     * Check if this access has a lookup error.
+     */
+    syn boolean InstAccess.hasLookupError()      = false;
+    eq InstAmbiguousAccess.hasLookupError()      = true;
+    eq InstAmbiguousArrayAccess.hasLookupError() = true;
+    eq InstGlobalAccess.hasLookupError()         = getInstAccess().hasLookupError();
+    eq InstDot.hasLookupError()                  = getInstAccess(getNumInstAccess() - 1).hasLookupError();
+    eq InstComponentAccess.hasLookupError() {
+        myInstComponentDecl();
+        return lookupError;
+    }
+    eq InstComponentArrayAccess.hasLookupError() {
+        myInstComponentDecl();
+        return lookupError;
+    }
+
+    private boolean InstComponentAccess.lookupError      = false;
+    private boolean InstComponentArrayAccess.lookupError = false;
+
     syn InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
     eq InstDot.myInstComponentDecl()                       = getLastInstAccess().myInstComponentDecl();
     eq InstGlobalAccess.myInstComponentDecl()              = getInstAccess().myInstComponentDecl();
-    syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() = 
-        lookupInstComponent(name()).target(INST_UNKNOWN_COMPONENT, this);
-    syn lazy InstComponentDecl InstComponentArrayAccess.myInstComponentDecl() =
-        lookupInstComponent(name()).target(INST_UNKNOWN_COMPONENT, this);
+    syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() { 
+        InstLookupResult<InstComponentDecl> res = lookupInstComponent(name());
+        lookupError = res.isError();
+        return res.target(INST_UNKNOWN_COMPONENT, this);
+    }
+    syn lazy InstComponentDecl InstComponentArrayAccess.myInstComponentDecl() {
+        InstLookupResult<InstComponentDecl> res = lookupInstComponent(name());
+        lookupError = res.isError();
+        return res.target(INST_UNKNOWN_COMPONENT, this);
+    }
 	syn InstComponentDecl FInstAccessExp.myInstComponentDecl()   = getInstAccess().myInstComponentDecl();
     syn InstComponentDecl FIdUseInstAccess.myInstComponentDecl() = getInstAccess().myInstComponentDecl();
 

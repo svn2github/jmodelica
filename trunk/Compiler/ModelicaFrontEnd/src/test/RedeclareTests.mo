@@ -3444,6 +3444,35 @@ end RedeclareTests.RedeclareTest44;
 end RedeclareTest44;
 
 
+model RedeclareTest45
+    package A
+    end A;
+    
+    package B
+        model C
+            Real x = time;
+        end C;
+    end B;
+    
+    replaceable package D = B constrainedby A;
+    
+    D.C c;
+    Real y = c.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest45",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 3459, column 7:
+  Cannot use class C, because it is not present in constraining type of declaration 'replaceable package D = B constrainedby A'
+")})));
+end RedeclareTest45;
+
+
+
 model RedeclareElement1
   model A
     replaceable model B
