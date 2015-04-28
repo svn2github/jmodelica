@@ -436,6 +436,8 @@ aspect DynamicStateSelect{
             return false;
         if (!coefficient.continuous)
             return false;
+        if (getVariable().isTemporary())
+            return false;
         FAbstractVariable.StateSelect stateSelect = getVariable().stateSelection();
         if (stateSelect == FRealVariable.StateSelect.ALWAYS)
             return false;

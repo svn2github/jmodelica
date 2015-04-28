@@ -980,6 +980,95 @@ a1 := - a2 * a3 + 1
         
     end StateSelectBias;
     
+    model TempVar1
+        function F
+            input Real a;
+            input Real b;
+            input Real c;
+            output Real d;
+        algorithm
+            d := a * b + c * a;
+        end F;
+        // a1 a2 tmp
+        // +  +  + 
+        Real a1;
+        Real a2;
+        Real b;
+    equation
+        der(a1) = b;
+        der(a2) = b;
+        0 = F(a1 * a2, a1, a2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="DynamicStates_TempVar1",
+            description="Test so that temp variables doesn't form dynamic state sets",
+            dynamic_states=true,
+            methodName="printDAEBLT",
+            methodResult="
+--- Dynamic state block ---
+  --- States: a1 ---
+    --- Torn system (Block 1(a1).0) of 1 iteration variables and 1 solved variables ---
+    Torn variables:
+      temp_1
+
+    Iteration variables:
+      a2 ()
+
+    Torn equations:
+      temp_1 := ds(0, a1) * ds(0, a2)
+
+    Residual equations:
+      0 = temp_1 * ds(0, a1) + ds(0, a2) * temp_1
+        Iteration variables: a2
+    -------------------------------
+  --- States: a2 ---
+    --- Torn system (Block 1(a2).0) of 1 iteration variables and 1 solved variables ---
+    Torn variables:
+      temp_1
+
+    Iteration variables:
+      a1 ()
+
+    Torn equations:
+      temp_1 := ds(0, a1) * ds(0, a2)
+
+    Residual equations:
+      0 = temp_1 * ds(0, a1) + ds(0, a2) * temp_1
+        Iteration variables: a1
+    -------------------------------
+
+--- Torn linear system (Block 2) of 1 iteration variables and 3 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  b
+  dynDer(a1)
+  _der_temp_1
+
+Iteration variables:
+  dynDer(a2)
+
+Torn equations:
+  b := dynDer(a2)
+  dynDer(a1) := b
+  _der_temp_1 := ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2)
+
+Residual equations:
+  0 = temp_1 * dynDer(a1) + _der_temp_1 * ds(0, a1) + (ds(0, a2) * _der_temp_1 + dynDer(a2) * temp_1)
+    Iteration variables: dynDer(a2)
+
+Jacobian:
+  |-1.0, 0.0, 0.0, 1.0|
+  |-1.0, 1.0, 0.0, 0.0|
+  |0.0, - ds(0, a2), 1.0, - ds(0, a1)|
+  |0.0, - temp_1, - ds(0, a1) - ds(0, a2), - temp_1|
+
+--- Solved equation ---
+der(_ds.0.s0) := dsDer(0, 0)
+-------------------------------
+")})));
+    end TempVar1;
+
     package Examples
         model Pendulum
             parameter Real L = 1 "Pendulum length";
