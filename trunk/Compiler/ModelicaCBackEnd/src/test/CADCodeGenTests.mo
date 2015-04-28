@@ -5463,4 +5463,74 @@ equation
 ")})));
 end IfEqu4;
 
+model IfEqu5
+    Real x;
+    parameter Real y(fixed=false,start=3);
+initial equation
+    if time >= 1 then
+        (x,) = dummyFunc(1);
+    else
+        (x,) = dummyFunc(2);
+    end if;
+equation
+    when time > 1 then
+        x = 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="IfEqu5",
+            description="Code generation for if equation, initial equation",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            generate_ode_jacobian=true,
+            template="
+$CAD_ode_derivatives$
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+/******** Declarations *******/
+
+jmi_real_t** dz = jmi->dz;
+    /*********** ODE section ***********/
+    /*********** Real outputs **********/
+    /*** Integer and boolean outputs ***/
+    /********* Other variables *********/
+    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[0];
+        _x_0 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        (*res)[0] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, AD_WRAP_LITERAL(1), pre_x_0) - (_x_0);
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+
+")})));
+end IfEqu5;
+
 end CADCodeGenTests;

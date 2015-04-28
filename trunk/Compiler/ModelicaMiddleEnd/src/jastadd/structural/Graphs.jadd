@@ -901,6 +901,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
             Collection<E> depends = Collections.emptyList();
+            if (graph.isInitialSystem())
+                return depends;
             for (FVariable var : equation.getEquation().discretePreVariables()) {
                 FAbstractVariable nonPre = var.myNonPreVariable();
                 if (nonPre.isUnknown())
@@ -915,7 +917,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             if (!equation.isMeta()) {
                 V var = equation.getMatching();
                 FVariable fVar = var.getVariable();
-                if (fVar.isDiscrete()) {
+                if (fVar.isDiscrete() && !fVar.isPreVariable()) {
                     FAbstractVariable preVar = fVar.myPreVariable();
                     for (FIdUseExp exp : preVar.uses()) {
                         FAbstractEquation fae = exp.myFEquation().outermostEnclosingEquation();
@@ -923,9 +925,18 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                             continue;
                         Collection<E> eqns = graph.getEquations(fae);
                         if (eqns != null) {
-                            if (depends.isEmpty())
-                                depends = new ArrayList<E>();
-                            depends.addAll(eqns);
+//                            boolean add = false;
+//                            for (E eqn : eqns) {
+//                                if (eqn.getVariable(var.getName()) != null) {
+//                                    add = true;
+//                                    break;
+//                                }
+//                            }
+//                            if (add) {
+                                if (depends.isEmpty())
+                                    depends = new ArrayList<E>();
+                                depends.addAll(eqns);
+//                            }
                         }
                     }
                 }
