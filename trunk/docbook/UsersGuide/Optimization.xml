@@ -877,8 +877,9 @@ Returns::
         <programlisting>solver = model.prepare_optimization(options=opts)</programlisting>
 
         <para>Alternatively, the solver can be retrieved from an existing
-        optimization result, as <literal>solver =
-        res.get_solver()</literal>.</para>
+        optimization result, as <literal>solver = res.get_solver()</literal>.
+        Manipulating the solver (e.g. setting parameters) may affect the
+        original optimization problem object and vice versa.</para>
 
         <para>The obtained solver object represents the discretized problem,
         and can be used to solve it using its own <literal>optimize</literal>
