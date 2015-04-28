@@ -3341,10 +3341,21 @@ aspect ConstantEvaluation {
 
     public void FExp.flushUnknownSizes() {
         // Flush so that getArray() is cleared for unknown sizes, and then recalculate size and make sure it is evaluated
-        if (size().isUnknown()) {
+        if (size().flushUnknownSizes()) {
             flushCache();
             size().isUnknown();
         }
+    }
+    
+    public boolean Size.flushUnknownSizes() {
+        return false;
+    }
+    
+    public boolean MutableSize.flushUnknownSizes() {
+        for (FExp e : exps)
+            if (e != null)
+                return true;
+        return false;
     }
 
     public void FFunctionCall.flushUnknownSizes() {}
@@ -4178,6 +4189,7 @@ aspect ConstantEvaluation {
         int res = EVAL_CONT;
         for (Index i : ivals.indices()) {
             getIndex().setEvaluationValue(defaultVariableEvaluator(), ivals.getCell(i));
+            getForStmts().prepareForFunctionEval();
             res = getForStmts().evaluateList(evaluator);
             if (res != EVAL_CONT) {
                 break;
@@ -4205,6 +4217,7 @@ aspect ConstantEvaluation {
 	  CValueArray ivals = getFExp().ceval(evaluator).array();
 	  for (Index j : ivals.indices()) {
 		  var.setEvaluationValue(evaluator, ivals.getCell(j));
+		  stmts.prepareForFunctionEval();
 		  int res = last ? stmts.evaluateList(evaluator) : 
 				  indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
 		  if (res != FStatement.EVAL_CONT) {

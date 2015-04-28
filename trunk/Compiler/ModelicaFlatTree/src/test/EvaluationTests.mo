@@ -4048,4 +4048,60 @@ end EvaluationTests.ParameterMinMax8;
 end ParameterMinMax8;
 
 
+model ForLoopSizeVary1
+    function f
+        input Real x;
+        output Real y = 0;
+      algorithm
+        for i in 1:3 loop
+            for j in 1:i-1 loop
+                y := y + j;
+            end for;
+        end for;
+    end f;
+    
+    constant Real y1 = f(1);
+    Real y2 = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForLoopSizeVary1",
+            description="Varying sizes in for loops",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.ForLoopSizeVary1
+ constant Real y1 = 0;
+ constant Real y2 = 0;
+end EvaluationTests.ForLoopSizeVary1;
+")})));
+end ForLoopSizeVary1;
+
+model ForLoopSizeVary2
+    function f
+        input Real x;
+        output Real y = 0;
+      algorithm
+        for i in 1:3 loop
+            for j in 1:3-i loop
+                y := y + j;
+            end for;
+        end for;
+    end f;
+    
+    constant Real y1 = f(1);
+    Real y2 = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForLoopSizeVary2",
+            description="Varying sizes in for loops",
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.ForLoopSizeVary2
+ constant Real y1 = 9.0;
+ constant Real y2 = 9.0;
+end EvaluationTests.ForLoopSizeVary2;
+")})));
+end ForLoopSizeVary2;
+
 end EvaluationTests;
