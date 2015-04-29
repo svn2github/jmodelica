@@ -117,10 +117,6 @@ aspect InstLookupClasses {
     eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
     eq Root.getChild().lookupInstClassFromTop(String name)     = InstLookupResult.notFound();
 
-    syn boolean InstClassDecl.isRedeclared()      = false;
-    eq InstReplacingShortClassDecl.isRedeclared() = true;
-    eq InstReplacingFullClassDecl.isRedeclared()  = true;
-
     eq SourceRoot.getChild().lookupInstClass(String name) = InstLookupResult.notFound();
     eq FlatRoot.getChild().lookupInstClass(String name)   = InstLookupResult.notFound();
 
@@ -273,9 +269,49 @@ aspect InstLookupClasses {
     eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name)    = getTopInstAccess().lookupInstClass(name);
     eq InstArrayAccess.getExpandedSubscripts().lookupInstClass(String name)  = getTopInstAccess().lookupInstClass(name);
 
-	syn InstLookupResult<InstClassDecl> InstAccess.qualifiedLookupInstClass(String name) = InstLookupResult.notFound();	
-	eq InstClassAccess.qualifiedLookupInstClass(String name)                             = myInstClassDecl().memberInstClass(name);
-	eq InstComponentAccess.qualifiedLookupInstClass(String name)                         = myInstComponentDecl().memberInstClass(name);
+
+    syn InstLookupResult<InstClassDecl> InstAccess.qualifiedLookupInstClass(String name) {
+        InstLookupResult<InstClassDecl> res = qualifiedLookupInstClassUnconstrained(name);
+        if (res.successful()) { // TODO: limit to only replaceable and replaced components and their children?
+            InstNode constr = lookupConstrainingInstNode();
+            if (constr != null && !constr.memberInstClass(name).successful())
+                return InstLookupResult.<InstClassDecl>constrained(res, closestConstrainingDecl());
+        }
+        return res;
+    }
+
+    syn InstLookupResult<InstClassDecl> InstAccess.qualifiedLookupInstClassUnconstrained(String name) = 
+        InstLookupResult.notFound();
+    eq InstClassAccess.qualifiedLookupInstClassUnconstrained(String name)                                 = 
+        myInstClassDecl().memberInstClass(name);
+    eq InstComponentAccess.qualifiedLookupInstClassUnconstrained(String name)                             = 
+        lookupArrayElement(myInstComponentDecl()).memberInstClass(name);
+
+
+    eq InstClassAccess.lookupConstrainingInstNode() = 
+        inQualified() ? lookupConstrainingInstClass(name()) : lookupConstrainingInstClassHelper(null, name());
+
+    inh InstClassDecl InstAccess.lookupConstrainingInstClass(String name);
+    eq BaseNode.getChild().lookupConstrainingInstClass(String name) = null;
+    eq InstDot.getInstAccess(int i).lookupConstrainingInstClass(String name) =
+        lookupConstrainingInstClassHelper((i == 0) ? null : getInstAccessNoListTrans(i - 1), name);
+
+    syn InstClassDecl InstAccess.lookupConstrainingInstClassHelper(InstAccess part, String name) {
+        InstLookupResult<InstClassDecl> res;
+        if (part == null) {
+            res = lookupInstClass(name);
+        } else {
+            InstNode parent = part.lookupConstrainingInstNode();
+            res = (parent != null) ? parent.memberInstClass(name) : InstLookupResult.<InstClassDecl>notFound();
+        }
+        if (!res.successful())
+            return null;
+        InstClassDecl icd = res.target();
+        if (!icd.hasInstConstraining() || !icd.isReplaceable())
+            return icd;
+        return (InstClassDecl) icd.getInstConstraining().getInstNode();
+    }
+
 
     syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassInSurrounding(String name)     = lookupInstClass(name);
     eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name)                    = 
@@ -343,9 +379,13 @@ aspect InstLookupClasses {
         return myInstClass().lookupInstClassInSurrounding(name);
     }
 
+    syn boolean InstClassDecl.isRedeclaredNonSimple()      = false;
+    eq InstReplacingShortClassDecl.isRedeclaredNonSimple() = true;
+    eq InstReplacingFullClassDecl.isRedeclaredNonSimple()  = true;
+
     syn InstLookupResult<InstClassDecl> InstComponentDecl.superLookupInstClassInComponent(String name) {
         // TODO: Why do we do this? Seems to be needed, as tests fail without it
-        if (myInstClass().isRedeclared())
+        if (myInstClass().isRedeclaredNonSimple())
             return myInstClass().lookupInstClassInInstClassRedeclare(name);
         
         for (InstImport ii : instImports()) {
@@ -385,53 +425,34 @@ aspect InstLookupClasses {
     }
 
 
-    /**
-     * Check if constraining class/component (if any) has the given class.
-     */
-    syn InstLookupResult<InstClassDecl> InstNode.constrainMemberInstClass(String name, InstClassDecl icd) = 
-            constrainMemberInstClass(name, InstLookupResult.found(icd));
-
-    /**
-     * Check if constraining class/component (if any) has the given class.
-     */
-    syn InstLookupResult<InstClassDecl> InstNode.constrainMemberInstClass(String name, InstLookupResult<InstClassDecl> res) {
-        if (!res.successful() || !hasInstConstraining() || !isReplaceable())
-            return res;
-        if (getInstConstraining().getInstNode().memberInstClass(name).successful())
-            return res;
-        return InstLookupResult.<InstClassDecl>constrained(res, this);
-    }
-
     syn InstLookupResult<InstClassDecl> InstNode.memberInstClass(String name) = InstLookupResult.notFound();
 
     eq InstFullClassDecl.memberInstClass(String name) {
         for (InstClassDecl icd : instClassDecls()) 
             if (icd.matches(name)) 
-                return constrainMemberInstClass(name, findInnerClassIfAny(icd));
+                return InstLookupResult.found(findInnerClassIfAny(icd));
         
         for (InstExtends ie : instExtends()) {
             InstLookupResult<InstClassDecl> res = ie.memberInstClass(name);
             if (res.successful())
-                return constrainMemberInstClass(name, res);
+                return res;
         }
         
         return InstLookupResult.notFound();
     }
 
-    eq InstShortClassDecl.memberInstClass(String name)       = 
-        constrainMemberInstClass(name, getInstExtends(0).memberInstClass(name));
-    eq InstSimpleShortClassDecl.memberInstClass(String name) = 
-        constrainMemberInstClass(name, actualInstClass().memberInstClass(name));
+    eq InstShortClassDecl.memberInstClass(String name)       = getInstExtends(0).memberInstClass(name);
+    eq InstSimpleShortClassDecl.memberInstClass(String name) = actualInstClass().memberInstClass(name);
 
     eq InstExtends.memberInstClass(String name) {
         for (InstClassDecl icd : instClassDecls()) 
             if (icd.matches(name)) 
-                return constrainMemberInstClass(name, icd);
+                return InstLookupResult.found(icd);
         
         for (InstExtends ie : instExtends()) {
             InstLookupResult<InstClassDecl> res = ie.memberInstClass(name);
             if (res.successful())
-                return constrainMemberInstClass(name, res);
+                return res;
         }
         
         return InstLookupResult.notFound();
@@ -456,12 +477,12 @@ aspect InstLookupClasses {
         } else {
             for (InstClassDecl icd : instClassDecls()) 
                 if (icd.matches(name)) 
-                    return constrainMemberInstClass(name, findInnerClassIfAny(icd));
+                    return InstLookupResult.found(findInnerClassIfAny(icd));
             
             for (InstExtends ie : instExtends()) {
                 InstLookupResult<InstClassDecl> res = ie.memberInstClass(name);
                 if (res.successful())
-                    return constrainMemberInstClass(name, res);
+                    return res;
             }
             
             return InstLookupResult.notFound();

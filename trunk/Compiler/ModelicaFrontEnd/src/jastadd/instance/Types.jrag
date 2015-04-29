@@ -24,99 +24,85 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect Types { 
 
-   syn String InstNode.className() = "";
-   syn String InstComponentDecl.className() = myInstClass().name();
+    syn String InstNode.className() = "";
+    syn String InstComponentDecl.className() = myInstClass().name();
 
-   // The double dispatch pattern applied to subtype testing.
-   syn boolean InstNode.subType(InstNode t)              = subType(t, true);
-   syn boolean InstNode.subType(InstNode t, boolean top) = false;
+    // The double dispatch pattern applied to subtype testing.
+    syn boolean InstNode.subType(InstNode t)              = subType(t, true);
+    syn boolean InstNode.subType(InstNode t, boolean top) = false;
 
-   syn boolean InstNode.superTypeCompositeType(InstComposite subType, boolean top)          = false;
-   syn boolean InstNode.superTypeArrayType(InstArrayComponentDecl subType, boolean top)     = false;
-   syn boolean InstNode.superTypeRecordType(InstRecord subType, boolean top)                = false;
-   syn boolean InstNode.superTypeClassType(InstRoot subType, boolean top)                   = false;
-   syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) = false;
-   
-   eq InstComposite.subType(InstNode t, boolean top)          = t.superTypeCompositeType(this, top);
-   eq InstArrayComponentDecl.subType(InstNode t, boolean top) = t.superTypeArrayType(this, top);
-   eq InstRecord.subType(InstNode t, boolean top)             = t.superTypeRecordType(this, top);
-   eq InstPrimitive.subType(InstNode t, boolean top)          = t.superTypePrimitiveComponentType(this, top);
+    syn boolean InstNode.superTypeCompositeType(InstComposite subType, boolean top)          = false;
+    syn boolean InstNode.superTypeArrayType(InstArrayComponentDecl subType, boolean top)     = false;
+    syn boolean InstNode.superTypeRecordType(InstRecord subType, boolean top)                = false;
+    syn boolean InstNode.superTypeClassType(InstRoot subType, boolean top)                   = false;
+    syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) = false;
 
-   eq InstComposite.superTypeCompositeType(InstComposite subType, boolean top)               = compareCompositeTypes(this, subType, top);
-   eq InstArrayComponentDecl.superTypeArrayType(InstArrayComponentDecl subType, boolean top) = compareCompositeTypes(this, subType, top);
-   eq InstRecord.superTypeRecordType(InstRecord subType, boolean top)                        = compareCompositeTypes(this, subType, top);
-   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType, boolean top)          = true;
-   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType, boolean top)    = true;
-   eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) {
-       if (subType == this) 
-           return true;
-       return subType.baseClassName().equals(baseClassName()) && 
-               (subType.ndims() == ndims() || top && subType.ndims() == 0);
-   }
-   
-   public static boolean InstComponentDecl.compareCompositeTypes(InstComponentDecl superType, InstComponentDecl subType, boolean top) {
-       if (subType == superType || subType.myInstClass().isUnknown()) 
-           return true;
-       
-       if (superType.isArray() != subType.isArray()) {
-           if (top && superType.isArray()) 
-               return compareCompositeTypes(superType.getInstComponentDecl(0), subType, true);
-           else
-               return false;
-       }
-       
-       if (superType.isArray()) {
-           List<InstComponentDecl> superComponents = superType.getInstComponentDecls();
-           List<InstComponentDecl> subComponents = subType.getInstComponentDecls();
-           for (int i = 0, n = Math.min(superComponents.getNumChild(), subComponents.getNumChild()); i < n; i++)
-               if (!subComponents.getChild(i).subType(superComponents.getChild(i)))
-                   return false;
-       } else {
-           // Check that all elements (here: components) in superType are in subType 
-           for (InstNode superTypeComponentInst : superType.containedInstComponents()) {
-               // TODO: memberComponentInst should be switched for something in the general name analysis framework
-               HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
-               if (set.size() != 1)
-                   return false;
-               InstNode subTypeComponentInst = set.iterator().next();
-               if (!subTypeComponentInst.subType(superTypeComponentInst))
-                   return false;
-           }
-       }
-       return true;
-   }
+    eq InstComposite.subType(InstNode t, boolean top)          = t.superTypeCompositeType(this, top);
+    eq InstArrayComponentDecl.subType(InstNode t, boolean top) = t.superTypeArrayType(this, top);
+    eq InstRecord.subType(InstNode t, boolean top)             = t.superTypeRecordType(this, top);
+    eq InstPrimitive.subType(InstNode t, boolean top)          = t.superTypePrimitiveComponentType(this, top);
 
-  // Rudimentary name analysis framework for looking up instances
-  syn lazy HashSet<InstNode> InstNode.memberComponentInst(String name) {
-     HashSet<InstNode> set = new HashSet<InstNode>(4);
-     for (InstNode node : containedInstComponents()) {
-     	// This is to take InstExtends into account
-     if (node.name().equals(name))
-        set.add(node);
-     }
-     return set;
-  }
+    eq InstComposite.superTypeCompositeType(InstComposite subType, boolean top)               = compareCompositeTypes(this, subType, top);
+    eq InstArrayComponentDecl.superTypeArrayType(InstArrayComponentDecl subType, boolean top) = compareCompositeTypes(this, subType, top);
+    eq InstRecord.superTypeRecordType(InstRecord subType, boolean top)                        = compareCompositeTypes(this, subType, top);
+    // TODO: return true for more cases involving unknown to reduce secondary errors?
+    eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType, boolean top)          = true;
+    eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType, boolean top)    = true;
+    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) {
+        if (subType == this) 
+            return true;
+        return subType.baseClassName().equals(baseClassName()) && 
+                (subType.ndims() == ndims() || top && subType.ndims() == 0);
+    }
 
-  public static final Comparator<InstComponentDecl> InstComponentDecl.NAME_COMPARATOR = 
-	  new Comparator<InstComponentDecl>() {
-	  public int compare(InstComponentDecl o1, InstComponentDecl o2) {
-		  return o1.name().compareTo(o2.name());
-	  }
-  };
+    public static boolean InstComponentDecl.compareCompositeTypes(InstComponentDecl superType, InstComponentDecl subType, boolean top) {
+        if (subType == superType || subType.myInstClass().isUnknown()) 
+            return true;
+        
+        if (superType.isArray() != subType.isArray()) {
+            if (top && superType.isArray()) 
+                return compareCompositeTypes(superType.getInstComponentDecl(0), subType, true);
+            else
+                return false;
+        }
+        
+        if (superType.isArray()) {
+            List<InstComponentDecl> superComponents = superType.getInstComponentDecls();
+            List<InstComponentDecl> subComponents = subType.getInstComponentDecls();
+            for (int i = 0, n = Math.min(superComponents.getNumChild(), subComponents.getNumChild()); i < n; i++)
+                if (!subComponents.getChild(i).subType(superComponents.getChild(i)))
+                    return false;
+        } else {
+            // Check that all elements (here: components) in superType are in subType 
+            for (InstComponentDecl superTypeChild : superType.containedInstComponents()) {
+                InstComponentDecl subTypeChild = subType.memberInstComponent(superTypeChild.name()).targetOrNull();
+                if (subTypeChild == null || !subTypeChild.subType(superTypeChild.constrainingInstComponentDecl()))
+                    return false;
+            }
+        }
+        return true;
+    }
 
-  syn lazy SortedSet<InstComponentDecl> InstNode.containedInstComponents() {
-	  SortedSet<InstComponentDecl> s = new TreeSet<InstComponentDecl>(InstComponentDecl.NAME_COMPARATOR);
-	  for (InstNode node : getInstExtendss())
-		  s.addAll(node.containedInstComponents());
-	  for (InstComponentDecl node : getInstComponentDecls())
-		  s.add(node);
-	  return s;
-  }
-  
-  
-  syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
-  	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
-  
+    public static final Comparator<InstComponentDecl> InstComponentDecl.NAME_COMPARATOR = 
+        new Comparator<InstComponentDecl>() {
+        public int compare(InstComponentDecl o1, InstComponentDecl o2) {
+            return o1.name().compareTo(o2.name());
+        }
+    };
+
+    syn lazy SortedSet<InstComponentDecl> InstNode.containedInstComponents() {
+        SortedSet<InstComponentDecl> s = new TreeSet<InstComponentDecl>(InstComponentDecl.NAME_COMPARATOR);
+        for (InstNode node : getInstExtendss())
+            s.addAll(node.containedInstComponents());
+        for (InstComponentDecl node : getInstComponentDecls())
+            s.add(node);
+        return s;
+    }
+
+
+    syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
+        hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
+
 }
 
 aspect ConnectorTypes {
