@@ -214,80 +214,25 @@ aspect InstLookupComponents {
 
     eq InstDefaultRecordModification.getChild().lookupInstComponent(String name) = lookupInstComponentForBindingExp(name);
 
-
-    syn InstLookupResult<InstComponentDecl> InstAccess.qualifiedLookupInstComponent(String name) {
-        InstLookupResult<InstComponentDecl> res = qualifiedLookupInstComponentUnconstrained(name);
-        if (res.successful()) { // TODO: limit to only replaceable and replaced components and their children?
-            InstNode constr = lookupConstrainingInstNode();
-            if (constr != null && !constr.memberInstComponent(name).successful())
-                return InstLookupResult.<InstComponentDecl>constrained(res, closestConstrainingDecl());
-        }
-        return res;
-    }
-
-    syn InstLookupResult<InstComponentDecl> InstAccess.qualifiedLookupInstComponentUnconstrained(String name) = 
-        InstLookupResult.notFound();
-    eq InstClassAccess.qualifiedLookupInstComponentUnconstrained(String name)                                 = 
-        myInstClassDecl().memberInstComponent(name);
-    eq InstComponentAccess.qualifiedLookupInstComponentUnconstrained(String name)                             = 
-        lookupArrayElement(myInstComponentDecl()).memberInstComponent(name);
-    eq InstComponentArrayAccess.qualifiedLookupInstComponentUnconstrained(String name)                        = 
-        lookupArrayElement(myInstComponentDecl()).memberInstComponent(name);
-
-    syn InstNode InstAccess.lookupConstrainingInstNode()     = null;
-    eq InstComponentAccess.lookupConstrainingInstNode()      = 
-        lookupArrayElement(inQualified() ? lookupConstrainingInstComponent(name()) : lookupConstrainingInstComponentHelper(null, name()));
-    eq InstComponentArrayAccess.lookupConstrainingInstNode() = 
-        lookupArrayElement(inQualified() ? lookupConstrainingInstComponent(name()) : lookupConstrainingInstComponentHelper(null, name()));
-
-    inh InstComponentDecl InstAccess.lookupConstrainingInstComponent(String name);
-    eq BaseNode.getChild().lookupConstrainingInstComponent(String name)          = null;
-    eq InstDot.getInstAccess(int i).lookupConstrainingInstComponent(String name) =
-        lookupConstrainingInstComponentHelper((i == 0) ? null : getInstAccessNoListTrans(i - 1), name);
-
-    syn InstComponentDecl InstAccess.lookupConstrainingInstComponentHelper(InstAccess part, String name) {
-        InstLookupResult<InstComponentDecl> res;
-        if (part == null) {
-            res = lookupInstComponent(name);
-        } else {
-            InstNode parent = part.lookupConstrainingInstNode();
-            res = (parent != null) ? parent.memberInstComponent(name) : InstLookupResult.<InstComponentDecl>notFound();
-        }
-        if (!res.successful())
-            return null;
-        InstComponentDecl icd = res.target();
-        if (!icd.isReplaceable())
-            return icd;
-        return icd.constrainingInstComponentDecl();
-    }
-
-    syn InstNode InstAccess.closestConstrainingDecl()     = null;
-    eq InstClassAccess.closestConstrainingDecl()          = 
-        myInstClassDecl().isConstrained() ? myInstClassDecl().myConstrainingDecl() : findClosestConstrainingInstNode();
-    eq InstComponentAccess.closestConstrainingDecl()      = 
-        myInstComponentDecl().isConstrained() ? myInstComponentDecl().myConstrainingDecl() : findClosestConstrainingInstNode();
-    eq InstComponentArrayAccess.closestConstrainingDecl() = 
-        myInstComponentDecl().isConstrained() ? myInstComponentDecl().myConstrainingDecl() : findClosestConstrainingInstNode();
-
-    inh InstNode InstAccess.findClosestConstrainingInstNode();
-    eq InstDot.getInstAccess(int i).findClosestConstrainingInstNode() = 
-        (i == 0) ? null : getInstAccessNoListTrans(i - 1).closestConstrainingDecl();
-    eq BaseNode.getChild().findClosestConstrainingInstNode()          = null;
-
-    syn InstNode InstNode.myConstrainingDecl()                = this;
-    eq InstReplacingFullClassDecl.myConstrainingDecl()        = getOriginalInstClass();
-    eq InstReplacingShortClassDecl.myConstrainingDecl()       = getOriginalInstClass();
-    eq InstReplacingSimpleShortClassDecl.myConstrainingDecl() = getOriginalInstClass();
-    eq InstReplacingComposite.myConstrainingDecl()            = getOriginalInstComponent();
-    eq InstReplacingRecord.myConstrainingDecl()               = getOriginalInstComponent();
-    eq InstReplacingPrimitive.myConstrainingDecl()            = getOriginalInstComponent();
-
+    syn InstLookupResult<InstComponentDecl> InstAccess.qualifiedLookupInstComponent(String name) = InstLookupResult.notFound();
+    eq InstClassAccess.qualifiedLookupInstComponent(String name)                                 = 
+        myInstClassDecl().memberInstComponentConstrained(name);
+    eq InstComponentAccess.qualifiedLookupInstComponent(String name)                             = 
+        lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
+    eq InstComponentArrayAccess.qualifiedLookupInstComponent(String name)                        = 
+        lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
     inh InstLookupResult<InstComponentDecl> InstAccess.localLookupInstComponent(String name);
     eq InstRoot.getChild().localLookupInstComponent(String name)          = InstLookupResult.notFound();
     eq FlatRoot.getChild().localLookupInstComponent(String name)          = InstLookupResult.notFound();
     eq InstClassDecl.getChild().localLookupInstComponent(String name)     = memberInstComponent(name);
     eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
+
+//	inh InstLookupResult<InstComponentDecl> InstDefaultRecordModification.lookupInstComponentForDefaultArg(String name);
+//    eq InstRoot.getChild().lookupInstComponentForDefaultArg(String name)          = InstLookupResult.notFound();
+//    eq FlatRoot.getChild().lookupInstComponentForDefaultArg(String name)          = InstLookupResult.notFound();
+//    eq InstClassDecl.getChild().lookupInstComponentForDefaultArg(String name)     = genericLookupInstComponent(name);
+//    eq InstComponentDecl.getChild().lookupInstComponentForDefaultArg(String name) = genericLookupInstComponent(name);
 
     syn InstLookupResult<InstComponentDecl> InstValueModification.lookupInstComponentForBindingExp(String name) = lookupInstComponent(name);
     eq InstDefaultRecordModification.lookupInstComponentForBindingExp(String name)                              = 
@@ -399,6 +344,22 @@ aspect InstLookupComponents {
     eq InstComponentDecl.genericLookupInstConstant(String name)                             = myInstClass().lookupInstConstant(name);
     eq InstExtends.genericLookupInstConstant(String name)                                   = myInstClass().lookupInstConstant(name);
 
+    /**
+     * Check if constraining class/component (if any) has the given component.
+     */
+    syn InstLookupResult<InstComponentDecl> InstNode.constrainMemberInstComponent(String name, InstComponentDecl icd) = 
+        constrainMemberInstComponent(name, InstLookupResult.found(icd));
+
+    /**
+     * Check if constraining class/component (if any) has the given component.
+     */
+    syn InstLookupResult<InstComponentDecl> InstNode.constrainMemberInstComponent(String name, InstLookupResult<InstComponentDecl> res) {
+        if (!res.successful() || !hasInstConstraining() || !isReplaceable())
+            return res;
+        if (getInstConstraining().getInstNode().memberInstComponent(name).successful())
+            return res;
+        return InstLookupResult.<InstComponentDecl>constrained(res, this);
+    }
 
     syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, int ndims) {
         if (ndims == 0) 
@@ -432,8 +393,8 @@ aspect InstLookupComponents {
     }
     eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
 
-//    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponentConstrained(String name) = 
-//        isArray() ? memberInstComponent(name) : constrainMemberInstComponent(name, memberInstComponent(name));
+    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponentConstrained(String name) = 
+        isArray() ? memberInstComponent(name) : constrainMemberInstComponent(name, memberInstComponent(name));
 
     inh lazy InstLookupResult<InstComponentDecl> InstNode.lookupInstConstant(String name);
     eq Root.getChild().lookupInstConstant(String name)     = InstLookupResult.notFound();
@@ -472,11 +433,12 @@ aspect InstLookupComponents {
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstConstant(String name) {
         for (InstComponentDecl ic : instComponentDecls()) 
             if (ic.getComponentDecl().isConstant() && ic.matches(name))
-                return InstLookupResult.found(ic);
+                return constrainMemberInstComponent(name, ic);
         
         return InstLookupResult.notFound();
     }
-    eq InstSimpleShortClassDecl.memberInstConstant(String name) = actualInstClass().memberInstConstant(name);
+    eq InstSimpleShortClassDecl.memberInstConstant(String name) = 
+        constrainMemberInstComponent(name, actualInstClass().memberInstConstant(name));
 
     syn InstLookupResult<InstComponentDecl> InstImport.lookupInstConstantInImport(String name) {
         // Assume import points to a single (constant) component
@@ -580,15 +542,15 @@ aspect LookupInstComponentsInModifications {
     eq InstNamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 
     eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name)     = 
-        getClassName().myInstClassDecl().memberInstComponent(name);
+        getClassName().myInstClassDecl().memberInstComponentConstrained(name);
     eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = 
-        getClassName().myInstClassDecl().memberInstComponent(name);
+        getClassName().myInstClassDecl().memberInstComponentConstrained(name);
     eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name)              = 
-        myInstClass().memberInstComponent(name); 
+        myInstClass().memberInstComponentConstrained(name); 
     eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name)        = 
         getName().qualifiedLookupInstComponent(name);
     eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name)         = 
-        myInstClass().memberInstComponent(name);
+        myInstClass().memberInstComponentConstrained(name);
 //  eq InstShortClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name)        = getClassName().myInstClassDecl().memberInstComponent(name);
     eq InstComponentRedeclare.getName().lookupInstComponent(String name)                                  = lookupInstComponentInInstElement(name);
     eq InstRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();

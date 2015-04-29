@@ -52,15 +52,15 @@ UnknownInstClassDecl     : InstFullClassDecl;
 BadInstClassDecl         : InstFullClassDecl;
 
 InstReplacingFullClassDecl        : InstFullClassDecl  ::= 
-                                     <OriginalClassDecl:ClassDecl> 
+	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingShortClassDecl       : InstShortClassDecl ::= 
-                                     <OriginalClassDecl:ClassDecl> 
+	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingSimpleShortClassDecl : InstSimpleShortClassDecl ::=
-                                     <OriginalClassDecl:ClassDecl> 
+	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl;
