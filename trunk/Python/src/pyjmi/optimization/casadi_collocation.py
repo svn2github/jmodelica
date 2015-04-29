@@ -4371,8 +4371,12 @@ class LocalDAECollocator(CasadiCollocator):
             c_inds, i, k = self.get_nlp_constraint_indices(eqtype)
             self.c_sources['eqtype'][c_inds] = eqtype
             self.c_sources['eqind'][c_inds] = N.arange(c_inds.shape[1], dtype=N.int)
-            self.c_sources['i'][c_inds] = i[:, N.newaxis]
-            self.c_sources['k'][c_inds] = k[:, N.newaxis]
+            
+            # work around numpy broadcasted assignment bug
+            promoter = N.zeros(c_inds.shape[1], dtype=N.int)
+
+            self.c_sources['i'][c_inds] = (i[:, N.newaxis] + promoter)
+            self.c_sources['k'][c_inds] = (k[:, N.newaxis] + promoter)
 
         # Create mapping from nlp variables xx to model variables
         self.xx_sources = {}
