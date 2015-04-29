@@ -259,7 +259,7 @@ model RecordFlat7
 			description="Merging of equivalent record variables when flattening",
 			flatModel="
 fclass RecordTests.RecordFlat7
- RecordTests.RecordFlat7.A d.a;
+ RecordTests.RecordFlat7.A d.a(b = time);
 
 public
  record RecordTests.RecordFlat7.A
@@ -354,7 +354,7 @@ fclass RecordTests.RecordFlat10
 
 public
  function RecordTests.RecordFlat10.r.f
-  input RecordTests.RecordFlat10.R2 r2;
+  input RecordTests.RecordFlat10.R2 r2(xx = r2.x);
   output Real x := r2.xx;
  algorithm
   return;
@@ -1367,7 +1367,7 @@ model RecordBinding24
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
  final parameter Real r1.r2.y2 = 51 /* 51 */;
- final parameter Real r1.r2.r3.x3 = 51.0 /* 51.0 */;
+ final parameter Real r1.r2.r3.x3 = 51 /* 51 */;
  parameter Real r1.r2.r3.y3;
 parameter equation
  r1.r2.r3.y3 = r1.y1;
@@ -3137,9 +3137,9 @@ model RecordScalarize27
             description="Flattening of record with size determined by parameter component",
             flatModel="
 fclass RecordTests.RecordScalarize27
- structural parameter Integer r1.n;
+ structural parameter Integer r1.n = 0 /* 0 */;
  structural parameter Integer r2.n = 0 /* 0 */;
- structural parameter Integer r3.n;
+ structural parameter Integer r3.n = 0 /* 0 */;
  constant Real r4.x[1] = 1;
  constant Real r4.x[2] = 2;
  structural parameter Integer r4.n = 2 /* 2 */;
@@ -3483,6 +3483,34 @@ public
 end RecordTests.RecordScalarize35;
 ")})));
 end RecordScalarize35;
+
+model RecordScalarize36
+    record R
+        parameter Integer n = 1 annotation(Evaluate=true);
+        Real[n] x = 1:n;
+    end R;
+    
+    R r(n=3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize36",
+            description="Scalarizing record without binding expressions.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize36
+ eval parameter Integer r.n = 3 /* 3 */;
+ Real r.x[1];
+ Real r.x[2];
+ Real r.x[3];
+equation
+ r.x[1] = 1;
+ r.x[2] = 2;
+ r.x[3] = 3;
+end RecordTests.RecordScalarize36;
+")})));
+end RecordScalarize36;
 
 
 model RecordFunc1
@@ -5587,7 +5615,7 @@ equation
             description="Test that evaluation before scalarization of record variable works",
             flatModel="
 fclass RecordTests.RecordEval7
- parameter RecordTests.RecordEval7.A a1(x = 3);
+ parameter RecordTests.RecordEval7.A a1(x = 3,b(y = a1.b.x + 1,n = 2));
  parameter RecordTests.RecordEval7.B b1 = a1.b;
  Real x;
 equation
@@ -5602,7 +5630,7 @@ public
 
  record RecordTests.RecordEval7.A
   parameter Real x;
-  parameter RecordTests.RecordEval7.SB b(final n = 2);
+  parameter RecordTests.RecordEval7.SB b(final n = 2,y = b.x + 1);
  end RecordTests.RecordEval7.A;
 
  record RecordTests.RecordEval7.B

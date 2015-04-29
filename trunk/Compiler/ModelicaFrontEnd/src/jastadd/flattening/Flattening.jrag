@@ -935,27 +935,30 @@ aspect Flattening {
 	
 	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
 		super.addAttributesToFV(attr);
-		generateSizeAttributes(attr);
-//		if (hasBindingFExp())
-//			generateSizeAttributesFromBExp(attr, getBindingFExp());
+		generateAdditionalAttributes(attr, hasBindingFExp() || variability().knownParameterOrLess());
 	}
 	
-	public void InstComponentDecl.generateSizeAttributes(List<FAttribute> attr) {}
+	public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, boolean top) {}
 	
-	public void InstRecord.generateSizeAttributes(List<FAttribute> attr) {
+	public void InstRecord.generateAdditionalAttributes(List<FAttribute> attr, boolean top) {
 		for (InstComponentDecl icd : allInstComponentDecls()) {
 			FAttribute a = findMatching(attr, icd.name());
 			boolean create = (a == null);
+			boolean b = icd.hasBindingFExp() || icd.variability().knownParameterOrLess();
 			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
             if (icd.declaredSizeCalc().isUnknownNoEval())
 				list.add(new FInternalAttribute("size()", icd.size().createFExp()));
-			icd.generateSizeAttributes(list);
-			if (create && list.getNumChild() > 0) {
+			icd.generateAdditionalAttributes(list, top || b);
+			if (create && (list.getNumChild() > 0 || (!top && b))) {
 				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQNameEmpty())), 
 						new FIdDecl(new FQNameString(icd.name())), 
 						new Opt(), true, 0, new Opt(), new Opt(), list);
 				attr.add(a);
 			}
+			
+            if (!top && b) {
+                a.setValue(((InstAssignable)icd).flattenBindingFExp());
+            }
 		}
 	}
 	

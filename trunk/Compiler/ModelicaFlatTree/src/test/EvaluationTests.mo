@@ -1672,7 +1672,7 @@ fclass EvaluationTests.EvaluateAnnotation6
 
 public
  function EvaluationTests.EvaluateAnnotation6.f
-  input EvaluationTests.EvaluateAnnotation6.R x;
+  input EvaluationTests.EvaluateAnnotation6.R x(n = 1);
   output EvaluationTests.EvaluateAnnotation6.R y := x;
  algorithm
   return;
@@ -1717,7 +1717,7 @@ fclass EvaluationTests.EvaluateAnnotation7
 
 public
  function EvaluationTests.EvaluateAnnotation7.f
-  input EvaluationTests.EvaluateAnnotation7.P x;
+  input EvaluationTests.EvaluateAnnotation7.P x(n = 1);
   output EvaluationTests.EvaluateAnnotation7.P y := x;
  algorithm
   return;
@@ -1787,8 +1787,8 @@ fclass EvaluationTests.EvaluateAnnotation9
 
 public
  function EvaluationTests.EvaluateAnnotation9.F
-  input EvaluationTests.EvaluateAnnotation9.R i;
-  output EvaluationTests.EvaluateAnnotation9.R o;
+  input EvaluationTests.EvaluateAnnotation9.R i(p = -41);
+  output EvaluationTests.EvaluateAnnotation9.R o(p = -41);
  algorithm
   o.p := i.p + 42;
   return;
@@ -2012,7 +2012,7 @@ fclass EvaluationTests.FinalParameterEval6
 
 public
  function EvaluationTests.FinalParameterEval6.f
-  input EvaluationTests.FinalParameterEval6.R x;
+  input EvaluationTests.FinalParameterEval6.R x(n = 1);
   output EvaluationTests.FinalParameterEval6.R y := x;
  algorithm
   return;
