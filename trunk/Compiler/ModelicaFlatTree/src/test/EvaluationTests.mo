@@ -4070,8 +4070,8 @@ model ForLoopSizeVary1
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.ForLoopSizeVary1
- constant Real y1 = 0;
- constant Real y2 = 0;
+ constant Real y1 = 4.0;
+ constant Real y2 = 4.0;
 end EvaluationTests.ForLoopSizeVary1;
 ")})));
 end ForLoopSizeVary1;
@@ -4098,8 +4098,8 @@ model ForLoopSizeVary2
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.ForLoopSizeVary2
- constant Real y1 = 9.0;
- constant Real y2 = 9.0;
+ constant Real y1 = 4.0;
+ constant Real y2 = 4.0;
 end EvaluationTests.ForLoopSizeVary2;
 ")})));
 end ForLoopSizeVary2;

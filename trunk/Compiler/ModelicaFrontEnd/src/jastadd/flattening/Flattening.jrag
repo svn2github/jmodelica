@@ -668,7 +668,7 @@ aspect Flattening {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
 		for (int i = 0; i < exps.length; i++) {
-			if (exps[i] != null) {
+			if (size[i] == Size.UNKNOWN && exps[i] != null) {
 				res.exps[i] = exps[i].flatten(prefix);
 				if (context != null)
 					res.exps[i] = context.affixExpression(res.exps[i]);
