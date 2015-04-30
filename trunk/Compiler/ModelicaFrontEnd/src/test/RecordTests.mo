@@ -3589,6 +3589,38 @@ end RecordTests.RecordScalarize37;
 ")})));
 end RecordScalarize37;
 
+model RecordScalarize38
+    record A
+        Real y[2];
+    end A;
+ 
+    A a1[2](y = {{1,2},{3,4}} * time);
+    A a2 = if time > 1 then a1[1] else a1[2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize38",
+            description="Scalarizing record with binding expressions.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize38
+ Real a1[1].y[1];
+ Real a1[1].y[2];
+ Real a1[2].y[1];
+ Real a1[2].y[2];
+ Real a2.y[1];
+ Real a2.y[2];
+equation
+ a1[1].y[1] = time;
+ a1[1].y[2] = 2 * time;
+ a1[2].y[1] = 3 * time;
+ a1[2].y[2] = 4 * time;
+ a2.y[1] = if time > 1 then a1[1].y[1] else a1[2].y[1];
+ a2.y[2] = if time > 1 then a1[1].y[2] else a1[2].y[2];
+end RecordTests.RecordScalarize38;
+")})));
+end RecordScalarize38;
 
 
 model RecordFunc1

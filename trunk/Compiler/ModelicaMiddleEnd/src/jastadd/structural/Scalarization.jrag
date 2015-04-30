@@ -2516,6 +2516,14 @@ aspect Scalarization {
     public FExp FIdUseExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
         return dynamicFExp(createNode(new FIdUse(getFIdUse().getFQName().specify(i, true))));
     }
+    
+    public FExp FIfExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
+        FIfExp res = new FIfExp();
+        res.setIfExp(getIfExp().scalarize(indexMap));
+        res.setThenExp(getThenExp().extractArrayCell(indexMap, i));
+        res.setElseExp(getElseExp().extractArrayCell(indexMap, i));
+        return dynamicFExp(res);
+    }
 	
 	/**
 	 * Scalarize equation and put all scalarized equations in list eqns.
