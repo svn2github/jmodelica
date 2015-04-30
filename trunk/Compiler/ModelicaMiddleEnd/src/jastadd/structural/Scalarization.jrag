@@ -374,7 +374,7 @@ aspect Scalarization {
         } else {
             fv.setBindingExpOpt(new Opt());
         }
-        fv.inheritFrom(last, variability);
+        fv.inheritFrom(vars, equs, last, variability);
         fv.addArrayAttributesFromType(i, myFDerivedType());
         vars.add(fv);
     }
@@ -385,7 +385,7 @@ aspect Scalarization {
         FVariable tmp = dynamicFVariable((FVariable) fullCopy());
         if (last != null) {
             tmp.reflatten(name.copyPrefix());
-            tmp.inheritFrom(last, variability);
+            tmp.inheritFrom(vars, equs, last, variability);
         }
         dynamicFVariable(tmp);
         
@@ -570,7 +570,7 @@ aspect Scalarization {
 	/**
 	 * Inherit prefixes and attributes from the FVariable representing the surrounding record.
 	 */
-	public void FVariable.inheritFrom(FVariable other, FTypePrefixVariability variability) {
+    public void FVariable.inheritFrom(List<FVariable> vars, List<FAbstractEquation> equs, FVariable other, FTypePrefixVariability variability) {
 		if (other == null)
 			return;
 
@@ -588,15 +588,15 @@ aspect Scalarization {
 			myCell = name.getFArraySubscripts().asIndex();
 		for (FAttribute a : other.getFAttributes()) {
 			// TODO: support attributes on single cell in array (#599)
-			// TODO: don't these need scalarizing as well?
 			String attrName = a.getName().getFQName().partName(0);
 			if (myName.equals(attrName)) {
-				FAttribute na = a.copyForCell(myCell);
+                FAttribute na = a.copyForCell(myCell);
+                na.parent = a;
 				if (a.getName().getFQName().numParts() > 1) {
 					na.getName().setFQName(a.getName().getFQName().copySuffix());
 					addFAttribute(na);
 				} else {
-                    inheritFrom(getFAttributes(), na.getFAttributes());
+                    inheritFrom(vars, equs, getFAttributes(), na.getFAttributes());
 				}
 			}
 		}
@@ -605,7 +605,8 @@ aspect Scalarization {
     /**
      * Merge attributes from other into self, overwriting in conflicts.
      */
-    public void FVariable.inheritFrom(List<FAttribute> self, List<FAttribute> other) {
+    public void FVariable.inheritFrom(List<FVariable> vars, List<FAbstractEquation> equs, List<FAttribute> self, List<FAttribute> other) {
+        Map<String, FExp> indexMap = Collections.<String,FExp>emptyMap();
         Map<String, FAttribute> m2 = new HashMap<String,FAttribute>();
         for (FAttribute a : other) {
             m2.put(a.name(), a);
@@ -615,15 +616,21 @@ aspect Scalarization {
             String name = a.name();
             if (m2.containsKey(name)) {
                 FAttribute o = m2.get(name);
-                inheritFrom(a.getFAttributes(), m2.get(name).getFAttributes());
+                inheritFrom(vars, equs, a.getFAttributes(), m2.get(name).getFAttributes());
                 if (o.hasValue())
-                    a.setValue(o.getValue().fullCopy());
+                    a.setValue(o.getValue().scalarize(indexMap));
                 visited.add(m2.get(name));
             }
         }
         for (FAttribute a : other) {
             if (!visited.contains(a) && !a.isInternal()) {
-                self.add(a.fullCopy());
+                FAttribute ac = a.fullCopy();
+                FExp e = a.getValue();
+                if (e != null) {
+                    e.createArrayTemporaries(equs, vars, indexMap);
+                    ac.setValue(e.scalarize(indexMap));
+                }
+                self.add(ac);
             }
         }
     }

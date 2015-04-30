@@ -3513,6 +3513,84 @@ end RecordTests.RecordScalarize36;
 end RecordScalarize36;
 
 
+model RecordScalarize37
+    record A
+        Real x;
+    end A;
+    
+    function AA
+        input Real x;
+        output A a = A(x);
+      algorithm
+    end AA;
+    
+    function f
+        input A x;
+        output Real a;
+    algorithm
+        a := 1;
+    end f;
+    
+    A a1(x(start=f(AA(3))));
+    A[2] a2(x(start={f(AA(4)),f(AA(5))}));
+  equation
+    a1.x = 4;
+    a2[1].x = 4;
+    a2[2].x = 4;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize37",
+            description="Scalarizing record with temporaries in start value modifiers",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize37
+ Real a1.x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_1.x)));
+ Real a2[1].x(start = {RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_2.x)), RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_3.x))});
+ Real a2[2].x(start = {RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_4.x)), RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_5.x))});
+ Real temp_1.x;
+ Real temp_2.x;
+ Real temp_3.x;
+ Real temp_4.x;
+ Real temp_5.x;
+equation
+ a1.x = 4;
+ a2[1].x = 4;
+ a2[2].x = 4;
+ (RecordTests.RecordScalarize37.A(temp_1.x)) = RecordTests.RecordScalarize37.AA(3);
+ (RecordTests.RecordScalarize37.A(temp_2.x)) = RecordTests.RecordScalarize37.AA(4);
+ (RecordTests.RecordScalarize37.A(temp_3.x)) = RecordTests.RecordScalarize37.AA(5);
+ (RecordTests.RecordScalarize37.A(temp_4.x)) = RecordTests.RecordScalarize37.AA(4);
+ (RecordTests.RecordScalarize37.A(temp_5.x)) = RecordTests.RecordScalarize37.AA(5);
+
+public
+ function RecordTests.RecordScalarize37.f
+  input RecordTests.RecordScalarize37.A x;
+  output Real a;
+ algorithm
+  a := 1;
+  return;
+ end RecordTests.RecordScalarize37.f;
+
+ function RecordTests.RecordScalarize37.AA
+  input Real x;
+  output RecordTests.RecordScalarize37.A a;
+ algorithm
+  a.x := x;
+  return;
+ end RecordTests.RecordScalarize37.AA;
+
+ record RecordTests.RecordScalarize37.A
+  Real x;
+ end RecordTests.RecordScalarize37.A;
+
+end RecordTests.RecordScalarize37;
+")})));
+end RecordScalarize37;
+
+
+
 model RecordFunc1
  record A
   Real x;
