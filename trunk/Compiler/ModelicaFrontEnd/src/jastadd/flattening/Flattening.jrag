@@ -2244,13 +2244,12 @@ aspect FlatExpressions {
 		Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();
 		return new FAssert(getTest().flatten(prefix), getMsg().flatten(prefix), level); 
 	}
-	                     
-	public FCardinality FCardinality.flatten(FQName prefix) { 
-	    FCardinality res = new FCardinality(getFExp().flatten(prefix));
-	    res.rewriteCardinality = true;
-	    return res;
-	}
-	
+
+    public FCardinality FCardinality.flatten(FQName prefix) { 
+        FCardinality res = new FCardinality(getFExp().flatten(prefix));
+        return res;
+    }
+
 	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	public FConnectionsOp FConnBoolOp.flatten(FQName prefix) {
 		FConnBoolOp res = createNode(getA().flatten(prefix));

@@ -3142,6 +3142,10 @@ aspect Scalarization {
         }
     }
 
+    public FExp FCardinality.scalarizeExp(Map<String,FExp> indexMap) {
+        return new FIntegerLitExp(getFExp().cardinalityValue());
+    }
+
 	public FExp FMinMaxExp.scalarizeExp(Map<String,FExp> indexMap) {
 		if (hasY())
 			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));

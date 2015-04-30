@@ -940,8 +940,8 @@ aspect Connections {
                     leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
                 }
             }
-            csm.countCardinality(left.name());
-            csm.countCardinality(right.name());
+            csm.countCardinality(left.getFQName().scalarName());
+            csm.countCardinality(right.getFQName().scalarName());
         }
     }
 
@@ -967,8 +967,8 @@ aspect Connections {
                 else
                     csm.addVars(left, right);
             }
-            csm.countCardinality(left.name());
-            csm.countCardinality(right.name());
+            csm.countCardinality(left.getFQName().scalarName());
+            csm.countCardinality(right.getFQName().scalarName());
         }
     }
 
@@ -2565,12 +2565,14 @@ aspect Cardinality {
         return (e == null) ? 0 : e.peek();
     }
 
-
-    private boolean FCardinality.rewriteCardinality = false;
-    
-    rewrite FCardinality {
-        when (rewriteCardinality) to FIntegerLitExp 
-            new FIntegerLitExp(myFClass().getConnectionSetManager().getCardinality(((FIdUseExp) getFExp()).name()));
+    // Can only be calculated after flattening - give dummy value before that to prevent error messages about structural parameters for cardinality()
+    syn int FExp.cardinalityValue() {
+        throw new UnsupportedOperationException();
     }
-    
+    eq FIdUseExp.cardinalityValue()      = getFIdUse().cardinalityValue();
+    eq FInstAccessExp.cardinalityValue() = 1;
+
+    syn int FIdUse.cardinalityValue()      = myFClass().getConnectionSetManager().getCardinality(scalarName());
+    eq FIdUseInstAccess.cardinalityValue() = 1;
+
 }

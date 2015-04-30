@@ -2205,8 +2205,7 @@ aspect ConstantEvaluation {
         return getFExp().ceval(evaluator, i).array().getCell(i);
     }
 
-    // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
-    eq FCardinality.cevalCalc(VariableEvaluator evaluator) = new CValueInteger(1);
+    eq FCardinality.cevalCalc(VariableEvaluator evaluator) = new CValueInteger(getFExp().cardinalityValue());
 
     eq FConnectionsOp.cevalCalc(VariableEvaluator evaluator) {
         throw new ConstantEvaluationException();

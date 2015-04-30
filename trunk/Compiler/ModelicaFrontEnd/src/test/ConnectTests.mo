@@ -2320,7 +2320,7 @@ end StreamTest5;
 
 
 model Cardinality1
-	connector A = Real;
+    connector A = Real;
 
     A x;
     A y;
@@ -2331,30 +2331,20 @@ equation
     if cardinality(x) == 2 then
         x = time;
     elseif cardinality(y) == 2 then
-        y = time;
+        y = 2 * time;
     else
-        z = time;
+        z = 3 * time;
     end if;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        TransformCanonicalTestCase(
             name="Cardinality1",
             description="cardinality(): basic test",
             flatModel="
 fclass ConnectTests.Cardinality1
  Real x;
- Real y;
- Real z;
 equation
- if 1 == 2 then
-  x = time;
- elseif 2 == 2 then
-  y = time;
- else
-  z = time;
- end if;
- x = y;
- y = z;
+ x = 2 * time;
 end ConnectTests.Cardinality1;
 ")})));
 end Cardinality1;
@@ -2362,8 +2352,8 @@ end Cardinality1;
 
 model Cardinality2
     connector A
-        Real x;
-        flow Real y;
+        Real a;
+        Real b;
     end A;
 	
     A x;
@@ -2373,39 +2363,26 @@ equation
     connect(x, y);
     connect(y, z);
     if cardinality(x) == 2 then
-        x.x = time;
+        x.a = time;
     elseif cardinality(y) == 2 then
-        y.x = time;
+        y.a = 2 * time;
     else
-        z.x = time;
+        z.a = 3 * time;
     end if;
+	x.b = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="Cardinality2",
-			description="cardinality(): basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cardinality2",
+            description="cardinality(): basic test",
+            flatModel="
 fclass ConnectTests.Cardinality2
- Real x.x;
- Real x.y;
- Real y.x;
- Real y.y;
- Real z.x;
- Real z.y;
+ Real x.a;
+ constant Real x.b = 1;
+ constant Real y.b = 1;
+ constant Real z.b = 1;
 equation
- if 1 == 2 then
-  x.x = time;
- elseif 2 == 2 then
-  y.x = time;
- else
-  z.x = time;
- end if;
- x.x = y.x;
- y.x = z.x;
- - x.y - y.y - z.y = 0;
- x.y = 0;
- y.y = 0;
- z.y = 0;
+ x.a = 2 * time;
 end ConnectTests.Cardinality2;
 ")})));
 end Cardinality2;
@@ -2442,9 +2419,8 @@ At line 1815, column 9:
 ")})));
 end Cardinality3;
 
-//TODO: Wrong, #3374
 model Cardinality4
-	connector A = Real;
+    connector A = Real;
 
     A x[2];
     A y;
@@ -2453,32 +2429,22 @@ equation
     connect(x[2], y);
     if cardinality(x[1]) == 2 then
         x[1] = time;
-    elseif cardinality(y) == 2 then
-        y = time;
+    elseif cardinality(x[2]) == 2 then
+        x[2] = 2 * time;
     else
-        x[2] = time;
+        y = 3 * time;
     end if;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        TransformCanonicalTestCase(
             name="Cardinality4",
-            description="cardinality(): array test",
+            description="",
             flatModel="
 fclass ConnectTests.Cardinality4
- Real x[2];
- Real y;
+ Real x[1];
 equation
- if 3 == 2 then
-  x[1] = time;
- elseif 1 == 2 then
-  y = time;
- else
-  x[2] = time;
- end if;
- x[1] = x[2];
- x[2] = y;
+ x[1] = 2 * time;
 end ConnectTests.Cardinality4;
-			
 ")})));
 end Cardinality4;
 
@@ -2507,11 +2473,9 @@ equation
 Error: in file '...':
 Semantic error at line 2350, column 20:
   The argument of cardinality() must be a scalar reference to a connector
-			
 ")})));
 end Cardinality5;
 
-//TODO: Wrong, #3374
 model Cardinality6
 	connector A = Real;
 
@@ -2519,24 +2483,18 @@ model Cardinality6
 equation
     connect(x[1:2], x[2:3]);
     for i in 1:3 loop
-		assert(cardinality(x[i]) == 1, "Message");
-	end for;
+        assert(cardinality(x[i]) == 1, "Failed for index: " + String(i));
+    end for;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        ErrorTestCase(
             name="Cardinality6",
             description="cardinality(): array test",
-            flatModel="
-fclass ConnectTests.Cardinality6
- Real x[3];
-equation
- for i in 1:3 loop
-  assert(4 == 1, \"Message\");
- end for;
- x[1] = x[2];
- x[2] = x[3];
-end ConnectTests.Cardinality6;
-			
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: Failed for index: 2
 ")})));
 end Cardinality6;
 
