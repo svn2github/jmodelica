@@ -3472,6 +3472,46 @@ Semantic error at line 3459, column 7:
 end RedeclareTest45;
 
 
+model RedeclareTest50
+    function f1
+        input Real a;
+        input Real b;
+        output Real c = a + b;
+    algorithm
+    end f1;
+    
+    model A
+        replaceable function f2 = f1(b=2);
+    
+        Real x = f2(time);
+    end A;
+
+    model B = A(redeclare function f2 = f1);
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest50",
+            description="Check that modifications on constraining type of functions are retained",
+            flatModel="
+fclass RedeclareTests.RedeclareTest50
+ Real b.x = RedeclareTests.RedeclareTest50.b.f2(time, 2);
+
+public
+ function RedeclareTests.RedeclareTest50.b.f2
+  input Real a;
+  input Real b := 2;
+  output Real c := a + b;
+ algorithm
+  return;
+ end RedeclareTests.RedeclareTest50.b.f2;
+
+end RedeclareTests.RedeclareTest50;
+")})));
+end RedeclareTest50;
+
+
 
 model RedeclareElement1
   model A

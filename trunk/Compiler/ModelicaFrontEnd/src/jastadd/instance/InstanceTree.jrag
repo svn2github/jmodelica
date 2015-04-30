@@ -285,12 +285,11 @@ aspect Environments {
 	eq InstReplacingShortClassDecl.originalInstClass()       = getOriginalInstClass();
 	eq InstReplacingSimpleShortClassDecl.originalInstClass() = getOriginalInstClass();
 	eq InstReplacingFullClassDecl.originalInstClass()        = getOriginalInstClass();
-	 	
-	// TODO: This should probably be implemented as an AST node child. 	
-	syn lazy boolean InstClassDecl.hasInstClassModification() = false;
-	eq InstShortClassDecl.hasInstClassModification() = getInstExtends(0).hasInstClassModification(); 	
-	syn lazy InstClassModification InstClassDecl.getInstClassModification() = null;
-	eq InstShortClassDecl.getInstClassModification() = getInstExtends(0).getInstClassModification(); 	
+
+    syn boolean InstClassDecl.hasInstClassModification() = false;
+    eq InstShortClassDecl.hasInstClassModification()     = getInstExtends(0).hasInstClassModification();
+    syn InstClassModification InstClassDecl.getInstClassModification() = null;
+    eq InstShortClassDecl.getInstClassModification()                   = getInstExtends(0).getInstClassModification();
 
 	eq InstExtends.localInstModifications() {
 		ArrayList<InstModification> l = new ArrayList<InstModification>();
@@ -343,75 +342,70 @@ aspect Environments {
 	}
 
 
-	/**
-	 * myEnvironment represents the environment of the InstNode itself. It is defined
-	 * as an inherited attribute and is computed from the outer environment located at
-	 * ancestor InstNodes.
-	 */	
-	inh Environment InstNode.myEnvironment();
-	inh Environment InstNode.myEnvironment(String name);
+    /**
+     * myEnvironment represents the environment of the InstNode itself. It is defined
+     * as an inherited attribute and is computed from the outer environment located at
+     * ancestor InstNodes.
+     */ 
+    inh Environment InstNode.myEnvironment();
+    inh Environment InstNode.myEnvironment(String name);
     eq Root.getChild().myEnvironment()            = null;
     eq Root.getChild().myEnvironment(String name) = null;
-	
-	/**
-	 * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor
-	 * InstNode is simply duplicated. This is typically the case for extends clauses.
-	 */
-	eq InstNode.getChild().myEnvironment() = getMergedEnvironment().clone();
 
-/*
-	eq InstReplacingShortClassDecl.getChild().myEnvironment() {
-		Environment env = getMergedEnvironment().clone();
-		if (getOriginalInstClass().hasInstConstraining()) {
-			if (getOriginalInstClass().getInstConstraining().hasInstClassModification())
-				env.mergeInnerModification(getOriginalInstClass().getInstConstraining().getInstClassModification());
-		} else {
-		    InstClassDecl origDecl = getOriginalInstClass();
-			if (origDecl.getInstExtends(0).hasInstClassModification())
-				env.mergeInnerModification(origDecl.getInstExtends(0).getInstClassModification());
-		}
-		return env;
-	}
-*/
+    /**
+     * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor
+     * InstNode is simply duplicated. This is typically the case for extends clauses.
+     */
+    eq InstNode.getChild().myEnvironment() = getMergedEnvironment().clone();
 
-	/** 
-	 * When a string argument representing a component name is given as argument to myEnvironment,
-	 * the resulting environment consists only of modifications with a matching prefix. In effect, this 
-	 * results in a "peeling" operation, where the first name in a qualified name is removed, and the rest
-	 * of the modification is added to myEnvironment. The algorithm is somewhat complicated by component
-	 * redeclares that needs to be taken into account. 
-	 */
-	eq InstNode.getChild().myEnvironment(String name) = myEnvironment_def(name); // This is just to get caching at the right place.
-	
-	syn lazy Environment InstNode.myEnvironment_def(String name) {
-		Environment env = new Environment();
-		boolean componentRedeclareFound = false;
-		InstComponentRedeclare icr = retrieveReplacingComponent(name);
-		boolean classRedeclareFound = false;
-		InstRedeclareClassNode iclrn = retrieveReplacingClass(name);
-		for (InstModification im : getMergedEnvironment()) {
-			// If a first component redeclare modification is found, add modifiers
-			if (!componentRedeclareFound && im == icr) {
-            	if (icr.getInstComponentDecl().hasInstModification()) 
-    				env.mergeInnerModification(icr.getInstComponentDecl().getInstModification());
-				componentRedeclareFound = true;
-			}
-			// If a first class redeclare modification is found, add modifiers
-			// TODO: Do we need to handle the case when iclrn is an InstClassDecl?
-			if (!classRedeclareFound && im == iclrn) {
-				InstClassRedeclare iclr = (InstClassRedeclare) im;
-            	if (iclr.getInstClassDecl().hasInstClassModification()) 
-    				env.mergeInnerModification(iclr.getInstClassDecl().getInstClassModification());
-				classRedeclareFound = true;
-			}
-			
-			if (im.matchInstModification(name) != null) {
-				env.mergeInnerModification(im.matchInstModification(name));
-			}
-		}
-		return env;
-		
-	}
+    /** 
+     * When a string argument representing a component name is given as argument to myEnvironment,
+     * the environment is filtered on that name.
+     */
+    eq InstNode.getChild().myEnvironment(String name) = myEnvironment_def(name); // This is just to get caching at the right place.
+
+    syn lazy Environment InstNode.myEnvironment_def(String name) = filterEnvironment(getMergedEnvironment(), name, true);
+
+    eq InstReplacingShortClassDecl.getOriginalInstClass().myEnvironment()            = filteredEnvironment();
+    eq InstReplacingShortClassDecl.getOriginalInstClass().myEnvironment(String name) = filterEnvironment(filteredEnvironment(), name, false);
+
+    /** 
+     * Filter given environment for a named class or component.
+     * 
+     * When filtering the environment, the resultconsists only of modifications with a matching prefix. 
+     * In effect, this results in a "peeling" operation, where the first name in a qualified name is removed, 
+     * and the rest of the modification is added to myEnvironment. The algorithm is somewhat complicated by 
+     * component redeclares that needs to be taken into account. 
+     */
+    public Environment InstNode.filterEnvironment(Environment env, String name, boolean findReplacing) {
+        Environment res = new Environment();
+        boolean componentRedeclareFound = false;
+        InstComponentRedeclare icr = findReplacing ? retrieveReplacingComponent(name) : null;
+        boolean classRedeclareFound = false;
+        InstRedeclareClassNode iclrn = findReplacing ? retrieveReplacingClass(name) : null;
+        for (InstModification im : env) {
+            // If a first component redeclare modification is found, add modifiers
+            if (!componentRedeclareFound && im == icr) {
+                if (icr.getInstComponentDecl().hasInstModification()) 
+                    res.mergeInnerModification(icr.getInstComponentDecl().getInstModification());
+                componentRedeclareFound = true;
+            }
+            // If a first class redeclare modification is found, add modifiers
+            // TODO: Do we need to handle the case when iclrn is an InstClassDecl?
+            if (!classRedeclareFound && im == iclrn) {
+                InstClassRedeclare iclr = (InstClassRedeclare) im;
+                if (iclr.getInstClassDecl().hasInstClassModification()) 
+                    res.mergeInnerModification(iclr.getInstClassDecl().getInstClassModification());
+                classRedeclareFound = true;
+            }
+            
+            InstModification match = im.matchInstModification(name);
+            if (match != null) {
+                res.mergeInnerModification(match);
+            }
+        }
+        return res;
+    }
 
 	eq Program.getInstProgramRoot().myEnvironment() = new Environment();
 	eq Program.getInstProgramRoot().myEnvironment(String name) = new Environment();
@@ -1391,14 +1385,17 @@ aspect InstanceTreeConstruction {
 		return new InstReplacingSimpleShortClassDecl(getClassDecl(), getInstConstrainingOpt(), 
 				getInstRestriction(), getOriginalClassDecl(), getInstClassRedeclare());
 	}
-	
-	syn boolean InstShortClassDecl.shouldBeExpanded() = 
-		hasFArraySubscripts() || 
-		hasInstClassModification() || 
-		getClassDecl().hasTypePrefix() || 
-		(hasInstConstraining() && getInstConstraining().hasInstClassModification()) || 
-		!filteredEnvironment().isEmpty();
-	
+
+    syn boolean InstShortClassDecl.shouldBeExpanded() = 
+        hasFArraySubscripts() || 
+        hasInstClassModification() || 
+        getClassDecl().hasTypePrefix() || 
+        !filteredEnvironment().isEmpty();
+    eq InstReplacingShortClassDecl.shouldBeExpanded() =
+        super.shouldBeExpanded() || 
+        (hasInstConstraining() && getInstConstraining().hasInstClassModification()) || 
+        (isFunction() && !localInstModificationsForReplacingClass().isEmpty());
+
 	syn boolean ClassDecl.hasTypePrefix() = false;
 	eq ShortClassDecl.hasTypePrefix()     = getExtendsClauseShortClass().hasTypePrefix();
 	
