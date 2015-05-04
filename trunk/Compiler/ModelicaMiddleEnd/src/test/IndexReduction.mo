@@ -3349,6 +3349,91 @@ end IndexReduction.FunctionInlining.Test8;
 ")})));
     end Test8;
 
+    model Test9
+        function F
+            input Real i1[1];
+            input Real i2;
+            output Real o1;
+        algorithm
+            o1 := i2;
+            annotation(Inline=false,derivative(noDerivative=i1)=F_der);
+        end F;
+    
+        function F_der
+            input Real i1[1];
+            input Real i2;
+            input Real i2_der;
+            output Real o1_der;
+        algorithm
+            o1_der := F(i1, i2_der * i1[1] + i2 * i1[1]);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real a;
+        parameter Real[1] p = {1};
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = a*x;
+        der(vy) = a*y;
+        x + y = F(p, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionInlining_Test9",
+            description="Test function inlining during index reduction. Differentiated extra equations that aren't continuous should be removed!",
+            flatModel="
+fclass IndexReduction.FunctionInlining.Test9
+ Real x;
+ Real y;
+ Real vx;
+ Real vy;
+ Real a;
+ parameter Real p[1] = 1 /* 1 */;
+ Real _der_x;
+ Real _der_vx;
+ Real _der_der_x;
+ Real _der_der_y;
+ parameter Real temp_1;
+ Real temp_2;
+ parameter Real temp_5;
+initial equation 
+ y = 0.0;
+ vy = 0.0;
+parameter equation
+ temp_1 = p[1];
+ temp_5 = temp_1;
+equation
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = a * x;
+ der(vy) = a * y;
+ x + y = IndexReduction.FunctionInlining.Test9.F({p[1]}, time);
+ temp_2 = time;
+ _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({temp_1}, temp_1 + temp_2 * temp_1);
+ _der_der_x = _der_vx;
+ _der_der_y = der(vy);
+ _der_der_x + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, temp_1 * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
+
+public
+ function IndexReduction.FunctionInlining.Test9.F
+  input Real[1] i1;
+  input Real i2;
+  output Real o1;
+ algorithm
+  o1 := i2;
+  return;
+ annotation(derivative(noDerivative = i1) = IndexReduction.FunctionInlining.Test9.F_der,Inline = false);
+ end IndexReduction.FunctionInlining.Test9.F;
+
+end IndexReduction.FunctionInlining.Test9;
+")})));
+    end Test9;
+
 end FunctionInlining;
 
 end IndexReduction;

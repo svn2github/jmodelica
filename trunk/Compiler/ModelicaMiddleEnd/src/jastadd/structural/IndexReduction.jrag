@@ -623,6 +623,8 @@ aspect IndexReduction {
         if (baseEqn.getMeDifferentiated() != null)
             return;
         
+        ASTNode.log.info("Differentiating %s", baseEqn);
+        
         // Go through all group members and collect all unique AST equations.
         // There might be several equations the second time an inlined
         // equation is differentiated.
@@ -653,10 +655,19 @@ aspect IndexReduction {
         }
         Collection<FAbstractEquation> extraEquations = new ArrayList<FAbstractEquation>();
         for (FAbstractEquation fEqn : baseEqn.getExtraEquations()) {
-            if (baseEqn.diffExtraEqn(fEqn))
-                diffedFEqns.add(differentiateEquation(fEqn, inliner));
-            else
-                extraEquations.add(fEqn);
+            ASTNode.log.info("  Extra equation: %s", fEqn);
+            extraEquations.add(fEqn);
+            if (baseEqn.diffExtraEqn(fEqn)) {
+                FAbstractEquation diffedFEqn = differentiateEquation(fEqn, inliner);
+                ASTNode.log.info("    Diffed into: %s", diffedFEqn);
+                if (diffedFEqn.isContinuous()) {
+                    diffedFEqns.add(diffedFEqn);
+                } else {
+                    ASTNode.log.info("    Diffed not added!");
+                }
+            } else {
+                ASTNode.log.info("    Not diffed!");
+            }
         }
         
         // Handle inlining of function calls
@@ -775,6 +786,8 @@ aspect IndexReduction {
                 // its differentiated counterpart
                 original.setMeDifferentiated(diffedEqn);
                 diffedEqn.setMeIntegrated(original);
+                
+                ASTNode.log.info("Added equation: %s, %s", diffedEqn, diffedEqn.printEquation());
                 
                 if (original.getMatching() != null && !match(diffedEqn, original.getMatching().getMeDifferentiated()))
                     eqToMatchStack.add(diffedEqn);
