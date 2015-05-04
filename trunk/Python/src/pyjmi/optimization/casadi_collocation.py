@@ -5449,22 +5449,24 @@ class LocalDAECollocationAlgResult(JMResultBase):
         self.h_opt = h_opt
         self.times = times
         
-        # Save values from the solver since they might change in the solver.
-        # Assumes that solver.primal_opt and solver.dual_opt will not be mutated, which seems to be the case.
-        self.primal_opt = solver.primal_opt
-        self.dual_opt = solver.dual_opt
-        self.solver_statistics = solver.get_solver_statistics()
-        self.opt_input = solver.get_opt_input()
-        
-        # Print times
-        print("\nTotal time: %.2f seconds" % times['tot'])
-        print("Pre-processing time: %.2f seconds" % times['init'])
-        print("Solution time: %.2f seconds" % times['sol'])
-        print("Post-processing time: %.2f seconds\n" %
-              times['post_processing'])
+        if solver is not None:
+            # Save values from the solver since they might change in the solver.
+            # Assumes that solver.primal_opt and solver.dual_opt will not be mutated, which seems to be the case.
+            self.primal_opt = solver.primal_opt
+            self.dual_opt = solver.dual_opt
+            self.solver_statistics = solver.get_solver_statistics()
+            self.opt_input = solver.get_opt_input()
+
+        if times is not None:
+            # Print times
+            print("\nTotal time: %.2f seconds" % times['tot'])
+            print("Pre-processing time: %.2f seconds" % times['init'])
+            print("Solution time: %.2f seconds" % times['sol'])
+            print("Post-processing time: %.2f seconds\n" %
+                  times['post_processing'])
 
         # Print condition numbers
-        if self.options['print_condition_numbers']:
+        if options is not None and self.options['print_condition_numbers']:
             J_init_cond = N.linalg.cond(solver.get_J("init"))
             J_opt_cond = N.linalg.cond(solver.get_J("opt"))
             KKT_init_cond = N.linalg.cond(solver.get_KKT("init"))
