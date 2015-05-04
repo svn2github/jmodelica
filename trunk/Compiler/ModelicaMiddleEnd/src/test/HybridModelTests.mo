@@ -476,5 +476,29 @@ Discrete equations:
 -------------------------------
 ")})));
     end NoResTest1;
+    
+    model MixedVariabilityMatch1
+        parameter Real a(fixed=false);
+        Real b;
+    initial equation
+        b = 1;
+    equation
+        b = sin(a + time);
+        
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.MixedVariabilityMatch1",
+            description="Verify that a noncontinuous variable can be matched to and continuous equation in the initial system",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Solved equation ---
+b := 1
+
+--- Unsolved equation (Block 1) ---
+b = sin(a + time)
+  Computed variables: a
+-------------------------------
+")})));
+    end MixedVariabilityMatch1;
 
 end HybridModelTests;
