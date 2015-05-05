@@ -136,5 +136,15 @@ parameter Real p(free=true, min=1, initialGuess=2);
 
 end CSTR_MPC_Parameter;
 
+model CSTR_mhe_model
+extends CSTR(F0 = 100/100/60, c0 = 1000, c_init = 0);
+
+end CSTR_mhe_model;
+
+optimization CSTR_mhe
+extends CSTR_mhe_model;
+constraint
+    c >= 0;
+end CSTR_mhe;
 
 end CSTR;
