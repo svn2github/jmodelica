@@ -15985,7 +15985,7 @@ void jmi_set_start_values_0_0(jmi_t* jmi) {
     __runtime_log_to_file_24 = (JMI_FALSE);
     __use_Brent_in_1d_25 = (JMI_TRUE);
     __use_jacobian_equilibration_26 = (JMI_FALSE);
-    __use_newton_for_brent_27 = (JMI_TRUE);
+    __use_newton_for_brent_27 = (JMI_FALSE);
 }
 
 void jmi_set_start_values_1_0(jmi_t* jmi) {

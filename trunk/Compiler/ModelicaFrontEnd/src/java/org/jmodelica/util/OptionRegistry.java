@@ -479,7 +479,7 @@ abstract public class OptionRegistry {
         USE_NEWTON_FOR_BRENT
             ("use_newton_for_brent",
              runtime,
-             true,
+             false,
              "If a few Newton steps are to be performed to get a better initial guess for Brent."),
         ITERATION_VARIABLE_SCALING
             ("iteration_variable_scaling",
