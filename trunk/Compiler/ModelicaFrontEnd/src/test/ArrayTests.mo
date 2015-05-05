@@ -7381,6 +7381,60 @@ end ArrayTests.Other.ArraySize3;
 end ArraySize3;
 
 
+model ArraySize4
+    function f
+        input Real[:] x1;
+        input Real[:] x2;
+        output Boolean[size(x1,1)-1, size(x2,1)-1] y;
+    protected
+        final parameter Integer n1 = size(x1,1)-1;
+        parameter Integer n2 = size(x1,1)-1;
+    algorithm
+        for i in 1:n1 loop
+        end for;
+    end f;
+    
+    Boolean[3,3] y = f({1,2,3,4},{1,2,3,4});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Other_ArraySize4",
+            description="",
+            flatModel="
+fclass ArrayTests.Other.ArraySize4
+ parameter Boolean y[1,1];
+ parameter Boolean y[1,2];
+ parameter Boolean y[1,3];
+ parameter Boolean y[2,1];
+ parameter Boolean y[2,2];
+ parameter Boolean y[2,3];
+ parameter Boolean y[3,1];
+ parameter Boolean y[3,2];
+ parameter Boolean y[3,3];
+parameter equation
+ ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}, {y[3,1], y[3,2], y[3,3]}}) = ArrayTests.Other.ArraySize4.f({1, 2, 3, 4}, {1, 2, 3, 4});
+
+public
+ function ArrayTests.Other.ArraySize4.f
+  input Real[:] x1;
+  input Real[:] x2;
+  output Boolean[:,:] y;
+  Integer n1;
+  Integer n2;
+ algorithm
+  size(y) := {size(x1, 1) - 1, size(x2, 1) - 1};
+  n1 := size(x1, 1) - 1;
+  n2 := size(x1, 1) - 1;
+  for i in 1:n1 loop
+  end for;
+  return;
+ end ArrayTests.Other.ArraySize4.f;
+
+end ArrayTests.Other.ArraySize4;
+
+")})));
+end ArraySize4;
+
+
 model ArraySizeInIf1
     function f1
         input Integer g;
